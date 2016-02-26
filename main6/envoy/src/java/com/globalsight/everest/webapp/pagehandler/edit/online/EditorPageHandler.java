@@ -18,6 +18,7 @@ package com.globalsight.everest.webapp.pagehandler.edit.online;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,7 +52,6 @@ import com.globalsight.everest.edit.online.PageInfo;
 import com.globalsight.everest.edit.online.PaginateInfo;
 import com.globalsight.everest.edit.online.RenderingOptions;
 import com.globalsight.everest.edit.online.SegmentFilter;
-import com.globalsight.everest.edit.online.SegmentMatchResult;
 import com.globalsight.everest.edit.online.SegmentView;
 import com.globalsight.everest.edit.online.UIConstants;
 import com.globalsight.everest.foundation.User;
@@ -61,7 +61,6 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
-import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -69,10 +68,10 @@ import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
+import com.globalsight.everest.util.online.OnlineService;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState.PagePair;
 import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
@@ -82,6 +81,7 @@ import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUpl
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.EmojiUtil;
@@ -312,7 +312,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             }
         }
 
-        // GBS-4281 show segment details
+        // show segment datails
         if ((value = p_request.getParameter("param")) != null)
         {
             SegmentView view;
@@ -334,6 +334,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             ServletOutputStream out = p_response.getOutputStream();
             try
             {
+                json.put("str_segmentId", tuvid[1]);
                 json.put("str_segmentFormat", view.getDataType());
                 json.put("str_segmentType", view.getItemType());
                 json.put("str_wordCount", String.valueOf(view.getWordCount()));
@@ -342,7 +343,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 {
                     str_sid = "N/A";
                 }
-                json.put("str_sid", str_sid);
+                json.put("str_sid", str_sid);// view.getTargetTuv().getSid()
                 String str_lastModifyUser = view.getTargetTuv()
                         .getLastModifiedUser();
                 if (str_lastModifyUser == null
@@ -380,62 +381,10 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     else
                     {
                         str_segementPtag = str_segementPtag.replace("<TR>", "<TR valign=top>").replace("<TD", "<TD noWrap"); 
-                        str_segementPtag = str_segementPtag.replace("<tr>", "<TR valign=top>").replace("<td", "<TD noWrap");     
+                        str_segementPtag = str_segementPtag.replace("<tr>", "<TR valign=top>").replace("<td", "<TD noWrap");    
                     }
                     
-                    String Source = getHtmlSegment(str_sourceSegment,str_dataType,state);
                     json.put("str_segementPtag", str_segementPtag);
-                    json.put("m_sourceSegment", Source);
-                    List<SegmentMatchResult> list = view.getTmMatchResults();
-                    StringBuffer tmMatchesStr = new StringBuffer();
-                    StringBuffer mtTranslationStr = new StringBuffer();
-                    if (list.size()>0)
-                    {
-                        SegmentMatchResult matchResult = null;
-                        int j = 1;
-                        for (int i=0;i<list.size();i++)
-                        {
-                            matchResult = list.get(i);
-                            if (matchResult.getTmName().endsWith("_MT"))
-                            {
-                                long sourcePageId = state.getSourcePageId();
-                                MachineTranslationProfile mtProfile = MTProfileHandlerHelper
-                                      .getMtProfileBySourcePageId(sourcePageId,
-                                              state.getTargetLocale());
-                                if (mtProfile !=null)
-                                {
-                                    mtTranslationStr = mtTranslationStr.append(
-                                            "<table><tr class=\"standardText\"><td style=\"width:200px\"><B>Target Match Type:</B></td>"
-                                                    +"<td>"+matchResult.getMatchType()+"</td></tr>"
-                                                    +"<tr class=\"standardText\"><td style=\"width:200px\"><B>MT Engine:</B></td>"
-                                                    +"<td>"+mtProfile.getMtEngine()+"</td></tr>"
-                                                    +"<tr class=\"standardText\"><td style=\"width:200px\"><B>Target Match %:</B></td>"
-                                                    +"<td>"+Math.round(matchResult.getMatchPercentage())+"%</td></tr>"
-                                                    +"<tr class=\"standardText\"><td style=\"width:200px\"><B>Source:</B></td>"
-                                                    +"<td>"+Source+"</td></tr>"
-                                                    +"<tr class=\"standardText\"><td style=\"width:200px\"><B>Target:</B></td>"
-                                                    +"<td>"+getHtmlSegment(matchResult.getMatchContent(),str_dataType,state)+"</td><tr>"
-                                                    +"</table>");
-                                }
-                            }
-                            else
-                            {
-                                tmMatchesStr = tmMatchesStr.append(
-                                        "<table><tr class=\"standardText\"><td style=\"width:200px\"><B>match"+j+":</B></td>"
-                                              +"<td>"+"("+Math.round(matchResult.getMatchPercentage())+"%/"+ matchResult.getTmName()+")</td></tr>"
-                                              +"<tr class=\"standardText\"><td style=\"width:200px\"><B>Target Match Type:</B></td>"
-                                              +"<td>"+matchResult.getMatchType()+"</td></tr>"
-                                              +"<tr class=\"standardText\"><td style=\"width:200px\"><B>Source:</B></td>"
-                                              +"<td>"+getHtmlSegment(matchResult.getMatchContentSource(),str_dataType,state)
-                                              +"<tr class=\"standardText\"><td style=\"width:200px\"><B>Target:</B></td>"
-                                              +"<td>"+getHtmlSegment(matchResult.getMatchContent(),str_dataType,state)+"</td></tr>"
-                                              +"<tr height=\"10px\"><td></td></tr></table>");
-                                j++;
-                            }
-                        }
-                    }
-                    json.put("mt_match", mtTranslationStr.toString());
-                    json.put("tm_match", tmMatchesStr.toString());
                 }
                 catch (Exception e1)
                 {
@@ -500,28 +449,6 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         p_response.getWriter().write(jsonStr);
     }
 
-    /**
-     * Gets html segment and write back.
-     * 
-     * @throws Exception
-     */
-    private String getHtmlSegment(String segment,String str_dataType,EditorState state) throws Exception
-    {
-        OnlineHelper helper = new OnlineHelper();
-        helper.setInputSegment(segment, "", str_dataType, Boolean.parseBoolean(str_dataType));
-        
-        String result = segment;
-        if (EditorConstants.PTAGS_VERBOSE.equals(state.getPTagFormat()))
-        {
-            result = helper.makeVerboseColoredPtags(segment);
-        }
-        else
-        {
-            result = helper.makeCompactColoredPtags(segment);
-        }
-        return result;
-    }
-    
     /**
      * Get the target language based on job id and source page id
      * 

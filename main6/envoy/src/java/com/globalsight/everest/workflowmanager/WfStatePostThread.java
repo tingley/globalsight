@@ -39,6 +39,7 @@ import org.apache.http.impl.cookie.BestMatchSpecFactory;
 import org.apache.http.impl.cookie.BrowserCompatSpec;
 import org.apache.http.impl.cookie.BrowserCompatSpecFactory;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
@@ -74,23 +75,32 @@ public class WfStatePostThread implements Runnable
         wfStatePost(task, destinationArrow, isDispatch);
     }
 
-    private void wfStatePost(Task p_task, String p_destinationArrow, boolean isDispatch)
+    private synchronized void wfStatePost(Task p_task, String p_destinationArrow, boolean isDispatch)
     {
+        long taskId = p_task.getId();
         try
         {
+            s_logger.info("Begin to post workflow state transition info for task: " + taskId);
+
             JSONObject jsonObj = getNotifyMessage(p_task, destinationArrow, isDispatch);
+            s_logger.info("workflow transition post info: " + jsonObj);
             L10nProfile l10nProfile = ServerProxy.getJobHandler().getL10nProfileByJobId(
                     p_task.getJobId());
             long wfStatePostId = l10nProfile.getWfStatePostId();
             WorkflowStatePosts wfStatePost = ServerProxy.getProjectHandler().getWfStatePostProfile(
                     wfStatePostId);
-            s_logger.info("workflow transition post info: " + jsonObj);
 
             doPost(wfStatePost, jsonObj);
         }
         catch (Exception e)
         {
             s_logger.error("wfStatePost error:", e);
+        }
+        finally
+        {
+            shutdownHttpClient();
+
+            s_logger.info("End to post workflow state transition info for task: " + taskId);
         }
     }
 
@@ -231,7 +241,7 @@ public class WfStatePostThread implements Runnable
     {
         int num = wfStatePost.getRetryNumber();
         CloseableHttpClient httpClient = getHttpClient();
-        for (int i = 0; i < num + 1; i++)
+        for (int i = 0; i < num; i++)
         {
             try
             {
@@ -252,28 +262,36 @@ public class WfStatePostThread implements Runnable
                 try
                 {
                     response = httpClient.execute(httpPost);
+                    if (response != null)
+                    {
+                        EntityUtils.consumeQuietly(response.getEntity());
+                    }
                 }
                 catch (Exception e)
                 {
                     s_logger.error("Post workflow transition info error:", e);
                 }
-                if (response != null && response.getStatusLine().getStatusCode() == 204)
+                if (response != null)
                 {
-                    break;
-                }
-                else
-                {
-                    logPostFailureInfo(response);
-                    if (StringUtils.isNotEmpty(wfStatePost.getNotifyEmail()) && (i == num))
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    if (statusCode == 204)
                     {
-                        String recipient = wfStatePost.getNotifyEmail();
-                        long companyId = wfStatePost.getCompanyId();
-                        String[] messageArguments =
-                        { wfStatePost.getName(), wfStatePost.getListenerURL(), message.toString() };
-                        ServerProxy.getMailer().sendMailFromAdmin(recipient, messageArguments,
-                                MailerConstants.WORKFLOW_STATE_POST_FAILURE_SUBJECT,
-                                MailerConstants.WORKFLOW_STATE_POST_FAILURE_MESSAGE,
-                                String.valueOf(companyId));
+                        break;
+                    }
+                    else
+                    {
+                        logPostFailureInfo(statusCode);
+                        if (StringUtils.isNotEmpty(wfStatePost.getNotifyEmail()) && (i == num))
+                        {
+                            String recipient = wfStatePost.getNotifyEmail();
+                            long companyId = wfStatePost.getCompanyId();
+                            String[] messageArguments =
+                            { wfStatePost.getName(), wfStatePost.getListenerURL(), message.toString() };
+                            ServerProxy.getMailer().sendMailFromAdmin(recipient, messageArguments,
+                                    MailerConstants.WORKFLOW_STATE_POST_FAILURE_SUBJECT,
+                                    MailerConstants.WORKFLOW_STATE_POST_FAILURE_MESSAGE,
+                                    String.valueOf(companyId));
+                        }
                     }
                 }
             }
@@ -282,8 +300,6 @@ public class WfStatePostThread implements Runnable
                 s_logger.error(e);
             }
         }
-
-        shutdownHttpClient();
     }
 
     CookieSpecProvider easySpecProvider = new CookieSpecProvider()
@@ -335,27 +351,24 @@ public class WfStatePostThread implements Runnable
         }
     }
 
-    private static void logPostFailureInfo(HttpResponse res)
+    private static void logPostFailureInfo(int statusCode)
     {
-        if (res != null)
+        s_logger.warn("Fail to post workflow transition info, status code is: " + statusCode);
+        if (statusCode == 400)
         {
-            s_logger.warn("GlobalSight is trying to post workflow transition info to Listener URL of workflow state post profile, but fails.");
-            if (res.getStatusLine().getStatusCode() == 400)
-            {
-                s_logger.warn("Workflow state post failure: The request payload data failed validation!");
-            }
-            else if (res.getStatusLine().getStatusCode() == 401)
-            {
-                s_logger.warn("Workflow state post failure: Not authorized. The secret value is incorrect!");
-            }
-            else if (res.getStatusLine().getStatusCode() == 405)
-            {
-                s_logger.warn("Workflow state post failure: The request did not use the POST method!");
-            }
-            else if (res.getStatusLine().getStatusCode() == 500)
-            {
-                s_logger.warn("Workflow state post failure: Database error!");
-            }
+            s_logger.warn("Workflow state post failure: The request payload data failed validation!");
+        }
+        else if (statusCode == 401)
+        {
+            s_logger.warn("Workflow state post failure: Not authorized. The secret value is incorrect!");
+        }
+        else if (statusCode == 405)
+        {
+            s_logger.warn("Workflow state post failure: The request did not use the POST method!");
+        }
+        else if (statusCode == 500)
+        {
+            s_logger.warn("Workflow state post failure: Database error!");
         }
     }
 }

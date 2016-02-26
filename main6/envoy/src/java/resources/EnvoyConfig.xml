@@ -1477,7 +1477,6 @@
         <PageLink linkName="addSourceFiles" destinationPageName="ADDSOURCE"></PageLink>
         <PageLink linkName="editor" destinationPageName="ED1"></PageLink>
         <PageLink linkName="neweditor" destinationPageName="NEWED1"></PageLink>
-        <PageLink linkName="pictureEditor" destinationPageName="EDIG1"></PageLink>
         <PageLink linkName="sourceEditor" destinationPageName="EDS1"></PageLink>
         <PageLink linkName="allStatus" destinationPageName="ALLS"></PageLink>
         <PageLink linkName="editSourcePageWc" destinationPageName="EDITSOURCEPAGEWC"></PageLink>
@@ -1694,14 +1693,6 @@
       <WebPage pageName="NEWED19" isDefault="false" jspName="/envoy/edit/online2/search.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online3.EditorPageHandler"></WebPage>
     </WebActivity>
   </WebModule>
-  <WebModule webModuleName="pictureEditor">
-    <WebActivity webActivityName="edit4" clearSession="false">
-     <WebPage pageName="EDIG1" isDefault="true" jspName="/envoy/edit/online4/imageMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online4.EditorImageHandler">
-       <PageLink linkName="self" destinationPageName="EDIG1"></PageLink>
-       <PageLink linkName="startupload" destinationPageName="EDIG1"></PageLink>
-     </WebPage>
-   </WebActivity>
- </WebModule>
  <WebModule webModuleName="editor">
     <WebActivity webActivityName="edit">
       <WebPage pageName="ED1" isDefault="true" jspName="/envoy/edit/online/me_main.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.EditorPageHandler">
@@ -2023,7 +2014,6 @@
         <PageLink linkName="dtpUpload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="editor" destinationPageName="ED1"></PageLink>
         <PageLink linkName="newEditor" destinationPageName="NEWED1"></PageLink>
-        <PageLink linkName="pictureEditor" destinationPageName="EDIG1"></PageLink>
         <PageLink linkName="incontextreiview" destinationPageName="inctxrvED1"></PageLink>
         <PageLink linkName="editorSameWindow" destinationPageName="EDN1"></PageLink>
         <PageLink linkName="finish" destinationPageName="TK1A"></PageLink>

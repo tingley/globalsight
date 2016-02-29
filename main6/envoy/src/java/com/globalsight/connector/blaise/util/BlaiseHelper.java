@@ -126,11 +126,7 @@ public class BlaiseHelper
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error when invoke listInbox: " + e.getMessage());
-			if (logger.isDebugEnabled())
-			{
-				logger.error(e);
-			}
+			logger.error("Error when invoke listInbox(state):", e);
 		}
 
 		return results;
@@ -145,7 +141,7 @@ public class BlaiseHelper
 		}
 		catch (Exception e)
 		{
-			logger.error(e);
+			logger.error("Error when invoke listInboxByIds(ids):", e);
 		}
 		if (client != null)
 		{
@@ -171,11 +167,7 @@ public class BlaiseHelper
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error when invoke listInboxByIds: " + e.getMessage());
-			if (logger.isDebugEnabled())
-			{
-				logger.error(e);
-			}
+			logger.error("Error when invoke listInboxByIds(client, ids):", e);
 		}
 
 		return results;
@@ -207,7 +199,7 @@ public class BlaiseHelper
 			}
 			else
 			{
-				logger.error(e);
+				logger.error("Error when cliam entry: " + id, e);
 			}
 		}
     }

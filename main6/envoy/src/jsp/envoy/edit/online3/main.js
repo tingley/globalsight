@@ -812,7 +812,9 @@ function contextForSegment(obj, e)
         new ContextItem("<B>Edit segment</B>",
           function(){editSegment(ids[0], ids[1], ids[2])}),
         new ContextItem("Add/edit comment",
-          function(){editComment(ids[0], ids[1], ids[2])})
+          function(){editComment(ids[0], ids[1], ids[2])}),
+        new ContextItem("Segment details",
+          function(){showDetails(ids[0], ids[1], ids[2])})
         ];
     }
     
@@ -874,4 +876,53 @@ function closeAllComments()
 function sortComments(arg)
 {
   document.location = url_self+"&sortComments=" + arg;
+}
+
+function showDetails(tuId, tuvId, subId){
+    $("#showDetails").html("");
+    var str = jsonUrl+"&action=getDetails&random="+Math.random();
+    var details = "tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId;
+    $.post(str,{param:details},function(data){
+        var result = eval("("+data+")");
+        var Y = ($(window).height())/3;
+        var X = ($(window).width())/3;
+        var scrollTop = $(document).scrollTop();
+        var scrollLeft = $(document).scrollLeft();
+        var detailhtml = '<table cellspacing="5" cellpadding="2" border="0" style="table-layout:fixed;">'
+                    +'<tr class="standardText"><td noWrap style="width:200px;"><B>'+lb_id+':</B></td><td>'+ tuId +'</td></tr>'
+                    +'<tr class="standardText"><td noWrap><B>'+lb_segmentFormat+':</B></td><td>'+result.str_segmentFormat+'</td></tr>'
+                    +'<tr class="standardText"><td noWrap><B>'+lb_segmentType+':</B></td><td>'+ result.str_segmentType +'</td></tr>'
+                    +'<tr class="standardText"><td><B>'+lb_wordCount+':</B></td><td>'+ result.str_wordCount +'</td></tr>'
+                    +'<tr class="standardText"><td noWrap><B>'+lb_tagInfo+':</B></td><td><table border="0">'+ result.str_segementPtag +'</table></td></tr>'
+                    +'<tr class="standardText"><td noWrap><B>'+lb_sid+':</B></td><td>'+ result.str_sid +'</td></tr>'
+                    +'<tr class="standardText"><td><B>'+lb_modify_by+':</B></td><td>'+ result.str_lastModifyUser +'</td></tr>'
+                    +'<tr class="standardText"><td><B>Source:</B></td><td>'+result.m_sourceSegment+'</td></tr>'
+        //TM Match
+        var tm_matchhtml = '';
+        if (result.tm_match.length > 0)
+        {
+            tm_matchhtml = '<tr class="standardText"><td colspan="2"><B>TM Match Results:</B></td></tr>'
+                          +'<tr class="standardText"><td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;'+result.tm_match +'</td></tr>';
+        }
+        //MT Match
+        var mt_matchhtml = '';
+        if (result.mt_match.length > 0)
+        {
+            mt_matchhtml = '<tr class="standardText"><td colspan="2"><B>MT Match Results:</B></td></tr>'
+                          +'<tr class="standardText"><td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;'+result.mt_match +'</td></tr>';
+        }
+        
+        var foothtml = '</table>';
+        
+        $("#showDetails").window({
+            title:'<%=lb_title%>',
+            width:600,
+            height:400,
+            left:X+scrollLeft,
+            top:Y+scrollTop,
+            content:detailhtml + tm_matchhtml + mt_matchhtml + foothtml,
+            minimizable:false,
+            closable:true
+        });
+     });
 }

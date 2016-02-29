@@ -159,26 +159,26 @@ public class JobSourceFilesHandler extends PageHandler implements
         List<JobSourcePageDisplay> jobSourcePageDisplayList = new ArrayList<JobSourcePageDisplay>();
         for (SourcePage sourcePage : sourcePages)
         {
-            JobSourcePageDisplay jobSourcePageDisplay = new JobSourcePageDisplay(
-                    sourcePage);
+            JobSourcePageDisplay jobSourcePageDisplay = new JobSourcePageDisplay(sourcePage);
             jobSourcePageDisplay.setPageUrl(getPageUrl(job, sourcePage));
-            jobSourcePageDisplay
-                    .setDataSourceName(getDataSourceName(sourcePage));
-            jobSourcePageDisplay.setWordCountOverriden(sourcePage
-                    .isWordCountOverriden());
+            jobSourcePageDisplay.setDataSourceName(getDataSourceName(sourcePage));
+            jobSourcePageDisplay.setWordCountOverriden(sourcePage.isWordCountOverriden());
             jobSourcePageDisplay.setSourceLink(getSourceLink(sourcePage));
-            String unextractedFileName = sourcePage.getUnextractedFile().getName();
-            if (unextractedFileName != null)
+            if (sourcePage.getUnextractedFile() != null)
             {
-                String fileExtension = unextractedFileName.substring(
-                        unextractedFileName.lastIndexOf('.') + 1).toLowerCase();
-                if (WebAppConstants.FILE_EXTENSION_LIST.contains(fileExtension))
+                String unextractedFileName = sourcePage.getUnextractedFile().getName();
+                if (unextractedFileName != null)
                 {
-                    jobSourcePageDisplay.setImageFile(true);
-                }
-                else
-                {
-                    jobSourcePageDisplay.setImageFile(false);
+                    String fileExtension = unextractedFileName.substring(
+                            unextractedFileName.lastIndexOf('.') + 1).toLowerCase();
+                    if (WebAppConstants.FILE_EXTENSION_LIST.contains(fileExtension))
+                    {
+                        jobSourcePageDisplay.setImageFile(true);
+                    }
+                    else
+                    {
+                        jobSourcePageDisplay.setImageFile(false);
+                    }
                 }
             }
             jobSourcePageDisplayList.add(jobSourcePageDisplay);

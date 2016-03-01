@@ -408,15 +408,15 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                                 if (mtProfile !=null)
                                 {
                                     mtTranslationStr = mtTranslationStr.append(
-                                            "<table><tr class=\"standardText\"><td style=\"width:200px\"><B>Target Match Type:</B></td>"
+                                            "<table><tr class=\"standardText\"><td style=\"width:120px\"><B>Target Match Type:</B></td>"
                                                     +"<td>"+matchResult.getMatchType()+"</td></tr>"
-                                                    +"<tr class=\"standardText\"><td style=\"width:200px\"><B>"+bundle.getString("lb_tm_mt_engine")+":</B></td>"
+                                                    +"<tr class=\"standardText\"><td><B>"+bundle.getString("lb_tm_mt_engine")+":</B></td>"
                                                     +"<td>"+mtProfile.getMtEngine()+"</td></tr>"
-                                                    +"<tr class=\"standardText\"><td style=\"width:200px\"><B>Target Match %:</B></td>"
+                                                    +"<tr class=\"standardText\"><td><B>Target Match %:</B></td>"
                                                     +"<td>"+Math.round(matchResult.getMatchPercentage())+"%</td></tr>"
-                                                    +"<tr class=\"standardText\"><td style=\"width:200px\"><B>Source:</B></td>"
+                                                    +"<tr class=\"standardText\"><td ><B>Source:</B></td>"
                                                     +"<td>"+sourceSegment+"</td></tr>"
-                                                    +"<tr class=\"standardText\"><td style=\"width:200px\"><B>Target:</B></td>"
+                                                    +"<tr class=\"standardText\"><td><B>Target:</B></td>"
                                                     +"<td>"+getHtmlSegment(matchResult.getMatchContent(),str_dataType,state)+"</td><tr>"
                                                     +"</table>");
                                 }
@@ -424,13 +424,13 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                             else
                             {
                                 tmMatchesStr = tmMatchesStr.append(
-                                        "<table><tr class=\"standardText\"><td style=\"width:200px\"><B>match"+j+":</B></td>"
+                                        "<table><tr class=\"standardText\"><td style=\"width:120px\"><B>match"+j+":</B></td>"
                                               +"<td>"+"("+Math.round(matchResult.getMatchPercentage())+"%/"+ matchResult.getTmName()+")</td></tr>"
-                                              +"<tr class=\"standardText\"><td style=\"width:200px\"><B>Target Match Type:</B></td>"
+                                              +"<tr class=\"standardText\"><td><B>Target Match Type:</B></td>"
                                               +"<td>"+matchResult.getMatchType()+"</td></tr>"
-                                              +"<tr class=\"standardText\"><td style=\"width:200px\"><B>Source:</B></td>"
+                                              +"<tr class=\"standardText\"><td><B>Source:</B></td>"
                                               +"<td>"+getHtmlSegment(matchResult.getMatchContentSource(),str_dataType,state)
-                                              +"<tr class=\"standardText\"><td style=\"width:200px\"><B>Target:</B></td>"
+                                              +"<tr class=\"standardText\"><td><B>Target:</B></td>"
                                               +"<td>"+getHtmlSegment(matchResult.getMatchContent(),str_dataType,state)+"</td></tr>"
                                               +"<tr height=\"10px\"><td></td></tr></table>");
                                 j++;

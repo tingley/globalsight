@@ -517,6 +517,7 @@ var lb_wordCount = "<%=lb_wordCount%>";
 var lb_tagInfo = "<%=lb_tagInfo%>";
 var lb_sid ="<%=bundle.getString("lb_sid")%>";
 var lb_modify_by = "<%=bundle.getString("lb_modify_by")%>";
+var lb_title = "<%=bundle.getString("lb_segment_details")%>";
 </script>
 </HEAD>
 <BODY id="idBody" oncontextmenu="contextForX(event)" onbeforeunload="exit()">

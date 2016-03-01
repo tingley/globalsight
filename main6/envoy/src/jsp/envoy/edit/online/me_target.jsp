@@ -520,7 +520,7 @@ function show(tuId, tuvId, subId){
         var scrollTop = $(document).scrollTop();
         var scrollLeft = $(document).scrollLeft();
         var detailhtml = '<table cellspacing="5" cellpadding="2" border="0" style="table-layout:fixed;">'
-                    +'<tr class="standardText"><td noWrap style="width:200px;"><B><%=lb_id%>:</B></td><td>'+ tuId +'</td></tr>'
+                    +'<tr class="standardText"><td noWrap style="width:120px;"><B><%=lb_id%>:</B></td><td>'+ tuId +'</td></tr>'
                     +'<tr class="standardText"><td noWrap><B><%=lb_segmentFormat%>:</B></td><td>'+result.str_segmentFormat+'</td></tr>'
                     +'<tr class="standardText"><td noWrap><B><%=lb_segmentType%>:</B></td><td>'+ result.str_segmentType +'</td></tr>'
                     +'<tr class="standardText"><td><B><%=lb_wordCount%>:</B></td><td>'+ result.str_wordCount +'</td></tr>'

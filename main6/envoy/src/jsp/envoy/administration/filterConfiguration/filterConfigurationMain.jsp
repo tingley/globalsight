@@ -100,7 +100,6 @@ session="true" %>
         	    var id = "filterName_" + obj.id.split("_")[1];
         	    obj.src = "/globalsight/images/ecllapse.jpg";
         		document.getElementById(id).style.display = "block";
-        		obj.src = "/globalsight/images/enlarge.jpg";
         	}
         			
         }

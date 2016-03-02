@@ -183,6 +183,7 @@ function generateFilterTable(filterConfigurations)
 	str.append("</table>");
 
 	document.getElementById("filterConfigurationTable").innerHTML = str.toString();
+	loadExpand();
 }
 
 function expand(obj)

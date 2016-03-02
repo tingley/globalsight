@@ -149,7 +149,8 @@ public class FileProfileMainHandler extends PageHandler
             if ((p_request.getParameter("linkName") != null && !p_request
                     .getParameter("linkName").startsWith("self")))
             {
-                sessionMgr.clear();
+                clearSessionExceptTableInfo(session,
+                        FileProfileConstants.FILEPROFILE_KEY);
             }
             handleFilters(p_request, sessionMgr, action);
             dataForTable(p_request, session);

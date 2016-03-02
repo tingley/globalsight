@@ -90,6 +90,16 @@ public class FileprofileVo
     {
         return fileProfile.getName();
     }
-    
-    
+    public Long getL10nprofileId()
+    {
+        return fileProfile.getL10nProfileId();
+    }
+    public Long getSpecialFilterId()
+    {
+        return fileProfile.getSpecialFilterId();
+    }
+    public String getFilterTabName()
+    {
+        return fileProfile.getFilterTableName();
+    }
 }

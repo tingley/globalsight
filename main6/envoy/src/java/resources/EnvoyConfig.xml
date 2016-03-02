@@ -774,6 +774,8 @@
         <PageLink linkName="edit" destinationPageName="FPED"></PageLink>
         <PageLink linkName="new1" destinationPageName="FPED"></PageLink>
         <PageLink linkName="search" destinationPageName="FP1"></PageLink>
+        <PageLink linkName="editL10nProfile" destinationPageName="LPN1"></PageLink>
+        <PageLink linkName="editFilterConfiguration" destinationPageName="FC1"></PageLink>
       </WebPage>
       <WebPage pageName="FPED" isDefault="false"
       jspName="/envoy/administration/fileprofile/fileprofileBasic.jsp"
@@ -900,6 +902,8 @@
         <PageLink linkName="remove" destinationPageName="LP1"></PageLink>
         <PageLink linkName="details" destinationPageName="LPDET"></PageLink>
         <PageLink linkName="duplicate" destinationPageName="LPDUP"></PageLink>
+        <PageLink linkName="editTM" destinationPageName="MTMP"></PageLink>
+        <PageLink linkName="editProject" destinationPageName="M4P"></PageLink>
       </WebPage>
       <WebPage pageName="LPN1" isDefault="false" jspName="/envoy/projects/l10nprofiles/locprofileNewAndEdit.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileNewAndEditHandler">
         <PageLink linkName="save" destinationPageName="LP1"></PageLink>
@@ -1484,6 +1488,7 @@
         <PageLink linkName="searchText" destinationPageName="SOURCEFILES"></PageLink>
         <PageLink linkName="jobScorecard" destinationPageName="SCORECARD"></PageLink>
         <PageLink linkName="incontextreiview" destinationPageName="inctxrvED1"></PageLink>
+        <PageLink linkName="editFileProfile" destinationPageName="FPED"></PageLink>
       </WebPage>
       <WebPage pageName="COSTS" isDefault="false" jspName="/envoy/projects/workflows/jobCosts.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobCostsHandler">
         <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>

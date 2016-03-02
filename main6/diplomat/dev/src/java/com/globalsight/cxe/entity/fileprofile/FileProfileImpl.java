@@ -17,23 +17,31 @@
 package com.globalsight.cxe.entity.fileprofile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
+import com.globalsight.cxe.entity.filterconfiguration.FilterConfiguration;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.JSPFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JavaScriptFilter;
 import com.globalsight.cxe.entity.filterconfiguration.MSOfficeDocFilter;
+import com.globalsight.cxe.entity.filterconfiguration.MapOfTableNameAndSpecialFilter;
 import com.globalsight.cxe.entity.filterconfiguration.POFilter;
 import com.globalsight.cxe.entity.filterconfiguration.QAFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * Represents a CXE File Profile entity object.
@@ -754,6 +762,33 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         return name;
     }
 
+    public Long getSpecialFilterId()
+    {
+        long id = 0;
+        if (filterId > 0)
+        {
+            try
+            {
+                Session session = HibernateUtil.getSession();
+                String hql = "from  FilterConfiguration f where f.filterTableName = :fid "
+                        + "and companyId = '1000'";
+                Map<String, String> map = new HashMap<String, String>();
+                map.put("fid", filterTableName);
+                List result = HibernateUtil.search(hql, map);
+                if (result != null && result.size() > 0)
+                {
+                    FilterConfiguration fc =  (FilterConfiguration) result.get(0);
+                    id = fc.getId();
+                }
+                session.close();
+            }
+            catch (Exception e)
+            {
+                s_logger.error(e.getMessage(), e);
+            }
+        }
+        return id;
+    }
     public boolean getPreserveSpaces()
     {
         if (filterId > 0)

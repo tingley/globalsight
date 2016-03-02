@@ -120,6 +120,7 @@ public class WorkflowActivitiesHandler extends PageHandler
             }
             WorkflowInstance wfi = WorkflowHandlerHelper
                     .getWorkflowInstance(wfId);
+            sessionMgr.setAttribute("WorkflowInstance", wfi);
             if (action != null && "view".equals(action))
             {
                 List taskInfos = (List) sessionMgr

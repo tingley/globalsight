@@ -29,21 +29,27 @@ var LineData = {
 				"</div>").appendTo(c);
 		
 		var txt = div.find("#txt" + l.id);
-		txt.focus(function() {
-			l.data.txt = txt.val();
-			$(this).addClass("focus");
-		}).blur(function() {
-			$(this).removeClass("focus");
-			l.data.txt = txt.val();
-			l.showTxt();
-		});
-		
-		txt.bind('keypress', function(event) {
-			if (event.keyCode == "13") {
+		if (UI.editable){
+			
+			txt.focus(function() {
 				l.data.txt = txt.val();
-				txt.blur();
-			} 
-		});
+				$(this).addClass("focus");
+			}).blur(function() {
+				$(this).removeClass("focus");
+				l.data.txt = txt.val();
+				l.showTxt();
+			});
+			
+			txt.bind('keypress', function(event) {
+				if (event.keyCode == "13") {
+					l.data.txt = txt.val();
+					txt.blur();
+				} 
+			});
+		} else {
+			txt.attr("disabled",true); 
+		}
+		
 
 		return l;
 	},

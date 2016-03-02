@@ -71,7 +71,9 @@ var Model = {
 		return node;
 	},
 	nodeChanged : function() {
-		Navigation.draw();
+		if (typeof (Navigation) != "undefined"){
+			Navigation.draw();
+		}
 	},
 	deleteSelectedNode : function() {
 		if (Model.selectedNode) {

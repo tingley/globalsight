@@ -1,5 +1,6 @@
 package com.globalsight.everest.util.applet;
 
+import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -49,8 +50,12 @@ import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.F
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper;
+import com.globalsight.everest.workflow.WorkflowArrow;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
 import com.globalsight.everest.workflow.WorkflowConstants;
+import com.globalsight.everest.workflow.WorkflowInstance;
+import com.globalsight.everest.workflow.WorkflowTask;
+import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflow.WorkflowTemplate;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -685,4 +690,65 @@ public class AppletService extends HttpServlet
             ctx.close();
         }
     }
-}
+    
+    /**
+     * Used for GBS-4022. Remove applet from job detail/workflows/details page.
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void getWorkflowInstance()
+    {
+        SessionManager sessionMgr = (SessionManager) request.getSession()
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        
+        WorkflowInstance wfi = (WorkflowInstance) sessionMgr.getAttribute("WorkflowInstance");
+        
+        Vector<WorkflowTaskInstance> wts = wfi.getWorkflowInstanceTasks();
+        
+        Map result = new HashMap();
+        Vector lines = new Vector();
+        Vector nodes = new Vector();
+        result.put("lines", lines);
+        result.put("nodes", nodes);
+        
+        for (WorkflowTaskInstance wt : wts)
+        {
+            Map map = new HashMap();
+            map.put("id", wt.getTaskId());
+            
+            int state = wt.getTaskState();
+            map.put("state", state);
+            Point p = wt.getPosition();
+            map.put("x", p.getX());
+            map.put("y", p.getY());
+            
+            int type = wt.getType();
+            map.put("type", type);
+            
+            if (type == WorkflowConstants.ACTIVITY)
+            {
+                map.put("roleName", wt.getDisplayRoleName());
+                map.put("activityName", wt.getActivityDisplayName());
+            }
+            
+            Vector arrows = wt.getOutgoingArrows();
+            
+            for (int j = 0; j < arrows.size(); j++)
+            {
+                WorkflowArrow modelArrow = (WorkflowArrow) arrows.elementAt(j);
+                WorkflowTask twt = modelArrow.getTargetNode();
+                
+                Map tmap = new HashMap();
+                tmap.put("fid", wt.getTaskId());
+                tmap.put("tid", twt.getTaskId());
+                tmap.put("name", modelArrow.getName());
+                tmap.put("isDefault", modelArrow.isDefault());
+                lines.add(tmap);
+            }
+            
+            nodes.add(map);
+        }
+        
+        String js = JsonUtil.toJson(result);
+        writeString(js);
+    }
+ }

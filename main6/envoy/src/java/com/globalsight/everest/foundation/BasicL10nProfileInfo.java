@@ -18,6 +18,8 @@ package com.globalsight.everest.foundation;
 
 public class BasicL10nProfileInfo implements java.io.Serializable
 {
+    private static final long serialVersionUID = -956324322517955432L;
+
     protected long m_profileId = -1;
     protected String m_name = null;    
     protected String m_description = null;

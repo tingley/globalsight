@@ -167,29 +167,23 @@ function submitForm(button)
 
 }
 
-function modifyuser(name){
-	
+function modifyuser(name)
+{
 	var url = "<%=editURL%>&&radioBtn=" + name;
-
 	fpForm.action = url;
-
 	fpForm.submit();
-				  
-			
 }
 
-function editL10nprofile(name)
+function editL10nprofile(l10nProfileId)
 {
-	var  url = "<%=editL10nURL%>&&radioBtn=" + name;
-	
+	var url = "<%=editL10nURL%>&radioBtn=" + l10nProfileId;
 	fpForm.action = url;
-	
 	fpForm.submit();
 }
 
 function editfc(id)
 {
-	var  url = "<%=editfcURL%>&filterId="+id;
+	var url = "<%=editfcURL%>&filterConfigurationId=" + id;
 	fpForm.action = url;	
 	fpForm.submit();
 }
@@ -276,10 +270,10 @@ function filterItems(e)
                      %> 
                 </amb:column>
                  <amb:column label="lb_loc_filter_name" sortBy="<%=FileProfileComparator.FILTER_NAME%>" filter="uFNFilter" filterValue="<%=uFNFilter%>" width="20%">
-                 <amb:permission name="<%=Permission.FILTER_CONFIGURATION_EDIT_FILTER%>" ><a href='javascript:void(0)' title='Edit FilterConfiguration' onclick="editfc(<%=fp.getSpecialFilterId()%>)" ></amb:permission>
+                 <amb:permission name="<%=Permission.FILTER_CONFIGURATION_VIEW%>" ><a href='javascript:void(0)' title='Edit FilterConfiguration' onclick="editfc(<%=fp.getSpecialFilterId()%>)" ></amb:permission>
                      <% String filterName = fp.getFilterName();
                         out.print(filterName);%> 
-                 <amb:permission name="<%=Permission.FILTER_CONFIGURATION_EDIT_FILTER%>" ></a></amb:permission>
+                 <amb:permission name="<%=Permission.FILTER_CONFIGURATION_VIEW%>" ></a></amb:permission>
                 </amb:column>
                 <amb:column label="lb_source_file_encoding" sortBy="<%=FileProfileComparator.CODE_NAME%>" width="120px">
                      <% 

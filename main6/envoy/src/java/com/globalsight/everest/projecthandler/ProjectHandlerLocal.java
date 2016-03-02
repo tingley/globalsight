@@ -689,7 +689,7 @@ public class ProjectHandlerLocal implements ProjectHandler
     {
         Vector args = CompanyWrapper.addCompanyIdBoundArgs(new Vector());
         StringBuffer sql = new StringBuffer(
-                "select l10n.ID, l10n.NAME, l10n.DESCRIPTION,l10n.COMPANYID,tmp.NAME TMPNAME,tmp.ID TMPID, p.PROJECT_NAME,p.PROJECT_SEQ project_id,l10n.IS_AUTO_DISPATCH,l10n.SOURCE_LOCALE_ID,count(lpwi.WF_TEMPLATE_ID) countwft");
+                "select l10n.ID, l10n.NAME, l10n.DESCRIPTION,l10n.COMPANYID,tmp.NAME TMPNAME,tmp.ID TMPID, p.PROJECT_NAME, p.PROJECT_SEQ project_id, l10n.IS_AUTO_DISPATCH, l10n.SOURCE_LOCALE_ID,count(lpwi.WF_TEMPLATE_ID) countwft");
         sql.append(" from l10n_profile l10n, l10n_profile_tm_profile lptp, tm_profile tmp, project p, company c,l10n_profile_wftemplate_info lpwi");
         sql.append(" where 1 = 1");
         sql.append(" and l10n.IS_ACTIVE = 'Y'");
@@ -719,7 +719,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             sql.append(" and p.PROJECT_NAME LIKE '%" + filterParams[3] + "%'");
         }
         sql.append(" group by l10n.ID, l10n.NAME, l10n.DESCRIPTION, "
-                    + "l10n.COMPANYID, tmp.NAME, p.PROJECT_NAME, "
+                    + "l10n.COMPANYID, tmp.NAME, tmp.ID, p.PROJECT_NAME, p.PROJECT_SEQ,"
                     + "l10n.IS_AUTO_DISPATCH,l10n.SOURCE_LOCALE_ID");
         sql.append(" order by l10n.NAME ");
         return sql.toString();

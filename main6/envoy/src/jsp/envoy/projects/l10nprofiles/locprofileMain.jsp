@@ -25,14 +25,14 @@
 <jsp:useBean id="duplicate" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="details" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="remove" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
-<jsp:useBean id="editTM" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
+<jsp:useBean id="editTMP" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="editProject" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="locprofiles" class="java.util.ArrayList" scope="request"/>
 
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
     String selfURL = self.getPageURL();
-    String editTM_URL = editTM.getPageURL();
+    String editTMP_URL = editTMP.getPageURL();
     String editProject_URl = editProject.getPageURL();
     String newURL = new1.getPageURL() + "&action=new";
     String modifyURL = mod1.getPageURL() + "&action=edit";
@@ -170,20 +170,20 @@ function handleSelectAll() {
 	  enableButtons();
 }
 
-function editTM(id)
+function editTMP(id)
 {
-	var url = "<%=editTM_URL%>&formAction=edit&tmProfileId="+id;
+	var url = "<%=editTMP_URL%>&formAction=edit&tmProfileId="+id;
 	locprofileForm.action = url;
 	locprofileForm.submit();
-	
 }
 
 function editProject(id)
 {
 	var url = "<%=editProject_URl%>&action=edit&radioBtn="+id;
 	locprofileForm.action = url;
-	locprofileForm.submit();	
+	locprofileForm.submit();
 }
+
 function filterItems(e) {
 	e = e ? e : window.event;
     var keyCode = e.which ? e.which : e.keyCode;
@@ -272,9 +272,9 @@ function sendAjaxForCheckNewMessage(){
                 </amb:column>
                 <% } %>
                  <amb:column label="lb_tm_profiles" sortBy="<%=LocProfileComparator.TMPROFILE%>" filter="L10nProfilesTMPFilter" filterValue="<%=l10nProfilesTMPFilter%>" width="20%">
-                 <amb:permission name="<%=Permission.TM_EDIT%>" ><a href='javascript:void(0)' title='Edit Translation Memory Profiles' onclick="editTM(<%=locprofile.getTMProfileId()%>)" ></amb:permission>
+                 <amb:permission name="<%=Permission.TMP_EDIT%>" ><a href='javascript:void(0)' title='Edit Translation Memory Profile' onclick="editTMP(<%=locprofile.getTMProfileId()%>)" ></amb:permission>
                      <%= locprofile.getTmProfileName()%>
-                 <amb:permission name="<%=Permission.TM_EDIT%>" ></a></amb:permission>
+                 <amb:permission name="<%=Permission.TMP_EDIT%>" ></a></amb:permission>
                 </amb:column>
                  <amb:column label="lb_project" sortBy="<%=LocProfileComparator.PROJECT%>" filter="L10nProfilesProjectFilter" filterValue="<%=l10nProfilesProjectFilter%>" width="10%">
                  <amb:permission name="<%=Permission.PROJECTS_EDIT%>" ><a href='javascript:void(0)' title='Edit Project' onclick="editProject(<%=locprofile.getProjectId()%>)" ></amb:permission>

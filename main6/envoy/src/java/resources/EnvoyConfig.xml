@@ -902,7 +902,7 @@
         <PageLink linkName="remove" destinationPageName="LP1"></PageLink>
         <PageLink linkName="details" destinationPageName="LPDET"></PageLink>
         <PageLink linkName="duplicate" destinationPageName="LPDUP"></PageLink>
-        <PageLink linkName="editTM" destinationPageName="MTMP"></PageLink>
+        <PageLink linkName="editTMP" destinationPageName="MTMP"></PageLink>
         <PageLink linkName="editProject" destinationPageName="M4P"></PageLink>
       </WebPage>
       <WebPage pageName="LPN1" isDefault="false" jspName="/envoy/projects/l10nprofiles/locprofileNewAndEdit.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileNewAndEditHandler">

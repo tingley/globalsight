@@ -29,7 +29,7 @@ session="true" %>
 	String importsUrl = imports.getPageURL()+ "&action=importFilter";
 	// GBS-3697
 	Vector locales = (Vector) request.getAttribute(LocalePairConstants.LOCALES);
-	String fp_filterId = (String)request.getAttribute("filterId");
+	String fp_filterId = (String)request.getAttribute("filterConfigurationId");
 %>
 
 <HTML>
@@ -97,11 +97,10 @@ session="true" %>
         	var obj = document.getElementById(bj);
         	if(obj != null)
         	{
-        	    var id = "filterName_" + obj.id.split("_")[1];
+        	    var id = "filterName_" + <%=fp_filterId%>;
         	    obj.src = "/globalsight/images/ecllapse.jpg";
         		document.getElementById(id).style.display = "block";
         	}
-        			
         }
         </script>
         <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>

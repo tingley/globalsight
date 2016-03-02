@@ -416,15 +416,12 @@ function editfileprofile(param)
 					</td>
 					<%if(b_clickfplink){%>
 					<td style="text-align:left">
-					<a  href="javascript:;"  onclick="editfileprofile(${item.getSourcePage().getRequest().getDataSourceId()})" title="Edit FileProfile">
+						<a href="javascript:;" onclick="editfileprofile(${item.getSourcePage().getRequest().getDataSourceId()})" title="Edit File Profile">
 						${item.dataSourceName}
-					</a>
+						</a>
 					</td>
-					<%}%>
-					<%if(!b_clickfplink){%>
-					<td style="text-align:left">
-						${item.dataSourceName}
-					</td>
+					<%} else { %>
+					<td style="text-align:left">${item.dataSourceName}</td>
 					<%}%>
 					<td style="text-align:center">
 						<span <c:if test="${item.isWordCountOverriden}">style="font-style:oblique;font-weight:bold;"

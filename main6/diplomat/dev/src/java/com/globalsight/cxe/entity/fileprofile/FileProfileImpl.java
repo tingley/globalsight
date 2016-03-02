@@ -25,8 +25,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConfiguration;
@@ -35,7 +33,6 @@ import com.globalsight.cxe.entity.filterconfiguration.JSPFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JavaScriptFilter;
 import com.globalsight.cxe.entity.filterconfiguration.MSOfficeDocFilter;
-import com.globalsight.cxe.entity.filterconfiguration.MapOfTableNameAndSpecialFilter;
 import com.globalsight.cxe.entity.filterconfiguration.POFilter;
 import com.globalsight.cxe.entity.filterconfiguration.QAFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
@@ -762,6 +759,9 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         return name;
     }
 
+    /**
+     * Return the id in filter configuration table.
+     */
     public Long getSpecialFilterId()
     {
         long id = 0;
@@ -769,26 +769,26 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         {
             try
             {
-                Session session = HibernateUtil.getSession();
-                String hql = "from  FilterConfiguration f where f.filterTableName = :fid "
-                        + "and companyId = '1000'";
-                Map<String, String> map = new HashMap<String, String>();
-                map.put("fid", filterTableName);
+                String hql = "from  FilterConfiguration f where f.filterTableName = :filterTableName "
+                        + "and f.companyId = :companyId";
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("filterTableName", filterTableName);
+                map.put("companyId", m_companyId);
                 List result = HibernateUtil.search(hql, map);
                 if (result != null && result.size() > 0)
                 {
                     FilterConfiguration fc =  (FilterConfiguration) result.get(0);
                     id = fc.getId();
                 }
-                session.close();
             }
             catch (Exception e)
             {
-                s_logger.error(e.getMessage(), e);
+                s_logger.error(e);
             }
         }
         return id;
     }
+
     public boolean getPreserveSpaces()
     {
         if (filterId > 0)

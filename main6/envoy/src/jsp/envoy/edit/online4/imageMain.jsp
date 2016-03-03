@@ -136,7 +136,7 @@ function closeWindow()
 
  function uploadTragetImage()
  {
-	$("#uploadFormDiv").dialog({width:400, height:100,resizable:true});
+	$("#uploadFormDiv").dialog({width:500, height:100,resizable:true});
  }
  
  function uploadFileMethod()
@@ -216,11 +216,11 @@ function closeWindow()
 	    <table id = "uploadFormTable" style="width:97%;" class="standardText">
 	    	<BR>
 	    	<tr>
-		    	<td align="left" valign="middle">
-		    		<%=bundle.getString("lb_file")%>:
-		          <input type="file" name="fileFieldName" size="60" id="fileUploadDialog" style="height:24px;width:150px">
+		    	<td style="width:70%;" align="left" valign="middle">
+		    	   <span style="width:20%;"><%=bundle.getString("lb_file")%>:</span>
+		          <input type="file" name="fileFieldName" size="60" id="fileUploadDialog" style="height:24px;width:80%;">
 		    	</td>
-		      <td align="right" valign="middle">
+		      <td style="width:30%;" align="right" valign="middle">
 		          <input type="button" onclick="uploadFileMethod()" value="<%=bundle.getString("lb_upload")%>">
 		          <input type="button" onclick="$('#uploadFormDiv').dialog('close')" value="<%=bundle.getString("lb_close")%>">
 		      </td>

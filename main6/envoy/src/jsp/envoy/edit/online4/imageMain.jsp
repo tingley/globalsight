@@ -16,8 +16,6 @@
 %>
 <jsp:useBean id="self" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
- <jsp:useBean id="startupload" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
  <%@ include file="/envoy/common/installedModules.jspIncl" %>
 <%
 ResourceBundle bundle = PageHandler.getBundle(session);
@@ -26,7 +24,7 @@ SessionManager sessionMgr = (SessionManager) session
 
 String lb_title = "Popup editor Image";
 String url_self = self.getPageURL();
-String uploadUrl = startupload.getPageURL() +
+String uploadUrl = url_self +
 "&" + WebAppConstants.UPLOAD_ACTION +
 "=" + WebAppConstants.UPLOAD_ACTION_START_UPLOAD;
 
@@ -37,7 +35,7 @@ String lb_sourceLocale = bundle.getString("lb_source_locale");
 String lb_targetLocale  = bundle.getString("lb_target_locale");
 String lb_source_file = bundle.getString("lb_source_file");
 String lb_target_file = bundle.getString("lb_target_file");
-String lb_upload_image_message = bundle.getString("lb_upload_image_message");
+String lb_upload_image_difExtension_message = bundle.getString("lb_upload_image_difExtension_message");
 
 Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
 long jobId = Long.valueOf(sessionMgr.getAttribute(WebAppConstants.JOB_ID).toString());
@@ -55,8 +53,12 @@ String targetImageName = targetImagePath.split("/")[targetImagePath
 		.split("/").length - 1];
 String targetImageSuffix = targetImageName.substring(
 		targetImageName.indexOf(".") + 1, targetImageName.length());
-//String sourcePath = "/globalsight/GlobalSight/UnextractedFiles2/1063/PSF/en_US/1028/source_02_1041P_693.png";
-//String targetPath = "http://localhost:8080/globalsight/terminologyImg/tuv_429101.png";
+String isCanUpload = (String)request.getAttribute("isCanUpload");
+boolean displayUploadButton = false;
+if(isCanUpload != null && Boolean.parseBoolean(isCanUpload))
+{
+	displayUploadButton = true;
+}
 Long currentLocaleId = (Long)request.getAttribute("currentLocaleId");
 List<GlobalSightLocale> targetLocalesList = (List<GlobalSightLocale>)request.getAttribute("targetLocalesList");
 StringBuffer str_targetLocaleBuffer = new StringBuffer();
@@ -93,16 +95,19 @@ else
 <TITLE><%=lb_title%></TITLE>
 <STYLE>
 .contentTable{width:100%;table-layout:fixed;}
-.top {width:100%;height:3%;position:absolute;Z-INDEX: 10; LEFT:0px;top:0px;border-bottom:4.5px solid;border-bottom-style:ridge;border-bottom-color:#E8E8E8;}
-.title {width:100%;height:3%;position:absolute;Z-INDEX: 10;LEFT:0px;top:3.5%;}
+.top {width:100%;height:26px;position:absolute;Z-INDEX: 10; LEFT:0px;top:0px;border-bottom:4px solid;border-bottom-style:ridge;border-bottom-color:#E8E8E8;}
+
+.title {width:100%;height:26px;position:absolute;Z-INDEX: 10;LEFT:0px;top:30px;}
 .titleSource{width:50%;height:100%;position:absolute;left:0px;}
-.titleTarget{width:50%;height:100%;position:absolute;right:0px;border-left:4.5px solid;border-left-style:ridge;border-left-color:#E8E8E8;}
-.content{width:100%;height:90%;position:absolute;Z-INDEX: 10; LEFT:0px;top:6.5%;}
-.contentSource{width:49.8%;height:100%;position:absolute;left:0px;overflow:auto;}
-.contentTarget{width:50%;height:100%;position:absolute;right:0px;overflow:auto;border-left:4.5px solid;border-left-style:ridge;border-left-color:#E8E8E8;}
-.foot {width:100%;height:3%;position:absolute;Z-INDEX: 10; LEFT: 0px;bottom:0px;}
+.titleTarget{width:50%;height:100%;position:absolute;right:0px;border-left:4px solid;border-left-style:ridge;border-left-color:#E8E8E8;}
+
+.content{width:100%;position:absolute;Z-INDEX: 10;LEFT:0px;top:56px;bottom:27px;height:auto;}
+.contentSource{width:49.6%;height:100%;position:absolute;left:0px;overflow:auto;}
+.contentTarget{width:50%;height:100%;position:absolute;right:0px;overflow:auto;border-left:4px solid;border-left-style:ridge;border-left-color:#E8E8E8;}
+
+.foot {width:100%;height:26px;position:absolute;Z-INDEX: 10; LEFT: 0px;bottom:0px;}
 .footSource{width:50%;height:100%;position:absolute;left:0px;}
-.footTarget{width:50%;height:100%;position:absolute;right:0px;border-left:4.5px solid;border-left-style:ridge;border-left-color:#E8E8E8;}
+.footTarget{width:50%;height:100%;position:absolute;right:0px;border-left:4px solid;border-left-style:ridge;border-left-color:#E8E8E8;}
 
 /* Background colors for issue status, class name is the status token. */
 .open   { background-color: red !important; }
@@ -114,7 +119,7 @@ else
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <script>
 var url_self = "<%=url_self%>";
-var helpFile = "<%=bundle.getString("help_main_editor2")%>";
+var helpFile = "<%=bundle.getString("help_main_image_editor")%>";
 var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 function helpSwitch()
 {
@@ -131,18 +136,29 @@ function closeWindow()
 
  function uploadTragetImage()
  {
-  $("#uploadFormDiv").dialog({width:400, height:100,resizable:true});
+	$("#uploadFormDiv").dialog({width:400, height:100,resizable:true});
  }
  
  function uploadFileMethod()
  {
 	 var fileName = document.uploadForm.fileFieldName.value;
-	 var fileSuffix = fileName.split(".")[1];
-	 if(fileSuffix != "<%=targetImageSuffix%>")
+	 var str= new Array();   
+	 var fileArr = fileName.split(".");
+	 if(fileArr != null && fileArr.length > 1)
 	 {
-		alert("<%=lb_upload_image_message%>");	
+		 var fileExtension = fileArr[1];
+		 if(fileExtension != "<%=targetImageSuffix%>")
+		 {
+			alert("<%=lb_upload_image_difExtension_message%>");	
+			return;
+		 }
+	 }
+	 else
+	 {
+		alert("<%=lb_upload_image_difExtension_message%>");	
 		return;
 	 }
+	
 	 document.uploadForm.action = "<%=uploadUrl%>"+"&fileFieldName="+fileName;
 	 document.uploadForm.submit();
 	 $('#uploadFormDiv').dialog('close');
@@ -157,20 +173,20 @@ function closeWindow()
 </HEAD>
 <BODY id="idBody" onload="">
 	<input type="hidden" name="<%=ReportConstants.JOB_IDS%>" value="<%=jobId%>">
-	<table class="contentTable" cellspacing="0" cellpadding="0" border="0">
-		<tr class="tableHeadingBasic top" ALIGN="RIGHT" VALIGN="TOP">
-			<td colspan="2" width="100%">
+	<table class="contentTable">
+		<tr class="tableHeadingBasic top" ALIGN="right">
+			<td colspan="2" width="100%" style="line-height:26px;">
 				<A HREF="#" onclick="closeWindow(); return false;" CLASS="HREFBoldWhite"><%=lb_close%></A> |
 				<A HREF="#" onclick="helpSwitch(); return false;" CLASS="HREFBoldWhite"><%=lb_help%></A>&nbsp;&nbsp;&nbsp;&nbsp;
 			</td>
 		</tr>
-		<tr CLASS="tableHeadingGray title" >
-			<td class="titleSource"><%=lb_source_file%></td>
-			<td class="titleTarget"><%=lb_target_file%></td>
+		<tr CLASS="tableHeadingGray title">
+			<td class="titleSource" style="line-height:26px;"><%=lb_source_file%></td>
+			<td class="titleTarget" style="line-height:26px;"><%=lb_target_file%></td>
 		</tr>
 		<tr class="content">
 			<td class="contentSource">
-			   <a CLASS="standardHREF" HREF="<%=sourceImagePath%>" >
+			   <a CLASS="standardHREF" HREF="#" >
 					<img id="sourceImg" src="<%=sourceImagePath%>" alt="Source File"/>
 				</a>
 			</td>
@@ -181,13 +197,13 @@ function closeWindow()
 			</td>
 		</tr>
 		<tr CLASS="tableHeadingBasic foot">
-			<td class="footSource"><%=lb_sourceLocale%>: <%=str_sourceLocale%></td>
-			<td class="footTarget">
-				<span style="float:left">&nbsp;&nbsp;<%=lb_targetLocale%>: <%=str_targetLocaleBuffer.toString()%></span>
+			<td class="footSource" style="line-height:26px;"><%=lb_sourceLocale%>: <%=str_sourceLocale%></td>
+			<td class="footTarget" style="line-height:26px;">
+				<span style="float:left;">&nbsp;&nbsp;<%=lb_targetLocale%>: <%=str_targetLocaleBuffer.toString()%></span>
 				<%
-					if(targetLocalesList == null){
+					if(targetLocalesList == null && displayUploadButton){
 				%>
-			    <span style="float:right"><A HREF="#" onclick="uploadTragetImage(); return false;" CLASS="HREFBoldWhite"><%=lb_upload%></A>&nbsp;&nbsp;&nbsp;</span>
+			    <span style="float:right;line-height:bottom"><A HREF="#" onclick="uploadTragetImage(); return false;" CLASS="HREFBoldWhite"><%=lb_upload%></A>&nbsp;&nbsp;&nbsp;</span>
 				<%
 				}
 				%>

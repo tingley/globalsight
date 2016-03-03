@@ -19,11 +19,9 @@ package com.globalsight.everest.webapp.pagehandler.edit.online4;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -44,10 +42,10 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
-import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
 import com.globalsight.everest.webapp.pagehandler.offline.upload.MultipartFormDataReader;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -194,7 +192,14 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
 
             p_request.setAttribute("sourceLanguage", sourceLanguage);
             p_request.setAttribute("targetLanguage", targetLanguage);
-
+            
+            boolean isCanUpload = false;
+            int state = task.getState();
+            if (state == Task.STATE_ACCEPTED && TaskImpl.TYPE_TRANSLATE == task.getType())
+            {
+                isCanUpload = true;
+            }
+            p_request.setAttribute("isCanUpload", String.valueOf(isCanUpload));
         }
         catch (Exception e)
         {
@@ -251,6 +256,8 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
                             p_request.setAttribute("sourceImagePath", spUrl);
                             p_request.setAttribute("currentLocaleId", trgLocale.getId());
                             p_request.setAttribute("sourceLanguage", srcPage
+                                    .getGlobalSightLocale().getDisplayName(p_uiLocale));
+                            p_request.setAttribute("targetLanguage", trgPage
                                     .getGlobalSightLocale().getDisplayName(p_uiLocale));
                         }
                     }

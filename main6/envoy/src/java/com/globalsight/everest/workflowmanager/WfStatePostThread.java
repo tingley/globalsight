@@ -262,14 +262,17 @@ public class WfStatePostThread implements Runnable
                 try
                 {
                     response = httpClient.execute(httpPost);
-                    if (response != null)
-                    {
-                        EntityUtils.consumeQuietly(response.getEntity());
-                    }
                 }
                 catch (Exception e)
                 {
                     s_logger.error("Post workflow transition info error:", e);
+                }
+                finally
+                {
+                    if (response != null)
+                    {
+                        EntityUtils.consumeQuietly(response.getEntity());
+                    }                    
                 }
                 if (response != null)
                 {

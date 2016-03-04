@@ -528,6 +528,8 @@ public class Exporter
                 ps = ((WorkflowImpl) wf).getTargetPagesSet();
                 tpIt = ps.iterator();
             }
+            boolean isLastFile = false;
+            FileState[] fileStates = null;
             synchronized (FILE_STATES)
             {
                 m_batchId = (String) m_cxeMessage.getParameters().get(
@@ -590,18 +592,14 @@ public class Exporter
                         FileSystemAdapterException fsae = new FileSystemAdapterException(
                                 "XmlDtdValidateEx", errorArgs, e);
 
-                        exportStatusMsg = makeExportErrorMessage(fsae,
-                                xmlDtd.getId());
+                        exportStatusMsg = makeExportErrorMessage(fsae, xmlDtd.getId());
                     }
                 }
 
                 if (isLastFile())
                 {
-					if (wf.getJob().isMindTouchJob())
-                	{
-                        // Post/push files back to MindTouch server
-                        handleMindTouchFiles(wf, FILE_STATES.get(m_batchId));
-                	}
+                    isLastFile = true;
+                    fileStates = FILE_STATES.get(m_batchId);
 
                     addDtdValidationFailedComment();
                     FILE_STATES.remove(m_batchId);
@@ -609,6 +607,14 @@ public class Exporter
                     XliffFileUtil.processXliffFiles(wf);
                     XliffFileUtil.processXLZFiles(wf);
                 }
+            }
+
+            // MindTouch files are handled together after all files exported.
+            // This logic cannot be synchronized because it need much time.
+            if (isLastFile && fileStates != null && fileStates.length > 0 
+                    && wf.getJob().isMindTouchJob())
+            {
+                handleMindTouchFiles(wf, fileStates);
             }
         }
         catch (FileSystemAdapterException fsae)

@@ -121,6 +121,9 @@ else
 var url_self = "<%=url_self%>";
 var helpFile = "<%=bundle.getString("help_main_image_editor")%>";
 var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
+var w_editor;
+window.focus();
+
 function helpSwitch()
 {
     // The variable helpFile is defined in each JSP
@@ -169,6 +172,14 @@ function closeWindow()
  	document.location = url_self+"&action=refresh" + p_locale;
  }
  
+ function CanClose()
+ {
+ 	if(w_editor)
+     {
+     	w_editor.close();
+     }
+ 	return true;
+ }
 </script>
 </HEAD>
 <BODY id="idBody" onload="">

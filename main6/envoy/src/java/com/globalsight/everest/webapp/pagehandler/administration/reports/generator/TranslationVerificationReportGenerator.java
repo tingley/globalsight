@@ -18,6 +18,9 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.genera
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -81,7 +84,9 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
+import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
@@ -656,6 +661,13 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
                             tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,
                             sourceTuv, targetTuv, p_job.getId());
 
+                    //for GBS-4304
+                    String targetGxml = targetTuv.getGxml();
+                    boolean flag = checkMtmatch(p_job,targetGxml);
+                    if (flag)
+                    {
+                        matches.append("\r\n").append("MT Match");
+                    }
                     // Get Terminology/Glossary Source and Target.
                     String sourceTerms = "";
                     String targetTerms = "";
@@ -823,6 +835,41 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
         return p_row;
     }
 
+    private boolean checkMtmatch(Job job, String ss)
+    {
+        boolean flag = false;
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            long cpId = job.getCompanyId();
+            connection = DbUtil.getConnection();
+
+            String sql = "select id from  translation_unit_variant_" + cpId
+                    + " where segment_string ='" + ss
+                    + "'and modify_user='ms_translator_mt'";
+            ps = connection.prepareStatement(sql);
+            rs = ps.executeQuery();
+            if (rs.next())
+            {
+                flag = true;
+            }
+            return flag;
+        }
+        catch (Exception ex)
+        {
+            throw new LingManagerException(ex);
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(connection);
+        }
+
+    }
+    
     private void addCommentStatus(Sheet p_sheet,
             Set<Integer> rowsWithCommentSet, int last_row)
     {

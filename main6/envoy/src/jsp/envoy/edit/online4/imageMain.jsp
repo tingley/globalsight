@@ -197,7 +197,7 @@ function closeWindow()
 		</tr>
 		<tr class="content">
 			<td class="contentSource">
-			   <a CLASS="standardHREF" HREF="#" >
+			   <a CLASS="standardHREF" HREF="<%=sourceImagePath%>" >
 					<img id="sourceImg" src="<%=sourceImagePath%>" alt="Source File"/>
 				</a>
 			</td>

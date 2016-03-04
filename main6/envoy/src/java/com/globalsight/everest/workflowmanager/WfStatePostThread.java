@@ -49,6 +49,7 @@ import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.workflow.WorkflowArrowInstance;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.mail.MailerConstants;
 
 public class WfStatePostThread implements Runnable
@@ -99,7 +100,7 @@ public class WfStatePostThread implements Runnable
         finally
         {
             shutdownHttpClient();
-
+            HibernateUtil.closeSession();
             s_logger.info("End to post workflow state transition info for task: " + taskId);
         }
     }

@@ -18,9 +18,15 @@ package com.globalsight.everest.qachecks;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -46,10 +52,15 @@ import com.globalsight.cxe.entity.filterconfiguration.QARuleDefault;
 import com.globalsight.cxe.entity.filterconfiguration.QARuleException;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.integration.ling.LingServerProxy;
+import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
+import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.Tuv;
@@ -58,12 +69,17 @@ import com.globalsight.everest.util.comparator.QARuleComparator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.ling.tm.LeverageMatchLingManager;
+import com.globalsight.ling.tm.LingManagerException;
+import com.globalsight.ling.tm2.leverage.LeverageUtil;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
@@ -176,16 +192,52 @@ public class QAChecker
         boolean processed = false;
         int row = ROW_SEGMENT_START;
 
+        Job p_job = p_workflow.getJob();
         GlobalSightLocale sourceLocale = p_workflow.getJob().getSourceLocale();
         GlobalSightLocale targetLocale = p_workflow.getTargetLocale();
         boolean rtlSourceLocale = EditUtil.isRTLLocale(sourceLocale);
         boolean rtlTargetLocale = EditUtil.isRTLLocale(targetLocale);
 
+        TranslationMemoryProfile tmp = null;
+        Vector<String> excludItems = null;
+        
         long jobId = p_workflow.getJob().getId();
         Vector<TargetPage> targetPages = p_workflow.getTargetPages();
+        LeverageMatchLingManager leverageMatchLingManager = LingServerProxy
+                .getLeverageMatchLingManager();
+        
+        for (Workflow workflow : p_job.getWorkflows())
+        {
+            if (Workflow.PENDING.equals(workflow.getState())
+                    || Workflow.CANCELLED.equals(workflow.getState())
+                    || Workflow.EXPORT_FAILED.equals(workflow.getState())
+                    || Workflow.IMPORT_FAILED.equals(workflow.getState()))
+            {
+                continue;
+            }
+                targetPages = workflow.getTargetPages();
+                tmp = workflow.getJob().getL10nProfile()
+                        .getTranslationMemoryProfile();
+                if (tmp != null)
+                {
+                    excludItems = tmp.getJobExcludeTuTypes();
+                }
+        }
+        
         for (TargetPage targetPage : targetPages)
         {
             SourcePage sourcePage = targetPage.getSourcePage();
+            // Leverage TM
+            
+            MatchTypeStatistics tuvMatchTypes = leverageMatchLingManager
+                    .getMatchTypesForStatistics(
+                            sourcePage.getIdAsLong(),
+                            targetPage.getLocaleId(),
+                            p_job.getLeverageMatchThreshold());
+            Map<Long, Set<LeverageMatch>> fuzzyLeverageMatcheMap = leverageMatchLingManager
+                    .getFuzzyMatches(sourcePage.getIdAsLong(),
+                            targetPage.getLocaleId());
+                       
             long fileProfileId = sourcePage.getRequest().getDataSourceId();
             FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
                     .readFileProfile(fileProfileId);
@@ -221,6 +273,17 @@ public class QAChecker
                 String displayTargetSegment = rtlTargetLocale ? EditUtil
                         .toRtlString(targetSegment) : targetSegment;
 
+
+                // for GBS-4047
+                StringBuilder matches = getMatches(fuzzyLeverageMatcheMap, tuvMatchTypes,
+                        excludItems, sourceTuvs, targetTuvs, sourceTuv, targetTuv, p_job.getId());
+                String targetGxml = targetTuv.getGxml();
+                boolean flag = checkMtmatch(p_job, targetGxml);
+                if (flag)
+                {
+                    matches.append("\r\n").append("MT Match");
+                }
+                        
                 // check regular rules
                 for (QARule rule : rules)
                 {
@@ -284,7 +347,7 @@ public class QAChecker
                     fillCells(p_workbook, currentRow, p_workflow, jobId,
                             rtlSourceLocale, rtlTargetLocale, sourcePage,
                             sourceTuv, displaySourceSegment,
-                            displayTargetSegment, rule.getDescription());
+                            displayTargetSegment,matches,rule.getDescription());
                     row++;
                     processed = true;
                 }
@@ -344,7 +407,7 @@ public class QAChecker
                     fillCells(p_workbook, currentRow, p_workflow, jobId,
                             rtlSourceLocale, rtlTargetLocale, sourcePage,
                             sourceTuv, displaySourceSegment,
-                            displayTargetSegment, ruleDefault.getDescription());
+                            displayTargetSegment,matches,ruleDefault.getDescription());
                     row++;
                     processed = true;
                 }
@@ -357,11 +420,111 @@ public class QAChecker
         return processed;
     }
 
-    private void fillCells(Workbook p_workbook, Row p_currentRow,
-            Workflow p_workflow, long p_jobId, boolean p_rtlSourceLocale,
-            boolean p_rtlTargetLocale, SourcePage p_sourcePage,
-            Tuv p_sourceTuv, String p_sourceSegment, String p_targetSegment,
-            String p_desc)
+    private boolean checkMtmatch(Job job, String ss)
+    {
+        boolean flag = false;
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            long cpId = job.getCompanyId();
+            connection = DbUtil.getConnection();
+
+            String sql = "select id from  translation_unit_variant_" + cpId
+                    + " where segment_string ='" + ss
+                    + "'and modify_user='ms_translator_mt'";
+            ps = connection.prepareStatement(sql);
+            rs = ps.executeQuery();
+            if (rs.next())
+            {
+                flag = true;
+            }
+            return flag;
+        }
+        catch (Exception ex)
+        {
+            throw new LingManagerException(ex);
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(connection);
+        }
+
+    }
+    
+    private StringBuilder getMatches(Map fuzzyLeverageMatchMap,
+            MatchTypeStatistics tuvMatchTypes,
+            Vector<String> excludedItemTypes, List sourceTuvs, List targetTuvs,
+            Tuv sourceTuv, Tuv targetTuv, long p_jobId)
+    {
+        StringBuilder matches = new StringBuilder();
+
+        Set fuzzyLeverageMatches = (Set) fuzzyLeverageMatchMap.get(sourceTuv
+                .getIdAsLong());
+        if (LeverageUtil.isIncontextMatch(sourceTuv, sourceTuvs, targetTuvs,
+                tuvMatchTypes, excludedItemTypes, p_jobId))
+        {
+            matches.append(m_bundle.getString("lb_in_context_match"));
+        }
+        else if (LeverageUtil.isExactMatch(sourceTuv, tuvMatchTypes))
+        {
+            matches.append(StringUtil.formatPCT(100));
+        }
+        else if (fuzzyLeverageMatches != null)
+        {
+            int count = 0;
+            for (Iterator ite = fuzzyLeverageMatches.iterator(); ite.hasNext();)
+            {
+                LeverageMatch leverageMatch = (LeverageMatch) ite.next();
+                if ((fuzzyLeverageMatches.size() > 1))
+                {
+                    matches.append(++count)
+                            .append(", ")
+                            .append(StringUtil
+                                    .formatPCT(leverageMatch
+                                            .getScoreNum()))
+                            .append("\r\n");
+                }
+                else
+                {
+                    matches.append(StringUtil
+                            .formatPCT(leverageMatch.getScoreNum()));
+                    break;
+                }
+            }
+        }
+        else
+        {
+            matches.append(m_bundle.getString("lb_no_match_report"));
+        }
+
+        if (matches.indexOf("100%") == -1
+                && matches.indexOf(m_bundle.getString("lb_in_context_match")) == -1)
+        {
+            if (targetTuv.isRepeated())
+            {
+                matches.append("\r\n")
+                        .append(m_bundle
+                                .getString("jobinfo.tradosmatches.invoice.repeated"));
+            }
+            else if (targetTuv.getRepetitionOfId() > 0)
+            {
+                matches.append("\r\n")
+                        .append(m_bundle
+                                .getString("jobinfo.tradosmatches.invoice.repetition"));
+            }
+        }
+
+        return matches;
+    }
+    
+    private void fillCells(Workbook p_workbook, Row p_currentRow, Workflow p_workflow,
+            long p_jobId, boolean p_rtlSourceLocale, boolean p_rtlTargetLocale,
+            SourcePage p_sourcePage, Tuv p_sourceTuv, String p_sourceSegment,
+            String p_targetSegment, StringBuilder matches, String p_desc)
     {
         int col = 0;
 
@@ -411,6 +574,13 @@ public class QAChecker
         targetCell.setCellStyle(trgStyle);
         col++;
 
+        // TM match
+        CellStyle contentStyle = getContentStyle(p_workbook);
+        Cell TMmatchCell = getCell(p_currentRow, col);
+        TMmatchCell.setCellValue(matches.toString());
+        TMmatchCell.setCellStyle(contentStyle);
+        col++;
+        
         // False Positive
         Cell falsePositiveCell = getCell(p_currentRow, col);
         falsePositiveCell.setCellValue(FALSE_POSITIVE_NO);
@@ -552,6 +722,12 @@ public class QAChecker
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
+        Cell TMmatchCell = getCell(segHeaderRow, col);
+        TMmatchCell.setCellValue(m_bundle.getString("lb_tm_match_original"));
+        TMmatchCell.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.setColumnWidth(col, 15 * 256);
+        col++;
+        
         Cell falsePositiveCell = getCell(segHeaderRow, col);
         falsePositiveCell.setCellValue(m_bundle
                 .getString("lb_report_qa_report_false_positive"));

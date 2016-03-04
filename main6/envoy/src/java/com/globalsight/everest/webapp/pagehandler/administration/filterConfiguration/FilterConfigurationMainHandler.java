@@ -69,13 +69,14 @@ public class FilterConfigurationMainHandler extends PageHandler
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
+        String fp_filterId = p_request.getParameter("filterConfigurationId");
+        p_request.setAttribute("filterConfigurationId", fp_filterId);
 
         String[] filters =
         { "MS Office Doc Filter", "XML Filter", "HTML Filter", "JSP Filter",
-                "MS Office Excel Filter", "Java Properties Filter",
-                "Java Script Filter", "InDesign Filter", "OpenOffice Filter",
-                "MS Office PowerPoint Filter", "MS Office 2010 Filter",
-                "Portable Object Filter", "Base Text Filter",
+                "MS Office Excel Filter", "Java Properties Filter", "Java Script Filter",
+                "InDesign Filter", "OpenOffice Filter", "MS Office PowerPoint Filter",
+                "MS Office 2010 Filter", "Portable Object Filter", "Base Text Filter",
                 "Frame Maker 9 Filter", "Plain Text Filter", "QA Filter" };
 
         String hql2 = "select f.name from FilterConfiguration f where f.companyId=:companyId";

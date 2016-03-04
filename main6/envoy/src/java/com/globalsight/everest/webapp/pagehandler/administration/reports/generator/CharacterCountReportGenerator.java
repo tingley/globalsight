@@ -19,6 +19,9 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.genera
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,6 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import netscape.security.Target;
+
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -42,6 +47,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.hibernate.Session;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -50,6 +56,7 @@ import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
@@ -65,10 +72,13 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
+import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.ExcelUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
@@ -580,6 +590,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
                             .getTextValue();
                     targetSegmentString = targetTuv.getGxmlElement()
                             .getTextValue();
+
                     category = sourceTuv.getTu(p_job.getId()).getTuType();
                     if (excludItems != null && excludItems.contains(category))
                     {
@@ -588,6 +599,14 @@ public class CharacterCountReportGenerator implements ReportGenerator
                     StringBuilder matches = getMatches(fuzzyLeverageMatcheMap,
                             tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,
                             sourceTuv, targetTuv, p_job.getId());
+                    
+                    //for GBS-4304
+                    String targetGxml = targetTuv.getGxml();
+                    boolean flag = checkMtmatch(p_job,targetGxml);
+                    if (flag)
+                    {
+                        matches.append("\r\n").append("MT Match");
+                    }
                     
                     CellStyle contentStyle = getContentStyle(p_workBook);
                     Row currentRow = getRow(p_sheet, p_row);
@@ -647,6 +666,41 @@ public class CharacterCountReportGenerator implements ReportGenerator
             }
         }
         totalSegmentCount.put(p_targetLang, p_row-7);
+    }
+
+    private boolean checkMtmatch(Job job, String ss)
+    {
+        boolean flag = false;
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            long cpId = job.getCompanyId();
+            connection = DbUtil.getConnection();
+
+            String sql = "select id from  translation_unit_variant_" + cpId
+                    + " where segment_string ='" + ss
+                    + "'and modify_user='ms_translator_mt'";
+            ps = connection.prepareStatement(sql);
+            rs = ps.executeQuery();
+            if (rs.next())
+            {
+                flag = true;
+            }
+            return flag;
+        }
+        catch (Exception ex)
+        {
+            throw new LingManagerException(ex);
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(connection);
+        }
+
     }
 
     private void setAllCellStyleNull()

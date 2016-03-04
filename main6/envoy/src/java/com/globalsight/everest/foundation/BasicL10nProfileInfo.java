@@ -18,6 +18,8 @@ package com.globalsight.everest.foundation;
 
 public class BasicL10nProfileInfo implements java.io.Serializable
 {
+    private static final long serialVersionUID = -956324322517955432L;
+
     protected long m_profileId = -1;
     protected String m_name = null;    
     protected String m_description = null;
@@ -27,7 +29,28 @@ public class BasicL10nProfileInfo implements java.io.Serializable
     protected String m_projectName = null;
     protected char m_isAutoDispatch;
     protected String m_srcLocaleName = null;
+    protected String m_tmProfileId = null;
+    protected String m_projectId = null;
+    
+    public String getProjectId()
+    {
+        return m_projectId;
+    }
 
+    public void setProjectId(String m_projectId)
+    {
+        this.m_projectId = m_projectId;
+    }
+
+    public String getTMProfileId()
+    {
+        return m_tmProfileId;
+    }
+
+    public void setTMProfileId(String m_tmProfileId)
+    {
+        this.m_tmProfileId = m_tmProfileId;
+    }
 
     public String getSrcLocaleName()
     {
@@ -128,4 +151,5 @@ public class BasicL10nProfileInfo implements java.io.Serializable
     { 
         return getName();
     }
+    
 }

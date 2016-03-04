@@ -27,6 +27,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -64,7 +65,7 @@ public class BlaiseHelper
     {
     	try
     	{
-			getTranslationClient();
+			initTranslationClient();
 		}
     	catch(UnknownHostException e)
     	{
@@ -107,6 +108,12 @@ public class BlaiseHelper
 		try
 		{
 			TranslationAgencyClient client = getTranslationClient();
+			if (client == null)
+			{
+			    logger.error("TranslationAgencyClient is null, cannot list inbox by state");
+			    return null;
+			}
+
 			List<InboxEntry> inboxEntries = null;
 			if (state == null)
 			{
@@ -126,11 +133,7 @@ public class BlaiseHelper
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error when invoke listInbox: " + e.getMessage());
-			if (logger.isDebugEnabled())
-			{
-				logger.error(e);
-			}
+			logger.error("Error when invoke listInbox(state):", e);
 		}
 
 		return results;
@@ -138,21 +141,15 @@ public class BlaiseHelper
 
     public List<TranslationInboxEntryVo> listInboxByIds(Set<Long> ids)
     {
-    	TranslationAgencyClient client = null;
-		try
-		{
-			client = getTranslationClient();
-		}
-		catch (Exception e)
-		{
-			logger.error(e);
-		}
-		if (client != null)
-		{
-	    	return listInboxByIds(client, ids);
-		}
+    	TranslationAgencyClient client = getTranslationClient();
+        if (client == null)
+        {
+            logger.error("TranslationAgencyClient is null, cannot list inbox by Ids: "
+                    + listToString(ids));
+            return null;
+        }
 
-		return null;
+        return listInboxByIds(client, ids);
     }
 
 	private List<TranslationInboxEntryVo> listInboxByIds(
@@ -171,11 +168,7 @@ public class BlaiseHelper
 		}
 		catch (Exception e)
 		{
-			logger.warn("Error when invoke listInboxByIds: " + e.getMessage());
-			if (logger.isDebugEnabled())
-			{
-				logger.error(e);
-			}
+            logger.error("Error when invoke listInboxByIds(client, ids):" + listToString(ids), e);
 		}
 
 		return results;
@@ -194,7 +187,13 @@ public class BlaiseHelper
     	try
 		{
 			TranslationAgencyClient client = getTranslationClient();
-    		Set<Long> ids = new HashSet<Long>();
+			if (client == null)
+			{
+			    logger.error("TranslationAgencyClient is null, entry cannot be claimed: " + id);
+			    return;
+			}
+
+			Set<Long> ids = new HashSet<Long>();
     		ids.add(id);
     		client.claim(ids);
 		}
@@ -202,12 +201,11 @@ public class BlaiseHelper
 		{
 			if (e.getMessage().toLowerCase().contains("task already claimed."))
 			{
-				logger.warn("Warning when claim entry(" + id + "): "
-						+ e.getMessage());
+                logger.warn("Warning when claim entry(" + id + "): " + e.getMessage());
 			}
 			else
 			{
-				logger.error(e);
+				logger.error("Error when claim entry: " + id, e);
 			}
 		}
     }
@@ -225,6 +223,13 @@ public class BlaiseHelper
     	try
 		{
 			TranslationAgencyClient client = getTranslationClient();
+			if (client == null)
+			{
+                logger.error("TranslationAgencyClient is null, cannot download xliff for entry: "
+                        + entry.getId());
+			    return;
+			}
+
 			is = (GZIPInputStream) client.downloadXliff(entry.getId());
 	        os = new FileOutputStream(storeFile);
 
@@ -240,7 +245,7 @@ public class BlaiseHelper
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed to downloadXliff: " + entry.getId(), e);
+			logger.error("Fail to downloadXliff for entry: " + entry.getId(), e);
 		}
 	}
 
@@ -248,18 +253,24 @@ public class BlaiseHelper
 	{
 		try
 		{
-		    String content = FileUtil.readFile(file, "UTF-8");
-		    // A simple replace to "cheat" Blaise API
-		    content = StringUtil.replace(content, "<target state=\"new\"", "<target state=\"translated\"");
-		    FileUtil.writeFile(file, content);
-
-		    InputStream is = new ByteArrayInputStream(content.getBytes());
 			TranslationAgencyClient client = getTranslationClient();
+            if (client == null)
+            {
+                logger.error("TranslationAgencyClient is null, entry cannot be uploaded: " + entryId);
+                return;
+            }
+
+            String content = FileUtil.readFile(file, "UTF-8");
+            // A simple replace to "cheat" Blaise API
+            content = StringUtil.replace(content, "<target state=\"new\"", "<target state=\"translated\"");
+            FileUtil.writeFile(file, content);
+
+            InputStream is = new ByteArrayInputStream(content.getBytes());
 			client.uploadXliff(entryId, is);
 		}
 		catch (Exception e)
 		{
-			logger.error("Error when invoke 'uploadXliff': ", e);
+			logger.error("Error when invoke 'uploadXliff' for entryId:" + entryId, e);
 		}
 	}
 
@@ -268,7 +279,14 @@ public class BlaiseHelper
 		try
 		{
 			TranslationAgencyClient client = getTranslationClient();
-	    	for (Long id : ids)
+			if (client == null)
+			{
+                logger.error("TranslationAgencyClient is null, entry cannot be completed: "
+                        + listToString(ids));
+                return;
+			}
+
+			for (Long id : ids)
 	    	{
 	    		try
 	    		{
@@ -276,7 +294,7 @@ public class BlaiseHelper
 	    		}
 	    		catch (Exception e)
 	    		{
-	    			logger.error("Failed to complete entry: " + id, e);
+	    			logger.error("Fail to complete entry: " + id, e);
 	    		}
 	    	}
 		}
@@ -290,7 +308,21 @@ public class BlaiseHelper
     {
 		try
 		{
-			TranslationAgencyClient client = getTranslationClient();
+		    Set<Long> ids = new HashSet<Long>();
+		    ids.add(id);
+		    List<TranslationInboxEntryVo> entries = listInboxByIds(ids);
+		    if (entries == null || entries.size() == 0)
+		    {
+		        logger.warn("Entry " + id + " has been not available, cannot complete it.");
+		        return;
+		    }
+
+		    TranslationAgencyClient client = getTranslationClient();
+		    if (client == null)
+		    {
+		        logger.error("TranslationAgencyClient is null, entry cannot be completed: " + id);
+		        return;
+		    }
 			client.complete(id);
 		}
 		catch (Exception e)
@@ -299,8 +331,35 @@ public class BlaiseHelper
 		}
     }
 
-    // is this a bit heavy operation?
     private TranslationAgencyClient getTranslationClient()
+    {
+        try
+        {
+            return initTranslationClient();
+        }
+        catch(UnknownHostException e)
+        {
+            logger.error("Incorrect URL: " + blc.getUrl(), e);
+        }
+        catch (SecurityException e)
+        {
+            logger.error("Incorrect username or password: " + blc.getUsername() + "/"
+                    + blc.getPassword(), e);
+        }
+        catch (IncompatibleVersionException e)
+        {
+            logger.error("Incorrect client core version: " + blc.getClientCoreVersion(), e);
+        }
+        catch (Exception e)
+        {
+            logger.error("Fail to get Blaise translation client: ", e);
+        }
+
+        return null;
+    }
+
+    // is this a bit heavy operation?
+    private TranslationAgencyClient initTranslationClient()
 			throws SecurityException, IncompatibleVersionException,
 			MalformedURLException, IOException, URISyntaxException
 	{
@@ -419,5 +478,27 @@ public class BlaiseHelper
     	}
 
     	return localeString;
+    }
+
+    /**
+     * Change list to string comma separated.
+     * 
+     * @return String like "string1,string2,string3".
+     */
+    public static String listToString(Collection<Long> objects)
+    {
+        StringBuilder buffer = new StringBuilder();
+        int counter = 0;
+        for (Long number : objects)
+        {
+            if (counter > 0)
+            {
+                buffer.append(",");
+            }
+            counter++;
+            buffer.append(number);
+        }
+
+        return buffer.toString();
     }
 }

@@ -100,6 +100,19 @@
 <TITLE><%= title %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
+
+<link rel="STYLESHEET" type="text/css" href="/globalsight/includes/css/workflow/ui.css">
+<link rel="STYLESHEET" type="text/css" href="/globalsight/includes/css/workflow/view.css">
+<%@ include file="/includes/workflow/l18n.js"%>
+<SCRIPT SRC="/globalsight/jquery/jquery-1.6.4.min.js" type="text/javascript"></SCRIPT>
+<SCRIPT SRC="/globalsight/includes/workflow/ajax.js" type="text/javascript"></SCRIPT>
+<SCRIPT SRC="/globalsight/includes/workflow/ui.js" type="text/javascript"></SCRIPT>
+<SCRIPT SRC="/globalsight/includes/workflow/line.js" type="text/javascript"></SCRIPT>
+<SCRIPT SRC="/globalsight/includes/workflow/shape.js" type="text/javascript"></SCRIPT>
+<SCRIPT SRC="/globalsight/includes/workflow/Utils.js" type="text/javascript"></SCRIPT>
+<SCRIPT SRC="/globalsight/includes/workflow/model.js" type="text/javascript"></SCRIPT>
+<SCRIPT SRC="/globalsight/includes/workflow/workflowInstance/view.js" type="text/javascript"></SCRIPT>
+
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
 var needWarning = false;
@@ -124,47 +137,14 @@ var w_viewer;
 
 <TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 WIDTH="100%">
 <TR>
-<TD WIDTH="100%" HEIGHT="410">                 
-				<!-- CONVERTER VERSION 1.4 -->
-				<%
-                boolean isIE = request.getHeader("User-Agent").indexOf("MSIE")!=-1;
-                %>
-                <%if(isIE){%>
-				<OBJECT classid="clsid:CAFEEFAC-0018-0000-0045-ABCDEFFEDCBA"
-				WIDTH = "90%" HEIGHT = "95%" NAME = "GPUI"  
-                codebase="<%=httpProtocolToUse%>://javadl.sun.com/webapps/download/AutoDL?BundleId=107109">
-				<PARAM NAME = CODE VALUE = "com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVApplet.class" >
-				<%} else {%>           
-                <SPAN CLASS="standardText"><%=bundle.getString("applet_need_java_support")%></SPAN>
-                <BR>
-                <APPLET type="application/x-java-applet;jpi-version=1.8.0_45"
-                height="95%" width="90%" pluginspage="<%=httpProtocolToUse%>://www.java.com/en/download/manual.jsp" code="com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVApplet.class">
-                <%}%>
-				<!-- PARAM NAME = CODEBASE VALUE = "/classes/" -->
-				
-				<PARAM NAME = "cache_option" VALUE = "Plugin" >
-                <PARAM NAME = "cache_archive" VALUE = "/globalsight/applet/lib/graphicalWf.jar">
-				<PARAM NAME = NAME VALUE = "GPUI" >
-				<PARAM NAME = "scriptable" VALUE="true">
-				<PARAM NAME =  "rand" value=<%=session.getAttribute("UID_" + session.getId())%>>
-                <PARAM NAME = "servletUrl" value="/globalsight/ControlServlet?linkName=workflowActivities&pageName=DTLS&applet=true&rand=">
-                <PARAM NAME = "grid" value="com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVPane">				
-	            <COMMENT>
-				<EMBED type="application/x-java-applet;jpi-version=1.8.0_45"  
-				CODE = "com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVApplet.class" 
-				CODEBASE = "/classes/"
-				cache_option = "Plugin"
-                NAME = "GPUI" WIDTH = 100% HEIGHT = 100% 
-				scriptable=true
-                pluginspage="<%=httpProtocolToUse%>://www.java.com/en/download/manual.jsp">
-                <NOEMBED></COMMENT>
-                </NOEMBED></EMBED>
-				<% if(isIE){%>
-                </OBJECT>
-                <%} else {%>
-                </APPLET>
-                <%}%>
-				<!--"END_CONVERTED_APPLET"-->
+<TD WIDTH="100%" HEIGHT="410">
+    <div id="viewport"> 
+    <DIV id="canvasDiv">
+        <CANVAS id="canvas" style="position: absolute;"></CANVAS>
+        <CANVAS id="snapLineCanvas" style="position: absolute;"></CANVAS>
+     </DIV>
+    </div>
+    
 </TD>
 </TR>
 </TABLE>

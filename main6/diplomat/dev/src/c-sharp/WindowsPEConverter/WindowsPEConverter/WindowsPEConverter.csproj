@@ -102,7 +102,6 @@
     </None>
     <Compile Include="WinPEConverterImpl.cs" />
     <Compile Include="WinPEConverterUtil.cs" />
-    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="GSIcon.ico">

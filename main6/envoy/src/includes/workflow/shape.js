@@ -700,7 +700,7 @@ function ActivityNode() {
 		context.lineTo(x1, y2);
 		context.lineTo(x1, y1);
 		context.stroke();
-		context.fillStyle = 'rgba(153, 204, 204, 0.8)';
+		context.fillStyle = this.getStateColor();
 		context.fill();
 
 		// color out border again.
@@ -713,7 +713,22 @@ function ActivityNode() {
 		context.lineTo(x1, y1);
 		context.stroke();
 	};
-	
+	this.getStateColor = function(){
+		var defaultColor = "rgba(153, 204, 204, 0.8)";
+		if (typeof (this.state) == "undefined"){
+			return defaultColor;
+		}
+		
+		// start
+		if (this.state == 3){
+			return "rgba(51, 153, 102, 0.8)";
+		} else if (this.state == 5){
+			// finished
+			return "rgba(102, 153, 204, 0.8)";
+		}
+		
+		return defaultColor;
+	}
 	this.json = {
 			   "@name": "",
 			   "task":    {

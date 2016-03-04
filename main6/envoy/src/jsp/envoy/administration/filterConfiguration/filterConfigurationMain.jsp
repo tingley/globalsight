@@ -29,7 +29,9 @@ session="true" %>
 	String importsUrl = imports.getPageURL()+ "&action=importFilter";
 	// GBS-3697
 	Vector locales = (Vector) request.getAttribute(LocalePairConstants.LOCALES);
+	String fp_filterId = (String)request.getAttribute("filterConfigurationId");
 %>
+
 <HTML>
 <!-- This is envoy\administration\filterConfiguration\filterConfigurationMain.jsp -->
     <HEAD>
@@ -88,7 +90,19 @@ session="true" %>
         <script type="text/javascript" src="/globalsight/includes/filter/BaseFilter.js"></script>
         <script type="text/javascript" src="/globalsight/includes/filter/PlainTextFilter.js"></script>
         <script type="text/javascript" src="/globalsight/includes/filter/QAFilter.js"></script>
-        
+        <script type="text/javascript">
+        function loadExpand()
+        {
+        	var bj = "img_" + <%=fp_filterId%>;
+        	var obj = document.getElementById(bj);
+        	if(obj != null)
+        	{
+        	    var id = "filterName_" + <%=fp_filterId%>;
+        	    obj.src = "/globalsight/images/ecllapse.jpg";
+        		document.getElementById(id).style.display = "block";
+        	}
+        }
+        </script>
         <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
         <%@ include file="/envoy/common/warning.jspIncl" %>
         <SCRIPT LANGUAGE="JavaScript">

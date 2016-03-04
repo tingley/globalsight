@@ -33,14 +33,16 @@
 <jsp:useBean id="addSourceFiles" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="editor" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="neweditor" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="pictureEditor" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="sourceEditor" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="allStatus" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="editSourcePageWc" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
- <jsp:useBean id="pageSearch" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
- <jsp:useBean id="searchText" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-  <jsp:useBean id="jobScorecard" scope="request"
+<jsp:useBean id="editFileProfile" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="pageSearch" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="searchText" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobScorecard" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
- <jsp:useBean id="incontextreiview" scope="request"
+<jsp:useBean id="incontextreiview" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
 	//jobSummary child page needed started.
@@ -66,6 +68,11 @@
 
 	String thisFileSearchText = (String) request
 			.getAttribute(JobManagementHandler.PAGE_SEARCH_TEXT);
+	PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+	boolean b_clickfplink=true;
+	if (!perms.getPermissionFor(Permission.FILE_PROFILES_EDIT)) {
+		b_clickfplink = false;
+	}
 	if (thisFileSearchText == null)
 	{
 		thisFileSearchText = "";
@@ -107,6 +114,7 @@
 			+ AddSourceHandler.UPLOAD_SOURCE_FILES;
 	String showUpdateProgressURL = addSourceFilesURL + "&action="
 			+ AddSourceHandler.SHOW_UPDATE_PROGRESS;
+	String editFileProfileURL = editFileProfile.getPageURL();
 
 	SessionManager sessionMgr = (SessionManager) session
 			.getAttribute(WebAppConstants.SESSION_MANAGER);
@@ -261,6 +269,12 @@ function searchPages(){
     pageSearchTextForm.action = url;
     pageSearchTextForm.submit();
 }
+
+function editfileprofile(param)
+{ 
+	pageSearchTextForm.action = "<%=editFileProfileURL%>&action=edit&&radioBtn="+ param;  
+	pageSearchTextForm.submit();   
+}
 </script>
 
 </head>
@@ -375,7 +389,13 @@ function searchPages(){
 								<amb:permission  name="<%=Permission.JOB_FILES_EDIT%>" >
 									<c:choose>
 							    		<c:when test="${item.sourcePage.primaryFileType == 2}">
-											<a class="standardHREF" href="${item.pageUrl}" target="_blank" title="${item.sourcePage.displayPageName}">
+											<c:if test="${item.isImageFile}">
+												<a class="standardHREF" href="#" onclick="openImageWindow('&sourcePageId=${item.sourcePage.id}&jobId=${item.sourcePage.jobId}',event);return false;" 
+												 oncontextmenu="openPageForImage('&sourcePageId=${item.sourcePage.id}&jobId=${item.sourcePage.jobId}',event,'${ status.index}');" target="_blank" title="${item.sourcePage.displayPageName}">
+							    			</c:if>
+							    			<c:if  test="${!item.isImageFile}">
+							    				<a class="standardHREF" href="${item.pageUrl}" target="_blank" title="${item.sourcePage.displayPageName}">
+							    			</c:if>
 										</c:when>
 										<c:otherwise>
 											<a class="standardHREF" href="#" onclick="openViewerWindow('${item.pageUrl}');return false;" oncontextmenu="contextForPage('${item.pageUrl}',event, '${ status.index}')" onfocus="this.blur();" title="${item.sourcePage.displayPageName}">
@@ -394,9 +414,15 @@ function searchPages(){
 							</c:otherwise>
 						</c:choose>
 					</td>
+					<%if(b_clickfplink){%>
 					<td style="text-align:left">
+						<a href="javascript:;" onclick="editfileprofile(${item.getSourcePage().getRequest().getDataSourceId()})" title="Edit File Profile">
 						${item.dataSourceName}
+						</a>
 					</td>
+					<%} else { %>
+					<td style="text-align:left">${item.dataSourceName}</td>
+					<%}%>
 					<td style="text-align:center">
 						<span <c:if test="${item.isWordCountOverriden}">style="font-style:oblique;font-weight:bold;"
 							      <c:set value="true" var="sourcePageWordCountOverriden" scope="page"></c:set>
@@ -675,6 +701,60 @@ function openViewerWindow(url)
 			alert(data);
 		}
 	});
+}
+
+function openPageForImage(url, e, displayName)
+{
+    if(e instanceof Object)
+    {
+	    e.preventDefault();
+	    e.stopPropagation();
+    }
+    var fontB1 = "<B>", fontB2 = "</B>";
+    displayName = pageNames[displayName];
+    
+    var fileName = displayName;
+    if (fileName.match(/\)$/))
+    {
+    	fileName = displayName.substr(0, displayName.lastIndexOf("("));
+    	if (fileName.match(/ $/))
+    	{
+    		fileName = fileName.substr(0, fileName.length - 1);
+    	}
+    }
+    
+    var lb_context_item_popup_editor   = "<%=bundle.getString("lb_context_item_popup_editor") %>";
+    lb_context_item_popup_editor   = fontB1 + lb_context_item_popup_editor + fontB2;
+    
+    var popupoptions = [new ContextItem(lb_context_item_popup_editor, function(){ openImageEditor(url, e);})];
+    
+    ContextMenu.display(popupoptions, e); 
+}
+
+function openImageEditor(url, e)
+{
+	document.getElementById("idBody").focus();
+	
+	var ajaxUrl = "<%=checkPageExistURL%>&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>")) +"&targetLocale="+"<%=thisTargetLocaleId%>"+ url;
+	$.get(ajaxUrl,function(data){
+		if(data==""){
+        	if (w_viewer != null && !w_viewer.closed)
+            {
+                w_viewer.focus();
+                return;
+            }
+
+            var style = "resizable=yes,top=0,left=0,height=" + (screen.availHeight - 60) + ",width=" + (screen.availWidth - 20);
+            w_viewer = window.open('${pictureEditor.pageURL}' + url, 'Viewer', style);
+		}else{
+			alert(data);
+		}
+	});
+}
+
+function openImageWindow(url, e)
+{
+    openImageEditor(url, e);
 }
 
 function openNewViewerWindow(url)

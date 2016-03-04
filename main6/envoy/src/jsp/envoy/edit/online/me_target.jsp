@@ -159,8 +159,8 @@ for(String segFilter : OnlineEditorConstants.SEGMENT_FILTERS)
         str_segmengFilter.append("selected ");
     }
     str_segmengFilter.append("value=\""+segFilter+"\">")
-    				 .append(bundle.getString(segFilter))
-    				 .append("</option>");
+                     .append(bundle.getString(segFilter))
+                     .append("</option>");
 }
 str_segmengFilter.append("</select>");
 
@@ -183,6 +183,7 @@ File jsFile = new File(jsPath);
 <SCRIPT src="/globalsight/envoy/terminology/viewer/error.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/snippets/snippet.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/online/editsnippets.js" defer></SCRIPT>
+<script src="/globalsight/includes/ajaxJquery/online.js"></script>
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
 <script src="/globalsight/includes/ContextMenu.js"></script>
 <link type="text/css" rel="StyleSheet" id="cssEditor"
@@ -190,6 +191,10 @@ File jsFile = new File(jsPath);
 <link type="text/css" rel="StyleSheet" id="cssEditorTouched" href="/globalsight/envoy/edit/online/editorTouched.css">
 <link type="text/css" rel="StyleSheet" id="cssEditorTranslated" href="/globalsight/envoy/edit/online/editorTranslated.css">
 <link type="text/css" rel="StyleSheet" id="cssEditorUntranslated" href="/globalsight/envoy/edit/online/editorUntranslated.css">
+<link rel="stylesheet" type="text/css" href="/globalsight/jquery/easyui.css">
+<link rel="stylesheet" type="text/css" href="/globalsight/jquery/icon.css">
+<link type="text/css" rel="StyleSheet" id="cssPtag"
+  href="/globalsight/envoy/edit/online2/ptag.css">
 <STYLE>
 .editorComment { cursor: hand;cursor:pointer; }
 
@@ -200,7 +205,7 @@ File jsFile = new File(jsPath);
                 behavior: url("/globalsight/envoy/edit/snippets/gs-tag.htc");
                 display: block;
                 cursor: hand;
-				cursor:pointer;
+                cursor:pointer;
               }
 .GSaddedGeneric {
                 behavior: url("/globalsight/envoy/edit/snippets/gs-tag.htc");
@@ -225,11 +230,12 @@ A:visited { color: blue; }
 .lbid{height:'23';width:'3'} 
 .repstyle{ALIGN:'CENTER'}
 pre {
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 10pt;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
 }
 </STYLE>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery.easyui.min.js"></script>
 <%if(jsFile.exists()){ %>
 <link href="/globalsight/javaScriptClient/jqueryUI/css/smoothness/jquery-ui-1.9.1.custom.min.css" rel="stylesheet"></link>
 <script src="/globalsight/javaScriptClient/jqueryUI/js/jquery-1.8.2.min.js"></script>
@@ -362,7 +368,7 @@ function SaveSegment(tuId, tuvId, subId, segment, ptagFormat)
 
 function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, status, category, share, overwrite)
 {
-	var o_form = document.CommentForm;
+    var o_form = document.CommentForm;
 
     o_form.tuId.value = tuId;
     o_form.tuvId.value = tuvId;
@@ -489,7 +495,7 @@ function forceCloseEditor(p_type)
 }
 
 function showDetails(tuId, tuvId, subId){
-	if (!CanClose())
+    if (!CanClose())
     {
         cancelEvent();
         RaiseEditor();
@@ -503,62 +509,53 @@ function showDetails(tuId, tuvId, subId){
 }
 
 function show(tuId, tuvId, subId){
-	var detail = "seg"+tuId+"_"+tuvId+"_"+subId;
-    var Y = ($(window).height())/2;
-    var X = ($(window).width())/2;
-    var scrollTop = $(document).scrollTop();     
-    var scrollLeft = $(document).scrollLeft(); 
-	$("#showDetails").css({top:Y+scrollTop,left:X+scrollLeft});
-	$("#showDetails").html("");
-	var str_url = "<%=url_refresh%>" ;
-	var str = jsonUrl + str_url;
+    $("#showDetails").html("");
+    var str_url = "<%=url_refresh%>" ;
+    var str = jsonUrl + str_url;
     var details = "tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId;
     $.post(str,{param:details},function(data){
-	    var result = eval("("+data+")");
-		$("#showDetails").html('<div id="details-title" onmousedown="Milan_StartMove(event,this.parentNode)" onmouseup="Milan_StopMove(event)" style="background:#0C1476; text-align:right;cursor:move;">'
-		+'<div><a href="##" style="color:#FFF" onclick="closeDetails()"><%=lb_close%></a></div></div><div style="position: absolute;overflow:auto;background-color:#FFFFFF;width:400px;height:240px"><table cellspacing="5" cellpadding="2" border="0" style="table-layout:fixed;">'
-		+'<tr class="standardText"><td noWrap colspan="2"><span class="mainHeading"><%=lb_title%></span></td></tr>'
-		+'<tr class="standardText"><td noWrap style="width:100px;"><B><%=lb_segmentId%>:</B></td><td>'+ result.str_segmentId +'</td></tr><tr class="standardText"><td noWrap><B><%=lb_segmentFormat%>:</B></td><td>'+result.str_segmentFormat+'</td></tr>'
-		+'<tr class="standardText"><td noWrap><B><%=lb_segmentType%>:</B></td><td>'+ result.str_segmentType +'</td></tr><tr class="standardText"><td><B><%=lb_wordCount%>:</B></td><td>'+ result.str_wordCount +'</td></tr>'
-		+'<tr class="standardText"><td noWrap><B><%=lb_tagInfo%>:</B></td><td><table border="0">'+ result.str_segementPtag +'</table></td></tr>'
-		+'<tr class="standardText"><td noWrap><B><%=bundle.getString("lb_sid")%>:</B></td><td>'+ result.str_sid +'</td></tr><tr class="standardText"><td><B><%=bundle.getString("lb_modify_by")%>:</B></td><td>'+ result.str_lastModifyUser +'</td></tr></table></div>');
-	 });
-	 $("#showDetails").show();	 	 
-}
-
-function Milan_StartMove(oEvent,div_id)
-{
-    var whichButton;
-    if(document.all&&oEvent.button==1) whichButton=true;
-    else { if(oEvent.button==0)whichButton=true;}
-    if(whichButton)
-    {
-        var oDiv=div_id;
-        offset_x=parseInt(oEvent.clientX-oDiv.offsetLeft);
-        offset_y=parseInt(oEvent.clientY-oDiv.offsetTop);
-        document.documentElement.onmousemove=function(mEvent)
-        {   
-            var eEvent;
-            if(document.all) eEvent=event;
-            else{eEvent=mEvent;}
-            var oDiv=div_id;
-            var x=eEvent.clientX-offset_x;
-            var y=eEvent.clientY-offset_y;
-            oDiv.style.left=(x)+"px";
-            oDiv.style.top=(y)+"px";
-            var d_oDiv=document.getElementById("disable_"+oDiv.id);
-            d_oDiv.style.left=(x)+"px";
-            d_oDiv.style.top=(y)+"px";
+        var result = eval("("+data+")");
+        var Y = ($(window).height())/3;
+        var X = ($(window).width())/3;
+        var scrollTop = $(document).scrollTop();
+        var scrollLeft = $(document).scrollLeft();
+        var detailhtml = '<table cellspacing="5" cellpadding="2" border="0" style="table-layout:fixed;">'
+                    +'<tr class="standardText"><td noWrap style="width:120px;"><B><%=lb_id%>:</B></td><td>'+ tuId +'</td></tr>'
+                    +'<tr class="standardText"><td noWrap><B><%=lb_segmentFormat%>:</B></td><td>'+result.str_segmentFormat+'</td></tr>'
+                    +'<tr class="standardText"><td noWrap><B><%=lb_segmentType%>:</B></td><td>'+ result.str_segmentType +'</td></tr>'
+                    +'<tr class="standardText"><td><B><%=lb_wordCount%>:</B></td><td>'+ result.str_wordCount +'</td></tr>'
+                    +'<tr class="standardText"><td noWrap><B><%=lb_tagInfo%>:</B></td><td><table border="0">'+ result.str_segementPtag +'</table></td></tr>'
+                    +'<tr class="standardText"><td noWrap><B><%=bundle.getString("lb_sid")%>:</B></td><td>'+ result.str_sid +'</td></tr>'
+                    +'<tr class="standardText"><td><B><%=bundle.getString("lb_modify_by")%>:</B></td><td>'+ result.str_lastModifyUser +'</td></tr>'
+                    +'<tr class="standardText"><td><B>Source:</B></td><td>'+result.m_sourceSegment+'</td></tr>'
+        //TM Match
+        var tm_matchhtml = '';
+        if (result.tm_match.length > 0)
+        {
+            tm_matchhtml = '<tr class="standardText"><td colspan="2"><B>TM Match Results:</B></td></tr>'
+                          +'<tr class="standardText"><td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;'+result.tm_match +'</td></tr>';
         }
-    }
-}
-
-function Milan_StopMove(oEvent){
-	document.documentElement.onmousemove=null; 
-	}
-
-function closeDetails(){
-	$("#showDetails").css("display", "none");
+        //MT Match
+        var mt_matchhtml = '';
+        if (result.mt_match.length > 0)
+        {
+            mt_matchhtml = '<tr class="standardText"><td colspan="2"><B>MT Match Results:</B></td></tr>'
+                          +'<tr class="standardText"><td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;'+result.mt_match +'</td></tr>';
+        }
+        
+        var foothtml = '</table>';
+        
+        $("#showDetails").window({
+            title:'<%=lb_title%>',
+            width:600,
+            height:400,
+            left:X+scrollLeft,
+            top:Y+scrollTop,
+            content:detailhtml + tm_matchhtml + mt_matchhtml + foothtml,
+            minimizable:false,
+            closable:true
+        });
+     });
 }
 
 function editComment(tuId, tuvId, subId)
@@ -886,7 +883,7 @@ function contextForX(e)
     {
     o = e.target;
     while(o.nodeType != o.ELEMENT_NODE)
-	o = o.parentNode;
+    o = o.parentNode;
     }
 
     o = getEditableSegment(o);
@@ -936,7 +933,7 @@ function contextForSegment(obj, e)
         ];
     }
     else
-    {	
+    {
       popupoptions = [
         new ContextItem("<B>Edit segment</B>",
           function(){editSegment(ids[0], ids[1], ids[2])}),
@@ -1016,7 +1013,7 @@ var pageToScroll = otherPane ? otherPane.content : null;
 
 $(window).ready(function(){
     $(window).scroll(function(){
-    	<%=str_scrollHandler%>
+        <%=str_scrollHandler%>
     }); 
 });
 
@@ -1045,8 +1042,8 @@ function showProgressBar()
 {
    try
    {
-	   var div = document.getElementById('tgt_prograssbar');
-	   div.style.visibility = "visible";
+       var div = document.getElementById('tgt_prograssbar');
+       div.style.visibility = "visible";
    }
    catch(e)
    {
@@ -1072,7 +1069,7 @@ function Preview(tuvids)
 function doLoad()
 {
     // add javascript to synchronize scroll bars 
-    // by segment id in the pop-up editor	
+    // by segment id in the pop-up editor    
     //if (pageToScroll)
     //{
     //    try
@@ -1082,7 +1079,7 @@ function doLoad()
     //    {
     //    }
     //}
-	
+    
     ContextMenu.intializeContextMenu();
 
     parent.parent.parent.SetTargetLocaleInfo(
@@ -1135,82 +1132,82 @@ function checkMenuLoadingFinished()
 // by segment id in the pop-up editor
 function update_tr(id) 
 {
-	var otherPane = parent.parent.source;
-	var pageToScroll = otherPane ? otherPane.content : null;
+    var otherPane = parent.parent.source;
+    var pageToScroll = otherPane ? otherPane.content : null;
     
     if(pageToScroll) 
     {
-		var target_cell;
-		var source_cell;		
-		if (document.getElementById) 
-		{
-		    try
-		    {
+        var target_cell;
+        var source_cell;        
+        if (document.getElementById) 
+        {
+            try
+            {
               target_cell = document.getElementById(id);
-			  source_cell = pageToScroll.document.getElementById(id);
-		    }catch(e){}
+              source_cell = pageToScroll.document.getElementById(id);
+            }catch(e){}
         }
-		else if (document.all)
-		{
-		    try
-		    {
+        else if (document.all)
+        {
+            try
+            {
               target_cell = document.all[id];
-			  source_cell = pageToScroll.document.all[id];
-		    }catch(e){}
+              source_cell = pageToScroll.document.all[id];
+            }catch(e){}
         }
-			
-		if (target_cell && source_cell) 
-		{
-			if (target_cell.offsetHeight > source_cell.offsetHeight) 
-			{
-				source_cell.height = target_cell.offsetHeight;
-			}
-	
-			if (target_cell.offsetHeight < source_cell.offsetHeight) 
-			{
-				target_cell.height = source_cell.offsetHeight;
-			}
-		}		
-	}
-	
+            
+        if (target_cell && source_cell) 
+        {
+            if (target_cell.offsetHeight > source_cell.offsetHeight) 
+            {
+                source_cell.height = target_cell.offsetHeight;
+            }
+    
+            if (target_cell.offsetHeight < source_cell.offsetHeight) 
+            {
+                target_cell.height = source_cell.offsetHeight;
+            }
+        }        
+    }
+    
 }
 
 function doSegmentFilter(p_segmentFilter)
 {
-	parent.parent.parent.SegmentFilter(p_segmentFilter);
+    parent.parent.parent.SegmentFilter(p_segmentFilter);
 }
 </SCRIPT>
 <script type="text/javascript" src="/globalsight/jquery/me_table.js"></script>
 <style type="text/css">
 <!--
 #tgt_prograssbar {
-	visibility: hidden;
-	position: absolute;
-	background-color: white;
-	width: 500px;
-	height: 50px;
-	text-align: center;
-	vertical-align: middle;
-	border: 1px solid #ddd;
+    visibility: hidden;
+    position: absolute;
+    background-color: white;
+    width: 500px;
+    height: 50px;
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid #ddd;
 }
 -->
 </style>
 
 <script type="text/javascript">
 <!--
-	function resetLocation(p_eid) {
-		try	{
-			var diffY = 0;
-			if (document.documentElement && document.documentElement.scrollTop)
-				diffY = document.documentElement.scrollTop;
-			else if (document.body)
-				diffY = document.body.scrollTop;
-			else {/*Netscape stuff*/
-			}
-			document.getElementById(p_eid).style.top = diffY + 300;
-	    } catch(e) {
-		}
-	}
+    function resetLocation(p_eid) {
+        try    {
+            var diffY = 0;
+            if (document.documentElement && document.documentElement.scrollTop)
+                diffY = document.documentElement.scrollTop;
+            else if (document.body)
+                diffY = document.body.scrollTop;
+            else {/*Netscape stuff*/
+            }
+            document.getElementById(p_eid).style.top = diffY + 300;
+        } catch(e) {
+        }
+    }
 //-->
 </script>
 
@@ -1258,13 +1255,13 @@ function doSegmentFilter(p_segmentFilter)
             display: none;"></div>
             
 <div id="tgt_prograssbar" style="top: 300px; left: 100px;">
-	<br /> <img alt="<%=lb_loadingPreview %>" src="/globalsight/includes/loading.gif"> <%=lb_loadingPreview %> <br />
+    <br /> <img alt="<%=lb_loadingPreview %>" src="/globalsight/includes/loading.gif"> <%=lb_loadingPreview %> <br />
 </div>
 
 <% if (i_viewMode == EditorConstants.VIEWMODE_DETAIL) { %>
 <TABLE WIDTH="100%" CELLSPACING="0" CELLPADDING="3" BORDER="1"
  style="border-color: lightgrey; border-collapse: collapse; border-style: solid; border-width: 1px;
- 		font-family: Arial,Helvetica,sans-serif; font-size: 10pt;">
+         font-family: Arial,Helvetica,sans-serif; font-size: 10pt;">
   <COL WIDTH="1%" VALIGN="TOP" CLASS="editorId" ID="editorId" NOWRAP>
   <COL WIDTH="99%" VALIGN="TOP" CLASS="editorText">
 
@@ -1276,11 +1273,10 @@ function doSegmentFilter(p_segmentFilter)
   </THEAD>
   <TBODY id="idPageHtml"><%=str_pageHtml%></TBODY>
 </TABLE>
-<div id="showDetails" style="display:none;position: absolute;z-index:999;width:400px;height:260px;border-style:ridge;border-width:5pt; border-color:#0C1476">
-</div>
+<div id="showDetails" ></div>
 <% } else { %>
 <DIV id="idPageHtml" style="font-family: Arial,Helvetica,sans-serif; font-size: 10pt;">
-	<%=str_pageHtml%>
+    <%=str_pageHtml%>
 </DIV>
 <% } %>
 

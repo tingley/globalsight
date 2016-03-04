@@ -31,12 +31,18 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="advsearch" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="editL10nProfile" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+  <jsp:useBean id="editFilterConfiguration" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="templates" scope="request" class="java.util.ArrayList" />
 
 <%
   ResourceBundle bundle = PageHandler.getBundle(session);
   SessionManager sessionMgr =
-      (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER); 
+      (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
+  String editL10nURL = editL10nProfile.getPageURL() +"&action=edit";
+  String editfcURL = editFilterConfiguration.getPageURL();
   String newURL = new1.getPageURL() + "&action=" + FileProfileConstants.CREATE;
   String editURL = edit.getPageURL() + "&action=" + FileProfileConstants.EDIT;
   String removeURL = remove.getPageURL() + "&action=" + FileProfileConstants.REMOVE;
@@ -161,16 +167,27 @@ function submitForm(button)
 
 }
 
-function modifyuser(name){
-	
+function modifyuser(name)
+{
 	var url = "<%=editURL%>&&radioBtn=" + name;
-
 	fpForm.action = url;
-
 	fpForm.submit();
-				  
-			
 }
+
+function editL10nprofile(l10nProfileId)
+{
+	var url = "<%=editL10nURL%>&radioBtn=" + l10nProfileId;
+	fpForm.action = url;
+	fpForm.submit();
+}
+
+function editfc(id)
+{
+	var url = "<%=editfcURL%>&filterConfigurationId=" + id;
+	fpForm.action = url;	
+	fpForm.submit();
+}
+
 function handleSelectAll() {
 	var ch = $("#selectAll").attr("checked");
 	if (ch == "checked") {
@@ -242,9 +259,9 @@ function filterItems(e)
                          "" : fp.getDescription()); %>
                 </amb:column>
                 <amb:column label="lb_loc_profile" sortBy="<%=FileProfileComparator.LP%>"  filter="uLPFilter" filterValue="<%=uLPFilter%>" width="20%">
-                     <% 
-                        out.print(fp.getLocName());
-                     %> 
+                    <amb:permission name="<%=Permission.LOCPROFILES_EDIT%>" ><a href='javascript:void(0)' title='Edit L10nProfile' onclick="editL10nprofile('<%=fp.getL10nprofileId() %>')" ></amb:permission>
+                     <% out.print(fp.getLocName());%>
+                     <amb:permission name="<%=Permission.LOCPROFILES_EDIT%>" ></a></amb:permission>
                 </amb:column>
                   <amb:column label="lb_source_file_format" sortBy="<%=FileProfileComparator.FORMATTYPES_NAME%>" filter="uSourceFileFormatFilter" filterValue="<%=uSourceFileFormatFilter%>" width="15%">
                      <% 
@@ -253,10 +270,10 @@ function filterItems(e)
                      %> 
                 </amb:column>
                  <amb:column label="lb_loc_filter_name" sortBy="<%=FileProfileComparator.FILTER_NAME%>" filter="uFNFilter" filterValue="<%=uFNFilter%>" width="20%">
-                     <% 
-                        String filterName = fp.getFilterName();
-                        out.print(filterName);
-                     %> 
+                 <amb:permission name="<%=Permission.FILTER_CONFIGURATION_VIEW%>" ><a href='javascript:void(0)' title='Edit FilterConfiguration' onclick="editfc(<%=fp.getSpecialFilterId()%>)" ></amb:permission>
+                     <% String filterName = fp.getFilterName();
+                        out.print(filterName);%> 
+                 <amb:permission name="<%=Permission.FILTER_CONFIGURATION_VIEW%>" ></a></amb:permission>
                 </amb:column>
                 <amb:column label="lb_source_file_encoding" sortBy="<%=FileProfileComparator.CODE_NAME%>" width="120px">
                      <% 

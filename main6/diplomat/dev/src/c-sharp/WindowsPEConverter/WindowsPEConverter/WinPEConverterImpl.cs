@@ -285,10 +285,12 @@ namespace GlobalSight.WinPEConverter
 
             // check if this file is PE file
             string startFlag = PEUtil.ConvertByteArrayToHexString(binary, 0, 2);
+            // dos MZ header
             if (!"4D5A".Equals(startFlag))
             {
                 throw new Exception("This file is not a valid PE file (not start with 4D5Ah)");
             }
+            // PE signature PE00
             string allHex = PEUtil.ConvertByteArrayToHexString(binary);
             if (!allHex.Contains("50450000"))
             {

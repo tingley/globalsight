@@ -17,13 +17,17 @@
 package com.globalsight.cxe.entity.fileprofile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
+import com.globalsight.cxe.entity.filterconfiguration.FilterConfiguration;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.JSPFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
@@ -34,6 +38,7 @@ import com.globalsight.cxe.entity.filterconfiguration.QAFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * Represents a CXE File Profile entity object.
@@ -752,6 +757,36 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         }
 
         return name;
+    }
+
+    /**
+     * Return the id in filter configuration table.
+     */
+    public Long getSpecialFilterId()
+    {
+        long id = 0;
+        if (filterId > 0)
+        {
+            try
+            {
+                String hql = "from  FilterConfiguration f where f.filterTableName = :filterTableName "
+                        + "and f.companyId = :companyId";
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("filterTableName", filterTableName);
+                map.put("companyId", m_companyId);
+                List result = HibernateUtil.search(hql, map);
+                if (result != null && result.size() > 0)
+                {
+                    FilterConfiguration fc =  (FilterConfiguration) result.get(0);
+                    id = fc.getId();
+                }
+            }
+            catch (Exception e)
+            {
+                s_logger.error(e);
+            }
+        }
+        return id;
     }
 
     public boolean getPreserveSpaces()

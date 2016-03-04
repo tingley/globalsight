@@ -1380,7 +1380,7 @@ public class Ambassador extends AbstractWebService
 				for (String s : fileProfileIds)
                 {
 					FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
-							Long.parseLong(s), true);
+							Long.parseLong(s), false);
 					if (fp == null)
                 	{
                 		list.add(s);
@@ -1388,11 +1388,10 @@ public class Ambassador extends AbstractWebService
                 }
 				if (list.size() > 0)
                 {
-					String invalidFpIds = AmbassadorUtil.listToString(list);
-					String errXml = makeErrorXml("createJob(HashMap args)",
-							"Below file profiles do not exist or have been inactive: "
-									+ invalidFpIds);
-                	throw new WebServiceException(errXml);
+                    String invalidFpIds = AmbassadorUtil.listToString(list);
+                    String errXml = makeErrorXml("createJob(HashMap args)",
+                            "Below file profiles do not exist : " + invalidFpIds);
+                    throw new WebServiceException(errXml);
                 }
                 if (fileProfileIds != null && fileProfileIds.size() > 0)
                 {
@@ -1557,11 +1556,10 @@ public class Ambassador extends AbstractWebService
             }
 			if (list.size() > 0)
             {
-				String invalidFpIds = AmbassadorUtil.listToString(list);
-				String errXml = makeErrorXml("createJobOnInitial",
-						"Below file profiles do not exist or have been inactive: "
-								+ invalidFpIds);
-            	throw new WebServiceException(errXml);
+                String invalidFpIds = AmbassadorUtil.listToString(list);
+                String errXml = makeErrorXml("createJobOnInitial",
+                        "Below file profiles do not exist : " + invalidFpIds);
+                throw new WebServiceException(errXml);
             }
             for (String fpids : fileProfileIds)
             {

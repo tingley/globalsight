@@ -1548,7 +1548,7 @@ public class Ambassador extends AbstractWebService
 			for (String s : fileProfileIds)
             {
 				FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
-						Long.parseLong(s), true);
+						Long.parseLong(s), false);
 				if (fp == null)
             	{
             		list.add(s);

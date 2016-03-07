@@ -808,6 +808,35 @@ public class ProjectHandlerLocal implements ProjectHandler
                     args, pe);
         }
     }
+    
+    public L10nProfile getL10nProfileByName(String p_profileName, String p_companyId)
+    {
+        try
+        {
+            StringBuffer hql = new StringBuffer();
+            hql.append("From BasicL10nProfile where isActive = 'Y' ");
+            if (StringUtil.isNotEmpty(p_profileName))
+            {
+                hql.append(" AND name = '").append(p_profileName).append("'");
+            }
+
+            if (StringUtil.isNotEmpty(p_companyId))
+            {
+                hql.append(" AND companyId = ").append(Long.parseLong(p_companyId));
+            }
+
+            return (L10nProfile) HibernateUtil.getFirst(hql.toString());
+
+        }
+        catch (Exception pe)
+        {
+            c_category.error(p_profileName + " " + pe.getMessage(), pe);
+            String[] args = new String[1];
+            args[0] = p_profileName;
+            throw new ProjectHandlerException(
+                    ProjectHandlerException.MSG_FAILED_TO_GET_LOCALIZATION_PROFILE, args, pe);
+        }
+    }
 
     // /////////////////////////////////////////////////////////////////////////
     // END: Localization Profiles ///////////////////////////////////////////

@@ -707,9 +707,9 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                     sid = sourceTuv.getSid();
 
                     // TM Match
-                    StringBuilder matches = getMatches(fuzzyLeverageMatchMap,
+                    StringBuilder matches = ReportGeneratorUtil.getMatches(fuzzyLeverageMatchMap,
                             tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,
-                            sourceTuv, targetTuv, jobId);
+                            m_bundle,sourceTuv, targetTuv, jobId);
 
                     // Get Terminology/Glossary Source and Target.
                     String sourceTerms = "";
@@ -726,15 +726,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                             targetTerms = tlm.getMatchedTargetTerm();
                         }
                     }
-
-                    
-                    //for GBS-4304
-                    String targetGxml = targetTuv.getGxml();
-                    boolean flag = checkMtmatch(p_job,targetGxml);
-                    if (flag)
-                    {
-                        matches.append("\r\n").append("MT Match");
-                    }
+                   
                     
                     CellStyle contentStyle = getContentStyle(p_workBook);
                     Row currentRow = getRow(p_sheet, p_row);
@@ -856,41 +848,6 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
         }
 
         return p_row;
-    }
-
-    private boolean checkMtmatch(Job job, String ss)
-    {
-        boolean flag = false;
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try
-        {
-            long cpId = job.getCompanyId();
-            connection = DbUtil.getConnection();
-
-            String sql = "select id from  translation_unit_variant_" + cpId
-                    + " where segment_string ='" + ss
-                    + "'and modify_user='ms_translator_mt'";
-            ps = connection.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next())
-            {
-                flag = true;
-            }
-            return flag;
-        }
-        catch (Exception ex)
-        {
-            throw new LingManagerException(ex);
-        }
-        finally
-        {
-            DbUtil.silentClose(rs);
-            DbUtil.silentClose(ps);
-            DbUtil.silentReturnConnection(connection);
-        }
-
     }
     
     /**
@@ -1247,70 +1204,6 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
         p_sheet.addValidationData(validation);
     }
     
-    /**
-     * Get TM matches.
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private StringBuilder getMatches(Map fuzzyLeverageMatchMap,
-            MatchTypeStatistics tuvMatchTypes,
-            Vector<String> excludedItemTypes, List sourceTuvs, List targetTuvs,
-            Tuv sourceTuv, Tuv targetTuv, long p_jobId)
-    {
-        StringBuilder matches = new StringBuilder();
-
-        Set fuzzyLeverageMatches = (Set) fuzzyLeverageMatchMap.get(sourceTuv
-                .getIdAsLong());
-        if (LeverageUtil.isIncontextMatch(sourceTuv, sourceTuvs, targetTuvs,
-                tuvMatchTypes, excludedItemTypes, p_jobId))
-        {
-            matches.append(m_bundle.getString("lb_in_context_match"));
-        }
-        else if (LeverageUtil.isExactMatch(sourceTuv, tuvMatchTypes))
-        {
-            matches.append(StringUtil.formatPCT(100));
-        }
-        else if (fuzzyLeverageMatches != null)
-        {
-            int count = 0;
-            for (Iterator ite = fuzzyLeverageMatches.iterator(); ite.hasNext();)
-            {
-                LeverageMatch leverageMatch = (LeverageMatch) ite.next();
-                if ((fuzzyLeverageMatches.size() > 1))
-                {
-                    matches.append(++count)
-                            .append(", ")
-                            .append(StringUtil.formatPCT(leverageMatch
-                                    .getScoreNum())).append("\r\n");
-                }
-                else
-                {
-                    matches.append(StringUtil.formatPCT(leverageMatch
-                            .getScoreNum()));
-                    break;
-                }
-            }
-        }
-        else
-        {
-            matches.append(m_bundle.getString("lb_no_match_report"));
-        }
-
-        if (targetTuv.isRepeated())
-        {
-            matches.append("\r\n")
-                    .append(m_bundle
-                            .getString("jobinfo.tradosmatches.invoice.repeated"));
-        }
-        else if (targetTuv.getRepetitionOfId() > 0)
-        {
-            matches.append("\r\n")
-                    .append(m_bundle
-                            .getString("jobinfo.tradosmatches.invoice.repetition"));
-        }
-
-        return matches;
-    }
-
     @Override
     public String getReportType()
     {

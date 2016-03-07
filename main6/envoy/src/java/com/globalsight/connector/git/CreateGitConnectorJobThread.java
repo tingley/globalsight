@@ -19,7 +19,6 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.connector.git.form.CreateGitConnectorJobForm;
 import com.globalsight.connector.git.util.GitConnectorHelper;
-import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
 import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.Condition;
 import com.globalsight.cxe.entity.customAttribute.DateCondition;
@@ -48,7 +47,6 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.ProcessRunner;
 import com.globalsight.util.RuntimeCache;
 import com.globalsight.webservices.attribute.AddJobAttributeThread;
 
@@ -420,6 +418,10 @@ public class CreateGitConnectorJobThread implements Runnable
         catch (Exception e)
         {
             logger.error(e);
+        }
+        finally
+        {
+            HibernateUtil.closeSession();
         }
     }
 }

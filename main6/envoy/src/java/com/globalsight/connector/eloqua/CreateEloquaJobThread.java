@@ -14,7 +14,7 @@
  *  limitations under the License.
  *  
  */
-package com.globalsight.connector.mindtouch;
+package com.globalsight.connector.eloqua;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,7 +23,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,11 +31,11 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
 
-import com.globalsight.connector.mindtouch.form.CreateMindTouchJobForm;
-import com.globalsight.connector.mindtouch.util.MindTouchHelper;
-import com.globalsight.connector.mindtouch.vo.MindTouchPage;
+import com.globalsight.connector.eloqua.form.CreateEloquaForm;
+import com.globalsight.connector.eloqua.models.Email;
+import com.globalsight.connector.eloqua.models.LandingPage;
+import com.globalsight.connector.eloqua.util.EloquaHelper;
 import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.Condition;
 import com.globalsight.cxe.entity.customAttribute.DateCondition;
@@ -45,10 +44,10 @@ import com.globalsight.cxe.entity.customAttribute.IntCondition;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.cxe.entity.customAttribute.ListCondition;
 import com.globalsight.cxe.entity.customAttribute.TextCondition;
+import com.globalsight.cxe.entity.eloqua.EloquaConnector;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
-import com.globalsight.cxe.entity.mindtouch.MindTouchConnector;
 import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.User;
@@ -66,34 +65,33 @@ import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.RuntimeCache;
 import com.globalsight.webservices.attribute.AddJobAttributeThread;
 
-public class CreateMindTouchJobThread implements Runnable
+public class CreateEloquaJobThread implements Runnable
 {
     static private final Logger logger = Logger
-            .getLogger(CreateMindTouchJobThread.class);
-
+            .getLogger(CreateEloquaJobThread.class);
     private User user;
     private String currentCompanyId;
-    private MindTouchConnector conn;
+    private EloquaConnector conn;
     private File attachment;
-    private CreateMindTouchJobForm mtForm;
+    private CreateEloquaForm eForm;
     private String[] targetLocales;
     private String attachmentName;
+    private String attribute;
     private String uuid;
     
-    public CreateMindTouchJobThread(User user, String currentCompanyId,
-            MindTouchConnector conn, CreateMindTouchJobForm mtForm,
-            String[] targetLocales, File attachment, String attachmentName,
-            String uuid)
+    public CreateEloquaJobThread(User user, String currentCompanyId,
+            EloquaConnector conn, File attachment, CreateEloquaForm eForm,
+            String[] targetLocales, String attachmentName, String attribute, String uuid)
     {
         super();
-
         this.user = user;
         this.currentCompanyId = currentCompanyId;
         this.conn = conn;
-        this.mtForm = mtForm;
-        this.targetLocales = targetLocales;
         this.attachment = attachment;
+        this.eForm = eForm;
+        this.targetLocales = targetLocales;
         this.attachmentName = attachmentName;
+        this.attribute = attribute;
         this.uuid = uuid;
     }
 
@@ -101,27 +99,29 @@ public class CreateMindTouchJobThread implements Runnable
     {
         try
         {
-            String jobName = mtForm.getJobName();
-            String comment = mtForm.getComment();
-            String priority = mtForm.getPriority();
+            String jobName = eForm.getJobName();
+            String comment = eForm.getComment();
+            String priority = eForm.getPriority();
             
             String randomStr = String.valueOf((new Random()).nextInt(999999999));
             while (randomStr.length() < 9)
             {
                 randomStr = "0" + randomStr;
             }
+
             jobName = jobName + "_" + randomStr;
 
-            // The fileMapFileProfile should be like 1234contents-1001, 1234tags-1001.
-            // "1234" means MindTouch "pageID", "1001" means file profile ID.
+            // The fileMapFileProfile should be like e11-1001, e12-1002
+            String fileMapFileProfile = eForm.getFileMapFileProfile();
             List<String> files = new ArrayList<String>();
+            List<String> fps = new ArrayList<String>();
             List<FileProfile> fileProfileList = new ArrayList<FileProfile>();
-            String fileMapFileProfile = mtForm.getFileMapFileProfile();
             String[] ffs = fileMapFileProfile.split(",");
             for (String ff : ffs)
             {
                 String[] f = ff.split("-");
                 files.add(f[0]);
+                fps.add(f[1]);
                 fileProfileList.add(HibernateUtil.get(FileProfileImpl.class,
                         Long.parseLong(f[1])));
             }
@@ -129,24 +129,23 @@ public class CreateMindTouchJobThread implements Runnable
             long l10Id = fileProfileList.get(0).getL10nProfileId();
             BasicL10nProfile l10Profile = HibernateUtil.get(
                     BasicL10nProfile.class, l10Id);
-
-            String locs = this.initTargetLocale(targetLocales);
-
-			Job job = JobCreationMonitor.initializeJob(jobName, uuid,
-					user.getUserId(), l10Id, priority, Job.IN_QUEUE,
-					Job.JOB_TYPE_MINDTOUCH);
-
-            String sourceLocaleName = l10Profile.getSourceLocale().getLocaleCode();
             // init files and file profiles infomation
             List<String> descList = new ArrayList<String>();
-            retrieveRealFilesFromMindTouch(descList, job, files, sourceLocaleName);
+
+            // init target locale infomation
+            String locs = this.initTargetLocale(targetLocales);
+			Job job = JobCreationMonitor.initializeJob(jobName, uuid,
+					user.getUserId(), l10Id, priority, Job.IN_QUEUE,
+					Job.JOB_TYPE_ELOQUA);
+            String sourceLocaleName = l10Profile.getSourceLocale()
+                    .getLocaleCode();
+            initDescAndFileProfile(descList, job, files, sourceLocaleName);
             Map<String, long[]> filesToFpId = FileProfileUtil.excuteScriptOfFileProfile(
                     descList, fileProfileList, job);
-
             Set<String> fileNames = filesToFpId.keySet();
             Integer pageCount = new Integer(fileNames.size());
-            List<JobAttribute> jobAttribtues = getJobAttributes(
-                    mtForm.getAttributeString(), l10Profile);
+            List<JobAttribute> jobAttribtues = getJobAttributes(attribute,
+                    l10Profile);
             // cache job attributes if there are any
             if (jobAttribtues != null && jobAttribtues.size() != 0)
             {
@@ -244,6 +243,20 @@ public class CreateMindTouchJobThread implements Runnable
         thread.setJobAttributes(jobAttributeList);
         thread.createJobAttributes();
     }
+
+    /**
+     * Move tmp files to proper directory and save the paths and file profiles.
+     * 
+     * @param descList
+     * @param fpIdList
+     * @param filePaths
+     * @param l10nAndfileProfiles
+     * @param blp
+     * @param tmpFolderName
+     * @param jobName
+     * @throws FileNotFoundException
+     * @throws Exception
+     */
 
     private List<JobAttribute> getJobAttributes(String attributeString,
             BasicL10nProfile l10Profile)
@@ -356,159 +369,88 @@ public class CreateMindTouchJobThread implements Runnable
         return targetLocaleString.toString();
     }
     
-    private void retrieveRealFilesFromMindTouch(List<String> descList, Job job, List<String> files,
-            String sourceLocale) throws Exception
+    private String getFileName(String name)
     {
-        String pageId = null;
-        String pageInfoXml = null;
-        File srcFile = null;
-        File objFile = null;
-        String flag = null;
-        String sourceContent = null;
-        // <pageId:MindTouchPage>
-        HashMap<String, MindTouchPage> pageInfoMap = new HashMap<String, MindTouchPage>();
-        MindTouchHelper helper = new MindTouchHelper(conn);
-        try
-        {
-            for (String f : files)
-            {
-                if (f.endsWith("contents"))
-                {
-                    pageId = f.substring(0, f.indexOf("contents"));
-                    flag = "contents";
-                }
-                else if (f.endsWith("tags"))
-                {
-                    pageId = f.substring(0, f.indexOf("tags"));
-                    flag = "tags";
-                }
-                else if (f.endsWith("properties"))
-                {
-                	 pageId = f.substring(0, f.indexOf("properties"));
-                     flag = "properties";
-                }
-
-                MindTouchPage mtp = pageInfoMap.get(pageId);
-                if (mtp == null)
-                {
-    				pageInfoXml = helper.getPageInfo(conn.getUrl(),
-    						Long.parseLong(pageId));
-                    if (pageInfoXml != null)
-                    {
-                        mtp = helper.parsePageInfoXml(pageInfoXml);
-                    }
-                }
-
-                if (mtp != null)
-                {
-                    String externalPageId = getFilePath(sourceLocale, job.getId(), mtp, flag);
-                    srcFile = new File(AmbFileStoragePathUtils.getCxeDocDir(currentCompanyId)
-                            + File.separator + externalPageId);
-                    if ("contents".equals(flag))
-                    {
-                        sourceContent = helper.getPageContents(pageId);
-                    }
-                    else if ("tags".equals(flag))
-                    {
-                        sourceContent = helper.getPageTags(Long.parseLong(pageId));
-                    }
-                    else if("properties".equals(flag))
-                    {
-                    	sourceContent = helper.getPageProperties(Long.parseLong(pageId));
-                    }
-                    FileUtil.writeFile(srcFile, sourceContent, "UTF-8");
-                    descList.add(externalPageId);
-                    logger.info("MindTouch page is retrieved from MindTouch server: " + externalPageId);
-
-                    // save one ".obj" file with same pathname which is used to send
-                    // translated files back to MindTouch server.
-                    String objFilePathName = externalPageId + ".obj";
-                    objFile = new File(AmbFileStoragePathUtils.getCxeDocDir(currentCompanyId)
-                            + File.separator + objFilePathName);
-                    JSONObject json = new JSONObject();
-                    json.put("mindTouchConnectorId", String.valueOf(conn.getId()));
-                    json.put("pageId", pageId);
-                    json.put("path", mtp.getPath());
-                    json.put("title", mtp.getTitle());
-                    FileUtil.writeFile(objFile, json.toString());
-                }
-            }
-        }
-        catch(Exception e)
-        {
-        	logger.error(e);
-        }
-        finally
-        {
-        	helper.shutdownHttpClient();
-        }
+    	if (name.length() > 100)
+     	   name = name.substring(0, 100);
+    	
+     	name = name.replace("\\", "");
+     	name = name.replace("/", "");
+     	name = name.replace(":", "");
+     	name = name.replace("*", "");
+     	name = name.replace("?", "");
+     	name = name.replace("\"", "");
+     	name = name.replace("<", "");
+     	name = name.replace(">", "");
+     	name = name.replace("|", "");
+     	
+     	return name;
     }
 
-    private String getFilePath(String sourceLocale, long jobId,
-            MindTouchPage mtp, String flag)
+    private void initDescAndFileProfile(List<String> descList, Job job,
+            List<String> files, String sorceLocale)
+            throws FileNotFoundException, Exception
     {
-        StringBuffer filePath = new StringBuffer();
-        filePath.append(sourceLocale).append(File.separator).append(jobId);
-        if (mtp.getPath() != null && mtp.getPath().trim().length() > 0)
+        EloquaHelper eh = new EloquaHelper(conn);
+        for (String f : files)
         {
-            filePath.append(File.separator).append(mtp.getPath());
-        }
-        // The path includes the title generally, but not always. A title like
-        // "Get Involved" will be "Get_Involved" in path.
-        String title = mtp.getTitle().replace(" ", "_");
-        if (!filePath.toString().endsWith(title))
-        {
-        	// file name should not include "<", ">", "\" and "/".
-        	title = mtp.getTitle().replace("<", "").replace(">", "");
-        	title = title.replace("\\", "").replace("/", "");
-            filePath.append(File.separator).append(title);
-        }
-        if ("contents".equals(flag))
-        {
-            filePath.append("(contents).xml");
-        }
-        else if ("tags".equals(flag))
-        {
-            filePath.append("(tags).xml");
-        }
-        else if("properties".equals(flag))
-        {
-        	filePath.append("(properties).xml");
-        }
-
-        String str = filePath.toString().replace("\\", "/");
-
-        return handleSpecialChars(str);
-    }
-
-    // The "pathName" uses "/" as separator.
-    private String handleSpecialChars(String pathName)
-    {
-        StringBuffer sb = new StringBuffer();
-        String[] arr = pathName.split("/");
-        if (arr != null && arr.length > 0)
-        {
-            for (String str : arr)
+            if (f.startsWith("e"))
             {
-                str = str.replace("\\", "");
-                str = str.replace("/", "");
-                str = str.replace(":", "");
-                str = str.replace("*", "");
-                str = str.replace("?", "");
-                str = str.replace("\"", "");
-                str = str.replace("<", "");
-                str = str.replace(">", "");
-                str = str.replace("|", "");
-
-                sb.append(str).append(File.separator);
+                f = f.substring(1);
+                Email e = eh.getEmail(f);
+                e.setConnect(conn);
+                
+                if (f.equals(e.getId()))
+                {
+                	// the name may be like ~!@#$%^&*()_+|}{":?"<>,./;'[]\\` 
+                	String name = "(" + e.getId() + ")" +  e.getDisplayName();
+                	name = getFileName(name);
+                	
+                    String file = sorceLocale + File.separator + job.getId()
+                            + File.separator + name + ".email.html";
+                    String file2 = sorceLocale + File.separator + job.getId()
+                            + File.separator + name + ".obj";
+                    File f1 = new File(AmbFileStoragePathUtils.getCxeDocDir()
+                            + File.separator + file);
+                    
+                    File f2 = new File(AmbFileStoragePathUtils.getCxeDocDir()
+                            + File.separator + file2);
+                    
+                    e.saveToFile(f1);
+                    e.saveJsonToFile(f2);
+                    descList.add(file);
+                }
+            }
+            else if (f.startsWith("p"))
+            {
+                f = f.substring(1);
+                LandingPage p = eh.getLandingPage(f);
+                p.setConnect(conn);
+                
+                if (f.equals(p.getId()))
+                {
+                	String name = "(" + p.getId() + ")" +  p.getDisplayName();
+                	name = getFileName(name);
+                	
+                    String file = sorceLocale + File.separator + job.getId()
+                            + File.separator + name + ".landingPage.html";
+                    String file2 = sorceLocale + File.separator + job.getId()
+                            + File.separator + name + ".obj";
+                    File f1 = new File(AmbFileStoragePathUtils.getCxeDocDir()
+                            + File.separator + file);
+                    File f2 = new File(AmbFileStoragePathUtils.getCxeDocDir()
+                            + File.separator + file2);
+                    
+                    p.saveToFile(f1);
+                    p.saveJsonToFile(f2);
+                    descList.add(file);
+                }
+            }
+            else 
+            {
+                logger.error("Don't know how to handle the eloqua file with id " + f);
             }
         }
-        if (sb.toString().endsWith(File.separator))
-        {
-            return sb.substring(0, sb.length() - 1);
-        }
-
-        return sb.toString();
     }
 
     @Override
@@ -528,4 +470,3 @@ public class CreateMindTouchJobThread implements Runnable
         }
     }
 }
-

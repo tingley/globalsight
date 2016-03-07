@@ -55,6 +55,7 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
+import com.globalsight.everest.integration.ling.tm2.Types;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -274,15 +275,9 @@ public class QAChecker
                         .toRtlString(targetSegment) : targetSegment;
 
 
-                // for GBS-4047
+                // for GBS-3095
                 StringBuilder matches = getMatches(fuzzyLeverageMatcheMap, tuvMatchTypes,
                         excludItems, sourceTuvs, targetTuvs, sourceTuv, targetTuv, p_job.getId());
-                String targetGxml = targetTuv.getGxml();
-                boolean flag = checkMtmatch(p_job, targetGxml);
-                if (flag)
-                {
-                    matches.append("\r\n").append("MT Match");
-                }
                         
                 // check regular rules
                 for (QARule rule : rules)
@@ -419,41 +414,6 @@ public class QAChecker
         }
         return processed;
     }
-
-    private boolean checkMtmatch(Job job, String ss)
-    {
-        boolean flag = false;
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try
-        {
-            long cpId = job.getCompanyId();
-            connection = DbUtil.getConnection();
-
-            String sql = "select id from  translation_unit_variant_" + cpId
-                    + " where segment_string ='" + ss
-                    + "'and modify_user='ms_translator_mt'";
-            ps = connection.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next())
-            {
-                flag = true;
-            }
-            return flag;
-        }
-        catch (Exception ex)
-        {
-            throw new LingManagerException(ex);
-        }
-        finally
-        {
-            DbUtil.silentClose(rs);
-            DbUtil.silentClose(ps);
-            DbUtil.silentReturnConnection(connection);
-        }
-
-    }
     
     private StringBuilder getMatches(Map fuzzyLeverageMatchMap,
             MatchTypeStatistics tuvMatchTypes,
@@ -517,7 +477,26 @@ public class QAChecker
                                 .getString("jobinfo.tradosmatches.invoice.repetition"));
             }
         }
-
+        // GBS-3905: mt translation into target tuv directly
+        if (targetTuv.getLastModifiedUser() != null
+                && targetTuv.getLastModifiedUser().toLowerCase().endsWith("_mt"))
+        {
+            matches.append("\r\n").append("MT Match");
+        }
+        else
+        {
+            // mt translation to tm, then search out for target tuv
+            Types type = tuvMatchTypes.getTypes(sourceTuv.getId(), LeverageUtil.DUMMY_SUBID);
+            if (type != null)
+            {
+                LeverageMatch lm = type.getLeverageMatch();
+                if (lm.getCreationUser() != null
+                        && lm.getCreationUser().toLowerCase().endsWith("_mt"))
+                {
+                    matches.append("\r\n").append("MT Match");
+                }
+            }
+        }
         return matches;
     }
     
@@ -725,7 +704,7 @@ public class QAChecker
         Cell TMmatchCell = getCell(segHeaderRow, col);
         TMmatchCell.setCellValue(m_bundle.getString("lb_tm_match_original"));
         TMmatchCell.setCellStyle(getHeaderStyle(p_workbook));
-        p_sheet.setColumnWidth(col, 15 * 256);
+        p_sheet.setColumnWidth(col, 40 * 256);
         col++;
         
         Cell falsePositiveCell = getCell(segHeaderRow, col);

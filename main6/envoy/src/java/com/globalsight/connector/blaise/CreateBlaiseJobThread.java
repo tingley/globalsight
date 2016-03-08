@@ -267,6 +267,10 @@ public class CreateBlaiseJobThread  extends Thread
         {
             logger.error(e);
         }
+        finally
+        {
+            HibernateUtil.closeSession();
+        }
     }
 }
 

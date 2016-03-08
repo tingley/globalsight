@@ -397,6 +397,7 @@ public class Ambassador extends AbstractWebService
     public static final String GET_IN_CONTEXT_REVIEW_LINK = "getInContextReviewLink";
 
     public static final String GET_TRANSLATION_PERCENTAGE = "getTranslationPercentage";
+    public static final String GET_FILEPROFILES_FOR_L10PROFILE = "getFileProfilesForL10nProfile";
 
     public static String ERROR_JOB_NAME = "You cannot have \\, /, :, ;, *, ?, |, \", &lt;, &gt;, % or &amp; in the Job Name.";
 
@@ -5995,6 +5996,143 @@ public class Ambassador extends AbstractWebService
                     errorMessage.toString());
             throw new WebServiceException(message);
         }
+    }
+
+    /**
+     * Get file profiles for specified l10nProfile name and company name.
+     * 
+     * @param p_accessToken
+     *            --Access token
+     * 
+     * @param p_l10nProfileName
+     *            --l10nProfile name, required.
+     * 
+     * @param p_companyName
+     *            -- company name, required.
+     * 
+     * @return String An XML description which contains file profiles
+     * 
+     */
+    public String getFileProfilesForL10nProfile(String p_accessToken, String p_l10nProfileName,
+            String p_companyName) throws WebServiceException
+    {
+        if (StringUtil.isEmpty(p_accessToken))
+            return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invaild access token");
+
+        checkAccess(p_accessToken, GET_FILEPROFILES_FOR_L10PROFILE);
+
+        if (StringUtil.isEmpty(p_l10nProfileName))
+        {
+            return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invaild l10Profile name.");
+        }
+
+        if (StringUtil.isEmpty(p_companyName))
+        {
+            return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invaild company name.");
+        }
+
+        StringBuffer returnBuffer = new StringBuffer(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n");
+        WebServicesLog.Start activityStart = null;
+        try
+        {
+            User loggedUser = getUser(getUsernameFromSession(p_accessToken));
+            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+            activityArgs.put("loggedUserName", loggedUser.getUserName());
+            activityArgs.put("l10nProfileName", p_l10nProfileName);
+            activityArgs.put("companyName", p_companyName);
+            activityStart = WebServicesLog.start(Ambassador.class, GET_FILEPROFILES_FOR_L10PROFILE,
+                    activityArgs);
+            Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
+
+            if (company == null)
+            {
+                return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE,
+                        "Invaild company name, company does not exist: " + p_companyName);
+            }
+
+            L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfileByName(
+                    p_l10nProfileName, String.valueOf(company.getId()));
+
+            returnBuffer.append("<l10nInfo>\r\n");
+            returnBuffer.append("\t<l10nId>").append(lp.getId()).append("</l10nId>\r\n");
+            returnBuffer.append("\t<l10nName>").append(lp.getName()).append("</l10nName>\r\n");
+            returnBuffer.append("\t<localeInfo>\r\n");
+            returnBuffer.append("\t\t<sourceLocale>").append(lp.getSourceLocale().getDisplayName())
+                    .append("</sourceLocale>\r\n");
+            GlobalSightLocale[] targetLocales = lp.getTargetLocales();
+            for (GlobalSightLocale targetLocale : targetLocales)
+            {
+                returnBuffer.append("\t\t<targetLocale>").append(targetLocale.getDisplayName())
+                        .append("</targetLocale>\r\n");
+            }
+            returnBuffer.append("\t</localeInfo>\r\n");
+            returnBuffer.append("\t<fileProfiles>\r\n");
+
+            FileProfilePersistenceManager fileProfileManager = ServerProxy
+                    .getFileProfilePersistenceManager();
+            Set fileProfiles = lp.getFileProfiles();
+            Iterator it = fileProfiles.iterator();
+            while (it.hasNext())
+            {
+                FileProfileImpl fileProfile = (FileProfileImpl) it.next();
+                if (!fileProfile.isActive())
+                    continue;
+                returnBuffer.append("\t\t<fileProfile>\r\n");
+                returnBuffer.append("\t\t\t<id>").append(fileProfile.getId()).append("</id>\r\n");
+                returnBuffer.append("\t\t\t<name>").append(fileProfile.getName())
+                        .append("</name>\r\n");
+                returnBuffer.append("\t\t\t<sourceFileFormat>")
+                        .append(fileProfile.getKnownFormatTypeId())
+                        .append("</sourceFileFormat>\r\n");
+                returnBuffer.append("\t\t\t<description>").append(fileProfile.getDescription())
+                        .append("</description>\r\n");
+                returnBuffer.append("\t\t\t<fileExtensionInfo>\r\n");
+                Vector<Long> extensionIds = fileProfile.getFileExtensionIds();
+                if (extensionIds.size() == 0)
+                {
+                    returnBuffer.append("\t\t\t\t<fileExtension>").append("All")
+                            .append("</fileExtension>\r\n");
+                }
+                else
+                {
+                    String fileExtensions = "";
+                    for (int j = 0; j < extensionIds.size(); j++)
+                    {
+                        FileExtension fileExtension = fileProfileManager
+                                .readFileExtension(extensionIds.get(j));
+                        fileExtensions += fileExtension.getName() + ",";
+                    }
+                    if (fileExtensions != "" && fileExtensions.endsWith(","))
+                    {
+                        returnBuffer
+                                .append("\t\t\t\t<fileExtension>")
+                                .append(fileExtensions.substring(0, fileExtensions.lastIndexOf(",")))
+                                .append("</fileExtension>\r\n");
+                    }
+                }
+                returnBuffer.append("\t\t\t</fileExtensionInfo>\r\n");
+                returnBuffer.append("\t\t</fileProfile>\r\n");
+            }
+
+            returnBuffer.append("\t</fileProfiles>\r\n");
+            returnBuffer.append("</l10nInfo>");
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
+        }
+
+        return returnBuffer.toString();
     }
 
     /**

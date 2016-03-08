@@ -256,6 +256,10 @@
      <permission id="<%=Permission.FILTER_CONFIGURATION_EDIT_FILTER%>"/>
      <permission id="<%=Permission.FILTER_CONFIGURATION_EXPORT_FILTERS%>"/>
      <permission id="<%=Permission.FILTER_CONFIGURATION_IMPORT_FILTERS%>"/>
+     <permission id="<%=Permission.BASE_TEXT_FILTER_VIEW%>">
+         <permission id="<%=Permission.BASE_TEXT_FILTER_INTERNAL_TEXT%>"/>
+         <permission id="<%=Permission.BASE_TEXT_FILTER_ESCAPING%>"/>
+     </permission> 
   </permission>
   <permission id="<%=Permission.FILE_EXT_VIEW%>">
      <permission id="<%=Permission.FILE_EXT_NEW%>"/>

@@ -522,6 +522,10 @@ public class CreateMindTouchJobThread implements Runnable
         {
             logger.error(e);
         }
+        finally
+        {
+            HibernateUtil.closeSession();
+        }
     }
 }
 

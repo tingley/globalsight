@@ -18,9 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.genera
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -57,7 +54,6 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
-import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
@@ -78,9 +74,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
-import com.globalsight.ling.tm.LingManagerException;
-import com.globalsight.ling.tm2.leverage.LeverageUtil;
-import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
@@ -91,7 +84,6 @@ import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
@@ -687,17 +679,9 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     sid = sourceTuv.getSid();
 
                     // TM Match
-                    StringBuilder matches = getMatches(fuzzyLeverageMatchMap,
-                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,
+                    StringBuilder matches = ReportGeneratorUtil.getMatches(fuzzyLeverageMatchMap,
+                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs, m_bundle,
                             sourceTuv, targetTuv, jobId);
-
-                    //for GBS-4304
-                    String targetGxml = targetTuv.getGxml();
-                    boolean flag = checkMtmatch(p_job,targetGxml);
-                    if (flag)
-                    {
-                        matches.append("\r\n").append("MT Match");
-                    }
                     
                     // Get Terminology/Glossary Source and Target.
                     String sourceTerms = "";
@@ -866,40 +850,6 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
         return p_row;
     }
 
-    private boolean checkMtmatch(Job job, String ss)
-    {
-        boolean flag = false;
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try
-        {
-            long cpId = job.getCompanyId();
-            connection = DbUtil.getConnection();
-
-            String sql = "select id from  translation_unit_variant_" + cpId
-                    + " where segment_string ='" + ss
-                    + "'and modify_user='ms_translator_mt'";
-            ps = connection.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next())
-            {
-                flag = true;
-            }
-            return flag;
-        }
-        catch (Exception ex)
-        {
-            throw new LingManagerException(ex);
-        }
-        finally
-        {
-            DbUtil.silentClose(rs);
-            DbUtil.silentClose(ps);
-            DbUtil.silentReturnConnection(connection);
-        }
-
-    }
     /**
      * Populates a term leverage options object.
      */
@@ -1460,69 +1410,6 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
         p_sheet.addValidationData(validation);
     }
 
-    /**
-     * Get TM matches.
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private StringBuilder getMatches(Map fuzzyLeverageMatchMap,
-            MatchTypeStatistics tuvMatchTypes,
-            Vector<String> excludedItemTypes, List sourceTuvs, List targetTuvs,
-            Tuv sourceTuv, Tuv targetTuv, long p_jobId)
-    {
-        StringBuilder matches = new StringBuilder();
-
-        Set fuzzyLeverageMatches = (Set) fuzzyLeverageMatchMap.get(sourceTuv
-                .getIdAsLong());
-        if (LeverageUtil.isIncontextMatch(sourceTuv, sourceTuvs, targetTuvs,
-                tuvMatchTypes, excludedItemTypes, p_jobId))
-        {
-            matches.append(m_bundle.getString("lb_in_context_match"));
-        }
-        else if (LeverageUtil.isExactMatch(sourceTuv, tuvMatchTypes))
-        {
-            matches.append(StringUtil.formatPCT(100));
-        }
-        else if (fuzzyLeverageMatches != null)
-        {
-            int count = 0;
-            for (Iterator ite = fuzzyLeverageMatches.iterator(); ite.hasNext();)
-            {
-                LeverageMatch leverageMatch = (LeverageMatch) ite.next();
-                if ((fuzzyLeverageMatches.size() > 1))
-                {
-                    matches.append(++count)
-                            .append(", ")
-                            .append(StringUtil.formatPCT(leverageMatch
-                                    .getScoreNum())).append("\r\n");
-                }
-                else
-                {
-                    matches.append(StringUtil.formatPCT(leverageMatch
-                            .getScoreNum()));
-                    break;
-                }
-            }
-        }
-        else
-        {
-            matches.append(m_bundle.getString("lb_no_match_report"));
-        }
-
-        if (targetTuv.isRepeated())
-        {
-            matches.append("\r\n")
-                    .append(m_bundle
-                            .getString("jobinfo.tradosmatches.invoice.repeated"));
-        }
-        else if (targetTuv.getRepetitionOfId() > 0)
-        {
-            matches.append("\r\n")
-                    .append(m_bundle
-                            .getString("jobinfo.tradosmatches.invoice.repetition"));
-        }
-
-        return matches;
-    }
 
     @Override
     public String getReportType()

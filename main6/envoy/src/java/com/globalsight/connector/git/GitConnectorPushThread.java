@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Transaction;
 
 import com.globalsight.connector.git.util.GitConnectorHelper;
 import com.globalsight.cxe.entity.gitconnector.GitConnector;
@@ -21,38 +20,40 @@ public class GitConnectorPushThread implements Runnable
         super();
     }
 
+    @SuppressWarnings("unchecked")
     public void startPush() throws Exception
     {
-			while (true) 
-			{
-				String hql = " from GitConnectorCacheFile";
-				List<GitConnectorCacheFile> cacheFiles = (List<GitConnectorCacheFile>)
-						HibernateUtil.search(hql);
-				if (cacheFiles != null && cacheFiles.size() > 0) 
-				{
-					for (GitConnectorCacheFile cacheFile : cacheFiles) 
-					{
-						GitConnector gc = GitConnectorManagerLocal
-								.getGitConnectorById(cacheFile.getGitConnectorId());
-						GitConnectorHelper helper = new GitConnectorHelper(gc);
-						try
-						{
-							helper.gitConnectorPull();
-							helper.gitConnectorPush(cacheFile);
-						}
-						catch (Exception e)
-						{
-							String errorMsg = "Git push failed. Git connector folder: "
-	    							+ helper.getGitFolder() + ", file path: " + helper.getGitFolder() + File.separator + cacheFile.getFilePath() + ".";
-							logger.error(errorMsg, e);
-						}
-						HibernateUtil.delete(cacheFile);
-					}
-				}
-				HibernateUtil.closeSession();
-				
-				Thread.sleep(60 * 1000);
-			}
+        while (true)
+        {
+            String hql = " from GitConnectorCacheFile";
+            List<GitConnectorCacheFile> cacheFiles = (List<GitConnectorCacheFile>) HibernateUtil
+                    .search(hql);
+            if (cacheFiles != null && cacheFiles.size() > 0)
+            {
+                for (GitConnectorCacheFile cacheFile : cacheFiles)
+                {
+                    GitConnector gc = GitConnectorManagerLocal.getGitConnectorById(cacheFile
+                            .getGitConnectorId());
+                    GitConnectorHelper helper = new GitConnectorHelper(gc);
+                    try
+                    {
+                        helper.gitConnectorPull();
+                        helper.gitConnectorPush(cacheFile);
+                    }
+                    catch (Exception e)
+                    {
+                        String errorMsg = "Git push failed. Git connector folder: "
+                                + helper.getGitFolder() + ", file path: " + helper.getGitFolder()
+                                + File.separator + cacheFile.getFilePath() + ".";
+                        logger.error(errorMsg, e);
+                    }
+                    HibernateUtil.delete(cacheFile);
+                }
+            }
+            HibernateUtil.closeSession();
+
+            Thread.sleep(60 * 1000);
+        }
     }
 
     @Override

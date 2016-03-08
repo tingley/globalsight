@@ -17,8 +17,6 @@
 package com.globalsight.everest.aligner;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.Locale;
 
 import org.apache.log4j.Logger;
@@ -42,9 +40,7 @@ import com.globalsight.util.resourcebundle.LocaleWrapper;
  */
 public class UploadThread extends MultiCompanySupportedThread
 {
-    static private final Logger c_logger =
-        Logger.getLogger(
-            UploadThread.class);
+    static private final Logger c_logger = Logger.getLogger(UploadThread.class);
 
     private AlignerPackageUploadOptions m_alignerPackageUploadOptions;
     private String m_packageFile;
@@ -143,7 +139,6 @@ public class UploadThread extends MultiCompanySupportedThread
             HibernateUtil.closeSession();
         }
     }
-
 
     private String getProjectName(String p_filename)
     {

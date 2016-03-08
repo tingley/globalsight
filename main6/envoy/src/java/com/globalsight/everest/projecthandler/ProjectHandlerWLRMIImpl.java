@@ -118,6 +118,11 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
         return m_localReference.getL10nProfile(p_profileId);
     }
 
+    public L10nProfile getL10nProfileByName(String p_profileName, String p_companyId)
+    {
+        return m_localReference.getL10nProfileByName(p_profileName, p_companyId);
+    }
+    
     public void removeL10nProfile(L10nProfile p_l10nProfile)
             throws RemoteException, ProjectHandlerException
     {

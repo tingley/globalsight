@@ -34,6 +34,9 @@ import com.globalsight.util.StringUtil;
 public class ReportGeneratorUtil
 {
 
+    /**
+     * Gets TM Matches.
+     */
     public static StringBuilder getMatches(Map fuzzyLeverageMatchMap,
             MatchTypeStatistics tuvMatchTypes, Vector<String> excludedItemTypes, List targetTuvs,
             List sourceTuvs, ResourceBundle bundle, Tuv sourceTuv, Tuv targetTuv, long p_jobId)

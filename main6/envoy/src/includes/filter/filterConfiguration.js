@@ -269,9 +269,16 @@ function generateSpecialFiltersTable(filterId, specialFilters, color)
 		str.append("<input type='checkbox' id='checkbox_" + filterId + "_" + specialFilter.id + "' topFilterId='"+filterId+"' specialFilterId='"+specialFilter.id+"' filterTable='"+specialFilter.filterTableName+"' firstColor='"+color+"' onclick='checkSpecialFilterToDel(this)'></input>");
 		if(hasEditFilter == 'true')
 		{
-			str.append("<a href='#' class='specialfilter_a' onclick='editFilter(\""+specialFilter.id+"\",\""+specialFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")' >")
-			str.append(specialFilter.filterName);
-			str.append("</a>");
+			if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='false')
+			{
+				str.append(specialFilter.filterName);
+			}
+			else
+			{
+				str.append("<a href='#' class='specialfilter_a' onclick='editFilter(\""+specialFilter.id+"\",\""+specialFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")' >")
+				str.append(specialFilter.filterName);
+				str.append("</a>");
+			}
 		}
 		else
 		{

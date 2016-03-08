@@ -493,6 +493,10 @@ public class Permission
     static public final String FILTER_CONFIGURATION_EDIT_FILTER = "filter.configuration.edit.filter";
     static public final String FILTER_CONFIGURATION_EXPORT_FILTERS = "filter.configuration.export.filters";
     static public final String FILTER_CONFIGURATION_IMPORT_FILTERS = "filter.configuration.import.filters";
+    static public final String BASE_TEXT_FILTER_VIEW = "base.text.filter.view";
+    static public final String BASE_TEXT_FILTER_INTERNAL_TEXT = "base.text.filter.internal.text";
+    static public final String BASE_TEXT_FILTER_ESCAPING = "base.text.filter.escaping";
+    
 
     static public final String GSEDITION_VIEW = "gsedition.view";
     static public final String GSEDITION_REMOVE = "gsedition.remove";
@@ -1097,6 +1101,10 @@ public class Permission
         added = addPermission(420, REPORTS_TRANSLATIONS_VERIFICATION) || added;
         added = addPermission(422, JOB_WORKFLOWS_TRANSLATED_TEXT) || added;
         added = addPermission(423, BLAISE_CONNECTOR) || added;
+        //GBS-4053
+        added = addPermission(424, BASE_TEXT_FILTER_VIEW) || added;
+        added = addPermission(425, BASE_TEXT_FILTER_INTERNAL_TEXT) || added;
+        added = addPermission(426, BASE_TEXT_FILTER_ESCAPING) || added;
 
         return added;
     }

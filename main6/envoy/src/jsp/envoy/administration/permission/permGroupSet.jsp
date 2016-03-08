@@ -128,6 +128,7 @@ function loadTree()
 {
     var xmlDocument;
     var xmlStr = "<%=xml%>";
+    //alert(xmlStr);
     var loaded;
 
     if(window.ActiveXObject)

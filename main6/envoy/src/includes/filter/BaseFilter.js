@@ -148,7 +148,7 @@ BaseFilter.prototype.edit = function(filterId, color, specialFilters, topFilterI
 
 BaseFilter.prototype.generateDiv = function(topFilterId, color)
 {
-	if (hasBaseFilter =='true')
+	if (hasBaseFilter_InternalText == "true" || hasBaseFilter_Escaping == "true")
 	{
 		this.initOptionMap();
 		var str = new StringBuffer("<table border=0 width='400px'>");

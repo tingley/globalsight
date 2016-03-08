@@ -112,7 +112,18 @@ function loadFilterConfigurationsCallback(data)
 function generateFilterTable(filterConfigurations)
 {
 	var str = new StringBuffer("<table cellpadding='0' cellspacing='0' border='1' class='main_table'>");
-
+	//GBS-4053
+	if (hasBaseFilter == "false")
+	{
+		for (var j = 0; j < filterConfigurations.length; j++)
+		{
+			if (filterConfigurations[j].filterName == "Base Text Filter")
+			{
+				filterConfigurations.splice(j,1);
+			}
+		}
+	}
+	
 	for(var i = 0; i < filterConfigurations.length; i++)
 	{
 		var filter = filterConfigurations[i];
@@ -145,6 +156,17 @@ function generateFilterTable(filterConfigurations)
 		if(hasAddFilter == 'true')
 		{
 			str.append("<input type='button' id='" + filter.filterTableName + "_" + jsAdd + "' value='" + jsAdd + "' onclick='addSpecialFilter(\""+filter.filterTableName+"\",\""+filter.id+"\",\""+color+"\");'/>");
+		}
+		else
+		{
+			if (hasBaseFilter == "true")
+			{
+				if (filterConfigurations[i].filterName == "Base Text Filter")
+				{
+					var baseFilter = filterConfigurations[i];
+					str.append("<input type='button' id='" + baseFilter.filterTableName + "_" + jsAdd + "' value='" + jsAdd + "' onclick='addSpecialFilter(\""+baseFilter.filterTableName+"\",\""+baseFilter.id+"\",\""+color+"\");'/>");
+				}
+			}
 		}
 		str.append("</td>");
 		
@@ -282,9 +304,22 @@ function generateSpecialFiltersTable(filterId, specialFilters, color)
 		}
 		else
 		{
-			str.append("<Label style='color:#810081'>");
-			str.append(specialFilter.filterName);
-			str.append("</Label>");
+			if (hasBaseFilter_InternalText =='true' || hasBaseFilter_Escaping =='true')
+			{
+				if (filterConfigurations[i].filterName == "Base Text Filter")
+				{
+					var baseFilter = specialFilters[i];
+					str.append("<a href='#' class='specialfilter_a' onclick='editFilter(\""+baseFilter.id+"\",\""+baseFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")' >")
+					str.append(baseFilter.filterName);
+					str.append("</a>");
+				}
+			}
+			else
+			{
+				str.append("<Label style='color:#810081'>");
+				str.append(specialFilter.filterName);
+				str.append("</Label>");
+			}
 		}
 
 		str.append("<img style='display:none' id=delete_"+specialFilter.id+" src='"+imgSrc+"' onclick='deleteFilter(\""+specialFilter.id+"\",\""+specialFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")'></img>");

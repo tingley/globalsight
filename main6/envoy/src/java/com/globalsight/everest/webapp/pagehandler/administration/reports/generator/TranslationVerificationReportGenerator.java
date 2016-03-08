@@ -18,9 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.genera
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -84,9 +81,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
-import com.globalsight.ling.tm.LingManagerException;
-import com.globalsight.ling.tm2.leverage.LeverageUtil;
-import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;

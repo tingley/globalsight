@@ -62,10 +62,10 @@
         edit = true;
         permGroup = (PermissionGroup)sessionMgr.getAttribute("permGroup");
         if (1 == permGroup.getCompanyId()
-        	&& !WebAppConstants.SUPER_ADMINISTRATOR_NAME.equals(permGroup.getName())
-        	&& !WebAppConstants.SUPER_PM_NAME.equals(permGroup.getName()))
+            && !WebAppConstants.SUPER_ADMINISTRATOR_NAME.equals(permGroup.getName())
+            && !WebAppConstants.SUPER_PM_NAME.equals(permGroup.getName()))
         {
-        	isGlobalLpGroup = true;
+            isGlobalLpGroup = true;
         }
         helpFile = bundle.getString("help_permission_edit_group_perms");
         String pgname = (String)sessionMgr.getAttribute("permGroupName");
@@ -128,7 +128,6 @@ function loadTree()
 {
     var xmlDocument;
     var xmlStr = "<%=xml%>";
-    //alert(xmlStr);
     var loaded;
 
     if(window.ActiveXObject)
@@ -154,7 +153,7 @@ function loadTree()
     }
     else
     {
-    	alert("<%=bundle.getString("jsmsg_error_notParseXML")%>");
+        alert("<%=bundle.getString("jsmsg_error_notParseXML")%>");
     }
 
     var objTree = new jsTree;
@@ -235,42 +234,42 @@ function submitForm(formAction)
 
 function initPermissions()
 {
-	<%
-		if (permGroup == null && "Transware".equals(EMEA) 
-			|| permGroup != null && isGlobalLpGroup)
-		{
-	%>
-		for (var m = 0; m < permForm.elements.length; m++)
-		{
-			if (permForm.elements[m].type == "checkbox")
-			{
-	<%
-				for (int i = 0; i < Permission.GLOBAL_LP_PERMS.length; i++)
-				{
-	%>
-					if (permForm.elements[m].value != "perm." + "<%=Permission.GLOBAL_LP_PERMS[i]%>")
-					{
-						permForm.elements[m].disabled = true;
-					}
-					else
-					{
-						permForm.elements[m].disabled = false;
-						continue;
-					}
-	<%
-				}
-	%>
-			}
-			if (permForm.elements[m].value == "cat.lb_my_activities"
-					    ||permForm.elements[m].value == "cat.lb_setup"
-						|| permForm.elements[m].value == "cat.lb_cms"
-						|| permForm.elements[m].value == "cat.lb_notification_options")
-					permForm.elements[m].disabled = false;
-		}
-	<%
-		}
-	%>
-	loadGuides();
+    <%
+        if (permGroup == null && "Transware".equals(EMEA) 
+            || permGroup != null && isGlobalLpGroup)
+        {
+    %>
+        for (var m = 0; m < permForm.elements.length; m++)
+        {
+            if (permForm.elements[m].type == "checkbox")
+            {
+    <%
+                for (int i = 0; i < Permission.GLOBAL_LP_PERMS.length; i++)
+                {
+    %>
+                    if (permForm.elements[m].value != "perm." + "<%=Permission.GLOBAL_LP_PERMS[i]%>")
+                    {
+                        permForm.elements[m].disabled = true;
+                    }
+                    else
+                    {
+                        permForm.elements[m].disabled = false;
+                        continue;
+                    }
+    <%
+                }
+    %>
+            }
+            if (permForm.elements[m].value == "cat.lb_my_activities"
+                        ||permForm.elements[m].value == "cat.lb_setup"
+                        || permForm.elements[m].value == "cat.lb_cms"
+                        || permForm.elements[m].value == "cat.lb_notification_options")
+                    permForm.elements[m].disabled = false;
+        }
+    <%
+        }
+    %>
+    loadGuides();
 }
 
 

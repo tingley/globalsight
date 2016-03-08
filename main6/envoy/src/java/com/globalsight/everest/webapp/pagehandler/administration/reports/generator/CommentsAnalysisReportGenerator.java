@@ -19,15 +19,11 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.genera
 import java.io.File;
 import java.io.FileOutputStream;
 import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -88,14 +84,10 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
-import com.globalsight.ling.tm.LingManagerException;
-import com.globalsight.ling.tm2.leverage.LeverageUtil;
-import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
-import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**

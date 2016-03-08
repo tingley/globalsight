@@ -19,12 +19,8 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.genera
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -36,7 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import netscape.security.Target;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -47,7 +42,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.hibernate.Session;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -56,7 +50,6 @@ import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
@@ -68,21 +61,15 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ReportUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
-import com.globalsight.ling.tm.LingManagerException;
-import com.globalsight.ling.tm2.leverage.LeverageUtil;
-import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.ExcelUtil;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
@@ -598,8 +585,8 @@ public class CharacterCountReportGenerator implements ReportGenerator
                         continue;
                     }
                     StringBuilder matches = ReportGeneratorUtil.getMatches(fuzzyLeverageMatcheMap,
-                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,m_bundle,
-                            sourceTuv, targetTuv, p_job.getId());                    
+                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs, m_bundle,
+                            sourceTuv, targetTuv, p_job.getId());                 
                     
                     CellStyle contentStyle = getContentStyle(p_workBook);
                     Row currentRow = getRow(p_sheet, p_row);

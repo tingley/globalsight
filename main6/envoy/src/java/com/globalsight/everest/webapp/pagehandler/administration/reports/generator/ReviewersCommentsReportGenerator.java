@@ -18,9 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.genera
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -58,7 +55,6 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
-import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
@@ -79,9 +75,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
-import com.globalsight.ling.tm.LingManagerException;
-import com.globalsight.ling.tm2.leverage.LeverageUtil;
-import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
@@ -92,7 +85,6 @@ import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
@@ -708,8 +700,8 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
 
                     // TM Match
                     StringBuilder matches = ReportGeneratorUtil.getMatches(fuzzyLeverageMatchMap,
-                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,
-                            m_bundle,sourceTuv, targetTuv, jobId);
+                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs, m_bundle,
+                            sourceTuv, targetTuv, jobId);
 
                     // Get Terminology/Glossary Source and Target.
                     String sourceTerms = "";

@@ -5999,19 +5999,20 @@ public class Ambassador extends AbstractWebService
     }
 
     /**
-     * According l10nProfile name and company name to get file profile messages.
+     * Get file profiles for specified l10nProfile name and company name.
      * 
      * @param p_accessToken
      *            --Access token
      * 
      * @param p_l10nProfileName
-     *            --l10nProfile name,can not empty.
+     *            --l10nProfile name, required.
      * 
      * @param p_companyName
-     *            -- company name,can not empty.
+     *            -- company name, required.
      * 
      * @return String An XML description which contains file profiles
-     * */
+     * 
+     */
     public String getFileProfilesForL10nProfile(String p_accessToken, String p_l10nProfileName,
             String p_companyName) throws WebServiceException
     {
@@ -6039,6 +6040,7 @@ public class Ambassador extends AbstractWebService
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggedUser.getUserName());
             activityArgs.put("l10nProfileName", p_l10nProfileName);
+            activityArgs.put("companyName", p_companyName);
             activityStart = WebServicesLog.start(Ambassador.class, GET_FILEPROFILES_FOR_L10PROFILE,
                     activityArgs);
             Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
@@ -6046,7 +6048,7 @@ public class Ambassador extends AbstractWebService
             if (company == null)
             {
                 return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE,
-                        "Invaild company name, company name not exist.");
+                        "Invaild company name, company does not exist: " + p_companyName);
             }
 
             L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfileByName(

@@ -253,7 +253,12 @@ public class BlaiseHelper
 	{
 		try
 		{
-			TranslationAgencyClient client = getTranslationClient();
+		    if (!isEntryExisted(entryId))
+		    {
+		        return;
+		    }
+
+		    TranslationAgencyClient client = getTranslationClient();
             if (client == null)
             {
                 logger.error("TranslationAgencyClient is null, entry cannot be uploaded: " + entryId);
@@ -267,6 +272,7 @@ public class BlaiseHelper
 
             InputStream is = new FileInputStream(file);
 			client.uploadXliff(entryId, is);
+            logger.info("Blaise file is uploaded successfully for entryId: " + entryId);
 		}
 		catch (Exception e)
 		{
@@ -291,6 +297,7 @@ public class BlaiseHelper
 	    		try
 	    		{
 	    			client.complete(id);
+	    			logger.info("Blaise entry is completed successfully: " + id);
 	    		}
 	    		catch (Exception e)
 	    		{
@@ -308,12 +315,8 @@ public class BlaiseHelper
     {
 		try
 		{
-		    Set<Long> ids = new HashSet<Long>();
-		    ids.add(id);
-		    List<TranslationInboxEntryVo> entries = listInboxByIds(ids);
-		    if (entries == null || entries.size() == 0)
+		    if (!isEntryExisted(id))
 		    {
-		        logger.warn("Entry " + id + " has been not available, cannot complete it.");
 		        return;
 		    }
 
@@ -323,12 +326,28 @@ public class BlaiseHelper
 		        logger.error("TranslationAgencyClient is null, entry cannot be completed: " + id);
 		        return;
 		    }
-			client.complete(id);
+
+		    client.complete(id);
+            logger.info("Blaise entry is completed successfully: " + id);
 		}
 		catch (Exception e)
 		{
 			logger.error("Failed to complete entry: " + id, e);
 		}
+    }
+
+    public boolean isEntryExisted(long id)
+    {
+        Set<Long> ids = new HashSet<Long>();
+        ids.add(id);
+        List<TranslationInboxEntryVo> entries = listInboxByIds(ids);
+        if (entries == null || entries.size() == 0)
+        {
+            logger.warn("Entry " + id + " is not existed already, cannot operate on it.");
+            return false;
+        }
+
+        return true;
     }
 
     private TranslationAgencyClient getTranslationClient()

@@ -155,17 +155,16 @@ function generateFilterTable(filterConfigurations)
 		str.append("<td width='15%' class='main_table_head'>");
 		if(hasAddFilter == 'true')
 		{
-			str.append("<input type='button' id='" + filter.filterTableName + "_" + jsAdd + "' value='" + jsAdd + "' onclick='addSpecialFilter(\""+filter.filterTableName+"\",\""+filter.id+"\",\""+color+"\");'/>");
-		}
-		else
-		{
-			if (hasBaseFilter == "true")
+			if (filter.filterName == "Base Text Filter")
 			{
-				if (filterConfigurations[i].filterName == "Base Text Filter")
+				if (hasBaseFilter_InternalText == "true" || hasBaseFilter_Escaping == "true")
 				{
-					var baseFilter = filterConfigurations[i];
-					str.append("<input type='button' id='" + baseFilter.filterTableName + "_" + jsAdd + "' value='" + jsAdd + "' onclick='addSpecialFilter(\""+baseFilter.filterTableName+"\",\""+baseFilter.id+"\",\""+color+"\");'/>");
+					str.append("<input type='button' id='" + filter.filterTableName + "_" + jsAdd + "' value='" + jsAdd + "' onclick='addSpecialFilter(\""+filter.filterTableName+"\",\""+filter.id+"\",\""+color+"\");'/>");
 				}
+			}
+			else
+			{
+				str.append("<input type='button' id='" + filter.filterTableName + "_" + jsAdd + "' value='" + jsAdd + "' onclick='addSpecialFilter(\""+filter.filterTableName+"\",\""+filter.id+"\",\""+color+"\");'/>");
 			}
 		}
 		str.append("</td>");
@@ -291,27 +290,41 @@ function generateSpecialFiltersTable(filterId, specialFilters, color)
 		str.append("<input type='checkbox' id='checkbox_" + filterId + "_" + specialFilter.id + "' topFilterId='"+filterId+"' specialFilterId='"+specialFilter.id+"' filterTable='"+specialFilter.filterTableName+"' firstColor='"+color+"' onclick='checkSpecialFilterToDel(this)'></input>");
 		if(hasEditFilter == 'true')
 		{
-			if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='false')
+			if (specialFilter.filterName == "Base Text Filter")
 			{
-				str.append(specialFilter.filterName);
+				if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='false')
+				{
+					str.append(specialFilter.filterName);
+				}
+				else
+				{
+					str.append("<a href='#' class='specialfilter_a' onclick='editFilter(\""+specialFilter.id+"\",\""+specialFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")' >");
+					str.append(specialFilter.filterName);
+					str.append("</a>");
+				}
 			}
 			else
 			{
-				str.append("<a href='#' class='specialfilter_a' onclick='editFilter(\""+specialFilter.id+"\",\""+specialFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")' >")
+				str.append("<a href='#' class='specialfilter_a' onclick='editFilter(\""+specialFilter.id+"\",\""+specialFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")' >");
 				str.append(specialFilter.filterName);
 				str.append("</a>");
 			}
 		}
 		else
 		{
-			if (hasBaseFilter_InternalText =='true' || hasBaseFilter_Escaping =='true')
+			if (specialFilter.filterName == "Base Text Filter")
 			{
-				if (filterConfigurations[i].filterName == "Base Text Filter")
+				if (hasBaseFilter_InternalText =='true' || hasBaseFilter_Escaping =='true')
 				{
-					var baseFilter = specialFilters[i];
-					str.append("<a href='#' class='specialfilter_a' onclick='editFilter(\""+baseFilter.id+"\",\""+baseFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")' >")
-					str.append(baseFilter.filterName);
+					str.append("<a href='#' class='specialfilter_a' onclick='editFilter(\""+specialFilter.id+"\",\""+specialFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")' >");
+					str.append(specialFilter.filterName);
 					str.append("</a>");
+				}
+				else
+				{
+					str.append("<Label style='color:#810081'>");
+					str.append(specialFilter.filterName);
+					str.append("</Label>");	
 				}
 			}
 			else

@@ -16,8 +16,8 @@
  */
 package com.globalsight.connector.blaise.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -260,12 +260,12 @@ public class BlaiseHelper
                 return;
             }
 
-            String content = FileUtil.readFile(file, "UTF-8");
             // A simple replace to "cheat" Blaise API
+            String content = FileUtil.readFile(file, "UTF-8");
             content = StringUtil.replace(content, "<target state=\"new\"", "<target state=\"translated\"");
-            FileUtil.writeFile(file, content);
+            FileUtil.writeFile(file, content, "UTF-8");
 
-            InputStream is = new ByteArrayInputStream(content.getBytes());
+            InputStream is = new FileInputStream(file);
 			client.uploadXliff(entryId, is);
 		}
 		catch (Exception e)

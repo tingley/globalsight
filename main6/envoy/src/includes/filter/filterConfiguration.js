@@ -117,8 +117,9 @@ function generateFilterTable(filterConfigurations)
 	{
 		for (var j = 0; j < filterConfigurations.length; j++)
 		{
-			if (filterConfigurations[j].filterName == "Base Text Filter")
+			if (filterConfigurations[j].filterTableName == "base_filter")
 			{
+				existBaseFilters = filterConfigurations[j].specialFilters;
 				filterConfigurations.splice(j,1);
 			}
 		}
@@ -155,17 +156,7 @@ function generateFilterTable(filterConfigurations)
 		str.append("<td width='15%' class='main_table_head'>");
 		if(hasAddFilter == 'true')
 		{
-			if (filter.filterName == "Base Text Filter")
-			{
-				if (hasBaseFilter_InternalText == "true" || hasBaseFilter_Escaping == "true")
-				{
-					str.append("<input type='button' id='" + filter.filterTableName + "_" + jsAdd + "' value='" + jsAdd + "' onclick='addSpecialFilter(\""+filter.filterTableName+"\",\""+filter.id+"\",\""+color+"\");'/>");
-				}
-			}
-			else
-			{
-				str.append("<input type='button' id='" + filter.filterTableName + "_" + jsAdd + "' value='" + jsAdd + "' onclick='addSpecialFilter(\""+filter.filterTableName+"\",\""+filter.id+"\",\""+color+"\");'/>");
-			}
+			str.append("<input type='button' id='" + filter.filterTableName + "_" + jsAdd + "' value='" + jsAdd + "' onclick='addSpecialFilter(\""+filter.filterTableName+"\",\""+filter.id+"\",\""+color+"\");'/>");
 		}
 		str.append("</td>");
 		
@@ -290,7 +281,7 @@ function generateSpecialFiltersTable(filterId, specialFilters, color)
 		str.append("<input type='checkbox' id='checkbox_" + filterId + "_" + specialFilter.id + "' topFilterId='"+filterId+"' specialFilterId='"+specialFilter.id+"' filterTable='"+specialFilter.filterTableName+"' firstColor='"+color+"' onclick='checkSpecialFilterToDel(this)'></input>");
 		if(hasEditFilter == 'true')
 		{
-			if (specialFilter.filterName == "Base Text Filter")
+			if (specialFilter.filterTableName == "base_filter")
 			{
 				if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='false')
 				{
@@ -312,7 +303,7 @@ function generateSpecialFiltersTable(filterId, specialFilters, color)
 		}
 		else
 		{
-			if (specialFilter.filterName == "Base Text Filter")
+			if (specialFilter.filterTableName == "base_filter")
 			{
 				if (hasBaseFilter_InternalText =='true' || hasBaseFilter_Escaping =='true')
 				{

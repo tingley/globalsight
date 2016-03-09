@@ -148,8 +148,6 @@ BaseFilter.prototype.edit = function(filterId, color, specialFilters, topFilterI
 
 BaseFilter.prototype.generateDiv = function(topFilterId, color)
 {
-	if (hasBaseFilter_InternalText == "true" || hasBaseFilter_Escaping == "true")
-	{
 		this.initOptionMap();
 		var str = new StringBuffer("<table border=0 width='400px'>");
 		str.append("<tr>");
@@ -183,7 +181,6 @@ BaseFilter.prototype.generateDiv = function(topFilterId, color)
 		saveBaseFilter.edit = false;
 		saveBaseFilter.topFilterId = topFilterId;
 		saveBaseFilter.color = color;
-	}
 }
 
 function saveBaseFilter()
@@ -313,20 +310,36 @@ BaseFilter.prototype.generateTagsTable = function (filter)
 	str.append("</label>"); 
 	str.append("<select id='baseFilterRulesSection' onchange='baseFilter.switchRules(this)'>");
 
-	if (hasBaseFilter_InternalText =='false')
+	if (filter)
 	{
-		var index0 = baseFilter.availableOptions.indexOf("0");
-		if (index0!=-1)
+		if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='true')
 		{
-			baseFilter.availableOptions.splice(index0,1);
+			var index0 = baseFilter.availableOptions.indexOf("0");
+			if (index0!=-1)
+			{
+				baseFilter.availableOptions.splice(index0,1);
+			}
+		}
+		if (hasBaseFilter_Escaping =='false' && hasBaseFilter_InternalText =='true')
+		{
+			var index1 = baseFilter.availableOptions.indexOf("1");
+			if (index1!=-1)
+			{
+				baseFilter.availableOptions.splice(index1,1);
+			}
 		}
 	}
-	if (hasBaseFilter_Escaping =='false')
+	else
 	{
+		var index0 = baseFilter.availableOptions.indexOf("0");
 		var index1 = baseFilter.availableOptions.indexOf("1");
-		if (index1!=-1)
+		if (index0 == -1)
 		{
-			baseFilter.availableOptions.splice(index1,1);
+			baseFilter.availableOptions.push("0");
+		}
+		if (index1 == -1)
+		{
+			baseFilter.availableOptions.push("1");
 		}
 	}
 

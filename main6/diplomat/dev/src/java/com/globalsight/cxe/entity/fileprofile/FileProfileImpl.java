@@ -41,8 +41,7 @@ import com.globalsight.everest.persistence.PersistentObject;
 public class FileProfileImpl extends PersistentObject implements FileProfile
 {
     private static final long serialVersionUID = -6739135285284626287L;
-    static private final Logger s_logger = Logger
-            .getLogger(FileProfileImpl.class);
+    static private final Logger s_logger = Logger.getLogger(FileProfileImpl.class);
 
     /** used for TOPLink queries against the profile id attribute */
     static final public String L10NPROFILE_ID = "m_l10nProfileId";
@@ -82,6 +81,11 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
 
     private long reference_fp = 0;
 
+    // GBS-3830
+    public static final int EOL_ENCODING_PRESERVE = 0;
+    public static final int EOL_ENCODING_LF = 1;
+    public static final int EOL_ENCODING_CRLF = 2;
+
     public static final int UTF_BOM_PRESERVE = 1;
     public static final int UTF_BOM_ADD = 2;
     public static final int UTF_BOM_REMOVE = 3;
@@ -90,6 +94,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     public static final int UTF_16_LE = 2;
     public static final int UTF_16_BE = 3;
     private int BOMType = 0;
+    private int m_eolEncoding = 0;
 
     // CONSTRUCTORS
     /** Default constructor for TOPLink */
@@ -134,9 +139,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         filterId = o.getFilterId();
         qaFilter = o.getQaFilter();
         BOMType = o.getBOMType();
+        m_eolEncoding = o.getEolEncoding();
     }
-
-    // PUBLIC METHODS
 
     public int getBOMType()
     {
@@ -146,6 +150,16 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     public void setBOMType(int bOMType)
     {
         BOMType = bOMType;
+    }
+
+    public int getEolEncoding()
+    {
+        return m_eolEncoding;
+    }
+
+    public void setEolEncoding(int p_eolEncoding)
+    {
+        m_eolEncoding = p_eolEncoding;
     }
 
     /**
@@ -297,8 +311,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             int size = p_extensionIds.size();
             for (int i = 0; i < size; i++)
             {
-                Long extensionId = new Long(
-                        ((Number) p_extensionIds.elementAt(i)).longValue());
+                Long extensionId = new Long(((Number) p_extensionIds.elementAt(i)).longValue());
                 m_extensionIds.add(extensionId);
             }
         }
@@ -408,16 +421,12 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
      */
     public String toDebugString()
     {
-        return super.toString() + " m_knownFormatTypeId="
-                + Long.toString(m_knownFormatTypeId) + " m_l10nProfileId="
-                + Long.toString(m_l10nProfileId) + " m_name="
+        return super.toString() + " m_knownFormatTypeId=" + Long.toString(m_knownFormatTypeId)
+                + " m_l10nProfileId=" + Long.toString(m_l10nProfileId) + " m_name="
                 + (m_name == null ? "null" : m_name) + " m_description="
-                + (m_description == null ? "null" : m_description)
-                + " m_scriptOnImport="
-                + (m_scriptOnImport == null ? "null" : m_scriptOnImport)
-                + " m_scriptOnExport="
-                + (m_scriptOnExport == null ? "null" : m_scriptOnExport)
-                + " m_extensionIds="
+                + (m_description == null ? "null" : m_description) + " m_scriptOnImport="
+                + (m_scriptOnImport == null ? "null" : m_scriptOnImport) + " m_scriptOnExport="
+                + (m_scriptOnExport == null ? "null" : m_scriptOnExport) + " m_extensionIds="
                 + (m_extensionIds == null ? "null" : m_extensionIds.toString());
     }
 
@@ -425,8 +434,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     {
         if (filterId > -2)
         {
-            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, m_companyId);
+            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(m_knownFormatTypeId,
+                    m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
@@ -452,8 +461,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         if (filterId > -2)
         {
             // The filter have been take effect.
-            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, m_companyId);
+            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(m_knownFormatTypeId,
+                    m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
@@ -461,8 +470,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             }
             else
             {
-                return (filter instanceof MSOfficeDocFilter) ? ((MSOfficeDocFilter) filter)
-                        .isHeaderTranslate() : false;
+                return (filter instanceof MSOfficeDocFilter)
+                        ? ((MSOfficeDocFilter) filter).isHeaderTranslate() : false;
             }
         }
 
@@ -474,8 +483,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         if (filterId > -2)
         {
             // The filter have been take effect.
-            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, m_companyId);
+            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(m_knownFormatTypeId,
+                    m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
@@ -483,8 +492,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             }
             else
             {
-                return (filter instanceof JavaPropertiesFilter) ? ((JavaPropertiesFilter) filter)
-                        .getEnableSidSupport() : false;
+                return (filter instanceof JavaPropertiesFilter)
+                        ? ((JavaPropertiesFilter) filter).getEnableSidSupport() : false;
             }
         }
 
@@ -496,8 +505,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         if (filterId > -2)
         {
             // The filter have been take effect.
-            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, m_companyId);
+            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(m_knownFormatTypeId,
+                    m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
@@ -527,8 +536,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         if (filterId > -2)
         {
             // The filter have been take effect.
-            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, m_companyId);
+            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(m_knownFormatTypeId,
+                    m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
@@ -536,8 +545,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             }
             else
             {
-                return (filter instanceof JSPFilter) ? ((JSPFilter) filter)
-                        .getEnableEscapeEntity() : false;
+                return (filter instanceof JSPFilter) ? ((JSPFilter) filter).getEnableEscapeEntity()
+                        : false;
             }
         }
 
@@ -549,8 +558,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         if (filterId > -2)
         {
             // The filter have been take effect.
-            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, m_companyId);
+            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(m_knownFormatTypeId,
+                    m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
@@ -558,8 +567,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             }
             else
             {
-                return (filter instanceof JavaScriptFilter) ? ((JavaScriptFilter) filter)
-                        .getJsFunctionText() : null;
+                return (filter instanceof JavaScriptFilter)
+                        ? ((JavaScriptFilter) filter).getJsFunctionText() : null;
             }
         }
 
@@ -635,19 +644,16 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         {
             try
             {
-                Filter filter = FilterHelper.getFilter(filterTableName,
-                        filterId);
+                Filter filter = FilterHelper.getFilter(filterTableName, filterId);
                 if (filter != null)
                 {
                     if (filter instanceof JavaPropertiesFilter)
                     {
-                        secondFilterId = ((JavaPropertiesFilter) filter)
-                                .getSecondFilterId();
+                        secondFilterId = ((JavaPropertiesFilter) filter).getSecondFilterId();
                     }
                     else if (filter instanceof POFilter)
                     {
-                        secondFilterId = ((POFilter) filter)
-                                .getSecondFilterId();
+                        secondFilterId = ((POFilter) filter).getSecondFilterId();
                     }
                 }
             }
@@ -680,8 +686,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             // filter, and we should re-coding to use post filter way instead of
             // this.
             Filter filter = FilterHelper.getFilter(filterTableName, filterId);
-            if (filter instanceof JavaPropertiesFilter
-                    || filter instanceof POFilter)
+            if (filter instanceof JavaPropertiesFilter || filter instanceof POFilter)
             {
                 return true;
             }
@@ -706,8 +711,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         {
             try
             {
-                Filter filter = FilterHelper.getFilter(filterTableName,
-                        filterId);
+                Filter filter = FilterHelper.getFilter(filterTableName, filterId);
                 if (filter != null)
                 {
                     if (filter instanceof JavaPropertiesFilter)
@@ -717,8 +721,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                     }
                     else if (filter instanceof POFilter)
                     {
-                        secondFilterTableName = ((POFilter) filter)
-                                .getSecondFilterTableName();
+                        secondFilterTableName = ((POFilter) filter).getSecondFilterTableName();
                     }
                 }
             }
@@ -738,8 +741,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         {
             try
             {
-                Filter filter = FilterHelper.getFilter(filterTableName,
-                        filterId);
+                Filter filter = FilterHelper.getFilter(filterTableName, filterId);
                 if (filter != null)
                 {
                     name = filter.getFilterName();
@@ -759,8 +761,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         if (filterId > 0)
         {
             // The filter have been take effect.
-            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(
-                    m_knownFormatTypeId, m_companyId);
+            ArrayList<Filter> filters = FilterHelper.getFiltersByKnownFormatId(m_knownFormatTypeId,
+                    m_companyId);
             Filter filter = FilterHelper.getFilterById(filters, filterId);
             if (filter == null)
             {
@@ -768,8 +770,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             }
             else
             {
-                return (filter instanceof JavaPropertiesFilter) ? ((JavaPropertiesFilter) filter)
-                        .getEnablePreserveSpaces() : false;
+                return (filter instanceof JavaPropertiesFilter)
+                        ? ((JavaPropertiesFilter) filter).getEnablePreserveSpaces() : false;
             }
         }
 

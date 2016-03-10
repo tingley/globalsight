@@ -121,32 +121,31 @@ public class CreateJobsMainHandler extends PageHandler
 {
     public static final String TMP_FOLDER_NAME = "createJob_tmp";
 
-    private static final Logger logger = Logger
-            .getLogger(CreateJobsMainHandler.class);
+    private static final Logger logger = Logger.getLogger(CreateJobsMainHandler.class);
     private static final String DOT = ".";
     private static final String DISABLED = "disabled";
     private static final String SELECTED = "selected";
     private static final String SELECTED_FOLDER = "selected_folder_path_in_create_job";
     public static final String CREATING_JOBS_NUM_SQL = "select count(ID) from JobImpl "
-    	+ " where STATE in ('" + Job.UPLOADING + "', '" + Job.IN_QUEUE
-    	+ "', '" + Job.EXTRACTING + "', '" + Job.LEVERAGING + "', '"
-    	+ Job.CALCULATING_WORD_COUNTS + "', '" + Job.PROCESSING + "')";
+            + " where STATE in ('" + Job.UPLOADING + "', '" + Job.IN_QUEUE + "', '" + Job.EXTRACTING
+            + "', '" + Job.LEVERAGING + "', '" + Job.CALCULATING_WORD_COUNTS + "', '"
+            + Job.PROCESSING + "')";
     private static final int SUCCEED = 0;
     private static final int FAIL = 1;
     private final static int MAX_LINE_LENGTH = 4096;
     private Map<String, List<FileProfileImpl>> extensionToFileProfileMap;
     private Map<String, String> l10NToTargetLocalesMap = new HashMap<String, String>();
-//    private Map<String, String> l10NToJobAttributeMap = new HashMap<String, String>();
 
-    public void invokePageHandler(WebPageDescriptor pageDescriptor,
-            HttpServletRequest request, HttpServletResponse response,
-            ServletContext context) throws ServletException, IOException,
-            EnvoyServletException, PermissionException
+    // private Map<String, String> l10NToJobAttributeMap = new HashMap<String,
+    // String>();
+
+    public void invokePageHandler(WebPageDescriptor pageDescriptor, HttpServletRequest request,
+            HttpServletResponse response, ServletContext context)
+            throws ServletException, IOException, EnvoyServletException, PermissionException
     {
         // permission check
         HttpSession session = request.getSession(false);
-        PermissionSet userPerms = (PermissionSet) session
-                .getAttribute(WebAppConstants.PERMISSIONS);
+        PermissionSet userPerms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
         if (!userPerms.getPermissionFor(Permission.CREATE_JOB)
                 && !userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET))
         {
@@ -155,8 +154,7 @@ public class CreateJobsMainHandler extends PageHandler
             return;
         }
         // get the operator
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
         if (user == null)
         {
@@ -180,8 +178,7 @@ public class CreateJobsMainHandler extends PageHandler
             }
             else if (action.equals("queryFileProfile"))
             {
-            	this.setPageParameter(request, bundle, user, session,
-                        currentCompanyId);
+                this.setPageParameter(request, bundle, user, session, currentCompanyId);
                 this.queryFileProfile(request, response, currentCompanyId, user);
                 return;
             }
@@ -202,8 +199,7 @@ public class CreateJobsMainHandler extends PageHandler
             }
             else if (action.equals("getCreatingJobsNum"))
             {
-                Integer creatingJobsNum = getCreatingJobsNum(new Long(
-                        currentCompanyId));
+                Integer creatingJobsNum = getCreatingJobsNum(new Long(currentCompanyId));
                 PrintWriter writer = response.getWriter();
                 writer.write(creatingJobsNum.toString());
                 return;
@@ -215,60 +211,63 @@ public class CreateJobsMainHandler extends PageHandler
                 List<File> uploadedFiles = new ArrayList<File>();
                 try
                 {
-					uploadedFiles = uploadSelectedFile(request, tempFolder,	type);
-					for (File uploadedFile : uploadedFiles)
-					{
-                    	StringBuffer ret = new StringBuffer("[");
-                    	response.setContentType("text/html;charset=UTF-8");
-                    	if ("0".equals(type))// source files
-                    	{
-                    		if (isSupportedZipFileFormat(uploadedFile)
-                    				&& isUnCompress(uploadedFile))
-                    		{
-                    			if (CreateJobUtil.isZipFile(uploadedFile))
-                    			{
-                    				ret.append(addZipFile(uploadedFile));
-                    			}
-                    			else if (CreateJobUtil.isRarFile(uploadedFile))
-                    			{
-                    				ret.append(addRarFile(uploadedFile));
-                    			}
-                    			else if (CreateJobUtil.is7zFile(uploadedFile))
-                    			{
-                    				ret.append(addZip7zFile(uploadedFile));
-                    			}
-                    			else
-                    			{
-                    				ret.append(addCommonFile(uploadedFile));
-                    			}
-                    			
-                    			ret.append("]");
-                    			PrintWriter writer = response.getWriter();
-                    			writer.write("<script type='text/javascript'>window.parent.addDivForNewFile("
-                    					+ ret.toString() + ")</script>;");
-                    			if (CreateJobUtil.isZipFile(uploadedFile)
-                    					|| CreateJobUtil.isRarFile(uploadedFile)
-                    					|| (CreateJobUtil.is7zFile(uploadedFile)))
-                    			{
-                    				uploadedFile.delete();
-                    			}
-                    		}
-                    		else
-                    		{
-                    			ret.append(addCommonFile(uploadedFile));
-                    			ret.append("]");
-                    			PrintWriter writer = response.getWriter();
-                    			writer.write("<script type='text/javascript'>window.parent.addDivForNewFile("
-                    					+ ret.toString() + ")</script>;");
-                    		}
-                    	}
-                    	else if ("1".equals(type))// job comment file
-                    	{
-                    		PrintWriter writer = response.getWriter();
-                    		writer.write("<script type='text/javascript'>window.parent.addAttachment('"
-                    				+ uploadedFile.getName().replace("'", "\\'")
-                    				+ "')</script>;");
-                    	}
+                    uploadedFiles = uploadSelectedFile(request, tempFolder, type);
+                    for (File uploadedFile : uploadedFiles)
+                    {
+                        StringBuffer ret = new StringBuffer("[");
+                        response.setContentType("text/html;charset=UTF-8");
+                        if ("0".equals(type))// source files
+                        {
+                            if (isSupportedZipFileFormat(uploadedFile)
+                                    && isUnCompress(uploadedFile))
+                            {
+                                if (CreateJobUtil.isZipFile(uploadedFile))
+                                {
+                                    ret.append(addZipFile(uploadedFile));
+                                }
+                                else if (CreateJobUtil.isRarFile(uploadedFile))
+                                {
+                                    ret.append(addRarFile(uploadedFile));
+                                }
+                                else if (CreateJobUtil.is7zFile(uploadedFile))
+                                {
+                                    ret.append(addZip7zFile(uploadedFile));
+                                }
+                                else
+                                {
+                                    ret.append(addCommonFile(uploadedFile));
+                                }
+
+                                ret.append("]");
+                                PrintWriter writer = response.getWriter();
+                                writer.write(
+                                        "<script type='text/javascript'>window.parent.addDivForNewFile("
+                                                + ret.toString() + ")</script>;");
+                                if (CreateJobUtil.isZipFile(uploadedFile)
+                                        || CreateJobUtil.isRarFile(uploadedFile)
+                                        || (CreateJobUtil.is7zFile(uploadedFile)))
+                                {
+                                    uploadedFile.delete();
+                                }
+                            }
+                            else
+                            {
+                                ret.append(addCommonFile(uploadedFile));
+                                ret.append("]");
+                                PrintWriter writer = response.getWriter();
+                                writer.write(
+                                        "<script type='text/javascript'>window.parent.addDivForNewFile("
+                                                + ret.toString() + ")</script>;");
+                            }
+                        }
+                        else if ("1".equals(type))// job comment file
+                        {
+                            PrintWriter writer = response.getWriter();
+                            writer.write(
+                                    "<script type='text/javascript'>window.parent.addAttachment('"
+                                            + uploadedFile.getName().replace("'", "\\'")
+                                            + "')</script>;");
+                        }
                     }
                 }
                 catch (Exception e)
@@ -279,10 +278,9 @@ public class CreateJobsMainHandler extends PageHandler
             }
             else if (action.equals("createJob"))
             {
-                final Map<Object, Object> dataMap = prepareDataForJob(request,
-                        currentCompanyId, user);
-                this.setPageParameter(request, bundle, user, session,
-                        currentCompanyId);
+                final Map<Object, Object> dataMap = prepareDataForJob(request, currentCompanyId,
+                        user);
+                this.setPageParameter(request, bundle, user, session, currentCompanyId);
                 request.setAttribute("create_result",
                         bundle.getString("msg_job_create_successful"));
                 Runnable runnable = new Runnable()
@@ -298,8 +296,7 @@ public class CreateJobsMainHandler extends PageHandler
         }
         if (!"createJob".equals(action))
         {
-            this.setPageParameter(request, bundle, user, session,
-                    currentCompanyId);
+            this.setPageParameter(request, bundle, user, session, currentCompanyId);
         }
 
         // how many jobs are being created
@@ -335,8 +332,7 @@ public class CreateJobsMainHandler extends PageHandler
     private boolean isSupportedZipFileFormat(File file)
     {
         String extension = CreateJobUtil.getFileExtension(file);
-        if ("rar".equalsIgnoreCase(extension)
-                || "zip".equalsIgnoreCase(extension)
+        if ("rar".equalsIgnoreCase(extension) || "zip".equalsIgnoreCase(extension)
                 || "7z".equalsIgnoreCase(extension))
         {
             return true;
@@ -346,23 +342,23 @@ public class CreateJobsMainHandler extends PageHandler
 
     public static Integer getCreatingJobsNum(Long companyId)
     {
-    	Integer creatingJobsNum = null;
-    	try
+        Integer creatingJobsNum = null;
+        try
         {
-    		boolean isSuperCompany = CompanyWrapper.isSuperCompany(companyId.toString());
-    		if(isSuperCompany)
-    		{ 			
-    			creatingJobsNum = HibernateUtil.count(CREATING_JOBS_NUM_SQL);
-    		}
-    		else
-    		{
-    			creatingJobsNum = HibernateUtil.count(CREATING_JOBS_NUM_SQL 
-    					+ " and COMPANY_ID = " + companyId);
-    		}
+            boolean isSuperCompany = CompanyWrapper.isSuperCompany(companyId.toString());
+            if (isSuperCompany)
+            {
+                creatingJobsNum = HibernateUtil.count(CREATING_JOBS_NUM_SQL);
+            }
+            else
+            {
+                creatingJobsNum = HibernateUtil
+                        .count(CREATING_JOBS_NUM_SQL + " and COMPANY_ID = " + companyId);
+            }
         }
         catch (Exception e)
         {
-        	logger.error("Failed to get createingJobsNum.", e);
+            logger.error("Failed to get createingJobsNum.", e);
             // not blocking the following processes.
         }
         return creatingJobsNum;
@@ -378,8 +374,8 @@ public class CreateJobsMainHandler extends PageHandler
                 .getAttribute(SESSION_MANAGER);
         dataMap.put(SESSION_MANAGER, sessionMgr);
 
-        String jobName = EditUtil.removeCRLF(request.getParameter("jobName"))
-                + "_" + getRandomNumber();
+        String jobName = EditUtil.removeCRLF(request.getParameter("jobName")) + "_"
+                + getRandomNumber();
         dataMap.put("jobName", jobName);
         String comment = request.getParameter("comment");
         dataMap.put("comment", comment);
@@ -390,8 +386,7 @@ public class CreateJobsMainHandler extends PageHandler
         String[] filePaths = request.getParameterValues("jobFilePath");
         dataMap.put("jobFilePath", filePaths);
         // l10n info and file profile info
-        String[] l10nAndfileProfiles = request
-                .getParameterValues("fileProfile");
+        String[] l10nAndfileProfiles = request.getParameterValues("fileProfile");
         dataMap.put("fileProfile", l10nAndfileProfiles);
         // mapped target locales
         String[] targetLocales = request.getParameterValues("targetLocale");
@@ -423,44 +418,42 @@ public class CreateJobsMainHandler extends PageHandler
      * @param response
      * @throws IOException
      */
-    private void queryJobAttributes(HttpServletRequest request,
-            HttpServletResponse response) throws IOException
+    private void queryJobAttributes(HttpServletRequest request, HttpServletResponse response)
+            throws IOException
     {
         PrintWriter writer = response.getWriter();
         try
         {
             String l10Nid = request.getParameter("l10Nid");
             String hasAttribute = "false";
-//            if (l10NToJobAttributeMap.get(l10Nid) == null)
-//            {
-                L10nProfile lp = ServerProxy.getProjectHandler()
-                        .getL10nProfile(Long.valueOf(l10Nid));
-                Project p = lp.getProject();
-                AttributeSet attributeSet = p.getAttributeSet();
+            // if (l10NToJobAttributeMap.get(l10Nid) == null)
+            // {
+            L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfile(Long.valueOf(l10Nid));
+            Project p = lp.getProject();
+            AttributeSet attributeSet = p.getAttributeSet();
 
-                if (attributeSet != null)
+            if (attributeSet != null)
+            {
+                List<Attribute> attributeList = attributeSet.getAttributeAsList();
+                for (Attribute attribute : attributeList)
                 {
-                    List<Attribute> attributeList = attributeSet
-                            .getAttributeAsList();
-                    for (Attribute attribute : attributeList)
+                    if (attribute.isRequired())
                     {
-                        if (attribute.isRequired())
-                        {
-                            hasAttribute = "required";
-                            break;
-                        }
-                        else
-                        {
-                            hasAttribute = "true";
-                        }
+                        hasAttribute = "required";
+                        break;
+                    }
+                    else
+                    {
+                        hasAttribute = "true";
                     }
                 }
-//                l10NToJobAttributeMap.put(l10Nid, hasAttribute);
-//            }
-//            else
-//            {
-//                hasAttribute = l10NToJobAttributeMap.get(l10Nid);
-//            }
+            }
+            // l10NToJobAttributeMap.put(l10Nid, hasAttribute);
+            // }
+            // else
+            // {
+            // hasAttribute = l10NToJobAttributeMap.get(l10Nid);
+            // }
             response.setContentType("text/html;charset=UTF-8");
             writer.write(hasAttribute);
         }
@@ -483,35 +476,29 @@ public class CreateJobsMainHandler extends PageHandler
      * @param session
      * @param currentCompanyId
      */
-    private void setPageParameter(HttpServletRequest request,
-            ResourceBundle bundle, User user, HttpSession session,
-            String currentCompanyId)
+    private void setPageParameter(HttpServletRequest request, ResourceBundle bundle, User user,
+            HttpSession session, String currentCompanyId)
     {
         this.setLable(request, bundle);
-        request.setAttribute("rand",
-                session.getAttribute("UID_" + session.getId()));
+        request.setAttribute("rand", session.getAttribute("UID_" + session.getId()));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
         String tmpFolderName = sdf.format(new Date()) + "-" + getRandomNumber();
         if (user != null)
         {
-            request.setAttribute(
-                    "lastSelectedFolder",
-                    convertFilePath(
-                            getLastSelectedFolder(user.getUserId(),
-                                    SELECTED_FOLDER)).replace("\\", "\\\\"));
+            request.setAttribute("lastSelectedFolder",
+                    convertFilePath(getLastSelectedFolder(user.getUserId(), SELECTED_FOLDER))
+                            .replace("\\", "\\\\"));
         }
         else
         {
             request.setAttribute("lastSelectedFolder", "");
         }
 
-        request.setAttribute(
-                "baseTmpFolder",
+        request.setAttribute("baseTmpFolder",
                 convertFilePath(
-                        AmbFileStoragePathUtils.getCxeDocDir() + File.separator
-                                + TMP_FOLDER_NAME).replace("\\", "\\\\"));
-        request.setAttribute("baseStorageFolder", tmpFolderName + ","
-                + currentCompanyId);
+                        AmbFileStoragePathUtils.getCxeDocDir() + File.separator + TMP_FOLDER_NAME)
+                                .replace("\\", "\\\\"));
+        request.setAttribute("baseStorageFolder", tmpFolderName + "," + currentCompanyId);
 
         if (request.getParameter("currentFolderName") != null)
         {
@@ -524,17 +511,14 @@ public class CreateJobsMainHandler extends PageHandler
             extensionToFileProfileMap = new HashMap<String, List<FileProfileImpl>>();
         }
         SystemConfiguration sysConfig = SystemConfiguration.getInstance();
-        boolean useSSL = sysConfig
-                .getBooleanParameter(SystemConfigParamNames.USE_SSL);
+        boolean useSSL = sysConfig.getBooleanParameter(SystemConfigParamNames.USE_SSL);
         if (useSSL)
         {
-            request.setAttribute("httpProtocolToUse",
-                    WebAppConstants.PROTOCOL_HTTPS);
+            request.setAttribute("httpProtocolToUse", WebAppConstants.PROTOCOL_HTTPS);
         }
         else
         {
-            request.setAttribute("httpProtocolToUse",
-                    WebAppConstants.PROTOCOL_HTTP);
+            request.setAttribute("httpProtocolToUse", WebAppConstants.PROTOCOL_HTTP);
         }
     }
 
@@ -547,8 +531,8 @@ public class CreateJobsMainHandler extends PageHandler
      * @param user
      * @throws IOException
      */
-    private void queryTargetLocales(HttpServletRequest request,
-            HttpServletResponse response, User user) throws IOException
+    private void queryTargetLocales(HttpServletRequest request, HttpServletResponse response,
+            User user) throws IOException
     {
         String l10Nid = request.getParameter("l10Nid");
         if (StringUtils.isNotEmpty(l10Nid))
@@ -559,15 +543,13 @@ public class CreateJobsMainHandler extends PageHandler
                 String hsql = "select wti.targetLocale from "
                         + "L10nProfileWFTemplateInfo as ltp, WorkflowTemplateInfo wti "
                         + "where wti.id = ltp.key.wfTemplateId and ltp.key.l10nProfileId = "
-                        + l10Nid
-                        + " and ltp.isActive = 'Y' and wti.isActive = 'Y' "
+                        + l10Nid + " and ltp.isActive = 'Y' and wti.isActive = 'Y' "
                         + "order by wti.targetLocale.language";
                 List<?> localeList = HibernateUtil.search(hsql);
 
                 if (localeList != null)
                 {
-                    targetLocalesString = this.initTargetLocaleSelect(
-                            localeList, user);
+                    targetLocalesString = this.initTargetLocaleSelect(localeList, user);
                     l10NToTargetLocalesMap.put(l10Nid, targetLocalesString);
                 }
                 else
@@ -595,9 +577,8 @@ public class CreateJobsMainHandler extends PageHandler
      */
     @SuppressWarnings(
     { "unchecked", "rawtypes" })
-    private void queryFileProfile(HttpServletRequest request,
-            HttpServletResponse response, String currentCompanyId, User user)
-            throws IOException
+    private void queryFileProfile(HttpServletRequest request, HttpServletResponse response,
+            String currentCompanyId, User user) throws IOException
     {
         try
         {
@@ -611,14 +592,12 @@ public class CreateJobsMainHandler extends PageHandler
 
             if (fileName != null && fileName.contains(DOT))
             {
-                String fileExtension = fileName.substring(fileName
-                        .lastIndexOf(DOT) + 1);
+                String fileExtension = fileName.substring(fileName.lastIndexOf(DOT) + 1);
                 List<FileProfileImpl> fileProfileListOfUser;
 
                 if (extensionToFileProfileMap.get(fileExtension) != null)
                 {
-                    fileProfileListOfUser = extensionToFileProfileMap
-                            .get(fileExtension);
+                    fileProfileListOfUser = extensionToFileProfileMap.get(fileExtension);
                 }
                 else
                 {
@@ -626,24 +605,20 @@ public class CreateJobsMainHandler extends PageHandler
                     List<String> extensionList = new ArrayList<String>();
                     extensionList.add(fileExtension);
                     List<FileProfileImpl> fileProfileListOfCompany = (List) ServerProxy
-                            .getFileProfilePersistenceManager()
-                            .getFileProfilesByExtension(extensionList,
-                                    Long.valueOf(currentCompanyId));
-                    SortUtil.sort(fileProfileListOfCompany,
-                            new Comparator<Object>()
-                            {
-                                public int compare(Object arg0, Object arg1)
-                                {
-                                    FileProfileImpl a0 = (FileProfileImpl) arg0;
-                                    FileProfileImpl a1 = (FileProfileImpl) arg1;
-                                    return a0.getName().compareToIgnoreCase(
-                                            a1.getName());
-                                }
-                            });
+                            .getFileProfilePersistenceManager().getFileProfilesByExtension(
+                                    extensionList, Long.valueOf(currentCompanyId));
+                    SortUtil.sort(fileProfileListOfCompany, new Comparator<Object>()
+                    {
+                        public int compare(Object arg0, Object arg1)
+                        {
+                            FileProfileImpl a0 = (FileProfileImpl) arg0;
+                            FileProfileImpl a1 = (FileProfileImpl) arg1;
+                            return a0.getName().compareToIgnoreCase(a1.getName());
+                        }
+                    });
 
-                    List projectsOfCurrentUser = ServerProxy
-                            .getProjectHandler().getProjectsByUser(
-                                    user.getUserId());
+                    List projectsOfCurrentUser = ServerProxy.getProjectHandler()
+                            .getProjectsByUser(user.getUserId());
 
                     for (FileProfileImpl fp : fileProfileListOfCompany)
                     {
@@ -655,8 +630,7 @@ public class CreateJobsMainHandler extends PageHandler
                             fileProfileListOfUser.add(fp);
                         }
                     }
-                    extensionToFileProfileMap.put(fileExtension,
-                            fileProfileListOfUser);
+                    extensionToFileProfileMap.put(fileExtension, fileProfileListOfUser);
                 }
 
                 if (fileProfileListOfUser.size() > 0)
@@ -664,15 +638,13 @@ public class CreateJobsMainHandler extends PageHandler
                     // the return value should be in the pattern of html
                     response.setContentType("text/html;charset=UTF-8");
                     PrintWriter writer = response.getWriter();
-                    this.initFileProfileSelect(fileProfileListOfUser, writer,
-                            l10nId);
+                    this.initFileProfileSelect(fileProfileListOfUser, writer, l10nId);
                     writer.close();
                 }
             }
             else
             {
-                logger.warn("The file " + fileName
-                        + " doesn't have a extension.");
+                logger.warn("The file " + fileName + " doesn't have a extension.");
             }
         }
         catch (Exception e)
@@ -693,17 +665,16 @@ public class CreateJobsMainHandler extends PageHandler
         {
             String filePath = request.getParameter("filePath");
             String folder = request.getParameter("folder");
-            String uploadPath = AmbFileStoragePathUtils.getCxeDocDir()
-                    + File.separator + TMP_FOLDER_NAME + File.separator
-                    + folder;
+            String uploadPath = AmbFileStoragePathUtils.getCxeDocDir() + File.separator
+                    + TMP_FOLDER_NAME + File.separator + folder;
             if (filePath == null)
             {
                 FileUtil.deleteFile(new File(uploadPath));
             }
             else if (filePath.contains(folder))
             {
-            	File file = new File(filePath);
-            	file.delete();
+                File file = new File(filePath);
+                file.delete();
             }
             else
             {
@@ -730,14 +701,14 @@ public class CreateJobsMainHandler extends PageHandler
      * @param response
      * @throws IOException
      */
-    private void getUploadedFiles(HttpServletRequest request,
-            HttpServletResponse response) throws IOException
+    private void getUploadedFiles(HttpServletRequest request, HttpServletResponse response)
+            throws IOException
     {
         PrintWriter writer = response.getWriter();
         try
         {
-            String baseTmpPath = AmbFileStoragePathUtils.getCxeDocDir()
-                    + File.separator + TMP_FOLDER_NAME;
+            String baseTmpPath = AmbFileStoragePathUtils.getCxeDocDir() + File.separator
+                    + TMP_FOLDER_NAME;
             String path = request.getParameter("path") == null ? baseTmpPath
                     : request.getParameter("path");
             path = convertFilePath(path);
@@ -771,8 +742,7 @@ public class CreateJobsMainHandler extends PageHandler
      * @param path
      * @return
      */
-    private String initUploadedFolderSelect(String[] fileNames,
-            String folderName, String path)
+    private String initUploadedFolderSelect(String[] fileNames, String folderName, String path)
     {
         StringBuffer data = new StringBuffer();
         for (String fileName : fileNames)
@@ -791,23 +761,19 @@ public class CreateJobsMainHandler extends PageHandler
                 continue;
             }
             link = link.replace("\\", "\\\\");
-            data.append(
-                    "<div id='" + FileUtil.getFileNo(link)
-                            + "' STYLE='word-wrap:break-word;'>")
-                    .append("<input name='uploaded' type='checkbox' value='")
-                    .append(fileName).append("'>&nbsp;");
+            data.append("<div id='" + FileUtil.getFileNo(link) + "' STYLE='word-wrap:break-word;'>")
+                    .append("<input name='uploaded' type='checkbox' value='").append(fileName)
+                    .append("'>&nbsp;");
             if (tmp.isDirectory())
             {
                 data.append(
                         "<IMG SRC='/globalsight/images/folderclosed.gif' width='15' height='13'>")
-                        .append("&nbsp;&nbsp;")
-                        .append("<a href='javascript:getUploadedFiles(\"")
+                        .append("&nbsp;&nbsp;").append("<a href='javascript:getUploadedFiles(\"")
                         .append(link).append("\")'>");
             }
             else
             {
-                data.append(
-                        "<IMG SRC='/globalsight/images/file.gif' height='15' width='13'>")
+                data.append("<IMG SRC='/globalsight/images/file.gif' height='15' width='13'>")
                         .append("&nbsp;&nbsp;");
             }
             data.append(fileName);
@@ -833,20 +799,17 @@ public class CreateJobsMainHandler extends PageHandler
             String comment = (String) dataMap.get("comment");
             String tmpFolderName = (String) dataMap.get("tmpFolderName");
             String[] filePaths = (String[]) dataMap.get("jobFilePath");
-            String[] l10nAndfileProfiles = (String[]) dataMap
-                    .get("fileProfile");
+            String[] l10nAndfileProfiles = (String[]) dataMap.get("fileProfile");
             String[] targetLocales = (String[]) dataMap.get("targetLocale");
             String priority = (String) dataMap.get("priority");
             String baseFolder = (String) dataMap.get("baseFolder");
             if (StringUtils.isNotEmpty(baseFolder))
             {
-                this.saveBaseFolder(user.getUserId(), SELECTED_FOLDER,
-                        baseFolder);
+                this.saveBaseFolder(user.getUserId(), SELECTED_FOLDER, baseFolder);
             }
             String[] isSwitched = (String[]) dataMap.get("isSwitched");
             String attachmentName = (String) dataMap.get("attachment");
-            String baseStorageFolder = (String) dataMap
-                    .get("baseStorageFolder");
+            String baseStorageFolder = (String) dataMap.get("baseStorageFolder");
             String attribute = (String) dataMap.get("attributeString");
 
             BasicL10nProfile l10Profile = getBasicL10Profile(l10nAndfileProfiles);
@@ -858,25 +821,21 @@ public class CreateJobsMainHandler extends PageHandler
             // init target locale infomation
             String locs = this.initTargetLocale(targetLocales);
             // for GBS-2137, initialize the job with "IN_QUEUE" state
-            SessionManager sessionMgr = (SessionManager) dataMap
-                    .get(SESSION_MANAGER);
+            SessionManager sessionMgr = (SessionManager) dataMap.get(SESSION_MANAGER);
             String uuid = sessionMgr.getAttribute("uuid") == null ? null
                     : (String) sessionMgr.getAttribute("uuid");
             sessionMgr.removeElement("uuid");
 
-            Job job = JobCreationMonitor.initializeJob(jobName, uuid,
-                    user.getUserId(), l10Profile.getId(), priority,
-                    Job.IN_QUEUE);
-            this.initDescAndFileProfile(descList, fpIdList, filePaths,
-                    l10nAndfileProfiles, l10Profile, tmpFolderName, job,
-                    isSwitched, sourceFilesList, fileProfileList);
-            Map<String, long[]> filesToFpId = FileProfileUtil.excuteScriptOfFileProfile(
-                    descList, fileProfileList, job);
+            Job job = JobCreationMonitor.initializeJob(jobName, uuid, user.getUserId(),
+                    l10Profile.getId(), priority, Job.IN_QUEUE);
+            this.initDescAndFileProfile(descList, fpIdList, filePaths, l10nAndfileProfiles,
+                    l10Profile, tmpFolderName, job, isSwitched, sourceFilesList, fileProfileList);
+            Map<String, long[]> filesToFpId = FileProfileUtil.excuteScriptOfFileProfile(descList,
+                    fileProfileList, job);
             Set<String> fileNames = filesToFpId.keySet();
             Integer pageCount = new Integer(fileNames.size());
             String jobUuid = uuid == null ? ((JobImpl) job).getUuid() : uuid;
-            List<JobAttribute> jobAttribtues = getJobAttributes(attribute,
-                    l10Profile);
+            List<JobAttribute> jobAttribtues = getJobAttributes(attribute, l10Profile);
             // cache job attributes if there are any
             if (jobAttribtues != null && jobAttribtues.size() != 0)
             {
@@ -897,22 +856,18 @@ public class CreateJobsMainHandler extends PageHandler
                 // If use JMS
                 if (FileImportUtil.USE_JMS)
                 {
-					CxeProxy.importFromFileSystem(fileName,
-							String.valueOf(job.getId()), jobName,
-							fileProfileId, pageCount, count, 1, 1,
-							Boolean.TRUE, Boolean.FALSE,
-							CxeProxy.IMPORT_TYPE_L10N, exitValue, priority);
+                    CxeProxy.importFromFileSystem(fileName, String.valueOf(job.getId()), jobName,
+                            fileProfileId, pageCount, count, 1, 1, Boolean.TRUE, Boolean.FALSE,
+                            CxeProxy.IMPORT_TYPE_L10N, exitValue, priority);
                 }
                 // If not use JMS, we control the concurrent threads number
                 else
                 {
-					CxeMessage cxeMessage = CxeProxy.formCxeMessageType(
-							fileName, String.valueOf(job.getId()), jobName,
-							fileProfileId, pageCount, count, 1, 1,
-							Boolean.TRUE, Boolean.FALSE,
-							CxeProxy.IMPORT_TYPE_L10N, exitValue, priority,
-							String.valueOf(job.getCompanyId()));
-					cxeMsgs.add(cxeMessage);
+                    CxeMessage cxeMessage = CxeProxy.formCxeMessageType(fileName,
+                            String.valueOf(job.getId()), jobName, fileProfileId, pageCount, count,
+                            1, 1, Boolean.TRUE, Boolean.FALSE, CxeProxy.IMPORT_TYPE_L10N, exitValue,
+                            priority, String.valueOf(job.getCompanyId()));
+                    cxeMsgs.add(cxeMessage);
                 }
             }
 
@@ -936,30 +891,24 @@ public class CreateJobsMainHandler extends PageHandler
             }
 
             // save job comment
-            if (!StringUtils.isEmpty(comment)
-                    || !StringUtils.isEmpty(attachmentName))
+            if (!StringUtils.isEmpty(comment) || !StringUtils.isEmpty(attachmentName))
             {
-                String dir = convertFilePath(AmbFileStoragePathUtils
-                        .getFileStorageDirPath(job.getCompanyId()))
-                        + File.separator
-                        + "GlobalSight"
-                        + File.separator
-                        + "CommentReference"
-                        + File.separator
-                        + "tmp"
-                        + File.separator
-                        + baseStorageFolder.split(",")[0];
-                SaveCommentThread sct = new SaveCommentThread(jobName, comment,
-                        attachmentName, user.getUserId(), dir);
+                String dir = convertFilePath(
+                        AmbFileStoragePathUtils.getFileStorageDirPath(job.getCompanyId()))
+                        + File.separator + "GlobalSight" + File.separator + "CommentReference"
+                        + File.separator + "tmp" + File.separator + baseStorageFolder.split(",")[0];
+                SaveCommentThread sct = new SaveCommentThread(jobName, comment, attachmentName,
+                        user.getUserId(), dir);
                 sct.start();
             }
             // Send email at the end.
             Project project = l10Profile.getProject();
-            if(comment == null || comment.equals("null")){
-            	comment = "";
+            if (comment == null || comment.equals("null"))
+            {
+                comment = "";
             }
-            sendUploadCompletedEmail(filePaths, fpIdList, jobName, comment,
-                    new Date(), user, currentCompanyId, project);
+            sendUploadCompletedEmail(filePaths, fpIdList, jobName, comment, new Date(), user,
+                    currentCompanyId, project);
 
             // after all steps, delete files that are used to create job
             for (File source : sourceFilesList)
@@ -967,9 +916,8 @@ public class CreateJobsMainHandler extends PageHandler
                 FileUtil.deleteFile(source);
             }
             // delete the upload directory
-            File uploads = new File(AmbFileStoragePathUtils.getCxeDocDir()
-                    + File.separator + TMP_FOLDER_NAME + File.separator
-                    + tmpFolderName);
+            File uploads = new File(AmbFileStoragePathUtils.getCxeDocDir() + File.separator
+                    + TMP_FOLDER_NAME + File.separator + tmpFolderName);
             if (uploads != null && uploads.exists())
             {
                 FileUtil.deleteFile(uploads);
@@ -997,17 +945,16 @@ public class CreateJobsMainHandler extends PageHandler
      * @param l10Profile
      * @throws ParseException
      */
-    private void saveAttributes(List<JobAttribute> jobAttributeList,
-            String currentCompanyId, Job job)
+    private void saveAttributes(List<JobAttribute> jobAttributeList, String currentCompanyId,
+            Job job)
     {
-        AddJobAttributeThread thread = new AddJobAttributeThread(
-                ((JobImpl) job).getUuid(), currentCompanyId);
+        AddJobAttributeThread thread = new AddJobAttributeThread(((JobImpl) job).getUuid(),
+                currentCompanyId);
         thread.setJobAttributes(jobAttributeList);
         thread.createJobAttributes();
     }
 
-    private List<JobAttribute> getJobAttributes(String attributeString,
-            BasicL10nProfile l10Profile)
+    private List<JobAttribute> getJobAttributes(String attributeString, BasicL10nProfile l10Profile)
     {
         List<JobAttribute> jobAttributeList = new ArrayList<JobAttribute>();
 
@@ -1025,15 +972,13 @@ public class CreateJobsMainHandler extends PageHandler
                 {
                     String attributeId = ele.substring(ele.indexOf(",.,") + 3,
                             ele.lastIndexOf(",.,"));
-                    String attributeValue = ele.substring(ele
-                            .lastIndexOf(",.,") + 3);
+                    String attributeValue = ele.substring(ele.lastIndexOf(",.,") + 3);
 
                     Attribute attribute = HibernateUtil.get(Attribute.class,
                             Long.parseLong(attributeId));
                     JobAttribute jobAttribute = new JobAttribute();
                     jobAttribute.setAttribute(attribute.getCloneAttribute());
-                    if (attribute != null
-                            && StringUtils.isNotEmpty(attributeValue))
+                    if (attribute != null && StringUtils.isNotEmpty(attributeValue))
                     {
                         Condition condition = attribute.getCondition();
                         if (condition instanceof TextCondition)
@@ -1042,20 +987,16 @@ public class CreateJobsMainHandler extends PageHandler
                         }
                         else if (condition instanceof IntCondition)
                         {
-                            jobAttribute.setIntegerValue(Integer
-                                    .parseInt(attributeValue));
+                            jobAttribute.setIntegerValue(Integer.parseInt(attributeValue));
                         }
                         else if (condition instanceof FloatCondition)
                         {
-                            jobAttribute.setFloatValue(Float
-                                    .parseFloat(attributeValue));
+                            jobAttribute.setFloatValue(Float.parseFloat(attributeValue));
                         }
                         else if (condition instanceof DateCondition)
                         {
-                            SimpleDateFormat sdf = new SimpleDateFormat(
-                                    DateCondition.FORMAT);
-                            jobAttribute
-                                    .setDateValue(sdf.parse(attributeValue));
+                            SimpleDateFormat sdf = new SimpleDateFormat(DateCondition.FORMAT);
+                            jobAttribute.setDateValue(sdf.parse(attributeValue));
                         }
                         else if (condition instanceof ListCondition)
                         {
@@ -1074,8 +1015,8 @@ public class CreateJobsMainHandler extends PageHandler
         }
         else
         {
-            List<Attribute> attsList = l10Profile.getProject()
-                    .getAttributeSet().getAttributeAsList();
+            List<Attribute> attsList = l10Profile.getProject().getAttributeSet()
+                    .getAttributeAsList();
             for (Attribute att : attsList)
             {
                 JobAttribute jobAttribute = new JobAttribute();
@@ -1102,11 +1043,10 @@ public class CreateJobsMainHandler extends PageHandler
         {
             GlobalSightLocale gsl = (GlobalSightLocale) localeList.get(i);
             sb.append("<div class='locale'>");
-            sb.append("<input type='checkbox' name='targetLocale' value='"
-                    + gsl.getId() + "' checked='true'>&nbsp;");
+            sb.append("<input type='checkbox' name='targetLocale' value='" + gsl.getId()
+                    + "' checked='true'>&nbsp;");
             sb.append(gsl.getLanguage() + "_" + gsl.getCountry() + " ("
-                    + gsl.getDisplayLanguage(locale) + "_"
-                    + gsl.getDisplayCountry(locale) + ")");
+                    + gsl.getDisplayLanguage(locale) + "_" + gsl.getDisplayCountry(locale) + ")");
             sb.append("</div>");
         }
         return sb.toString();
@@ -1120,13 +1060,12 @@ public class CreateJobsMainHandler extends PageHandler
      * @param parameterName
      * @param folderPath
      */
-    private void saveBaseFolder(String userId, String parameterName,
-            String folderPath)
+    private void saveBaseFolder(String userId, String parameterName, String folderPath)
     {
         try
         {
-            UserParameter up = ServerProxy.getUserParameterManager()
-                    .getUserParameter(userId, parameterName);
+            UserParameter up = ServerProxy.getUserParameterManager().getUserParameter(userId,
+                    parameterName);
             if (up == null)
             {
                 up = new UserParameterImpl(userId, parameterName, folderPath);
@@ -1157,8 +1096,8 @@ public class CreateJobsMainHandler extends PageHandler
         {
             if (userId != null)
             {
-                UserParameter up = ServerProxy.getUserParameterManager()
-                        .getUserParameter(userId, parameterName);
+                UserParameter up = ServerProxy.getUserParameterManager().getUserParameter(userId,
+                        parameterName);
                 if (up != null)
                 {
                     return up.getValue();
@@ -1187,19 +1126,18 @@ public class CreateJobsMainHandler extends PageHandler
      * @throws FileNotFoundException
      * @throws Exception
      */
-    private void initDescAndFileProfile(List<String> descList,
-            List<String> fpIdList, String[] filePaths,
-            String[] l10nAndfileProfiles, BasicL10nProfile blp,
-            String tmpFolderName, Job job, String[] isSwitched,
-            List<File> sourceFilesList, List<FileProfile> fileProfileList)
-            throws FileNotFoundException, Exception
+    private void initDescAndFileProfile(List<String> descList, List<String> fpIdList,
+            String[] filePaths, String[] l10nAndfileProfiles, BasicL10nProfile blp,
+            String tmpFolderName, Job job, String[] isSwitched, List<File> sourceFilesList,
+            List<FileProfile> fileProfileList) throws FileNotFoundException, Exception
     {
         for (int i = 0; i < filePaths.length; i++)
         {
             String filePath = convertFilePath(filePaths[i]);
-            if(filePath.contains(tmpFolderName))
+            if (filePath.contains(tmpFolderName))
             {
-            	filePath = filePath.substring(filePath.indexOf(tmpFolderName) + tmpFolderName.length());
+                filePath = filePath
+                        .substring(filePath.indexOf(tmpFolderName) + tmpFolderName.length());
             }
             String fileProfileId = l10nAndfileProfiles[i].split(",")[1];
 
@@ -1208,13 +1146,12 @@ public class CreateJobsMainHandler extends PageHandler
             if (filePath.toLowerCase().endsWith(".xlz"))
             {
                 fileProfileId = String.valueOf(fp.getReferenceFP());
-                fp = ServerProxy
-                        .getFileProfilePersistenceManager()
+                fp = ServerProxy.getFileProfilePersistenceManager()
                         .getFileProfileById(Long.parseLong(fileProfileId), true);
             }
 
-            List<String> desc = copyTmpFilesToProperDirectory(blp, filePath,
-                    tmpFolderName, job, fp, isSwitched[i], sourceFilesList);
+            List<String> desc = copyTmpFilesToProperDirectory(blp, filePath, tmpFolderName, job, fp,
+                    isSwitched[i], sourceFilesList);
             descList.addAll(desc);
             for (int j = 0; j < desc.size(); j++)
             {
@@ -1236,8 +1173,7 @@ public class CreateJobsMainHandler extends PageHandler
      * @throws GeneralException
      */
     private String initTargetLocale(String[] targetLocales)
-            throws LocaleManagerException, NumberFormatException,
-            RemoteException, GeneralException
+            throws LocaleManagerException, NumberFormatException, RemoteException, GeneralException
     {
         StringBuffer targetLocaleString = new StringBuffer();
         for (int i = 0; i < targetLocales.length; i++)
@@ -1286,17 +1222,15 @@ public class CreateJobsMainHandler extends PageHandler
      * @throws FileNotFoundException
      * @throws Exception
      */
-    private List<String> copyTmpFilesToProperDirectory(
-            BasicL10nProfile basicL10nProfile, String filePath,
-            String tmpFolderName, Job job, FileProfile fp, String isSwitched,
+    private List<String> copyTmpFilesToProperDirectory(BasicL10nProfile basicL10nProfile,
+            String filePath, String tmpFolderName, Job job, FileProfile fp, String isSwitched,
             List<File> sourceFilesList) throws FileNotFoundException, Exception
     {
         try
         {
             List<String> ret = new ArrayList<String>();
 
-            String sourceLocaleName = basicL10nProfile.getSourceLocale()
-                    .getLocaleCode();
+            String sourceLocaleName = basicL10nProfile.getSourceLocale().getLocaleCode();
 
             File saveDir = AmbFileStoragePathUtils.getCxeDocDir();
             String currentLocation = "";
@@ -1308,38 +1242,29 @@ public class CreateJobsMainHandler extends PageHandler
                 if (currentLocation.contains(TMP_FOLDER_NAME))
                 {
                     // the file is under createjob_tmp folder
-                    String baseTmpDir = saveDir + File.separator
-                            + TMP_FOLDER_NAME;
-                    filePath = filePath.substring(filePath.indexOf(baseTmpDir)
-                            + baseTmpDir.length());
+                    String baseTmpDir = saveDir + File.separator + TMP_FOLDER_NAME;
+                    filePath = filePath
+                            .substring(filePath.indexOf(baseTmpDir) + baseTmpDir.length());
                     if (filePath.startsWith(File.separator))
                     {
                         filePath = filePath.substring(1);
                     }
-                    tmpFolderName = filePath.substring(0,
-                            filePath.indexOf(File.separator));
-                    filePath = filePath.substring(filePath
-                            .indexOf(File.separator) + 1);
-                    destinationLocation = sourceLocaleName + File.separator
-                            + job.getId() + File.separator + filePath;
+                    tmpFolderName = filePath.substring(0, filePath.indexOf(File.separator));
+                    filePath = filePath.substring(filePath.indexOf(File.separator) + 1);
+                    destinationLocation = sourceLocaleName + File.separator + job.getId()
+                            + File.separator + filePath;
                     // find old attachment path, and delete unused attachment
                     // files
-                    String oldAttachmentPath = AmbFileStoragePathUtils
-                            .getFileStorageDirPath()
-                            + File.separator
-                            + "GlobalSight"
-                            + File.separator
-                            + "CommentReference"
-                            + File.separator
-                            + "tmp"
-                            + File.separator + tmpFolderName;
+                    String oldAttachmentPath = AmbFileStoragePathUtils.getFileStorageDirPath()
+                            + File.separator + "GlobalSight" + File.separator + "CommentReference"
+                            + File.separator + "tmp" + File.separator + tmpFolderName;
                     FileUtil.deleteFile(new File(oldAttachmentPath));
                 }
                 else
                 {
                     // the file is under locale folder
-                    filePath = filePath.substring(filePath.indexOf(saveDir
-                            .getPath()) + saveDir.getPath().length());
+                    filePath = filePath.substring(
+                            filePath.indexOf(saveDir.getPath()) + saveDir.getPath().length());
                     if (filePath.startsWith(File.separator))
                     {
                         filePath = filePath.substring(1);
@@ -1354,11 +1279,9 @@ public class CreateJobsMainHandler extends PageHandler
                 {
                     filePath = filePath.substring(filePath.indexOf(":") + 1);
                 }
-                currentLocation = saveDir + File.separator + TMP_FOLDER_NAME
-                        + File.separator + tmpFolderName + File.separator
-                        + filePath;
-                destinationLocation = sourceLocaleName + File.separator
-                        + job.getId() + filePath;
+                currentLocation = saveDir + File.separator + TMP_FOLDER_NAME + File.separator
+                        + tmpFolderName + File.separator + filePath;
+                destinationLocation = sourceLocaleName + File.separator + job.getId() + filePath;
             }
 
             // if the source file is in tmp folder,
@@ -1366,8 +1289,7 @@ public class CreateJobsMainHandler extends PageHandler
             if (currentLocation.contains(TMP_FOLDER_NAME))
             {
                 File sourceFile = new File(currentLocation);
-                File descFile = new File(saveDir + File.separator
-                        + destinationLocation);
+                File descFile = new File(saveDir + File.separator + destinationLocation);
                 FileUtil.copyFile(sourceFile, descFile);
 
                 sourceFilesList.add(sourceFile);
@@ -1376,15 +1298,14 @@ public class CreateJobsMainHandler extends PageHandler
             // FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
             // .getFileProfileById(Long.parseLong(fileProfileId), true);
 
-            if (fp.getKnownFormatTypeId() == XliffFileUtil.KNOWN_FILE_FORMAT_XLIFF
-                    && ServerProxy.getFileProfilePersistenceManager()
-                            .isXlzReferenceXlfFileProfile(fp.getName()))
+            if (fp.getKnownFormatTypeId() == XliffFileUtil.KNOWN_FILE_FORMAT_XLIFF && ServerProxy
+                    .getFileProfilePersistenceManager().isXlzReferenceXlfFileProfile(fp.getName()))
             {
                 String zipDir = destinationLocation.substring(0,
                         destinationLocation.lastIndexOf("."));
-                ArrayList<String> zipFiles = ZipIt.unpackZipPackage(saveDir
-                        + File.separator + destinationLocation, saveDir
-                        + File.separator + zipDir);
+                ArrayList<String> zipFiles = ZipIt.unpackZipPackage(
+                        saveDir + File.separator + destinationLocation,
+                        saveDir + File.separator + zipDir);
                 for (String file : zipFiles)
                 {
                     String tmpFilename = zipDir + File.separator + file;
@@ -1422,8 +1343,7 @@ public class CreateJobsMainHandler extends PageHandler
         Hashtable<String, FileProfile> subFiles = new Hashtable<String, FileProfile>();
         String tmp = "";
         XliffFileUtil.processMultipleFileTags(subFiles, p_file, p_fileProfile);
-        for (Iterator<String> iterator = subFiles.keySet().iterator(); iterator
-                .hasNext();)
+        for (Iterator<String> iterator = subFiles.keySet().iterator(); iterator.hasNext();)
         {
             tmp = iterator.next();
             p_fileList.add(tmp);
@@ -1439,8 +1359,8 @@ public class CreateJobsMainHandler extends PageHandler
      * @param writer
      * @throws IOException
      */
-    private void initFileProfileSelect(List<?> fileProfileList,
-            PrintWriter writer, long l10nId) throws IOException
+    private void initFileProfileSelect(List<?> fileProfileList, PrintWriter writer, long l10nId)
+            throws IOException
     {
         if (fileProfileList.size() == 1)
         {
@@ -1462,8 +1382,7 @@ public class CreateJobsMainHandler extends PageHandler
         }
         else
         {
-            int enableCount = countAvailableOptionCounts(fileProfileList,
-                    l10nId);
+            int enableCount = countAvailableOptionCounts(fileProfileList, l10nId);
             for (int i = 0; i < fileProfileList.size(); i++)
             {
                 FileProfileImpl fp = (FileProfileImpl) fileProfileList.get(i);
@@ -1535,8 +1454,8 @@ public class CreateJobsMainHandler extends PageHandler
         {
             option.append(replaceSpecialCharacters(fp.getDescription()));
         }
-        option.append("\" value=\"").append(fp.getL10nProfileId()).append(",")
-                .append(fp.getId()).append("\"");
+        option.append("\" value=\"").append(fp.getL10nProfileId()).append(",").append(fp.getId())
+                .append("\"");
         if (flag != null)
         {
             option.append(" ").append(flag).append("=\"true\"");
@@ -1559,14 +1478,15 @@ public class CreateJobsMainHandler extends PageHandler
         setLableToJsp(request, bundle, "lb_file_profile");// file profile
         setLableToJsp(request, bundle, "lb_target_locales");// target locales
         setLableToJsp(request, bundle, "lb_create_job");// create job
-        setLableToJsp(request, bundle, "lb_create_job_without_java");// create job(zip only)
+        setLableToJsp(request, bundle, "lb_create_job_without_java");// create
+                                                                     // job(zip
+                                                                     // only)
         setLableToJsp(request, bundle, "lb_add_files");// add files
         setLableToJsp(request, bundle, "lb_browse");// Browse
         setLableToJsp(request, bundle, "lb_cancel");// Cancel
         setLableToJsp(request, bundle, "jsmsg_customer_job_name");
         setLableToJsp(request, bundle, "jsmsg_invalid_job_name_1");
-        setLableToJsp(request, bundle,
-                "jsmsg_choose_file_profiles_for_all_files");
+        setLableToJsp(request, bundle, "jsmsg_choose_file_profiles_for_all_files");
         setLableToJsp(request, bundle, "lb_import_select_target_locale");
         setLableToJsp(request, bundle, "jsmsg_customer_job_name");
         setLableToJsp(request, bundle, "jsmsg_customer_comment");
@@ -1607,8 +1527,7 @@ public class CreateJobsMainHandler extends PageHandler
      * @param request
      * @param bundle
      */
-    private void setLableToJsp(HttpServletRequest request,
-            ResourceBundle bundle, String msg)
+    private void setLableToJsp(HttpServletRequest request, ResourceBundle bundle, String msg)
     {
         String label = bundle.getString(msg);
         request.setAttribute(msg, label);
@@ -1635,14 +1554,12 @@ public class CreateJobsMainHandler extends PageHandler
      * @param user
      * @param companyId
      */
-    private void sendUploadCompletedEmail(String[] fileNames,
-            List<String> fpIds, String jobName, String jobComment,
-            Date uploadDate, User user, String companyId, Project project)
+    private void sendUploadCompletedEmail(String[] fileNames, List<String> fpIds, String jobName,
+            String jobComment, Date uploadDate, User user, String companyId, Project project)
     {
         try
         {
-            boolean systemNotificationEnabled = EventNotificationHelper
-                    .systemNotificationEnabled();
+            boolean systemNotificationEnabled = EventNotificationHelper.systemNotificationEnabled();
             if (!systemNotificationEnabled)
             {
                 return;
@@ -1657,28 +1574,27 @@ public class CreateJobsMainHandler extends PageHandler
             messageArguments[1] = jobName;
             messageArguments[2] = jobComment;
             messageArguments[3] = "Project: " + project.getName();
-            messageArguments[4] = user.getUserName() + "(" + user.getEmail()
-                    + ")";
+            messageArguments[4] = user.getUserName() + "(" + user.getEmail() + ")";
             messageArguments[5] = this.getFileProfileForEmail(fileNames, fpIds);
             messageArguments[6] = user.getSpecialNameForEmail();
 
             // send mail to uploader
-			UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
-			UserParameter up = uppml.getUserParameter(user.getUserId(),
-					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
-			if (up != null && up.getIntValue() == 1) {
-				ServerProxy.getMailer().sendMailFromAdmin(user,
-						messageArguments,
-						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
-						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
-						companyId);
-			}
+            UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
+            UserParameter up = uppml.getUserParameter(user.getUserId(),
+                    UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
+            if (up != null && up.getIntValue() == 1)
+            {
+                ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
+                        MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
+                        MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE, companyId);
+            }
             // get the PM address
             User pm = UserHandlerHelper.getUser(project.getProjectManagerId());
             if (pm == null)
             {
-                logger.error("Can not get project manager for DesktopIcon upload notification by project "
-                        + project.getName());
+                logger.error(
+                        "Can not get project manager for DesktopIcon upload notification by project "
+                                + project.getName());
                 return;
             }
             else if (pm.getUserId().equals(user.getUserId()))
@@ -1689,14 +1605,13 @@ public class CreateJobsMainHandler extends PageHandler
             }
             messageArguments[6] = pm.getSpecialNameForEmail();
 
-		    up = uppml.getUserParameter(pm.getUserId(),
-					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
-			if (up != null && up.getIntValue() == 1) {
-				ServerProxy.getMailer().sendMailFromAdmin(pm, messageArguments,
-						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
-						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
-						companyId);
-			}
+            up = uppml.getUserParameter(pm.getUserId(), UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
+            if (up != null && up.getIntValue() == 1)
+            {
+                ServerProxy.getMailer().sendMailFromAdmin(pm, messageArguments,
+                        MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
+                        MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE, companyId);
+            }
         }
         catch (Exception e)
         {
@@ -1705,8 +1620,8 @@ public class CreateJobsMainHandler extends PageHandler
     }
 
     private String getFileProfileForEmail(String[] fileNames, List<String> fpIds)
-            throws FileProfileEntityException, NumberFormatException,
-            RemoteException, GeneralException, NamingException
+            throws FileProfileEntityException, NumberFormatException, RemoteException,
+            GeneralException, NamingException
     {
         StringBuffer sb = new StringBuffer();
         int filesLength = fileNames.length;
@@ -1716,11 +1631,10 @@ public class CreateJobsMainHandler extends PageHandler
         }
         for (int i = 0; i < filesLength; i++)
         {
-            sb.append(fileNames[i])
-                    .append("  (")
+            sb.append(fileNames[i]).append("  (")
                     .append(ServerProxy.getFileProfilePersistenceManager()
-                            .readFileProfile(Long.parseLong(fpIds.get(i)))
-                            .getName()).append(")");
+                            .readFileProfile(Long.parseLong(fpIds.get(i))).getName())
+                    .append(")");
             if (i != filesLength - 1)
             {
                 sb.append("\r\n");
@@ -1772,8 +1686,7 @@ public class CreateJobsMainHandler extends PageHandler
     {
         if (path != null)
         {
-            return path.replace("\\", File.separator).replace("/",
-                    File.separator);
+            return path.replace("\\", File.separator).replace("/", File.separator);
         }
         else
         {
@@ -1795,27 +1708,24 @@ public class CreateJobsMainHandler extends PageHandler
         try
         {
             long l10nProfileId = p_fp.getL10nProfileId();
-            L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfile(
-                    l10nProfileId);
+            L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfile(l10nProfileId);
             p = lp.getProject();
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Failed to get the project that file profile "
-                            + p_fp.toString() + " is associated with.", e);
+            logger.error("Failed to get the project that file profile " + p_fp.toString()
+                    + " is associated with.", e);
         }
         return p;
     }
 
     private String replaceSpecialCharacters(String input)
     {
-        return input.replace("<", "&lt;").replace(">", "&gt;")
-                .replace("\"", "&quot;");
+        return input.replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
     }
-    
-    private List<File> uploadSelectedFile(HttpServletRequest request,
-            String tempFolder, String type) throws Exception
+
+    private List<File> uploadSelectedFile(HttpServletRequest request, String tempFolder,
+            String type) throws Exception
     {
         File parentFile = null;
         List<String> fileNames = new ArrayList<String>();
@@ -1830,283 +1740,280 @@ public class CreateJobsMainHandler extends PageHandler
         else if (type.equals("1"))// comment file
         {
             File saveDir = AmbFileStoragePathUtils.getCommentReferenceDir();
-            parentFile = new File(saveDir + File.separator + "tmp"
-                    + File.separator + tempFolder);
+            parentFile = new File(saveDir + File.separator + "tmp" + File.separator + tempFolder);
             parentFile.mkdirs();
         }
 
         fileNames = uploadFile(request, parentFile);
-		for (String fileName : fileNames)
+        for (String fileName : fileNames)
         {
-        	File uploadedFile = new File(fileName); 
-        	uploadedFiles.add(uploadedFile);
+            File uploadedFile = new File(fileName);
+            uploadedFiles.add(uploadedFile);
         }
         return uploadedFiles;
     }
 
-	private List<String> uploadFile(HttpServletRequest p_request,
-			File parentFile) throws GlossaryException, IOException
-	{
-		byte[] inBuf = new byte[MAX_LINE_LENGTH];
-		int bytesRead;
-		ServletInputStream in;
-		String contentType;
-		String boundary;
-		String filePath = "";
-		String path = parentFile.getPath() + File.separator;
-		List<String> filePaths = new ArrayList<String>();
-		File file = new File(path);   
-	    Set<String> uploadedFileNames = new HashSet<String>();
-	    for (File f : file.listFiles()) {
-	    	uploadedFileNames.add(f.getName());
-	    }
-		
-		// Let's make sure that we have the right type of content
-		//
-		contentType = p_request.getContentType();
-		if (contentType == null
-				|| !contentType.toLowerCase().startsWith("multipart/form-data"))
-		{
-			String[] arg = { "form did not use ENCTYPE=multipart/form-data but `"
-					+ contentType + "'" };
-		
-			throw new GlossaryException(
-					GlossaryException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
-		}
-		
-		// Extract the boundary string in this request. The
-		// boundary string is part of the content type string
-		//
-		int bi = contentType.indexOf("boundary=");
-		if (bi == -1)
-		{
-			String[] arg = { "no boundary string found in request" };
+    private List<String> uploadFile(HttpServletRequest p_request, File parentFile)
+            throws GlossaryException, IOException
+    {
+        byte[] inBuf = new byte[MAX_LINE_LENGTH];
+        int bytesRead;
+        ServletInputStream in;
+        String contentType;
+        String boundary;
+        String filePath = "";
+        String path = parentFile.getPath() + File.separator;
+        List<String> filePaths = new ArrayList<String>();
+        File file = new File(path);
+        Set<String> uploadedFileNames = new HashSet<String>();
+        for (File f : file.listFiles())
+        {
+            uploadedFileNames.add(f.getName());
+        }
 
-			throw new GlossaryException(
-					GlossaryException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
-		}
-		else
-		{
-			// 9 := len("boundary=")
-			boundary = contentType.substring(bi + 9);
+        // Let's make sure that we have the right type of content
+        //
+        contentType = p_request.getContentType();
+        if (contentType == null || !contentType.toLowerCase().startsWith("multipart/form-data"))
+        {
+            String[] arg =
+            { "form did not use ENCTYPE=multipart/form-data but `" + contentType + "'" };
 
-			// The real boundary has additional two dashes in
-			// front
-			//
-			boundary = "--" + boundary;
-		}
-		
-		in = p_request.getInputStream();
-		bytesRead = in.readLine(inBuf, 0, inBuf.length);
-		
-		if (bytesRead < 3)
-		{
-			String[] arg = { "incomplete request (not enough data)" };
-		
-			// Not enough content was send as part of the post
-			throw new GlossaryException(
-					GlossaryException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
-		}
-		
-		while (bytesRead != -1)
-		{
-			String lineRead = new String(inBuf, 0, bytesRead, "utf-8");
-			if (lineRead.startsWith("Content-Disposition: form-data; name=\""))
-			{
-				if (lineRead.indexOf("filename=\"") != -1)
-				{		
-					// Get file name
-					String fileName = getFilename(lineRead.substring(0, lineRead.length() - 2));
-					
-					// Get content type line
-					bytesRead = in.readLine(inBuf, 0, inBuf.length);
-					lineRead = new String(inBuf, 0, bytesRead - 2, "utf-8");
-		
-					// Read and ignore the blank line
-					bytesRead = in.readLine(inBuf, 0, inBuf.length);
-		
-					// Create a temporary file to store the
-					// contents in it for now. We might not have
-					// additional information, such as TUV id for
-					// building the complete file path. We will
-					// save the contents in this file for now and
-					// finally rename it to correct file name.
-					//
-					
-					// if a file with same name has been uploaded, ignore this
-					if (uploadedFileNames.contains(fileName)) {
-						continue;
-					}
+            throw new GlossaryException(GlossaryException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
+        }
 
-		        	filePath = path + fileName;
-			        filePaths.add(filePath);
-					File m_tempFile = new File(filePath);
-					FileOutputStream fos = new FileOutputStream(m_tempFile);
-					BufferedOutputStream bos = new BufferedOutputStream(fos,
-							MAX_LINE_LENGTH * 4);
+        // Extract the boundary string in this request. The
+        // boundary string is part of the content type string
+        //
+        int bi = contentType.indexOf("boundary=");
+        if (bi == -1)
+        {
+            String[] arg =
+            { "no boundary string found in request" };
 
-					// Read through the file contents and write
-					// it out to a local temp file.
-					boolean writeRN = false;
-					while ((bytesRead = in.readLine(inBuf, 0, inBuf.length)) != -1)
-					{
-						// Let's first check if we are already on
-						// boundary line
-						if (bytesRead > 2 && inBuf[0] == '-' && inBuf[1] == '-')
-						{
-							lineRead = new String(inBuf, 0, bytesRead, "utf-8");
-							if (lineRead.startsWith(boundary))
-							{
-								break;
-							}
-						}
-		
-						// Write out carriage-return, new-line
-						// pair which might have been left over
-						// from last write.
-						//
-						if (writeRN)
-						{
-							bos.write(new byte[] { (byte) '\r', (byte) '\n' });
-							writeRN = false;
-						}
-		
-						// The ServletInputStream.readline() adds
-						// "\r\n" bytes for the last line of the
-						// file contents. If we find these pair
-						// as the last bytes we need to delay
-						// writing it until the next go, since it
-						// could very well be the last line of
-						// file content.
-						//
-						if (bytesRead > 2 && inBuf[bytesRead - 2] == '\r'
-								&& inBuf[bytesRead - 1] == '\n')
-						{
-							bos.write(inBuf, 0, bytesRead - 2);
-							writeRN = true;
-						}
-						else
-						{
-							bos.write(inBuf, 0, bytesRead);
-						}
-					}
-		
-					bos.flush();
-					bos.close();
-					fos.close();
-				}
-				else
-				{
-					// This is the field part
-		
-					// First get the field name
-		
-//					int start = lineRead.indexOf("name=\"");
-//					int end = lineRead.indexOf("\"", start + 7);
-//					String fieldName = lineRead.substring(start + 6, end);
-		
-					// Read and ignore the blank line
-					bytesRead = in.readLine(inBuf, 0, inBuf.length);
-		
-					// String Buffer to keep the field value
-					//
-					StringBuffer fieldValue = new StringBuffer();
-		
-					boolean writeRN = false;
-					while ((bytesRead = in.readLine(inBuf, 0, inBuf.length)) != -1)
-					{
-						lineRead = new String(inBuf, 0, bytesRead, "utf-8");
-		
-						// Let's first check if we are already on
-						// boundary line
-						//
-						if (bytesRead > 2 && inBuf[0] == '-' && inBuf[1] == '-')
-						{
-							if (lineRead.startsWith(boundary))
-							{
-								break;
-							}
-						}
-		
-						// Write out carriage-return, new-line
-						// pair which might have been left over
-						// from last write.
-						//
-						if (writeRN)
-						{
-							fieldValue.append("\r\n");
-							writeRN = false;
-						}
-		
-						// The ServletInputStream.readline() adds
-						// "\r\n" bytes for the last line of the
-						// field value. If we find these pair as
-						// the last bytes we need to delay
-						// writing it until the next go, since it
-						// could very well be the last line of
-						// field value.
-						//
-						if (bytesRead > 2 && inBuf[bytesRead - 2] == '\r'
-								&& inBuf[bytesRead - 1] == '\n')
-						{
-							fieldValue.append(lineRead.substring(0, lineRead
-									.length() - 2));
-							writeRN = true;
-						}
-						else
-						{
-							fieldValue.append(lineRead);
-						}
-					}
-				}
-			}
-		
-			bytesRead = in.readLine(inBuf, 0, inBuf.length);
-		}
-		return filePaths;
-	}
+            throw new GlossaryException(GlossaryException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
+        }
+        else
+        {
+            // 9 := len("boundary=")
+            boundary = contentType.substring(bi + 9);
 
-	private String getFilename(String p_filenameLine)
-	{
-		int start = 0;
+            // The real boundary has additional two dashes in
+            // front
+            //
+            boundary = "--" + boundary;
+        }
 
-		if (p_filenameLine != null
-				&& (start = p_filenameLine.indexOf("filename=\"")) != -1)
-		{
-			String filepath = p_filenameLine.substring(start + 10,
-					p_filenameLine.length() - 1);
+        in = p_request.getInputStream();
+        bytesRead = in.readLine(inBuf, 0, inBuf.length);
 
-			// Handle Windows v/s Unix file path
-			if ((start = filepath.lastIndexOf('\\')) > -1)
-			{
-				return filepath.substring(start + 1);
-			}
-			else if ((start = filepath.lastIndexOf('/')) > -1)
-			{
-				return  filepath.substring(start + 1);
-			}
-			else
-			{
-				return  filepath;
-			}
-		}
-		return null;
-	}
-	
-	
+        if (bytesRead < 3)
+        {
+            String[] arg =
+            { "incomplete request (not enough data)" };
+
+            // Not enough content was send as part of the post
+            throw new GlossaryException(GlossaryException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
+        }
+
+        while (bytesRead != -1)
+        {
+            String lineRead = new String(inBuf, 0, bytesRead, "utf-8");
+            if (lineRead.startsWith("Content-Disposition: form-data; name=\""))
+            {
+                if (lineRead.indexOf("filename=\"") != -1)
+                {
+                    // Get file name
+                    String fileName = getFilename(lineRead.substring(0, lineRead.length() - 2));
+
+                    // Get content type line
+                    bytesRead = in.readLine(inBuf, 0, inBuf.length);
+                    lineRead = new String(inBuf, 0, bytesRead - 2, "utf-8");
+
+                    // Read and ignore the blank line
+                    bytesRead = in.readLine(inBuf, 0, inBuf.length);
+
+                    // Create a temporary file to store the
+                    // contents in it for now. We might not have
+                    // additional information, such as TUV id for
+                    // building the complete file path. We will
+                    // save the contents in this file for now and
+                    // finally rename it to correct file name.
+                    //
+
+                    // if a file with same name has been uploaded, ignore this
+                    if (uploadedFileNames.contains(fileName))
+                    {
+                        continue;
+                    }
+
+                    filePath = path + fileName;
+                    filePaths.add(filePath);
+                    File m_tempFile = new File(filePath);
+                    FileOutputStream fos = new FileOutputStream(m_tempFile);
+                    BufferedOutputStream bos = new BufferedOutputStream(fos, MAX_LINE_LENGTH * 4);
+
+                    // Read through the file contents and write
+                    // it out to a local temp file.
+                    boolean writeRN = false;
+                    while ((bytesRead = in.readLine(inBuf, 0, inBuf.length)) != -1)
+                    {
+                        // Let's first check if we are already on
+                        // boundary line
+                        if (bytesRead > 2 && inBuf[0] == '-' && inBuf[1] == '-')
+                        {
+                            lineRead = new String(inBuf, 0, bytesRead, "utf-8");
+                            if (lineRead.startsWith(boundary))
+                            {
+                                break;
+                            }
+                        }
+
+                        // Write out carriage-return, new-line
+                        // pair which might have been left over
+                        // from last write.
+                        //
+                        if (writeRN)
+                        {
+                            bos.write(new byte[]
+                            { (byte) '\r', (byte) '\n' });
+                            writeRN = false;
+                        }
+
+                        // The ServletInputStream.readline() adds
+                        // "\r\n" bytes for the last line of the
+                        // file contents. If we find these pair
+                        // as the last bytes we need to delay
+                        // writing it until the next go, since it
+                        // could very well be the last line of
+                        // file content.
+                        //
+                        // since GBS-3830, do not write \r\n in the last line
+                        if (bytesRead >= 2 && inBuf[bytesRead - 2] == '\r'
+                                && inBuf[bytesRead - 1] == '\n')
+                        {
+                            bos.write(inBuf, 0, bytesRead - 2);
+                            writeRN = true;
+                        }
+                        else
+                        {
+                            bos.write(inBuf, 0, bytesRead);
+                        }
+                    }
+
+                    bos.flush();
+                    bos.close();
+                    fos.close();
+                }
+                else
+                {
+                    // This is the field part
+
+                    // First get the field name
+
+                    // int start = lineRead.indexOf("name=\"");
+                    // int end = lineRead.indexOf("\"", start + 7);
+                    // String fieldName = lineRead.substring(start + 6, end);
+
+                    // Read and ignore the blank line
+                    bytesRead = in.readLine(inBuf, 0, inBuf.length);
+
+                    // String Buffer to keep the field value
+                    //
+                    StringBuffer fieldValue = new StringBuffer();
+
+                    boolean writeRN = false;
+                    while ((bytesRead = in.readLine(inBuf, 0, inBuf.length)) != -1)
+                    {
+                        lineRead = new String(inBuf, 0, bytesRead, "utf-8");
+
+                        // Let's first check if we are already on
+                        // boundary line
+                        //
+                        if (bytesRead > 2 && inBuf[0] == '-' && inBuf[1] == '-')
+                        {
+                            if (lineRead.startsWith(boundary))
+                            {
+                                break;
+                            }
+                        }
+
+                        // Write out carriage-return, new-line
+                        // pair which might have been left over
+                        // from last write.
+                        //
+                        if (writeRN)
+                        {
+                            fieldValue.append("\r\n");
+                            writeRN = false;
+                        }
+
+                        // The ServletInputStream.readline() adds
+                        // "\r\n" bytes for the last line of the
+                        // field value. If we find these pair as
+                        // the last bytes we need to delay
+                        // writing it until the next go, since it
+                        // could very well be the last line of
+                        // field value.
+                        //
+                        if (bytesRead > 2 && inBuf[bytesRead - 2] == '\r'
+                                && inBuf[bytesRead - 1] == '\n')
+                        {
+                            fieldValue.append(lineRead.substring(0, lineRead.length() - 2));
+                            writeRN = true;
+                        }
+                        else
+                        {
+                            fieldValue.append(lineRead);
+                        }
+                    }
+                }
+            }
+
+            bytesRead = in.readLine(inBuf, 0, inBuf.length);
+        }
+        return filePaths;
+    }
+
+    private String getFilename(String p_filenameLine)
+    {
+        int start = 0;
+
+        if (p_filenameLine != null && (start = p_filenameLine.indexOf("filename=\"")) != -1)
+        {
+            String filepath = p_filenameLine.substring(start + 10, p_filenameLine.length() - 1);
+
+            // Handle Windows v/s Unix file path
+            if ((start = filepath.lastIndexOf('\\')) > -1)
+            {
+                return filepath.substring(start + 1);
+            }
+            else if ((start = filepath.lastIndexOf('/')) > -1)
+            {
+                return filepath.substring(start + 1);
+            }
+            else
+            {
+                return filepath;
+            }
+        }
+        return null;
+    }
+
     /**
      * Add a progress bar for each files within a zip file.
+     * 
      * @param file
-     * @throws Exception 
+     * @throws Exception
      */
     private String addZipFile(File file) throws Exception
     {
         String zipFileFullPath = file.getPath();
-        String zipFilePath = zipFileFullPath.substring(0,
-                zipFileFullPath.indexOf(file.getName()));
-        
-        List<net.lingala.zip4j.model.FileHeader> entriesInZip = CreateJobUtil.getFilesInZipFile(file);
-        
+        String zipFilePath = zipFileFullPath.substring(0, zipFileFullPath.indexOf(file.getName()));
+
+        List<net.lingala.zip4j.model.FileHeader> entriesInZip = CreateJobUtil
+                .getFilesInZipFile(file);
+
         StringBuffer ret = new StringBuffer("");
         for (net.lingala.zip4j.model.FileHeader entry : entriesInZip)
         {
@@ -2121,23 +2028,19 @@ public class CreateJobsMainHandler extends PageHandler
             String unzippedFileFullPath = zipFilePath
                     + file.getName().substring(0, file.getName().lastIndexOf(".")) + "_"
                     + CreateJobUtil.getFileExtension(file) + File.separator + zipEntryName;
-            // if zip file contains subfolders, entry name will contains "/" or "\"
+            // if zip file contains subfolders, entry name will contains "/" or
+            // "\"
             if (zipEntryName.indexOf("/") != -1)
             {
-                zipEntryName = zipEntryName.substring(zipEntryName
-                        .lastIndexOf("/") + 1);
+                zipEntryName = zipEntryName.substring(zipEntryName.lastIndexOf("/") + 1);
             }
             else if (zipEntryName.indexOf("\\") != -1)
             {
-                zipEntryName = zipEntryName.substring(zipEntryName
-                        .lastIndexOf("\\") + 1);
+                zipEntryName = zipEntryName.substring(zipEntryName.lastIndexOf("\\") + 1);
             }
             String id = CreateJobUtil.getFileId(unzippedFileFullPath);
-            ret.append("{id:'")
-                    .append(id)
-                    .append("',zipName:'")
-                    .append(file.getName().replace("'", "\\'"))
-                    .append("',path:'")
+            ret.append("{id:'").append(id).append("',zipName:'")
+                    .append(file.getName().replace("'", "\\'")).append("',path:'")
                     .append(unzippedFileFullPath.replace("\\", File.separator)
                             .replace("/", File.separator).replace("\\", "\\\\").replace("'", "\\'"))
                     .append("',name:'").append(zipEntryName.replace("'", "\\'")).append("',size:'")
@@ -2145,20 +2048,20 @@ public class CreateJobsMainHandler extends PageHandler
         }
         return ret.toString();
     }
-    
+
     /**
      * Add a progress bar for each files within a rar file.
+     * 
      * @param file
      */
     private String addRarFile(File file) throws Exception
     {
         String rarEntryName = null;
         String rarFileFullPath = file.getPath();
-        String rarFilePath = rarFileFullPath.substring(0,
-                rarFileFullPath.indexOf(file.getName()));
-        
+        String rarFilePath = rarFileFullPath.substring(0, rarFileFullPath.indexOf(file.getName()));
+
         List<FileHeader> entriesInRar = CreateJobUtil.getFilesInRarFile(file);
-        
+
         StringBuffer ret = new StringBuffer("");
         for (FileHeader header : entriesInRar)
         {
@@ -2180,23 +2083,19 @@ public class CreateJobsMainHandler extends PageHandler
             String unzippedFileFullPath = rarFilePath
                     + file.getName().substring(0, file.getName().lastIndexOf(".")) + "_"
                     + CreateJobUtil.getFileExtension(file) + File.separator + rarEntryName;
-            // if zip file contains subfolders, entry name will contains "/" or "\"
+            // if zip file contains subfolders, entry name will contains "/" or
+            // "\"
             if (rarEntryName.indexOf("/") != -1)
             {
-                rarEntryName = rarEntryName.substring(rarEntryName
-                        .lastIndexOf("/") + 1);
+                rarEntryName = rarEntryName.substring(rarEntryName.lastIndexOf("/") + 1);
             }
             else if (rarEntryName.indexOf("\\") != -1)
             {
-                rarEntryName = rarEntryName.substring(rarEntryName
-                        .lastIndexOf("\\") + 1);
+                rarEntryName = rarEntryName.substring(rarEntryName.lastIndexOf("\\") + 1);
             }
             String id = CreateJobUtil.getFileId(unzippedFileFullPath);
-            ret.append("{id:'")
-                    .append(id)
-                    .append("',zipName:'")
-                    .append(file.getName().replace("'", "\\'"))
-                    .append("',path:'")
+            ret.append("{id:'").append(id).append("',zipName:'")
+                    .append(file.getName().replace("'", "\\'")).append("',path:'")
                     .append(unzippedFileFullPath.replace("\\", File.separator)
                             .replace("/", File.separator).replace("\\", "\\\\").replace("'", "\\'"))
                     .append("',name:'").append(rarEntryName.replace("'", "\\'")).append("',size:'")
@@ -2204,11 +2103,12 @@ public class CreateJobsMainHandler extends PageHandler
         }
         return ret.toString();
     }
-    
+
     /**
      * Add a progress bar for each files within a 7z file.
+     * 
      * @param file
-     * @throws Exception 
+     * @throws Exception
      */
     private String addZip7zFile(File file) throws Exception
     {
@@ -2216,8 +2116,7 @@ public class CreateJobsMainHandler extends PageHandler
         String zip7zFilePath = zip7zFileFullPath.substring(0,
                 zip7zFileFullPath.indexOf(file.getName()));
 
-        List<SevenZArchiveEntry> entriesInZip7z = CreateJobUtil
-                .getFilesIn7zFile(file);
+        List<SevenZArchiveEntry> entriesInZip7z = CreateJobUtil.getFilesIn7zFile(file);
 
         StringBuffer ret = new StringBuffer("");
         for (SevenZArchiveEntry item : entriesInZip7z)
@@ -2237,24 +2136,18 @@ public class CreateJobsMainHandler extends PageHandler
             // "\"
             if (zip7zEntryName.indexOf("/") != -1)
             {
-                zip7zEntryName = zip7zEntryName.substring(zip7zEntryName
-                        .lastIndexOf("/") + 1);
+                zip7zEntryName = zip7zEntryName.substring(zip7zEntryName.lastIndexOf("/") + 1);
             }
             else if (zip7zEntryName.indexOf("\\") != -1)
             {
-                zip7zEntryName = zip7zEntryName.substring(zip7zEntryName
-                        .lastIndexOf("\\") + 1);
+                zip7zEntryName = zip7zEntryName.substring(zip7zEntryName.lastIndexOf("\\") + 1);
             }
             String id = CreateJobUtil.getFileId(unzippedFileFullPath);
-            ret.append("{id:'")
-                    .append(id)
-                    .append("',zipName:'")
-                    .append(file.getName().replace("'", "\\'"))
-                    .append("',path:'")
+            ret.append("{id:'").append(id).append("',zipName:'")
+                    .append(file.getName().replace("'", "\\'")).append("',path:'")
                     .append(unzippedFileFullPath.replace("\\", File.separator)
-                            .replace("/", File.separator).replace("\\", "\\\\")
-                            .replace("'", "\\'")).append("',name:'")
-                    .append(zip7zEntryName.replace("'", "\\'"))
+                            .replace("/", File.separator).replace("\\", "\\\\").replace("'", "\\'"))
+                    .append("',name:'").append(zip7zEntryName.replace("'", "\\'"))
                     .append("',size:'").append(item.getSize()).append("'}");
         }
         return ret.toString();
@@ -2262,16 +2155,18 @@ public class CreateJobsMainHandler extends PageHandler
 
     /**
      * Add a progress bar for a common file.
+     * 
      * @param file
      */
     private String addCommonFile(File file)
     {
         String id = CreateJobUtil.getFileId(file.getPath());
         StringBuffer ret = new StringBuffer("");
-        ret.append("{id:'").append(id).append("',zipName:'").append(file.getName().replace("'", "\\'"))
-        		.append("',path:'").append(file.getPath().replace("\\", "\\\\").replace("'", "\\'"))
-                .append("',name:'").append(file.getName().replace("'", "\\'")).append("',size:'")
-                .append(file.length()).append("'}");
+        ret.append("{id:'").append(id).append("',zipName:'")
+                .append(file.getName().replace("'", "\\'")).append("',path:'")
+                .append(file.getPath().replace("\\", "\\\\").replace("'", "\\'")).append("',name:'")
+                .append(file.getName().replace("'", "\\'")).append("',size:'").append(file.length())
+                .append("'}");
         return ret.toString();
     }
 }

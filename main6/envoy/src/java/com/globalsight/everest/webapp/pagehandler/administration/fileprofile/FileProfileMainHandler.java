@@ -80,8 +80,7 @@ import com.globalsight.util.StringUtil;
  */
 public class FileProfileMainHandler extends PageHandler
 {
-    static private final Logger logger = Logger
-            .getLogger(FileProfileMainHandler.class);
+    static private final Logger logger = Logger.getLogger(FileProfileMainHandler.class);
     private static int NUM_PER_PAGE = 10;
     String m_userId;
 
@@ -97,29 +96,25 @@ public class FileProfileMainHandler extends PageHandler
      * @param context
      *            context the Servlet context
      */
-    public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-            HttpServletRequest p_request, HttpServletResponse p_response,
-            ServletContext p_context) throws ServletException, IOException,
-            EnvoyServletException
+    public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
+            HttpServletResponse p_response, ServletContext p_context)
+            throws ServletException, IOException, EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
         m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
         String action = p_request.getParameter("action");
 
         try
         {
             if (FileProfileConstants.CANCEL.equals(action))
             {
-                clearSessionExceptTableInfo(session,
-                        FileProfileConstants.FILEPROFILE_KEY);
+                clearSessionExceptTableInfo(session, FileProfileConstants.FILEPROFILE_KEY);
                 // sessionMgr.setAttribute("searchParams", params);
             }
             else if (FileProfileConstants.CREATE.equals(action))
             {
-                if (FormUtil.isNotDuplicateSubmisson(p_request,
-                        FormUtil.Forms.NEW_FILE_PROFILE))
+                if (FormUtil.isNotDuplicateSubmisson(p_request, FormUtil.Forms.NEW_FILE_PROFILE))
                 {
                     createFileProfile(p_request);
                 }
@@ -133,8 +128,7 @@ public class FileProfileMainHandler extends PageHandler
                     return;
                 }
                 modifyFileProfile(p_request);
-                clearSessionExceptTableInfo(session,
-                        FileProfileConstants.FILEPROFILE_KEY);
+                clearSessionExceptTableInfo(session, FileProfileConstants.FILEPROFILE_KEY);
             }
             else if (FileProfileConstants.REMOVE.equals(action))
             {
@@ -146,8 +140,8 @@ public class FileProfileMainHandler extends PageHandler
                 }
                 removeFileProfile(p_request, session);
             }
-            if ((p_request.getParameter("linkName") != null && !p_request
-                    .getParameter("linkName").startsWith("self")))
+            if ((p_request.getParameter("linkName") != null
+                    && !p_request.getParameter("linkName").startsWith("self")))
             {
                 sessionMgr.clear();
             }
@@ -156,31 +150,26 @@ public class FileProfileMainHandler extends PageHandler
         }
         catch (NamingException ne)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
-                    ne);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ne);
         }
         catch (RemoteException re)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
-                    re);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, re);
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
-                    ge);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
         }
 
-        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
-                p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 
     /**
      * Before being able to create a File Profile, certain objects must exist.
      * Check that here.
      */
-    private void checkPreReqData(HttpServletRequest p_request,
-            HttpSession p_session, Hashtable p_l10nProfilePairs)
-            throws EnvoyServletException
+    private void checkPreReqData(HttpServletRequest p_request, HttpSession p_session,
+            Hashtable p_l10nProfilePairs) throws EnvoyServletException
     {
         if (p_l10nProfilePairs == null || p_l10nProfilePairs.size() < 1)
         {
@@ -196,8 +185,7 @@ public class FileProfileMainHandler extends PageHandler
         }
     }
 
-    private void createFileProfile(HttpServletRequest p_request)
-            throws EnvoyServletException
+    private void createFileProfile(HttpServletRequest p_request) throws EnvoyServletException
     {
         FileProfileImpl fp = new FileProfileImpl();
 
@@ -209,10 +197,9 @@ public class FileProfileMainHandler extends PageHandler
             if (fp.getKnownFormatTypeId() == 48)
                 processXLZFormat(p_request, fp);
 
-            ServerProxy.getFileProfilePersistenceManager()
-                    .createFileProfile(fp);
-            OperationLog.log(m_userId, OperationLog.EVENT_ADD,
-                    OperationLog.COMPONET_FILE_PROFILE, fp.getName());
+            ServerProxy.getFileProfilePersistenceManager().createFileProfile(fp);
+            OperationLog.log(m_userId, OperationLog.EVENT_ADD, OperationLog.COMPONET_FILE_PROFILE,
+                    fp.getName());
 
             updateXslPath(p_request, fp);
         }
@@ -222,8 +209,7 @@ public class FileProfileMainHandler extends PageHandler
         }
     }
 
-    private void updateXslPath(HttpServletRequest p_request, FileProfileImpl fp)
-            throws Exception
+    private void updateXslPath(HttpServletRequest p_request, FileProfileImpl fp) throws Exception
     {
         String xslPath = p_request.getParameter("tmpXslPath");
         StringBuffer updatedPath = new StringBuffer("");
@@ -232,8 +218,7 @@ public class FileProfileMainHandler extends PageHandler
         {
             File file = new File(xslPath);
 
-            updatedPath
-                    .append(xslPath.substring(0, xslPath.lastIndexOf("~TMP")));
+            updatedPath.append(xslPath.substring(0, xslPath.lastIndexOf("~TMP")));
             updatedPath.append(fp.getId());
 
             File updatedFile = new File(updatedPath.toString());
@@ -257,8 +242,7 @@ public class FileProfileMainHandler extends PageHandler
     private void removeRelevantXslFile(String id) throws Exception
     {
 
-        String xslPath = AmbFileStoragePathUtils.getXslDir().getPath() + "/"
-                + id;
+        String xslPath = AmbFileStoragePathUtils.getXslDir().getPath() + "/" + id;
         File xslFiles = new File(xslPath);
         if (xslFiles.exists())
         {
@@ -270,13 +254,11 @@ public class FileProfileMainHandler extends PageHandler
 
     }
 
-    private void modifyFileProfile(HttpServletRequest p_request)
-            throws EnvoyServletException
+    private void modifyFileProfile(HttpServletRequest p_request) throws EnvoyServletException
     {
         SessionManager sessionMgr = (SessionManager) p_request.getSession()
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-        FileProfileImpl fp = (FileProfileImpl) sessionMgr
-                .getAttribute("fileprofile");
+        FileProfileImpl fp = (FileProfileImpl) sessionMgr.getAttribute("fileprofile");
         FileProfileImpl newFp = new FileProfileImpl();
 
         Transaction tx = HibernateUtil.getTransaction();
@@ -302,8 +284,7 @@ public class FileProfileMainHandler extends PageHandler
                 Map map = new HashMap();
                 map.put("oId", fp.getId());
 
-                List<FileProfileImpl> fps = (List<FileProfileImpl>) HibernateUtil
-                        .search(hql, map);
+                List<FileProfileImpl> fps = (List<FileProfileImpl>) HibernateUtil.search(hql, map);
                 for (FileProfileImpl f : fps)
                 {
                     f.setName(newName);
@@ -314,8 +295,8 @@ public class FileProfileMainHandler extends PageHandler
             }
 
             HibernateUtil.commit(tx);
-            OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
-                    OperationLog.COMPONET_FILE_PROFILE, newName);
+            OperationLog.log(m_userId, OperationLog.EVENT_EDIT, OperationLog.COMPONET_FILE_PROFILE,
+                    newName);
         }
         catch (Exception e)
         {
@@ -324,15 +305,12 @@ public class FileProfileMainHandler extends PageHandler
             throw new EnvoyServletException(e);
         }
 
-        boolean isRmoveXsl = "true".equals(p_request
-                .getParameter("removeXslFile"));
+        boolean isRmoveXsl = "true".equals(p_request.getParameter("removeXslFile"));
 
         if (!isRmoveXsl)
         {
-            String xslPath = AmbFileStoragePathUtils.getXslDir().getPath()
-                    + "/" + fp.getId();
-            String newXslPath = AmbFileStoragePathUtils.getXslDir().getPath()
-                    + "/" + newFp.getId();
+            String xslPath = AmbFileStoragePathUtils.getXslDir().getPath() + "/" + fp.getId();
+            String newXslPath = AmbFileStoragePathUtils.getXslDir().getPath() + "/" + newFp.getId();
             File xslFiles = new File(xslPath);
 
             try
@@ -361,8 +339,7 @@ public class FileProfileMainHandler extends PageHandler
         }
     }
 
-    private void processXLZFormat(HttpServletRequest p_request,
-            FileProfileImpl p_fp)
+    private void processXLZFormat(HttpServletRequest p_request, FileProfileImpl p_fp)
     {
         FileProfileImpl xlzRefFp = null;
         try
@@ -402,8 +379,8 @@ public class FileProfileMainHandler extends PageHandler
         }
     }
 
-    private void removeFileProfile(HttpServletRequest p_request,
-            HttpSession p_session) throws EnvoyServletException
+    private void removeFileProfile(HttpServletRequest p_request, HttpSession p_session)
+            throws EnvoyServletException
     {
         try
         {
@@ -415,8 +392,8 @@ public class FileProfileMainHandler extends PageHandler
                 {
                     String id = idarray[i].split(",")[0];
                     FileProfileImpl fp = (FileProfileImpl) ServerProxy
-                            .getFileProfilePersistenceManager().getFileProfileById(
-                                    Long.parseLong(id), true);
+                            .getFileProfilePersistenceManager()
+                            .getFileProfileById(Long.parseLong(id), true);
 
                     // CVSFileProfileManagerLocal cvsFPManager = new
                     // CVSFileProfileManagerLocal();
@@ -469,19 +446,17 @@ public class FileProfileMainHandler extends PageHandler
         // for bug GBS-2590, by fan
         char[] xmlEncodeChar =
         { '<', '>', '&', '"' };
-        String desc = XmlFilterHelper.encodeSpecifiedEntities(
-                p_request.getParameter("desc"), xmlEncodeChar);
+        String desc = XmlFilterHelper.encodeSpecifiedEntities(p_request.getParameter("desc"),
+                xmlEncodeChar);
         p_fp.setDescription(desc);
 
-        p_fp.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance()
-                .getValue()));
+        p_fp.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance().getValue()));
         // p_fp.setSupportSid(p_request.getParameter("supportSid") != null);
         // p_fp.setUnicodeEscape(p_request.getParameter("unicodeEscape") !=
         // null);
         // p_fp.setHeaderTranslate(p_request.getParameter("headerTranslate") !=
         // null);
-        p_fp.setL10nProfileId(Long.parseLong(p_request
-                .getParameter("locProfileId")));
+        p_fp.setL10nProfileId(Long.parseLong(p_request.getParameter("locProfileId")));
         p_fp.setScriptOnImport(p_request.getParameter("scriptOnImport"));
         p_fp.setScriptOnExport(p_request.getParameter("scriptOnExport"));
         String formatInfo = p_request.getParameter("formatInfo");
@@ -500,10 +475,9 @@ public class FileProfileMainHandler extends PageHandler
         // p_fp.setXmlRuleFileId(0);
         // }
 
-        KnownFormatTypeImpl knownFormat = HibernateUtil.get(
-                KnownFormatTypeImpl.class, Long.parseLong(formatInfo));
-        if (knownFormat != null
-                && !KnownFormatType.XML.equals(knownFormat.getName()))
+        KnownFormatTypeImpl knownFormat = HibernateUtil.get(KnownFormatTypeImpl.class,
+                Long.parseLong(formatInfo));
+        if (knownFormat != null && !KnownFormatType.XML.equals(knownFormat.getName()))
         {
             p_fp.setXmlDtd(null);
         }
@@ -512,8 +486,7 @@ public class FileProfileMainHandler extends PageHandler
             String dtdIds = p_request.getParameter("dtdIds");
             if (dtdIds != null && !"-1".equals(dtdIds))
             {
-                p_fp.setXmlDtd(HibernateUtil.get(XmlDtdImpl.class,
-                        Long.parseLong(dtdIds)));
+                p_fp.setXmlDtd(HibernateUtil.get(XmlDtdImpl.class, Long.parseLong(dtdIds)));
             }
             else
             {
@@ -563,12 +536,13 @@ public class FileProfileMainHandler extends PageHandler
         String BOMType = p_request.getParameter("bomType");
         p_fp.setBOMType(Integer.parseInt(BOMType));
 
-        String xlfSourceAsUnTranslatedTarget = p_request
-                .getParameter("xlfSrcAsTargetRadio");
+        String eolEncoding = p_request.getParameter("eolEncoding");
+        p_fp.setEolEncoding(Integer.parseInt(eolEncoding));
+
+        String xlfSourceAsUnTranslatedTarget = p_request.getParameter("xlfSrcAsTargetRadio");
         if (xlfSourceAsUnTranslatedTarget != null)
         {
-            p_fp.setXlfSourceAsUnTranslatedTarget(Integer
-                    .parseInt(xlfSourceAsUnTranslatedTarget));
+            p_fp.setXlfSourceAsUnTranslatedTarget(Integer.parseInt(xlfSourceAsUnTranslatedTarget));
         }
 
         /**
@@ -582,19 +556,17 @@ public class FileProfileMainHandler extends PageHandler
     /**
      * Get data for main table.
      */
-    private void dataForTable(HttpServletRequest p_request,
-            HttpSession p_session) throws RemoteException, NamingException,
-            GeneralException
+    private void dataForTable(HttpServletRequest p_request, HttpSession p_session)
+            throws RemoteException, NamingException, GeneralException
     {
-        SessionManager sessionMgr = (SessionManager) p_session
-                .getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) p_session.getAttribute(SESSION_MANAGER);
         StringBuffer condition = new StringBuffer();
         String[][] array = new String[][]
         {
-        { "uNameFilter", "f.name" },
-        { "uLPFilter", "lp.name" },
-        { "uSourceFileFormatFilter", "kft.name" },
-        { "uCompanyFilter", "c.name" } };
+                { "uNameFilter", "f.name" },
+                { "uLPFilter", "lp.name" },
+                { "uSourceFileFormatFilter", "kft.name" },
+                { "uCompanyFilter", "c.name" } };
         // filterTableName
         String uFNFilter = (String) sessionMgr.getAttribute("uFNFilter");
         boolean needRemove = false;
@@ -602,8 +574,8 @@ public class FileProfileMainHandler extends PageHandler
         if (StringUtils.isNotBlank(uFNFilter))
         {
             condition.append(" and  f.filterTableName IS NOT null");
-            filres = FilterHelper.getallFiltersLikeName(StringUtil
-                    .transactSQLInjection(uFNFilter.trim()));
+            filres = FilterHelper
+                    .getallFiltersLikeName(StringUtil.transactSQLInjection(uFNFilter.trim()));
             needRemove = true;
 
         }
@@ -620,16 +592,12 @@ public class FileProfileMainHandler extends PageHandler
             {
                 if (filres.size() > 0)
                 {
-                    LOOP: for (Iterator iter = fileprofiles.iterator(); iter
-                            .hasNext();)
+                    LOOP: for (Iterator iter = fileprofiles.iterator(); iter.hasNext();)
                     {
-                        FileprofileVo fileprofilevo = (FileprofileVo) iter
-                                .next();
-                        FileProfile FileProfile = fileprofilevo
-                                .getFileProfile();
-                        String filterName = filres.get(FileProfile
-                                .getFilterTableName()
-                                + FileProfile.getFilterId());
+                        FileprofileVo fileprofilevo = (FileprofileVo) iter.next();
+                        FileProfile FileProfile = fileprofilevo.getFileProfile();
+                        String filterName = filres
+                                .get(FileProfile.getFilterTableName() + FileProfile.getFilterId());
                         if (filterName == null)
                         {
                             iter.remove();
@@ -647,8 +615,7 @@ public class FileProfileMainHandler extends PageHandler
             throw new EnvoyServletException(e);
         }
 
-        Locale uiLocale = (Locale) p_session
-                .getAttribute(WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
 
         String numOfPerPage = p_request.getParameter("numOfPageSize");
         if (StringUtil.isNotEmpty(numOfPerPage))
@@ -662,18 +629,16 @@ public class FileProfileMainHandler extends PageHandler
                 NUM_PER_PAGE = Integer.MAX_VALUE;
             }
         }
-        HashMap<Long, String> idViewExtensions = ServerProxy
-                .getFileProfilePersistenceManager().getIdViewFileExtensions();
+        HashMap<Long, String> idViewExtensions = ServerProxy.getFileProfilePersistenceManager()
+                .getIdViewFileExtensions();
         setTableNavigation(p_request, p_session, (List) fileprofiles,
-                new FileProfileComparator(uiLocale, idViewExtensions),
-                NUM_PER_PAGE, FileProfileConstants.FILEPROFILE_LIST,
-                FileProfileConstants.FILEPROFILE_KEY);
+                new FileProfileComparator(uiLocale, idViewExtensions), NUM_PER_PAGE,
+                FileProfileConstants.FILEPROFILE_LIST, FileProfileConstants.FILEPROFILE_KEY);
 
         CVSFileProfileManagerLocal cvsFPManager = new CVSFileProfileManagerLocal();
         ArrayList<CVSFileProfile> cvsfps = (ArrayList<CVSFileProfile>) cvsFPManager
                 .getAllCVSFileProfiles();
-        ArrayList<String> existCVSFPs = new ArrayList<String>();
-        ;
+        ArrayList<String> existCVSFPs = new ArrayList<String>();;
         if (cvsfps != null)
         {
             for (CVSFileProfile f : cvsfps)
@@ -683,33 +648,29 @@ public class FileProfileMainHandler extends PageHandler
         }
         p_request.setAttribute("existCVSFPs", existCVSFPs);
         p_request.setAttribute("idViewExtensions", idViewExtensions);
-        Hashtable l10nprofiles = ServerProxy.getProjectHandler()
-                .getAllL10nProfileNames();
+        Hashtable l10nprofiles = ServerProxy.getProjectHandler().getAllL10nProfileNames();
         checkPreReqData(p_request, p_session, l10nprofiles);
     }
 
-    private void makeCondition(SessionManager sessionMgr,
-            StringBuffer condition, String par, String sqlparam)
+    private void makeCondition(SessionManager sessionMgr, StringBuffer condition, String par,
+            String sqlparam)
     {
         String uNameFilter = (String) sessionMgr.getAttribute(par);
         if (StringUtils.isNotBlank(uNameFilter))
         {
             condition.append(" and  " + sqlparam + " LIKE '%"
-                    + StringUtil.transactSQLInjection(uNameFilter.trim())
-                    + "%'");
+                    + StringUtil.transactSQLInjection(uNameFilter.trim()) + "%'");
         }
     }
 
     /**
      * Search for fileprofiles with certain criteria.
      */
-    private FileProfileSearchParameters getSearchCriteria(
-            HttpServletRequest p_request, boolean advSearch)
-            throws EnvoyServletException
+    private FileProfileSearchParameters getSearchCriteria(HttpServletRequest p_request,
+            boolean advSearch) throws EnvoyServletException
     {
         HttpSession session = p_request.getSession();
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
         FileProfileSearchParameters params = new FileProfileSearchParameters();
         String buf = p_request.getParameter("nameOptions");
         params.setFileProfileCondition(buf);
@@ -738,32 +699,27 @@ public class FileProfileMainHandler extends PageHandler
         return params;
     }
 
-    private void handleFilters(HttpServletRequest p_request,
-            SessionManager sessionMgr, String action)
+    private void handleFilters(HttpServletRequest p_request, SessionManager sessionMgr,
+            String action)
     {
         String uNameFilter = (String) p_request.getParameter("uNameFilter");
         String uLPFilter = (String) p_request.getParameter("uLPFilter");
         String uFNFilter = (String) p_request.getParameter("uFNFilter");
-        String uSourceFileFormatFilter = (String) p_request
-                .getParameter("uSourceFileFormatFilter");
-        String uCompanyFilter = (String) p_request
-                .getParameter("uCompanyFilter");
+        String uSourceFileFormatFilter = (String) p_request.getParameter("uSourceFileFormatFilter");
+        String uCompanyFilter = (String) p_request.getParameter("uCompanyFilter");
 
-        if (p_request.getMethod().equalsIgnoreCase(
-                WebAppConstants.REQUEST_METHOD_GET))
+        if (p_request.getMethod().equalsIgnoreCase(WebAppConstants.REQUEST_METHOD_GET))
         {
             uNameFilter = (String) sessionMgr.getAttribute("uNameFilter");
             uLPFilter = (String) sessionMgr.getAttribute("uLPFilter");
             uFNFilter = (String) sessionMgr.getAttribute("uFNFilter");
-            uSourceFileFormatFilter = (String) sessionMgr
-                    .getAttribute("uSourceFileFormatFilter");
+            uSourceFileFormatFilter = (String) sessionMgr.getAttribute("uSourceFileFormatFilter");
             uCompanyFilter = (String) sessionMgr.getAttribute("uCompanyFilter");
         }
         sessionMgr.setAttribute("uNameFilter", uNameFilter);
         sessionMgr.setAttribute("uLPFilter", uLPFilter);
         sessionMgr.setAttribute("uFNFilter", uFNFilter);
-        sessionMgr.setAttribute("uSourceFileFormatFilter",
-                uSourceFileFormatFilter);
+        sessionMgr.setAttribute("uSourceFileFormatFilter", uSourceFileFormatFilter);
         sessionMgr.setAttribute("uCompanyFilter", uCompanyFilter);
     }
 }

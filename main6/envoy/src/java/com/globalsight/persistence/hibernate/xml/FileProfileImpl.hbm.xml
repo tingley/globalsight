@@ -33,6 +33,8 @@
 		<property name="newId" column="NEW_ID" type="long" not-null="false" />
 		<property name="BOMType" column="BOM_TYPE" type="int"
 			not-null="false" />
+		<property name="eolEncoding" column="EOL_ENCODING" type="int"
+			not-null="false" />
 		<property name="filterId" column="FILTER_ID" type="long"
 			not-null="false" unique="false" />
 		<property name="filterTableName" length="45" column="FILTER_TABLE_NAME"

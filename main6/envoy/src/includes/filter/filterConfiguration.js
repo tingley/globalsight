@@ -285,7 +285,9 @@ function generateSpecialFiltersTable(filterId, specialFilters, color)
 			{
 				if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='false')
 				{
+					str.append("<Label style='color:#810081'>");
 					str.append(specialFilter.filterName);
+					str.append("</Label>");	
 				}
 				else
 				{

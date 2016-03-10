@@ -188,6 +188,8 @@ public interface ProjectHandler
      */
     L10nProfile getL10nProfile(long p_profileId) throws RemoteException,
             ProjectHandlerException;
+    
+    L10nProfile getL10nProfileByName(String p_profileName, String p_companyId);
 
     // ////////////////////////////////////////////////////////////////////////////
     // END: Localization Profiles //////////////////////////////////////////////

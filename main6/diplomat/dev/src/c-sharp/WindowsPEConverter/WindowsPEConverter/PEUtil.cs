@@ -135,19 +135,7 @@ namespace GlobalSight.WinPEConverter
 
         public static string GetSectionName(PEReader.IMAGE_SECTION_HEADER secHeader)
         {
-            byte[] data = new byte[8];
-            data[0] = secHeader.Name_0;
-            data[1] = secHeader.Name_1;
-            data[2] = secHeader.Name_2;
-            data[3] = secHeader.Name_3;
-            data[4] = secHeader.Name_4;
-            data[5] = secHeader.Name_5;
-            data[6] = secHeader.Name_6;
-            data[7] = secHeader.Name_7;
-            data[0] = secHeader.Name_0;
-            data[0] = secHeader.Name_0;
-
-            string name = Encoding.ASCII.GetString(data);
+            string name = Encoding.ASCII.GetString(secHeader.Name);
 
             return name;
         }
@@ -286,6 +274,15 @@ namespace GlobalSight.WinPEConverter
                 }
 
                 binary[resOffset + i] = nnn[i];
+            }
+
+            // add 0 to the end
+            if (i < resSize)
+            {
+                for (; i < resSize; i++)
+                {
+                    binary[resOffset + i] = 0;
+                }
             }
         }
     }

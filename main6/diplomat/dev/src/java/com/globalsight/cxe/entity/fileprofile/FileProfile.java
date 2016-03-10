@@ -211,6 +211,8 @@ public interface FileProfile
     public void setFilterTableName(String filterTableName);
 
     public String getFilterName();
+    
+    public Long getSpecialFilterId();
 
     public String getFilterTableName();
 

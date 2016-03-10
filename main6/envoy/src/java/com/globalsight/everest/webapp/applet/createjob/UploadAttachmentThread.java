@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import netscape.javascript.JSObject;
 
 import com.globalsight.everest.webapp.applet.common.AppletHelper;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.webservices.client2.Ambassador2;
 import com.globalsight.webservices.client2.WebService2ClientHelper;
 
@@ -66,6 +67,10 @@ public class UploadAttachmentThread extends Thread
         catch(Exception e)
         {
             e.printStackTrace();
+        }
+        finally
+        {
+            HibernateUtil.closeSession();
         }
     }
     

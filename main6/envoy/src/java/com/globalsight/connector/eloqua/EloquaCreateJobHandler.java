@@ -465,7 +465,7 @@ public class EloquaCreateJobHandler extends PageActionHandler
                 .createUuid() : (String) sessionMgr.getAttribute("uuid");
         sessionMgr.removeElement("uuid");
 
-        CreateJobThread runnable = new CreateJobThread(user, currentCompanyId,
+        CreateEloquaJobThread runnable = new CreateEloquaJobThread(user, currentCompanyId,
                 conn, file, eForm, targetLocales, attachmentName, attribute,
                 uuid);
         Thread t = new MultiCompanySupportedThread(runnable);

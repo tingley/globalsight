@@ -1,6 +1,7 @@
 var UI = {
 	isDrag : false,
 	init : false,
+	editable : true,
     button : {
     	value : 4,
     	activity : 0,

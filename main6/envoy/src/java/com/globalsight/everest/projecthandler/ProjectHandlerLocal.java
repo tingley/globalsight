@@ -646,10 +646,12 @@ public class ProjectHandlerLocal implements ProjectHandler
             {
                 long id = Long.valueOf(rs.getString("id"));
                 String name = rs.getString("name");
+                String tmpId = rs.getString("TMPID");
                 String description = rs.getString("description");
                 String companyId = rs.getString("companyid");
                 String tmpName = rs.getString("tmpname");
                 String projectName = rs.getString("project_name");
+                String projectId = rs.getString("project_id");
                 char isAutoDispatch = rs.getString("is_auto_dispatch")
                         .toCharArray()[0];
                 String srcLocaleId = rs.getString("source_locale_id");
@@ -662,6 +664,8 @@ public class ProjectHandlerLocal implements ProjectHandler
                 basicL10nProfileInfo.setSrcLocaleName(CacheData
                         .getLocaleDisplayNameById(srcLocaleId, uiLocale));
                 basicL10nProfileInfo.setWFTCount(wftCount);
+                basicL10nProfileInfo.setTMProfileId(tmpId);
+                basicL10nProfileInfo.setProjectId(projectId);
                 v.add(basicL10nProfileInfo);
             }
             return v;
@@ -685,7 +689,7 @@ public class ProjectHandlerLocal implements ProjectHandler
     {
         Vector args = CompanyWrapper.addCompanyIdBoundArgs(new Vector());
         StringBuffer sql = new StringBuffer(
-                "select l10n.ID, l10n.NAME, l10n.DESCRIPTION,l10n.COMPANYID,tmp.NAME TMPNAME, p.PROJECT_NAME,l10n.IS_AUTO_DISPATCH,l10n.SOURCE_LOCALE_ID,count(lpwi.WF_TEMPLATE_ID) countwft");
+                "select l10n.ID, l10n.NAME, l10n.DESCRIPTION,l10n.COMPANYID,tmp.NAME TMPNAME,tmp.ID TMPID, p.PROJECT_NAME, p.PROJECT_SEQ project_id, l10n.IS_AUTO_DISPATCH, l10n.SOURCE_LOCALE_ID,count(lpwi.WF_TEMPLATE_ID) countwft");
         sql.append(" from l10n_profile l10n, l10n_profile_tm_profile lptp, tm_profile tmp, project p, company c,l10n_profile_wftemplate_info lpwi");
         sql.append(" where 1 = 1");
         sql.append(" and l10n.IS_ACTIVE = 'Y'");
@@ -715,7 +719,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             sql.append(" and p.PROJECT_NAME LIKE '%" + filterParams[3] + "%'");
         }
         sql.append(" group by l10n.ID, l10n.NAME, l10n.DESCRIPTION, "
-                    + "l10n.COMPANYID, tmp.NAME, p.PROJECT_NAME, "
+                    + "l10n.COMPANYID, tmp.NAME, tmp.ID, p.PROJECT_NAME, p.PROJECT_SEQ,"
                     + "l10n.IS_AUTO_DISPATCH,l10n.SOURCE_LOCALE_ID");
         sql.append(" order by l10n.NAME ");
         return sql.toString();
@@ -802,6 +806,35 @@ public class ProjectHandlerLocal implements ProjectHandler
             throw new ProjectHandlerException(
                     ProjectHandlerException.MSG_FAILED_TO_GET_LOCALIZATION_PROFILE,
                     args, pe);
+        }
+    }
+    
+    public L10nProfile getL10nProfileByName(String p_profileName, String p_companyId)
+    {
+        try
+        {
+            StringBuffer hql = new StringBuffer();
+            hql.append("From BasicL10nProfile where isActive = 'Y' ");
+            if (StringUtil.isNotEmpty(p_profileName))
+            {
+                hql.append(" AND name = '").append(p_profileName).append("'");
+            }
+
+            if (StringUtil.isNotEmpty(p_companyId))
+            {
+                hql.append(" AND companyId = ").append(Long.parseLong(p_companyId));
+            }
+
+            return (L10nProfile) HibernateUtil.getFirst(hql.toString());
+
+        }
+        catch (Exception pe)
+        {
+            c_category.error(p_profileName + " " + pe.getMessage(), pe);
+            String[] args = new String[1];
+            args[0] = p_profileName;
+            throw new ProjectHandlerException(
+                    ProjectHandlerException.MSG_FAILED_TO_GET_LOCALIZATION_PROFILE, args, pe);
         }
     }
 

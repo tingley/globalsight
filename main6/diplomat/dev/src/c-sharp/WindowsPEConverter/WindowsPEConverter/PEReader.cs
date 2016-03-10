@@ -29,22 +29,12 @@ namespace GlobalSight.WinPEConverter
             public UInt16 e_cs;                 // Initial (relative) CS value
             public UInt16 e_lfarlc;             // File address of relocation table
             public UInt16 e_ovno;               // Overlay number
-            public UInt16 e_res_0;              // Reserved words
-            public UInt16 e_res_1;              // Reserved words
-            public UInt16 e_res_2;              // Reserved words
-            public UInt16 e_res_3;              // Reserved words
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+            public UInt16[] e_res;              // Reserved words
             public UInt16 e_oemid;              // OEM identifier (for e_oeminfo)
             public UInt16 e_oeminfo;            // OEM information; e_oemid specific
-            public UInt16 e_res2_0;             // Reserved words
-            public UInt16 e_res2_1;             // Reserved words
-            public UInt16 e_res2_2;             // Reserved words
-            public UInt16 e_res2_3;             // Reserved words
-            public UInt16 e_res2_4;             // Reserved words
-            public UInt16 e_res2_5;             // Reserved words
-            public UInt16 e_res2_6;             // Reserved words
-            public UInt16 e_res2_7;             // Reserved words
-            public UInt16 e_res2_8;             // Reserved words
-            public UInt16 e_res2_9;             // Reserved words
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+            public UInt16[] e_res2;             // Reserved words
             public UInt32 e_lfanew;             // File address of new exe header
         }
 
@@ -150,14 +140,8 @@ namespace GlobalSight.WinPEConverter
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct IMAGE_SECTION_HEADER
         {
-            public Byte Name_0;
-            public Byte Name_1;
-            public Byte Name_2;
-            public Byte Name_3;
-            public Byte Name_4;
-            public Byte Name_5;
-            public Byte Name_6;
-            public Byte Name_7;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+            public Byte[] Name;
             public UInt32 PhysicalAddressOrVirtualSize;
             public UInt32 VirtualAddress; // rva
             public UInt32 SizeOfRawData; // size

@@ -297,6 +297,11 @@ String lb_target = bundle.getString("lb_target");
 String lb_termbases = bundle.getString("lb_termbases");
 String lb_id = bundle.getString("lb_id");
 String lb_segment = bundle.getString("lb_segment");
+String lb_segmentId = bundle.getString("lb_segmentId");
+String lb_segmentFormat = bundle.getString("lb_segmentFormat");
+String lb_segmentType = bundle.getString("lb_segmentType");
+String lb_wordCount = bundle.getString("lb_totalWordCount");
+String lb_tagInfo = bundle.getString("lb_tagInfo");
 String lable = "";
 String action = "";
 String unmarklable = bundle.getString("lb_unmark_pTag_segments");
@@ -474,6 +479,10 @@ ul.dropdown li:hover > ul 		    { visibility: visible;}
 </STYLE>
 <link type="text/css" rel="StyleSheet" id="cssEditor" href="/globalsight/envoy/edit/online3/editor.css">
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
+<link rel="stylesheet" type="text/css" href="/globalsight/jquery/easyui.css">
+<link rel="stylesheet" type="text/css" href="/globalsight/jquery/icon.css">
+<link type="text/css" rel="StyleSheet" id="cssPtag"
+  href="/globalsight/envoy/edit/online2/ptag.css">
 <script>
 var tempTotalPageNum = <%=(pi.getTotalPageNum())%>;
 var g_disableLink = eval("<%=disableComment%>");
@@ -501,6 +510,14 @@ var g_disableComment = eval("<%=disableComment%>");
 var helpFile = "<%=bundle.getString("help_main_editor2")%>";
 var reviewModeText = "<%=WebAppConstants.REVIEW_MODE%>";
 var approveAction = "<%=approveAction%>";
+var lb_id = "<%=lb_id%>";
+var lb_segmentFormat = "<%=lb_segmentFormat%>";
+var lb_segmentType = "<%=lb_segmentType%>";
+var lb_wordCount = "<%=lb_wordCount%>";
+var lb_tagInfo = "<%=lb_tagInfo%>";
+var lb_sid ="<%=bundle.getString("lb_sid")%>";
+var lb_modify_by = "<%=bundle.getString("lb_modify_by")%>";
+var lb_title = "<%=bundle.getString("lb_segment_details")%>";
 </script>
 </HEAD>
 <BODY id="idBody" oncontextmenu="contextForX(event)" onbeforeunload="exit()">
@@ -768,11 +785,13 @@ var approveAction = "<%=approveAction%>";
 <%}%>
 </TABLE>
 </div>
+<div id="showDetails" ></div>
 </BODY>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/envoy/edit/online3/main.js"></script>
 <script src="/globalsight/includes/ContextMenu.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery.easyui.min.js"></script>
 <script>
 ContextMenu.intializeContextMenu();
 
@@ -788,5 +807,7 @@ if (updatePopupEditorFlag != null && updatePopupEditorFlag != "null"
     <%state.setNeedUpdatePopUpEditor(null);%>
     editSegment(g_lastTuId, g_lastTuvId, g_lastSubId);
 }
+
+
 </script>
 </HTML>

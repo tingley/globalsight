@@ -18,44 +18,23 @@
 package com.globalsight.everest.projecthandler.importer;
 
 import org.apache.log4j.Logger;
-
-import com.globalsight.everest.projecthandler.importer.ImportUtil;
-
-import com.globalsight.everest.projecthandler.Project;
-
-import com.globalsight.importer.IReader;
-import com.globalsight.importer.ImporterException;
-import com.globalsight.importer.ImportOptions;
-import com.globalsight.util.IntHolder;
-import com.globalsight.util.ReaderResult;
-import com.globalsight.util.ReaderResultQueue;
-import com.globalsight.util.UTC;
-
-
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.ElementHandler;
 import org.dom4j.ElementPath;
-import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
-import org.xml.sax.InputSource;
-
-import java.sql.Timestamp;
-
-import java.io.*;
-import java.util.*;
+import com.globalsight.importer.ImportOptions;
+import com.globalsight.util.ReaderResult;
+import com.globalsight.util.ReaderResultQueue;
 
 /**
  * Reads TMX files and produces TU objects by putting
  * ReaderResult objects into a ReaderResultQueue.
  */
-public class XmlReaderThread
-    extends Thread
+public class XmlReaderThread extends Thread
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            XmlReaderThread.class);
+    private static final Logger CATEGORY = Logger.getLogger(XmlReaderThread.class);
 
     private ReaderResultQueue m_results;
     private ImportOptions m_options;

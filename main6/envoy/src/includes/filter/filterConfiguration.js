@@ -112,7 +112,19 @@ function loadFilterConfigurationsCallback(data)
 function generateFilterTable(filterConfigurations)
 {
 	var str = new StringBuffer("<table cellpadding='0' cellspacing='0' border='1' class='main_table'>");
-
+	//GBS-4053
+	if (hasBaseFilter == "false")
+	{
+		for (var j = 0; j < filterConfigurations.length; j++)
+		{
+			if (filterConfigurations[j].filterTableName == "base_filter")
+			{
+				existBaseFilters = filterConfigurations[j].specialFilters;
+				filterConfigurations.splice(j,1);
+			}
+		}
+	}
+	
 	for(var i = 0; i < filterConfigurations.length; i++)
 	{
 		var filter = filterConfigurations[i];
@@ -183,6 +195,7 @@ function generateFilterTable(filterConfigurations)
 	str.append("</table>");
 
 	document.getElementById("filterConfigurationTable").innerHTML = str.toString();
+	loadExpand();
 }
 
 function expand(obj)
@@ -268,15 +281,51 @@ function generateSpecialFiltersTable(filterId, specialFilters, color)
 		str.append("<input type='checkbox' id='checkbox_" + filterId + "_" + specialFilter.id + "' topFilterId='"+filterId+"' specialFilterId='"+specialFilter.id+"' filterTable='"+specialFilter.filterTableName+"' firstColor='"+color+"' onclick='checkSpecialFilterToDel(this)'></input>");
 		if(hasEditFilter == 'true')
 		{
-			str.append("<a href='#' class='specialfilter_a' onclick='editFilter(\""+specialFilter.id+"\",\""+specialFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")' >")
-			str.append(specialFilter.filterName);
-			str.append("</a>");
+			if (specialFilter.filterTableName == "base_filter")
+			{
+				if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='false')
+				{
+					str.append("<Label style='color:#810081'>");
+					str.append(specialFilter.filterName);
+					str.append("</Label>");	
+				}
+				else
+				{
+					str.append("<a href='#' class='specialfilter_a' onclick='editFilter(\""+specialFilter.id+"\",\""+specialFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")' >");
+					str.append(specialFilter.filterName);
+					str.append("</a>");
+				}
+			}
+			else
+			{
+				str.append("<a href='#' class='specialfilter_a' onclick='editFilter(\""+specialFilter.id+"\",\""+specialFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")' >");
+				str.append(specialFilter.filterName);
+				str.append("</a>");
+			}
 		}
 		else
 		{
-			str.append("<Label style='color:#810081'>");
-			str.append(specialFilter.filterName);
-			str.append("</Label>");
+			if (specialFilter.filterTableName == "base_filter")
+			{
+				if (hasBaseFilter_InternalText =='true' || hasBaseFilter_Escaping =='true')
+				{
+					str.append("<a href='#' class='specialfilter_a' onclick='editFilter(\""+specialFilter.id+"\",\""+specialFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")' >");
+					str.append(specialFilter.filterName);
+					str.append("</a>");
+				}
+				else
+				{
+					str.append("<Label style='color:#810081'>");
+					str.append(specialFilter.filterName);
+					str.append("</Label>");	
+				}
+			}
+			else
+			{
+				str.append("<Label style='color:#810081'>");
+				str.append(specialFilter.filterName);
+				str.append("</Label>");
+			}
 		}
 
 		str.append("<img style='display:none' id=delete_"+specialFilter.id+" src='"+imgSrc+"' onclick='deleteFilter(\""+specialFilter.id+"\",\""+specialFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")'></img>");

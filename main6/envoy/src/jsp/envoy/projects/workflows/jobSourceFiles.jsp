@@ -37,11 +37,12 @@
 <jsp:useBean id="sourceEditor" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="allStatus" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="editSourcePageWc" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
- <jsp:useBean id="pageSearch" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
- <jsp:useBean id="searchText" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-  <jsp:useBean id="jobScorecard" scope="request"
+<jsp:useBean id="editFileProfile" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="pageSearch" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="searchText" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobScorecard" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
- <jsp:useBean id="incontextreiview" scope="request"
+<jsp:useBean id="incontextreiview" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
 	//jobSummary child page needed started.
@@ -67,6 +68,11 @@
 
 	String thisFileSearchText = (String) request
 			.getAttribute(JobManagementHandler.PAGE_SEARCH_TEXT);
+	PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+	boolean b_clickfplink=true;
+	if (!perms.getPermissionFor(Permission.FILE_PROFILES_EDIT)) {
+		b_clickfplink = false;
+	}
 	if (thisFileSearchText == null)
 	{
 		thisFileSearchText = "";
@@ -108,6 +114,7 @@
 			+ AddSourceHandler.UPLOAD_SOURCE_FILES;
 	String showUpdateProgressURL = addSourceFilesURL + "&action="
 			+ AddSourceHandler.SHOW_UPDATE_PROGRESS;
+	String editFileProfileURL = editFileProfile.getPageURL();
 
 	SessionManager sessionMgr = (SessionManager) session
 			.getAttribute(WebAppConstants.SESSION_MANAGER);
@@ -262,6 +269,12 @@ function searchPages(){
     pageSearchTextForm.action = url;
     pageSearchTextForm.submit();
 }
+
+function editfileprofile(param)
+{ 
+	pageSearchTextForm.action = "<%=editFileProfileURL%>&action=edit&&radioBtn="+ param;  
+	pageSearchTextForm.submit();   
+}
 </script>
 
 </head>
@@ -401,9 +414,15 @@ function searchPages(){
 							</c:otherwise>
 						</c:choose>
 					</td>
+					<%if(b_clickfplink){%>
 					<td style="text-align:left">
+						<a href="javascript:;" onclick="editfileprofile(${item.getSourcePage().getRequest().getDataSourceId()})" title="Edit File Profile">
 						${item.dataSourceName}
+						</a>
 					</td>
+					<%} else { %>
+					<td style="text-align:left">${item.dataSourceName}</td>
+					<%}%>
 					<td style="text-align:center">
 						<span <c:if test="${item.isWordCountOverriden}">style="font-style:oblique;font-weight:bold;"
 							      <c:set value="true" var="sourcePageWordCountOverriden" scope="page"></c:set>

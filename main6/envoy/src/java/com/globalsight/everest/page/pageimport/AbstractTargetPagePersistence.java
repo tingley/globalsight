@@ -1105,7 +1105,7 @@ public abstract class AbstractTargetPagePersistence implements
         s_logger.info("Begin to hit " + machineTranslator.getEngineName()
                 + "(Segment number:" + p_segments.length + "; SourcePageID:"
                 + p_sourcePage.getIdAsLong() + "; TargetLocale:"
-                + p_targetLocale.getLocale().getLanguage() + ").");
+                + p_targetLocale.getLocaleCode() + ").");
         String[] translatedSegments = machineTranslator.translateBatchSegments(
                 p_sourceLocale.getLocale(), p_targetLocale.getLocale(),
                 p_segments, LeverageMatchType.CONTAINTAGS, true);
@@ -1120,8 +1120,7 @@ public abstract class AbstractTargetPagePersistence implements
         }
         s_logger.info("End hit " + machineTranslator.getEngineName()
                 + "(SourcePageID:" + p_sourcePage.getIdAsLong()
-                + "; TargetLocale:" + p_targetLocale.getLocale().getLanguage()
-                + ").");
+                + "; TargetLocale:" + p_targetLocale.getLocaleCode() + ").");
         // handle translate result one by one.
         Collection<LeverageMatch> lmCollection = new ArrayList<LeverageMatch>();
         for (int tuvIndex = 0; tuvIndex < targetTuvsInArray.length; tuvIndex++)

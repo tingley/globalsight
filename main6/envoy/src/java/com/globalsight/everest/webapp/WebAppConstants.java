@@ -866,5 +866,6 @@ public interface WebAppConstants
     public static final String ACTION_REMOVE = "remove";
     public static final String ACTION_CANCEL = "cancel";
 
-    public static final List<String> FILE_EXTENSION_LIST = Arrays.asList("bmp", "jpg", "png","gif","jpeg","jpe");
+    public static final List<String> FILE_EXTENSION_LIST = Arrays.asList("bmp", "jpg", "png",
+            "gif", "jpeg", "jpe");
 }

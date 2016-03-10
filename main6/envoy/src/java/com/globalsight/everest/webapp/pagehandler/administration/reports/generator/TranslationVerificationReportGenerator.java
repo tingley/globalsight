@@ -81,7 +81,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
-import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
@@ -652,8 +651,8 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
 
                     sid = sourceTuv.getSid();
 
-                    StringBuilder matches = getMatches(fuzzyLeverageMatchMap,
-                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,
+                    StringBuilder matches = ReportGeneratorUtil.getMatches(fuzzyLeverageMatchMap,
+                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs, m_bundle,
                             sourceTuv, targetTuv, p_job.getId());
 
                     // Get Terminology/Glossary Source and Target.
@@ -1340,68 +1339,6 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
         p_sheet.addValidationData(validation);
     }
 
-    /**
-     * Get TM matches.
-     */
-    private StringBuilder getMatches(Map fuzzyLeverageMatchMap,
-            MatchTypeStatistics tuvMatchTypes,
-            Vector<String> excludedItemTypes, List sourceTuvs, List targetTuvs,
-            Tuv sourceTuv, Tuv targetTuv, long p_jobId)
-    {
-        StringBuilder matches = new StringBuilder();
-
-        Set fuzzyLeverageMatches = (Set) fuzzyLeverageMatchMap.get(sourceTuv
-                .getIdAsLong());
-        if (LeverageUtil.isIncontextMatch(sourceTuv, sourceTuvs, targetTuvs,
-                tuvMatchTypes, excludedItemTypes, p_jobId))
-        {
-            matches.append(m_bundle.getString("lb_in_context_match"));
-        }
-        else if (LeverageUtil.isExactMatch(sourceTuv, tuvMatchTypes))
-        {
-            matches.append(StringUtil.formatPCT(100));
-        }
-        else if (fuzzyLeverageMatches != null)
-        {
-            int count = 0;
-            for (Iterator ite = fuzzyLeverageMatches.iterator(); ite.hasNext();)
-            {
-                LeverageMatch leverageMatch = (LeverageMatch) ite.next();
-                if ((fuzzyLeverageMatches.size() > 1))
-                {
-                    matches.append(++count)
-                            .append(", ")
-                            .append(StringUtil.formatPCT(leverageMatch
-                                    .getScoreNum())).append("\r\n");
-                }
-                else
-                {
-                    matches.append(StringUtil.formatPCT(leverageMatch
-                            .getScoreNum()));
-                    break;
-                }
-            }
-        }
-        else
-        {
-            matches.append(m_bundle.getString("lb_no_match_report"));
-        }
-
-        if (targetTuv.isRepeated())
-        {
-            matches.append("\r\n")
-                    .append(m_bundle
-                            .getString("jobinfo.tradosmatches.invoice.repeated"));
-        }
-        else if (targetTuv.getRepetitionOfId() > 0)
-        {
-            matches.append("\r\n")
-                    .append(m_bundle
-                            .getString("jobinfo.tradosmatches.invoice.repetition"));
-        }
-
-        return matches;
-    }
 
     private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale,
             long p_jobId)

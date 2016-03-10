@@ -111,12 +111,13 @@ public class MindTouchHelper
     public String doTest()
     {
         CloseableHttpClient httpClient = getHttpClient();
+        HttpResponse httpResponse = null;
         try
         {
             String url = mtc.getUrl() + "/@api/deki/pages/home/info";
             HttpGet httpget = getHttpGet(url);
 
-            HttpResponse httpResponse = httpClient.execute(httpget);
+            httpResponse = httpClient.execute(httpget);
 
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == 200)
@@ -133,29 +134,37 @@ public class MindTouchHelper
             logger.warn("Fail to test MindTouch connector: " + e.getMessage());
             return "Failed to connect to MindTouch server";
         }
+        finally
+        {
+            consumeQuietly(httpResponse);
+        }
     }
 
     public void deletePage(long pageId) throws Exception
     {
         CloseableHttpClient httpClient = getHttpClient();
+        HttpResponse httpResponse = null;
         try
         {
             String url = mtc.getUrl() + "/@api/deki/pages/" + pageId;
             HttpDelete httpDelete = getHttpDelete(url);
 
-            HttpResponse httpResponse = httpClient.execute(httpDelete);
+            httpResponse = httpClient.execute(httpDelete);
 
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode != 200)
             {
-                logger.error("Fail to delete page: " + pageId
-                        + ", returning info is: "
+                logger.error("Fail to delete page: " + pageId + ", returning info is: "
                         + EntityUtils.toString(httpResponse.getEntity()));
             }
         }
         catch (Exception e)
         {
             logger.error("Fail to delete page: " + pageId, e);
+        }
+        finally
+        {
+            consumeQuietly(httpResponse);
         }
     }
 
@@ -166,12 +175,13 @@ public class MindTouchHelper
     public String getTreeXml(String pageId)
     {
         CloseableHttpClient httpClient = getHttpClient();
+        HttpResponse httpResponse = null;
         try
         {
             String url = mtc.getUrl() + "/@api/deki/pages/" + pageId + "/tree";
             HttpGet httpget = getHttpGet(url);
 
-            HttpResponse httpResponse = httpClient.execute(httpget);
+            httpResponse = httpClient.execute(httpget);
 
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == 200)
@@ -189,6 +199,10 @@ public class MindTouchHelper
         {
             logger.error("Fail to get sitemap tree: " + e.getMessage());
             return null;
+        }
+        finally
+        {
+            consumeQuietly(httpResponse);
         }
     }
 
@@ -301,13 +315,13 @@ public class MindTouchHelper
     public String getPageContents(String pageId)
     {
         CloseableHttpClient httpClient = getHttpClient();
+        HttpResponse httpResponse = null;
         try
         {
-            String url = mtc.getUrl() + "/@api/deki/pages/" + pageId
-                    + "/contents?mode=edit";
+            String url = mtc.getUrl() + "/@api/deki/pages/" + pageId + "/contents?mode=edit";
             HttpGet httpget = getHttpGet(url);
 
-            HttpResponse httpResponse = httpClient.execute(httpget);
+            httpResponse = httpClient.execute(httpget);
 
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == 200)
@@ -324,6 +338,10 @@ public class MindTouchHelper
         {
             logger.error("Fail to get page content for pageId: " + pageId, e);
         }
+        finally
+        {
+            consumeQuietly(httpResponse);
+        }
 
         return null;
     }
@@ -337,12 +355,13 @@ public class MindTouchHelper
     public String getPageTags(long pageId)
     {
         CloseableHttpClient httpClient = getHttpClient();
+        HttpResponse httpResponse = null;
         try
         {
             String url = mtc.getUrl() + "/@api/deki/pages/" + pageId + "/tags";
             HttpGet httpget = getHttpGet(url);
 
-            HttpResponse httpResponse = httpClient.execute(httpget);
+            httpResponse = httpClient.execute(httpget);
 
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == 200)
@@ -359,6 +378,10 @@ public class MindTouchHelper
         {
             logger.error("Fail to get page tags for pageId: " + pageId, e);
         }
+        finally
+        {
+            consumeQuietly(httpResponse);
+        }
 
         return null;
     }
@@ -372,12 +395,13 @@ public class MindTouchHelper
     public String getPageProperties(long pageId)
     {
         CloseableHttpClient httpClient = getHttpClient();
+        HttpResponse httpResponse = null;
         try
         {
             String url = mtc.getUrl() + "/@api/deki/pages/" + pageId + "/properties";
             HttpGet httpget = getHttpGet(url);
 
-            HttpResponse httpResponse = httpClient.execute(httpget);
+            httpResponse = httpClient.execute(httpget);
 
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == 200)
@@ -394,6 +418,10 @@ public class MindTouchHelper
         {
             logger.error("Fail to get page properties for pageId: " + pageId, e);
         }
+        finally
+        {
+            consumeQuietly(httpResponse);
+        }
 
         return null;
     }
@@ -401,12 +429,13 @@ public class MindTouchHelper
     public String getPageProperties(String url, String pagePath)
     {
         CloseableHttpClient httpClient = getHttpClient();
+        HttpResponse httpResponse = null;
         try
         {
             url += "/@api/deki/pages/=" + pagePath + "/properties";
             HttpGet httpget = getHttpGet(url);
 
-            HttpResponse httpResponse = httpClient.execute(httpget);
+            httpResponse = httpClient.execute(httpget);
 
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == 200)
@@ -422,6 +451,10 @@ public class MindTouchHelper
         catch (Exception e)
         {
             logger.error("Fail to get page properties for pagePath: " + pagePath, e);
+        }
+        finally
+        {
+            consumeQuietly(httpResponse);
         }
 
         return null;
@@ -441,10 +474,12 @@ public class MindTouchHelper
             {
                 logger.info("Retry to getPageFiles for url: " + url);
             }
+
+            HttpResponse httpResponse = null;
             try
             {
                 HttpGet httpget = getHttpGet(url);
-                HttpResponse httpResponse = httpClient.execute(httpget);
+                httpResponse = httpClient.execute(httpget);
                 int statusCode = httpResponse.getStatusLine().getStatusCode();
                 if (statusCode == 200)
                 {
@@ -460,6 +495,10 @@ public class MindTouchHelper
             {
                 logger.error("Fail to get page files for pageId: " + pageId, e);
             }
+            finally
+            {
+                consumeQuietly(httpResponse);
+            }
         }
 
         return pageFilesXml;
@@ -469,10 +508,11 @@ public class MindTouchHelper
     {
         logger.info("getPageFile url: " + url);
     	CloseableHttpClient httpClient = getHttpClient();
+    	HttpResponse httpResponse = null;
         try
         {
             HttpGet httpget = getHttpGet(url);
-            HttpResponse httpResponse = httpClient.execute(httpget);
+            httpResponse = httpClient.execute(httpget);
 
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == 200)
@@ -509,6 +549,10 @@ public class MindTouchHelper
         catch (Exception e)
         {
             logger.error("Fail to get page file for url: " + url, e);
+        }
+        finally
+        {
+            consumeQuietly(httpResponse);
         }
 
         return null;
@@ -598,12 +642,11 @@ public class MindTouchHelper
     private String getPageInfo2(String url)
     {
         CloseableHttpClient httpClient = getHttpClient();
+        HttpResponse httpResponse = null;
         try
         {
             HttpGet httpget = getHttpGet(url);
-
-            HttpResponse httpResponse = httpClient.execute(httpget);
-
+            httpResponse = httpClient.execute(httpget);
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == 200)
             {
@@ -613,6 +656,10 @@ public class MindTouchHelper
         catch (Exception e)
         {
             logger.warn("Fail to get page info for page: " + url, e);
+        }
+        finally
+        {
+            consumeQuietly(httpResponse);
         }
 
         return null;
@@ -715,6 +762,7 @@ public class MindTouchHelper
             while (times < 2)
             {
         		times++;
+        		HttpResponse response = null;
         		try
         		{
                     String tmpContent = content;
@@ -745,7 +793,7 @@ public class MindTouchHelper
                             url.getQuery(), null);
                     HttpPost httppost = getHttpPost(uri, targetLocale);
                     httppost.setEntity(reqEntity);
-                    HttpResponse response = httpClient.execute(httppost);
+                    response = httpClient.execute(httppost);
 
                     String entityContent = null;
                     if (response.getEntity() != null)
@@ -777,13 +825,16 @@ public class MindTouchHelper
                     logger.error("Fail to post contents back to MindTouch server for " + times
                             + "times for page '" + path + "'.", e);
         		}
+        		finally
+        		{
+        		    consumeQuietly(response);
+        		}
             }
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Fail to post contents back to MindTouch server for page '"
-                            + path + "'.", e);
+            logger.error("Fail to post contents back to MindTouch server for page '" + path + "'.",
+                    e);
         }
     }
 
@@ -807,6 +858,7 @@ public class MindTouchHelper
     	}
     	
         CloseableHttpClient httpClient = getHttpClient();
+        HttpResponse response = null;
         String path = null;
         String url = null;
         try
@@ -832,7 +884,7 @@ public class MindTouchHelper
             reqEntity.setContentType("application/xml; charset=UTF-8");
             httpput.setEntity(reqEntity);
 
-            HttpResponse response = httpClient.execute(httpput);
+            response = httpClient.execute(httpput);
 
             String entityContent = null;
             if (response.getEntity() != null) {
@@ -849,6 +901,10 @@ public class MindTouchHelper
             logger.error(
                     "Fail to put tags back to MindTouch server for page '"
                             + path + "'.", e);
+        }
+        finally
+        {
+            consumeQuietly(response);
         }
     }
 
@@ -869,6 +925,7 @@ public class MindTouchHelper
         while (entityContent == null && count < 3)
         {
             count++;
+            HttpResponse response = null;
             try
             {
                 String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
@@ -886,7 +943,7 @@ public class MindTouchHelper
                 FileEntity reqEntity = new FileEntity(picFile);
                 httpput.setEntity(reqEntity);
                 
-                HttpResponse response = httpClient.execute(httpput);
+                response = httpClient.execute(httpput);
 
                 if (response.getEntity() != null) {
                     entityContent = EntityUtils.toString(response.getEntity());
@@ -902,6 +959,10 @@ public class MindTouchHelper
                 logger.error(
                         "Fail to put file back to MindTouch server for file '"
                                 + filePath + "'.", e);
+            }
+            finally
+            {
+                consumeQuietly(response);
             }
         }
         if (picFile != null && picFile.exists())
@@ -957,6 +1018,7 @@ public class MindTouchHelper
     	}
     	
         CloseableHttpClient httpClient = getHttpClient();
+        HttpResponse response = null;
         String path = null;
         String url = null;
         try
@@ -991,10 +1053,11 @@ public class MindTouchHelper
             reqEntity.setContentType("application/xml; charset=UTF-8");
             httpput.setEntity(reqEntity);
 
-            HttpResponse response = httpClient.execute(httpput);
+            response = httpClient.execute(httpput);
 
             String entityContent = null;
-            if (response.getEntity() != null) {
+            if (response.getEntity() != null)
+            {
                 entityContent = EntityUtils.toString(response.getEntity());
             }
             if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
@@ -1006,8 +1069,11 @@ public class MindTouchHelper
         catch (Exception e)
         {
             logger.error(
-                    "Fail to put properties back to MindTouch server for page '"
-                            + path + "'.", e);
+                    "Fail to put properties back to MindTouch server for page '" + path + "'.", e);
+        }
+        finally
+        {
+            consumeQuietly(response);
         }
     }
 
@@ -1483,7 +1549,22 @@ public class MindTouchHelper
         return httpClient;
     }
 
-    public void shutdownHttpClient()
+	private void consumeQuietly(HttpResponse httpResponse)
+	{
+        if (httpResponse != null)
+        {
+            try
+            {
+                EntityUtils.consumeQuietly(httpResponse.getEntity());                
+            }
+            catch (Exception ignore)
+            {
+                
+            }
+        }
+	}
+
+	public void shutdownHttpClient()
     {
         if (httpClient == null)
             return;

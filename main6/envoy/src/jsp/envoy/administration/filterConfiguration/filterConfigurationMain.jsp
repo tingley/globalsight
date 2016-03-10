@@ -14,21 +14,29 @@ session="true" %>
 <jsp:useBean id="export"  scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="imports"  scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <%
-	ResourceBundle bundle = PageHandler.getBundle(session);
+    ResourceBundle bundle = PageHandler.getBundle(session);
     Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
-	String title = bundle.getString("lb_filter_configuration");
-	String helperText = bundle
-			.getString("helper_text_filter_configuration");
-	PermissionSet perms = (PermissionSet) session
-			.getAttribute(WebAppConstants.PERMISSIONS);
-	boolean hasAddFilter = perms
-			.getPermissionFor(Permission.FILTER_CONFIGURATION_ADD_FILTER);
-	boolean hasEditFilter = perms
-			.getPermissionFor(Permission.FILTER_CONFIGURATION_EDIT_FILTER);
-	String exportUrl = export.getPageURL()+"&action=export";
-	String importsUrl = imports.getPageURL()+ "&action=importFilter";
-	// GBS-3697
-	Vector locales = (Vector) request.getAttribute(LocalePairConstants.LOCALES);
+    String title = bundle.getString("lb_filter_configuration");
+    String helperText = bundle
+            .getString("helper_text_filter_configuration");
+    PermissionSet perms = (PermissionSet) session
+            .getAttribute(WebAppConstants.PERMISSIONS);
+    boolean hasAddFilter = perms
+            .getPermissionFor(Permission.FILTER_CONFIGURATION_ADD_FILTER);
+    boolean hasEditFilter = perms
+            .getPermissionFor(Permission.FILTER_CONFIGURATION_EDIT_FILTER);
+    String exportUrl = export.getPageURL()+"&action=export";
+    String importsUrl = imports.getPageURL()+ "&action=importFilter";
+    // GBS-3697
+    Vector locales = (Vector) request.getAttribute(LocalePairConstants.LOCALES);
+    String fp_filterId = (String)request.getAttribute("filterConfigurationId");
+    //GBS-4053
+    boolean hasBaseFilter = perms
+            .getPermissionFor(Permission.BASE_TEXT_FILTER_VIEW);
+    boolean hasBaseFilter_InternalText = perms
+            .getPermissionFor(Permission.BASE_TEXT_FILTER_INTERNAL_TEXT);
+    boolean hasBaseFilter_Escaping = perms
+            .getPermissionFor(Permission.BASE_TEXT_FILTER_ESCAPING);
 %>
 <HTML>
 <!-- This is envoy\administration\filterConfiguration\filterConfigurationMain.jsp -->
@@ -88,7 +96,19 @@ session="true" %>
         <script type="text/javascript" src="/globalsight/includes/filter/BaseFilter.js"></script>
         <script type="text/javascript" src="/globalsight/includes/filter/PlainTextFilter.js"></script>
         <script type="text/javascript" src="/globalsight/includes/filter/QAFilter.js"></script>
-        
+        <script type="text/javascript">
+        function loadExpand()
+        {
+            var bj = "img_" + <%=fp_filterId%>;
+            var obj = document.getElementById(bj);
+            if(obj != null)
+            {
+                var id = "filterName_" + <%=fp_filterId%>;
+                obj.src = "/globalsight/images/ecllapse.jpg";
+                document.getElementById(id).style.display = "block";
+            }
+        }
+        </script>
         <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
         <%@ include file="/envoy/common/warning.jspIncl" %>
         <SCRIPT LANGUAGE="JavaScript">
@@ -116,6 +136,10 @@ session="true" %>
             <%
             }
             %>
+            //GBS-4053
+            var hasBaseFilter = "<%=hasBaseFilter%>";
+            var hasBaseFilter_InternalText = "<%=hasBaseFilter_InternalText%>";
+            var hasBaseFilter_Escaping = "<%=hasBaseFilter_Escaping%>";
         </SCRIPT>
     </HEAD>
     <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" onload="loadGuides();loadFilterConfigurations();">
@@ -379,10 +403,10 @@ session="true" %>
                                             </tr>
                                             <tr>
                                                 <td colspan='3'>
-                                                	<select name='xmlRuleConfiguredTag_cond_attributes' 
-                                                			id='xmlRuleConfiguredTag_cond_attributes'
-                                                			multiple style="width: 100%">
-                                                	</select>
+                                                    <select name='xmlRuleConfiguredTag_cond_attributes' 
+                                                            id='xmlRuleConfiguredTag_cond_attributes'
+                                                            multiple style="width: 100%">
+                                                    </select>
                                                 </td>
                                                 <td valign='top'><input value=" <%=bundle.getString("lb_remove")%> " type="button"
                                                     style="width: 100%"
@@ -406,10 +430,10 @@ session="true" %>
                                             </tr>
                                             <tr>
                                                 <td>
-                                                	<select name='xmlRuleConfiguredTag_trans_attributes' 
-                                                			id='xmlRuleConfiguredTag_trans_attributes'
-                                                			multiple style="width: 100%">
-                                                	</select>
+                                                    <select name='xmlRuleConfiguredTag_trans_attributes' 
+                                                            id='xmlRuleConfiguredTag_trans_attributes'
+                                                            multiple style="width: 100%">
+                                                    </select>
                                                 </td>
                                                 <td valign='top'><input value=" <%=bundle.getString("lb_remove")%> " type="button"
                                                     style="width: 100%"
@@ -419,27 +443,27 @@ session="true" %>
                                         </table></td>
                                     </tr>
                                     <tr id="xmlRuleConfiguredTag_trans_attr_1" style="display:none">
-                                    	<td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_SegmentationRule")%>:</td>
+                                        <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_SegmentationRule")%>:</td>
                                         <td class='htmlFilter_right_td'>
-                                        	<nobr><input value='1' type='radio' name='xmlRuleConfiguredTag_segRule' id="xmlRuleConfiguredTag_segRule_1" /><font class='specialFilter_dialog_label'><%=bundle.getString("lb_filter_EmbedAttrValue")%></font></nobr>
-                                        	<br />
-                                        	<nobr><input value='2' type='radio' name='xmlRuleConfiguredTag_segRule' id="xmlRuleConfiguredTag_segRule_2" /><font class='specialFilter_dialog_label'><%=bundle.getString("lb_filter_TreatAttrValue")%></font></nobr>
+                                            <nobr><input value='1' type='radio' name='xmlRuleConfiguredTag_segRule' id="xmlRuleConfiguredTag_segRule_1" /><font class='specialFilter_dialog_label'><%=bundle.getString("lb_filter_EmbedAttrValue")%></font></nobr>
+                                            <br />
+                                            <nobr><input value='2' type='radio' name='xmlRuleConfiguredTag_segRule' id="xmlRuleConfiguredTag_segRule_2" /><font class='specialFilter_dialog_label'><%=bundle.getString("lb_filter_TreatAttrValue")%></font></nobr>
                                         </td>
                                     </tr>
                                     <tr id="xmlRuleConfiguredTag_content_incl_0" style="display:none">
-                                    	<td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_Type")%>:</td>
+                                        <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_Type")%>:</td>
                                         <td class='htmlFilter_right_td'>
-                                        	<nobr><input value='1' type='radio' name='xmlRuleConfiguredTag_inclType' id="xmlRuleConfiguredTag_inclType_1" /><font class='specialFilter_dialog_label'><%=bundle.getString("lb_filter_Include")%></font></nobr>
-                                        	<nobr><input value='2' type='radio' name='xmlRuleConfiguredTag_inclType' id="xmlRuleConfiguredTag_inclType_2" /><font class='specialFilter_dialog_label'><%=bundle.getString("lb_filter_Exclude")%></font></nobr>
+                                            <nobr><input value='1' type='radio' name='xmlRuleConfiguredTag_inclType' id="xmlRuleConfiguredTag_inclType_1" /><font class='specialFilter_dialog_label'><%=bundle.getString("lb_filter_Include")%></font></nobr>
+                                            <nobr><input value='2' type='radio' name='xmlRuleConfiguredTag_inclType' id="xmlRuleConfiguredTag_inclType_2" /><font class='specialFilter_dialog_label'><%=bundle.getString("lb_filter_Exclude")%></font></nobr>
                                         </td>
                                     </tr>
                                     <tr id="xmlRuleConfiguredTag_content_from_attribute" style="display:none">
-                                    	<td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_srcCmt")%>:</td>
+                                        <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_srcCmt")%>:</td>
                                         <td class='htmlFilter_right_td'>
-                                        	<nobr><input value='1' type='radio' name='xmlRuleConfiguredTag_from' id="xmlRuleConfiguredTag_fromAttribute" onclick="xmlFilter.onFromAttributeClick()" /><font class='specialFilter_dialog_label'><%=bundle.getString("lb_filter_fromAttribute")%> - </font></nobr>
-                                        	<nobr><font class='specialFilter_dialog_label'><%=bundle.getString("lb_filter_AttrName")%>: </font><input type='text' name='xmlRuleConfiguredTag_attributeName' id="xmlRuleConfiguredTag_attributeName" /></nobr>
-                                        	<br />
-                                        	<nobr><input value='2' type='radio' name='xmlRuleConfiguredTag_from' id="xmlRuleConfiguredTag_fromTagContent" onclick="xmlFilter.onFromAttributeClick()" /><font class='specialFilter_dialog_label'><%=bundle.getString("lb_filter_fromTagContent")%></font></nobr>
+                                            <nobr><input value='1' type='radio' name='xmlRuleConfiguredTag_from' id="xmlRuleConfiguredTag_fromAttribute" onclick="xmlFilter.onFromAttributeClick()" /><font class='specialFilter_dialog_label'><%=bundle.getString("lb_filter_fromAttribute")%> - </font></nobr>
+                                            <nobr><font class='specialFilter_dialog_label'><%=bundle.getString("lb_filter_AttrName")%>: </font><input type='text' name='xmlRuleConfiguredTag_attributeName' id="xmlRuleConfiguredTag_attributeName" /></nobr>
+                                            <br />
+                                            <nobr><input value='2' type='radio' name='xmlRuleConfiguredTag_from' id="xmlRuleConfiguredTag_fromTagContent" onclick="xmlFilter.onFromAttributeClick()" /><font class='specialFilter_dialog_label'><%=bundle.getString("lb_filter_fromTagContent")%></font></nobr>
                                         </td>
                                     </tr>
                                 </table>
@@ -486,10 +510,10 @@ session="true" %>
                                             </tr>
                                             <tr>
                                                 <td colspan='3'>
-                                                	<select name='xmlFilterCdatapostFilter_cond_items' 
-                                                			id='xmlFilterCdatapostFilter_cond_items'
-                                                			multiple style="width: 100%">
-                                                	</select>
+                                                    <select name='xmlFilterCdatapostFilter_cond_items' 
+                                                            id='xmlFilterCdatapostFilter_cond_items'
+                                                            multiple style="width: 100%">
+                                                    </select>
                                                 </td>
                                                 <td valign='top'><input value=" <%=bundle.getString("lb_remove")%> " type="button"
                                                     style="width: 100%"
@@ -507,7 +531,7 @@ session="true" %>
                                 <tr>
                                     <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_Translatable")%>:</td>
                                     <td class='htmlFilter_right_td'>
-                                    	<input type='checkbox' id="xmlFilterCdatapostFilter_trans" />
+                                        <input type='checkbox' id="xmlFilterCdatapostFilter_trans" />
                                     </td>
                                 </tr>
                             </table>
@@ -629,10 +653,10 @@ session="true" %>
                                             </tr>
                                             <tr>
                                                 <td>
-                                                	<select name='xmlRuleFilter_pi_trans_attributes' 
-                                                			id='xmlRuleFilter_pi_trans_attributes'
-                                                			multiple style="width: 100%">
-                                                	</select>
+                                                    <select name='xmlRuleFilter_pi_trans_attributes' 
+                                                            id='xmlRuleFilter_pi_trans_attributes'
+                                                            multiple style="width: 100%">
+                                                    </select>
                                                 </td>
                                                 <td valign='top'><input value=" <%=bundle.getString("lb_remove")%> " type="button"
                                                     style="width: 100%"
@@ -657,19 +681,19 @@ session="true" %>
                                     <%=bundle.getString("lb_filter_SrcCmtXmlComment")%>
                                 </label>
                             </div>
-					<table id='xmlRuleFilter_srcCmtXmlComment_AddContent' style='margin: 20px; margin-top: 20px; margin-bottom: 20px; margin-left: 20px'>
-						<tr>
-							<td class='htmlFilter_left_td'><%=bundle.getString("lb_content")%>:</td>
-							<td class='htmlFilter_right_td'><input type='text'
-								id='xmlRuleFilter_srcCmtXmlComment_name'></td>
-						</tr>
-						<tr>
-							<td class='htmlFilter_left_td'><%=bundle.getString("lb_is_regex")%>:</td>
-							<td class='htmlFilter_right_td'><input type='checkbox'
-								id='xmlRuleFilter_srcCmtXmlComment_isRE'></input></td>
-						</tr>
-					</table>
-					<div id="div_button_xmlRuleFilter_srcCmtXmlComment_add" style="float:left;margin-left:100px;margin-top:10px">
+                    <table id='xmlRuleFilter_srcCmtXmlComment_AddContent' style='margin: 20px; margin-top: 20px; margin-bottom: 20px; margin-left: 20px'>
+                        <tr>
+                            <td class='htmlFilter_left_td'><%=bundle.getString("lb_content")%>:</td>
+                            <td class='htmlFilter_right_td'><input type='text'
+                                id='xmlRuleFilter_srcCmtXmlComment_name'></td>
+                        </tr>
+                        <tr>
+                            <td class='htmlFilter_left_td'><%=bundle.getString("lb_is_regex")%>:</td>
+                            <td class='htmlFilter_right_td'><input type='checkbox'
+                                id='xmlRuleFilter_srcCmtXmlComment_isRE'></input></td>
+                        </tr>
+                    </table>
+                    <div id="div_button_xmlRuleFilter_srcCmtXmlComment_add" style="float:left;margin-left:100px;margin-top:10px">
                                 <center>
                                     <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='xmlFilter.saveSrcCmtXmlComment()'/><input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('xmlRuleFilter_srcCmtXmlComment_Dialog')"/>
                                 </center>

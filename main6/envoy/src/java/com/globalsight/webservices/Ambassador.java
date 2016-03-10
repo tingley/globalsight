@@ -6013,7 +6013,7 @@ public class Ambassador extends AbstractWebService
      * @return String An XML description which contains file profiles
      * 
      */
-    public String getFileProfilesForL10nProfile(String p_accessToken, String p_l10nProfileName,
+    public String getFileProfilesForL10NProfile(String p_accessToken, String p_l10nProfileName,
             String p_companyName) throws WebServiceException
     {
         if (StringUtil.isEmpty(p_accessToken))

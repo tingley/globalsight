@@ -828,12 +828,6 @@ public class Exporter
     {
         try
         {
-            // If job is in exported state, it must have been "uploadXliff(..)".
-            if (Job.EXPORTED.equals(wf.getJob().getState()))
-            {
-                return;
-            }
-
             long jobId = wf.getJob().getJobId();
             BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(jobId);
             if (bcj != null)
@@ -846,7 +840,6 @@ public class Exporter
                     File trgFile = new File(finalFileName);
                     BlaiseHelper helper = new BlaiseHelper(blc);
                     helper.uploadXliff(bcj.getBlaiseEntryId(), trgFile);
-                    logger.info("Blaise file is uploaded successfully: " + finalFileName);
                 }
             }
         }

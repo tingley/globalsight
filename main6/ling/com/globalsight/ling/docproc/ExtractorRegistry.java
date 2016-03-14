@@ -115,7 +115,7 @@ public class ExtractorRegistry implements IFormatNames
             "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",
-            "com.globalsight.ling.docproc.merger.javaprop.JavapropPostMergeProcessor",
+            "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",

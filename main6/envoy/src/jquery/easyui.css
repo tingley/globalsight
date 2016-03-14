@@ -128,7 +128,7 @@
 .panel-title {
   font-size: 12px;
   font-weight: bold;
-  color: #0E2D5F;
+  color: #ffffff;
   height: 16px;
   line-height: 16px;
 }
@@ -183,12 +183,12 @@
 }
 .window {
   overflow: hidden;
-  padding: 5px;
+  padding: 0.5px;
   border-width: 1px;
   border-style: solid;
 }
 .window .window-header {
-  background: transparent;
+  background: #0C1476;
   padding: 0px 0px 6px 0px;
 }
 .window .window-body {
@@ -239,8 +239,6 @@
 .window,
 .window-shadow {
   position: absolute;
-  -moz-border-radius: 5px 5px 5px 5px;
-  -webkit-border-radius: 5px 5px 5px 5px;
   border-radius: 5px 5px 5px 5px;
 }
 .window-shadow {
@@ -256,10 +254,6 @@
 }
 .window {
   background-color: #0C1476;
-  background: -webkit-linear-gradient(top,#EFF5FF 0,#0C1476 20%);
-  background: -moz-linear-gradient(top,#EFF5FF 0,#0C1476 20%);
-  background: -o-linear-gradient(top,#EFF5FF 0,#0C1476 20%);
-  background: linear-gradient(to bottom,#EFF5FF 0,#0C1476 20%);
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#EFF5FF,endColorstr=#0C1476,GradientType=0);
 }

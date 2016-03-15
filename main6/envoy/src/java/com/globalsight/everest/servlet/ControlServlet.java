@@ -690,7 +690,7 @@ public class ControlServlet extends HttpServlet
                     e2);
 
             EnvoyServletException e = new EnvoyServletException(
-                            EnvoyServletException.EX_GENERAL, "Invalid termbase id");
+                            EnvoyServletException.EX_GENERAL, "Invalid number");
 
             // If the response has already been started, there's nothing we can
             // do about it.

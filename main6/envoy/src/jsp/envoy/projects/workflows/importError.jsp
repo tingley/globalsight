@@ -40,6 +40,21 @@ function cleanError()
 	}
 }
 
+function messageDetails(i)
+{
+	var index = "message"+i;
+    var target=document.getElementById(index);
+
+    if (target.style.display=="block")
+    {
+         target.style.display="none";
+    } 
+    else 
+    {
+         target.style.display="block";
+    }
+	
+}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"

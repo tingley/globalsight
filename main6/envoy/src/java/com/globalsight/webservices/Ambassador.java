@@ -2426,7 +2426,7 @@ public class Ambassador extends AbstractWebService
                     pivotCurrencyName = pivotCurrency.getDisplayName();
                     // calculate expenses
                     Cost cost = ServerProxy.getCostingEngine().calculateCost(
-                            job, pivotCurrency, true, Cost.EXPENSE);
+                            job, pivotCurrency, true, Cost.REVENUE);
                     if (cost != null)
                     {
                         Money m = cost.getEstimatedCost();

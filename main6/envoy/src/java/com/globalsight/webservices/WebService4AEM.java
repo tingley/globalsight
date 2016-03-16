@@ -136,7 +136,7 @@ public interface WebService4AEM
      * @return
      * @throws WebServiceException
      */
-    public String getJobStatus(String p_accessToken, String p_jobName)
+    public String getStatus(String p_accessToken, String p_jobName)
             throws WebServiceException;
 
     /**

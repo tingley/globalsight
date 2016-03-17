@@ -17,10 +17,15 @@
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
 import org.apache.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 
 // globalsight
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageState;
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -157,12 +162,50 @@ public class WorkflowImportErrorHandler
             {
                 sb.append("");
             }
-            sb.append("</TD>\n");
+            String exceptionAsString = getMessage(curPage.getSourcePage());
+            if (exceptionAsString != null && exceptionAsString.length()>0)
+            {
+                sb.append("&nbsp;&nbsp;&nbsp;<a style = 'font-size: 9pt;' href= \"##\" id = \"hrefa"+i+"\" onclick='messageDetails("+i+")'>"
+                        + "Show Details</a></TD><TR><TD colspan=\"4\"><DIV  id = \"message"+i+"\" style = \"display: none;width:100%;\">"
+                        + "<TEXTAREA readonly style=\"width:100%;border-style:none;min-height: 300px;\">"
+                        +exceptionAsString+"</TEXTAREA></DIV></TD><TR>");
+            }
+            else
+            {
+                sb.append("</TD>\n");
+            }
             sb.append("</TR>\n");
         }
         return sb.toString();
     }
 
+    
+    //This method gets ExceptionMessage from DB.
+    private String getMessage(SourcePage curPage)
+    {
+        String exceptionMessage = curPage.getRequest().getExceptionAsString();
+        String stackTrace = null;
+        if (exceptionMessage!=null && exceptionMessage.length()>0)
+        {
+            try 
+            {
+                Document document = DocumentHelper.parseText(exceptionMessage);
+                Element root = document.getRootElement();
+                @SuppressWarnings("unchecked")
+                List<Element> childList = root.elements("stackTrace");
+                stackTrace= childList.get(0).getText().replaceAll("&gt;", ">").replaceAll("&lt;", "<")
+                        .replaceAll("&#xd;", "").replace("\\\"", "\"").replace("\\r\\n", "");
+            } 
+            catch (DocumentException ignore) 
+            {
+            }
+        }
+        return stackTrace;
+    }
+    
+    
+    
+    
     /**
     * Looks up the import error message for a given target page
     * @param targetPage -- the target page

@@ -29,7 +29,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
@@ -40,7 +39,6 @@ import com.globalsight.everest.jobhandler.JobHandlerLocal;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.request.RequestImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -130,11 +128,11 @@ public class ImportErrorHandler extends JobDetailsHandler
                             : exception.getTopLevelMessage(uiLocale))
                             : GeneralExceptionConstants.DEFAULT_MSG_STRING)
                     + "</SPAN>");
-            String exceptionAsString = getMessage(p_job.getId(),curPage.getId());
+            String exceptionAsString = getMessage(curPage);
             if (exceptionAsString != null && exceptionAsString.length()>0)
             {
-                sB.append("&nbsp;&nbsp;&nbsp;<a href= \"##\" onclick='messageDetails("+i+")'>Deatils</a></TD>"
-                        + "<TR><TD colspan=\"4\"><DIV  id = \"message"+i+"\" style = \"display: none;width:100%;\">"
+                sB.append("&nbsp;&nbsp;&nbsp;<a style = 'font-size: 9pt;' href= \"##\" id = \"hrefa"+i+"\" onclick='messageDetails("+i+")'>"
+                        + "Show Details</a></TD><TR><TD colspan=\"4\"><DIV  id = \"message"+i+"\" style = \"display: none;width:100%;\">"
                         + "<TEXTAREA readonly style=\"width:100%;border-style:none;min-height: 300px;\">"
                         +exceptionAsString+"</TEXTAREA></DIV></TD><TR>");
             }
@@ -148,11 +146,9 @@ public class ImportErrorHandler extends JobDetailsHandler
     }
 
     //This method gets ExceptionMessage from DB.
-    private String getMessage(Long jobId,Long pageId)
+    private String getMessage(SourcePage curPage)
     {
-        String hql = "from RequestImpl re where re.job.id = ? and re.pageId = ?";
-        RequestImpl re = (RequestImpl) HibernateUtil.getFirst(hql, jobId,pageId);
-        String exceptionMessage = re.getExceptionAsString();
+        String exceptionMessage = curPage.getRequest().getExceptionAsString();
         String stackTrace = null;
         if (exceptionMessage!=null && exceptionMessage.length()>0)
         {
@@ -165,14 +161,11 @@ public class ImportErrorHandler extends JobDetailsHandler
                 stackTrace= childList.get(0).getText().replaceAll("&gt;", ">").replaceAll("&lt;", "<")
                         .replaceAll("&#xd;", "").replace("\\\"", "\"").replace("\\r\\n", "");
             } 
-            catch (DocumentException e) 
+            catch (DocumentException ignore) 
             {
-                logger.info(e);
             }
         }
         return stackTrace;
     }
-    
-    static private final Logger logger = Logger
-            .getLogger(ImportErrorHandler.class);
+
 }

@@ -42,15 +42,23 @@ function cleanError()
 
 function messageDetails(i)
 {
-	var index = "message"+i;
-    var target=document.getElementById(index);
-
+	var indexDiv = "message"+i;
+    var indexA = "hrefa"+i;
+    var target=document.getElementById(indexDiv);
     if (target.style.display=="block")
     {
+    	if (document.getElementById(indexA).innerHTML == "Hide Details")
+    	{
+    		document.getElementById(indexA).innerHTML = "Show Details";
+    	}
          target.style.display="none";
     } 
     else 
     {
+    	if (document.getElementById(indexA).innerHTML == "Show Details")
+    	{
+    		document.getElementById(indexA).innerHTML = "Hide Details";
+    	}
          target.style.display="block";
     }
 	

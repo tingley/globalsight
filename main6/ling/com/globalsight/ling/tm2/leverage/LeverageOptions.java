@@ -92,6 +92,11 @@ public class LeverageOptions
     {
         return m_tmProfile.isSaveExactMatchSegToProjectTM();
     }
+    
+    public boolean saveMTedSegToProjectTM()
+    {
+        return m_tmProfile.isSaveMTedSegToProjectTM();
+    }
 
     public long getSaveTmId()
     {

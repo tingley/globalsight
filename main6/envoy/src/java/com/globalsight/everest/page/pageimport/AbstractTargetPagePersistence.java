@@ -313,6 +313,7 @@ public abstract class AbstractTargetPagePersistence implements
                         p_sourcePage.getId());
                 paramMap.put(MachineTranslator.TARGET_LOCALE_ID,
                         p_targetLocale.getIdAsLong());
+                paramMap.put(MachineTranslator.MT_PROFILE, mtProfile);
                 boolean isXlf = MTHelper2.isXlf(p_sourcePage.getId());
                 paramMap.put(
                         MachineTranslator.NEED_SPECAIL_PROCESSING_XLF_SEGS,
@@ -332,7 +333,10 @@ public abstract class AbstractTargetPagePersistence implements
                         sourceLocale, p_targetLocale);
                 if (isLocalePairSupportedByMT)
                 {
-                    unAppliedTus.removeAll(appliedTuTuvMap.keySet());
+                    if (!mtProfile.isIgnoreTMMatch())
+                    {
+                        unAppliedTus.removeAll(appliedTuTuvMap.keySet());
+                    }
                     appliedTuTuvMap = applyMTMatches(p_sourcePage,
                             p_sourceTuvMap, sourceLocale, p_targetLocale,
                             unAppliedTus, appliedTuTuvMap);
@@ -1146,7 +1150,7 @@ public abstract class AbstractTargetPagePersistence implements
                         machineTranslatedGxml, jobId);
             }
             // replace the content in target tuv with mt result
-            if (mtConfidenceScore == 100 && isGetMTResult && tagMatched)
+            if (isGetMTResult && tagMatched)
             {
                 // GBS-3722
                 if (mtProfile.isIncludeMTIdentifiers())

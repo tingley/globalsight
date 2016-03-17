@@ -184,6 +184,18 @@ public class TranslationMemoryProfile extends PersistentObject
     private boolean m_isSaveLocSegToProjectTM = true;
     
     private boolean m_isSaveExactMatchSegToProjectTM = true;
+    
+    private boolean m_isSaveMTedSegToProjectTM = true;
+
+    public boolean isSaveMTedSegToProjectTM()
+    {
+        return m_isSaveMTedSegToProjectTM;
+    }
+
+    public void setSaveMTedSegToProjectTM(boolean p_isSaveMTedSegToProjectTM)
+    {
+        this.m_isSaveMTedSegToProjectTM = p_isSaveMTedSegToProjectTM;
+    }
 
     private Set<TMPAttribute> attributes;
     private String choiceIfAttNotMatch = null;

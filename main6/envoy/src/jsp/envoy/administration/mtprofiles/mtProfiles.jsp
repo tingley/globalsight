@@ -292,12 +292,7 @@ function findSelectedMTP()
                     out.print(mtProfile.getMtEngine());
                 %>
             </amb:column>
-             <amb:column label="lb_show_in_editor" sortBy="<%=MTProfileComparator.SHOW_IN_EDITOR%>" width="8%">
-                <%
-                    out.print(mtProfile.isShowInEditor()?"yes":"no");
-                %>
-            </amb:column>
-             <amb:column label="lb_tm_mt_confidence_score2" sortBy="<%=MTProfileComparator.MT_CONFIDENCE_SCORE%>" width="11%">
+             <amb:column label="lb_tm_mt_threshold_level2" sortBy="<%=MTProfileComparator.MT_CONFIDENCE_SCORE%>" width="11%">
                 <% out.print(mtProfile.getMtConfidenceScore()); %>
             </amb:column>
             <% if (isSuperAdmin) { %>

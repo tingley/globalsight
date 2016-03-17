@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileConstants;
 import com.globalsight.machineTranslation.AbstractTranslator;
 import com.globalsight.machineTranslation.MTHelper;
@@ -128,7 +129,8 @@ public class SafabaProxy extends AbstractTranslator implements MachineTranslator
             String password = (String) paramMap.get(TMProfileConstants.MT_SAFA_PASSWORD);
             String client = (String) paramMap.get(TMProfileConstants.MT_SAFA_CLIENT);
             String langPair = SafabaTranslateUtil.getLocalePairs(sourceLocale, targetLocale);
-
+            MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap
+                    .get(MachineTranslator.MT_PROFILE);
             List<String> allSegments = new ArrayList<String>();
             for (int i = 0; i < segments.length; i++)
             {
@@ -168,7 +170,7 @@ public class SafabaProxy extends AbstractTranslator implements MachineTranslator
 
             String[] translatedSegs = SafabaTranslateUtil.batchTranslate(host,
                     Integer.parseInt(port), companyName, password, client,
-                    langPair, allSegmentsArr, maxWaitingTimeInSeconds);
+                    langPair, allSegmentsArr, maxWaitingTimeInSeconds, mtProfile);
 
             if (translatedSegs == null
                     || translatedSegs.length != allSegmentsArr.length)
@@ -244,10 +246,12 @@ public class SafabaProxy extends AbstractTranslator implements MachineTranslator
             String password = (String) paramMap.get(TMProfileConstants.MT_SAFA_PASSWORD);
             String client = (String) paramMap.get(TMProfileConstants.MT_SAFA_CLIENT);
             String langPair = SafabaTranslateUtil.getLocalePairs(sourceLocale, targetLocale);
+            MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap
+                    .get(MachineTranslator.MT_PROFILE);
             
             return SafabaTranslateUtil.batchTranslate(host,
                     Integer.parseInt(port), companyName, password, client,
-                    langPair, segments, maxWaitingTimeInSeconds);
+                    langPair, segments, maxWaitingTimeInSeconds,mtProfile);
         }
         catch (Exception e)
         {

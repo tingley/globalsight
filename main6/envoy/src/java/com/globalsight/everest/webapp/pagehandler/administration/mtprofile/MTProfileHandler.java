@@ -230,9 +230,6 @@ public class MTProfileHandler extends PageHandler
                 .append(".TIMESTAMP=").append(df.format(mtp.getTimestamp()))
                 .append(NEW_LINE);
         buffer.append("MachineTranslationProfile.").append(mtp.getId())
-                .append(".SHOW_IN_EDITOR=").append(mtp.isShowInEditor())
-                .append(NEW_LINE);
-        buffer.append("MachineTranslationProfile.").append(mtp.getId())
                 .append(".INCLUDE_MT_IDENTIFIERS=")
                 .append(mtp.isIncludeMTIdentifiers()).append(NEW_LINE);
         buffer.append("MachineTranslationProfile.").append(mtp.getId())

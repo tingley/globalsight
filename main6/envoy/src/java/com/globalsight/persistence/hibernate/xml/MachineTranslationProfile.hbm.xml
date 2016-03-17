@@ -46,7 +46,9 @@
 		<property name="companyid" type="java.lang.Long">
 			<column name="COMPANY_ID" />
 		</property>
-		<property name="showInEditor" column="SHOW_IN_EDITOR" type="yes_no"
+	<!-- 	<property name="showInEditor" column="SHOW_IN_EDITOR" type="yes_no"
+			not-null="false" /> -->
+		<property name="logDebugInfo" column="LOG_DEBUG_INFO" type="yes_no"
 			not-null="false" />
 		<property name="includeMTIdentifiers" column="INCLUDE_MT_IDENTIFIERS"
 			type="yes_no" not-null="false" />
@@ -58,6 +60,12 @@
 		</property>
 		<property name="active" column="IS_ACTIVE" type="yes_no"
 			not-null="false" />
+		<property name="ignoreTMMatch" column="IGNORE_TM_MATCHES" type="yes_no"
+		not-null="false" />
+		<property name="msMaxLength" column="MS_MAX_LENGTH" type="long"
+		not-null="false" />
+		<property name="msTransType" column="MS_TRANS_TYPE" type="string"
+		not-null="false" />
 		<set name="exInfo" table="mt_profile_extent_info" cascade="all">
 			<key column="MT_PROFILE_ID"></key>
 

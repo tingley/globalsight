@@ -51,10 +51,53 @@ public class MachineTranslationProfile implements java.io.Serializable
     private Set<MachineTranslationExtentInfo> exInfo = new HashSet<MachineTranslationExtentInfo>();
     private String jsonInfo;
     private long mtConfidenceScore;
-    private boolean showInEditor;
     private boolean includeMTIdentifiers = false;
     private String mtIdentifierLeading;
     private String mtIdentifierTrailing;
+    private boolean logDebugInfo;
+    private boolean ignoreTMMatch;
+    private long msMaxLength;
+    private String msTransType;
+
+    public String getMsTransType()
+    {
+        return msTransType;
+    }
+
+    public void setMsTransType(String msTransType)
+    {
+        this.msTransType = msTransType;
+    }
+
+    public long getMsMaxLength()
+    {
+        return msMaxLength;
+    }
+
+    public void setMsMaxLength(long msMaxLength)
+    {
+        this.msMaxLength = msMaxLength;
+    }
+
+    public boolean isIgnoreTMMatch()
+    {
+        return ignoreTMMatch;
+    }
+
+    public void setIgnoreTMMatch(boolean ignoreTMMatch)
+    {
+        this.ignoreTMMatch = ignoreTMMatch;
+    }
+
+    public boolean isLogDebugInfo()
+    {
+        return logDebugInfo;
+    }
+
+    public void setLogDebugInfo(boolean logDebugInfo)
+    {
+        this.logDebugInfo = logDebugInfo;
+    }
 
     public String getJsonInfo()
     {
@@ -64,16 +107,6 @@ public class MachineTranslationProfile implements java.io.Serializable
     public void setJsonInfo(String jsonInfo)
     {
         this.jsonInfo = jsonInfo;
-    }
-
-    public boolean isShowInEditor()
-    {
-        return showInEditor;
-    }
-
-    public void setShowInEditor(boolean showInEditor)
-    {
-        this.showInEditor = showInEditor;
     }
 
     public boolean isIncludeMTIdentifiers()

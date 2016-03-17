@@ -444,15 +444,11 @@ if (stages != null)
 String str_stageSegments = stb_segments.toString();
 
 //if show mt in segment editor
-boolean show_in_editor = false;
 boolean show_MT = false;
 try 
 {
 	  String showMachineTranslation = (String) sessionMgr.getAttribute("showMachineTranslation");
 	  show_MT = (new Boolean(showMachineTranslation)).booleanValue();
-	  
-    String showInEditor = (String) sessionMgr.getAttribute(MTHelper2.SHOW_IN_EDITOR);
-    show_in_editor = (new Boolean(showInEditor)).booleanValue();
 } 
 catch (Exception e) { }
 %>
@@ -2044,13 +2040,7 @@ function showMatchdetailInfo()
 
 <!-- TB Matches -->
 <HR style="position: relative; top: 0; left: 0;" COLOR="#0C1476" WIDTH="95%">
-<% if (show_in_editor && hasXliff) { %>
 <DIV id="idTbMatches" STYLE="position: relative; margin-left: 5px;height:auto!important;height:85px; min-height:85px;">
-<% } else if ( (show_in_editor && !hasXliff) || (!show_in_editor && hasXliff) ) { %>
-<DIV id="idTbMatches" STYLE="position: relative; margin-left: 5px;height:auto!important;height:85px; min-height:85px;">
-<% } else {%>
-<DIV id="idTbMatches" STYLE="position: relative; margin-left: 5px;height:auto!important;height:85px; min-height:85px;">
-<% }%>
   <NOBR>
   <SPAN CLASS="standardTextBold">
     <% if (b_haveTermbase)
@@ -2118,11 +2108,7 @@ function showMatchdetailInfo()
   {
 %>
 <HR style="position: relative; top: 0; left: 0;" COLOR="#0C1476" WIDTH="95%">
-<% if (show_in_editor) { %>
 <DIV id="idXliffTrans" STYLE="position: relative; margin-left: 5px;overflow: hidden;">
-<% } else {%>
-<DIV id="idXliffTrans" STYLE="position: relative; margin-left: 5px;overflow: hidden;">
-<% }%>
 <nobr>
   <SPAN CLASS="standardTextBold">Xliff Alt</SPAN>
   <SPAN CLASS="standardTextItalic">right-click for actions</SPAN>
@@ -2166,14 +2152,7 @@ function showMatchdetailInfo()
 
 <!-- TM Matches -->
 <HR style="position: relative; top: 0; left: 0;" COLOR="#0C1476" WIDTH="95%">
-<% if (show_in_editor && hasXliff) { %>
 <DIV id="idTmMatches" STYLE="position: relative; margin-left: 5px; height:auto!important;height:85px; min-height:85px;">
-<% } else if ( (show_in_editor && !hasXliff) || (!show_in_editor && hasXliff) ) { %>
-<DIV id="idTmMatches" STYLE="position: relative; margin-left: 5px; height:auto!important;height:85px; min-height:85px;">
-<% } else { %>
-<DIV id="idTmMatches" STYLE="position: relative; margin-left: 5px; height:auto!important;height:85px; min-height:85px;">
-<% } %>
-
   <nobr>
   <SPAN CLASS="standardTextBold"><%=lb_tmMatchResults%></SPAN>
   <SPAN CLASS="standardTextItalic"><%=bundle.getString("lb_right_click_for_actions") %></SPAN>
@@ -2256,14 +2235,7 @@ function showMatchdetailInfo()
 
 <!-- Stages -->
 <HR style="position: relative; top: 0; left: 0;" COLOR="#0C1476" WIDTH="95%">
-<% if (show_in_editor && hasXliff) { %>
 <DIV id="idStages" STYLE="position: relative; margin-left: 5px;height:auto!important;height:85px; min-height:85px;">
-<% } else if ( (show_in_editor && !hasXliff) || (!show_in_editor && hasXliff) ) { %>
-<DIV id="idStages" STYLE="position: relative; margin-left: 5px;height:auto!important;height:85px; min-height:85px;">
-<% } else {%>
-<DIV id="idStages" STYLE="position: relative; margin-left: 5px;height:auto!important;height:85px; min-height:85px;">
-<% } %>
-
   <nobr>
   <SPAN CLASS="standardTextBold"><%=lb_segmentVersions%></SPAN>
   <SPAN CLASS="standardTextItalic"><%=bundle.getString("lb_right_click_for_actions") %></SPAN>

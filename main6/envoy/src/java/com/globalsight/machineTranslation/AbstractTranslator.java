@@ -27,7 +27,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.projecthandler.EngineEnum;
-import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileConstants;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -125,24 +125,29 @@ public abstract class AbstractTranslator implements MachineTranslator
                 translatedSegs = trSafaba(sourceLocale, targetLocale, segments);
                 break;
             case MS_Translator:
-                String type = MTHelper.getMTConfig("ms_translator.translate.type");
-                // old version
-                if ("1".equals(type))
-                {
-                    translatedSegs = trMs1(sourceLocale, targetLocale, segments, containTags);
-                }
-                else
-                {
-                    // Seems MS Translator cannot return valid GXML for certain languages
-                    // such as "sr_Cyrl", we have to try pure text way.
-                    String trgSrLang = (String) getMtParameterMap().get(
-                            MachineTranslator.SR_LANGUAGE);
-                    if ("sr-Cyrl".equalsIgnoreCase(trgSrLang)) {
-                        translatedSegs = trMs1(sourceLocale, targetLocale, segments, containTags);
-                    } else {
-                        translatedSegs = trMs2(sourceLocale, targetLocale, segments);
-                    }
-                }
+                    HashMap paramMap = getMtParameterMap();
+                    MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap
+                            .get(MachineTranslator.MT_PROFILE);
+                    String type = mtProfile.getMsTransType();
+                     // old version
+                     if ("1".equals(type))
+                     {
+                         translatedSegs = trMs1(sourceLocale, targetLocale, segments, containTags);
+                     }
+                     else
+                     {
+                         // Seems MS Translator cannot return valid GXML for certain languages
+                         // such as "sr_Cyrl", we have to try pure text way.
+                        String trgSrLang = (String) getMtParameterMap().get(MachineTranslator.SR_LANGUAGE);
+                        if ("sr-Cyrl".equalsIgnoreCase(trgSrLang))
+                        {
+                            translatedSegs = trMs1(sourceLocale, targetLocale, segments, containTags);
+                        }
+                        else
+                        {
+                            translatedSegs = trMs2(sourceLocale, targetLocale, segments);
+                        }
+                     }
                 break;
             case IPTranslator:
                 translatedSegs = trIPTranslator(sourceLocale, targetLocale, segments);
@@ -378,8 +383,14 @@ public abstract class AbstractTranslator implements MachineTranslator
         int charCount = 0;
         for (int i = 0; i < segmentsNoStyleInfo.length; i++)
         {
-            if (segmentsNoStyleInfo[i].length() > TMProfileConstants.MT_MS_MAX_CHARACTER_NUM)
+            HashMap paramMap = getMtParameterMap();
+            MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap
+                    .get(MachineTranslator.MT_PROFILE);
+            if (segmentsNoStyleInfo[i].length() > mtProfile.getMsMaxLength())
             {
+                CATEGORY.info("Current segment length is " + segmentsNoStyleInfo[i].length()
+                        + " which is longer than" + mtProfile.getMsMaxLength()
+                        + ". The segment will be ignored. Segment info :" + segmentsNoStyleInfo[i]);
                 if (subList.size() > 0)
                 {
                     translatedList.addAll(doMSTranslation(subList, sourceLocale, targetLocale));
@@ -388,7 +399,7 @@ public abstract class AbstractTranslator implements MachineTranslator
                 subList.clear();
                 charCount = 0;
             }
-            else if (charCount + segmentsNoStyleInfo[i].length() > TMProfileConstants.MT_MS_MAX_CHARACTER_NUM)
+            else if (charCount + segmentsNoStyleInfo[i].length() > mtProfile.getMsMaxLength())
             {
                 i--;
                 translatedList.addAll(doMSTranslation(subList, sourceLocale,
@@ -488,9 +499,12 @@ public abstract class AbstractTranslator implements MachineTranslator
         for (int i = 0; i < segments.length; i++)
         {
             subList.add(segments[i]);
+            HashMap paramMap = getMtParameterMap();
+            MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap
+                    .get(MachineTranslator.MT_PROFILE);
             // sentences passed to MS MT should be less than 1000 characters.
             if (i == segments.length - 1
-                    || charCount + removeTags(segments[i + 1]).length() > TMProfileConstants.MT_MS_MAX_CHARACTER_NUM)
+                    || charCount + removeTags(segments[i + 1]).length() > mtProfile.getMsMaxLength())
             {
                 Object[] segmentObjArray = subList.toArray();
                 String[] segmentsArray = new String[segmentObjArray.length];

@@ -304,6 +304,31 @@ public abstract class DbUtil
         }
     }
     
+    public void execute (String sql, List args) 
+    {
+        Connection conn = null;
+        PreparedStatement st = null;
+        try
+        {
+            conn = getConnection();
+            st = conn.prepareStatement(sql);
+            for (int i = 0; i < args.size(); i++)
+            {
+                st.setObject(i + 1, args.get(i));
+            }
+            st.execute();
+        }
+        catch(Exception e)
+        {
+            log.error(e);
+        }
+        finally
+        {
+            closeStatement(st);
+            closeConn(conn);
+        }
+    }
+    
     public List<Long> executeWithIds (String sql, Execute e) throws SQLException
     {
     	List<Long> rIds = new ArrayList<Long>();

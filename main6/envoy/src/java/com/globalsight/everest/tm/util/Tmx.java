@@ -97,6 +97,7 @@ public class Tmx
     static final public String PROP_NEXT_HASH = "x-hash-next";
     static final public String PROP_JOB_ID = "x-creationjobid";
     static final public String PROP_JOB_NAME = "x-creationjobname";
+    static final public String PROP_MT_NAME = "x-mt";
 
     static final public String PROP_TM_UDA_SID = "x-idiom-tm-uda-SID";
     //

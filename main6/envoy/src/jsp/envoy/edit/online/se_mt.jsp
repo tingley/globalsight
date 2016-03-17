@@ -24,14 +24,11 @@ String mtTranslationMessageURL = mtTranslation.getPageURL()
 + "&action=" + MTHelper2.ACTION_GET_MT_TRANSLATION_MESSAGE;
 	
 //if show mt in segment editor
-boolean show_in_editor = false;
 boolean show_MT = false;
 try 
 {
 	String showMachineTranslation = (String) sessionMgr.getAttribute("showMachineTranslation");
 	show_MT = (new Boolean(showMachineTranslation)).booleanValue();
-    String showInEditor = (String) sessionMgr.getAttribute(MTHelper2.SHOW_IN_EDITOR);
-    show_in_editor = (new Boolean(showInEditor)).booleanValue();
 } 
 catch (Exception e) { }
 

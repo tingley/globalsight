@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.machineTranslation.MTHelper;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 
 import safaba.api.SafabaSecureClient;
 
@@ -99,6 +99,7 @@ public class SafabaTranslateUtil
      * @param langPair Locale pairs. The pair should in the pattern like "ENUS-DEDE"
      * @param textList The text list to be translated.
      * @param waitTime How many seconds the server will wait, until timeout.
+     * @param mtProfile 
      * @return The translated string list.
      * @throws Exception e
      */
@@ -106,10 +107,10 @@ public class SafabaTranslateUtil
     public static String[] batchTranslate(final String hostName, final int port,
             final String companyName, final String password,
             final String safabaClient, final String langPair,
-            final String[] textList, int waitTime)
+            final String[] textList, int waitTime, MachineTranslationProfile mtProfile)
             throws Exception
     {
-        if (MTHelper.isLogDetailedInfo(SafabaProxy.ENGINE_SAFABA))
+        if (mtProfile.isLogDebugInfo())
         {
             for (int i = 0; i < textList.length; i++)
             {
@@ -149,7 +150,7 @@ public class SafabaTranslateUtil
             if (back != null)
             {
                 String[] result = new String[back.size()];
-                if (MTHelper.isLogDetailedInfo(SafabaProxy.ENGINE_SAFABA))
+                if (mtProfile.isLogDebugInfo())
                 {
                     for (int i = 0; i < back.size(); i++)
                     {

@@ -40,7 +40,6 @@ public class MTHelper2
     private static final Logger logger = Logger.getLogger(MTHelper2.class);
 
     public static final String ENGINE_NAME = "ENGINE_NAME";
-    public static final String SHOW_IN_EDITOR = "SHOW_IN_EDITOR";
     public static final String MT_TRANSLATION = "MT_TRANSLATION";
 
     public static final String ACTION_GET_MT_TRANSLATION = "getMtTranslation";

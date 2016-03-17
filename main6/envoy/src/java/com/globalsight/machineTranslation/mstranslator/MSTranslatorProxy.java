@@ -16,9 +16,7 @@
  */
 package com.globalsight.machineTranslation.mstranslator;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -28,8 +26,8 @@ import org.datacontract.schemas._2004._07.Microsoft_MT_Web_Service_V2.TranslateO
 import org.tempuri.SoapService;
 import org.tempuri.SoapServiceLocator;
 
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.machineTranslation.AbstractTranslator;
-import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.microsofttranslator.api.V2.LanguageService;
@@ -234,7 +232,10 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             Locale p_targetLocale, String[] segments)
             throws MachineTranslationException
     {
-        if (MTHelper.isLogDetailedInfo(ENGINE_MSTRANSLATOR))
+        HashMap paramMap = getMtParameterMap();
+        MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap
+                .get(MachineTranslator.MT_PROFILE);
+        if (mtProfile.isLogDebugInfo())
         {
             for (int i = 0; i < segments.length; i++)
             {
@@ -252,7 +253,6 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
         targetLang = checkLang(targetLang, targetCountry);
 
         String exceptionMsg = null;
-        HashMap paramMap = getMtParameterMap();
         String endpoint = (String) paramMap
                 .get(MachineTranslator.MSMT_ENDPOINT);
         String msCategory = (String) paramMap
@@ -324,7 +324,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             {
                 results[i] = result[i].getTranslatedText();
             }
-            if (MTHelper.isLogDetailedInfo(ENGINE_MSTRANSLATOR))
+            if (mtProfile.isLogDebugInfo())
             {
                 for (int i = 0; i < results.length; i++)
                 {

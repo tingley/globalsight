@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileConstants;
 import com.globalsight.machineTranslation.AbstractTranslator;
 import com.globalsight.machineTranslation.MTHelper;
@@ -53,10 +54,11 @@ public class IPTranslatorProxy extends AbstractTranslator implements
         String key = (String) paramMap.get(MTProfileConstants.MT_IP_KEY);
         boolean isXlf = MTHelper.isXlf(paramMap);
         String mtEngineWordCountKey = getKeyForMtWordCount();
-
+        MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap
+                .get(MachineTranslator.MT_PROFILE);
         return IPTranslatorUtil.doBatchTranslation(url, key,
                 getPair(sourceLocale), getPair(targetLocale), p_strings, isXlf,
-                mtEngineWordCountKey);
+                mtEngineWordCountKey,mtProfile);
     }
 
     private String getPair(Locale locale)

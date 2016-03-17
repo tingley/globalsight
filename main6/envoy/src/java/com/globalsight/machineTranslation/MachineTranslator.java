@@ -62,6 +62,7 @@ public interface MachineTranslator
         
     // AO MT needs this to judge if support locale pair.
     public static final String MT_PROFILE_ID = "mtProfileID";
+    public static final String MT_PROFILE = "mtProfile";
     public static final String SOURCE_PAGE_ID = "sourcePageID";
     public static final String CONTAIN_TAGS = "containTags";
     public static final String TARGET_LOCALE_ID = "targetLocaleId";

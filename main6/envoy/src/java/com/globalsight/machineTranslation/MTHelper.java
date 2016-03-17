@@ -457,26 +457,6 @@ public class MTHelper
         return factory.getProperties(MT_EXTRA_CONFIGS);
     }
 
-    /**
-     * User may want more detailed information in "GlobalSight.log" when use MT,
-     * flag "mt.log.detailed.info" is for this purpose, default false.
-     * 
-     * @return boolean
-     */
-    public static boolean isLogDetailedInfo(String engineName)
-    {
-        if (engineName == null || engineName.trim().length() == 0)
-            return false;
-
-        String key = engineName.toLowerCase() + ".log.detailed.info";
-        String logDetailedInfo = getMTConfig(key);
-        if ("true".equalsIgnoreCase(logDetailedInfo))
-        {
-            return true;
-        }
-        return false;
-    }
-
 /**
      * If XML attribute has "<" in it ,it will parse error. This method replaces
      * the attribute "<" into "&lt;".

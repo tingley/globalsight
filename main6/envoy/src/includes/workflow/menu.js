@@ -1,6 +1,9 @@
 var Menu = {
 	showProperty : false,
 	init : function() {
+		UI.node_menu.hide();
+		UI.condition_menu.hide();
+		
 		UI.body.bind("click.menu", function(e) {
 			UI.node_menu.hide();
 			UI.condition_menu.hide();

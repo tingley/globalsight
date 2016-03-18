@@ -531,7 +531,7 @@ public class GraphicalWorkflowInstanceHandler extends PageHandler implements
     }
 
     // save the workflow...
-    private void saveWorkflow(HttpSession p_session,
+    public void saveWorkflow(HttpSession p_session,
             SessionManager p_sessionMgr, Object p_workflowObject,
             Hashtable p_modifiedTaskInfoMap) throws EnvoyServletException
     {

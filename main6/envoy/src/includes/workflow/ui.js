@@ -31,7 +31,8 @@ var UI = {
 		Toolbar.init();
 		this.initBodyMethod();
 		Dialog.init();
-		Navigation.init();
+		if (typeof (Navigation) != "undefined")
+		    Navigation.init();
 	},
 	
 	updateCursorForPoint : function(e){
@@ -95,7 +96,9 @@ var UI = {
 			if (UI.button.value == UI.button.point) {
 				UI.bodyDiv.unbind("mousemove.creating");
 				Model.hideSnapLine();
-				Navigation.draw();
+				
+				if (typeof (Navigation) != "undefined")
+				    Navigation.draw();
 			}
 		});
 	},

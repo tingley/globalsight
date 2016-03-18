@@ -1582,18 +1582,19 @@ public class WorkflowProcessAdapter extends WorkflowHelper
     {
         boolean isExist = false;
 
-        Vector outgoingArrows = p_wfTask.getOutgoingArrows();
-
-        for (Enumeration e = outgoingArrows.elements(); e.hasMoreElements();)
-        {
-            WorkflowArrowInstance wfArrow = (WorkflowArrowInstance) e
-                    .nextElement();
-            if (p_transition.getName().equals(wfArrow.getName()))
-            {
-                isExist = true;
-                break;
-            }
-        }
+//        Vector outgoingArrows = p_wfTask.getOutgoingArrows();
+//
+//        for (Enumeration e = outgoingArrows.elements(); e.hasMoreElements();)
+//        {
+//            WorkflowArrowInstance wfArrow = (WorkflowArrowInstance) e
+//                    .nextElement();
+//            if (p_transition.getName().equals(wfArrow.getName()) 
+//                    && p_transition.getTo().getName().endsWith(wfArrow.getTargetNode().getName()))
+//            {
+//                isExist = true;
+//                break;
+//            }
+//        }
 
         return isExist;
     }

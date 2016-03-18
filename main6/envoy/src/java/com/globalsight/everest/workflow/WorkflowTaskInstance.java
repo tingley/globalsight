@@ -457,7 +457,7 @@ public class WorkflowTaskInstance extends WorkflowTask implements Serializable
      * set the task id during the NodeInstance to WorkflowTaskInstance
      * conversion.
      */
-    void setTaskId(long p_taskId)
+    public void setTaskId(long p_taskId)
     {
         m_taskInstanceId = p_taskId;
     }

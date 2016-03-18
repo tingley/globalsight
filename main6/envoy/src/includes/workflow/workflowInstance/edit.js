@@ -1,5 +1,13 @@
+var workflowDetailData;
+var workflowCompanyId;
+
 $(function() {
-	UI.editable = false;
+	
+	workflowDetailData = getAjaxValue("getWorkflowDetailDataForEdit");
+	workflowDetailData = eval("(" + workflowDetailData + ")");
+	
+	workflowCompanyId = workflowDetailData["companyId"];
+	
 	initUI();
 	initWorkflow();
 	window.onresize=function(){
@@ -7,27 +15,25 @@ $(function() {
 	}		
 });
 
-
 function updateSize(){
-    var w = $(window).width() - 30;
-	$("#viewport").css("width", w);
+
 }
 
 function initUI() {
-	UI.intArg();	 
-	
-	UI.canvas.attr({
-		width : 2000,
-		height : 2000
-	});
-	
-	UI.snapLineCanvas.attr({
-		width : 2000,
-		height : 2000
-	});
-	
-	UI.showGrid();
+	UI.initUI();
 	updateSize();
+	initMethod();
+}
+
+function initMethod(){
+	$("#saveButton").click(function() {
+		
+		
+		if (validateWorkflow()){
+			var xml = getWorkflowXml();
+			saveWorkflowInstance(xml);
+		}
+	});	
 }
 
 function addStart(n) {
@@ -48,10 +54,7 @@ function addActivity(n) {
 	var node = new ActivityNode();
 	node.id = n["id"];
 	node.init(parseFloat(n["x"]), parseFloat(n["y"]));
-	node.showTxt = function() {
-		$('#name' + this.id).html(n["activityName"]);
-		$('#user' + this.id).html(n["roleName"]);			
-	};
+	node.json = n["json"];
 	node.state = n["state"];
 	Model.add(node);
 }
@@ -64,7 +67,8 @@ function addCondition(n) {
 }
 
 function initWorkflow(){
-	var data = getAjaxValue("getWorkflowInstance");
+	
+	var data = getAjaxValue("getWorkflowInstanceForEdit");
 	data = eval("(" + data + ")");
 	
 	var lines = data["lines"];

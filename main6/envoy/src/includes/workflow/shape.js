@@ -184,8 +184,8 @@ function Node() {
 	// the x, y is used in print.
 	this.showTxt = function() {
 		if (this.type == "activityNode"){
-			var name = this.getAssignmentValue("role_name");
-			var user = this.getDisplayActivity();
+			var user = this.getAssignmentValue("role_name");
+			var name = this.getDisplayActivity();
 			$('#name' + this.id).html(name);
 			$('#user' + this.id).html(user);			
 		}	

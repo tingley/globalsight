@@ -90,7 +90,7 @@
 <SCRIPT SRC="/globalsight/includes/workflow/model.js" type="text/javascript"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/workflow/workflowData.js" type="text/javascript"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/workflow/workflow.js" type="text/javascript"></SCRIPT>
-
+<SCRIPT SRC="/globalsight/includes/workflow/workflowUtil.js" type="text/javascript"></SCRIPT>
 
 
 <!-- end -->

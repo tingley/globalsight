@@ -36,7 +36,7 @@ var Utils = {
 		Utils.i++;
 		var b = Math.random();
 		var a = (b + new Date().getTime());
-		return a.toString(16).replace(".", "") + Utils.i;
+		return "new" + a.toString(16).replace(".", "") + Utils.i;
 	},
 	newZIndex : function() {
 		this.i++;

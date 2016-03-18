@@ -39,6 +39,7 @@ function reviewMode()
     {
     	action="false";
 	}
+    alert(url_refresh+"&"+reviewModeText+"=" + action);
     document.location = url_refresh+"&"+reviewModeText+"=" + action;
 }
 
@@ -765,7 +766,7 @@ function contextForX(e)
     }
     else
     {
-        //contextForReadOnly();
+        contextForReadOnly(o, e);
     }
 }
 
@@ -803,9 +804,7 @@ function contextForSegment(obj, e)
         new ContextItem("Edit segment",
           function(){editSegment(ids[0], ids[1], ids[2])}),
         new ContextItem("<B>Add/edit comment</B>",
-          function(){editComment(ids[0], ids[1], ids[2])}),
-        new ContextItem("Segment details",
-          function(){showDetails(ids[0], ids[1], ids[2])})
+          function(){editComment(ids[0], ids[1], ids[2])})
         ];
     }
     else
@@ -814,11 +813,11 @@ function contextForSegment(obj, e)
         new ContextItem("<B>Edit segment</B>",
           function(){editSegment(ids[0], ids[1], ids[2])}),
         new ContextItem("Add/edit comment",
-          function(){editComment(ids[0], ids[1], ids[2])}),
-        new ContextItem("Segment details",
-          function(){showDetails(ids[0], ids[1], ids[2])})
+          function(){editComment(ids[0], ids[1], ids[2])})
         ];
     }
+    popupoptions.push(new ContextItem("Segment details",
+            function(){showDetails(ids[0], ids[1], ids[2])}));
     
     ContextMenu.display(popupoptions, e);
 }
@@ -898,7 +897,7 @@ function showDetails(tuId, tuvId, subId){
                     +'<tr class="standardText"><td noWrap><B>'+lb_tagInfo+':</B></td><td><table border="0">'+ result.str_segementPtag +'</table></td></tr>'
                     +'<tr class="standardText"><td noWrap><B>'+lb_sid+':</B></td><td>'+ result.str_sid +'</td></tr>'
                     +'<tr class="standardText"><td><B>'+lb_modify_by+':</B></td><td>'+ result.str_lastModifyUser +'</td></tr>'
-                    +'<tr class="standardText"><td><B>Source:</B></td><td>'+result.m_sourceSegment+'</td></tr>'
+                    +'<tr class="standardText"><td><B>Source:</B></td><td '+result.m_sourceDIR+'>'+result.m_sourceSegment+'</td></tr>'
         //TM Match
         var tm_matchhtml = '';
         if (result.tm_match.length > 0)
@@ -924,7 +923,9 @@ function showDetails(tuId, tuvId, subId){
             top:Y+scrollTop,
             content:detailhtml + tm_matchhtml + mt_matchhtml + foothtml,
             minimizable:false,
-            closable:true
+            closable:true,
+            collapsible:false,
+            maximizable:false
         });
      });
 }

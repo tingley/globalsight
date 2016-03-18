@@ -83,6 +83,7 @@ import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUpl
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.EmojiUtil;
@@ -387,8 +388,10 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     }
                     
                     String sourceSegment = getHtmlSegment(str_sourceSegment,str_dataType,state);
+                    String sourceDIR = getDIR(state,str_sourceSegment,true);
                     json.put("str_segementPtag", str_segementPtag);
                     json.put("m_sourceSegment", sourceSegment);
+                    json.put("m_sourceDIR", sourceDIR);
                     List<SegmentMatchResult> list = view.getTmMatchResults();
                     StringBuffer tmMatchesStr = new StringBuffer();
                     StringBuffer mtTranslationStr = new StringBuffer();
@@ -399,6 +402,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                         for (int i=0;i<list.size();i++)
                         {
                             matchResult = list.get(i);
+                            String targetDIR = getDIR(state,matchResult.getMatchContent(),false);
                             if (matchResult.getTmName().endsWith("_MT"))
                             {
                                 long sourcePageId = state.getSourcePageId();
@@ -415,23 +419,23 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                                                     +"<tr class=\"standardText\"><td><B>Target Match %:</B></td>"
                                                     +"<td>"+Math.round(matchResult.getMatchPercentage())+"%</td></tr>"
                                                     +"<tr class=\"standardText\"><td ><B>Source:</B></td>"
-                                                    +"<td>"+sourceSegment+"</td></tr>"
+                                                    +"<td "+sourceDIR+">"+sourceSegment+"</td></tr>"
                                                     +"<tr class=\"standardText\"><td><B>Target:</B></td>"
-                                                    +"<td>"+getHtmlSegment(matchResult.getMatchContent(),str_dataType,state)+"</td><tr>"
+                                                    +"<td "+targetDIR+">"+getHtmlSegment(matchResult.getMatchContent(),str_dataType,state)+"</td><tr>"
                                                     +"</table>");
                                 }
                             }
                             else
                             {
                                 tmMatchesStr = tmMatchesStr.append(
-                                        "<table><tr class=\"standardText\"><td style=\"width:120px\"><B>match"+j+":</B></td>"
-                                              +"<td>"+"("+Math.round(matchResult.getMatchPercentage())+"%/"+ matchResult.getTmName()+")</td></tr>"
+                                        "<table><tr class=\"standardText\"><td style=\"width:120px\"><B>Match&nbsp;&nbsp;"+j+":</B></td>"
+                                              +"<td>"+"("+Math.round(matchResult.getMatchPercentage())+"%&nbsp;&nbsp;/&nbsp;&nbsp;"+ matchResult.getTmName()+")</td></tr>"
                                               +"<tr class=\"standardText\"><td><B>Target Match Type:</B></td>"
                                               +"<td>"+matchResult.getMatchType()+"</td></tr>"
                                               +"<tr class=\"standardText\"><td><B>Source:</B></td>"
-                                              +"<td>"+getHtmlSegment(matchResult.getMatchContentSource(),str_dataType,state)
+                                              +"<td "+sourceDIR+">"+getHtmlSegment(matchResult.getMatchContentSource(),str_dataType,state)
                                               +"<tr class=\"standardText\"><td><B>Target:</B></td>"
-                                              +"<td>"+getHtmlSegment(matchResult.getMatchContent(),str_dataType,state)+"</td></tr>"
+                                              +"<td "+targetDIR+">"+getHtmlSegment(matchResult.getMatchContent(),str_dataType,state)+"</td></tr>"
                                               +"<tr height=\"10px\"><td></td></tr></table>");
                                 j++;
                             }
@@ -503,6 +507,32 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         p_response.getWriter().write(jsonStr);
     }
 
+    private String getDIR (EditorState state,String segment,boolean isSource) 
+    {
+        String dir = "";
+        boolean rtlLocale = false;
+        TuImpl tu = null;
+        try {
+                if (isSource)
+                {
+                    rtlLocale = EditUtil.isRTLLocale(state.getSourceLocale());
+                }
+                else
+                {
+                    rtlLocale = EditUtil.isRTLLocale(state.getTargetLocale());
+                }
+//                tu = SegmentTuUtil.getTuById(state.getTuId(), jobId);
+//                boolean isLocalizable = tu.isLocalizable();
+                if (rtlLocale 
+                        && Text.containsBidiChar(segment))
+                {
+                    dir = " DIR=rtl";
+                }
+        } catch (Exception ignore) {
+        }
+        return dir;
+    }
+    
     /**
      * Gets html segment and write back.
      * 

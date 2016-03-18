@@ -1055,11 +1055,11 @@ function openEditorWindow(url, e)
 {
 	if (b_editInSameWindow)
     {
-        openParaEditor(url, e);
+        openParaEditor(url+"&openEditorType=inlineEditor", e);
     }
     else
     {
-        openListEditor(url, e);
+        openListEditor(url+"&openEditorType=popupEditor", e);
     }
 }
 

@@ -34,7 +34,7 @@ public class ClientTester
 	private static int MAX_SEND_SIZE = 5 * 1000 * 1024;//5M
 	private static String HOST_NAME = "localhost";
 	private static String HOST_PORT = "8080";
-	private static String userName = "york";
+	private static String userName = "belindaadmin";
 	private static String password = "password";
 	private static boolean enableHttps = false;
 
@@ -69,7 +69,9 @@ public class ClientTester
 //                    fullAccessToken);
 //            testImportWorkOfflineFiles(ambassador, fullAccessToken, identifyKey);
 			
-			testDownloadXliffOfflineFile(ambassador, fullAccessToken);
+//			testDownloadXl/iffOfflineFile(ambassador, fullAccessToken);
+			String xml = ambassador.nextTus(fullAccessToken, "4192", "belinda", "en_us", "HE-IL", "2", "0");
+			System.out.println(xml);
 		}
 		catch (Exception ex)
 		{

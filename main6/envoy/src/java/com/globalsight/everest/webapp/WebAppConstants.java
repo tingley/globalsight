@@ -868,4 +868,6 @@ public interface WebAppConstants
 
     public static final List<String> FILE_EXTENSION_LIST = Arrays.asList("bmp", "jpg", "png",
             "gif", "jpeg", "jpe");
+    public static final List<String> OPEN_EDITOR_TYPE = Arrays.asList("postReviewEditor",
+            "popupEditor");
 }

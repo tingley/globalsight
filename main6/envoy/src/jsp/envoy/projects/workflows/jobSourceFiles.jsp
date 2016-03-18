@@ -686,6 +686,8 @@ function openViewerWindow(url)
 {
 	document.getElementById("idBody").focus();
 	
+	url += "&openEditorType=popupEditor";
+	
 	var ajaxUrl = "<%=checkPageExistURL%>&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>")) +"&targetLocale="+"<%=thisTargetLocaleId%>"+ url;
 	$.get(ajaxUrl,function(data){
 		if(data==""){
@@ -723,18 +725,42 @@ function openPageForImage(url, e, displayName)
     	}
     }
     
-    var lb_context_item_popup_editor   = "<%=bundle.getString("lb_context_item_popup_editor") %>";
+    var lb_context_item_popup_editor   = "<%=bundle.getString("lb_context_item_view_trans_status") %>";
     lb_context_item_popup_editor   = fontB1 + lb_context_item_popup_editor + fontB2;
+    var lb_context_item_post_review_editor = "<%=bundle.getString("lb_context_item_post_review_editor")%>";
     
-    var popupoptions = [new ContextItem(lb_context_item_popup_editor, function(){ openImageEditor(url, e);})];
+    var popupEditorUrl = url + "&openEditorType=popupEditor";
+    var postReviewUrl = url + "&openEditorType=postReviewEditor";
+    
+    var popupoptions = [new ContextItem(lb_context_item_popup_editor, function(){ openImagePopupEditor(popupEditorUrl, e);}),
+                        		new ContextItem(lb_context_item_post_review_editor,function(){ openImagePostRwEditor(postReviewUrl,e);})];
     
     ContextMenu.display(popupoptions, e); 
 }
 
-function openImageEditor(url, e)
+function openImagePopupEditor(url, e)
 {
 	document.getElementById("idBody").focus();
-	
+	var ajaxUrl = "<%=checkPageExistURL%>&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>")) +"&targetLocale="+"<%=thisTargetLocaleId%>"+ url;
+	$.get(ajaxUrl,function(data){
+		if(data==""){
+        	if (w_viewer != null && !w_viewer.closed)
+            {
+                w_viewer.focus();
+                return;
+            }
+
+            var style = "resizable=yes,top=0,left=0,height=" + (screen.availHeight - 60) + ",width=" + (screen.availWidth - 20);
+            w_viewer = window.open('${pictureEditor.pageURL}' + url, 'Viewer', style);
+		}else{
+			alert(data);
+		}
+	});
+}
+
+function openImagePostRwEditor(url, e)
+{
+	document.getElementById("idBody").focus();
 	var ajaxUrl = "<%=checkPageExistURL%>&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>")) +"&targetLocale="+"<%=thisTargetLocaleId%>"+ url;
 	$.get(ajaxUrl,function(data){
 		if(data==""){
@@ -754,7 +780,7 @@ function openImageEditor(url, e)
 
 function openImageWindow(url, e)
 {
-    openImageEditor(url, e);
+	openImagePopupEditor(url+ "&openEditorType=popupEditor", e);
 }
 
 function openNewViewerWindow(url)
@@ -806,15 +832,20 @@ function contextForPage(url, e, displayName)
     var showInContextReview = (1 == incontextReviewPDF);
     var inctxTitle = "Open In Context Review";
 
+    var popupEditorUrl = url + "&openEditorType=popupEditor";
+    var postReviewUrl = url + "&openEditorType=postReviewEditor";
+    var editSrcPageUrl = url + "&openEditorType=editSrcPage";
+    var inContextReview = url +"&openEditorType=inContextReview"
+    
     if (allowEditSource)
     {
        popupoptions = [
          new ContextItem("<B><%=bundle.getString("lb_context_item_view_trans_status")%></B>",
-           function(){ openViewerWindow(url);}),
+           function(){ openViewerWindow(popupEditorUrl);}),
          new ContextItem("<%=bundle.getString("lb_context_item_post_review_editor")%>",
-           function(){ openNewViewerWindow(url);}),
+           function(){ openNewViewerWindow(postReviewUrl);}),
          new ContextItem("<%=bundle.getString("lb_context_item_edit_src_page")%>",
-           function(){ openGxmlEditor(url,"${sourceEditor.pageURL}");}, !canEditSource)
+           function(){ openGxmlEditor(editSrcPageUrl,"${sourceEditor.pageURL}");}, !canEditSource)
        ];
        
        if (showInContextReview)
@@ -827,15 +858,15 @@ function contextForPage(url, e, displayName)
     {
        popupoptions = [
          new ContextItem("<B><%=bundle.getString("lb_context_item_view_trans_status")%></B>",
-           function(){ openViewerWindow(url);}),
+           function(){ openViewerWindow(popupEditorUrl);}),
          new ContextItem("<%=bundle.getString("lb_context_item_post_review_editor")%>",
-           function(){ openNewViewerWindow(url);})
+           function(){ openNewViewerWindow(postReviewUrl);})
        ];
        
        if (showInContextReview)
        {
     	   popupoptions[popupoptions.length] = new ContextItem(inctxTitle,
-       	        function(){ openInContextReview(url);});
+       	        function(){ openInContextReview(inContextReview);});
        }
     }
     

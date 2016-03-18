@@ -821,7 +821,9 @@ function contextForPage(url, e, displayName)
     
     var showInContextReview = (1 == incontextReviewPDF);
     var inctxTitle = "Open In Context Review";
-    
+    var inlineEditorUrl = url + "&openEditorType=inlineEditor";
+    var popupEditorUrl = url + "&openEditorType=popupEditor";
+    var postRwEditorUrl = url + "&openEditorType=postReviewEditor";
     if (b_canEditInSameWindow)
     {
     	lb_context_item_inline_editor  = "<%=bundle.getString("lb_context_item_inline_editor") %>";
@@ -838,11 +840,11 @@ function contextForPage(url, e, displayName)
         }
       popupoptions = [
         new ContextItem(lb_context_item_inline_editor,
-          function(){ openParaEditor(url, e);}),
+          function(){ openParaEditor(inlineEditorUrl, e);}),
         new ContextItem(lb_context_item_popup_editor,
-          function(){ openListEditor(url, e);}),
+          function(){ openListEditor(popupEditorUrl, e);}),
         new ContextItem(lb_context_item_post_review_editor,
-          function(){ openNewListEditor(url, e);})
+          function(){ openNewListEditor(postRwEditorUrl, e);})
         ];
       
       if (showInContextReview)
@@ -862,8 +864,8 @@ function contextForPage(url, e, displayName)
       }
   
       popupoptions = [
-   		new ContextItem(title, function(){ openListEditor(url, e);}),
-   		new ContextItem(title2, function(){ openNewListEditor(url, e);})
+   		new ContextItem(title, function(){ openListEditor(popupEditorUrl, e);}),
+   		new ContextItem(title2, function(){ openNewListEditor(postRwEditorUrl, e);})
         ];
       
       if (showInContextReview)
@@ -895,15 +897,42 @@ function openPageForImage(url, e, displayName)
     	}
     }
     
-    var lb_context_item_popup_editor   = "<%=bundle.getString("lb_context_item_popup_editor") %>";
-    lb_context_item_popup_editor   = fontB1 + lb_context_item_popup_editor + fontB2;
+    var popupEditorUrl = url + "&openEditorType=popupEditor";
+    var postRwEditorUrl = url + "&openEditorType=postReviewEditor";
+    var lb_context_item_popup_editor = "<%=bundle.getString("lb_context_item_popup_editor") %>";
+	if (!b_editInSameWindow)
+    {
+    	lb_context_item_popup_editor   = fontB1 + lb_context_item_popup_editor + fontB2;
+    }
+    var lb_context_item_post_review_editor = "<%=bundle.getString("lb_context_item_post_review_editor") %>";
     
-    var popupoptions = [new ContextItem(lb_context_item_popup_editor, function(){ openImageEditor(url, e);})];
+    
+    var popupoptions = [new ContextItem(lb_context_item_popup_editor, function(){ openImgForPopupEditor(popupEditorUrl, e);}), 
+                        		new ContextItem(lb_context_item_post_review_editor, function(){ openImgPostReviewEditor(postRwEditorUrl, e);})];
     
     ContextMenu.display(popupoptions, e); 
 }
 
-function openImageEditor(url, e)
+function openImgPostReviewEditor(url, e)
+{
+    if (!canClose())
+    {
+        cancelEvent(e);
+        raiseSegmentEditor();
+    }
+    else
+    {
+        hideContextMenu();
+
+       url = "<%=pictureEditorUrl%>" + url;
+        w_editor = window.open(url, 'MainEditor',
+             'resizable,top=0,left=0,height=' + (screen.availHeight - 60) +
+            ',width=' + (screen.availWidth - 20));
+    }
+}
+
+
+function openImgForPopupEditor(url, e)
 {
     if (!canClose())
     {
@@ -923,7 +952,7 @@ function openImageEditor(url, e)
 
 function openImageWindow(url, e)
 {
-    openImageEditor(url, e);
+	openImgForPopupEditor(url+"&openEditorType=popupEditor", e);
 }
 
 function openParaEditor(url, e)

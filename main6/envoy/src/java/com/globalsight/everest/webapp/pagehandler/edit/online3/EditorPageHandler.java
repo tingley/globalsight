@@ -1381,6 +1381,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
                 .booleanValue();
         String pageSearchText = request
                 .getParameter(JobManagementHandler.PAGE_SEARCH_TEXT);
+        String openEditorType = request.getParameter("openEditorType");
+        
         if (StringUtil.isNotEmpty(pageSearchText))
         {
             pageSearchText = URLDecoder.decode(pageSearchText, "UTF-8");
@@ -1393,7 +1395,8 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
     	String srcPageId = request.getParameter(WebAppConstants.SOURCE_PAGE_ID);
         String trgPageId = request.getParameter(WebAppConstants.TARGET_PAGE_ID);
         
-    	if (taskId != null && srcPageId != null && trgPageId != null)
+        if (StringUtil.isNotEmptyAndNull(taskId) && StringUtil.isNotEmpty(srcPageId)
+                && StringUtil.isNotEmpty(trgPageId))
         {
             sessionMgr.setAttribute(WebAppConstants.IS_FROM_ACTIVITY, "yes");
             // store jobId, target language and source page id for Lisa QA
@@ -1406,9 +1409,10 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
             sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
                     String.valueOf(theTask.getTargetLocale().getId()));
             sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
+            request.setAttribute(WebAppConstants.TASK_ID, taskId);
 
             state = new EditorState();
-
+            state.setOpenEditorType(openEditorType);
             EditorHelper.initEditorManager(state);
             EditorHelper.initEditorOptions(state, session);
 
@@ -1429,21 +1433,21 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
             	sessionMgr.setAttribute("approveAction", "false");
             }
         }
-    	else if (jobId != null && srcPageId != null)
+        else if (StringUtil.isNotEmpty(jobId) && StringUtil.isNotEmpty(srcPageId))
         {
             isAssignee = false;
             TaskHelper.storeObject(session, IS_ASSIGNEE,new Boolean(isAssignee));
 
             state = new EditorState();
+            state.setOpenEditorType(openEditorType);
             EditorHelper.initEditorManager(state);
             EditorHelper.initEditorOptions(state, session);
             sessionMgr.setAttribute(WebAppConstants.EDITORSTATE, state);
-            sessionMgr.setAttribute(WebAppConstants.JOB_ID,
-                    Long.parseLong(jobId));
             sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
                     getTargetIDS(jobId, srcPageId));
             sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
-
+            sessionMgr.setAttribute(WebAppConstants.JOB_ID, jobId);
+            
             initializeFromJob(state, request, jobId, srcPageId, trgPageId,
                     uiLocale, user);
 

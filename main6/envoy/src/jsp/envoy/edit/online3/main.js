@@ -66,11 +66,22 @@ function exit()
 
 function refresh(direction)
 {
-	if(w_editor)
-    {
-    	w_editor.close();
-    }
-	document.location = url_self + "&action=refresh&refresh=" + direction+"&random="+Math.random();
+	if (direction == '-1' && isPicturePreviousFile == 'true' || isPicturePreviousFile == true)
+	{
+		window.open(url_previousPictureEditor, '_self' );
+	}
+	else if(direction == '1' && isPictureNextFile == 'true' || isPictureNextFile == true)
+	{
+		window.open(url_previousPictureEditor, '_self' );
+	}
+	else
+	{
+		if(w_editor)
+	    {
+	    	w_editor.close();
+	    }
+		document.location = url_self + "&action=refresh&refresh=" + direction+"&random="+Math.random();
+	}
 }
 
 function showPageInfo()

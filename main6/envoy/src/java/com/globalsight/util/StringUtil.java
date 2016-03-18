@@ -46,6 +46,15 @@ public class StringUtil
         return !isEmpty(s);
     }
 
+    public static boolean isEmptyAndNull(String s)
+    {
+        return s == null || s.trim().length() == 0 || s.equalsIgnoreCase("null");
+    }
+
+    public static boolean isNotEmptyAndNull(String s) {
+        return !isEmptyAndNull(s);
+    }
+    
     /***
      * @deprecated just leave it here for testing purpose
      */

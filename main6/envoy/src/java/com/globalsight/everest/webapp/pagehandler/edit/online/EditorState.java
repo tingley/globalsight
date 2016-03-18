@@ -58,28 +58,36 @@ public class EditorState extends PersistentObject implements EditorConstants
         public String m_pageName;
         public boolean m_hasGsaTags;
         public String m_workflowState;
+        public boolean m_isPictureNextFile;
+        public boolean m_isPicturePreviousFile;
 
         private HashMap<String, Long> m_target = new HashMap<String, Long>();
         private HashMap<Long, GlobalSightLocale> m_targetIds = new HashMap<Long, GlobalSightLocale>();
 
-        public PagePair (Long p_srcPageId, GlobalSightLocale p_srcLocale,
-            String p_pageName, boolean p_hasGsaTags, String p_workflowState)
+        public PagePair(Long p_srcPageId, GlobalSightLocale p_srcLocale, String p_pageName,
+                boolean p_hasGsaTags, String p_workflowState, boolean p_isPictureNextFile,
+                boolean p_isPicturePreviousFile)
         {
             m_sourcePageId = p_srcPageId;
             m_sourceLocale = p_srcLocale;
             m_pageName = p_pageName;
             m_hasGsaTags = p_hasGsaTags;
             m_workflowState = p_workflowState;
+            m_isPictureNextFile = p_isPictureNextFile;
+            m_isPicturePreviousFile = p_isPicturePreviousFile;
         }
 
-        public PagePair (long p_srcPageId, GlobalSightLocale p_srcLocale,
-            String p_pageName, boolean p_hasGsaTags, String p_workflowState)
+        public PagePair(long p_srcPageId, GlobalSightLocale p_srcLocale, String p_pageName,
+                boolean p_hasGsaTags, String p_workflowState, boolean p_isPictureNextFile,
+                boolean p_isPicturePreviousFile)
         {
             m_sourcePageId = new Long(p_srcPageId);
             m_sourceLocale = p_srcLocale;
             m_pageName = p_pageName;
             m_hasGsaTags = p_hasGsaTags;
             m_workflowState = p_workflowState;
+            m_isPictureNextFile = p_isPictureNextFile;
+            m_isPicturePreviousFile = p_isPicturePreviousFile;
         }
 
         public Long getSourcePageId()
@@ -96,7 +104,17 @@ public class EditorState extends PersistentObject implements EditorConstants
         {
             return m_hasGsaTags;
         }
+        
+        public boolean isPictureNextFile()
+        {
+            return m_isPictureNextFile;
+        }
 
+        public boolean isPicturePreviousFile()
+        {
+            return m_isPicturePreviousFile;
+        }
+        
         public String getWorkflowState()
         {
             return m_workflowState;
@@ -608,7 +626,7 @@ public class EditorState extends PersistentObject implements EditorConstants
 	private boolean needFindRepeatedSegments = false;
 	private boolean needShowPTags = false;
 	private String segmentFilter = OnlineEditorConstants.SEGMENT_FILTER_ALL;
-
+	private String openEditorType = null; 
 	//
     // Constructors
     //
@@ -624,7 +642,16 @@ public class EditorState extends PersistentObject implements EditorConstants
     //
     // Public methods
     //
+    public String getOpenEditorType()
+    {
+        return openEditorType;
+    }
 
+    public void setOpenEditorType(String openEditorType)
+    {
+        this.openEditorType = openEditorType;
+    }
+    
     public String getUserName() {
         return userName;
     }

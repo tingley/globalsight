@@ -187,6 +187,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         String jobId = p_request.getParameter(WebAppConstants.JOB_ID);
         String taskId = p_request.getParameter(WebAppConstants.TASK_ID);
         String dataFormat = p_request.getParameter("dataFormat");
+        String openEditorType = p_request.getParameter("openEditorType");
         // Get user object for the person who has logged in.
         User user = TaskHelper.getUser(session);
 
@@ -213,7 +214,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
         // From Activity Details (Translator opening pages read-write or
         // read-only)
-        if (taskId != null && srcPageId != null && trgPageId != null)
+        if (StringUtil.isNotEmptyAndNull(taskId) && StringUtil.isNotEmpty(srcPageId)
+                && StringUtil.isNotEmpty(trgPageId))
         {
             sessionMgr.setAttribute(WebAppConstants.IS_FROM_ACTIVITY, "yes");
             // store jobId, target language and source page id for Lisa QA
@@ -226,9 +228,10 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
                     String.valueOf(theTask.getTargetLocale().getId()));
             sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
+            p_request.setAttribute(WebAppConstants.TASK_ID, taskId);
 
             state = new EditorState();
-
+            state.setOpenEditorType(openEditorType);
             EditorHelper.initEditorManager(state);
             EditorHelper.initEditorOptions(state, session);
 
@@ -240,7 +243,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             initState(state, session);
         }
         // From Job Details (Admin or PM opening pages read-only)
-        else if (jobId != null && srcPageId != null)
+        else if (StringUtil.isNotEmpty(jobId) && StringUtil.isNotEmpty(srcPageId))
         {
             // being assignee is not important when accessing editor from job
             // details.
@@ -249,13 +252,13 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     new Boolean(isAssignee));
 
             state = new EditorState();
+            state.setOpenEditorType(openEditorType);
             EditorHelper.initEditorManager(state);
             EditorHelper.initEditorOptions(state, session);
             sessionMgr.setAttribute(WebAppConstants.EDITORSTATE, state);
             // store jobId, target language and source page id for Lisa QA
             // report
-            sessionMgr.setAttribute(WebAppConstants.JOB_ID,
-                    Long.parseLong(jobId));
+            sessionMgr.setAttribute(WebAppConstants.JOB_ID, jobId);
             sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
                     getTargetIDS(jobId, srcPageId));
             sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);

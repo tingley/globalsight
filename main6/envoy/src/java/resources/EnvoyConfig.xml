@@ -1695,6 +1695,7 @@
         <PageLink linkName="autoPropagate" destinationPageName="ED20"></PageLink>
         <PageLink linkName="segmentEditor" destinationPageName="SE1"></PageLink>
         <PageLink linkName="commentEditor" destinationPageName="CE1"></PageLink>
+        <PageLink linkName="pictureEditor" destinationPageName="EDIG1"></PageLink>
       </WebPage>
       <WebPage pageName="NEWED19" isDefault="false" jspName="/envoy/edit/online2/search.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online3.EditorPageHandler"></WebPage>
     </WebActivity>
@@ -1703,6 +1704,8 @@
 	<WebActivity webActivityName="edit4" clearSession="false">
 		<WebPage pageName="EDIG1" isDefault="true" jspName="/envoy/edit/online4/imageMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online4.EditorImageHandler">
 			<PageLink linkName="self" destinationPageName="EDIG1"></PageLink>
+			<PageLink linkName="postReviewEditor" destinationPageName="NEWED1"></PageLink>
+			<PageLink linkName="popupEditor" destinationPageName="ED1"></PageLink>
 		</WebPage>
 	</WebActivity>
   </WebModule>
@@ -1728,6 +1731,7 @@
         <PageLink linkName="help" destinationPageName="ED11"></PageLink>
         <PageLink linkName="search" destinationPageName="ED19"></PageLink>
         <PageLink linkName="autoPropagate" destinationPageName="ED20"></PageLink>
+        <PageLink linkName="pictureEditor" destinationPageName="EDIG1"></PageLink>
       </WebPage>
       <WebPage pageName="ED3" isDefault="false" jspName="/envoy/edit/online/me_split.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.EditorPageHandler">
         <PageLink linkName="self" destinationPageName="ED3"></PageLink>

@@ -367,6 +367,12 @@ public class Ambassador extends AbstractWebService
 
     public static final String GET_JOB_EXPORT_FILES = "getJobExportFiles";
 
+    public static final String GET_WORKFLOW_EXPORT_FILES_IN_ZIP = "getWorkflowExportFilesInZip";
+
+    public static final String GET_JOB_EXPORT_FILES_IN_ZIP = "getJobExportFilesInZip";
+
+    public static final String webservice_zip = "/webservice_zip";
+
     public static final String EXPORT_TM = "exportTM";
 
     public static final String DELETE_TU_BY_TUID = "deleteTuByTuIds";
@@ -1363,7 +1369,7 @@ public class Ambassador extends AbstractWebService
             if (job == null)
             {
                 String userId = UserUtil.getUserIdByName(userName);
-	            String priority = (String) args.get("priority");				
+                String priority = (String) args.get("priority");
                 Vector<String> fileProfileIds = new Vector<String>();
                 Object fpIdsObj = args.get("fileProfileIds");
                 if (fpIdsObj instanceof String)
@@ -1378,16 +1384,16 @@ public class Ambassador extends AbstractWebService
                     fileProfileIds = (Vector<String>) fpIdsObj;
                 }
                 ArrayList<String> list = new ArrayList();
-				for (String s : fileProfileIds)
+                for (String s : fileProfileIds)
                 {
-					FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
-							Long.parseLong(s), false);
-					if (fp == null)
-                	{
-                		list.add(s);
-                	}
+                    FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
+                            Long.parseLong(s), false);
+                    if (fp == null)
+                    {
+                        list.add(s);
+                    }
                 }
-				if (list.size() > 0)
+                if (list.size() > 0)
                 {
                     String invalidFpIds = AmbassadorUtil.listToString(list);
                     String errXml = makeErrorXml("createJob(HashMap args)",
@@ -1401,13 +1407,13 @@ public class Ambassador extends AbstractWebService
                     FileProfile fp = ServerProxy
                             .getFileProfilePersistenceManager()
                             .readFileProfile(iFpId);
-					if (priority == null) 
-					{
-						long l10nProfileId = fp.getL10nProfileId();
-						BasicL10nProfile blp = HibernateUtil.get(
-								BasicL10nProfile.class, l10nProfileId);
-						priority = String.valueOf(blp.getPriority());
-					}
+                    if (priority == null) 
+                    {
+                        long l10nProfileId = fp.getL10nProfileId();
+                        BasicL10nProfile blp = HibernateUtil.get(
+                                BasicL10nProfile.class, l10nProfileId);
+                        priority = String.valueOf(blp.getPriority());
+                    }
                     job = JobCreationMonitor.initializeJob(jobName, userId,
                             fp.getL10nProfileId(), priority, Job.PROCESSING);
                     
@@ -1494,10 +1500,10 @@ public class Ambassador extends AbstractWebService
             String jobId = (String) args.get("jobId");
             Assert.assertIsInteger(jobId);
             job = JobCreationMonitor.loadJobFromDB(Long.parseLong(jobId));
-			if (job == null)
+            if (job == null)
             {
-				String msg = "current jobId : " + jobId + " does not exist.";
-            	throw new WebServiceException(makeErrorXml(
+                String msg = "current jobId : " + jobId + " does not exist.";
+                throw new WebServiceException(makeErrorXml(
                          "createJobOnInitial", msg));
             }
 
@@ -1545,16 +1551,16 @@ public class Ambassador extends AbstractWebService
                 fileProfileIds = (Vector<String>) fpIdsObj;
             }
             ArrayList<String> list = new ArrayList<String>();
-			for (String s : fileProfileIds)
+            for (String s : fileProfileIds)
             {
-				FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
-						Long.parseLong(s), false);
-				if (fp == null)
-            	{
-            		list.add(s);
-            	}
+                FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
+                        Long.parseLong(s), false);
+                if (fp == null)
+                {
+                    list.add(s);
+                }
             }
-			if (list.size() > 0)
+            if (list.size() > 0)
             {
                 String invalidFpIds = AmbassadorUtil.listToString(list);
                 String errXml = makeErrorXml("createJobOnInitial",
@@ -2990,6 +2996,566 @@ public class Ambassador extends AbstractWebService
             logger.error("Error found in getJobExportFiles.", e);
 
             return makeErrorXml(GET_JOB_EXPORT_FILES, e.getMessage());
+        }
+        finally
+        {
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
+        }
+    }
+
+    /**
+     * Gets exported files in one zip by job ids
+     * 
+     * @param p_accessToken
+     *            -- Access token
+     * @param p_jobIds
+     *            -- job IDs
+     * 
+     * @return String in XML format contains information of exported job files
+     * 
+     * @throws WebServiceException
+     */
+    public String getJobExportFilesInZip(String p_accessToken, String p_jobIds)
+            throws WebServiceException
+    {
+        checkAccess(p_accessToken, GET_JOB_EXPORT_FILES_IN_ZIP);
+        if (p_jobIds == null || p_jobIds.trim() == "")
+        {
+            String msg = "jobIds can not be empty.";
+            throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, msg));
+        }
+
+        String currentCompanyId = accessCurrentCompanyId(p_accessToken);
+        String[] jobIdlist = p_jobIds.split(",");
+        Set<Long> jobIds = new HashSet<Long>();
+        Set<String> locales = new HashSet<String>();
+        for (String id : jobIdlist)
+        {
+            long jobId = Long.parseLong(id);
+            Job job = JobCreationMonitor.loadJobFromDB(jobId);
+            if (job == null)
+            {
+                String msg = "current jobId : " + jobId + " does not exist.";
+                throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, msg));
+            }
+
+            String jobCompanyId = String.valueOf(job.getCompanyId());
+            if (!currentCompanyId.equals(jobCompanyId))
+                throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP,
+                        "Cannot access the job which is not in the same company with current user"));
+
+            jobIds.add(jobId);
+        }
+
+        String userName = getUsernameFromSession(p_accessToken);
+        Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+        activityArgs.put("loggedUserName", userName);
+        activityArgs.put("jobIds", p_jobIds);
+        WebServicesLog.Start activityStart = WebServicesLog.start(Ambassador.class,
+                "getJobExportFilesInZip", activityArgs);
+
+        // Check if there are exporting workflows
+        ArrayList<Workflow> exportingwfs = new ArrayList<Workflow>();
+        for (Long id : jobIds)
+        {
+            for (Workflow wf : JobCreationMonitor.loadJobFromDB(id).getWorkflows())
+            {
+                if (WorkflowExportingHelper.isExporting(wf.getId()))
+                {
+                    exportingwfs.add(wf);
+                }
+            }
+        }
+
+        try
+        {
+            FileProfilePersistenceManager fpManager = ServerProxy
+                    .getFileProfilePersistenceManager();
+
+            // Find all entry files
+            Set<String> jobFileList = new HashSet<String>();
+            Set<File> entryFiles = new HashSet<File>();
+            String identifyKey = AmbassadorUtil.getRandomFeed();
+            if (exportingwfs.size() == 0)
+            {
+                for (Long jobId : jobIds)
+                {
+                    Job job = JobCreationMonitor.loadJobFromDB(jobId);
+                    JobFiles jobFileInOneJob = new JobFiles();
+                    long fileProfileId = -1l;
+                    FileProfile fp = null;
+                    boolean isXLZFile = false;
+                    Set<String> passoloFiles = new HashSet<String>();
+                    for (Workflow w : job.getWorkflows())
+                    {
+                        ArrayList<String> fileList = new ArrayList<String>();
+                        for (TargetPage page : w.getTargetPages())
+                        {
+                            SourcePage sPage = page.getSourcePage();
+                            if (sPage != null && sPage.isPassoloPage())
+                            {
+                                String p = sPage.getPassoloFilePath();
+                                p = p.replace("\\", "/");
+                                p = p.substring(p.indexOf("/") + 1);
+                                passoloFiles.add(p);
+                                if (fileList.contains(p))
+                                    continue;
+                                else
+                                {
+                                    fileList.add(p);
+                                }
+
+                                continue;
+                            }
+
+                            fileProfileId = sPage.getRequest().getFileProfileId();
+                            fp = fpManager.getFileProfileById(fileProfileId, false);
+                            if (fpManager.isXlzReferenceXlfFileProfile(fp.getName()))
+                                isXLZFile = true;
+
+                            String path = page.getExternalPageId();
+                            path = path.replace("\\", "/");
+                            if (StringUtil.isNotEmpty(fp.getScriptOnExport()))
+                            {
+                                path = handlePathForScripts(path, job);
+                            }
+                            int index = path.indexOf("/");
+                            path = path.substring(index);
+                            path = getRealFilePathForXliff(path, isXLZFile);
+
+                            if (fileList.contains(path))
+                                continue;
+                            else
+                            {
+                                fileList.add(path);
+                            }
+
+                            StringBuffer allPath = new StringBuffer();
+                            allPath.append(page.getGlobalSightLocale());
+                            for (String s : path.split("/"))
+                            {
+                                if (s.length() > 0)
+                                {
+                                    allPath.append("/").append(URLEncoder.encode(s, "utf-8"));
+                                }
+                            }
+                            jobFileInOneJob.addPath(allPath.toString());
+
+                            isXLZFile = false;
+                        }
+                    }
+
+                    for (String path : passoloFiles)
+                    {
+                        StringBuffer allPath = new StringBuffer();
+                        allPath.append("passolo");
+                        for (String s : path.split("/"))
+                        {
+                            if (s.length() > 0)
+                            {
+                                allPath.append("/").append(URLEncoder.encode(s, "utf-8"));
+                            }
+                        }
+                        jobFileInOneJob.addPath(allPath.toString());
+                    }
+
+                    for (String path : jobFileInOneJob.getPaths())
+                    {
+                        String[] pathlist = path.split("/");
+                        String entryfilepath = (AmbFileStoragePathUtils.getCxeDocDirPath(job
+                                .getCompanyId()) + "\\" + path).replace("/", "\\");
+                        File entryfile = new File(entryfilepath);
+                        if (entryfile.exists() && entryfile.isFile())
+                        {
+                            entryFiles.add(entryfile);
+                            jobFileList.add(pathlist[0] + "/" + pathlist[pathlist.length - 2] + "/"
+                                    + pathlist[pathlist.length - 1]);
+                            locales.add(pathlist[0]);
+                        }
+                    }
+                }
+            }
+
+            String tempS = jobIds.toString();
+            String jobNamesstr =  tempS.substring(1, tempS.length() - 1);
+            String zipName = "GlobalSight_Download_jobs(" + jobNamesstr + ").zip";
+            
+            // Zip all files into zip file
+            if (exportingwfs.size() == 0 && jobFileList.size() > 0)
+            {
+                try
+                {                    
+                    String cxedocpath = AmbFileStoragePathUtils.getCxeDocDirPath(currentCompanyId);
+                    File zipFileDir = new File(cxedocpath + webservice_zip + "/" + identifyKey);
+                    File zipfile = new File(zipFileDir, zipName);
+                    zipfile.getParentFile().mkdirs();
+
+                    Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(
+                            entryFiles, jobIds, locales, cxedocpath);
+                    ZipIt.addEntriesToZipFile(zipfile, entryFileToFileNameMap, "");
+                }
+                catch (Exception e)
+                {
+                    logger.error("Error found in getJobExportFilesInZip.", e);
+
+                    return makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, e.getMessage());
+                }
+            }
+
+            StringBuffer returnStr = new StringBuffer();
+            returnStr.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n");
+            returnStr.append("<JobFiles>\r\n");
+            returnStr.append("\t<requestedJobIds>" + p_jobIds + "</requestedJobIds>\r\n");
+            returnStr.append("\t<exportingJobs>");
+            if (exportingwfs.size() > 0)
+            {
+                returnStr.append("\r\n");
+                for (Workflow wfone : exportingwfs)
+                {
+                    returnStr.append("\t<exportingJob>\r\n");
+                    returnStr.append("\t\t<jobId>" + wfone.getJob().getId() + "</jobId>\r\n");
+                    returnStr.append("\t\t<language>" + wfone.getTargetLocale() + "</language>\r\n");
+                    returnStr.append("\t</exportingJob>\r\n");
+                }
+                returnStr.append("\t</exportingJobs>\r\n");
+                returnStr.append("\t<message></message>\r\n");
+                returnStr.append("\t<path></path>\r\n");
+            }
+            else if (jobFileList.size() == 0)
+            {
+                returnStr.append("\t</exportingJobs>\r\n");
+                returnStr.append("\t<message>No exported files found</message>\r\n");
+                returnStr.append("\t<path></path>\r\n");
+            }
+            else
+            {
+                StringBuilder prefix = new StringBuilder();
+                prefix.append(getUrl()).append("/cxedocs/");
+                String comName = CompanyWrapper.getCompanyNameById(currentCompanyId);
+                prefix.append(URLEncoder.encode(comName, "utf-8"));
+                String root = prefix.toString();
+
+                returnStr.append("</exportingJobs>\r\n");
+                returnStr.append("\t<message></message>\r\n");
+                returnStr.append("\t<path>" + root + webservice_zip + "/" + identifyKey
+                        + "/"+zipName+"</path>\r\n");
+            }
+            returnStr.append("</JobFiles>");
+            return returnStr.toString();
+        }
+        catch (Exception e)
+        {
+            logger.error("Error found in getJobExportFilesInZip.", e);
+            return makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, e.getMessage());
+        }
+        finally
+        {
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
+        }
+    }
+
+    /**
+     * Gets zip file entry name
+     * 
+     * @param entryFiles
+     * @param jobIdSet
+     *            --job ids set
+     * @param locales
+     *            --locales set
+     * @param cxeDocsDirPath
+     *            --cxedoc path
+     * @return Map includes entryFileName info
+     */
+    private Map<File, String> getEntryFileToFileNameMap(Set<File> entryFiles, Set<Long> jobIdSet,
+            Set<String> locales, String cxeDocsDirPath)
+    {
+        Map<File, String> entryFileToFileNameMap = new HashMap<File, String>();
+        File tempFile;
+
+        for (Long jobId : jobIdSet)
+        {
+            ArrayList<String> entryNames = new ArrayList<String>();
+            String prefixPassolo = cxeDocsDirPath + File.separator + "passolo" + File.separator
+                    + jobId;
+            for (File entryFile : entryFiles)
+            {
+                String entryFilePath = entryFile.getPath();
+                if (entryFilePath.startsWith(prefixPassolo))
+                {
+                    entryNames.add(entryFilePath.replaceAll("\\\\", "/"));
+                }
+            }
+            if (entryNames.size() > 0)
+            {
+                Map<String, String> tempMap = ZipIt.getEntryNamesMap(entryNames);
+                for (String key : tempMap.keySet())
+                {
+                    tempFile = new File(key);
+                    entryFileToFileNameMap.put(tempFile, jobId + File.separator + "passolo"
+                            + File.separator + tempMap.get(key));
+                }
+            }
+
+            for (String locale : locales)
+            {
+                entryNames.clear();
+                String prefixStr1 = cxeDocsDirPath.replace("/", "\\") + File.separator + locale
+                        + File.separator + jobId;
+                String prefixStr2 = cxeDocsDirPath.replace("/", "\\") + File.separator + locale
+                        + File.separator + "webservice" + File.separator + jobId;
+                for (File entryFile : entryFiles)
+                {
+                    String entryFilePath = entryFile.getPath();
+                    if (entryFilePath.startsWith(prefixStr1)
+                            || entryFilePath.startsWith(prefixStr2))
+                    {
+                        entryNames.add(entryFilePath.replaceAll("\\\\", "/"));
+                    }
+                }
+                if (entryNames.size() > 0)
+                {
+                    Map<String, String> tempMap = ZipIt.getEntryNamesMap(entryNames);
+                    for (String key : tempMap.keySet())
+                    {
+                        tempFile = new File(key);
+                        entryFileToFileNameMap.put(tempFile, jobId + File.separator + locale
+                                + File.separator + tempMap.get(key));
+                    }
+                }
+            }
+        }
+        return entryFileToFileNameMap;
+    }
+    
+    
+    /**
+     * Gets exported files in a zip by workflowIds
+     * 
+     * @param p_accessToken
+     *            -- Access token
+     * @param p_workflowIds
+     *            -- workflow IDs
+     * 
+     * @return String in XML format contains information of exported job files
+     * 
+     * @throws WebServiceException
+     */
+    public String getWorkflowExportFilesInZip(String p_accessToken, String p_workflowIds)
+            throws WebServiceException
+    {
+        checkAccess(p_accessToken, GET_WORKFLOW_EXPORT_FILES_IN_ZIP);
+        if(p_workflowIds == null || p_workflowIds == "")
+        {
+            String msg = "workflowIds can not be empty.";
+            throw new WebServiceException(makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP, msg));
+        }
+
+        String userName = getUsernameFromSession(p_accessToken);
+        Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+        activityArgs.put("loggedUserName", userName);
+        activityArgs.put("p_workflowIds", p_workflowIds);
+        WebServicesLog.Start activityStart = WebServicesLog.start(Ambassador.class,
+                "getWorkflowExportFilesInZip", activityArgs);
+
+        String currentCompanyId = accessCurrentCompanyId(p_accessToken);
+        JobFiles jobFiles = new JobFiles();
+        Set<String> jobFileList = new HashSet<String>();
+        Set<File> entryFiles = new HashSet<File>();
+        ArrayList<Workflow> exportingwfs = new ArrayList<Workflow>();
+        Set<String> locales = new HashSet<String>();      
+        Set<Long> jobExist = new HashSet<Long>();
+        String identifyKey = AmbassadorUtil.getRandomFeed();
+        long jobId = -1;
+        try
+        {
+            WorkflowManagerWLRemote wfrm = ServerProxy.getWorkflowManager();
+            FileProfilePersistenceManager fpManager = ServerProxy
+                    .getFileProfilePersistenceManager();
+
+            String[] wflist = p_workflowIds.split(",");
+            for (String wfId : wflist)
+            {
+                Workflow wf = wfrm.getWorkflowById(Long.parseLong(wfId));
+                Job job = wf.getJob();
+                jobId = job.getId();
+
+                String jobCompanyId = String.valueOf(job.getCompanyId());
+                if (!currentCompanyId.equals(jobCompanyId))
+                    throw new WebServiceException(
+                            makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP,
+                                    "Cannot access the job which is not in the same company with current user"));
+
+                jobExist.add(jobId);
+                if (WorkflowExportingHelper.isExporting(wf.getId()))
+                {
+                    exportingwfs.add(wf);
+                }
+            }
+            if (jobExist.size() > 1)
+            {
+                throw new WebServiceException("Workflow ids are not from the same job.");
+            }
+
+            if (exportingwfs.size() == 0)
+            {
+                for (String wfId : wflist)
+                {
+                    Workflow wf = wfrm.getWorkflowById(Long.parseLong(wfId));
+                    Job job = wf.getJob();
+
+                    long fileProfileId = -1l;
+                    FileProfile fp = null;
+                    boolean isXLZFile = false;
+                    Set<String> passoloFiles = new HashSet<String>();
+                    ArrayList<String> fileList = new ArrayList<String>();
+                    for (TargetPage page : wf.getTargetPages())
+                    {
+                        SourcePage sPage = page.getSourcePage();
+                        if (sPage != null && sPage.isPassoloPage())
+                        {
+                            String p = sPage.getPassoloFilePath();
+                            p = p.replace("\\", "/");
+                            p = p.substring(p.indexOf("/") + 1);
+                            passoloFiles.add(p);
+                            if (fileList.contains(p))
+                                continue;
+                            else
+                            {
+                                fileList.add(p);
+                            }
+
+                            continue;
+                        }
+
+                        fileProfileId = sPage.getRequest().getFileProfileId();
+                        fp = fpManager.getFileProfileById(fileProfileId, false);
+                        if (fpManager.isXlzReferenceXlfFileProfile(fp.getName()))
+                            isXLZFile = true;
+
+                        String path = page.getExternalPageId();
+                        path = path.replace("\\", "/");
+                        if (StringUtil.isNotEmpty(fp.getScriptOnExport()))
+                        {
+                            path = handlePathForScripts(path, job);
+                        }
+                        int index = path.indexOf("/");
+                        path = path.substring(index);
+                        path = getRealFilePathForXliff(path, isXLZFile);
+
+                        if (fileList.contains(path))
+                            continue;
+                        else
+                        {
+                            fileList.add(path);
+                        }
+
+                        StringBuffer allPath = new StringBuffer();
+                        allPath.append(page.getGlobalSightLocale());
+                        for (String s : path.split("/"))
+                        {
+                            if (s.length() > 0)
+                            {
+                                allPath.append("/").append(URLEncoder.encode(s, "utf-8"));
+                            }
+                        }
+                        jobFiles.addPath(allPath.toString());
+                    }
+
+                    for (String path : passoloFiles)
+                    {
+                        StringBuffer allPath = new StringBuffer();
+                        allPath.append("passolo");
+                        for (String s : path.split("/"))
+                        {
+                            if (s.length() > 0)
+                            {
+                                allPath.append("/").append(URLEncoder.encode(s, "utf-8"));
+                            }
+                        }
+                        jobFiles.addPath(allPath.toString());
+                    }
+                    
+                    ArrayList<String> paths = (ArrayList<String>) jobFiles.getPaths();
+                    for (String path : paths)
+                    {
+                        String[] pathlist = path.split("/");
+                        String entryfilepath = (AmbFileStoragePathUtils.getCxeDocDirPath(job
+                                .getCompanyId()) + "\\" + path).replace("/", "\\");
+                        File entryfile = new File(entryfilepath);
+                        if (entryfile.exists() && entryfile.isFile())
+                        {
+                            entryFiles.add(entryfile);
+                            jobFileList.add(pathlist[0] + "/" + pathlist[pathlist.length - 2] + "/"
+                                    + pathlist[pathlist.length - 1]);
+                            locales.add(pathlist[0]);
+                        }
+                    }
+                }
+            }
+
+            StringBuffer returnStr = new StringBuffer();
+            returnStr.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n");
+            returnStr.append("<JobFiles>\r\n");
+            returnStr.append("\t<RequestedWorkflowIds>" + p_workflowIds + "</RequestedWorkflowIds>\r\n");
+            if (exportingwfs.size() > 0)
+            {
+                returnStr.append("\t<exportingWorkflows>\r\n");
+                for (Workflow wf : exportingwfs)
+                {
+                    returnStr.append("\t<exportingWorkflow>\r\n");
+                    returnStr.append("\t\t<workflowId>" + wf.getId() + "</workflowId>\r\n");
+                    returnStr.append("\t\t<language>" + wf.getTargetLocale() + "</language>\r\n");
+                    returnStr.append("\t</exportingWorkflow>\r\n");
+                }
+                returnStr.append("\t</exportingWorkflows>\r\n");
+                returnStr.append("\t<message></message>\r\n");
+                returnStr.append("\t<path></path>\r\n");
+            }
+            else if (jobFileList.size() > 0)
+            {
+                StringBuilder prefix = new StringBuilder();
+                prefix.append(getUrl()).append("/cxedocs/");  
+                String company = CompanyWrapper.getCompanyNameById(currentCompanyId);
+                prefix.append(URLEncoder.encode(company, "utf-8"));
+                String commonPath = prefix.toString();
+                
+                String zipName = "GlobalSight_Download_jobs(" + jobId + ").zip";
+                
+                String cxedocpath = AmbFileStoragePathUtils.getCxeDocDirPath(currentCompanyId);
+                File zipFileDir = new File(cxedocpath + webservice_zip + "\\" + identifyKey);
+                File zipFile = new File(zipFileDir,zipName);
+                zipFile.getParentFile().mkdirs();
+
+                Set<Long> jobIds = new HashSet<Long>();
+                jobIds.add(jobId);
+                Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(
+                        entryFiles, jobIds, locales, cxedocpath);
+                ZipIt.addEntriesToZipFile(zipFile, entryFileToFileNameMap, "");
+                
+                returnStr.append("\t<exportingWorkflows></exportingWorkflows>\r\n");
+                returnStr.append("\t<message></message>\r\n");
+                returnStr.append("\t<path>" + commonPath + webservice_zip + "/" + identifyKey
+                        + "/" + zipName + "</path>\r\n");
+            }
+            else
+            {
+                returnStr.append("\t<exportingWorkflows></exportingWorkflows>\r\n");
+                returnStr.append("\t<message>No exported files found</message>\r\n");
+                returnStr.append("\t<path></path>\r\n");
+            }
+            returnStr.append("</JobFiles>");
+            return returnStr.toString();
+        }
+        catch (Exception e)
+        {
+            logger.error("Error found in " + GET_WORKFLOW_EXPORT_FILES_IN_ZIP, e);
+            return makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP, e.getMessage());
         }
         finally
         {
@@ -7619,16 +8185,16 @@ public class Ambassador extends AbstractWebService
                 return;
             }
 
-			UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
-			UserParameter up = uppml.getUserParameter(user.getUserId(),
-					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
-			if (up != null && up.getIntValue() == 1) {
-				ServerProxy.getMailer().sendMailFromAdmin(user,
-						messageArguments,
-						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
-						MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
-						companyIdStr);
-			}
+            UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
+            UserParameter up = uppml.getUserParameter(user.getUserId(),
+                    UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
+            if (up != null && up.getIntValue() == 1) {
+                ServerProxy.getMailer().sendMailFromAdmin(user,
+                        messageArguments,
+                        MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
+                        MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
+                        companyIdStr);
+            }
             // get the PMs address (could be a group alias)
             List pms = new ArrayList();
             boolean add = true;
@@ -7678,14 +8244,14 @@ public class Ambassador extends AbstractWebService
                 messageArguments[0] = time.toString();
                 messageArguments[6] = u.getSpecialNameForEmail();
                 
-    		    up = uppml.getUserParameter(u.getUserId(),
-    					UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
-    			if (up != null && up.getIntValue() == 1) {
+                up = uppml.getUserParameter(u.getUserId(),
+                        UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
+                if (up != null && up.getIntValue() == 1) {
                 ServerProxy.getMailer().sendMailFromAdmin(u, messageArguments,
                         MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
                         MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
                         companyIdStr);
-    			}
+                }
             }
         }
         catch (Exception e)
@@ -9471,18 +10037,18 @@ public class Ambassador extends AbstractWebService
      */
     private String wrapSegment(String segment, boolean escapeString)
     {
-		if (segment == null) {
-			segment = "";
-		}
+        if (segment == null) {
+            segment = "";
+        }
 
-		if (segment.startsWith("<segment") && segment.endsWith("</segment>")) {
-			segment = GxmlUtil.stripRootTag(segment);
-		}
-		if (escapeString) {
-			segment = XmlUtil.escapeString(segment);
-		}
+        if (segment.startsWith("<segment") && segment.endsWith("</segment>")) {
+            segment = GxmlUtil.stripRootTag(segment);
+        }
+        if (escapeString) {
+            segment = XmlUtil.escapeString(segment);
+        }
 
-		return "<segment>" + segment + "</segment>";
+        return "<segment>" + segment + "</segment>";
     }
 
     private Company getCompanyByName(String companyName)
@@ -11317,137 +11883,137 @@ public class Ambassador extends AbstractWebService
     }
 
     /**
-	 * Delete tu by tu id.
-	 *
-	 * @param accessToken
-	 *            To judge caller has logon or not, can not be null. you can get
-	 *            it by calling method <code>login(username, password)</code>.
-	 * @param tmName
-	 *            TM name, be used to get tm id, can not be empty.
-	 * @param companyName
-	 *            company name, be used to get tm id, can not be empty.
-	 * @param tuId
-	 *            tu ids to remove, can not be empty, i.e "12,14,15".
-	 * @return String
-	 * @throws WebServiceException
-	 */
-	public String deleteTuByTuIds(String accessToken, String tmName,
-			String companyName, String tuIds) throws WebServiceException
-	{
-		try
-		{
-			Assert.assertNotEmpty(accessToken, "access token");
-			Assert.assertNotEmpty(tmName, "tm name");
-			Assert.assertNotEmpty(companyName, "company name");
-		}
-		catch (Exception e)
-		{
-			return makeErrorXml(DELETE_TU_BY_TUID, e.getMessage());
-		}
+     * Delete tu by tu id.
+     *
+     * @param accessToken
+     *            To judge caller has logon or not, can not be null. you can get
+     *            it by calling method <code>login(username, password)</code>.
+     * @param tmName
+     *            TM name, be used to get tm id, can not be empty.
+     * @param companyName
+     *            company name, be used to get tm id, can not be empty.
+     * @param tuId
+     *            tu ids to remove, can not be empty, i.e "12,14,15".
+     * @return String
+     * @throws WebServiceException
+     */
+    public String deleteTuByTuIds(String accessToken, String tmName,
+            String companyName, String tuIds) throws WebServiceException
+    {
+        try
+        {
+            Assert.assertNotEmpty(accessToken, "access token");
+            Assert.assertNotEmpty(tmName, "tm name");
+            Assert.assertNotEmpty(companyName, "company name");
+        }
+        catch (Exception e)
+        {
+            return makeErrorXml(DELETE_TU_BY_TUID, e.getMessage());
+        }
 
-		checkAccess(accessToken, DELETE_TU_BY_TUID);
-		checkPermission(accessToken, Permission.TM_DELETE);
+        checkAccess(accessToken, DELETE_TU_BY_TUID);
+        checkPermission(accessToken, Permission.TM_DELETE);
 
-		WebServicesLog.Start activityStart = null;
-		try
-		{
-			String loggedUserName = this.getUsernameFromSession(accessToken);
-			Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-			activityArgs.put("loggedUserName", loggedUserName);
-			activityArgs.put("tmName", tmName);
-			activityArgs.put("companyName", companyName);
-			activityArgs.put("tuIds", tuIds);
-			activityStart = WebServicesLog.start(Ambassador.class,
-					DELETE_TU_BY_TUID, activityArgs);
+        WebServicesLog.Start activityStart = null;
+        try
+        {
+            String loggedUserName = this.getUsernameFromSession(accessToken);
+            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+            activityArgs.put("loggedUserName", loggedUserName);
+            activityArgs.put("tmName", tmName);
+            activityArgs.put("companyName", companyName);
+            activityArgs.put("tuIds", tuIds);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    DELETE_TU_BY_TUID, activityArgs);
 
-			Company company = getCompanyByName(companyName);
-			if (company == null)
-			{
+            Company company = getCompanyByName(companyName);
+            if (company == null)
+            {
                 return makeErrorXml(DELETE_TU_BY_TUID, "Can not find the company with name ("
                         + companyName + ")");
-			}
-			ProjectTM ptm = getProjectTm(tmName, company.getIdAsLong());
-			if (ptm == null)
-			{
-				return makeErrorXml(DELETE_TU_BY_TUID,
-						"Can not find the tm with tm name (" + tmName
-								+ ") and company name (" + companyName + ")");
-			}
+            }
+            ProjectTM ptm = getProjectTm(tmName, company.getIdAsLong());
+            if (ptm == null)
+            {
+                return makeErrorXml(DELETE_TU_BY_TUID,
+                        "Can not find the tm with tm name (" + tmName
+                                + ") and company name (" + companyName + ")");
+            }
 
-			if (ptm.getTm3Id() == null)
-			{
-				return makeErrorXml(DELETE_TU_BY_TUID,
-						"DeleteTuByTuIds method does not support tm2 tu deletion.");
-			}
+            if (ptm.getTm3Id() == null)
+            {
+                return makeErrorXml(DELETE_TU_BY_TUID,
+                        "DeleteTuByTuIds method does not support tm2 tu deletion.");
+            }
 
-			if (StringUtil.isEmpty(tuIds))
-			{
-				return makeErrorXml(DELETE_TU_BY_TUID,
-						"Tu ids can not be empty.");
-			}
+            if (StringUtil.isEmpty(tuIds))
+            {
+                return makeErrorXml(DELETE_TU_BY_TUID,
+                        "Tu ids can not be empty.");
+            }
 
-			String[] tuIdArr = tuIds.split(",");
-			List<Long> tuIdList = new ArrayList<Long>();
-			for (String tuId : tuIdArr)
-			{
-				if (StringUtil.isEmpty(tuId))
-				{
-					return makeErrorXml(DELETE_TU_BY_TUID,
-							"Invaild tu id(s): " + tuIds);
-				}
-				try
-				{
-					Assert.assertIsInteger(tuId);
-					tuIdList.add(Long.parseLong(tuId));
-				}
-				catch (Exception e)
-				{
-					return makeErrorXml(DELETE_TU_BY_TUID,
-							"Invaild tu id(s): " + tuIds);
-				}
-			}
+            String[] tuIdArr = tuIds.split(",");
+            List<Long> tuIdList = new ArrayList<Long>();
+            for (String tuId : tuIdArr)
+            {
+                if (StringUtil.isEmpty(tuId))
+                {
+                    return makeErrorXml(DELETE_TU_BY_TUID,
+                            "Invaild tu id(s): " + tuIds);
+                }
+                try
+                {
+                    Assert.assertIsInteger(tuId);
+                    tuIdList.add(Long.parseLong(tuId));
+                }
+                catch (Exception e)
+                {
+                    return makeErrorXml(DELETE_TU_BY_TUID,
+                            "Invaild tu id(s): " + tuIds);
+                }
+            }
 
-			Tm tm = ServerProxy.getProjectHandler().getProjectTMById(
-					ptm.getId(), true);
-			TM3Tm<GSTuvData> tm3tm = (new Tm3SegmentTmInfo()).getTM3Tm(tm
-					.getTm3Id());
-			List<TM3Tu<GSTuvData>> tus = tm3tm.getTu(tuIdList);
-			List<SegmentTmTu> resultList = new ArrayList<SegmentTmTu>();
-			TM3Attribute typeAttr = TM3Util.getAttr(tm3tm, TYPE);
-			TM3Attribute formatAttr = TM3Util.getAttr(tm3tm, FORMAT);
-			TM3Attribute sidAttr = TM3Util.getAttr(tm3tm, SID);
-			TM3Attribute translatableAttr = TM3Util.getAttr(tm3tm, TRANSLATABLE);
-			TM3Attribute fromWsAttr = TM3Util.getAttr(tm3tm, FROM_WORLDSERVER);
-			TM3Attribute projectAttr = TM3Util.getAttr(tm3tm, UPDATED_BY_PROJECT);
-			for (TM3Tu<GSTuvData> tm3tu : tus)
-			{
-				if (tm3tu.getTm().getId().equals(tm.getTm3Id()))
-				{
-					SegmentTmTu segmentTmTu = TM3Util.toSegmentTmTu(tm3tu,
-							tm.getId(), formatAttr, typeAttr, sidAttr,
-							fromWsAttr, translatableAttr, projectAttr);
-					resultList.add(segmentTmTu);
-				}
-				else
-				{
-					return makeErrorXml(DELETE_TU_BY_TUID, "Tu id ("
-							+ tm3tu.getId()
-							+ ") does not belong to current tm.");
-				}
-			}
-			if (resultList.size() > 0)
-			{
-				TmCoreManager manager = LingServerProxy.getTmCoreManager();
-				manager.deleteSegmentTmTus(tm, resultList, false);
-			}
-			return "Removing is done successfully.";
-		}
-		catch (Exception e)
-		{
-			return makeErrorXml(DELETE_TU_BY_TUID, e.getMessage());
-		}
-	}
-	
+            Tm tm = ServerProxy.getProjectHandler().getProjectTMById(
+                    ptm.getId(), true);
+            TM3Tm<GSTuvData> tm3tm = (new Tm3SegmentTmInfo()).getTM3Tm(tm
+                    .getTm3Id());
+            List<TM3Tu<GSTuvData>> tus = tm3tm.getTu(tuIdList);
+            List<SegmentTmTu> resultList = new ArrayList<SegmentTmTu>();
+            TM3Attribute typeAttr = TM3Util.getAttr(tm3tm, TYPE);
+            TM3Attribute formatAttr = TM3Util.getAttr(tm3tm, FORMAT);
+            TM3Attribute sidAttr = TM3Util.getAttr(tm3tm, SID);
+            TM3Attribute translatableAttr = TM3Util.getAttr(tm3tm, TRANSLATABLE);
+            TM3Attribute fromWsAttr = TM3Util.getAttr(tm3tm, FROM_WORLDSERVER);
+            TM3Attribute projectAttr = TM3Util.getAttr(tm3tm, UPDATED_BY_PROJECT);
+            for (TM3Tu<GSTuvData> tm3tu : tus)
+            {
+                if (tm3tu.getTm().getId().equals(tm.getTm3Id()))
+                {
+                    SegmentTmTu segmentTmTu = TM3Util.toSegmentTmTu(tm3tu,
+                            tm.getId(), formatAttr, typeAttr, sidAttr,
+                            fromWsAttr, translatableAttr, projectAttr);
+                    resultList.add(segmentTmTu);
+                }
+                else
+                {
+                    return makeErrorXml(DELETE_TU_BY_TUID, "Tu id ("
+                            + tm3tu.getId()
+                            + ") does not belong to current tm.");
+                }
+            }
+            if (resultList.size() > 0)
+            {
+                TmCoreManager manager = LingServerProxy.getTmCoreManager();
+                manager.deleteSegmentTmTus(tm, resultList, false);
+            }
+            return "Removing is done successfully.";
+        }
+        catch (Exception e)
+        {
+            return makeErrorXml(DELETE_TU_BY_TUID, e.getMessage());
+        }
+    }
+    
     /**
      * Search tus according to the specified tu.
      * 
@@ -11689,49 +12255,49 @@ public class Ambassador extends AbstractWebService
                 targetLocales.add(trgGSLocale);
             }
 
-			StringBuffer result = new StringBuffer();
-			IExportManager exporter = null;
-			String options = null;
-			exporter = TmManagerLocal.getProjectTmExporter(ptm.getName());
-			options = exporter.getExportOptions();
-			Document doc = DocumentHelper.parseText(options);
-			Element rootElt = doc.getRootElement();
-			Iterator fileIter = rootElt.elementIterator("fileOptions");
-			while (fileIter.hasNext())
-			{
-				Element fileEle = (Element) fileIter.next();
-				Element fileTypeElem = fileEle.element("fileType");
-				fileTypeElem.setText("xml");
-			}
-			
-			Iterator filterIter = rootElt.elementIterator("filterOptions");
-			while (filterIter.hasNext())
-			{
-				Element filterEle = (Element) filterIter.next();
-				Element language = filterEle.element("language");
-				if (trgGSLocale != null)
-				{
-					language.setText(trgGSLocale.getLanguage() + "_"
-							+ trgGSLocale.getCountry());
-				}
-			}
+            StringBuffer result = new StringBuffer();
+            IExportManager exporter = null;
+            String options = null;
+            exporter = TmManagerLocal.getProjectTmExporter(ptm.getName());
+            options = exporter.getExportOptions();
+            Document doc = DocumentHelper.parseText(options);
+            Element rootElt = doc.getRootElement();
+            Iterator fileIter = rootElt.elementIterator("fileOptions");
+            while (fileIter.hasNext())
+            {
+                Element fileEle = (Element) fileIter.next();
+                Element fileTypeElem = fileEle.element("fileType");
+                fileTypeElem.setText("xml");
+            }
+            
+            Iterator filterIter = rootElt.elementIterator("filterOptions");
+            while (filterIter.hasNext())
+            {
+                Element filterEle = (Element) filterIter.next();
+                Element language = filterEle.element("language");
+                if (trgGSLocale != null)
+                {
+                    language.setText(trgGSLocale.getLanguage() + "_"
+                            + trgGSLocale.getCountry());
+                }
+            }
 
-			options = doc.asXML().substring(
-					doc.asXML().indexOf("<exportOptions>"));
-			exporter.setExportOptions(options);
+            options = doc.asXML().substring(
+                    doc.asXML().indexOf("<exportOptions>"));
+            exporter.setExportOptions(options);
 
-			Tmx tmx = new Tmx();
-			tmx.setSourceLang(Tmx.DEFAULT_SOURCELANG);
-			tmx.setDatatype(Tmx.DATATYPE_HTML);
+            Tmx tmx = new Tmx();
+            tmx.setSourceLang(Tmx.DEFAULT_SOURCELANG);
+            tmx.setDatatype(Tmx.DATATYPE_HTML);
 
-			TmxWriter tmxWriter = new TmxWriter(
-					exporter.getExportOptionsObject(), ptm, tmx);
-			for (SegmentTmTu segTmTu : segTmTus)
-			{
-				result.append(tmxWriter.getSegmentTmForXml(segTmTu));
-			}
+            TmxWriter tmxWriter = new TmxWriter(
+                    exporter.getExportOptionsObject(), ptm, tmx);
+            for (SegmentTmTu segTmTu : segTmTus)
+            {
+                result.append(tmxWriter.getSegmentTmForXml(segTmTu));
+            }
 
-			return result.toString();
+            return result.toString();
         }
         catch (Exception e)
         {
@@ -12161,7 +12727,7 @@ public class Ambassador extends AbstractWebService
             Element elem = (Element) nodes.get(i);
             SegmentTmTuv tuv = new SegmentTmTuv();
             PageTmTu pageTmTu = new PageTmTu(-1, -1, "plaintext", "text",
-            		true);
+                    true);
             tuv.setTu(pageTmTu);
             tuv.setSid(sid);
             TmxUtil.convertFromTmx(elem, tuv);
@@ -12170,12 +12736,12 @@ public class Ambassador extends AbstractWebService
 
             Iterator itSplit = splitSegments.iterator();
             while (itSplit.hasNext())
-			{
-				AbstractTmTuv.SegmentAttributes segAtt = (AbstractTmTuv.SegmentAttributes) itSplit
-						.next();
-				String segmentString = segAtt.getText();
-				tuv.setSegment(segmentString);
-			}
+            {
+                AbstractTmTuv.SegmentAttributes segAtt = (AbstractTmTuv.SegmentAttributes) itSplit
+                        .next();
+                String segmentString = segAtt.getText();
+                tuv.setSegment(segmentString);
+            }
             // Check the locale
             List<SegmentTmTuv> savedTuvs = new ArrayList<SegmentTmTuv>();
             for (BaseTmTuv savedTuv : tu.getTuvs())
@@ -19132,10 +19698,10 @@ public class Ambassador extends AbstractWebService
                 try
                 {
                     exporter.setExportOptions(options);
-					if (StringUtil.isEmpty(p_exportedFileName))
-					{
-						options = exporter.analyzeTm();
-					}
+                    if (StringUtil.isEmpty(p_exportedFileName))
+                    {
+                        options = exporter.analyzeTm();
+                    }
                     // pass down new options from client
                     exporter.setExportOptions(options);
                     ((com.globalsight.everest.tm.exporter.ExportOptions) exporter

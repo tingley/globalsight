@@ -63,11 +63,9 @@ import com.globalsight.util.resourcebundle.SystemResourceBundle;
  * </p>
  * 
  */
-public abstract class RTFWriterUnicode extends RTFUnicode implements
-        WriterInterface
+public abstract class RTFWriterUnicode extends RTFUnicode implements WriterInterface
 {
-    static private final Logger c_logger = Logger
-            .getLogger(RTFWriterUnicode.class);
+    static private final Logger c_logger = Logger.getLogger(RTFWriterUnicode.class);
 
     //
     // Public Constants
@@ -135,8 +133,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
     static protected final String RTF_STYLESHEET_END = " \\cgrid\\loch\\f1\\hich\\af0\\dbch\\af16\\fs24 \\snext0 Normal;}"
             + "{\\*\\cs10 \\additive Default Paragraph Font;}"
             + "{\\*\\cs1 \\additive \\v\\f4\\fs24\\sub\\cf11 tw4winMark;}"
-            + "{\\*\\cs2 \\additive \\cf3\\fs40\\f4 tw4winError;}"
-            +
+            + "{\\*\\cs2 \\additive \\cf3\\fs40\\f4 tw4winError;}" +
             // RTF spec: lang1024 is defined as
             // "Process or User Default Language"
             "{\\*\\cs3 \\additive \\f4\\cf10\\lang1024 tw4winPopup;}"
@@ -145,8 +142,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
             + "{\\*\\cs6 \\additive \\f4\\fs24\\cf6\\lang1024 tw4winInternal;}"
             + "{\\*\\cs7 \\additive \\cf1 tw4winTerm;}"
             + "{\\*\\cs8 \\additive \\f4\\cf12\\lang1024 DO_NOT_TRANSLATE;}"
-            + "{\\*\\cs9 \\additive \\fs16 \\sbasedon10 annotation ref;}"
-            +
+            + "{\\*\\cs9 \\additive \\fs16 \\sbasedon10 annotation ref;}" +
             // RTF spec: lang1024 is defined as
             // "Process or User Default Language"
             "{\\*\\cs11 \\additive \\f4\\fs20\\cf15\\lang1024 gsComment;}"
@@ -158,20 +154,16 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
             + "{\\s10 \\ql\\fs20\\li0\\ri0\\widctlpar\\aspalpha\\aspnum\\faauto\\adjustright\\rin0\\lin0\\itap0  annotation txt}"
             + "}";
 
-    static protected final String COLOR_TABLE = "{\\colortbl;\r\n"
-            + "\\red0\\green0\\blue0;\r\n" + "\\red0\\green0\\blue255;\r\n"
-            + "\\red0\\green255\\blue255;\r\n" + "\\red0\\green255\\blue0;\r\n"
-            + "\\red255\\green0\\blue255;\r\n" + "\\red255\\green0\\blue0;\r\n"
-            + "\\red255\\green255\\blue0;\r\n"
-            + "\\red255\\green255\\blue255;\r\n"
-            + "\\red0\\green0\\blue128;\r\n" + "\\red0\\green128\\blue128;\r\n"
-            + "\\red0\\green128\\blue0;\r\n" + "\\red128\\green0\\blue128;\r\n"
-            + "\\red128\\green0\\blue0;\r\n" + "\\red128\\green128\\blue0;\r\n"
-            + "\\red128\\green128\\blue128;\r\n"
-            + "\\red192\\green192\\blue192;\r\n"
-            + "\\red204\\green255\\blue255;\r\n"
-            + "\\red230\\green230\\blue230;\r\n"
-            + "\\red255\\green102\\blue0;\r\n"
+    static protected final String COLOR_TABLE = "{\\colortbl;\r\n" + "\\red0\\green0\\blue0;\r\n"
+            + "\\red0\\green0\\blue255;\r\n" + "\\red0\\green255\\blue255;\r\n"
+            + "\\red0\\green255\\blue0;\r\n" + "\\red255\\green0\\blue255;\r\n"
+            + "\\red255\\green0\\blue0;\r\n" + "\\red255\\green255\\blue0;\r\n"
+            + "\\red255\\green255\\blue255;\r\n" + "\\red0\\green0\\blue128;\r\n"
+            + "\\red0\\green128\\blue128;\r\n" + "\\red0\\green128\\blue0;\r\n"
+            + "\\red128\\green0\\blue128;\r\n" + "\\red128\\green0\\blue0;\r\n"
+            + "\\red128\\green128\\blue0;\r\n" + "\\red128\\green128\\blue128;\r\n"
+            + "\\red192\\green192\\blue192;\r\n" + "\\red204\\green255\\blue255;\r\n"
+            + "\\red230\\green230\\blue230;\r\n" + "\\red255\\green102\\blue0;\r\n"
             + "\\red102\\green255\\blue0;\r\n" + "}";
 
     // short cuts to character styles
@@ -384,8 +376,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
      * The ui locale. Used to write comments and other header text when
      * possible.
      */
-    protected Locale m_uiLocale = GlobalSightLocale
-            .makeLocaleFromString("en_US");
+    protected Locale m_uiLocale = GlobalSightLocale.makeLocaleFromString("en_US");
 
     /**
      * The output stream to which we write the RTF results.
@@ -413,44 +404,38 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
      * document title etc. The info section becomes part of the encoded RTF
      * header.
      */
-    protected abstract String makeRTF_infoSection()
-            throws AmbassadorDwUpException;
+    protected abstract String makeRTF_infoSection() throws AmbassadorDwUpException;
 
     /**
      * Extend this method to create docment variables. The doc variables section
      * is part of the encoded RTF header.
      */
-    protected abstract String makeRTF_documentVariables()
-            throws AmbassadorDwUpException;
+    protected abstract String makeRTF_documentVariables() throws AmbassadorDwUpException;
 
     /**
      * Extend this method to create the template attachment section. The
      * template section is part of the encoded RTF header.
      */
-    protected abstract String makeRTF_templateAttachment()
-            throws AmbassadorDwUpException;
+    protected abstract String makeRTF_templateAttachment() throws AmbassadorDwUpException;
 
     /**
      * Extend this method to create the document default view section. The dco
      * defaults section is part of the encoded RTF header.
      */
-    protected abstract String makeRTF_documentDefaults()
-            throws AmbassadorDwUpException;
+    protected abstract String makeRTF_documentDefaults() throws AmbassadorDwUpException;
 
     /**
      * Extend this method to write a visible ambassador file header, a section
      * that the user sees before any segments.
      */
-    protected abstract void writeRTF_docHeader() throws IOException,
-            AmbassadorDwUpException;
+    protected abstract void writeRTF_docHeader() throws IOException, AmbassadorDwUpException;
 
     /**
      * Extend this method to write the main body of the document. Classes that
      * extend RTFWriterUnicode should use this method to create the desired
      * segment presentation format.
      */
-    protected abstract void writeRTF_docBody() throws IOException,
-            AmbassadorDwUpException;
+    protected abstract void writeRTF_docBody() throws IOException, AmbassadorDwUpException;
 
     //
     // Protected Methods
@@ -494,14 +479,12 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
      * @param p_issue
      *            the associated segment level Issue object
      */
-    protected void writeRTF_docSegment(String p_bmName, String p_segment,
-            String p_textStyle, String p_tagStyle, boolean p_isRtlLang,
-            boolean p_cvtTagToFld, String p_nativeFormat, boolean p_renderTags,
-            Issue p_issue, User p_user) throws IOException
+    protected void writeRTF_docSegment(String p_bmName, String p_segment, String p_textStyle,
+            String p_tagStyle, boolean p_isRtlLang, boolean p_cvtTagToFld, String p_nativeFormat,
+            boolean p_renderTags, Issue p_issue, User p_user) throws IOException
     {
-        m_outputStream.write(makeRTF_docSegment(p_bmName, p_segment,
-                p_textStyle, p_tagStyle, p_isRtlLang, p_cvtTagToFld,
-                p_nativeFormat, p_renderTags, p_issue, p_user));
+        m_outputStream.write(makeRTF_docSegment(p_bmName, p_segment, p_textStyle, p_tagStyle,
+                p_isRtlLang, p_cvtTagToFld, p_nativeFormat, p_renderTags, p_issue, p_user));
     }
 
     /**
@@ -529,16 +512,15 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
      * @param p_user
      *            the download user.
      */
-    public String makeRTF_docSegment(String p_bmName, String p_segment,
-            String p_textStyle, String p_tagStyle, boolean p_isRtlLang,
-            boolean p_cvtTagToFld, String p_nativeFormat, boolean p_renderTags,
-            Issue p_issue, User p_user)
+    public String makeRTF_docSegment(String p_bmName, String p_segment, String p_textStyle,
+            String p_tagStyle, boolean p_isRtlLang, boolean p_cvtTagToFld, String p_nativeFormat,
+            boolean p_renderTags, Issue p_issue, User p_user)
     {
         StringBuffer sb = new StringBuffer();
 
         boolean bookmark = (p_bmName != null && p_bmName.length() > 0);
-        String segTextRTF = formatSegmentText(p_segment, p_tagStyle,
-                p_isRtlLang, p_cvtTagToFld, p_nativeFormat, p_renderTags);
+        String segTextRTF = formatSegmentText(p_segment, p_tagStyle, p_isRtlLang, p_cvtTagToFld,
+                p_nativeFormat, p_renderTags);
 
         sb.append("{");
         sb.append(p_textStyle);
@@ -621,8 +603,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
      *            string to appended to the root id (can be null).
      * @return string
      */
-    private String makeBookmarkName(boolean p_oldStyle,
-            OfflineSegmentData p_osd, String p_suffix)
+    private String makeBookmarkName(boolean p_oldStyle, OfflineSegmentData p_osd, String p_suffix)
     {
         StringBuffer rslt = new StringBuffer();
 
@@ -656,8 +637,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
         rslt.append(p_osd.getDisplaySegmentID());
 
         // addable ptag category
-        if (p_oldStyle
-                && p_osd.getDisplaySegmentFormat().toLowerCase().equals("html")
+        if (p_oldStyle && p_osd.getDisplaySegmentFormat().toLowerCase().equals("html")
                 && p_osd.getSegmentType().toLowerCase().equals("text"))
         {
             rslt.append(WC_SUFFIX_SEGID_ADDABLE_HTML);
@@ -673,15 +653,13 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
 
     protected void setDefaults()
     {
-        m_localeRes = SystemResourceBundle.getInstance().getResourceBundle(
-                ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
+        m_localeRes = SystemResourceBundle.getInstance()
+                .getResourceBundle(ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
 
         String str_sourceLocale = m_page.getSourceLocaleName().trim();
         String str_targetLocale = m_page.getTargetLocaleName().trim();
-        String str_labelAndHeaderLocale = m_uiLocale.getLanguage() + "_"
-                + m_uiLocale.getCountry();
-        String str_issueLocale = m_uiLocale.getLanguage() + "_"
-                + m_uiLocale.getCountry();
+        String str_labelAndHeaderLocale = m_uiLocale.getLanguage() + "_" + m_uiLocale.getCountry();
+        String str_issueLocale = m_uiLocale.getLanguage() + "_" + m_uiLocale.getCountry();
 
         // set up the parameters we need: source locale id, lang
         try
@@ -749,21 +727,18 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
             m_issueIsRtlLang = true;
         }
 
-        m_strSourceLcid = "\\lang" + m_sourceLcid + "\\langfe" + m_sourceLcid
-                + "\\cgrid\\langnp" + m_sourceLcid + "\\langfenp"
-                + m_sourceLcid;
-        m_strTargetLcid = "\\lang" + m_targetLcid + "\\langfe" + m_targetLcid
-                + "\\cgrid\\langnp" + m_targetLcid + "\\langfenp"
-                + m_targetLcid;
+        m_strSourceLcid = "\\lang" + m_sourceLcid + "\\langfe" + m_sourceLcid + "\\cgrid\\langnp"
+                + m_sourceLcid + "\\langfenp" + m_sourceLcid;
+        m_strTargetLcid = "\\lang" + m_targetLcid + "\\langfe" + m_targetLcid + "\\cgrid\\langnp"
+                + m_targetLcid + "\\langfenp" + m_targetLcid;
         m_strLabelAndHeaderLcid = "\\lang" + m_labelAndHeaderLcid + "\\langfe"
-                + m_labelAndHeaderLcid + "\\cgrid\\langnp"
-                + m_labelAndHeaderLcid + "\\langfenp" + m_labelAndHeaderLcid;
-        m_strIssueLcid = "\\lang" + m_issueLcid + "\\langfe" + m_issueLcid
-                + "\\cgrid\\langnp" + m_issueLcid + "\\langfenp" + m_issueLcid;
+                + m_labelAndHeaderLcid + "\\cgrid\\langnp" + m_labelAndHeaderLcid + "\\langfenp"
+                + m_labelAndHeaderLcid;
+        m_strIssueLcid = "\\lang" + m_issueLcid + "\\langfe" + m_issueLcid + "\\cgrid\\langnp"
+                + m_issueLcid + "\\langfenp" + m_issueLcid;
 
         // set up shortcuts for the RTF controls we need
-        m_strDefaultStyle = PSTYLE_PLAIN + FONT_ARIAL + SIZE_12PT
-                + m_strDefaultLcid + " ";
+        m_strDefaultStyle = PSTYLE_PLAIN + FONT_ARIAL + SIZE_12PT + m_strDefaultLcid + " ";
 
         // style for source segments (text still in source language)
         m_strSourceTextStyle = FONT_SOURCE + SIZE_12PT + m_strSourceLcid + " ";
@@ -775,8 +750,9 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
 
         // style for source text with a fuzzy match (text is **NOT**
         // in target language)
-        m_strSourceTextFuzzyStyle = FONT_SOURCE + SIZE_12PT + COLOR_PURPLE
-                + m_strSourceLcid + " "; // use source lcid
+        m_strSourceTextFuzzyStyle = FONT_SOURCE + SIZE_12PT + COLOR_PURPLE + m_strSourceLcid + " "; // use
+                                                                                                    // source
+                                                                                                    // lcid
 
         if (m_sourceIsRtlLang)
         {
@@ -792,8 +768,8 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
         }
 
         // style for exact target segments (text already in target language)
-        m_strTargetTextExactStyle = FONT_TARGET + SIZE_12PT + COLOR_DARK_GREEN
-                + m_strTargetLcid + " ";
+        m_strTargetTextExactStyle = FONT_TARGET + SIZE_12PT + COLOR_DARK_GREEN + m_strTargetLcid
+                + " ";
 
         if (m_targetIsRtlLang)
         {
@@ -802,29 +778,28 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
 
         // style for Unverified exact target segments (text already in
         // target language)
-        m_strTargetTextUnverifiedExactStyle = FONT_TARGET + SIZE_12PT
-                + COLOR_LIGHT_GREEN + m_strTargetLcid + " ";
-
-        if (m_targetIsRtlLang)
-        {
-            m_strTargetTextUnverifiedExactStyle = "\\rtlch"
-                    + m_strTargetTextUnverifiedExactStyle;
-        }
-
-        // style for exact target segments (text already in target language)
-        m_strTargetTextLockedExactStyle = FONT_TARGET + SIZE_12PT + COLOR_GREY
+        m_strTargetTextUnverifiedExactStyle = FONT_TARGET + SIZE_12PT + COLOR_LIGHT_GREEN
                 + m_strTargetLcid + " ";
 
         if (m_targetIsRtlLang)
         {
-            m_strTargetTextLockedExactStyle = "\\rtlch"
-                    + m_strTargetTextLockedExactStyle;
+            m_strTargetTextUnverifiedExactStyle = "\\rtlch" + m_strTargetTextUnverifiedExactStyle;
+        }
+
+        // style for exact target segments (text already in target language)
+        m_strTargetTextLockedExactStyle = FONT_TARGET + SIZE_12PT + COLOR_GREY + m_strTargetLcid
+                + " ";
+
+        if (m_targetIsRtlLang)
+        {
+            m_strTargetTextLockedExactStyle = "\\rtlch" + m_strTargetTextLockedExactStyle;
         }
 
         // style for target text which is an inserted fuzzy match
         // (text **is* in target language)
-        m_strTargetTextFuzzyStyle = FONT_TARGET + SIZE_12PT + COLOR_PURPLE
-                + m_strTargetLcid + " "; // use source lcid
+        m_strTargetTextFuzzyStyle = FONT_TARGET + SIZE_12PT + COLOR_PURPLE + m_strTargetLcid + " "; // use
+                                                                                                    // source
+                                                                                                    // lcid
 
         if (m_targetIsRtlLang)
         {
@@ -834,13 +809,12 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
         // style for comment and header text
         // NOTE: lets try using ARIAL instead of the comment font (FONT_COMMENT)
         // looks better.
-        m_strLabelAndHeaderTextStyle = CSTYLE_GS_COMMENT + FONT_ARIAL
-                + SIZE_10PT + COLOR_GREY + m_strLabelAndHeaderLcid + " ";
+        m_strLabelAndHeaderTextStyle = CSTYLE_GS_COMMENT + FONT_ARIAL + SIZE_10PT + COLOR_GREY
+                + m_strLabelAndHeaderLcid + " ";
 
         if (m_labelAndHeaderIsRtlLang)
         {
-            m_strLabelAndHeaderTextStyle = "\\rtlch"
-                    + m_strLabelAndHeaderTextStyle;
+            m_strLabelAndHeaderTextStyle = "\\rtlch" + m_strLabelAndHeaderTextStyle;
         }
 
         // style for editable issue field
@@ -887,8 +861,8 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
         // }
 
         // style for the editor info text (use label Lcid for now)
-        m_strEditorInfoTextStyle = CSTYLE_GS_INFO + FONT_TIMES + SIZE_10PT
-                + COLOR_BLUE + m_strLabelAndHeaderLcid + " ";
+        m_strEditorInfoTextStyle = CSTYLE_GS_INFO + FONT_TIMES + SIZE_10PT + COLOR_BLUE
+                + m_strLabelAndHeaderLcid + " ";
 
         if (m_labelAndHeaderIsRtlLang)
         {
@@ -897,17 +871,16 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
 
         // default ptag style
         m_strDefaultPtagStyle = CSTYLE_GS_PTAG + FONT_ARIAL + SIZE_8PT
-                + COLOR_GREY /* + m_strDefaultLcid */+ " ";
+                + COLOR_GREY /* + m_strDefaultLcid */ + " ";
 
         // Trados styles
         m_strInternalStyle = CSTYLE_TW4WIN_INTERNAL + COLOR_RED + FONT_ARIAL
-                + SIZE_12PT /* + m_strDefaultLcid */+ " ";
+                + SIZE_12PT /* + m_strDefaultLcid */ + " ";
         m_strExternalStyle = CSTYLE_TW4WIN_EXTERNAL + COLOR_GREY + FONT_COURIER
-                + SIZE_10PT /* + m_strDefaultLcid */+ " ";
-        m_strExternalStyleWithTargetFont = CSTYLE_TW4WIN_EXTERNAL + COLOR_GREY
-                + FONT_TARGET + SIZE_12PT /* + m_strDefaultLcid */+ " ";
-        m_strMarkerStyle = CSTYLE_TW4WIN_MARK + COLOR_DARK_GREEN + FONT_ARIAL
-                + "\\sub\\v ";
+                + SIZE_10PT /* + m_strDefaultLcid */ + " ";
+        m_strExternalStyleWithTargetFont = CSTYLE_TW4WIN_EXTERNAL + COLOR_GREY + FONT_TARGET
+                + SIZE_12PT /* + m_strDefaultLcid */ + " ";
+        m_strMarkerStyle = CSTYLE_TW4WIN_MARK + COLOR_DARK_GREEN + FONT_ARIAL + "\\sub\\v ";
 
     }
 
@@ -950,8 +923,8 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
      *            the locale used to write the Header and other non-translatable
      *            instructions
      */
-    public void write(OfflinePageData p_page, OutputStream p_outputStream,
-            Locale p_uiLocale) throws IOException, AmbassadorDwUpException
+    public void write(OfflinePageData p_page, OutputStream p_outputStream, Locale p_uiLocale)
+            throws IOException, AmbassadorDwUpException
     {
         m_outputStream = new OutputStreamWriter(p_outputStream, "ASCII");
         m_page = p_page;
@@ -1021,8 +994,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
      *             other properties like <code>RTFHeaderStart</code> cannot be
      *             found.
      */
-    private void writeRTF_rtfHeader() throws IOException,
-            AmbassadorDwUpException
+    private void writeRTF_rtfHeader() throws IOException, AmbassadorDwUpException
     {
         Exception error = null;
         String str_sourceFont = getFont(m_page.getSourceLocaleName());
@@ -1125,8 +1097,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
                 catch (MissingResourceException ex)
                 {
                     throw new AmbassadorDwUpException(
-                            AmbassadorDwUpExceptionConstants.RTF_MISSING_RESOURCE,
-                            ex);
+                            AmbassadorDwUpExceptionConstants.RTF_MISSING_RESOURCE, ex);
                 }
             }
         }
@@ -1134,8 +1105,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
         return result;
     }
 
-    protected void debug_writeRTF_dummyBookmarks(int p_howMany)
-            throws IOException
+    protected void debug_writeRTF_dummyBookmarks(int p_howMany) throws IOException
     {
         int cnt = 0;
 
@@ -1145,10 +1115,8 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
             String infoBkmName = "" + cnt;
 
             m_outputStream.write("{ ");
-            m_outputStream.write(makeRTF_bookmark(BM_OPEN,
-                    infoBkmName.toString()));
-            m_outputStream.write(makeRTF_bookmark(BM_CLOSE,
-                    infoBkmName.toString()));
+            m_outputStream.write(makeRTF_bookmark(BM_OPEN, infoBkmName.toString()));
+            m_outputStream.write(makeRTF_bookmark(BM_CLOSE, infoBkmName.toString()));
             m_outputStream.write("}\\par ");
         }
     }
@@ -1162,8 +1130,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
             cnt++;
             String fldInst = "MACROBUTTON ptag";
             m_outputStream.write("{ ");
-            m_outputStream.write(makeRTF_field(true, true, true, true, fldInst,
-                    "result"));
+            m_outputStream.write(makeRTF_field(true, true, true, true, fldInst, "result"));
             m_outputStream.write("}");
         }
     }
@@ -1222,8 +1189,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
         // sb.append("{");
 
         // title line ------------------
-        editable = (p_user != null)
-                && p_issue.getCreatorId().equalsIgnoreCase(p_user.getUserId());
+        editable = (p_user != null) && p_issue.getCreatorId().equalsIgnoreCase(p_user.getUserId());
 
         sb.append(m_strEOL);
         sb.append(formatIssueTitle(p_issue, editable));
@@ -1240,8 +1206,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
             while (it.hasNext())
             {
                 issHis = (IssueHistory) it.next();
-                firstIsCreatorCmt = issHis.reportedBy().equalsIgnoreCase(
-                        p_user.getUserId());
+                firstIsCreatorCmt = issHis.reportedBy().equalsIgnoreCase(p_user.getUserId());
 
                 if (first && !firstIsCreatorCmt)
                 {
@@ -1284,8 +1249,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
         sb.append(formatFieldStart(true, "Status"));
         sb.append("=");
         // sb.append("{\\b"); //open bold
-        sb.append(encodeText(m_localeRes.getString("issue.status."
-                + p_issue.getStatus())));
+        sb.append(encodeText(m_localeRes.getString("issue.status." + p_issue.getStatus())));
         // sb.append("}"); // close bold
         sb.append(formatFieldEnd(true));
         sb.append("}");
@@ -1295,8 +1259,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
         sb.append(formatFieldStart(true, "Priority"));
         sb.append("=");
         // sb.append("{\\b ="); // open bold
-        sb.append(encodeText(m_localeRes.getString("issue.priority."
-                + p_issue.getPriority())));
+        sb.append(encodeText(m_localeRes.getString("issue.priority." + p_issue.getPriority())));
         // sb.append("}"); // close bold
         sb.append(formatFieldEnd(true));
         sb.append("}");
@@ -1360,8 +1323,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
     }
 
     // history level comment formatter
-    private String formatIssueHistoryComment(IssueHistory p_issueHistory,
-            boolean p_editable)
+    private String formatIssueHistoryComment(IssueHistory p_issueHistory, boolean p_editable)
     {
         StringBuffer sb = new StringBuffer();
 
@@ -1391,17 +1353,14 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
     }
 
     // history level info
-    private String formatIssueHistoryInfo(IssueHistory p_issueHistory,
-            boolean p_editable)
+    private String formatIssueHistoryInfo(IssueHistory p_issueHistory, boolean p_editable)
     {
-        return formatIssueInfo(UserUtil.getUserNameById(p_issueHistory
-                .reportedBy()), p_issueHistory.dateReported(),
-                p_editable ? COLOR_GREY : COLOR_GREY);
+        return formatIssueInfo(UserUtil.getUserNameById(p_issueHistory.reportedBy()),
+                p_issueHistory.dateReported(), p_editable ? COLOR_GREY : COLOR_GREY);
     }
 
     // base info formatter
-    private String formatIssueInfo(String p_creatorId, String p_createdDate,
-            String p_color)
+    private String formatIssueInfo(String p_creatorId, String p_createdDate, String p_color)
     {
         StringBuffer sb = new StringBuffer();
 
@@ -1440,9 +1399,8 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
      *            ptags on upload.
      * @return an encoded RTF string.
      */
-    protected String formatSegmentText(String p_segment, String p_tagStyle,
-            boolean p_isRtlLang, boolean p_wrapTagInFld,
-            String p_segNativeFormat, boolean p_renderTags)
+    protected String formatSegmentText(String p_segment, String p_tagStyle, boolean p_isRtlLang,
+            boolean p_wrapTagInFld, String p_segNativeFormat, boolean p_renderTags)
     {
         final int DIR_LTR = 2;
         final int DIR_RTL = 3;
@@ -1489,26 +1447,13 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
                         ++i_at;
                     } while (ch != ']');
 
-                    rtfRun.append(convertTag(isEpt, tagRun.toString(),
-                            p_tagStyle, p_segNativeFormat, p_wrapTagInFld,
-                            p_renderTags));
+                    rtfRun.append(convertTag(isEpt, tagRun.toString(), p_tagStyle,
+                            p_segNativeFormat, p_wrapTagInFld, p_renderTags));
 
                     continue;
                 }
             }
-            else if (ch == NORMALIZED_LINEBREAK)
-            {
-                rtfRun.append(convertTag(false, "[LF]", p_tagStyle,
-                        p_segNativeFormat, p_wrapTagInFld, p_renderTags));
-
-                // Note: By this time, the string has been converted to ptag.
-                // Unprotected newlines were normalized for Rtf when we
-                // got the target text in writeTranslationUnit().
-                ++i_at;
-                continue;
-            }
-            else if (p_isRtlLang && direction != DIR_LTR && ch != ' '
-                    && !Text.isBidiChar(ch))
+            else if (p_isRtlLang && direction != DIR_LTR && ch != ' ' && !Text.isBidiChar(ch))
             {
                 // open left-to-right run
                 rtfRun.append("{\\ltrch ");
@@ -1536,9 +1481,8 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
         return rtfRun.toString();
     }
 
-    private String convertTag(boolean p_isEpt, String p_tagRun,
-            String p_tagStyle, String p_segNativeFormat,
-            boolean p_wrapTagInFld, boolean p_render)
+    private String convertTag(boolean p_isEpt, String p_tagRun, String p_tagStyle,
+            String p_segNativeFormat, boolean p_wrapTagInFld, boolean p_render)
     {
         PseudoData PD = new PseudoData();
         PseudoOverrideMapItem POMI = null;
@@ -1563,10 +1507,9 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
                     // So, we can now go ahead and render it.
                     POMI = PD.getOverrideMapItem(mapKey);
 
-                    return (String) (p_isEpt ? POMI.m_hAttributes
-                            .get(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT)
-                            : POMI.m_hAttributes
-                                    .get(PseudoConstants.ADDABLE_RTF_CONTENT));
+                    return (String) (p_isEpt
+                            ? POMI.m_hAttributes.get(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT)
+                            : POMI.m_hAttributes.get(PseudoConstants.ADDABLE_RTF_CONTENT));
                 }
             }
         }
@@ -1574,8 +1517,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
         return formatPtag(p_tagRun, p_tagStyle, p_wrapTagInFld);
     }
 
-    private String formatPtag(String p_tagRun, String p_tagStyle,
-            boolean p_wrapTagInFld)
+    private String formatPtag(String p_tagRun, String p_tagStyle, boolean p_wrapTagInFld)
     {
         // Format the tag:
         // Regardless of the languages in this file, ptags
@@ -1590,8 +1532,8 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
         if (p_wrapTagInFld)
         {
             rtfRun.insert(0, " MACROBUTTON ptag ");
-            rtfRun = new StringBuffer(makeRTF_field(false, false, false, true,
-                    rtfRun.toString(), ""));
+            rtfRun = new StringBuffer(
+                    makeRTF_field(false, false, false, true, rtfRun.toString(), ""));
         }
 
         return rtfRun.toString();
@@ -1617,8 +1559,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
     {
         StringBuffer sb = new StringBuffer();
 
-        if (p_atnId != null && p_atnAuthor != null
-                && p_formattedRtfContent != null)
+        if (p_atnId != null && p_atnAuthor != null && p_formattedRtfContent != null)
         {
             // make initialization groups
             sb.append(makeRTF_annotationIdandAuthor(p_atnId, p_atnAuthor));
@@ -1651,8 +1592,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
      * @param p_atnAuthor
      *            - name of the person who inserted the comment
      */
-    protected String makeRTF_annotationIdandAuthor(String p_atnId,
-            String p_atnAuthor)
+    protected String makeRTF_annotationIdandAuthor(String p_atnId, String p_atnAuthor)
     {
         StringBuffer sb = new StringBuffer();
 
@@ -1674,8 +1614,7 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements
     {
         StringBuffer sb = new StringBuffer();
 
-        sb.append("{" + m_strExternalStyle
-                + AmbassadorDwUpConstants.HEADER_NOTES_KEY + " ");
+        sb.append("{" + m_strExternalStyle + AmbassadorDwUpConstants.HEADER_NOTES_KEY + " ");
         sb.append(p_msg);
         sb.append("}\\par");
         sb.append(m_strEOL); // required by grammar

@@ -602,6 +602,19 @@
 		}
 	}
 	
+	function checkLength()
+	{
+		var sessionTime = $("#msMaxLength").val();
+		if(!isNumeric(sessionTime)){
+			alert("The value must be Integer!")
+		}
+	}
+	
+	function isNumeric(str){
+		if (str.startsWith("0"))
+			return false;
+		return /^(-|\+)?\d+(\.\d+)?$/.test(str);
+	}
 </SCRIPT>
 </HEAD>
 
@@ -886,7 +899,7 @@
 									<TD><INPUT CLASS="standardText"
 										NAME="<%=MTProfileConstants.MT_MS_MAX_LENGTH%>"
 									id="msMaxLength" value="<%=mtProfile4val.getMsMaxLength()==0?1000:mtProfile4val.getMsMaxLength() %>"
-									 TYPE="text"	MAXLENGTH="6" SIZE="7"/>
+									 TYPE="text"	MAXLENGTH="6" SIZE="7" onblur="checkLength()"/>
 									</TD>
 								</TR>
 							</TABLE>

@@ -173,8 +173,7 @@ public interface TMProfileConstants
     public static final String MT_USE_MT="machineTranslation.useMT";
     public static final String MT_ENGINE = "machineTranslation.engine";
 //    public static final String MT_AUTOCOMMIT_TO_TM = "machineTranslation.autoCommitToTM";
-    public static final String MT_SHOW_IN_EDITOR = "machineTranslation.showInEditor";
-    
+   
     public static final String MT_PTSURL = "ptsurl";
     public static final String MT_LocalPairs_Map = "directionsMap";
     public static final String MT_LocalPairs_List = "directionsList";

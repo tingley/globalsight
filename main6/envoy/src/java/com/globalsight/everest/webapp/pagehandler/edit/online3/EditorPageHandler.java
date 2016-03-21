@@ -1409,7 +1409,7 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
             sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
                     String.valueOf(theTask.getTargetLocale().getId()));
             sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
-            request.setAttribute(WebAppConstants.TASK_ID, taskId);
+            sessionMgr.setAttribute(WebAppConstants.TASK_ID, taskId);
 
             state = new EditorState();
             state.setOpenEditorType(openEditorType);

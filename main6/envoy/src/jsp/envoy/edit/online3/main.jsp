@@ -320,7 +320,7 @@ String lb_nextPage = "<IMG SRC='/globalsight/images/editorNextPagex.gif' BORDER=
 PaginateInfo pi = state.getPaginateInfo();
 
 String jobId = (String)sessionMgr.getAttribute(WebAppConstants.JOB_ID);
-String taskId = (String)request.getAttribute(WebAppConstants.TASK_ID);
+String taskId = (String)sessionMgr.getAttribute(WebAppConstants.TASK_ID);
 String tgtIDS = sessionMgr.getAttribute(ReportConstants.TARGETLOCALE_LIST).toString();
 
 Boolean assigneeValue = (Boolean)TaskHelper.retrieveObject(

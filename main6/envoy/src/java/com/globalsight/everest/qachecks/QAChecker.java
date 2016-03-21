@@ -109,7 +109,7 @@ public class QAChecker
     public static final int ROW_LANGUAGE_INFO = 4;
     public static final int ROW_SEGMENT_HEADER = 6;
     public static final int ROW_SEGMENT_START = 7;
-    public static final int COLUMN_FALSE_POSITIVE = 6;
+    public static final int COLUMN_FALSE_POSITIVE = 7;
     public static final int COLUMN_HIDDEN_INFO = 26;
 
     public void runQAChecksAndGenerateReport(TaskInstance taskInstance)
@@ -382,7 +382,7 @@ public class QAChecker
         }
         if (processed)
         {
-            addFalsePositiveValidation(p_sheet, row - 1);
+			addFalsePositiveValidation(p_sheet, row - 1);
         }
         return processed;
     }
@@ -459,7 +459,7 @@ public class QAChecker
         commentsCell.setCellStyle(getUnlockedStyle(p_workbook));
     }
 
-    private void addFalsePositiveValidation(Sheet p_sheet, int p_lastRow)
+	private void addFalsePositiveValidation(Sheet p_sheet, int p_lastRow)
     {
         DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
 

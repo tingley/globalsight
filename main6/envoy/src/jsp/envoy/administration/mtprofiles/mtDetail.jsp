@@ -688,7 +688,7 @@
 					<TR>
 						<TD align="left"><%=bundle.getString("lb_ms_ignore_tm_matches")%>:</TD>
 						<TD><INPUT CLASS="standardText"	NAME="<%=MTProfileConstants.MT_IGNORE_TM_MATCHES%>"
-									id="ignoreTmMatches"<%=mtProfile4val.isIgnoreTMMatch() ? "checked" : ""%> 
+									id="ignoreTmMatches"<%=mtProfile.isIgnoreTMMatch() ? "checked" : ""%> 
 									TYPE="checkbox" />
 						</TD>
 					</TR>
@@ -813,10 +813,10 @@
 								<tr>
 									<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_client_id")%><font
 										color="red">*</font>:</td>
-									<td colspan="2"><INPUT CLASS="standardText" ID="idMsMtClientid"
+									<td colspan="2" style="white-space:nowrap"><INPUT CLASS="standardText" ID="idMsMtClientid"
 										NAME="<%=MTProfileConstants.MT_MS_CLIENT_ID%>"
 										value="<%=mtProfile4val.getUsername()%>" TYPE="text"
-										MAXLENGTH="100" SIZE="90" /> <a
+										MAXLENGTH="100" SIZE="90"></input> <a
 										href="http://go.microsoft.com/?linkid=9782667" target="_blank"><%=bundle.getString("lb_tm_ms_mt_appid_tag")%></a>
 									</td>
 								</tr>
@@ -880,22 +880,25 @@
 								</tr>
 								<% }
 							    } %>
-							    <tr>
-									<TD align="left"><INPUT CLASS="standardText"
+							     <tr>
+			                        <td  ALIGN="LEFT" STYLE="vertical-align: middle">
+			                        	<%=bundle.getString("lb_mt_ms_trans_type") %>:
+			                        </td>
+			                        <td>
+			                        	<INPUT CLASS="standardText"
 									NAME="<%= MTProfileConstants.MT_MS_TRANS_TYPE%>"
-									id="type1" VALUE= "1" TYPE="radio" <%="1".equals(mtProfile4val.getMsTransType()) ? "checked" : ""%>/>
-									<%=bundle.getString("lb_ms_text_between_tags")%></td>
-								</tr>
-							 
-								<tr>
-									<TD align="left"><INPUT CLASS="standardText"
+									id="type1" VALUE= "1" TYPE="radio" <%="1".equals(mtProfile4val.getMsTransType()) ? "checked" : ""%>></input>
+									<%=bundle.getString("lb_ms_text_between_tags")%>
+			                        	<br/>
+			                        	<INPUT CLASS="standardText"
 									NAME="<%=MTProfileConstants.MT_MS_TRANS_TYPE %>"
-									id="type2" VALUE= "2" TYPE="radio" <%="2".equals(mtProfile4val.getMsTransType())||mtProfile4val.getMsTransType()==null? "checked" : ""%>/>
-									<%=bundle.getString("lb_ms_text_including_tags")%></td>
-								</tr>
+									id="type2" VALUE= "2" TYPE="radio" <%="2".equals(mtProfile4val.getMsTransType())||mtProfile4val.getMsTransType()==null? "checked" : ""%>></input>
+									<%=bundle.getString("lb_ms_text_including_tags")%>
+			                        </td>
+		                        </tr>
 								
 								<TR>
-									<TD align="left"><%=bundle.getString("lb_ms_max_length")%>:</TD>
+									<TD align="left" style="white-space:nowrap"><%=bundle.getString("lb_ms_max_length")%>:</TD>
 									<TD><INPUT CLASS="standardText"
 										NAME="<%=MTProfileConstants.MT_MS_MAX_LENGTH%>"
 									id="msMaxLength" value="<%=mtProfile4val.getMsMaxLength()==0?1000:mtProfile4val.getMsMaxLength() %>"

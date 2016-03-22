@@ -33,6 +33,8 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
@@ -927,6 +929,19 @@ public class RequestImpl extends PersistentObject implements Request,
                     break;
                 }
             }
+        }
+    }
+    
+    public boolean isInactiveFpId(Long id)
+    {
+        FileProfile fp = HibernateUtil.get(FileProfileImpl.class, id, true);
+        if (fp != null)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
         }
     }
 

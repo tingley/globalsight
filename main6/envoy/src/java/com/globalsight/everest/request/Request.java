@@ -19,6 +19,7 @@ package com.globalsight.everest.request;
 import java.util.Hashtable;
 import java.util.List;
 
+import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
@@ -77,6 +78,13 @@ public interface Request
      * @return long The unique id that maps to a particular datasource.
      */
     public long getDataSourceId();
+    
+    /**
+     * Return true if fileprofile id is active and exsit.
+     * 
+     * @return boolean  
+     */
+    public boolean isInactiveFpId(Long id);
 
     /**
      * Returns the Event Flow XML associated with this request. This information

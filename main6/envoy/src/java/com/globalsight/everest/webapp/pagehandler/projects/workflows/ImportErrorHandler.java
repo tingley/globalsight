@@ -117,8 +117,8 @@ public class ImportErrorHandler extends JobDetailsHandler {
                     + "</SPAN>");
             String exceptionAsString = getMessage(curPage);
             if (exceptionAsString != null && exceptionAsString.length() > 0) {
-                sB.append("&nbsp;&nbsp;&nbsp;<a style = 'font-size: 9pt;' href= \"##\" id = \"hrefa" + i
-                        + "\" onclick='messageDetails(" + i + ")'>" + "Show Details</a>");
+                sB.append("&nbsp;&nbsp;&nbsp;<a style ='font-size: 9pt;white-space: nowrap;' class=\"standardText\" href=\"##\" id =\"hrefa"
+                        + i +"\" onclick='messageDetails(" + i + ")'>" + "Show Details</a>");
             }
             sB.append("</TD>\n");
             sB.append("</TR>");

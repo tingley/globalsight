@@ -144,8 +144,9 @@ public class WorkflowImportErrorHandler extends JobDetailsHandler {
             }
             String exceptionAsString = getMessage(curPage.getSourcePage());
             if (exceptionAsString != null && exceptionAsString.length() > 0) {
-                sb.append("&nbsp;&nbsp;&nbsp;<a style = 'font-size: 9pt;' href= \"##\" id = \"hrefa" + i
-                        + "\" onclick='messageDetails(" + i + ")'>" + "Show Details</a>");
+                sb.append("&nbsp;&nbsp;&nbsp;<a style = 'font-size: 9pt;white-space: nowrap;' class=\"standardText\""
+                        + "href= \"##\" id = \"hrefa" + i + "\" onclick='messageDetails(" + i + ")'>"
+                        + "Show Details</a>");
             }
             sb.append("</TD>\n");
             sb.append("</TR>\n");

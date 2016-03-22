@@ -144,7 +144,7 @@ public class ExtractorRegistry implements IFormatNames
             "com.globalsight.ling.docproc.merger.fm.FmPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.xml.NoOpPostMergeProcessor",
-            "com.globalsight.ling.docproc.merger.xml.NoOpPostMergeProcessor",
+            "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor" };
 
     // format names used in diplomat

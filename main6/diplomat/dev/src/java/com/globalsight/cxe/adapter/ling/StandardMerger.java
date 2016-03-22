@@ -232,7 +232,7 @@ public class StandardMerger implements IFormatNames
     private boolean eolHandledFormat()
     {
         return FORMAT_PLAINTEXT.equals(m_formatType) || FORMAT_JAVAPROP.equals(m_formatType)
-                || FORMAT_XML.equals(m_formatType);
+                || FORMAT_XML.equals(m_formatType) || FORMAT_AUTHORIT_XML.equals(m_formatType);
     }
 
     private String fixGxml(String p_mergeResult) throws Exception

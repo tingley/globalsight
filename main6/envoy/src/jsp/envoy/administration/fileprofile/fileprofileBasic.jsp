@@ -923,7 +923,8 @@ function noEncodingNeededForFormat(format)
 
 function needEolEncodingSettingFormat(format)
 {
-    if (isPlainText(format) || isJavaProperties(format) || format == "XML")
+    if (isPlainText(format) || isJavaProperties(format) || format == "XML" 
+    		|| format == "AuthorIT XML")
     {
         return true;
     }

@@ -19,7 +19,6 @@ package com.globalsight.everest.request;
 import java.util.Hashtable;
 import java.util.List;
 
-import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;

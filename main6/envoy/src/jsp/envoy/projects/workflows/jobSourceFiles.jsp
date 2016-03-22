@@ -415,11 +415,16 @@ function editfileprofile(param)
 						</c:choose>
 					</td>
 					<%if(b_clickfplink){%>
+					<c:if test="${item.getSourcePage().getRequest().isInactiveFpId(item.getSourcePage().getRequest().getDataSourceId()) == false}">
 					<td style="text-align:left">
 						<a href="javascript:;" onclick="editfileprofile(${item.getSourcePage().getRequest().getDataSourceId()})" title="Edit File Profile">
 						${item.dataSourceName}
 						</a>
 					</td>
+					</c:if>>
+					<c:if test="${item.getSourcePage().getRequest().isInactiveFpId(item.getSourcePage().getRequest().getDataSourceId()) == true}">
+					<td style="text-align:left">${item.dataSourceName}</td>
+					</c:if>
 					<%} else { %>
 					<td style="text-align:left">${item.dataSourceName}</td>
 					<%}%>

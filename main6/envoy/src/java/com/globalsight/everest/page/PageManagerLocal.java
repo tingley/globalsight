@@ -1115,14 +1115,9 @@ public final class PageManagerLocal implements PageManager
                     if (exportCode
                             .startsWith(JobManagementHandler.SAME_AS_SOURCE))
                     {
-                        long fileProfileId = page.getRequest()
-                                .getFileProfileId();
-                        FileProfile fileProfile = (FileProfile) HibernateUtil
-                                .get(FileProfileImpl.class, fileProfileId,
-                                        false);
                         eParameters.setExportCodeset(exportCode.replace(
-                                JobManagementHandler.SAME_AS_SOURCE,
-                                fileProfile.getCodeSet()));
+                                JobManagementHandler.SAME_AS_SOURCE, page.getRequest().getJob()
+                                        .getFileProfile().getCodeSet()));
                     }
 
                     ExtractedSourceFile sfile = (ExtractedSourceFile) page
@@ -1150,6 +1145,12 @@ public final class PageManagerLocal implements PageManager
                 }
                 else if (secondaryTargetFile != null)
                 {
+                    if (exportCode.startsWith(JobManagementHandler.SAME_AS_SOURCE))
+                    {
+                        eParameters.setExportCodeset(exportCode.replace(
+                                JobManagementHandler.SAME_AS_SOURCE, secondaryTargetFile
+                                        .getWorkflow().getJob().getFileProfile().getCodeSet()));
+                    }
                     path = secondaryTargetFile.getStoragePath();
                 }
 

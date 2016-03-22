@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.edit.online4;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -57,7 +56,6 @@ import com.globalsight.everest.webapp.pagehandler.offline.upload.MultipartFormDa
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
-import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
@@ -124,7 +122,7 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
                 }
                 else
                 {
-                    getPictureFromJob(p_response, jobId, srcPageId, trgPageId);
+                    getPictureFromJob(p_response,state, jobId, srcPageId, trgPageId);
                     return;
                 }
             }
@@ -139,7 +137,7 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
                 try
                 {
                     ServerProxy.getNativeFileManager().save(uf, p_tempFile, p_user);
-                    initializeFromActivity(p_request, user.getUserId(), taskId, uiLocale);
+                    initializeFromActivity(p_request, state, user.getUserId(), taskId, uiLocale);
                 }
                 catch (Exception e)
                 {
@@ -152,7 +150,7 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
             }
             else if ("switchTargetLocale".equalsIgnoreCase(action))
             {
-                setCurrentPageFromJob(p_request.getSession(), state, srcPageId, jobId);
+                setCurrentPageFromJob(p_request.getSession(), state, srcPageId, jobId, trgPageId);
                 initializeFromJob(p_request, state, uiLocale);
             }
         }
@@ -163,22 +161,20 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
             if (StringUtil.isNotEmptyAndNull(taskId) && StringUtil.isNotEmpty(srcPageId)
                     && StringUtil.isNotEmpty(trgPageId))
             {
-                initializeFromActivity(p_request, user.getUserId(), taskId, uiLocale);
+                initializeFromActivity(p_request, state, user.getUserId(), taskId, uiLocale);
                 setCurrentPageFromActivity(p_request, state, user.getUserId(), taskId, srcPageId);
 
-                p_request.setAttribute(WebAppConstants.TASK_ID, taskId);
+                sessionMgr.setAttribute(WebAppConstants.TASK_ID, taskId);
                 sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
                 sessionMgr.setAttribute(WebAppConstants.TARGET_PAGE_ID, trgPageId);
-                sessionMgr.setAttribute(WebAppConstants.IS_FROM_ACTIVITY, "yes");
             }
             else if (StringUtil.isNotEmpty(jobId) && StringUtil.isNotEmpty(srcPageId))
             {
-                setCurrentPageFromJob(p_request.getSession(), state, srcPageId, jobId);
+                setCurrentPageFromJob(p_request.getSession(), state, srcPageId, jobId,trgPageId);
                 initializeFromJob(p_request, state, uiLocale);
 
                 sessionMgr.setAttribute(WebAppConstants.JOB_ID, jobId);
                 sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
-                sessionMgr.setAttribute(WebAppConstants.IS_FROM_ACTIVITY, "no");
             }
         }
 
@@ -241,8 +237,8 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
         }
     }
     
-    private void getPictureFromJob(HttpServletResponse p_response, String p_jobId,
-            String p_srcPageId, String p_trgPageId)
+    private void getPictureFromJob(HttpServletResponse p_response, EditorState state,
+            String p_jobId, String p_srcPageId, String p_trgPageId)
     {
         JSONObject mainJson = new JSONObject();
         try
@@ -263,7 +259,6 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
                 for (it1 = srcPage.getTargetPages().iterator(); it1.hasNext();)
                 {
                     trgPage = (TargetPage) it1.next();
-                    
                     if (trgPage.getId() != Long.parseLong(p_trgPageId))
                         continue;
 
@@ -289,7 +284,7 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
                     mainJson.put("targetImagePath", tgurl);
                 }
             }
-
+            
             p_response.setContentType("text/html;charset=UTF-8");
             ServletOutputStream out = p_response.getOutputStream();
             out.write(mainJson.toString().getBytes("UTF-8"));
@@ -301,8 +296,8 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
         }
     }
     
-    private void initializeFromActivity(HttpServletRequest p_request, String p_userId,
-            String p_taskId, Locale p_uiLocale) throws EnvoyServletException
+    private void initializeFromActivity(HttpServletRequest p_request, EditorState p_state,
+            String p_userId, String p_taskId, Locale p_uiLocale) throws EnvoyServletException
     {
         try
         {
@@ -312,10 +307,12 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
             Task task = ServerProxy.getTaskManager().getTask(p_userId, Long.parseLong(p_taskId),
                     WorkflowConstants.TASK_ALL_STATES);
             String sourceLanguage = task.getSourceLocale().getDisplayName(p_uiLocale);
-            String targetLanguage = task.getTargetLocale().getDisplayName(p_uiLocale);
 
-            p_request.setAttribute("sourceLanguage", sourceLanguage);
-            p_request.setAttribute("targetLanguage", targetLanguage);
+            GlobalSightLocale viewLocale = p_state.getTargetViewLocale();
+            if (viewLocale == null)
+            {
+                p_state.setTargetViewLocale(task.getTargetLocale());
+            }
 
             boolean isCanUpload = false;
             int taskState = task.getState();
@@ -323,8 +320,10 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
             {
                 isCanUpload = true;
             }
+            p_request.setAttribute("sourceLanguage", sourceLanguage);
             p_request.setAttribute("isCanUpload", String.valueOf(isCanUpload));
             sessionMgr.setAttribute("targetLocale", task.getTargetLocale());
+            sessionMgr.setAttribute(WebAppConstants.IS_FROM_ACTIVITY, "yes");
         }
         catch (Exception e)
         {
@@ -355,7 +354,7 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
             {
                 p_state.setTargetViewLocale((GlobalSightLocale) trgLocales.elementAt(0));
             }
-
+            
             long targetPageId = p_state.getCurrentPage().getTargetPageId(
                     p_state.getTargetViewLocale());
             p_request.setAttribute("sourceLanguage",
@@ -364,6 +363,7 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
                     String.valueOf(p_state.getCurrentPage().getSourcePageId()));
             sessionMgr.setAttribute(WebAppConstants.TARGET_PAGE_ID, String.valueOf(targetPageId));
             sessionMgr.setAttribute(WebAppConstants.EDITORSTATE, p_state);
+            sessionMgr.setAttribute(WebAppConstants.IS_FROM_ACTIVITY, "no");
         }
         catch (Exception e)
         {
@@ -396,20 +396,20 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
             nextPage(state, p_request.getSession(), fromActivity);
         }
         
+        PagePair currentPage = state.getCurrentPage();
         if (fromActivity)
         {
-            PagePair currentPage = state.getCurrentPage();
             String sourcePageId = String.valueOf(currentPage.getSourcePageId());
             String targetPageId = String.valueOf(currentPage
                     .getTargetPageId((GlobalSightLocale) sessionMgr.getAttribute("targetLocale")));
-            initializeFromActivity(p_request, p_userId, p_taskId, uiLocale);
-            sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, sourcePageId);
+            initializeFromActivity(p_request, state, p_userId, p_taskId, uiLocale);
             sessionMgr.setAttribute(WebAppConstants.TASK_ID, p_taskId);
+            sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, sourcePageId);
             sessionMgr.setAttribute(WebAppConstants.TARGET_PAGE_ID, targetPageId);
         }
         else
         {
-            initializeFromJob(p_request,state,uiLocale);
+            initializeFromJob(p_request, state, uiLocale);
         }
     }
     
@@ -485,7 +485,7 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
     }
     
     private void setCurrentPageFromJob(HttpSession p_session, EditorState p_state,
-            String p_srcPageId,String p_jobId)
+            String p_srcPageId,String p_jobId,String p_trgPageId)
     {
         try
         {
@@ -525,6 +525,11 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
 
         p_state.setIsFirstPage(i_offset == 1);
         p_state.setIsLastPage(pages.size() == i_offset);
+        if (StringUtil.isNotEmptyAndNull(p_trgPageId))
+        {
+            p_state.setTargetViewLocale(p_state.getCurrentPage().getTargetPageLocale(
+                    Long.parseLong(p_trgPageId)));
+        }
     }
     
     private List<EditorState.PagePair> getPagePairList(HttpSession p_session,

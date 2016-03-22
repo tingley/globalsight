@@ -394,7 +394,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         	segHeaderRow = getRow(p_sheet, 2);
             col++;
             Cell cell_Score = getCell(segHeaderRow, col);
-            cell_Score.setCellValue(m_bundle.getString("lb_tm_mt_confidence_score"));
+            cell_Score.setCellValue(m_bundle.getString("lb_tm_mt_threshold_level"));
             cell_Score.setCellStyle(getHeaderStyle(p_workBook));
             p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
             setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
@@ -1153,7 +1153,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         csvWriter.write(bundle.getString("lb_total"));
         if (data.inludeMtColumn)
         {
-            csvWriter.write(bundle.getString("lb_tm_mt_confidence_score"));
+            csvWriter.write(bundle.getString("lb_tm_mt_threshold_level"));
         }
         csvWriter.endRecord();
     }

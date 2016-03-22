@@ -228,7 +228,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
                     String.valueOf(theTask.getTargetLocale().getId()));
             sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
-            p_request.setAttribute(WebAppConstants.TASK_ID, taskId);
+            sessionMgr.setAttribute(WebAppConstants.TASK_ID, taskId);
 
             state = new EditorState();
             state.setOpenEditorType(openEditorType);

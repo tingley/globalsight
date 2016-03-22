@@ -1020,7 +1020,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         cell_Total.setCellStyle(getHeaderStyle(p_workbook));
 
         Cell cell_Score = getCell(thirRow, ++col);
-        cell_Score.setCellValue(m_bundle.getString("lb_tm_mt_confidence_score"));
+        cell_Score.setCellValue(m_bundle.getString("lb_tm_mt_threshold_level"));
         cell_Score.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
         setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),

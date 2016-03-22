@@ -6609,16 +6609,17 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("companyName", p_companyName);
             activityStart = WebServicesLog.start(Ambassador.class, GET_FILEPROFILES_FOR_L10PROFILE,
                     activityArgs);
-            Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
-
-            if (company == null)
+            String userName = getUsernameFromSession(p_accessToken);
+            Company logUserCompany = getCompanyInfo(userName);
+            if (!logUserCompany.getName().equalsIgnoreCase(p_companyName.trim()))
             {
-                return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE,
-                        "Invaild company name, company does not exist: " + p_companyName);
+                return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invaild company name: "
+                        + p_companyName);
             }
-
+            
+            Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
             L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfileByName(
-                    p_l10nProfileName, String.valueOf(company.getId()));
+                    p_l10nProfileName.trim(), String.valueOf(company.getId()));
 
             if (lp != null)
             {

@@ -167,7 +167,6 @@ public interface MTProfileConstants
     public static final String MT_ENGINE = "machineTranslation.engine";
     // public static final String MT_AUTOCOMMIT_TO_TM =
     // "machineTranslation.autoCommitToTM";
-    public static final String MT_SHOW_IN_EDITOR = "machineTranslation.showInEditor";
     public static final String MT_INCLUDE_MT_IDENTIFIERS = "machineTranslation.includeMTIdentifiers";
     public static final String MT_MT_IDENTIFIER_LEADING = "machineTranslation.mtIdentifierLeading";
     public static final String MT_MT_IDENTIFIER_TRAILING = "machineTranslation.mtIdentifierTrailing";

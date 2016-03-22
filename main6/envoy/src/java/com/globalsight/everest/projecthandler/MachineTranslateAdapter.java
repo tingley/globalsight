@@ -163,9 +163,6 @@ public class MachineTranslateAdapter
         }
         mtProfile.setMtConfidenceScore(long_mtConfidenceScore);
 
-        // show in segment editor
-        String showInEditor = p_request
-                .getParameter(MTProfileConstants.MT_SHOW_IN_EDITOR);
         // show log debug info
         String logDebugInfo = p_request
                 .getParameter(MTProfileConstants.MT_LOG_DEBUG_INFO);

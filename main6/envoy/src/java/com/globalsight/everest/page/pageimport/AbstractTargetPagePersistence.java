@@ -76,6 +76,7 @@ import com.globalsight.ling.tm.ExactMatchedSegments;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm.LeverageMatchType;
 import com.globalsight.ling.tm.LeverageSegment;
+import com.globalsight.ling.tm.TuLing;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.Leverager;
@@ -1052,6 +1053,13 @@ public abstract class AbstractTargetPagePersistence implements
         {
             return p_appliedTuTuvMap;
         }
+        
+        Set<Tu> appliedTuMap = p_appliedTuTuvMap.keySet();
+        List tuIdList = new ArrayList<>();
+        for (Tu appliedTu : appliedTuMap)
+        {
+         tuIdList.add(appliedTu.getId());
+        }
 
         long jobId = p_sourcePage.getJobId();
         MachineTranslationProfile mtProfile = MTProfileHandlerHelper
@@ -1150,7 +1158,7 @@ public abstract class AbstractTargetPagePersistence implements
                         machineTranslatedGxml, jobId);
             }
             // replace the content in target tuv with mt result
-            if (isGetMTResult && tagMatched)
+            if (isGetMTResult && tagMatched && !tuIdList.contains(currentTu.getId()))
             {
                 // GBS-3722
                 if (mtProfile.isIncludeMTIdentifiers())

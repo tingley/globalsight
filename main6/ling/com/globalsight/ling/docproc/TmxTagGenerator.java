@@ -47,9 +47,8 @@ public class TmxTagGenerator
     public static final int UT = 5;
 
     private static final String[] m_TmxTagTypes =
-    { DiplomatNames.Element.BPT, DiplomatNames.Element.EPT,
-            DiplomatNames.Element.SUB, DiplomatNames.Element.IT,
-            DiplomatNames.Element.PH, DiplomatNames.Element.UT, };
+    { DiplomatNames.Element.BPT, DiplomatNames.Element.EPT, DiplomatNames.Element.SUB,
+            DiplomatNames.Element.IT, DiplomatNames.Element.PH, DiplomatNames.Element.UT, };
 
     // static TMX position types
     public static final int POS_BEGIN = 0;
@@ -121,26 +120,23 @@ public class TmxTagGenerator
     public static final int OFFICE_SUB = 52;
     public static final int OFFICE_SUP = 53;
     public static final int OFFICE_HIGHLIGHT = 54;
-    
+    // GBS-4336
+    public static final int LF = 55;
+
     // specific for html
     private static final String[] m_InlineTypes =
-    { "x-unknown", "bold", "italic", "x-strike", "x-sub", "x-super", "ulined",
-            "link", "font", "color", "dulined",
-            "lb",
-            "x-comment",
-            "x-javascript",
-            "x-tab",
-            "x-space", // javprop leading spaces
-            "x-formfeed",
-            "x-nbspace",
-            "x-variable",
+    { "x-unknown", "bold", "italic", "x-strike", "x-sub", "x-super", "ulined", "link", "font",
+            "color", "dulined", "lb", "x-comment", "x-javascript", "x-tab", "x-space", // javprop
+                                                                                       // leading
+                                                                                       // spaces
+            "x-formfeed", "x-nbspace", "x-variable",
             // special inline formatting types
-            "x-bold", "x-italic", "x-ulined", "x-br", "strong", "x-strong",
-            "em", "x-em", "c-bold", "c-x-bold", "c-strong", "c-x-strong",
-            "c-italic", "c-x-italic", "c-ulined", "c-x-ulined", "c-link",
-            "c-strike", "c-sub", "c-super", "c-font", "c-em", "c-x-em", "c-lb",
-            "c-tab", "c-formfeed", "c-br", "superscript","hyperlink", "office-bold",
-            "color", "office-italic", "office-underline", "office-sub", "office-sup", "highlight"};
+            "x-bold", "x-italic", "x-ulined", "x-br", "strong", "x-strong", "em", "x-em", "c-bold",
+            "c-x-bold", "c-strong", "c-x-strong", "c-italic", "c-x-italic", "c-ulined",
+            "c-x-ulined", "c-link", "c-strike", "c-sub", "c-super", "c-font", "c-em", "c-x-em",
+            "c-lb", "c-tab", "c-formfeed", "c-br", "superscript", "hyperlink", "office-bold",
+            "color", "office-italic", "office-underline", "office-sub", "office-sup", "highlight",
+            "x-lf" };
 
     public TmxTagGenerator()
     {
@@ -188,11 +184,9 @@ public class TmxTagGenerator
             case PH:
                 if (m_iInlineType != -1)
                 {
-                    strInlineType = " type=\"" + m_InlineTypes[m_iInlineType]
-                            + "\"";
+                    strInlineType = " type=\"" + m_InlineTypes[m_iInlineType] + "\"";
                 }
-                else if (m_strInlineType != null
-                        && m_strInlineType.length() > 0)
+                else if (m_strInlineType != null && m_strInlineType.length() > 0)
                 {
                     strInlineType = " type=\"" + m_strInlineType + "\"";
                 }
@@ -233,8 +227,7 @@ public class TmxTagGenerator
             case EPT:
                 if (m_iInternalMatching != 0)
                 {
-                    strInternalMatchingAtt = " i=\"" + m_iInternalMatching
-                            + "\"";
+                    strInternalMatchingAtt = " i=\"" + m_iInternalMatching + "\"";
                 }
                 break;
             default:
@@ -248,8 +241,7 @@ public class TmxTagGenerator
             case IT:
                 if (m_iExternalMatching != 0)
                 {
-                    strExternalMatchingAtt = " x=\"" + m_iExternalMatching
-                            + "\"";
+                    strExternalMatchingAtt = " x=\"" + m_iExternalMatching + "\"";
                 }
                 break;
             default:

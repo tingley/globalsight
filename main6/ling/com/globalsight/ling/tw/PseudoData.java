@@ -84,8 +84,7 @@ public class PseudoData
         try
         {
             // load default resource
-            m_defaultResource = ResourceBundle.getBundle(
-                    PseudoConstants.PSEUDO_RESPATH, Locale.US);
+            m_defaultResource = ResourceBundle.getBundle(PseudoConstants.PSEUDO_RESPATH, Locale.US);
 
             // must set m_hPseudoOverrideMap first
             m_hPseudoOverrideMap = mapPseudoOverrides();
@@ -253,8 +252,17 @@ public class PseudoData
      */
     public boolean isAddableAllowed()
     {
-        return (m_nAddablesMode != PseudoConstants.ADDABLES_DISABLED) ? true
-                : false;
+        return (m_nAddablesMode != PseudoConstants.ADDABLES_DISABLED) ? true : false;
+    }
+
+    /**
+     * "LF" tag is always taken as addable tag.
+     * 
+     * @since GBS-4336
+     */
+    public boolean isAddableAllowed(String p_tagName)
+    {
+        return "LF".equals(p_tagName) ? true : isAddableAllowed();
     }
 
     /**
@@ -272,8 +280,7 @@ public class PseudoData
             rslt = new Hashtable();
 
             String key;
-            for (Enumeration e = this.m_hPseudo2NativeMap.keys(); e
-                    .hasMoreElements();)
+            for (Enumeration e = this.m_hPseudo2NativeMap.keys(); e.hasMoreElements();)
             {
                 key = (String) e.nextElement();
                 rslt.put(key, (String) m_hPseudo2NativeMap.get(key));
@@ -330,8 +337,7 @@ public class PseudoData
             {
                 if (wrappedSourceString.contains(tag))
                 {
-                    wrappedSourceString = wrappedSourceString.replace(tag,
-                            map.get(tag));
+                    wrappedSourceString = wrappedSourceString.replace(tag, map.get(tag));
                 }
             }
         }
@@ -353,8 +359,7 @@ public class PseudoData
             {
                 if (wrappedTargetString.contains(tag))
                 {
-                    wrappedTargetString = wrappedTargetString.replace(tag,
-                            map.get(tag));
+                    wrappedTargetString = wrappedTargetString.replace(tag, map.get(tag));
                 }
             }
         }
@@ -418,8 +423,7 @@ public class PseudoData
      */
     public TagNode getSrcTagItem(int p_idx)
     {
-        if (m_SrcCompleteTagList == null
-                || !(p_idx < m_SrcCompleteTagList.size()))
+        if (m_SrcCompleteTagList == null || !(p_idx < m_SrcCompleteTagList.size()))
         {
             return null;
         }
@@ -481,8 +485,7 @@ public class PseudoData
     }
 
     /**
-     * Returns a mapping of tmx types to Override items.
-     * <p.>
+     * Returns a mapping of tmx types to Override items. <p.>
      * <p>
      * NOTE:
      * <p>
@@ -507,8 +510,7 @@ public class PseudoData
      * @return a mapping table in the form of a properties hash.
      * @throws PseudoOverrideItemException
      */
-    private static Properties mapPseudoOverrides()
-            throws PseudoOverrideItemException
+    private static Properties mapPseudoOverrides() throws PseudoOverrideItemException
     {
         Properties p = new Properties();
 
@@ -540,8 +542,7 @@ public class PseudoData
         B_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\b0 ");
 
         // subscript
-        String strSub = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.OFFICE_SUB);
+        String strSub = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.OFFICE_SUB);
 
         Hashtable sub_Data = new Hashtable();
         sub_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "bpt");
@@ -556,8 +557,7 @@ public class PseudoData
         sub_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\b0 ");
 
         // subscript
-        String strSup = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.OFFICE_SUP);
+        String strSup = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.OFFICE_SUP);
         Hashtable sup_Data = new Hashtable();
         sup_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "bpt");
         sup_Data.put(PseudoConstants.ADDABLE_TMX_TYPE, strSup);
@@ -569,10 +569,9 @@ public class PseudoData
         sup_Data.put(PseudoConstants.ADDABLE_ENDPAIR_HTML_CONTENT, "</sup>");
         sup_Data.put(PseudoConstants.ADDABLE_RTF_CONTENT, "\\b ");
         sup_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\b0 ");
-        
+
         // highlight
-        String strHighlight = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.OFFICE_HIGHLIGHT);
+        String strHighlight = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.OFFICE_HIGHLIGHT);
         Hashtable highlight_Data = new Hashtable();
         highlight_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "bpt");
         highlight_Data.put(PseudoConstants.ADDABLE_TMX_TYPE, strHighlight);
@@ -586,8 +585,7 @@ public class PseudoData
         highlight_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\b0 ");
 
         // BOLD
-        String cStrB = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.C_BOLD);
+        String cStrB = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.C_BOLD);
 
         Hashtable C_B_Data = new Hashtable();
         C_B_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "bpt");
@@ -602,8 +600,7 @@ public class PseudoData
         C_B_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\b0 ");
 
         // strong
-        String strStrong = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.STRONG);
+        String strStrong = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.STRONG);
 
         Hashtable STRONG_Data = new Hashtable();
         STRONG_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "bpt");
@@ -613,14 +610,12 @@ public class PseudoData
         // B_Data.put(PseudoConstants.ADDABLE_ATTR_MOVABLE, movableVal);
         // Note: enter raw native content - caller must encode as needed
         STRONG_Data.put(PseudoConstants.ADDABLE_HTML_CONTENT, "<strong>");
-        STRONG_Data.put(PseudoConstants.ADDABLE_ENDPAIR_HTML_CONTENT,
-                "</strong>");
+        STRONG_Data.put(PseudoConstants.ADDABLE_ENDPAIR_HTML_CONTENT, "</strong>");
         STRONG_Data.put(PseudoConstants.ADDABLE_RTF_CONTENT, "\\b ");
         STRONG_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\b0 ");
 
         // STRONG
-        String cStrStrong = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.C_STRONG);
+        String cStrStrong = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.C_STRONG);
 
         Hashtable C_STRONG_Data = new Hashtable();
         C_STRONG_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "bpt");
@@ -630,8 +625,7 @@ public class PseudoData
         // B_Data.put(PseudoConstants.ADDABLE_ATTR_MOVABLE, movableVal);
         // Note: enter raw native content - caller must encode as needed
         C_STRONG_Data.put(PseudoConstants.ADDABLE_HTML_CONTENT, "<STRONG>");
-        C_STRONG_Data.put(PseudoConstants.ADDABLE_ENDPAIR_HTML_CONTENT,
-                "</STRONG>");
+        C_STRONG_Data.put(PseudoConstants.ADDABLE_ENDPAIR_HTML_CONTENT, "</STRONG>");
         C_STRONG_Data.put(PseudoConstants.ADDABLE_RTF_CONTENT, "\\b ");
         C_STRONG_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\b0 ");
 
@@ -677,8 +671,7 @@ public class PseudoData
         I_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\i0 ");
 
         // I
-        String cStrI = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.C_ITALIC);
+        String cStrI = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.C_ITALIC);
 
         Hashtable C_I_Data = new Hashtable();
         C_I_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "bpt");
@@ -693,8 +686,7 @@ public class PseudoData
         C_I_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "\\i0 ");
 
         // u
-        String strU = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.UNDERLINE);
+        String strU = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.UNDERLINE);
 
         Hashtable U_Data = new Hashtable();
         U_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "bpt");
@@ -709,8 +701,7 @@ public class PseudoData
         U_Data.put(PseudoConstants.ADDABLE_ENDPAIR_RTF_CONTENT, "}");
 
         // U
-        String cStrU = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.C_UNDERLINE);
+        String cStrU = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.C_UNDERLINE);
 
         Hashtable C_U_Data = new Hashtable();
         C_U_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "bpt");
@@ -727,8 +718,7 @@ public class PseudoData
         // Unique attributes for un-paired addable tags
 
         // Nbsp
-        String strNbsp = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.NBSPACE);
+        String strNbsp = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.NBSPACE);
 
         Hashtable NBSP_Data = new Hashtable();
         NBSP_Data.put(PseudoConstants.ADDABLE_TMX_TAG, "ph");
@@ -738,6 +728,14 @@ public class PseudoData
         // Note: enter raw native content - caller must encode as needed
         NBSP_Data.put(PseudoConstants.ADDABLE_HTML_CONTENT, "&nbsp;");
         NBSP_Data.put(PseudoConstants.ADDABLE_RTF_CONTENT, "\\~");
+
+        // LF
+        String strLf = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.LF);
+        Hashtable lfData = new Hashtable();
+        lfData.put(PseudoConstants.ADDABLE_TMX_TAG, "ph");
+        lfData.put(PseudoConstants.ADDABLE_TMX_TYPE, strLf);
+        lfData.put(PseudoConstants.ADDABLE_ATTR_ERASABLE, erasableVal);
+        lfData.put(PseudoConstants.ADDABLE_HTML_CONTENT, "\n");
 
         // br
         String strBr = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.X_BR);
@@ -765,55 +763,35 @@ public class PseudoData
 
         // Get the TMX type-names for the remaining overrides that are
         // not addable.
-        String strXB = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.X_BOLD);
-        String strXSTRONG = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.X_STRONG);
-        String strXI = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.X_ITALIC);
+        String strXB = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.X_BOLD);
+        String strXSTRONG = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.X_STRONG);
+        String strXI = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.X_ITALIC);
         String strXEM = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.X_EM);
-        String strXU = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.X_UNDERLINE);
+        String strXU = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.X_UNDERLINE);
         String strL = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.LINK);
-        String strFC = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.FONTCHANGE);
-        String strLB = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.LINEBREAK);
+        String strFC = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.FONTCHANGE);
+        String strLB = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.LINEBREAK);
         String strSP = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.SPACE);
         String strTab = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.TAB);
-        String strFF = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.FORMFEED);
+        String strFF = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.FORMFEED);
 
-        String cStrXB = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.C_X_BOLD);
-        String cStrXSTRONG = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.C_X_STRONG);
-        String cStrXI = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.C_X_ITALIC);
-        String cStrXEM = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.C_X_EM);
-        String cStrXU = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.C_X_UNDERLINE);
-        String cStrL = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.C_LINK);
-        String cStrFC = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.C_FONTCHANGE);
-        String cStrLB = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.C_LINEBREAK);
-        String cStrTab = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.C_TAB);
-        String cStrFF = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.C_FORMFEED);
+        String cStrXB = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.C_X_BOLD);
+        String cStrXSTRONG = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.C_X_STRONG);
+        String cStrXI = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.C_X_ITALIC);
+        String cStrXEM = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.C_X_EM);
+        String cStrXU = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.C_X_UNDERLINE);
+        String cStrL = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.C_LINK);
+        String cStrFC = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.C_FONTCHANGE);
+        String cStrLB = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.C_LINEBREAK);
+        String cStrTab = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.C_TAB);
+        String cStrFF = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.C_FORMFEED);
         String officeSuperscript = TmxTagGenerator
                 .getInlineTypeName(TmxTagGenerator.OFFICE_SUPERSCRIPT);
         String officeHyperlink = TmxTagGenerator
                 .getInlineTypeName(TmxTagGenerator.OFFICE_HYPERLINK);
-        String officeBold = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.OFFICE_BOLD);
-        String officeColor = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.OFFICE_COLOR);
-        String officeItalic = TmxTagGenerator
-                .getInlineTypeName(TmxTagGenerator.OFFICE_ITALIC);
+        String officeBold = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.OFFICE_BOLD);
+        String officeColor = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.OFFICE_COLOR);
+        String officeItalic = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.OFFICE_ITALIC);
         String officeUnderline = TmxTagGenerator
                 .getInlineTypeName(TmxTagGenerator.OFFICE_UNDERLINE);
 
@@ -856,94 +834,62 @@ public class PseudoData
         // =============================================================
 
         // TmxType TmxType paired verbose comp. num. addable
-        p.put(strL, new PseudoOverrideMapItem(strL, true, "link", "l", true,
-                null));
-        p.put(cStrL, new PseudoOverrideMapItem(cStrL, true, "LINK", "L", true,
-                null));
-        p.put(strFC, new PseudoOverrideMapItem(strFC, true, "font", "f", true,
-                null));
-        p.put(cStrFC, new PseudoOverrideMapItem(cStrFC, true, "FONT", "F",
-                true, null));
-        p.put(strB, new PseudoOverrideMapItem(strB, true, "bold", "b", false,
-                B_Data));
-        p.put(cStrB, new PseudoOverrideMapItem(cStrB, true, "BOLD", "B", false,
-                C_B_Data));
-        p.put(strI, new PseudoOverrideMapItem(strI, true, "italic", "i", false,
-                I_Data));
-        p.put(cStrI, new PseudoOverrideMapItem(cStrI, true, "ITALIC", "I",
-                false, C_I_Data));
-        p.put(strEm, new PseudoOverrideMapItem(strEm, true, "em", "e", false,
-                EM_Data));
-        p.put(cStrEm, new PseudoOverrideMapItem(cStrEm, true, "EM", "E", false,
-                C_EM_Data));
-        p.put(strU, new PseudoOverrideMapItem(strU, true, "underline", "u",
-                false, U_Data));
-        p.put(cStrU, new PseudoOverrideMapItem(cStrU, true, "UNDERLINE", "U",
-                false, C_U_Data));
-        p.put(strXB, new PseudoOverrideMapItem(strXB, true, "bold", "b", true,
-                null));
-        p.put(cStrXB, new PseudoOverrideMapItem(cStrXB, true, "BOLD", "B",
-                true, null));
-        p.put(strXI, new PseudoOverrideMapItem(strXI, true, "italic", "i",
-                true, null));
-        p.put(cStrXI, new PseudoOverrideMapItem(cStrXI, true, "ITALIC", "I",
-                true, null));
-        p.put(strXEM, new PseudoOverrideMapItem(strXEM, true, "em", "e", true,
-                null));
-        p.put(cStrXEM, new PseudoOverrideMapItem(cStrXEM, true, "EM", "E",
-                true, null));
-        p.put(strXU, new PseudoOverrideMapItem(strXU, true, "underline", "u",
-                true, null));
-        p.put(cStrXU, new PseudoOverrideMapItem(cStrXU, true, "UNDERLINE", "U",
-                true, null));
-        p.put(strLB, new PseudoOverrideMapItem(strLB, false, "lineBreak", "lb",
-                true, null));
-        p.put(cStrLB, new PseudoOverrideMapItem(cStrLB, false, "LINE_BREAK",
-                "LB", true, null));
-        p.put(strTab, new PseudoOverrideMapItem(strTab, false, "tab", "t",
-                true, null));
-        p.put(cStrTab, new PseudoOverrideMapItem(cStrTab, false, "TAB", "T",
-                true, null));
-        p.put(strSP, new PseudoOverrideMapItem(strSP, false, "space", "sp",
-                true, null));
-        p.put(strFF, new PseudoOverrideMapItem(strFF, false, "formfeed", "ff",
-                true, null));
-        p.put(cStrFF, new PseudoOverrideMapItem(cStrFF, false, "FORM_FEED",
-                "FF", true, null));
-        p.put(strNbsp, new PseudoOverrideMapItem(strNbsp, false, "nbsp",
-                "nbsp", false, NBSP_Data));
-        p.put(strBr, new PseudoOverrideMapItem(strBr, false, "break", "br",
-                false, BR_Data));
-        p.put(cStrBr, new PseudoOverrideMapItem(cStrBr, false, "BREAK", "BR",
-                false, C_BR_Data));
-        p.put(strStrong, new PseudoOverrideMapItem(strStrong, true, "strong",
-                "strong", false, STRONG_Data));
-        p.put(cStrStrong, new PseudoOverrideMapItem(cStrStrong, true, "STRONG",
-                "STRONG", false, C_STRONG_Data));
-        p.put(strXSTRONG, new PseudoOverrideMapItem(strXSTRONG, true, "strong",
-                "strong", true, null));
-        p.put(cStrXSTRONG, new PseudoOverrideMapItem(cStrXSTRONG, true,
-                "strong", "strong", true, null));
-        p.put(officeSuperscript, new PseudoOverrideMapItem(officeSuperscript,
-                true, "superscript", "superscript", true, null));
-        p.put(officeHyperlink, new PseudoOverrideMapItem(officeHyperlink, true,
-                "hyperlink", "hyperlink", true, null));
-        p.put(officeBold, new PseudoOverrideMapItem(officeBold, true, "bold",
-                "bold", true, null));
-        p.put(officeColor, new PseudoOverrideMapItem(officeColor, true,
-                "color", "color", true, null));
-        p.put(officeItalic, new PseudoOverrideMapItem(officeItalic, true,
-                "italic", "italic", true, null));
-        p.put(officeUnderline, new PseudoOverrideMapItem(officeUnderline, true,
-                "underline", "underline", true, null));
+        p.put(strL, new PseudoOverrideMapItem(strL, true, "link", "l", true, null));
+        p.put(cStrL, new PseudoOverrideMapItem(cStrL, true, "LINK", "L", true, null));
+        p.put(strFC, new PseudoOverrideMapItem(strFC, true, "font", "f", true, null));
+        p.put(cStrFC, new PseudoOverrideMapItem(cStrFC, true, "FONT", "F", true, null));
+        p.put(strB, new PseudoOverrideMapItem(strB, true, "bold", "b", false, B_Data));
+        p.put(cStrB, new PseudoOverrideMapItem(cStrB, true, "BOLD", "B", false, C_B_Data));
+        p.put(strI, new PseudoOverrideMapItem(strI, true, "italic", "i", false, I_Data));
+        p.put(cStrI, new PseudoOverrideMapItem(cStrI, true, "ITALIC", "I", false, C_I_Data));
+        p.put(strEm, new PseudoOverrideMapItem(strEm, true, "em", "e", false, EM_Data));
+        p.put(cStrEm, new PseudoOverrideMapItem(cStrEm, true, "EM", "E", false, C_EM_Data));
+        p.put(strU, new PseudoOverrideMapItem(strU, true, "underline", "u", false, U_Data));
+        p.put(cStrU, new PseudoOverrideMapItem(cStrU, true, "UNDERLINE", "U", false, C_U_Data));
+        p.put(strXB, new PseudoOverrideMapItem(strXB, true, "bold", "b", true, null));
+        p.put(cStrXB, new PseudoOverrideMapItem(cStrXB, true, "BOLD", "B", true, null));
+        p.put(strXI, new PseudoOverrideMapItem(strXI, true, "italic", "i", true, null));
+        p.put(cStrXI, new PseudoOverrideMapItem(cStrXI, true, "ITALIC", "I", true, null));
+        p.put(strXEM, new PseudoOverrideMapItem(strXEM, true, "em", "e", true, null));
+        p.put(cStrXEM, new PseudoOverrideMapItem(cStrXEM, true, "EM", "E", true, null));
+        p.put(strXU, new PseudoOverrideMapItem(strXU, true, "underline", "u", true, null));
+        p.put(cStrXU, new PseudoOverrideMapItem(cStrXU, true, "UNDERLINE", "U", true, null));
+        p.put(strLB, new PseudoOverrideMapItem(strLB, false, "lineBreak", "lb", true, null));
+        p.put(cStrLB, new PseudoOverrideMapItem(cStrLB, false, "LINE_BREAK", "LB", true, null));
+        p.put(strTab, new PseudoOverrideMapItem(strTab, false, "tab", "t", true, null));
+        p.put(cStrTab, new PseudoOverrideMapItem(cStrTab, false, "TAB", "T", true, null));
+        p.put(strSP, new PseudoOverrideMapItem(strSP, false, "space", "sp", true, null));
+        p.put(strFF, new PseudoOverrideMapItem(strFF, false, "formfeed", "ff", true, null));
+        p.put(cStrFF, new PseudoOverrideMapItem(cStrFF, false, "FORM_FEED", "FF", true, null));
+        p.put(strNbsp, new PseudoOverrideMapItem(strNbsp, false, "nbsp", "nbsp", false, NBSP_Data));
+        p.put(strLf, new PseudoOverrideMapItem(strLf, false, "LF", "LF", false, lfData));
+        p.put(strBr, new PseudoOverrideMapItem(strBr, false, "break", "br", false, BR_Data));
+        p.put(cStrBr, new PseudoOverrideMapItem(cStrBr, false, "BREAK", "BR", false, C_BR_Data));
+        p.put(strStrong,
+                new PseudoOverrideMapItem(strStrong, true, "strong", "strong", false, STRONG_Data));
+        p.put(cStrStrong, new PseudoOverrideMapItem(cStrStrong, true, "STRONG", "STRONG", false,
+                C_STRONG_Data));
+        p.put(strXSTRONG,
+                new PseudoOverrideMapItem(strXSTRONG, true, "strong", "strong", true, null));
+        p.put(cStrXSTRONG,
+                new PseudoOverrideMapItem(cStrXSTRONG, true, "strong", "strong", true, null));
+        p.put(officeSuperscript, new PseudoOverrideMapItem(officeSuperscript, true, "superscript",
+                "superscript", true, null));
+        p.put(officeHyperlink, new PseudoOverrideMapItem(officeHyperlink, true, "hyperlink",
+                "hyperlink", true, null));
+        p.put(officeBold, new PseudoOverrideMapItem(officeBold, true, "bold", "bold", true, null));
+        p.put(officeColor,
+                new PseudoOverrideMapItem(officeColor, true, "color", "color", true, null));
+        p.put(officeItalic,
+                new PseudoOverrideMapItem(officeItalic, true, "italic", "italic", true, null));
+        p.put(officeUnderline, new PseudoOverrideMapItem(officeUnderline, true, "underline",
+                "underline", true, null));
 
-        p.put(strSub, new PseudoOverrideMapItem(strSub, true, "subscript",
-                "sub", false, sub_Data));
-        p.put(strSup, new PseudoOverrideMapItem(strSup, true, "superscript",
-                "sup", false, sup_Data));
-        
-        p.put(strHighlight, new PseudoOverrideMapItem(strSup, true, "highlight",
-                "hl", true, null));
+        p.put(strSub, new PseudoOverrideMapItem(strSub, true, "subscript", "sub", false, sub_Data));
+        p.put(strSup,
+                new PseudoOverrideMapItem(strSup, true, "superscript", "sup", false, sup_Data));
+
+        p.put(strHighlight, new PseudoOverrideMapItem(strSup, true, "highlight", "hl", true, null));
 
         return p;
     }
@@ -978,8 +924,7 @@ public class PseudoData
         for (Enumeration e = p_hMainOverrideMap.keys(); e.hasMoreElements();)
         {
             String key = (String) e.nextElement();
-            PseudoOverrideMapItem item = (PseudoOverrideMapItem) p_hMainOverrideMap
-                    .get(key);
+            PseudoOverrideMapItem item = (PseudoOverrideMapItem) p_hMainOverrideMap.get(key);
 
             if (item.m_hAttributes != null)
             {
@@ -1067,8 +1012,7 @@ public class PseudoData
      * @param p_formatName
      *            - the format name under which to look. Example: html
      */
-    public String isAddableInFormat(String p_strTagName,
-            String p_nativeFormatName)
+    public String isAddableInFormat(String p_strTagName, String p_nativeFormatName)
     {
         String overrideMapKey = null;
         PseudoOverrideMapItem overrideMapItem = null;
@@ -1105,8 +1049,7 @@ public class PseudoData
         if (overrideMapKey != null)
         {
             overrideMapItem = getOverrideMapItem(overrideMapKey);
-            return overrideMapItem.m_hAttributes.get(contentCheck) != null ? overrideMapKey
-                    : null;
+            return overrideMapItem.m_hAttributes.get(contentCheck) != null ? overrideMapKey : null;
         }
         else
         {
@@ -1205,8 +1148,7 @@ public class PseudoData
 
                 thisTagAttrVal = (String) p_hAttributes.get(thisTagAttrKey);
 
-                if (!thisTagAttrVal.equals(srcListItem.getAttributes().get(
-                        thisTagAttrKey)))
+                if (!thisTagAttrVal.equals(srcListItem.getAttributes().get(thisTagAttrKey)))
                 {
                     return null;
                 }
@@ -1268,8 +1210,7 @@ public class PseudoData
         }
         else if (p_locale.length() == 5) // language plus country
         {
-            locale = new Locale(p_locale.substring(0, 2), p_locale.substring(3,
-                    5));
+            locale = new Locale(p_locale.substring(0, 2), p_locale.substring(3, 5));
         }
         else
         {
@@ -1296,8 +1237,7 @@ public class PseudoData
         // re-load resources - defaults loaded in constructor
         try
         {
-            newBundle = ResourceBundle.getBundle(
-                    PseudoConstants.PSEUDO_RESPATH, p_locale);
+            newBundle = ResourceBundle.getBundle(PseudoConstants.PSEUDO_RESPATH, p_locale);
         }
         catch (MissingResourceException e)
         {
@@ -1320,13 +1260,11 @@ public class PseudoData
      *            - the default name to use.
      * @return the PTag name as a string.
      */
-    public String makePseudoTagName(String p_tmxTagName,
-            Hashtable p_attributes, String p_strDefaultName)
-            throws DiplomatBasicParserException
+    public String makePseudoTagName(String p_tmxTagName, Hashtable p_attributes,
+            String p_strDefaultName) throws DiplomatBasicParserException
     {
         // do not force the tag to be numbered
-        return (makePseudoTagName(p_tmxTagName, p_attributes, p_strDefaultName,
-                false));
+        return (makePseudoTagName(p_tmxTagName, p_attributes, p_strDefaultName, false));
     }
 
     /**
@@ -1346,9 +1284,8 @@ public class PseudoData
      *            attributes..
      * @return the PTag name as a string.
      */
-    public String makePseudoTagName(String p_tmxTagName,
-            Hashtable p_attributes, String p_strDefaultName,
-            boolean p_bMakeNumbered) throws DiplomatBasicParserException
+    public String makePseudoTagName(String p_tmxTagName, Hashtable p_attributes,
+            String p_strDefaultName, boolean p_bMakeNumbered) throws DiplomatBasicParserException
     {
         String tag = "";
         String p_strType = (String) p_attributes.get("type");
@@ -1382,8 +1319,7 @@ public class PseudoData
                 {
                     try
                     {
-                        int intNativeCodeID = (new Integer(nativeCodeID))
-                                .intValue() + 1;
+                        int intNativeCodeID = (new Integer(nativeCodeID)).intValue() + 1;
                         nativeCodeID = String.valueOf(intNativeCodeID);
                     }
                     catch (Exception e)
@@ -1456,8 +1392,7 @@ public class PseudoData
                 if ((nativeCodeID == null) || (nativeCodeID.length() <= 0))
                 {
                     throw new DiplomatBasicParserException(
-                            "MakePtagName(): The \"x\" attribute is empty for : "
-                                    + p_tmxTagName);
+                            "MakePtagName(): The \"x\" attribute is empty for : " + p_tmxTagName);
                 }
 
                 if (p_strType.length() == 0)
@@ -1518,8 +1453,7 @@ public class PseudoData
                 // for mapped types we can force them to be numbered.
                 if (nativeCodeID != null)
                 {
-                    if (PNameItem.m_bNumbered || (p_bMakeNumbered == true)
-                            || (!isAddableAllowed()))
+                    if (PNameItem.m_bNumbered || !isAddableAllowed(tag))
                     {
                         tag = tag + nativeCodeID;
                     }
@@ -1556,8 +1490,7 @@ public class PseudoData
         return m_mtIdentifierTrailing;
     }
 
-    public void addInternalTags(String tag, String segment)
-            throws TagNodeException
+    public void addInternalTags(String tag, String segment) throws TagNodeException
     {
         m_internalTexts.put(tag, segment);
         Properties attributes = new Properties();
@@ -1575,22 +1508,19 @@ public class PseudoData
         m_SrcCompleteTagList.add(tagNode);
     }
 
-    public void addMTIdentifierLeading(String tag, String segment)
-            throws TagNodeException
+    public void addMTIdentifierLeading(String tag, String segment) throws TagNodeException
     {
         m_mtIdentifierLeading.put(tag, segment);
         addMTIdentifiers(tag, segment);
     }
 
-    public void addMTIdentifierTrailing(String tag, String segment)
-            throws TagNodeException
+    public void addMTIdentifierTrailing(String tag, String segment) throws TagNodeException
     {
         m_mtIdentifierTrailing.put(tag, segment);
         addMTIdentifiers(tag, segment);
     }
 
-    private void addMTIdentifiers(String tag, String segment)
-            throws TagNodeException
+    private void addMTIdentifiers(String tag, String segment) throws TagNodeException
     {
         m_mtIdentifiers.put(tag, segment);
         Properties attributes = new Properties();
@@ -1658,7 +1588,8 @@ public class PseudoData
     }
 
     /**
-     * @param isXliff20File the isXliff20File to set
+     * @param isXliff20File
+     *            the isXliff20File to set
      */
     public void setXliff20File(boolean isXliff20File)
     {

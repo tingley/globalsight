@@ -33,7 +33,7 @@ EditorState state = (EditorState) sessionMgr.getAttribute(WebAppConstants.EDITOR
 boolean isFistPage = state.isFirstPage();
 boolean isLastPage = state.isLastPage();
 
-String lb_title = "Popup editor Image";
+String lb_title = "Image Editor";
 String url_self = self.getPageURL();
 String uploadUrl = url_self +
 "&" + WebAppConstants.USER_ACTION +
@@ -53,18 +53,9 @@ String lb_nextFile = "<IMG SRC='/globalsight/images/editorNextPagex.gif' BORDER=
 
 Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
 String jobId = (String)sessionMgr.getAttribute(WebAppConstants.JOB_ID);
-String taskId = (String)request.getAttribute(WebAppConstants.TASK_ID);
+String taskId = (String)sessionMgr.getAttribute(WebAppConstants.TASK_ID);
 String srcPageId = (String)sessionMgr.getAttribute(WebAppConstants.SOURCE_PAGE_ID);
 String trgPageId = (String)sessionMgr.getAttribute(WebAppConstants.TARGET_PAGE_ID);
-String getDataUrl = url_self + "&" + WebAppConstants.TASK_ID + "=" + taskId 
-									 + "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + srcPageId 
-									 + "&" + WebAppConstants.JOB_ID+"="+jobId
-									 + "&" + WebAppConstants.TARGET_PAGE_ID + "=" + trgPageId;
-url_self += "&" + WebAppConstants.TASK_ID + "=" + taskId 
-			+ "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + srcPageId 
-			+ "&" + WebAppConstants.JOB_ID+"="+jobId
-			+ "&" + WebAppConstants.TARGET_PAGE_ID + "=" + trgPageId;
-
 uploadUrl += "&" + WebAppConstants.TASK_ID + "=" + taskId + "&"
 		+ WebAppConstants.SOURCE_PAGE_ID + "=" + srcPageId + "&"
 		+ WebAppConstants.TARGET_PAGE_ID + "=" + trgPageId;
@@ -79,6 +70,22 @@ if(isFromActivity != null)
 		isActivity = true;
 	}
 }
+if(isActivity)
+{
+	url_self += "&" + WebAppConstants.TASK_ID + "=" + taskId 
+	+ "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + srcPageId
+	+ "&" + WebAppConstants.TARGET_PAGE_ID + "=" + trgPageId;
+	
+}
+else
+{
+	url_self += "&" + WebAppConstants.JOB_ID+"="+jobId
+			+ "&" + WebAppConstants.TARGET_PAGE_ID + "=" + trgPageId
+			+ "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + srcPageId;
+}
+
+String getDataUrl = url_self;
+
 String isCanUpload = (String)request.getAttribute("isCanUpload");
 boolean displayUploadButton = false;
 if(isCanUpload != null && Boolean.parseBoolean(isCanUpload))
@@ -101,38 +108,68 @@ int i_index = state.getPages().indexOf(currentPage);
 if(!isPicturePreviousFile && i_index > 0)
 {
 	PagePair previousPage = state.getPages().get(i_index-1);
-	String parameter =  "&" + WebAppConstants.TASK_ID + "=" + taskId 
-			+ "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + previousPage.getSourcePageId() 
-			+ "&" + WebAppConstants.JOB_ID+"="+jobId
-			+ "&" + WebAppConstants.TARGET_PAGE_ID + "=" + previousPage.getTargetPageId(state.getTargetLocale())
-			+ "&openEditorType="+state.getOpenEditorType();
+	StringBuffer parameter = new StringBuffer();
+	if(isActivity)
+	{
+		parameter.append("&").append(WebAppConstants.TASK_ID).append("=").append(taskId);
+		parameter.append("&").append(WebAppConstants.SOURCE_PAGE_ID).append("=").append(previousPage.getSourcePageId());
+		parameter.append("&").append(WebAppConstants.TARGET_PAGE_ID).append("=").append(previousPage.getTargetPageId(state.getTargetLocale()));
+	}
+	else
+	{
+		parameter.append("&").append(WebAppConstants.JOB_ID).append("=").append(jobId);
+		parameter.append("&").append(WebAppConstants.SOURCE_PAGE_ID).append("=").append(previousPage.getSourcePageId());
+		parameter.append("&").append(WebAppConstants.TARGET_PAGE_ID).append("=").append(previousPage.getTargetPageId(state.getTargetLocale()));
+	}
+	parameter.append("&openEditorType=").append(state.getOpenEditorType());
+	
+//	String parameter =  "&" + WebAppConstants.TASK_ID + "=" + taskId 
+	//		+ "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + previousPage.getSourcePageId() 
+		//	+ "&" + WebAppConstants.JOB_ID+"="+jobId
+		//	+ "&" + WebAppConstants.TARGET_PAGE_ID + "=" + previousPage.getTargetPageId(state.getTargetLocale())
+		//	+ "&openEditorType="+state.getOpenEditorType();
 	
 	if(openEditorType!= null && openEditorType.equalsIgnoreCase("postReviewEditor"))
 	{
-		url_previousPostRwEditor += parameter;
+		url_previousPostRwEditor += parameter.toString();
 	}
 	else if(openEditorType!= null && openEditorType.equalsIgnoreCase("popupEditor"))
 	{
-		url_previousPopupEditor += parameter;
+		url_previousPopupEditor += parameter.toString();
 	}
 }
 
 if(!isPictureNextFile && i_index < state.getPages().size()-1)
 {
 	PagePair nextPage = state.getPages().get(i_index+1);
-	String parameter = "&" + WebAppConstants.TASK_ID + "=" + taskId 
-			+ "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + nextPage.getSourcePageId() 
-			+ "&" + WebAppConstants.JOB_ID+"="+jobId
-			+ "&" + WebAppConstants.TARGET_PAGE_ID + "=" + nextPage.getTargetPageId(state.getTargetLocale())
-			+ "&openEditorType="+state.getOpenEditorType();
+	StringBuffer parameter = new StringBuffer();
+	if(isActivity)
+	{
+		parameter.append("&").append(WebAppConstants.TASK_ID).append("=").append(taskId);
+		parameter.append("&").append(WebAppConstants.SOURCE_PAGE_ID).append("=").append(nextPage.getSourcePageId());
+		parameter.append("&").append(WebAppConstants.TARGET_PAGE_ID).append("=").append(nextPage.getTargetPageId(state.getTargetLocale()));
+	}
+	else
+	{
+		parameter.append("&").append(WebAppConstants.JOB_ID).append("=").append(jobId);
+		parameter.append("&").append(WebAppConstants.SOURCE_PAGE_ID).append("=").append(nextPage.getSourcePageId());
+		parameter.append("&").append(WebAppConstants.TARGET_PAGE_ID).append("=").append(nextPage.getTargetPageId(state.getTargetLocale()));
+	}
+	parameter.append("&openEditorType=").append(state.getOpenEditorType());
+	
+	//String parameter = "&" + WebAppConstants.TASK_ID + "=" + taskId 
+	//		+ "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + nextPage.getSourcePageId() 
+	//		+ "&" + WebAppConstants.JOB_ID+"="+jobId
+	//		+ "&" + WebAppConstants.TARGET_PAGE_ID + "=" + nextPage.getTargetPageId(state.getTargetLocale())
+	//		+ "&openEditorType="+state.getOpenEditorType();
 	
 	if(openEditorType!= null && openEditorType.equalsIgnoreCase("postReviewEditor"))
 	{
-		url_nextPostRwEditor += parameter;
+		url_nextPostRwEditor += parameter.toString();
 	}
 	else if(openEditorType!= null && openEditorType.equalsIgnoreCase("popupEditor"))
 	{
-		url_nextPopupEditor += parameter;
+		url_nextPopupEditor += parameter.toString();
 	}
 }
 
@@ -163,7 +200,7 @@ if(!isActivity){
 }
 else
 {
-	str_targetLocaleBuffer.append(str_targetLocale);
+	str_targetLocaleBuffer.append(state.getTargetLocale().getDisplayName(uiLocale));
 }
 %>
 <HTML>

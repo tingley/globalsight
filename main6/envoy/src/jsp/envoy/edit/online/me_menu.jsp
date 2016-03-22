@@ -131,7 +131,7 @@ if (state.isReadOnly() || state.getIsReviewActivity()
     b_showAutoPropagateLink = false;
 }
 String jobId = (String)sessionMgr.getAttribute(WebAppConstants.JOB_ID);
-String taskId = (String)request.getAttribute(WebAppConstants.TASK_ID);
+String taskId = (String)sessionMgr.getAttribute(WebAppConstants.TASK_ID);
 String tgtIDS = sessionMgr.getAttribute(ReportConstants.TARGETLOCALE_LIST).toString();
 
 String url_previousPictureEditor = url_pictureEditor;

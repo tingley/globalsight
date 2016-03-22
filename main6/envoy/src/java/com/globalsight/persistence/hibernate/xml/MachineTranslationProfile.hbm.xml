@@ -46,8 +46,6 @@
 		<property name="companyid" type="java.lang.Long">
 			<column name="COMPANY_ID" />
 		</property>
-	<!-- 	<property name="showInEditor" column="SHOW_IN_EDITOR" type="yes_no"
-			not-null="false" /> -->
 		<property name="logDebugInfo" column="LOG_DEBUG_INFO" type="yes_no"
 			not-null="false" />
 		<property name="includeMTIdentifiers" column="INCLUDE_MT_IDENTIFIERS"

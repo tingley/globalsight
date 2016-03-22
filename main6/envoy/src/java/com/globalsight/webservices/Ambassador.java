@@ -3022,6 +3022,7 @@ public class Ambassador extends AbstractWebService
             throws WebServiceException
     {
         checkAccess(p_accessToken, GET_JOB_EXPORT_FILES_IN_ZIP);
+        p_jobIds = p_jobIds.replace(" ", "");
         if (p_jobIds == null || p_jobIds.trim() == "")
         {
             String msg = "jobIds can not be empty.";

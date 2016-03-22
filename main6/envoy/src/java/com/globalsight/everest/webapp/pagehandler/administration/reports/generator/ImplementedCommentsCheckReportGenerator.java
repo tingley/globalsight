@@ -56,6 +56,8 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
+import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
+import com.globalsight.everest.integration.ling.tm2.Types;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -76,6 +78,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm.LeverageSegment;
+import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.util.GlobalSightLocale;
@@ -86,7 +89,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
 {
     private static final Logger logger = Logger
             .getLogger(ImplementedCommentsCheckReportGenerator.class);
-    
+
     final String TAG_COMBINED = "-combined";
     private HttpServletRequest request = null;
     private ResourceBundle bundle = null;
@@ -99,21 +102,21 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
     private CellStyle unlockedRightStyle = null;
     private CellStyle hightLightRightStyle = null;
     private CellStyle hightLightStyle = null;
-    
+
     protected String m_companyName = "";
     protected List<Long> m_jobIDS = new ArrayList<Long>();
     protected List<GlobalSightLocale> m_targetLocales = new ArrayList<GlobalSightLocale>();
-    
+
     private static final String CATEGORY_FAILURE_DROP_DOWN_LIST = "categoryFailureDropDownList";
     private static final String DEFAULT_DATE_FORMAT = "MM/dd/yy hh:mm:ss a z";
-    
+
     public static final String reportType = ReportConstants.IMPLEMENTED_COMMENTS_CHECK_REPORT;
     public static final int LANGUAGE_HEADER_ROW = 3;
     public static final int LANGUAGE_INFO_ROW = 4;
     public static final int SEGMENT_HEADER_ROW = 6;
     public static final int SEGMENT_START_ROW = 7;
     public static final int CATEGORY_FAILURE_COLUMN = 7;
-    
+
     private Locale uiLocale = new Locale("en", "US");
     String m_userId;
 
@@ -135,8 +138,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
         m_companyName = UserUtil.getCurrentCompanyName(request);
         CompanyThreadLocal.getInstance().setValue(m_companyName);
-        uiLocale = (Locale) request.getSession().getAttribute(
-                WebAppConstants.UILOCALE);
+        uiLocale = (Locale) request.getSession().getAttribute(WebAppConstants.UILOCALE);
         if (uiLocale == null)
         {
             uiLocale = Locale.US;
@@ -144,13 +146,11 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
 
         if (p_request.getParameter(ReportConstants.JOB_IDS) != null)
         {
-            m_jobIDS = ReportHelper.getListOfLong(p_request
-                    .getParameter(ReportConstants.JOB_IDS));
+            m_jobIDS = ReportHelper.getListOfLong(p_request.getParameter(ReportConstants.JOB_IDS));
             GlobalSightLocaleComparator comparator = new GlobalSightLocaleComparator(
                     GlobalSightLocaleComparator.ISO_CODE, uiLocale);
-            m_targetLocales = ReportHelper.getTargetLocaleList(p_request
-                    .getParameterValues(ReportConstants.TARGETLOCALE_LIST),
-                    comparator);
+            m_targetLocales = ReportHelper.getTargetLocaleList(
+                    p_request.getParameterValues(ReportConstants.TARGETLOCALE_LIST), comparator);
         }
         bundle = PageHandler.getBundle(request.getSession());
 
@@ -169,8 +169,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
      *            HttpServletResponse
      * @throws Exception
      */
-    public void sendReports(List<Long> p_jobIDS,
-            List<GlobalSightLocale> p_targetLocales,
+    public void sendReports(List<Long> p_jobIDS, List<GlobalSightLocale> p_targetLocales,
             HttpServletResponse p_response) throws Exception
     {
         if (p_jobIDS == null || p_jobIDS.size() == 0)
@@ -198,8 +197,8 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
      *            Company Name
      * @throws Exception
      */
-    public File[] generateReports(List<Long> p_jobIDS,
-            List<GlobalSightLocale> p_targetLocales) throws Exception
+    public File[] generateReports(List<Long> p_jobIDS, List<GlobalSightLocale> p_targetLocales)
+            throws Exception
     {
         ArrayList<String> stateList = ReportHelper.getAllJobStatusList();
         stateList.remove(Job.PENDING);
@@ -223,32 +222,32 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         }
 
         int finishedJobNum = 0;
-		for (long jobID : p_jobIDS)
-		{
-			// Cancel generate reports.
-			if (isCancelled())
-				return null;
+        for (long jobID : p_jobIDS)
+        {
+            // Cancel generate reports.
+            if (isCancelled())
+                return null;
 
-			Job job = ServerProxy.getJobHandler().getJobById(jobID);
-			if (job == null || !stateList.contains(job.getState()))
-				continue;
+            Job job = ServerProxy.getJobHandler().getJobById(jobID);
+            if (job == null || !stateList.contains(job.getState()))
+                continue;
 
-			stateSet.add(job.getDisplayState());
-			projectSet.add(job.getProject().getName());
+            stateSet.add(job.getDisplayState());
+            projectSet.add(job.getProject().getName());
 
-			setAllCellStyleNull();
-			Workbook workBook = new SXSSFWorkbook();
-			createReport(workBook, job, p_targetLocales, dateFormat);
-			File file = getFile(reportType, job, workBook);
-			FileOutputStream out = new FileOutputStream(file);
-			workBook.write(out);
-			out.close();
-			((SXSSFWorkbook) workBook).dispose();
-			workBooks.add(file);
+            setAllCellStyleNull();
+            Workbook workBook = new SXSSFWorkbook();
+            createReport(workBook, job, p_targetLocales, dateFormat);
+            File file = getFile(reportType, job, workBook);
+            FileOutputStream out = new FileOutputStream(file);
+            workBook.write(out);
+            out.close();
+            ((SXSSFWorkbook) workBook).dispose();
+            workBooks.add(file);
 
-			// Sets Reports Percent.
-			setPercent(++finishedJobNum);
-		}
+            // Sets Reports Percent.
+            setPercent(++finishedJobNum);
+        }
 
         return ReportHelper.moveReports(workBooks, m_userId);
     }
@@ -258,53 +257,51 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
      * 
      * @throws Exception
      */
-	private void createReport(Workbook p_workbook, Job p_job,
-			List<GlobalSightLocale> p_targetLocales, String p_dateFormat)
-			throws Exception
-	{
-		List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(p_job);
-		for (GlobalSightLocale trgLocale : p_targetLocales)
-		{
-			if (!jobTL.contains(trgLocale))
-				continue;
+    private void createReport(Workbook p_workbook, Job p_job,
+            List<GlobalSightLocale> p_targetLocales, String p_dateFormat) throws Exception
+    {
+        List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(p_job);
+        for (GlobalSightLocale trgLocale : p_targetLocales)
+        {
+            if (!jobTL.contains(trgLocale))
+                continue;
 
-			String srcLang = p_job.getSourceLocale().getDisplayName(uiLocale);
-			String trgLang = trgLocale.getDisplayName(uiLocale);
+            String srcLang = p_job.getSourceLocale().getDisplayName(uiLocale);
+            String trgLang = trgLocale.getDisplayName(uiLocale);
 
-			// Create One Report Sheet/Tab
-			Sheet sheet = null;
-			if (p_workbook.getSheet(trgLocale.toString()) != null)
-			{
-				sheet = p_workbook.getSheet(trgLocale.toString());
-			}
-			else
-			{
-				sheet = p_workbook.createSheet(trgLocale.toString());
-				sheet.protectSheet("");
+            // Create One Report Sheet/Tab
+            Sheet sheet = null;
+            if (p_workbook.getSheet(trgLocale.toString()) != null)
+            {
+                sheet = p_workbook.getSheet(trgLocale.toString());
+            }
+            else
+            {
+                sheet = p_workbook.createSheet(trgLocale.toString());
+                sheet.protectSheet("");
 
-				// Add Title
-				addTitle(p_workbook, sheet);
+                // Add Title
+                addTitle(p_workbook, sheet);
 
-				// Add Locale Pair Header
-				addLanguageHeader(p_workbook, sheet);
+                // Add Locale Pair Header
+                addLanguageHeader(p_workbook, sheet);
 
-				// Add Segment Header
-				addSegmentHeader(p_workbook, sheet);
+                // Add Segment Header
+                addSegmentHeader(p_workbook, sheet);
 
-				// Insert Language Data
-				writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
-			}
+                // Insert Language Data
+                writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
+            }
 
-			// Create Name Areas for drop down list.
-			if (p_workbook.getName(CATEGORY_FAILURE_DROP_DOWN_LIST) == null)
-			{
-				createCategoryFailureNameArea(p_workbook);
-			}
+            // Create Name Areas for drop down list.
+            if (p_workbook.getName(CATEGORY_FAILURE_DROP_DOWN_LIST) == null)
+            {
+                createCategoryFailureNameArea(p_workbook);
+            }
 
-    		writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, p_dateFormat,
-    					SEGMENT_START_ROW);
-		}
-	}
+            writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, p_dateFormat, SEGMENT_START_ROW);
+        }
+    }
 
     /**
      * Add segment header to the sheet for Implemented Comments Check Report
@@ -314,26 +311,25 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
      *            the sheet
      * @throws Exception
      */
-    private void addSegmentHeader(Workbook p_workBook, Sheet p_sheet)
-            throws Exception
+    private void addSegmentHeader(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
         int col = 0;
         int row = SEGMENT_HEADER_ROW;
         Row segHeaderRow = getRow(p_sheet, row);
         CellStyle headerStyle = getHeaderStyle(p_workBook);
-        
+
         Cell cell_A = getCell(segHeaderRow, col);
         cell_A.setCellValue(bundle.getString("lb_job_id_report"));
         cell_A.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 30 * 256);
         col++;
-        
+
         Cell cell_B = getCell(segHeaderRow, col);
         cell_B.setCellValue(bundle.getString("lb_segment_id"));
         cell_B.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 30 * 256);
         col++;
-        
+
         Cell cell_C = getCell(segHeaderRow, col);
         cell_C.setCellValue(bundle.getString("lb_page_name"));
         cell_C.setCellStyle(headerStyle);
@@ -345,13 +341,13 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         cell_D.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
-        
+
         Cell cell_E = getCell(segHeaderRow, col);
         cell_E.setCellValue(bundle.getString("lb_target_segment"));
         cell_E.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 30 * 256);
         col++;
-        
+
         Cell cell_F = getCell(segHeaderRow, col);
         cell_F.setCellValue(bundle.getString("lb_sid"));
         cell_F.setCellStyle(headerStyle);
@@ -363,13 +359,13 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         cell_G.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
-        
+
         Cell cell_H = getCell(segHeaderRow, col);
         cell_H.setCellValue(bundle.getString("lb_category_failure"));
         cell_H.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 30 * 256);
         col++;
-        
+
         Cell cell_I = getCell(segHeaderRow, col);
         cell_I.setCellValue(bundle.getString("lb_tm_match_original"));
         cell_I.setCellStyle(headerStyle);
@@ -381,7 +377,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         cell_J.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 30 * 256);
         col++;
-        
+
         Cell cell_K = getCell(segHeaderRow, col);
         cell_K.setCellValue(bundle.getString("lb_glossary_target"));
         cell_K.setCellStyle(headerStyle);
@@ -400,7 +396,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
     {
         int col = 0;
         int row = LANGUAGE_HEADER_ROW;
-        
+
         Row langRow = getRow(p_sheet, row);
         Cell srcLangCell = getCell(langRow, col);
         srcLangCell.setCellValue(bundle.getString("lb_source_language"));
@@ -428,8 +424,8 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         titleCell.setCellStyle(getTitleStyle(p_workBook));
     }
 
-    private void writeLanguageInfo(Workbook p_workbook, Sheet p_sheet,
-            String p_sourceLang, String p_targetLang) throws Exception
+    private void writeLanguageInfo(Workbook p_workbook, Sheet p_sheet, String p_sourceLang,
+            String p_targetLang) throws Exception
     {
         int col = 0;
         int row = LANGUAGE_INFO_ROW;
@@ -440,7 +436,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         Cell srcLangCell = getCell(langInfoRow, col++);
         srcLangCell.setCellValue(p_sourceLang);
         srcLangCell.setCellStyle(contentStyle);
-        
+
         // Target Language
         Cell trgLangCell = getCell(langInfoRow, col++);
         trgLangCell.setCellValue(p_targetLang);
@@ -448,8 +444,8 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
     }
 
     /**
-     * For Implemented Comments Check Report, Write segment information into each row of
-     * the sheet.
+     * For Implemented Comments Check Report, Write segment information into
+     * each row of the sheet.
      * 
      * @param p_workBook
      *            the workBook
@@ -467,15 +463,13 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
      */
     @SuppressWarnings("unchecked")
     private int writeSegmentInfo(Workbook p_workBook, Sheet p_sheet, Job p_job,
-            GlobalSightLocale p_targetLocale, String p_dateFormat, int p_row)
-            throws Exception
+            GlobalSightLocale p_targetLocale, String p_dateFormat, int p_row) throws Exception
     {
         Vector<TargetPage> targetPages = new Vector<TargetPage>();
 
         long companyId = p_job.getCompanyId();
 
-        TranslationMemoryProfile tmp = p_job.getL10nProfile()
-                .getTranslationMemoryProfile();
+        TranslationMemoryProfile tmp = p_job.getL10nProfile().getTranslationMemoryProfile();
         List<String> excludItems = null;
         if (tmp != null)
         {
@@ -493,28 +487,26 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
             }
             if (p_targetLocale.getId() == workflow.getTargetLocale().getId())
             {
-            	p_targetLocale = workflow.getTargetLocale();
+                p_targetLocale = workflow.getTargetLocale();
                 targetPages = workflow.getTargetPages();
             }
         }
         if (targetPages.isEmpty())
         {
-        	if (SEGMENT_START_ROW == p_row)
+            if (SEGMENT_START_ROW == p_row)
             {
-                writeBlank(p_workBook , p_sheet, SEGMENT_START_ROW, 10);
+                writeBlank(p_workBook, p_sheet, SEGMENT_START_ROW, 10);
             }
         }
         else
         {
             LeverageMatchLingManager leverageMatchLingManager = LingServerProxy
                     .getLeverageMatchLingManager();
-            TermLeverageManager termLeverageManager = ServerProxy
-                    .getTermLeverageManager();
+            TermLeverageManager termLeverageManager = ServerProxy.getTermLeverageManager();
             Locale sourcePageLocale = p_job.getSourceLocale().getLocale();
             Locale targetPageLocale = p_targetLocale.getLocale();
             Map<Long, Set<TermLeverageMatch>> termLeverageMatchResultMap = termLeverageManager
-                    .getTermMatchesForPages(p_job.getSourcePages(),
-                            p_targetLocale);
+                    .getTermMatchesForPages(p_job.getSourcePages(), p_targetLocale);
 
             TargetPage targetPage = null;
             SourcePage sourcePage = null;
@@ -530,28 +522,24 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
                 List targetTuvs = SegmentTuvUtil.getTargetTuvs(targetPage);
 
                 // Leverage TM
-                Map<Long, LeverageSegment> exactMatches = leverageMatchLingManager
-                        .getExactMatches(sourcePage.getIdAsLong(),
-                                targetPage.getLocaleId());
+                MatchTypeStatistics tuvMatchTypes = leverageMatchLingManager
+                        .getMatchTypesForStatistics(sourcePage.getIdAsLong(),
+                                targetPage.getLocaleId(), p_job.getLeverageMatchThreshold());
+                Map<Long, LeverageSegment> exactMatches = leverageMatchLingManager.getExactMatches(
+                        sourcePage.getIdAsLong(), targetPage.getLocaleId());
                 Map<Long, Set<LeverageMatch>> fuzzyLeverageMatcheMap = leverageMatchLingManager
-                        .getFuzzyMatches(sourcePage.getIdAsLong(),
-                                targetPage.getLocaleId());
+                        .getFuzzyMatches(sourcePage.getIdAsLong(), targetPage.getLocaleId());
 
                 // Find segment comments
-                Map<Long, IssueImpl> issuesMap = CommentHelper
-                        .getIssuesMap(targetPage.getId());
-                if(issuesMap.isEmpty())
+                Map<Long, IssueImpl> issuesMap = CommentHelper.getIssuesMap(targetPage.getId());
+                if (issuesMap.isEmpty())
                 {
                     continue;
                 }
-                sourcePageLocale = sourcePage.getGlobalSightLocale()
-                        .getLocale();
-                targetPageLocale = targetPage.getGlobalSightLocale()
-                        .getLocale();
-                boolean rtlSourceLocale = EditUtil.isRTLLocale(sourcePageLocale
-                        .toString());
-                boolean rtlTargetLocale = EditUtil.isRTLLocale(targetPageLocale
-                        .toString());
+                sourcePageLocale = sourcePage.getGlobalSightLocale().getLocale();
+                targetPageLocale = targetPage.getGlobalSightLocale().getLocale();
+                boolean rtlSourceLocale = EditUtil.isRTLLocale(sourcePageLocale.toString());
+                boolean rtlTargetLocale = EditUtil.isRTLLocale(targetPageLocale.toString());
 
                 String category = null;
                 for (int j = 0; j < targetTuvs.size(); j++)
@@ -559,29 +547,26 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
                     int col = 0;
                     Tuv targetTuv = (Tuv) targetTuvs.get(j);
                     Tuv sourceTuv = (Tuv) sourceTuvs.get(j);
-                    sourceSegmentString = sourceTuv.getGxmlElement()
-                            .getTextValue();
-                    targetSegmentString = targetTuv.getGxmlElement()
-                            .getTextValue();
+                    sourceSegmentString = sourceTuv.getGxmlElement().getTextValue();
+                    targetSegmentString = targetTuv.getGxmlElement().getTextValue();
                     sid = sourceTuv.getSid();
-                    Date targetSegmentModifiedDate = targetTuv
-                            .getLastModified();
-                    
+                    Date targetSegmentModifiedDate = targetTuv.getLastModified();
+
                     category = sourceTuv.getTu(companyId).getTuType();
                     if (excludItems != null && excludItems.contains(category))
                     {
                         continue;
                     }
-                    
-                    StringBuilder matches = getMatches(exactMatches, 
-                    		fuzzyLeverageMatcheMap, targetTuv, sourceTuv);
+
+                    StringBuilder matches = getMatches(tuvMatchTypes, exactMatches,
+                            fuzzyLeverageMatcheMap, targetTuv, sourceTuv);
 
                     List<IssueHistory> issueHistories = new ArrayList<IssueHistory>();
                     String lastComment = "";
                     String failure = "";
                     Date issueCreatedDate = null;
                     Issue issue = issuesMap.get(targetTuv.getId());
-                    
+
                     if (issue != null)
                     {
                         issueHistories = issue.getHistory();
@@ -589,14 +574,13 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
                     }
                     if (issueHistories != null && issueHistories.size() > 0)
                     {
-                        IssueHistory issueHistory = (IssueHistory) issueHistories
-                                .get(0);
+                        IssueHistory issueHistory = (IssueHistory) issueHistories.get(0);
                         lastComment = issueHistory.getComment();
                         issueCreatedDate = issueHistory.dateReportedAsDate();
                     }
-                    if("".equals(lastComment))
+                    if ("".equals(lastComment))
                     {
-                    	continue;
+                        continue;
                     }
                     String sourceTerms = "";
                     String targetTerms = "";
@@ -606,8 +590,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
                                 .get(sourceTuv.getId());
                         if (termLeverageMatchSet != null)
                         {
-                            TermLeverageMatch tlm = termLeverageMatchSet
-                                    .iterator().next();
+                            TermLeverageMatch tlm = termLeverageMatchSet.iterator().next();
                             sourceTerms = tlm.getMatchedSourceTerm();
                             targetTerms = tlm.getMatchedTargetTerm();
                         }
@@ -650,12 +633,10 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
                     cell_C.setCellStyle(contentStyle);
                     col++;
 
-
                     // Source segment
                     CellStyle srcStyle = rtlSourceLocale ? getRtlContentStyle(p_workBook)
                             : contentStyle;
-                    String srcContent = rtlSourceLocale ? EditUtil
-                            .toRtlString(sourceSegmentString)
+                    String srcContent = rtlSourceLocale ? EditUtil.toRtlString(sourceSegmentString)
                             : sourceSegmentString;
                     Cell cell_D = getCell(currentRow, col);
                     cell_D.setCellValue(srcContent);
@@ -663,10 +644,9 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
                     col++;
 
                     // Target segment
-                    CellStyle trgStyle  = rtlTargetLocale ? getRtlContentStyle(p_workBook)
+                    CellStyle trgStyle = rtlTargetLocale ? getRtlContentStyle(p_workBook)
                             : contentStyle;
-                    String content = rtlTargetLocale ? EditUtil
-                            .toRtlString(targetSegmentString)
+                    String content = rtlTargetLocale ? EditUtil.toRtlString(targetSegmentString)
                             : targetSegmentString;
                     Cell cell_E = getCell(currentRow, col);
                     cell_E.setCellValue(content);
@@ -678,8 +658,8 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
                     cell_F.setCellValue(sid);
                     cell_F.setCellStyle(contentStyle);
                     col++;
-                    
-                    //comment
+
+                    // comment
                     CellStyle commentStyle = rtlTargetLocale ? getUnlockedRightStyle(p_workBook)
                             : getUnlockedStyle(p_workBook);
                     // Set color format for target segment changed
@@ -690,7 +670,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
                     }
                     if (rtlTargetLocale)
                     {
-                    	 lastComment = EditUtil.toRtlString(lastComment);
+                        lastComment = EditUtil.toRtlString(lastComment);
                     }
                     Cell cell_G = getCell(currentRow, col);
                     cell_G.setCellValue(lastComment);
@@ -739,7 +719,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
             // Add category failure drop down list here.
             addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row,
                     CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
-            
+
             termLeverageMatchResultMap = null;
         }
 
@@ -762,19 +742,18 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
     {
         for (int col = 0; col < p_colLen; col++)
         {
-        	Row row = getRow(p_sheet, p_row);
-        	Cell cell = getCell(row, col++);
-        	cell.setCellValue("");
+            Row row = getRow(p_sheet, p_row);
+            Cell cell = getCell(row, col++);
+            cell.setCellValue("");
         }
     }
-    
+
     private List<String> getFailureCategoriesList()
     {
         List<String> result = new ArrayList<String>();
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-        List failureCategories = IssueOptions.getAllCategories(bundle,
-                currentCompanyId);
+        List failureCategories = IssueOptions.getAllCategories(bundle, currentCompanyId);
         for (int i = 0; i < failureCategories.size(); i++)
         {
             Select aCategory = (Select) failureCategories.get(i);
@@ -790,7 +769,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         this.contentStyle = null;
         this.rtlContentStyle = null;
     }
-    
+
     private CellStyle getHeaderStyle(Workbook p_workbook)
     {
         if (headerStyle == null)
@@ -805,7 +784,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
             CellStyle cs = p_workbook.createCellStyle();
             cs.setFont(font);
             cs.setWrapText(true);
-            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
             cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
             cs.setBorderTop(CellStyle.BORDER_THIN);
             cs.setBorderRight(CellStyle.BORDER_THIN);
@@ -857,7 +836,6 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         return rtlContentStyle;
     }
 
-
     private CellStyle getUnlockedRightStyle(Workbook p_workbook) throws Exception
     {
         if (unlockedRightStyle == null)
@@ -865,7 +843,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
             Font font = p_workbook.createFont();
             font.setFontName("Arial");
             font.setFontHeightInPoints((short) 10);
-            
+
             CellStyle style = p_workbook.createCellStyle();
             style.setFont(font);
             style.setLocked(false);
@@ -878,7 +856,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
 
         return unlockedRightStyle;
     }
-    
+
     private CellStyle getRedRightStyle(Workbook p_workbook) throws Exception
     {
         CellStyle style = p_workbook.createCellStyle();
@@ -894,14 +872,14 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
             style.setWrapText(true);
             style.setAlignment(CellStyle.ALIGN_RIGHT);
             style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-            style.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            style.setFillPattern(CellStyle.SOLID_FOREGROUND);
             style.setFillForegroundColor(IndexedColors.ROSE.getIndex());
             hightLightRightStyle = style;
         }
 
         return hightLightRightStyle;
     }
-    
+
     /**
      * 
      * @return format of the unlocked cell
@@ -914,7 +892,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
             Font font = p_workbook.createFont();
             font.setFontName("Arial");
             font.setFontHeightInPoints((short) 10);
-            
+
             CellStyle style = p_workbook.createCellStyle();
             style.setFont(font);
             style.setLocked(false);
@@ -927,7 +905,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
 
         return unlockedStyle;
     }
-    
+
     private CellStyle getTitleStyle(Workbook p_workBook)
     {
         if (titleStyle == null)
@@ -940,7 +918,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
             titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
             CellStyle cs = p_workBook.createCellStyle();
             cs.setFont(titleFont);
-            
+
             titleStyle = cs;
         }
 
@@ -949,11 +927,11 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
 
     private CellStyle getRedStyle(Workbook p_workbook) throws Exception
     {
-    	CellStyle style = p_workbook.createCellStyle();
+        CellStyle style = p_workbook.createCellStyle();
         Font font = p_workbook.createFont();
         if (hightLightStyle == null)
         {
-        	font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
             font.setColor(IndexedColors.BLACK.getIndex());
             font.setUnderline(Font.U_NONE);
             font.setFontName("Arial");
@@ -962,14 +940,14 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
             style.setWrapText(true);
             style.setAlignment(CellStyle.ALIGN_LEFT);
             style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-            style.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            style.setFillPattern(CellStyle.SOLID_FOREGROUND);
             style.setFillForegroundColor(IndexedColors.ROSE.getIndex());
             hightLightStyle = style;
         }
 
         return hightLightStyle;
     }
-    
+
     private Sheet getSheet(Workbook p_workbook, int index)
     {
         Sheet sheet = p_workbook.getSheetAt(index);
@@ -993,7 +971,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
             cell = p_row.createCell(index);
         return cell;
     }
-    
+
     /**
      * Create workbook name areas for category failure drop down list, it is
      * from "AA8" to "AAn".
@@ -1021,9 +999,8 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
                 cell.setCellValue(categories.get(i));
             }
 
-            String formula = firstSheet.getSheetName() + "!$AA$"
-                    + (SEGMENT_START_ROW + 1) + ":$AA$"
-                    + (SEGMENT_START_ROW + categories.size());
+            String formula = firstSheet.getSheetName() + "!$AA$" + (SEGMENT_START_ROW + 1)
+                    + ":$AA$" + (SEGMENT_START_ROW + categories.size());
             Name name = p_workbook.createName();
             name.setRefersToFormula(formula);
             name.setNameName(CATEGORY_FAILURE_DROP_DOWN_LIST);
@@ -1033,11 +1010,10 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Error when create hidden area for category failures.", e);
+            logger.error("Error when create hidden area for category failures.", e);
         }
     }
-    
+
     /**
      * Add category failure drop down list. It is from "J8" to "Jn".
      * 
@@ -1047,17 +1023,16 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
      * @param startColumn
      * @param lastColumn
      */
-    private void addCategoryFailureValidation(Sheet p_sheet, int startRow,
-            int lastRow, int startColumn, int lastColumn)
+    private void addCategoryFailureValidation(Sheet p_sheet, int startRow, int lastRow,
+            int startColumn, int lastColumn)
     {
         // Add category failure drop down list here.
         DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
         DataValidationConstraint dvConstraint = dvHelper
                 .createFormulaListConstraint(CATEGORY_FAILURE_DROP_DOWN_LIST);
-        CellRangeAddressList addressList = new CellRangeAddressList(startRow,
-                lastRow, startColumn, lastColumn);
-        DataValidation validation = dvHelper.createValidation(dvConstraint,
-                addressList);
+        CellRangeAddressList addressList = new CellRangeAddressList(startRow, lastRow, startColumn,
+                lastColumn);
+        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
         validation.setSuppressDropDownArrow(true);
         validation.setShowErrorBox(true);
         p_sheet.addValidationData(validation);
@@ -1066,12 +1041,13 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
     /**
      * Get TM matches.
      */
-    private StringBuilder getMatches(Map<Long, LeverageSegment> exactMatches,
+    private StringBuilder getMatches(MatchTypeStatistics tuvMatchTypes,
+            Map<Long, LeverageSegment> exactMatches,
             Map<Long, Set<LeverageMatch>> fuzzyLeverageMatcheMap, Tuv targetTuv, Tuv sourceTuv)
     {
-    	StringBuilder matches = new StringBuilder();
-    	Set<LeverageMatch>  leverageMatches = (Set<LeverageMatch>) fuzzyLeverageMatcheMap.get(sourceTuv
-                .getIdAsLong());
+        StringBuilder matches = new StringBuilder();
+        Set<LeverageMatch> leverageMatches = (Set<LeverageMatch>) fuzzyLeverageMatcheMap
+                .get(sourceTuv.getIdAsLong());
 
         if (exactMatches.get(sourceTuv.getIdAsLong()) != null)
         {
@@ -1080,24 +1056,18 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         else if (leverageMatches != null)
         {
             int count = 0;
-            for (Iterator ite = leverageMatches.iterator(); ite
-                    .hasNext();)
+            for (Iterator ite = leverageMatches.iterator(); ite.hasNext();)
             {
-                LeverageMatch leverageMatch = (LeverageMatch) ite
-                        .next();
+                LeverageMatch leverageMatch = (LeverageMatch) ite.next();
                 if ((leverageMatches.size() > 1))
                 {
-                    matches.append(++count)
-                            .append(", ")
-                            .append(StringUtil
-                                    .formatPCT(leverageMatch
-                                            .getScoreNum()))
+                    matches.append(++count).append(", ")
+                            .append(StringUtil.formatPCT(leverageMatch.getScoreNum()))
                             .append("\r\n");
                 }
                 else
                 {
-                    matches.append(StringUtil
-                            .formatPCT(leverageMatch.getScoreNum()));
+                    matches.append(StringUtil.formatPCT(leverageMatch.getScoreNum()));
                     break;
                 }
             }
@@ -1108,20 +1078,38 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         }
         if (targetTuv.isRepeated())
         {
-            matches.append("\r\n")
-                    .append(bundle
-                            .getString("jobinfo.tradosmatches.invoice.repeated"));
+            matches.append("\r\n").append(
+                    bundle.getString("jobinfo.tradosmatches.invoice.repeated"));
         }
         else if (targetTuv.getRepetitionOfId() > 0)
         {
-            matches.append("\r\n")
-                    .append(bundle
-                            .getString("jobinfo.tradosmatches.invoice.repetition"));
+            matches.append("\r\n").append(
+                    bundle.getString("jobinfo.tradosmatches.invoice.repetition"));
         }
-        
+
+        // GBS-3905: mt translation into target tuv directly
+        if (targetTuv.getLastModifiedUser() != null
+                && targetTuv.getLastModifiedUser().toLowerCase().endsWith("_mt"))
+        {
+            matches.append("\r\n").append("MT Match");
+        }
+        else
+        {
+            // mt translation to tm, then search out for target tuv
+            Types type = tuvMatchTypes.getTypes(sourceTuv.getId(), LeverageUtil.DUMMY_SUBID);
+            if (type != null)
+            {
+                LeverageMatch lm = type.getLeverageMatch();
+                if (lm.getCreationUser() != null
+                        && lm.getCreationUser().toLowerCase().endsWith("_mt"))
+                {
+                    matches.append("\r\n").append("MT Match");
+                }
+            }
+        }
         return matches;
     }
-    
+
     @Override
     public String getReportType()
     {
@@ -1131,28 +1119,29 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
     @Override
     public void setPercent(int p_finishedJobNum)
     {
-        ReportGeneratorHandler.setReportsMapByGenerator(m_userId, m_jobIDS, 100
-                * p_finishedJobNum / m_jobIDS.size(), getReportType());
+        ReportGeneratorHandler.setReportsMapByGenerator(m_userId, m_jobIDS, 100 * p_finishedJobNum
+                / m_jobIDS.size(), getReportType());
     }
 
     @Override
     public boolean isCancelled()
     {
-        ReportsData data = ReportGeneratorHandler.getReportsMap(m_userId,
-                m_jobIDS, getReportType());
+        ReportsData data = ReportGeneratorHandler
+                .getReportsMap(m_userId, m_jobIDS, getReportType());
         if (data != null)
             return data.isCancle();
 
         return false;
     }
-    
+
     /**
      * Create Report File.
      */
     protected File getFile(String p_reportType, Job p_job, Workbook p_workBook)
     {
         String langInfo = null;
-        // If the Workbook has only one sheet, the report name should contain language pair info, such as en_US_de_DE.
+        // If the Workbook has only one sheet, the report name should contain
+        // language pair info, such as en_US_de_DE.
         if (p_workBook != null && p_workBook.getNumberOfSheets() == 1)
         {
             Sheet sheet = p_workBook.getSheetAt(0);
@@ -1198,7 +1187,8 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
                 langInfo = srcLang + "_" + trgLang;
             }
         }
-        
-        return ReportHelper.getReportFile(p_reportType, p_job, ReportConstants.EXTENSION_XLSX, langInfo);
+
+        return ReportHelper.getReportFile(p_reportType, p_job, ReportConstants.EXTENSION_XLSX,
+                langInfo);
     }
 }

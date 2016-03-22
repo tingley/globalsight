@@ -421,7 +421,7 @@ function editfileprofile(param)
 						${item.dataSourceName}
 						</a>
 					</td>
-					</c:if>>
+					</c:if>
 					<c:if test="${item.getSourcePage().getRequest().isInactiveFpId(item.getSourcePage().getRequest().getDataSourceId()) == true}">
 					<td style="text-align:left">${item.dataSourceName}</td>
 					</c:if>

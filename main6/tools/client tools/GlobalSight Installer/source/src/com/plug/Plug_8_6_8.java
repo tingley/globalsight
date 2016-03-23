@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.util.FileUtil;
 import com.util.PropertyUtil;
 import com.util.ServerUtil;
 import com.util.db.DbUtil;
@@ -31,6 +34,8 @@ import com.util.db.Execute;
 
 public class Plug_8_6_8 implements Plug
 {
+    private static Logger log = Logger.getLogger(Plug_8_6_8.class);
+
     private static final String DEPLOY_PATH = "/jboss/server/standalone/deployments";
     private static final String PROPERTIES_PATH = DEPLOY_PATH
             + "/globalsight.ear/lib/classes/properties/mt.config.properties";
@@ -41,13 +46,19 @@ public class Plug_8_6_8 implements Plug
     public static final String ENGINE_SAFABA = "Safaba";
     public static final String ENGINE_IPTRANSLATOR = "IPTranslator";
     public static final String ENGINE_DOMT = "DoMT";
-    
+
+    public static final String SPELL_CHECK_WAR = "/jboss/server/standalone/deployments/globalsight.ear/spellchecker.war";
+    public static final String XDE_SPELL_CHECK_WAR = "/jboss/server/standalone/deployments/globalsight.ear/xdespellchecker.war";
+
     public DbUtil dbUtil = DbUtilFactory.getDbUtil();
 
     @Override
     public void run()
     {
-        Properties properties = PropertyUtil.getProperties(new File(ServerUtil.getPath() + (PROPERTIES_PATH)));
+        removeSpellCheck();
+        
+        Properties properties = PropertyUtil.getProperties(new File(ServerUtil.getPath()
+                + (PROPERTIES_PATH)));
         String isSafabaLog = properties.getProperty("safaba.log.detailed.info");
         if ("true".equalsIgnoreCase(isSafabaLog))
         {
@@ -66,8 +77,7 @@ public class Plug_8_6_8 implements Plug
         {
             updateColum("N", ENGINE_DOMT);
         }
-        String isIPLog = properties
-                .getProperty("iptranslator.log.detailed.info");
+        String isIPLog = properties.getProperty("iptranslator.log.detailed.info");
         if ("true".equalsIgnoreCase(isIPLog))
         {
             updateColum("Y", ENGINE_IPTRANSLATOR);
@@ -85,8 +95,7 @@ public class Plug_8_6_8 implements Plug
         {
             updateColum("N", ENGINE_PROMT);
         }
-        String isMSLog = properties
-                .getProperty("ms_translator.log.detailed.info");
+        String isMSLog = properties.getProperty("ms_translator.log.detailed.info");
         if ("true".equalsIgnoreCase(isMSLog))
         {
             updateColum("Y", ENGINE_MSTRANSLATOR);
@@ -95,8 +104,7 @@ public class Plug_8_6_8 implements Plug
         {
             updateColum("N", ENGINE_MSTRANSLATOR);
         }
-        String isAsiaLog = properties
-                .getProperty("asia_online.log.detailed.info");
+        String isAsiaLog = properties.getProperty("asia_online.log.detailed.info");
         if ("true".equalsIgnoreCase(isAsiaLog))
         {
             updateColum("Y", ENGINE_ASIA_ONLINE);
@@ -105,8 +113,7 @@ public class Plug_8_6_8 implements Plug
         {
             updateColum("N", ENGINE_ASIA_ONLINE);
         }
-        String isGoogleLog = properties
-                .getProperty("google_translate.log.detailed.info");
+        String isGoogleLog = properties.getProperty("google_translate.log.detailed.info");
         if ("true".equalsIgnoreCase(isGoogleLog))
         {
             updateColum("Y", ENGINE_GOOGLE);
@@ -121,7 +128,7 @@ public class Plug_8_6_8 implements Plug
         args.add(MSType);
 
         dbUtil.execute(sql, args);
-    
+
     }
 
     private void updateColum(String isLogDebugInfo, String engineName)
@@ -133,4 +140,21 @@ public class Plug_8_6_8 implements Plug
         dbUtil.execute(updateSql, args);
     }
 
+    private void deleteFiles(String path)
+    {
+        try
+        {
+            FileUtil.deleteFile(new File(path));
+        }
+        catch (Exception e)
+        {
+            log.error(e);
+        }
+    }
+    
+    private void removeSpellCheck()
+    {
+        deleteFiles(ServerUtil.getPath() + SPELL_CHECK_WAR);
+        deleteFiles(ServerUtil.getPath() + XDE_SPELL_CHECK_WAR);
+    }
 }

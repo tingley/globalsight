@@ -872,20 +872,30 @@ function generateBaseFilterList(filterTableName, filter)
 		for(var i = 0; i < bfs.length; i++)
 		{
 			var bf = bfs[i];
-			
-			if (!baseFilter.isDefined(bf)
-					|| !baseFilter.isDefined(bf.filterName)
-					|| !baseFilter.isDefined(bf.id))
+			if (hasBaseFilter == "true")
+		    {
+				if (!baseFilter.isDefined(bf)
+						|| !baseFilter.isDefined(bf.filterName)
+						|| !baseFilter.isDefined(bf.id))
+				{
+					continue;
+				}
+				
+				var selected = "";
+				if(filter && filter.baseFilterId == bf.id)
+				{
+					selected = "selected";
+				}
+				str.append("<option value='"+bf.id+"' "+selected+">"+bf.filterName+"</option>");
+		    }
+			else
 			{
-				continue;
+				if(filter && filter.baseFilterId == bf.id)
+				{
+					selected = "selected";
+					str.append("<option value='"+bf.id+"' "+selected+">"+bf.filterName+"</option>");
+				}
 			}
-			
-			var selected = "";
-			if(filter && filter.baseFilterId == bf.id)
-			{
-				selected = "selected";
-			}
-			str.append("<option value='"+bf.id+"' "+selected+">"+bf.filterName+"</option>");
 		}
 	}
 	str.append("</select>");

@@ -56,6 +56,7 @@ public class FileUploadThread extends Thread
                     files.add(zipFilePath
                             + file.getName().substring(0,
                                     file.getName().lastIndexOf("."))
+                             +"_" + CreateJobUtil.getFileExtension(file)
                             + File.separator + zipEntryName);
                 }
             }
@@ -79,6 +80,7 @@ public class FileUploadThread extends Thread
                     files.add(zipFilePath
                             + file.getName().substring(0,
                                     file.getName().lastIndexOf("."))
+                            + "_" + CreateJobUtil.getFileExtension(file)
                             + File.separator + rarEntryName);
                 }
             }
@@ -99,6 +101,7 @@ public class FileUploadThread extends Thread
                         files.add(zipFilePath
                                 + file.getName().substring(0,
                                         file.getName().lastIndexOf("."))
+                                + "_" + CreateJobUtil.getFileExtension(file)
                                 + File.separator + zip7zEntryName);
                     }
                 }

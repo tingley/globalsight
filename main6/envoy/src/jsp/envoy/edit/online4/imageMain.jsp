@@ -123,12 +123,6 @@ if(!isPicturePreviousFile && i_index > 0)
 	}
 	parameter.append("&openEditorType=").append(state.getOpenEditorType());
 	
-//	String parameter =  "&" + WebAppConstants.TASK_ID + "=" + taskId 
-	//		+ "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + previousPage.getSourcePageId() 
-		//	+ "&" + WebAppConstants.JOB_ID+"="+jobId
-		//	+ "&" + WebAppConstants.TARGET_PAGE_ID + "=" + previousPage.getTargetPageId(state.getTargetLocale())
-		//	+ "&openEditorType="+state.getOpenEditorType();
-	
 	if(openEditorType!= null && openEditorType.equalsIgnoreCase("postReviewEditor"))
 	{
 		url_previousPostRwEditor += parameter.toString();
@@ -156,12 +150,6 @@ if(!isPictureNextFile && i_index < state.getPages().size()-1)
 		parameter.append("&").append(WebAppConstants.TARGET_PAGE_ID).append("=").append(nextPage.getTargetPageId(state.getTargetLocale()));
 	}
 	parameter.append("&openEditorType=").append(state.getOpenEditorType());
-	
-	//String parameter = "&" + WebAppConstants.TASK_ID + "=" + taskId 
-	//		+ "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + nextPage.getSourcePageId() 
-	//		+ "&" + WebAppConstants.JOB_ID+"="+jobId
-	//		+ "&" + WebAppConstants.TARGET_PAGE_ID + "=" + nextPage.getTargetPageId(state.getTargetLocale())
-	//		+ "&openEditorType="+state.getOpenEditorType();
 	
 	if(openEditorType!= null && openEditorType.equalsIgnoreCase("postReviewEditor"))
 	{
@@ -299,8 +287,8 @@ var w_editor;
 	<table class="contentTable">
 		<tr class="tableHeadingBasic top">
 			<TD class="topLeft" NOWRAP VALIGN="TOP">
-				<%=lb_fileNavigation%><BR>
-		    	<label id="fileNavPre"><%=lb_prevFile%></label>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%=lb_fileNavigation%><BR>
+		    	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label id="fileNavPre"><%=lb_prevFile%></label>
 		    	<label id="fileNavNext"><%=lb_nextFile%></label>
 		    </TD>
 			<td class="topRight" style="line-height:26px;" align="RIGHT">

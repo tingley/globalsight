@@ -40,20 +40,19 @@ public class NativeFileManagerWLRMIImpl extends RemoteServer
     }
 
     // See interface for documentation 
-    public void save(SecondaryTargetFile p_stf, File p_tmpFile, 
-        User p_user, String p_newFilename) 
-        throws NativeFileManagerException
+    public void save(SecondaryTargetFile p_stf, File p_tmpFile, User p_user, String p_newFilename,
+            long p_companyId) throws NativeFileManagerException
     {
-        m_localInstance.save(p_stf, p_tmpFile, p_user, p_newFilename);
+        m_localInstance.save(p_stf, p_tmpFile, p_user, p_newFilename, p_companyId);
     }
 
     /**
      * @see NativeFileManager.save(UnextractedFile, byte[])
      */
-    public void save(UnextractedFile p_unextractedFile, File p_tmpFile, User p_user) 
-        throws NativeFileManagerException
+    public void save(UnextractedFile p_unextractedFile, File p_tmpFile, User p_user,
+            long p_companyId) throws NativeFileManagerException
     {
-        m_localInstance.save(p_unextractedFile, p_tmpFile, p_user);
+        m_localInstance.save(p_unextractedFile, p_tmpFile, p_user, p_companyId);
     }
 
 

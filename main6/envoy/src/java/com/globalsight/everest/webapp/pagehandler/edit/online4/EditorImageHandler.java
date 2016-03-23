@@ -136,7 +136,8 @@ public class EditorImageHandler extends PageHandler implements EditorConstants
                 UnextractedFile uf = (UnextractedFile) tp.getPrimaryFile();
                 try
                 {
-                    ServerProxy.getNativeFileManager().save(uf, p_tempFile, p_user);
+                    ServerProxy.getNativeFileManager().save(uf, p_tempFile, p_user,
+                            tp.getCompanyId());
                     initializeFromActivity(p_request, state, user.getUserId(), taskId, uiLocale);
                 }
                 catch (Exception e)

@@ -15,9 +15,6 @@ function getDataByFrom(url){
 		{
 			$("#sourceImg").attr("src",data.sourceImagePath);
 			$("#targetImg").attr("src",data.targetImagePath);
-			$("#sourceHref").attr("href",data.sourceImagePath);
-			$("#targetHref").attr("href",data.targetImagePath);
-			
 			targetImageSuffix = data.targetImageSuffix;
 		}
 	});

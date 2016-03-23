@@ -47,9 +47,8 @@ import java.io.File;
      *         Note: passing null will retain the original filename.
      * @throws NativeFileException
      */
-    public void save(SecondaryTargetFile p_stf, File p_tmpFile, 
-        User p_user, String p_newFilename) 
-        throws NativeFileManagerException;
+    public void save(SecondaryTargetFile p_stf, File p_tmpFile, User p_user, String p_newFilename,
+            long p_companyId) throws NativeFileManagerException;
 
     /** 
      * Overwrites the specified UnextractedFile. 
@@ -59,8 +58,8 @@ import java.io.File;
      * 
      * @throws NativeFileException
      */
-    public void save(UnextractedFile p_unextractedFile, File p_tmpFile, User p_user) 
-        throws NativeFileManagerException;
+    public void save(UnextractedFile p_unextractedFile, File p_tmpFile, User p_user,
+            long p_companyId) throws NativeFileManagerException;
     
 
     /**

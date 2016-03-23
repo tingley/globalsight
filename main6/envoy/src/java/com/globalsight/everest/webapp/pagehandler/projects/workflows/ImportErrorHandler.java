@@ -123,7 +123,7 @@ public class ImportErrorHandler extends JobDetailsHandler {
             sB.append("</TD>\n");
             sB.append("</TR>");
             sB.append("<TR><TD colspan=\"4\"><DIV  id = \"message" + i + "\" style = \"display: none;width:100%;\">"
-                    + "<TEXTAREA readonly style=\"width:100%;border-style:none;min-height: 300px;\">"
+                    + "<TEXTAREA readonly class=\"standardText\"  style=\"width:100%;border-style:none;min-height: 300px;\">"
                     + exceptionAsString + "</TEXTAREA></DIV></TD><TR>");
         }
         return sB.toString();

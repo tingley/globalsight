@@ -46,6 +46,7 @@ public interface TMProfileConstants
     public static final String SAVE_EXACT_MATCH_SEGS_TO_PROJECT_TM = "isSaveExactMatchToProjectTm";
     public static final String SAVE_UNLOC_SEGS_TO_PAGE_TM = "isSaveToPageTm";
     public static final String SAVE_WHOLLY_INTERNAL_TEXT_TM = "isSaveWhollyInternalTextTm";
+    public static final String SAVE_MTED_SEGS_TO_PROJECT_TM = "isSaveMTedSegToProjectTm";
     public static final String LEVERAGE_EXCLUDE_TYPES = "excludeItemType";
     public static final String LEVERAGE_LOCALIZABLES = "levLocalizable";
     public static final String LEVERAGE_EXACT_MATCH_ONLY = "levExactMatches";
@@ -172,8 +173,7 @@ public interface TMProfileConstants
     public static final String MT_USE_MT="machineTranslation.useMT";
     public static final String MT_ENGINE = "machineTranslation.engine";
 //    public static final String MT_AUTOCOMMIT_TO_TM = "machineTranslation.autoCommitToTM";
-    public static final String MT_SHOW_IN_EDITOR = "machineTranslation.showInEditor";
-    
+   
     public static final String MT_PTSURL = "ptsurl";
     public static final String MT_LocalPairs_Map = "directionsMap";
     public static final String MT_LocalPairs_List = "directionsList";
@@ -194,7 +194,6 @@ public interface TMProfileConstants
     public static final String MT_MS_GET_ACCESS_TOKEN_URL = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13";
     public static final String MT_MS_CATEGORY = "ms_mt_category";
     public static final String MT_MS_URL_FLAG = "ms_mt_url_flag";
-    public static final int MT_MS_MAX_CHARACTER_NUM = 1000;
     
     public static final String MT_AO_URL = "ao_mt_url";
     public static final String MT_AO_PORT = "ao_mt_port";

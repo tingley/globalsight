@@ -31,6 +31,7 @@
             com.globalsight.everest.taskmanager.Task,
             com.globalsight.config.UserParamNames,
             com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
+            com.globalsight.everest.webapp.pagehandler.edit.online.EditorState.PagePair,
             java.util.Locale,
             java.util.ResourceBundle"
     session="true"
@@ -57,6 +58,8 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="skin" scope="request"
  class="com.globalsight.everest.webapp.javabean.SkinBean" />
+  <jsp:useBean id="pictureEditor" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
  <%@ include file="/envoy/common/installedModules.jspIncl" %>
  <%!
 static private final int COL_ID = 1;
@@ -279,6 +282,7 @@ String url_options     = options.getPageURL();
 String url_search     = search.getPageURL();
 String url_segmentEditor = segmentEditor.getPageURL();
 String url_commentEditor = commentEditor.getPageURL();
+String url_pictureEditor = pictureEditor.getPageURL();
 
 String lb_close = bundle.getString("lb_close");
 String lb_help = bundle.getString("lb_help");
@@ -315,7 +319,8 @@ String lb_nextPage = "<IMG SRC='/globalsight/images/editorNextPagex.gif' BORDER=
 
 PaginateInfo pi = state.getPaginateInfo();
 
-long jobId = Long.valueOf(sessionMgr.getAttribute(WebAppConstants.JOB_ID).toString());
+String jobId = (String)sessionMgr.getAttribute(WebAppConstants.JOB_ID);
+String taskId = (String)sessionMgr.getAttribute(WebAppConstants.TASK_ID);
 String tgtIDS = sessionMgr.getAttribute(ReportConstants.TARGETLOCALE_LIST).toString();
 
 Boolean assigneeValue = (Boolean)TaskHelper.retrieveObject(
@@ -328,6 +333,35 @@ boolean disableComment = isAssignee && b_readOnly;
 long lastTuId  = state.getTuId();
 long lastTuvId = state.getTuvId();
 long lastSubId = state.getSubId();
+
+String url_previousPictureEditor = url_pictureEditor;
+String url_nextPictureEditor = url_pictureEditor;
+
+PagePair currentPage = state.getCurrentPage();
+boolean isPicturePreviousFile = currentPage.isPicturePreviousFile();
+boolean isPictureNextFile = currentPage.isPictureNextFile();
+	int i_index = state.getPages().indexOf(currentPage);
+if(isPicturePreviousFile && i_index > 0)
+{
+	PagePair previousPage = state.getPages().get(i_index-1);
+	
+	url_previousPictureEditor += "&" + WebAppConstants.TASK_ID + "=" + taskId 
+			+ "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + previousPage.getSourcePageId() 
+			+ "&" + WebAppConstants.JOB_ID+"="+jobId
+			+ "&" + WebAppConstants.TARGET_PAGE_ID + "=" + previousPage.getTargetPageId(state.getTargetLocale())
+			+ "&openEditorType="+state.getOpenEditorType();
+}
+
+if(isPictureNextFile && i_index < state.getPages().size() - 1)
+{
+	PagePair nextPage = state.getPages().get(i_index+1);
+	
+	url_nextPictureEditor += "&" + WebAppConstants.TASK_ID + "=" + taskId 
+			+ "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + nextPage.getSourcePageId() 
+			+ "&" + WebAppConstants.JOB_ID+"="+jobId
+			+ "&" + WebAppConstants.TARGET_PAGE_ID + "=" + nextPage.getTargetPageId(state.getTargetLocale())
+			+ "&openEditorType="+state.getOpenEditorType();
+}
 
 String lb_sourceLocale = bundle.getString("lb_source_locale");
 Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
@@ -494,6 +528,8 @@ var url_segmentEditor = "<%=url_segmentEditor%>";
 var url_commentEditor = "<%=url_commentEditor%>";
 var url_self = "<%=url_self%>";
 var url_refresh = "<%=url_refresh%>";
+var url_previousPictureEditor = '<%=url_previousPictureEditor%>';
+var url_nextPictureEditor = '<%=url_nextPictureEditor%>';
 var url_search = "<%=url_search%>";
 var url_termbases = "<%=url_termbases%>";
 var url_options = "<%=url_options%>";
@@ -502,6 +538,8 @@ var isFirstPage = '<%=state.isFirstPage()%>';
 var isLastPage = '<%=state.isLastPage()%>';
 var isFirstBatch = '<%=state.isFirstBatch()%>';
 var isLastBatch = '<%=state.isLastBatch()%>';
+var isPictureNextFile = '<%=isPictureNextFile%>';
+var isPicturePreviousFile = '<%=isPicturePreviousFile%>';
 var g_isReviewActivity = eval("<%=b_isReviewActivity%>");
 var g_readOnly = eval("<%=b_readOnly%>");
 var currentIssuesSize = "<%=currentIssuesSize%>";

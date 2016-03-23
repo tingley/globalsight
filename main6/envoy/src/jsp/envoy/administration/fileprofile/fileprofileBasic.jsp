@@ -119,6 +119,7 @@
 	int terminologyApproval=0;
 	int populateSourceToTarget = 0;
 	int BOMType = 0;
+	int eolEncoding = 0;
 
     if (fp != null)
     {
@@ -185,6 +186,7 @@
        populateSourceToTarget = fp.getXlfSourceAsUnTranslatedTarget();
 
        BOMType = fp.getBOMType();
+       eolEncoding = fp.getEolEncoding();
     }
     
 
@@ -718,6 +720,7 @@ function enforceEncodingAndTargetFileExportIfNeeded()
     }
 
     hideBOMType();
+    hideEolEncoding();
     
     if (thisFormatMustUseUTF8(format))
     {
@@ -821,6 +824,11 @@ function enforceEncodingAndTargetFileExportIfNeeded()
     {
     	showBOMType();
     }
+    // GBS-3830
+    if (needEolEncodingSettingFormat(format))
+    {
+        showEolEncoding();
+    }
     
     isSupportSid();
     isSupportXsl();
@@ -906,6 +914,17 @@ function thisFormatMustUseUTF8(format)
 function noEncodingNeededForFormat(format)
 {
     if (format == "Un-extracted")
+    {
+        return true;
+    }
+
+    return false;
+}
+
+function needEolEncodingSettingFormat(format)
+{
+    if (isPlainText(format) || isJavaProperties(format) || format == "XML" 
+    		|| format == "AuthorIT XML")
     {
         return true;
     }
@@ -1074,6 +1093,16 @@ function showBOMType() {
 function hideBOMType() {
     document.getElementById("lb_bomType").style.display = "none";
 	document.getElementById("td_bomType").style.display = "none";
+}
+
+function showEolEncoding() {
+	document.getElementById("eolEncoding").style.display = "block";
+	document.getElementById("td_eolEncoding").style.display = "block";
+}
+
+function hideEolEncoding() {
+    document.getElementById("eolEncoding").style.display = "none";
+    document.getElementById("td_eolEncoding").style.display = "none";
 }
 
 function isSpecialFormat(specialFormatType)
@@ -1536,6 +1565,20 @@ function isProjectUseTermbase(data) {
               <option value="1" <%=BOMType == FileProfileImpl.UTF_BOM_PRESERVE ? "selected" : "" %>><%=bundle.getString("lb_utf_bom_preserve") %></option>
               <option value="2" <%=BOMType == FileProfileImpl.UTF_BOM_ADD ? "selected" : "" %>><%=bundle.getString("lb_utf_bom_add") %></option>
               <option value="3" <%=BOMType == FileProfileImpl.UTF_BOM_REMOVE ? "selected" : "" %>><%=bundle.getString("lb_utf_bom_remove") %></option>
+            </select>
+          </td>
+        </tr>
+        
+        <!-- EOL encoding -->
+        <tr>
+          <td valign="top">
+            <span id="eolEncoding" class="standardText"><%=bundle.getString("lb_eol_encoding") %>:</span>
+          </td>
+          <td id="td_eolEncoding">
+            <select name="eolEncoding" id="eolEncoding" class="standardText">
+              <option value="0" <%=eolEncoding == FileProfileImpl.EOL_ENCODING_PRESERVE ? "selected" : "" %>><%=bundle.getString("lb_eol_encoding_preserve") %></option>
+              <option value="1" <%=eolEncoding == FileProfileImpl.EOL_ENCODING_LF ? "selected" : "" %>><%=bundle.getString("lb_eol_encoding_lf") %></option>
+              <option value="2" <%=eolEncoding == FileProfileImpl.EOL_ENCODING_CRLF ? "selected" : "" %>><%=bundle.getString("lb_eol_encoding_crlf") %></option>
             </select>
           </td>
         </tr>

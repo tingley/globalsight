@@ -395,8 +395,6 @@ public class SegmentEditorPageHandler extends PageHandler implements
         if (machineTranslationProfile != null)
         {
         	sessionMgr.setAttribute("showMachineTranslation", String.valueOf(true));
-            sessionMgr.setAttribute(MTHelper2.SHOW_IN_EDITOR,
-                    String.valueOf(machineTranslationProfile.isShowInEditor()));
         }
     }
 

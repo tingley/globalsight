@@ -76,6 +76,7 @@ import com.globalsight.ling.tm.ExactMatchedSegments;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm.LeverageMatchType;
 import com.globalsight.ling.tm.LeverageSegment;
+import com.globalsight.ling.tm.TuLing;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.Leverager;
@@ -313,6 +314,7 @@ public abstract class AbstractTargetPagePersistence implements
                         p_sourcePage.getId());
                 paramMap.put(MachineTranslator.TARGET_LOCALE_ID,
                         p_targetLocale.getIdAsLong());
+                paramMap.put(MachineTranslator.MT_PROFILE, mtProfile);
                 boolean isXlf = MTHelper2.isXlf(p_sourcePage.getId());
                 paramMap.put(
                         MachineTranslator.NEED_SPECAIL_PROCESSING_XLF_SEGS,
@@ -332,7 +334,10 @@ public abstract class AbstractTargetPagePersistence implements
                         sourceLocale, p_targetLocale);
                 if (isLocalePairSupportedByMT)
                 {
-                    unAppliedTus.removeAll(appliedTuTuvMap.keySet());
+                    if (!mtProfile.isIgnoreTMMatch())
+                    {
+                        unAppliedTus.removeAll(appliedTuTuvMap.keySet());
+                    }
                     appliedTuTuvMap = applyMTMatches(p_sourcePage,
                             p_sourceTuvMap, sourceLocale, p_targetLocale,
                             unAppliedTus, appliedTuTuvMap);
@@ -1048,6 +1053,13 @@ public abstract class AbstractTargetPagePersistence implements
         {
             return p_appliedTuTuvMap;
         }
+        
+        Set<Tu> appliedTuMap = p_appliedTuTuvMap.keySet();
+        List tuIdList = new ArrayList<>();
+        for (Tu appliedTu : appliedTuMap)
+        {
+         tuIdList.add(appliedTu.getId());
+        }
 
         long jobId = p_sourcePage.getJobId();
         MachineTranslationProfile mtProfile = MTProfileHandlerHelper
@@ -1146,7 +1158,7 @@ public abstract class AbstractTargetPagePersistence implements
                         machineTranslatedGxml, jobId);
             }
             // replace the content in target tuv with mt result
-            if (mtConfidenceScore == 100 && isGetMTResult && tagMatched)
+            if (isGetMTResult && tagMatched && !tuIdList.contains(currentTu.getId()))
             {
                 // GBS-3722
                 if (mtProfile.isIncludeMTIdentifiers())

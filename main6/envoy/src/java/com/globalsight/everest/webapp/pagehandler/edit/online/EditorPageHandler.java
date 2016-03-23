@@ -83,6 +83,7 @@ import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUpl
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.EmojiUtil;
@@ -186,6 +187,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         String jobId = p_request.getParameter(WebAppConstants.JOB_ID);
         String taskId = p_request.getParameter(WebAppConstants.TASK_ID);
         String dataFormat = p_request.getParameter("dataFormat");
+        String openEditorType = p_request.getParameter("openEditorType");
         // Get user object for the person who has logged in.
         User user = TaskHelper.getUser(session);
 
@@ -212,7 +214,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
         // From Activity Details (Translator opening pages read-write or
         // read-only)
-        if (taskId != null && srcPageId != null && trgPageId != null)
+        if (StringUtil.isNotEmptyAndNull(taskId) && StringUtil.isNotEmpty(srcPageId)
+                && StringUtil.isNotEmpty(trgPageId))
         {
             sessionMgr.setAttribute(WebAppConstants.IS_FROM_ACTIVITY, "yes");
             // store jobId, target language and source page id for Lisa QA
@@ -225,9 +228,10 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
                     String.valueOf(theTask.getTargetLocale().getId()));
             sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
+            sessionMgr.setAttribute(WebAppConstants.TASK_ID, taskId);
 
             state = new EditorState();
-
+            state.setOpenEditorType(openEditorType);
             EditorHelper.initEditorManager(state);
             EditorHelper.initEditorOptions(state, session);
 
@@ -239,7 +243,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             initState(state, session);
         }
         // From Job Details (Admin or PM opening pages read-only)
-        else if (jobId != null && srcPageId != null)
+        else if (StringUtil.isNotEmpty(jobId) && StringUtil.isNotEmpty(srcPageId))
         {
             // being assignee is not important when accessing editor from job
             // details.
@@ -248,13 +252,13 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     new Boolean(isAssignee));
 
             state = new EditorState();
+            state.setOpenEditorType(openEditorType);
             EditorHelper.initEditorManager(state);
             EditorHelper.initEditorOptions(state, session);
             sessionMgr.setAttribute(WebAppConstants.EDITORSTATE, state);
             // store jobId, target language and source page id for Lisa QA
             // report
-            sessionMgr.setAttribute(WebAppConstants.JOB_ID,
-                    Long.parseLong(jobId));
+            sessionMgr.setAttribute(WebAppConstants.JOB_ID, jobId);
             sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
                     getTargetIDS(jobId, srcPageId));
             sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
@@ -387,8 +391,10 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     }
                     
                     String sourceSegment = getHtmlSegment(str_sourceSegment,str_dataType,state);
+                    String sourceDIR = getDIR(state,str_sourceSegment,true);
                     json.put("str_segementPtag", str_segementPtag);
                     json.put("m_sourceSegment", sourceSegment);
+                    json.put("m_sourceDIR", sourceDIR);
                     List<SegmentMatchResult> list = view.getTmMatchResults();
                     StringBuffer tmMatchesStr = new StringBuffer();
                     StringBuffer mtTranslationStr = new StringBuffer();
@@ -399,6 +405,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                         for (int i=0;i<list.size();i++)
                         {
                             matchResult = list.get(i);
+                            String targetDIR = getDIR(state,matchResult.getMatchContent(),false);
                             if (matchResult.getTmName().endsWith("_MT"))
                             {
                                 long sourcePageId = state.getSourcePageId();
@@ -415,23 +422,23 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                                                     +"<tr class=\"standardText\"><td><B>Target Match %:</B></td>"
                                                     +"<td>"+Math.round(matchResult.getMatchPercentage())+"%</td></tr>"
                                                     +"<tr class=\"standardText\"><td ><B>Source:</B></td>"
-                                                    +"<td>"+sourceSegment+"</td></tr>"
+                                                    +"<td "+sourceDIR+">"+sourceSegment+"</td></tr>"
                                                     +"<tr class=\"standardText\"><td><B>Target:</B></td>"
-                                                    +"<td>"+getHtmlSegment(matchResult.getMatchContent(),str_dataType,state)+"</td><tr>"
+                                                    +"<td "+targetDIR+">"+getHtmlSegment(matchResult.getMatchContent(),str_dataType,state)+"</td><tr>"
                                                     +"</table>");
                                 }
                             }
                             else
                             {
                                 tmMatchesStr = tmMatchesStr.append(
-                                        "<table><tr class=\"standardText\"><td style=\"width:120px\"><B>match"+j+":</B></td>"
-                                              +"<td>"+"("+Math.round(matchResult.getMatchPercentage())+"%/"+ matchResult.getTmName()+")</td></tr>"
+                                        "<table><tr class=\"standardText\"><td style=\"width:120px\"><B>Match&nbsp;&nbsp;"+j+":</B></td>"
+                                              +"<td>"+"("+Math.round(matchResult.getMatchPercentage())+"%&nbsp;&nbsp;/&nbsp;&nbsp;"+ matchResult.getTmName()+")</td></tr>"
                                               +"<tr class=\"standardText\"><td><B>Target Match Type:</B></td>"
                                               +"<td>"+matchResult.getMatchType()+"</td></tr>"
                                               +"<tr class=\"standardText\"><td><B>Source:</B></td>"
-                                              +"<td>"+getHtmlSegment(matchResult.getMatchContentSource(),str_dataType,state)
+                                              +"<td "+sourceDIR+">"+getHtmlSegment(matchResult.getMatchContentSource(),str_dataType,state)
                                               +"<tr class=\"standardText\"><td><B>Target:</B></td>"
-                                              +"<td>"+getHtmlSegment(matchResult.getMatchContent(),str_dataType,state)+"</td></tr>"
+                                              +"<td "+targetDIR+">"+getHtmlSegment(matchResult.getMatchContent(),str_dataType,state)+"</td></tr>"
                                               +"<tr height=\"10px\"><td></td></tr></table>");
                                 j++;
                             }
@@ -503,6 +510,32 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         p_response.getWriter().write(jsonStr);
     }
 
+    private String getDIR (EditorState state,String segment,boolean isSource) 
+    {
+        String dir = "";
+        boolean rtlLocale = false;
+        TuImpl tu = null;
+        try {
+                if (isSource)
+                {
+                    rtlLocale = EditUtil.isRTLLocale(state.getSourceLocale());
+                }
+                else
+                {
+                    rtlLocale = EditUtil.isRTLLocale(state.getTargetLocale());
+                }
+//                tu = SegmentTuUtil.getTuById(state.getTuId(), jobId);
+//                boolean isLocalizable = tu.isLocalizable();
+                if (rtlLocale 
+                        && Text.containsBidiChar(segment))
+                {
+                    dir = " DIR=rtl";
+                }
+        } catch (Exception ignore) {
+        }
+        return dir;
+    }
+    
     /**
      * Gets html segment and write back.
      * 

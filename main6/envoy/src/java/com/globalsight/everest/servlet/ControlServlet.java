@@ -674,6 +674,33 @@ public class ControlServlet extends HttpServlet
         {
             throw e; // handled higher
         }
+        catch (NumberFormatException e2)
+        {
+            String pageHandlerClassName = null;
+            String pageName = null;
+            if (targetPageDescriptor != null)
+            {
+                pageHandlerClassName = targetPageDescriptor
+                        .getPageHandlerClassName();
+                pageName = targetPageDescriptor.getPageName();
+            }
+            CATEGORY.error("Exception in targetPageHandler["
+                    + pageHandlerClassName + "," + pageName + "](isApplet="
+                    + isApplet + ")(" + getRequestParameters(p_request) + ")",
+                    e2);
+
+            EnvoyServletException e = new EnvoyServletException(
+                            EnvoyServletException.EX_GENERAL, "Invalid number");
+
+            // If the response has already been started, there's nothing we can
+            // do about it.
+            if (!p_response.isCommitted())
+            {
+                reportErrorPage(isApplet != null, null, e, p_request,
+                        p_response, m_servletContext, userSession,
+                        targetPageHandler);
+            }
+        }
         catch (Exception t)
         {
             String pageHandlerClassName = null;

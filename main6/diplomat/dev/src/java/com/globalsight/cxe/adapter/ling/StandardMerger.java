@@ -99,8 +99,8 @@ public class StandardMerger implements IFormatNames
     private String filterTableName;
 
     private static final String CONFIG_FILE = "/properties/LingAdapter.properties";
-    private static Pattern SPAN_PATTERN = Pattern.compile(
-            "(<span [^<>]+lastCR[^<>]+>)[\\r\\n]</span>", Pattern.DOTALL);
+    private static Pattern SPAN_PATTERN = Pattern
+            .compile("(<span [^<>]+lastCR[^<>]+>)[\\r\\n]</span>", Pattern.DOTALL);
 
     /**
      * Creates a StandardMerger object
@@ -136,10 +136,8 @@ public class StandardMerger implements IFormatNames
             String s = getContent();
 
             MessageData fmd = MessageDataFactory.createFileMessageData();
-            BufferedOutputStream bos = new BufferedOutputStream(
-                    fmd.getOutputStream());
-            OutputStreamWriter osw = new OutputStreamWriter(bos,
-                    m_targetEncoding);
+            BufferedOutputStream bos = new BufferedOutputStream(fmd.getOutputStream());
+            OutputStreamWriter osw = new OutputStreamWriter(bos, m_targetEncoding);
 
             osw.write(s, 0, s.length());
             osw.close();
@@ -190,21 +188,20 @@ public class StandardMerger implements IFormatNames
             else
                 mergeResult = mergeWithDiplomat(gxml);
 
-            m_logger.info("Done Merging: " + m_fileName + ", result size: "
-                    + mergeResult.length);
+            m_logger.info("Done Merging: " + m_fileName + ", result size: " + mergeResult.length);
             Logger.writeDebugFile("lam_merge.txt", mergeResult);
 
             String s = new String(mergeResult, m_targetEncoding);
 
-            s = handleReturns(s);
-
-            if (FORMAT_XML.equals(m_formatType)
-                    && filterId != -1
-                    && FilterConstants.XMLRULE_TABLENAME
-                            .equals(filterTableName))
+            if (!eolHandledFormat())
             {
-                s = XmlFilterHelper
-                        .saveNonAsciiAs(s, filterId, filterTableName);
+                s = handleReturns(s);
+            }
+
+            if (FORMAT_XML.equals(m_formatType) && filterId != -1
+                    && FilterConstants.XMLRULE_TABLENAME.equals(filterTableName))
+            {
+                s = XmlFilterHelper.saveNonAsciiAs(s, filterId, filterTableName);
             }
 
             if (FORMAT_MIF.equals(m_formatType))
@@ -225,6 +222,17 @@ public class StandardMerger implements IFormatNames
             m_logger.error("Exception during merging", e);
             throw new LingAdapterException("CxeInternal", m_errorArgs, e);
         }
+    }
+
+    /**
+     * For the formats that need to handle the eol encoding.
+     * 
+     * @since GBS-3830
+     */
+    private boolean eolHandledFormat()
+    {
+        return FORMAT_PLAINTEXT.equals(m_formatType) || FORMAT_JAVAPROP.equals(m_formatType)
+                || FORMAT_XML.equals(m_formatType) || FORMAT_AUTHORIT_XML.equals(m_formatType);
     }
 
     private String fixGxml(String p_mergeResult) throws Exception
@@ -259,8 +267,7 @@ public class StandardMerger implements IFormatNames
 
         if (isRestoreInvalidUnicodeChar())
         {
-            p_mergeResult = SegmentUtil
-                    .restoreInvalidUnicodeChar(p_mergeResult);
+            p_mergeResult = SegmentUtil.restoreInvalidUnicodeChar(p_mergeResult);
         }
 
         return p_mergeResult;
@@ -307,10 +314,8 @@ public class StandardMerger implements IFormatNames
             if (startIndex != -1 && endIndex != -1)
             {
                 int lengthOfEndTag = "</title>".length();
-                String titleText = p_mergeResult.substring(startIndex, endIndex
-                        + lengthOfEndTag);
-                p_mergeResult = StringUtil
-                        .replace(p_mergeResult, titleText, "");
+                String titleText = p_mergeResult.substring(startIndex, endIndex + lengthOfEndTag);
+                p_mergeResult = StringUtil.replace(p_mergeResult, titleText, "");
             }
 
             // remove PicExportError in
@@ -320,11 +325,9 @@ public class StandardMerger implements IFormatNames
 
             if (startIndex != -1 && endIndex != -1)
             {
-                String headString = p_mergeResult.substring(startIndex,
-                        endIndex);
+                String headString = p_mergeResult.substring(startIndex, endIndex);
 
-                if (headString
-                        .contains("list-style-image:url(\"PicExportError\");"))
+                if (headString.contains("list-style-image:url(\"PicExportError\");"))
                 {
                     String before = p_mergeResult.substring(0, startIndex);
                     String end = p_mergeResult.substring(endIndex);
@@ -349,15 +352,14 @@ public class StandardMerger implements IFormatNames
             return p_mergeResult;
         }
 
-        p_mergeResult = StringUtil.replaceWithRE(p_mergeResult, SPAN_PATTERN,
-                new Replacer()
-                {
-                    @Override
-                    public String getReplaceString(Matcher m)
-                    {
-                        return m.group(1) + "&#13;</span>";
-                    }
-                });
+        p_mergeResult = StringUtil.replaceWithRE(p_mergeResult, SPAN_PATTERN, new Replacer()
+        {
+            @Override
+            public String getReplaceString(Matcher m)
+            {
+                return m.group(1) + "&#13;</span>";
+            }
+        });
 
         return p_mergeResult;
     }
@@ -372,16 +374,14 @@ public class StandardMerger implements IFormatNames
             if (m_relSafeName.endsWith(OpenOfficeHelper.XML_CONTENT)
                     && m_relSafeName.toLowerCase().contains(".ods.1"))
             {
-                String oriXmlPath = OpenOfficeHelper.getConversionDir()
-                        + File.separator + m_sourceLocale + File.separator
-                        + m_relSafeName;
+                String oriXmlPath = OpenOfficeHelper.getConversionDir() + File.separator
+                        + m_sourceLocale + File.separator + m_relSafeName;
                 File oriXmlFile = new File(oriXmlPath);
                 if (oriXmlFile.exists())
                 {
                     String oriXml = FileUtils.read(oriXmlFile, "UTF-8");
-                    return OpenOfficeHelper.fixContentXmlForOds(p_content,
-                            oriXml, m_sourceLocale, m_targetLocale,
-                            m_relSafeName);
+                    return OpenOfficeHelper.fixContentXmlForOds(p_content, oriXml, m_sourceLocale,
+                            m_targetLocale, m_relSafeName);
                 }
             }
         }
@@ -442,13 +442,13 @@ public class StandardMerger implements IFormatNames
             diplomat.setTargetLocale(m_targetLocale);
             diplomat.setCxeMessage(m_cxeMessage);
             diplomat.setPreview(m_isPreview);
-            mergeResult = diplomat
-                    .merge(p_gxml, m_targetEncoding, m_keepGsTags);
+            // GBS-3830
+            diplomat.setFileName(m_fileName);
+            mergeResult = diplomat.merge(p_gxml, m_targetEncoding, m_keepGsTags);
         }
         catch (TranscoderException e)
         {
-            m_logger.error("Merger encoding exception. Using default encoding",
-                    e);
+            m_logger.error("Merger encoding exception. Using default encoding", e);
             mergeResult = diplomat.merge(p_gxml, m_keepGsTags).getBytes();
         }
 
@@ -472,8 +472,7 @@ public class StandardMerger implements IFormatNames
             {
                 String xml = new String(p_mergeResult, m_targetEncoding);
                 // first find out what the tags to unescape are
-                String tagsProperty = m_config
-                        .getStringParameter("unescapedTags");
+                String tagsProperty = m_config.getStringParameter("unescapedTags");
                 if (tagsProperty == null || tagsProperty.length() == 0)
                 {
                     return p_mergeResult;
@@ -485,43 +484,35 @@ public class StandardMerger implements IFormatNames
                 {
                     if (m_logger.isDebugEnabled())
                     {
-                        FileProfile fp = ServerProxy
-                                .getFileProfilePersistenceManager()
+                        FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
                                 .readFileProfile(Long.parseLong(m_fileProfile));
 
                         if (m_logger.isDebugEnabled())
                         {
-                            m_logger.debug("No xml rule found for file profile \""
-                                    + fp.getName() + "\"");
+                            m_logger.debug(
+                                    "No xml rule found for file profile \"" + fp.getName() + "\"");
                         }
                     }
                     return p_mergeResult;
                 }
                 List tagsHere = new ArrayList();
-                org.dom4j.Document doc = org.dom4j.DocumentHelper
-                        .parseText(xmlRuleText);
-                List tranList = org.dom4j.DocumentHelper.selectNodes(
-                        "//translate", doc);
+                org.dom4j.Document doc = org.dom4j.DocumentHelper.parseText(xmlRuleText);
+                List tranList = org.dom4j.DocumentHelper.selectNodes("//translate", doc);
                 StringBuffer exIndex = new StringBuffer();
                 for (Iterator iter = tranList.iterator(); iter.hasNext();)
                 {
                     org.dom4j.Node node = (org.dom4j.Node) iter.next();
 
                     if (node instanceof org.dom4j.Element
-                            && ((org.dom4j.Element) node)
-                                    .attributeValue("path") != null)
+                            && ((org.dom4j.Element) node).attributeValue("path") != null)
                     {
                         org.dom4j.Element element = (org.dom4j.Element) node;
                         for (int i = 0; i < tags.length; i++)
                         {
                             if (exIndex.toString().indexOf("" + i) == -1
-                                    && element.attributeValue("path").endsWith(
-                                            "/" + tags[i])
-                                    && element
-                                            .attributeValue("containedInHtml") != null
-                                    && element
-                                            .attributeValue("containedInHtml")
-                                            .equals("yes"))
+                                    && element.attributeValue("path").endsWith("/" + tags[i])
+                                    && element.attributeValue("containedInHtml") != null
+                                    && element.attributeValue("containedInHtml").equals("yes"))
                             {
                                 tagsHere.add(tags[i]);
                                 exIndex.append(i);
@@ -546,8 +537,7 @@ public class StandardMerger implements IFormatNames
         }
         catch (Exception e)
         {
-            m_logger.error("Failed to (internal) post process merge result: ",
-                    e);
+            m_logger.error("Failed to (internal) post process merge result: ", e);
             result = p_mergeResult; // just return the original merge result
         }
         // Runtime.getRuntime().gc();
@@ -560,12 +550,10 @@ public class StandardMerger implements IFormatNames
         try
         {
             String tagsFile = "/properties/Tags.properties";
-            SystemConfiguration tagsProperties = SystemConfiguration
-                    .getInstance(tagsFile);
-            String pairedTagHtml[] = tagsProperties.getStringParameter(
-                    "PairedTag_html").split(",");
-            String unpairedTagHtml[] = tagsProperties.getStringParameter(
-                    "UnpairedTag_html").split(",");
+            SystemConfiguration tagsProperties = SystemConfiguration.getInstance(tagsFile);
+            String pairedTagHtml[] = tagsProperties.getStringParameter("PairedTag_html").split(",");
+            String unpairedTagHtml[] = tagsProperties.getStringParameter("UnpairedTag_html")
+                    .split(",");
 
             for (int i = 0; p_tags != null && p_tags.length > i; i++)
             {
@@ -574,8 +562,7 @@ public class StandardMerger implements IFormatNames
                 boolean isUnairedTagHtml = isInTheArray(tag, unpairedTagHtml);
 
                 // <p> </p> ... can be recoverd here
-                if (isPairedTagHtml
-                        && result.indexOf("&lt;" + tag + "&gt;") != -1)
+                if (isPairedTagHtml && result.indexOf("&lt;" + tag + "&gt;") != -1)
                 {
                     String regex1 = "\\&lt;" + tag + "\\&gt;";
                     String ex1 = "<" + tag + ">";
@@ -586,9 +573,8 @@ public class StandardMerger implements IFormatNames
                 }
 
                 // <br/> <hr /> ... can be recoverd here
-                if (isUnairedTagHtml
-                        && (result.indexOf("&lt;" + tag + "/&gt;") != -1 || result
-                                .indexOf("&lt;" + tag + " /&gt;") != -1))
+                if (isUnairedTagHtml && (result.indexOf("&lt;" + tag + "/&gt;") != -1
+                        || result.indexOf("&lt;" + tag + " /&gt;") != -1))
                 {
                     String regex1 = "\\&lt;" + tag + "\\/&gt;";
                     String ex1 = "<" + tag + "/>";
@@ -605,10 +591,9 @@ public class StandardMerger implements IFormatNames
                 // ... can be recoverd here
                 // index_1 is the "&lt;tag " 's index
                 int index_1 = result.indexOf("&lt;" + tag + " ");
-                if (index_1 != -1
-                        && ((isPairedTagHtml && result.indexOf("&lt;/" + tag
-                                + "&gt;", index_1 + 4) != -1) || (isUnairedTagHtml && result
-                                .indexOf("&gt;", index_1 + 4) != -1)))
+                if (index_1 != -1 && ((isPairedTagHtml
+                        && result.indexOf("&lt;/" + tag + "&gt;", index_1 + 4) != -1)
+                        || (isUnairedTagHtml && result.indexOf("&gt;", index_1 + 4) != -1)))
                 {
                     StringBuffer xmlBuffer = new StringBuffer();
                     String tempxml = result;
@@ -624,8 +609,7 @@ public class StandardMerger implements IFormatNames
 
                         // handle the special content like &amp;quot; to &quot;
                         String content = tempxml.substring(0, index_2);
-                        String contentAfterDecode = XmlUtil
-                                .unescapeString(content);
+                        String contentAfterDecode = XmlUtil.unescapeString(content);
 
                         // to find the matched "&gt;" 's index (index_2) for
                         // "&lt;tag "
@@ -642,20 +626,18 @@ public class StandardMerger implements IFormatNames
 
                             if (index_sign2 == 0)
                                 index_sign2 = 1;
-                            String temp = (index_equalSign != -1) ? contentAfterDecode
-                                    .substring(index_equalSign) : "";
+                            String temp = (index_equalSign != -1)
+                                    ? contentAfterDecode.substring(index_equalSign) : "";
                             while (index_sign2 > 0
-                                    && (temp.indexOf('"') != -1 || temp
-                                            .indexOf('\'') != -1))
+                                    && (temp.indexOf('"') != -1 || temp.indexOf('\'') != -1))
                             {
                                 quotCount = aposCount = 0;
                                 index_sign2 = 0;
                                 boolean countQuot = false;
 
                                 if (temp.indexOf('\'') == -1
-                                        || (temp.indexOf('"') < temp
-                                                .indexOf('\'') && temp
-                                                .indexOf('"') != -1))
+                                        || (temp.indexOf('"') < temp.indexOf('\'')
+                                                && temp.indexOf('"') != -1))
                                 {
                                     countQuot = true;
                                 }
@@ -665,26 +647,22 @@ public class StandardMerger implements IFormatNames
                                     {
                                         quotCount++;
                                     }
-                                    else if (!countQuot
-                                            && temp.charAt(j) == '\'')
+                                    else if (!countQuot && temp.charAt(j) == '\'')
                                     {
                                         aposCount++;
                                     }
-                                    if ((quotCount + aposCount) == 2
-                                            && index_sign2 == 0)
+                                    if ((quotCount + aposCount) == 2 && index_sign2 == 0)
                                     {
                                         index_sign2 = j;
                                     }
                                 }
 
-                                if (index_sign2 > 0
-                                        && (quotCount + aposCount) >= 2)
+                                if (index_sign2 > 0 && (quotCount + aposCount) >= 2)
                                 {
-                                    index_equalSign = contentAfterDecode
-                                            .indexOf('=', index_sign2
-                                                    + index_equalSign);
-                                    temp = (index_equalSign != -1) ? contentAfterDecode
-                                            .substring(index_equalSign) : "";
+                                    index_equalSign = contentAfterDecode.indexOf('=',
+                                            index_sign2 + index_equalSign);
+                                    temp = (index_equalSign != -1)
+                                            ? contentAfterDecode.substring(index_equalSign) : "";
                                     continue;
                                 }
                             }
@@ -694,8 +672,7 @@ public class StandardMerger implements IFormatNames
                                 index_2 = tempxml.indexOf("&gt;", index_2 + 4);
 
                                 content = tempxml.substring(0, index_2);
-                                contentAfterDecode = XmlUtil
-                                        .unescapeString(content);
+                                contentAfterDecode = XmlUtil.unescapeString(content);
                             }
                             else
                             {
@@ -715,8 +692,8 @@ public class StandardMerger implements IFormatNames
 
                     if (isPairedTagHtml)
                     {
-                        result = StringUtil.replaceWithRE(result, "\\&lt;/"
-                                + tag + "\\&gt;", "</" + tag + ">");
+                        result = StringUtil.replaceWithRE(result, "\\&lt;/" + tag + "\\&gt;",
+                                "</" + tag + ">");
                     }
                 }
             }
@@ -790,31 +767,29 @@ public class StandardMerger implements IFormatNames
             Element sourceElement = (Element) nl.item(0);
             m_formatType = sourceElement.getAttribute("formatType");
             m_fileProfile = sourceElement.getAttribute("dataSourceId");
-            long fpId = (m_fileProfile == null) ? -1 : Long
-                    .parseLong(m_fileProfile);
+            long fpId = (m_fileProfile == null) ? -1 : Long.parseLong(m_fileProfile);
             filterId = -1;
             if (fpId > 0)
             {
-                FileProfileImpl fp = HibernateUtil.get(FileProfileImpl.class,
-                        fpId, false);
+                FileProfileImpl fp = HibernateUtil.get(FileProfileImpl.class, fpId, false);
                 filterId = fp.getFilterId();
                 filterTableName = fp.getFilterTableName();
             }
             // source locale
-            Element sourceLocaleElement = (Element) sourceElement
-                    .getElementsByTagName("locale").item(0);
+            Element sourceLocaleElement = (Element) sourceElement.getElementsByTagName("locale")
+                    .item(0);
             m_sourceLocale = sourceLocaleElement.getFirstChild().getNodeValue();
 
             // Get Target EventFlow
             nl = elem.getElementsByTagName("target");
             Element targetElement = (Element) nl.item(0);
             // target encoding
-            Element charsetElement = (Element) targetElement
-                    .getElementsByTagName("charset").item(0);
+            Element charsetElement = (Element) targetElement.getElementsByTagName("charset")
+                    .item(0);
             m_targetEncoding = charsetElement.getFirstChild().getNodeValue();
             // target locale
-            Element targetLocaleElement = (Element) targetElement
-                    .getElementsByTagName("locale").item(0);
+            Element targetLocaleElement = (Element) targetElement.getElementsByTagName("locale")
+                    .item(0);
             m_targetLocale = targetLocaleElement.getFirstChild().getNodeValue();
 
             // if this is a source page export, we leave the GS tags intact
@@ -828,9 +803,7 @@ public class StandardMerger implements IFormatNames
             // converter accept.
             // related issue: gbs-1341
             if ("unknown".equals(m_targetEncoding)
-                    || CxeMessageType
-                            .getCxeMessageType(
-                                    CxeMessageType.ADOBE_LOCALIZED_EVENT)
+                    || CxeMessageType.getCxeMessageType(CxeMessageType.ADOBE_LOCALIZED_EVENT)
                             .getName().equals(m_postMergeEvent))
             {
                 m_targetEncoding = "UTF-8";
@@ -843,8 +816,7 @@ public class StandardMerger implements IFormatNames
             m_errorArgs[0] = m_fileName;
 
             // get relSafeName for open office xml
-            nl = (isOpenOfficeXml() || isOfficeXml()) ? elem
-                    .getElementsByTagName("da") : null;
+            nl = (isOpenOfficeXml() || isOfficeXml()) ? elem.getElementsByTagName("da") : null;
             if (nl != null && nl.getLength() > 0)
             {
                 for (int i = 0, nllen = nl.getLength(); i < nllen; i++)
@@ -853,12 +825,10 @@ public class StandardMerger implements IFormatNames
                     String daName = daElement.getAttribute("name");
                     if ("relSafeName".equals(daName))
                     {
-                        Node dvElement = daElement.getElementsByTagName("dv")
-                                .item(0);
+                        Node dvElement = daElement.getElementsByTagName("dv").item(0);
                         if (dvElement != null)
                         {
-                            m_relSafeName = dvElement.getFirstChild()
-                                    .getNodeValue();
+                            m_relSafeName = dvElement.getFirstChild().getNodeValue();
                         }
                     }
                 }
@@ -866,9 +836,8 @@ public class StandardMerger implements IFormatNames
         }
         catch (Exception e)
         {
-            m_logger.error(
-                    "Unable to parse EventFlowXml. Cannot determine locale, "
-                            + "encoding, and format_type for merging.", e);
+            m_logger.error("Unable to parse EventFlowXml. Cannot determine locale, "
+                    + "encoding, and format_type for merging.", e);
             throw new LingAdapterException("CxeInternal", m_errorArgs, e);
         }
         finally
@@ -902,8 +871,7 @@ public class StandardMerger implements IFormatNames
 
     private boolean isRestoreInvalidUnicodeChar()
     {
-        return FORMAT_XML.equals(m_formatType)
-                || FORMAT_IDML.equals(m_formatType);
+        return FORMAT_XML.equals(m_formatType) || FORMAT_IDML.equals(m_formatType);
     }
 
     /**
@@ -936,8 +904,7 @@ public class StandardMerger implements IFormatNames
         {
             // Retrieve the (XML) Rule File from the Database.
             String SQL_SELECT_RULE = "SELECT RULE_TEXT FROM FILE_PROFILE, XML_RULE"
-                    + " WHERE FILE_PROFILE.ID=?"
-                    + " and XML_RULE.ID=FILE_PROFILE.XML_RULE_ID";
+                    + " WHERE FILE_PROFILE.ID=?" + " and XML_RULE.ID=FILE_PROFILE.XML_RULE_ID";
             connection = ConnectionPool.getConnection();
             query = connection.prepareStatement(SQL_SELECT_RULE);
             query.setString(1, m_fileProfile);
@@ -956,16 +923,14 @@ public class StandardMerger implements IFormatNames
         }
         catch (ConnectionPoolException cpe)
         {
-            m_logger.error(
-                    "Unable to connect to database retrieve XML rule file"
-                            + " for FileProfileID " + m_fileProfile, cpe);
+            m_logger.error("Unable to connect to database retrieve XML rule file"
+                    + " for FileProfileID " + m_fileProfile, cpe);
             throw new LingAdapterException("DbConnection", m_errorArgs, cpe);
         }
         catch (SQLException sqle)
         {
-            m_logger.error(
-                    "Unable to retrieve XML rule file for FileProfileID "
-                            + m_fileProfile, sqle);
+            m_logger.error("Unable to retrieve XML rule file for FileProfileID " + m_fileProfile,
+                    sqle);
             throw new LingAdapterException("SqlException", m_errorArgs, sqle);
         }
         finally

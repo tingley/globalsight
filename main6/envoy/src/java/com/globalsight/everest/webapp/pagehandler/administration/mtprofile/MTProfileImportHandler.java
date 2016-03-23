@@ -608,10 +608,6 @@ public class MTProfileImportHandler extends PageHandler
                     Timestamp dateTime = new Timestamp(timeDate.getTime());
                     mtp.setTimestamp(dateTime);
                 }
-                else if (keyField.equalsIgnoreCase("SHOW_IN_EDITOR"))
-                {
-                    mtp.setShowInEditor(Boolean.parseBoolean(valueField));
-                }
                 else if (keyField.equalsIgnoreCase("INCLUDE_MT_IDENTIFIERS"))
                 {
                     mtp.setIncludeMTIdentifiers(Boolean

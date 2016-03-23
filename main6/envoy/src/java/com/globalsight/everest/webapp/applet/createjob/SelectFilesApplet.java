@@ -459,9 +459,8 @@ public class SelectFilesApplet extends EnvoyJApplet
             /* The unzipped files are in folders named by the zip file name*/
              
             String unzippedFileFullPath = zipFilePath
-                    + file.getName().substring(0,
-                            file.getName().lastIndexOf(".")) + File.separator
-                    + zipEntryName;
+                    + file.getName().substring(0, file.getName().lastIndexOf(".")) + "_"
+                    + CreateJobUtil.getFileExtension(file) + File.separator + zipEntryName;
             // if zip file contains subfolders, entry name will contains "/" or "\"
             if (zipEntryName.indexOf("/") != -1)
             {
@@ -513,9 +512,8 @@ public class SelectFilesApplet extends EnvoyJApplet
              * The unzipped files are in folders named by the zip file name
              */
             String unzippedFileFullPath = rarFilePath
-                    + file.getName().substring(0,
-                            file.getName().lastIndexOf(".")) + File.separator
-                    + zipEntryName;
+                    + file.getName().substring(0, file.getName().lastIndexOf(".")) + "_"
+                    + CreateJobUtil.getFileExtension(file) + File.separator + zipEntryName;
             // if zip file contains subfolders, entry name will contains "/" or "\"
             if (zipEntryName.indexOf("/") != -1)
             {
@@ -560,9 +558,8 @@ public class SelectFilesApplet extends EnvoyJApplet
              /** The unzipped files are in folders named by the zip file name*/
              
             String unzippedFileFullPath = zip7zFilePath
-                    + file.getName().substring(0,
-                            file.getName().lastIndexOf(".")) + File.separator
-                    + zip7zEntryName;
+                    + file.getName().substring(0, file.getName().lastIndexOf(".")) + "_"
+                    + CreateJobUtil.getFileExtension(file) + File.separator + zip7zEntryName;
             // if zip file contains subf,olders, entry name will contains "/" or
             // "\"
             if (zip7zEntryName.indexOf("/") != -1)

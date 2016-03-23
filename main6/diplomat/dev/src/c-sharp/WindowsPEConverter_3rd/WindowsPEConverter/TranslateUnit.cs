@@ -7,22 +7,88 @@ namespace GlobalSight.WinPEConverter
 {
     public class TranslateUnit
     {
-        private string _category;
-        private int _lineNumber = -1;
+        private string _number;
+        private string _id;
+        private string _index;
+        private string _subIndex;
         private string _srcString;
         private string _tgtString;
-        
+        private string _category;
+        private string _type;
 
         public TranslateUnit()
         {
         }
 
-        public TranslateUnit(int lineNumber, string category, string srcString, string tgtString)
+        public TranslateUnit(string number, string id, string index, string subIndex)
         {
-            _lineNumber = lineNumber;
-            _category = category;
+            _number = number;
+            _id = id;
+            _index = index;
+            _subIndex = subIndex;
+        }
+
+        public TranslateUnit(string number, string id, string index, string subIndex, string srcString)
+        {
+            _number = number;
+            _id = id;
+            _index = index;
+            _subIndex = subIndex;
             _srcString = srcString;
+        }
+
+        public TranslateUnit(string number, string id, string index, string subIndex, string srcString, string tgtString)
+            : this(number, id, index, subIndex, srcString)
+        {
             _tgtString = tgtString;
+        }
+
+        public String Number
+        {
+            set
+            {
+                _number = value;
+            }
+            get
+            {
+                return _number;
+            }
+        }
+
+        public String Id
+        {
+            set
+            {
+                _id = value;
+            }
+            get
+            {
+                return _id;
+            }
+        }
+
+        public String Index
+        {
+            set
+            {
+                _index = value;
+            }
+            get
+            {
+                return _index;
+            }
+        }
+
+        public String SubIndex
+        {
+            set
+            {
+                _subIndex = value;
+            }
+            get
+            {
+                return _subIndex;
+            }
         }
 
         public String SourceContent
@@ -61,26 +127,26 @@ namespace GlobalSight.WinPEConverter
             }
         }
 
-        public int LineNumber
+        public String Type
         {
             set
             {
-                _lineNumber = value;
+                _type = value;
             }
             get
             {
-                return _lineNumber;
+                return _type == null ? "" : _type;
             }
         }
     }
 
     public class TranslateUnitUtil
     {
-        public static TranslateUnit GetTranslateUnit(List<TranslateUnit> units, string category, int lineNumber)
+        public static TranslateUnit GetTranslateUnit(List<TranslateUnit> units, string category, string id)
         {
             foreach (TranslateUnit tu in units)
             {
-                if (tu.Category.Equals(category) && (tu.LineNumber == lineNumber))
+                if (tu.Category.Equals(category) && tu.Id.Equals(id))
                 {
                     return tu;
                 }
@@ -88,13 +154,18 @@ namespace GlobalSight.WinPEConverter
 
             return null;
         }
-    }
 
-    public enum TranslateUnitType
-    {
-        MenuType,
-        StringType,
-        DialogType,
-        VersionType
+        public static TranslateUnit GetTranslateUnit(List<TranslateUnit> units, string category, string categoryIndex, string subIndex)
+        {
+            foreach (TranslateUnit tu in units)
+            {
+                if (tu.Category.Equals(category) && tu.Index.Equals(categoryIndex) && tu.SubIndex.Equals(subIndex))
+                {
+                    return tu;
+                }
+            }
+
+            return null;
+        }
     }
 }

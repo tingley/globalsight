@@ -31,6 +31,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileConstants;
 import com.globalsight.machineTranslation.AbstractTranslator;
 import com.globalsight.machineTranslation.MTHelper;
@@ -39,7 +40,6 @@ import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
-
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.TextNode;
 
@@ -144,6 +144,9 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
         boolean isXlf = MTHelper.isXlf(this.getMtParameterMap());
         try
         {
+            HashMap paramMap = getMtParameterMap();
+            MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap
+                    .get(MachineTranslator.MT_PROFILE);
             // Ensure the sequence will be unchanged after translation.
             HashMap<Integer, String> id2Segs = new HashMap<Integer, String>();
             String[] heads = new String[segments.length];
@@ -180,13 +183,13 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
             if (id2Segs.size() > 0)
             {
                 String srcXlf = getDoMtXliff(id2Segs, sourceLocale, targetLocale);
-                if (MTHelper.isLogDetailedInfo(ENGINE_DOMT))
+                if (mtProfile.isLogDebugInfo())
                 {
                     logger.info("Segments in XLF sending to DoMT:" + srcXlf);
                 }
 
                 String translatedXlf = hitDoMt(sourceLocale, targetLocale, srcXlf);
-                if (MTHelper.isLogDetailedInfo(ENGINE_DOMT))
+                if (mtProfile.isLogDebugInfo())
                 {
                     logger.info("Segments in XLF returned from DoMT:" + translatedXlf);
                 }
@@ -265,6 +268,9 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
         String[] results = new String[segments.length];
         try
         {
+            HashMap paramMap = getMtParameterMap();
+            MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap
+                    .get(MachineTranslator.MT_PROFILE);
             // Ensure the sequence will be unchanged after translation.
             HashMap<Integer, String> id2Segs = new HashMap<Integer, String>();
             for (int i = 0; i < segments.length; i++)
@@ -288,13 +294,13 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
             if (id2Segs.size() > 0)
             {
                 String srcXlf = getDoMtXliff(id2Segs, sourceLocale, targetLocale);
-                if (MTHelper.isLogDetailedInfo(ENGINE_DOMT))
+                if (mtProfile.isLogDebugInfo())
                 {
                     logger.info("Segments in XLF sending to DoMT:" + srcXlf);
                 }
 
                 String translatedXlf = hitDoMt(sourceLocale, targetLocale, srcXlf);
-                if (MTHelper.isLogDetailedInfo(ENGINE_DOMT))
+                if (mtProfile.isLogDebugInfo())
                 {
                     logger.info("Segments in XLF returned from DoMT:" + translatedXlf);
                 }
@@ -348,7 +354,9 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
         String translatedXlf = null;
         try
         {
-            String url = (String) getMtParameterMap().get(
+            HashMap paramMap = getMtParameterMap();
+            MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap
+                    .get(MachineTranslator.MT_PROFILE);            String url = (String) getMtParameterMap().get(
                     MTProfileConstants.MT_DOMT_URL);
             XmlRpcClient client = DoMTUtil.getXmlRpcClient(url);
 
@@ -370,7 +378,7 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
                         returning = (Object[]) client.execute("run", params);
                     }
 
-                    if (MTHelper.isLogDetailedInfo(ENGINE_DOMT))
+                    if (mtProfile.isLogDebugInfo())
                     {
                         DoMTUtil.logRunInfo(returning);
                     }
@@ -412,7 +420,7 @@ public class DoMTProxy extends AbstractTranslator implements MachineTranslator
                             status = (HashMap) client.execute("status", statusParams);
                         }
 
-                        if (MTHelper.isLogDetailedInfo(ENGINE_DOMT))
+                        if (mtProfile.isLogDebugInfo())
                         {
                             DoMTUtil.logStatusInfo(status, jobId);
                         }

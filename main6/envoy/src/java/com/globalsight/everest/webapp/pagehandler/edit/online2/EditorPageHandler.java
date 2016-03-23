@@ -131,7 +131,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         String jobId = (String) p_request.getParameter(WebAppConstants.JOB_ID);
         String taskId = (String) p_request
                 .getParameter(WebAppConstants.TASK_ID);
-
+        String openEditorType = p_request.getParameter("openEditorType");
+        
         // Get user object for the person who has logged in.
         User user = TaskHelper.getUser(session);
 
@@ -144,7 +145,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         {
             sessionMgr.setAttribute(WebAppConstants.IS_FROM_ACTIVITY, "yes");
             state = new EditorState();
-
+            state.setOpenEditorType(openEditorType);
             tmProfile = TaskHelper.getTask(Integer.parseInt(taskId))
                     .getWorkflow().getJob().getL10nProfile()
                     .getTranslationMemoryProfile();
@@ -168,7 +169,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         else if (jobId != null && srcPageId != null)
         {
             state = new EditorState();
-
+            state.setOpenEditorType(openEditorType);
             EditorHelper.initEditorManager(state);
             EditorHelper.initEditorOptions(state, session);
 

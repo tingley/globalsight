@@ -25,8 +25,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -54,8 +52,7 @@ public class OfflineSegmentData implements Serializable
 {
     private static final long serialVersionUID = 5007464538350680545L;
 
-    static private final Logger CATEGORY = Logger
-            .getLogger(OfflineSegmentData.class);
+    static private final Logger CATEGORY = Logger.getLogger(OfflineSegmentData.class);
 
     /**
      * A back reference to the OfflinePageData that holds this object.
@@ -128,8 +125,7 @@ public class OfflineSegmentData implements Serializable
     //
     public OfflineSegmentData()
     {
-        this("", "", "", "", "", -1, "",
-                AmbassadorDwUpConstants.MATCH_TYPE_UNDEFINED, null, null,
+        this("", "", "", "", "", -1, "", AmbassadorDwUpConstants.MATCH_TYPE_UNDEFINED, null, null,
                 false, null);
     }
 
@@ -141,8 +137,7 @@ public class OfflineSegmentData implements Serializable
      */
     public OfflineSegmentData(String p_id)
     {
-        this(p_id, "", "", "", "", -1, "",
-                AmbassadorDwUpConstants.MATCH_TYPE_UNDEFINED, null, null,
+        this(p_id, "", "", "", "", -1, "", AmbassadorDwUpConstants.MATCH_TYPE_UNDEFINED, null, null,
                 false, null);
     }
 
@@ -173,10 +168,9 @@ public class OfflineSegmentData implements Serializable
      *            if true the segment is "presented" as protected to the user.
      *            If false, it "appears" unprotected.
      */
-    public OfflineSegmentData(String p_id, String p_segFmt, String p_segType,
-            String p_srcText, String p_trgText, float p_matchScore,
-            String p_matchType, int p_matchTypeId, List p_fuzzyList,
-            List p_fuzzyRefTmsList, boolean p_isProtected, List p_termList)
+    public OfflineSegmentData(String p_id, String p_segFmt, String p_segType, String p_srcText,
+            String p_trgText, float p_matchScore, String p_matchType, int p_matchTypeId,
+            List p_fuzzyList, List p_fuzzyRefTmsList, boolean p_isProtected, List p_termList)
     {
         super();
 
@@ -237,9 +231,8 @@ public class OfflineSegmentData implements Serializable
 
             if (CATEGORY.isDebugEnabled())
             {
-                System.out.println("Looking up issue " + key + " (dispid="
-                        + m_displaySegmentId + ") "
-                        + (result != null ? "found" : "not found"));
+                System.out.println("Looking up issue " + key + " (dispid=" + m_displaySegmentId
+                        + ") " + (result != null ? "found" : "not found"));
             }
         }
 
@@ -493,42 +486,7 @@ public class OfflineSegmentData implements Serializable
      */
     public void setDisplayTargetText(String p_newTargetText)
     {
-        Pattern p = Pattern
-                .compile("^\\s*0\\s*>.*?<\\s*\\}\\s*\\d+\\s*\\{\\s*>.*?<\\s*0\\s*\\}");
-        Matcher m = p.matcher(p_newTargetText);
-        if (m.find())
-            p_newTargetText = "{" + p_newTargetText;
-
-        p_newTargetText = changeLF(p_newTargetText, "[LF]");
-        p_newTargetText = changeLF(p_newTargetText, "[lF]");
-        p_newTargetText = changeLF(p_newTargetText, "[Lf]");
-        p_newTargetText = changeLF(p_newTargetText, "[lf]");
         m_displayTargetText = new StringBuffer(p_newTargetText);
-    }
-
-    private String changeLF(String s, String lf)
-    {
-        int i = s.indexOf(lf);
-        while (i > -1)
-        {
-            int x = i - 1;
-            for (; x > -1; x--)
-            {
-                if ('[' != s.charAt(x))
-                {
-                    break;
-                }
-            }
-
-            if ((i - x) % 2 != 0)
-            {
-                s = s.substring(0, i) + '\n' + s.substring(i + 4);
-            }
-
-            i = s.indexOf(lf, i + 1);
-        }
-
-        return s;
     }
 
     /**
@@ -895,8 +853,7 @@ public class OfflineSegmentData implements Serializable
     {
         int idx;
 
-        if ((idx = m_displaySegmentId
-                .indexOf(AmbassadorDwUpConstants.SEGMENT_ID_DELIMITER)) != -1
+        if ((idx = m_displaySegmentId.indexOf(AmbassadorDwUpConstants.SEGMENT_ID_DELIMITER)) != -1
                 || (idx = m_displaySegmentId
                         .indexOf(AmbassadorDwUpConstants.BOOKMARK_SEG_ID_DELIM)) != -1)
         {
@@ -948,8 +905,7 @@ public class OfflineSegmentData implements Serializable
      */
     public String getSubflowParentTagName()
     {
-        return m_displayParentOfSubTagName != null ? m_displayParentOfSubTagName
-                : "";
+        return m_displayParentOfSubTagName != null ? m_displayParentOfSubTagName : "";
     }
 
     /**
@@ -1086,14 +1042,10 @@ public class OfflineSegmentData implements Serializable
     {
         final int prime = 31;
         int result = 1;
-        result = prime
-                * result
-                + ((m_displaySourceText == null) ? 0 : m_displaySourceText
-                        .toString().hashCode());
-        result = prime
-                * result
-                + ((m_displayTargetText == null) ? 0 : m_displayTargetText
-                        .toString().hashCode());
+        result = prime * result
+                + ((m_displaySourceText == null) ? 0 : m_displaySourceText.toString().hashCode());
+        result = prime * result
+                + ((m_displayTargetText == null) ? 0 : m_displayTargetText.toString().hashCode());
         return result;
     }
 
@@ -1112,16 +1064,14 @@ public class OfflineSegmentData implements Serializable
             if (other.m_displaySourceText != null)
                 return false;
         }
-        else if (!m_displaySourceText.toString().equals(
-                other.m_displaySourceText.toString()))
+        else if (!m_displaySourceText.toString().equals(other.m_displaySourceText.toString()))
             return false;
         if (m_displayTargetText == null)
         {
             if (other.m_displayTargetText != null)
                 return false;
         }
-        else if (!m_displayTargetText.toString().equals(
-                other.m_displayTargetText.toString()))
+        else if (!m_displayTargetText.toString().equals(other.m_displayTargetText.toString()))
             return false;
         if (m_matchScore != other.getMatchValue())
             return false;

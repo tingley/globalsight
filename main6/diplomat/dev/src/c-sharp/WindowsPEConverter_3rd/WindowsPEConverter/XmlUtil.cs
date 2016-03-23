@@ -15,16 +15,22 @@ namespace GlobalSight.WinPEConverter
             StringBuilder sb = new StringBuilder();
             // head
             sb.Append("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
-            sb.Append("<GlobalSightPE version=\"8.6.8\">");
+            sb.Append("<GlobalSightPE version=\"8.2.3\">");
             // body
             if (units != null && units.Count != 0)
             {
                 foreach (TranslateUnit unit in units)
                 {
-                    sb.Append("<TranslateUnit lineNumber=\"");
-                    sb.Append(unit.LineNumber);
+                    sb.Append("<TranslateUnit number=\"");
+                    sb.Append(unit.Number);
+                    sb.Append("\" id=\"");
+                    sb.Append(unit.Id);
                     sb.Append("\" category=\"");
                     sb.Append(unit.Category);
+                    sb.Append("\" index=\"");
+                    sb.Append(unit.Index);
+                    sb.Append("\" subindex=\"");
+                    sb.Append(unit.SubIndex);
                     sb.Append("\">");
                     sb.Append(Escape(unit.SourceContent));
                     sb.Append("</TranslateUnit>");
@@ -64,11 +70,15 @@ namespace GlobalSight.WinPEConverter
             {
                 foreach (XmlNode node in nodes)
                 {
-                    int lineNumber = Int32.Parse(node.Attributes["lineNumber"].Value);
+                    string number = node.Attributes["number"].Value;
+                    string id = node.Attributes["id"].Value;
+                    string index = node.Attributes["index"].Value;
+                    string subindex = node.Attributes["subindex"].Value;
                     string category = node.Attributes["category"].Value;
                     string content = node.InnerText;
 
-                    TranslateUnit u = new TranslateUnit(lineNumber, category, content, content);
+                    TranslateUnit u = new TranslateUnit(number, id, index, subindex, content);
+                    u.Category = category;
                     result.Add(u);
                 }
             }

@@ -16,6 +16,7 @@
  */
 package com.globalsight.ling.docproc.merger.xml;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Locale;
@@ -29,6 +30,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.ling.common.RegEx;
 import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.common.RegExMatchInterface;
@@ -36,19 +38,36 @@ import com.globalsight.ling.docproc.DiplomatMergerException;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterChecker;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.merger.PostMergeProcessor;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
+import com.globalsight.util.StringUtil;
 
 /**
  * This class post processes a merged XML document.
  */
 public class XmlPostMergeProcessor implements PostMergeProcessor
 {
-    private static Logger c_category = Logger
-            .getLogger(XmlPostMergeProcessor.class.getName());
+    private static Logger c_category = Logger.getLogger(XmlPostMergeProcessor.class.getName());
 
     private boolean generateLang = false;
     private boolean generateEncoding = false;
     private Locale locale = null;
     private XmlFilterHelper xmlFilterHelper = null;
+    // GBS-3830
+    private int m_eolEncoding = 0;
+    private String m_fileName = null;
+    private static final String EOL_LF = "\n";
+    private static final String EOL_CRLF = "\r\n";
+
+    public void setEolEncoding(int p_eolEncoding)
+    {
+        m_eolEncoding = p_eolEncoding;
+    }
+
+    public void setFileName(String p_fileName)
+    {
+        m_fileName = p_fileName;
+    }
 
     public void setGenerateLang(boolean generateLang)
     {
@@ -88,13 +107,13 @@ public class XmlPostMergeProcessor implements PostMergeProcessor
      * @see com.globalsight.ling.document.merger.PostMergeProcessor#process(java.lang.String,
      *      java.lang.String)
      */
-    public String process(String p_content, String p_IanaEncoding)
-            throws DiplomatMergerException
+    public String process(String p_content, String p_IanaEncoding) throws DiplomatMergerException
     {
         String processed = null;
         try
         {
             String content = p_content;
+            content = handleEolEncoding(content);
             // add xml:lang first if needed
             if (generateLang && locale != null)
             {
@@ -129,23 +148,20 @@ public class XmlPostMergeProcessor implements PostMergeProcessor
                             {
                                 String tagName = sub.substring(1, indexOfSpace);
                                 String cloaseTagRE = "<.+/\\s*>";
-                                Pattern closeTagPattern = Pattern.compile(
-                                        cloaseTagRE, Pattern.MULTILINE
-                                                | Pattern.DOTALL);
-                                Matcher closeTagMatcher = closeTagPattern
-                                        .matcher(sub);
+                                Pattern closeTagPattern = Pattern.compile(cloaseTagRE,
+                                        Pattern.MULTILINE | Pattern.DOTALL);
+                                Matcher closeTagMatcher = closeTagPattern.matcher(sub);
                                 boolean isClosedTag = closeTagMatcher.find();
-                                String tempXml = isClosedTag ? sub : sub + "</"
-                                        + tagName + ">";
+                                String tempXml = isClosedTag ? sub : sub + "</" + tagName + ">";
                                 Node rootNode = getRootNode(tempXml);
 
-                                isExclude = (xmlFilterHelper != null) ? xmlFilterHelper
-                                        .isExclude(rootNode) : false;
+                                isExclude = (xmlFilterHelper != null)
+                                        ? xmlFilterHelper.isExclude(rootNode) : false;
                             }
 
-                            String subNew = isExclude ? sub : sub.replaceAll(
-                                    "(xml:lang\\s*=\\s*['\"][^'\"]*['\"])",
-                                    langStr);
+                            String subNew = isExclude ? sub
+                                    : sub.replaceAll("(xml:lang\\s*=\\s*['\"][^'\"]*['\"])",
+                                            langStr);
                             buffer.append(part0);
                             buffer.append(subNew);
                         } while (matcher.find());
@@ -156,8 +172,7 @@ public class XmlPostMergeProcessor implements PostMergeProcessor
                 }
                 catch (Exception e)
                 {
-                    c_category
-                            .error("Generate xml:lang to root element failed. ");
+                    c_category.error("Generate xml:lang to root element failed. ");
                     throw new DiplomatMergerException(e);
                 }
 
@@ -169,22 +184,20 @@ public class XmlPostMergeProcessor implements PostMergeProcessor
                     if (rootNode != null)
                     {
                         String rootName = rootNode.getNodeName();
-                        RegExMatchInterface rootMatch = RegEx.matchSubstring(
-                                content, ".*(<" + rootName + "[^>]*>).*");
+                        RegExMatchInterface rootMatch = RegEx.matchSubstring(content,
+                                ".*(<" + rootName + "[^>]*>).*");
 
                         if (rootMatch != null)
                         {
                             int rootSt = rootMatch.beginOffset(1);
                             int rootEn = rootMatch.endOffset(1);
-                            StringBuffer rootStr = new StringBuffer(
-                                    rootMatch.group(1));
+                            StringBuffer rootStr = new StringBuffer(rootMatch.group(1));
                             if (rootStr.indexOf(" xml:lang=") == -1)
                             {
                                 int insertIndex = ("<" + rootName).length();
-                                String newRootStr = rootStr.insert(insertIndex,
-                                        " " + langStr).toString();
-                                content = content.substring(0, rootSt)
-                                        + newRootStr
+                                String newRootStr = rootStr.insert(insertIndex, " " + langStr)
+                                        .toString();
+                                content = content.substring(0, rootSt) + newRootStr
                                         + content.substring(rootEn);
                             }
                         }
@@ -192,18 +205,15 @@ public class XmlPostMergeProcessor implements PostMergeProcessor
                 }
                 catch (Exception e)
                 {
-                    c_category
-                            .error("Generate xml:lang to root element failed. ");
+                    c_category.error("Generate xml:lang to root element failed. ");
                     throw new DiplomatMergerException(e);
                 }
             }
 
             // add encoding if needed.
             String encodingStr = " encoding=\"" + p_IanaEncoding + "\"";
-            RegExMatchInterface match = RegEx
-                    .matchSubstring(
-                            content,
-                            "<\\?xml(\\s+version\\s*=\\s*['\"][^'\"]*['\"])(\\s+encoding\\s*=\\s*['\"][^'\"]*['\"])?([^>]*)\\?>");
+            RegExMatchInterface match = RegEx.matchSubstring(content,
+                    "<\\?xml(\\s+version\\s*=\\s*['\"][^'\"]*['\"])(\\s+encoding\\s*=\\s*['\"][^'\"]*['\"])?([^>]*)\\?>");
 
             // add XML declaration if there isn't one.
             if (match == null)
@@ -216,12 +226,10 @@ public class XmlPostMergeProcessor implements PostMergeProcessor
                 String version = match.group(1);
                 String encoding = match.group(2);
                 String rest = match.group(3);
-                String replacement = (encoding == null) ? "<?xml" + version
-                        + rest + "?>" : "<?xml" + version + encodingStr + rest
-                        + "?>";
+                String replacement = (encoding == null) ? "<?xml" + version + rest + "?>"
+                        : "<?xml" + version + encodingStr + rest + "?>";
 
-                processed = RegEx.substituteAll(content, "<\\?xml\\s[^>]+\\?>",
-                        replacement);
+                processed = RegEx.substituteAll(content, "<\\?xml\\s[^>]+\\?>", replacement);
             }
         }
         catch (RegExException e)
@@ -230,6 +238,30 @@ public class XmlPostMergeProcessor implements PostMergeProcessor
             c_category.error(e.getMessage(), e);
         }
         return processed;
+    }
+
+    /**
+     * Changes the content's eol encoding according to the file profile's eol
+     * encoding setting.
+     */
+    private String handleEolEncoding(String content)
+    {
+        File docDir = AmbFileStoragePathUtils.getCxeDocDir();
+        File sourceFile = new File(docDir, m_fileName);
+        boolean isSourceCRLF = FileUtil.isWindowsReturnMethod(sourceFile.getAbsolutePath());
+
+        if (m_eolEncoding == FileProfileImpl.EOL_ENCODING_PRESERVE && isSourceCRLF
+                && content.indexOf(EOL_CRLF) == -1)
+        {
+            content = StringUtil.replace(content, EOL_LF, EOL_CRLF);
+        }
+        else if (m_eolEncoding == FileProfileImpl.EOL_ENCODING_CRLF
+                && content.indexOf(EOL_CRLF) == -1)
+        {
+            content = StringUtil.replace(content, EOL_LF, EOL_CRLF);
+        }
+
+        return content;
     }
 
     private Node getRootNode(String p_text) throws SAXException, IOException

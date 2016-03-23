@@ -74,6 +74,7 @@ import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.glossaries.GlossaryState;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
@@ -86,6 +87,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.gxml.GxmlElement;
 
@@ -342,7 +344,7 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static private void setPagesInJob(EditorState p_state, Job p_job)
+    static public void setPagesInJob(EditorState p_state, Job p_job)
             throws EnvoyServletException
     {
         ArrayList pages = new ArrayList();
@@ -350,10 +352,11 @@ public class EditorHelper implements EditorConstants
 
         Iterator it1, it2;
         SourcePage srcPage;
-        TargetPage trgPage;
+        TargetPage trgPage, nextTrgPage = null, previousTargetPage = null;
         GlobalSightLocale srcLocale, trgLocale;
-        EditorState.PagePair pair;
-
+        List unextractedTargetPages;
+        EditorState.PagePair pair = null;
+        String openEditorType = p_state.getOpenEditorType();
         // New: For target page lookup the source page. Add the source
         // page to a hash, and add target pages to the PagePair object
         // referenced by the source page key.
@@ -373,15 +376,17 @@ public class EditorHelper implements EditorConstants
                 {
                     continue l_workflows;
                 }
-
+       
+                unextractedTargetPages = (List) workflow
+                        .getTargetPages(ExtractedSourceFile.UNEXTRACTED_FILE);
+                Vector<TargetPage> targetPages = workflow.getTargetPages();
+                
                 l_targetpages:
                 // retrieve just the pages with an extracted file associated
                 // with it
-                for (it2 = workflow.getTargetPages(
-                        ExtractedSourceFile.EXTRACTED_FILE).iterator(); it2
-                        .hasNext();)
+                    for(int i=0 ; i < targetPages.size();i++)
                 {
-                    trgPage = (TargetPage) it2.next();
+                    trgPage =  targetPages.get(i);
                     srcPage = trgPage.getSourcePage();
                     String state = srcPage.getPageState();
                     if (state.equals(PageState.IMPORT_FAIL))
@@ -392,37 +397,76 @@ public class EditorHelper implements EditorConstants
                         // happen?), ignore this target page.
                         continue l_targetpages;
                     }
-
+                    
+                    if (i < targetPages.size() - 1)
+                    {
+                        nextTrgPage = targetPages.get(i + 1);
+                    }
+                    
+                    if (i > 0)
+                    {
+                        previousTargetPage = (TargetPage)targetPages.get(i-1);
+                    }
+                    
                     if (pagesHash.containsKey(srcPage.getIdAsLong()))
                     {
-                        ((EditorState.PagePair) (pagesHash.get(srcPage
-                                .getIdAsLong()))).putTargetPage(trgLocale,
-                                trgPage.getIdAsLong());
+                        ((EditorState.PagePair) (pagesHash.get(srcPage.getIdAsLong())))
+                                .putTargetPage(trgLocale, trgPage.getIdAsLong());
                     }
                     else
                     {
-                        pair = new EditorState.PagePair(
-                                srcPage.getIdAsLong(),
-                                srcPage.getGlobalSightLocale(),
-                                srcPage.getExternalPageId(),
-                                getExtractedSourceFile(srcPage).containGsTags(),
-                                workflow.getState());
+                        if (unextractedTargetPages != null
+                                && unextractedTargetPages.contains(trgPage))
+                        {
+                            if (StringUtil.isNotEmpty(openEditorType)
+                                    && WebAppConstants.OPEN_EDITOR_TYPE.contains(openEditorType))
+                            {
+                                String pageName = trgPage.getDisplayPageName();
+                                if (pageName.lastIndexOf(".") != -1)
+                                {
+                                    String fileExtension = pageName.substring(
+                                            pageName.lastIndexOf('.') + 1).toLowerCase();
+                                    if (WebAppConstants.FILE_EXTENSION_LIST.contains(fileExtension))
+                                    {
+                                        pair = new EditorState.PagePair(srcPage.getIdAsLong(),
+                                                srcPage.getGlobalSightLocale(),
+                                                srcPage.getExternalPageId(), false,
+                                                workflow.getState(), isPictureFile(
+                                                        unextractedTargetPages, nextTrgPage),
+                                                isPictureFile(unextractedTargetPages,
+                                                        previousTargetPage));
 
-                        pair.putTargetPage(trgLocale, trgPage.getIdAsLong());
+                                        pair.putTargetPage(trgLocale, trgPage.getIdAsLong());
+                                        pagesHash.put(srcPage.getIdAsLong(), pair);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            pair = new EditorState.PagePair(srcPage.getIdAsLong(),
+                                    srcPage.getGlobalSightLocale(), srcPage.getExternalPageId(),
+                                    getExtractedSourceFile(srcPage).containGsTags(),
+                                    workflow.getState(), isPictureFile(unextractedTargetPages,
+                                            nextTrgPage), isPictureFile(unextractedTargetPages,
+                                            previousTargetPage));
 
-                        pagesHash.put(srcPage.getIdAsLong(), pair);
+                            pair.putTargetPage(trgLocale, trgPage.getIdAsLong());
+                            pagesHash.put(srcPage.getIdAsLong(), pair);
+                        }
                     }
                 }
             }
 
-            it1 = p_job.getSourcePages(ExtractedSourceFile.EXTRACTED_FILE)
-                    .iterator();
+//            it1 = p_job.getSourcePages(ExtractedSourceFile.EXTRACTED_FILE)
+//                    .iterator();
+            it1 = p_job.getSourcePages().iterator();
             while (it1.hasNext())
             {
                 srcPage = (SourcePage) it1.next();
 
-                EditorState.PagePair pagepair = (EditorState.PagePair) pagesHash
-                        .get(srcPage.getIdAsLong());
+                EditorState.PagePair pagepair = (EditorState.PagePair) pagesHash.get(srcPage
+                        .getIdAsLong());
 
                 if (pagepair != null)
                 {
@@ -525,12 +569,12 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static private void setPagesInActivity(EditorState p_state, Task p_task)
+    static public void setPagesInActivity(EditorState p_state, Task p_task)
     {
         ArrayList<EditorState.PagePair> pages = new ArrayList<EditorState.PagePair>();
 
         SourcePage srcPage;
-        TargetPage trgPage;
+        TargetPage trgPage,nextTargetPage = null,previousTargetPage=null;
         GlobalSightLocale srcLocale, trgLocale;
         Iterator it;
 
@@ -538,25 +582,90 @@ public class EditorHelper implements EditorConstants
         // source and target page and create a page pair.
         srcLocale = p_task.getSourceLocale();
         trgLocale = p_task.getTargetLocale();
-
-        for (it = p_task.getTargetPages(ExtractedSourceFile.EXTRACTED_FILE)
-                .iterator(); it.hasNext();)
+        String openEditorType = p_state.getOpenEditorType();
+        EditorState.PagePair pair = null;
+        
+        List unextractedList = p_task.getTargetPages(ExtractedSourceFile.UNEXTRACTED_FILE);
+        List targetPages = p_task.getTargetPages();
+        
+        for(int i=0;i<targetPages.size();i++)
         {
-            trgPage = (TargetPage) it.next();
+            trgPage = (TargetPage)targetPages.get(i);
             srcPage = trgPage.getSourcePage();
+           
+            if (i < targetPages.size() - 1)
+            {
+                nextTargetPage = (TargetPage)targetPages.get(i+1);
+            }
+            
+            if (i > 0)
+            {
+                previousTargetPage = (TargetPage)targetPages.get(i-1);
+            }
+            
+            if (unextractedList != null && unextractedList.contains(trgPage))
+            {
+                if (StringUtil.isNotEmpty(openEditorType)
+                        && WebAppConstants.OPEN_EDITOR_TYPE.contains(openEditorType))
+                {
+                    String pageName = trgPage.getDisplayPageName();
+                    if (pageName.lastIndexOf(".") != -1)
+                    {
+                        String fileExtension = pageName.substring(pageName.lastIndexOf('.') + 1)
+                                .toLowerCase();
+                        if (WebAppConstants.FILE_EXTENSION_LIST.contains(fileExtension))
+                        {
+                            pair = new EditorState.PagePair(srcPage.getId(), srcLocale,
+                                    srcPage.getExternalPageId(), false, Workflow.DISPATCHED,
+                                    isPictureFile(unextractedList, nextTargetPage), isPictureFile(
+                                            unextractedList, previousTargetPage));
 
-            EditorState.PagePair pair = new EditorState.PagePair(
-                    srcPage.getId(), srcLocale, srcPage.getExternalPageId(),
-                    getExtractedSourceFile(srcPage).containGsTags(),
-                    Workflow.DISPATCHED);
-            pair.putTargetPage(trgLocale, trgPage.getIdAsLong());
-
-            pages.add(pair);
+                            pair.putTargetPage(trgLocale, trgPage.getIdAsLong());
+                            pages.add(pair);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                pair = new EditorState.PagePair(srcPage.getId(), srcLocale,
+                        srcPage.getExternalPageId(), getExtractedSourceFile(srcPage)
+                                .containGsTags(), Workflow.DISPATCHED, isPictureFile(
+                                unextractedList, nextTargetPage), isPictureFile(unextractedList,
+                                previousTargetPage));
+                pair.putTargetPage(trgLocale, trgPage.getIdAsLong());
+                pages.add(pair);
+            }
         }
-
+        
         p_state.setPages(pages);
     }
 
+    private static boolean isPictureFile(List unextractedList,TargetPage targetPage)
+    {
+        boolean isPictureNextFile = false;
+        if (targetPage == null)
+            return isPictureNextFile;
+
+        if (unextractedList != null && unextractedList.size() > 0)
+        {
+            if (unextractedList.contains(targetPage))
+            {
+                String pageName = targetPage.getDisplayPageName();
+                if (pageName.lastIndexOf(".") != -1)
+                {
+                    String fileExtension = pageName.substring(pageName.lastIndexOf('.') + 1)
+                            .toLowerCase();
+                    if (WebAppConstants.FILE_EXTENSION_LIST.contains(fileExtension))
+                    {
+                        isPictureNextFile = true;
+                    }
+                }
+            }
+        }
+        return isPictureNextFile;
+    }
+    
     static public void setExcludedItemsFromActivity(EditorState p_state,
             Task p_task)
     {

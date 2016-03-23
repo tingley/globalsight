@@ -2183,8 +2183,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 sb.append(m_unextractedFilenameHead);
                 sb.append(m_unextractedFilenameTail);
 
-                ServerProxy.getNativeFileManager().save(stf, p_tmpFile, p_user,
-                        sb.toString());
+                ServerProxy.getNativeFileManager().save(stf, p_tmpFile, p_user, sb.toString(),
+                        companyId);
             }
             else
             // if m_unextractedFileType.equalsIgnoreCase(PRIMARY_TYPE)
@@ -2217,8 +2217,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 }
                 else
                 {
-                    ServerProxy.getNativeFileManager().save(uf, p_tmpFile,
-                            p_user);
+                    ServerProxy.getNativeFileManager().save(uf, p_tmpFile, p_user, companyId);
                     // Persist the updated unextracted file info.
                     // The user, modify date and file length was updated in the
                     // "save" method.

@@ -16,52 +16,58 @@
  */
 package com.globalsight.ling.docproc.merger.plaintext;
 
-import org.apache.log4j.Logger;
+import java.io.File;
 
-import com.globalsight.ling.docproc.merger.PostMergeProcessor;
+import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.ling.docproc.DiplomatMergerException;
+import com.globalsight.ling.docproc.merger.PostMergeProcessor;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
+import com.globalsight.util.StringUtil;
 
 /**
- * This class post processes a merged plaintext document: every
- * Unix-style LF is replaced by Windows-style CRLF.
+ * This class post processes a merged plain text document.
  */
-public class PlaintextPostMergeProcessor
-    implements PostMergeProcessor
+public class PlaintextPostMergeProcessor implements PostMergeProcessor
 {
-    private static Logger c_category =
-        Logger.getLogger(
-            PlaintextPostMergeProcessor.class);
+    // GBS-3830
+    private int m_eolEncoding = 0;
+    private String m_fileName = null;
+    private static final String EOL_LF = "\n";
+    private static final String EOL_CRLF = "\r\n";
+
+    public void setEolEncoding(int p_eolEncoding)
+    {
+        m_eolEncoding = p_eolEncoding;
+    }
+
+    public void setFileName(String p_fileName)
+    {
+        m_fileName = p_fileName;
+    }
 
     /**
-     * @see com.globalsight.ling.document.merger.PostMergeProcessor#process(java.lang.String, java.lang.String)
+     * @see com.globalsight.ling.document.merger.PostMergeProcessor#process(java.lang.String,
+     *      java.lang.String)
      */
-    public String process(String p_content, String p_IanaEncoding)
-        throws DiplomatMergerException
+    public String process(String content, String ianaEncoding) throws DiplomatMergerException
     {
-        StringBuffer result = new StringBuffer();
+        // for GBS-3830
+        File docDir = AmbFileStoragePathUtils.getCxeDocDir();
+        File sourceFile = new File(docDir, m_fileName);
+        boolean isSourceCRLF = FileUtil.isWindowsReturnMethod(sourceFile.getAbsolutePath());
 
-        boolean b_skip = false;
-        for (int i = 0, max = p_content.length(); i < max; i++)
+        if (m_eolEncoding == FileProfileImpl.EOL_ENCODING_PRESERVE && isSourceCRLF
+                && content.indexOf(EOL_CRLF) == -1)
         {
-            char ch = p_content.charAt(i);
-
-            if (ch == '\r')
-            {
-                b_skip = true;
-            }
-            else if (ch == '\n')
-            {
-                if (!b_skip)
-                {
-                    result.append('\r');
-                }
-
-                b_skip = false;
-            }
-
-            result.append(ch);
+            content = StringUtil.replace(content, EOL_LF, EOL_CRLF);
+        }
+        else if (m_eolEncoding == FileProfileImpl.EOL_ENCODING_CRLF
+                && content.indexOf(EOL_CRLF) == -1)
+        {
+            content = StringUtil.replace(content, EOL_LF, EOL_CRLF);
         }
 
-        return result.toString();
+        return content;
     }
 }

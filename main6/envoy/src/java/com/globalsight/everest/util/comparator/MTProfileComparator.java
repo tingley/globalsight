@@ -35,7 +35,6 @@ public class MTProfileComparator extends StringComparator
     public static final int MT_ENGINE = 3;
     public static final int MT_CONFIDENCE_SCORE = 4;
     public static final int MT_ACTIVE = 5;
-    public static final int SHOW_IN_EDITOR = 6;
 
 	/**
 	* Creates a TMProfileComparator with the given type and locale.
@@ -114,9 +113,6 @@ public class MTProfileComparator extends StringComparator
                 break;
             case MT_ACTIVE:
                 rv = a.isActive() == true ? 1 : -1;
-                break;
-            case SHOW_IN_EDITOR:
-                rv = a.isShowInEditor() == true ? 1 : -1;
                 break;
             default:
                 aValue = a.getMtProfileName();

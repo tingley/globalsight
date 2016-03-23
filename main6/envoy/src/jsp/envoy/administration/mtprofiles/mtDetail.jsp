@@ -180,7 +180,7 @@
 	            return;
 			}
 			$("#OK").attr("disabled",true);
-		    var isShowInEditor = $("#idShowInEditor").is(":checked");
+		    //var isShowInEditor = $("#idShowInEditor").is(":checked");
 			var engine_name = document.getElementById('mtEngine').value;
 			if(forceSave){
 				MTOptionsForm.action = '<%=saveMTOptionsUrl%>';
@@ -602,6 +602,19 @@
 		}
 	}
 	
+	function checkLength()
+	{
+		var sessionTime = $("#msMaxLength").val();
+		if(!isNumeric(sessionTime)){
+			alert("The value must be Integer!")
+		}
+	}
+	
+	function isNumeric(str){
+		if (str.startsWith("0"))
+			return false;
+		return /^(-|\+)?\d+(\.\d+)?$/.test(str);
+	}
 </SCRIPT>
 </HEAD>
 
@@ -659,21 +672,26 @@
 					</TR>
 
 					<TR>
-						<TD ALIGN="LEFT" STYLE="vertical-align: middle"><%=bundle.getString("lb_tm_mt_confidence_score")%>:</TD>
+						<TD ALIGN="LEFT" STYLE="vertical-align: middle"><%=bundle.getString("lb_tm_mt_threshold_level")%>:</TD>
 						<TD><INPUT CLASS="standardText" ID="mtConfidenceScore" NAME="mtConfidenceScore"
 							SIZE="1" MAXLENGTH="3"
 							VALUE="<%=mtProfile.getMtConfidenceScore()%>">%</TD>
 					</TR>
-
 					<TR>
-						<TD align="left"><%=bundle.getString("lb_show_in_editor")%>:</TD>
+						<TD align="left"><%=bundle.getString("lb_log_debug_info")%>:</TD>
 						<TD><INPUT CLASS="standardText"
-							NAME="<%=MTProfileConstants.MT_SHOW_IN_EDITOR%>"
-							id="idShowInEditor"
-							<%=mtProfile.isShowInEditor() ? "checked" : ""%> TYPE="checkbox" />
+							NAME="<%=MTProfileConstants.MT_LOG_DEBUG_INFO%>"
+							id="logDebugInfo"
+							<%=mtProfile.isLogDebugInfo() ? "checked" : ""%> TYPE="checkbox" />
 						</TD>
 					</TR>
-					
+					<TR>
+						<TD align="left"><%=bundle.getString("lb_ms_ignore_tm_matches")%>:</TD>
+						<TD><INPUT CLASS="standardText"	NAME="<%=MTProfileConstants.MT_IGNORE_TM_MATCHES%>"
+									id="ignoreTmMatches"<%=mtProfile.isIgnoreTMMatch() ? "checked" : ""%> 
+									TYPE="checkbox" />
+						</TD>
+					</TR>
 					<TR>
 						<TD align="left"><%=bundle.getString("lb_mt_include_mt_identifiers")%>:</TD>
 						<TD><INPUT CLASS="standardText" TYPE="checkbox" ID="includeMTIdentifiers" NAME="<%=MTProfileConstants.MT_INCLUDE_MT_IDENTIFIERS%>" <%=mtProfile.isIncludeMTIdentifiers() ? "checked" : ""%> />
@@ -795,10 +813,10 @@
 								<tr>
 									<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_client_id")%><font
 										color="red">*</font>:</td>
-									<td colspan="2"><INPUT CLASS="standardText" ID="idMsMtClientid"
+									<td colspan="2" style="white-space:nowrap"><INPUT CLASS="standardText" ID="idMsMtClientid"
 										NAME="<%=MTProfileConstants.MT_MS_CLIENT_ID%>"
 										value="<%=mtProfile4val.getUsername()%>" TYPE="text"
-										MAXLENGTH="100" SIZE="90" /> <a
+										MAXLENGTH="100" SIZE="90"></input> <a
 										href="http://go.microsoft.com/?linkid=9782667" target="_blank"><%=bundle.getString("lb_tm_ms_mt_appid_tag")%></a>
 									</td>
 								</tr>
@@ -862,6 +880,31 @@
 								</tr>
 								<% }
 							    } %>
+							     <tr>
+			                        <td  ALIGN="LEFT" STYLE="vertical-align: middle">
+			                        	<%=bundle.getString("lb_mt_ms_trans_type") %>:
+			                        </td>
+			                        <td>
+			                        	<INPUT CLASS="standardText"
+									NAME="<%= MTProfileConstants.MT_MS_TRANS_TYPE%>"
+									id="type1" VALUE= "1" TYPE="radio" <%="1".equals(mtProfile4val.getMsTransType()) ? "checked" : ""%>></input>
+									<%=bundle.getString("lb_ms_text_between_tags")%>
+			                        	<br/>
+			                        	<INPUT CLASS="standardText"
+									NAME="<%=MTProfileConstants.MT_MS_TRANS_TYPE %>"
+									id="type2" VALUE= "2" TYPE="radio" <%="2".equals(mtProfile4val.getMsTransType())||mtProfile4val.getMsTransType()==null? "checked" : ""%>></input>
+									<%=bundle.getString("lb_ms_text_including_tags")%>
+			                        </td>
+		                        </tr>
+								
+								<TR>
+									<TD align="left" style="white-space:nowrap"><%=bundle.getString("lb_ms_max_length")%>:</TD>
+									<TD><INPUT CLASS="standardText"
+										NAME="<%=MTProfileConstants.MT_MS_MAX_LENGTH%>"
+									id="msMaxLength" value="<%=mtProfile4val.getMsMaxLength()==0?1000:mtProfile4val.getMsMaxLength() %>"
+									 TYPE="text"	MAXLENGTH="6" SIZE="7" onblur="checkLength()"/>
+									</TD>
+								</TR>
 							</TABLE>
 							<p>
 						</div>

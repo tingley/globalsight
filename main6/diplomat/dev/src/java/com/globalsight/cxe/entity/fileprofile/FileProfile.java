@@ -239,4 +239,8 @@ public interface FileProfile
     public int getBOMType();
 
     public void setBOMType(int p_BOMType);
+
+    public int getEolEncoding();
+
+    public void setEolEncoding(int p_eolEncoding);
 }

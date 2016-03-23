@@ -40,6 +40,29 @@ function cleanError()
 	}
 }
 
+function messageDetails(i)
+{
+	var indexDiv = "message"+i;
+    var indexA = "hrefa"+i;
+    var target=document.getElementById(indexDiv);
+    if (target.style.display=="block")
+    {
+    	if (document.getElementById(indexA).innerHTML == "Hide Details")
+    	{
+    		document.getElementById(indexA).innerHTML = "Show Details";
+    	}
+         target.style.display="none";
+    } 
+    else 
+    {
+    	if (document.getElementById(indexA).innerHTML == "Show Details")
+    	{
+    		document.getElementById(indexA).innerHTML = "Hide Details";
+    	}
+         target.style.display="block";
+    }
+	
+}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"

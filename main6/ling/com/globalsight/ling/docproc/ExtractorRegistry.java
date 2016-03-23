@@ -27,8 +27,7 @@ public class ExtractorRegistry implements IFormatNames
     // Extractor class names. Update when we add a new extractor type.
     // *** Keep this table in sync with m_DecoderClassPath ***
     private String[] m_ExtractorClassPath =
-    {
-            "com.globalsight.ling.docproc.extractor.plaintext.Extractor",
+    { "com.globalsight.ling.docproc.extractor.plaintext.Extractor",
             "com.globalsight.ling.docproc.extractor.html.Extractor",
             "com.globalsight.ling.docproc.extractor.javascript.Extractor",
             "com.globalsight.ling.docproc.extractor.java.Extractor",
@@ -77,8 +76,7 @@ public class ExtractorRegistry implements IFormatNames
             "com.globalsight.ling.common.JSEscapeSequence",
             "com.globalsight.ling.common.CssEscapeSequence",
             "com.globalsight.ling.common.CssEscapeSequence",
-            "com.globalsight.ling.common.XmlEnDecoder",
-            "com.globalsight.ling.common.XmlEnDecoder",
+            "com.globalsight.ling.common.XmlEnDecoder", "com.globalsight.ling.common.XmlEnDecoder",
             "com.globalsight.ling.common.JPEscapeSequence",
             "com.globalsight.ling.common.JPEscapeSequence",
             "com.globalsight.ling.common.JPMFEscapeSequence",
@@ -89,33 +87,27 @@ public class ExtractorRegistry implements IFormatNames
             "com.globalsight.ling.common.HtmlEscapeSequence",
             "com.globalsight.ling.common.HtmlEscapeSequence",
             "com.globalsight.ling.common.CppEscapeSequence",
-            "com.globalsight.ling.common.RtfEnDecoder",
-            "com.globalsight.ling.common.XmlEnDecoder",
+            "com.globalsight.ling.common.RtfEnDecoder", "com.globalsight.ling.common.XmlEnDecoder",
             "com.globalsight.ling.common.XPTagEnDecoder",
             "com.globalsight.ling.common.TroffEnDecoder",
             "com.globalsight.ling.common.HtmlEscapeSequence",
             "com.globalsight.ling.common.HtmlEscapeSequence",
             "com.globalsight.ling.common.HtmlEscapeSequence",
             "com.globalsight.ling.common.HtmlEscapeSequence",
-            "com.globalsight.ling.common.XmlEnDecoder",
-            "com.globalsight.ling.common.XmlEnDecoder",
-            "com.globalsight.ling.common.XmlEnDecoder",
-            "com.globalsight.ling.common.PTEscapeSequence",
+            "com.globalsight.ling.common.XmlEnDecoder", "com.globalsight.ling.common.XmlEnDecoder",
             "com.globalsight.ling.common.XmlEnDecoder",
             "com.globalsight.ling.common.PTEscapeSequence",
             "com.globalsight.ling.common.XmlEnDecoder",
-            "com.globalsight.ling.common.XmlEnDecoder",
-            "com.globalsight.ling.common.MifEnDecoder",
-            "com.globalsight.ling.common.XmlEnDecoder",
-            "com.globalsight.ling.common.XmlEnDecoder",
-            "com.globalsight.ling.common.XmlEnDecoder",
+            "com.globalsight.ling.common.PTEscapeSequence",
+            "com.globalsight.ling.common.XmlEnDecoder", "com.globalsight.ling.common.XmlEnDecoder",
+            "com.globalsight.ling.common.MifEnDecoder", "com.globalsight.ling.common.XmlEnDecoder",
+            "com.globalsight.ling.common.XmlEnDecoder", "com.globalsight.ling.common.XmlEnDecoder",
             "com.globalsight.ling.common.XmlEnDecoder" };
 
     // Post merge process class names
     // *** Keep this table in sync with m_FormatName ***
     private String[] m_PostMergeClassPath =
-    {
-            "com.globalsight.ling.docproc.merger.plaintext.PlaintextPostMergeProcessor",
+    { "com.globalsight.ling.docproc.merger.plaintext.PlaintextPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.html.HtmlPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",
@@ -152,22 +144,19 @@ public class ExtractorRegistry implements IFormatNames
             "com.globalsight.ling.docproc.merger.fm.FmPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.xml.NoOpPostMergeProcessor",
-            "com.globalsight.ling.docproc.merger.xml.NoOpPostMergeProcessor",
+            "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor" };
 
     // format names used in diplomat
     private String[] m_FormatName =
-    { FORMAT_PLAINTEXT, FORMAT_HTML, FORMAT_JAVASCRIPT, FORMAT_JAVA,
-            FORMAT_CSS, FORMAT_CSS_STYLE, FORMAT_XML, FORMAT_XSL,
-            FORMAT_JAVAPROP, FORMAT_JAVAPROP_HTML, FORMAT_JAVAPROP_MSG,
-            FORMAT_VBSCRIPT, FORMAT_CFSCRIPT, FORMAT_CF, FORMAT_JHTML,
-            FORMAT_ASP, FORMAT_JSP, FORMAT_CPP, FORMAT_RTF, FORMAT_SGML,
-            FORMAT_XPTAG, FORMAT_TROFF_MAN, FORMAT_EXCEL_HTML,
-            FORMAT_WORD_HTML, FORMAT_POWERPOINT_HTML, FORMAT_EBAY_SGML,
-            FORMAT_EBAY_PRJ, FORMAT_XLIFF, FORMAT_OPENOFFICE_XML, FORMAT_PO,
-            FORMAT_OFFICE_XML, FORMAT_RC, FORMAT_RESX, FORMAT_IDML, FORMAT_MIF,
-            FORMAT_PASSOLO, FORMAT_WINDOWSPE, FORMAT_AUTHORIT_XML,
-            FORMAT_XLIFF20 };
+    { FORMAT_PLAINTEXT, FORMAT_HTML, FORMAT_JAVASCRIPT, FORMAT_JAVA, FORMAT_CSS, FORMAT_CSS_STYLE,
+            FORMAT_XML, FORMAT_XSL, FORMAT_JAVAPROP, FORMAT_JAVAPROP_HTML, FORMAT_JAVAPROP_MSG,
+            FORMAT_VBSCRIPT, FORMAT_CFSCRIPT, FORMAT_CF, FORMAT_JHTML, FORMAT_ASP, FORMAT_JSP,
+            FORMAT_CPP, FORMAT_RTF, FORMAT_SGML, FORMAT_XPTAG, FORMAT_TROFF_MAN, FORMAT_EXCEL_HTML,
+            FORMAT_WORD_HTML, FORMAT_POWERPOINT_HTML, FORMAT_EBAY_SGML, FORMAT_EBAY_PRJ,
+            FORMAT_XLIFF, FORMAT_OPENOFFICE_XML, FORMAT_PO, FORMAT_OFFICE_XML, FORMAT_RC,
+            FORMAT_RESX, FORMAT_IDML, FORMAT_MIF, FORMAT_PASSOLO, FORMAT_WINDOWSPE,
+            FORMAT_AUTHORIT_XML, FORMAT_XLIFF20 };
 
     /** Singleton instance, call getObject(). */
     private ExtractorRegistry()

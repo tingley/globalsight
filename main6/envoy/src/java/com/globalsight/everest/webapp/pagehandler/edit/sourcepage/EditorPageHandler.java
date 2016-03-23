@@ -96,11 +96,11 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 .getAttribute(WebAppConstants.UILOCALE);
         EditorState state = (EditorState) sessionMgr
                 .getAttribute(WebAppConstants.EDITORSTATE);
-
+        String openEditorType = p_request.getParameter("openEditorType");
         if (state == null)
         {
             state = new EditorState();
-
+            
             EditorHelper.initEditorManager(state);
             EditorHelper.initEditorOptions(state, session);
 
@@ -117,6 +117,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         // Must get called from Job Details (Admin or PM)
         if (jobId != null && srcPageId != null)
         {
+            state.setOpenEditorType(openEditorType);
             initializeFromJob(state, p_request, jobId, srcPageId, uiLocale,
                     user);
 

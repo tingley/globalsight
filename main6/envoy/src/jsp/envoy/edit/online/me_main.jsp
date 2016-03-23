@@ -162,6 +162,11 @@ function Refresh(p_url)
     document.location = p_url;
 }
 
+function openPictureEditor(url)
+{
+	window.open(url, '_self');
+}
+
 function RefreshCommentPane()
 {
     review.document.location = review.document.location;

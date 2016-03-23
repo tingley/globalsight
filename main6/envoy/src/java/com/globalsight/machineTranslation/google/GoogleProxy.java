@@ -24,9 +24,9 @@ import org.apache.log4j.Logger;
 import org.google.translate.api.v2.core.Translator;
 import org.google.translate.api.v2.core.model.Translation;
 
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileConstants;
 import com.globalsight.machineTranslation.AbstractTranslator;
-import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
 
@@ -281,7 +281,10 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
             Locale p_targetLocale, String[] p_segments)
             throws MachineTranslationException
     {
-    	 if (MTHelper.isLogDetailedInfo(ENGINE_GOOGLE))
+        HashMap paramMap = getMtParameterMap();
+        MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap
+                .get(MachineTranslator.MT_PROFILE);
+    	 if (mtProfile.isLogDebugInfo())
          {
              for (int i = 0; i < p_segments.length; i++)
              {
@@ -325,7 +328,7 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
 				results[i] = translations[i].getTranslatedText();
 			}
 
-			if (MTHelper.isLogDetailedInfo(ENGINE_GOOGLE))
+			if (mtProfile.isLogDebugInfo())
             {
                 for (int i = 0; i < results.length; i++)
                 {

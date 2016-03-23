@@ -29,9 +29,6 @@ String str_langAttr = EditUtil.getLanguageAttributes(
 <HTML>
 <HEAD>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<script SRC="/globalsight/includes/spellcheck.js"></script>
-<script SRC="/globalsight/spellchecker/jsp/spellcheck.js"></script>
-<script SRC="/globalsight/xdespellchecker/noapplet/SpellCheckNoApplet.js"></script>
 <script SRC="/globalsight/envoy/edit/online/coolbuttons.js"></script>
 <STYLE>
 A, A:hover, A:active, A:visited, A:link { color: blue; text-decoration: none}
@@ -51,56 +48,11 @@ img.middle {
 var o_textbox = null;
 var b_changed = false;
 
-var g_SC_GSA = new SC_GSA_Parameters();
-var g_SC_XDE = new SC_XDE_Parameters();
-var g_canSpellcheck = true;
 var w_scwin = null;
 
 var sc_customDict = null;
 var sc_dict;
 var sc_uiLang;
-
-function spellCheck()
-{
-    if (g_SC_XDE.isLanguageSupported(parent.parent.targetlocale))
-    {
-        // XDE spell checking
-
-        if (!sc_customDict)
-        {
-          sc_dict = g_SC_XDE.getSystemDict(parent.parent.targetlocale);
-          sc_customDict = g_SC_XDE.getCustomDict(
-            parent.parent.userId, parent.parent.targetlocale);
-          sc_uiLang = g_SC_XDE.getUiLanguage(parent.parent.uilocale);
-
-          frmSC.language.value = sc_dict;
-        }
-
-        //alert("XDE spell checking using dict `" + sc_dict +
-        //  "', customdict `" + sc_customDict + "'");
-
-        w_scwin = doSpell(this, 'frmSC.language', 'textarea&typectrl=textarea',
-          false, sc_customDict, sc_uiLang);
-    }
-    else 
-    {
-        // GlobalSight spell checking (supports all languages)
-
-        if (!sc_customDict)
-        {
-          sc_dict = g_SC_GSA.getSystemDict(parent.parent.targetlocale);
-          sc_customDict = g_SC_GSA.getCustomDict(
-            parent.parent.userId, parent.parent.targetlocale);
-        }
-
-        //alert("GlobalSight spell checking using dict `" + sc_dict +
-        //  "', customdict `" + sc_customDict + "'");
-
-        w_scwin = scSpell(this, 'textarea&typectrl=textarea',
-          parent.parent.targetlocale, parent.parent.uilocale,
-          sc_dict, sc_customDict);
-    }
-}
 
 function doOnBeforeUnload()
 {
@@ -338,9 +290,6 @@ function addText(strText)
   <td align="right">
     <table cellspacing="0">
       <tr>
-	<td class="coolButton" id="idSpellCheck" onclick="spellCheck()">
-	  <img src="/globalsight/envoy/edit/online2/Spellcheck2.gif">
-	</td>
 	<td class="coolButton" id="idBrackets" onclick="addBrackets()"  title="Square Brackets">
 	    <img src="/globalsight/envoy/edit/online2/Brackets.gif" class="middle">	    
 	</td>

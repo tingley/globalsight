@@ -11,6 +11,7 @@
             com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorState,
+            com.globalsight.everest.webapp.pagehandler.edit.online.EditorState.PagePair,
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants,
             com.globalsight.everest.edit.online.UIConstants,
             com.globalsight.everest.util.system.SystemConfigParamNames,
@@ -42,6 +43,8 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
  <jsp:useBean id="autoPropagate" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
+ <jsp:useBean id="pictureEditor" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
  <%@ include file="/envoy/common/installedModules.jspIncl" %>
 <%
 
@@ -64,6 +67,7 @@ String url_options     = options.getPageURL();
 String url_search     = search.getPageURL();
 String url_autoPropagate = autoPropagate.getPageURL() 
 	+ "&action=default" + "&targetPageId=" + state.getTargetPageId();
+String url_pictureEditor = pictureEditor.getPageURL();
 
 String lb_close = bundle.getString("lb_close");
 String lb_editLocaleContent = bundle.getString("lb_edit_locale_content");
@@ -126,9 +130,38 @@ if (state.isReadOnly() || state.getIsReviewActivity()
 {
     b_showAutoPropagateLink = false;
 }
-
-long jobId = Long.valueOf(sessionMgr.getAttribute(WebAppConstants.JOB_ID).toString());
+String jobId = (String)sessionMgr.getAttribute(WebAppConstants.JOB_ID);
+String taskId = (String)sessionMgr.getAttribute(WebAppConstants.TASK_ID);
 String tgtIDS = sessionMgr.getAttribute(ReportConstants.TARGETLOCALE_LIST).toString();
+
+String url_previousPictureEditor = url_pictureEditor;
+String url_nextPictureEditor = url_pictureEditor;
+
+PagePair currentPage = state.getCurrentPage();
+boolean isPicturePreviousFile = currentPage.isPicturePreviousFile();
+boolean isPictureNextFile = currentPage.isPictureNextFile();
+int i_index = state.getPages().indexOf(currentPage);
+if(isPicturePreviousFile && i_index > 0)
+{
+	PagePair previousPage = state.getPages().get(i_index-1);
+	
+	url_previousPictureEditor += "&" + WebAppConstants.TASK_ID + "=" + taskId 
+			+ "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + previousPage.getSourcePageId() 
+			+ "&" + WebAppConstants.JOB_ID+"="+jobId
+			+ "&" + WebAppConstants.TARGET_PAGE_ID + "=" + previousPage.getTargetPageId(state.getTargetLocale())
+			+ "&openEditorType="+state.getOpenEditorType();
+}
+
+if(isPictureNextFile && i_index < state.getPages().size()-1)
+{
+	PagePair nextPage = state.getPages().get(i_index+1);
+	
+	url_nextPictureEditor += "&" + WebAppConstants.TASK_ID + "=" + taskId 
+			+ "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + nextPage.getSourcePageId() 
+			+ "&" + WebAppConstants.JOB_ID+"="+jobId
+			+ "&" + WebAppConstants.TARGET_PAGE_ID + "=" + nextPage.getTargetPageId(state.getTargetLocale())
+			+ "&openEditorType="+state.getOpenEditorType();
+}
 %>
 <HTML>
 <HEAD>
@@ -141,7 +174,10 @@ var b_singlePageIsSource = false;
 var b_canEditAll = eval("<%=state.canEditAll()%>");
 var b_isReviewMode = eval("<%=state.isReviewMode()%>");
 var b_isReviewActivity = eval("<%=state.getIsReviewActivity()%>");
-
+var url_previousPictureEditor = '<%=url_previousPictureEditor%>';
+var url_nextPictureEditor = '<%=url_nextPictureEditor%>';
+var isPictureNextFile = '<%=isPictureNextFile%>';
+var isPicturePreviousFile = '<%=isPicturePreviousFile%>';
 var w_options = null;
 var w_pageinfo = null;
 var w_resources = null;
@@ -431,18 +467,29 @@ function refresh(direction)
 {
     var str_url;
 
-    if (!canCloseTarget())
-    {
-        cancelEvent();
-        RaiseEditor();
-    }
-    else
-    {
-        str_url  = "<%=url_refresh%>";
-        str_url += "&refresh=" + direction;
-        showHourglass();
-        parent.Refresh(str_url);
-    }
+	if (direction == '-1' && isPicturePreviousFile == 'true' || isPicturePreviousFile == true)
+	{
+		parent.openPictureEditor(url_previousPictureEditor);
+	}
+	else if(direction == '1' && isPictureNextFile == 'true' || isPictureNextFile == true)
+	{
+		parent.openPictureEditor(url_nextPictureEditor);
+	}
+	else
+	{
+	    if (!canCloseTarget())
+	    {
+	        cancelEvent();
+	        RaiseEditor();
+	    }
+	    else
+	    {
+	        str_url  = "<%=url_refresh%>";
+	        str_url += "&refresh=" + direction;
+	        showHourglass();
+	        parent.Refresh(str_url);
+	    }
+	}
 }
 
 var comments=["<%=bundle.getString("lb_editor_hide_comments") %>","<%=bundle.getString("lb_editor_show_comments") %>"]

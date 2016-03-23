@@ -163,16 +163,16 @@ public class MachineTranslateAdapter
         }
         mtProfile.setMtConfidenceScore(long_mtConfidenceScore);
 
-        // show in segment editor
-        String showInEditor = p_request
-                .getParameter(MTProfileConstants.MT_SHOW_IN_EDITOR);
-        if (showInEditor == null || !"on".equals(showInEditor))
+        // show log debug info
+        String logDebugInfo = p_request
+                .getParameter(MTProfileConstants.MT_LOG_DEBUG_INFO);
+        if (logDebugInfo == null || !"on".equals(logDebugInfo))
         {
-            mtProfile.setShowInEditor(false);
+            mtProfile.setLogDebugInfo(false);
         }
         else
         {
-            mtProfile.setShowInEditor(true);
+            mtProfile.setLogDebugInfo(true);
         }
         String includeMTIdentifiers = p_request
                 .getParameter(MTProfileConstants.MT_INCLUDE_MT_IDENTIFIERS);
@@ -378,6 +378,27 @@ public class MachineTranslateAdapter
 			logger.warn("Fail to save MT setting for MS Translator Serbian: "
 					+ e.getMessage());
 		}
+        
+       String msTransType =  p_request.getParameter(MTProfileConstants.MT_MS_TRANS_TYPE);
+       if (msTransType != null && !"".equals(msTransType.trim()))
+       {
+           mtProfile.setMsTransType(msTransType);
+       }
+          
+       String mtIgnoreTmMatches = p_request.getParameter(MTProfileConstants.MT_IGNORE_TM_MATCHES);
+       if (mtIgnoreTmMatches == null || !"on".equals(mtIgnoreTmMatches))
+       {
+           mtProfile.setIgnoreTMMatch(false);
+       }
+       else
+       {
+           mtProfile.setIgnoreTMMatch(true);
+       }
+       String msMaxLength = p_request.getParameter(MTProfileConstants.MT_MS_MAX_LENGTH);
+        if (msMaxLength != null && !"".equals(msMaxLength.trim()))
+        {
+            mtProfile.setMsMaxLength(Long.parseLong(msMaxLength));
+        }
     }
 
     /**
@@ -846,7 +867,7 @@ public class MachineTranslateAdapter
 
         try
         {
-            DoMTUtil.testDoMtHost(url, engineName);
+            DoMTUtil.testDoMtHost(mtProfile);
         }
         catch (Exception e)
         {

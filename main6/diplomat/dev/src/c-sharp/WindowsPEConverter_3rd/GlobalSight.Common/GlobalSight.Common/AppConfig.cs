@@ -62,5 +62,21 @@ namespace GlobalSight.Common
                 }
             }
         }
+
+        public static bool LogDebugMSG
+        {
+            get
+            {
+                try
+                {
+                    string v = GetAppConfig("LogDebugMSG");
+                    return "true".Equals(v, StringComparison.CurrentCultureIgnoreCase);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
     }
 }

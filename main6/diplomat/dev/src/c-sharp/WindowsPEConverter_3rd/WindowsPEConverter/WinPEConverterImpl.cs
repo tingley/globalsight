@@ -123,14 +123,14 @@ namespace GlobalSight.WinPEConverter
                 // process files
                 if (!m_isConvertBack)
                 {
-                    List<TranslateUnit> units = Extract(comUtil);
-                    String xml = XmlUtil.OutputTranslateUnits(units);
-                    XmlUtil.WriteXml(xml, m_xmlFileName, "UTF-8");
+                    List<TranslateUnit3RD> units = Extract(comUtil);
+                    String xml = XmlUtil3RD.OutputTranslateUnits(units);
+                    XmlUtil3RD.WriteXml(xml, m_xmlFileName, "UTF-8");
                 }
                 else
                 {
-                    String xml = XmlUtil.ReadFile(m_xmlFileName, "UTF-8");
-                    List<TranslateUnit> units = XmlUtil.ParseTranslateUnits(xml);
+                    String xml = XmlUtil3RD.ReadFile(m_xmlFileName, "UTF-8");
+                    List<TranslateUnit3RD> units = XmlUtil3RD.ParseTranslateUnits(xml);
                     int c = units.Count;
                     Merge(comUtil, units);
                 }
@@ -151,7 +151,7 @@ namespace GlobalSight.WinPEConverter
             }
         }
 
-        private void Merge(CommandUtil comUtil, List<TranslateUnit> units)
+        private void Merge(CommandUtil comUtil, List<TranslateUnit3RD> units)
         {
             string[] filenames = comUtil.Extract(m_peFileName);
             string menurc = null, stringrc = null, dialogrc = null, versionrc = null;
@@ -162,50 +162,22 @@ namespace GlobalSight.WinPEConverter
                 // menu.rc
                 menurc = filenames[0];
                 menures = menurc.Substring(0, menurc.LastIndexOf(".")) + ".res";
-                string[] menulines = File.ReadAllLines(menurc);
-                DoMerge(menulines, units, TranslateUnitType.MenuType, menurc, Encoding.Default);
-                comUtil.CompileAndModify(m_peFileName, m_newFileName0, menurc, menures);
-
-                if (!File.Exists(m_newFileName0))
-                {
-                    File.Copy(m_peFileName, m_newFileName0);
-                }
+                MergeOneFile(comUtil, units, menurc, menures, TranslateUnitType.MenuType, m_peFileName, m_newFileName0);
 
                 // string.rc
                 stringrc = filenames[1];
                 stringres = stringrc.Substring(0, stringrc.LastIndexOf(".")) + ".res";
-                string[] stringlines = File.ReadAllLines(stringrc);
-                DoMerge(stringlines, units, TranslateUnitType.StringType, stringrc, Encoding.Default);
-                comUtil.CompileAndModify(m_newFileName0, m_newFileName1, stringrc, stringres);
-
-                if (!File.Exists(m_newFileName1))
-                {
-                    File.Copy(m_newFileName0, m_newFileName1);
-                }
+                MergeOneFile(comUtil, units, stringrc, stringres, TranslateUnitType.StringType, m_newFileName0, m_newFileName1);
 
                 // dialog.rc
                 dialogrc = filenames[2];
                 dialogres = dialogrc.Substring(0, dialogrc.LastIndexOf(".")) + ".res";
-                string[] dialoglines = File.ReadAllLines(dialogrc, Encoding.Unicode);
-                DoMerge(dialoglines, units, TranslateUnitType.DialogType, dialogrc, Encoding.Unicode);
-                comUtil.CompileAndModify(m_newFileName1, m_newFileName2, dialogrc, dialogres);
-
-                if (!File.Exists(m_newFileName2))
-                {
-                    File.Copy(m_newFileName1, m_newFileName2);
-                }
+                MergeOneFile(comUtil, units, dialogrc, dialogres, TranslateUnitType.DialogType, m_newFileName1, m_newFileName2);
 
                 // version.rc
                 versionrc = filenames[3];
                 versionres = versionrc.Substring(0, versionrc.LastIndexOf(".")) + ".res";
-                string[] versionlines = File.ReadAllLines(versionrc);
-                DoMerge(versionlines, units, TranslateUnitType.VersionType, versionrc, Encoding.Default);
-                comUtil.CompileAndModify(m_newFileName2, m_newFileName3, versionrc, versionres);
-
-                if (!File.Exists(m_newFileName3))
-                {
-                    File.Copy(m_newFileName2, m_newFileName3);
-                }
+                MergeOneFile(comUtil, units, versionrc, versionres, TranslateUnitType.VersionType, m_newFileName2, m_newFileName3);
 
                 File.Copy(m_newFileName3, m_peFileName, true);
             }
@@ -228,7 +200,91 @@ namespace GlobalSight.WinPEConverter
             }
         }
 
-        private void DoMerge(string[] lines, List<TranslateUnit> units, TranslateUnitType type, string filepath, Encoding encoding)
+        private void MergeOneFile(CommandUtil comUtil, List<TranslateUnit3RD> units, string rcFile, string resFile, TranslateUnitType tuType, string oriFile, String newFile)
+        {
+            Encoding encoding = Encoding.Unicode;
+            string[] menulines = File.ReadAllLines(rcFile, encoding);
+
+            if (menulines.Length == 1)
+            {
+                encoding = FileUtil.GetEncoding(rcFile);
+                menulines = File.ReadAllLines(rcFile, encoding);
+            }
+
+            if (menulines.Length != 0)
+            {
+                for (int i = 0; i < menulines.Length; i++)
+                {
+                    string line = menulines[i];
+
+                    while (line.StartsWith("\0"))
+                    {
+                        line = line.Substring(1);
+                    }
+
+                    menulines[i] = line;
+                }
+
+                DoMerge(menulines, units, tuType, false, null);
+
+                File.WriteAllLines(rcFile, menulines, Encoding.Unicode);
+                comUtil.Compile(rcFile, resFile);
+
+                if (!File.Exists(resFile) || File.ReadAllBytes(resFile).Length == 32)
+                {
+                    File.WriteAllLines(rcFile, menulines, Encoding.Default);
+                    comUtil.Compile(rcFile, resFile);
+                }
+
+                if (!File.Exists(resFile) || File.ReadAllBytes(resFile).Length == 32)
+                {
+                    String specalChar = "\x2063";
+
+                    switch (tuType)
+                    {
+                        case TranslateUnitType.StringType: specalChar = " "; break;
+                        case TranslateUnitType.DialogType: specalChar = "\x2063"; break;
+                        case TranslateUnitType.MenuType: specalChar = "\x2063"; break;
+                        case TranslateUnitType.VersionType: specalChar = " "; break;
+                    }
+
+                    DoMerge(menulines, units, tuType, true, specalChar);
+
+                    File.WriteAllLines(rcFile, menulines, Encoding.Unicode);
+                    comUtil.Compile(rcFile, resFile);
+
+                    if (!File.Exists(resFile) || File.ReadAllBytes(resFile).Length == 32)
+                    {
+                        File.WriteAllLines(rcFile, menulines, Encoding.Default);
+                        comUtil.Compile(rcFile, resFile);
+                    }
+                }
+
+                if (!File.Exists(resFile) || File.ReadAllBytes(resFile).Length == 32)
+                {
+                    string log = comUtil.GetLog();
+                    if (log.Contains("Error compiling script at line"))
+                    {
+                        StringIndex si = StringUtil.GetBetween(log, "Error compiling script at line", ":", 0, 1);
+
+                        if (si != null && si.content != null)
+                        {
+                            string line = si.content.Trim();
+                            //TODO: fix this line
+                        }
+                    }
+                }
+
+                comUtil.Modify(oriFile, newFile, resFile);
+            }
+
+            if (!File.Exists(newFile))
+            {
+                File.Copy(oriFile, newFile);
+            }
+        }
+
+        private void DoMerge(string[] lines, List<TranslateUnit3RD> units, TranslateUnitType type, bool addChar, string specialChar)
         {
             if (lines == null || lines.Length == 0 || units == null || units.Count == 0)
             {
@@ -246,15 +302,15 @@ namespace GlobalSight.WinPEConverter
                     case TranslateUnitType.MenuType:
                         if (lineTrimed.StartsWith("POPUP") || lineTrimed.StartsWith("MENUITEM"))
                         {
-                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, 0, 1);
+                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, true, 0, 1);
 
                             if (si != null)
                             {
-                                TranslateUnit tu = TranslateUnitUtil.GetTranslateUnit(units, "menu", lineNumber);
+                                TranslateUnit3RD tu = TranslateUnitUtil3RD.GetTranslateUnit(units, "menu", lineNumber);
 
                                 if (tu != null)
                                 {
-                                    string line_new = line.Substring(0, si.startIndex) + tu.TargetContent + line.Substring(si.endIndex);
+                                    string line_new = line.Substring(0, si.startIndex) + tu.TargetContent + (addChar ? specialChar : "") + line.Substring(si.endIndex);
                                     lines[i] = line_new;
                                 }
                             }
@@ -264,15 +320,15 @@ namespace GlobalSight.WinPEConverter
                     case TranslateUnitType.StringType:
                         if (lineTrimed.Contains(startChar) && lineTrimed.Contains(endChar))
                         {
-                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, 0, 1);
+                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, true, 0, 1);
 
                             if (si != null)
                             {
-                                TranslateUnit tu = TranslateUnitUtil.GetTranslateUnit(units, "string", lineNumber);
+                                TranslateUnit3RD tu = TranslateUnitUtil3RD.GetTranslateUnit(units, "string", lineNumber);
 
                                 if (tu != null)
                                 {
-                                    string line_new = line.Substring(0, si.startIndex) + tu.TargetContent + line.Substring(si.endIndex);
+                                    string line_new = line.Substring(0, si.startIndex) + tu.TargetContent + (addChar ? specialChar : "") + line.Substring(si.endIndex);
                                     lines[i] = line_new;
                                 }
                             }
@@ -282,15 +338,15 @@ namespace GlobalSight.WinPEConverter
                     case TranslateUnitType.DialogType:
                         if (lineTrimed.StartsWith("CAPTION") || lineTrimed.StartsWith("CONTROL"))
                         {
-                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, 0, 1);
+                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, true, 0, 1);
 
                             if (si != null)
                             {
-                                TranslateUnit tu = TranslateUnitUtil.GetTranslateUnit(units, "dialog", lineNumber);
+                                TranslateUnit3RD tu = TranslateUnitUtil3RD.GetTranslateUnit(units, "dialog", lineNumber);
 
                                 if (tu != null)
                                 {
-                                    string line_new = line.Substring(0, si.startIndex) + tu.TargetContent + line.Substring(si.endIndex);
+                                    string line_new = line.Substring(0, si.startIndex) + tu.TargetContent + (addChar ? specialChar : "") + line.Substring(si.endIndex);
                                     lines[i] = line_new;
                                 }
                             }
@@ -300,15 +356,15 @@ namespace GlobalSight.WinPEConverter
                     case TranslateUnitType.VersionType:
                         if (lineTrimed.StartsWith("VALUE"))
                         {
-                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, 0, 3);
+                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, true, 0, 3);
 
                             if (si != null)
                             {
-                                TranslateUnit tu = TranslateUnitUtil.GetTranslateUnit(units, "version", lineNumber);
+                                TranslateUnit3RD tu = TranslateUnitUtil3RD.GetTranslateUnit(units, "version", lineNumber);
 
                                 if (tu != null)
                                 {
-                                    string line_new = line.Substring(0, si.startIndex) + tu.TargetContent + line.Substring(si.endIndex);
+                                    string line_new = line.Substring(0, si.startIndex) + tu.TargetContent + (addChar ? specialChar : "") + line.Substring(si.endIndex);
                                     lines[i] = line_new;
                                 }
                             }
@@ -316,36 +372,32 @@ namespace GlobalSight.WinPEConverter
                         break;
                 }
             }
-
-            File.WriteAllLines(filepath, lines, encoding);
         }
 
-        private List<TranslateUnit> Extract(CommandUtil comUtil)
+        private List<TranslateUnit3RD> Extract(CommandUtil comUtil)
         {
+            List<TranslateUnit> resultSelf = ParsePEFile();
+
             string[] filenames = comUtil.Extract(m_peFileName);
-            List<TranslateUnit> result = new List<TranslateUnit>();
+            List<TranslateUnit3RD> result = new List<TranslateUnit3RD>();
             string menurc = null, stringrc = null, dialogrc = null, versionrc = null;
             try
             {
                 // menu.rc
                 menurc = filenames[0];
-                string[] menulines = File.ReadAllLines(menurc);
-                DoExtract(result, menulines, TranslateUnitType.MenuType);
+                ExtractOneFile(result, menurc, TranslateUnitType.MenuType, resultSelf);
 
                 // string.rc
                 stringrc = filenames[1];
-                string[] stringlines = File.ReadAllLines(stringrc);
-                DoExtract(result, stringlines, TranslateUnitType.StringType);
+                ExtractOneFile(result, stringrc, TranslateUnitType.StringType, resultSelf);
 
                 // dialog.rc
                 dialogrc = filenames[2];
-                string[] dialoglines = File.ReadAllLines(dialogrc, Encoding.Unicode);
-                DoExtract(result, dialoglines, TranslateUnitType.DialogType);
+                ExtractOneFile(result, dialogrc, TranslateUnitType.DialogType, resultSelf);
 
                 // version.rc
                 versionrc = filenames[3];
-                string[] versionlines = File.ReadAllLines(versionrc);
-                DoExtract(result, versionlines, TranslateUnitType.VersionType);
+                ExtractOneFile(result, versionrc, TranslateUnitType.VersionType, resultSelf);
             }
             finally
             {
@@ -353,6 +405,140 @@ namespace GlobalSight.WinPEConverter
                 DeleteFile(stringrc);
                 DeleteFile(dialogrc);
                 DeleteFile(versionrc);
+            }
+
+            return result;
+        }
+
+        private void ExtractOneFile(List<TranslateUnit3RD> result, string rcFile, TranslateUnitType tuType, List<TranslateUnit> resultSelf)
+        {
+            Encoding encoding = FileUtil.GetEncoding(rcFile);
+            string[] menulines = File.ReadAllLines(rcFile, Encoding.Unicode);
+
+            if (menulines.Length == 1)
+            {
+                menulines = File.ReadAllLines(rcFile, encoding);
+            }
+
+            DoExtract(result, menulines, tuType, resultSelf);
+        }
+
+        private List<TranslateUnit> ParsePEFile()
+        {
+            PEUtil.ResetPEResourceIndex();
+            List<TranslateUnit> result = new List<TranslateUnit>();
+            int number = 0;
+
+            byte[] binary = null;
+            using (FileStream fs = new FileStream(m_peFileName, FileMode.Open))
+            {
+                BinaryReader br = new BinaryReader(fs);
+                binary = br.ReadBytes(System.Convert.ToInt32(fs.Length));
+            }
+
+            // check if this file is PE file
+            string startFlag = PEUtil.ConvertByteArrayToHexString(binary, 0, 2);
+            // dos MZ header
+            if (!"4D5A".Equals(startFlag))
+            {
+                throw new Exception("This file is not a valid PE file (not start with 4D5Ah)");
+            }
+            // PE signature PE00
+            string allHex = PEUtil.ConvertByteArrayToHexString(binary);
+            if (!allHex.Contains("50450000"))
+            {
+                throw new Exception("This file is not a valid PE file (not contain with 50450000h)");
+            }
+
+            // get pe header information
+            PEReader peReader = new PEReader(m_peFileName);
+            string name1 = PEUtil.GetSectionName(peReader.ImageSectionHeader[0]);
+
+            PEResourceDataList resDataList = new PEResourceDataList();
+            PEResourceEntries[] ResourceEntriesAll = peReader.ResourceEntriesAll;
+            for (int i = 0; i < ResourceEntriesAll.Length; i++)
+            {
+                PEResourceEntries resourceEntries = ResourceEntriesAll[i];
+                // which resouce should be extracted
+                // first version information : 0Eh
+                if (resourceEntries.level1Entry.Name_l >= 0)
+                {
+                    int vCount = resourceEntries.level2Entries.Length;
+                    for (int j = 0; j < vCount; j++)
+                    {
+                        PEReader.IMAGE_RESOURCE_DIRECTORY_ENTRY level2 = resourceEntries.level2Entries[j];
+                        object obj = resourceEntries.level2Map3Entries[level2];
+                        PEReader.IMAGE_RESOURCE_DIRECTORY_ENTRY[] level3Array = (PEReader.IMAGE_RESOURCE_DIRECTORY_ENTRY[])obj;
+
+                        for (int k = 0; k < level3Array.Length; k++)
+                        {
+                            PEResourceData resData = new PEResourceData();
+                            PEReader.IMAGE_RESOURCE_DIRECTORY_ENTRY level3 = level3Array[k];
+                            PEReader.IMAGE_RESOURCE_DATA_ENTRY data = (PEReader.IMAGE_RESOURCE_DATA_ENTRY)resourceEntries.level3DATA[level3];
+                            uint dataRVA = data.OffsetToData;
+                            uint dataSize = data.Size;
+                            uint resRVA = peReader.ResourceRVA;
+                            if (dataRVA < resRVA)
+                            {
+                                continue;
+                            }
+
+                            uint dataOffset = peReader.ResourceOffSet + (dataRVA - resRVA);
+                            if (dataOffset + dataSize > binary.Length)
+                            {
+                                continue;
+                            }
+
+                            byte[] resourceData = new byte[dataSize];
+                            Array.Copy(binary, dataOffset, resourceData, 0, dataSize);
+                            string content = Encoding.Unicode.GetString(resourceData);
+
+                            resData.ResourceType = resourceEntries.level1Entry.Name_l;
+                            resData.FileOffset = dataOffset;
+                            resData.Size = dataSize;
+                            resData.Data = resourceData;
+                            resData.Content = content;
+                            resData.PEFileName = m_peFileName;
+                            resDataList.Add(resData);
+                        }
+                    }
+                }
+            }
+
+            foreach (PEResourceData resData in resDataList)
+            {
+                resData.ParseData(number);
+                List<TranslateUnit> tus = resData.GetTus();
+                result.AddRange(tus);
+                if (tus.Count != 0)
+                {
+                    byte[] ddd = resData.GetSrcData();
+                    int lll = ddd.Length;
+                }
+            }
+
+            string peOffset = PEUtil.GetPEHeaderAddress(allHex);
+            int h_peOffset = PEUtil.ConvertHexToInt(peOffset);
+
+            bool isDotNet = true;
+            Assembly ass = null;
+
+            try
+            {
+                ass = Assembly.Load(binary);
+                isDotNet = true;
+                m_log.Log("Loading " + m_peFileName + " with Microsoft .Net parser.");
+            }
+            catch (BadImageFormatException)
+            {
+                string name = peReader.Is32BitHeader ? "Win32" : "Win32+";
+                isDotNet = false;
+                m_log.Log("Loading " + m_peFileName + " with " + name + " parser.");
+            }
+
+            if (isDotNet)
+            {
+                throw new Exception("This file is a .NET file which is not support now.");
             }
 
             return result;
@@ -367,7 +553,7 @@ namespace GlobalSight.WinPEConverter
             catch { }
         }
 
-        private void DoExtract(List<TranslateUnit> result, string[] lines, TranslateUnitType type)
+        private void DoExtract(List<TranslateUnit3RD> result, string[] lines, TranslateUnitType type, List<TranslateUnit> resultSelf)
         {
             if (lines == null || lines.Length == 0)
             {
@@ -385,11 +571,11 @@ namespace GlobalSight.WinPEConverter
                     case TranslateUnitType.MenuType:
                         if (lineTrimed.StartsWith("POPUP") || lineTrimed.StartsWith("MENUITEM"))
                         {
-                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, 0, 1);
+                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, true, 0, 1);
 
                             if (si != null && si.content != null && si.content.Length > 0 && si.content.Trim().Length > 0)
                             {
-                                TranslateUnit tu = new TranslateUnit(lineNumber, "menu", si.content, si.content);
+                                TranslateUnit3RD tu = new TranslateUnit3RD(lineNumber, "menu", si.content, si.content);
 
                                 result.Add(tu);
                             }
@@ -399,11 +585,11 @@ namespace GlobalSight.WinPEConverter
                     case TranslateUnitType.StringType:
                         if (lineTrimed.Contains(startChar) && lineTrimed.Contains(endChar))
                         {
-                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, 0, 1);
+                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, true, 0, 1);
 
                             if (si != null && si.content != null && si.content.Length > 0 && si.content.Trim().Length > 0)
                             {
-                                TranslateUnit tu = new TranslateUnit(lineNumber, "string", si.content, si.content);
+                                TranslateUnit3RD tu = new TranslateUnit3RD(lineNumber, "string", si.content, si.content);
 
                                 result.Add(tu);
                             }
@@ -413,11 +599,11 @@ namespace GlobalSight.WinPEConverter
                     case TranslateUnitType.DialogType:
                         if (lineTrimed.StartsWith("CAPTION") || lineTrimed.StartsWith("CONTROL"))
                         {
-                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, 0, 1);
+                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, true, 0, 1);
 
                             if (si != null && si.content != null && si.content.Length > 0 && si.content.Trim().Length > 0)
                             {
-                                TranslateUnit tu = new TranslateUnit(lineNumber, "dialog", si.content, si.content);
+                                TranslateUnit3RD tu = new TranslateUnit3RD(lineNumber, "dialog", si.content, si.content);
 
                                 result.Add(tu);
                             }
@@ -427,11 +613,26 @@ namespace GlobalSight.WinPEConverter
                     case TranslateUnitType.VersionType:
                         if (lineTrimed.StartsWith("VALUE"))
                         {
-                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, 0, 3);
+                            StringIndex si = StringUtil.GetBetween(line, startChar, endChar, true, 0, 3);
 
                             if (si != null && si.content != null && si.content.Length > 0 && si.content.Trim().Length > 0)
                             {
-                                TranslateUnit tu = new TranslateUnit(lineNumber, "version", si.content, si.content);
+                                TranslateUnit3RD tu = new TranslateUnit3RD(lineNumber, "version", si.content, si.content);
+
+                                // set id for version
+                                StringIndex siID = StringUtil.GetBetween(line, startChar, endChar, true, 0, 1);
+                                if (siID != null && siID.content != null && siID.content.Length > 0)
+                                {
+                                    tu.Id = siID.content;
+
+                                    TranslateUnit tuSelf = TranslateUnitUtil.GetTranslateUnit(resultSelf, "RT_VERSION", tu.Id);
+                                    if (tuSelf != null)
+                                    {
+                                        tu.SourceContent = tuSelf.SourceContent;
+                                        tu.TargetContent = tuSelf.SourceContent;
+                                    }
+
+                                }
 
                                 result.Add(tu);
                             }

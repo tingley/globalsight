@@ -14,6 +14,7 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.machineTranslation.MTHelper2;
 import com.globalsight.machineTranslation.MachineTranslationException;
@@ -110,7 +111,7 @@ public class IPTranslatorUtil
     private static String[] translate(String transXliffUrl, String key,
             String from, String to, String[] segments,
             DefaultHttpClient httpClient, boolean isXlf,
-            String p_mtEngineWordCountKey) throws IOException
+            String p_mtEngineWordCountKey, MachineTranslationProfile mtProfile) throws IOException
     {
         //IPTranslator uses XLF specification, replace "i" to "id".
         if (!isXlf)
@@ -132,7 +133,7 @@ public class IPTranslatorUtil
             }
         }
 
-        if (MTHelper.isLogDetailedInfo(IPTranslatorProxy.ENGINE_IPTRANSLATOR))
+        if (mtProfile.isLogDebugInfo())
         {
             for (int j = 0; j < segments.length; j++)
             {
@@ -195,7 +196,7 @@ public class IPTranslatorUtil
                         }
                     }
 
-                    if (MTHelper.isLogDetailedInfo(IPTranslatorProxy.ENGINE_IPTRANSLATOR))
+                    if (mtProfile.isLogDebugInfo())
                     {
                         for (int m = 0; m < translatedXlf.length; m++)
                         {
@@ -280,7 +281,7 @@ public class IPTranslatorUtil
 
     public static String[] doBatchTranslation(String url, String key,
             String from, String to, String[] p_string, boolean isXlf,
-            String mtEngineWordCountKey) throws MachineTranslationException
+            String mtEngineWordCountKey, MachineTranslationProfile mtProfile) throws MachineTranslationException
     {
         DefaultHttpClient httpClient = new DefaultHttpClient();
 
@@ -297,7 +298,7 @@ public class IPTranslatorUtil
         try
         {
             result = translate(transXliffUrl, key, from, to, p_string,
-                    httpClient, isXlf, mtEngineWordCountKey);
+                    httpClient, isXlf, mtEngineWordCountKey, mtProfile);
         }
         catch (IOException e)
         {

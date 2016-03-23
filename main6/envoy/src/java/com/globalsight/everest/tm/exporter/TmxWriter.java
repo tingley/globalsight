@@ -788,7 +788,14 @@ public class TmxWriter implements IWriter
         	prop = new Tmx.Prop(Tmx.PROP_JOB_NAME, String.valueOf(jobName));
             result.append(prop.asXML());
         }
-
+        
+        String mtName = p_tuv.getCreationUser();
+        if (mtName != null && mtName.length() > 0&& mtName.toLowerCase().endsWith("_mt"))
+        {
+            prop = new Tmx.Prop(Tmx.PROP_MT_NAME, String.valueOf(mtName));
+            result.append(prop.asXML());
+        }
+        
         // TODO: preserve the sub ids and locType in <prop>.
         result.append(convertToTmx(p_tuv.getSegment(), outputFormat));
         result.append("</tuv>\r\n");

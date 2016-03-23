@@ -23,8 +23,8 @@ var Model = {
 		    // for txt
 			if (node.type == "activityNode") {
 				$("<div class='shape_box' style='padding:7px;'>" +
-						"<div class='txtDiv' id='name" + node.id + "'></div>" +
 						"<div class='txtDiv' style='margin-top:5px;' id='user" + node.id + "'></div>" +
+						"<div class='txtDiv' id='name" + node.id + "'></div>" +
 						"</div>").appendTo(modelDiv);
 			}
 
@@ -81,6 +81,11 @@ var Model = {
 			
 			// can not delete start node
 			if (node.type == "startNode"){
+				return;
+			}
+			
+			// can not delete node that the state is start or complate
+			if (3 == node.state || 5 == node.state){
 				return;
 			}
 			

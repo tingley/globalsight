@@ -56,6 +56,7 @@
    String isSaveExactMatchToProjectTm = TMProfileConstants.SAVE_EXACT_MATCH_SEGS_TO_PROJECT_TM;
    String isSaveToPageTm = TMProfileConstants.SAVE_UNLOC_SEGS_TO_PAGE_TM;
    String isSaveWhollyInternalTextTm = TMProfileConstants.SAVE_WHOLLY_INTERNAL_TEXT_TM;
+   String isSaveMTedSegToTm = TMProfileConstants.SAVE_MTED_SEGS_TO_PROJECT_TM;
    String leverageExcludeType = TMProfileConstants.LEVERAGE_EXCLUDE_TYPES;
    String levLocalizable      = TMProfileConstants.LEVERAGE_LOCALIZABLES;
    String levExactMatches =  TMProfileConstants.LEVERAGE_EXACT_MATCH_ONLY;
@@ -140,6 +141,7 @@
    String lbDynLevPopulationTm = bundle.getString("lb_dynLevPopulationTm");
    String lbDynLevReferenceTm = bundle.getString("lb_dynLevReferenceTm");
    String lbRelatedSRX = bundle.getString("msg_relate_with_srx");
+   String lbSaveMTedToTm = bundle.getString("msg_save_mted_segments_to_tm");
 
    Long tmProfileId = (Long)request.getAttribute(TMProfileConstants.TM_PROFILE_ID);
    
@@ -1096,6 +1098,9 @@ function doOnLoad()
 			                               <INPUT TYPE="checkbox" NAME="<%=isSaveLocToProjectTm%>" VALUE="true" CHECKED><%=lbsavelocSegToTm%>
 			                           </TD>
 			                        </TR>
+			                         <TR ALIGN="LEFT">
+                                        <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveMTedSegToTm%>" VALUE="true" checked><%=lbSaveMTedToTm%></TD>
+                                    </TR>
                                     <TR ALIGN="LEFT">
                                         <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveWhollyInternalTextTm%>" VALUE="true"><%=lbisSaveWhollyInternalTextTm%></TD>
                                     </TR>
@@ -1109,7 +1114,7 @@ function doOnLoad()
 			                        </TR>
                                     <TR ALIGN="LEFT">
                                         <TD COLSPAN=2><INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" CHECKED><%=lbisSaveToPageTm%></TD>
-                                    </TR>
+                                    </TR>                                   
                                 </TABLE>
                                 <BR>
                                 <BR>

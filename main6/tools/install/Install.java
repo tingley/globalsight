@@ -1217,24 +1217,6 @@ public class Install extends installer.EventBroadcaster
                         "lib/classes/properties/SRX2.0.xsd.template"),
                 concatPath(DIR_EAR, "lib/classes/properties/SRX2.0.xsd"));
 
-        // process the XDE spellchecker files
-        m_configFileList.put(
-                concatPath(DIR_EAR,
-                        "xdespellchecker.war/WEB-INF/web.xml.template"),
-                concatPath(DIR_EAR, "xdespellchecker.war/WEB-INF/web.xml"));
-
-        // process the GlobalSight spellchecker files
-        m_configFileList
-                .put(concatPath(DIR_EAR,
-                        "spellchecker.war/WEB-INF/web.xml.template"),
-                        concatPath(DIR_EAR, "spellchecker.war/WEB-INF/web.xml"));
-
-        m_configFileList
-                .put(concatPath(DIR_EAR,
-                        "spellchecker.war/WEB-INF/classes/spell/spell.properties.template"),
-                        concatPath(DIR_EAR,
-                                "spellchecker.war/WEB-INF/classes/spell/spell.properties"));
-
         // process command line scripts
         m_configFileList.put(
                 concatPath(DIR_EAR, "bin/CreateDictionary.cmd.template"),

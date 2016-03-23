@@ -25,7 +25,9 @@ public class XliffInternalTag implements InternalTag
 {
     private static final String I_REGEX = "i=\"(\\d*?)\"";
     private static final String PATTERN = "<mrk mtype=\"protected\" comment=\"internal text, i={0}\">{1}</mrk>";
-    private static final String PATTERN_REGEX = "<mrk mtype=\"protected\" comment=\"internal text, i=(\\d*?)\">([^<]*?)</mrk>";
+    
+    // for GBS-4328 Offline XLF upload fails on attribute order in mrk element
+    private static final String PATTERN_REGEX = "<mrk [^>]*comment=\"internal text, i=(\\d*?)\"[^>]*>([^<]*?)</mrk>";
     private static final String REVERT_FORMAT = "<bpt internal=\"yes\" i=\"{0}\"/>{1}<ept i=\"{0}\"/>";
 
     @Override

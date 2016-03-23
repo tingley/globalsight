@@ -118,8 +118,8 @@ public class NativeFileManagerLocal implements NativeFileManager
     /**
      * See NativeFileManager interface for documentation
      */
-    public void save(SecondaryTargetFile p_stf, File p_tmpFile, User p_user,
-            String p_newFilename) throws NativeFileManagerException
+    public void save(SecondaryTargetFile p_stf, File p_tmpFile, User p_user, String p_newFilename,
+            long p_companyId) throws NativeFileManagerException
     {
         NativeFileManagerException nfme = null;
         boolean isRename = false;
@@ -140,7 +140,7 @@ public class NativeFileManagerLocal implements NativeFileManager
 
         try
         {
-            newFile = save(AmbFileStoragePathUtils.getStfParentDir(),
+            newFile = save(AmbFileStoragePathUtils.getStfParentDir(p_companyId),
                     storagePath, p_tmpFile);
 
             p_stf.setModifierUserId(p_user != null ? p_user.getUserId()
@@ -183,13 +183,13 @@ public class NativeFileManagerLocal implements NativeFileManager
      * @see NativeFileManager
      */
     public void save(UnextractedFile p_unextractedFile, File p_tmpFile,
-            User p_user) throws NativeFileManagerException
+            User p_user,long p_companyId) throws NativeFileManagerException
     {
         NativeFileManagerException nfme = null;
         File newFile = null;
         try
         {
-            newFile = save(AmbFileStoragePathUtils.getUnextractedParentDir(),
+            newFile = save(AmbFileStoragePathUtils.getUnextractedParentDir(p_companyId),
                     p_unextractedFile.getStoragePath(), p_tmpFile);
 
             // update the UnextractedFile Info

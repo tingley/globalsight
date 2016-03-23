@@ -15,6 +15,7 @@ namespace GlobalSight.WinPEConverter
     {
         private static Object locker = new object();
         private string exepath = null;
+        private string logpath = null;
 
         public CommandUtil()
         {
@@ -22,6 +23,7 @@ namespace GlobalSight.WinPEConverter
             FileInfo assFile = new FileInfo(assembly.Location);
             string parent = assFile.DirectoryName;
             exepath = "\"" + parent + "\\resh.exe\"";
+            logpath = parent + "\\resh.log";
             string filepath = parent + "\\resh.exe";
 
             if (!File.Exists(filepath))
@@ -64,13 +66,28 @@ namespace GlobalSight.WinPEConverter
             return new string[]{rcMenu, rcString, rcdialog, rcversion};
         }
 
-        public void CompileAndModify(string filename, String newfilename, string rcfilename, string resfilename)
+        public void Compile(string rcfilename, string resfilename)
         {
             string argCompile = "-compile \"" + rcfilename + "\",\"" + resfilename + "\"";
             RunExternalExe(exepath, argCompile);
+        }
 
+        public void Modify(string filename, String newfilename, string resfilename)
+        {
             string argModify = "-modify \"" + filename + "\",\"" + newfilename + "\",\"" + resfilename + "\",,,";
             RunExternalExe(exepath, argModify);
+        }
+
+        public string GetLog()
+        {
+            string log = File.ReadAllText(logpath, Encoding.Unicode);
+
+            if (!log.Contains("CurrentDir") || !log.Contains("resh.exe"))
+            {
+                log = File.ReadAllText(logpath, Encoding.Default);
+            }
+
+            return log;
         }
 
         private string RunExternalExe(string filename, string arguments = null)

@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
-import com.globalsight.machineTranslation.MTHelper;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.util.StringUtil;
 
 public class DoMTUtil
@@ -53,22 +53,23 @@ public class DoMTUtil
      * is invalid, the exception message will be "list index out of range".
      * </p>
      * 
-     * @param url
-     * @param engineName
      * @throws Exception
      */
-    public static void testDoMtHost(String url, String engineName)
+
+    public static void testDoMtHost(MachineTranslationProfile mtProfile)
             throws Exception
     {
+        String url = mtProfile.getUrl();
+        String engineName = mtProfile.getCategory();
         try
         {
             XmlRpcClient client = getXmlRpcClient(url);
-
+            
             String[] xliff = new String[] { getSampleXlf(engineName) };
             Object[] params = new Object[]{ xliff };
             Object[] returning = (Object[]) client.execute("run", params);
-
-            if (MTHelper.isLogDetailedInfo(DoMTProxy.ENGINE_DOMT))
+            
+            if (mtProfile.isLogDebugInfo())
             {
                 logRunInfo(returning);
             }
@@ -79,7 +80,7 @@ public class DoMTUtil
             logger.warn("Invalid DoMT URL or engine name(" + url + " :: "
                     + engineName + ").");
             logger.warn("Excetion message is :: " + e.getMessage());
-
+            
             throw new Exception(msg);
         }
     }

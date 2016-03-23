@@ -66,3 +66,13 @@ function saveWorkflow(xml)
 		theForm = document.all.templateCancel;
 	theForm.submit();
 }
+
+function saveWorkflowInstance(xml)
+{
+	var data= {
+			xml : xml,
+			ids : ids
+		};
+	var value = getAjaxValue("saveWorkflowInstance", data);
+	location.replace(location.href);
+}

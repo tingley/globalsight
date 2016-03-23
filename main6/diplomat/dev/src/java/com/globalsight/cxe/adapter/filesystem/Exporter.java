@@ -100,8 +100,8 @@ public class Exporter
 {
     private static Pattern FILE_PATTERN = Pattern
             .compile("<file[^>]*(target-language=[\"']([^\"']*?)[\"'])[^>]*>");
-    private static Pattern UNIT_PATTERN = Pattern
-            .compile("<trans-unit[\\s\\S]*?(<target[^>]*xml:lang=[\"']([^\"']*?)[\"'][\\s\\S]*?</target>)[\\s\\S]*?</trans-unit>");
+    private static Pattern UNIT_PATTERN = Pattern.compile(
+            "<trans-unit[\\s\\S]*?(<target[^>]*xml:lang=[\"']([^\"']*?)[\"'][\\s\\S]*?</target>)[\\s\\S]*?</trans-unit>");
 
     private String m_cxeDocsDir;
     private CxeMessage m_cxeMessage;
@@ -120,14 +120,13 @@ public class Exporter
     private FileProfile fileProfile = null;
     private XmlDtdImpl xmlDtd = null;
     private String m_messageId = null;
+    // GBS-3830
+    private static final String EOL_LF = "\n";
+    private static final String EOL_CRLF = "\r\n";
 
     private static Map<String, FileState[]> FILE_STATES = new HashMap<String, FileState[]>();
 
     public static final String XML_DTD_ID = "sendEmail";
-
-    private static String lineSeparator = (String) java.security.AccessController
-            .doPrivileged(new sun.security.action.GetPropertyAction(
-                    "line.separator"));
 
     static private final org.apache.log4j.Logger logger = org.apache.log4j.Logger
             .getLogger(Exporter.class);
@@ -138,13 +137,12 @@ public class Exporter
      * @param p_cxeMessage
      *            a CxeMessage to work from
      */
-    Exporter(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger)
-            throws GeneralException
+    Exporter(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger) throws GeneralException
     {
         m_cxeMessage = p_cxeMessage;
         m_logger = p_logger;
-        m_cxeDocsDir = SystemConfiguration.getInstance().getStringParameter(
-                SystemConfigParamNames.CXE_DOCS_DIR);
+        m_cxeDocsDir = SystemConfiguration.getInstance()
+                .getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR);
     }
 
     /**
@@ -202,8 +200,7 @@ public class Exporter
             if (m_formatType.equals("xptag"))
             {
                 m_logger.debug("Special export handling for xptag file.");
-                FileMessageData fmd = (FileMessageData) m_cxeMessage
-                        .getMessageData();
+                FileMessageData fmd = (FileMessageData) m_cxeMessage.getMessageData();
                 fmd.operatingSystemSafeCopyTo(finalFile);
             }
             else
@@ -212,8 +209,7 @@ public class Exporter
             }
 
             String fileTargetEncoding = "UTF-8";
-            Object messageTargetCharset = m_cxeMessage.getParameters().get(
-                    "TargetCharset");
+            Object messageTargetCharset = m_cxeMessage.getParameters().get("TargetCharset");
 
             if (messageTargetCharset != null)
             {
@@ -224,8 +220,7 @@ public class Exporter
             // needed to be uploaded in serverA, if the xliff file have no bom
             // format, it will throw exception when check.
             Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
-                    (Long.parseLong(m_cxeMessage.getParameters()
-                            .get("WorkflowId").toString())));
+                    (Long.parseLong(m_cxeMessage.getParameters().get("WorkflowId").toString())));
             if ("xlz".equals(m_formatType) || "xlf".equals(m_formatType))
             {
                 String fileEncoding = FileUtil.guessEncoding(finalFile);
@@ -234,13 +229,11 @@ public class Exporter
                     fileEncoding = fileTargetEncoding;
                 }
 
-                changeTargetLocale(wf.getTargetLocale().toString(), finalFile,
-                        fileEncoding);
+                changeTargetLocale(wf.getTargetLocale().toString(), finalFile, fileEncoding);
             }
 
             exportStatusMsg = makeExportSuccessMessage(finalFile);
-            BaseAdapter.preserveOriginalFileContent(
-                    m_cxeMessage.getMessageData(),
+            BaseAdapter.preserveOriginalFileContent(m_cxeMessage.getMessageData(),
                     exportStatusMsg.getParameters());
 
             m_cxeMessage.setDeleteMessageData(true);
@@ -250,38 +243,39 @@ public class Exporter
                     Long.parseLong(m_dataSourceId), false);
 
             // Check if unicode escape for "properties" and "js" files
-            if ("javaprop".equals(m_formatType)
-                    || "javascript".equals(m_formatType))
+            if (IFormatNames.FORMAT_JAVAPROP.equals(m_formatType)
+                    || IFormatNames.FORMAT_JAVASCRIPT.equals(m_formatType))
             {
                 String targetEncoding = fileTargetEncoding;
                 targetEncoding = targetEncoding.toLowerCase();
+                // GBS-3830
+                int eolEncoding = fp.getEolEncoding();
+                String lineSeparator = decideEol(eolEncoding);
 
                 // At this moment,only extended characters are unicode escaped
                 if (!fp.supportsUnicodeEscape())
                 {
-                    Object unicodeEscape = m_cxeMessage.getParameters().get(
-                            "UnicodeEscape");
+                    Object unicodeEscape = m_cxeMessage.getParameters().get("UnicodeEscape");
                     // the "UnicodeEscape" parameter is from the export page's
                     // "Character Encoding"
-                    if (unicodeEscape != null
-                            && "true".equalsIgnoreCase((String) unicodeEscape)
-                            && finalFileName.endsWith(".properties"))
+                    if (unicodeEscape != null && "true".equalsIgnoreCase((String) unicodeEscape)
+                            && IFormatNames.FORMAT_JAVAPROP.equals(m_formatType))
                     {
-                        unicodeAllEscape(finalFileName, targetEncoding);
+                        unicodeAllEscape(finalFileName, targetEncoding, lineSeparator);
                     }
                     else
                     {
-                        notUnicodeEscape(finalFileName, targetEncoding);
-                        if (finalFileName.endsWith(".properties"))
+                        notUnicodeEscape(finalFileName, targetEncoding, lineSeparator);
+                        if (IFormatNames.FORMAT_JAVAPROP.equals(m_formatType))
                         {
-                            handleExtraEscapeCharacter(finalFileName,
-                                    targetEncoding);
+                            handleExtraEscapeCharacter(finalFileName, targetEncoding,
+                                    lineSeparator);
                         }
                     }
                 }
-                else if (finalFileName.endsWith(".properties"))
+                else if (IFormatNames.FORMAT_JAVAPROP.equals(m_formatType))
                 {
-                    handleExtraEscapeCharacter(finalFileName, targetEncoding);
+                    handleExtraEscapeCharacter(finalFileName, targetEncoding, lineSeparator);
                 }
             }
 
@@ -291,15 +285,14 @@ public class Exporter
                 if (FileUtil.isNeedBOMProcessing(finalFileName))
                 {
                     // BOM Processing
-                    int bomType = ((Integer) m_cxeMessage.getParameters().get(
-                            "BOMType")).intValue();
+                    int bomType = ((Integer) m_cxeMessage.getParameters().get("BOMType"))
+                            .intValue();
                     if (bomType == ExportConstants.NOT_SELECTED)
                     {
                         bomType = fp.getBOMType();
                     }
-                    int sourcePageBomType = ((Integer) m_cxeMessage
-                            .getParameters().get("SourcePageBomType"))
-                            .intValue();
+                    int sourcePageBomType = ((Integer) m_cxeMessage.getParameters()
+                            .get("SourcePageBomType")).intValue();
                     byte[] fileContent = null;
                     if (FileUtil.isUTFFormat(fileTargetEncoding))
                     {
@@ -315,20 +308,15 @@ public class Exporter
                                     if (bomType == ExportConstants.UTF_BOM_PRESERVE
                                             || bomType == ExportConstants.UTF_BOM_ADD)
                                     {
-                                        FileUtil.addBom(finalFile,
-                                                fileTargetEncoding);
+                                        FileUtil.addBom(finalFile, fileTargetEncoding);
                                     }
                                     else if (bomType == ExportConstants.UTF_BOM_REMOVE)
                                     {
-                                        String encoding = FileUtil
-                                                .guessEncoding(finalFile);
+                                        String encoding = FileUtil.guessEncoding(finalFile);
                                         if (FileUtil.UTF8.equals(encoding))
                                         {
-                                            FileUtil.writeFile(
-                                                    finalFile,
-                                                    new String(
-                                                            fileContent,
-                                                            3,
+                                            FileUtil.writeFile(finalFile,
+                                                    new String(fileContent, 3,
                                                             fileContent.length - 3),
                                                     fileTargetEncoding);
                                         }
@@ -341,8 +329,7 @@ public class Exporter
                                 if (bomType == ExportConstants.UTF_BOM_ADD)
                                 {
                                     // Current output file has no BOM info
-                                    FileUtil.addBom(finalFile,
-                                            fileTargetEncoding);
+                                    FileUtil.addBom(finalFile, fileTargetEncoding);
                                 }
                                 break;
                             default:
@@ -357,14 +344,13 @@ public class Exporter
                     fileTypes.add(IFormatNames.FORMAT_PLAINTEXT);
 
                     StringBuilder sourceFileName = new StringBuilder();
-                    sourceFileName.append(AmbFileStoragePathUtils
-                            .getCxeDocDirPath(fp.getCompanyId()));
+                    sourceFileName
+                            .append(AmbFileStoragePathUtils.getCxeDocDirPath(fp.getCompanyId()));
                     sourceFileName.append(File.separator);
                     sourceFileName.append(m_sourceFileName);
 
                     if (fileTypes.contains(m_formatType)
-                            && isSourceHasBom(new File(
-                                    sourceFileName.toString())))
+                            && isSourceHasBom(new File(sourceFileName.toString())))
                     {
                         FileUtil.addBom(finalFile, fileTargetEncoding);
                     }
@@ -388,8 +374,7 @@ public class Exporter
             if ("jsp".equals(kf.getFormatType()))
             {
                 String targetEncoding = "iso-8859-1";
-                Object targetCharset = m_cxeMessage.getParameters().get(
-                        "TargetCharset");
+                Object targetCharset = m_cxeMessage.getParameters().get("TargetCharset");
                 if (targetCharset != null)
                 {
                     targetEncoding = (String) targetCharset;
@@ -397,24 +382,21 @@ public class Exporter
 
                 if (fp.getEntityEscape())
                 {
-                    Object entityEscape = m_cxeMessage.getParameters().get(
-                            "EntityEscape");
+                    Object entityEscape = m_cxeMessage.getParameters().get("EntityEscape");
                     if (targetEncoding.equalsIgnoreCase("iso-8859-1"))
                     {
                         convertToHtmlEntity(finalFileName, targetEncoding);
                     }
-                    else if ((entityEscape != null && "true"
-                            .equalsIgnoreCase((String) entityEscape)))
+                    else if ((entityEscape != null
+                            && "true".equalsIgnoreCase((String) entityEscape)))
                     {
                         convertToHtmlEntity(finalFileName, targetEncoding);
                     }
                 }
                 else
                 {
-                    Object entityEscape = m_cxeMessage.getParameters().get(
-                            "EntityEscape");
-                    if (entityEscape != null
-                            && "true".equalsIgnoreCase((String) entityEscape))
+                    Object entityEscape = m_cxeMessage.getParameters().get("EntityEscape");
+                    if (entityEscape != null && "true".equalsIgnoreCase((String) entityEscape))
                     {
                         convertToHtmlEntity(finalFileName, targetEncoding);
                     }
@@ -423,8 +405,7 @@ public class Exporter
 
             finalFileStr = finalFile.getAbsolutePath();
             String scriptOnExport = fp.getScriptOnExport();
-            boolean hasScript = scriptOnExport != null
-                    && scriptOnExport.length() > 0;
+            boolean hasScript = scriptOnExport != null && scriptOnExport.length() > 0;
 
             if (hasScript)
             {
@@ -442,11 +423,9 @@ public class Exporter
                         // execute script
                         // "PostProcessed" parameter may be used as flag to tell
                         // it should invoke post processor.
-                        String trgLocale = "targetLocale:"
-                                + wf.getTargetLocale().toString();
-                        String cmd = "cmd.exe /c " + scriptOnExport + " \""
-                                + targetFolder + "\" \"PostProcessed\" \""
-                                + trgLocale + "\" -r";
+                        String trgLocale = "targetLocale:" + wf.getTargetLocale().toString();
+                        String cmd = "cmd.exe /c " + scriptOnExport + " \"" + targetFolder
+                                + "\" \"PostProcessed\" \"" + trgLocale + "\" -r";
                         ProcessRunner pr = new ProcessRunner(cmd);
                         Thread t = new Thread(pr);
                         t.start();
@@ -458,8 +437,7 @@ public class Exporter
                         {
                         }
                         m_logger.info("Script on Export " + scriptOnExport
-                                + " is called to handle files in folder: "
-                                + targetFolder);
+                                + " is called to handle files in folder: " + targetFolder);
                     }
                     catch (Exception e)
                     {
@@ -479,8 +457,7 @@ public class Exporter
                     {
                         // FileUtils.deleteSilently(finalFileName);
                         FileUtils.deleteAllFilesSilently(targetFolder);
-                        finalFileStr = finalFile.getParentFile()
-                                .getParentFile().getAbsolutePath()
+                        finalFileStr = finalFile.getParentFile().getParentFile().getAbsolutePath()
                                 + File.separator + finalFile.getName();
                     }
                 }
@@ -491,8 +468,7 @@ public class Exporter
                 File f = new File(finalFileName);
                 if (!f.exists())
                 {
-                    File f2 = new File(f.getParentFile().getParentFile(),
-                            f.getName());
+                    File f2 = new File(f.getParentFile().getParentFile(), f.getName());
                     if (f2.exists())
                         finalFileName = f2.getAbsolutePath();
                 }
@@ -508,16 +484,16 @@ public class Exporter
             }
 
             // For GitConnector file
-			String tmpDisplayName = m_displayName.substring(0,
-					m_displayName.indexOf(File.separator));
-			handleGitConnectorFiles(finalFileName, wf, tmpDisplayName);
+            String tmpDisplayName = m_displayName.substring(0,
+                    m_displayName.indexOf(File.separator));
+            handleGitConnectorFiles(finalFileName, wf, tmpDisplayName);
 
-			// For CVS file
-            HashMap<String, String> infos = CVSUtil.seperateFileInfo(
-                    finalFileStr, m_exportLocation);
+            // For CVS file
+            HashMap<String, String> infos = CVSUtil.seperateFileInfo(finalFileStr,
+                    m_exportLocation);
             if (infos != null && CVSUtil.isCVSJob(infos.get("jobId")))
             {
-				CVSUtil.saveCVSFile(infos, tmpDisplayName);
+                CVSUtil.saveCVSFile(infos, tmpDisplayName);
             }
 
             XmlDtd xmlDtd = getXmlDtd();
@@ -532,12 +508,9 @@ public class Exporter
             FileState[] fileStates = null;
             synchronized (FILE_STATES)
             {
-                m_batchId = (String) m_cxeMessage.getParameters().get(
-                        "ExportBatchId");
-                m_pageCount = (Integer) m_cxeMessage.getParameters().get(
-                        "PageCount");
-                m_pageNumber = (Integer) m_cxeMessage.getParameters().get(
-                        "PageNum");
+                m_batchId = (String) m_cxeMessage.getParameters().get("ExportBatchId");
+                m_pageCount = (Integer) m_cxeMessage.getParameters().get("PageCount");
+                m_pageNumber = (Integer) m_cxeMessage.getParameters().get("PageNum");
 
                 if (xmlDtd == null)
                 {
@@ -571,8 +544,7 @@ public class Exporter
                 {
                     try
                     {
-                        XmlDtdManager
-                                .validateXmlFile(xmlDtd.getId(), finalFile);
+                        XmlDtdManager.validateXmlFile(xmlDtd.getId(), finalFile);
                         mark(FileState.VALIDATION_SUCCESSFUL);
                     }
                     catch (DtdException e)
@@ -598,8 +570,11 @@ public class Exporter
 
                 if (isLastFile())
                 {
-                    isLastFile = true;
-                    fileStates = FILE_STATES.get(m_batchId);
+                    if (wf.getJob().isMindTouchJob())
+                    {
+                        // Post/push files back to MindTouch server
+                        handleMindTouchFiles(wf, FILE_STATES.get(m_batchId));
+                    }
 
                     addDtdValidationFailedComment();
                     FILE_STATES.remove(m_batchId);
@@ -611,7 +586,7 @@ public class Exporter
 
             // MindTouch files are handled together after all files exported.
             // This logic cannot be synchronized because it need much time.
-            if (isLastFile && fileStates != null && fileStates.length > 0 
+            if (isLastFile && fileStates != null && fileStates.length > 0
                     && wf.getJob().isMindTouchJob())
             {
                 handleMindTouchFiles(wf, fileStates);
@@ -627,13 +602,34 @@ public class Exporter
 
             String errorArgs[] = new String[1];
             errorArgs[0] = m_logger.getName();
-            FileSystemAdapterException fsae = new FileSystemAdapterException(
-                    "CxeInternalEx", errorArgs, e);
+            FileSystemAdapterException fsae = new FileSystemAdapterException("CxeInternalEx",
+                    errorArgs, e);
 
             exportStatusMsg = makeExportErrorMessage(fsae);
         }
 
         return exportStatusMsg;
+    }
+
+    /**
+     * Chooses the line separator according to the eol encoding set in file
+     * profile.
+     * 
+     * @since GBS-3830
+     */
+    private String decideEol(int eolEncoding)
+    {
+        File docDir = AmbFileStoragePathUtils.getCxeDocDir();
+        File sourceFile = new File(docDir, m_displayName);
+        boolean isSourceCRLF = FileUtil.isWindowsReturnMethod(sourceFile.getAbsolutePath());
+        String lineSeparator = EOL_LF;
+        if (eolEncoding == FileProfileImpl.EOL_ENCODING_PRESERVE && isSourceCRLF
+                || eolEncoding == FileProfileImpl.EOL_ENCODING_CRLF)
+        {
+            lineSeparator = EOL_CRLF;
+        }
+
+        return lineSeparator;
     }
 
     /**
@@ -661,161 +657,166 @@ public class Exporter
     private void handleMindTouchFiles(Workflow wf, FileState[] fileStates)
     {
         logger.info("Begin to handle MindTouch Files...");
-    	File docDir = AmbFileStoragePathUtils.getCxeDocDir(wf.getCompanyId());
+        File docDir = AmbFileStoragePathUtils.getCxeDocDir(wf.getCompanyId());
 
-    	// Get all target files that are exported
-    	List<File> trgFiles = new ArrayList<File>();
-    	if (fileStates != null)
-    	{
+        // Get all target files that are exported
+        List<File> trgFiles = new ArrayList<File>();
+        if (fileStates != null)
+        {
             logger.info("MindTouch content/tag/properties files total size: " + fileStates.length);
-    		for (FileState fs : fileStates)
-    		{
-    			String file = fs.getFile();
-    			File f = new File(docDir, file);
-    			// If it has script on import/export...
-    			String prefix = "PreProcessed_" + wf.getJob().getId() + "_";
-				if (f != null && f.getParentFile().getName().startsWith(prefix))
-    			{
-                	f = new File(f.getParentFile().getParentFile(), f.getName());
-                }
-
-				if (f != null && f.exists())
+            for (FileState fs : fileStates)
+            {
+                String file = fs.getFile();
+                File f = new File(docDir, file);
+                // If it has script on import/export...
+                String prefix = "PreProcessed_" + wf.getJob().getId() + "_";
+                if (f != null && f.getParentFile().getName().startsWith(prefix))
                 {
-                	trgFiles.add(f);
+                    f = new File(f.getParentFile().getParentFile(), f.getName());
                 }
-    		}
-    	}
 
-    	MindTouchHelper helper = null;
-    	try
-    	{
-    		// Initialize one MindTouchHelper for all files from one job
+                if (f != null && f.exists())
+                {
+                    trgFiles.add(f);
+                }
+            }
+        }
+
+        MindTouchHelper helper = null;
+        try
+        {
+            // Initialize one MindTouchHelper for all files from one job
             String sourceLocale = wf.getJob().getL10nProfile().getSourceLocale().toString();
             String targetLocale = wf.getTargetLocale().toString();
-        	long jobId = wf.getJob().getJobId();
+            long jobId = wf.getJob().getJobId();
             String srcLocale = "/" + sourceLocale + "/" + jobId + "/";
-    		String trgLocale = "/" + targetLocale + "/" + jobId + "/";
-    		MindTouchConnector mtc = null;
-        	for (File trgFile : trgFiles)
-        	{
+            String trgLocale = "/" + targetLocale + "/" + jobId + "/";
+            MindTouchConnector mtc = null;
+            for (File trgFile : trgFiles)
+            {
                 MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale, trgLocale, trgFile);
-        		if (pageInfo != null)
-        		{
+                if (pageInfo != null)
+                {
                     long mtcId = Long.parseLong(pageInfo.getMindTouchConnectorId());
-					mtc = MindTouchManager.getMindTouchConnectorById(mtcId);
-					helper = new MindTouchHelper(mtc);
+                    mtc = MindTouchManager.getMindTouchConnectorById(mtcId);
+                    helper = new MindTouchHelper(mtc);
 
-					break;
-        		}
-        	}
+                    break;
+                }
+            }
 
-        	if (helper == null)
-        	{
-                logger.error("Fail to initialize MindTouchHelper, MindTouch files will NOT be pushed to target server, re-export is required!");
-        	}
+            if (helper == null)
+            {
+                logger.error(
+                        "Fail to initialize MindTouchHelper, MindTouch files will NOT be pushed to target server, re-export is required!");
+            }
 
             if (!helper.isTargetServerExist(targetLocale) && !mtc.getIsPostToSourceServer())
-        	{
-        		return;
-        	}
+            {
+                return;
+            }
 
-			// As need post content to create page first, group them first
-        	List<File> contentFiles = new ArrayList<File>();
-        	List<File> tagFiles = new ArrayList<File>();
-        	List<File> propFiles = new ArrayList<File>();
-        	String path = null;
-        	for (File trgFile : trgFiles)
-        	{
-        		path = trgFile.getAbsolutePath();
-        		if (path.endsWith("(contents).xml"))
-        		{
-        			contentFiles.add(trgFile);
-        		}
-        		else if (path.endsWith("(tags).xml"))
-        		{
-        			tagFiles.add(trgFile);
-        		}
-        		else if (path.endsWith("(properties).xml"))
-        		{
-        			propFiles.add(trgFile);
-        		}
-        	}
+            // As need post content to create page first, group them first
+            List<File> contentFiles = new ArrayList<File>();
+            List<File> tagFiles = new ArrayList<File>();
+            List<File> propFiles = new ArrayList<File>();
+            String path = null;
+            for (File trgFile : trgFiles)
+            {
+                path = trgFile.getAbsolutePath();
+                if (path.endsWith("(contents).xml"))
+                {
+                    contentFiles.add(trgFile);
+                }
+                else if (path.endsWith("(tags).xml"))
+                {
+                    tagFiles.add(trgFile);
+                }
+                else if (path.endsWith("(properties).xml"))
+                {
+                    propFiles.add(trgFile);
+                }
+            }
 
-        	// Post content files one by one
+            // Post content files one by one
             logger.info(contentFiles.size() + " content files need to be posted to target server.");
             int count = 0;
-        	for (File trgFile : contentFiles)
-        	{
-        		try
-        		{
-        		    count++;
-                    MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale, trgLocale, trgFile);
+            for (File trgFile : contentFiles)
+            {
+                try
+                {
+                    count++;
+                    MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale, trgLocale,
+                            trgFile);
                     logger.info("Begin to post MindTouch content to target server[" + count + "]: "
                             + pageInfo.getPath());
                     helper.postPageContents(trgFile, pageInfo, sourceLocale, targetLocale);
                     logger.info("End to post MindTouch content to target server[" + count + "]: "
                             + trgFile);
-        		}
-        		catch (Exception e)
-        		{
-        			logger.error("postPageContents: " + trgFile, e);
-        		}
-        	}
+                }
+                catch (Exception e)
+                {
+                    logger.error("postPageContents: " + trgFile, e);
+                }
+            }
 
-        	// Put tag files one by one
-        	count = 0;
-        	for (File trgFile : tagFiles)
-        	{
-        	    count++;
+            // Put tag files one by one
+            count = 0;
+            for (File trgFile : tagFiles)
+            {
+                count++;
                 MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale, trgLocale, trgFile);
                 helper.putPageTags(trgFile, pageInfo, sourceLocale, targetLocale);
                 logger.info("MindTouch tag is put to target server[" + count + "]: " + trgFile);
-        	}
+            }
 
-        	// put properties files one by one
-        	count = 0;
-        	for (File trgFile : propFiles)
-        	{
-        	    count++;
+            // put properties files one by one
+            count = 0;
+            for (File trgFile : propFiles)
+            {
+                count++;
                 MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale, trgLocale, trgFile);
                 helper.putPageProperties(trgFile, pageInfo, sourceLocale, targetLocale);
-                logger.info("MindTouch properties is put to target server[" + count + "]: " + trgFile);
-        	}
-    	}
-    	catch (Exception e)
-    	{
-    	    logger.error(e);
-    	}
-    	finally
-    	{
-    		if (helper != null)
-    		{
-            	helper.shutdownHttpClient();
-    		}
-    	}
+                logger.info(
+                        "MindTouch properties is put to target server[" + count + "]: " + trgFile);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+        }
+        finally
+        {
+            if (helper != null)
+            {
+                helper.shutdownHttpClient();
+            }
+        }
     }
 
     /**
      * 
-     * @param sourceLocale -- like "/en_US/1234/"
-     * @param targetLocale -- like "/fr_FR/1234/"
+     * @param sourceLocale
+     *            -- like "/en_US/1234/"
+     * @param targetLocale
+     *            -- like "/fr_FR/1234/"
      * @param trgFile
      * @return
      */
-	private MindTouchPageInfo getMindTouchPageInfo(String sourceLocale,
-			String targetLocale, File trgFile)
-	{
-		String trgPath = trgFile.getAbsolutePath().replace("\\", "/");
-		String srcPath = trgPath.replace(targetLocale, sourceLocale);
+    private MindTouchPageInfo getMindTouchPageInfo(String sourceLocale, String targetLocale,
+            File trgFile)
+    {
+        String trgPath = trgFile.getAbsolutePath().replace("\\", "/");
+        String srcPath = trgPath.replace(targetLocale, sourceLocale);
 
-		File objFile = new File(srcPath + ".obj");
-		if (objFile != null && objFile.exists())
-		{
-			return MindTouchHelper.parseObjFile(objFile);
-		}
+        File objFile = new File(srcPath + ".obj");
+        if (objFile != null && objFile.exists())
+        {
+            return MindTouchHelper.parseObjFile(objFile);
+        }
 
-		return null;
-	}
+        return null;
+    }
 
     /**
      * When export, post Blaise xliff back to Blaise server.
@@ -823,31 +824,23 @@ public class Exporter
      * @param finalFileName
      *            -- the absolute full pathname.
      */
-	private void handleBlaiseFiles(String finalFileName, Workflow wf)
+    private void handleBlaiseFiles(String finalFileName, Workflow wf)
     {
         try
         {
-        	// If job is in exported state, it must have been "uploadXliff(..)".
-        	if (Job.EXPORTED.equals(wf.getJob().getState()))
-        	{
-        		return;
-        	}
-
-        	long jobId = wf.getJob().getJobId();
-			BlaiseConnectorJob bcj = BlaiseManager
-					.getBlaiseConnectorJobByJobId(jobId);
-        	if (bcj != null)
-        	{
-				BlaiseConnector blc = BlaiseManager.getBlaiseConnectorById(bcj
-						.getBlaiseConnectorId());
-				if (blc != null)
-				{
-	        		finalFileName = finalFileName.replace("/", "\\");
-	                File trgFile = new File(finalFileName);
-	                BlaiseHelper helper = new BlaiseHelper(blc);
-	                helper.uploadXliff(bcj.getBlaiseEntryId(), trgFile);
-	                logger.info("Blaise file is uploaded successfully: " + finalFileName);
-				}
+            long jobId = wf.getJob().getJobId();
+            BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(jobId);
+            if (bcj != null)
+            {
+                BlaiseConnector blc = BlaiseManager
+                        .getBlaiseConnectorById(bcj.getBlaiseConnectorId());
+                if (blc != null)
+                {
+                    finalFileName = finalFileName.replace("/", "\\");
+                    File trgFile = new File(finalFileName);
+                    BlaiseHelper helper = new BlaiseHelper(blc);
+                    helper.uploadXliff(bcj.getBlaiseEntryId(), trgFile);
+                }
             }
         }
         catch (Exception e)
@@ -856,8 +849,7 @@ public class Exporter
         }
     }
 
-    private void handleGitConnectorFiles(String finalFileName, Workflow wf,
-            String sourceLocale)
+    private void handleGitConnectorFiles(String finalFileName, Workflow wf, String sourceLocale)
     {
         try
         {
@@ -869,12 +861,11 @@ public class Exporter
                 HashMap<String, String> infos = getInfos(finalFileName, wf);
 
                 GitConnector gc = GitConnectorManagerLocal
-                        .getGitConnectorById(gitConnectorJob
-                                .getGitConnectorId());
+                        .getGitConnectorById(gitConnectorJob.getGitConnectorId());
 
                 List<GitConnectorFileMapping> gcfms = (List<GitConnectorFileMapping>) GitConnectorManagerLocal
-                        .getAllFileMappings(gc.getId(), sourceLocale, wf
-                                .getTargetLocale().toString());
+                        .getAllFileMappings(gc.getId(), sourceLocale,
+                                wf.getTargetLocale().toString());
                 HashMap<String, String> mappings = getMappings(gcfms);
 
                 GitConnectorHelper helper = new GitConnectorHelper(gc);
@@ -884,20 +875,15 @@ public class Exporter
                 String sourceFolderMappingPath = "";
                 if (sourceFileMappingPath.indexOf(File.separator) > 0)
                 {
-                    sourceFolderMappingPath = sourceFileMappingPath.substring(
-                            0,
+                    sourceFolderMappingPath = sourceFileMappingPath.substring(0,
                             sourceFileMappingPath.lastIndexOf(File.separator));
                 }
                 String suffix;
                 if (mappings.size() == 0)
                 {
-                    suffix = relativeFilePath.substring(0,
-                            relativeFilePath.lastIndexOf("."))
-                            + "("
-                            + wf.getTargetLocale().toString()
-                            + ")"
-                            + relativeFilePath.substring(relativeFilePath
-                                    .lastIndexOf("."));
+                    suffix = relativeFilePath.substring(0, relativeFilePath.lastIndexOf(".")) + "("
+                            + wf.getTargetLocale().toString() + ")"
+                            + relativeFilePath.substring(relativeFilePath.lastIndexOf("."));
                 }
                 else if (mappings.get(sourceFileMappingPath) != null)
                 {
@@ -906,29 +892,22 @@ public class Exporter
                 else if (mappings.get(sourceFolderMappingPath) != null)
                 {
                     suffix = mappings.get(sourceFolderMappingPath)
-                            + sourceFileMappingPath.substring(
-                                    sourceFolderMappingPath.length(),
+                            + sourceFileMappingPath.substring(sourceFolderMappingPath.length(),
                                     sourceFileMappingPath.length());
                 }
                 else
                 {
-                    suffix = relativeFilePath.substring(0,
-                            relativeFilePath.lastIndexOf("."))
-                            + "("
-                            + wf.getTargetLocale().toString()
-                            + ")"
-                            + relativeFilePath.substring(relativeFilePath
-                                    .lastIndexOf("."));
+                    suffix = relativeFilePath.substring(0, relativeFilePath.lastIndexOf(".")) + "("
+                            + wf.getTargetLocale().toString() + ")"
+                            + relativeFilePath.substring(relativeFilePath.lastIndexOf("."));
                 }
 
-                String dstFilePath = gitFolder.getPath() + File.separator
-                        + suffix;
+                String dstFilePath = gitFolder.getPath() + File.separator + suffix;
                 String srcFilePath = finalFileName;
 
                 GitConnectorCacheFile cacheFile = new GitConnectorCacheFile();
                 cacheFile.setFilePath(suffix);
-                cacheFile
-                        .setGitConnectorId(gitConnectorJob.getGitConnectorId());
+                cacheFile.setGitConnectorId(gitConnectorJob.getGitConnectorId());
                 cacheFile.setSrcFilePath(srcFilePath);
                 cacheFile.setDstFilePath(dstFilePath);
                 HibernateUtil.save(cacheFile);
@@ -943,17 +922,15 @@ public class Exporter
     private HashMap<String, String> getInfos(String finalFileName, Workflow wf)
     {
         HashMap<String, String> infos = new HashMap<String, String>();
-        String prefixStr = m_exportLocation + File.separator
-                + wf.getTargetLocale().toString();
+        String prefixStr = m_exportLocation + File.separator + wf.getTargetLocale().toString();
         String jobIdFilePath = finalFileName.substring(prefixStr.length() + 1);
-        String relativeFilePath = jobIdFilePath.substring(jobIdFilePath
-                .indexOf(File.separator) + 1);
+        String relativeFilePath = jobIdFilePath
+                .substring(jobIdFilePath.indexOf(File.separator) + 1);
         infos.put("relativeFilePath", relativeFilePath);
         return infos;
     }
 
-    private HashMap<String, String> getMappings(
-            List<GitConnectorFileMapping> gcfms)
+    private HashMap<String, String> getMappings(List<GitConnectorFileMapping> gcfms)
     {
         HashMap<String, String> mappings = new HashMap<String, String>();
 
@@ -961,22 +938,20 @@ public class Exporter
         {
             for (GitConnectorFileMapping gcfm : gcfms)
             {
-                mappings.put(gcfm.getSourceMappingPath(),
-                        gcfm.getTargetMappingPath());
+                mappings.put(gcfm.getSourceMappingPath(), gcfm.getTargetMappingPath());
             }
         }
 
         return mappings;
     }
 
-    private void handleEloquaFiles(String finalFileName, FileProfile fp,
-            Workflow wf, boolean hasScript)
+    private void handleEloquaFiles(String finalFileName, FileProfile fp, Workflow wf,
+            boolean hasScript)
     {
         if (finalFileName.toLowerCase().endsWith(".email.html")
                 || finalFileName.toLowerCase().endsWith(".landingpage.html"))
         {
-            String name = finalFileName.substring(
-                    finalFileName.lastIndexOf(File.separator) + 1,
+            String name = finalFileName.substring(finalFileName.lastIndexOf(File.separator) + 1,
                     finalFileName.lastIndexOf("."));
             name = name.substring(0, name.lastIndexOf("."));
             String targetFolder = finalFileName.substring(0,
@@ -1015,13 +990,11 @@ public class Exporter
 
                         String targetLocale = wf.getTargetLocale().toString();
 
-                        boolean isHtml = m.updateFromFile(emailFile, uploaded,
-                                targetLocale);
+                        boolean isHtml = m.updateFromFile(emailFile, uploaded, targetLocale);
                         if (isHtml)
                         {
                             String html = m.getHtml();
-                            String newContent = h.updateDynamicContent(html,
-                                    targetLocale);
+                            String newContent = h.updateDynamicContent(html, targetLocale);
                             m.setHtml(newContent);
                         }
 
@@ -1034,8 +1007,7 @@ public class Exporter
                             if (!uploaded)
                             {
                                 String eloquaName = m.getName();
-                                eloquaName = eloquaName + "(" + targetLocale
-                                        + ")";
+                                eloquaName = eloquaName + "(" + targetLocale + ")";
                                 m.setName(eloquaName);
                             }
 
@@ -1059,16 +1031,14 @@ public class Exporter
                     if (m.getName() != null)
                     {
                         String targetLocale = wf.getTargetLocale().toString();
-                        boolean isHtml = m.updateFromFile(saveFile, uploaded,
-                                targetLocale);
+                        boolean isHtml = m.updateFromFile(saveFile, uploaded, targetLocale);
                         EloquaConnector conn = m.getConnect();
                         EloquaHelper h = new EloquaHelper(conn);
 
                         if (isHtml)
                         {
                             String html = m.getHtml();
-                            String newContent = h.updateDynamicContent(html,
-                                    targetLocale);
+                            String newContent = h.updateDynamicContent(html, targetLocale);
                             m.setHtml(newContent);
                         }
 
@@ -1082,8 +1052,7 @@ public class Exporter
                             {
                                 String eloquaName = m.getName();
 
-                                eloquaName = eloquaName + "(" + targetLocale
-                                        + ")";
+                                eloquaName = eloquaName + "(" + targetLocale + ")";
                                 m.setName(eloquaName);
                             }
                             m.setId("");
@@ -1104,8 +1073,7 @@ public class Exporter
 
     private String replaceFileLocale(String content, String targetLocale)
     {
-        content = StringUtil.replaceWithRE(content, FILE_PATTERN, new Replacer(
-                targetLocale)
+        content = StringUtil.replaceWithRE(content, FILE_PATTERN, new Replacer(targetLocale)
         {
 
             @Override
@@ -1123,8 +1091,7 @@ public class Exporter
         return content;
     }
 
-    private void changeTargetLocale(String targetLocale, File xliffFile,
-            String encoding)
+    private void changeTargetLocale(String targetLocale, File xliffFile, String encoding)
     {
         targetLocale = StringUtil.replace(targetLocale, "_", "-");
         try
@@ -1143,8 +1110,7 @@ public class Exporter
 
     private String replaceTransUnit(String content, String targetLocale)
     {
-        content = StringUtil.replaceWithRE(content, UNIT_PATTERN, new Replacer(
-                targetLocale)
+        content = StringUtil.replaceWithRE(content, UNIT_PATTERN, new Replacer(targetLocale)
         {
             @Override
             public String getReplaceString(Matcher m)
@@ -1193,8 +1159,8 @@ public class Exporter
     {
         if (fileProfile == null && m_fileProfileId != null)
         {
-            fileProfile = HibernateUtil.get(FileProfileImpl.class,
-                    Long.parseLong(m_fileProfileId), false);
+            fileProfile = HibernateUtil.get(FileProfileImpl.class, Long.parseLong(m_fileProfileId),
+                    false);
         }
 
         return fileProfile;
@@ -1276,26 +1242,25 @@ public class Exporter
     /*
      * Change all string to unicode.
      */
-    private void unicodeAllEscape(String fileName, String encoding)
+    private void unicodeAllEscape(String fileName, String encoding, String lineSeparator)
             throws Exception
     {
         String tempFileName = fileName + ".tmp";
-        File sourceFile = new File(fileName);
+        File targetFile = new File(fileName);
         File tempfile = new File(tempFileName);
 
-        sourceFile.renameTo(tempfile);
-        if (sourceFile.exists())
+        targetFile.renameTo(tempfile);
+        if (targetFile.exists())
         {
-            sourceFile.delete();
+            targetFile.delete();
         }
 
         BufferedReader in = null;
         FileOutputStream fos = null;
-
         try
         {
             in = new BufferedReader(new FileReader(tempFileName));
-            fos = new FileOutputStream(sourceFile);
+            fos = new FileOutputStream(targetFile);
 
             String s = in.readLine();
             String s2 = null;
@@ -1306,7 +1271,6 @@ public class Exporter
                 if (s.startsWith("#") || s.startsWith("!"))
                 {
                     fos.write(s.getBytes(encoding));
-                    fos.write(lineSeparator.getBytes(encoding));
                 }
                 else
                 {
@@ -1333,14 +1297,13 @@ public class Exporter
                         String value = loadConvert(s.substring(index + 1));
                         fos.write(key.getBytes(encoding));
                         fos.write(toUnicode(value).getBytes(encoding));
-                        fos.write(lineSeparator.getBytes(encoding));
                     }
                     else
                     {
                         fos.write(loadConvert(s).getBytes(encoding));
-                        fos.write(lineSeparator.getBytes(encoding));
                     }
                 }
+                fos.write(lineSeparator.getBytes(encoding));
 
                 s = s2;
                 if (s == null)
@@ -1385,17 +1348,17 @@ public class Exporter
         return uStr;
     }
 
-    private void notUnicodeEscape(String fileName, String encoding)
+    private void notUnicodeEscape(String fileName, String encoding, String lineSeparator)
             throws Exception
     {
         String tempFileName = fileName + ".tmp";
-        File sourceFile = new File(fileName);
+        File targetFile = new File(fileName);
         File tempfile = new File(tempFileName);
 
-        sourceFile.renameTo(tempfile);
-        if (sourceFile.exists())
+        targetFile.renameTo(tempfile);
+        if (targetFile.exists())
         {
-            sourceFile.delete();
+            targetFile.delete();
         }
 
         BufferedReader reader = null;
@@ -1406,9 +1369,9 @@ public class Exporter
             if (fileEncoding == null)
                 fileEncoding = encoding;
 
-            reader = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(tempfile), fileEncoding));
-            fos = new FileOutputStream(sourceFile);
+            reader = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(tempfile), fileEncoding));
+            fos = new FileOutputStream(targetFile);
             String s = reader.readLine();
             while (s != null)
             {
@@ -1447,18 +1410,18 @@ public class Exporter
      * @param encoding
      * @throws Exception
      */
-    private void handleExtraEscapeCharacter(String fileName, String encoding)
+    private void handleExtraEscapeCharacter(String fileName, String encoding, String lineSeparator)
             throws Exception
     {
         String tempFileName = fileName + ".tmp";
-        File sourceFile = new File(fileName);
+        File targetFile = new File(fileName);
         File tempfile = new File(tempFileName);
 
-        sourceFile.renameTo(tempfile);
+        targetFile.renameTo(tempfile);
 
-        if (sourceFile.exists())
+        if (targetFile.exists())
         {
-            sourceFile.delete();
+            targetFile.delete();
         }
 
         BufferedReader reader = null;
@@ -1466,11 +1429,10 @@ public class Exporter
 
         try
         {
-            InputStreamReader isr = new InputStreamReader(new FileInputStream(
-                    tempfile), encoding);
+            InputStreamReader isr = new InputStreamReader(new FileInputStream(tempfile), encoding);
             reader = new BufferedReader(isr);
 
-            fos = new FileOutputStream(sourceFile);
+            fos = new FileOutputStream(targetFile);
             String s = reader.readLine();
 
             while (s != null)
@@ -1584,8 +1546,7 @@ public class Exporter
                                 value = (value << 4) + 10 + aChar - 'A';
                                 break;
                             default:
-                                throw new IllegalArgumentException(
-                                        "Malformed \\uxxxx encoding.");
+                                throw new IllegalArgumentException("Malformed \\uxxxx encoding.");
                         }
                     }
                     out[outLen++] = (char) value;
@@ -1608,8 +1569,8 @@ public class Exporter
     // Private Methods //
     // ////////////////////////////////////
 
-    private void copyOriFilesToTargetFolder(String p_targetFolder,
-            String p_companyId, String fileName)
+    private void copyOriFilesToTargetFolder(String p_targetFolder, String p_companyId,
+            String fileName)
     {
         String sourceFolder = determineSourceFolder(p_companyId);
         File targetFile = new File(p_targetFolder).getParentFile();
@@ -1624,8 +1585,7 @@ public class Exporter
         for (int i = 0; i < fs.length; i++)
         {
             File file = fs[i];
-            if (!isFileExist(file, targetFile)
-                    && file.getName().equals(fileName))
+            if (!isFileExist(file, targetFile) && file.getName().equals(fileName))
             {
                 FileCopier.copyFile(file, targetFile);
             }
@@ -1643,10 +1603,8 @@ public class Exporter
         String sourceFolder = determineSourceFolder(p_companyId);
         File filesInTargetFolder = new File(p_targetFolder);
         File filesInSourceFolder = new File(sourceFolder);
-        if (filesInTargetFolder.listFiles() != null
-                && filesInSourceFolder.listFiles() != null
-                && filesInTargetFolder.listFiles().length == filesInSourceFolder
-                        .listFiles().length)
+        if (filesInTargetFolder.listFiles() != null && filesInSourceFolder.listFiles() != null
+                && filesInTargetFolder.listFiles().length == filesInSourceFolder.listFiles().length)
         {
             return true;
         }
@@ -1659,8 +1617,7 @@ public class Exporter
         String filteredDispalyName = SourcePage.filtSpecialFile(m_displayName);
         String sourceFolder = filteredDispalyName.substring(0,
                 filteredDispalyName.lastIndexOf(File.separator));
-        StringBuffer sb = new StringBuffer(
-                AmbFileStoragePathUtils.getCxeDocDirPath(p_companyId));
+        StringBuffer sb = new StringBuffer(AmbFileStoragePathUtils.getCxeDocDirPath(p_companyId));
         sb.append(File.separator).append(sourceFolder);
 
         return sb.toString();
@@ -1687,8 +1644,7 @@ public class Exporter
         // copy parameters that were preset by other adapters
         // (office adapter calls this code once per batch)
         // (quark and frame call this code once per file)
-        String isComp = (String) m_cxeMessage.getParameters().get(
-                "IsComponentPage");
+        String isComp = (String) m_cxeMessage.getParameters().get("IsComponentPage");
 
         if (isComp != null)
         {
@@ -1696,8 +1652,7 @@ public class Exporter
             newParams.put("IsComponentPage", isComp);
         }
 
-        String absoluteExportPath = (String) m_cxeMessage.getParameters().get(
-                "AbsoluteExportPath");
+        String absoluteExportPath = (String) m_cxeMessage.getParameters().get("AbsoluteExportPath");
 
         if (absoluteExportPath != null)
         {
@@ -1737,8 +1692,7 @@ public class Exporter
      *            send email or not.
      * @return CxeMessage
      */
-    private CxeMessage makeExportErrorMessage(
-            FileSystemAdapterException p_fsae, Long xmlDtdId)
+    private CxeMessage makeExportErrorMessage(FileSystemAdapterException p_fsae, Long xmlDtdId)
     {
         CxeMessageType type = CxeMessageType
                 .getCxeMessageType(CxeMessageType.CXE_EXPORT_STATUS_EVENT);
@@ -1830,8 +1784,8 @@ public class Exporter
             {
                 NodeList values = attrElement.getElementsByTagName("dv");
                 Element valElement = (Element) values.item(0);
-                m_exportLocation = makeDirectoryNameOperatingSystemSafe(valElement
-                        .getFirstChild().getNodeValue());
+                m_exportLocation = makeDirectoryNameOperatingSystemSafe(
+                        valElement.getFirstChild().getNodeValue());
                 foundExportLoc = true;
 
                 m_logger.debug("export location:" + m_exportLocation);
@@ -1843,8 +1797,7 @@ public class Exporter
                 Element valElement = (Element) values.item(0);
                 m_localeSubDir = valElement.getFirstChild().getNodeValue();
 
-                if (m_localeSubDir.startsWith("\\")
-                        || m_localeSubDir.startsWith("/"))
+                if (m_localeSubDir.startsWith("\\") || m_localeSubDir.startsWith("/"))
                 {
                     m_localeSubDir = m_localeSubDir.substring(1);
                 }
@@ -1893,8 +1846,7 @@ public class Exporter
         if ("passolo".equals(m_formatType))
         {
             String name = StringUtil.replace(m_sourceFileName, "\\", "/");
-            return m_exportLocation + "/passolo"
-                    + name.substring(name.indexOf("/"));
+            return m_exportLocation + "/passolo" + name.substring(name.indexOf("/"));
         }
 
         StringBuffer fullpath = new StringBuffer(m_exportLocation);
@@ -1937,8 +1889,7 @@ public class Exporter
         return newName;
     }
 
-    private static void convertToHtmlEntity(String fileName, String encoding)
-            throws Exception
+    private static void convertToHtmlEntity(String fileName, String encoding) throws Exception
     {
         String tempFileName = fileName + ".tmp";
         File sourceFile = new File(fileName);
@@ -1953,8 +1904,8 @@ public class Exporter
         BufferedReader in = null;
         try
         {
-            in = new BufferedReader(new InputStreamReader(new FileInputStream(
-                    tempFileName), encoding));
+            in = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(tempFileName), encoding));
             // fos = new FileOutputStream(sourceFile);
             pw = new PrintWriter(sourceFile);
             String s1 = null;

@@ -527,7 +527,7 @@ function show(tuId, tuvId, subId){
                     +'<tr class="standardText"><td noWrap><B><%=lb_tagInfo%>:</B></td><td><table border="0">'+ result.str_segementPtag +'</table></td></tr>'
                     +'<tr class="standardText"><td noWrap><B><%=bundle.getString("lb_sid")%>:</B></td><td>'+ result.str_sid +'</td></tr>'
                     +'<tr class="standardText"><td><B><%=bundle.getString("lb_modify_by")%>:</B></td><td>'+ result.str_lastModifyUser +'</td></tr>'
-                    +'<tr class="standardText"><td><B>Source:</B></td><td>'+result.m_sourceSegment+'</td></tr>'
+                    +'<tr class="standardText"><td><B>Source:</B></td><td '+result.m_sourceDIR+'>'+result.m_sourceSegment+'</td></tr>'
         //TM Match
         var tm_matchhtml = '';
         if (result.tm_match.length > 0)
@@ -553,7 +553,9 @@ function show(tuId, tuvId, subId){
             top:Y+scrollTop,
             content:detailhtml + tm_matchhtml + mt_matchhtml + foothtml,
             minimizable:false,
-            closable:true
+            closable:true,
+            collapsible:false,
+            maximizable:false
         });
      });
 }

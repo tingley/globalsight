@@ -447,6 +447,16 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         {
             tmProfile.setSaveUnLocSegToPageTM(true);
         }
+        //GBS-4306
+        String saveMTedSegToTm = p_request.getParameter("isSaveMTedSegToProjectTm");
+        if (saveMTedSegToTm == null)
+        {
+            tmProfile.setSaveMTedSegToProjectTM(false);
+        }
+        else if (saveMTedSegToTm.equals("true"))
+        {
+            tmProfile.setSaveMTedSegToProjectTM(true);
+        }
         // 6
         String excludeItemType = p_request.getParameter("excludeItemType");
         if (excludeItemType != null && excludeItemType.length() > 0)

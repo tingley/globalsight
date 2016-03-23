@@ -40,12 +40,6 @@
 			<!-- GlobalSight Services WAR -->
 			<zipfileset dir="${globalsightServices}/globalsightServices" prefix="${product}/${deployment}/globalsight.ear/globalsightServices.war" excludes="**/*.java" />
 			
-			<!-- GlobalSight Spell Checker WAR -->
-			<zipfileset dir="${spellchecker}/spellchecker" prefix="${product}/${deployment}/globalsight.ear/spellchecker.war" excludes="**/*.java" />
-
-			<!-- XDE Spell Checker WAR -->
-			<zipfileset dir="../xdespellchecker/applications/xdespellchecker" prefix="${product}/${deployment}/globalsight.ear/xdespellchecker.war" />
-
 			<!-- Command line scripts for TMX, TBX, luke etc -->
 			<zipfileset dir="${lingtools}/scripts" prefix="${product}/${deployment}/globalsight.ear/bin/" />
 

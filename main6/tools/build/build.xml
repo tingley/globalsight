@@ -132,7 +132,7 @@
 		</jar>
 	</target>
 
-	<target name="zip" depends="all, globalsight.jar, globalsightServices, SpellChecker, installer, distdir">
+	<target name="zip" depends="all, globalsight.jar, globalsightServices, installer, distdir">
 		<ant antfile="zip.xml" target="zip" />
 	</target>
 
@@ -144,140 +144,6 @@
 	<!-- Target to package the GS services -->
 	<target name="globalsightServices">
 		<ant dir="${globalsightServices}/" antfile="build.xml" target="build" inheritAll="false" />
-	</target>
-
-	<!-- Target to build the GS SpellChecker -->
-	<target name="SpellChecker">
-		<ant dir="${spellchecker}/" antfile="build.xml" target="build" inheritAll="false" />
-	</target>
-
-	<!-- Target to package all spell-checker files (not used) -->
-	<target name="XdeSpellChecker" />
-
-	<!-- Target to package all spell-checker dictionaries -->
-	<target name="XdeSpellCheckerDictionaries">
-		<echo message="**** Packaging all Spell-Checker Dictionaries ****" />
-
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="arabic" />
-			<param name="jars" value="arabic.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="chinese" />
-			<param name="jars" value="chinese.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="czech" />
-			<param name="jars" value="czech.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="danish" />
-			<param name="jars" value="danish.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="dutch" />
-			<param name="jars" value="dutch.jar,dutch2002.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="english_australian" />
-			<param name="jars" value="australian.jar,ukenglish.jar,ukenglish2002.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="english_canadian" />
-			<param name="jars" value="canadian.jar,ukenglish.jar,ukenglish2002.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="english_southafrican" />
-			<param name="jars" value="africansouth.jar,ukenglish.jar,ukenglish2002.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="english_uk" />
-			<param name="jars" value="ukenglish.jar,ukenglish2002.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="estonian" />
-			<param name="jars" value="estonian.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="finnish" />
-			<param name="jars" value="finnish.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="french" />
-			<param name="jars" value="french.jar,french2002.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="french_canada" />
-			<param name="jars" value="canadianfrench.jar,french.jar,french2002.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="greek" />
-			<param name="jars" value="greek.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="german" />
-			<param name="jars" value="german.jar,german2002.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="italian" />
-			<param name="jars" value="italian.jar,italian2002.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="japanese" />
-			<param name="jars" value="japaneseroman.jar,japanesesanscript.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="norwegian" />
-			<param name="jars" value="norwegian.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="polish" />
-			<param name="jars" value="polish.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="portuguese" />
-			<param name="jars" value="portuguese.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="portuguese_brazil" />
-			<param name="jars" value="brazilianportuguese.jar,portuguese.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="spanish" />
-			<param name="jars" value="spanish.jar,spanish2002.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="spanish_argentina" />
-			<param name="jars" value="argentina.jar,spanish.jar,spanish2002.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="spanish_bolivia" />
-			<param name="jars" value="bolivian.jar,spanish.jar,spanish2002.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="spanish_colombo" />
-			<param name="jars" value="colombian.jar,spanish.jar,spanish2002.jar" />
-		</antcall>
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="swedish" />
-			<param name="jars" value="swedish.jar" />
-		</antcall>
-
-		<!-- Be nice to inhouse testers and pack all dicts in one zip -->
-		<antcall target="XdeSpellCheckerDictionary">
-			<param name="lang" value="ALL" />
-			<param name="jars" value="*.jar" />
-		</antcall>
-	</target>
-
-	<!-- Target to package one spell-checker dictionary -->
-	<target name="XdeSpellCheckerDictionary">
-		<echo message="**** ${lang}" />
-
-		<mkdir dir="${dist}/scdict" />
-		<zip duplicate="preserve" zipfile="${dist}/scdict/scdict_${lang}.zip">
-			<zipfileset dir="../xdespellchecker/applications/xdespellchecker/WEB-INF/lib" prefix="${product}/${deployment}/globalsight.ear/xdespellchecker.war/WEB-INF/lib" includes="${jars}" />
-		</zip>
 	</target>
 
 	<!-- Target for Desktop Icon in package-->
@@ -472,7 +338,6 @@
 		<ant dir="../../${diplomatDevSrcJava}/../webtop-plugin" antfile="build.xml" target="clean" inheritAll="false" />
 		<ant antfile="../../envoy/src/webserviceClients/java/build.xml" target="clean" inheritAll="false" />
 		<ant dir="../../envoy/src/applet/AddSourceApplet" antfile="build.xml" target="clean" />
-		<ant dir="${spellchecker}" antfile="build.xml" target="clean" inheritAll="false" />
 		<ant dir="${globalsightServices}" antfile="build.xml" target="clean" inheritAll="false" />
 		<delete dir="${capclasses}" />
 		<delete dir="${testclasses}" />

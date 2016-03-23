@@ -61,10 +61,7 @@ border:solid 1px #6e8bde;
 </style>
 
 <script SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<script SRC="/globalsight/includes/spellcheck.js"></script>
-<script SRC="/globalsight/spellchecker/jsp/spellcheck.js"></script>
 <script SRC="/globalsight/includes/filter/StringBuffer.js"></script>
-<script SRC="/globalsight/xdespellchecker/noapplet/SpellCheckNoApplet.js"></script>
 <SCRIPT SRC="/globalsight/envoy/terminology/viewer/viewerAPI.js"></SCRIPT>
 <script src="/globalsight/includes/menu/js/poslib.js"></script>
 <script src="/globalsight/includes/menu/js/scrollbutton.js"></script>
@@ -79,55 +76,6 @@ var textboxSource;
 var textboxTarget;
 var userId;
 var uiLocale;
-
-function spellCheck(type, edit)
-{
-	var g_SC_GSA = new SC_GSA_Parameters();
-	var w_scwin = null;
-	var sc_customDict = null;
-	var sc_dict;
-	var tLocale;
-	if("source"==type)
-	{
-		var sourceText = textboxSource.getText();
-		if(""==sourceText)
-		{
-			alert("${msg_tm_search_add_source_null}");
-			return;
-		}
-		var sourceLocaleText=$("#sourceLocale").find("option:selected").text(); 
-		if(""==sourceLocaleText)
-		{
-			alert("${msg_tm_search_source}");
-			return;
-		}
-		tLocale = sourceLocaleText.substring(sourceLocaleText.indexOf("[")+1, sourceLocaleText.indexOf("]"));
-	}
-	else
-	{
-		var targetText = textboxTarget.getText();
-		if(""==targetText)
-		{
-			alert("${msg_tm_search_add_target_null}");
-			return;
-		}
-		var targetLocaleText=$("#targetLocale").find("option:selected").text(); 
-		if(""==targetLocaleText)
-		{
-			alert("${msg_tm_search_target}");
-			return;
-		}
-		tLocale = targetLocaleText.substring(targetLocaleText.indexOf("[")+1, targetLocaleText.indexOf("]"));
-	}
-        
-	if (!sc_customDict)
-    {
-       sc_dict = g_SC_GSA.getSystemDict(tLocale);
-       sc_customDict = g_SC_GSA.getCustomDict(userId, tLocale);
-    }
-
-    w_scwin = scSpell(this, edit+'&typectrl=richedit', tLocale, uiLocale, sc_dict, sc_customDict);
-}
 	
 function addLre(textbox)
 {
@@ -317,9 +265,6 @@ $(document).ready(function(){
            <table cellspacing="0" class="standardTextNew" style="background: none repeat scroll 0 0 #FFFFFF;width:98%">
            <tbody>
            <tr>
-           <td id="idSpellCheck" class="coolButton" onclick="spellCheck('source', 'addSource')" style="border-left: 1px solid buttonshadow; border-right: 1px solid buttonshadow; border-width: 1px; border-style: solid; border-color: buttonshadow; padding: 1px;">
-           <img src="/globalsight/envoy/edit/online2/Spellcheck2.gif">
-           </td>
            <td id="idBold" class="coolButton" onclick="textboxSource.makeBold(); textboxSource.frameWindow.focus();">
            <b>[bold]</b>
            </td>
@@ -364,9 +309,6 @@ $(document).ready(function(){
            <table cellspacing="0" class="standardTextNew" style="background: none repeat scroll 0 0 #FFFFFF;width:98%">
            <tbody>
            <tr>
-           <td id="idSpellCheck" class="coolButton" onclick="spellCheck('target', 'addTarget')" style="border-left: 1px solid buttonshadow; border-right: 1px solid buttonshadow; border-width: 1px; border-style: solid; border-color: buttonshadow; padding: 1px;">
-           <img src="/globalsight/envoy/edit/online2/Spellcheck2.gif">
-           </td>
            <td id="idBold" class="coolButton" onclick="textboxTarget.makeBold(); textboxTarget.frameWindow.focus();">
            <b>[bold]</b>
            </td>

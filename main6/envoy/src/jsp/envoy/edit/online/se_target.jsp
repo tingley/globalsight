@@ -458,10 +458,7 @@ catch (Exception e) { }
 <!-- This is envoy\edit\online\se_target.jsp -->
 <HEAD>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<script SRC="/globalsight/includes/spellcheck.js"></script>
-<script SRC="/globalsight/spellchecker/jsp/spellcheck.js"></script>
 <script SRC="/globalsight/includes/filter/StringBuffer.js"></script>
-<script SRC="/globalsight/xdespellchecker/noapplet/SpellCheckNoApplet.js"></script>
 <SCRIPT SRC="/globalsight/envoy/terminology/viewer/viewerAPI.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/dnd/DragAndDrop.js"></SCRIPT>
 <script src="/globalsight/includes/ajaxJquery/online.js"></script>
@@ -535,9 +532,6 @@ var g_defaultTermbaseId = "<%=l_defaultTermbaseId%>";
 var g_haveTermbase = eval("<%=b_haveTermbase%>");
 var g_selectedTerm = null;
 
-var g_SC_GSA = new SC_GSA_Parameters();
-var g_SC_XDE = new SC_XDE_Parameters();
-var g_canSpellcheck = true;
 var w_scwin = null;
 
 var w_ptags = null;
@@ -1242,48 +1236,6 @@ var sc_customDict = null;
 var sc_dict;
 var sc_uiLang;
 
-function spellCheck()
-{
-    if (g_SC_XDE.isLanguageSupported(parent.parent.targetlocale))
-    {
-        // XDE spell checking
-
-        if (!sc_customDict)
-        {
-          sc_dict = g_SC_XDE.getSystemDict(parent.parent.targetlocale);
-          sc_customDict = g_SC_XDE.getCustomDict(
-            parent.parent.userId, parent.parent.targetlocale);
-          sc_uiLang = g_SC_XDE.getUiLanguage(parent.parent.uilocale);
-
-          frmSC.language.value = sc_dict;
-        }
-
-        //alert("XDE spell checking using dict `" + sc_dict +
-        //  "', customdict `" + sc_customDict + "'");
-
-        w_scwin = doSpell(this, 'frmSC.language', 'edit&typectrl=richedit',
-          false, sc_customDict, sc_uiLang);
-    }
-    else
-    {
-        // GlobalSight spell checking (supports all languages)
-
-        if (!sc_customDict)
-        {
-          sc_dict = g_SC_GSA.getSystemDict(parent.parent.targetlocale);
-          sc_customDict = g_SC_GSA.getCustomDict(
-            parent.parent.userId, parent.parent.targetlocale);
-        }
-
-        //alert("GlobalSight spell checking using dict `" + sc_dict +
-        //  "', customdict `" + sc_customDict + "'");
-
-        w_scwin = scSpell(this, 'edit&typectrl=richedit',
-          parent.parent.targetlocale, parent.parent.uilocale,
-          sc_dict, sc_customDict);
-    }
-}
-
 function debug()
 {
   var edit = document.all.edit;
@@ -1982,9 +1934,6 @@ function showMatchdetailInfo()
     <td align="right">
       <table cellspacing="0">
     <tr>
-      <td class="coolButton" id="idSpellCheck" onclick="spellCheck()">
-        <img src="/globalsight/envoy/edit/online2/Spellcheck2.gif">
-      </td>
       <td class="coolButton" id="idSub"
 	    onclick="o_textbox.makeSub(); o_textbox.frameWindow.focus();">
 	    <img src="/globalsight/envoy/edit/online2/subscript.gif">

@@ -212,9 +212,6 @@ if (b_readonly || !perms.getPermissionFor(Permission.ACTIVITIES_UPDATE_LEVERAGE)
 <script src="/globalsight/envoy/edit/online2/stringbuilder.js"></script>
 <script src="/globalsight/envoy/edit/online2/richedit.js"></script>
 <script src="/globalsight/includes/machinetranslation.js"></script>
-<script src="/globalsight/includes/spellcheck.js"></script>
-<script src="/globalsight/spellchecker/jsp/spellcheck.js"></script>
-<script src="/globalsight/xdespellchecker/noapplet/SpellCheckNoApplet.js"></script>
 <script language="JavaScript1.5" src="/globalsight/includes/ieemu.js"></script>
 <script src="/globalsight/includes/coolbutton2.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/dnd/DragAndDrop.js"></SCRIPT>
@@ -368,9 +365,6 @@ var g_canShowMt = eval("<%=b_canShowMt%>");
 var g_showMt = eval("<%=b_showMt%>");
 var g_canUseMt = false;
 var g_MT = new MT_Parameters();
-var g_SC_GSA = new SC_GSA_Parameters();
-var g_SC_XDE = new SC_XDE_Parameters();
-var g_canSpellcheck = true;
 
 var g_syncMessage =
   "<%=syncMessage != null ? EditUtil.toJavascript(syncMessage) : ""%>";
@@ -1383,7 +1377,7 @@ function setButtonState()
   if (g_target)
   {
     PTagBox.disabled=false;
-    if (g_canSpellcheck) idButSpellCheck.setEnabled(true);
+  
     idButUndo.setEnabled(true);
     idButRedo.setEnabled(true);
 
@@ -1438,7 +1432,7 @@ function setButtonState()
   else
   {
     PTagBox.disabled=true;
-    idButSpellCheck.setEnabled(false);
+
     idButUndo.setEnabled(false);
     idButRedo.setEnabled(false);
     idButBold.setEnabled(false);
@@ -1777,46 +1771,6 @@ function openInfoWin()
 var sc_customDict = null;
 var sc_dict = null;
 var sc_uiLang = null;
-
-function spellCheck()
-{
-    if (!g_target) return;
-
-    if (g_SC_XDE.isLanguageSupported(g_targetLocale))
-    {
-        // XDE spell checking
-
-        if (!sc_customDict)
-        {
-          sc_dict = g_SC_XDE.getSystemDict(g_targetLocale);
-          sc_customDict = g_SC_XDE.getCustomDict(g_userId, g_targetLocale);
-          sc_uiLang = g_SC_XDE.getUiLanguage(g_uiLocale);
-
-          frmSC.language.value = sc_dict;
-        }
-
-        alert("<%=bundle.getString("jsmsg_editor_xde_spell_check_note")%>".replace("%1", sc_dict).replace("%2", sc_customDict));
-
-        w_scwin = doSpell(this, 'frmSC.language', 'idEditor2&typectrl=xdeedit',
-          false, sc_customDict, sc_uiLang);
-    }
-    else
-    {
-        // GlobalSight spell checking (supports all languages)
-
-        if (!sc_customDict)
-        {
-          sc_dict = g_SC_GSA.getSystemDict(g_targetLocale);
-          sc_customDict = g_SC_GSA.getCustomDict(g_userId, g_targetLocale);
-        }
-
-        //alert("GlobalSight spell checking using dict `" + sc_dict +
-        //  "', customdict `" + sc_customDict + "'");
-
-        w_scwin = scSpell(this, 'idEditor2&typectrl=xdeedit',
-          g_targetLocale, g_uiLocale, sc_dict, sc_customDict);
-    }
-}
 
 function showTmWindow()
 {
@@ -2278,20 +2232,12 @@ function doInit()
   for (var i = 0; i < cells.length; i++)
   {
     // 6,19,22 are spacer cells (6,19,22 for bidi)
-    if (i == 6 || i == 21 || i == 24) continue;
+    if (i == 6 || i == 20 || i == 23) continue;
     createButton(cells[i]);
   }
   // cell 23 is the TM button (23 for bidi)
   cells[25].setToggle(true);
   setButtonState();
-
-  /* GS can always spellcheck
-  if (!g_SC.isLanguageSupported(g_targetLocale))
-  {
-    g_canSpellcheck = false;
-    idButSpellCheck.setEnabled(false);
-  }
-  */
 
   g_canUseMt = g_MT.isLanguageSupported("google", g_sourceLocale, g_targetLocale);
   idButMt.setEnabled(false);
@@ -2581,7 +2527,6 @@ function fnImageChangeWrapper()
 {
   if(isIE) return;
   
-  fnImageChange("idImgSpellcheck");
   fnImageChange("idImgUndo");
   fnImageChange("idImgRedo");
   fnImageChange("idImgBold");
@@ -3176,8 +3121,7 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
     <td onaction="Close()" title="<%=bundle.getString("lb_editor_segment_close_nosave") %>"
       ><img src="/globalsight/envoy/edit/online2/Close.gif" attr="1" id="idImgClose"></td>
     <td width="20px"></td>
-    <td id="idButSpellCheck" onaction="spellCheck();" title="<%=bundle.getString("lb_spellcheck") %>"
-      ><img src="/globalsight/envoy/edit/online2/Spellcheck2.gif" id="idImgSpellcheck"></td>
+
     <td id="idButUndo" onaction="makeUndo()" title="<%=bundle.getString("lb_undo") %>"
       ><img src="/globalsight/envoy/edit/online2/Undo.gif" id="idImgUndo"></td>
     <td id="idButRedo" onaction="makeRedo()" title="<%=bundle.getString("lb_redo") %>"

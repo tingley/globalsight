@@ -79,10 +79,7 @@ border:solid 1px #6e8bde;
 </style>
 
 <script SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<script SRC="/globalsight/includes/spellcheck.js"></script>
-<script SRC="/globalsight/spellchecker/jsp/spellcheck.js"></script>
 <script SRC="/globalsight/includes/filter/StringBuffer.js"></script>
-<script SRC="/globalsight/xdespellchecker/noapplet/SpellCheckNoApplet.js"></script>
 <SCRIPT SRC="/globalsight/envoy/terminology/viewer/viewerAPI.js"></SCRIPT>
 <script src="/globalsight/includes/menu/js/poslib.js"></script>
 <script src="/globalsight/includes/menu/js/scrollbutton.js"></script>
@@ -112,21 +109,6 @@ var sourceInternals = new Array();
 var targetInternals = new Array();
 var controlChars = "\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\u0009\u000A\u000B\u000C\u000D\u000E\u000F\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001A\u001B\u001C\u001D\u001E\u001F";
 var hexChars = "0123456789ABCDEF";
-
-function spellCheck(tLocale, edit)
-{
-	var g_SC_GSA = new SC_GSA_Parameters();
-	var w_scwin = null;
-	var sc_customDict = null;
-	var sc_dict;
-	if (!sc_customDict)
-    {
-       sc_dict = g_SC_GSA.getSystemDict(tLocale);
-       sc_customDict = g_SC_GSA.getCustomDict(userId, tLocale);
-    }
-
-    w_scwin = scSpell(this, edit+'&typectrl=richedit', tLocale, uiLocale, sc_dict, sc_customDict);
-}
 
 function showPTags(type)
 {
@@ -570,9 +552,6 @@ $(document).ready(function(){
            <table cellspacing="0" class="standardTextNew" style="background: none repeat scroll 0 0 #FFFFFF;width:98%">
            <tbody>
            <tr>
-           <td id="idSpellCheck" class="coolButton" onclick="spellCheck(sourceLocale, 'editSource')" style="border-left: 1px solid buttonshadow; border-right: 1px solid buttonshadow; border-width: 1px; border-style: solid; border-color: buttonshadow; padding: 1px;">
-           <img src="/globalsight/envoy/edit/online2/Spellcheck2.gif">
-           </td>
            <td id="idBold" class="coolButton" onclick="textboxSource.makeBold(); textboxSource.frameWindow.focus();">
            <b>[bold]</b>
            </td>
@@ -614,9 +593,6 @@ $(document).ready(function(){
            <table cellspacing="0" class="standardTextNew" style="background: none repeat scroll 0 0 #FFFFFF;width:98%">
            <tbody>
            <tr>
-           <td id="idSpellCheck" class="coolButton" onclick="spellCheck(targetLocale, 'editTarget')" style="border-left: 1px solid buttonshadow; border-right: 1px solid buttonshadow; border-width: 1px; border-style: solid; border-color: buttonshadow; padding: 1px;">
-           <img src="/globalsight/envoy/edit/online2/Spellcheck2.gif">
-           </td>
            <td id="idBold" class="coolButton" onclick="textboxTarget.makeBold(); textboxTarget.frameWindow.focus();">
            <b>[bold]</b>
            </td>

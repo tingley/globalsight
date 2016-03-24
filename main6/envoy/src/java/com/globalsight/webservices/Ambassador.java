@@ -1600,14 +1600,14 @@ public class Ambassador extends AbstractWebService
             Set<String> gls = new HashSet<String>();
             for (GlobalSightLocale trgLoc_l10n : targetLocales_l10n)
             {
-                gls.add(trgLoc_l10n.toString());
+                gls.add(trgLoc_l10n.toString().toLowerCase());
             }
             StringBuilder sb = new StringBuilder();
             for (String trgLocs : targetLocales)
             {
                 for (String trgLoc : trgLocs.split(","))
                 {
-                    if (!gls.contains(trgLoc))
+                    if (StringUtil.isNotEmpty(trgLocs) && !gls.contains(trgLoc.toLowerCase()))
                     {
                         sb.append(",");
                         sb.append(trgLoc);

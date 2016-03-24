@@ -243,9 +243,16 @@ public class XmlPostMergeProcessor implements PostMergeProcessor
     /**
      * Changes the content's eol encoding according to the file profile's eol
      * encoding setting.
+     * 
+     * @since GBS-3830
      */
     private String handleEolEncoding(String content)
     {
+        if (m_fileName == null)
+        {
+            // m_fileName can not be null if this is from export request
+            return content;
+        }
         File docDir = AmbFileStoragePathUtils.getCxeDocDir();
         File sourceFile = new File(docDir, m_fileName);
         boolean isSourceCRLF = FileUtil.isWindowsReturnMethod(sourceFile.getAbsolutePath());

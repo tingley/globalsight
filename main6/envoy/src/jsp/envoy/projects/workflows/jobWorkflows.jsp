@@ -1009,29 +1009,5 @@ function closeOpenedWindow()
     w_updateLeverage = null;
 }
 </script>
-
-<script type="text/javascript">
-// Set cookie for most recently used job list
-var thisjob = "${jobId}:${Job.jobName}";
-var cookie = getJobCookie("<%=JobSearchConstants.MRU_JOBS_COOKIE%><%=session.getAttribute(WebAppConstants.USER_NAME).hashCode()%>");
-if (cookie.length != 0)
-{
-    // only save last 3.  make sure this one isn't already on the list.
-    var lastjobs = thisjob;
-    var jobs = cookie.split(",");
-    for (i = 0; i < jobs.length && i < 3; i++)
-    {
-        if (jobs[i] != thisjob)
-        {
-            lastjobs += "," + jobs[i];
-        }
-    }
-	setJobCookie(lastjobs,"<%=JobSearchConstants.MRU_JOBS_COOKIE%><%=session.getAttribute(WebAppConstants.USER_NAME).hashCode()%>" + "=");
-}
-else
-{
-	setJobCookie(thisjob,"<%=JobSearchConstants.MRU_JOBS_COOKIE%><%=session.getAttribute(WebAppConstants.USER_NAME).hashCode()%>" + "=");
-}
-</script>
 </body>
 </html>

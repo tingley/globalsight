@@ -1600,14 +1600,14 @@ public class Ambassador extends AbstractWebService
             Set<String> gls = new HashSet<String>();
             for (GlobalSightLocale trgLoc_l10n : targetLocales_l10n)
             {
-                gls.add(trgLoc_l10n.toString());
+                gls.add(trgLoc_l10n.toString().toLowerCase());
             }
             StringBuilder sb = new StringBuilder();
             for (String trgLocs : targetLocales)
             {
                 for (String trgLoc : trgLocs.split(","))
                 {
-                    if (!gls.contains(trgLoc))
+                    if (StringUtil.isNotEmpty(trgLocs) && !gls.contains(trgLoc.toLowerCase()))
                     {
                         sb.append(",");
                         sb.append(trgLoc);
@@ -3022,6 +3022,11 @@ public class Ambassador extends AbstractWebService
             throws WebServiceException
     {
         checkAccess(p_accessToken, GET_JOB_EXPORT_FILES_IN_ZIP);
+        checkPermission(p_accessToken, Permission.JOBS_VIEW);
+        checkPermission(p_accessToken, Permission.JOBS_EXPORT);
+        
+        String userName = getUsernameFromSession(p_accessToken);
+        String userId = UserUtil.getUserIdByName(userName);
         p_jobIds = p_jobIds.replace(" ", "");
         if (p_jobIds == null || p_jobIds.trim() == "")
         {
@@ -3044,14 +3049,14 @@ public class Ambassador extends AbstractWebService
             }
 
             String jobCompanyId = String.valueOf(job.getCompanyId());
-            if (!currentCompanyId.equals(jobCompanyId))
+            if (!currentCompanyId.equals(jobCompanyId) && !UserUtil.isSuperAdmin(userId)
+                    && !UserUtil.isSuperPM(userId))
                 throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP,
                         "Cannot access the job which is not in the same company with current user"));
 
             jobIds.add(jobId);
         }
 
-        String userName = getUsernameFromSession(p_accessToken);
         Map<Object, Object> activityArgs = new HashMap<Object, Object>();
         activityArgs.put("loggedUserName", userName);
         activityArgs.put("jobIds", p_jobIds);
@@ -3351,13 +3356,17 @@ public class Ambassador extends AbstractWebService
             throws WebServiceException
     {
         checkAccess(p_accessToken, GET_WORKFLOW_EXPORT_FILES_IN_ZIP);
+        checkPermission(p_accessToken, Permission.JOBS_VIEW);
+        checkPermission(p_accessToken, Permission.JOBS_EXPORT);
+        
+        String userName = getUsernameFromSession(p_accessToken);
+        String userId = UserUtil.getUserIdByName(userName);
         if(p_workflowIds == null || p_workflowIds == "")
         {
             String msg = "workflowIds can not be empty.";
             throw new WebServiceException(makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP, msg));
         }
 
-        String userName = getUsernameFromSession(p_accessToken);
         Map<Object, Object> activityArgs = new HashMap<Object, Object>();
         activityArgs.put("loggedUserName", userName);
         activityArgs.put("p_workflowIds", p_workflowIds);
@@ -3387,7 +3396,8 @@ public class Ambassador extends AbstractWebService
                 jobId = job.getId();
 
                 String jobCompanyId = String.valueOf(job.getCompanyId());
-                if (!currentCompanyId.equals(jobCompanyId))
+                if (!currentCompanyId.equals(jobCompanyId) && !UserUtil.isSuperAdmin(userId)
+                        && !UserUtil.isSuperPM(userId))
                     throw new WebServiceException(
                             makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP,
                                     "Cannot access the job which is not in the same company with current user"));
@@ -3462,7 +3472,7 @@ public class Ambassador extends AbstractWebService
                         {
                             if (s.length() > 0)
                             {
-                                allPath.append("/").append(URLEncoder.encode(s, "utf-8"));
+                                allPath.append("/").append(s);
                             }
                         }
                         jobFiles.addPath(allPath.toString());

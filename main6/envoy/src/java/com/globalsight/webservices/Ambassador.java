@@ -3462,7 +3462,7 @@ public class Ambassador extends AbstractWebService
                         {
                             if (s.length() > 0)
                             {
-                                allPath.append("/").append(URLEncoder.encode(s, "utf-8"));
+                                allPath.append("/").append(s);
                             }
                         }
                         jobFiles.addPath(allPath.toString());

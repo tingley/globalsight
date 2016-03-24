@@ -88,7 +88,11 @@ public class CmdUtil
                     line += ".";
                 }
 
-                throw new Exception(line);
+                // ignore this for mysql 5.7.9
+                if (line.indexOf("Using a password on the command line interface can be insecure") == -1)
+                {
+                    throw new Exception(line);                  
+                }
             }
         }
         finally

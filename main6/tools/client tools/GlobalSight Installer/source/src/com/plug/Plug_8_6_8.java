@@ -25,7 +25,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.util.FileUtil;
+import com.util.FileUtil;
 import com.util.PropertyUtil;
 import com.util.ServerUtil;
 import com.util.db.DbUtil;

@@ -34,7 +34,14 @@ function BaseFilter()
 	this.sortOrder = "asc";
 	this.sortColumnIndex = 1;
 	this.currentPage = 0;
-	this.currentOption = this.optionInternalTexts;
+    if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='true')
+	{
+		this.currentOption = this.optionEscapings;
+	}
+	else
+	{
+		this.currentOption = this.optionInternalTexts;
+	}
 	this.editItemId = -1;
 	this.editItemEnable = false;
 }
@@ -148,39 +155,39 @@ BaseFilter.prototype.edit = function(filterId, color, specialFilters, topFilterI
 
 BaseFilter.prototype.generateDiv = function(topFilterId, color)
 {
-		this.initOptionMap();
-		var str = new StringBuffer("<table border=0 width='400px'>");
-		str.append("<tr>");
-		str.append("<td class='specialFilter_dialog_label' width='80px;'>" + jsFilterName + ":</td>");	
-		str.append("<td><input type='text' style='width:100%' id='baseFilterName' maxlength='"+maxFilterNameLength+"' value='Base Text Filter'></input>");
-		str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
-		str.append("</tr>");
-		
-		str.append("<tr>");
-		str.append("<td class='specialFilter_dialog_label' VALIGN='bottom'>" + jsFilterDesc + ":</td>");	
-		str.append("<td><textarea style='width:100%' rows='4' id='baseFilterDesc' name='desc'></textarea>");
-		str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
-		str.append("</tr>");
-		str.append("</table>");
-		
-		str.append("<table border=0 width='400px'>");
-		str.append("<tr>");
-		str.append("<td>");
-		str.append("<br /><br />");
-		str.append("</td>");
-		str.append("</tr>");
-		str.append("</table>");
-		
-		str.append("<div class='specialFilter_dialog_label' style='width:98%'>");
-		str.append(this.generateTagsTable());
-		str.append("</div>");
-		
-		var dialogObj = document.getElementById('baseFilterPopupContent');
-		dialogObj.innerHTML = str.toString();
-		this.showDialog();
-		saveBaseFilter.edit = false;
-		saveBaseFilter.topFilterId = topFilterId;
-		saveBaseFilter.color = color;
+	this.initOptionMap();
+	var str = new StringBuffer("<table border=0 width='400px'>");
+	str.append("<tr>");
+	str.append("<td class='specialFilter_dialog_label' width='80px;'>" + jsFilterName + ":</td>");	
+	str.append("<td><input type='text' style='width:100%' id='baseFilterName' maxlength='"+maxFilterNameLength+"' value='Base Text Filter'></input>");
+	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='specialFilter_dialog_label' VALIGN='bottom'>" + jsFilterDesc + ":</td>");	
+	str.append("<td><textarea style='width:100%' rows='4' id='baseFilterDesc' name='desc'></textarea>");
+	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
+	str.append("</tr>");
+	str.append("</table>");
+	
+	str.append("<table border=0 width='400px'>");
+	str.append("<tr>");
+	str.append("<td>");
+	str.append("<br /><br />");
+	str.append("</td>");
+	str.append("</tr>");
+	str.append("</table>");
+	
+	str.append("<div class='specialFilter_dialog_label' style='width:98%'>");
+	str.append(this.generateTagsTable());
+	str.append("</div>");
+	
+	var dialogObj = document.getElementById('baseFilterPopupContent');
+	dialogObj.innerHTML = str.toString();
+	this.showDialog();
+	saveBaseFilter.edit = false;
+	saveBaseFilter.topFilterId = topFilterId;
+	saveBaseFilter.color = color;
 }
 
 function saveBaseFilter()

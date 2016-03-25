@@ -205,14 +205,7 @@ namespace GlobalSight.WinPEConverter
 
         private void MergeOneFile(CommandUtil comUtil, List<TranslateUnit3RD> units, string rcFile, string resFile, TranslateUnitType tuType, string oriFile, String newFile)
         {
-            Encoding encoding = Encoding.Unicode;
-            string[] menulines = File.ReadAllLines(rcFile, encoding);
-
-            if (menulines.Length == 1)
-            {
-                encoding = FileUtil.GetEncoding(rcFile);
-                menulines = File.ReadAllLines(rcFile, encoding);
-            }
+            string[] menulines = ReadAllLinesForRCFile(rcFile, tuType);
 
             if (menulines.Length != 0)
             {
@@ -248,8 +241,8 @@ namespace GlobalSight.WinPEConverter
                     switch (tuType)
                     {
                         case TranslateUnitType.StringType: specalChar = " "; break;
-                        case TranslateUnitType.DialogType: specalChar = "&amp;"; break;
-                        case TranslateUnitType.MenuType: specalChar = "&amp;"; break;
+                        case TranslateUnitType.DialogType: specalChar = "\x2063"; break;
+                        case TranslateUnitType.MenuType: specalChar = "\x2063"; break;
                         case TranslateUnitType.VersionType: specalChar = " "; break;
                     }
 
@@ -437,12 +430,19 @@ namespace GlobalSight.WinPEConverter
 
         private void ExtractOneFile(List<TranslateUnit3RD> result, string rcFile, TranslateUnitType tuType, List<TranslateUnit> resultSelf)
         {
-            Encoding encoding = FileUtil.GetEncoding(rcFile);
+            string[] menulines = ReadAllLinesForRCFile(rcFile, tuType);
+
+            DoExtract(result, menulines, tuType, resultSelf);
+        }
+
+        private static string[] ReadAllLinesForRCFile(string rcFile, TranslateUnitType tuType)
+        {
             string[] menulines = File.ReadAllLines(rcFile, Encoding.Unicode);
             string all = File.ReadAllText(rcFile, Encoding.Unicode);
 
             if (menulines.Length == 1)
             {
+                Encoding encoding = FileUtil.GetEncoding(rcFile);
                 menulines = File.ReadAllLines(rcFile, encoding);
             }
 
@@ -460,11 +460,11 @@ namespace GlobalSight.WinPEConverter
 
                 if (!all.Contains(keyWord))
                 {
+                    Encoding encoding = FileUtil.GetEncoding(rcFile);
                     menulines = File.ReadAllLines(rcFile, encoding);
                 }
             }
-
-            DoExtract(result, menulines, tuType, resultSelf);
+            return menulines;
         }
 
         private List<TranslateUnit> ParsePEFile()

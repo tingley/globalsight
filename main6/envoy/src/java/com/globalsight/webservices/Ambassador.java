@@ -3359,6 +3359,7 @@ public class Ambassador extends AbstractWebService
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
         
+        p_workflowIds = p_workflowIds.replace(" ", "");
         String userName = getUsernameFromSession(p_accessToken);
         String userId = UserUtil.getUserIdByName(userName);
         if(p_workflowIds == null || p_workflowIds == "")

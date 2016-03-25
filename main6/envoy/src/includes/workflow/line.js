@@ -570,11 +570,11 @@ function Line() {
 	}
 }
 
-var lineIndex = -1;
+var lineIndex = 0;
 var regx = /Action(\d+)/;
 function getLineIndex(){
 	
-	if (lineIndex == -1){
+	if (lineIndex == 0){
 		for ( var i in LineData.lines) {
 			var l = LineData.lines[i];
 			var txt = l.data.txt;

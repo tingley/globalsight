@@ -399,6 +399,10 @@ public class MachineTranslateAdapter
         {
             mtProfile.setMsMaxLength(Long.parseLong(msMaxLength));
         }
+        else
+        {
+            mtProfile.setMsMaxLength(1000);
+        }
     }
 
     /**

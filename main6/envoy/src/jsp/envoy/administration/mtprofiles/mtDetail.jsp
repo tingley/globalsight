@@ -164,6 +164,10 @@
 				alert("Please check name");
 				return;
 			}
+			if(!checkLength()){
+				return;
+			};
+			
 			var mtIdentifiersRegex = /[\"\'<>&]/;
 			var mtIdentiferLeading = $.trim($("#mtIdentifierLeading").val());
 			var mtIdentiferTrailing = $.trim($("#mtIdentifierTrailing").val());
@@ -605,10 +609,14 @@
 	function checkLength()
 	{
 		var msMaxLength = $("#msMaxLength").val().trim();
-		if(msMaxLength == ' ' || !isPositiveNum(msMaxLength))
+		if(msMaxLength == '' || isPositiveNum(msMaxLength))
 		{
+			return true;
+		}else{
 			alert("<%=bundle.getString("msg_duplicate_max_length")%>");
+			return false;
 		}
+		
 	}
 	function isPositiveNum(s)
 	{
@@ -904,7 +912,7 @@
 									<TD><INPUT CLASS="standardText"
 										NAME="<%=MTProfileConstants.MT_MS_MAX_LENGTH%>"
 									id="msMaxLength" value="<%=mtProfile4val.getMsMaxLength()==0?1000:mtProfile4val.getMsMaxLength() %>"
-									 TYPE="text"	MAXLENGTH="20" SIZE="7" onblur="checkLength()"/>
+									 TYPE="text"	MAXLENGTH="20" SIZE="7"/>
 									</TD>
 								</TR>
 							</TABLE>

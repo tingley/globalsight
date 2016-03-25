@@ -164,7 +164,7 @@ if(!isPictureNextFile && i_index < state.getPages().size()-1)
 Vector targetLocalesList = state.getJobTargetLocales();
 StringBuffer str_targetLocaleBuffer = new StringBuffer();
 if(!isActivity){
-	if (targetLocalesList != null &&  targetLocalesList.size()>1)
+	if (targetLocalesList != null &&  targetLocalesList.size()>0)
 	{
 		SortUtil.sort(targetLocalesList, new GlobalSightLocaleComparator(Locale.getDefault()));
 		str_targetLocaleBuffer.append("<select name='tarLocales' onchange='switchTargetLocale(this[this.selectedIndex].value)' style='font-size: 8pt;'>");
@@ -249,11 +249,10 @@ var w_editor;
  function uploadFileMethod()
  {
 	 var fileName = document.uploadForm.fileFieldName.value;
-	 var str= new Array();   
-	 var fileArr = fileName.split(".");
-	 if(fileArr != null && fileArr.length > 1)
+	 var fileExtension = fileName.substring(fileName.lastIndexOf(".")+1,fileName.length);
+	 alert("fileExtension="+fileExtension);
+	 if(fileName.indexOf(".") != -1)
 	 {
-		 var fileExtension = fileArr[1];
 		 if(fileExtension != targetImageSuffix)
 		 {
 			alert("<%=lb_upload_image_difExtension_message%>");	

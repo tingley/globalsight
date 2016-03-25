@@ -68,7 +68,7 @@
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
 
 <!-- for workflow -->
-<%@ include file="/includes/workflow/l18n.js"%>
+<%@ include file="/includes/workflow/i18n.js"%>
 <%@ include file="/includes/workflow/template.js"%>
 
 <link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css" />

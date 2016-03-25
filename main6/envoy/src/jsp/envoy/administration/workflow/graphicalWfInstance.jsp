@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.everest.workflowmanager.Workflow"%>
 <%@ page contentType="text/html; charset=UTF-8"
 		errorPage="/envoy/common/error.jsp"
 		import="java.util.*,com.globalsight.everest.servlet.util.SessionManager,
@@ -34,7 +35,7 @@
       (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     String workflowTemplateInfoId = 
       (String)sessionMgr.getAttribute(WorkflowTemplateConstants.TEMPLATE_ID);
-    
+    Workflow workflow = (Workflow)sessionMgr.getAttribute(WorkflowTemplateConstants.WF_INSTANCE);
     String workflowName = (String)sessionMgr.getAttribute(
                            WorkflowTemplateConstants.WF_INSTANCE_NAME);
     String wfIdParam = (String)request.getAttribute(JobManagementHandler.WF_ID);
@@ -132,7 +133,7 @@ function onClose() {
 </style>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" 
-    ONLOAD="loadGuides()">
+    ONLOAD="loadGuides()" class="standardText">
 <%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
@@ -140,7 +141,16 @@ function onClose() {
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
 
 <div CLASS="standardTextBold">
-<%=workflowName%>
+    <table class="standardText">
+       <tr>
+           <td width="100"><b><%=bundle.getString("lb_job_name")%>:</b></td>
+           <td><%=workflow.getJob().getJobName() %></td>
+       </tr>
+       <tr>
+           <td><b><%=bundle.getString("lb_graphical_workflow_link")%>:</b></td>
+           <td><%=workflowName%></td>
+       </tr>
+   </table>
 </div>
 <DIV id="bodyDiv">
                 <table class="toolbar" id="toolbar">

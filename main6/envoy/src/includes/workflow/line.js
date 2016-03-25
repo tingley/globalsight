@@ -570,8 +570,23 @@ function Line() {
 	}
 }
 
-var lineIndex = 0;
+var lineIndex = -1;
+var regx = /Action(\d+)/;
 function getLineIndex(){
+	
+	if (lineIndex == -1){
+		for ( var i in LineData.lines) {
+			var l = LineData.lines[i];
+			var txt = l.data.txt;
+			var num = regx.exec(txt);
+			if (num != null){
+				var n = Number(num[1]);
+				if (n > lineIndex)
+				    lineIndex = n;
+			}
+		}
+	}
+	
 	lineIndex++;
 	return lineIndex;
 }

@@ -604,17 +604,17 @@
 	
 	function checkLength()
 	{
-		var sessionTime = $("#msMaxLength").val();
-		if(!isNumeric(sessionTime)){
-			alert("The value must be Integer!")
+		var msMaxLength = $("#msMaxLength").val().trim();
+		if(msMaxLength == ' ' || !isPositiveNum(msMaxLength))
+		{
+			alert("<%=bundle.getString("msg_duplicate_max_length")%>");
 		}
 	}
-	
-	function isNumeric(str){
-		if (str.startsWith("0"))
-			return false;
-		return /^(-|\+)?\d+(\.\d+)?$/.test(str);
-	}
+	function isPositiveNum(s)
+	{
+		var re = /^[0-9]*[1-9][0-9]*$/ ;
+		return re.test(s)
+	} 
 </SCRIPT>
 </HEAD>
 
@@ -677,6 +677,14 @@
 							SIZE="1" MAXLENGTH="3"
 							VALUE="<%=mtProfile.getMtConfidenceScore()%>">%</TD>
 					</TR>
+						<TR>
+						<td></td>
+						<TD align="left"><%=bundle.getString("lb_ms_ignore_tm_matches")%>:
+						<INPUT CLASS="standardText"	NAME="<%=MTProfileConstants.MT_IGNORE_TM_MATCHES%>"
+									id="ignoreTmMatches"<%=mtProfile.isIgnoreTMMatch() ? "checked" : ""%> 
+									TYPE="checkbox" />
+						</TD>
+					</TR>
 					<TR>
 						<TD align="left"><%=bundle.getString("lb_log_debug_info")%>:</TD>
 						<TD><INPUT CLASS="standardText"
@@ -685,13 +693,7 @@
 							<%=mtProfile.isLogDebugInfo() ? "checked" : ""%> TYPE="checkbox" />
 						</TD>
 					</TR>
-					<TR>
-						<TD align="left"><%=bundle.getString("lb_ms_ignore_tm_matches")%>:</TD>
-						<TD><INPUT CLASS="standardText"	NAME="<%=MTProfileConstants.MT_IGNORE_TM_MATCHES%>"
-									id="ignoreTmMatches"<%=mtProfile.isIgnoreTMMatch() ? "checked" : ""%> 
-									TYPE="checkbox" />
-						</TD>
-					</TR>
+				
 					<TR>
 						<TD align="left"><%=bundle.getString("lb_mt_include_mt_identifiers")%>:</TD>
 						<TD><INPUT CLASS="standardText" TYPE="checkbox" ID="includeMTIdentifiers" NAME="<%=MTProfileConstants.MT_INCLUDE_MT_IDENTIFIERS%>" <%=mtProfile.isIncludeMTIdentifiers() ? "checked" : ""%> />
@@ -902,7 +904,7 @@
 									<TD><INPUT CLASS="standardText"
 										NAME="<%=MTProfileConstants.MT_MS_MAX_LENGTH%>"
 									id="msMaxLength" value="<%=mtProfile4val.getMsMaxLength()==0?1000:mtProfile4val.getMsMaxLength() %>"
-									 TYPE="text"	MAXLENGTH="6" SIZE="7" onblur="checkLength()"/>
+									 TYPE="text"	MAXLENGTH="20" SIZE="7" onblur="checkLength()"/>
 									</TD>
 								</TR>
 							</TABLE>

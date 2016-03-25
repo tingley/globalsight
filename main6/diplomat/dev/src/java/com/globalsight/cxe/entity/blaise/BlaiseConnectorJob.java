@@ -22,11 +22,17 @@ public class BlaiseConnectorJob extends PersistentObject
 {
 	private static final long serialVersionUID = -933803792285804414L;
 
+	// Available values for "uploadXliffState" and "completeState".
+	public static String FAIL = "fail";
+	public static String SUCCEED = "succeed";
+
 	private long blaiseConnectorId;
 	private long blaiseEntryId;
     private long jobId;
-    
-	public long getBlaiseConnectorId()
+    private String uploadXliffState;
+    private String completeState;
+
+    public long getBlaiseConnectorId()
 	{
 		return blaiseConnectorId;
 	}
@@ -55,4 +61,24 @@ public class BlaiseConnectorJob extends PersistentObject
 	{
 		return jobId;
 	}
+
+    public String getUploadXliffState()
+    {
+        return uploadXliffState;
+    }
+
+    public void setUploadXliffState(String uploadXliffState)
+    {
+        this.uploadXliffState = uploadXliffState;
+    }
+
+    public String getCompleteState()
+    {
+        return completeState;
+    }
+
+    public void setCompleteState(String completeState)
+    {
+        this.completeState = completeState;
+    }
 }

@@ -16,6 +16,10 @@
         	length="20" type="long" not-null="true" />
         <property name="jobId" column="JOB_ID" 
         	length="20" type="long" not-null="true" />
+        <property name="uploadXliffState" length="20" column="UPLOAD_XLF_STATE" 
+            type="string" not-null="false" unique="false" />
+        <property name="completeState" length="20" column="COMPLETE_STATE" 
+            type="string" not-null="false" unique="false" />
     </class>
 
 </hibernate-mapping>

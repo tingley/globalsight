@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -43,13 +45,16 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.cognitran.translation.client.TranslationPageCommand;
 import com.globalsight.connector.blaise.form.BlaiseInboxEntryFilter;
 import com.globalsight.connector.blaise.form.CreateBlaiseJobForm;
 import com.globalsight.connector.blaise.util.BlaiseHelper;
 import com.globalsight.connector.blaise.util.BlaiseManager;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
+import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
 import com.globalsight.cxe.entity.customAttribute.Attribute;
+import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 import com.globalsight.cxe.entity.customAttribute.Condition;
 import com.globalsight.cxe.entity.customAttribute.DateCondition;
 import com.globalsight.cxe.entity.customAttribute.FloatCondition;
@@ -71,13 +76,13 @@ import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.util.comparator.BlaiseInboxEntryComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.FileUploader;
 import com.globalsight.everest.webapp.pagehandler.administration.createJobs.CreateJobsMainHandler;
+import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
@@ -91,73 +96,196 @@ public class BlaiseCreateJobHandler extends PageActionHandler
             .getLogger(BlaiseCreateJobHandler.class);
 
     private static final int MAX_THREAD = 5;
+    private static final int DEFAULT_PAGE_SIZE = 25;
 
-    private List<TranslationInboxEntryVo> allInboxEntries = null;
-    private List<TranslationInboxEntryVo> inboxEntries = null;
-    private Map<Long, TranslationInboxEntryVo> allInboxEntryMap = new HashMap<Long, TranslationInboxEntryVo>();
+    private static final String KEY = "blaiseEntryKey";
+
+    private static final String NUM_PER_PAGE = KEY + TableConstants.NUM_PER_PAGE_STR;
+    private static final String NUM_PAGES = KEY + TableConstants.NUM_PAGES;
+    private static final String SORTING = KEY + TableConstants.SORTING;
+    private static final String REVERSE_SORT = KEY + TableConstants.REVERSE_SORT;
+    private static final String PAGE_NUM = KEY + TableConstants.PAGE_NUM;
+    private static final String LAST_PAGE_NUM = KEY + TableConstants.LAST_PAGE_NUM;
+    private static final String TOTAL_SIZE = KEY + TableConstants.LIST_SIZE;
+    private static final String DO_SORT = KEY + TableConstants.DO_SORT;
+
+    private int totalSize = 0;
+    private List<TranslationInboxEntryVo> currPageEntries = null;
+    private Map<Long, TranslationInboxEntryVo> currPageEntryMap = new HashMap<Long, TranslationInboxEntryVo>();
 
     private BlaiseInboxEntryFilter filter = null;
 
+    // Cache helpers for performance: <blaise connector id>:<BlaiseHelper>
+    private static ConcurrentHashMap<Long, BlaiseHelper> helpers = new ConcurrentHashMap<Long, BlaiseHelper>();
+    
     @ActionHandler(action = "connect", formClass = "")
     public void prepareConnect(HttpServletRequest p_request,
             HttpServletResponse p_response, Object form) throws Exception
     {
-    	refreshAllInboxEntries(p_request);
+        helpers.clear();
     }
 
     @ActionHandler(action = "filter", formClass = "com.globalsight.connector.blaise.form.BlaiseInboxEntryFilter")
     public void filter(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
-		if (allInboxEntries == null) {
-			refreshAllInboxEntries(request);
-		}
-
     	filter = (BlaiseInboxEntryFilter) form;
-		inboxEntries = filter.filter(allInboxEntries);
 
 		SessionManager sessionMgr = getSessionManager(request);
-		sessionMgr.setAttribute("idFilter", filter.getIdFilter());
+		sessionMgr.setAttribute("relatedObjectIdFilter", filter.getRelatedObjectIdFilter());
 		sessionMgr.setAttribute("sourceLocaleFilter", filter.getSourceLocaleFilter());
 		sessionMgr.setAttribute("targetLocaleFilter", filter.getTargetLocaleFilter());
 		sessionMgr.setAttribute("descriptionFilter", filter.getDescriptionFilter());
 		sessionMgr.setAttribute("jobIdFilter", filter.getJobIdFilter());
     }
 
+    private void fetchEntries(HttpServletRequest request)
+    {
+        SessionManager sessionMgr = getSessionManager(request);
+        BlaiseConnector blc = getBlaiseConnector(request);
+        BlaiseHelper helper = getBlaiseHelper(blc);
+
+        int pageIndex = getPageNum(request);
+        int pageSize = getNumPerPage(request);
+        int sortBy = getSortBy(request);
+        boolean sortDesc = false;
+        String sourceLocaleFilter = (String) sessionMgr.getAttribute("sourceLocaleFilter");
+        String targetLocaleFilter = (String) sessionMgr.getAttribute("targetLocaleFilter");
+        String descriptionFilter = (String) sessionMgr.getAttribute("descriptionFilter");
+        String relatedObjectIdFilter = (String) sessionMgr.getAttribute("relatedObjectIdFilter");
+        String jobIdFilter = (String) sessionMgr.getAttribute("jobIdFilter");
+        Set<Long> entryIds = getEntryIdsFromJobIdFilter(jobIdFilter);
+
+        // For getInboxEntryCount, it does not care page index, page size, sort by, sort asc/desc.
+        TranslationPageCommand command = BlaiseHelper.initTranslationPageCommand(pageIndex,
+                pageSize, relatedObjectIdFilter, sourceLocaleFilter, targetLocaleFilter,
+                descriptionFilter, sortBy, sortDesc);
+        if (entryIds.size() > 0)
+        {
+            pageIndex = 1;
+            command.setPageIndex(pageIndex);
+            command.setSortDesc(isSortDesc(request, pageIndex, sortBy));
+            currPageEntries = helper.listInboxByIds(entryIds, command);
+            totalSize = currPageEntries.size();
+        }
+        else
+        {
+            totalSize = helper.getInboxEntryCount(command);
+            pageIndex = possibllyFixPageIndex(totalSize, pageSize, pageIndex);
+            command.setPageIndex(pageIndex);
+            command.setSortDesc(isSortDesc(request, pageIndex, sortBy));
+            currPageEntries = helper.listInbox(command);
+        }
+
+        currPageEntryMap.clear();
+        for (TranslationInboxEntryVo entry : currPageEntries)
+        {
+            currPageEntryMap.put(entry.getId(), entry);
+        }
+    }
+
+    private Set<Long> getEntryIdsFromJobIdFilter(String jobIdFilter)
+    {
+        Set<Long> entryIds = new HashSet<Long>();
+        if (StringUtil.isEmpty(jobIdFilter))
+            return entryIds;
+
+        for (String jobId : jobIdFilter.split(","))
+        {
+            try
+            {
+                BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(Long
+                        .parseLong(jobId.trim()));
+                if (bcj != null)
+                {
+                    entryIds.add(bcj.getBlaiseEntryId());
+                }
+            }
+            catch (NumberFormatException e)
+            {
+                
+            }
+        }
+
+        return entryIds;
+    }
+
+    private int possibllyFixPageIndex(int totalSize, int pageSize, int pageIndex)
+    {
+        int numOfPages = getNumOfPages(totalSize, pageSize);
+        if ((totalSize % pageSize == 0) && (pageIndex * pageSize > totalSize))
+        {
+            pageIndex--;
+            if (pageIndex == 0)
+            {
+                pageIndex = 1;
+            }
+        }
+        if (pageIndex > numOfPages)
+        {
+            pageIndex = 1;
+        }
+        return pageIndex;
+    }
+
+    private boolean isSortDesc(HttpServletRequest request, int pageIndex, int sortBy)
+    {
+        boolean isSortDesc = false;
+
+        SessionManager sessionMgr = getSessionManager(request);
+        String isSortDescStr = (String) sessionMgr.getAttribute("isSortDesc");
+        if (StringUtil.isNotEmpty(isSortDescStr))
+        {
+            isSortDesc = "true".equals(isSortDescStr) ? true : false;
+        }
+
+        Integer lastSortChoice = (Integer) sessionMgr.getAttribute(SORTING);
+        Integer currentSortChoice = new Integer(sortBy);
+        String doSort = (String) request.getParameter(DO_SORT);
+        // click column header to reverse sorting
+        if (doSort != null)
+        {
+            if (lastSortChoice != null && lastSortChoice.equals(currentSortChoice))
+            {
+                isSortDesc = !isSortDesc;
+            }
+            else
+            {
+                isSortDesc = false;
+            }
+        }
+        // page navigation/filtering/page size change
+        else
+        {
+            if (lastSortChoice == null || !lastSortChoice.equals(currentSortChoice))
+            {
+                isSortDesc = false;
+            }
+        }
+
+        sessionMgr.setAttribute("isSortDesc", String.valueOf(isSortDesc));
+
+        return isSortDesc;
+    }
+
     @ActionHandler(action = "claim", formClass = "")
     public void claim(HttpServletRequest p_request,
             HttpServletResponse p_response, Object form) throws Exception
     {
-    	// Refresh to get latest entries
-    	refreshAllInboxEntries(p_request);
-
     	BlaiseConnector blc = getBlaiseConnector(p_request);
-    	BlaiseHelper helper = new BlaiseHelper(blc);
+    	BlaiseHelper helper = getBlaiseHelper(blc);
 
-    	boolean flag = false;
     	String selectedEntryIds = p_request.getParameter("entryIds");
     	String[] ids = selectedEntryIds.split(",");
     	for (String id : ids)
     	{
     		long longId = Long.parseLong(id.trim());
-    		TranslationInboxEntryVo entry = allInboxEntryMap.get(longId);
+    		TranslationInboxEntryVo entry = currPageEntryMap.get(longId);
     		if (entry != null && entry.getEntry().isGroup())
     		{
     			helper.claim(longId);
-    			flag = true;
     		}
     	}
-
-		// Refresh to get latest entries again
-		if (flag)
-		{
-			refreshAllInboxEntries(p_request);
-		}
-
-		if (filter != null)
-		{
-			inboxEntries = filter.filter(allInboxEntries);
-		}
     }
 
     /**
@@ -174,7 +302,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
     		for (String entryId : entryIds.split(",")) {
     			try {
         			long id = Long.parseLong(entryId);
-        			TranslationInboxEntryVo vo = allInboxEntryMap.get(id);
+        			TranslationInboxEntryVo vo = currPageEntryMap.get(id);
         			if (vo != null) {
             			selectedEntries.add(vo);
         			}
@@ -221,6 +349,57 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         pageReturn();
     }
 
+    /**
+     * Get job attributes
+     * 
+     * @param request
+     * @param response
+     * @throws IOException
+     */
+    @ActionHandler(action = "checkAttributeRequired", formClass = "")
+    public void checkAttributeRequired(HttpServletRequest request, HttpServletResponse response,
+            Object form) throws IOException
+    {
+        PrintWriter writer = response.getWriter();
+        try
+        {
+            String l10Nid = request.getParameter("l10Nid");
+            String hasAttribute = "false";
+            L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfile(Long.valueOf(l10Nid));
+            Project p = lp.getProject();
+            AttributeSet attributeSet = p.getAttributeSet();
+
+            if (attributeSet != null)
+            {
+                List<Attribute> attributeList = attributeSet.getAttributeAsList();
+                for (Attribute attribute : attributeList)
+                {
+                    if (attribute.isRequired())
+                    {
+                        hasAttribute = "required";
+                        break;
+                    }
+                    else
+                    {
+                        hasAttribute = "true";
+                    }
+                }
+            }
+            response.setContentType("text/html;charset=UTF-8");
+            writer.write(hasAttribute);
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to query job attributes of project.", e);
+        }
+        finally
+        {
+            writer.close();
+        }
+        
+        pageReturn();
+    }
+
     @ActionHandler(action = "createBlaiseJob", formClass = "com.globalsight.connector.blaise.form.CreateBlaiseJobForm")
     public void createBlaiseJob(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
@@ -228,6 +407,9 @@ public class BlaiseCreateJobHandler extends PageActionHandler
     	CreateBlaiseJobForm blaiseForm = (CreateBlaiseJobForm) form;
         SessionManager sessionMgr = this.getSessionManager(request);
 
+        // Have to reset?
+        resetParameters(request, blaiseForm);
+       
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
 		if (user == null) {
@@ -253,8 +435,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
         List<Long> entryIds = new ArrayList<Long>();
         List<FileProfile> fileProfileList = new ArrayList<FileProfile>();
-        String fileMapFileProfile = blaiseForm.getFileMapFileProfile();
-        String[] ffs = fileMapFileProfile.split(",");
+        String[] ffs = blaiseForm.getFileMapFileProfile().split(",");
         for (String ff : ffs)
         {
             String[] f = ff.split("-");
@@ -264,11 +445,10 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         }
 
         // Claim all entries one by one.
-        BlaiseHelper helper = new BlaiseHelper(blc);
+        BlaiseHelper helper = getBlaiseHelper(blc);
         for (int i = 0; i < entryIds.size(); i++)
         {
-        	TranslationInboxEntryVo curEntry =
-        			allInboxEntryMap.get(entryIds.get(i));
+            TranslationInboxEntryVo curEntry = currPageEntryMap.get(entryIds.get(i));
         	if (curEntry.getEntry().isGroup())
         	{
                 helper.claim(entryIds.get(i));
@@ -290,8 +470,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
 		// Every entry creates one job with one workflow
 		for (int i = 0; i < entryIds.size(); i++)
         {
-        	TranslationInboxEntryVo curEntry =
-        			allInboxEntryMap.get(entryIds.get(i));
+            TranslationInboxEntryVo curEntry = currPageEntryMap.get(entryIds.get(i));
         	FileProfile curFileProfile = fileProfileList.get(i);
             String uuid = JobImpl.createUuid();
             if (srcFolder!= null && srcFolder.exists())
@@ -342,14 +521,16 @@ public class BlaiseCreateJobHandler extends PageActionHandler
 			EnvoyServletException
     {
         response.setCharacterEncoding("utf-8");
-        response.setContentType("text/html"); 
-	}
+        response.setContentType("text/html");
+    }
 
 	@Override
 	public void afterAction(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException,
 			EnvoyServletException
 	{
+	    fetchEntries(request);
+
         setLables(request, PageHandler.getBundle(request.getSession(false)));
 
         // All XLF 1.2 file profiles.
@@ -361,11 +542,42 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         BlaiseConnector blc = getBlaiseConnector(request);
 		getSessionManager(request).setAttribute("blaiseConnector", blc);
 
-		setJobIdsForEntries(blc.getId(), inboxEntries);
+		setJobIdsForEntries(blc.getId(), currPageEntries);
 
 		setCreatingJobsNum(request);
 
-        dataForTable(request);
+		setBlaiseLocalesInfo(request);
+
+		dataForTable(request);
+	}
+
+	private void resetParameters(HttpServletRequest request, CreateBlaiseJobForm blaiseForm)
+	{
+        String blaiseConnectorId = request.getParameter("blaiseConnectorId");
+        if (StringUtil.isNotEmpty(blaiseConnectorId))
+        {
+            blaiseForm.setBlaiseConnectorId(blaiseConnectorId);
+        }
+        String attributeString = request.getParameter("attributeString");
+        if (StringUtil.isNotEmpty(attributeString))
+        {
+            blaiseForm.setAttributeString(attributeString);
+        }
+        String fileMapFileProfile = request.getParameter("fileMapFileProfile");
+        if (StringUtil.isNotEmpty(fileMapFileProfile))
+        {
+            blaiseForm.setFileMapFileProfile(fileMapFileProfile);
+        }
+        String priority = request.getParameter("priority");
+        if (StringUtil.isNotEmpty(priority))
+        {
+            blaiseForm.setPriority(priority);
+        }
+        String comment = request.getParameter("comment");
+        if (StringUtil.isNotEmpty(comment))
+        {
+            blaiseForm.setComment(comment);
+        }
 	}
 
 	private void setEntryInfo(HttpServletRequest request)
@@ -376,10 +588,9 @@ public class BlaiseCreateJobHandler extends PageActionHandler
 
         HashMap<Long, String> id2FileNameMap = new HashMap<Long, String>();
         HashMap<Long, String> id2LocaleMap =  new HashMap<Long, String>();
-        for (TranslationInboxEntryVo entry : allInboxEntries)
+        for (TranslationInboxEntryVo entry : currPageEntries)
         {
-			id2FileNameMap.put(entry.getId(),
-					BlaiseHelper.getEntryFileName(entry));
+            id2FileNameMap.put(entry.getId(), BlaiseHelper.getEntryFileName(entry));
 
 			Locale javaLocale = entry.getTargetLocale();
 			String localeCode = BlaiseHelper.fixLocale(javaLocale.getLanguage()
@@ -394,6 +605,12 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         getSessionManager(request).setAttribute("id2FileNameMap", id2FileNameMap);
         getSessionManager(request).setAttribute("id2LocaleMap", id2LocaleMap);
 	}
+
+    private void setBlaiseLocalesInfo(HttpServletRequest request)
+    {
+        getSessionManager(request).setAttribute("allBlaiseLocales",
+                BlaiseHelper.blaiseSupportedLocales);
+    }
 
 	private String getXlfFileProfileOptions(HttpServletRequest request)
     {
@@ -535,29 +752,202 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         request.setAttribute("creatingJobsNum", creatingJobsNum);
 	}
 
-	private void dataForTable(HttpServletRequest request)
-            throws GeneralException
+    @SuppressWarnings("rawtypes")
+    private void dataForTable(HttpServletRequest request) throws GeneralException
     {
         HttpSession session = request.getSession(false);
-        Locale uiLocale = (Locale) session
-                .getAttribute(WebAppConstants.UILOCALE);
+        SessionManager sessionManager = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
 
+        int numPerPage = getNumPerPage(request);
+        int numOfPages = getNumOfPages(totalSize, numPerPage);
+        int pageNum = this.getCurrentPageNum(request, totalSize, numPerPage);
+
+        Integer lastPageNumber = (Integer) sessionManager.getAttribute(LAST_PAGE_NUM);
+
+        int sortChoice = getSortBy(request);
+
+        Boolean reverseSort = Boolean.FALSE;
+        // Compare to the last sort choice. If the sort choice has changed,
+        // then kick them back to page one
+        Integer lastSortChoice = (Integer) sessionManager.getAttribute(SORTING);
+
+        Integer currentSortChoice = new Integer(sortChoice);
+        reverseSort = (Boolean) sessionManager.getAttribute(REVERSE_SORT);
+        if (reverseSort == null)
+        {
+            reverseSort = Boolean.FALSE;
+            sessionManager.setAttribute(REVERSE_SORT, reverseSort);
+        }
+        Integer currentPageNumber = new Integer(pageNum);
+        if (lastPageNumber == null)
+        {
+            lastPageNumber = currentPageNumber;
+            sessionManager.setAttribute(LAST_PAGE_NUM, lastPageNumber);
+        }
+
+        // "doSort" should be passed in the url on column headers. This
+        // is so that when another button on that page returns to the same
+        // page, it keeps the same sort, rather than reversing it.
+        String doSort = (String) request.getParameter(DO_SORT);
+        if (lastSortChoice == null)
+        {
+            sessionManager.setAttribute(SORTING, currentSortChoice);
+        }
+        else if (doSort != null)
+        {
+            // see if the user stayed on the same page and
+            // clicked a sort column header
+            if (lastSortChoice.equals(currentSortChoice))
+            {
+                // flip the sort direction (no auto refresh on this page)
+                // if they clicked the same link again on the same page
+                if (lastPageNumber.equals(currentPageNumber))
+                {
+                    reverseSort = new Boolean(!reverseSort.booleanValue());
+                    sessionManager.setAttribute(REVERSE_SORT, reverseSort);
+                }
+            }
+            else
+            {
+                reverseSort = Boolean.FALSE;
+                sessionManager.setAttribute(REVERSE_SORT, reverseSort);
+            }
+            sessionManager.setAttribute(SORTING, currentSortChoice);
+        }
+
+        if (currPageEntries == null)
+            request.setAttribute("blaiseEntryList", new ArrayList());
+        else
+            request.setAttribute("blaiseEntryList", currPageEntries);
+
+        request.setAttribute(PAGE_NUM, new Integer(pageNum));
+        request.setAttribute(NUM_PAGES, new Integer(numOfPages));
+        request.setAttribute(NUM_PER_PAGE, new Integer(numPerPage));
+        request.setAttribute(TOTAL_SIZE, new Integer(totalSize));
+
+        // remember the sortChoice and pageNumber
+        int current = currentPageNumber.intValue();
+        if (current > numOfPages && numOfPages != 0)
+        {
+            sessionManager.setAttribute(LAST_PAGE_NUM, new Integer(current - 1));
+        }
+        else
+        {
+            sessionManager.setAttribute(LAST_PAGE_NUM, currentPageNumber);
+        }
+    }
+
+    private int getPageNum(HttpServletRequest request)
+    {
+        String currentPageNumber = (String) request.getParameter(PAGE_NUM);
+        HttpSession session = request.getSession(false);
+        SessionManager sessionManager = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        Integer lastPageNumber = (Integer) sessionManager.getAttribute(LAST_PAGE_NUM);
+
+        int pageNum = 1;
+        if (currentPageNumber != null)
+        {
+            pageNum = Integer.parseInt(currentPageNumber);
+        }
+        else if (lastPageNumber != null)
+        {
+            pageNum = lastPageNumber.intValue();
+        }
+
+        return pageNum;
+    }
+
+    private int getNumPerPage(HttpServletRequest request)
+    {
+        HttpSession session = request.getSession(false);
         Integer orgSize = (Integer) session.getAttribute("blaiseConnectorPageSize");
-        int size = orgSize == null ? 10 : orgSize;
+        int pageSize = orgSize == null ? DEFAULT_PAGE_SIZE : orgSize;
         String numOfPerPage = request.getParameter("numOfPageSize");
-		if (StringUtil.isNotEmpty(numOfPerPage)) {
-			try {
-				size = Integer.parseInt(numOfPerPage);
-			} catch (Exception e) {
-				size = Integer.MAX_VALUE;
-			}
+        if (StringUtil.isNotEmpty(numOfPerPage))
+        {
+            try
+            {
+                pageSize = Integer.parseInt(numOfPerPage);
+            }
+            catch (Exception e)
+            {
+                pageSize = Integer.MAX_VALUE;
+            }
 
-			session.setAttribute("blaiseConnectorPageSize", size);
-		}
+            session.setAttribute("blaiseConnectorPageSize", pageSize);
+        }
 
-		setTableNavigation(request, session, inboxEntries,
-				new BlaiseInboxEntryComparator(uiLocale), size,
-				"blaiseInboxEntryList", "blaiseInboxEntryKey");
+        return pageSize;
+    }
+
+    private int getCurrentPageNum(HttpServletRequest request, int totalSize, int pageSize)
+    {
+        int numOfPages = getNumOfPages(totalSize, pageSize);
+
+        SessionManager sessionManager = getSessionManager(request);
+        Integer lastPageNumber = (Integer) sessionManager.getAttribute(LAST_PAGE_NUM);
+        String currentPageNumber = (String) request.getParameter(PAGE_NUM);
+
+        int pageNum = 1;
+        if (currentPageNumber != null)
+        {
+            pageNum = Integer.parseInt(currentPageNumber);
+        }
+        else if (lastPageNumber != null)
+        {
+            pageNum = lastPageNumber.intValue();
+        }
+
+        // GBS-1322 problem (4).
+        // Page number will be set to previous or no result page if removing the
+        // record which is the only one in current page.
+        if ((totalSize % pageSize == 0) && (pageNum * pageSize > totalSize))
+        {
+            pageNum--;
+            if (pageNum == 0)
+            {
+                pageNum = 1;
+            }
+        }
+        if (pageNum > numOfPages)
+        {
+            pageNum = 1;
+        }
+        return pageNum;
+    }
+
+    private int getSortBy(HttpServletRequest request)
+    {
+        int sortChoice = 0;
+
+        String sortType = (String) request.getParameter(SORTING);
+        if (sortType == null)
+        {
+            SessionManager sessionManager = getSessionManager(request);
+            Integer sortTypeInt = (Integer) sessionManager.getAttribute(SORTING);
+            if (sortTypeInt != null)
+                sortType = sortTypeInt.toString();
+        }
+        if (sortType != null)
+        {
+            sortChoice = Integer.parseInt(sortType);
+        }
+        return sortChoice;
+    }
+
+    // get total number of pages that can be displayed.
+    private int getNumOfPages(int numOfItems, int perPage)
+    {
+        if (perPage == 0)
+        {
+            return perPage;
+        }
+        // List of templates
+        int remainder = numOfItems % perPage;
+
+        return remainder == 0 ? (numOfItems / perPage) : ((numOfItems - remainder) / perPage) + 1;
     }
 
     private void setLables(HttpServletRequest request, ResourceBundle bundle)
@@ -616,23 +1006,6 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         String label = bundle.getString(msg);
         request.setAttribute(msg, label);
     }
-
-    /**
-	 * Get all latest Blaise inbox entries.
-	 */
-	private void refreshAllInboxEntries(HttpServletRequest request)
-	{
-		BlaiseConnector blc = getBlaiseConnector(request);
-		BlaiseHelper helper = new BlaiseHelper(blc);
-		allInboxEntries = helper.listInbox();
-		inboxEntries = allInboxEntries;
-
-		allInboxEntryMap.clear();
-		for (TranslationInboxEntryVo entry : allInboxEntries)
-		{
-			allInboxEntryMap.put(entry.getId(), entry);
-		}
-	}
 
 	private BlaiseConnector getBlaiseConnector(HttpServletRequest request)
 	{
@@ -740,6 +1113,18 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         }
 
         return jobAttributeList;
+    }
+
+    private BlaiseHelper getBlaiseHelper(BlaiseConnector blc)
+    {
+        BlaiseHelper helper = helpers.get(blc.getIdAsLong());
+        if (helper == null)
+        {
+            helper = new BlaiseHelper(blc);
+            helpers.put(blc.getIdAsLong(), helper);
+        }
+
+        return helper;
     }
 
     private SessionManager getSessionManager(HttpServletRequest request)

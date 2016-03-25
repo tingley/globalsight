@@ -839,7 +839,7 @@ public class Exporter
                     finalFileName = finalFileName.replace("/", "\\");
                     File trgFile = new File(finalFileName);
                     BlaiseHelper helper = new BlaiseHelper(blc);
-                    helper.uploadXliff(bcj.getBlaiseEntryId(), trgFile);
+                    helper.uploadXliff(bcj.getBlaiseEntryId(), trgFile, jobId);
                 }
             }
         }

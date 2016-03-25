@@ -23,7 +23,7 @@ import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
 
 public class BlaiseInboxEntryFilter
 {
-    private String idFilter = null;
+    private String relatedObjectIdFilter = null;
 	private String sourceLocaleFilter = null;
     private String targetLocaleFilter = null;
     private String descriptionFilter = null;
@@ -35,7 +35,7 @@ public class BlaiseInboxEntryFilter
         
         for (TranslationInboxEntryVo entry : entries)
         {
-            if (!like(idFilter, String.valueOf(entry.getRelatedObjectId())))
+            if (!like(relatedObjectIdFilter, String.valueOf(entry.getRelatedObjectId())))
             {
                 continue;
             }
@@ -84,14 +84,14 @@ public class BlaiseInboxEntryFilter
         return candidateValue.indexOf(filterValue) > -1;
     }
 
-    public String getIdFilter()
+    public String getRelatedObjectIdFilter()
     {
-		return idFilter;
+		return relatedObjectIdFilter;
 	}
 
-	public void setIdFilter(String idFilter)
+	public void setRelatedObjectIdFilter(String relatedObjectIdFilter)
 	{
-		this.idFilter = idFilter;
+		this.relatedObjectIdFilter = relatedObjectIdFilter;
 	}
 
 	public String getSourceLocaleFilter()

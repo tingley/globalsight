@@ -46,7 +46,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.globalsight.connector.blaise.util.BlaiseManager;
 import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
+import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
 import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
@@ -181,7 +183,16 @@ public class JobSummaryHelper
         p_request.setAttribute("sourceWordCount", totalWord);
         // Set extra info for PPTX and DOCX files (GBS-3373) 
         setPptxDocxInfo(job, p_request);
-		
+
+        if (job.isBlaiseJob())
+        {
+            BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(job.getId());
+            if (bcj != null)
+            {
+                p_request.setAttribute("blaiseUploadXliffState", bcj.getUploadXliffState());
+                p_request.setAttribute("blaiseCompleteState", bcj.getCompleteState());
+            }
+        }
 		// Edit Source page word counts and edit costs page needed
 		sessionMgr.setAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET,
 				job.getJobName());

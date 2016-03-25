@@ -354,7 +354,7 @@ public class EditorHelper implements EditorConstants
         SourcePage srcPage;
         TargetPage trgPage, nextTrgPage = null, previousTargetPage = null;
         GlobalSightLocale srcLocale, trgLocale;
-        List unextractedTargetPages;
+        List unextractedTargetPages,extractedTargetPages;
         EditorState.PagePair pair = null;
         String openEditorType = p_state.getOpenEditorType();
         // New: For target page lookup the source page. Add the source
@@ -377,8 +377,10 @@ public class EditorHelper implements EditorConstants
                     continue l_workflows;
                 }
        
-                unextractedTargetPages = (List) workflow
-                        .getTargetPages(ExtractedSourceFile.UNEXTRACTED_FILE);
+                unextractedTargetPages = getNewUnextractedList(workflow
+                        .getTargetPages(ExtractedSourceFile.UNEXTRACTED_FILE));
+                extractedTargetPages = workflow.getTargetPages(ExtractedSourceFile.EXTRACTED_FILE);
+                
                 Vector<TargetPage> targetPages = workflow.getTargetPages();
                 
                 l_targetpages:
@@ -400,12 +402,14 @@ public class EditorHelper implements EditorConstants
                     
                     if (i < targetPages.size() - 1)
                     {
-                        nextTrgPage = targetPages.get(i + 1);
+                        nextTrgPage = getNextTargetPage(unextractedTargetPages,
+                                extractedTargetPages, targetPages, i);
                     }
-                    
+
                     if (i > 0)
                     {
-                        previousTargetPage = (TargetPage)targetPages.get(i-1);
+                        previousTargetPage = getPreviousTargetPage(unextractedTargetPages,
+                                extractedTargetPages, targetPages, i);
                     }
                     
                     if (pagesHash.containsKey(srcPage.getIdAsLong()))
@@ -431,10 +435,9 @@ public class EditorHelper implements EditorConstants
                                         pair = new EditorState.PagePair(srcPage.getIdAsLong(),
                                                 srcPage.getGlobalSightLocale(),
                                                 srcPage.getExternalPageId(), false,
-                                                workflow.getState(), isPictureFile(
-                                                        unextractedTargetPages, nextTrgPage),
-                                                isPictureFile(unextractedTargetPages,
-                                                        previousTargetPage));
+                                                workflow.getState(),
+                                                unextractedTargetPages.contains(nextTrgPage),
+                                                unextractedTargetPages.contains(previousTargetPage));
 
                                         pair.putTargetPage(trgLocale, trgPage.getIdAsLong());
                                         pagesHash.put(srcPage.getIdAsLong(), pair);
@@ -442,14 +445,15 @@ public class EditorHelper implements EditorConstants
                                 }
                             }
                         }
-                        else
+                        else if (extractedTargetPages != null
+                                && extractedTargetPages.contains(trgPage))
                         {
                             pair = new EditorState.PagePair(srcPage.getIdAsLong(),
                                     srcPage.getGlobalSightLocale(), srcPage.getExternalPageId(),
                                     getExtractedSourceFile(srcPage).containGsTags(),
-                                    workflow.getState(), isPictureFile(unextractedTargetPages,
-                                            nextTrgPage), isPictureFile(unextractedTargetPages,
-                                            previousTargetPage));
+                                    workflow.getState(),
+                                    unextractedTargetPages.contains(nextTrgPage),
+                                    unextractedTargetPages.contains(previousTargetPage));
 
                             pair.putTargetPage(trgLocale, trgPage.getIdAsLong());
                             pagesHash.put(srcPage.getIdAsLong(), pair);
@@ -458,8 +462,6 @@ public class EditorHelper implements EditorConstants
                 }
             }
 
-//            it1 = p_job.getSourcePages(ExtractedSourceFile.EXTRACTED_FILE)
-//                    .iterator();
             it1 = p_job.getSourcePages().iterator();
             while (it1.hasNext())
             {
@@ -574,7 +576,7 @@ public class EditorHelper implements EditorConstants
         ArrayList<EditorState.PagePair> pages = new ArrayList<EditorState.PagePair>();
 
         SourcePage srcPage;
-        TargetPage trgPage,nextTargetPage = null,previousTargetPage=null;
+        TargetPage trgPage, nextTargetPage = null, previousTargetPage = null;
         GlobalSightLocale srcLocale, trgLocale;
         Iterator it;
 
@@ -585,7 +587,11 @@ public class EditorHelper implements EditorConstants
         String openEditorType = p_state.getOpenEditorType();
         EditorState.PagePair pair = null;
         
-        List unextractedList = p_task.getTargetPages(ExtractedSourceFile.UNEXTRACTED_FILE);
+        
+        List unextractedList = getNewUnextractedList(p_task
+                .getTargetPages(ExtractedSourceFile.UNEXTRACTED_FILE));
+        List extractedFileList = p_task.getTargetPages(ExtractedSourceFile.EXTRACTED_FILE);
+        
         List targetPages = p_task.getTargetPages();
         
         for(int i=0;i<targetPages.size();i++)
@@ -595,12 +601,14 @@ public class EditorHelper implements EditorConstants
            
             if (i < targetPages.size() - 1)
             {
-                nextTargetPage = (TargetPage)targetPages.get(i+1);
+                nextTargetPage = getNextTargetPage(unextractedList, extractedFileList, targetPages,
+                        i);
             }
-            
+
             if (i > 0)
             {
-                previousTargetPage = (TargetPage)targetPages.get(i-1);
+                previousTargetPage = getPreviousTargetPage(unextractedList, extractedFileList,
+                        targetPages, i);
             }
             
             if (unextractedList != null && unextractedList.contains(trgPage))
@@ -617,8 +625,8 @@ public class EditorHelper implements EditorConstants
                         {
                             pair = new EditorState.PagePair(srcPage.getId(), srcLocale,
                                     srcPage.getExternalPageId(), false, Workflow.DISPATCHED,
-                                    isPictureFile(unextractedList, nextTargetPage), isPictureFile(
-                                            unextractedList, previousTargetPage));
+                                    unextractedList.contains(nextTargetPage),
+                                    unextractedList.contains(previousTargetPage));
 
                             pair.putTargetPage(trgLocale, trgPage.getIdAsLong());
                             pages.add(pair);
@@ -626,13 +634,14 @@ public class EditorHelper implements EditorConstants
                     }
                 }
             }
-            else
+            else if (extractedFileList != null && extractedFileList.contains(trgPage))
             {
                 pair = new EditorState.PagePair(srcPage.getId(), srcLocale,
                         srcPage.getExternalPageId(), getExtractedSourceFile(srcPage)
-                                .containGsTags(), Workflow.DISPATCHED, isPictureFile(
-                                unextractedList, nextTargetPage), isPictureFile(unextractedList,
-                                previousTargetPage));
+                                .containGsTags(), Workflow.DISPATCHED,
+                        unextractedList.contains(nextTargetPage),
+                        unextractedList.contains(previousTargetPage));
+                
                 pair.putTargetPage(trgLocale, trgPage.getIdAsLong());
                 pages.add(pair);
             }
@@ -640,32 +649,69 @@ public class EditorHelper implements EditorConstants
         
         p_state.setPages(pages);
     }
-
-    private static boolean isPictureFile(List unextractedList,TargetPage targetPage)
+    
+    private static TargetPage getNextTargetPage(List unextractedList, List extractedFileList,
+            List targetPages, int index)
     {
-        boolean isPictureNextFile = false;
-        if (targetPage == null)
-            return isPictureNextFile;
-
-        if (unextractedList != null && unextractedList.size() > 0)
+        TargetPage nextTargetPage = null;
+        for (int j = index + 1; j < targetPages.size() - 1; j++)
         {
-            if (unextractedList.contains(targetPage))
+            nextTargetPage = (TargetPage) targetPages.get(j);
+            if (!unextractedList.contains(nextTargetPage)
+                    && !extractedFileList.contains(nextTargetPage))
             {
-                String pageName = targetPage.getDisplayPageName();
-                if (pageName.lastIndexOf(".") != -1)
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+        return nextTargetPage;
+    }
+
+    private static TargetPage getPreviousTargetPage(List unextractedList, List extractedFileList,
+            List targetPages, int index)
+    {
+        TargetPage previousTargetPage = null;
+        for (int j = index - 1; j > 0; j--)
+        {
+            previousTargetPage = (TargetPage) targetPages.get(j);
+            if (!unextractedList.contains(previousTargetPage)
+                    && !extractedFileList.contains(previousTargetPage))
+            {
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+        return previousTargetPage;
+    }
+    
+    private static List getNewUnextractedList(List unextractedList)
+    {
+        ArrayList targetPages = new ArrayList();
+        TargetPage targetPage = null;
+        for (int i = 0; i < unextractedList.size(); i++)
+        {
+            targetPage = (TargetPage) unextractedList.get(i);
+            String pageName = targetPage.getDisplayPageName();
+            if (pageName.lastIndexOf(".") != -1)
+            {
+                String fileExtension = pageName.substring(pageName.lastIndexOf('.') + 1)
+                        .toLowerCase();
+                if (WebAppConstants.FILE_EXTENSION_LIST.contains(fileExtension))
                 {
-                    String fileExtension = pageName.substring(pageName.lastIndexOf('.') + 1)
-                            .toLowerCase();
-                    if (WebAppConstants.FILE_EXTENSION_LIST.contains(fileExtension))
-                    {
-                        isPictureNextFile = true;
-                    }
+                    targetPages.add(targetPage);
                 }
             }
         }
-        return isPictureNextFile;
+
+        return targetPages;
     }
-    
+
     static public void setExcludedItemsFromActivity(EditorState p_state,
             Task p_task)
     {

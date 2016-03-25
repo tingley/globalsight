@@ -183,20 +183,23 @@ namespace GlobalSight.WinPEConverter
             }
             finally
             {
-                DeleteFile(menurc);
-                DeleteFile(stringrc);
-                DeleteFile(dialogrc);
-                DeleteFile(versionrc);
+                if (!AppConfig.KeepTempFiles)
+                {
+                    DeleteFile(menurc);
+                    DeleteFile(stringrc);
+                    DeleteFile(dialogrc);
+                    DeleteFile(versionrc);
 
-                DeleteFile(menures);
-                DeleteFile(stringres);
-                DeleteFile(dialogres);
-                DeleteFile(versionres);
+                    DeleteFile(menures);
+                    DeleteFile(stringres);
+                    DeleteFile(dialogres);
+                    DeleteFile(versionres);
 
-                DeleteFile(m_newFileName0);
-                DeleteFile(m_newFileName1);
-                DeleteFile(m_newFileName2);
-                DeleteFile(m_newFileName3);
+                    DeleteFile(m_newFileName0);
+                    DeleteFile(m_newFileName1);
+                    DeleteFile(m_newFileName2);
+                    DeleteFile(m_newFileName3);
+                }
             }
         }
 
@@ -229,11 +232,13 @@ namespace GlobalSight.WinPEConverter
 
                 File.WriteAllLines(rcFile, menulines, Encoding.Unicode);
                 comUtil.Compile(rcFile, resFile);
+                DebugCompile(Encoding.Unicode, resFile);
 
                 if (!File.Exists(resFile) || File.ReadAllBytes(resFile).Length == 32)
                 {
                     File.WriteAllLines(rcFile, menulines, Encoding.Default);
                     comUtil.Compile(rcFile, resFile);
+                    DebugCompile(Encoding.Default, resFile);
                 }
 
                 if (!File.Exists(resFile) || File.ReadAllBytes(resFile).Length == 32)
@@ -243,8 +248,8 @@ namespace GlobalSight.WinPEConverter
                     switch (tuType)
                     {
                         case TranslateUnitType.StringType: specalChar = " "; break;
-                        case TranslateUnitType.DialogType: specalChar = "\x2063"; break;
-                        case TranslateUnitType.MenuType: specalChar = "\x2063"; break;
+                        case TranslateUnitType.DialogType: specalChar = "&amp;"; break;
+                        case TranslateUnitType.MenuType: specalChar = "&amp;"; break;
                         case TranslateUnitType.VersionType: specalChar = " "; break;
                     }
 
@@ -252,11 +257,13 @@ namespace GlobalSight.WinPEConverter
 
                     File.WriteAllLines(rcFile, menulines, Encoding.Unicode);
                     comUtil.Compile(rcFile, resFile);
+                    DebugCompile(Encoding.Unicode, resFile);
 
                     if (!File.Exists(resFile) || File.ReadAllBytes(resFile).Length == 32)
                     {
                         File.WriteAllLines(rcFile, menulines, Encoding.Default);
                         comUtil.Compile(rcFile, resFile);
+                        DebugCompile(Encoding.Default, resFile);
                     }
                 }
 
@@ -273,6 +280,8 @@ namespace GlobalSight.WinPEConverter
                             //TODO: fix this line
                         }
                     }
+
+                    m_log.Debug(log);
                 }
 
                 comUtil.Modify(oriFile, newFile, resFile);
@@ -281,6 +290,19 @@ namespace GlobalSight.WinPEConverter
             if (!File.Exists(newFile))
             {
                 File.Copy(oriFile, newFile);
+            }
+        }
+
+        private void DebugCompile(Encoding encoding, String resFile)
+        {
+            m_log.Debug("Using " + encoding + " for Compile");
+            if (File.Exists(resFile))
+            {
+                m_log.Debug("Result file length " + File.ReadAllBytes(resFile).Length + " (32)");
+            }
+            else
+            {
+                m_log.Debug("Result file does not exist.");
             }
         }
 
@@ -401,10 +423,13 @@ namespace GlobalSight.WinPEConverter
             }
             finally
             {
-                DeleteFile(menurc);
-                DeleteFile(stringrc);
-                DeleteFile(dialogrc);
-                DeleteFile(versionrc);
+                if (!AppConfig.KeepTempFiles)
+                {
+                    DeleteFile(menurc);
+                    DeleteFile(stringrc);
+                    DeleteFile(dialogrc);
+                    DeleteFile(versionrc);
+                }
             }
 
             return result;

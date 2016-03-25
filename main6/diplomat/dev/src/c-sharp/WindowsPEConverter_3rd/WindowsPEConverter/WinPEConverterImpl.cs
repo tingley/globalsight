@@ -439,10 +439,29 @@ namespace GlobalSight.WinPEConverter
         {
             Encoding encoding = FileUtil.GetEncoding(rcFile);
             string[] menulines = File.ReadAllLines(rcFile, Encoding.Unicode);
+            string all = File.ReadAllText(rcFile, Encoding.Unicode);
 
             if (menulines.Length == 1)
             {
                 menulines = File.ReadAllLines(rcFile, encoding);
+            }
+
+            if (all != null && all.Length > 0)
+            {
+                string keyWord = "";
+
+                switch (tuType)
+                {
+                    case TranslateUnitType.StringType: keyWord = "STRING"; break;
+                    case TranslateUnitType.DialogType: keyWord = "DIALOG"; break;
+                    case TranslateUnitType.MenuType: keyWord = "MENU"; break;
+                    case TranslateUnitType.VersionType: keyWord = "VERSIONINFO"; break;
+                }
+
+                if (!all.Contains(keyWord))
+                {
+                    menulines = File.ReadAllLines(rcFile, encoding);
+                }
             }
 
             DoExtract(result, menulines, tuType, resultSelf);

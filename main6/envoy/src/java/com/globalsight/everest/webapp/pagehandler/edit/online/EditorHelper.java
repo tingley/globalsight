@@ -690,33 +690,6 @@ public class EditorHelper implements EditorConstants
         return previousTargetPage;
     }
     
-    
-    
-    private static boolean isPictureFile(List unextractedList,TargetPage targetPage)
-    {
-        boolean isPictureNextFile = false;
-        if (targetPage == null)
-            return isPictureNextFile;
-
-        if (unextractedList != null && unextractedList.size() > 0)
-        {
-            if (unextractedList.contains(targetPage))
-            {
-                String pageName = targetPage.getDisplayPageName();
-                if (pageName.lastIndexOf(".") != -1)
-                {
-                    String fileExtension = pageName.substring(pageName.lastIndexOf('.') + 1)
-                            .toLowerCase();
-                    if (WebAppConstants.FILE_EXTENSION_LIST.contains(fileExtension))
-                    {
-                        isPictureNextFile = true;
-                    }
-                }
-            }
-        }
-        return isPictureNextFile;
-    }
-    
     private static List getNewUnextractedList(List unextractedList)
     {
         ArrayList targetPages = new ArrayList();

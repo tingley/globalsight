@@ -3193,14 +3193,18 @@ public class Ambassador extends AbstractWebService
             if (exportingwfs.size() == 0 && jobFileList.size() > 0)
             {
                 try
-                {                    
+                {            
                     String cxedocpath = AmbFileStoragePathUtils.getCxeDocDirPath(currentCompanyId);
+                    if (UserUtil.isSuperAdmin(userId) || UserUtil.isSuperPM(userId))
+                    {
+                        cxedocpath = cxedocpath + "/Welocalize";
+                    }
                     File zipFileDir = new File(cxedocpath + webservice_zip + "/" + identifyKey);
                     File zipfile = new File(zipFileDir, zipName);
                     zipfile.getParentFile().mkdirs();
 
                     Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(
-                            entryFiles, jobIds, locales, cxedocpath);
+                            entryFiles, jobIds, locales, cxedocpath, userId);
                     ZipIt.addEntriesToZipFile(zipfile, entryFileToFileNameMap, "");
                 }
                 catch (Exception e)
@@ -3279,7 +3283,7 @@ public class Ambassador extends AbstractWebService
      * @return Map includes entryFileName info
      */
     private Map<File, String> getEntryFileToFileNameMap(Set<File> entryFiles, Set<Long> jobIdSet,
-            Set<String> locales, String cxeDocsDirPath)
+            Set<String> locales, String cxeDocsDirPath,String userId)
     {
         Map<File, String> entryFileToFileNameMap = new HashMap<File, String>();
         File tempFile;
@@ -3315,13 +3319,27 @@ public class Ambassador extends AbstractWebService
                         + File.separator + jobId;
                 String prefixStr2 = cxeDocsDirPath.replace("/", "\\") + File.separator + locale
                         + File.separator + "webservice" + File.separator + jobId;
+                String prefixStr3 = File.separator + locale + File.separator + "webservice"
+                        + File.separator + jobId;
+                String prefixStr4 = File.separator + locale + File.separator + jobId;
                 for (File entryFile : entryFiles)
                 {
                     String entryFilePath = entryFile.getPath();
-                    if (entryFilePath.startsWith(prefixStr1)
-                            || entryFilePath.startsWith(prefixStr2))
+                    if (!UserUtil.isSuperAdmin(userId) && !UserUtil.isSuperPM(userId))
                     {
-                        entryNames.add(entryFilePath.replaceAll("\\\\", "/"));
+                        if (entryFilePath.startsWith(prefixStr1)
+                                || entryFilePath.startsWith(prefixStr2))
+                        {
+                            entryNames.add(entryFilePath.replaceAll("\\\\", "/"));
+                        }
+                    }
+                    else
+                    {
+                        if (entryFilePath.contains(prefixStr3)
+                                || entryFilePath.contains(prefixStr4))
+                        {
+                            entryNames.add(entryFilePath.replaceAll("\\\\", "/"));
+                        }
                     }
                 }
                 if (entryNames.size() > 0)
@@ -3540,14 +3558,18 @@ public class Ambassador extends AbstractWebService
                 String zipName = "GlobalSight_Download_jobs(" + jobId + ").zip";
                 
                 String cxedocpath = AmbFileStoragePathUtils.getCxeDocDirPath(currentCompanyId);
+                if (UserUtil.isSuperAdmin(userId) || UserUtil.isSuperPM(userId))
+                {
+                    cxedocpath = cxedocpath + "/Welocalize";
+                }
                 File zipFileDir = new File(cxedocpath + webservice_zip + "\\" + identifyKey);
                 File zipFile = new File(zipFileDir,zipName);
                 zipFile.getParentFile().mkdirs();
 
                 Set<Long> jobIds = new HashSet<Long>();
                 jobIds.add(jobId);
-                Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(
-                        entryFiles, jobIds, locales, cxedocpath);
+                Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(entryFiles,
+                        jobIds, locales, cxedocpath, userId);
                 ZipIt.addEntriesToZipFile(zipFile, entryFileToFileNameMap, "");
                 
                 returnStr.append("\t<exportingWorkflows></exportingWorkflows>\r\n");

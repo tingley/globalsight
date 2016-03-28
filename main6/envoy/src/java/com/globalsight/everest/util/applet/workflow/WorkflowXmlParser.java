@@ -243,6 +243,15 @@ public class WorkflowXmlParser
             WorkflowTaskInstance source = taskMaps.get(a.getSourceNode().getActivityName());
             WorkflowTaskInstance target = taskMaps.get(a.getTargetNode().getActivityName());
 
+            if (source == null)
+            {
+                source = taskMaps.get("Condition Node");
+            }
+            
+            if (target == null)
+            {
+                target = taskMaps.get("Condition Node");
+            }
             wfic.addArrowInstance(a.getName(), WorkflowConstants.REGULAR_ARROW, source, target);
         }
     }

@@ -250,7 +250,7 @@ var w_editor;
  {
 	 var fileName = document.uploadForm.fileFieldName.value;
 	 var fileExtension = fileName.substring(fileName.lastIndexOf(".")+1,fileName.length);
-	 alert("fileExtension="+fileExtension);
+
 	 if(fileName.indexOf(".") != -1)
 	 {
 		 if(fileExtension != targetImageSuffix)

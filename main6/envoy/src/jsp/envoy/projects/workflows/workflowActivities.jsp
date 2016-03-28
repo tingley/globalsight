@@ -103,7 +103,7 @@
 
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/css/workflow/ui.css">
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/css/workflow/view.css">
-<%@ include file="/includes/workflow/l18n.js"%>
+<%@ include file="/includes/workflow/i18n.js"%>
 <SCRIPT SRC="/globalsight/jquery/jquery-1.6.4.min.js" type="text/javascript"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/workflow/ajax.js" type="text/javascript"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/workflow/ui.js" type="text/javascript"></SCRIPT>

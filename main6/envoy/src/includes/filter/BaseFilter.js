@@ -26,9 +26,19 @@ function BaseFilter()
 	this.operatorNameMap[this.operatorMatch] = jsOperatorMatch;
 	
 	this.optionObjsMap = new Object();
-	this.availableOptions = [this.optionInternalTexts, this.optionEscapings];
-	this.checkedItemIds = new Array();
-	
+    if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='true')
+	{
+    	this.availableOptions = [this.optionEscapings];
+	}
+    else if(hasBaseFilter_InternalText =='true' && hasBaseFilter_Escaping =='false')
+    {
+    	this.availableOptions = [this.optionInternalTexts];
+    }
+    else
+    {
+    	this.availableOptions = [this.optionInternalTexts, this.optionEscapings];
+    }
+	this.checkedItemIds = new Array();	
 	this.tagsEveryPage = 10;
 	this.currentPage = 0;
 	this.sortOrder = "asc";
@@ -317,38 +327,38 @@ BaseFilter.prototype.generateTagsTable = function (filter)
 	str.append("</label>"); 
 	str.append("<select id='baseFilterRulesSection' onchange='baseFilter.switchRules(this)'>");
 
-	if (filter)
-	{
-		if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='true')
-		{
-			var index0 = baseFilter.availableOptions.indexOf("0");
-			if (index0!=-1)
-			{
-				baseFilter.availableOptions.splice(index0,1);
-			}
-		}
-		if (hasBaseFilter_Escaping =='false' && hasBaseFilter_InternalText =='true')
-		{
-			var index1 = baseFilter.availableOptions.indexOf("1");
-			if (index1!=-1)
-			{
-				baseFilter.availableOptions.splice(index1,1);
-			}
-		}
-	}
-	else
-	{
-		var index0 = baseFilter.availableOptions.indexOf("0");
-		var index1 = baseFilter.availableOptions.indexOf("1");
-		if (index0 == -1)
-		{
-			baseFilter.availableOptions.push("0");
-		}
-		if (index1 == -1)
-		{
-			baseFilter.availableOptions.push("1");
-		}
-	}
+//	if (filter)
+//	{
+//		if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='true')
+//		{
+//			var index0 = baseFilter.availableOptions.indexOf("0");
+//			if (index0!=-1)
+//			{
+//				baseFilter.availableOptions.splice(index0,1);
+//			}
+//		}
+//		if (hasBaseFilter_Escaping =='false' && hasBaseFilter_InternalText =='true')
+//		{
+//			var index1 = baseFilter.availableOptions.indexOf("1");
+//			if (index1!=-1)
+//			{
+//				baseFilter.availableOptions.splice(index1,1);
+//			}
+//		}
+//	}
+//	else
+//	{
+//		var index0 = baseFilter.availableOptions.indexOf("0");
+//		var index1 = baseFilter.availableOptions.indexOf("1");
+//		if (index0 == -1)
+//		{
+//			baseFilter.availableOptions.push("0");
+//		}
+//		if (index1 == -1)
+//		{
+//			baseFilter.availableOptions.push("1");
+//		}
+//	}
 
 	for(var i = 0; i < baseFilter.availableOptions.length; i++)
 	{

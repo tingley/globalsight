@@ -110,6 +110,13 @@
 			    setDisableTR('mtIdentifierTrailingTR', true);
 			}
 		});
+		if(<%=mtProfile.getMtConfidenceScore()%> ==100)
+		{
+			MTOptionsForm.ignoreTmMatches.disabled = false;
+		}else{
+			MTOptionsForm.ignoreTmMatches.checked = false;
+			MTOptionsForm.ignoreTmMatches.disabled= true;
+		}
 	});
 	  
 	$(function(){
@@ -618,11 +625,24 @@
 		}
 		
 	}
+	
 	function isPositiveNum(s)
 	{
 		var re = /^[0-9]*[1-9][0-9]*$/ ;
 		return re.test(s)
 	} 
+	
+	function checkValue(){
+		var mtConfidenceScore = $("#mtConfidenceScore").val().trim();
+		 var disable = new Boolean();
+		if(mtConfidenceScore==100){
+			disable = false;
+		}else{
+			MTOptionsForm.ignoreTmMatches.checked = false;
+			disable = true;
+		}
+		MTOptionsForm.ignoreTmMatches.disabled = disable;
+	}
 </SCRIPT>
 </HEAD>
 
@@ -683,11 +703,12 @@
 						<TD ALIGN="LEFT" STYLE="vertical-align: middle"><%=bundle.getString("lb_tm_mt_threshold_level")%>:</TD>
 						<TD><INPUT CLASS="standardText" ID="mtConfidenceScore" NAME="mtConfidenceScore"
 							SIZE="1" MAXLENGTH="3"
-							VALUE="<%=mtProfile.getMtConfidenceScore()%>">%</TD>
+							VALUE="<%=mtProfile.getMtConfidenceScore()%>" onblur = "checkValue()">%</TD>
 					</TR>
 						<TR>
-						<td></td>
-						<TD align="left"><%=bundle.getString("lb_ms_ignore_tm_matches")%>:
+						<TD align="left">
+						 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<%=bundle.getString("lb_ms_ignore_tm_matches")%>:</td><td>
 						<INPUT CLASS="standardText"	NAME="<%=MTProfileConstants.MT_IGNORE_TM_MATCHES%>"
 									id="ignoreTmMatches"<%=mtProfile.isIgnoreTMMatch() ? "checked" : ""%> 
 									TYPE="checkbox" />

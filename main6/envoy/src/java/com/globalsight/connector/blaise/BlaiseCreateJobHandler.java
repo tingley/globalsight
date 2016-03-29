@@ -574,10 +574,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
             blaiseForm.setPriority(priority);
         }
         String comment = request.getParameter("comment");
-        if (StringUtil.isNotEmpty(comment))
-        {
-            blaiseForm.setComment(comment);
-        }
+        blaiseForm.setComment(comment);
 	}
 
 	private void setEntryInfo(HttpServletRequest request)

@@ -413,6 +413,7 @@ function delAttc()
 {
     $("#attachmentArea").html("");
     $("#delAtt").hide();
+    $("#attachment").val("");
     $("#attachmentArea").removeClass("uploadifyError");
     attachmentUploading = false;
 }
@@ -466,9 +467,9 @@ function emptyFileValue() {
 
 function addTempAttachment(fileName) {
     $("#attachmentArea").html("<div style='line-height:25px;position:absolute;background-color:#0099FF;' id='ProgressBarAttach'></div>" 
-                            + "<div id='attName' style='width:336px' class='attachment_div'>" + fileName + "</div>" 
-                            + "<input type='hidden' name='attachment' value=\"" + fileName + "\">");
+                            + "<div id='attName' style='width:336px' class='attachment_div'>" + fileName + "</div>" );
     $("#ProgressBarAttach").height($("#attachmentArea").height());
+    $("#attachment").val(fileName);
     runAttachProgress(10);
     runAttachProgress(20);
     runAttachProgress(30);
@@ -704,14 +705,16 @@ $(document).ready(function ()
                     var userName = $("#userName").val();
                     var priority = $("#priority").val();
                     var comment = $("#comment").val();
-
+					var attachment =  $("#attachment").val();
+					
                     var createJobUrl = "<%=createBlaiseJobUrl%>" 
                     	+ "&blaiseConnectorId=" + blaiseConnectorId
                     	+ "&attributeString=" + attributeString
                     	+ "&fileMapFileProfile=" + fileMapFileProfile
                     	+ "&userName=" + userName
                     	+ "&priority=" + priority
-                    	+ "&comment=" + comment;
+                    	+ "&comment=" + comment
+                    	+ "&attachment=" + attachment;
 
                     $("#createJobForm").ajaxSubmit({
                			type: 'post',
@@ -893,7 +896,9 @@ $(document).ready(function ()
 	                                    <td width="18%" height="25" valign="middle" style="font-family:Arial,Helvetica,sans-serif;font-size:10pt;">
 	                                        <c:out value="${lb_attachment}"/> / <c:out value="${lb_reference_file}"/>:
 	                                    </td>
-	                                    <td width="40%" valign="middle"><div id="attachmentArea" style="border:1px solid #0C1476;padding-left:0;height:25px;line-height:25px"></div></td>
+	                                    <td width="40%" valign="middle"><div id="attachmentArea" style="border:1px solid #0C1476;padding-left:0;height:25px;line-height:25px"></div>
+	                                    <input type='hidden' name='attachment' id='attachment' value="">
+	                                    </td>
 	                                    <td width="5%" valign="middle" align="left"><div id="delAtt" style="display:none;"><img src="/globalsight/images/createjob/delete.png" style="cursor:pointer;padding-top:4px;" onclick="delAttc();"></div></td>
 	                                    <td width="10%">
 	                                        <input type="button" id="attachmentFileBtn"  title="<c:out value='${lb_create_job_browse_tip}'/>" onclick="clickAtt()" class="standardBtn_mouseout" style="width:90px;" value="<c:out value='${lb_browse}'/>" />

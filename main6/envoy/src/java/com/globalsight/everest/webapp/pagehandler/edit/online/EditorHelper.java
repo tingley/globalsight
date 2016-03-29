@@ -654,7 +654,7 @@ public class EditorHelper implements EditorConstants
             List targetPages, int index)
     {
         TargetPage nextTargetPage = null;
-        for (int j = index + 1; j < targetPages.size() - 1; j++)
+        for (int j = index + 1; j < targetPages.size(); j++)
         {
             nextTargetPage = (TargetPage) targetPages.get(j);
             if (!unextractedList.contains(nextTargetPage)
@@ -674,7 +674,7 @@ public class EditorHelper implements EditorConstants
             List targetPages, int index)
     {
         TargetPage previousTargetPage = null;
-        for (int j = index - 1; j > 0; j--)
+        for (int j = index - 1; j >= 0; j--)
         {
             previousTargetPage = (TargetPage) targetPages.get(j);
             if (!unextractedList.contains(previousTargetPage)

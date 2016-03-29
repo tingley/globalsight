@@ -108,6 +108,11 @@ var Model = {
 		node.showPoints();
 	},
 	deleteNode : function(node) {
+		// can not delete node that the state is start or complate
+		if (3 == node.state || 5 == node.state){
+			return;
+		}
+		
 		for (var i in node.froms) {
 			var l = node.froms[i];
 			l.to.id = -1;

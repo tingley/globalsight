@@ -867,9 +867,23 @@ function getEditableSegment(obj)
     while (obj && !isEditableSegment(obj))
     {
         obj = obj.parentElement || obj.parentNode;//Added for Firefox
+        if (obj && obj.tagName == 'TD'&& obj.id.indexOf('undefined')==-1)
+            return obj;
     }
 
     return obj;
+}
+
+function get3Ids(obj)
+{
+    if (obj.href)
+    {
+        return getSegmentIdFromHref(obj.href);
+    }
+    else
+    {
+        return getSegmentIdFromIdAttr(obj.id);
+    }
 }
 
 function contextForX(e)
@@ -892,7 +906,7 @@ function contextForX(e)
 
     if (o)
     {
-        if (o.className == 'editorSegmentLocked'||o.className == 'segmentContext')
+        if (o.className == 'editorSegmentLocked'||o.className == 'segmentContext' || o.tagName == 'TD')
         {
             contextForReadOnly(o, e);
         }
@@ -913,7 +927,7 @@ function contextForSegment(obj, e)
     {
         return false;
     }
-    var ids = getSegmentIdFromHref(obj.href);
+    var ids = get3Ids(obj);
 
     var popupoptions;
 
@@ -951,20 +965,19 @@ function contextForSegment(obj, e)
 
 function contextForReadOnly(obj, e)
 {
-    var ids = getSegmentIdFromHref(obj.href);
-
+    var ids = get3Ids(obj);
     var popupoptions = [
-        new ContextItem("<B>Add/edit comment</B>",
-          function(){editComment(ids[0], ids[1], ids[2])})
-        ];
-
-/*
-    var popupoptions = [
-        new ContextItem("Segment is read-only", function(){ hideContextMenu(); })
-        ];
-*/
+        new ContextItem("<B>Segment details</B>",
+        function(){showDetails(ids[0], ids[1], ids[2])})];
 
     ContextMenu.display(popupoptions, e);
+}
+
+function getSegmentIdFromIdAttr(idValue)
+{
+    //obtain 3 ids from id value like "seg1207987_5375884_0".
+    idValue = idValue.substring(3);
+    return idValue.split('_');    
 }
 
 function doUnload()

@@ -100,7 +100,7 @@ import com.globalsight.util.gxml.GxmlElement;
 public class EditorHelper implements EditorConstants
 {
     private static final Logger CATEGORY = Logger.getLogger(EditorHelper.class);
-
+    public static List<Long> sourcePageIdList = null;
     /**
      * This class can not be instantiated.
      */
@@ -593,12 +593,30 @@ public class EditorHelper implements EditorConstants
         List extractedFileList = p_task.getTargetPages(ExtractedSourceFile.EXTRACTED_FILE);
         
         List targetPages = p_task.getTargetPages();
+        if (sourcePageIdList != null)
+        {
+            List newTargetPages = new ArrayList();
+            for (int i = 0; i < targetPages.size(); i++)
+            {
+                trgPage = (TargetPage) targetPages.get(i);
+                srcPage = trgPage.getSourcePage();
+                if (sourcePageIdList.contains(srcPage.getId()))
+                {
+                    newTargetPages.add(trgPage);
+                }
+            }
+            if (newTargetPages != null && newTargetPages.size() > 0)
+            {
+                targetPages.clear();
+                targetPages = newTargetPages;
+            }
+        }
         
         for(int i=0;i<targetPages.size();i++)
         {
             trgPage = (TargetPage)targetPages.get(i);
             srcPage = trgPage.getSourcePage();
-           
+            
             if (i < targetPages.size() - 1)
             {
                 nextTargetPage = getNextTargetPage(unextractedList, extractedFileList, targetPages,

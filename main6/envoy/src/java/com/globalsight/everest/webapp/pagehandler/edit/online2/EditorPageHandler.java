@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
@@ -521,7 +522,11 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 .getAttribute(WebAppConstants.PERMISSIONS);
 
         p_state.setUserIsPm(false);
-
+        SessionManager sessionMgr = (SessionManager) p_session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        List<Long> sourcePageIdList = (List<Long>) sessionMgr
+                .getAttribute("sourcePageIdList");
+        EditorHelper.sourcePageIdList = sourcePageIdList;
         // Reset all options because the state may be inherited from a
         // previous page.
         EditorHelper.initEditorOptions(p_state, p_session);

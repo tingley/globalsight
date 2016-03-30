@@ -792,6 +792,7 @@ public class UpdateLeverageHandler extends PageActionHandler
         boolean isXlf = MTHelper2.isXlf(p_sourcePage.getId());
         paramMap.put(MachineTranslator.NEED_SPECAIL_PROCESSING_XLF_SEGS, isXlf ? "true" : "false");
         paramMap.put(MachineTranslator.DATA_TYPE, MTHelper2.getDataType(p_sourcePage.getId()));
+        paramMap.put(MachineTranslator.MT_PROFILE, mtProfile);
         if (MachineTranslator.ENGINE_MSTRANSLATOR.equalsIgnoreCase(machineTranslator
                 .getEngineName()) && p_targetLocale.getLanguage().equalsIgnoreCase("sr"))
         {

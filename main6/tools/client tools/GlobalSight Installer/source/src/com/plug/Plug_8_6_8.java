@@ -25,7 +25,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.util.FileUtil;
+import com.util.FileUtil;
 import com.util.PropertyUtil;
 import com.util.ServerUtil;
 import com.util.db.DbUtil;
@@ -50,13 +50,25 @@ public class Plug_8_6_8 implements Plug
     public static final String SPELL_CHECK_WAR = "/jboss/server/standalone/deployments/globalsight.ear/spellchecker.war";
     public static final String XDE_SPELL_CHECK_WAR = "/jboss/server/standalone/deployments/globalsight.ear/xdespellchecker.war";
 
-    public DbUtil dbUtil = DbUtilFactory.getDbUtil();
+    private static final String BLAISE_OLD_JAR_FILE = "/jboss/server/standalone/deployments/globalsight.ear/lib/blaise-translation-supplier-api-example-1.0.1.jar";
+    private static final String BLAISE_OLD_JAR_FILE2 = "/jboss/server/standalone/deployments/globalsight.ear/lib/blaise-translation-supplier-api-example-1.0.0.jar";
 
+    public DbUtil dbUtil = DbUtilFactory.getDbUtil();
+    
     @Override
     public void run()
     {
         removeSpellCheck();
-        
+
+        // Delete old Blaise jar file
+        deleteFiles(ServerUtil.getPath() + BLAISE_OLD_JAR_FILE);
+        deleteFiles(ServerUtil.getPath() + BLAISE_OLD_JAR_FILE2);
+
+        updateForMT();
+    }
+
+    private void updateForMT()
+    {
         Properties properties = PropertyUtil.getProperties(new File(ServerUtil.getPath()
                 + (PROPERTIES_PATH)));
         String isSafabaLog = properties.getProperty("safaba.log.detailed.info");
@@ -128,7 +140,6 @@ public class Plug_8_6_8 implements Plug
         args.add(MSType);
 
         dbUtil.execute(sql, args);
-
     }
 
     private void updateColum(String isLogDebugInfo, String engineName)
@@ -144,7 +155,9 @@ public class Plug_8_6_8 implements Plug
     {
         try
         {
-            FileUtil.deleteFile(new File(path));
+            File f = new File(path);
+            if (f.exists())
+                FileUtil.deleteFile(f);
         }
         catch (Exception e)
         {

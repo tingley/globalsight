@@ -72,7 +72,7 @@ function refresh(direction)
     }
     else if(direction == '1' && isPictureNextFile == 'true' || isPictureNextFile == true)
     {
-        window.open(url_previousPictureEditor, '_self' );
+        window.open(url_nextPictureEditor, '_self' );
     }
     else
     {

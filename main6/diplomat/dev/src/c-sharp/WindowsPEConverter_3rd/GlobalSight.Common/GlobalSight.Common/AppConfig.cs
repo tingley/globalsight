@@ -63,6 +63,22 @@ namespace GlobalSight.Common
             }
         }
 
+        public static bool KeepTempFiles
+        {
+            get
+            {
+                try
+                {
+                    string v = GetAppConfig("KeepTempFiles");
+                    return "true".Equals(v, StringComparison.CurrentCultureIgnoreCase);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
         public static bool LogDebugMSG
         {
             get

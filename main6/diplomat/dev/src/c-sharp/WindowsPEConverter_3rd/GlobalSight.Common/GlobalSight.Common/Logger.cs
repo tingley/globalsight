@@ -88,5 +88,17 @@ namespace GlobalSight.Common
 			sb.Append(p_msg);
 			this.WriteLine(sb.ToString());
 		}
+
+        public void Debug(string p_msg)
+        {
+            if (AppConfig.LogDebugMSG)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append(DateTime.Now.ToString("G")); //08/17/2000 16:32:32
+                sb.Append("; DEBUG ");
+                sb.Append(p_msg);
+                this.WriteLine(sb.ToString());
+            }
+        }
 	}
 }

@@ -1600,14 +1600,14 @@ public class Ambassador extends AbstractWebService
             Set<String> gls = new HashSet<String>();
             for (GlobalSightLocale trgLoc_l10n : targetLocales_l10n)
             {
-                gls.add(trgLoc_l10n.toString());
+                gls.add(trgLoc_l10n.toString().toLowerCase());
             }
             StringBuilder sb = new StringBuilder();
             for (String trgLocs : targetLocales)
             {
                 for (String trgLoc : trgLocs.split(","))
                 {
-                    if (!gls.contains(trgLoc))
+                    if (StringUtil.isNotEmpty(trgLocs) && !gls.contains(trgLoc.toLowerCase()))
                     {
                         sb.append(",");
                         sb.append(trgLoc);
@@ -3022,6 +3022,11 @@ public class Ambassador extends AbstractWebService
             throws WebServiceException
     {
         checkAccess(p_accessToken, GET_JOB_EXPORT_FILES_IN_ZIP);
+        checkPermission(p_accessToken, Permission.JOBS_VIEW);
+        checkPermission(p_accessToken, Permission.JOBS_EXPORT);
+        
+        String userName = getUsernameFromSession(p_accessToken);
+        String userId = UserUtil.getUserIdByName(userName);
         p_jobIds = p_jobIds.replace(" ", "");
         if (p_jobIds == null || p_jobIds.trim() == "")
         {
@@ -3044,14 +3049,14 @@ public class Ambassador extends AbstractWebService
             }
 
             String jobCompanyId = String.valueOf(job.getCompanyId());
-            if (!currentCompanyId.equals(jobCompanyId))
+            if (!currentCompanyId.equals(jobCompanyId) && !UserUtil.isSuperAdmin(userId)
+                    && !UserUtil.isSuperPM(userId))
                 throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP,
                         "Cannot access the job which is not in the same company with current user"));
 
             jobIds.add(jobId);
         }
 
-        String userName = getUsernameFromSession(p_accessToken);
         Map<Object, Object> activityArgs = new HashMap<Object, Object>();
         activityArgs.put("loggedUserName", userName);
         activityArgs.put("jobIds", p_jobIds);
@@ -3188,14 +3193,18 @@ public class Ambassador extends AbstractWebService
             if (exportingwfs.size() == 0 && jobFileList.size() > 0)
             {
                 try
-                {                    
+                {            
                     String cxedocpath = AmbFileStoragePathUtils.getCxeDocDirPath(currentCompanyId);
+                    if (UserUtil.isSuperAdmin(userId) || UserUtil.isSuperPM(userId))
+                    {
+                        cxedocpath = cxedocpath + "/Welocalize";
+                    }
                     File zipFileDir = new File(cxedocpath + webservice_zip + "/" + identifyKey);
                     File zipfile = new File(zipFileDir, zipName);
                     zipfile.getParentFile().mkdirs();
 
                     Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(
-                            entryFiles, jobIds, locales, cxedocpath);
+                            entryFiles, jobIds, locales, cxedocpath, userId);
                     ZipIt.addEntriesToZipFile(zipfile, entryFileToFileNameMap, "");
                 }
                 catch (Exception e)
@@ -3274,7 +3283,7 @@ public class Ambassador extends AbstractWebService
      * @return Map includes entryFileName info
      */
     private Map<File, String> getEntryFileToFileNameMap(Set<File> entryFiles, Set<Long> jobIdSet,
-            Set<String> locales, String cxeDocsDirPath)
+            Set<String> locales, String cxeDocsDirPath,String userId)
     {
         Map<File, String> entryFileToFileNameMap = new HashMap<File, String>();
         File tempFile;
@@ -3310,13 +3319,27 @@ public class Ambassador extends AbstractWebService
                         + File.separator + jobId;
                 String prefixStr2 = cxeDocsDirPath.replace("/", "\\") + File.separator + locale
                         + File.separator + "webservice" + File.separator + jobId;
+                String prefixStr3 = File.separator + locale + File.separator + "webservice"
+                        + File.separator + jobId;
+                String prefixStr4 = File.separator + locale + File.separator + jobId;
                 for (File entryFile : entryFiles)
                 {
                     String entryFilePath = entryFile.getPath();
-                    if (entryFilePath.startsWith(prefixStr1)
-                            || entryFilePath.startsWith(prefixStr2))
+                    if (!UserUtil.isSuperAdmin(userId) && !UserUtil.isSuperPM(userId))
                     {
-                        entryNames.add(entryFilePath.replaceAll("\\\\", "/"));
+                        if (entryFilePath.startsWith(prefixStr1)
+                                || entryFilePath.startsWith(prefixStr2))
+                        {
+                            entryNames.add(entryFilePath.replaceAll("\\\\", "/"));
+                        }
+                    }
+                    else
+                    {
+                        if (entryFilePath.contains(prefixStr3)
+                                || entryFilePath.contains(prefixStr4))
+                        {
+                            entryNames.add(entryFilePath.replaceAll("\\\\", "/"));
+                        }
                     }
                 }
                 if (entryNames.size() > 0)
@@ -3351,13 +3374,18 @@ public class Ambassador extends AbstractWebService
             throws WebServiceException
     {
         checkAccess(p_accessToken, GET_WORKFLOW_EXPORT_FILES_IN_ZIP);
+        checkPermission(p_accessToken, Permission.JOBS_VIEW);
+        checkPermission(p_accessToken, Permission.JOBS_EXPORT);
+        
+        p_workflowIds = p_workflowIds.replace(" ", "");
+        String userName = getUsernameFromSession(p_accessToken);
+        String userId = UserUtil.getUserIdByName(userName);
         if(p_workflowIds == null || p_workflowIds == "")
         {
             String msg = "workflowIds can not be empty.";
             throw new WebServiceException(makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP, msg));
         }
 
-        String userName = getUsernameFromSession(p_accessToken);
         Map<Object, Object> activityArgs = new HashMap<Object, Object>();
         activityArgs.put("loggedUserName", userName);
         activityArgs.put("p_workflowIds", p_workflowIds);
@@ -3387,7 +3415,8 @@ public class Ambassador extends AbstractWebService
                 jobId = job.getId();
 
                 String jobCompanyId = String.valueOf(job.getCompanyId());
-                if (!currentCompanyId.equals(jobCompanyId))
+                if (!currentCompanyId.equals(jobCompanyId) && !UserUtil.isSuperAdmin(userId)
+                        && !UserUtil.isSuperPM(userId))
                     throw new WebServiceException(
                             makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP,
                                     "Cannot access the job which is not in the same company with current user"));
@@ -3462,7 +3491,7 @@ public class Ambassador extends AbstractWebService
                         {
                             if (s.length() > 0)
                             {
-                                allPath.append("/").append(URLEncoder.encode(s, "utf-8"));
+                                allPath.append("/").append(s);
                             }
                         }
                         jobFiles.addPath(allPath.toString());
@@ -3529,14 +3558,18 @@ public class Ambassador extends AbstractWebService
                 String zipName = "GlobalSight_Download_jobs(" + jobId + ").zip";
                 
                 String cxedocpath = AmbFileStoragePathUtils.getCxeDocDirPath(currentCompanyId);
+                if (UserUtil.isSuperAdmin(userId) || UserUtil.isSuperPM(userId))
+                {
+                    cxedocpath = cxedocpath + "/Welocalize";
+                }
                 File zipFileDir = new File(cxedocpath + webservice_zip + "\\" + identifyKey);
                 File zipFile = new File(zipFileDir,zipName);
                 zipFile.getParentFile().mkdirs();
 
                 Set<Long> jobIds = new HashSet<Long>();
                 jobIds.add(jobId);
-                Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(
-                        entryFiles, jobIds, locales, cxedocpath);
+                Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(entryFiles,
+                        jobIds, locales, cxedocpath, userId);
                 ZipIt.addEntriesToZipFile(zipFile, entryFileToFileNameMap, "");
                 
                 returnStr.append("\t<exportingWorkflows></exportingWorkflows>\r\n");

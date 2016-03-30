@@ -110,6 +110,13 @@
 			    setDisableTR('mtIdentifierTrailingTR', true);
 			}
 		});
+		if(<%=mtProfile.getMtConfidenceScore()%> ==100)
+		{
+			MTOptionsForm.ignoreTmMatches.disabled = false;
+		}else{
+			MTOptionsForm.ignoreTmMatches.checked = false;
+			MTOptionsForm.ignoreTmMatches.disabled= true;
+		}
 	});
 	  
 	$(function(){
@@ -164,6 +171,10 @@
 				alert("Please check name");
 				return;
 			}
+			if(!checkLength()){
+				return;
+			};
+			
 			var mtIdentifiersRegex = /[\"\'<>&]/;
 			var mtIdentiferLeading = $.trim($("#mtIdentifierLeading").val());
 			var mtIdentiferTrailing = $.trim($("#mtIdentifierTrailing").val());
@@ -604,16 +615,33 @@
 	
 	function checkLength()
 	{
-		var sessionTime = $("#msMaxLength").val();
-		if(!isNumeric(sessionTime)){
-			alert("The value must be Integer!")
+		var msMaxLength = $("#msMaxLength").val().trim();
+		if(msMaxLength == '' || isPositiveNum(msMaxLength))
+		{
+			return true;
+		}else{
+			alert("<%=bundle.getString("msg_duplicate_max_length")%>");
+			return false;
 		}
+		
 	}
 	
-	function isNumeric(str){
-		if (str.startsWith("0"))
-			return false;
-		return /^(-|\+)?\d+(\.\d+)?$/.test(str);
+	function isPositiveNum(s)
+	{
+		var re = /^[0-9]*[1-9][0-9]*$/ ;
+		return re.test(s)
+	} 
+	
+	function checkValue(){
+		var mtConfidenceScore = $("#mtConfidenceScore").val().trim();
+		 var disable = new Boolean();
+		if(mtConfidenceScore==100){
+			disable = false;
+		}else{
+			MTOptionsForm.ignoreTmMatches.checked = false;
+			disable = true;
+		}
+		MTOptionsForm.ignoreTmMatches.disabled = disable;
 	}
 </SCRIPT>
 </HEAD>
@@ -675,7 +703,16 @@
 						<TD ALIGN="LEFT" STYLE="vertical-align: middle"><%=bundle.getString("lb_tm_mt_threshold_level")%>:</TD>
 						<TD><INPUT CLASS="standardText" ID="mtConfidenceScore" NAME="mtConfidenceScore"
 							SIZE="1" MAXLENGTH="3"
-							VALUE="<%=mtProfile.getMtConfidenceScore()%>">%</TD>
+							VALUE="<%=mtProfile.getMtConfidenceScore()%>" onblur = "checkValue()">%</TD>
+					</TR>
+						<TR>
+						<TD align="left">
+						 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<%=bundle.getString("lb_ms_ignore_tm_matches")%>:</td><td>
+						<INPUT CLASS="standardText"	NAME="<%=MTProfileConstants.MT_IGNORE_TM_MATCHES%>"
+									id="ignoreTmMatches"<%=mtProfile.isIgnoreTMMatch() ? "checked" : ""%> 
+									TYPE="checkbox" />
+						</TD>
 					</TR>
 					<TR>
 						<TD align="left"><%=bundle.getString("lb_log_debug_info")%>:</TD>
@@ -685,13 +722,7 @@
 							<%=mtProfile.isLogDebugInfo() ? "checked" : ""%> TYPE="checkbox" />
 						</TD>
 					</TR>
-					<TR>
-						<TD align="left"><%=bundle.getString("lb_ms_ignore_tm_matches")%>:</TD>
-						<TD><INPUT CLASS="standardText"	NAME="<%=MTProfileConstants.MT_IGNORE_TM_MATCHES%>"
-									id="ignoreTmMatches"<%=mtProfile.isIgnoreTMMatch() ? "checked" : ""%> 
-									TYPE="checkbox" />
-						</TD>
-					</TR>
+				
 					<TR>
 						<TD align="left"><%=bundle.getString("lb_mt_include_mt_identifiers")%>:</TD>
 						<TD><INPUT CLASS="standardText" TYPE="checkbox" ID="includeMTIdentifiers" NAME="<%=MTProfileConstants.MT_INCLUDE_MT_IDENTIFIERS%>" <%=mtProfile.isIncludeMTIdentifiers() ? "checked" : ""%> />
@@ -902,7 +933,7 @@
 									<TD><INPUT CLASS="standardText"
 										NAME="<%=MTProfileConstants.MT_MS_MAX_LENGTH%>"
 									id="msMaxLength" value="<%=mtProfile4val.getMsMaxLength()==0?1000:mtProfile4val.getMsMaxLength() %>"
-									 TYPE="text"	MAXLENGTH="6" SIZE="7" onblur="checkLength()"/>
+									 TYPE="text"	MAXLENGTH="20" SIZE="7"/>
 									</TD>
 								</TR>
 							</TABLE>

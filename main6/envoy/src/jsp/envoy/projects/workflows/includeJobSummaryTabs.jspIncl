@@ -244,6 +244,15 @@ function vilidateRename(){
 				<span class="jobSummaryContentName"><%=bundle.getString("lb_docx_page_number")%>:</span><span class="jobSummaryContentValue">${numPagesDocx}  (from ${countDocx} docx file(s))</span>
 			</c:if>
 		</div>
+		<div>
+		    <c:if test="${blaiseUploadXliffState != null && blaiseUploadXliffState != ''}">
+				<span class="jobSummaryContentName">Blaise Upload Xliff State:</span><span class="jobSummaryContentValue">${blaiseUploadXliffState}</span>
+			</c:if>
+			<c:if test="${blaiseCompleteState != null && blaiseCompleteState != ''}">
+				<span class="jobSummaryContentName jobSummaryContentRight">Blaise Complete State:</span><span class="jobSummaryContentValue">${blaiseCompleteState}</span>			
+			</c:if>
+		</div>
+
 		<c:if test="${isCostingEnabled}">
 			<div style="display:none">
 				<span class="jobSummaryContentName"><%=bundle.getString("lb_pages")%>

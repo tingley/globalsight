@@ -16,112 +16,116 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
-import org.apache.log4j.Logger;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-
-// globalsight
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.page.PageState;
-import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.page.TargetPage;
-
-import com.globalsight.everest.servlet.EnvoyServletException;
-
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-
-import com.globalsight.everest.workflowmanager.Workflow;
-
-import com.globalsight.util.GlobalSightLocale;
-
-// java
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import java.io.IOException;
-
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import java.rmi.RemoteException;
+// java
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+
+// globalsight
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.page.PageState;
+import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.util.GlobalSightLocale; 
 
 /**
- * Handler for displaying the import errors associated with the target pages of
- * a workflow.
+ * Handler for displaying the import errors associated with the
+ * target pages of a workflow.
  */
-public class WorkflowImportErrorHandler extends JobDetailsHandler {
-    // static class variables
-    private static Logger c_logger = Logger.getLogger(WorkflowImportErrorHandler.class.getName());
+public class WorkflowImportErrorHandler
+    extends JobDetailsHandler
+{
+    //  static class variables
+    private static Logger c_logger =
+        Logger.getLogger(
+            WorkflowImportErrorHandler.class.getName());
 
     /**
      * Invokes this EntryPageHandler object
      * <p>
-     * 
-     * @param p_descriptor
-     *            the description of the page to be produced.
-     * @param p_request
-     *            original request sent from the browser.
-     * @param p_response
-     *            original response object.
-     * @param p_context
-     *            the Servlet context.
+     * @param p_descriptor the description of the page to be produced.
+     * @param p_request original request sent from the browser.
+     * @param p_response original response object.
+     * @param p_context the Servlet context.
      */
-    public void invokePageHandler(WebPageDescriptor p_descriptor, HttpServletRequest p_request,
-            HttpServletResponse p_response, ServletContext p_context)
-                    throws ServletException, IOException, RemoteException, EnvoyServletException {
+    public void invokePageHandler(WebPageDescriptor p_descriptor,
+                                  HttpServletRequest p_request,
+                                  HttpServletResponse p_response,
+                                  ServletContext p_context)
+        throws ServletException, IOException, RemoteException, EnvoyServletException
+    {
         getJobDetailsInfo(p_request);
 
-        // turn off cache. do both. "pragma" for the older browsers.
-        p_response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-        p_response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-        p_response.addHeader("Cache-Control", "no-store"); // tell proxy not to
-                                                           // cache
+        // turn off cache.  do both.  "pragma" for the older browsers.
+        p_response.setHeader("Pragma", "no-cache"); //HTTP 1.0
+        p_response.setHeader("Cache-Control", "no-cache"); //HTTP 1.1
+        p_response.addHeader("Cache-Control", "no-store"); // tell proxy not to cache
         p_response.addHeader("Cache-Control", "max-age=0"); // stale right away
 
         // forward to the jsp page.
-        RequestDispatcher dispatcher = p_context.getRequestDispatcher(p_descriptor.getJspURL());
+        RequestDispatcher dispatcher = 
+            p_context.getRequestDispatcher(p_descriptor.getJspURL());
         dispatcher.forward(p_request, p_response);
     }
 
-    protected Job getJobDetailsInfo(HttpServletRequest p_request) throws EnvoyServletException {
+    protected Job getJobDetailsInfo(HttpServletRequest p_request)
+        throws EnvoyServletException
+    {
         HttpSession session = p_request.getSession(false);
-        Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
-        Workflow wf = WorkflowHandlerHelper
-                .getWorkflowById(Long.parseLong(p_request.getParameter(JobManagementHandler.ERROR_WF_PARAM)));
+        Locale uiLocale = (Locale)session.
+            getAttribute(WebAppConstants.UILOCALE);
+        Workflow wf = 
+            WorkflowHandlerHelper.
+            getWorkflowById(Long.parseLong(p_request.
+                                           getParameter(JobManagementHandler.
+                                                        ERROR_WF_PARAM)));
         GlobalSightLocale targetLocale = wf.getTargetLocale();
-        p_request.setAttribute(JobManagementHandler.TRGT_LOCALE_SCRIPTLET, targetLocale.getDisplayName(uiLocale));
+        p_request.setAttribute(JobManagementHandler.TRGT_LOCALE_SCRIPTLET,
+                               targetLocale.getDisplayName(uiLocale));
         return super.getJobDetailsInfo(p_request, s_isCostingEnabled, s_isRevenueEnabled);
     }
 
     // This method gets called from getJobDetailsInfo function.
-    protected String getJobContentInfo(Job p_job, HttpServletRequest p_request) throws EnvoyServletException {
+    protected String getJobContentInfo(Job p_job, HttpServletRequest p_request)
+        throws EnvoyServletException
+    {
         HttpSession session = p_request.getSession(false);
-        Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale)session.
+            getAttribute(WebAppConstants.UILOCALE);
         ResourceBundle bundle = getBundle(session);
-        Workflow wf = WorkflowHandlerHelper
-                .getWorkflowById(Long.parseLong(p_request.getParameter(JobManagementHandler.ERROR_WF_PARAM)));
+        Workflow wf = WorkflowHandlerHelper.
+            getWorkflowById(Long.parseLong(p_request.
+                                           getParameter(JobManagementHandler.
+                                                        ERROR_WF_PARAM)));
         StringBuffer sb = new StringBuffer();
         List targetPages = new ArrayList(wf.getAllTargetPages());
-        for (int i = 0; i < targetPages.size(); i++) {
-            TargetPage curPage = (TargetPage) targetPages.get(i);
+        for (int i=0; i<targetPages.size(); i++)
+        {
+            TargetPage curPage = (TargetPage)targetPages.get(i);
             String state = curPage.getPageState();
 
             sb.append("<TR VALIGN=TOP BGCOLOR=\"");
-            sb.append(i % 2 == 0 ? "#FFFFFF" : "#EEEEEE");
+            sb.append(i%2==0 ? "#FFFFFF" : "#EEEEEE");
             sb.append("\" ");
             sb.append("CLASS=\"");
-            sb.append((state.equals(PageState.IMPORT_FAIL) ? "warningText" : "standardText"));
+            sb.append((state.equals(PageState.IMPORT_FAIL) ?
+                       "warningText" : 
+                       "standardText"));
             sb.append("\">\n");
             sb.append("<TD><INPUT TYPE=CHECKBOX NAME=page");
             sb.append(" VALUE=pageId_");
@@ -136,66 +140,45 @@ public class WorkflowImportErrorHandler extends JobDetailsHandler {
             sb.append(state);
             sb.append("</TD>\n");
             sb.append("<TD>");
-
-            if (state.equals(PageState.IMPORT_FAIL)) {
+            
+            if (state.equals(PageState.IMPORT_FAIL))
+            {
                 sb.append(lookupImportErrorMessage(curPage, uiLocale));
-            } else {
-                sb.append("");
             }
-            String exceptionAsString = getMessage(curPage.getSourcePage());
-            if (exceptionAsString != null && exceptionAsString.length() > 0) {
-                sb.append("&nbsp;&nbsp;&nbsp;<a style = 'font-size: 9pt;white-space: nowrap;' class=\"standardText\""
-                        + "href= \"##\" id = \"hrefa" + i + "\" onclick='messageDetails(" + i + ")'>"
-                        + "Show Details</a>");
+            else
+            {
+                sb.append("");
             }
             sb.append("</TD>\n");
             sb.append("</TR>\n");
-            sb.append("<TR><TD colspan=\"4\"><DIV  id = \"message" + i + "\" style = \"display: none;width:100%;\">"
-                    + "<TEXTAREA readonly class=\"standardText\" style=\"width:100%;border-style:none;min-height: 300px;\">"
-                    + exceptionAsString + "</TEXTAREA></DIV></TD><TR>");
         }
         return sb.toString();
     }
 
-    // This method gets ExceptionMessage from DB.
-    private String getMessage(SourcePage curPage) {
-        String exceptionMessage = curPage.getRequest().getExceptionAsString();
-        String stackTrace = null;
-        if (exceptionMessage != null && exceptionMessage.length() > 0) {
-            try {
-                Document document = DocumentHelper.parseText(exceptionMessage);
-                Element root = document.getRootElement();
-                @SuppressWarnings("unchecked")
-                List<Element> childList = root.elements("stackTrace");
-                stackTrace = childList.get(0).getText().replaceAll("&gt;", ">").replaceAll("&lt;", "<")
-                        .replaceAll("&#xd;", "").replace("\\\"", "\"").replace("\\r\\n", "");
-            } catch (DocumentException ignore) {
-            }
-        }
-        return stackTrace;
-    }
-
     /**
-     * Looks up the import error message for a given target page
-     * 
-     * @param targetPage
-     *            -- the target page
-     * @param uiLocale
-     *            -- the user's UI locale
-     * @return the localized export error message
-     */
-    private String lookupImportErrorMessage(TargetPage p_targetPage, Locale p_uiLocale) {
+    * Looks up the import error message for a given target page
+    * @param targetPage -- the target page
+    * @param uiLocale -- the user's UI locale
+    * @return the localized export error message
+    */
+    private String lookupImportErrorMessage(TargetPage p_targetPage, 
+                                            Locale p_uiLocale)
+    {
         String importError = "";
-
-        try {
+        
+        try 
+        {
             if (p_targetPage.getImportError() != null)
-                // get only the toplevel message for the UI
+                //get only the toplevel message for the UI
                 importError = p_targetPage.getImportError().getOwnMessage(p_uiLocale);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             c_logger.error("Problem getting import error from target page: ", e);
             importError = "Unknown Error";
         }
-
+        
         return importError;
     }
 }
+

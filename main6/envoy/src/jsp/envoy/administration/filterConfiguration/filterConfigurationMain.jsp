@@ -41,6 +41,12 @@ session="true" %>
 <HTML>
 <!-- This is envoy\administration\filterConfiguration\filterConfigurationMain.jsp -->
     <HEAD>
+        <script type="text/javascript">
+        //GBS-4053
+        var hasBaseFilter = "<%=hasBaseFilter%>";
+        var hasBaseFilter_InternalText = "<%=hasBaseFilter_InternalText%>";
+        var hasBaseFilter_Escaping = "<%=hasBaseFilter_Escaping%>";
+        </script>
         <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
         <TITLE><%=title%></TITLE>
         
@@ -136,10 +142,6 @@ session="true" %>
             <%
             }
             %>
-            //GBS-4053
-            var hasBaseFilter = "<%=hasBaseFilter%>";
-            var hasBaseFilter_InternalText = "<%=hasBaseFilter_InternalText%>";
-            var hasBaseFilter_Escaping = "<%=hasBaseFilter_Escaping%>";
         </SCRIPT>
     </HEAD>
     <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" onload="loadGuides();loadFilterConfigurations();">

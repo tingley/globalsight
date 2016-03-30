@@ -58,6 +58,7 @@ import com.globalsight.everest.page.pageimport.optimize.Office2Optimizer;
 import com.globalsight.everest.page.pageimport.optimize.OptimizeUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvIndexUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvPersistence;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.request.Request;
@@ -76,6 +77,7 @@ import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.IFormatNames;
@@ -174,21 +176,49 @@ public class ExtractedFileImporter extends FileImporter
             if (p_request.getType() == Request.EXTRACTED_LOCALIZATION_REQUEST)
             {
                 ExactMatchedSegments exactMatchedSegments = null;
-
-                if (p_request.getL10nProfile().getTmChoice() != L10nProfile.NO_TM)
+                // get the target locales
+                List<GlobalSightLocale> targetLocales = p_request.getInactiveTargetLocales();
+                List unimport = p_request.getUnimportTargetLocales();
+                // List unActive = profile.getUnActiveLocales();
+                targetLocales.removeAll(unimport);
+                
+                if (PassoloUtil.isPassoloFile(sourcePage))
                 {
-                    c_logger.info("TM leveraging for page: "
-                            + p_request.getExternalPageId());
-                    time_PERFORMANCE = System.currentTimeMillis();
+                    String path = sourcePage.getExternalPageId();
+                    String locale = PassoloUtil.getLocale(path);
+                    locale = PassoloUtil.getMappingLocales(locale);
 
-                    exactMatchedSegments = leveragePage(p_request, sourcePage,
-                            jobId);
-
-                    if (c_logger.isDebugEnabled())
+                    for (int i = targetLocales.size() - 1; i >= 0; i--)
                     {
-                        c_logger.debug("Performance:: TM leveraging time = "
-                                + +(System.currentTimeMillis() - time_PERFORMANCE)
-                                + " " + p_request.getExternalPageId());
+                        GlobalSightLocale targetLocale = (GlobalSightLocale) targetLocales
+                                .get(i);
+                        if (!targetLocale.toString().equals(locale))
+                        {
+                            targetLocales.remove(i);
+                        }
+                    }
+                }
+                for (GlobalSightLocale trgLocale : targetLocales)
+                {
+                    MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                            .getMtProfileBySourcePage(sourcePage, trgLocale);
+                    if (mtProfile != null && !mtProfile.isIgnoreTMMatch())
+                    {
+                        if (p_request.getL10nProfile().getTmChoice() != L10nProfile.NO_TM)
+                        {
+                            c_logger.info("TM leveraging for page: "
+                                    + p_request.getExternalPageId());
+                            time_PERFORMANCE = System.currentTimeMillis();
+
+                            exactMatchedSegments = leveragePage(p_request, sourcePage, jobId);
+
+                            if (c_logger.isDebugEnabled())
+                            {
+                                c_logger.debug("Performance:: TM leveraging time = "
+                                        + +(System.currentTimeMillis() - time_PERFORMANCE) + " "
+                                        + p_request.getExternalPageId());
+                            }
+                        }
                     }
                 }
 

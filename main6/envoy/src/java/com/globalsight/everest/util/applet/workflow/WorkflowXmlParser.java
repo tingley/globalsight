@@ -294,6 +294,12 @@ public class WorkflowXmlParser
             w1.setActionType(w2.getActionType());
             w1.setRolePreference(w2.getRolePreference());
         }
+        else if (w1.getType() == WorkflowConstants.CONDITION)
+        {
+            w1.setSequence(w2.getSequence());
+            w1.setNodeName(w2.getNodeName());
+            w1.setName(w2.getName());
+        }
         
         w1.setPosition(w2.getPosition());
     }
@@ -357,7 +363,9 @@ public class WorkflowXmlParser
         setPosiont(wt, p);
         Node sequence = getNextSibling(point);
         String sn = sequence.getFirstChild().getNodeValue();
-        wt.setTaskId(idMaps.get(sn));
+        wt.setTaskId(WorkflowTask.ID_UNSET);
+        wt.setSequence(Integer.parseInt(sn));
+        wt.setNodeName(name);
         
         Node condition = getNextSibling(sequence);
         String defaultArrow = getDefaultArrow(condition);

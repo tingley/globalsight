@@ -183,33 +183,29 @@ namespace GlobalSight.WinPEConverter
             }
             finally
             {
-                DeleteFile(menurc);
-                DeleteFile(stringrc);
-                DeleteFile(dialogrc);
-                DeleteFile(versionrc);
+                if (!AppConfig.KeepTempFiles)
+                {
+                    DeleteFile(menurc);
+                    DeleteFile(stringrc);
+                    DeleteFile(dialogrc);
+                    DeleteFile(versionrc);
 
-                DeleteFile(menures);
-                DeleteFile(stringres);
-                DeleteFile(dialogres);
-                DeleteFile(versionres);
+                    DeleteFile(menures);
+                    DeleteFile(stringres);
+                    DeleteFile(dialogres);
+                    DeleteFile(versionres);
 
-                DeleteFile(m_newFileName0);
-                DeleteFile(m_newFileName1);
-                DeleteFile(m_newFileName2);
-                DeleteFile(m_newFileName3);
+                    DeleteFile(m_newFileName0);
+                    DeleteFile(m_newFileName1);
+                    DeleteFile(m_newFileName2);
+                    DeleteFile(m_newFileName3);
+                }
             }
         }
 
         private void MergeOneFile(CommandUtil comUtil, List<TranslateUnit3RD> units, string rcFile, string resFile, TranslateUnitType tuType, string oriFile, String newFile)
         {
-            Encoding encoding = Encoding.Unicode;
-            string[] menulines = File.ReadAllLines(rcFile, encoding);
-
-            if (menulines.Length == 1)
-            {
-                encoding = FileUtil.GetEncoding(rcFile);
-                menulines = File.ReadAllLines(rcFile, encoding);
-            }
+            string[] menulines = ReadAllLinesForRCFile(rcFile, tuType);
 
             if (menulines.Length != 0)
             {
@@ -229,11 +225,13 @@ namespace GlobalSight.WinPEConverter
 
                 File.WriteAllLines(rcFile, menulines, Encoding.Unicode);
                 comUtil.Compile(rcFile, resFile);
+                DebugCompile(Encoding.Unicode, resFile);
 
                 if (!File.Exists(resFile) || File.ReadAllBytes(resFile).Length == 32)
                 {
                     File.WriteAllLines(rcFile, menulines, Encoding.Default);
                     comUtil.Compile(rcFile, resFile);
+                    DebugCompile(Encoding.Default, resFile);
                 }
 
                 if (!File.Exists(resFile) || File.ReadAllBytes(resFile).Length == 32)
@@ -252,11 +250,13 @@ namespace GlobalSight.WinPEConverter
 
                     File.WriteAllLines(rcFile, menulines, Encoding.Unicode);
                     comUtil.Compile(rcFile, resFile);
+                    DebugCompile(Encoding.Unicode, resFile);
 
                     if (!File.Exists(resFile) || File.ReadAllBytes(resFile).Length == 32)
                     {
                         File.WriteAllLines(rcFile, menulines, Encoding.Default);
                         comUtil.Compile(rcFile, resFile);
+                        DebugCompile(Encoding.Default, resFile);
                     }
                 }
 
@@ -273,6 +273,8 @@ namespace GlobalSight.WinPEConverter
                             //TODO: fix this line
                         }
                     }
+
+                    m_log.Debug(log);
                 }
 
                 comUtil.Modify(oriFile, newFile, resFile);
@@ -281,6 +283,19 @@ namespace GlobalSight.WinPEConverter
             if (!File.Exists(newFile))
             {
                 File.Copy(oriFile, newFile);
+            }
+        }
+
+        private void DebugCompile(Encoding encoding, String resFile)
+        {
+            m_log.Debug("Using " + encoding + " for Compile");
+            if (File.Exists(resFile))
+            {
+                m_log.Debug("Result file length " + File.ReadAllBytes(resFile).Length + " (32)");
+            }
+            else
+            {
+                m_log.Debug("Result file does not exist.");
             }
         }
 
@@ -401,10 +416,13 @@ namespace GlobalSight.WinPEConverter
             }
             finally
             {
-                DeleteFile(menurc);
-                DeleteFile(stringrc);
-                DeleteFile(dialogrc);
-                DeleteFile(versionrc);
+                if (!AppConfig.KeepTempFiles)
+                {
+                    DeleteFile(menurc);
+                    DeleteFile(stringrc);
+                    DeleteFile(dialogrc);
+                    DeleteFile(versionrc);
+                }
             }
 
             return result;
@@ -412,15 +430,41 @@ namespace GlobalSight.WinPEConverter
 
         private void ExtractOneFile(List<TranslateUnit3RD> result, string rcFile, TranslateUnitType tuType, List<TranslateUnit> resultSelf)
         {
-            Encoding encoding = FileUtil.GetEncoding(rcFile);
+            string[] menulines = ReadAllLinesForRCFile(rcFile, tuType);
+
+            DoExtract(result, menulines, tuType, resultSelf);
+        }
+
+        private static string[] ReadAllLinesForRCFile(string rcFile, TranslateUnitType tuType)
+        {
             string[] menulines = File.ReadAllLines(rcFile, Encoding.Unicode);
+            string all = File.ReadAllText(rcFile, Encoding.Unicode);
 
             if (menulines.Length == 1)
             {
+                Encoding encoding = FileUtil.GetEncoding(rcFile);
                 menulines = File.ReadAllLines(rcFile, encoding);
             }
 
-            DoExtract(result, menulines, tuType, resultSelf);
+            if (all != null && all.Length > 0)
+            {
+                string keyWord = "";
+
+                switch (tuType)
+                {
+                    case TranslateUnitType.StringType: keyWord = "STRING"; break;
+                    case TranslateUnitType.DialogType: keyWord = "DIALOG"; break;
+                    case TranslateUnitType.MenuType: keyWord = "MENU"; break;
+                    case TranslateUnitType.VersionType: keyWord = "VERSIONINFO"; break;
+                }
+
+                if (!all.Contains(keyWord))
+                {
+                    Encoding encoding = FileUtil.GetEncoding(rcFile);
+                    menulines = File.ReadAllLines(rcFile, encoding);
+                }
+            }
+            return menulines;
         }
 
         private List<TranslateUnit> ParsePEFile()

@@ -32,15 +32,12 @@ var Menu = {
 					}
 				}
 			} else if (e.keyCode == 46) {
-				log("delete");
 				
 				var l = LineData.selectedLine;
-				log(1 + l);
 				if (l){
 					LineData.deleteSelectedLine();
 				} else {
 					var node = Model.selectedNode;
-					log(2 + node);
 					if (node) {
 						Model.deleteSelectedNode();
 					}
@@ -108,6 +105,15 @@ function onRightDown(e) {
 			UI.node_menu.find("li:eq(0)").hide();
 		}
 		
+		var deleteLi = UI.node_menu.find("li:eq(1)");
+		var cannotDelete = 3 == node.state || 5 == node.state;
+		
+		// can not delete node that the state is start or complate
+		if (cannotDelete){
+			deleteLi.hide();
+		} else {
+			deleteLi.show();
+		}
 		
 		UI.node_menu.find("li:eq(1)").unbind("click").bind("click", function() {
 			Model.deleteNode(node);

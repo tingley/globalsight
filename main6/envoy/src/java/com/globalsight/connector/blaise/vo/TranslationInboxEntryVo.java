@@ -68,8 +68,9 @@ public class TranslationInboxEntryVo
 
 	public String getDisplaySourceLocale()
 	{
-		return this.entry.getSourceLocale().toString()
-				+ getLocaleCode(getSourceLocale());
+        Locale locale = getSourceLocale();
+        return getLocaleCode(locale) + " (" + locale.getDisplayLanguage() + "_"
+                + locale.getDisplayCountry() + ")";
 	}
 
 	public Locale getTargetLocale()
@@ -79,15 +80,14 @@ public class TranslationInboxEntryVo
 
 	public String getDisplayTargetLocale()
 	{
-		return this.entry.getTargetLocale().toString()
-				+ getLocaleCode(getTargetLocale());
+	    Locale locale = getTargetLocale();
+        return getLocaleCode(getTargetLocale()) + " (" + locale.getDisplayLanguage() + "_"
+                + locale.getDisplayCountry() + ")";
 	}
 
 	private String getLocaleCode(Locale locale)
 	{
-		String fixedLocale = BlaiseHelper.fixLocale(locale.getLanguage() + "_"
-				+ locale.getCountry());
-		return " [" + fixedLocale + "]";
+        return BlaiseHelper.fixLocale(locale.getLanguage() + "_" + locale.getCountry());
 	}
 
 	public String getDescription()

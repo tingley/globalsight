@@ -162,7 +162,16 @@ public class MachineTranslateAdapter
 
         }
         mtProfile.setMtConfidenceScore(long_mtConfidenceScore);
-
+        
+       String mtIgnoreTmMatches = p_request.getParameter(MTProfileConstants.MT_IGNORE_TM_MATCHES);
+       if (mtIgnoreTmMatches == null || !"on".equals(mtIgnoreTmMatches))
+       {
+           mtProfile.setIgnoreTMMatch(false);
+       }
+       else
+       {
+           mtProfile.setIgnoreTMMatch(true);
+       }
         // show log debug info
         String logDebugInfo = p_request
                 .getParameter(MTProfileConstants.MT_LOG_DEBUG_INFO);
@@ -384,20 +393,15 @@ public class MachineTranslateAdapter
        {
            mtProfile.setMsTransType(msTransType);
        }
-          
-       String mtIgnoreTmMatches = p_request.getParameter(MTProfileConstants.MT_IGNORE_TM_MATCHES);
-       if (mtIgnoreTmMatches == null || !"on".equals(mtIgnoreTmMatches))
-       {
-           mtProfile.setIgnoreTMMatch(false);
-       }
-       else
-       {
-           mtProfile.setIgnoreTMMatch(true);
-       }
+  
        String msMaxLength = p_request.getParameter(MTProfileConstants.MT_MS_MAX_LENGTH);
         if (msMaxLength != null && !"".equals(msMaxLength.trim()))
         {
             mtProfile.setMsMaxLength(Long.parseLong(msMaxLength));
+        }
+        else
+        {
+            mtProfile.setMsMaxLength(1000);
         }
     }
 

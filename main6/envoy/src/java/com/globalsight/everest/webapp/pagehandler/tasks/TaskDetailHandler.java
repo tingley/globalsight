@@ -1448,6 +1448,7 @@ public class TaskDetailHandler extends PageHandler
 			}
 			return filteredFiles;
 		}
+		sessionMgr.removeElement("sourcePageIdList");
 			// just return all - no filter
 		return p_pages;
 	}

@@ -129,7 +129,7 @@ public class ImportErrorHandler extends JobDetailsHandler {
         return sB.toString();
     }
 
-    // This method gets ExceptionMessage from DB.
+    // This method gets ExceptionMessage
     private String getMessage(SourcePage curPage) {
         String exceptionMessage = curPage.getRequest().getExceptionAsString();
         String stackTrace = null;

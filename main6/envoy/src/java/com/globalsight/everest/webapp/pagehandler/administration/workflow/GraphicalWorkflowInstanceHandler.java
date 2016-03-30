@@ -58,6 +58,7 @@ import com.globalsight.everest.webapp.applet.common.AppletDate;
 import com.globalsight.everest.webapp.javabean.TaskInfoBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowInstance;
@@ -200,6 +201,18 @@ public class GraphicalWorkflowInstanceHandler extends PageHandler implements
                 {
                     List taskInfos = (List) sessionMgr
                             .getAttribute(WorkflowConstants.TASK_INFOS);
+                    
+                    if (taskInfos == null)
+                    {
+                        WorkflowInstance wfi = WorkflowHandlerHelper
+                                .getWorkflowInstance(workflow.getId());
+                        taskInfos = (ArrayList) ServerProxy
+                                .getWorkflowServer().timeDurationsInDefaultPath(workflow.getId(),
+                                        -1, null, wfi);
+                        sessionMgr
+                                .setAttribute(WorkflowConstants.TASK_INFOS, taskInfos);
+                    }
+                    
                     String taskIdParam = p_request.getParameter("taskId");
                     long taskId = Long.parseLong(taskIdParam);
 

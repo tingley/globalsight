@@ -26,15 +26,32 @@ function BaseFilter()
 	this.operatorNameMap[this.operatorMatch] = jsOperatorMatch;
 	
 	this.optionObjsMap = new Object();
-	this.availableOptions = [this.optionInternalTexts, this.optionEscapings];
-	this.checkedItemIds = new Array();
-	
+    if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='true')
+	{
+    	this.availableOptions = [this.optionEscapings];
+	}
+    else if(hasBaseFilter_InternalText =='true' && hasBaseFilter_Escaping =='false')
+    {
+    	this.availableOptions = [this.optionInternalTexts];
+    }
+    else
+    {
+    	this.availableOptions = [this.optionInternalTexts, this.optionEscapings];
+    }
+	this.checkedItemIds = new Array();	
 	this.tagsEveryPage = 10;
 	this.currentPage = 0;
 	this.sortOrder = "asc";
 	this.sortColumnIndex = 1;
 	this.currentPage = 0;
-	this.currentOption = this.optionInternalTexts;
+    if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='true')
+	{
+		this.currentOption = this.optionEscapings;
+	}
+	else
+	{
+		this.currentOption = this.optionInternalTexts;
+	}
 	this.editItemId = -1;
 	this.editItemEnable = false;
 }
@@ -148,39 +165,39 @@ BaseFilter.prototype.edit = function(filterId, color, specialFilters, topFilterI
 
 BaseFilter.prototype.generateDiv = function(topFilterId, color)
 {
-		this.initOptionMap();
-		var str = new StringBuffer("<table border=0 width='400px'>");
-		str.append("<tr>");
-		str.append("<td class='specialFilter_dialog_label' width='80px;'>" + jsFilterName + ":</td>");	
-		str.append("<td><input type='text' style='width:100%' id='baseFilterName' maxlength='"+maxFilterNameLength+"' value='Base Text Filter'></input>");
-		str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
-		str.append("</tr>");
-		
-		str.append("<tr>");
-		str.append("<td class='specialFilter_dialog_label' VALIGN='bottom'>" + jsFilterDesc + ":</td>");	
-		str.append("<td><textarea style='width:100%' rows='4' id='baseFilterDesc' name='desc'></textarea>");
-		str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
-		str.append("</tr>");
-		str.append("</table>");
-		
-		str.append("<table border=0 width='400px'>");
-		str.append("<tr>");
-		str.append("<td>");
-		str.append("<br /><br />");
-		str.append("</td>");
-		str.append("</tr>");
-		str.append("</table>");
-		
-		str.append("<div class='specialFilter_dialog_label' style='width:98%'>");
-		str.append(this.generateTagsTable());
-		str.append("</div>");
-		
-		var dialogObj = document.getElementById('baseFilterPopupContent');
-		dialogObj.innerHTML = str.toString();
-		this.showDialog();
-		saveBaseFilter.edit = false;
-		saveBaseFilter.topFilterId = topFilterId;
-		saveBaseFilter.color = color;
+	this.initOptionMap();
+	var str = new StringBuffer("<table border=0 width='400px'>");
+	str.append("<tr>");
+	str.append("<td class='specialFilter_dialog_label' width='80px;'>" + jsFilterName + ":</td>");	
+	str.append("<td><input type='text' style='width:100%' id='baseFilterName' maxlength='"+maxFilterNameLength+"' value='Base Text Filter'></input>");
+	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='specialFilter_dialog_label' VALIGN='bottom'>" + jsFilterDesc + ":</td>");	
+	str.append("<td><textarea style='width:100%' rows='4' id='baseFilterDesc' name='desc'></textarea>");
+	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
+	str.append("</tr>");
+	str.append("</table>");
+	
+	str.append("<table border=0 width='400px'>");
+	str.append("<tr>");
+	str.append("<td>");
+	str.append("<br /><br />");
+	str.append("</td>");
+	str.append("</tr>");
+	str.append("</table>");
+	
+	str.append("<div class='specialFilter_dialog_label' style='width:98%'>");
+	str.append(this.generateTagsTable());
+	str.append("</div>");
+	
+	var dialogObj = document.getElementById('baseFilterPopupContent');
+	dialogObj.innerHTML = str.toString();
+	this.showDialog();
+	saveBaseFilter.edit = false;
+	saveBaseFilter.topFilterId = topFilterId;
+	saveBaseFilter.color = color;
 }
 
 function saveBaseFilter()
@@ -310,38 +327,38 @@ BaseFilter.prototype.generateTagsTable = function (filter)
 	str.append("</label>"); 
 	str.append("<select id='baseFilterRulesSection' onchange='baseFilter.switchRules(this)'>");
 
-	if (filter)
-	{
-		if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='true')
-		{
-			var index0 = baseFilter.availableOptions.indexOf("0");
-			if (index0!=-1)
-			{
-				baseFilter.availableOptions.splice(index0,1);
-			}
-		}
-		if (hasBaseFilter_Escaping =='false' && hasBaseFilter_InternalText =='true')
-		{
-			var index1 = baseFilter.availableOptions.indexOf("1");
-			if (index1!=-1)
-			{
-				baseFilter.availableOptions.splice(index1,1);
-			}
-		}
-	}
-	else
-	{
-		var index0 = baseFilter.availableOptions.indexOf("0");
-		var index1 = baseFilter.availableOptions.indexOf("1");
-		if (index0 == -1)
-		{
-			baseFilter.availableOptions.push("0");
-		}
-		if (index1 == -1)
-		{
-			baseFilter.availableOptions.push("1");
-		}
-	}
+//	if (filter)
+//	{
+//		if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='true')
+//		{
+//			var index0 = baseFilter.availableOptions.indexOf("0");
+//			if (index0!=-1)
+//			{
+//				baseFilter.availableOptions.splice(index0,1);
+//			}
+//		}
+//		if (hasBaseFilter_Escaping =='false' && hasBaseFilter_InternalText =='true')
+//		{
+//			var index1 = baseFilter.availableOptions.indexOf("1");
+//			if (index1!=-1)
+//			{
+//				baseFilter.availableOptions.splice(index1,1);
+//			}
+//		}
+//	}
+//	else
+//	{
+//		var index0 = baseFilter.availableOptions.indexOf("0");
+//		var index1 = baseFilter.availableOptions.indexOf("1");
+//		if (index0 == -1)
+//		{
+//			baseFilter.availableOptions.push("0");
+//		}
+//		if (index1 == -1)
+//		{
+//			baseFilter.availableOptions.push("1");
+//		}
+//	}
 
 	for(var i = 0; i < baseFilter.availableOptions.length; i++)
 	{

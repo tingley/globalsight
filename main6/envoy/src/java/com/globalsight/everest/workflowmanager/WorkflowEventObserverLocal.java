@@ -362,7 +362,7 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
 					// If this entry has been completed, it will be removed from
 					// Blaise inbox entries, this will throw "object with id xxx
 					// not found" exception. Ignore this exception.
-	                helper.complete(bcj.getBlaiseEntryId());
+	                helper.complete(bcj.getBlaiseEntryId(), job.getId());
 				}
             }
         }

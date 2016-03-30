@@ -41,17 +41,19 @@
     BlaiseConnector blc = (BlaiseConnector) sessionMgr.getAttribute("blaiseConnector");
     HashMap<Long, String> id2FileNameMap = (HashMap<Long, String>) sessionMgr.getAttribute("id2FileNameMap");
     HashMap<Long, String> id2LocaleMap = (HashMap<Long, String>) sessionMgr.getAttribute("id2LocaleMap");
+    List<java.util.Locale> allBlaiseLocales = (List<java.util.Locale>) sessionMgr.getAttribute("allBlaiseLocales");
 
     // URLs
 	String filterURL = self.getPageURL() + "&action=filter";
 	String claimURL = self.getPageURL() + "&action=claim";
     String uploadAttachmentUrl = self.getPageURL() + "&action=uploadAttachment";
     String checkTargetLocalesUrl = self.getPageURL() + "&action=checkTargetLocalesUrl";
+    String checkAttrRequiredUrl = self.getPageURL() + "&action=checkAttributeRequired";
     String createBlaiseJobUrl = self.getPageURL() + "&action=createBlaiseJob";
 
     // Filters
-    String idFilter = (String) sessionMgr.getAttribute("idFilter");
-    idFilter = idFilter == null ? "" : idFilter;
+    String relatedObjectIdFilter = (String) sessionMgr.getAttribute("relatedObjectIdFilter");
+    relatedObjectIdFilter = relatedObjectIdFilter == null ? "" : relatedObjectIdFilter;
 	String sourceLocaleFilter = (String) sessionMgr.getAttribute("sourceLocaleFilter");
 	sourceLocaleFilter = sourceLocaleFilter == null ? "" : sourceLocaleFilter;
 	String targetLocaleFilter = (String) sessionMgr.getAttribute("targetLocaleFilter");
@@ -116,6 +118,35 @@ var id2LocaleMap = {};
 for (Map.Entry<Long, String> entry : id2LocaleMap.entrySet())
 {%>
 	id2LocaleMap['<%=entry.getKey()%>'] = '<%=entry.getValue()%>';
+<%
+}
+%>
+
+var srcLocaleOptions = "<option>Choose...</option>";
+<%
+String lCode = null;
+String displayName = null;
+String selected = "";
+for (java.util.Locale locale : allBlaiseLocales)
+{
+    lCode = locale.getLanguage() + "_" + locale.getCountry();
+    displayName = lCode + " (" + locale.getDisplayLanguage() + "_" + locale.getDisplayCountry() + ")";
+    selected = lCode.equalsIgnoreCase(sourceLocaleFilter) ? "SELECTED" : "";
+%>
+    srcLocaleOptions += "<option value='<%=lCode%>' <%=selected%>>" + "<%=displayName%>" + "</option>";
+<%
+}
+%>
+
+var trgLocaleOptions = "<option>Choose...</option>";
+<%
+for (java.util.Locale locale : allBlaiseLocales)
+{
+    lCode = locale.getLanguage() + "_" + locale.getCountry();
+    displayName = lCode + " (" + locale.getDisplayLanguage() + "_" + locale.getDisplayCountry() + ")";
+    selected = lCode.equalsIgnoreCase(targetLocaleFilter) ? "SELECTED" : "";
+%>
+	trgLocaleOptions += "<option value='<%=lCode%>' <%=selected%>>" + "<%=displayName%>" + "</option>";
 <%
 }
 %>
@@ -224,8 +255,8 @@ function updateFileProfileSelect()
 
 function checkAttrRequired()
 {
-    $.get("/globalsight/ControlServlet?activityName=createZipJobs",
-        {"uploadAction":"getAttributes","l10Nid":l10Nid,"no":Math.random()}, 
+    $.get('<%=checkAttrRequiredUrl%>', 
+    	{"l10Nid":l10Nid,"no":Math.random()}, 
         function(ret) {
             if (ret == "true" || ret == "required") {
                 $("#attributeButton").show();
@@ -342,11 +373,39 @@ function filterItems(e)
 {
     e = e ? e : window.event;
     var keyCode = e.which ? e.which : e.keyCode;
-    if (keyCode == 13)
+    if (keyCode == 13 && checkFilters())
     {
     	blaiseEntriesForm.action = "<%=filterURL%>";
     	blaiseEntriesForm.submit();
     }
+}
+
+function filterSelectItems(e)
+{
+	filterItems(e);
+}
+
+function checkFilters()
+{
+	var tmp = "";
+	tmp = ATrim($("#relatedObjectIdFilter").val());
+	if (tmp != "" && !isAllDigits(tmp)) {
+		alert("Invalid Blaise ID, only integer number is allowed.");
+		return false;
+	}
+
+	tmp = ATrim($("#jobIdFilter").val());
+	var ids = tmp.split(",");
+	var id = "";
+    for (var i = 0; i < ids.length; i++) {
+    	id = ATrim(ids[i]);
+    	if (id != "" && !isAllDigits(id)) {
+    		alert("Invalid job ID, only integer number is allowed.");
+    		return false;
+    	}
+	}
+    
+    return true;
 }
 
 //Delete attachment file
@@ -354,6 +413,7 @@ function delAttc()
 {
     $("#attachmentArea").html("");
     $("#delAtt").hide();
+    $("#attachment").val("");
     $("#attachmentArea").removeClass("uploadifyError");
     attachmentUploading = false;
 }
@@ -407,9 +467,9 @@ function emptyFileValue() {
 
 function addTempAttachment(fileName) {
     $("#attachmentArea").html("<div style='line-height:25px;position:absolute;background-color:#0099FF;' id='ProgressBarAttach'></div>" 
-                            + "<div id='attName' style='width:336px' class='attachment_div'>" + fileName + "</div>" 
-                            + "<input type='hidden' name='attachment' value=\"" + fileName + "\">");
+                            + "<div id='attName' style='width:336px' class='attachment_div'>" + fileName + "</div>" );
     $("#ProgressBarAttach").height($("#attachmentArea").height());
+    $("#attachment").val(fileName);
     runAttachProgress(10);
     runAttachProgress(20);
     runAttachProgress(30);
@@ -469,7 +529,10 @@ $(document).ready(function ()
 	// "Browser" file button should be hidden always
 	$("#selectedAttachmentFile").hide();
 
-	// action of job name text
+	$("#sourceLocaleFilter").html(srcLocaleOptions);
+	$("#targetLocaleFilter").html(trgLocaleOptions);
+
+// action of job name text
 //    $("#jobName").focus(function() {
 //        if ($("#jobName").attr("value") == "<c:out value='${jsmsg_customer_job_name}'/>") {
 //            $("#jobName").attr("value","");
@@ -612,6 +675,7 @@ $(document).ready(function ()
 
         // validation of target locales
         var checkTrgLocalUrl = "<%=checkTargetLocalesUrl%>&entryIds=" + entryIds + "&l10Nid=" + l10Nid;
+        $("#createJobForm").attr("enctype","application/x-www-form-urlencoded");
         $("#createJobForm").ajaxSubmit({
    			type: 'post',
             url: checkTrgLocalUrl,
@@ -629,13 +693,32 @@ $(document).ready(function ()
             	} else {
                     alert('<%=bundle.getString("msg_job_create_successful")%>');
                     creating = false;
+
                     $("#createJobForm").attr("target", "_self");
                     $("#createJobForm").attr("action", "<%=createBlaiseJobUrl%>");
                     $("#createJobForm").attr("enctype","application/x-www-form-urlencoded");
                     $("#createJobForm").attr("encoding","application/x-www-form-urlencoded");
+
+                    var blaiseConnectorId = $("#blaiseConnectorId").val();
+                    var attributeString = $("#attributeString").val();
+                    var fileMapFileProfile = $("#fileMapFileProfile").val();
+                    var userName = $("#userName").val();
+                    var priority = $("#priority").val();
+                    var comment = $("#comment").val();
+					var attachment =  $("#attachment").val();
+					
+                    var createJobUrl = "<%=createBlaiseJobUrl%>" 
+                    	+ "&blaiseConnectorId=" + blaiseConnectorId
+                    	+ "&attributeString=" + attributeString
+                    	+ "&fileMapFileProfile=" + fileMapFileProfile
+                    	+ "&userName=" + userName
+                    	+ "&priority=" + priority
+                    	+ "&comment=" + comment
+                    	+ "&attachment=" + attachment;
+
                     $("#createJobForm").ajaxSubmit({
                			type: 'post',
-                        url: "<%=createBlaiseJobUrl%>",
+                        url: createJobUrl,
                         dataType:'text',
                         timeout:100000000,
                         success: function(data) {
@@ -674,12 +757,12 @@ $(document).ready(function ()
 		<table cellpadding=0 cellspacing=0 border=0 class="standardText" width="100%" style="min-width:1024px;" >
 		    <tr valign="top">
 		        <td align="right">
-		            <amb:tableNav bean="blaiseInboxEntryList" key="blaiseInboxEntryKey" pageUrl="self" />
+		            <amb:tableNav bean="blaiseEntryList" key="blaiseEntryKey" pageUrl="self" />
 		        </td>
 		    </tr>
 		    <tr>
 		        <td>
-			        <amb:table bean="blaiseInboxEntryList" id="blaiseInboxEntry" key="blaiseInboxEntryKey"
+			        <amb:table bean="blaiseEntryList" id="blaiseInboxEntry" key="blaiseEntryKey"
 			        	dataClass="com.globalsight.connector.blaise.vo.TranslationInboxEntryVo"
 			        	pageUrl="self" hasFilter="true" 
 			        	emptyTableMsg="msg_blaise_inbox_entry_none">
@@ -688,17 +771,17 @@ $(document).ready(function ()
 		                <input type="checkbox" name="blaiseInboxEntryIds" value="<%=blaiseInboxEntry.getId()%>" onclick="setButtonState();">
 		            </amb:column>
 
-		            <amb:column label="lb_blaise_id" sortBy="<%=BlaiseInboxEntryComparator.RELATED_OBJECT_ID%>" filter="idFilter" filterValue="<%=idFilter%>" width="3%">
+		            <amb:column label="lb_blaise_id" sortBy="<%=BlaiseInboxEntryComparator.RELATED_OBJECT_ID%>" filter="relatedObjectIdFilter" filterValue="<%=relatedObjectIdFilter%>" width="3%">
 						<%=blaiseInboxEntry.getRelatedObjectId()%>
 		            </amb:column>
 
 		            <amb:column label="" width="5px">&nbsp;</amb:column>
 
-		            <amb:column label="lb_source_locale" sortBy="<%=BlaiseInboxEntryComparator.SOURCE_LOCALE%>" filter="sourceLocaleFilter" filterValue="<%=sourceLocaleFilter%>" width="15%">
+		            <amb:column label="lb_source_locale" sortBy="<%=BlaiseInboxEntryComparator.SOURCE_LOCALE%>" filterSelect="sourceLocaleFilter" filterValue="<%=sourceLocaleFilter%>" width="15%">
 		                <%=blaiseInboxEntry.getDisplaySourceLocale() == null ? "" : blaiseInboxEntry.getDisplaySourceLocale()%>
 		            </amb:column>
 
-		            <amb:column label="lb_target_locale" sortBy="<%=BlaiseInboxEntryComparator.TARGET_LOCALE%>" filter="targetLocaleFilter" filterValue="<%=targetLocaleFilter%>" width="15%">
+		            <amb:column label="lb_target_locale" sortBy="<%=BlaiseInboxEntryComparator.TARGET_LOCALE%>" filterSelect="targetLocaleFilter" filterValue="<%=targetLocaleFilter%>" width="15%">
 		                <%=blaiseInboxEntry.getDisplayTargetLocale() == null ? "" : blaiseInboxEntry.getDisplayTargetLocale()%>
 		            </amb:column>
 
@@ -706,7 +789,7 @@ $(document).ready(function ()
 		                <%=blaiseInboxEntry.getDescription() == null ? "" : blaiseInboxEntry.getDescription()%>
 		            </amb:column>
 
-		            <amb:column label="lb_source_revision" sortBy="<%=BlaiseInboxEntryComparator.SOURCE_REVISION%>" width="10%">
+		            <amb:column label="lb_source_revision" width="10%">
 		                <%=blaiseInboxEntry.getSourceRevision()%>
 		            </amb:column>
 
@@ -718,7 +801,7 @@ $(document).ready(function ()
 		                <%=dateFormat.format(blaiseInboxEntry.getDueDate())%>
 		            </amb:column>
 
-		            <amb:column label="lb_job_id" sortBy="<%=BlaiseInboxEntryComparator.JOB_ID%>" filter="jobIdFilter" filterValue="<%=jobIdFilter%>" width="25%">
+		            <amb:column label="lb_job_id" filter="jobIdFilter" filterValue="<%=jobIdFilter%>" width="25%">
 			            <%=blaiseInboxEntry.getJobIdsForDisplay() == null ? "" : blaiseInboxEntry.getJobIdsForDisplay()%>
 		            </amb:column>
 
@@ -726,7 +809,7 @@ $(document).ready(function ()
 	        	</td>
 		    </tr>
 		    <tr style="padding-top: 5px;">
-		    	<td><amb:tableNav  bean="blaiseInboxEntryList" key="blaiseInboxEntryKey" pageUrl="self" scope="10,20,50,All" showTotalCount="false"/></td>
+		    	<td><amb:tableNav  bean="blaiseEntryList" key="blaiseEntryKey" pageUrl="self" scope="25,50,100" showTotalCount="false"/></td>
 		    </tr>
 		    <tr>
 		        <td style="padding-top:5px" align="left">
@@ -750,13 +833,15 @@ $(document).ready(function ()
         	<tr><td width="100%"><%=noteFNameAsJobName%></td></tr>
         </table>
     </div>
+
+
     <!-- Start of Create Job Section -->
     <div id="createJobDiv" style="margin-left:0px; margin-top:0px; display:none;" class="standardText">
-        <form name="createJobForm" id="createJobForm" method="post" action="" enctype="multipart/form-data" target="none_iframe">
+        <form name="createJobForm" id="createJobForm" method="post" action="" enctype="multipart/form-data">
             <input type="hidden" id="attributeString" name="attributeString" value="" />
             <input type="hidden" id="fileMapFileProfile" name="fileMapFileProfile" value="" />
-            <input type="hidden" name="userName" value="<%=userName%>" />
-            <input type="hidden" name="blaiseConnectorId" value="<%=blc.getId()%>" />
+            <input type="hidden" id="userName" name="userName" value="<%=userName%>" />
+            <input type="hidden" id="blaiseConnectorId" name="blaiseConnectorId" value="<%=blc.getId()%>" />
 
         <table class="listborder" cellspacing="0" cellpadding="0" width="979" align="left" border="0">
             <tr>
@@ -802,7 +887,7 @@ $(document).ready(function ()
 	                        </td>
 	                    </tr>
 	                    <tr>
-	                        <td height="50" colspan="3"><textarea class="textarea" name="comment" style="color:#cccccc"><c:out value="${jsmsg_customer_comment}"/></textarea></td>
+	                        <td height="50" colspan="3"><textarea class="textarea" id="comment" name="comment" style="color:#cccccc"><c:out value="${jsmsg_customer_comment}"/></textarea></td>
 	                    </tr>
 	                    <tr>
 	                        <td colspan="3">
@@ -811,7 +896,9 @@ $(document).ready(function ()
 	                                    <td width="18%" height="25" valign="middle" style="font-family:Arial,Helvetica,sans-serif;font-size:10pt;">
 	                                        <c:out value="${lb_attachment}"/> / <c:out value="${lb_reference_file}"/>:
 	                                    </td>
-	                                    <td width="40%" valign="middle"><div id="attachmentArea" style="border:1px solid #0C1476;padding-left:0;height:25px;line-height:25px"></div></td>
+	                                    <td width="40%" valign="middle"><div id="attachmentArea" style="border:1px solid #0C1476;padding-left:0;height:25px;line-height:25px"></div>
+	                                    <input type='hidden' name='attachment' id='attachment' value="">
+	                                    </td>
 	                                    <td width="5%" valign="middle" align="left"><div id="delAtt" style="display:none;"><img src="/globalsight/images/createjob/delete.png" style="cursor:pointer;padding-top:4px;" onclick="delAttc();"></div></td>
 	                                    <td width="10%">
 	                                        <input type="button" id="attachmentFileBtn"  title="<c:out value='${lb_create_job_browse_tip}'/>" onclick="clickAtt()" class="standardBtn_mouseout" style="width:90px;" value="<c:out value='${lb_browse}'/>" />

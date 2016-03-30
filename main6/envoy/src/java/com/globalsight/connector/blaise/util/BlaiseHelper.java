@@ -28,6 +28,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,25 +39,50 @@ import org.apache.log4j.Logger;
 import com.cognitran.blaise.translation.api.ClientFactory;
 import com.cognitran.blaise.translation.api.TranslationAgencyClient;
 import com.cognitran.client.IncompatibleVersionException;
+import com.cognitran.translation.client.TranslationPageCommand;
 import com.cognitran.translation.client.workflow.TranslationInboxEntry;
 import com.cognitran.workflow.client.InboxEntry;
-import com.cognitran.workflow.client.State;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
+import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
+import com.globalsight.everest.util.comparator.BlaiseInboxEntryComparator;
+import com.globalsight.ling.common.URLEncoder;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
 
 public class BlaiseHelper
 {
-    static private final Logger logger = Logger
-            .getLogger(BlaiseHelper.class);
+    static private final Logger logger = Logger.getLogger(BlaiseHelper.class);
+
+    private BlaiseConnector blc = null;
+    private TranslationAgencyClient client = null;
 
     private static final String DASH = " - ";
-    private BlaiseConnector blc = null;
-
     private static List<String> specialChars = new ArrayList<String>();
 
-    public BlaiseHelper (BlaiseConnector blc)
+    private static final String blaiseSupportedLangs =
+              "ar_SA, bg_BG, cs_CZ, da_DK, de_DE, el_GR, en_GB, en_US, es_ES, es_MX,"
+            + "et_EE, fi_FI, fr_CA, fr_FR, he_IL, hi_IN, hr_HR, hu_HU, hy_AM, id_ID,"
+            + "is_IS, it_IT, ja_JP, kk_KZ, ko_KR, lt_LT, lv_LV, nl_NL, no_NO, pl_PL,"
+            + "pt_BR, pt_PT, ro_RO, ru_RU, sk_SK, sl_SI, sv_SE, tr_TR, zh_CN, zh_TW";
+
+    public static final List<java.util.Locale> blaiseSupportedLocales = new ArrayList<java.util.Locale>();
+    public static final HashMap<String, java.util.Locale> blaiseSupportedLocalesMap = new HashMap<String, java.util.Locale>(); 
+
+    static
+    {
+        java.util.Locale locale = null;
+        for (String localeCode : blaiseSupportedLangs.split(","))
+        {
+            localeCode = localeCode.trim();
+            locale = getLocale(localeCode);
+            blaiseSupportedLocales.add(locale);
+            blaiseSupportedLocalesMap.put(localeCode.toLowerCase(), locale);
+        }
+    }
+
+    public BlaiseHelper(BlaiseConnector blc)
     {
     	this.blc = blc;
     }
@@ -65,7 +91,7 @@ public class BlaiseHelper
     {
     	try
     	{
-			initTranslationClient();
+			client = initTranslationClient();
 		}
     	catch(UnknownHostException e)
     	{
@@ -97,49 +123,57 @@ public class BlaiseHelper
     	return "";
     }
 
-    public List<TranslationInboxEntryVo> listInbox()
+    public int getInboxEntryCount(TranslationPageCommand command)
     {
-    	return listInbox(null);
+        int number = 0;
+        try
+        {
+            TranslationAgencyClient client = getTranslationClient();
+            if (client == null)
+            {
+                logger.error("TranslationAgencyClient is null.");
+                return 0;
+            }
+
+            number = client.getInboxEntryCount(command);
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when getInboxEntryCount(TranslationPageCommand command):", e);
+        }
+
+        return number;
     }
 
-    public List<TranslationInboxEntryVo> listInbox(State state)
-	{
-		List<TranslationInboxEntryVo> results = new ArrayList<TranslationInboxEntryVo>();
-		try
-		{
-			TranslationAgencyClient client = getTranslationClient();
-			if (client == null)
-			{
-			    logger.error("TranslationAgencyClient is null, cannot list inbox by state");
-			    return null;
-			}
+    public List<TranslationInboxEntryVo> listInbox(TranslationPageCommand command)
+    {
+        List<TranslationInboxEntryVo> results = new ArrayList<TranslationInboxEntryVo>();
+        try
+        {
+            TranslationAgencyClient client = getTranslationClient();
+            if (client == null)
+            {
+                logger.error("TranslationAgencyClient is null, cannot list inbox.");
+                return null;
+            }
 
-			List<InboxEntry> inboxEntries = null;
-			if (state == null)
-			{
-				inboxEntries = client.listInbox();
-			}
-			else
-			{
-				inboxEntries = client.listInbox(state);
-			}
+            List<InboxEntry> inboxEntries = client.listInbox(command);
+            for (InboxEntry entry : inboxEntries)
+            {
+                TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
+                        (TranslationInboxEntry) entry);
+                results.add(vo);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when invoke listInbox(TranslationPageCommand command): ", e);
+        }
 
-			for (InboxEntry entry : inboxEntries)
-			{
-				TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
-						(TranslationInboxEntry) entry);
-				results.add(vo);
-			}
-		}
-		catch (Exception e)
-		{
-			logger.error("Error when invoke listInbox(state):", e);
-		}
+        return results;
+    }
 
-		return results;
-	}
-
-    public List<TranslationInboxEntryVo> listInboxByIds(Set<Long> ids)
+    public List<TranslationInboxEntryVo> listInboxByIds(Set<Long> ids, TranslationPageCommand command)
     {
     	TranslationAgencyClient client = getTranslationClient();
         if (client == null)
@@ -149,29 +183,23 @@ public class BlaiseHelper
             return null;
         }
 
-        return listInboxByIds(client, ids);
-    }
+        List<TranslationInboxEntryVo> results = new ArrayList<TranslationInboxEntryVo>();
+        try
+        {
+            List<InboxEntry> inboxEntries = client.listInbox(ids, command);
+            for (InboxEntry entry : inboxEntries)
+            {
+                TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
+                        (TranslationInboxEntry) entry);
+                results.add(vo);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when invoke listInboxByIds(ids):" + listToString(ids), e);
+        }
 
-	private List<TranslationInboxEntryVo> listInboxByIds(
-			TranslationAgencyClient client, Set<Long> ids)
-    {
-		List<TranslationInboxEntryVo> results = new ArrayList<TranslationInboxEntryVo>();
-		try
-		{
-			List<InboxEntry> inboxEntries = client.listInbox(ids);
-			for (InboxEntry entry : inboxEntries)
-			{
-				TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
-						(TranslationInboxEntry) entry);
-				results.add(vo);
-			}
-		}
-		catch (Exception e)
-		{
-            logger.error("Error when invoke listInboxByIds(client, ids):" + listToString(ids), e);
-		}
-
-		return results;
+        return results;
     }
 
 	/**
@@ -199,7 +227,7 @@ public class BlaiseHelper
 		}
 		catch (Exception e)
 		{
-			if (e.getMessage().toLowerCase().contains("task already claimed."))
+			if (e.getMessage().toLowerCase().contains("task already claimed"))
 			{
                 logger.warn("Warning when claim entry(" + id + "): " + e.getMessage());
 			}
@@ -249,7 +277,7 @@ public class BlaiseHelper
 		}
 	}
 
-	public void uploadXliff(long entryId, File file)
+	public void uploadXliff(long entryId, File file, long jobId)
 	{
 		try
 		{
@@ -268,50 +296,44 @@ public class BlaiseHelper
             // A simple replace to "cheat" Blaise API
             String content = FileUtil.readFile(file, "UTF-8");
             content = StringUtil.replace(content, "<target state=\"new\"", "<target state=\"translated\"");
+            content = StringUtil.replace(content, "<target state=\"needs-review-translation\"", "<target state=\"translated\"");
+            content = StringUtil.replace(content, "<target state=\"needs-i10n\"", "<target state=\"translated\"");
             FileUtil.writeFile(file, content, "UTF-8");
 
             InputStream is = new FileInputStream(file);
 			client.uploadXliff(entryId, is);
             logger.info("Blaise file is uploaded successfully for entryId: " + entryId);
+
+            updateUploadXliffSuccess(jobId);
 		}
 		catch (Exception e)
 		{
-			logger.error("Error when invoke 'uploadXliff' for entryId:" + entryId, e);
+		    updateUploadXliffFail(jobId);
+			logger.error("Error when uploadXliff for job:" + jobId, e);
 		}
 	}
 
-	public void complete(Set<Long> ids)
-    {
-		try
-		{
-			TranslationAgencyClient client = getTranslationClient();
-			if (client == null)
-			{
-                logger.error("TranslationAgencyClient is null, entry cannot be completed: "
-                        + listToString(ids));
-                return;
-			}
+	private void updateUploadXliffSuccess(long jobId)
+	{
+        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(jobId);
+        if (bcj != null)
+        {
+            bcj.setUploadXliffState(BlaiseConnectorJob.SUCCEED);
+            HibernateUtil.saveOrUpdate(bcj);
+        }
+	}
 
-			for (Long id : ids)
-	    	{
-	    		try
-	    		{
-	    			client.complete(id);
-	    			logger.info("Blaise entry is completed successfully: " + id);
-	    		}
-	    		catch (Exception e)
-	    		{
-	    			logger.error("Fail to complete entry: " + id, e);
-	    		}
-	    	}
-		}
-		catch (Exception e)
-		{
-			logger.error(e);
-		}
+    private void updateUploadXliffFail(long jobId)
+    {
+        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(jobId);
+        if (bcj != null)
+        {
+            bcj.setUploadXliffState(BlaiseConnectorJob.FAIL);
+            HibernateUtil.saveOrUpdate(bcj);
+        }
     }
 
-    public void complete(long id)
+    public void complete(long id, long jobId)
     {
 		try
 		{
@@ -329,18 +351,44 @@ public class BlaiseHelper
 
 		    client.complete(id);
             logger.info("Blaise entry is completed successfully: " + id);
+
+            updateCompleteSuccess(jobId);
 		}
 		catch (Exception e)
 		{
-			logger.error("Failed to complete entry: " + id, e);
+		    updateCompleteFail(jobId);
+			logger.error("Failed to complete entry for job: " + jobId, e);
 		}
     }
 
-    public boolean isEntryExisted(long id)
+	private void updateCompleteSuccess(long jobId)
+	{
+        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(jobId);
+        if (bcj != null)
+        {
+            bcj.setCompleteState(BlaiseConnectorJob.SUCCEED);
+            HibernateUtil.saveOrUpdate(bcj);
+        }
+	}
+
+	private void updateCompleteFail(long jobId)
+	{
+        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(jobId);
+        if (bcj != null)
+        {
+            bcj.setCompleteState(BlaiseConnectorJob.FAIL);
+            HibernateUtil.saveOrUpdate(bcj);
+        }
+	}
+
+	public boolean isEntryExisted(long id)
     {
         Set<Long> ids = new HashSet<Long>();
         ids.add(id);
-        List<TranslationInboxEntryVo> entries = listInboxByIds(ids);
+
+        TranslationPageCommand command = initTranslationPageCommand(1, 100, null, null, null, null,
+                0, false);
+        List<TranslationInboxEntryVo> entries = listInboxByIds(ids, command);
         if (entries == null || entries.size() == 0)
         {
             logger.warn("Entry " + id + " is not existed already, cannot operate on it.");
@@ -350,11 +398,136 @@ public class BlaiseHelper
         return true;
     }
 
+    /**
+     * Initialize a TranslationPageCommand object for query from Blaise server.
+     * 
+     * @param pageIndex
+     * @param pageSize
+     * @param relatedObjectIdFilter
+     * @param sourceLocaleFilter
+     * @param targetLocaleFilter
+     * @param desFilter
+     * @param sortBy
+     * @param sortDesc
+     * 
+     * @return TranslationPageCommand
+     */
+    public static TranslationPageCommand initTranslationPageCommand(int pageIndex, int pageSize,
+            String relatedObjectIdFilter, String sourceLocaleFilter, String targetLocaleFilter,
+            String desFilter, int sortBy, boolean sortDesc)
+    {
+        TranslationPageCommand command = new TranslationPageCommand();
+
+        command.setPageIndex(pageIndex);
+        command.setPageSize(pageSize);
+
+        setFilters(command, relatedObjectIdFilter, sourceLocaleFilter, targetLocaleFilter,
+                desFilter);
+
+        setSortBy(command, sortBy);
+
+        if (sortDesc)
+        {
+            command.setSortDesc(true);
+        }
+
+        return command;
+    }
+
+    // Set filters
+    private static void setFilters(TranslationPageCommand command, String relatedObjectIdFilter,
+            String sourceLocaleFilter, String targetLocaleFilter, String desFilter)
+    {
+        // Blaise ID
+        if (StringUtil.isNotEmpty(relatedObjectIdFilter))
+        {
+            try
+            {
+                long relatedObjId = Long.parseLong(relatedObjectIdFilter.trim());
+                command.setRelatedObjectIdFilter(relatedObjId);
+            }
+            catch (NumberFormatException ignore)
+            {
+
+            }
+        }
+
+        // Source Locale
+        if (sourceLocaleFilter != null)
+        {
+            java.util.Locale locale = blaiseSupportedLocalesMap.get(sourceLocaleFilter.trim()
+                    .toLowerCase());
+            if (locale != null)
+            {
+                com.cognitran.core.model.i18n.Locale srcLocale = com.cognitran.core.model.i18n.Locale
+                        .get(locale);
+                command.setSourceLocaleFilter(srcLocale);                
+            }
+        }
+
+        // Target Locale
+        if (targetLocaleFilter != null)
+        {
+            java.util.Locale locale = blaiseSupportedLocalesMap.get(targetLocaleFilter.trim()
+                    .toLowerCase());
+            if (locale != null)
+            {
+                com.cognitran.core.model.i18n.Locale trgLocale = com.cognitran.core.model.i18n.Locale
+                        .get(locale);
+                command.setTargetLocaleFilter(trgLocale);                
+            }
+        }
+
+        // Description
+        if (StringUtil.isNotEmpty(desFilter))
+        {
+            desFilter = "*" + desFilter.trim() + "*";
+            desFilter = URLEncoder.encode(desFilter);
+            command.setDescriptionFilter(desFilter);
+        }
+    }
+
+    private static void setSortBy(TranslationPageCommand command, int sortBy)
+    {
+        // sort by related object id as default
+        command.sortByRelatedObjectId();
+
+        if (sortBy == BlaiseInboxEntryComparator.SOURCE_LOCALE)
+        {
+            command.sortBySourceLocale();
+        }
+        else if (sortBy == BlaiseInboxEntryComparator.TARGET_LOCALE)
+        {
+            command.sortByTargetLocale();
+        }
+        else if (sortBy == BlaiseInboxEntryComparator.DESCRIPTION)
+        {
+            command.sortByDescription();
+        }
+        else if (sortBy == BlaiseInboxEntryComparator.WORKFLOW_START_DATE)
+        {
+            command.sortByCreationDate();
+        }
+        else if (sortBy == BlaiseInboxEntryComparator.DUE_DATE)
+        {
+            command.sortByDueDate();
+        }
+        else if (sortBy == BlaiseInboxEntryComparator.ENTRY_ID)
+        {
+            command.sortById();
+        }
+    }
+
     private TranslationAgencyClient getTranslationClient()
     {
+        if (client != null)
+        {
+            return client;
+        }
+
         try
         {
-            return initTranslationClient();
+            client = initTranslationClient();
         }
         catch(UnknownHostException e)
         {
@@ -374,33 +547,39 @@ public class BlaiseHelper
             logger.error("Fail to get Blaise translation client: ", e);
         }
 
-        return null;
+        return client;
     }
 
-    // is this a bit heavy operation?
-    private TranslationAgencyClient initTranslationClient()
-			throws SecurityException, IncompatibleVersionException,
-			MalformedURLException, IOException, URISyntaxException
-	{
-    	if (blc.getClientCoreVersion() != null)
-    	{
-    		ClientFactory.setClientCoreVersion(blc.getClientCoreVersion());
-    	}
-		ClientFactory.setClientCoreRevision(blc.getClientCoreRevision());
+    private TranslationAgencyClient initTranslationClient() throws SecurityException,
+            IncompatibleVersionException, MalformedURLException, IOException, URISyntaxException
+    {
+        TranslationAgencyClient client = null;
+        if (blc.getClientCoreVersion() != null)
+        {
+            ClientFactory.setClientCoreVersion(blc.getClientCoreVersion());
+        }
+        ClientFactory.setClientCoreRevision(blc.getClientCoreRevision());
 
-		if (blc.getWorkflowId() == null)
-		{
-			return ClientFactory.createClient(new URL(blc.getUrl()),
-					blc.getUsername(), blc.getPassword());
-		}
-		else
-		{
-			return ClientFactory.createClient(new URL(blc.getUrl()),
-					blc.getUsername(), blc.getPassword(), blc.getWorkflowId());
-		}
-	}
+        if (blc.getWorkflowId() == null)
+        {
+            client = ClientFactory.createClient(new URL(blc.getUrl()), blc.getUsername(),
+                    blc.getPassword());
+        }
+        else
+        {
+            client = ClientFactory.createClient(new URL(blc.getUrl()), blc.getUsername(),
+                    blc.getPassword(), blc.getWorkflowId());
+        }
 
-	/**
+        return client;
+    }
+
+    public void destroyTranslationClient()
+    {
+        client = null;
+    }
+
+    /**
 	 * Blaise inbox entry file name is like
 	 * "Blaise inbox entry - Alerts - 40768 - 2 - es_MX.xlf".
 	 * 
@@ -427,13 +606,10 @@ public class BlaiseHelper
 
 		String localeInfo = fixLocale(entry.getEntry().getTargetLocale()
 				.getLocaleCode());
-		fileName.append("Blaise Entry ")
-				.append(entry.getId())
-				.append(DASH)
-				.append(des).append(DASH)
-				.append(entry.getRelatedObjectId()).append(DASH)
-				.append(entry.getSourceRevision()).append(DASH)
-				.append(localeInfo)
+		fileName.append("Blaise ID ").append(entry.getRelatedObjectId())
+		        .append(DASH).append(entry.getSourceRevision())
+				.append(DASH).append(des)
+				.append(DASH).append(localeInfo)
 				.append(".xlf").toString();
 		String fileNameStr = fileName.toString();
 
@@ -480,6 +656,12 @@ public class BlaiseHelper
 			specialChars.add("|");
 		}
 	}
+
+	private static java.util.Locale getLocale(String localeCode)
+	{
+	    String[] locs = localeCode.split("_");
+	    return new java.util.Locale(locs[0], locs[1]);
+ 	}
 
 	public static String fixLocale(String localeString)
     {

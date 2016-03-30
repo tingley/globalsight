@@ -18,6 +18,7 @@ package com.globalsight.machineTranslation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -498,44 +499,42 @@ public abstract class AbstractTranslator implements MachineTranslator
 
         for (int i = 0; i < segments.length; i++)
         {
-            subList.add(segments[i]);
             HashMap paramMap = getMtParameterMap();
             MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap
                     .get(MachineTranslator.MT_PROFILE);
-            // sentences passed to MS MT should be less than 1000 characters.
-            if (i == segments.length - 1
-                    || charCount + removeTags(segments[i + 1]).length() > mtProfile.getMsMaxLength())
+            // sentences passed to MS MT should be less than user set max length characters.
+            if (removeTags(segments[i]).length() > mtProfile.getMsMaxLength())
             {
-                Object[] segmentObjArray = subList.toArray();
-                String[] segmentsArray = new String[segmentObjArray.length];
-                for (int j = 0; j < segmentObjArray.length; j++)
+                CATEGORY.info("Current segment length is " + removeTags(segments[i]).length()
+                        + " which is longer than" + mtProfile.getMsMaxLength()
+                        + ". The segment will be ignored. Segment info :" + removeTags(segments[i]));
+                if (subList.size() > 0)
                 {
-                    segmentsArray[j] = (String) segmentObjArray[j];
+                    translatedList.addAll(doMSTranslation1(subList, sourceLocale, targetLocale, containTags));
                 }
-                String[] subResults = null;
-
-                if (containTags)
-                {
-                    subResults = translateSegmentsWithTags(
-                            sourceLocale, targetLocale, segmentsArray);
-                }
-                else if (!containTags)
-                {
-                    subResults = translateSegmentsWithoutTags(sourceLocale,
-                            targetLocale, segmentsArray);
-                }
-
-                if (subResults != null)
-                {
-                    translatedList.addAll(Arrays.asList(subResults));
-                }
+                translatedList.add("");
+                subList.clear();
+                charCount = 0;
+            }
+            else if(charCount + removeTags(segments[i]).length() > mtProfile.getMsMaxLength()){
+                i--;
+                translatedList.addAll(doMSTranslation1(subList, sourceLocale, targetLocale, containTags));
                 subList.clear();
                 charCount = 0;
             }
             else
             {
+                subList.add(segments[i]);
                 charCount += removeTags(segments[i]).length();
             }
+        }
+        if (subList.size() > 0)
+            
+        {
+            translatedList.addAll(doMSTranslation1(subList, sourceLocale,
+                    targetLocale, containTags));
+            subList.clear();
+            charCount = 0;
         }
 
         String[] results = new String[segments.length];
@@ -549,6 +548,40 @@ public abstract class AbstractTranslator implements MachineTranslator
             CATEGORY.debug("Used time: " + (System.currentTimeMillis() - start));
         }
         return results;
+    }
+
+    private List<String> doMSTranslation1(List<String> subList,
+            Locale sourceLocale, Locale targetLocale, boolean containTags) throws MachineTranslationException
+    {
+        List<String> translatedResult = new ArrayList<String>();
+        Object[] segmentObjArray = subList.toArray();
+        String[] segmentsArray = new String[segmentObjArray.length];
+        for (int j = 0; j < segmentObjArray.length; j++)
+        {
+            segmentsArray[j] = (String) segmentObjArray[j];
+        }
+        String[] subResults = null;
+
+        if (containTags)
+        {
+            subResults = translateSegmentsWithTags(sourceLocale, targetLocale, segmentsArray);
+        }
+        else if (!containTags)
+        {
+            subResults = translateSegmentsWithoutTags(sourceLocale, targetLocale, segmentsArray);
+        }
+        if (subResults != null)
+        {
+            translatedResult.addAll(Arrays.asList(subResults));
+        }
+        else
+        {
+            for (int k = 0; k < segmentsArray.length; k++)
+            {
+                translatedResult.add("");
+            }
+        }
+        return translatedResult;
     }
 
     private String[] trSafaba(Locale sourceLocale, Locale targetLocale,

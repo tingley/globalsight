@@ -820,7 +820,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 hql.append(" AND name = '").append(p_profileName).append("'");
             }
 
-            if (StringUtil.isNotEmpty(p_companyId))
+            if (StringUtil.isNotEmpty(p_companyId) && Long.parseLong(p_companyId) != 1)
             {
                 hql.append(" AND companyId = ").append(Long.parseLong(p_companyId));
             }

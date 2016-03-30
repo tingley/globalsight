@@ -53,6 +53,7 @@ import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.tda.TdaHelper;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.workflow.Activity;
@@ -531,7 +532,14 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             }
             else if (isPenaltiedExtarctMatch(data))
             {
-                state = "translated";
+                if (TuvState.NOT_LOCALIZED.equals(data.getTargetTuv().getState()))
+                {
+                    state = "new";
+                }
+                else
+                {
+                    state = "translated";
+                }
             }
             else if (isFuzzyMatch(data))
             {

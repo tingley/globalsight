@@ -170,11 +170,22 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         }
         else
         {
-            totalSize = helper.getInboxEntryCount(command);
-            pageIndex = possibllyFixPageIndex(totalSize, pageSize, pageIndex);
-            command.setPageIndex(pageIndex);
-            command.setSortDesc(isSortDesc(request, pageIndex, sortBy));
-            currPageEntries = helper.listInbox(command);
+            if (StringUtil.isNotEmpty(jobIdFilter) && entryIds.size() == 0)
+            {
+                totalSize = 0;
+                pageIndex = possibllyFixPageIndex(totalSize, pageSize, pageIndex);
+                command.setPageIndex(pageIndex);
+                command.setSortDesc(isSortDesc(request, pageIndex, sortBy));
+                currPageEntries = new ArrayList<TranslationInboxEntryVo>();
+            }
+            else
+            {
+                totalSize = helper.getInboxEntryCount(command);
+                pageIndex = possibllyFixPageIndex(totalSize, pageSize, pageIndex);
+                command.setPageIndex(pageIndex);
+                command.setSortDesc(isSortDesc(request, pageIndex, sortBy));
+                currPageEntries = helper.listInbox(command);
+            }
         }
 
         currPageEntryMap.clear();

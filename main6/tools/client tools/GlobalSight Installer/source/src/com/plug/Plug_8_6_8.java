@@ -51,7 +51,7 @@ public class Plug_8_6_8 implements Plug
     public static final String XDE_SPELL_CHECK_WAR = "/jboss/server/standalone/deployments/globalsight.ear/xdespellchecker.war";
 
     private static final String BLAISE_OLD_JAR_FILE = "/jboss/server/standalone/deployments/globalsight.ear/lib/blaise-translation-supplier-api-example-1.0.1.jar";
-    private static final String BLAISE_OLD_JAR_FILE2 = "/jboss/server/standalone/deployments/globalsight.ear/lib/blaise-translation-supplier-api-example-1.0.1.jar";
+    private static final String BLAISE_OLD_JAR_FILE2 = "/jboss/server/standalone/deployments/globalsight.ear/lib/blaise-translation-supplier-api-example-1.0.0.jar";
 
     public DbUtil dbUtil = DbUtilFactory.getDbUtil();
     

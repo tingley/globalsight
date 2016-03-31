@@ -3038,6 +3038,7 @@ public class Ambassador extends AbstractWebService
         String currentCompanyId = accessCurrentCompanyId(p_accessToken);
         String[] jobIdlist = p_jobIds.split(",");
         Set<Long> jobIds = new HashSet<Long>();
+        Set<String> companyIds = new HashSet<String>();
         Set<String> locales = new HashSet<String>();
         for (String id : jobIdlist)
         {
@@ -3056,9 +3057,10 @@ public class Ambassador extends AbstractWebService
                         "Cannot access the job which is not in the same company with current user"));
 
             jobIds.add(jobId);
+            companyIds.add(jobCompanyId);
         }
 
-        if (UserUtil.isSuperPM(userId) && jobIds.size() > 1)
+        if (UserUtil.isSuperPM(userId) && companyIds.size() > 1)
         {
             throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP,
                     "Job ids are not from the same job"));

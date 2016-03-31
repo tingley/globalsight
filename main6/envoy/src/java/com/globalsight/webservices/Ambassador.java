@@ -1584,12 +1584,15 @@ public class Ambassador extends AbstractWebService
             Object trgLocalesObj = args.get("targetLocales");
             if (trgLocalesObj instanceof String)
             {
-                targetLocales = handleTargetLocales((String) trgLocalesObj,
-                        fileProfileIds.size());
-            }
-            else if (trgLocalesObj == null)
-            {
-                targetLocales = handleTargetLocales("", fileProfileIds.size());
+                if (trgLocalesObj == null || ((String) trgLocalesObj).trim().equals("")
+                        || ((String) trgLocalesObj).equalsIgnoreCase("null"))
+                {
+                    String message = makeErrorXml("createJobOnInitial",
+                            "Target locale can not be empty.");
+                    throw new WebServiceException(message);
+                }
+                
+                targetLocales = handleTargetLocales((String) trgLocalesObj, fileProfileIds.size());
             }
             else
             {
@@ -1894,8 +1897,7 @@ public class Ambassador extends AbstractWebService
     {
         Vector<String> tLocales = new Vector<String>();
 
-        if (StringUtil.isEmpty(p_targetLocales)
-                || StringUtil.isEmpty(p_targetLocales.replace("|", "")))
+        if (p_targetLocales.trim().equals("*"))
         {
             for (int i = 0; i < fileSize; i++)
             {
@@ -1921,7 +1923,14 @@ public class Ambassador extends AbstractWebService
                 }
                 else
                 {
-                    tLocales.add(tLocale.trim());
+                    if (tLocale.trim().equals("*"))
+                    {
+                        tLocales.add(" ");
+                    }
+                    else
+                    {
+                        tLocales.add(tLocale.trim());
+                    }
                 }
             }
         }

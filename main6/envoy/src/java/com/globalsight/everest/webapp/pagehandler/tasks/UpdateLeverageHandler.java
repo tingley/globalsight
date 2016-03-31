@@ -872,7 +872,7 @@ public class UpdateLeverageHandler extends PageActionHandler
                         .canBeModified(currentNewTuv, machineTranslatedGxml, jobId);
             }
             // replace the content in target tuv with mt result
-            if (mtConfidenceScore == 100 && isGetMTResult && tagMatched)
+            if (isGetMTResult && tagMatched)
             {
                 // GBS-3722
                 if (mtProfile.isIncludeMTIdentifiers())

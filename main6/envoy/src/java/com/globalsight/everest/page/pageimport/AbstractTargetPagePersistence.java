@@ -281,7 +281,7 @@ public abstract class AbstractTargetPagePersistence implements
             }
 
             /****** Priority 2 : Handle local TM matches ******/
-            if (mtProfile != null && !mtProfile.isIgnoreTMMatch())
+            if (mtProfile == null || !mtProfile.isIgnoreTMMatch())
             {
                 unAppliedTus.removeAll(appliedTuTuvMap.keySet());
                 appliedTuTuvMap = applyLocalTmMatches(p_sourcePage, p_sourceTuvMap, sourceLocale,

@@ -3027,6 +3027,7 @@ public class Ambassador extends AbstractWebService
         
         String userName = getUsernameFromSession(p_accessToken);
         String userId = UserUtil.getUserIdByName(userName);
+        
         p_jobIds = p_jobIds.replace(" ", "");
         if (p_jobIds == null || p_jobIds.trim() == "")
         {
@@ -3057,6 +3058,12 @@ public class Ambassador extends AbstractWebService
             jobIds.add(jobId);
         }
 
+        if (UserUtil.isSuperPM(userId) && jobIds.size() > 1)
+        {
+            throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP,
+                    "Job ids are not from the same job"));
+        }
+        
         Map<Object, Object> activityArgs = new HashMap<Object, Object>();
         activityArgs.put("loggedUserName", userName);
         activityArgs.put("jobIds", p_jobIds);

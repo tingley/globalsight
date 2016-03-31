@@ -3024,15 +3024,16 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, GET_JOB_EXPORT_FILES_IN_ZIP);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
-        
+
         String userName = getUsernameFromSession(p_accessToken);
         String userId = UserUtil.getUserIdByName(userName);
-        
+
+        String errorMsg = "";
         p_jobIds = p_jobIds.replace(" ", "");
         if (p_jobIds == null || p_jobIds.trim() == "")
         {
-            String msg = "jobIds can not be empty.";
-            throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, msg));
+            errorMsg = "Job ids can not be empty.";
+            throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, errorMsg));
         }
 
         String currentCompanyId = accessCurrentCompanyId(p_accessToken);
@@ -3046,15 +3047,17 @@ public class Ambassador extends AbstractWebService
             Job job = JobCreationMonitor.loadJobFromDB(jobId);
             if (job == null)
             {
-                String msg = "current jobId : " + jobId + " does not exist.";
-                throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, msg));
+                errorMsg = "Job " + jobId + " does not exist.";
+                throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, errorMsg));
             }
 
             String jobCompanyId = String.valueOf(job.getCompanyId());
             if (!currentCompanyId.equals(jobCompanyId) && !UserUtil.isSuperAdmin(userId)
                     && !UserUtil.isSuperPM(userId))
-                throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP,
-                        "Cannot access the job which is not in the same company with current user"));
+            {
+                errorMsg = "Job " + jobId + " is not from the user's company.";
+                throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, errorMsg));
+            }
 
             jobIds.add(jobId);
             companyIds.add(jobCompanyId);
@@ -3062,10 +3065,10 @@ public class Ambassador extends AbstractWebService
 
         if (UserUtil.isSuperPM(userId) && companyIds.size() > 1)
         {
-            throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP,
-                    "Job ids are not from the same job"));
+            errorMsg = userId + " is super PM, but job ids are not from the same company.";
+            throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, errorMsg));
         }
-        
+
         Map<Object, Object> activityArgs = new HashMap<Object, Object>();
         activityArgs.put("loggedUserName", userName);
         activityArgs.put("jobIds", p_jobIds);
@@ -3385,14 +3388,15 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, GET_WORKFLOW_EXPORT_FILES_IN_ZIP);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
-        
+
+        String errormsg = "";
         p_workflowIds = p_workflowIds.replace(" ", "");
         String userName = getUsernameFromSession(p_accessToken);
         String userId = UserUtil.getUserIdByName(userName);
-        if(p_workflowIds == null || p_workflowIds == "")
+        if (p_workflowIds == null || p_workflowIds == "")
         {
-            String msg = "workflowIds can not be empty.";
-            throw new WebServiceException(makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP, msg));
+            errormsg = "Workflow ids can not be empty.";
+            throw new WebServiceException(makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP, errormsg));
         }
 
         Map<Object, Object> activityArgs = new HashMap<Object, Object>();
@@ -3406,7 +3410,7 @@ public class Ambassador extends AbstractWebService
         Set<String> jobFileList = new HashSet<String>();
         Set<File> entryFiles = new HashSet<File>();
         ArrayList<Workflow> exportingwfs = new ArrayList<Workflow>();
-        Set<String> locales = new HashSet<String>();      
+        Set<String> locales = new HashSet<String>();
         Set<Long> jobExist = new HashSet<Long>();
         String identifyKey = AmbassadorUtil.getRandomFeed();
         long jobId = -1;
@@ -3426,10 +3430,12 @@ public class Ambassador extends AbstractWebService
                 String jobCompanyId = String.valueOf(job.getCompanyId());
                 if (!currentCompanyId.equals(jobCompanyId) && !UserUtil.isSuperAdmin(userId)
                         && !UserUtil.isSuperPM(userId))
-                    throw new WebServiceException(
-                            makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP,
-                                    "Cannot access the job which is not in the same company with current user"));
+                {
 
+                    errormsg = "Workflow " + wfId + " is not from the user's company.";;
+                    throw new WebServiceException(makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP,
+                            errormsg));
+                }
                 jobExist.add(jobId);
                 if (WorkflowExportingHelper.isExporting(wf.getId()))
                 {
@@ -3438,7 +3444,9 @@ public class Ambassador extends AbstractWebService
             }
             if (jobExist.size() > 1)
             {
-                throw new WebServiceException("Workflow ids are not from the same job.");
+                errormsg = "Workflow ids are not from the same job.";
+                throw new WebServiceException(makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP,
+                        errormsg));
             }
 
             if (exportingwfs.size() == 0)

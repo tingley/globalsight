@@ -80,6 +80,16 @@ long l_targetPageId = state.getTargetPageId().longValue();
 boolean b_isReviewActivity = state.getIsReviewActivity();
 boolean b_readOnly = state.isReadOnly();
 
+String lb_title = bundle.getString("lb_segment_details");
+String lb_details = lb_title;
+
+String lb_segmentId = bundle.getString("lb_segmentId");
+String lb_segmentFormat = bundle.getString("lb_segmentFormat");
+String lb_segmentType = bundle.getString("lb_segmentType");
+String lb_wordCount = bundle.getString("lb_totalWordCount");
+String lb_close = bundle.getString("lb_close");
+String lb_tagInfo = bundle.getString("lb_tagInfo");
+
 Boolean assigneeValue = (Boolean)TaskHelper.retrieveObject(
    session, WebAppConstants.IS_ASSIGNEE);
 boolean isAssignee = assigneeValue == null ? true :
@@ -150,8 +160,8 @@ for(String segFilter : OnlineEditorConstants.SEGMENT_FILTERS)
         str_segmengFilter.append("selected ");
     }
     str_segmengFilter.append("value=\""+segFilter+"\">")
-    				 .append(bundle.getString(segFilter))
-    				 .append("</option>");
+                     .append(bundle.getString(segFilter))
+                     .append("</option>");
 }
 str_segmengFilter.append("</select>");
 
@@ -174,6 +184,7 @@ File jsFile = new File(jsPath);
 <SCRIPT src="/globalsight/envoy/terminology/viewer/error.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/snippets/snippet.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/online/editsnippets.js" defer></SCRIPT>
+<script src="/globalsight/includes/ajaxJquery/online.js"></script>
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
 <script src="/globalsight/includes/ContextMenu.js"></script>
 <link type="text/css" rel="StyleSheet" id="cssEditor"
@@ -181,6 +192,10 @@ File jsFile = new File(jsPath);
 <link type="text/css" rel="StyleSheet" id="cssEditorTouched" href="/globalsight/envoy/edit/online/editorTouched.css">
 <link type="text/css" rel="StyleSheet" id="cssEditorTranslated" href="/globalsight/envoy/edit/online/editorTranslated.css">
 <link type="text/css" rel="StyleSheet" id="cssEditorUntranslated" href="/globalsight/envoy/edit/online/editorUntranslated.css">
+<link rel="stylesheet" type="text/css" href="/globalsight/jquery/easyui.css">
+<link rel="stylesheet" type="text/css" href="/globalsight/jquery/icon.css">
+<link type="text/css" rel="StyleSheet" id="cssPtag"
+  href="/globalsight/envoy/edit/online2/ptag.css">
 <STYLE>
 .editorComment { cursor: hand;cursor:pointer; }
 
@@ -191,7 +206,7 @@ File jsFile = new File(jsPath);
                 behavior: url("/globalsight/envoy/edit/snippets/gs-tag.htc");
                 display: block;
                 cursor: hand;
-				cursor:pointer;
+                cursor:pointer;
               }
 .GSaddedGeneric {
                 behavior: url("/globalsight/envoy/edit/snippets/gs-tag.htc");
@@ -216,11 +231,12 @@ A:visited { color: blue; }
 .lbid{height:'23';width:'3'} 
 .repstyle{ALIGN:'CENTER'}
 pre {
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 10pt;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
 }
 </STYLE>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery.easyui.min.js"></script>
 <%if(jsFile.exists()){ %>
 <link href="/globalsight/javaScriptClient/jqueryUI/css/smoothness/jquery-ui-1.9.1.custom.min.css" rel="stylesheet"></link>
 <script src="/globalsight/javaScriptClient/jqueryUI/js/jquery-1.8.2.min.js"></script>
@@ -259,11 +275,6 @@ var w_editor = null;
 var segmentEditorHeight = "540";
 
 var showFinish = false;
-
-
-
-
-
 
 if (screen.availHeight > 600)
 {
@@ -353,7 +364,7 @@ function SaveSegment(tuId, tuvId, subId, segment, ptagFormat)
 
 function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, status, category, share, overwrite)
 {
-	var o_form = document.CommentForm;
+    var o_form = document.CommentForm;
 
     o_form.tuId.value = tuId;
     o_form.tuvId.value = tuvId;
@@ -479,6 +490,72 @@ function forceCloseEditor(p_type)
     }
 }
 
+function showDetails(tuId, tuvId, subId){
+    if (!CanClose())
+    {
+        cancelEvent();
+        RaiseEditor();
+    }
+    else
+    {
+        forceCloseEditor('segment');
+        hideContextMenu();
+     show(tuId, tuvId, subId);
+    }
+}
+
+function show(tuId, tuvId, subId){
+    $("#showDetails").html("");
+    var str_url = "<%=url_refresh%>" ;
+    var str = str_url;
+    var details = "tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId;
+    $.post(str,{param:details},function(data){
+        var result = eval("("+data+")");
+        var Y = ($(window).height())/3;
+        var X = ($(window).width())/4;
+        var scrollTop = $(document).scrollTop();
+        var scrollLeft = $(document).scrollLeft();
+        var detailhtml = '<table cellspacing="5" cellpadding="2" border="0" style="table-layout:fixed;">'
+                    +'<tr class="standardText"><td noWrap style="width:120px;"><B><%=lb_id%>:</B></td><td>'+ tuId +'</td></tr>'
+                    +'<tr class="standardText"><td noWrap><B><%=lb_segmentFormat%>:</B></td><td>'+result.str_segmentFormat+'</td></tr>'
+                    +'<tr class="standardText"><td noWrap><B><%=lb_segmentType%>:</B></td><td>'+ result.str_segmentType +'</td></tr>'
+                    +'<tr class="standardText"><td><B><%=lb_wordCount%>:</B></td><td>'+ result.str_wordCount +'</td></tr>'
+                    +'<tr class="standardText"><td noWrap><B><%=lb_tagInfo%>:</B></td><td><table border="0">'+ result.str_segementPtag +'</table></td></tr>'
+                    +'<tr class="standardText"><td noWrap><B><%=bundle.getString("lb_sid")%>:</B></td><td>'+ result.str_sid +'</td></tr>'
+                    +'<tr class="standardText"><td><B><%=bundle.getString("lb_modify_by")%>:</B></td><td>'+ result.str_lastModifyUser +'</td></tr>'
+                    +'<tr class="standardText"><td><B>Source:</B></td><td '+result.m_sourceDIR+'>'+result.m_sourceSegment+'</td></tr>'
+        //TM Match
+        var tm_matchhtml = '';
+        if (result.tm_match.length > 0)
+        {
+            tm_matchhtml = '<tr class="standardText"><td colspan="2"><B>TM Match Results:</B></td></tr>'
+                          +'<tr class="standardText"><td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;'+result.tm_match +'</td></tr>';
+        }
+        //MT Match
+        var mt_matchhtml = '';
+        if (result.mt_match.length > 0)
+        {
+            mt_matchhtml = '<tr class="standardText"><td colspan="2"><B>MT Match Results:</B></td></tr>'
+                          +'<tr class="standardText"><td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;'+result.mt_match +'</td></tr>';
+        }
+        
+        var foothtml = '</table>';
+        
+        $("#showDetails").window({
+            title:'<%=lb_title%>',
+            width:600,
+            height:400,
+            left:X+scrollLeft,
+            top:Y+scrollTop,
+            content:detailhtml + tm_matchhtml + mt_matchhtml + foothtml,
+            minimizable:false,
+            closable:true,
+            collapsible:false,
+            maximizable:false
+        });
+     },"html");
+}
+
 function editComment(tuId, tuvId, subId)
 {
     if (!CanClose())
@@ -496,7 +573,7 @@ function editComment(tuId, tuvId, subId)
         hideContextMenu();
 
         w_editor = window.open(str_url, "CommentEditor",
-          "width=550,height=610,top=100,left=100"); //resizable,
+          "width=550,height=750,top=100,left=100"); //resizable,
     }
 }
 
@@ -529,42 +606,42 @@ function SE(tuId, tuvId, subId, p_forceComment)
   
     if (typeof(parent.parent.source.content.findSegment) != "undefined")
     {
-    	var format;
-  	  var donotMove = false;
-  	  var pageNum = false;
-  	  var repIndex = 1;
-  	  var tgtSegmentNoTag;
-  	  var srcSegmentNoTag;
-  	  
-  	  if (typeof(window.parent.parent.parent.localData) != "undefined"
-  			  && typeof(window.parent.parent.parent.localData.source) != "undefined"
-  			  && typeof(window.parent.parent.parent.localData.target) != "undefined")
-  	  {
-  		  format = window.parent.parent.parent.localData.source[0].format;
-  		  
-  		  for(var i0 = 0; i0 < window.parent.parent.parent.localData.target.length; i0++)
-  		  {
-  			  var seg0 = window.parent.parent.parent.localData.target[i0];
-  			  if (seg0.tuId == tuId)
-  		      {
-  				  tgtSegmentNoTag = seg0.segmentNoTag;
-  				  break;
-  		      }
-  		  }
-  		  
-  		  for(var i0 = 0; i0 < window.parent.parent.parent.localData.source.length; i0++)
-		  {
-			  var seg0 = window.parent.parent.parent.localData.source[i0];
-			  if (seg0.tuId == tuId)
-		      {
-				  srcSegmentNoTag = seg0.segmentNoTag;
-				  break;
-		      }
-		  }
-  	  }
-  	  else
-  	  {
-  		var xmlHttp=null;
+        var format;
+      var donotMove = false;
+      var pageNum = false;
+      var repIndex = 1;
+      var tgtSegmentNoTag;
+      var srcSegmentNoTag;
+      
+      if (typeof(window.parent.parent.parent.localData) != "undefined"
+              && typeof(window.parent.parent.parent.localData.source) != "undefined"
+              && typeof(window.parent.parent.parent.localData.target) != "undefined")
+      {
+          format = window.parent.parent.parent.localData.source[0].format;
+          
+          for(var i0 = 0; i0 < window.parent.parent.parent.localData.target.length; i0++)
+          {
+              var seg0 = window.parent.parent.parent.localData.target[i0];
+              if (seg0.tuId == tuId)
+              {
+                  tgtSegmentNoTag = seg0.segmentNoTag;
+                  break;
+              }
+          }
+          
+          for(var i0 = 0; i0 < window.parent.parent.parent.localData.source.length; i0++)
+          {
+              var seg0 = window.parent.parent.parent.localData.source[i0];
+              if (seg0.tuId == tuId)
+              {
+                  srcSegmentNoTag = seg0.segmentNoTag;
+                  break;
+              }
+          }
+      }
+      else
+      {
+        var xmlHttp=null;
         try
         {// Firefox, Opera 8.0+, Safari, IE7
         xmlHttp=new XMLHttpRequest();
@@ -588,8 +665,8 @@ function SE(tuId, tuvId, subId, p_forceComment)
       var _dataArray = _data.split("_globalsight_sep_");
       srcSegmentNoTag = _dataArray[0];
       tgtSegmentNoTag = _dataArray[1];
-  	  }
-    	
+      }
+        
       parent.parent.source.content.findSegment(format, tuId, srcSegmentNoTag, tgtSegmentNoTag, donotMove, pageNum, repIndex);
     }
 
@@ -866,9 +943,23 @@ function getEditableSegment(obj)
     while (obj && !isEditableSegment(obj))
     {
         obj = obj.parentElement || obj.parentNode;//Added for Firefox
+        if (obj && obj.tagName == 'TD'&& obj.id.indexOf('undefined')==-1)
+            return obj;
     }
 
     return obj;
+}
+
+function get3Ids(obj)
+{
+    if (obj.href)
+    {
+        return getSegmentIdFromHref(obj.href);
+    }
+    else
+    {
+        return getSegmentIdFromIdAttr(obj.id);
+    }
 }
 
 function contextForX(e)
@@ -884,7 +975,7 @@ function contextForX(e)
     {
     o = e.target;
     while(o.nodeType != o.ELEMENT_NODE)
-	o = o.parentNode;
+    o = o.parentNode;
     }
 
     o = getEditableSegment(o);
@@ -892,11 +983,12 @@ function contextForX(e)
     if (o)
     {
         if (o.className == 'editorSegmentLocked'||o.className == 'segmentContext'
-        		|| o.className.indexOf('editorSegmentLocked') != -1 
-        		|| (o.className.indexOf('segmentContextUnlock') == -1 
-        				&& o.className.indexOf('segmentContext') != -1))
+                || o.className.indexOf('editorSegmentLocked') != -1 
+                || (o.className.indexOf('segmentContextUnlock') == -1 
+                        && o.className.indexOf('segmentContext') != -1)
+                    || o.tagName == 'TD')
         {
-            //contextForReadOnly(o, e);
+            contextForReadOnly(o, e);
         }
         else
         {
@@ -915,7 +1007,7 @@ function contextForSegment(obj, e)
     {
         return false;
     }
-    var ids = getSegmentIdFromHref(obj.href);
+    var ids = get3Ids(obj);
 
     var popupoptions;
 
@@ -945,18 +1037,18 @@ function contextForSegment(obj, e)
           function(){editComment(ids[0], ids[1], ids[2])})
         ];
     }
+    popupoptions.push(new ContextItem("Segment details",
+            function(){showDetails(ids[0], ids[1], ids[2])}));
     
     ContextMenu.display(popupoptions, e);
 }
 
 function contextForReadOnly(obj, e)
 {
-    var ids = getSegmentIdFromHref(obj.href);
-
+    var ids = get3Ids(obj);
     var popupoptions = [
-        new ContextItem("<B>Add/edit comment</B>",
-          function(){editComment(ids[0], ids[1], ids[2])})
-        ];
+        new ContextItem("<B>Segment details</B>",
+        function(){showDetails(ids[0], ids[1], ids[2])})];
 
 /*
     var popupoptions = [
@@ -965,6 +1057,13 @@ function contextForReadOnly(obj, e)
 */
 
     ContextMenu.display(popupoptions, e);
+}
+
+function getSegmentIdFromIdAttr(idValue)
+{
+    //obtain 3 ids from id value like "seg1207987_5375884_0".
+    idValue = idValue.substring(3);
+    return idValue.split('_');    
 }
 
 function doUnload()
@@ -1015,7 +1114,7 @@ var pageToScroll = otherPane ? otherPane.content : null;
 
 $(window).ready(function(){
     $(window).scroll(function(){
-    	<%=str_scrollHandler%>
+        <%=str_scrollHandler%>
     }); 
 });
 
@@ -1044,8 +1143,8 @@ function showProgressBar()
 {
    try
    {
-	   var div = document.getElementById('tgt_prograssbar');
-	   div.style.visibility = "visible";
+       var div = document.getElementById('tgt_prograssbar');
+       div.style.visibility = "visible";
    }
    catch(e)
    {
@@ -1071,7 +1170,7 @@ function Preview(tuvids)
 function doLoad()
 {
     // add javascript to synchronize scroll bars 
-    // by segment id in the pop-up editor	
+    // by segment id in the pop-up editor   
     //if (pageToScroll)
     //{
     //    try
@@ -1081,7 +1180,7 @@ function doLoad()
     //    {
     //    }
     //}
-	
+    
     ContextMenu.intializeContextMenu();
 
     parent.parent.parent.SetTargetLocaleInfo(
@@ -1134,82 +1233,82 @@ function checkMenuLoadingFinished()
 // by segment id in the pop-up editor
 function update_tr(id) 
 {
-	var otherPane = parent.parent.source;
-	var pageToScroll = otherPane ? otherPane.content : null;
+    var otherPane = parent.parent.source;
+    var pageToScroll = otherPane ? otherPane.content : null;
     
     if(pageToScroll) 
     {
-		var target_cell;
-		var source_cell;		
-		if (document.getElementById) 
-		{
-		    try
-		    {
+        var target_cell;
+        var source_cell;        
+        if (document.getElementById) 
+        {
+            try
+            {
               target_cell = document.getElementById(id);
-			  source_cell = pageToScroll.document.getElementById(id);
-		    }catch(e){}
+              source_cell = pageToScroll.document.getElementById(id);
+            }catch(e){}
         }
-		else if (document.all)
-		{
-		    try
-		    {
+        else if (document.all)
+        {
+            try
+            {
               target_cell = document.all[id];
-			  source_cell = pageToScroll.document.all[id];
-		    }catch(e){}
+              source_cell = pageToScroll.document.all[id];
+            }catch(e){}
         }
-			
-		if (target_cell && source_cell) 
-		{
-			if (target_cell.offsetHeight > source_cell.offsetHeight) 
-			{
-				source_cell.height = target_cell.offsetHeight;
-			}
-	
-			if (target_cell.offsetHeight < source_cell.offsetHeight) 
-			{
-				target_cell.height = source_cell.offsetHeight;
-			}
-		}		
-	}
-	
+            
+        if (target_cell && source_cell) 
+        {
+            if (target_cell.offsetHeight > source_cell.offsetHeight) 
+            {
+                source_cell.height = target_cell.offsetHeight;
+            }
+    
+            if (target_cell.offsetHeight < source_cell.offsetHeight) 
+            {
+                target_cell.height = source_cell.offsetHeight;
+            }
+        }       
+    }
+    
 }
 
 function doSegmentFilter(p_segmentFilter)
 {
-	parent.parent.parent.SegmentFilter(p_segmentFilter);
+    parent.parent.parent.SegmentFilter(p_segmentFilter);
 }
 </SCRIPT>
 <script type="text/javascript" src="/globalsight/jquery/me_table.js"></script>
 <style type="text/css">
 <!--
 #tgt_prograssbar {
-	visibility: hidden;
-	position: absolute;
-	background-color: white;
-	width: 500px;
-	height: 50px;
-	text-align: center;
-	vertical-align: middle;
-	border: 1px solid #ddd;
+    visibility: hidden;
+    position: absolute;
+    background-color: white;
+    width: 500px;
+    height: 50px;
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid #ddd;
 }
 -->
 </style>
 
 <script type="text/javascript">
 <!--
-	function resetLocation(p_eid) {
-		try	{
-			var diffY = 0;
-			if (document.documentElement && document.documentElement.scrollTop)
-				diffY = document.documentElement.scrollTop;
-			else if (document.body)
-				diffY = document.body.scrollTop;
-			else {/*Netscape stuff*/
-			}
-			document.getElementById(p_eid).style.top = diffY + 300;
-	    } catch(e) {
-		}
-	}
+    function resetLocation(p_eid) {
+        try {
+            var diffY = 0;
+            if (document.documentElement && document.documentElement.scrollTop)
+                diffY = document.documentElement.scrollTop;
+            else if (document.body)
+                diffY = document.body.scrollTop;
+            else {/*Netscape stuff*/
+            }
+            document.getElementById(p_eid).style.top = diffY + 300;
+        } catch(e) {
+        }
+    }
 //-->
 </script>
 
@@ -1257,17 +1356,16 @@ function doSegmentFilter(p_segmentFilter)
             display: none;"></div>
             
 <div id="tgt_prograssbar" style="top: 300px; left: 100px;">
-	<br /> <img alt="<%=lb_loadingPreview %>" src="/globalsight/includes/loading.gif"> <%=lb_loadingPreview %> <br />
+    <br /> <img alt="<%=lb_loadingPreview %>" src="/globalsight/includes/loading.gif"> <%=lb_loadingPreview %> <br />
 </div>
 
 <% if (i_viewMode == EditorConstants.VIEWMODE_DETAIL) { %>
 <TABLE WIDTH="100%" CELLSPACING="0" CELLPADDING="3" BORDER="1"
  style="border-color: lightgrey; border-collapse: collapse; border-style: solid; border-width: 1px;
- 		font-family: Arial,Helvetica,sans-serif; font-size: 10pt;">
- 		
-  <COL WIDTH="0%" VALIGN="TOP" CLASS="editorId" ID="editorId" NOWRAP>		
-  <COL WIDTH="100%" VALIGN="TOP" CLASS="editorText">
-  
+         font-family: Arial,Helvetica,sans-serif; font-size: 10pt;">
+  <COL WIDTH="1%" VALIGN="TOP" CLASS="editorId" ID="editorId" NOWRAP>
+  <COL WIDTH="99%" VALIGN="TOP" CLASS="editorText">
+
   <THEAD>
     <TR CLASS="tableHeadingGray">
       <TD ALIGN="CENTER" class="lbid"></TD>
@@ -1276,9 +1374,10 @@ function doSegmentFilter(p_segmentFilter)
   </THEAD>
   <TBODY id="idPageHtml"><%=str_pageHtml%></TBODY>
 </TABLE>
+<div id="showDetails" ></div>
 <% } else { %>
 <DIV id="idPageHtml" style="font-family: Arial,Helvetica,sans-serif; font-size: 10pt;">
-	<%=str_pageHtml%>
+    <%=str_pageHtml%>
 </DIV>
 <% } %>
 

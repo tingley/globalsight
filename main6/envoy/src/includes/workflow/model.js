@@ -84,7 +84,7 @@ var Model = {
 				return;
 			}
 			
-			// can not delete node that the state is start or complate
+			// can not delete node that the state is start or complete
 			if (3 == node.state || 5 == node.state){
 				return;
 			}
@@ -108,7 +108,7 @@ var Model = {
 		node.showPoints();
 	},
 	deleteNode : function(node) {
-		// can not delete node that the state is start or complate
+		// can not delete node that the state is start or complete
 		if (3 == node.state || 5 == node.state){
 			return;
 		}

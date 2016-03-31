@@ -221,6 +221,34 @@ function generateEndNode(node) {
 	return returnValue;
 }
 
+function getDefaultNode(node){
+	var l = node.tos[0];
+	
+	for ( var i in node.tos) {
+		var line = node.tos[i];		
+		if (line.isDefault){
+			l = line;
+			break;
+		}			
+	}
+	
+	return Model.nodes[l.to.id];
+}
+
+function getCompletedNode(node){
+	for ( var i in node.tos) {
+		var line = node.tos[i];
+		var toId = line.to.id;
+		var to = Model.nodes[toId];
+		
+		if (5 == to.state || 3 == to.state){
+			return to;
+		}
+	}
+	
+	return null;
+}
+
 var decisionTemplate = $("#decisionTemplate").html();
 var branchTemplate = $("#branchTemplate").html();
 var transitionTemplate = $("#transitionTemplate").html();
@@ -237,6 +265,18 @@ function generateConditionNode(node) {
 	data["x"] = getTemplateNumber(node.locale.x);
 	data["y"] = getTemplateNumber(node.locale.y);
 	data["sequence"] = n;
+	
+	// update the default path
+	var dn = getDefaultNode(node);
+	if (5 != dn.state && 3 != dn.state){
+		var cn = getCompletedNode(node);
+		if (cn != null){
+			for ( var i in node.tos) {
+				var line = node.tos[i];
+				line.isDefault = line.to.id == cn.id;
+			}
+		}
+	}
 	
 	var branchs = "";
 	var transitions = "";

@@ -202,7 +202,7 @@ public class ExtractedFileImporter extends FileImporter
                 {
                     MachineTranslationProfile mtProfile = MTProfileHandlerHelper
                             .getMtProfileBySourcePage(sourcePage, trgLocale);
-                    if (mtProfile != null && !mtProfile.isIgnoreTMMatch())
+                    if (mtProfile == null || !mtProfile.isIgnoreTMMatch())
                     {
                         if (p_request.getL10nProfile().getTmChoice() != L10nProfile.NO_TM)
                         {

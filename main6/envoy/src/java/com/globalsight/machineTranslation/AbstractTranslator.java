@@ -392,7 +392,7 @@ public abstract class AbstractTranslator implements MachineTranslator
                     .get(MachineTranslator.MT_PROFILE);
             if (segmentsNoStyleInfo[i].length() > mtProfile.getMsMaxLength())
             {
-                CATEGORY.info("Max Chunk Length (" + mtProfile.getMsMaxLength()
+                CATEGORY.info("Max chunk length (" + mtProfile.getMsMaxLength()
                         + ") exceeded; the segment will be ignored. Segment info: length = " + segmentsNoStyleInfo[i].length()
                         + "; text = " + segmentsNoStyleInfo[i]);
                 if (subList.size() > 0)

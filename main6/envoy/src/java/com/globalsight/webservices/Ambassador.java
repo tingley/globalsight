@@ -3024,6 +3024,7 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, GET_JOB_EXPORT_FILES_IN_ZIP);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
+        checkPermission(p_accessToken,Permission.JOBS_DOWNLOAD);
 
         String userName = getUsernameFromSession(p_accessToken);
         String userId = UserUtil.getUserIdByName(userName);
@@ -3388,6 +3389,7 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, GET_WORKFLOW_EXPORT_FILES_IN_ZIP);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
+        checkPermission(p_accessToken,Permission.JOBS_DOWNLOAD);
 
         String errormsg = "";
         p_workflowIds = p_workflowIds.replace(" ", "");

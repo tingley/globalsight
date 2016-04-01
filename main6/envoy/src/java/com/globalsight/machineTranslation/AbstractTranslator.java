@@ -52,6 +52,9 @@ public abstract class AbstractTranslator implements MachineTranslator
 
     private static final String TAG_REGEX = "<.pt.*?>[^<]*?</.pt>";
     private static final String TAG_REGEX_ALONE = "<[^>]*?>";
+    private static final String TAG_REGEX_IT = "<it[\\s].*?>[^<]*?</it>";
+    private static final String TAG_REGEX_PH = "<ph[\\s].*?>[^<]*?</ph>";
+    private static final String TAG_REGEX_MRK = "<mrk[\\s].*?>[^<]*?</mrk>";
 
     private HashMap parameterMap = null;
 
@@ -777,10 +780,16 @@ public abstract class AbstractTranslator implements MachineTranslator
         String s1, s2;
         s2 = segment;
         s1 = segment.replaceAll(TAG_REGEX, "");
+        s1 = s1.replaceAll(TAG_REGEX_IT, "");
+        s1 = s1.replaceAll(TAG_REGEX_PH, "");
+        s1 = s1.replaceAll(TAG_REGEX_MRK, "");
         while (!s1.equals(s2))
         {
             s2 = s1;
             s1 = segment.replaceAll(TAG_REGEX, "");
+            s1 = s1.replaceAll(TAG_REGEX_IT, "");
+            s1 = s1.replaceAll(TAG_REGEX_PH, "");
+            s1 = s1.replaceAll(TAG_REGEX_MRK, "");
         }
 
         s1 = s1.replaceAll(TAG_REGEX_ALONE, "");

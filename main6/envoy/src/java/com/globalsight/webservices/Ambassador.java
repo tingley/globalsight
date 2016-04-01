@@ -1584,15 +1584,11 @@ public class Ambassador extends AbstractWebService
             Object trgLocalesObj = args.get("targetLocales");
             if (trgLocalesObj instanceof String)
             {
-                if (trgLocalesObj == null || ((String) trgLocalesObj).trim().equals("")
-                        || ((String) trgLocalesObj).equalsIgnoreCase("null"))
-                {
-                    String message = makeErrorXml("createJobOnInitial",
-                            "Target locale can not be empty.");
-                    throw new WebServiceException(message);
-                }
-                
                 targetLocales = handleTargetLocales((String) trgLocalesObj, fileProfileIds.size());
+            }
+            else if (trgLocalesObj == null)
+            {
+                targetLocales = handleTargetLocales("", fileProfileIds.size());
             }
             else
             {
@@ -1897,7 +1893,9 @@ public class Ambassador extends AbstractWebService
     {
         Vector<String> tLocales = new Vector<String>();
 
-        if (p_targetLocales.trim().equals("*"))
+        if (StringUtil.isEmpty(p_targetLocales)
+                || StringUtil.isEmpty(p_targetLocales.replace("|", ""))
+                || p_targetLocales.trim().equals("*"))
         {
             for (int i = 0; i < fileSize; i++)
             {
@@ -3033,6 +3031,7 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, GET_JOB_EXPORT_FILES_IN_ZIP);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
+        checkPermission(p_accessToken,Permission.JOBS_DOWNLOAD);
 
         String userName = getUsernameFromSession(p_accessToken);
         String userId = UserUtil.getUserIdByName(userName);
@@ -3397,6 +3396,7 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, GET_WORKFLOW_EXPORT_FILES_IN_ZIP);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
+        checkPermission(p_accessToken,Permission.JOBS_DOWNLOAD);
 
         String errormsg = "";
         p_workflowIds = p_workflowIds.replace(" ", "");

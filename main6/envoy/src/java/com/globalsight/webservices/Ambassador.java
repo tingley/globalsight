@@ -1584,8 +1584,7 @@ public class Ambassador extends AbstractWebService
             Object trgLocalesObj = args.get("targetLocales");
             if (trgLocalesObj instanceof String)
             {
-                targetLocales = handleTargetLocales((String) trgLocalesObj,
-                        fileProfileIds.size());
+                targetLocales = handleTargetLocales((String) trgLocalesObj, fileProfileIds.size());
             }
             else if (trgLocalesObj == null)
             {
@@ -1895,7 +1894,8 @@ public class Ambassador extends AbstractWebService
         Vector<String> tLocales = new Vector<String>();
 
         if (StringUtil.isEmpty(p_targetLocales)
-                || StringUtil.isEmpty(p_targetLocales.replace("|", "")))
+                || StringUtil.isEmpty(p_targetLocales.replace("|", ""))
+                || p_targetLocales.trim().equals("*"))
         {
             for (int i = 0; i < fileSize; i++)
             {
@@ -1921,7 +1921,14 @@ public class Ambassador extends AbstractWebService
                 }
                 else
                 {
-                    tLocales.add(tLocale.trim());
+                    if (tLocale.trim().equals("*"))
+                    {
+                        tLocales.add(" ");
+                    }
+                    else
+                    {
+                        tLocales.add(tLocale.trim());
+                    }
                 }
             }
         }

@@ -1525,6 +1525,9 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
         PermissionSet perms = (PermissionSet) p_request.getSession()
                 .getAttribute(WebAppConstants.PERMISSIONS);
+        List<Long> sourcePageIdList = (List<Long>) sessionMgr
+                .getAttribute("sourcePageIdList");
+        EditorHelper.sourcePageIdList = sourcePageIdList;
         // Reset all options because the state may be inherited from a
         // previous page.
         EditorHelper.initEditorOptions(p_state, p_request.getSession());

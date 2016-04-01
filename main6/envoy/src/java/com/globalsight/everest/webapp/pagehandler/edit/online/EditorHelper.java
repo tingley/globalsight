@@ -382,6 +382,24 @@ public class EditorHelper implements EditorConstants
                 extractedTargetPages = workflow.getTargetPages(ExtractedSourceFile.EXTRACTED_FILE);
                 
                 Vector<TargetPage> targetPages = workflow.getTargetPages();
+                if (sourcePageIdList != null)
+                {
+                    Vector<TargetPage> newTargetPages = new Vector<TargetPage>();
+                    for (int i = 0; i < targetPages.size(); i++)
+                    {
+                        trgPage = (TargetPage) targetPages.get(i);
+                        srcPage = trgPage.getSourcePage();
+                        if (sourcePageIdList.contains(srcPage.getId()))
+                        {
+                            newTargetPages.add(trgPage);
+                        }
+                    }
+                    if (newTargetPages != null && newTargetPages.size() > 0)
+                    {
+                        targetPages.clear();
+                        targetPages = newTargetPages;
+                    }
+                }
                 
                 l_targetpages:
                 // retrieve just the pages with an extracted file associated

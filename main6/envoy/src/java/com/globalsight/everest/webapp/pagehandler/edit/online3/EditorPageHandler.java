@@ -120,7 +120,7 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 
 	public static boolean s_pmCanEditTargetPages = false;
 	public static boolean s_pmCanEditSnippets = false;
-	private static int currentPageIndex = 0;
+	private static int currentPageIndex = -1;
 
     static
     {
@@ -151,7 +151,10 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
         		.getAttribute(WebAppConstants.SESSION_MANAGER);
         EditorState state = (EditorState) sessionMgr
         		.getAttribute(WebAppConstants.EDITORSTATE);
-        currentPageIndex = Integer.parseInt(request.getParameter("currentPageIndex"));
+        if (StringUtil.isNotEmptyAndNull(request.getParameter("currentPageIndex")))
+        {
+            currentPageIndex = Integer.parseInt(request.getParameter("currentPageIndex"));
+        }
 		String value = request.getParameter("refresh");
         int i_direction = 0;
         if (!value.startsWith("0"))
@@ -269,7 +272,7 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
         ArrayList<EditorState.PagePair> pages = p_state.getPages();
         pages = (ArrayList<PagePair>) getPagePairList(p_session, pages);
         int i_index = pages.indexOf(p_state.getCurrentPage());
-        if (i_index != currentPageIndex)
+        if (currentPageIndex != -1 && i_index != currentPageIndex)
         {
             i_index = currentPageIndex;
         }
@@ -360,7 +363,7 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
         ArrayList<EditorState.PagePair> pages = p_state.getPages();
         pages = (ArrayList<PagePair>) getPagePairList(p_session, pages);
         int i_index = pages.indexOf(p_state.getCurrentPage());
-        if (i_index != currentPageIndex)
+        if (currentPageIndex != -1 && i_index != currentPageIndex)
         {
             i_index = currentPageIndex;
         }

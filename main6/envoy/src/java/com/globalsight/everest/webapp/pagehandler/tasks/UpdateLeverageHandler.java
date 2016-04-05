@@ -925,8 +925,7 @@ public class UpdateLeverageHandler extends PageActionHandler
                 lm.setMtName(machineTranslator.getEngineName() + "_MT");
                 lm.setMatchedOriginalSource(sourceTuv.getGxml());
 
-                // lm.setSid(sourceTuv.getSid());
-                lm.setCreationUser(machineTranslator.getEngineName());
+                lm.setCreationUser(machineTranslator.getEngineName() + "_MT");
                 lm.setCreationDate(sourceTuv.getLastModified());
                 lm.setModifyDate(sourceTuv.getLastModified());
 

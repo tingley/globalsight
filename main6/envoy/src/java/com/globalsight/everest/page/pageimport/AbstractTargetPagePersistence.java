@@ -1204,8 +1204,7 @@ public abstract class AbstractTargetPagePersistence implements
                 lm.setMtName(machineTranslator.getEngineName() + "_MT");
                 lm.setMatchedOriginalSource(sourceTuv.getGxml());
 
-                // lm.setSid(sourceTuv.getSid());
-                lm.setCreationUser(machineTranslator.getEngineName());
+                lm.setCreationUser(machineTranslator.getEngineName() + "_MT");
                 lm.setCreationDate(sourceTuv.getLastModified());
                 lm.setModifyDate(sourceTuv.getLastModified());
 
@@ -1278,7 +1277,7 @@ public abstract class AbstractTargetPagePersistence implements
                     lm.setMatchedOriginalSource(sourceTuv.getGxml());
 
                     // lm.setSid(sourceTuv.getSid());
-                    lm.setCreationUser(machineTranslator.getEngineName());
+                    lm.setCreationUser(machineTranslator.getEngineName() + "_MT");
                     lm.setCreationDate(sourceTuv.getLastModified());
                     lm.setModifyDate(sourceTuv.getLastModified());
 

@@ -793,7 +793,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
         {
             return m_xmlFilterHelper.isPreserveWhiteSpaces();
         }
-        return false;
+        return true;
     }
 
     // For GBS-2521.

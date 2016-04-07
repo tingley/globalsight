@@ -21,7 +21,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -57,7 +56,6 @@ import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
-import com.globalsight.everest.integration.ling.tm2.Types;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -78,11 +76,9 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm.LeverageSegment;
-import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
 public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
@@ -470,10 +466,10 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         long companyId = p_job.getCompanyId();
 
         TranslationMemoryProfile tmp = p_job.getL10nProfile().getTranslationMemoryProfile();
-        List<String> excludItems = null;
+        Vector<String> excludItems = null;
         if (tmp != null)
         {
-            excludItems = new ArrayList<String>(tmp.getJobExcludeTuTypes());
+            excludItems = tmp.getJobExcludeTuTypes();
         }
 
         for (Workflow workflow : p_job.getWorkflows())
@@ -558,8 +554,9 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
                         continue;
                     }
 
-                    StringBuilder matches = getMatches(tuvMatchTypes, exactMatches,
-                            fuzzyLeverageMatcheMap, targetTuv, sourceTuv);
+                    StringBuilder matches = ReportGeneratorUtil.getMatches(fuzzyLeverageMatcheMap,
+                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs, bundle, sourceTuv,
+                            targetTuv, p_job.getId());
 
                     List<IssueHistory> issueHistories = new ArrayList<IssueHistory>();
                     String lastComment = "";
@@ -1036,78 +1033,6 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
         validation.setSuppressDropDownArrow(true);
         validation.setShowErrorBox(true);
         p_sheet.addValidationData(validation);
-    }
-
-    /**
-     * Get TM matches.
-     */
-    private StringBuilder getMatches(MatchTypeStatistics tuvMatchTypes,
-            Map<Long, LeverageSegment> exactMatches,
-            Map<Long, Set<LeverageMatch>> fuzzyLeverageMatcheMap, Tuv targetTuv, Tuv sourceTuv)
-    {
-        StringBuilder matches = new StringBuilder();
-        Set<LeverageMatch> leverageMatches = (Set<LeverageMatch>) fuzzyLeverageMatcheMap
-                .get(sourceTuv.getIdAsLong());
-
-        if (exactMatches.get(sourceTuv.getIdAsLong()) != null)
-        {
-            matches.append(StringUtil.formatPCT(100));
-        }
-        else if (leverageMatches != null)
-        {
-            int count = 0;
-            for (Iterator ite = leverageMatches.iterator(); ite.hasNext();)
-            {
-                LeverageMatch leverageMatch = (LeverageMatch) ite.next();
-                if ((leverageMatches.size() > 1))
-                {
-                    matches.append(++count).append(", ")
-                            .append(StringUtil.formatPCT(leverageMatch.getScoreNum()))
-                            .append("\r\n");
-                }
-                else
-                {
-                    matches.append(StringUtil.formatPCT(leverageMatch.getScoreNum()));
-                    break;
-                }
-            }
-        }
-        else
-        {
-            matches.append(bundle.getString("lb_no_match_report"));
-        }
-        if (targetTuv.isRepeated())
-        {
-            matches.append("\r\n").append(
-                    bundle.getString("jobinfo.tradosmatches.invoice.repeated"));
-        }
-        else if (targetTuv.getRepetitionOfId() > 0)
-        {
-            matches.append("\r\n").append(
-                    bundle.getString("jobinfo.tradosmatches.invoice.repetition"));
-        }
-
-        // GBS-3905: mt translation into target tuv directly
-        if (targetTuv.getLastModifiedUser() != null
-                && targetTuv.getLastModifiedUser().toLowerCase().endsWith("_mt"))
-        {
-            matches.append("\r\n").append("MT Match");
-        }
-        else
-        {
-            // mt translation to tm, then search out for target tuv
-            Types type = tuvMatchTypes.getTypes(sourceTuv.getId(), LeverageUtil.DUMMY_SUBID);
-            if (type != null)
-            {
-                LeverageMatch lm = type.getLeverageMatch();
-                if (lm.getCreationUser() != null
-                        && lm.getCreationUser().toLowerCase().endsWith("_mt"))
-                {
-                    matches.append("\r\n").append("MT Match");
-                }
-            }
-        }
-        return matches;
     }
 
     @Override

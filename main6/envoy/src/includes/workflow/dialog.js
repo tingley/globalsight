@@ -224,9 +224,7 @@ var Dialog = {
 		var us = $(".userCheckbox");
 		for (var i = 0; i < us.length; i++){
 			var u = $(us[i]);
-			if (u.attr("checked") == "checked"){
-				u.attr("checked", true);
-			}
+			u.attr("checked", u[0].checked);
 		}
 		
 		$("#selectAllUserCheckbox").attr("checked", false);
@@ -281,14 +279,14 @@ var Dialog = {
 			for (var i = 0; i < us.length; i++) {
 				var u = us[i];
 				var val = $(u).val();
-				
+				var vals = roleMap[val][4];
 				if (!isFirst) {
 					role = role + "," + val;
-					roles = roles + "," + roleMap[val];
+					roles = roles + "," + vals;
 				} else {
 					isFirst = false;
 					role = val;
-					roles =  roleMap[val];
+					roles =  vals;
 				}
 			}
 			

@@ -17,14 +17,16 @@
 package com.globalsight.ling.docproc;
 
 /**
- * Used to maintain parser state. We Save Diplomat element type and
- * native format.
+ * Used to maintain parser state. We Save Diplomat element type and native
+ * format.
  */
 public class DiplomatParserState
 {
     private int m_elementType = -1;
     private String m_format = null;
     private String m_type = null;
+    // GBS-4336
+    private boolean m_preserveWhiteSpace = false;
 
     /**
      * Set our element and format types.
@@ -36,16 +38,23 @@ public class DiplomatParserState
         m_type = p_type;
     }
 
+    public DiplomatParserState(int p_elementType, String p_format, String p_type,
+            boolean p_preserveWhiteSpace)
+    {
+        this(p_elementType, p_format, p_type);
+        m_preserveWhiteSpace = p_preserveWhiteSpace;
+    }
+
     /**
      * Only equal if ElementType is the same. Ignore format.
      *
      * @return boolean
-     * @param p_state com.globalsight.ling.docproc.DiplomatParserState
+     * @param p_state
+     *            com.globalsight.ling.docproc.DiplomatParserState
      */
     public boolean equals(Object p_state)
     {
-        boolean equal =
-          (getElementType() == ((DiplomatParserState)p_state).getElementType());
+        boolean equal = (getElementType() == ((DiplomatParserState) p_state).getElementType());
         return equal;
     }
 
@@ -71,5 +80,10 @@ public class DiplomatParserState
     public String getType()
     {
         return m_type;
+    }
+
+    public boolean isPreserveWhiteSpace()
+    {
+        return m_preserveWhiteSpace;
     }
 }

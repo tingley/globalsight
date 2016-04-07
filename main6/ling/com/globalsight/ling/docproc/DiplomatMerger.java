@@ -596,6 +596,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
     {
         DiplomatParserState state = (DiplomatParserState) m_stateStack.peek();
         String type = state.getType();
+        boolean preserveWhiteSpace = state.isPreserveWhiteSpace();
         String format = null;
         String mainFormat = m_output.getDataFormat();
 
@@ -678,10 +679,11 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
 
             if (FORMAT_XML.equalsIgnoreCase(mainFormat))
             {
-                // GBS-4336, remove the line break if the xml filter configures
-                // not to preserve whitespace
-                if ("\n".equals(tmp) && !isXmlPreserveWhitespace())
+                if ("\n".equals(tmp) && !isXmlTagPreserveWhitespace(preserveWhiteSpace))
                 {
+                    // GBS-4336, remove the line break if the xml filter
+                    // configures
+                    // not to preserve whitespace
                     tmp = "";
                 }
 
@@ -787,13 +789,22 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
         }
     }
 
-    private boolean isXmlPreserveWhitespace()
+    /**
+     * Checks if the segment should be whitespace preserved or not according to
+     * the xml filter's settings.
+     * 
+     * @since GBS-4336
+     */
+    private boolean isXmlTagPreserveWhitespace(boolean thisTagPreserveWhiteSpace)
     {
         if (m_xmlFilterHelper != null)
         {
-            return m_xmlFilterHelper.isPreserveWhiteSpaces();
+            if (!m_xmlFilterHelper.isPreserveWhiteSpaces())
+            {
+                return thisTagPreserveWhiteSpace;
+            }
         }
-        return false;
+        return true;
     }
 
     // For GBS-2521.
@@ -871,7 +882,8 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                 case DocumentElement.TRANSLATABLE:
                     m_stateStack.push(new DiplomatParserState(de.type(),
                             ((TranslatableElement) de).getDataType(),
-                            ((TranslatableElement) de).getType()));
+                            ((TranslatableElement) de).getType(),
+                            ((TranslatableElement) de).isPreserveWhiteSpace()));
 
                     if (((TranslatableElement) de).getIsLocalized() != null)
                     {

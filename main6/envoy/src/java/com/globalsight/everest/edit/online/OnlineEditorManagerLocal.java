@@ -4674,7 +4674,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     {
         // Template-less UI mode shows only text segments, so nothing
         // needs to be excluded.
-
+        String modifiedUser = p_trgTuv.getLastModifiedUser();
+        if (modifiedUser != null && modifiedUser.endsWith("_MT"))
+        {
+            return STYLE_MT;
+        }
         // If the target tuv has been localized, i.e. previously been
         // overwritten by the user, don't color.
         if (p_trgTuv.isLocalized())

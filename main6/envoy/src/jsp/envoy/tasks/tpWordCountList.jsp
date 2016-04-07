@@ -142,7 +142,7 @@ $(document).ready(function(){
 %>
 <amb:header title="<%=detailedStatistics%>" />
 <p class="standardText"><%=bundle.getString("helper_text_detailed_statistics")%></p>
-<table cellpadding=0 cellspacing=0 border=0 class="standardText">
+<table cellpadding=0 cellspacing=0 border=0 class="standardText" style="table-layout:fixed;word-break:break-all;word-wrap:break-word">
   <tr valign="top">
     <td align="right">
       <amb:tableNav bean="targetPages" key="<%=WordCountHandler.TP_KEY%>" pageUrl="self" />
@@ -251,7 +251,7 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
 %>
 <p class="standardText"><amb:header title="<%=summaryStatistics%>" /></p>
 <p class="standardText"><%=bundle.getString("helper_text_summary_statistics")%></p>
-<table cellpadding=0 cellspacing=0 border=0 class="standardText">
+<table cellpadding=0 cellspacing=0 border=0 class="standardText" style="table-layout:fixed;word-break:break-all;word-wrap:break-word">
   <tr valign="top">
     <td align="right">
       <amb:tableNav bean="targetPages" key="<%=WordCountHandler.TP_KEY%>" pageUrl="self" />

@@ -17,13 +17,9 @@
 package com.globalsight.ling.docproc;
 
 import java.io.StringReader;
-
-import java.util.Properties;
 import java.util.Enumeration;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.Properties;
 import java.util.Stack;
-import java.util.Vector;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -32,49 +28,40 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.ParserAdapter;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.XmlEntities;
 
 /**
- * Converts a given DiplomatXML file or string to a <code>Output</code>
- * data structure.  <code>Output</code> can be thought of as a simple
- * DOM object model that we use for all internal Diplomat processing.
+ * Converts a given DiplomatXML file or string to a <code>Output</code> data
+ * structure. <code>Output</code> can be thought of as a simple DOM object model
+ * that we use for all internal Diplomat processing.
  *
- * This implementation uses the SAX 2 API to parse and convert the XML
- * input.  It does not validate.
+ * This implementation uses the SAX 2 API to parse and convert the XML input. It
+ * does not validate.
  */
-public class DiplomatReader
-    implements org.xml.sax.ContentHandler, DiplomatNames
+public class DiplomatReader implements org.xml.sax.ContentHandler, DiplomatNames
 {
     private String m_strXml;
     private Output m_output;
     private XmlEntities m_xmlEntities;
     private StringBuffer m_currentSegment = new StringBuffer(128);
+    private boolean m_preserveWhiteSpace = false;
     private Stack m_stateStack;
     private Exception m_error;
 
     /**
      * XML parser error handler. Required by SAX.
      */
-    private class ErrorHandler
-        extends org.xml.sax.helpers.DefaultHandler
+    private class ErrorHandler extends org.xml.sax.helpers.DefaultHandler
     {
         /** catch validation errors */
-        public void error(SAXParseException e)
-            throws SAXParseException
+        public void error(SAXParseException e) throws SAXParseException
         {
-            //throw e;  // not needed since we don't validate
+            // throw e; // not needed since we don't validate
         }
 
         /** catch warnings */
-        public void warning(SAXParseException err)
-            throws SAXParseException
+        public void warning(SAXParseException err) throws SAXParseException
         {
             throw err;
         }
@@ -90,8 +77,7 @@ public class DiplomatReader
     }
 
     /**
-     * Intialize a new DiplomatReader. Call this each time
-     * we call getOutput().
+     * Intialize a new DiplomatReader. Call this each time we call getOutput().
      */
     public void init(String p_diplomat)
     {
@@ -104,13 +90,10 @@ public class DiplomatReader
         m_stateStack = new Stack();
     }
 
-
     /**
-     * Parse the Diplomat input and return the corresponding Output
-     * object.
+     * Parse the Diplomat input and return the corresponding Output object.
      */
-    public Output getOutput()
-        throws DiplomatReaderException
+    public Output getOutput() throws DiplomatReaderException
     {
         try
         {
@@ -123,19 +106,17 @@ public class DiplomatReader
             // parser, we don't want to spend too much time on this.
 
             /*
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-
-            // request a bare bones parser
-            factory.setValidating(false);
-            factory.setNamespaceAware(false);
-
-            SAXParser sp = factory.newSAXParser();
-            parser = new ParserAdapter (sp.getParser());
-            */
+             * SAXParserFactory factory = SAXParserFactory.newInstance();
+             * 
+             * // request a bare bones parser factory.setValidating(false);
+             * factory.setNamespaceAware(false);
+             * 
+             * SAXParser sp = factory.newSAXParser(); parser = new ParserAdapter
+             * (sp.getParser());
+             */
 
             parser = new org.dom4j.io.aelfred.SAXDriver();
-            parser.setFeature("http://xml.org/sax/features/namespaces",
-                false);
+            parser.setFeature("http://xml.org/sax/features/namespaces", false);
 
             // set our error handler and input
             parser.setContentHandler(this);
@@ -146,24 +127,20 @@ public class DiplomatReader
         }
         catch (SAXParseException ex)
         {
-            throw new DiplomatReaderException(
-                ExtractorExceptionConstants.INTERNAL_ERROR, ex);
+            throw new DiplomatReaderException(ExtractorExceptionConstants.INTERNAL_ERROR, ex);
         }
         catch (SAXException ex)
         {
-            throw new DiplomatReaderException(
-                ExtractorExceptionConstants.INTERNAL_ERROR, ex);
+            throw new DiplomatReaderException(ExtractorExceptionConstants.INTERNAL_ERROR, ex);
         }
         catch (Exception ex)
         {
-            throw new DiplomatReaderException(
-                ExtractorExceptionConstants.INTERNAL_ERROR, ex);
+            throw new DiplomatReaderException(ExtractorExceptionConstants.INTERNAL_ERROR, ex);
         }
 
         if (m_error != null)
         {
-            throw new DiplomatReaderException(
-                ExtractorExceptionConstants.INTERNAL_ERROR, m_error);
+            throw new DiplomatReaderException(ExtractorExceptionConstants.INTERNAL_ERROR, m_error);
         }
 
         return m_output;
@@ -173,29 +150,41 @@ public class DiplomatReader
     // Implementation of Interface org.xml.sax.ContentHandler
     //
 
-    public void setDocumentLocator (Locator locator) {};
+    public void setDocumentLocator(Locator locator)
+    {
+    };
 
-    public void startDocument () throws SAXException {};
+    public void startDocument() throws SAXException
+    {
+    };
 
-    public void endDocument() throws SAXException {};
+    public void endDocument() throws SAXException
+    {
+    };
 
-    public void startPrefixMapping (String prefix, String uri)
-        throws SAXException {};
+    public void startPrefixMapping(String prefix, String uri) throws SAXException
+    {
+    };
 
-    public void endPrefixMapping (String prefix) throws SAXException {};
+    public void endPrefixMapping(String prefix) throws SAXException
+    {
+    };
 
-    public void ignorableWhitespace (char ch[], int start, int length)
-        throws SAXException {};
+    public void ignorableWhitespace(char ch[], int start, int length) throws SAXException
+    {
+    };
 
-    public void processingInstruction (String target, String data)
-        throws SAXException {};
+    public void processingInstruction(String target, String data) throws SAXException
+    {
+    };
 
-    public void skippedEntity (String name) throws SAXException {};
-
+    public void skippedEntity(String name) throws SAXException
+    {
+    };
 
     /**
-     * SAX handler. Intercept all character content.
-     * Add content to appropriate node type.
+     * SAX handler. Intercept all character content. Add content to appropriate
+     * node type.
      */
     public void characters(char buf[], int offset, int len)
     {
@@ -214,13 +203,12 @@ public class DiplomatReader
     }
 
     /**
-     * SAX handler. For each Diplomat start tag push on to our parser
-     * stack the current state, create the appropriate Output node and
-     * populate it's fields.
+     * SAX handler. For each Diplomat start tag push on to our parser stack the
+     * current state, create the appropriate Output node and populate it's
+     * fields.
      */
-    public void startElement(String namespaceURI, String tag,
-        String qName, Attributes attrs)
-        throws SAXException
+    public void startElement(String namespaceURI, String tag, String qName, Attributes attrs)
+            throws SAXException
     {
         if (qName.equalsIgnoreCase(DiplomatNames.Element.DIPLOMAT))
         {
@@ -228,8 +216,7 @@ public class DiplomatReader
         }
         else if (qName.equalsIgnoreCase(DiplomatNames.Element.TRANSLATABLE))
         {
-            m_stateStack.push(new DiplomatParserState(
-                DocumentElement.TRANSLATABLE, null, null));
+            m_stateStack.push(new DiplomatParserState(DocumentElement.TRANSLATABLE, null, null));
 
             try
             {
@@ -237,13 +224,12 @@ public class DiplomatReader
             }
             catch (DiplomatReaderException e)
             {
-                throw new SAXException (e);
+                throw new SAXException(e);
             }
         }
         else if (qName.equalsIgnoreCase(DiplomatNames.Element.LOCALIZABLE))
         {
-            m_stateStack.push(new DiplomatParserState(
-                DocumentElement.LOCALIZABLE, null, null));
+            m_stateStack.push(new DiplomatParserState(DocumentElement.LOCALIZABLE, null, null));
 
             try
             {
@@ -251,13 +237,12 @@ public class DiplomatReader
             }
             catch (DiplomatReaderException e)
             {
-                throw new SAXException (e);
+                throw new SAXException(e);
             }
         }
         else if (qName.equalsIgnoreCase(DiplomatNames.Element.SKELETON))
         {
-            m_stateStack.push(new DiplomatParserState(
-                DocumentElement.SKELETON, null, null));
+            m_stateStack.push(new DiplomatParserState(DocumentElement.SKELETON, null, null));
         }
         else if (qName.equalsIgnoreCase(DiplomatNames.Element.GSA))
         {
@@ -317,12 +302,12 @@ public class DiplomatReader
             }
 
             // SAX (2) does not indicate empty elements, but we want
-            // to output GSA as empty if they are.  The Output object
+            // to output GSA as empty if they are. The Output object
             // will set the last GSA to empty if there was no content.
             try
             {
-                m_output.addGsaStart(extract, description, locale, add,
-                    delete, added, deleted, snippetName, snippetId);
+                m_output.addGsaStart(extract, description, locale, add, delete, added, deleted,
+                        snippetName, snippetId);
             }
             catch (DocumentElementException ex)
             {
@@ -334,8 +319,18 @@ public class DiplomatReader
         else if (qName.equalsIgnoreCase(DiplomatNames.Element.SEGMENT))
         {
             m_currentSegment.setLength(0);
-            m_stateStack.push(new DiplomatParserState(
-                DocumentElement.SEGMENT, null, null));
+            m_stateStack.push(new DiplomatParserState(DocumentElement.SEGMENT, null, null));
+            // GBS-4336 record the preserveWhiteSpace attribute in the
+            // SegmentNode
+            for (int i = 0; i < attrs.getLength(); i++)
+            {
+                String name = attrs.getQName(i);
+                if (DiplomatNames.Attribute.PRESERVEWHITESPACE.equalsIgnoreCase(name))
+                {
+                    m_preserveWhiteSpace = "yes".equals(attrs.getValue(i));
+                    break;
+                }
+            }
         }
         else // must be a TMX tag
         {
@@ -344,11 +339,9 @@ public class DiplomatReader
     }
 
     /**
-     * SAX handler.
-     * For each Diplomat end tag take the appropriate action.
+     * SAX handler. For each Diplomat end tag take the appropriate action.
      */
-    public void endElement(String namespaceURI, String tag,
-        String qName)
+    public void endElement(String namespaceURI, String tag, String qName)
     {
         if (qName.equalsIgnoreCase(DiplomatNames.Element.DIPLOMAT))
         {
@@ -369,7 +362,7 @@ public class DiplomatReader
         else if (qName.equalsIgnoreCase(DiplomatNames.Element.GSA))
         {
             // SAX (2) does not indicate empty elements, but we want
-            // to output GSA as empty if they are.  The Output object
+            // to output GSA as empty if they are. The Output object
             // will set the last GSA to empty if there was no content.
             m_output.addGsaEnd();
         }
@@ -379,6 +372,7 @@ public class DiplomatReader
             {
                 SegmentNode sn = new SegmentNode();
                 sn.setSegment(m_currentSegment.toString());
+                sn.setPreserveWhiteSpace(m_preserveWhiteSpace);
                 m_output.addSegment(sn);
             }
             catch (DocumentElementException e)
@@ -387,6 +381,7 @@ public class DiplomatReader
             }
 
             m_currentSegment.setLength(0);
+            m_preserveWhiteSpace = false;
             m_stateStack.pop();
         }
         else // TMX
@@ -399,30 +394,28 @@ public class DiplomatReader
     // More public and private methods
     //
 
-    private void addCharContent(String p_content, int p_current)
-        throws DiplomatReaderException
+    private void addCharContent(String p_content, int p_current) throws DiplomatReaderException
     {
         switch (p_current)
         {
-        case DocumentElement.TRANSLATABLE:
-            m_output.addTranslatable(p_content);
-            break;
+            case DocumentElement.TRANSLATABLE:
+                m_output.addTranslatable(p_content);
+                break;
 
-        case DocumentElement.LOCALIZABLE:
-            m_output.addLocalizable(p_content);
-            break;
+            case DocumentElement.LOCALIZABLE:
+                m_output.addLocalizable(p_content);
+                break;
 
-        case DocumentElement.SKELETON:
-            m_output.addSkeleton(p_content);
-            break;
+            case DocumentElement.SKELETON:
+                m_output.addSkeleton(p_content);
+                break;
 
-        case DocumentElement.SEGMENT:
-            m_currentSegment.append(
-                m_xmlEntities.encodeStringBasic(p_content));
-            break;
+            case DocumentElement.SEGMENT:
+                m_currentSegment.append(m_xmlEntities.encodeStringBasic(p_content));
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 
@@ -495,8 +488,7 @@ public class DiplomatReader
             }
             else if (name.equalsIgnoreCase(DiplomatNames.Attribute.WORDCOUNT))
             {
-                m_output.setTotalWordCount(
-                    Integer.parseInt((p_attributes.getValue(i))));
+                m_output.setTotalWordCount(Integer.parseInt((p_attributes.getValue(i))));
             }
         }
     }
@@ -507,25 +499,24 @@ public class DiplomatReader
 
         switch (p_current)
         {
-        case DocumentElement.TRANSLATABLE:
-            m_output.addTranslatableTmx(endtag);
-            break;
+            case DocumentElement.TRANSLATABLE:
+                m_output.addTranslatableTmx(endtag);
+                break;
 
-        case DocumentElement.LOCALIZABLE:
-            m_output.addLocalizableTmx(endtag);
-            break;
+            case DocumentElement.LOCALIZABLE:
+                m_output.addLocalizableTmx(endtag);
+                break;
 
-        case DocumentElement.SEGMENT:
-            m_currentSegment.append(endtag);
-            break;
+            case DocumentElement.SEGMENT:
+                m_currentSegment.append(endtag);
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 
-    private void saveDiplomatEndTag(String p_name, Attributes p_attributes,
-        int p_current)
+    private void saveDiplomatEndTag(String p_name, Attributes p_attributes, int p_current)
     {
         Properties attrs = new Properties();
 
@@ -533,8 +524,7 @@ public class DiplomatReader
         {
             for (int i = 0, max = p_attributes.getLength(); i < max; i++)
             {
-                attrs.setProperty(p_attributes.getQName(i),
-                    p_attributes.getValue(i));
+                attrs.setProperty(p_attributes.getQName(i), p_attributes.getValue(i));
             }
         }
 
@@ -542,25 +532,24 @@ public class DiplomatReader
 
         switch (p_current)
         {
-        case DocumentElement.TRANSLATABLE:
-            m_output.addTranslatableTmx(starttag);
-            break;
+            case DocumentElement.TRANSLATABLE:
+                m_output.addTranslatableTmx(starttag);
+                break;
 
-        case DocumentElement.LOCALIZABLE:
-            m_output.addLocalizableTmx(starttag);
-            break;
+            case DocumentElement.LOCALIZABLE:
+                m_output.addLocalizableTmx(starttag);
+                break;
 
-        case DocumentElement.SEGMENT:
-            m_currentSegment.append(starttag);
-            break;
+            case DocumentElement.SEGMENT:
+                m_currentSegment.append(starttag);
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 
-    private void saveDiplomatStartTag(String p_name,
-        Attributes p_attributes, int p_current)
+    private void saveDiplomatStartTag(String p_name, Attributes p_attributes, int p_current)
     {
         Properties attrs = new Properties();
 
@@ -568,8 +557,7 @@ public class DiplomatReader
         {
             for (int i = 0, max = p_attributes.getLength(); i < max; i++)
             {
-                attrs.setProperty(p_attributes.getQName(i),
-                    p_attributes.getValue(i));
+                attrs.setProperty(p_attributes.getQName(i), p_attributes.getValue(i));
             }
         }
 
@@ -577,25 +565,24 @@ public class DiplomatReader
 
         switch (p_current)
         {
-        case DocumentElement.TRANSLATABLE:
-            m_output.addTranslatableTmx(starttag);
-            break;
+            case DocumentElement.TRANSLATABLE:
+                m_output.addTranslatableTmx(starttag);
+                break;
 
-        case DocumentElement.LOCALIZABLE:
-            m_output.addLocalizableTmx(starttag);
-            break;
+            case DocumentElement.LOCALIZABLE:
+                m_output.addLocalizableTmx(starttag);
+                break;
 
-        case DocumentElement.SEGMENT:
-            m_currentSegment.append(starttag);
-            break;
+            case DocumentElement.SEGMENT:
+                m_currentSegment.append(starttag);
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 
-    private void saveLocalizableAttrs(Attributes p_attributes)
-        throws DiplomatReaderException
+    private void saveLocalizableAttrs(Attributes p_attributes) throws DiplomatReaderException
     {
         String type = null;
         String datatype = null;
@@ -634,21 +621,18 @@ public class DiplomatReader
 
             if (wordcount > 0)
             {
-                LocalizableElement elem =
-                    (LocalizableElement)m_output.getCurrentElement();
+                LocalizableElement elem = (LocalizableElement) m_output.getCurrentElement();
 
                 elem.setWordcount(wordcount);
             }
         }
         catch (DocumentElementException e)
         {
-            throw new DiplomatReaderException (
-                ExtractorExceptionConstants.INTERNAL_ERROR, e);
+            throw new DiplomatReaderException(ExtractorExceptionConstants.INTERNAL_ERROR, e);
         }
     }
 
-    private void saveTranslatableAttrs(Attributes p_attributes)
-        throws DiplomatReaderException
+    private void saveTranslatableAttrs(Attributes p_attributes) throws DiplomatReaderException
     {
         String datatype = null;
         String type = null;
@@ -693,23 +677,20 @@ public class DiplomatReader
 
             if (wordcount > 0)
             {
-                TranslatableElement elem =
-                    (TranslatableElement)m_output.getCurrentElement();
+                TranslatableElement elem = (TranslatableElement) m_output.getCurrentElement();
 
                 elem.setWordcount(wordcount);
             }
-            
+
             if (escapintChars != null)
             {
-                TranslatableElement elem =
-                        (TranslatableElement)m_output.getCurrentElement();
+                TranslatableElement elem = (TranslatableElement) m_output.getCurrentElement();
                 elem.setEscapingChars(escapintChars);
             }
         }
         catch (DocumentElementException e)
         {
-            throw new DiplomatReaderException (
-                ExtractorExceptionConstants.INTERNAL_ERROR, e);
+            throw new DiplomatReaderException(ExtractorExceptionConstants.INTERNAL_ERROR, e);
         }
     }
 }

@@ -18,14 +18,15 @@ package com.globalsight.ling.docproc;
 
 import com.globalsight.everest.segmentationhelper.Segmentation;
 
-public class SegmentNode 
-    implements Cloneable
+public class SegmentNode implements Cloneable
 {
-    private String  m_strSegment = ""; // The segment
-    private int     m_iWordCount = 0;
+    private String m_strSegment = ""; // The segment
+    private int m_iWordCount = 0;
     private boolean isLeadingWS = false;
     private boolean isTrailingWS = false;
     private String m_srcComment = null;
+    // GBS-4336
+    private boolean m_preserveWhiteSpace = false;
 
     /**
      * SegmentNode constructor comment.
@@ -36,11 +37,12 @@ public class SegmentNode
     }
 
     /**
-     * Insert the method's description here.
-     * Creation date: (4/6/00 12:10:16 PM)
+     * Insert the method's description here. Creation date: (4/6/00 12:10:16 PM)
+     * 
      * @author: Jim Hargrave
      * 
-     * @param p_OriginalCopy com.globalsight.ling.docproc.SegmentNode
+     * @param p_OriginalCopy
+     *            com.globalsight.ling.docproc.SegmentNode
      */
     public SegmentNode(SegmentNode p_OriginalCopy)
     {
@@ -71,7 +73,8 @@ public class SegmentNode
     /**
      * Insert the method's description here.
      * 
-     * @param p_segment java.lang.String
+     * @param p_segment
+     *            java.lang.String
      */
     public void setSegment(String p_segment)
     {
@@ -81,7 +84,8 @@ public class SegmentNode
     /**
      * Insert the method's description here.
      * 
-     * @param p_wordCount int
+     * @param p_wordCount
+     *            int
      */
     public void setWordCount(int p_wordCount)
     {
@@ -91,7 +95,8 @@ public class SegmentNode
     /**
      * Insert the method's description here.
      * 
-     * @param p_segment java.lang.String
+     * @param p_segment
+     *            java.lang.String
      */
     public SegmentNode(String p_segment)
     {
@@ -117,24 +122,34 @@ public class SegmentNode
     {
         this.isTrailingWS = isTrailingWS;
     }
-    
+
+    public boolean isPreserveWhiteSpace()
+    {
+        return m_preserveWhiteSpace;
+    }
+
+    public void setPreserveWhiteSpace(boolean p_preserveWhiteSpace)
+    {
+        m_preserveWhiteSpace = p_preserveWhiteSpace;
+    }
+
     public boolean outputToSkeleton()
     {
         if (isLeadingWS)
         {
             return true;
         }
-        
+
         if (isTrailingWS)
         {
             return true;
         }
-        
+
         if (Segmentation.isWhitespaceString(m_strSegment))
         {
             return true;
         }
-        
+
         return false;
     }
 

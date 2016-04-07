@@ -386,6 +386,7 @@ public class CustomTextRuleHelper
             LineString lineString = lines.get(j);
             if (StringUtil.isEmpty(lineString.getLine()))
             {
+                processedChars += lineString.getLine().length() + 1;
                 j++;
                 continue;
             }

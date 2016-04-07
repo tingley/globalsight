@@ -173,6 +173,7 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
                     && (state.getTuIds() == null || state.getTuIds()
                             .size() == 0))
             {
+                currentPageIndex = -1;
                 previousPage(state, request.getSession(), fromActivity);
             }
         }
@@ -183,6 +184,7 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
                     && (state.getTuIds() == null || state.getTuIds()
                             .size() == 0))
             {
+                currentPageIndex = -1;
                 nextPage(state, request.getSession(), fromActivity);
             }
         }

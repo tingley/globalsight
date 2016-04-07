@@ -795,6 +795,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                         && (p_state.getTuIds() == null || p_state.getTuIds()
                                 .size() == 0))
                 {
+                    currentPageIndex = -1;
                     previousPage(p_state, p_request.getSession(), fromActivity);
                 }
             }
@@ -805,6 +806,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                         && (p_state.getTuIds() == null || p_state.getTuIds()
                                 .size() == 0))
                 {
+                    currentPageIndex = -1;
                     nextPage(p_state, p_request.getSession(), fromActivity);
                 }
             }

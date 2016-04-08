@@ -16,7 +16,6 @@
  */
 package com.globalsight.util;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -49,8 +48,7 @@ import org.apache.log4j.Logger;
 public class FileUtil
 {
     public static String lineSeparator = java.security.AccessController
-            .doPrivileged(new sun.security.action.GetPropertyAction(
-                    "line.separator"));
+            .doPrivileged(new sun.security.action.GetPropertyAction("line.separator"));
     static private final Logger logger = Logger.getLogger(FileUtil.class);
 
     static public final String NOT_UTF = "Not UTF";
@@ -154,8 +152,7 @@ public class FileUtil
      * @param root
      * @return
      */
-    public static List<File> getAllFilesAndFolders(File root,
-            boolean containEmpty)
+    public static List<File> getAllFilesAndFolders(File root, boolean containEmpty)
     {
         Assert.assertFileExist(root);
 
@@ -309,8 +306,7 @@ public class FileUtil
         }
     }
 
-    public static String readFile(File file, String encoding)
-            throws IOException
+    public static String readFile(File file, String encoding) throws IOException
     {
         return readFile(new FileInputStream(file), encoding);
     }
@@ -318,8 +314,7 @@ public class FileUtil
     /**
      * Reads the given input stream to a string content.
      */
-    public static String readFile(InputStream in, String encoding)
-            throws IOException
+    public static String readFile(InputStream in, String encoding) throws IOException
     {
         try
         {
@@ -369,8 +364,7 @@ public class FileUtil
         }
     }
 
-    public static void writeFile(File file, String content, String encoding)
-            throws IOException
+    public static void writeFile(File file, String content, String encoding) throws IOException
     {
         if (!file.exists())
         {
@@ -394,8 +388,8 @@ public class FileUtil
         }
     }
 
-    public static void writeFileWithBom(File file, String content,
-            String encoding) throws IOException
+    public static void writeFileWithBom(File file, String content, String encoding)
+            throws IOException
     {
         if (!file.exists())
         {
@@ -563,14 +557,12 @@ public class FileUtil
                 }
             }
 
-            BufferedOutputStream bos = new BufferedOutputStream(
-                    new FileOutputStream(file));
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
             byte[] b = null;
 
             if (UTF8.equals(encoding))
             {
-                if (buf[0] != (byte) 0xef && buf[1] != (byte) 0xbb
-                        && buf[2] != (byte) 0xbf)
+                if (buf[0] != (byte) 0xef && buf[1] != (byte) 0xbb && buf[2] != (byte) 0xbf)
                 {
                     b = new byte[buf.length + 3];
                     b[0] = (byte) 0xef;
@@ -621,8 +613,8 @@ public class FileUtil
      * temporary file to the final name. This avoids anyone trying to read the
      * file while it is being written. The temporary file ends in .tmp.
      */
-    public static void writeFileAtomically(File file, String content,
-            String encoding) throws IOException
+    public static void writeFileAtomically(File file, String content, String encoding)
+            throws IOException
     {
         File parent = file.getParentFile();
         if (!parent.exists())
@@ -633,15 +625,13 @@ public class FileUtil
         File tmpFile = File.createTempFile("GSFileUtilWFA", ".tmp", parent);
         try
         {
-            Writer out = new OutputStreamWriter(new FileOutputStream(tmpFile),
-                    encoding);
+            Writer out = new OutputStreamWriter(new FileOutputStream(tmpFile), encoding);
             out.write(content);
             out.flush();
             out.close();
             if (!tmpFile.renameTo(file))
             {
-                throw new IOException("Failed to rename " + tmpFile + " to "
-                        + file);
+                throw new IOException("Failed to rename " + tmpFile + " to " + file);
             }
         }
         finally
@@ -758,8 +748,7 @@ public class FileUtil
                                 value = (value << 4) + 10 + aChar - 'A';
                                 break;
                             default:
-                                throw new IllegalArgumentException(
-                                        "Malformed \\uxxxx encoding.");
+                                throw new IllegalArgumentException("Malformed \\uxxxx encoding.");
                         }
                     }
                     out[outLen++] = (char) value;
@@ -880,8 +869,8 @@ public class FileUtil
             return false;
 
         String tmp = p_fileName.toLowerCase();
-        return tmp.endsWith(".htm") || tmp.endsWith(".html")
-                || tmp.endsWith(".xml") || tmp.endsWith(".resx");
+        return tmp.endsWith(".htm") || tmp.endsWith(".html") || tmp.endsWith(".xml")
+                || tmp.endsWith(".resx");
     }
 
     public static boolean isWindowsReturnMethod(String p_filename)
@@ -889,30 +878,25 @@ public class FileUtil
         if (StringUtil.isEmpty(p_filename))
             return false;
 
-        String tmp = "";
-        boolean isWindowsReturnMethod = false;
-        byte[] buf = new byte[4096];
         try
         {
             File file = new File(p_filename);
-            BufferedInputStream bis = new BufferedInputStream(
-                    new FileInputStream(file));
-            while (!isWindowsReturnMethod && (bis.read(buf) != -1))
+            String encoding = guessEncoding(file);
+            if (encoding == null)
             {
-                tmp = new String(buf);
-                if (tmp.indexOf("\r\n") != -1)
-                {
-                    isWindowsReturnMethod = true;
-                    break;
-                }
+                encoding = UTF8;
             }
-            bis.close();
+            String content = readFile(file, encoding);
+            if (content.indexOf("\r\n") != -1)
+            {
+                return true;
+            }
         }
         catch (Exception e)
         {
             return false;
         }
-        return isWindowsReturnMethod;
+        return false;
     }
 
     /**

@@ -105,10 +105,11 @@ public class ImportUtil
 
     static private final String UTF16 = "UTF-16";
 
-    static private String[] encodingCheckFirst = {"UTF-8", "UTF-16", };
-    
+    static private String[] encodingCheckFirst =
+    { "UTF-8", "UTF-16", };
+
     static private Pattern pattern_encoding = Pattern.compile("encoding=\"([^\"]*?)\"");
-    
+
     //
     // Constructors
     //
@@ -249,11 +250,9 @@ public class ImportUtil
      *            : a locale string in form "xx_yy"; use normalizeLocale() to
      *            normalize any other string formats like "xx-yy" and "xx".
      */
-    static public GlobalSightLocale getLocaleByName(String p_locale)
-            throws Exception
+    static public GlobalSightLocale getLocaleByName(String p_locale) throws Exception
     {
-        GlobalSightLocale result = (GlobalSightLocale) s_name2locale
-                .get(p_locale);
+        GlobalSightLocale result = (GlobalSightLocale) s_name2locale.get(p_locale);
 
         if (result == null)
         {
@@ -391,8 +390,8 @@ public class ImportUtil
      * @param fileName
      * @throws Exception
      */
-    public void saveTmFileWithValidation(File file, File newFile,
-            TmProcessStatus status) throws Exception
+    public void saveTmFileWithValidation(File file, File newFile, TmProcessStatus status)
+            throws Exception
     {
         String encoding = "UTF-8";
         String outEncoding = "UTF-8";
@@ -409,8 +408,7 @@ public class ImportUtil
         {
             if (file.exists())
             {
-                CATEGORY.info("Validating TM file: "
-                        + newFile.getAbsolutePath());
+                CATEGORY.info("Validating TM file: " + newFile.getAbsolutePath());
 
                 Date startTime = new Date();
 
@@ -427,20 +425,16 @@ public class ImportUtil
 
                 // Initialize IO.
                 FileInputStream fIn = new FileInputStream(file);
-                BufferedReader in = new BufferedReader(new InputStreamReader(
-                        fIn, encoding));
+                BufferedReader in = new BufferedReader(new InputStreamReader(fIn, encoding));
                 FileOutputStream fOut = new FileOutputStream(newFile);
-                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-                        fOut, outEncoding));
+                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fOut, outEncoding));
                 FileOutputStream fError = new FileOutputStream(errorFile);
-                OutputStreamWriter error = new OutputStreamWriter(fError,
-                        logEncoding);
+                OutputStreamWriter error = new OutputStreamWriter(fError, logEncoding);
                 FileOutputStream fInfo = new FileOutputStream(infoFile);
                 BufferedWriter info = new BufferedWriter(
                         new OutputStreamWriter(fInfo, logEncoding));
                 FileOutputStream fLog = new FileOutputStream(logFile);
-                OutputStreamWriter log = new OutputStreamWriter(fLog,
-                        logEncoding);
+                OutputStreamWriter log = new OutputStreamWriter(fLog, logEncoding);
 
                 writeHead(error);
                 writeHead(log);
@@ -450,12 +444,11 @@ public class ImportUtil
                 // It must be <?xml ...
                 s = in.readLine();
                 s = changeXmlEncodingDec(s, outEncoding);
-                
+
                 status.addSize(s.getBytes(encoding).length);
                 if (CATEGORY.isDebugEnabled())
                 {
-                    CATEGORY.debug("The content of in.readLine for encoding is "
-                            + s);
+                    CATEGORY.debug("The content of in.readLine for encoding is " + s);
                 }
                 sb.append(s);
                 sb.append(strLine);
@@ -466,8 +459,7 @@ public class ImportUtil
                 s = in.readLine();
                 if (CATEGORY.isDebugEnabled())
                 {
-                    CATEGORY.debug("The content of in.readLine for doctype is "
-                            + s);
+                    CATEGORY.debug("The content of in.readLine for doctype is " + s);
                 }
                 if (s != null && s.indexOf("<!DOCTYPE") > -1)
                 {
@@ -499,8 +491,7 @@ public class ImportUtil
                     }
                     status.addSize(s.getBytes(encoding).length);
 
-                    if (isHeaderStart(s) && isTradosFontTableStart(s)
-                            && isHeaderEnd(s))
+                    if (isHeaderStart(s) && isTradosFontTableStart(s) && isHeaderEnd(s))
                     {
                         int headerEndTag = s.indexOf(">");
                         sb.append(s.subSequence(0, headerEndTag + 1));
@@ -631,8 +622,7 @@ public class ImportUtil
                 costTime = costTime % (1000 * 60);
                 long se = costTime / 1000;
                 StringBuffer time = new StringBuffer("Cost time: ");
-                time.append(h).append(" h ").append(m).append(" m ").append(se)
-                        .append(" s ");
+                time.append(h).append(" h ").append(m).append(" m ").append(se).append(" s ");
 
                 // Recodes some sample informations.
                 String msg = "Error: " + errorCount + strLine;
@@ -653,8 +643,9 @@ public class ImportUtil
 
                 if (lineCounter > 10000)
                 {
-                    CATEGORY.debug("forces jvm to perform gc when the line count reaches 10000. line count: "
-                            + lineCounter);
+                    CATEGORY.debug(
+                            "forces jvm to perform gc when the line count reaches 10000. line count: "
+                                    + lineCounter);
                     System.gc();
                 }
             }
@@ -711,8 +702,7 @@ public class ImportUtil
      * @param fileName
      * @throws Exception
      */
-    public void saveTmFileWithValidation(File file, File newFile)
-            throws Exception
+    public void saveTmFileWithValidation(File file, File newFile) throws Exception
     {
         String encoding = "UTF-8";
         String outEncoding = "UTF-8";
@@ -729,8 +719,7 @@ public class ImportUtil
         {
             if (file.exists())
             {
-                CATEGORY.info("Validating TM file: "
-                        + newFile.getAbsolutePath());
+                CATEGORY.info("Validating TM file: " + newFile.getAbsolutePath());
 
                 Date startTime = new Date();
 
@@ -747,20 +736,16 @@ public class ImportUtil
 
                 // Initialize IO.
                 FileInputStream fIn = new FileInputStream(file);
-                BufferedReader in = new BufferedReader(new InputStreamReader(
-                        fIn, encoding));
+                BufferedReader in = new BufferedReader(new InputStreamReader(fIn, encoding));
                 FileOutputStream fOut = new FileOutputStream(newFile);
-                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-                        fOut, outEncoding));
+                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fOut, outEncoding));
                 FileOutputStream fError = new FileOutputStream(errorFile);
-                OutputStreamWriter error = new OutputStreamWriter(fError,
-                        logEncoding);
+                OutputStreamWriter error = new OutputStreamWriter(fError, logEncoding);
                 FileOutputStream fInfo = new FileOutputStream(infoFile);
                 BufferedWriter info = new BufferedWriter(
                         new OutputStreamWriter(fInfo, logEncoding));
                 FileOutputStream fLog = new FileOutputStream(logFile);
-                OutputStreamWriter log = new OutputStreamWriter(fLog,
-                        logEncoding);
+                OutputStreamWriter log = new OutputStreamWriter(fLog, logEncoding);
 
                 writeHead(error);
                 writeHead(log);
@@ -770,11 +755,10 @@ public class ImportUtil
                 // It must be <?xml ...
                 s = in.readLine();
                 s = changeXmlEncodingDec(s, outEncoding);
-                
+
                 if (CATEGORY.isDebugEnabled())
                 {
-                    CATEGORY.debug("The content of in.readLine for encoding is "
-                            + s);
+                    CATEGORY.debug("The content of in.readLine for encoding is " + s);
                 }
                 sb.append(s);
                 sb.append(strLine);
@@ -783,8 +767,7 @@ public class ImportUtil
                 s = in.readLine();
                 if (CATEGORY.isDebugEnabled())
                 {
-                    CATEGORY.debug("The content of in.readLine for doctype is "
-                            + s);
+                    CATEGORY.debug("The content of in.readLine for doctype is " + s);
                 }
                 if (s != null && s.indexOf("<!DOCTYPE") > -1)
                 {
@@ -807,8 +790,7 @@ public class ImportUtil
                 SAXReader reader = new SAXReader();
                 while (s != null)
                 {
-                    if (isHeaderStart(s) && isTradosFontTableStart(s)
-                            && isHeaderEnd(s))
+                    if (isHeaderStart(s) && isTradosFontTableStart(s) && isHeaderEnd(s))
                     {
                         int headerEndTag = s.indexOf(">");
                         sb.append(s.subSequence(0, headerEndTag + 1));
@@ -939,8 +921,7 @@ public class ImportUtil
                 costTime = costTime % (1000 * 60);
                 long se = costTime / 1000;
                 StringBuffer time = new StringBuffer("Cost time: ");
-                time.append(h).append(" h ").append(m).append(" m ").append(se)
-                        .append(" s ");
+                time.append(h).append(" h ").append(m).append(" m ").append(se).append(" s ");
 
                 // Recodes some sample informations.
                 String msg = "Error: " + errorCount + strLine;
@@ -961,8 +942,9 @@ public class ImportUtil
 
                 if (lineCounter > 10000)
                 {
-                    CATEGORY.debug("suggests jvm to perform gc when the line count reaches 10000. line count: "
-                            + lineCounter);
+                    CATEGORY.debug(
+                            "suggests jvm to perform gc when the line count reaches 10000. line count: "
+                                    + lineCounter);
                     System.gc();
                 }
             }
@@ -1000,9 +982,8 @@ public class ImportUtil
 
     private boolean isTradosFontTableStart(String line)
     {
-        return (line.indexOf("<prop ") > -1 && (line
-                .indexOf("\"RTFFontTable\"") > -1 || line
-                .indexOf("\"RTFStyleSheet\"") > -1));
+        return (line.indexOf("<prop ") > -1 && (line.indexOf("\"RTFFontTable\"") > -1
+                || line.indexOf("\"RTFStyleSheet\"") > -1));
     }
 
     /**
@@ -1113,8 +1094,7 @@ public class ImportUtil
             while (fileIterator.hasNext())
             {
                 String file = fileIterator.next();
-                File preFile = new File(AmbFileStoragePathUtils.getCxeDocDir(),
-                        file);
+                File preFile = new File(AmbFileStoragePathUtils.getCxeDocDir(), file);
                 if (preFile.getAbsolutePath().endsWith(".xml"))
                 {
                     String originalEncode = guessEncodingByBom(preFile);
@@ -1125,8 +1105,7 @@ public class ImportUtil
 
                     if (!"UTF-8".equalsIgnoreCase(originalEncode))
                     {
-                        saveFileAsUTF8(preFile.getAbsolutePath(),
-                                originalEncode);
+                        saveFileAsUTF8(preFile.getAbsolutePath(), originalEncode);
                     }
                 }
             }
@@ -1143,42 +1122,16 @@ public class ImportUtil
         {
             originalEncode = "UTF-8";
         }
-        StringBuilder newStr = new StringBuilder();
-        BufferedReader in = null;
         try
         {
-            in = new BufferedReader(new InputStreamReader(new FileInputStream(
-                    absolutePath), originalEncode));
-            String str = new String();
-            str = in.readLine();
-
-            newStr.append(str);
-            newStr.append("\r\n");
-            while ((str = in.readLine()) != null)
-            {
-                newStr.append(str);
-                newStr.append("\r\n");
-            }
+            File file = new File(absolutePath);
+            String content = FileUtil.readFile(file, originalEncode);
+            FileUtil.writeFile(file, content, originalEncode);
         }
         catch (Exception e)
         {
             CATEGORY.error("Can not save file:" + absolutePath + " as UTF-8");
         }
-        finally
-        {
-            try
-            {
-                if (in != null)
-                {
-                    in.close();
-                }
-            }
-            catch (IOException e)
-            {
-                CATEGORY.error(e.getMessage(), e);
-            }
-        }
-        writeFile(absolutePath, newStr.toString());
     }
 
     public static void main(String[] args) throws IOException
@@ -1203,8 +1156,8 @@ public class ImportUtil
         Writer out = null;
         try
         {
-            out = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(absolutePath), "UTF-8"));
+            out = new BufferedWriter(
+                    new OutputStreamWriter(new FileOutputStream(absolutePath), "UTF-8"));
             out.write(newStr);
         }
         catch (IOException ex)
@@ -1261,7 +1214,6 @@ public class ImportUtil
     {
         byte[] bs = readFile(file, 160);
 
-        
         String foundEncoding = null;
         for (String enc : encodingCheckFirst)
         {
@@ -1272,14 +1224,14 @@ public class ImportUtil
                 break;
             }
         }
-        
+
         if (foundEncoding == null)
         {
             String encoding = "utf-8";
             Map chars = Charset.availableCharsets();
             Set keys = chars.keySet();
             Iterator iterator = keys.iterator();
-            
+
             while (iterator.hasNext())
             {
                 encoding = (String) iterator.next();
@@ -1295,9 +1247,8 @@ public class ImportUtil
         return foundEncoding;
     }
 
-    private static String checkEncoding(byte[] bs, String encoding,
-            Pattern pattern, File file) throws UnsupportedEncodingException,
-            IOException
+    private static String checkEncoding(byte[] bs, String encoding, Pattern pattern, File file)
+            throws UnsupportedEncodingException, IOException
     {
         String s = new String(bs, encoding);
         String foundEncoding = null;
@@ -1328,11 +1279,11 @@ public class ImportUtil
 
         head.append("<html>").append(strLine);
         head.append("<head>").append(strLine);
-        head.append("<META content=\"text/html; charset=unicode\">").append(
-                strLine);
+        head.append("<META content=\"text/html; charset=unicode\">").append(strLine);
         head.append("</head>").append(strLine);
         head.append("<body>").append(strLine);
-        head.append("<TEXTAREA warp=\"off\" STYLE=\"overflow:visible; width:100%;\" READONLY=\"true\">");
+        head.append(
+                "<TEXTAREA warp=\"off\" STYLE=\"overflow:visible; width:100%;\" READONLY=\"true\">");
         head.append(strLine);
         writer.write(head.toString());
     }

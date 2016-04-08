@@ -1714,6 +1714,11 @@ public class WorkflowProcessAdapter extends WorkflowHelper
         long overdueUser = p_wfTask.getOverdueToUser();
         nodePara.setAttribute(WorkflowConstants.FIELD_OVERDUE_USER_TIME,
                 Long.toString(overdueUser));
+        
+        // update report upload check
+        int reportUploadCheck =  p_wfTask.getReportUploadCheck();
+        nodePara.setAttribute(WorkflowConstants.FIELD_REPORT_UPLOAD_CHECK,
+                Integer.toString(reportUploadCheck));
 
         // update role name UDA
         String role_name = p_wfTask.getDisplayRoleName();

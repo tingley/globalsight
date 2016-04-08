@@ -246,7 +246,7 @@ var Dialog = {
 		node.updateAssignmentValue("activity", activityType);		
 		node.updateAssignmentValue("action_type", $("#systemActivitySelect").val());
 		
-		if ($("#uploadCheckbox").attr("checked")) {
+		if ($("#uploadCheckbox")[0].checked) {
 			node.updateAssignmentValue("report_upload_check", 1);
 		} else {
 			node.updateAssignmentValue("report_upload_check", 0);

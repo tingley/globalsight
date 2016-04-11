@@ -97,8 +97,8 @@ public class FileProfileMainHandler extends PageHandler
      *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
-            HttpServletResponse p_response, ServletContext p_context)
-            throws ServletException, IOException, EnvoyServletException
+            HttpServletResponse p_response, ServletContext p_context) throws ServletException,
+            IOException, EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
         m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
@@ -140,8 +140,8 @@ public class FileProfileMainHandler extends PageHandler
                 }
                 removeFileProfile(p_request, session);
             }
-            if ((p_request.getParameter("linkName") != null
-                    && !p_request.getParameter("linkName").startsWith("self")))
+            if ((p_request.getParameter("linkName") != null && !p_request.getParameter("linkName")
+                    .startsWith("self")))
             {
                 sessionMgr.clear();
             }
@@ -256,8 +256,8 @@ public class FileProfileMainHandler extends PageHandler
 
     private void modifyFileProfile(HttpServletRequest p_request) throws EnvoyServletException
     {
-        SessionManager sessionMgr = (SessionManager) p_request.getSession()
-                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) p_request.getSession().getAttribute(
+                WebAppConstants.SESSION_MANAGER);
         FileProfileImpl fp = (FileProfileImpl) sessionMgr.getAttribute("fileprofile");
         FileProfileImpl newFp = new FileProfileImpl();
 
@@ -385,6 +385,10 @@ public class FileProfileMainHandler extends PageHandler
         try
         {
             String idString = (String) p_request.getParameter(RADIO_BUTTON);
+            if (idString.contains("on"))
+            {
+                idString = idString.replace("on ","");
+            }
             if (idString != null)
             {
                 String[] idarray = idString.split(" ");
@@ -392,8 +396,8 @@ public class FileProfileMainHandler extends PageHandler
                 {
                     String id = idarray[i].split(",")[0];
                     FileProfileImpl fp = (FileProfileImpl) ServerProxy
-                            .getFileProfilePersistenceManager()
-                            .getFileProfileById(Long.parseLong(id), true);
+                            .getFileProfilePersistenceManager().getFileProfileById(
+                                    Long.parseLong(id), true);
 
                     // CVSFileProfileManagerLocal cvsFPManager = new
                     // CVSFileProfileManagerLocal();
@@ -563,10 +567,10 @@ public class FileProfileMainHandler extends PageHandler
         StringBuffer condition = new StringBuffer();
         String[][] array = new String[][]
         {
-                { "uNameFilter", "f.name" },
-                { "uLPFilter", "lp.name" },
-                { "uSourceFileFormatFilter", "kft.name" },
-                { "uCompanyFilter", "c.name" } };
+        { "uNameFilter", "f.name" },
+        { "uLPFilter", "lp.name" },
+        { "uSourceFileFormatFilter", "kft.name" },
+        { "uCompanyFilter", "c.name" } };
         // filterTableName
         String uFNFilter = (String) sessionMgr.getAttribute("uFNFilter");
         boolean needRemove = false;
@@ -574,8 +578,8 @@ public class FileProfileMainHandler extends PageHandler
         if (StringUtils.isNotBlank(uFNFilter))
         {
             condition.append(" and  f.filterTableName IS NOT null");
-            filres = FilterHelper
-                    .getallFiltersLikeName(StringUtil.transactSQLInjection(uFNFilter.trim()));
+            filres = FilterHelper.getallFiltersLikeName(StringUtil.transactSQLInjection(uFNFilter
+                    .trim()));
             needRemove = true;
 
         }
@@ -596,8 +600,8 @@ public class FileProfileMainHandler extends PageHandler
                     {
                         FileprofileVo fileprofilevo = (FileprofileVo) iter.next();
                         FileProfile FileProfile = fileprofilevo.getFileProfile();
-                        String filterName = filres
-                                .get(FileProfile.getFilterTableName() + FileProfile.getFilterId());
+                        String filterName = filres.get(FileProfile.getFilterTableName()
+                                + FileProfile.getFilterId());
                         if (filterName == null)
                         {
                             iter.remove();
@@ -631,9 +635,9 @@ public class FileProfileMainHandler extends PageHandler
         }
         HashMap<Long, String> idViewExtensions = ServerProxy.getFileProfilePersistenceManager()
                 .getIdViewFileExtensions();
-        setTableNavigation(p_request, p_session, (List) fileprofiles,
-                new FileProfileComparator(uiLocale, idViewExtensions), NUM_PER_PAGE,
-                FileProfileConstants.FILEPROFILE_LIST, FileProfileConstants.FILEPROFILE_KEY);
+        setTableNavigation(p_request, p_session, (List) fileprofiles, new FileProfileComparator(
+                uiLocale, idViewExtensions), NUM_PER_PAGE, FileProfileConstants.FILEPROFILE_LIST,
+                FileProfileConstants.FILEPROFILE_KEY);
 
         CVSFileProfileManagerLocal cvsFPManager = new CVSFileProfileManagerLocal();
         ArrayList<CVSFileProfile> cvsfps = (ArrayList<CVSFileProfile>) cvsFPManager

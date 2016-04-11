@@ -1434,6 +1434,7 @@ public class TaskDetailHandler extends PageHandler
 			sessionMgr.setAttribute("sourcePageIdList", sourcePageIdList);
 			return newPages;
 		}
+		sessionMgr.removeElement("sourcePageIdList");
 
 		if (thisFileSearch != null)
 		{
@@ -1448,7 +1449,6 @@ public class TaskDetailHandler extends PageHandler
 			}
 			return filteredFiles;
 		}
-		sessionMgr.removeElement("sourcePageIdList");
 			// just return all - no filter
 		return p_pages;
 	}

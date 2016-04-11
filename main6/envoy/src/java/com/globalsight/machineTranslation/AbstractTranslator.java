@@ -52,6 +52,9 @@ public abstract class AbstractTranslator implements MachineTranslator
 
     private static final String TAG_REGEX = "<.pt.*?>[^<]*?</.pt>";
     private static final String TAG_REGEX_ALONE = "<[^>]*?>";
+    private static final String TAG_REGEX_IT = "<it[\\s].*?>[^<]*?</it>";
+    private static final String TAG_REGEX_PH = "<ph[\\s].*?>[^<]*?</ph>";
+    private static final String TAG_REGEX_MRK = "<mrk[\\s].*?>[^<]*?</mrk>";
 
     private HashMap parameterMap = null;
 
@@ -389,9 +392,9 @@ public abstract class AbstractTranslator implements MachineTranslator
                     .get(MachineTranslator.MT_PROFILE);
             if (segmentsNoStyleInfo[i].length() > mtProfile.getMsMaxLength())
             {
-                CATEGORY.info("Current segment length is " + segmentsNoStyleInfo[i].length()
-                        + " which is longer than" + mtProfile.getMsMaxLength()
-                        + ". The segment will be ignored. Segment info :" + segmentsNoStyleInfo[i]);
+                CATEGORY.info("Max chunk length (" + mtProfile.getMsMaxLength()
+                        + ") exceeded; the segment will be ignored. Segment info: length = " + segmentsNoStyleInfo[i].length()
+                        + "; text = " + segmentsNoStyleInfo[i]);
                 if (subList.size() > 0)
                 {
                     translatedList.addAll(doMSTranslation(subList, sourceLocale, targetLocale));
@@ -505,9 +508,9 @@ public abstract class AbstractTranslator implements MachineTranslator
             // sentences passed to MS MT should be less than user set max length characters.
             if (removeTags(segments[i]).length() > mtProfile.getMsMaxLength())
             {
-                CATEGORY.info("Current segment length is " + removeTags(segments[i]).length()
-                        + " which is longer than" + mtProfile.getMsMaxLength()
-                        + ". The segment will be ignored. Segment info :" + removeTags(segments[i]));
+                CATEGORY.info("Max chunk length (" + mtProfile.getMsMaxLength()
+                        + ") exceeded; the segment will be ignored. Segment info: length = " + removeTags(segments[i]).length()
+                        + "; text = " + removeTags(segments[i]));
                 if (subList.size() > 0)
                 {
                     translatedList.addAll(doMSTranslation1(subList, sourceLocale, targetLocale, containTags));
@@ -777,10 +780,16 @@ public abstract class AbstractTranslator implements MachineTranslator
         String s1, s2;
         s2 = segment;
         s1 = segment.replaceAll(TAG_REGEX, "");
+        s1 = s1.replaceAll(TAG_REGEX_IT, "");
+        s1 = s1.replaceAll(TAG_REGEX_PH, "");
+        s1 = s1.replaceAll(TAG_REGEX_MRK, "");
         while (!s1.equals(s2))
         {
             s2 = s1;
             s1 = segment.replaceAll(TAG_REGEX, "");
+            s1 = s1.replaceAll(TAG_REGEX_IT, "");
+            s1 = s1.replaceAll(TAG_REGEX_PH, "");
+            s1 = s1.replaceAll(TAG_REGEX_MRK, "");
         }
 
         s1 = s1.replaceAll(TAG_REGEX_ALONE, "");

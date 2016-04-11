@@ -141,6 +141,7 @@ PagePair currentPage = state.getCurrentPage();
 boolean isPicturePreviousFile = currentPage.isPicturePreviousFile();
 boolean isPictureNextFile = currentPage.isPictureNextFile();
 int i_index = state.getPages().indexOf(currentPage);
+url_refresh += "&currentPageIndex="+i_index;
 if(isPicturePreviousFile && i_index > 0)
 {
 	PagePair previousPage = state.getPages().get(i_index-1);

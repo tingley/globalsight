@@ -19,11 +19,8 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,28 +29,21 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.util.comparator.PriorityComparator;
 import com.globalsight.ling.common.XmlEntities;
-import com.globalsight.ling.docproc.DocumentElement;
 import com.globalsight.ling.docproc.LineIndex;
 import com.globalsight.ling.docproc.LineString;
-import com.globalsight.ling.docproc.Output;
-import com.globalsight.ling.docproc.SegmentNode;
-import com.globalsight.ling.docproc.TranslatableElement;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
-import com.globalsight.util.TagIndex;
 
 public class CustomTextRuleHelper
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(CustomTextRuleHelper.class);
+    private static final Logger CATEGORY = Logger.getLogger(CustomTextRuleHelper.class);
     private static XmlEntities m_xmlEncoder = new XmlEntities();
 
     public static String FIRST = "FIRST";
     public static String LAST = "LAST";
 
-    public static String extractLines(String oriStr,
-            List<CustomTextRuleBase> rules, String lineSeparator)
-            throws Exception
+    public static String extractLines(String oriStr, List<CustomTextRuleBase> rules,
+            String lineSeparator) throws Exception
     {
         if (rules.size() == 0)
         {
@@ -96,8 +86,7 @@ public class CustomTextRuleHelper
                 }
             }
 
-            List<LineIndex> indexes = extractLines(lines,
-                    allStr.length(), rules, null);
+            List<LineIndex> indexes = extractLines(lines, allStr.length(), rules, null);
 
             if (indexes == null || indexes.size() == 0)
             {
@@ -121,7 +110,7 @@ public class CustomTextRuleHelper
 
                     start = lineIndex.getContentEnd();
                 }
-                
+
                 return sb.toString();
             }
         }
@@ -152,14 +141,13 @@ public class CustomTextRuleHelper
         }
     }
 
-    public static int[] extractOneLine(String line,
-            List<CustomTextRuleBase> rules)
+    public static int[] extractOneLine(String line, List<CustomTextRuleBase> rules)
     {
         if (line == null || line.length() == 0)
         {
             return null;
         }
-        
+
         if (rules == null)
         {
             return null;
@@ -167,7 +155,8 @@ public class CustomTextRuleHelper
 
         if (rules.size() == 0)
         {
-            return new int[] { 0, line.length() };
+            return new int[]
+            { 0, line.length() };
         }
 
         for (int i = 0; i < rules.size(); i++)
@@ -325,7 +314,7 @@ public class CustomTextRuleHelper
                                 if (find == number)
                                 {
                                     extractIndexFinish = m.start();
-                                    finishMatch =  (extractIndexFinish > extractIndexStart);
+                                    finishMatch = (extractIndexFinish > extractIndexStart);
                                     break;
                                 }
                             }
@@ -364,12 +353,11 @@ public class CustomTextRuleHelper
                                 if (find == number)
                                 {
                                     extractIndexFinish = i0;
-                                    finishMatch =  (extractIndexFinish > extractIndexStart);
+                                    finishMatch = (extractIndexFinish > extractIndexStart);
                                     break;
                                 }
 
-                                i0 = line.indexOf(finishStr,
-                                        i0 + finishStr.length());
+                                i0 = line.indexOf(finishStr, i0 + finishStr.length());
                             }
                         }
                     }
@@ -378,31 +366,37 @@ public class CustomTextRuleHelper
 
             if (startMatch && finishMatch)
             {
-                return new int[] { extractIndexStart, extractIndexFinish };
+                return new int[]
+                { extractIndexStart, extractIndexFinish };
             }
         }
 
         return null;
     }
 
-    public static List<LineIndex> extractLines(List<LineString> lines,
-            int length, List<CustomTextRuleBase> p_customTextRules,
-            List<CustomTextRuleBase> p_customSidRules)
+    public static List<LineIndex> extractLines(List<LineString> lines, int length,
+            List<CustomTextRuleBase> p_customTextRules, List<CustomTextRuleBase> p_customSidRules)
     {
         List<LineIndex> result = new ArrayList<LineIndex>();
         int processedChars = 0;
-        
+
         // process lines
-        for(int j = 0; (j < lines.size() && processedChars < length);)
+        for (int j = 0; (j < lines.size() && processedChars < length);)
         {
             LineString lineString = lines.get(j);
+            if (StringUtil.isEmpty(lineString.getLine()))
+            {
+                processedChars += lineString.getLine().length() + 1;
+                j++;
+                continue;
+            }
             String nextString = getNextAllString(lines, j + 1);
             int extractIndexStart = -1;
             int extractIndexFinish = -1;
             boolean isMultiline = false;
             boolean startMatch = false;
             boolean finishMatch = false;
-            
+
             // extract one line rule by rule
             for (int i = 0; i < p_customTextRules.size(); i++)
             {
@@ -412,7 +406,7 @@ public class CustomTextRuleHelper
                 extractIndexStart = -1;
                 extractIndexFinish = -1;
                 isMultiline = rule.getIsMultiline();
-                
+
                 String line = (isMultiline ? nextString : lineString.getLine());
 
                 String startStr = rule.getStartString();
@@ -422,7 +416,9 @@ public class CustomTextRuleHelper
 
                 if (rule.getStartIsRegEx())
                 {
-                    Pattern p = isMultiline ? Pattern.compile(startStr, Pattern.MULTILINE | Pattern.DOTALL) : Pattern.compile(startStr);
+                    Pattern p = isMultiline
+                            ? Pattern.compile(startStr, Pattern.MULTILINE | Pattern.DOTALL)
+                            : Pattern.compile(startStr);
                     Matcher m = p.matcher(line);
 
                     if (FIRST.equals(startOcc))
@@ -525,14 +521,16 @@ public class CustomTextRuleHelper
                     {
                         if (rule.getFinishIsRegEx())
                         {
-                            Pattern p = isMultiline ? Pattern.compile(finishStr, Pattern.MULTILINE | Pattern.DOTALL) : Pattern.compile(finishStr);;
+                            Pattern p = isMultiline
+                                    ? Pattern.compile(finishStr, Pattern.MULTILINE | Pattern.DOTALL)
+                                    : Pattern.compile(finishStr);;
                             Matcher m = p.matcher((line));
 
                             if (FIRST.equals(finishOcc))
                             {
                                 if (m.find(startIndex))
                                 {
-                                    extractIndexFinish =processedChars +  m.start();
+                                    extractIndexFinish = processedChars + m.start();
                                     finishMatch = true;
                                 }
                             }
@@ -562,7 +560,7 @@ public class CustomTextRuleHelper
                                     if (find == number)
                                     {
                                         extractIndexFinish = processedChars + m.start();
-                                        finishMatch =  (extractIndexFinish > extractIndexStart);
+                                        finishMatch = (extractIndexFinish > extractIndexStart);
                                         break;
                                     }
                                 }
@@ -601,12 +599,11 @@ public class CustomTextRuleHelper
                                     if (find == number)
                                     {
                                         extractIndexFinish = processedChars + i0;
-                                        finishMatch =  (extractIndexFinish > extractIndexStart);
+                                        finishMatch = (extractIndexFinish > extractIndexStart);
                                         break;
                                     }
 
-                                    i0 = line.indexOf(finishStr,
-                                            i0 + finishStr.length());
+                                    i0 = line.indexOf(finishStr, i0 + finishStr.length());
                                 }
                             }
                         }
@@ -615,14 +612,14 @@ public class CustomTextRuleHelper
 
                 if (startMatch && finishMatch)
                 {
-                     break;
+                    break;
                 }
             }
-            
+
             if (startMatch && finishMatch)
             {
                 LineIndex lineIndex = null;
-                
+
                 // extract sid from first line
                 int pcharCount = processedChars;
                 int sidStart = -1;
@@ -648,37 +645,33 @@ public class CustomTextRuleHelper
                             }
                         }
                     }
-                    
-                    int[] sidIndex = extractOneLine(l0,
-                            p_customSidRules);
+
+                    int[] sidIndex = extractOneLine(l0, p_customSidRules);
 
                     if (sidIndex != null && sidIndex.length == 2)
                     {
-                        for(int jjj = j; jjj < jj; jjj++)
+                        for (int jjj = j; jjj < jj; jjj++)
                         {
                             LineString temp = lines.get(jjj);
                             pcharCount = temp.getLine().length() + pcharCount;
-                            
-                            //\n
+
+                            // \n
                             pcharCount = pcharCount + 1;
                         }
-                        
+
                         sidStart = pcharCount + sidIndex[0];
                         sidEnd = pcharCount + sidIndex[1];
                     }
                 }
-                
+
                 if (isMultiline)
                 {
-                    lineIndex = new LineIndex(extractIndexStart,
-                            extractIndexFinish);
+                    lineIndex = new LineIndex(extractIndexStart, extractIndexFinish);
 
                     int lineCount = 0;
 
-                    String sub = nextString.substring(0, extractIndexFinish
-                            - processedChars);
-                    BufferedReader br = new BufferedReader(
-                            new StringReader(sub));
+                    String sub = nextString.substring(0, extractIndexFinish - processedChars);
+                    BufferedReader br = new BufferedReader(new StringReader(sub));
                     try
                     {
                         while (br.readLine() != null)
@@ -697,25 +690,22 @@ public class CustomTextRuleHelper
                     while (lastJ < j)
                     {
                         LineString _lineString = lines.get(lastJ);
-                        processedChars = processedChars
-                                + _lineString.getLine().length() + 1;
-                        
+                        processedChars = processedChars + _lineString.getLine().length() + 1;
+
                         lastJ++;
                     }
                 }
                 else
                 {
-                    lineIndex = new LineIndex(extractIndexStart,
-                            extractIndexFinish);
+                    lineIndex = new LineIndex(extractIndexStart, extractIndexFinish);
 
-                    processedChars = processedChars
-                            + lineString.getLine().length() + 1;
+                    processedChars = processedChars + lineString.getLine().length() + 1;
                     j = j + 1;
                 }
-                
+
                 lineIndex.setSidStart(sidStart);
                 lineIndex.setSidEnd(sidEnd);
-                
+
                 result.add(lineIndex);
             }
             else
@@ -723,29 +713,29 @@ public class CustomTextRuleHelper
                 processedChars = processedChars + lineString.getLine().length() + 1;
                 j = j + 1;
             }
-            
+
         }
-        
+
         return result;
     }
-    
+
     private static String getNextAllString(List<LineString> lines, int startLine)
     {
         StringBuffer sb = new StringBuffer();
-        
+
         for (LineString lineString : lines)
         {
             if (lineString.getLineNumber() >= startLine)
             {
                 sb.append(lineString.getLine());
-                
+
                 if (lineString.getLineNumber() < lines.size())
                 {
                     sb.append("\n");
                 }
             }
         }
-        
+
         return sb.toString();
     }
 }

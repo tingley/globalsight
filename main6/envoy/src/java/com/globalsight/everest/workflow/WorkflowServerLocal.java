@@ -2145,8 +2145,27 @@ public class WorkflowServerLocal implements WorkflowServer
                         {
                             return;
                         }
+                        
+                        int state = task.getState();
+                        if (state == Task.STATE_ACCEPTED)
+                        {
+                            try
+                            {
+                                ctx = WorkflowConfiguration.getInstance()
+                                        .getJbpmContext();
+                                TaskInstance taskInstance = WorkflowJbpmPersistenceHandler
+                                        .getTaskInstance(task.getId(), ctx);
+                                TaskInterimPersistenceAccessor.endInterimActivity(taskInstance);
+                            }
+                            finally
+                            {
+                                ctx.close();
+                            }
+                        }
+                        
                         ServerProxy.getTaskManager().acceptTask(userId, task,
                                 true);
+                        
                         if (i == indexInDefaultPath)
                         {
                             // i == indexInDefaultPath indicates this is the

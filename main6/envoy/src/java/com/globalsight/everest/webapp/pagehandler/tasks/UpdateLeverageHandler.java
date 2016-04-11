@@ -18,6 +18,7 @@ package com.globalsight.everest.webapp.pagehandler.tasks;
 
 import java.rmi.RemoteException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ import com.globalsight.everest.page.ExtractedFile;
 import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
@@ -64,7 +66,6 @@ import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowManager;
-import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm.LeverageMatchType;
 import com.globalsight.ling.tm.LeverageSegment;
@@ -81,6 +82,7 @@ import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.machineTranslation.MTHelper2;
 import com.globalsight.machineTranslation.MachineTranslator;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
@@ -769,11 +771,12 @@ public class UpdateLeverageHandler extends PageActionHandler
         //3.Re-save target tuv
         if (sourceTuvs.size() > 0)
         {
-            applyMTMatches(p_sourcePage, sourceLocale, targetLocale, untranslatedSrcTuvs);
+            applyMTMatches(p_wf, p_sourcePage, sourceLocale, targetLocale, untranslatedSrcTuvs);
         }
     }
 
-    private void applyMTMatches(SourcePage p_sourcePage, GlobalSightLocale p_sourceLocale,
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void applyMTMatches(Workflow p_wf, SourcePage p_sourcePage, GlobalSightLocale p_sourceLocale,
             GlobalSightLocale p_targetLocale, Collection<Tuv> untranslatedSrcTuvs) throws Exception
     {
         MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileBySourcePage(
@@ -809,7 +812,7 @@ public class UpdateLeverageHandler extends PageActionHandler
         HashMap<Tu, Tuv> needHitMTTuTuvMap = new HashMap<Tu, Tuv>();
         needHitMTTuTuvMap = formTuTuvMap(untranslatedSrcTuvs, sourceTuvMap, p_targetLocale, jobId);
 
-        XmlEntities xe = new XmlEntities();
+//        XmlEntities xe = new XmlEntities();
         // put all TUs into array.
         Object[] key_tus = needHitMTTuTuvMap.keySet().toArray();
         Tu[] tusInArray = new Tu[key_tus.length];
@@ -872,7 +875,7 @@ public class UpdateLeverageHandler extends PageActionHandler
                         .canBeModified(currentNewTuv, machineTranslatedGxml, jobId);
             }
             // replace the content in target tuv with mt result
-            if (mtConfidenceScore == 100 && isGetMTResult && tagMatched)
+            if (isGetMTResult && tagMatched)
             {
                 // GBS-3722
                 if (mtProfile.isIncludeMTIdentifiers())
@@ -925,8 +928,7 @@ public class UpdateLeverageHandler extends PageActionHandler
                 lm.setMtName(machineTranslator.getEngineName() + "_MT");
                 lm.setMatchedOriginalSource(sourceTuv.getGxml());
 
-                // lm.setSid(sourceTuv.getSid());
-                lm.setCreationUser(machineTranslator.getEngineName());
+                lm.setCreationUser(machineTranslator.getEngineName() + "_MT");
                 lm.setCreationDate(sourceTuv.getLastModified());
                 lm.setModifyDate(sourceTuv.getLastModified());
 
@@ -947,6 +949,9 @@ public class UpdateLeverageHandler extends PageActionHandler
 
         // Populate into target TUVs
         SegmentTuvUtil.updateTuvs(tuvsToBeUpdated, jobId);
+
+        updateMtScoreFields(mtConfidenceScore, p_sourcePage.getId(), p_targetLocale.getId(),
+                machineTranslator.getEngineName() + "_MT", p_wf);
     }
 
     private HashMap<Tu, Tuv> formTuTuvMap(Collection<Tuv> untranslatedSrcTuvs,
@@ -1101,6 +1106,41 @@ public class UpdateLeverageHandler extends PageActionHandler
         }
 
         return result;
+    }
+
+    /**
+     * When update leverage multiple times with different MT threshold, we apply
+     * the last MT threshold to all MT matches.
+     */
+    private void updateMtScoreFields(long mtConfidenceScore, long srcPageId, long trgLocaleId,
+            String mtEngineName, Workflow p_wf) throws Exception
+    {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        try
+        {
+            connection = DbUtil.getConnection();
+
+            StringBuilder buffer = new StringBuilder();
+            buffer.append("UPDATE ").append(BigTableUtil.getLMTableJobDataInBySourcePageId(srcPageId));
+            buffer.append(" SET score_num = ? ");
+            buffer.append(" WHERE source_page_id = ? AND target_locale_id = ? AND mt_name = ?");
+
+            ps = connection.prepareStatement(buffer.toString());
+            ps.setLong(1, mtConfidenceScore);
+            ps.setLong(2, srcPageId);
+            ps.setLong(3, trgLocaleId);
+            ps.setString(4, mtEngineName);
+            ps.execute();
+        }
+        finally
+        {
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(connection);
+        }
+
+        p_wf.setMtConfidenceScore((int) mtConfidenceScore);
+        HibernateUtil.saveOrUpdate(p_wf);
     }
 
     @Override

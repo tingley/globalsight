@@ -105,8 +105,9 @@ public class ReportGeneratorUtil
             if (type != null)
             {
                 LeverageMatch lm = type.getLeverageMatch();
-                if (lm.getCreationUser() != null
-                        && lm.getCreationUser().toLowerCase().endsWith("_mt"))
+                if ((lm.getMtName() != null && lm.getMtName().toLowerCase().endsWith("_mt"))
+                        || (lm.getCreationUser() != null && lm.getCreationUser().toLowerCase()
+                                .endsWith("_mt")))
                 {
                     matches.append("\r\n").append("MT Match");
                 }

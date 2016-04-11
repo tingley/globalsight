@@ -26,16 +26,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Vector;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.globalsight.config.UserParamNames;
@@ -52,6 +55,7 @@ import com.globalsight.everest.edit.online.PageInfo;
 import com.globalsight.everest.edit.online.PaginateInfo;
 import com.globalsight.everest.edit.online.RenderingOptions;
 import com.globalsight.everest.edit.online.SegmentFilter;
+import com.globalsight.everest.edit.online.SegmentMatchResult;
 import com.globalsight.everest.edit.online.SegmentView;
 import com.globalsight.everest.edit.online.UIConstants;
 import com.globalsight.everest.foundation.User;
@@ -62,6 +66,7 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -73,10 +78,12 @@ import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
+import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineHelper;
 import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
@@ -85,12 +92,14 @@ import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUpl
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.webservices.AmbassadorUtil;
 
 /**
@@ -282,6 +291,151 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             renderJson(p_request, p_response, state, isAssignee);
             return;
         }
+        
+        // GBS-4281 show segment details
+        String value = p_request.getParameter("param");
+        if (value != null)
+        {
+            ResourceBundle bundle = PageHandler.getBundle(session);
+            SegmentView view;
+            String param[] = value.split("&");
+            String tuid[] = param[0].split("=");
+            String tuvid[] = param[1].split("=");
+            String subid[] = param[2].split("=");
+            long tuId = Long.valueOf(tuid[1]).longValue();
+            long tuvId = Long.valueOf(tuvid[1]).longValue();
+            long subId = Long.valueOf(subid[1]).longValue();
+            Long targetPageId = state.getTargetPageId();
+            long sourceLocaleId = state.getSourceLocale().getId();
+            long targetLocaleId = state.getTargetLocale().getId();
+
+            view = EditorHelper.getSegmentView(state, tuId, tuvId, subId,
+                    targetPageId.longValue(), sourceLocaleId, targetLocaleId);
+
+            JSONObject json = new JSONObject();
+            ServletOutputStream out = p_response.getOutputStream();
+            try
+            {
+                json.put("str_segmentFormat", view.getDataType());
+                json.put("str_segmentType", view.getItemType());
+                json.put("str_wordCount", String.valueOf(view.getWordCount()));
+                String str_sid = view.getTargetTuv().getSid();
+                if (str_sid == null || str_sid.trim().length() == 0)
+                {
+                    str_sid = "N/A";
+                }
+                json.put("str_sid", str_sid);
+                String str_lastModifyUser = view.getTargetTuv()
+                        .getLastModifiedUser();
+                if (str_lastModifyUser == null
+                        || str_lastModifyUser.equalsIgnoreCase("xlf")
+                        || str_lastModifyUser.equalsIgnoreCase("Xliff"))
+                {
+                    str_lastModifyUser = "N/A";
+                }
+                json.put("str_lastModifyUser", str_lastModifyUser);
+                try
+                {
+                    OnlineHelper helper = new OnlineHelper();
+                    String str_sourceSegment = GxmlUtil.getInnerXml(view
+                            .getSourceSegment());
+                    String str_dataType = view.getDataType();
+
+                    helper.setInputSegment(str_sourceSegment, "", str_dataType);
+
+                    if (EditorConstants.PTAGS_VERBOSE.equals(state
+                            .getPTagFormat()))
+                    {
+                        helper.getVerbose();
+                    }
+                    else
+                    {
+                        helper.getCompact();
+                    }
+
+                    String str_segementPtag = helper
+                            .getPtagToNativeMappingTable();
+                    if (StringUtil.isEmpty(str_segementPtag))
+                    {
+                        str_segementPtag = "N/A";
+                    }
+                    else
+                    {
+                        str_segementPtag = str_segementPtag.replace("<TR>", "<TR valign=top>").replace("<TD", "<TD noWrap"); 
+                        str_segementPtag = str_segementPtag.replace("<tr>", "<TR valign=top>").replace("<td", "<TD noWrap");     
+                    }
+                    
+                    String sourceSegment = getHtmlSegment(str_sourceSegment,str_dataType,state);
+                    String sourceDIR = getDIR(state,str_sourceSegment,true);
+                    json.put("str_segementPtag", str_segementPtag);
+                    json.put("m_sourceSegment", sourceSegment);
+                    json.put("m_sourceDIR", sourceDIR);
+                    List<SegmentMatchResult> list = view.getTmMatchResults();
+                    StringBuffer tmMatchesStr = new StringBuffer();
+                    StringBuffer mtTranslationStr = new StringBuffer();
+                    if (list.size()>0)
+                    {
+                        SegmentMatchResult matchResult = null;
+                        int j = 1;
+                        for (int i=0;i<list.size();i++)
+                        {
+                            matchResult = list.get(i);
+                            String targetDIR = getDIR(state,matchResult.getMatchContent(),false);
+                            if (matchResult.getTmName().endsWith("_MT"))
+                            {
+                                long sourcePageId = state.getSourcePageId();
+                                MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                                      .getMtProfileBySourcePageId(sourcePageId,
+                                              state.getTargetLocale());
+                                if (mtProfile !=null)
+                                {
+                                    mtTranslationStr = mtTranslationStr.append(
+                                            "<table><tr class=\"standardText\"><td style=\"width:120px\"><B>Target Match Type:</B></td>"
+                                                    +"<td>"+matchResult.getMatchType()+"</td></tr>"
+                                                    +"<tr class=\"standardText\"><td><B>"+bundle.getString("lb_tm_mt_engine")+":</B></td>"
+                                                    +"<td>"+mtProfile.getMtEngine()+"</td></tr>"
+                                                    +"<tr class=\"standardText\"><td><B>Target Match %:</B></td>"
+                                                    +"<td>"+Math.round(matchResult.getMatchPercentage())+"%</td></tr>"
+                                                    +"<tr class=\"standardText\"><td ><B>Source:</B></td>"
+                                                    +"<td "+sourceDIR+">"+sourceSegment+"</td></tr>"
+                                                    +"<tr class=\"standardText\"><td><B>Target:</B></td>"
+                                                    +"<td "+targetDIR+">"+getHtmlSegment(matchResult.getMatchContent(),str_dataType,state)+"</td><tr>"
+                                                    +"</table>");
+                                }
+                            }
+                            else
+                            {
+                                tmMatchesStr = tmMatchesStr.append(
+                                        "<table><tr class=\"standardText\"><td style=\"width:120px\"><B>Match&nbsp;&nbsp;"+j+":</B></td>"
+                                              +"<td>"+"("+Math.round(matchResult.getMatchPercentage())+"%&nbsp;&nbsp;/&nbsp;&nbsp;"+ matchResult.getTmName()+")</td></tr>"
+                                              +"<tr class=\"standardText\"><td><B>Target Match Type:</B></td>"
+                                              +"<td>"+matchResult.getMatchType()+"</td></tr>"
+                                              +"<tr class=\"standardText\"><td><B>Source:</B></td>"
+                                              +"<td "+sourceDIR+">"+getHtmlSegment(matchResult.getMatchContentSource(),str_dataType,state)
+                                              +"<tr class=\"standardText\"><td><B>Target:</B></td>"
+                                              +"<td "+targetDIR+">"+getHtmlSegment(matchResult.getMatchContent(),str_dataType,state)+"</td></tr>"
+                                              +"<tr height=\"10px\"><td></td></tr></table>");
+                                j++;
+                            }
+                        }
+                    }
+                    json.put("mt_match", mtTranslationStr.toString());
+                    json.put("tm_match", tmMatchesStr.toString());
+                }
+                catch (Exception e1)
+                {
+                    CATEGORY.error("Get segement tag information. ", e1);
+                    throw new EnvoyServletException(e1);
+                }
+                out.write(json.toString().getBytes("UTF-8"));
+            }
+            catch (JSONException e)
+            {
+                CATEGORY.error("Get segement detail. ", e);
+                throw new EnvoyServletException(e);
+            }
+            return;
+        }
 
         // Reach here via link from "getInContextReviewLink()" API.
         try {
@@ -432,6 +586,54 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         return result;
     }
 
+    private String getDIR (EditorState state,String segment,boolean isSource) 
+    {
+        String dir = "";
+        boolean rtlLocale = false;
+        TuImpl tu = null;
+        try {
+                if (isSource)
+                {
+                    rtlLocale = EditUtil.isRTLLocale(state.getSourceLocale());
+                }
+                else
+                {
+                    rtlLocale = EditUtil.isRTLLocale(state.getTargetLocale());
+                }
+//                tu = SegmentTuUtil.getTuById(state.getTuId(), jobId);
+//                boolean isLocalizable = tu.isLocalizable();
+                if (rtlLocale 
+                        && Text.containsBidiChar(segment))
+                {
+                    dir = " DIR=rtl";
+                }
+        } catch (Exception ignore) {
+        }
+        return dir;
+    }
+    
+    /**
+     * Gets html segment and write back.
+     * 
+     * @throws Exception
+     */
+    private String getHtmlSegment(String segment,String str_dataType,EditorState state) throws Exception
+    {
+        OnlineHelper helper = new OnlineHelper();
+        helper.setInputSegment(segment, "", str_dataType, Boolean.parseBoolean(str_dataType));
+        
+        String result = segment;
+        if (EditorConstants.PTAGS_VERBOSE.equals(state.getPTagFormat()))
+        {
+            result = helper.makeVerboseColoredPtags(segment);
+        }
+        else
+        {
+            result = helper.makeCompactColoredPtags(segment);
+        }
+        return result;
+    }
+    
     private void renderJson(HttpServletRequest p_request,
             HttpServletResponse p_response, EditorState state,
             boolean isAssignee) throws IOException, EnvoyServletException

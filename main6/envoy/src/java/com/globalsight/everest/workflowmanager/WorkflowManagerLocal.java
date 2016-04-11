@@ -809,19 +809,19 @@ public class WorkflowManagerLocal implements WorkflowManager
                 }
 
                 Task task = (Task) wfClone.getTasks().get(taskId);
-                long jobId = task.getJobId();
-                L10nProfile l10nProfile = ServerProxy.getJobHandler()
-                        .getL10nProfileByJobId(jobId);
-                long wfStatePostId = l10nProfile.getWfStatePostId();
-                if (wfStatePostId != -1)
-                {
-                    WfStatePostThread myTask = new WfStatePostThread(task, null, true);
-                    Thread t = new MultiCompanySupportedThread(myTask);
-                    t.start();
-                }
-
                 if (task != null)
                 {
+                    long jobId = task.getJobId();
+                    L10nProfile l10nProfile = ServerProxy.getJobHandler().getL10nProfileByJobId(
+                            jobId);
+                    long wfStatePostId = l10nProfile.getWfStatePostId();
+                    if (wfStatePostId != -1)
+                    {
+                        WfStatePostThread myTask = new WfStatePostThread(task, null, true);
+                        Thread t = new MultiCompanySupportedThread(myTask);
+                        t.start();
+                    }
+
                     task.setProjectManagerName(pm);
                     TaskHelper.autoAcceptTask(task);
                 }

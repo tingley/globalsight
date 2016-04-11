@@ -108,7 +108,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             .getLogger(EditorPageHandler.class);
 
     private static int DEFAULT_VIEWMODE_IF_NO_PREVIEW = VIEWMODE_TEXT;
-
+    private static int currentPageIndex = -1;
     /**
      * Determines whether PMs can edit all target pages.
      * 
@@ -774,6 +774,10 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         // next & previous page
         if ((value = p_request.getParameter("refresh")) != null)
         {
+            if (StringUtil.isNotEmptyAndNull(p_request.getParameter("currentPageIndex")))
+            {
+                currentPageIndex = Integer.parseInt(p_request.getParameter("currentPageIndex"));
+            }
             int i_direction = 0;
             if (!value.startsWith("0"))
                 i_direction = Integer.parseInt(value);
@@ -791,6 +795,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                         && (p_state.getTuIds() == null || p_state.getTuIds()
                                 .size() == 0))
                 {
+                    currentPageIndex = -1;
                     previousPage(p_state, p_request.getSession(), fromActivity);
                 }
             }
@@ -801,6 +806,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                         && (p_state.getTuIds() == null || p_state.getTuIds()
                                 .size() == 0))
                 {
+                    currentPageIndex = -1;
                     nextPage(p_state, p_request.getSession(), fromActivity);
                 }
             }
@@ -1036,6 +1042,10 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         ArrayList<EditorState.PagePair> pages = p_state.getPages();
         pages = (ArrayList<PagePair>) getPagePairList(p_session, pages);
         int i_index = pages.indexOf(p_state.getCurrentPage());
+        if (currentPageIndex != -1 && i_index != currentPageIndex)
+        {
+            i_index = currentPageIndex;
+        }
 
         if (p_fromActivity)
         {
@@ -1122,7 +1132,11 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         ArrayList<EditorState.PagePair> pages = p_state.getPages();
         pages = (ArrayList<PagePair>) getPagePairList(p_session, pages);
         int i_index = pages.indexOf(p_state.getCurrentPage());
-
+        if (currentPageIndex != -1 && i_index != currentPageIndex)
+        {
+            i_index = currentPageIndex;
+        }
+        
         if (p_fromActivity)
         {
             boolean foundNonempty = false;
@@ -1450,6 +1464,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
         PermissionSet perms = (PermissionSet) p_request.getSession()
                 .getAttribute(WebAppConstants.PERMISSIONS);
+        List<Long> sourcePageIdList = (List<Long>) sessionMgr
+                .getAttribute("sourcePageIdList");
+        EditorHelper.sourcePageIdList = sourcePageIdList;
         // Reset all options because the state may be inherited from a
         // previous page.
         EditorHelper.initEditorOptions(p_state, p_request.getSession());

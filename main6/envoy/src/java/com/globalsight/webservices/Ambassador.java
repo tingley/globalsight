@@ -1584,8 +1584,7 @@ public class Ambassador extends AbstractWebService
             Object trgLocalesObj = args.get("targetLocales");
             if (trgLocalesObj instanceof String)
             {
-                targetLocales = handleTargetLocales((String) trgLocalesObj,
-                        fileProfileIds.size());
+                targetLocales = handleTargetLocales((String) trgLocalesObj, fileProfileIds.size());
             }
             else if (trgLocalesObj == null)
             {
@@ -1895,7 +1894,8 @@ public class Ambassador extends AbstractWebService
         Vector<String> tLocales = new Vector<String>();
 
         if (StringUtil.isEmpty(p_targetLocales)
-                || StringUtil.isEmpty(p_targetLocales.replace("|", "")))
+                || StringUtil.isEmpty(p_targetLocales.replace("|", ""))
+                || p_targetLocales.trim().equals("*"))
         {
             for (int i = 0; i < fileSize; i++)
             {
@@ -1921,7 +1921,14 @@ public class Ambassador extends AbstractWebService
                 }
                 else
                 {
-                    tLocales.add(tLocale.trim());
+                    if (tLocale.trim().equals("*"))
+                    {
+                        tLocales.add(" ");
+                    }
+                    else
+                    {
+                        tLocales.add(tLocale.trim());
+                    }
                 }
             }
         }
@@ -3024,19 +3031,23 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, GET_JOB_EXPORT_FILES_IN_ZIP);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
-        
+        checkPermission(p_accessToken,Permission.JOBS_DOWNLOAD);
+
         String userName = getUsernameFromSession(p_accessToken);
         String userId = UserUtil.getUserIdByName(userName);
+
+        String errorMsg = "";
         p_jobIds = p_jobIds.replace(" ", "");
         if (p_jobIds == null || p_jobIds.trim() == "")
         {
-            String msg = "jobIds can not be empty.";
-            throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, msg));
+            errorMsg = "Job ids can not be empty.";
+            throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, errorMsg));
         }
 
         String currentCompanyId = accessCurrentCompanyId(p_accessToken);
         String[] jobIdlist = p_jobIds.split(",");
         Set<Long> jobIds = new HashSet<Long>();
+        Set<String> companyIds = new HashSet<String>();
         Set<String> locales = new HashSet<String>();
         for (String id : jobIdlist)
         {
@@ -3044,17 +3055,26 @@ public class Ambassador extends AbstractWebService
             Job job = JobCreationMonitor.loadJobFromDB(jobId);
             if (job == null)
             {
-                String msg = "current jobId : " + jobId + " does not exist.";
-                throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, msg));
+                errorMsg = "Job " + jobId + " does not exist.";
+                throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, errorMsg));
             }
 
             String jobCompanyId = String.valueOf(job.getCompanyId());
             if (!currentCompanyId.equals(jobCompanyId) && !UserUtil.isSuperAdmin(userId)
                     && !UserUtil.isSuperPM(userId))
-                throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP,
-                        "Cannot access the job which is not in the same company with current user"));
+            {
+                errorMsg = "Job " + jobId + " is not from the user's company.";
+                throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, errorMsg));
+            }
 
             jobIds.add(jobId);
+            companyIds.add(jobCompanyId);
+        }
+
+        if (UserUtil.isSuperPM(userId) && companyIds.size() > 1)
+        {
+            errorMsg = userId + " is super PM, but job ids are not from the same company.";
+            throw new WebServiceException(makeErrorXml(GET_JOB_EXPORT_FILES_IN_ZIP, errorMsg));
         }
 
         Map<Object, Object> activityArgs = new HashMap<Object, Object>();
@@ -3376,14 +3396,16 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, GET_WORKFLOW_EXPORT_FILES_IN_ZIP);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
-        
+        checkPermission(p_accessToken,Permission.JOBS_DOWNLOAD);
+
+        String errormsg = "";
         p_workflowIds = p_workflowIds.replace(" ", "");
         String userName = getUsernameFromSession(p_accessToken);
         String userId = UserUtil.getUserIdByName(userName);
-        if(p_workflowIds == null || p_workflowIds == "")
+        if (p_workflowIds == null || p_workflowIds == "")
         {
-            String msg = "workflowIds can not be empty.";
-            throw new WebServiceException(makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP, msg));
+            errormsg = "Workflow ids can not be empty.";
+            throw new WebServiceException(makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP, errormsg));
         }
 
         Map<Object, Object> activityArgs = new HashMap<Object, Object>();
@@ -3397,7 +3419,7 @@ public class Ambassador extends AbstractWebService
         Set<String> jobFileList = new HashSet<String>();
         Set<File> entryFiles = new HashSet<File>();
         ArrayList<Workflow> exportingwfs = new ArrayList<Workflow>();
-        Set<String> locales = new HashSet<String>();      
+        Set<String> locales = new HashSet<String>();
         Set<Long> jobExist = new HashSet<Long>();
         String identifyKey = AmbassadorUtil.getRandomFeed();
         long jobId = -1;
@@ -3417,10 +3439,12 @@ public class Ambassador extends AbstractWebService
                 String jobCompanyId = String.valueOf(job.getCompanyId());
                 if (!currentCompanyId.equals(jobCompanyId) && !UserUtil.isSuperAdmin(userId)
                         && !UserUtil.isSuperPM(userId))
-                    throw new WebServiceException(
-                            makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP,
-                                    "Cannot access the job which is not in the same company with current user"));
+                {
 
+                    errormsg = "Workflow " + wfId + " is not from the user's company.";;
+                    throw new WebServiceException(makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP,
+                            errormsg));
+                }
                 jobExist.add(jobId);
                 if (WorkflowExportingHelper.isExporting(wf.getId()))
                 {
@@ -3429,7 +3453,9 @@ public class Ambassador extends AbstractWebService
             }
             if (jobExist.size() > 1)
             {
-                throw new WebServiceException("Workflow ids are not from the same job.");
+                errormsg = "Workflow ids are not from the same job.";
+                throw new WebServiceException(makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP,
+                        errormsg));
             }
 
             if (exportingwfs.size() == 0)
@@ -6643,15 +6669,31 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("companyName", p_companyName);
             activityStart = WebServicesLog.start(Ambassador.class, GET_FILEPROFILES_FOR_L10PROFILE,
                     activityArgs);
-            String userName = getUsernameFromSession(p_accessToken);
-            Company logUserCompany = getCompanyInfo(userName);
-            if (!logUserCompany.getName().equalsIgnoreCase(p_companyName.trim()))
+            Company company = null;
+            String logUserName = getUsernameFromSession(p_accessToken);
+            Company logUserCompany = getCompanyInfo(logUserName);
+            if (CompanyWrapper.SUPER_COMPANY_ID.equals(String.valueOf(logUserCompany.getId())))
             {
-                return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invaild company name: "
-                        + p_companyName);
+                company = ServerProxy.getJobHandler().getCompany(p_companyName);
+                if (company == null)
+                {
+                    return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invaild company name: "
+                            + p_companyName);
+                }
+            }
+            else
+            {
+                if (!logUserCompany.getName().equalsIgnoreCase(p_companyName.trim()))
+                {
+                    return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invaild company name: "
+                            + p_companyName);
+                }
+                else
+                {
+                    company = logUserCompany;
+                }
             }
             
-            Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
             L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfileByName(
                     p_l10nProfileName.trim(), String.valueOf(company.getId()));
 

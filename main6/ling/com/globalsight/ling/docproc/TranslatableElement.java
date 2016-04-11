@@ -17,15 +17,11 @@
 package com.globalsight.ling.docproc;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.XmlWriter;
 
-public class TranslatableElement
-    extends Segmentable
-    implements DocumentElement
+public class TranslatableElement extends Segmentable implements DocumentElement
 {
     public void addSegment(SegmentNode p_segment)
     {
@@ -35,6 +31,10 @@ public class TranslatableElement
         }
 
         segments.add(p_segment);
+        if (!isPreserveWhiteSpace())
+        {
+            setPreserveWhiteSpace(p_segment.isPreserveWhiteSpace());
+        }
     }
 
     public ArrayList getSegments()
@@ -47,11 +47,9 @@ public class TranslatableElement
         return (segments == null) ? false : true;
     }
 
-    public void toDiplomatString(DiplomatAttribute diplomatAttribute,
-        XmlWriter writer)
+    public void toDiplomatString(DiplomatAttribute diplomatAttribute, XmlWriter writer)
     {
-        toDiplomatString(diplomatAttribute, writer,
-            DiplomatNames.Element.TRANSLATABLE);
+        toDiplomatString(diplomatAttribute, writer, DiplomatNames.Element.TRANSLATABLE);
     }
 
     public int type()
@@ -73,7 +71,7 @@ public class TranslatableElement
 
         for (int i = 0, max = segments.size(); i < max; i++)
         {
-            SegmentNode node = (SegmentNode)segments.get(i);
+            SegmentNode node = (SegmentNode) segments.get(i);
 
             result.append(node.getSegment());
         }

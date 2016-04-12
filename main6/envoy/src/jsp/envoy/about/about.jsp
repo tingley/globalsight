@@ -45,10 +45,10 @@
 </TABLE>
 
 
-<FONT SIZE="-1">
+<FONT FACE="Arial" SIZE="-1">
 <%=lbCopyright%><BR></BR>
 <%=lbTrademark%><BR></BR>
-<%=bundle.getString("lb_tmx_logo_text1")%><%=bundle.getString("lb_tmx_logo_text2")%>
+<%=bundle.getString("lb_tmx_logo_text1")%>&nbsp;<%=bundle.getString("lb_tmx_logo_text2")%>
 </FONT>
 <BR><BR><SPAN CLASS="standardText">
 <B><%=lbVisitGlobalsight%></B>

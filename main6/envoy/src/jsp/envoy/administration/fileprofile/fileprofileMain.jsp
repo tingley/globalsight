@@ -111,71 +111,49 @@ $(
 				if(e.keyCode==13)
 				
 				{
-					submitForm("search")
+					submitForm()
 				
 				}
 				
 				});
 		}		
 	)
+$(document).ready(function() {
+	
+$("#newBtn").click(function(){
+	$("#fpForm").attr("action","<%=newURL%>");
+	fpForm.submit();
+})
 
-function submitForm(button)
+$("#removeBtn").click(function(){
+	var rv="";
+	$("input[name='radioBtn']:checked").each(function()
+	{
+		rv+=$(this).val()+" ";      
+	})
+    var varray = rv.split(" ");
+	for(var i=0;i<=varray.length-1;i++)
+	{
+		array=varray[i].split(",");
+        if (array[1] == "1") 
+        {
+           alert('The file profile is referred by CVS file profile. Please remove referred CVS file profile first.');
+           return false;
+        } 
+	}
+    if (!confirm('<%=confirmRemove%>'))
+    {
+        return false;
+    }	
+    fpForm.action = "<%=removeURL%>&&removeBtn="+rv;
+	fpForm.submit();
+})
+})
+
+function submitForm()
 {
-   if (button == "New")
-	    {
-	        fpForm.action = "<%=newURL%>";
-	    }
-   else if (button == "search")
-   {
-       fpForm.action = "<%=searchUrl%>";
-   }
-   else if(fpForm.radioBtn != null) 
-	    {
-	        	var radio = document.getElementsByName("radioBtn");
-	        	if(radio.length)
-		        {
-				    var rv="";
-				    $(":checkbox:checked").each
-				    (
-				        function(i)
-				        {
-				        	rv+=$(this).val()+" ";
-				        }		
-				    )
-				    if(rv.indexOf("on ")!=-1)
-				    {
-				    	rv = rv.replace("on ","");
-				    }
- 				    $(":checkbox:checked").each
-				    (
-				        function(i)
-				        {
-				           $(this).val(rv);
-				        }		
-				    ) 
- 		        	value = getRadioValue(fpForm.radioBtn);
-		        	varray = value.split(" ");
-		        	if (button == "Remove") 
-			        {	        	
-		        		for(var i=0;i<varray.length-1;i++)
-		        		{
-		        			array=varray[i].split(",");
-				            if (array[1] == "1") 
-				            {
-					           alert('The file profile is referred by CVS file profile. Please remove referred CVS file profile first.');
-					           return false;
-				            } 
-		        		}
-				        if (!confirm('<%=confirmRemove%>'))
-				        {
-				            return false;
-				        }	
-				        fpForm.action = "<%=removeURL%>";
-		        		}
-			        }
-		        }
-                fpForm.submit();
-                return;
+	fpForm.action = "<%=searchUrl%>";
+	fpForm.submit();
 }
 
 function modifyuser(name)
@@ -361,10 +339,11 @@ function filterItems(e)
 							name="<%=Permission.FILE_PROFILES_REMOVE%>">
 							<INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>"
 								name="removeBtn" id="removeBtn" disabled
-								onClick="submitForm('Remove');">
+							>
 						</amb:permission> <amb:permission name="<%=Permission.FILE_PROFILES_NEW%>">
 							<INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..."
-								onClick="submitForm('New');">
+							    name="newBtn"  id="newBtn"
+							>
 						</amb:permission></td>
 				</TR>
 			</TABLE>

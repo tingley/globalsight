@@ -384,7 +384,7 @@ public class FileProfileMainHandler extends PageHandler
     {
         try
         {
-            String idString = (String) p_request.getParameter(RADIO_BUTTON);
+            String idString = (String) p_request.getParameter("removeBtn");
             if (idString != null)
             {
                 String[] idarray = idString.split(" ");

@@ -217,6 +217,7 @@ public class XmlUtil
     public static JSON xml2Json(String xml)
     {
         XMLSerializer xmlSerializer = new XMLSerializer();
+        xmlSerializer.setTypeHintsCompatibility(false);
         return xmlSerializer.read(xml);
     }
     

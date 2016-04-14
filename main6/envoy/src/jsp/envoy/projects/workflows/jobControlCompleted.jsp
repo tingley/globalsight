@@ -141,6 +141,10 @@ function startExport()
     	{
     		alert("The activities of the job are uploading. Please wait.");
     	}
+    	else if (data.isExporting)
+   		{
+    		alert("<%=bundle.getString("msg_job_exporting")%>");
+   		}
     	else
     	{
     		$.getJSON("/globalsight/TaskListServlet", {

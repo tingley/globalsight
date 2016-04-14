@@ -19,10 +19,12 @@ package com.globalsight.everest.webapp.pagehandler.administration.activity;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -33,6 +35,7 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.Activity;
+import com.globalsight.everest.workflow.schedule.ActivityScheduleUtil;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GeneralException;
 
@@ -74,6 +77,31 @@ public class ActivityBasicHandler extends PageHandler
                         .getActivity(name);
                 sessionMgr.setAttribute(ActivityConstants.ACTIVITY, act);
                 p_request.setAttribute("edit", "true");
+            } 
+            else if (action.equals("validate"))
+            {
+                ServletOutputStream out = p_response.getOutputStream();
+                ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
+                
+                String s = p_request.getParameter("autoCompleteActivity");
+                if (!isInteger(s, Integer.MIN_VALUE, Integer.MAX_VALUE))
+                {
+                    out.write(bundle.getString("msg_activity_time_not_check").getBytes("UTF-8"));
+                    return;
+                }
+                
+                int completeType = Integer.parseInt(s);
+                if (completeType == Activity.COMPLETE_TYPE_SCHEDULE)
+                {
+                    String msg = ActivityScheduleUtil.validateSchedule(p_request);
+                    if (msg != null)
+                    {
+                        out.write(bundle.getString(msg).getBytes("UTF-8"));
+                        return;
+                    }
+                }
+                
+                return;
             }
         }
         catch (NamingException ne)
@@ -89,6 +117,21 @@ public class ActivityBasicHandler extends PageHandler
             throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
         }
         super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
+    }
+    
+    private boolean isInteger(String s, int mix, int max)
+    {
+        if (s == null || s.length() == 0)
+            return false;
+        try
+        {
+            int n = Integer.parseInt(s);
+            return n >= mix && n <=max;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 
     /**

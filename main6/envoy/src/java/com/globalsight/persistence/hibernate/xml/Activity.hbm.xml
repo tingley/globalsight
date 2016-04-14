@@ -27,6 +27,10 @@
 			type="yes_no" not-null="true" unique="false" />
 		<property name="autoCompleteActivity" column="AUTO_COMPLETE_ACTIVITY" type="yes_no"
 			not-null="true" unique="false" />
+		<property name="completeType" column="COMPLETE_TYPE"
+			type="int" not-null="false" />
+		<property name="completeSchedule" column="COMPLETE_SCHEDULE"
+			type="string"/>	
 		<property name="afterJobCreation" length="40" column="AFTER_JOB_CREATION"
 			type="string" not-null="false" unique="false" />
 		<property name="afterJobDispatch" length="40" column="AFTER_JOB_DISPATCH"

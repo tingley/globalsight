@@ -3,34 +3,37 @@ package com.globalsight.everest.servlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Timestamp;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.Vector;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.alibaba.fastjson.JSONArray;
-import com.globalsight.everest.company.Company;
-import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.everest.foundation.SearchCriteriaParameters;
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
-import com.globalsight.everest.util.comparator.CompanyComparator;
-import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
-import com.globalsight.everest.util.system.SystemConfigParamNames;
-import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.util.GlobalSightLocale;
-
 import org.apache.log4j.Logger;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.foundation.L10nProfile;
+import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportBatchEvent;
 import com.globalsight.everest.page.pageexport.ExportEventObserverHelper;
@@ -46,6 +49,10 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.taskmanager.TaskSearchParameters;
+import com.globalsight.everest.util.comparator.CompanyComparator;
+import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
+import com.globalsight.everest.util.system.SystemConfigParamNames;
+import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
@@ -62,6 +69,7 @@ import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 
@@ -401,6 +409,7 @@ public class TaskListServlet extends HttpServlet
         JSONObject obj = new JSONObject();
         String wfId = "-1";
         boolean isUploading = false;
+        boolean isExporting = false;
         if (exportFrom.equals("task")) 
         {
             try {
@@ -411,6 +420,10 @@ public class TaskListServlet extends HttpServlet
                     if(task.getIsUploading() == 'Y')
                     {
                         isUploading = true;
+                    } 
+                    else if (WorkflowExportingHelper.isExporting(task.getWorkflow().getId()))
+                    {
+                        isExporting = true;
                     }
                 }
             } catch (Exception e) {
@@ -425,6 +438,13 @@ public class TaskListServlet extends HttpServlet
                     break;
                 try 
                 {
+                    if (WorkflowExportingHelper.isExporting(Long.parseLong(workflowId)))
+                    {
+                        wfId = workflowId;
+                        isExporting = true;
+                        break;
+                    }
+                    
                     Workflow workflow = ServerProxy.getWorkflowManager().getWorkflowById(Long.parseLong(workflowId));
                     Hashtable tasks = workflow.getTasks();
                     for (Iterator<Long> ids = tasks.keySet().iterator(); ids.hasNext();)
@@ -432,6 +452,7 @@ public class TaskListServlet extends HttpServlet
                         long theTaskId = ids.next();
                         if(ServerProxy.getTaskManager().getTask(theTaskId).getIsUploading() == 'Y')
                         {
+                            wfId = workflowId;
                             isUploading = true;
                             break;
                         }
@@ -451,6 +472,14 @@ public class TaskListServlet extends HttpServlet
                 {
                     if(isUploading == true)
                         break;
+                    
+                    if (WorkflowExportingHelper.isExporting(workflow.getId()))
+                    {
+                        wfId = Long.toString(workflow.getId());
+                        isExporting = true;
+                        break;
+                    }
+                    
                     Hashtable tasks = workflow.getTasks();
                     for (Iterator<Long> ids = tasks.keySet().iterator(); ids.hasNext();)
                     {
@@ -475,14 +504,8 @@ public class TaskListServlet extends HttpServlet
             }
         }
         obj.put("workflowId", wfId);
-        if(isUploading)
-        {
-            obj.put("isUploading", true);
-        }
-        else
-        {
-            obj.put("isUploading", false);
-        }
+        obj.put("isUploading", isUploading);
+        obj.put("isExporting", isExporting);
 
         return obj.toJSONString();
     }

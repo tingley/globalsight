@@ -225,6 +225,7 @@
       <WebPage pageName="ACT2" isDefault="false" jspName="/envoy/administration/activities/activityBasic.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.activity.ActivityBasicHandler">
         <PageLink linkName="cancel" destinationPageName="ACT1"></PageLink>
         <PageLink linkName="save" destinationPageName="ACT1"></PageLink>
+        <PageLink linkName="self" destinationPageName="ACT2"></PageLink>
       </WebPage>
     </WebActivity>
   </WebModule>

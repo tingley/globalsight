@@ -158,6 +158,22 @@ var w_updateLeverage = null;
 function startExport()
 {
 	var jobId = getSelectJobId();
+	
+	var checkUrl = "${self.pageURL}&checkIsUploadingForExport=true&jobId=" + jobId + "&t=" + new Date().getTime();
+    var isContinue = true;
+    $.ajaxSetup({async: false}); 
+    $.get(checkUrl,function(data){
+        if (data == "exporting")
+        {
+            alert("<%=bundle.getString("msg_job_exporting")%>");
+            isContinue =  false;
+        }   
+    });
+    $.ajaxSetup({ async: true}); 
+
+    if(!isContinue)
+        return;
+	
     var random = Math.random();
     exportDownloadRandom = Math.random();
     $.getJSON("/globalsight/TaskListServlet", {
@@ -171,6 +187,10 @@ function startExport()
     	{
     		alert("The activities of the job are uploading. Please wait.");
     	}
+    	else if (data.isExporting)
+        {
+    		alert("The job is uploading. Please wait.");
+        }
     	else
     	{
     		$.getJSON("/globalsight/TaskListServlet", {
@@ -573,6 +593,11 @@ function submitForm(buttonClicked, curJobId)
 				alert("The job is uploading. Please wait.");
 				isContinue =  false;
 			}
+			else if (data == "exporting")
+			{
+				alert("<%=bundle.getString("msg_job_exporting")%>");
+                isContinue =  false;
+			}	
 		});
 		$.ajaxSetup({ async: true}); 
 	

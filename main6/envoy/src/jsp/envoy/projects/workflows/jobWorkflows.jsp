@@ -425,6 +425,10 @@ function startExport()
     	{
     		alert("The activities of the job are uploading. Please wait.");
     	}
+    	else if (data.isExporting)
+        {
+            alert("The activities of the job are exporting. Please wait.");
+        }
     	else
     	{
     		$.getJSON("/globalsight/TaskListServlet", {
@@ -885,6 +889,11 @@ function realSubmitForm(specificButton){
 			{
 				alert("One or more workflows are uploading. Please wait.");
 				return false;
+			}
+			else if (data == "exporting")
+			{
+				 alert("<%=bundle.getString("jsmsg_cannot_operate_workflow_exporting")%>");
+		         return false;
 			}
 			else
 			{

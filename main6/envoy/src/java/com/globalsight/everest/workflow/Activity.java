@@ -16,10 +16,14 @@
  */
 package com.globalsight.everest.workflow;
 
-// GlobalSight
+import com.globalsight.cxe.util.XmlUtil;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskImpl;
+
+import net.sf.json.JSONArray;
+// GlobalSight
+import net.sf.json.JSONObject;
 
 /**
  * This class only represent a wrapper object for the activity names defined in
@@ -68,7 +72,19 @@ public class Activity extends PersistentObject
     private String afterJobCreation;
     private String afterJobDispatch;
     private String afterActivityStart;
-    
+    private String completeSchedule;
+
+    private int completeType = -1;
+
+    public static int COMPLETE_TYPE_AFTER_JOB_CREATION = 1;
+    public static int COMPLETE_TYPE_AFTER_JOB_DISPATCH = 2;
+    public static int COMPLETE_TYPE_AFTER_ACTIVITY_START = 3;
+    public static int COMPLETE_TYPE_SCHEDULE = 4;
+    public static int COMPLETE_TYPE_DAILY = 5;
+    public static int COMPLETE_TYPE_WEEKLY = 6;
+    public static int COMPLETE_TYPE_MONTHLY = 7;
+    public static int COMPLETE_TYPE_ONE_TIME = 8;
+
     // ////////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
     // ////////////////////////////////////////////////////////////////////////////////
@@ -84,8 +100,7 @@ public class Activity extends PersistentObject
     public Activity(String p_activityName)
     {
         super();
-        setName(p_activityName.length() > 30 ? p_activityName.substring(0, 30)
-                : p_activityName);
+        setName(p_activityName.length() > 30 ? p_activityName.substring(0, 30) : p_activityName);
     }
 
     /**
@@ -96,12 +111,11 @@ public class Activity extends PersistentObject
      * @param p_activityDescription
      *            - The description of the activity.
      */
-    public Activity(String p_activityName, String p_activityDescription,
-            int p_type, String p_companyId)
+    public Activity(String p_activityName, String p_activityDescription, int p_type,
+            String p_companyId)
     {
         super();
-        setName(p_activityName.length() > 30 ? p_activityName.substring(0, 30)
-                : p_activityName);
+        setName(p_activityName.length() > 30 ? p_activityName.substring(0, 30) : p_activityName);
         m_activityDescription = p_activityDescription;
         m_type = p_type;
         setCompanyId(Long.parseLong(p_companyId));
@@ -314,8 +328,7 @@ public class Activity extends PersistentObject
         StringBuilder buff = new StringBuilder();
         buff.append(super.toString());
         buff.append(", m_activityDescription=");
-        buff.append(m_activityDescription != null ? m_activityDescription
-                : "null");
+        buff.append(m_activityDescription != null ? m_activityDescription : "null");
         buff.append(", m_type=");
         buff.append(typeAsString(m_type));
         buff.append(", m_userType=");
@@ -417,5 +430,109 @@ public class Activity extends PersistentObject
     public void setRunDitaQAChecks(boolean p_runDitaQAChecks)
     {
         this.m_runDitaQAChecks = p_runDitaQAChecks;
+    }
+
+    public int getCompleteType()
+    {
+        if (completeType == -1)
+        {
+            if (!getAutoCompleteActivity())
+            {
+                completeType = 0;
+            }
+            else if (afterJobCreation != "" && afterJobCreation != null)
+            {
+                completeType = COMPLETE_TYPE_AFTER_JOB_CREATION;
+            }
+            else if (afterJobDispatch != "" && afterJobDispatch != null)
+            {
+                completeType = COMPLETE_TYPE_AFTER_JOB_DISPATCH;
+            }
+            else if (afterJobCreation != "" && afterJobCreation != null)
+            {
+                completeType = COMPLETE_TYPE_AFTER_JOB_CREATION;
+            }
+            else
+            {
+                completeType = COMPLETE_TYPE_SCHEDULE;
+            }
+        }
+        return completeType;
+    }
+
+    public void setCompleteType(int completeType)
+    {
+        this.completeType = completeType;
+    }
+
+    public void setCompleteTime(String value, String prefixName, JSONObject js)
+    {
+        if (value == null || value.length() == 0)
+            return;
+
+        String[] strArr = value.split("-");
+
+        js.put(prefixName + "D", strArr[0]);
+        js.put(prefixName + "H", strArr[1]);
+        js.put(prefixName + "M", strArr[2]);
+    }
+
+    private void addEmptyList(JSONObject json, String name)
+    {
+        if (json.get(name) == null)
+        {
+            json.put(name, new JSONArray());
+        }
+    }
+    
+    private void addEmpltyValue(JSONObject json, String name, Object value)
+    {
+        if (json.get(name) == null)
+        {
+            json.put(name, value);
+        }
+    }
+    
+    private void setCompleteSchedule(JSONObject js)
+    {
+        addEmptyList(js, "weeklyWeeks");
+        addEmpltyValue(js, "dailyRecur", 1);
+        addEmpltyValue(js, "weeklyRecur", 1);
+        addEmpltyValue(js, "startH", 0);
+        addEmpltyValue(js, "startM", 0);
+        
+        if (this.getCompleteType() != COMPLETE_TYPE_SCHEDULE)
+            return;
+        
+        JSONObject json = (JSONObject) XmlUtil.xml2Json(getCompleteSchedule());
+        js.putAll(json);
+    }
+
+    public String toJson()
+    {
+        JSONObject js = new JSONObject();
+        js.put("name", getDisplayName());
+        js.put("desc", getDescription());
+        js.put("type", getActivityType());
+        js.put("autoComplete", getAutoCompleteActivity());
+        js.put("completeType", getCompleteType());
+
+        setCompleteTime(afterJobCreation, "afterJobCreation", js);
+        setCompleteTime(afterJobDispatch, "afterJobDispatch", js);
+        setCompleteTime(afterActivityStart, "afterActivityStart", js);
+
+        setCompleteSchedule(js);
+
+        return js.toString();
+    }
+
+    public String getCompleteSchedule()
+    {
+        return completeSchedule;
+    }
+
+    public void setCompleteSchedule(String completeSchedule)
+    {
+        this.completeSchedule = completeSchedule;
     }
 }

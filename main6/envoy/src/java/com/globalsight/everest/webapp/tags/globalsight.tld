@@ -392,4 +392,14 @@
 			<required>false</required>
 		</attribute>
 	</tag>
+	<tag>
+        <name>lb</name>
+        <tag-class>
+            com.globalsight.everest.webapp.tags.Lb
+        </tag-class>
+        <attribute>
+            <name>key</name>
+            <required>true</required>
+        </attribute>
+    </tag>
 </taglib>

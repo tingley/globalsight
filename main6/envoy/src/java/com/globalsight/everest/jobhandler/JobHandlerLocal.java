@@ -1899,6 +1899,8 @@ public class JobHandlerLocal implements JobHandler
             clone.setAfterJobCreation(p_activity.getAfterJobCreation());
             clone.setAfterJobDispatch(p_activity.getAfterJobDispatch());
             clone.setAfterActivityStart(p_activity.getAfterActivityStart());
+            clone.setCompleteType(p_activity.getCompleteType());
+            clone.setCompleteSchedule(p_activity.getCompleteSchedule());
             HibernateUtil.update(clone);
         }
         catch (Exception pe)

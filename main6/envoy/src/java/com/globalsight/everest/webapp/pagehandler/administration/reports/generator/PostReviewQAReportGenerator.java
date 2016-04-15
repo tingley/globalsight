@@ -493,7 +493,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         col++;
 
         Cell cell_B = getCell(segHeaderRow, col);
-        cell_B.setCellValue(m_bundle.getString("lb_original_target_segment"));
+        cell_B.setCellValue(m_bundle.getString("lb_edit_history"));
         cell_B.setCellStyle(getHeaderStyle(p_workBook));
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;

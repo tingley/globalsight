@@ -105,19 +105,6 @@ var objectName = "";
 var guideNode = "fileProfiles";
 var helpFile = "<%=bundle.getString("help_file_profiles_main_screen")%>";
 
-$(
-		function(){
-			$("#fpForm").keydown(function(e){
-				if(e.keyCode==13)
-				
-				{
-					submitForm()
-				
-				}
-				
-				});
-		}		
-	)
 $(document).ready(function() {
 	
 $("#newBtn").click(function(){
@@ -132,7 +119,7 @@ $("#removeBtn").click(function(){
 		rv+=$(this).val()+" ";      
 	})
     var varray = rv.split(" ");
-	for(var i=0;i<=varray.length-1;i++)
+	for(var i=0;i<varray.length-1;i++)
 	{
 		array=varray[i].split(",");
         if (array[1] == "1") 
@@ -145,16 +132,11 @@ $("#removeBtn").click(function(){
     {
         return false;
     }	
-    fpForm.action = "<%=removeURL%>&&removeBtn="+rv;
+    fpForm.action = "<%=removeURL%>&&selectFPIds="+rv;
 	fpForm.submit();
 })
 })
 
-function submitForm()
-{
-	fpForm.action = "<%=searchUrl%>";
-	fpForm.submit();
-}
 
 function modifyuser(name)
 {
@@ -335,15 +317,12 @@ function filterItems(e)
 				</TR>
 
 				<TR>
-					<td style="padding-top: 5px" align="left"><amb:permission
-							name="<%=Permission.FILE_PROFILES_REMOVE%>">
-							<INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>"
-								name="removeBtn" id="removeBtn" disabled
-							>
-						</amb:permission> <amb:permission name="<%=Permission.FILE_PROFILES_NEW%>">
-							<INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..."
-							    name="newBtn"  id="newBtn"
-							>
+					<td style="padding-top: 5px" align="left">
+					<amb:permission name="<%=Permission.FILE_PROFILES_REMOVE%>">
+							<INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>" name="removeBtn" id="removeBtn" disabled>
+						</amb:permission> 
+					<amb:permission name="<%=Permission.FILE_PROFILES_NEW%>">
+							<INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..." name="newBtn"  id="newBtn">
 						</amb:permission></td>
 				</TR>
 			</TABLE>

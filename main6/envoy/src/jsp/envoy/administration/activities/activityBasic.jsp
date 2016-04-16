@@ -348,7 +348,7 @@ function checkACA()
 		if(!isSelectOne)
 		{
 			alert("<%=EditUtil.toJavascript(bundle
-					.getString("jsmsg_activity_time_not_check"))%>");
+					.getString("msg_activity_time_not_check"))%>");
 			return false;
 		}
 	}

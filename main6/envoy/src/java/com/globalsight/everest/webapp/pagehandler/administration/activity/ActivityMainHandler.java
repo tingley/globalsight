@@ -167,10 +167,7 @@ public class ActivityMainHandler extends PageHandler implements
         boolean autoComplete = "true".equalsIgnoreCase(p_request
                 .getParameter("isAutoCompleteActivity"));
         act.setAutoCompleteActivity(autoComplete);
-        act.setAfterJobCreation(p_request.getParameter("afterJobCreation"));
-        act.setAfterJobDispatch(p_request.getParameter("afterJobDispatch"));
-        act.setAfterActivityStart(p_request.getParameter("afterActivityStart"));
-        
+                
         int completeType = 0;
         if (autoComplete)
         {
@@ -186,6 +183,10 @@ public class ActivityMainHandler extends PageHandler implements
             }
             act.setCompleteSchedule(completeSchedule);
         }
+        
+        act.setAfterJobCreation(p_request.getParameter(Integer.toString(Activity.COMPLETE_TYPE_AFTER_JOB_CREATION)));
+        act.setAfterJobDispatch(p_request.getParameter(Integer.toString(Activity.COMPLETE_TYPE_AFTER_JOB_DISPATCH)));
+        act.setAfterActivityStart(p_request.getParameter(Integer.toString(Activity.COMPLETE_TYPE_AFTER_ACTIVITY_START)));
 
         String isDitaAct = p_request
                 .getParameter(ActivityConstants.IS_DITA_QA_CHECK_ACTIVITY);

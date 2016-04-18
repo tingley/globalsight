@@ -256,6 +256,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
     private void createReport(Workbook p_workbook, Job p_job,
             List<GlobalSightLocale> p_targetLocales, String p_dateFormat) throws Exception
     {
+        boolean nameAreaDropDownAdded = false;
         List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(p_job);
         for (GlobalSightLocale trgLocale : p_targetLocales)
         {
@@ -291,12 +292,17 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             addSegmentHeader(p_workbook, sheet);
 
             // Create Name Areas for drop down list.
-            createCategoryFailureNameArea(p_workbook, sheet);
+            if (!nameAreaDropDownAdded)
+            {
+                createCategoryFailureNameArea(p_workbook);
 
-            createQualityAssessmentNameArea(p_workbook, sheet);
-
-            createMarketSuitabilityNameArea(p_workbook, sheet);
-
+                createQualityAssessmentNameArea(p_workbook);
+                
+                createMarketSuitabilityNameArea(p_workbook);
+                
+                nameAreaDropDownAdded = true;
+            }
+            
             // Insert Data into Report
             String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
             String trgLang = trgLocale.getDisplayName(m_uiLocale);
@@ -1087,17 +1093,21 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             {
                 lm = type.getLeverageMatch();
             }
-            boolean isAddMatch = addLeverageMatch(targetTuv.getLastModifiedUser(),previous, editorHistoryTask, lm);
-            if (!isAddMatch)
+            if (lm != null)
             {
-                isAddMatch = addLeverageMatch(lm.getMtName(),previous, editorHistoryTask, lm);
-            }
-            
-            if (!isAddMatch)
-            {
-                isAddMatch = addLeverageMatch(lm.getCreationUser(),previous, editorHistoryTask, lm);
-            }
+                boolean isAddMatch = addLeverageMatch(targetTuv.getLastModifiedUser(), previous,
+                        editorHistoryTask, lm);
+                if (!isAddMatch)
+                {
+                    isAddMatch = addLeverageMatch(lm.getMtName(), previous, editorHistoryTask, lm);
+                }
 
+                if (!isAddMatch)
+                {
+                    isAddMatch = addLeverageMatch(lm.getCreationUser(), previous,
+                            editorHistoryTask, lm);
+                }
+            }
             for (int k = 0; k < previousTaskTuvs.size(); k++)
             {
                 TaskTuv taskTuv = (TaskTuv) previousTaskTuvs.get(k);
@@ -1566,28 +1576,29 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
      * "[sheetName]!$AA$[startRow]:$AA$[endRow]",i.e."TER!$AA$8:$AA$32".
      * </P>
      */
-    private void createCategoryFailureNameArea(Workbook p_workbook, Sheet p_sheet)
+    private void createCategoryFailureNameArea(Workbook p_workbook)
     {
         try
         {
             List<String> categories = getFailureCategoriesList();
+            Sheet firstSheet = getSheet(p_workbook, 0);
             // Set the categories in "AA" column, starts with row 8.
             int col = 26;
             for (int i = 0; i < categories.size(); i++)
             {
-                Row row = getRow(p_sheet, SEGMENT_START_ROW + i);
+                Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
                 Cell cell = getCell(row, col);
                 cell.setCellValue(categories.get(i));
             }
 
-            String formula = p_sheet.getSheetName() + "!$AA$" + (SEGMENT_START_ROW + 1) + ":$AA$"
+            String formula = firstSheet.getSheetName() + "!$AA$" + (SEGMENT_START_ROW + 1) + ":$AA$"
                     + (SEGMENT_START_ROW + categories.size());
             Name name = p_workbook.createName();
             name.setRefersToFormula(formula);
             name.setNameName(CATEGORY_FAILURE_DROP_DOWN_LIST);
 
             // Hide "AA" column
-            p_sheet.setColumnHidden(26, true);
+            firstSheet.setColumnHidden(26, true);
         }
         catch (Exception e)
         {
@@ -1595,28 +1606,29 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         }
     }
 
-    private void createQualityAssessmentNameArea(Workbook p_workbook, Sheet p_sheet)
+    private void createQualityAssessmentNameArea(Workbook p_workbook)
     {
         try
         {
             List<String> qualityCategories = getQualityAssessmentList();
+            Sheet firstSheet = getSheet(p_workbook, 0);
             // Set the categories in "AA" column, starts with row 8.
             int col = 27;
             for (int i = 0; i < qualityCategories.size(); i++)
             {
-                Row row = getRow(p_sheet, SEGMENT_START_ROW + i);
+                Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
                 Cell cell = getCell(row, col);
                 cell.setCellValue(qualityCategories.get(i));
             }
 
-            String formula = p_sheet.getSheetName() + "!$AB$" + (SEGMENT_START_ROW + 1) + ":$AB$"
+            String formula = firstSheet.getSheetName() + "!$AB$" + (SEGMENT_START_ROW + 1) + ":$AB$"
                     + (SEGMENT_START_ROW + qualityCategories.size());
             Name name = p_workbook.createName();
             name.setRefersToFormula(formula);
             name.setNameName(QUALITY_ASSESSMENT_LIST);
 
             // Hide "AB" column
-            p_sheet.setColumnHidden(27, true);
+            firstSheet.setColumnHidden(27, true);
         }
         catch (Exception e)
         {
@@ -1624,28 +1636,29 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         }
     }
 
-    private void createMarketSuitabilityNameArea(Workbook p_workbook, Sheet p_sheet)
+    private void createMarketSuitabilityNameArea(Workbook p_workbook)
     {
         try
         {
             List<String> marketCategories = getMarketSuitabilityList();
             // Set the categories in "AC" column, starts with row 11.
             int col = 28;
+            Sheet firstSheet = getSheet(p_workbook, 0);
             for (int i = 0; i < marketCategories.size(); i++)
             {
-                Row row = getRow(p_sheet, SEGMENT_START_ROW + i);
+                Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
                 Cell cell = getCell(row, col);
                 cell.setCellValue(marketCategories.get(i));
             }
 
-            String formula = p_sheet.getSheetName() + "!$AC$" + (SEGMENT_START_ROW + 1) + ":$AC$"
+            String formula = firstSheet.getSheetName() + "!$AC$" + (SEGMENT_START_ROW + 1) + ":$AC$"
                     + (SEGMENT_START_ROW + marketCategories.size());
             Name name = p_workbook.createName();
             name.setRefersToFormula(formula);
             name.setNameName(MARKET_SUITABILITY_LIST);
 
             // Hide "AC" column
-            p_sheet.setColumnHidden(28, true);
+            firstSheet.setColumnHidden(28, true);
         }
         catch (Exception e)
         {

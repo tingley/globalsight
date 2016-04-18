@@ -234,7 +234,7 @@ function isNumeric(str){
 <BR><BR>
 
 <TABLE WIDTH="80%">
-    <TR><TD><SPAN CLASS="smallText"><%=bundle.getString("optionally_select_a_job")%></SPAN></TD></TR>
+    <TR><TD><SPAN CLASS="smallText"><%=bundle.getString("optionally_submit_generate")%><%=bundle.getString("hold_the_shift")%></SPAN></TD></TR>
 </TABLE>
 
 <form name="lisaQAForm" method="post" action="<%=formAction%>">
@@ -248,7 +248,7 @@ function isNumeric(str){
             <table cellspacing=0>
                 <tr id="idTRJobIds">
                     <td><input type="radio" name="reportOn" checked onclick="setDisableTRWrapper('idTRJobNames');" value="jobId"/><%=bundle.getString("lb_job_id")%></td>
-                    <td><input type="text" id="jobIds" name="jobIds" value=""></td>
+                    <td><input type="text" id="jobIds" name="jobIds" value=""><%=bundle.getString("lb_job_ids_description")%></td>
                 </tr>
                  <tr>
                  <td/><td/> 

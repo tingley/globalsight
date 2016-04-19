@@ -1111,8 +1111,8 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             for (int k = 0; k < previousTaskTuvs.size(); k++)
             {
                 TaskTuv taskTuv = (TaskTuv) previousTaskTuvs.get(k);
-                String taskUser = taskTuv.getTask().getAcceptor();
-                String taskName = taskTuv.getTaskName();
+                String taskUserName = UserUtil.getUserNameById(taskTuv.getTask().getAcceptor());
+                String taskName = taskTuv.getTaskName().substring(0,taskTuv.getTaskName().lastIndexOf("_"));
                 Tuv previousTuv = allTargetTuvsMap.get(taskTuv.getPreviousTuvId());
                 // generally it should not be null for performance
                 if (previousTuv != null)
@@ -1132,7 +1132,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                 if (!previous.contains(previousSegment))
                 {
                     previous.add(previousSegment);
-                    editorHistoryTask.add(taskUser + "(" + taskName + ")");
+                    editorHistoryTask.add(taskUserName + "(" + taskName + ")");
                 }
             }
 

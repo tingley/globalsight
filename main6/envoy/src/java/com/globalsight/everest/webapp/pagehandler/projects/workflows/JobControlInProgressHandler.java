@@ -56,6 +56,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.customer.downlo
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoInProgressSearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.util.StringUtil;
 
 public class JobControlInProgressHandler extends JobManagementHandler
@@ -125,6 +126,13 @@ public class JobControlInProgressHandler extends JobManagementHandler
         	{
         		if(result.length() > 0)
         			break;
+        		
+        		if (WorkflowExportingHelper.isExporting(workflow.getId()))
+                {
+                    result="exporting";
+                    break;
+                }
+        		
         		Hashtable<Long, Task> tasks = workflow.getTasks();
         		for(Long taskKey:  tasks.keySet())
         		{

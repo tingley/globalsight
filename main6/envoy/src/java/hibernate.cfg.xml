@@ -179,5 +179,6 @@
         <mapping resource="com/globalsight/persistence/hibernate/xml/InddTuMapping.hbm.xml" />
         <mapping resource="com/globalsight/persistence/hibernate/xml/LoginAttemptConfig.hbm.xml" />
         <mapping resource="com/globalsight/persistence/hibernate/xml/LoginAttempt.hbm.xml" />
+        <mapping resource="com/globalsight/persistence/hibernate/xml/JsonFilter.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

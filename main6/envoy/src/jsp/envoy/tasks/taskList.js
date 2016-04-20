@@ -807,7 +807,11 @@ function initButtonActions() {
         	if(data.isUploading)
         	{
         		alert("The activity is uploading. Please wait.");
-        	}
+        	}    	
+        	else if (data.isExporting)
+            {
+                alert('The activity is exporting. Please wait.');
+            }
         	else
         	{
         		$("#listForm").attr("action", action);
@@ -834,6 +838,10 @@ function initButtonActions() {
         	{
         		alert("The activity is uploading. Please wait.");
         	}
+        	else if (data.isExporting)
+            {
+                alert('The activity is exporting. Please wait.');
+            }
         	else
         	{
         		$.getJSON("/globalsight/TaskListServlet", {

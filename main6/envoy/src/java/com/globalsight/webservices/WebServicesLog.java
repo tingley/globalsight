@@ -25,8 +25,8 @@ public class WebServicesLog
     private static final Logger log = Logger.getLogger(WebServicesLog.class);
 
     // the webservice log
-    private static final Logger webServiceLog =
-        Logger.getLogger(WebServicesLog.class.getName() + ".entry");
+//    private static final Logger webServiceLog =
+//        Logger.getLogger(WebServicesLog.class.getName() + ".entry");
 
     // Log a start-up event so we know when GlobalSight has been restarted.
     // There is no corresponding end event.
@@ -54,7 +54,7 @@ public class WebServicesLog
 								.toString());
         	}
 
-        	webServiceLog.info(" -> " + activity + json);
+        	log.info(" -> " + activity + json);
             return new RealStart(activity);
         }
         catch (Exception e)
@@ -77,7 +77,7 @@ public class WebServicesLog
 
     private static void end(String activity, long dt)
     {
-		webServiceLog.info(" <- " + activity + " ("
+        log.info(" <- " + activity + " ("
 				+ String.format("%.3f", dt / 1000f) + "s)");
     }
 

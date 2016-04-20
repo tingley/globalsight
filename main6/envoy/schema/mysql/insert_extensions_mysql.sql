@@ -154,6 +154,10 @@ INSERT INTO EXTENSION VALUES (
 INSERT INTO EXTENSION VALUES (
    43,'dll', 1, 'Y'
 );
+
+INSERT INTO EXTENSION VALUES (
+   44,'json', 1, 'Y'
+);
 --  
 --  NOTE: ids >= 500 and < 1000 are reserved for customer-specific 
 --  predefined extensions.

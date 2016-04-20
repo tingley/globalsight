@@ -124,14 +124,6 @@
                 <suffix value=".yyyyMMdd"/>
                 <append value="true"/>
             </periodic-rotating-file-handler>
-            <periodic-rotating-file-handler name="webservicesLog" autoflush="true">
-                <formatter>
-                    <pattern-formatter pattern="%d;[%t]%m%n"/>
-                </formatter>
-                <file relative-to="jboss.server.log.dir" path="../../../../logs/webservices.log"/>
-                <suffix value=".yyyyMMdd"/>
-                <append value="true"/>
-            </periodic-rotating-file-handler>
             <periodic-rotating-file-handler name="TermAuditLog" autoflush="true">
                 <formatter>
                     <pattern-formatter pattern="%m%n"/>
@@ -212,12 +204,6 @@
                 <level name="ALL"/>
                 <handlers>
                     <handler name="webservices"/>
-                </handlers>
-            </logger>
-            <logger category="com.globalsight.webservices.WebServicesLog.entry" use-parent-handlers="false">
-                <level name="ALL"/>
-                <handlers>
-                    <handler name="webservicesLog"/>
                 </handlers>
             </logger>
             <logger category="TermAuditLog" use-parent-handlers="false">

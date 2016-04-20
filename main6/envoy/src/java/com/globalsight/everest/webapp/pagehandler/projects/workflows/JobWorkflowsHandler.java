@@ -100,6 +100,7 @@ import com.globalsight.everest.workflowmanager.JobWorkflowDisplay;
 import com.globalsight.everest.workflowmanager.TaskJbpmUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowAdditionSender;
+import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -176,17 +177,24 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         	String[] wfIds = p_request.getParameter("wfId").split(" ");
         	for(String wfIdStr: wfIds)
         	{
+        	    String result = "";
         		long wfId = Long.parseLong(wfIdStr);
         		Workflow workflow =  WorkflowHandlerHelper.getWorkflowById(wfId);
-        		Hashtable<Long, Task> tasks = workflow.getTasks();
-        		String result = "";
-        		for(Long taskKey:  tasks.keySet())
+        		if (WorkflowExportingHelper.isExporting(workflow.getId()))
+                {
+        		    result="exporting";
+                }
+        		else
         		{
-        			if(tasks.get(taskKey).getIsUploading() == 'Y')
-        			{
-        				result = "uploading";
-        				break;
-        			}
+        		    Hashtable<Long, Task> tasks = workflow.getTasks();
+                    for(Long taskKey:  tasks.keySet())
+                    {
+                        if(tasks.get(taskKey).getIsUploading() == 'Y')
+                        {
+                            result = "uploading";
+                            break;
+                        }
+                    }
         		}
         		
         		if(result.length() > 0)

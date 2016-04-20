@@ -39,8 +39,6 @@ import javax.servlet.http.HttpSession;
 
 import org.hibernate.HibernateException;
 
-import com.globalsight.everest.company.Company;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
@@ -57,8 +55,8 @@ import com.globalsight.everest.webapp.pagehandler.administration.customer.downlo
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoReadySearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
@@ -120,6 +118,13 @@ public class JobControlReadyHandler extends JobManagementHandler
         	{
         		if(result.length() > 0)
         			break;
+        		
+        		if (WorkflowExportingHelper.isExporting(workflow.getId()))
+                {
+                    result="exporting";
+                    break;
+                }
+        		
         		Hashtable<Long, Task> tasks = workflow.getTasks();
         		for(Long taskKey:  tasks.keySet())
         		{

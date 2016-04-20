@@ -2,6 +2,7 @@
          errorPage="/envoy/common/activityError.jsp"
          import="java.util.*,
                   com.globalsight.everest.webapp.WebAppConstants,
+                  com.globalsight.everest.projecthandler.Project,
                   com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
                   com.globalsight.everest.webapp.pagehandler.administration.reports.ReportJobInfo,
                   com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData,
@@ -18,7 +19,10 @@
         (List<ReportJobInfo>) request.getAttribute(ReportConstants.REPORTJOBINFO_LIST);
     ArrayList<GlobalSightLocale> targetLocalesList = 
         (ArrayList<GlobalSightLocale>) request.getAttribute(ReportConstants.TARGETLOCALE_LIST);
-
+   	List<Project> projectList = (ArrayList<Project>)
+      	     request.getAttribute(ReportConstants.PROJECT_LIST);
+    List<GlobalSightLocale> targetLocales = (ArrayList<GlobalSightLocale>)
+            request.getAttribute(ReportConstants.TARGETLOCALE_LIST);
     Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
     if (uiLocale == null)
     {
@@ -89,95 +93,129 @@ function fnGetSelectedJobIds()
 	var jobIDArr = new Array();
 	if(document.getElementsByName("reportOn")[0].checked)
 	{
-		var jobIDText = lisaQAForm.jobId.value;;
-		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");
-		jobIDArr = jobIDText.split(",");
-		if(jobIDArr.length>1)
+		var jobIDText = document.getElementById("jobIds").value;
+		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");	
+		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ",")
 		{
-			alert('<%=bundle.getString("lb_invalid_jobid_one")%>');
-        	return;
-		}
-		if(!isNumeric(jobIDText)){
-			alert('<%=bundle.getString("msg_invalid_jobId")%>');
+			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';			
 			return;
 		}
-	
+		jobIDArr = jobIDText.split(",");
 		if(!validateIDS(jobIDArr, jobInfos))
 		{
-			alert('<%=bundle.getString("lb_invalid_jobid_exist")%>');
-			return;
-		}
-		
-		if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
-		{
-			alert("<%=bundle.getString("lb_invalid_target_language")%>");
+			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
 			return;
 		}
 	}
 	else
 	{
-		var jobIDArr = lisaQAForm.jobName.value;
-		if(jobIDArr == "*")
+		var selObj = document.getElementById("jobNameList");
+		for (i=0; i<selObj.options.length; i++) 
 		{
-			alert('<%=bundle.getString("msg_invalid_jobName")%>');
-			return;
+			if (selObj.options[i].selected) 
+			{
+				jobIDArr.push(parseInt(selObj.options[i].value));
+			}
 		}
+		
+		if(!validateIDS(jobIDArr, jobInfos))
+	    {
+			alertInfo = '<%=bundle.getString("msg_invalid_jobName")%>';
+			return;
+	    }
 	}
+	
 	return jobIDArr;
 }
+
+function filterJob()
+{
+	if(document.getElementsByName("reportOn")[0].checked)
+	{
+		return;
+	}
+	
+	var jobNameList = document.getElementById("jobNameList");
+	var projectNameList = document.getElementById("projectNameList");
+	var jobStatus = document.getElementById("jobStatus");
+	var targetLocalesList = document.getElementById("targetLocalesList");
+	
+	// selected project 
+	var currSelectValueProject = new Array();
+	for(i=0;i<projectNameList.length;i++)
+	{
+		var op= projectNameList.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueProject.push(op.value);
+		}
+	}
+	   
+	// selected job status 
+	var currSelectValueJobStatus = new Array();
+	for(i=0;i<jobStatus.length;i++)
+	{
+		var op= jobStatus.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueJobStatus.push(op.value);
+		}
+	} 
+	   
+	// selected target locales 
+	var currSelectValueTargetLocale = new Array();
+	for(i=0;i<targetLocalesList.length;i++)
+	{
+		var op= targetLocalesList.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueTargetLocale.push(op.value);
+		}
+	}
+	
+	jobNameList.options.length=0;
+	
+	// Insert jobNameList select options 
+	for(var i=0; i<jobInfos.length; i++)
+	{
+		if(contains(currSelectValueProject, jobInfos[i].projectId)
+			&& contains(currSelectValueJobStatus, jobInfos[i].jobStatus)
+			&& containsArray(currSelectValueTargetLocale, jobInfos[i].targetLocals))
+		{
+			addOption("jobNameList", jobInfos[i].jobName, jobInfos[i].jobId);
+		}
+	}
+}
+
 
 function doOnload()
 {
 	// Set the jobIds as default check. 
-	setDisableTRWrapper("idTRJobName");
+    for(var i=0; i<jobInfos.length; i++)
+	{
+	   addOption("jobNameList", jobInfos[i].jobName, jobInfos[i].jobId);
+	}
+	setDisableTRWrapper("idTRJobNames");
 }
+
 
 function setDisableTRWrapper(trid)
 {
-	if(trid == "idTRJobId")
+	if(trid == "idTRJobIds")
 	{
-		setDisableTR("idTRJobId", true);
-		setDisableTR("idTRJobName", false);
-		filterTargetLocale();
+		setDisableTR("idTRJobIds", true);
+		setDisableTR("idTRJobNames", false);
+		setDisableTR("idTRProject", false);
+		setDisableTR("idTRJobStatus", false);
+		filterJob();
 	}
-	else if(trid == "idTRJobName")
+	else if(trid == "idTRJobNames")
 	{
-		setDisableTR("idTRJobId", false);
-		setDisableTR("idTRJobName", true);
-		$("#targetLocalesList").find("option").remove();
-		if(jobInfos == null || jobInfos.length ==0)
-		{
-			var sel = document.getElementById("targetLocalesList");
-			var option = new Option("<%=bundle.getString("no_job")%>", "*");
-			sel.options.add(option);
-		}else
-		{
-			for(var i=0; i<targetLocales.length; i++)
-			{
-				var sel = document.getElementById("targetLocalesList");
-				var option = new Option(targetLocales[i].displayName, targetLocales[i].id);
-				sel.options.add(option); 
-			}
-		}
+		setDisableTR("idTRJobIds", false);
+		setDisableTR("idTRJobNames", true);
+		setDisableTR("idTRProject", true);
+		setDisableTR("idTRJobStatus", true);
 	}
-}
-
-function filterTargetLocale()
-{
-	var jobID = lisaQAForm.jobName.value;
-	if(!isNumeric(jobID)){
-		alert('<%=bundle.getString("msg_invalid_jobName")%>');
-		return;
-	}
-	$("#targetLocalesList").find("option").remove();
-	var url ="${self.pageURL}&action=ajaxTERS"
-	$.getJSON(url,{jobId:jobID},function(data){
-		$(data).each(function(i, item){
-			var sel = document.getElementById("targetLocalesList");
-			var option = new Option(item.targetLocName, item.targetLocId);
-			sel.options.add(option); 
-		});
-	});
 }
 
 function isNumeric(str){
@@ -196,7 +234,7 @@ function isNumeric(str){
 <BR><BR>
 
 <TABLE WIDTH="80%">
-    <TR><TD><SPAN CLASS="smallText"><%=bundle.getString("optionally_select_a_job")%></SPAN></TD></TR>
+    <TR><TD><SPAN CLASS="smallText"><%=bundle.getString("optionally_submit_generate")%><%=bundle.getString("hold_the_shift")%></SPAN></TD></TR>
 </TABLE>
 
 <form name="lisaQAForm" method="post" action="<%=formAction%>">
@@ -208,9 +246,9 @@ function isNumeric(str){
     	<td class="standardText"><%=bundle.getString("lb_report_on")%></td>
     	  <td class="standardText" VALIGN="BOTTOM">
             <table cellspacing=0>
-                <tr id="idTRJobId">
-                    <td><input type="radio" name="reportOn" checked onclick="setDisableTRWrapper('idTRJobName');" value="jobId"/><%=bundle.getString("lb_job_id")%></td>
-                    <td><input type="text" id="jobId" name="jobId" value=""></td>
+                <tr id="idTRJobIds">
+                    <td><input type="radio" name="reportOn" checked onclick="setDisableTRWrapper('idTRJobNames');" value="jobId"/><%=bundle.getString("lb_job_id")%></td>
+                    <td><input type="text" id="jobIds" name="jobIds" value=""><%=bundle.getString("lb_job_ids_description")%></td>
                 </tr>
                  <tr>
                  <td/><td/> 
@@ -218,30 +256,45 @@ function isNumeric(str){
                 <tr>
                 <td/><td/>
                 </tr>
-                <tr id="idTRJobName">
-                    <td><input type="radio" name="reportOn" onclick="setDisableTRWrapper('idTRJobId');" value="jobName"/><%=bundle.getString("lb_job_name")%>:</td>
-                    <td class="standardText" VALIGN="BOTTOM">
-            <select id="jobName" name="jobName" style="width:300px" onChange="filterTargetLocale()">
-<%
-          	if (reportJobInfoList == null || reportJobInfoList.size() == 0)
-            {
-%>              <option VALUE="*"><%=bundle.getString("no_job")%></option>
-<%          }
-            else
-            {
-                for (ReportJobInfo j : reportJobInfoList)
-                {
-%>
-                <option title="<%=j.getJobName()%>" VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></option>
-<%
-                }
-           }
-%>
-           </select>
-        </td>
+                <tr id="idTRJobNames">
+                    <td><input type="radio" name="reportOn" onclick="setDisableTRWrapper('idTRJobIds');" value="jobName"/><%=bundle.getString("lb_job_name")%>:</td>
+                    <td class="standardText" VALIGN="BOTTOM"><select id="jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px;min-height:90px;"></select></td>
                 </tr>
             </table>
+            </td>
+     </tr>
+        <tr id="idTRProject">
+        <td class="standardText"><%=bundle.getString("lb_project")%>:</td>
+        <td class="standardText" VALIGN="BOTTOM">
+            <select id="projectNameList" name="projectNameList" MULTIPLE size="4" onChange="filterJob()">
+                <option VALUE="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<%
+                Iterator<Project> iterProject = projectList.iterator();
+                while (iterProject.hasNext())
+                {
+                    Project p = iterProject.next();
+%>
+         	    <option VALUE="<%=p.getId()%>"><%=p.getName()%></OPTION>
+<%
+                }
+%>
+            </select>
         </td>
+     </tr>
+
+     <tr id="idTRJobStatus">
+         <td class="standardText"><%=bundle.getString("lb_job_status")%>:</td>
+         <td class="standardText" VALIGN="BOTTOM">
+             <select id="jobStatus" name="jobStatus" MULTIPLE size="4" onChange="filterJob()">
+                 <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+                 <option VALUE="<%=Job.READY_TO_BE_DISPATCHED%>"><%=bundle.getString("lb_ready")%></OPTION>
+                 <option VALUE="<%=Job.DISPATCHED%>"><%=bundle.getString("lb_inprogress")%></OPTION>
+                 <option VALUE="<%=Job.LOCALIZED%>"><%=bundle.getString("lb_localized")%></OPTION>
+                 <option VALUE="<%=Job.EXPORTED%>"><%=bundle.getString("lb_exported")%></OPTION>
+                 <option VALUE="<%=Job.EXPORT_FAIL%>"><%=bundle.getString("lb_exported_failed")%></OPTION>
+                 <option VALUE="<%=Job.ARCHIVED%>"><%=bundle.getString("lb_archived")%></OPTION>
+             </select>
+         </td>
     </tr>
  		<tr>
                  <td/><td/> 
@@ -252,13 +305,20 @@ function isNumeric(str){
     <tr>
         <td class="standardText"><%=bundle.getString("lb_target_language")%>:</td>
         <td class="standardText" VALIGN="BOTTOM">
-            <select name="targetLocalesList"  id="targetLocalesList">
+            <select name="targetLocalesList"  id="targetLocalesList" MULTIPLE size="4" onChange="filterJob()">
+                            <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<%
+                for (GlobalSightLocale gsl : targetLocales)
+                {
+%>              <option VALUE="<%=gsl.getId()%>"><%=gsl.getDisplayName(uiLocale)%></option>
+<%              }
+%>
             </select>
         </td>
     </tr>
      <tr>
                  <td/><td/> 
-                </tr>
+     </tr>
                 <tr>
                 <td/><td/>
                 </tr>

@@ -382,6 +382,21 @@ function submitForm(buttonClicked)
    }
    else if (buttonClicked == "ExportForUpdate" || buttonClicked == "ReExport")
    {
+	    var checkUrl = "${self.pageURL}&checkIsUploadingForExport=true&jobId=" + jobId + "&t=" + new Date().getTime();
+	    var isContinue = true;
+	    $.ajaxSetup({async: false}); 
+	    $.get(checkUrl,function(data){
+	        if (data == "exporting")
+	        {
+	            alert("<%=bundle.getString("msg_job_exporting")%>");
+	            isContinue =  false;
+	        }   
+	    });
+	    $.ajaxSetup({ async: true}); 
+	    
+	    if(!isContinue)
+	        return;
+	    
       JobForm.action = "<%=request.getAttribute(JobManagementHandler.EXPORT_URL_PARAM)%>";
       jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
       JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=" + "<%=thisSearch%>";

@@ -35,6 +35,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.workflow.Activity;
+import com.globalsight.everest.workflow.schedule.ActivityScheduleUtil;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.StringUtil;
@@ -112,51 +113,62 @@ public class AutoCompleteActivityThread implements Runnable
                     {
                         acceptor = t.getAcceptor();
                         if (StringUtil.isEmpty(acceptor))
-                        	continue;
-
-                        Job job = jobHandler.getJobById(t.getJobId());
-                        String afterJobCreation = act.getAfterJobCreation();
-                        String afterJobDispatch = act.getAfterJobDispatch();
-                        String afterActivityStart = act.getAfterActivityStart();
-
-                        String[] arr;
-                        long d;
-                        long h;
-                        long m;
-                        long minutes1;
-                        long minutes2;
-                        Date nowTime = new Timestamp(Calendar.getInstance()
-                                .getTimeInMillis());
-                        if (afterJobCreation != null
-                                && afterJobCreation.length() > 0)
+                            continue;
+                        
+                        if (act.getCompleteType() == Activity.COMPLETE_TYPE_SCHEDULE)
                         {
-                            minutes1 = (nowTime.getTime() - job.getCreateDate()
-                                    .getTime()) / (1000 * 60);
-                            arr = afterJobCreation.split("-");
-                        }
-                        else if (afterJobDispatch != null
-                                && afterJobDispatch.length() > 0)
-                        {
-                            minutes1 = (nowTime.getTime() - t.getWorkflow()
-                                    .getDispatchedDate().getTime())
-                                    / (1000 * 60);
-                            arr = afterJobDispatch.split("-");
+                            if (ActivityScheduleUtil.autoCompleteActivity(act))
+                            {
+                                ServerProxy.getTaskManager().completeTask(
+                                        acceptor, t, null, null);
+                            }
                         }
                         else
                         {
-                            minutes1 = (nowTime.getTime() - t.getAcceptedDate()
-                                    .getTime()) / (1000 * 60);
-                            arr = afterActivityStart.split("-");
-                        }
-                        d = Long.parseLong(arr[0].trim());
-                        h = Long.parseLong(arr[1].trim());
-                        m = Long.parseLong(arr[2].trim());
-                        minutes2 = d * 24 * 60 + h * 60 + m;
+                            Job job = jobHandler.getJobById(t.getJobId());
+                            String afterJobCreation = act.getAfterJobCreation();
+                            String afterJobDispatch = act.getAfterJobDispatch();
+                            String afterActivityStart = act.getAfterActivityStart();
 
-                        if (minutes1 >= minutes2)
-                        {
-                            ServerProxy.getTaskManager().completeTask(
-                                    acceptor, t, null, null);
+                            String[] arr;
+                            long d;
+                            long h;
+                            long m;
+                            long minutes1;
+                            long minutes2;
+                            Date nowTime = new Timestamp(Calendar.getInstance()
+                                    .getTimeInMillis());
+                            if (afterJobCreation != null
+                                    && afterJobCreation.length() > 0)
+                            {
+                                minutes1 = (nowTime.getTime() - job.getCreateDate()
+                                        .getTime()) / (1000 * 60);
+                                arr = afterJobCreation.split("-");
+                            }
+                            else if (afterJobDispatch != null
+                                    && afterJobDispatch.length() > 0)
+                            {
+                                minutes1 = (nowTime.getTime() - t.getWorkflow()
+                                        .getDispatchedDate().getTime())
+                                        / (1000 * 60);
+                                arr = afterJobDispatch.split("-");
+                            }
+                            else
+                            {
+                                minutes1 = (nowTime.getTime() - t.getAcceptedDate()
+                                        .getTime()) / (1000 * 60);
+                                arr = afterActivityStart.split("-");
+                            }
+                            d = Long.parseLong(arr[0].trim());
+                            h = Long.parseLong(arr[1].trim());
+                            m = Long.parseLong(arr[2].trim());
+                            minutes2 = d * 24 * 60 + h * 60 + m;
+
+                            if (minutes1 >= minutes2)
+                            {
+                                ServerProxy.getTaskManager().completeTask(
+                                        acceptor, t, null, null);
+                            }
                         }
                     }
             	}
@@ -167,8 +179,8 @@ public class AutoCompleteActivityThread implements Runnable
             }
 
             HibernateUtil.closeSession();
-            // Check interval time is fixed 5 minutes.
-            Thread.sleep(5 * 60 * 1000);
+            // Check interval time is fixed 45s.
+            Thread.sleep(60 * 1000);
         }
     }
 

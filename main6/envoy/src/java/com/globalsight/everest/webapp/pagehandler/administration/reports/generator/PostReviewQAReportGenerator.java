@@ -61,6 +61,7 @@ import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
+import com.globalsight.everest.integration.ling.tm2.Types;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -81,6 +82,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
+import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
@@ -207,6 +209,15 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         CompanyThreadLocal.getInstance().setValue(m_companyName);
     }
 
+    private void setAllCellStyleNull()
+    {
+        this.headerStyle = null;
+        this.contentStyle = null;
+        this.rtlContentStyle = null;
+        this.unlockedStyle = null;
+        this.unlockedRightStyle = null;
+    }
+    
     @Override
     public File[] generateReports(List<Long> p_jobIDS,
             List<GlobalSightLocale> p_targetLocales) throws Exception
@@ -222,6 +233,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             if (job == null)
                 continue;
 
+            setAllCellStyleNull();
             Workbook workBook = new SXSSFWorkbook();
             createReport(workBook, job, p_targetLocales, m_dateFormat);
             File file = getFile(getReportType(), job, workBook);
@@ -242,59 +254,71 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
      * @throws Exception
      */
     private void createReport(Workbook p_workbook, Job p_job,
-            List<GlobalSightLocale> p_targetLocales, String p_dateFormat)
-            throws Exception
+            List<GlobalSightLocale> p_targetLocales, String p_dateFormat) throws Exception
     {
-        // Till now, only support one target locale.
-        GlobalSightLocale trgLocale = p_targetLocales.get(0);
+        boolean nameAreaDropDownAdded = false;
+        List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(p_job);
+        for (GlobalSightLocale trgLocale : p_targetLocales)
+        {
+            if (!jobTL.contains(trgLocale))
+                continue;
 
-        // Create Sheet
-        Sheet sheet = p_workbook.createSheet(trgLocale.toString());
-        sheet.protectSheet("");
+            if (cancel)
+                return;
 
-        // Add Title
-        addTitle(p_workbook, sheet);
+            // Create Sheet
+            Sheet sheet = p_workbook.createSheet(trgLocale.toString());
+            sheet.protectSheet("");
 
-        // Add hidden info "PRR_taskID" for uploading.
-        addHidenInfoForUpload(p_workbook, sheet, p_job, trgLocale);
+            // Add Title
+            addTitle(p_workbook, sheet);
 
-        // Add Locale Pair Header
-        addLanguageHeader(p_workbook, sheet);
+            // Add hidden info "PRR_taskID" for uploading.
+            addHidenInfoForUpload(p_workbook, sheet, p_job, trgLocale);
 
-        // Add Quality Assessment
-        addQuaAssessment(p_workbook, sheet);
+            // Add Locale Pair Header
+            addLanguageHeader(p_workbook, sheet);
 
-        // Add Suitability for Market
-        addSuitMarket(p_workbook, sheet);
+            // Add Quality Assessment
+            addQuaAssessment(p_workbook, sheet);
 
-        // Add Reviewer Comment
-        addReviwerCommet(p_workbook, sheet);
+            // Add Suitability for Market
+            addSuitMarket(p_workbook, sheet);
 
-        // Add Segment Header
-        addSegmentHeader(p_workbook, sheet);
+            // Add Reviewer Comment
+            addReviwerCommet(p_workbook, sheet);
 
-        // Create Name Areas for drop down list.
-        createCategoryFailureNameArea(p_workbook);
+            // Add Segment Header
+            addSegmentHeader(p_workbook, sheet);
 
-        createQualityAssessmentNameArea(p_workbook);
+            // Create Name Areas for drop down list.
+            if (!nameAreaDropDownAdded)
+            {
+                createCategoryFailureNameArea(p_workbook);
 
-        createMarketSuitabilityNameArea(p_workbook);
+                createQualityAssessmentNameArea(p_workbook);
+                
+                createMarketSuitabilityNameArea(p_workbook);
+                
+                nameAreaDropDownAdded = true;
+            }
+            
+            // Insert Data into Report
+            String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
+            String trgLang = trgLocale.getDisplayName(m_uiLocale);
+            writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
+            writeQualityAssessmentInfo(p_workbook, sheet, p_job, trgLocale);
+            writeMarketSuitabilityInfo(p_workbook, sheet, p_job, trgLocale);
+            writeReviewerComment(p_workbook, sheet);
 
-        // Insert Data into Report
-        String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
-        String trgLang = trgLocale.getDisplayName(m_uiLocale);
-        writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
-        writeQualityAssessmentInfo(p_workbook, sheet, p_job, trgLocale);
-        writeMarketSuitabilityInfo(p_workbook, sheet, p_job, trgLocale);
-        writeReviewerComment(p_workbook, sheet);
+            writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat,
+                    SEGMENT_START_ROW);
 
-        writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat,
-                SEGMENT_START_ROW);
-
-        addQualityAssessmentValidation(sheet, 6, 6, 1, 1);
-        addMarketSuitabilityValidation(sheet, 7, 7, 1, 1);
+            addQualityAssessmentValidation(sheet, 6, 6, 1, 1);
+            addMarketSuitabilityValidation(sheet, 7, 7, 1, 1);
+        }
     }
-
+    
     private void addMarketSuitabilityValidation(Sheet p_sheet, int startRow,
             int lastRow, int startColumn, int lastColumn)
     {
@@ -475,7 +499,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         col++;
 
         Cell cell_B = getCell(segHeaderRow, col);
-        cell_B.setCellValue(m_bundle.getString("lb_original_target_segment"));
+        cell_B.setCellValue(m_bundle.getString("lb_edit_history"));
         cell_B.setCellStyle(getHeaderStyle(p_workBook));
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
@@ -894,20 +918,20 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                     // Target segment with compact tags
                     CellStyle trgStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
                             : getContentStyle(p_workBook);
-                    String previousSegments = getPreviousSegments(allTuvMap,
-                            targetTuv.getId(), targetTuv, p_job.getId(), pData);
+                    String previousSegments = getPreviousSegments(allTuvMap, tuvMatchTypes,
+                            targetTuv.getId(), sourceTuv, targetTuv, p_job.getId(), pData);
                     Cell cell_B = getCell(currentRow, col);
                     cell_B.setCellValue(previousSegments);
                     cell_B.setCellStyle(trgStyle);
                     col++;
 
                     // Modify the translation
-                  CellStyle modifyTranslationStyle = m_rtlTargetLocale ?
-                     getUnlockedRightStyle(p_workBook): getUnlockedStyle(p_workBook);
-                     modifyTranslationStyle.setLocked(false);
+                    CellStyle modifyTranslationStyle = m_rtlTargetLocale ? getUnlockedRightStyle(p_workBook)
+                            : getUnlockedStyle(p_workBook);
+                    modifyTranslationStyle.setLocked(false);
                     Cell cell_C = getCell(currentRow, col);
-                    cell_C.setCellValue(getSegment(pData, targetTuv,
-                            m_rtlTargetLocale, p_job.getId()));
+                    cell_C.setCellValue(getSegment(pData, targetTuv, m_rtlTargetLocale,
+                            p_job.getId()));
                     if (review_only)
                     {
                         modifyTranslationStyle.setLocked(true);
@@ -1016,9 +1040,27 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         return p_row;
     }
     
+    private String getMtName(String name)
+    {
+        return name.substring(0, name.length() - 3) + "()";
+    }
+    
+    private boolean addLeverageMatch(String name, List<String> previous,  List<String> editorHistoryTask, LeverageMatch lm)
+    {
+        if (name != null && name.toLowerCase().endsWith("_mt"))
+        {
+            previous.add(lm.getLeveragedTargetString());
+            editorHistoryTask.add(getMtName(name));
+            return true;
+        }
+        
+        return false;
+    }
+    
+    @SuppressWarnings("unchecked")
     private String getPreviousSegments(Map<Long, Tuv> allTargetTuvsMap,
-            long p_trgTuvId, Tuv tuv, long p_jobId, PseudoData pData)
-            throws Exception
+            MatchTypeStatistics tuvMatchTypes, long p_trgTuvId, Tuv sourceTuv, Tuv targetTuv,
+            long p_jobId, PseudoData pData) throws Exception
     {
         List previousTaskTuvs = new ArrayList();
         TuvManager tuvManager = ServerProxy.getTuvManager();
@@ -1027,11 +1069,12 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         String previousSegment = null;
         String targetSegmentString = null;
         String dataType = null;
-        List previous = new ArrayList();
-        dataType = tuv.getDataType(p_jobId);
+        List<String> previous = new ArrayList<>();
+        List<String> editorHistoryTask = new ArrayList<>();
+        dataType = targetTuv.getDataType(p_jobId);
         pData.setAddables(dataType);
-        TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
-        targetSegmentString = (pData.getPTagSourceString());
+        TmxPseudo.tmx2Pseudo(targetTuv.getGxmlExcludeTopTags(), pData);
+        targetSegmentString = pData.getPTagSourceString();
         if (previousTaskTuvs.size() > 0)
         {
             SortUtil.sort(previousTaskTuvs, new Comparator()
@@ -1040,99 +1083,73 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                 {
                     TaskTuv a = (TaskTuv) p_taskTuvA;
                     TaskTuv b = (TaskTuv) p_taskTuvB;
-                    return a.getTask().getCompletedDate()
-                            .compareTo(b.getTask().getCompletedDate());
+                    return a.getTask().getCompletedDate().compareTo(b.getTask().getCompletedDate());
                 }
             });
 
-            int len = previousTaskTuvs.size() - 2;
-            int lastReviewerCount = 0;
-
-            while ((len >= 0)
-                    && (((TaskTuv) previousTaskTuvs.get(len)).getTask()
-                            .getType() == Task.TYPE_REVIEW))
+            Types type = tuvMatchTypes.getTypes(sourceTuv.getId(), LeverageUtil.DUMMY_SUBID);
+            LeverageMatch lm= null;
+            if (type != null)
             {
-                // Review only task does not change segments
-                lastReviewerCount++;
-                len--;
+                lm = type.getLeverageMatch();
             }
-
-            int beforeLastReviewerCount = previousTaskTuvs.size()
-                    - lastReviewerCount - 1;
-
-            if (beforeLastReviewerCount == 1)
+            if (lm != null)
             {
-                String previousSeg = "";
-                TaskTuv taskTuv = (TaskTuv) previousTaskTuvs.get(0);
-                Tuv previousTuv = allTargetTuvsMap.get(taskTuv
-                        .getPreviousTuvId());
+                boolean isAddMatch = addLeverageMatch(targetTuv.getLastModifiedUser(), previous,
+                        editorHistoryTask, lm);
+                if (!isAddMatch)
+                {
+                    isAddMatch = addLeverageMatch(lm.getMtName(), previous, editorHistoryTask, lm);
+                }
+
+                if (!isAddMatch)
+                {
+                    isAddMatch = addLeverageMatch(lm.getCreationUser(), previous,
+                            editorHistoryTask, lm);
+                }
+            }
+            for (int k = 0; k < previousTaskTuvs.size(); k++)
+            {
+                TaskTuv taskTuv = (TaskTuv) previousTaskTuvs.get(k);
+                String taskUserName = UserUtil.getUserNameById(taskTuv.getTask().getAcceptor());
+                String taskName = taskTuv.getTaskName().substring(0,taskTuv.getTaskName().lastIndexOf("_"));
+                Tuv previousTuv = allTargetTuvsMap.get(taskTuv.getPreviousTuvId());
                 // generally it should not be null for performance
                 if (previousTuv != null)
                 {
                     dataType = previousTuv.getDataType(p_jobId);
                     pData.setAddables(dataType);
                     TmxPseudo.tmx2Pseudo(previousTuv.getGxmlExcludeTopTags(), pData);
-                    previousSeg = pData.getPTagSourceString();
+                    previousSegment = pData.getPTagSourceString();
                 }
                 else
                 {
                     dataType = taskTuv.getTuv(p_jobId).getDataType(p_jobId);
                     pData.setAddables(dataType);
                     TmxPseudo.tmx2Pseudo(taskTuv.getTuv(p_jobId).getGxmlExcludeTopTags(), pData);
-                    previousSeg = pData.getPTagSourceString();
+                    previousSegment = pData.getPTagSourceString();
                 }
-                if (!previousSeg.equals(targetSegmentString))
+                if (!previous.contains(previousSegment))
                 {
-                    previousSegments = previousSegments + previousSeg;
+                    previous.add(previousSegment);
+                    editorHistoryTask.add(taskUserName + "(" + taskName + ")");
                 }
             }
-            else
-            {
-                for (int k = 0; k <= beforeLastReviewerCount; k++)
-                {
-                    TaskTuv taskTuv = (TaskTuv) previousTaskTuvs.get(k);
-                    Tuv previousTuv = allTargetTuvsMap.get(taskTuv
-                            .getPreviousTuvId());
-                    // generally it should not be null for performance
-                    if (previousTuv != null)
-                    {
-                        dataType = previousTuv.getDataType(p_jobId);
-                        pData.setAddables(dataType);
-                        TmxPseudo.tmx2Pseudo(previousTuv.getGxmlExcludeTopTags(), pData);
-                        previousSegment = pData.getPTagSourceString();
-                    }
-                    else
-                    {
-                        dataType = taskTuv.getTuv(p_jobId).getDataType(p_jobId);
-                        pData.setAddables(dataType);
-                        TmxPseudo.tmx2Pseudo(taskTuv.getTuv(p_jobId).getGxmlExcludeTopTags(), pData);
-                        previousSegment = pData.getPTagSourceString();
-                    }
-                    if (!previous.contains(previousSegment))
-                    {
-                        previous.add(previousSegment);
-                    }
-                }
-                String lastInPrevious = (String) previous
-                        .get(previous.size() - 1);
-                if (lastInPrevious.equals(targetSegmentString))
-                {
-                    previous.remove(previous.size() - 1);
-                }
 
-                for (int pi = 0; pi < previous.size(); pi++)
-                {
-                    previousSegment = (String) previous.get(pi);
-                    if (previous.size() > 1)
-                    {
-                        previousSegments = previousSegments + "{"
-                                + previousSegment + "}\r\n";
-                    }
-                    else
-                    {
-                        previousSegments = previousSegments + previousSegment;
-                    }
-                }
+            String lastInPrevious = previous.get(previous.size() - 1);
+            if (lastInPrevious.equals(targetSegmentString))
+            {
+                previous.remove(previous.size() - 1);
+            }
+
+            for (int pi = 0; pi < previous.size(); pi++)
+            {
+                if (previousSegments.length() > 0)
+                    previousSegments += "\r\n";
+                
+                previousSegment = previous.get(pi);
+                String previousTaskString = (String) editorHistoryTask.get(pi);
+                previousSegments += previousTaskString + "\r" + previousSegment;
             }
         }
         return previousSegments;
@@ -1563,36 +1580,29 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
     {
         try
         {
-            // Ensure the name area is written only one time,otherwise it has
-            // problem when open generated excel file.
-            if (p_workbook.getNumberOfSheets() == 1)
+            List<String> categories = getFailureCategoriesList();
+            Sheet firstSheet = getSheet(p_workbook, 0);
+            // Set the categories in "AA" column, starts with row 8.
+            int col = 26;
+            for (int i = 0; i < categories.size(); i++)
             {
-                Sheet firstSheet = getSheet(p_workbook, 0);
-                List<String> categories = getFailureCategoriesList();
-                // Set the categories in "AA" column, starts with row 8.
-                int col = 26;
-                for (int i = 0; i < categories.size(); i++)
-                {
-                    Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
-                    Cell cell = getCell(row, col);
-                    cell.setCellValue(categories.get(i));
-                }
-
-                String formula = firstSheet.getSheetName() + "!$AA$"
-                        + (SEGMENT_START_ROW + 1) + ":$AA$"
-                        + (SEGMENT_START_ROW + categories.size());
-                Name name = p_workbook.createName();
-                name.setRefersToFormula(formula);
-                name.setNameName(CATEGORY_FAILURE_DROP_DOWN_LIST);
-
-                // Hide "AA" column
-                firstSheet.setColumnHidden(26, true);
+                Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
+                Cell cell = getCell(row, col);
+                cell.setCellValue(categories.get(i));
             }
+
+            String formula = firstSheet.getSheetName() + "!$AA$" + (SEGMENT_START_ROW + 1) + ":$AA$"
+                    + (SEGMENT_START_ROW + categories.size());
+            Name name = p_workbook.createName();
+            name.setRefersToFormula(formula);
+            name.setNameName(CATEGORY_FAILURE_DROP_DOWN_LIST);
+
+            // Hide "AA" column
+            firstSheet.setColumnHidden(26, true);
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Error when create hidden area for category failures.", e);
+            logger.error("Error when create hidden area for category failures.", e);
         }
     }
 
@@ -1600,36 +1610,29 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
     {
         try
         {
-            // Ensure the name area is written only one time,otherwise it has
-            // problem when open generated excel file.
-            if (p_workbook.getNumberOfSheets() == 1)
+            List<String> qualityCategories = getQualityAssessmentList();
+            Sheet firstSheet = getSheet(p_workbook, 0);
+            // Set the categories in "AA" column, starts with row 8.
+            int col = 27;
+            for (int i = 0; i < qualityCategories.size(); i++)
             {
-                Sheet firstSheet = getSheet(p_workbook, 0);
-                List<String> qualityCategories = getQualityAssessmentList();
-                // Set the categories in "AA" column, starts with row 8.
-                int col = 27;
-                for (int i = 0; i < qualityCategories.size(); i++)
-                {
-                    Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
-                    Cell cell = getCell(row, col);
-                    cell.setCellValue(qualityCategories.get(i));
-                }
-
-                String formula = firstSheet.getSheetName() + "!$AB$"
-                        + (SEGMENT_START_ROW + 1) + ":$AB$"
-                        + (SEGMENT_START_ROW + qualityCategories.size());
-                Name name = p_workbook.createName();
-                name.setRefersToFormula(formula);
-                name.setNameName(QUALITY_ASSESSMENT_LIST);
-
-                // Hide "AB" column
-                firstSheet.setColumnHidden(27, true);
+                Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
+                Cell cell = getCell(row, col);
+                cell.setCellValue(qualityCategories.get(i));
             }
+
+            String formula = firstSheet.getSheetName() + "!$AB$" + (SEGMENT_START_ROW + 1) + ":$AB$"
+                    + (SEGMENT_START_ROW + qualityCategories.size());
+            Name name = p_workbook.createName();
+            name.setRefersToFormula(formula);
+            name.setNameName(QUALITY_ASSESSMENT_LIST);
+
+            // Hide "AB" column
+            firstSheet.setColumnHidden(27, true);
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Error when create hidden area for category failures.", e);
+            logger.error("Error when create hidden area for category failures.", e);
         }
     }
 
@@ -1637,38 +1640,32 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
     {
         try
         {
-            // Ensure the name area is written only one time,otherwise it has
-            // problem when open generated excel file.
-            if (p_workbook.getNumberOfSheets() == 1)
+            List<String> marketCategories = getMarketSuitabilityList();
+            // Set the categories in "AC" column, starts with row 11.
+            int col = 28;
+            Sheet firstSheet = getSheet(p_workbook, 0);
+            for (int i = 0; i < marketCategories.size(); i++)
             {
-                Sheet firstSheet = getSheet(p_workbook, 0);
-                List<String> marketCategories = getMarketSuitabilityList();
-                // Set the categories in "AC" column, starts with row 11.
-                int col = 28;
-                for (int i = 0; i < marketCategories.size(); i++)
-                {
-                    Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
-                    Cell cell = getCell(row, col);
-                    cell.setCellValue(marketCategories.get(i));
-                }
-
-                String formula = firstSheet.getSheetName() + "!$AC$"
-                        + (SEGMENT_START_ROW + 1) + ":$AC$"
-                        + (SEGMENT_START_ROW + marketCategories.size());
-                Name name = p_workbook.createName();
-                name.setRefersToFormula(formula);
-                name.setNameName(MARKET_SUITABILITY_LIST);
-
-                // Hide "AC" column
-                firstSheet.setColumnHidden(28, true);
+                Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
+                Cell cell = getCell(row, col);
+                cell.setCellValue(marketCategories.get(i));
             }
+
+            String formula = firstSheet.getSheetName() + "!$AC$" + (SEGMENT_START_ROW + 1) + ":$AC$"
+                    + (SEGMENT_START_ROW + marketCategories.size());
+            Name name = p_workbook.createName();
+            name.setRefersToFormula(formula);
+            name.setNameName(MARKET_SUITABILITY_LIST);
+
+            // Hide "AC" column
+            firstSheet.setColumnHidden(28, true);
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Error when create hidden area for category failures.", e);
+            logger.error("Error when create hidden area for category failures.", e);
         }
     }
+
 
     private String[] getCommentStatusList(String lastComment)
     {

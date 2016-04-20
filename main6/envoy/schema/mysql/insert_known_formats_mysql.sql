@@ -328,6 +328,12 @@ INSERT INTO KNOWN_FORMAT_TYPE VALUES (
    'XML_IMPORTED_EVENT',
    'XML_LOCALIZED_EVENT'
 );
+
+INSERT INTO KNOWN_FORMAT_TYPE VALUES (
+57, 'Json','JavaScript Object Notation','json',
+   'JSON_IMPORTED_EVENT',
+   'JSON_LOCALIZED_EVENT'
+);
 -- 
 --  NOTE: ids > 500 are reserved for customer-specific file formats.
 -- 

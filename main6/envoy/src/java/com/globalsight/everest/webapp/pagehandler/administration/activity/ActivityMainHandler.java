@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.globalsight.cxe.util.XmlUtil;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -44,6 +45,8 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.Activity;
+import com.globalsight.everest.workflow.schedule.ActivityCompleteSchedule;
+import com.globalsight.everest.workflow.schedule.ActivityScheduleUtil;
 import com.globalsight.persistence.dependencychecking.ActivityDependencyChecker;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GeneralException;
@@ -161,11 +164,29 @@ public class ActivityMainHandler extends PageHandler implements
         act.setUseType(p_request.getParameter("useTypeField"));
         act.setQaChecks("on".equalsIgnoreCase(p_request
                 .getParameter("qaChecks")));
-        act.setAutoCompleteActivity("true".equalsIgnoreCase(p_request
-                .getParameter("isAutoCompleteActivity")));
-        act.setAfterJobCreation(p_request.getParameter("afterJobCreation"));
-        act.setAfterJobDispatch(p_request.getParameter("afterJobDispatch"));
-        act.setAfterActivityStart(p_request.getParameter("afterActivityStart"));
+        boolean autoComplete = "true".equalsIgnoreCase(p_request
+                .getParameter("isAutoCompleteActivity"));
+        act.setAutoCompleteActivity(autoComplete);
+                
+        int completeType = 0;
+        if (autoComplete)
+        {
+            completeType = Integer.parseInt(p_request.getParameter("autoCompleteActivity"));
+            act.setCompleteType(completeType);
+            
+            String completeSchedule = "";
+            if (completeType == Activity.COMPLETE_TYPE_SCHEDULE)
+            {
+                ActivityCompleteSchedule schedule = new ActivityCompleteSchedule();
+                ActivityScheduleUtil.updateSchedule(schedule, p_request);
+                completeSchedule = XmlUtil.object2String(schedule);
+            }
+            act.setCompleteSchedule(completeSchedule);
+        }
+        
+        act.setAfterJobCreation(p_request.getParameter(Integer.toString(Activity.COMPLETE_TYPE_AFTER_JOB_CREATION)));
+        act.setAfterJobDispatch(p_request.getParameter(Integer.toString(Activity.COMPLETE_TYPE_AFTER_JOB_DISPATCH)));
+        act.setAfterActivityStart(p_request.getParameter(Integer.toString(Activity.COMPLETE_TYPE_AFTER_ACTIVITY_START)));
 
         String isDitaAct = p_request
                 .getParameter(ActivityConstants.IS_DITA_QA_CHECK_ACTIVITY);
@@ -196,11 +217,35 @@ public class ActivityMainHandler extends PageHandler implements
         act.setDescription(p_request.getParameter(ActivityConstants.DESC));
         act.setType(getType(p_request));
         act.setIsEditable(getIsEditable(p_request));
-        act.setAutoCompleteActivity("true".equalsIgnoreCase(p_request
-                .getParameter("isAutoCompleteActivity")));
-        act.setAfterJobCreation(p_request.getParameter("afterJobCreation"));
-        act.setAfterJobDispatch(p_request.getParameter("afterJobDispatch"));
-        act.setAfterActivityStart(p_request.getParameter("afterActivityStart"));
+        
+        boolean autoComplete = "true".equalsIgnoreCase(p_request
+                .getParameter("isAutoCompleteActivity"));
+        act.setAutoCompleteActivity(autoComplete);
+        
+        int completeType = 0;
+        if (autoComplete)
+        {
+            completeType = Integer.parseInt(p_request.getParameter("autoCompleteActivity"));
+            act.setCompleteType(completeType);
+            
+            String completeSchedule = "";
+            if (completeType == Activity.COMPLETE_TYPE_SCHEDULE)
+            {
+                ActivityCompleteSchedule schedule = new ActivityCompleteSchedule();
+                ActivityScheduleUtil.updateSchedule(schedule, p_request);
+                completeSchedule = XmlUtil.object2String(schedule);
+            }
+            act.setCompleteSchedule(completeSchedule);
+        }
+        else
+        {
+            act.setCompleteSchedule("");
+            act.setCompleteType(0);
+        }
+        
+        act.setAfterJobCreation(p_request.getParameter(Integer.toString(Activity.COMPLETE_TYPE_AFTER_JOB_CREATION)));
+        act.setAfterJobDispatch(p_request.getParameter(Integer.toString(Activity.COMPLETE_TYPE_AFTER_JOB_DISPATCH)));
+        act.setAfterActivityStart(p_request.getParameter(Integer.toString(Activity.COMPLETE_TYPE_AFTER_ACTIVITY_START)));
 
         Company company = ServerProxy.getJobHandler()
                 .getCompanyById(act.getCompanyId());
@@ -259,10 +304,9 @@ public class ActivityMainHandler extends PageHandler implements
     {
         int type = Activity.TYPE_TRANSLATE;
 
-        String typeStr = new String(
-                p_request.getParameter(ActivityConstants.TYPE));
-        if (ActivityConstants.REVIEW_NOT_EDITABLE.equals(typeStr)
-                || ActivityConstants.REVIEW_EDITABLE.equals(typeStr))
+        int typeValue = Integer.parseInt(p_request.getParameter(ActivityConstants.TYPE));
+        if (typeValue == Activity.TYPE_REVIEW
+                || typeValue == Activity.TYPE_REVIEW_EDITABLE)
         {
             type = Activity.TYPE_REVIEW;
         }
@@ -277,10 +321,9 @@ public class ActivityMainHandler extends PageHandler implements
     private boolean getIsEditable(HttpServletRequest p_request)
     {
         boolean isEditable = true;
-        String typeStr = new String(
-                p_request.getParameter(ActivityConstants.TYPE));
+        int typeValue = Integer.parseInt(p_request.getParameter(ActivityConstants.TYPE));
 
-        if (typeStr.equals(ActivityConstants.REVIEW_NOT_EDITABLE))
+        if (typeValue == Activity.TYPE_REVIEW_EDITABLE)
         {
             isEditable = false;
         }

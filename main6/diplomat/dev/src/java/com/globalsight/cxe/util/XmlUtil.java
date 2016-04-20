@@ -29,6 +29,10 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.log4j.Logger;
 
+import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
+import net.sf.json.xml.XMLSerializer;
+
 /**
  * A util class, provide some methods to convert java object and xml file.
  * <p>
@@ -116,9 +120,10 @@ public class XmlUtil
 
         return "";
     }
-    
+
     /**
      * Translates object to string.
+     * 
      * @param ob
      * @return
      */
@@ -126,13 +131,15 @@ public class XmlUtil
     {
         return object2String(ob, false);
     }
-    
+
     /**
      * Translates String to Object.
+     * 
      * @param ob
-     * @return 
+     * @return
      * @return
      */
+    @SuppressWarnings("unchecked")
     public static <T> T string2Object(Class<T> clazz, String xml)
     {
         T ob = null;
@@ -155,7 +162,7 @@ public class XmlUtil
 
         return ob;
     }
-    
+
     /**
      * Saves a java object to a xml file. If the file has been exist, it will be
      * covered.
@@ -198,5 +205,47 @@ public class XmlUtil
         }
 
         log.debug("Saving finished");
+    }
+
+    /**
+     * xml to json <node><key label="key1">value1</key></node> ×ª»¯Îª
+     * {"key":{"@label":"key1","#text":"value1"}}
+     * 
+     * @param xml
+     * @return
+     */
+    public static JSON xml2Json(String xml)
+    {
+        XMLSerializer xmlSerializer = new XMLSerializer();
+        xmlSerializer.setTypeHintsCompatibility(false);
+        return xmlSerializer.read(xml);
+    }
+    
+    public static String xml2JsonString(String xml)
+    {
+        return xml2Json(xml).toString();
+    }
+
+    /**
+     * json to xml {"node":{"key":{"@label":"key1","#text":"value1"}}} conver
+     * <o><node class="object"><key class="object" label="key1">value1</key>
+     * </node></o>
+     * 
+     * @param json
+     * @return
+     */
+    public static String json2Xml(String json)
+    {
+        try
+        {
+            XMLSerializer serializer = new XMLSerializer();
+            JSON jsonObject = JSONSerializer.toJSON(json);
+            return serializer.write(jsonObject);
+        }
+        catch (Exception e)
+        {
+            log.error(e);
+        }
+        return null;
     }
 }

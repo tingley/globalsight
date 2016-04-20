@@ -92,6 +92,7 @@
     ArrayList<Filter> poFilters = mapOfFormatTypeFilter.get("po");
     ArrayList<Filter> fmFilters = mapOfFormatTypeFilter.get("mif");
     ArrayList<Filter> intxtFilters = mapOfFormatTypeFilter.get("plaintext");
+    ArrayList<Filter> jsonFilters = mapOfFormatTypeFilter.get("json");
     List<Filter> qaFilters = (List<Filter>) request.getAttribute("qaFilters");
     
 	FileProfile fp = (FileProfile) sessionMgr.getAttribute("fileprofile");
@@ -513,6 +514,7 @@ function enforceEncodingAndTargetFileExportIfNeeded()
 	var poFilters = new Array();
 	var fmFilters = new Array();
 	var intxtFilters = new Array();
+	var jsonFilters = new Array();
   
 	<%
 		for(int i = 0; i < jpFilters.size(); i++)
@@ -591,6 +593,20 @@ function enforceEncodingAndTargetFileExportIfNeeded()
 			htmlFilter.filterName = "<%=filter.getFilterName()%>";
 			htmlFilter.filterTableName = "<%=filter.getFilterTableName()%>";
 			htmlFilters.push(htmlFilter);
+			<%
+		}
+	%>
+	
+	<%
+		for(int i = 0; i < jsonFilters.size(); i++)
+		{
+			Filter filter = jsonFilters.get(i);
+			%>
+			var jsonFilter = new Object();
+			jsonFilter.id = "<%=filter.getId()%>";
+			jsonFilter.filterName = "<%=filter.getFilterName()%>";
+			jsonFilter.filterTableName = "json_filter";
+			jsonFilters.push(jsonFilter);
 			<%
 		}
 	%>
@@ -800,6 +816,10 @@ function enforceEncodingAndTargetFileExportIfNeeded()
     else if (isPO(format))
     {
     	generateFilters(poFilters);
+    }
+    else if (isJson(format))
+    {
+    	generateFilters(jsonFilters);
     }
     else
     {
@@ -1137,6 +1157,11 @@ function isPPT()
 function isPO()
 {
 	return isSpecialFormat("Portable Object");
+}
+
+function isJson(format)
+{
+	return isSpecialFormat("Json");
 }
 
 function isJavaScript()

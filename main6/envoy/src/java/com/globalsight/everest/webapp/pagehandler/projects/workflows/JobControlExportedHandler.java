@@ -29,6 +29,7 @@ import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -36,13 +37,16 @@ import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoExportSearcher;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.everest.workflowmanager.WorkflowManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -186,6 +190,38 @@ public class JobControlExportedHandler
 			sessionMgr.removeElement("localesSet");
 			return;
 		}
+		else if(p_request.getParameter("checkIsUploadingForExport") != null)
+        {
+            long jobId = Long.parseLong(p_request.getParameter("jobId"));
+            Job job = WorkflowHandlerHelper.getJobById(jobId);
+            String result = "";
+            for (Workflow workflow: job.getWorkflows())
+            {
+                if(result.length() > 0)
+                    break;
+                
+                if (WorkflowExportingHelper.isExporting(workflow.getId()))
+                {
+                    result="exporting";
+                    break;
+                }
+                
+                Hashtable<Long, Task> tasks = workflow.getTasks();
+                for(Long taskKey:  tasks.keySet())
+                {
+                    if(tasks.get(taskKey).getIsUploading() == 'Y')
+                    {
+                        result = "uploading";
+                        break;
+                    }
+                }
+            }
+            PrintWriter out = p_response.getWriter();
+            p_response.setContentType("text/html");
+            out.write(result);
+            out.close();
+            return;
+        }
         
         performAppropriateOperation(p_request);
         Vector jobStates = new Vector();

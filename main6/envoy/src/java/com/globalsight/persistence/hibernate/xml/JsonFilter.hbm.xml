@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.cxe.entity.filterconfiguration.JsonFilter"
+		table="filter_json">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="companyId" column="COMPANY_ID" type="long"
+			not-null="true" unique="false" />
+		<property name="filterName" length="255" column="FILTER_NAME"
+			type="string" not-null="true" unique="false" />
+		<property name="filterDescription" length="4000"
+			column="FILTER_DESCRIPTION" type="string" not-null="false" unique="false" />
+		<property name="enableSidSupport" column="ENABLE_SID_SUPPORT"
+			type="yes_no" not-null="false" />
+		<property name="elementPostFilterId" column="ELEMENT_POST_FILTER_ID" type="long"
+			not-null="false" unique="false" />
+	    <property name="elementPostFilterTableName" length="100" column="ELEMENT_POST_FILTER_TABLE_NAME" type="string"
+            not-null="false" />
+		<property name="baseFilterId" column="BASE_FILTER_ID" type="long"
+			not-null="false" unique="false" />
+	</class>
+</hibernate-mapping>

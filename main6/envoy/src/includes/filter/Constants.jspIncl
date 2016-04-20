@@ -54,6 +54,7 @@ var jsFilterNameOO = "<%= bundle.getString("lb_filter_ooFilter") %>";
 var jsFilterNameO2010 = "<%= bundle.getString("lb_filter_o2010Filter") %>";
 var jsFilterNamePO = "<%= bundle.getString("lb_filter_pofilter") %>";
 var jsFilterNameBase = "<%= bundle.getString("lb_filter_basefilter") %>";
+var jsFilterNameJsonFilter = "<%= bundle.getString("lb_filter_jsonfilter") %>";
 var jsPriority = "<%= bundle.getString("lb_priority") %>";
 var jsCurrentPriority = "<%= bundle.getString("lb_priority_current") %>";
 var jsNewPriority = "<%= bundle.getString("lb_priority_new") %>";
@@ -74,6 +75,7 @@ var jsFilterDescOO = "<%= bundle.getString("lb_filter_ooFilter_desc") %>";
 var jsFilterDescO2010 = "<%= bundle.getString("lb_filter_o2010Filter_desc") %>";
 var jsFilterDescPO = "<%= bundle.getString("lb_filter_pofilter_desc") %>";
 var jsFilterDescBase = "<%= bundle.getString("lb_filter_basefilter_desc") %>";
+var jsFilterDescJsonFilter = "<%= bundle.getString("lb_filter_jsonfilter_desc") %>";
 
 var lbEmbeddableTags = "<%= bundle.getString("lb_embeddable_tags") %>";
 var lbPairedTags = "<%= bundle.getString("lb_paired_tags") %>";
@@ -338,6 +340,7 @@ namemap.put("base_filter", "jsFilterNameBase");
 namemap.put("frame_maker_filter", "jsFilterNameFMFilter");
 namemap.put("plain_text_filter", "jsFilterNamePlainTextFilter");
 namemap.put("qa_filter", "jsFilterNameQAFilter");
+namemap.put("json_filter", "jsFilterNameJsonFilter");
 
 java.util.Map<String, String> descmap = new java.util.HashMap<String, String>();
 descmap.put("java_properties_filter", "jsFilterDescJavaProperties");
@@ -356,6 +359,7 @@ descmap.put("base_filter", "jsFilterDescBase");
 descmap.put("frame_maker_filter", "jsFilterDescFMFilter");
 descmap.put("plain_text_filter", "jsFilterDescPlainTextFilter");
 descmap.put("qa_filter", "jsFilterDescQAFilter");
+descmap.put("json_filter", "jsFilterDescJsonFilter");
 %>
 
 function getFilterNameByTableName(tablename)

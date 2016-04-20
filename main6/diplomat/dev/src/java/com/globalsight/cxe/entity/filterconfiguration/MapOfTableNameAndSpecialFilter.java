@@ -50,6 +50,7 @@ public class MapOfTableNameAndSpecialFilter
         TABLENAME_FILTER.put(FilterConstants.PLAINTEXT_TABLENAME,
                 new PlainTextFilter());
         TABLENAME_FILTER.put(FilterConstants.QA_TABLENAME, new QAFilter());
+        TABLENAME_FILTER.put(FilterConstants.JSON_TABLENAME, new JsonFilter());
     }
 
     public static Filter getFilterInstance(String tableName)

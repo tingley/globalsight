@@ -2,15 +2,14 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import net.sf.json.JSONObject;
 
 import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.SortUtil;
-
-import net.sf.json.JSONObject;
 
 public class JsonFilter implements Filter
 {
@@ -110,8 +109,7 @@ public class JsonFilter implements Filter
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("filterName", filterName);
         map.put("companyId", companyId);
-        List<?> list = HibernateUtil.search(hql, map);
-        
+
         return HibernateUtil.search(hql, map).size() > 0;
     }
 

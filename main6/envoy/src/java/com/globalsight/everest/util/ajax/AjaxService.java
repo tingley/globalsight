@@ -217,6 +217,66 @@ public class AjaxService extends HttpServlet
         }
     }
 
+    public void saveJsonFilter()
+    {
+        String filterName = request.getParameter("filterName");
+        String filterDesc = request.getParameter("filterDesc");
+        boolean isSupportSid = Boolean.parseBoolean(request.getParameter("isSupportSid"));
+        long baseFilterId = -2;
+        long elementPostFilterId = -1;
+        String elementPostFilterTableName = request.getParameter("elementPostFilterTableName");
+        try
+        {
+            String elementPostFilterIdStr = request.getParameter("elementPostFilterId");
+            String baseFilterIdStr = request.getParameter("baseFilterId");
+            baseFilterId =  Long.parseLong(baseFilterIdStr);
+            elementPostFilterId = Long.parseLong(elementPostFilterIdStr);
+        }
+        catch (Exception ex)
+        {
+        }
+
+        long filterId = FilterHelper.saveJsonFilter(filterName, filterDesc, isSupportSid,
+                baseFilterId, elementPostFilterId, companyId,elementPostFilterTableName);
+        OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
+        saveBaseFilterMapping(filterId, FilterConstants.JSON_TABLENAME);
+        writer.write(filterId + "");
+    }
+    
+    public void updateJsonFilter()
+    {
+        String filterName = request.getParameter("filterName");
+        String filterDesc = request.getParameter("filterDesc");
+        boolean isSupportSid = Boolean.parseBoolean(request.getParameter("isSupportSid"));
+        long fId = Long.parseLong(request.getParameter("filterId"));        
+        long baseFilterId = -2;
+        long elementPostFilterId = -1;
+        String elementPostFilterTableName = null;
+        try
+        {
+            String elementPostFilterStr = request.getParameter("elementPostFilterId");
+            String baseFilterIdStr = request.getParameter("baseFilterId");
+            String[] elementPostFilterStrs = elementPostFilterStr.split("-");
+            baseFilterId =  Long.parseLong(baseFilterIdStr);
+            elementPostFilterId = Long.parseLong(elementPostFilterStrs[0]);
+            elementPostFilterTableName = elementPostFilterStrs[1];
+        }
+        catch (Exception ex)
+        {
+        }
+
+        long filterId = FilterHelper.updateJsonFilter(filterName, filterDesc, isSupportSid,
+                baseFilterId, elementPostFilterId, companyId, fId,elementPostFilterTableName);
+        OperationLog.log(m_userId, OperationLog.EVENT_EDIT,
+                OperationLog.COMPONET_FILTER_CONFIGURATION, filterName);
+
+        if (filterId > 0)
+        {
+            saveBaseFilterMapping(filterId, FilterConstants.JSON_TABLENAME);
+        }
+    }
+    
     public void saveJavaPropertiesFilter()
     {
         // writer = response.getWriter();

@@ -43,6 +43,7 @@ public class FilterConstants
     public final static String FM_TABLENAME = "frame_maker_filter";
     public final static String PLAINTEXT_TABLENAME = "plain_text_filter";
     public final static String QA_TABLENAME = "qa_filter";
+    public final static String JSON_TABLENAME = "json_filter";
 
     public final static ArrayList<String> ALL_FILTER_TABLE_NAMES = new ArrayList<String>();
     public final static Map<String, String> FILTER_TABLE_NAMES_FORMAT = new HashMap<String, String>();
@@ -63,6 +64,7 @@ public class FilterConstants
         ALL_FILTER_TABLE_NAMES.add(BASE_TABLENAME);
         ALL_FILTER_TABLE_NAMES.add(FM_TABLENAME);
         ALL_FILTER_TABLE_NAMES.add(PLAINTEXT_TABLENAME);
+        ALL_FILTER_TABLE_NAMES.add(JSON_TABLENAME);
 
         FILTER_TABLE_NAMES_FORMAT.put(HTML_TABLENAME, IFormatNames.FORMAT_HTML);
         FILTER_TABLE_NAMES_FORMAT.put(MSOFFICEDOC_TABLENAME,
@@ -86,5 +88,6 @@ public class FilterConstants
         FILTER_TABLE_NAMES_FORMAT.put(PLAINTEXT_TABLENAME,
                 IFormatNames.FORMAT_PLAINTEXT);
         FILTER_TABLE_NAMES_FORMAT.put(FM_TABLENAME, IFormatNames.FORMAT_MIF);
+        FILTER_TABLE_NAMES_FORMAT.put(JSON_TABLENAME, IFormatNames.FORMAT_JSON);
     }
 }

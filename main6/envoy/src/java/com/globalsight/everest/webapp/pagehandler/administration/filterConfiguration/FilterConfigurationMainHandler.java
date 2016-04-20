@@ -77,7 +77,7 @@ public class FilterConfigurationMainHandler extends PageHandler
                 "MS Office Excel Filter", "Java Properties Filter", "Java Script Filter",
                 "InDesign Filter", "OpenOffice Filter", "MS Office PowerPoint Filter",
                 "MS Office 2010 Filter", "Portable Object Filter", "Base Text Filter",
-                "Frame Maker 9 Filter", "Plain Text Filter", "QA Filter" };
+                "Frame Maker 9 Filter", "Plain Text Filter", "QA Filter" ,"JavaScript Object Notation Filter "};
 
         String hql2 = "select f.name from FilterConfiguration f where f.companyId=:companyId";
         String currentId = CompanyThreadLocal.getInstance().getValue();
@@ -192,6 +192,12 @@ public class FilterConfigurationMainHandler extends PageHandler
                     fc.setKnownFormatId("|0|");
                     fc.setFilterTableName("qa_filter");
                     fc.setFilterDescription("The filter to handle QA checks.");
+                }
+                else if (i == 16)
+                {
+                    fc.setKnownFormatId("|57|");
+                    fc.setFilterTableName("json_filter");
+                    fc.setFilterDescription("The filter for JavaScript Object Notation Filter.");
                 }
 
                 exCol.add(fc);

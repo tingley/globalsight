@@ -46,6 +46,7 @@ public interface IFormatNames
     public static final String FORMAT_SGML = "sgml";
     public static final String FORMAT_XPTAG = "xptag";
     public static final String FORMAT_TROFF_MAN = "troff-man";
+    public static final String FORMAT_JSON = "json";
 
     // Office Extractor support
     public static final String FORMAT_EXCEL_HTML = "excel-html";

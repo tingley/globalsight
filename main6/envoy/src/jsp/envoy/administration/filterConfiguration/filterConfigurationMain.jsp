@@ -102,6 +102,7 @@ session="true" %>
         <script type="text/javascript" src="/globalsight/includes/filter/BaseFilter.js"></script>
         <script type="text/javascript" src="/globalsight/includes/filter/PlainTextFilter.js"></script>
         <script type="text/javascript" src="/globalsight/includes/filter/QAFilter.js"></script>
+        <script type="text/javascript" src="/globalsight/includes/filter/JsonFilter.js"></script>
         <script type="text/javascript">
         function loadExpand()
         {
@@ -939,6 +940,22 @@ session="true" %>
                             </div>
                         </div>
                     </span>
+                      <span id="jsonFilter_content">
+                         <div id='jsonFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:400px;position:absolute;top:100px;z-index:21'>
+                              <div id='jsonFilterDialogT' onmousedown="DragAndDrop(document.getElementById('jsonFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;*width:110%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                    <%=bundle.getString("lb_filter_jsonfilter")%>
+                                </label>
+                            </div>  
+                            <div id='jsonFilterPopupcontent' style='margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px'>
+                            </div>
+                            <div id="div_button_json_filter" style="margin-left:50px;margin-right:50px;margin-top:10px;margin-bottom:10px;">
+                                <center>
+                                    <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='saveJson()'/><input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('jsonFilterDialog')"/>
+                                </center>
+                            </div>
+                        </div>
+                    </span> 
                     <span id="plaintextFilter_content">
                         <div id='plaintextFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:930px;position:absolute;top:100px;z-index:21'>
                             <div id='plaintextFilterDialogT' onmousedown="DragAndDrop(document.getElementById('plaintextFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>

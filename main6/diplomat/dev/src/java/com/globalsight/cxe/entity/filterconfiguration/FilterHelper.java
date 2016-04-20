@@ -142,7 +142,45 @@ public class FilterHelper
                 .getFilterInstance(filterTableName);
         return filter.checkExistsEdit(filterId, filterName, companyId);
     }
+    
+    public static long saveJsonFilter(String filterName,
+            String filterDesc, boolean isSupportSid, long baseFilterId,
+            long elementPostFilterId,long companyId,String elementPostFilterTableName)
+    {
+        JsonFilter filter = new JsonFilter();
+        filter.setFilterName(filterName);
+        filter.setFilterDescription(filterDesc);
+        filter.setEnableSidSupport(isSupportSid);
+        filter.setBaseFilterId(baseFilterId);
+        filter.setElementPostFilterId(elementPostFilterId);
+        filter.setCompanyId(companyId);
+        filter.setElementPostFilterTableName(elementPostFilterTableName);
 
+        HibernateUtil.saveOrUpdate(filter);
+        return filter.getId();
+    }
+    
+    public static long updateJsonFilter(String filterName, String filterDesc, boolean isSupportSid,
+            long baseFilterId, long elementPostFilterId, long companyId,long fId,String elementPostFilterTableName)
+    {
+        JsonFilter filter = null;
+        String hql = "from JsonFilter jp where jp.id='" + fId + "'";
+        if (HibernateUtil.search(hql).size() > 0)
+        {
+            filter = (JsonFilter) HibernateUtil.search(hql).get(0);
+            filter.setFilterName(filterName);
+            filter.setFilterDescription(filterDesc);
+            filter.setEnableSidSupport(isSupportSid);
+            filter.setBaseFilterId(baseFilterId);
+            filter.setElementPostFilterId(elementPostFilterId);
+            filter.setCompanyId(companyId);
+            filter.setElementPostFilterTableName(elementPostFilterTableName);
+            HibernateUtil.update(filter);
+        }
+
+        return filter != null ? filter.getId() : -1;
+    }
+    
     public static long saveJavaPropertiesFilter(String filterName,
             String filterDesc, boolean isSupportSid, boolean isUnicodeEscape,
             boolean isPreserveSpaces, long companyId, long secondFilterId,
@@ -302,10 +340,13 @@ public class FilterHelper
     public static void deleteFilter(String filterTableName, long filterId, String m_userId )
             throws Exception
     {
-        // Filter filter = MapOfTableNameAndSpecialFilter
-        // .getFilterInstance(filterTableName);
+
         List<Filter> list = getFilterByMapping(filterId, filterTableName);
         Filter filter = list.get(0);
+        if ("json_filter".equals(filterTableName))
+        {
+            filterTableName = "filter_json";
+        }
         String sql = "delete from " + filterTableName + " where id=" + filterId;
         HibernateUtil.executeSql(sql);
         OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
@@ -318,6 +359,10 @@ public class FilterHelper
     {
         Filter filter = MapOfTableNameAndSpecialFilter
                 .getFilterInstance(filterTableName);
+        if ("json_filter".equals(filterTableName))
+        {
+            filterTableName = "filter_json";
+        }
         String sql = "select * from " + filterTableName + " where id = ?";
 
         return (List<Filter>) HibernateUtil.searchWithSql(filter.getClass(),

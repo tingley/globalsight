@@ -20,6 +20,7 @@ allFilterDialogIds[12] = "baseFilterDialog";
 allFilterDialogIds[13] = "fmFilterDialog";
 allFilterDialogIds[14] = "plaintextFilterDialog";
 allFilterDialogIds[15] = "qaFilterDialog";
+allFilterDialogIds[16] = "jsonFilterDialog"
 var isBaseFilterSelectChanged = false;
 
 //For HTML
@@ -61,6 +62,7 @@ function loadFilterConfigurations()
 	specialFiltersMap["frame_maker_filter"] = new FMFilter();
 	specialFiltersMap["plain_text_filter"] = new PlainTextFilter();
 	specialFiltersMap["qa_filter"] = new QAFilter();
+	specialFiltersMap["json_filter"] = new JsonFilter();
 	
 	sendAjax(null, "loadFilterConfigurations", "loadFilterConfigurationsCallback");
 }

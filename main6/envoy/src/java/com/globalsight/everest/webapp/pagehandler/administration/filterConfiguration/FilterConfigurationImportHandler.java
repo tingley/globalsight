@@ -53,6 +53,7 @@ import com.globalsight.cxe.entity.filterconfiguration.InddFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JSPFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JavaScriptFilter;
+import com.globalsight.cxe.entity.filterconfiguration.JsonFilter;
 import com.globalsight.cxe.entity.filterconfiguration.MSOffice2010Filter;
 import com.globalsight.cxe.entity.filterconfiguration.MSOfficeDocFilter;
 import com.globalsight.cxe.entity.filterconfiguration.MSOfficeExcelFilter;
@@ -334,6 +335,7 @@ public class FilterConfigurationImportHandler extends PageHandler
         private Map<Long, Long> msOfficePPTFilterIdMap = new HashMap<Long, Long>();
         private Map<Long, Long> plainTextFilterIdMap = new HashMap<Long, Long>();
         private Map<Long, Long> poFilterIdMap = new HashMap<Long, Long>();
+        private Map<Long, Long> jsonFilterIdMap = new HashMap<Long, Long>();
 
         public DoImport(String sessionId, File uploadedFile, String companyId)
         {
@@ -421,6 +423,7 @@ public class FilterConfigurationImportHandler extends PageHandler
             List<XMLRuleFilter> xmlRuleFilterList = new ArrayList<XMLRuleFilter>();
             List<XmlRuleFileImpl> xmlRuleList = new ArrayList<XmlRuleFileImpl>();
             List<QAFilter> qaFilterList = new ArrayList<QAFilter>();
+            List<JsonFilter> jsonFilterList = new ArrayList<JsonFilter>();
 
             Set<String> keySet = map.keySet();
             Iterator it = keySet.iterator();
@@ -460,6 +463,11 @@ public class FilterConfigurationImportHandler extends PageHandler
                     {
                         JavaPropertiesFilter javaPropertiesFilter = putDataIntoJavaPropertiesFilter(valueMap);
                         javaPropertiesFilterList.add(javaPropertiesFilter);
+                    }
+                    else if (keyArr[0].equalsIgnoreCase("json_filter"))
+                    {
+                       JsonFilter jsonFilter = putDataIntoJsonFilter(valueMap);
+                       jsonFilterList.add(jsonFilter);
                     }
                     else if (keyArr[0].equalsIgnoreCase("java_script_filter"))
                     {
@@ -540,6 +548,9 @@ public class FilterConfigurationImportHandler extends PageHandler
 
             if (javaPropertiesFilterList.size() > 0)
                 dataMap.put("java_properties_filter", javaPropertiesFilterList);
+
+            if (jsonFilterList.size() >0)
+                dataMap.put("json_filter", jsonFilterList);
 
             if (javaScriptFilterList.size() > 0)
                 dataMap.put("java_script_filter", javaScriptFilterList);
@@ -635,6 +646,14 @@ public class FilterConfigurationImportHandler extends PageHandler
                 {
                     i++;
                     storeJavaPropertiesFilterData(dataMap);
+                    this.cachePercentage(i, size);
+                    Thread.sleep(100);
+                }
+                // store "json_filter" data to database
+                if (dataMap.containsKey("json_filter"))
+                {
+                    i++;
+                    storeJsonFilterData(dataMap);
                     this.cachePercentage(i, size);
                     Thread.sleep(100);
                 }
@@ -1033,6 +1052,55 @@ public class FilterConfigurationImportHandler extends PageHandler
             {
                 // TODO Auto-generated catch block
                 String msg = "Upload Xml Filter data failed !";
+                logger.warn(msg);
+                addToError(msg);
+            }
+        }
+
+        /**
+         * store json_filter data
+         * 
+         * @param dataMap
+         * */
+        private void storeJsonFilterData(Map<String, List> dataMap)
+        {
+            JsonFilter jsonFilter = null;
+            List<JsonFilter> jsonFilterList = (List<JsonFilter>) dataMap
+                    .get("json_filter");
+            try
+            {
+                for (int i = 0; i < jsonFilterList.size(); i++)
+                {
+                    jsonFilter = jsonFilterList.get(i);
+                    Long id = jsonFilter.getId();
+                    String name = jsonFilter.getFilterName();
+                    // get new filter name
+                    String newFilterName = checkFilterNameExists(name, "JsonFilter");
+                    jsonFilter.setFilterName(newFilterName);
+
+                    // Judgment "json_Filter" are references "html_filter"
+                    if (jsonFilter.getElementPostFilterTableName().equalsIgnoreCase(
+                            "html_filter")
+                            && htmlFilterIdMap
+                                    .containsKey(jsonFilter.getElementPostFilterId()))
+                    {
+                        jsonFilter.setElementPostFilterId(htmlFilterIdMap
+                                .get(jsonFilter.getElementPostFilterId()));
+                    }
+                    // store data to database
+                    HibernateUtil.save(jsonFilter);
+                    addMessage("<b>" + newFilterName + "</b>  is imported successfully !");
+                    // get new id
+                    Long newId = selectNewId(newFilterName, "JsonFilter");
+                    jsonFilterIdMap.put(id, newId);
+                    OperationLog.log(m_userId, OperationLog.EVENT_ADD,
+                            OperationLog.COMPONET_FILTER_CONFIGURATION, newFilterName);
+                }
+            }
+            catch (Exception e)
+            {
+                // TODO Auto-generated catch block
+                String msg = "Upload Java Properties Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
             }
@@ -1559,6 +1627,13 @@ public class FilterConfigurationImportHandler extends PageHandler
                             baseFilterMapping.setFilterId(javaPropertiesFilterIdMap.get(filterId));
                         }
                     }
+                    else if ("filter_json".equalsIgnoreCase(filterTableName))
+                    {
+                        if (jsonFilterIdMap.containsKey(filterId))
+                        {
+                            baseFilterMapping.setFilterId(jsonFilterIdMap.get(filterId));
+                        }
+                    }
                     else if ("office2010_filter".equalsIgnoreCase(filterTableName))
                     {
                         if (msOffice2010FilterIdMap.containsKey(filterId))
@@ -2038,6 +2113,54 @@ public class FilterConfigurationImportHandler extends PageHandler
                 }
             }
             return baseFilterMapping;
+        }
+
+        private JsonFilter putDataIntoJsonFilter(Map<String, String> valueMap)
+        {
+            JsonFilter jsonFilter = new JsonFilter();
+            String keyField = null;
+            String valueField = null;
+            Set<String> valueKey = valueMap.keySet();
+            Iterator itor = valueKey.iterator();
+            while (itor.hasNext())
+            {
+                keyField = (String) itor.next();
+                valueField = valueMap.get(keyField);
+
+                if (keyField.equalsIgnoreCase("ID"))
+                {
+                    jsonFilter.setId(Long.parseLong(valueField));
+                }
+                else if (keyField.equalsIgnoreCase("FILTER_NAME"))
+                {
+                    jsonFilter.setFilterName(containSpecialChar(valueField));
+                }
+                else if (keyField.equalsIgnoreCase("FILTER_DESCRIPTION"))
+                {
+                    jsonFilter.setFilterDescription(valueField);
+                }
+                else if (keyField.equalsIgnoreCase("ENABLE_SID_SUPPORT"))
+                {
+                    jsonFilter.setEnableSidSupport(Boolean.parseBoolean(valueField));
+                }
+                else if (keyField.equalsIgnoreCase("BASE_FILTER_ID"))
+                {
+                    jsonFilter.setBaseFilterId(Long.parseLong(valueField));
+                }
+                else if (keyField.equalsIgnoreCase("ELEMENT_POST_FILTER_ID"))
+                {
+                    jsonFilter.setElementPostFilterId(Long.parseLong(valueField));
+                }
+                else if (keyField.equalsIgnoreCase("ELEMENT_POST_FILTER_TABLE_NAME"))
+                {
+                    jsonFilter.setElementPostFilterTableName(valueField);;
+                }
+                else if (keyField.equalsIgnoreCase("COMPANY_ID"))
+                {
+                    jsonFilter.setCompanyId(Long.parseLong(companyId));
+                }
+            }
+            return jsonFilter;
         }
 
         private JavaPropertiesFilter putDataIntoJavaPropertiesFilter(Map<String, String> valueMap)

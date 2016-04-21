@@ -198,27 +198,20 @@ public class ExtractedFileImporter extends FileImporter
                         }
                     }
                 }
-                for (GlobalSightLocale trgLocale : targetLocales)
+
+                if (p_request.getL10nProfile().getTmChoice() != L10nProfile.NO_TM)
                 {
-                    MachineTranslationProfile mtProfile = MTProfileHandlerHelper
-                            .getMtProfileBySourcePage(sourcePage, trgLocale);
-                    if (mtProfile == null || !mtProfile.isIgnoreTMMatch())
+                    c_logger.info("TM leveraging for page: "
+                            + p_request.getExternalPageId());
+                    time_PERFORMANCE = System.currentTimeMillis();
+
+                    exactMatchedSegments = leveragePage(p_request, sourcePage, jobId);
+
+                    if (c_logger.isDebugEnabled())
                     {
-                        if (p_request.getL10nProfile().getTmChoice() != L10nProfile.NO_TM)
-                        {
-                            c_logger.info("TM leveraging for page: "
-                                    + p_request.getExternalPageId());
-                            time_PERFORMANCE = System.currentTimeMillis();
-
-                            exactMatchedSegments = leveragePage(p_request, sourcePage, jobId);
-
-                            if (c_logger.isDebugEnabled())
-                            {
-                                c_logger.debug("Performance:: TM leveraging time = "
-                                        + +(System.currentTimeMillis() - time_PERFORMANCE) + " "
-                                        + p_request.getExternalPageId());
-                            }
-                        }
+                        c_logger.debug("Performance:: TM leveraging time = "
+                                + +(System.currentTimeMillis() - time_PERFORMANCE) + " "
+                                + p_request.getExternalPageId());
                     }
                 }
 
@@ -1337,6 +1330,22 @@ public class ExtractedFileImporter extends FileImporter
 
         return targetPages;
     }
+    
+    private  List<GlobalSightLocale> getIgnoreTargetLocale(Set<GlobalSightLocale> locales, SourcePage sourcePage)
+    {
+        List<GlobalSightLocale> ignoreTargetLocale = new ArrayList<GlobalSightLocale>();
+        for (GlobalSightLocale trgLocale : locales)
+        {
+            MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                    .getMtProfileBySourcePage(sourcePage, trgLocale);
+            if (mtProfile != null && mtProfile.isIgnoreTMMatch())
+            {
+                ignoreTargetLocale.add(trgLocale);
+            }
+        }
+        
+        return ignoreTargetLocale;
+    }
 
     private LeverageDataCenter createLeverageDataCenter(Request p_request,
             SourcePage p_sourcePage, long jobId) throws Exception
@@ -1353,7 +1362,7 @@ public class ExtractedFileImporter extends FileImporter
             leveragingLocales.removeLeveragingLocales((GlobalSightLocale) it
                     .next());
         }
-
+        
         GlobalSightLocale[] jobLocales = p_request.getTargetLocalesToImport();
         LeveragingLocales newLeveragingLocales = new LeveragingLocales();
         for (int i = 0; i < jobLocales.length; i++)
@@ -1368,6 +1377,13 @@ public class ExtractedFileImporter extends FileImporter
 
         TranslationMemoryProfile tmProfile = l10nProfile
                 .getTranslationMemoryProfile();
+        
+        List<GlobalSightLocale> ignoreTargetLocale = getIgnoreTargetLocale(
+                newLeveragingLocales.getAllTargetLocales(), p_sourcePage);
+        for (GlobalSightLocale trgLocale : ignoreTargetLocale)
+        {
+            newLeveragingLocales.removeLeveragingLocales(trgLocale);
+        }
 
         LeverageOptions leverageOptions = new LeverageOptions(tmProfile,
                 newLeveragingLocales);

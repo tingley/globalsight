@@ -62,7 +62,7 @@ function loadFilterConfigurations()
 	specialFiltersMap["frame_maker_filter"] = new FMFilter();
 	specialFiltersMap["plain_text_filter"] = new PlainTextFilter();
 	specialFiltersMap["qa_filter"] = new QAFilter();
-	specialFiltersMap["json_filter"] = new JsonFilter();
+	specialFiltersMap["filter_json"] = new JsonFilter();
 	
 	sendAjax(null, "loadFilterConfigurations", "loadFilterConfigurationsCallback");
 }
@@ -130,6 +130,7 @@ function generateFilterTable(filterConfigurations)
 	for(var i = 0; i < filterConfigurations.length; i++)
 	{
 		var filter = filterConfigurations[i];
+		console.log(filter);
 		var color = 'white';
 		var backgroundColor = 'white';
 		if(i % 2 == 0)

@@ -1,7 +1,7 @@
 var jsonFilter = new JsonFilter();
 
 function JsonFilter() {
-	this.filterTableName = "json_filter";
+	this.filterTableName = "filter_json";
 
 //	this.checkedItemIds = new Array();
 //	this.optionInternalText = "0";
@@ -179,7 +179,7 @@ function saveJson() {
 	var filterDesc = document.getElementById("jsonDesc").value;
 	var isSupportSid = document.getElementById("isSupportSid").checked;
 
-	var baseFilterSelect = document.getElementById("json_filter_baseFilterSelect");
+	var baseFilterSelect = document.getElementById("filter_json_baseFilterSelect");
 	var indexBase = baseFilterSelect.selectedIndex;
 	var baseFilterId = baseFilterSelect.options[indexBase].value;
 
@@ -194,7 +194,7 @@ function saveJson() {
 	
 	var obj = {
 		isNew : isNew,
-		filterTableName : "json_filter",
+		filterTableName : "filter_json",
 		filterId : filterId,
 		filterName : filterName,
 		filterDesc : filterDesc,
@@ -236,7 +236,7 @@ function saveJsonFilterCallback(data) {
 	if (filter) {
 		var jpFilter = new Object();
 		jpFilter.id = data - 0;
-		jpFilter.filterTableName = "json_filter";
+		jpFilter.filterTableName = "filter_json";
 		jpFilter.filterName = checkExistJsonCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistJsonCallback.obj.filterDesc;
 		jpFilter.enableSidSupport = checkExistJsonCallback.obj.isSupportSid;
@@ -258,7 +258,7 @@ function updateJsonFilterCallback(data)
 	{
 		var jpFilter = new Object();
 		jpFilter.id = filterId;
-		jpFilter.filterTableName = "json_filter";
+		jpFilter.filterTableName = "filter_json";
 		jpFilter.filterName = checkExistJsonCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistJsonCallback.obj.filterDesc;
 		jpFilter.enableSidSupport = checkExistJsonCallback.obj.isSupportSid;

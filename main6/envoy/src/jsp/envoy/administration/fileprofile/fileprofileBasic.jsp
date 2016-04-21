@@ -605,7 +605,7 @@ function enforceEncodingAndTargetFileExportIfNeeded()
 			var jsonFilter = new Object();
 			jsonFilter.id = "<%=filter.getId()%>";
 			jsonFilter.filterName = "<%=filter.getFilterName()%>";
-			jsonFilter.filterTableName = "json_filter";
+			jsonFilter.filterTableName = "filter_json";
 			jsonFilters.push(jsonFilter);
 			<%
 		}

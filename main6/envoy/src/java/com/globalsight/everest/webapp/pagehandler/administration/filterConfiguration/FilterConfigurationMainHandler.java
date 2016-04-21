@@ -196,7 +196,7 @@ public class FilterConfigurationMainHandler extends PageHandler
                 else if (i == 16)
                 {
                     fc.setKnownFormatId("|57|");
-                    fc.setFilterTableName("json_filter");
+                    fc.setFilterTableName("filter_json");
                     fc.setFilterDescription("The filter for JavaScript Object Notation Filter.");
                 }
 

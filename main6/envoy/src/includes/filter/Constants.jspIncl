@@ -340,7 +340,7 @@ namemap.put("base_filter", "jsFilterNameBase");
 namemap.put("frame_maker_filter", "jsFilterNameFMFilter");
 namemap.put("plain_text_filter", "jsFilterNamePlainTextFilter");
 namemap.put("qa_filter", "jsFilterNameQAFilter");
-namemap.put("json_filter", "jsFilterNameJsonFilter");
+namemap.put("filter_json", "jsFilterNameJsonFilter");
 
 java.util.Map<String, String> descmap = new java.util.HashMap<String, String>();
 descmap.put("java_properties_filter", "jsFilterDescJavaProperties");
@@ -359,7 +359,7 @@ descmap.put("base_filter", "jsFilterDescBase");
 descmap.put("frame_maker_filter", "jsFilterDescFMFilter");
 descmap.put("plain_text_filter", "jsFilterDescPlainTextFilter");
 descmap.put("qa_filter", "jsFilterDescQAFilter");
-descmap.put("json_filter", "jsFilterDescJsonFilter");
+descmap.put("filter_json", "jsFilterDescJsonFilter");
 %>
 
 function getFilterNameByTableName(tablename)

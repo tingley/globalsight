@@ -67,7 +67,19 @@ for(int i=0; i<reportJobInfoList.size(); i++)
 function doSubmit()
 {
 	var jobIDArr = fnGetSelectedJobIds();
+	
+	if(jobIDArr == null || jobIDArr.length == 0)
+	{
+		if(alertInfo != null)
+			alert(alertInfo); 
+		return;	
+	}	
 
+	if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
+	{
+		alert("Invalid Target Locales. The selected jobs don't contain such target locales.");
+		return;
+	}
 	// Submit the Form, if possible(No report is generating.)
 	$.ajax({
 		type: 'POST',

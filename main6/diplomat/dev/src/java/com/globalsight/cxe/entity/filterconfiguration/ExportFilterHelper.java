@@ -156,6 +156,10 @@ public class ExportFilterHelper
             {
                 propertiesInputQAFilter(propertyFile, tableName, filterId, companyId);
             }
+            else if(FilterConstants.JSON_TABLENAME.equalsIgnoreCase(tableName))
+            {
+                propertiesInputJsonFilter(propertyFile, tableName, filterId, companyId);
+            }
         }
 
         ExportUtil.writeToResponse(response, propertyFile, fileName);
@@ -224,6 +228,27 @@ public class ExportFilterHelper
                     BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
                             javaPropertiesFilter.getSecondFilterTableName(),
                             javaPropertiesFilter.getSecondFilterId());
+
+                    if (bfm != null)
+                    {
+                        filterSet.add("base_filter_mapping" + "." + bfm.getId());
+                        filterSet.add(FilterConstants.BASE_TABLENAME + "." + bfm.getBaseFilterId());
+                    }
+                }
+            }
+            else if (FilterConstants.JSON_TABLENAME.equalsIgnoreCase(filterTableName))
+            {
+                JsonFilter jsonFilter = (JsonFilter) filter;
+                if (jsonFilter.getElementPostFilterTableName() != null
+                        && !"".equals(jsonFilter.getElementPostFilterTableName()))
+                {
+                    filterSet.add(jsonFilter.getElementPostFilterTableName() + "."
+                            + jsonFilter.getElementPostFilterId());
+
+                    // Judge whether the html_filter reference base_filter
+                    BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
+                            jsonFilter.getElementPostFilterTableName(),
+                            jsonFilter.getElementPostFilterId());
 
                     if (bfm != null)
                     {
@@ -1206,6 +1231,56 @@ public class ExportFilterHelper
                     .append(checkSpecialChar(plainTextFilter.getConfigXml())).append(NEW_LINE);
             buffer.append("##plain_text_filter.").append(plainTextFilter.getId()).append(".end")
                     .append(NEW_LINE).append(NEW_LINE);
+
+            writeToFile(propertyFile, buffer.toString().getBytes());
+        }
+    }
+
+    /**
+     * Write jsonFilter the properties file
+     * 
+     * @param prop
+     * @param filter
+     * @param baseFilterMapping
+     * */
+    private static void propertiesInputJsonFilter(File propertyFile, String tableName,
+            Long filterId, Long companyId)
+    {
+        StringBuffer buffer = new StringBuffer();
+        Filter filter = selectFilterDataFromDataBase(tableName, filterId, companyId);
+        if (filter != null)
+        {
+            JsonFilter jsonsFilter = (JsonFilter) filter;
+
+            buffer.append("##json_filter.").append(jsonsFilter.getId())
+                    .append(".begin").append(NEW_LINE);
+            buffer.append("json_filter.").append(jsonsFilter.getId())
+                    .append(".ID = ").append(jsonsFilter.getId()).append(NEW_LINE);
+            buffer.append("json_filter.").append(jsonsFilter.getId())
+                    .append(".FILTER_NAME = ")
+                    .append(editUtil.removeCRLF(jsonsFilter.getFilterName()))
+                    .append(NEW_LINE);
+            buffer.append("json_filter.").append(jsonsFilter.getId())
+                    .append(".FILTER_DESCRIPTION = ")
+                    .append(editUtil.removeCRLF(jsonsFilter.getFilterDescription()))
+                    .append(NEW_LINE);
+            buffer.append("json_filter.").append(jsonsFilter.getId())
+                    .append(".ENABLE_SID_SUPPORT = ")
+                    .append(jsonsFilter.isEnableSidSupport()).append(NEW_LINE);
+            buffer.append("json_filter.").append(jsonsFilter.getId())
+                    .append(".BASE_FILTER_ID = ")
+                    .append(jsonsFilter.getBaseFilterId()).append(NEW_LINE);
+            buffer.append("json_filter.").append(jsonsFilter.getId())
+                    .append(".ELEMENT_POST_FILTER_ID = ")
+                    .append(jsonsFilter.getElementPostFilterId()).append(NEW_LINE);
+            buffer.append("json_filter.").append(jsonsFilter.getId())
+                    .append(".ELEMENT_POST_FILTER_TABLE_NAME = ")
+                    .append(jsonsFilter.getElementPostFilterTableName()).append(NEW_LINE);
+            buffer.append("json_filter.").append(jsonsFilter.getId())
+                    .append(".COMPANY_ID = ").append(jsonsFilter.getCompanyId())
+                    .append(NEW_LINE);
+            buffer.append("##json_filter.").append(jsonsFilter.getId())
+                    .append(".end").append(NEW_LINE).append(NEW_LINE);
 
             writeToFile(propertyFile, buffer.toString().getBytes());
         }

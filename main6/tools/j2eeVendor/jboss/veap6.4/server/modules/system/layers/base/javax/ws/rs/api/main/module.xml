@@ -24,11 +24,15 @@
 
 <module xmlns="urn:jboss:module:1.1" name="javax.ws.rs.api">
     <resources>
-        <resource-root path="jboss-jaxrs-api_1.1_spec-1.0.1.Final-redhat-3.jar"/>
+        <resource-root path="jboss-jaxrs-api_2.0_spec-1.0.0.Final.jar"/>
         <!-- Insert resources here -->
     </resources>
 
     <dependencies>
+        <!--  needed because javax.ws.rs.core.Link uses JAXB annotations -->
+        <module name="javax.xml.bind.api"/>
+        <!--  needed because javax.ws.rs.core.Link uses JAXB annotations -->
+        <module name="javax.api"/>
         <module name="org.jboss.resteasy.resteasy-jaxrs" services="export"/>
     </dependencies>
 </module>

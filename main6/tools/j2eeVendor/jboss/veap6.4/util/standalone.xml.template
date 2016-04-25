@@ -124,6 +124,14 @@
                 <suffix value=".yyyyMMdd"/>
                 <append value="true"/>
             </periodic-rotating-file-handler>
+            <periodic-rotating-file-handler name="restWebservices" autoflush="true">
+                <formatter>
+                    <pattern-formatter pattern="%d;[%t];%-5p;%c;%m%n"/>
+                </formatter>
+                <file relative-to="jboss.server.log.dir" path="../../../../logs/restWebservices.log"/>
+                <suffix value=".yyyyMMdd"/>
+                <append value="true"/>
+            </periodic-rotating-file-handler>
             <periodic-rotating-file-handler name="TermAuditLog" autoflush="true">
                 <formatter>
                     <pattern-formatter pattern="%m%n"/>
@@ -204,6 +212,12 @@
                 <level name="ALL"/>
                 <handlers>
                     <handler name="webservices"/>
+                </handlers>
+            </logger>
+            <logger category="com.globalsight.restful" use-parent-handlers="false">
+                <level name="ALL"/>
+                <handlers>
+                    <handler name="restWebservices"/>
                 </handlers>
             </logger>
             <logger category="TermAuditLog" use-parent-handlers="false">

@@ -23,9 +23,9 @@
   -->
 
 <module xmlns="urn:jboss:module:1.1" name="org.jboss.resteasy.resteasy-multipart-provider">
-
     <resources>
-        <resource-root path="resteasy-multipart-provider-2.3.10.Final-redhat-1.jar"/>
+        <resource-root path="resteasy-multipart-provider-3.0.13.Final.jar"/>
+	<resource-root path="resteasy-multipart-provider-3.0.13.Final-jandex.jar"/>
         <!-- Insert resources here -->
     </resources>
 
@@ -39,5 +39,6 @@
         <module name="org.apache.james.mime4j"/>
         <module name="org.jboss.resteasy.resteasy-jaxb-provider"/>
         <module name="org.jboss.resteasy.resteasy-jaxrs"/>
+        <module name="org.jboss.logging"/>
     </dependencies>
 </module>

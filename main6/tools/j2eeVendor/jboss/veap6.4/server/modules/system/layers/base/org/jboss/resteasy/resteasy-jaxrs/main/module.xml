@@ -23,10 +23,10 @@
   -->
 
 <module xmlns="urn:jboss:module:1.1" name="org.jboss.resteasy.resteasy-jaxrs">
-
     <resources>
-        <resource-root path="async-http-servlet-3.0-2.3.10.Final-redhat-1.jar"/>
-        <resource-root path="resteasy-jaxrs-2.3.10.Final-redhat-1.jar"/>
+        <resource-root path="async-http-servlet-3.0-3.0.13.Final.jar"/>
+        <resource-root path="resteasy-jaxrs-3.0.13.Final.jar"/>
+        <resource-root path="resteasy-client-3.0.13.Final.jar"/>
         <!-- Insert resources here -->
     </resources>
 
@@ -38,13 +38,18 @@
         <module name="org.apache.commons.codec" />
         <module name="org.apache.httpcomponents" />
         <module name="org.apache.log4j"/>
-        <module name="org.scannotation.scannotation" />
         <module name="org.slf4j" />
         <module name="javax.servlet.api"/>
-        <module name="org.apache.commons.io"/>
-        
+        <module name="javax.validation.api"/>
+        <module name="javax.xml.bind.api"/>
+        <module name="org.hibernate.validator"/>
+        <module name="org.jboss.logging"/>
+        <!--module name="resteasy-validator-provider-10"/-->
+
         <!-- exported -->
         <module name="org.apache.httpcomponents" export="true"/>
-        <module name="org.jboss.logging" export="true"/>
+        <module name="org.apache.commons.io"/>
+        <module name="org.jboss.resteasy.resteasy-hibernatevalidator-provider" services="export" export="true"/>
+        
     </dependencies>
 </module>

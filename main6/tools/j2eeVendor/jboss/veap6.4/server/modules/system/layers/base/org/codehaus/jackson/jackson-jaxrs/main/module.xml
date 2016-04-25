@@ -27,7 +27,7 @@
     </properties>
 
     <resources>
-        <resource-root path="jackson-jaxrs-1.9.9.redhat-4.jar"/>
+        <resource-root path="jackson-jaxrs-1.9.12.jar"/>
         <!-- Insert resources here -->
     </resources>
 

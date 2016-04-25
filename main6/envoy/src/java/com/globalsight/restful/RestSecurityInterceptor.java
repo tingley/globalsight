@@ -1,0 +1,265 @@
+/**
+ * Copyright 2009 Welocalize, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.
+ *
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
+package com.globalsight.restful;
+
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
+
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.naming.NamingException;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.ext.Provider;
+
+import org.apache.log4j.Logger;
+import org.jboss.resteasy.core.Headers;
+import org.jboss.resteasy.core.ResourceMethodInvoker;
+import org.jboss.resteasy.core.ServerResponse;
+import org.jboss.resteasy.util.Base64;
+
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.usermgr.UserLdapHelper;
+import com.globalsight.util.StringUtil;
+
+/**
+ * This interceptor verify the access permissions for a user based on username
+ * and password provided in request.
+ *  
+ */
+@Provider
+public class RestSecurityInterceptor implements ContainerRequestFilter, RestConstants
+{
+    private static final Logger logger = Logger.getLogger(RestSecurityInterceptor.class);
+
+    private static final String AUTHORIZATION_PROPERTY = "Authorization";
+
+    private static final String AUTHENTICATION_SCHEME = "Basic";
+
+    private static final ServerResponse ACCESS_DENIED = new ServerResponse(
+            "Access denied for this resource", 401, new Headers<Object>());
+
+    private static final ServerResponse ACCESS_DENIED_EMPTY_USERNAME_PWD = new ServerResponse(
+            "Empty username and password", 401, new Headers<Object>());
+
+    private static final ServerResponse ACCESS_DENIED_INVALID_USER = new ServerResponse(
+            "Incorrect username", 401, new Headers<Object>());
+
+    private static final ServerResponse ACCESS_DENIED_INVALID_PASSWORD = new ServerResponse(
+            "Incorrect password", 401, new Headers<Object>());
+
+    private static final ServerResponse ACCESS_FORBIDDEN = new ServerResponse(
+            "Nobody can access this resource", 403, new Headers<Object>());
+
+    private static final ServerResponse SERVER_ERROR = new ServerResponse("INTERNAL SERVER ERROR",
+            500, new Headers<Object>());
+
+    /**
+     * Filter requests:
+     * 1. Validate basic authorization information.
+     * 2. Validate "companyName" parameter.
+     * 3. Other common validation such as "tmId" for TM resource.
+     */
+    @Override
+    public void filter(ContainerRequestContext requestContext)
+    {
+        ResourceMethodInvoker methodInvoker = (ResourceMethodInvoker) requestContext
+                .getProperty("org.jboss.resteasy.core.ResourceMethodInvoker");
+        Method method = methodInvoker.getMethod();
+
+        UriInfo uriInfo = requestContext.getUriInfo();
+        MultivaluedMap<String, String> pathParams = uriInfo.getPathParameters();
+        String companyName = pathParams.getFirst(COMPANY_NAME);
+
+        // "getAuthorization" method is a helper method, no need to filter.
+        if ("getAuthorization".equals(method.getName()))
+        {
+            return;
+        }
+
+        // Access allowed for all
+        if (!method.isAnnotationPresent(PermitAll.class))
+        {
+            // Access denied for all
+            if (method.isAnnotationPresent(DenyAll.class))
+            {
+                requestContext.abortWith(ACCESS_FORBIDDEN);
+                return;
+            }
+
+            // Get request headers
+            final MultivaluedMap<String, String> headers = requestContext.getHeaders();
+
+            // Fetch authorization header
+            final List<String> authorization = headers.get(AUTHORIZATION_PROPERTY);
+
+            // If no authorization information present; block access
+            if (authorization == null || authorization.isEmpty())
+            {
+                requestContext.abortWith(ACCESS_DENIED_EMPTY_USERNAME_PWD);
+                return;
+            }
+
+            // Get encoded username and password
+            final String encodedUserPassword = authorization.get(0).replaceFirst(
+                    AUTHENTICATION_SCHEME + " ", "");
+
+            // Decode username and password
+            String usernameAndPassword = null;
+            try
+            {
+                usernameAndPassword = new String(Base64.decode(encodedUserPassword));
+            }
+            catch (IOException e)
+            {
+                requestContext.abortWith(SERVER_ERROR);
+                return;
+            }
+
+            // Split username and password tokens
+            final StringTokenizer tokenizer = new StringTokenizer(usernameAndPassword, ":");
+            final String username = tokenizer.nextToken();
+            final String password = tokenizer.nextToken();
+            // Verifying username and password
+            User user = null;
+            try
+            {
+                user = ServerProxy.getUserManager().getUserByName(username);
+                if (user == null)
+                {
+                    user = ServerProxy.getUserManager().getUser(username);
+                }
+                if (user == null)
+                {
+                    requestContext.abortWith(ACCESS_DENIED_INVALID_USER);
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                requestContext.abortWith(ACCESS_DENIED_INVALID_USER);
+                return;
+            }
+
+            try
+            {
+                UserLdapHelper.authenticate(password, user.getPassword());
+                logger.info("User '" + user.getUserName() + "' is requesting '" + method.getName()
+                        + "' method with URL: " + uriInfo.getAbsolutePath());
+            }
+            catch (NamingException e)
+            {
+                requestContext.abortWith(ACCESS_DENIED_INVALID_PASSWORD);
+                return;
+            }
+
+            // Check "companyName" parameter
+            String errorMsg = checkCompany(companyName);
+            if (errorMsg != null)
+            {
+                ServerResponse invalidCompany = new ServerResponse(
+                        errorMsg, 400, new Headers<Object>());
+                requestContext.abortWith(invalidCompany);
+                return;
+            }
+
+            // User should belong to current company
+            if (!user.getCompanyName().equalsIgnoreCase(companyName))
+            {
+                String msg = "User '" + user.getUserName() + "' does not belong to company '"
+                        + companyName + "'.";
+                ServerResponse fromDiffCompanies = new ServerResponse(msg, 400,
+                        new Headers<Object>());
+                requestContext.abortWith(fromDiffCompanies);
+                return;
+            }
+
+            // Verify user access
+            if (method.isAnnotationPresent(RolesAllowed.class))
+            {
+                RolesAllowed rolesAnnotation = method.getAnnotation(RolesAllowed.class);
+                Set<String> rolesSet = new HashSet<String>(Arrays.asList(rolesAnnotation.value()));
+
+                // Is user valid?
+                if (!isUserAllowed(username, password, rolesSet))
+                {
+                    requestContext.abortWith(ACCESS_DENIED);
+                    return;
+                }
+            }
+
+            // required !!!
+            CompanyThreadLocal.getInstance().setValue(companyName);
+        }
+    }
+
+    private boolean isUserAllowed(final String username, final String password,
+            final Set<String> rolesSet)
+    {
+        boolean isAllowed = false;
+
+        // Step 1. Fetch password from database and match with password in
+        // argument.
+        // If both match then get the defined role for user from database and
+        // continue; else return isAllowed [false].
+        // Access the database and do this part yourself
+        // String userRole = userMgr.getUserRole(username);
+        String userRole = "ADMIN";
+
+        // Step 2. Verify user role
+        if (rolesSet.contains(userRole))
+        {
+            isAllowed = true;
+        }
+        return isAllowed;
+    }
+
+    private String checkCompany(String p_companyName)
+    {
+        String errorMsg = null;
+        if (StringUtil.isEmpty(p_companyName))
+        {
+            errorMsg = "Empty company name";
+        }
+
+        try
+        {
+            Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
+            if (company == null)
+            {
+                errorMsg = "Company does not exist: " + p_companyName;
+            }
+        }
+        catch (Exception e)
+        {
+            errorMsg = "Invalid company name: " + p_companyName;
+        }
+        return errorMsg;
+    }
+}

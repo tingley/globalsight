@@ -17111,7 +17111,7 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            throw new WebServiceException(makeErrorXml("jobsSkipActivity",
+            throw new WebServiceException(makeErrorXml("jobsAddLanguages",
                     e.getMessage()));
         }
         finally
@@ -20117,7 +20117,7 @@ public class Ambassador extends AbstractWebService
             startDate = checkDate(p_startDate);
             if (startDate.equals("error"))
             {
-                return makeErrorXml(EXPORT_TM, "Invaild start date.");
+                return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild start date.");
             }
         }
 
@@ -20126,7 +20126,7 @@ public class Ambassador extends AbstractWebService
             finishDate = checkDate(p_finishDate);
             if (finishDate.equals("error"))
             {
-                return makeErrorXml(EXPORT_TM, "Invaild finish date.");
+                return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild finish date.");
             }
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
             try
@@ -20137,7 +20137,7 @@ public class Ambassador extends AbstractWebService
                     Date staDate = sdf.parse(startDate);
                     if (fshDate.before(staDate))
                     {
-                        return makeErrorXml(EXPORT_TM,
+                        return makeErrorXml(TM_FULL_TEXT_SEARCH,
                                 "Invaild start date and finish date.");
                     }
                 }

@@ -65,7 +65,8 @@ public class ExtractorRegistry implements IFormatNames
             "com.globalsight.ling.docproc.extractor.passolo.PassoloExtractor",
             "com.globalsight.ling.docproc.extractor.windowspe.WindowsPEExtractor",
             "com.globalsight.ling.docproc.extractor.xml.XmlExtractor",
-            "com.globalsight.ling.docproc.extractor.xliff20.Extractor" };
+            "com.globalsight.ling.docproc.extractor.xliff20.Extractor" ,
+            "com.globalsight.ling.docproc.extractor.json.Extractor"};
 
     // Codec class names.
     // *** Keep this table in sync with m_ExtractorClassPath ***
@@ -156,7 +157,7 @@ public class ExtractorRegistry implements IFormatNames
             FORMAT_WORD_HTML, FORMAT_POWERPOINT_HTML, FORMAT_EBAY_SGML, FORMAT_EBAY_PRJ,
             FORMAT_XLIFF, FORMAT_OPENOFFICE_XML, FORMAT_PO, FORMAT_OFFICE_XML, FORMAT_RC,
             FORMAT_RESX, FORMAT_IDML, FORMAT_MIF, FORMAT_PASSOLO, FORMAT_WINDOWSPE,
-            FORMAT_AUTHORIT_XML, FORMAT_XLIFF20 };
+            FORMAT_AUTHORIT_XML, FORMAT_XLIFF20,FORMAT_JSON};
 
     /** Singleton instance, call getObject(). */
     private ExtractorRegistry()

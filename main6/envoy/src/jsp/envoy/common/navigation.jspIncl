@@ -542,7 +542,7 @@ dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_rss_reade
 <%}%>
 
 <% if (userPerms.getPermissionFor(Permission.CREATE_JOB)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_create_job")%>", "javascript:goToUrl('<%=createJobUrl%>');", ""));
+dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_create_job")%>(deprecated)", "javascript:goToUrl('<%=createJobUrl%>');", ""));
 <% } %>
 
 <% if (userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>

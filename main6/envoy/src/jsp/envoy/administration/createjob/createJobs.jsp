@@ -26,7 +26,7 @@
 <head>
 <link rel="stylesheet" type="text/css" href="/globalsight/includes/css/createJob.css"/>
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
-<title><c:out value="${lb_create_job}"/></title>
+<title><c:out value="${lb_create_job}(deprecated)"/></title>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/includes/utilityScripts.js"></script>
 <script type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></script>
@@ -772,7 +772,7 @@ $(document).ready(function() {
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 <div id="contentLayer" style="position: absolute; z-index: 9; top: 108; left: 20px; right: 20px;">
-<span class='mainHeading'><c:out value="${lb_create_job}"/></span><p>
+<span class='mainHeading'><c:out value="${lb_create_job} (deprecated)"/></span><p>
 <amb:permission name="<%=Permission.CREATE_JOB_NO_APPLET%>" >
 <span id="noJavaLink" class="titletext" style="height:10px"><c:out value="${helper_text_create_job_without_java}"/>
 <a href="/globalsight/ControlServlet?activityName=createZipJobs" title="<c:out value="${lb_create_job_without_java}"/>">here</a>.</span><p>

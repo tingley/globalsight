@@ -649,7 +649,7 @@
     <TD CLASS="wizardCell" ID="createJob">
         <A ID="createJobLink"
            CLASS="wizardLinks" 
-           HREF="javascript:loadUrl('<%=createJobGuide%>')" ><%= menuBundle.getString("lb_create_job") %></A>
+           HREF="javascript:loadUrl('<%=createJobGuide%>')" ><%= menuBundle.getString("lb_create_job") %>(deprecated)</A>
     </TD>
     <TD WIDTH=10></TD>
     <%}%>

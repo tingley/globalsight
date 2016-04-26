@@ -99,6 +99,7 @@
                 <file relative-to="jboss.server.log.dir" path="../../../../logs/GlobalSight.log"/>
                 <suffix value=".yyyyMMdd"/>
                 <append value="true"/>
+                <encoding value="UTF-8" />
             </periodic-rotating-file-handler>
             <periodic-rotating-file-handler name="activity" autoflush="true">
                 <formatter>
@@ -107,6 +108,7 @@
                 <file relative-to="jboss.server.log.dir" path="../../../../logs/activity.log"/>
                 <suffix value=".yyyyMMdd"/>
                 <append value="true"/>
+                <encoding value="UTF-8" />
             </periodic-rotating-file-handler>
             <periodic-rotating-file-handler name="operation" autoflush="true">
             	<formatter>
@@ -115,6 +117,7 @@
                 <file relative-to="jboss.server.log.dir" path="../../../../logs/operation.log"/>
                 <suffix value=".yyyyMMdd"/>
                 <append value="true"/>
+                <encoding value="UTF-8" />
             </periodic-rotating-file-handler>
 			<periodic-rotating-file-handler name="webservices" autoflush="true">
             	<formatter>
@@ -123,6 +126,7 @@
                 <file relative-to="jboss.server.log.dir" path="../../../../logs/webservices.log"/>
                 <suffix value=".yyyyMMdd"/>
                 <append value="true"/>
+                <encoding value="UTF-8" />
             </periodic-rotating-file-handler>
             <periodic-rotating-file-handler name="restWebservices" autoflush="true">
                 <formatter>
@@ -131,6 +135,7 @@
                 <file relative-to="jboss.server.log.dir" path="../../../../logs/restWebservices.log"/>
                 <suffix value=".yyyyMMdd"/>
                 <append value="true"/>
+                <encoding value="UTF-8" />
             </periodic-rotating-file-handler>
             <periodic-rotating-file-handler name="TermAuditLog" autoflush="true">
                 <formatter>

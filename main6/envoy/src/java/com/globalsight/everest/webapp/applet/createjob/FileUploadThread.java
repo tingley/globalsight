@@ -11,7 +11,6 @@ import netscape.javascript.JSObject;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 
 import com.globalsight.everest.webapp.applet.common.AppletHelper;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.webservices.client2.Ambassador2;
 
 import de.innosystec.unrar.rarfile.FileHeader;
@@ -147,10 +146,6 @@ public class FileUploadThread extends Thread
         catch (Exception e)
         {
             e.printStackTrace();
-        }
-        finally
-        {
-            HibernateUtil.closeSession();
         }
     }
 

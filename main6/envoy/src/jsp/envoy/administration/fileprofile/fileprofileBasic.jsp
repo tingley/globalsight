@@ -1423,18 +1423,28 @@ function isProjectUseTermbase(data) {
               onchange="enforceEncodingAndTargetFileExportIfNeeded()" class="standardText">
               <option value="-1"><%=bundle.getString("lb_choose")%></option>
 <%
-            for (Iterator it = formatTypes.iterator(); it.hasNext();)
-            {
-                KnownFormatType type = (KnownFormatType)it.next();
-                if (type.getId() == formatId)
-        		{
-                    out.println("<option value='" + type.getId() + "," + type.getName() + "' selected>" + type.getName() + "</option>");
-        		}
-                else
-        		{
-                    out.println("<option value='" + type.getId() + "," + type.getName() + "'>"          + type.getName() + "</option>");
-        		}
-            }
+    for (Iterator it = formatTypes.iterator(); it.hasNext();)
+    {
+        KnownFormatType type = (KnownFormatType) it.next();
+        String typeName = type.getName();
+        if (typeName.equals("Excel2003") || typeName.equals("PowerPoint2003")
+                || typeName.equals("Word2003") || typeName.equals("INDD (CS2)")
+                || typeName.equals("INDD (CS3)") || typeName.equals("INDD (CS4)")
+                || typeName.equals("INX (CS2)") || typeName.equals("INX (CS3)"))
+        {
+            typeName = typeName + " (deprecated)";
+        }
+        if (type.getId() == formatId)
+        {
+            out.println("<option value='" + type.getId() + "," + type.getName()
+                    + "' selected>" + typeName + "</option>");
+        }
+        else
+        {
+            out.println("<option value='" + type.getId() + "," + type.getName() + "'>"
+                    + typeName + "</option>");
+        }
+    }
 %>
             </select>
             

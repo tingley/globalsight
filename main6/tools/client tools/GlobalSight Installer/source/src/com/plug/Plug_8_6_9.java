@@ -32,15 +32,15 @@ public class Plug_8_6_9 implements Plug
 
     private static Logger log = Logger.getLogger(Plug_8_6_9.class);
 
-    private static final String DEPLOY_PATH = "/jboss/server/standalone/deployments";
-
     public DbUtil dbUtil = DbUtilFactory.getDbUtil();
 
     @Override
     public void run()
     {
         removeOldVersionJars();
-        handleDirtyDataFromLPfile();
+
+        // GBS-4355: old localization profiles not disabled 
+        fixDirtyDataForL10nProfile();
     }
  
     // For GBS-4123: upgrade RestEasy bundled in Jboss.
@@ -86,6 +86,46 @@ public class Plug_8_6_9 implements Plug
         }
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void fixDirtyDataForL10nProfile()
+    {
+        try
+        {
+            List<ArrayList> namesList = searchDirtyNameFromL10nProfile();
+            if (namesList.size() > 0)
+            {
+                for (ArrayList list0 : namesList)
+                {
+                    long companyId = (long) list0.get(0);
+                    List<ArrayList> l10nProfileIdlist = searchDirtyIdFromL10nProfile(companyId,
+                            (String) list0.get(1));
+                    if (l10nProfileIdlist.size() > 1)
+                    {
+                        long latestLPId = (long) l10nProfileIdlist.get(0).get(0);
+                        String sql1 = "UPDATE l10n_profile SET is_active= 'N' WHERE id = ?";
+                        String sql2 = "UPDATE file_profile SET l10n_profile_id = ? WHERE l10n_profile_id = ?  AND IS_ACTIVE = 'Y' AND companyid = ?";
+                        for (int i = 1; i < l10nProfileIdlist.size(); i++)
+                        {
+                            List sql1List = new ArrayList<>();
+                            sql1List.add(l10nProfileIdlist.get(i).get(0));
+                            dbUtil.execute(sql1, sql1List);
+
+                            List sql2List = new ArrayList<>();
+                            sql2List.add(latestLPId);
+                            sql2List.add(l10nProfileIdlist.get(i).get(0));
+                            sql2List.add(companyId);
+                            dbUtil.execute(sql2, sql2List);
+                        }
+                    }
+                }
+            }
+        }
+        catch (SQLException e)
+        {
+            log.error("Fail to update table file_profile and l10n_profile", e);
+        }
+    }
+
     private List<ArrayList> searchDirtyNameFromL10nProfile() throws SQLException
     {
         String sql = "SELECT companyId, NAME, COUNT(id) AS num FROM l10n_profile "
@@ -101,44 +141,5 @@ public class Plug_8_6_9 implements Plug
                 + " companyid = " + companyId + " AND is_active = 'y' ORDER BY TIMESTAMP DESC";
         List<ArrayList> l10nProfileIdlist = dbUtil.query(sql);
         return l10nProfileIdlist;
-    }
-
-    public void handleDirtyDataFromLPfile()
-    {
-        List<ArrayList> namesList;
-        try
-        {
-            namesList = searchDirtyNameFromL10nProfile();
-            if (namesList.size() > 0)
-            {
-                for (ArrayList list0 : namesList)
-                {
-                    long companyId = (long) list0.get(0);
-                    List<ArrayList> l10nProfileIdlist = searchDirtyIdFromL10nProfile(companyId,
-                            (String) list0.get(1));
-                    if (l10nProfileIdlist.size() > 0)
-                    {
-                        long latestLPId = (long) l10nProfileIdlist.get(0).get(0);
-                        for (int i = 1; i < l10nProfileIdlist.size(); i++)
-                        {
-                            String sql1 = "UPDATE l10n_profile SET is_active= 'N' WHERE id = ?";
-                            List sql1List = new ArrayList<>();
-                            sql1List.add(l10nProfileIdlist.get(i).get(0));
-                            dbUtil.execute(sql1, sql1List);
-                            String sql2 = "UPDATE file_profile SET l10n_profile_id = ? WHERE l10n_profile_id = ?  AND IS_ACTIVE = 'Y' AND companyid = ?";
-                            List sql2List = new ArrayList<>();
-                            sql2List.add(latestLPId);
-                            sql2List.add(l10nProfileIdlist.get(i).get(0));
-                            sql2List.add(companyId);
-                            dbUtil.execute(sql2, sql2List);
-                        }
-                    }
-                }
-            }
-        }
-        catch (SQLException e)
-        {
-            log.info("update table file_profile and l10n_profile fail ");
-        }
     }
 }

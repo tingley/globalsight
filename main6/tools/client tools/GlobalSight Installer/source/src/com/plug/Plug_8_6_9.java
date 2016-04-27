@@ -17,12 +17,15 @@
 package com.plug;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.util.ServerUtil;
-
 import org.apache.log4j.Logger;
+
+import com.util.ServerUtil;
+import com.util.db.DbUtil;
+import com.util.db.DbUtilFactory;
 
 public class Plug_8_6_9 implements Plug
 {
@@ -31,10 +34,13 @@ public class Plug_8_6_9 implements Plug
 
     private static final String DEPLOY_PATH = "/jboss/server/standalone/deployments";
 
+    public DbUtil dbUtil = DbUtilFactory.getDbUtil();
+
     @Override
     public void run()
     {
         removeOldVersionJars();
+        handleDirtyDataFromLPfile();
     }
  
     // For GBS-4123: upgrade RestEasy bundled in Jboss.
@@ -75,6 +81,62 @@ public class Plug_8_6_9 implements Plug
             {
                 log.error("Error to delete file: " + path, e);
             }
+        }
+    }
+
+    private List<ArrayList> searchDirtyNameFromL10nProfile() throws SQLException
+    {
+        String sql = "SELECT companyId, NAME, COUNT(id) AS num FROM l10n_profile "
+                + "WHERE is_active = 'Y' GROUP BY companyid, NAME HAVING num > 1";
+        List<ArrayList> lists = dbUtil.query(sql);
+        return lists;
+    }
+
+    private List<ArrayList> searchDirtyIdFromL10nProfile(long companyId, String name)
+            throws SQLException
+    {
+        String sql = "SELECT id FROM l10n_profile WHERE NAME = '" + name + "' AND "
+                + " companyid = " + companyId + " AND is_active = 'y' ORDER BY TIMESTAMP DESC";
+        List<ArrayList> l10nProfileIdlist = dbUtil.query(sql);
+        return l10nProfileIdlist;
+    }
+
+    public void handleDirtyDataFromLPfile()
+    {
+        List<ArrayList> namesList;
+        try
+        {
+            namesList = searchDirtyNameFromL10nProfile();
+            if (namesList.size() > 0)
+            {
+                for (ArrayList list0 : namesList)
+                {
+                    long companyId = (long) list0.get(0);
+                    List<ArrayList> l10nProfileIdlist = searchDirtyIdFromL10nProfile(companyId,
+                            (String) list0.get(1));
+                    if (l10nProfileIdlist.size() > 0)
+                    {
+                        long latestLPId = (long) l10nProfileIdlist.get(0).get(0);
+                        for (int i = 1; i < l10nProfileIdlist.size(); i++)
+                        {
+                            String sql1 = "UPDATE l10n_profile SET is_active= 'N' WHERE id = ?";
+                            List sql1List = new ArrayList<>();
+                            sql1List.add(l10nProfileIdlist.get(i).get(0));
+                            dbUtil.execute(sql1, sql1List);
+                            String sql2 = "UPDATE file_profile SET l10n_profile_id = ? WHERE l10n_profile_id = ?  AND IS_ACTIVE = 'Y' AND companyid = ?";
+                            List sql2List = new ArrayList<>();
+                            sql2List.add(latestLPId);
+                            sql2List.add(l10nProfileIdlist.get(i).get(0));
+                            sql2List.add(companyId);
+                            dbUtil.execute(sql2, sql2List);
+                        }
+                    }
+                }
+            }
+        }
+        catch (SQLException e)
+        {
+            log.info("update table file_profile and l10n_profile fail ");
         }
     }
 }

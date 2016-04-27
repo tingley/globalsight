@@ -252,15 +252,13 @@ public class AjaxService extends HttpServlet
         long fId = Long.parseLong(request.getParameter("filterId"));        
         long baseFilterId = -2;
         long elementPostFilterId = -1;
-        String elementPostFilterTableName = null;
+        String elementPostFilterTableName = request.getParameter("elementPostFilterTableName");
         try
         {
-            String elementPostFilterStr = request.getParameter("elementPostFilterId");
+            String elementPostFilterIdStr = request.getParameter("elementPostFilterId");
             String baseFilterIdStr = request.getParameter("baseFilterId");
-            String[] elementPostFilterStrs = elementPostFilterStr.split("-");
             baseFilterId =  Long.parseLong(baseFilterIdStr);
-            elementPostFilterId = Long.parseLong(elementPostFilterStrs[0]);
-            elementPostFilterTableName = elementPostFilterStrs[1];
+            elementPostFilterId = Long.parseLong(elementPostFilterIdStr);
         }
         catch (Exception ex)
         {

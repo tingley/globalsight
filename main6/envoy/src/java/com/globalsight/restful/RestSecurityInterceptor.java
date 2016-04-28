@@ -31,6 +31,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.naming.NamingException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
@@ -89,6 +90,8 @@ public class RestSecurityInterceptor implements ContainerRequestFilter, RestCons
     @Override
     public void filter(ContainerRequestContext requestContext)
     {
+        setCharset(requestContext);
+
         ResourceMethodInvoker methodInvoker = (ResourceMethodInvoker) requestContext
                 .getProperty("org.jboss.resteasy.core.ResourceMethodInvoker");
         Method method = methodInvoker.getMethod();
@@ -261,5 +264,19 @@ public class RestSecurityInterceptor implements ContainerRequestFilter, RestCons
             errorMsg = "Invalid company name: " + p_companyName;
         }
         return errorMsg;
+    }
+
+    /**
+     * Set "Accept-Charset" to "utf-8" as default to avoid corrupted words.
+     */
+    private void setCharset(ContainerRequestContext requestContext)
+    {
+        Object obj = requestContext.getProperty("RESTEASY_CHOSEN_ACCEPT");
+        if (obj != null && obj instanceof MediaType)
+        {
+            MediaType type = (MediaType) obj;
+            type = type.withCharset("utf-8");
+            requestContext.setProperty("RESTEASY_CHOSEN_ACCEPT", type);
+        }
     }
 }

@@ -515,6 +515,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             String searchText = "Welocalize - about us";
             String tmProfileName = "tmprofile_1";
             String sourceLocale = "en_US";
+            String targetLocale = "fr_FR";
             String escapeString = "true"; // or "false"
 
             StringBuffer url = new StringBuffer();
@@ -524,6 +525,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             url.append("&tmProfileName=").append(tmProfileName);
             url.append("&sourceLocale=").append(sourceLocale);
             // optional query params
+            url.append("&targetLocale=").append(targetLocale);
             url.append("&escapeString=").append(escapeString);
 
             HttpGet httpGet = getHttpGet(url.toString(), userName, password);

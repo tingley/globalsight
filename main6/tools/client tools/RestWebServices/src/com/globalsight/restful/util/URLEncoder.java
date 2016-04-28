@@ -14,7 +14,7 @@
  *  limitations under the License.
  *  
  */
-package com.globalsight.restful;
+package com.globalsight.restful.util;
 
 import java.io.UnsupportedEncodingException;
 import java.util.BitSet;

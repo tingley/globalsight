@@ -36,7 +36,7 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import com.globalsight.restful.RestfulApiTestHelper;
-import com.globalsight.restful.URLEncoder;
+import com.globalsight.restful.util.URLEncoder;
 
 public class TmResourceTester extends RestfulApiTestHelper
 {
@@ -352,6 +352,9 @@ public class TmResourceTester extends RestfulApiTestHelper
         }
     }
 
+    /**
+     * http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms/{tmId}/export
+     */
     public String testExportTM()
     {
         CloseableHttpClient httpClient = getHttpClient();
@@ -394,6 +397,9 @@ public class TmResourceTester extends RestfulApiTestHelper
         return null;
     }
 
+    /**
+     * http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms/{tmId}/export/{identifyKey}
+     */
     public void testGetTmExportFile(String identifyKey)
     {
         CloseableHttpClient httpClient = getHttpClient();

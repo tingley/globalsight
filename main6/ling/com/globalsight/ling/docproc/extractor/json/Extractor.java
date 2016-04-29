@@ -49,7 +49,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 {
     static private final Logger s_logger = Logger.getLogger(Extractor.class);
     private String REGEX_COLON = ":[\\s|\\t|\\r|\\n]*\"";
-//    private String REGEX_BRACKETS = ":[\\s|\\t|\\r|\\n]*\\[";
+    private String REGEX_BRACKETS = ":[\\s|\\t|\\r|\\n]*\\[";
     private Output m_output = null;
     private EFInputData m_input = null;
     private Filter m_elementPostFilter = null;
@@ -85,12 +85,12 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     public void extract() throws ExtractorException
     {
         this.setFormat();
-        m_input =  getInput();
-        m_output =  getOutput();
+        m_input = getInput();
+        m_output = getOutput();
         try
         {
             Pattern colonP = Pattern.compile(REGEX_COLON);
-//            Pattern bracketsP = Pattern.compile(REGEX_BRACKETS);
+            Pattern bracketsP = Pattern.compile(REGEX_BRACKETS);
             Filter mainFilter = getMainFilter();
             JsonFilter jsonFilter = (mainFilter != null && mainFilter instanceof JsonFilter) ? (JsonFilter) mainFilter
                     : null;
@@ -122,8 +122,9 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             StringBuffer colonBuffer = new StringBuffer();
             StringBuffer tranBuffer = new StringBuffer();
             String sid = null;
-            while((tempchar = bufferReader.read()) != -1){
-                char chr = (char)tempchar;
+            while ((tempchar = bufferReader.read()) != -1)
+            {
+                char chr = (char) tempchar;
                 if (chr == ':')
                 {
                     containColon = true;
@@ -141,7 +142,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                             char[] skeletonArr = skeletonBuffer.toString().toCharArray();
                             int firstIndex = -1;
                             int lastIndex = -1;
-                            int count  = 0;
+                            int count = 0;
                             for (int i = skeletonArr.length - 1; i >= 0; i--)
                             {
                                 if (skeletonArr[i] == '"')
@@ -158,7 +159,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                                     }
                                 }
                             }
-                            sid = skeletonBuffer.substring(firstIndex+1, lastIndex);
+                            sid = skeletonBuffer.substring(firstIndex + 1, lastIndex);
                         }
                         colonBuffer = new StringBuffer();
                         skeletonBuffer = new StringBuffer();
@@ -176,15 +177,39 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     }
                     else
                     {
-                        skeletonBuffer.append(chr);
                         tranChar = false;
-                        if (m_elementPostFilter != null)
-                            gotoPostFilter(tranBuffer.toString(), sid);
+                        // if translate segment is empty
+                        if (StringUtil.isEmpty(tranBuffer.toString().trim()))
+                        {
+                            skeletonBuffer.append(tranBuffer.toString()).append(chr);
+                            tranBuffer = new StringBuffer();
+                            continue;
+                        }
                         else
-                            m_output.addTranslatable(tranBuffer.toString(), sid);
+                        {
+                            // if translate segment is not empty
+                            skeletonBuffer.append(chr);
+                            tranChar = false;
 
-                        tranBuffer = new StringBuffer();
-                        continue;
+                            if (m_elementPostFilter != null)
+                            {
+                                try
+                                {
+                                    gotoPostFilter(tranBuffer.toString(), sid);
+                                }
+                                catch (Exception e)
+                                {
+                                    m_output.addTranslatable(tranBuffer.toString(), sid);
+                                }
+                            }
+                            else
+                            {
+                                m_output.addTranslatable(tranBuffer.toString(), sid);
+                            }
+
+                            tranBuffer = new StringBuffer();
+                            continue;
+                        }
                     }
                 }
                 else

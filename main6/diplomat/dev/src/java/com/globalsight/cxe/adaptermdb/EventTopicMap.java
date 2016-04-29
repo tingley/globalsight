@@ -277,6 +277,7 @@ public class EventTopicMap
         m_classMap.put(CxeMessageType.PRSXML_IMPORTED_EVENT,  new ExtractorMDB());
         m_classMap.put(CxeMessageType.RTF_IMPORTED_EVENT,  new ExtractorMDB());
         m_classMap.put(CxeMessageType.XPTAG_IMPORTED_EVENT,  new ExtractorMDB());
+        m_classMap.put(CxeMessageType.JSON_IMPORTED_EVENT,  new ExtractorMDB());
 
         // events for the merger
         m_classMap.put(CxeMessageType.HTML_LOCALIZED_EVENT, new MergerMDB());
@@ -284,6 +285,7 @@ public class EventTopicMap
         m_classMap.put(CxeMessageType.PRSXML_LOCALIZED_EVENT, new MergerMDB());
         m_classMap.put(CxeMessageType.RTF_LOCALIZED_EVENT, new MergerMDB());
         m_classMap.put(CxeMessageType.XPTAG_LOCALIZED_EVENT, new MergerMDB());
+        m_classMap.put(CxeMessageType.JSON_LOCALIZED_EVENT, new MergerMDB());
 
         // CAP-CXE related
         m_classMap.put(CxeMessageType.GXML_CREATED_EVENT, new CapTargetAdapterMDB());

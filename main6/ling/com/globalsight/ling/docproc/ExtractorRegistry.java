@@ -103,7 +103,8 @@ public class ExtractorRegistry implements IFormatNames
             "com.globalsight.ling.common.XmlEnDecoder", "com.globalsight.ling.common.XmlEnDecoder",
             "com.globalsight.ling.common.MifEnDecoder", "com.globalsight.ling.common.XmlEnDecoder",
             "com.globalsight.ling.common.XmlEnDecoder", "com.globalsight.ling.common.XmlEnDecoder",
-            "com.globalsight.ling.common.XmlEnDecoder" };
+            "com.globalsight.ling.common.XmlEnDecoder" ,
+            "com.globalsight.ling.common.JsonEnDecoder"};
 
     // Post merge process class names
     // *** Keep this table in sync with m_FormatName ***
@@ -146,7 +147,8 @@ public class ExtractorRegistry implements IFormatNames
             "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.xml.NoOpPostMergeProcessor",
             "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor",
-            "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor" };
+            "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor",
+            "com.globalsight.ling.docproc.merger.json.JsonPostMergeProcessor"};
 
     // format names used in diplomat
     private String[] m_FormatName =

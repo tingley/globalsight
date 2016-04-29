@@ -42,6 +42,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
+import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.everest.page.pageexport.style.docx.AtStyleStyle;
 import com.globalsight.everest.page.pageexport.style.docx.BoldStyle;
 import com.globalsight.everest.page.pageexport.style.docx.CapsStyle;
@@ -88,8 +89,7 @@ public class DocxStyleUtil extends StyleUtil
      */
     private Map<String, String> styles = new HashMap<String, String>();
 
-    static private final Logger s_logger = Logger
-            .getLogger(DocxStyleUtil.class);
+    static private final Logger s_logger = Logger.getLogger(DocxStyleUtil.class);
 
     /**
      * @see com.globalsight.everest.page.pageexport.style.StyleUtil#preHandle(java.lang.String)
@@ -177,8 +177,8 @@ public class DocxStyleUtil extends StyleUtil
     {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
-        BufferedReader br = new BufferedReader(new InputStreamReader(
-                new FileInputStream(new File(path)), "utf-8"));
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(new File(path)), "utf-8"));
 
         Document document = db.parse(new InputSource(br));
         List<Style> styles = getAllStyles();
@@ -264,10 +264,74 @@ public class DocxStyleUtil extends StyleUtil
             repairAttributeValue(filePath);
             forStylesInWt(filePath);
             forStylesNotInWt(filePath);
+            fixFooterTranslation(filePath);
         }
         catch (Exception e)
         {
             s_logger.error(e);
+        }
+    }
+
+    /**
+     * Fixes the footer translation on footerXXX.xml and core.xml.
+     * 
+     * @since GBS-4348
+     */
+    private void fixFooterTranslation(String filePath) throws Exception
+    {
+        String baseName = FileUtils.getBaseName(filePath);
+        if (baseName.endsWith(".xml") && baseName.startsWith("footer"))
+        {
+            // footerXXX.xml
+            File footer = new File(filePath);
+            String footerContent = FileUtil.readFile(footer, "utf-8");
+
+            File coreXml = new File(footer.getParentFile().getParent(), "docProps/core.xml");
+            String coreXmlContent = FileUtil.readFile(coreXml, "utf-8");
+
+            Pattern p = Pattern.compile("<w:sdt>([\\d\\D]*?)</w:sdt>");
+            Matcher m = p.matcher(footerContent);
+            while (m.find())
+            {
+                String sdtContent = m.group(1);
+                Pattern p2 = Pattern
+                        .compile("<w:dataBinding[^>]*?w:xpath=\"([\\d\\D]*?)\"[^>]*?/>");
+                Matcher m2 = p2.matcher(sdtContent);
+                if (m2.find())
+                {
+                    String xpath = m2.group(1);
+                    // e.g. w:xpath="/ns1:coreProperties[1]/ns0:creator[1]"
+                    int idx1 = xpath.indexOf("/ns0:");
+                    int idx2 = xpath.lastIndexOf("[1]");
+                    if (idx1 > 0 && idx2 > 0 && idx2 > idx1)
+                    {
+                        // e.g. propertyName = "creator"
+                        String propertyName = xpath.substring(idx1 + 5, idx2);
+                        Pattern p3 = Pattern.compile(
+                                "<w:sdtContent>[\\d\\D]*?<w:t>([\\d\\D]*?)</w:t>[\\d\\D]*?</w:sdtContent>");
+                        Matcher m3 = p3.matcher(sdtContent);
+                        if (m3.find())
+                        {
+                            String wtInFooter = m3.group(1);
+                            // e.g. dc:creator
+                            String nodeName = "dc:" + propertyName;
+                            String pattern = "(<" + nodeName + ">)" + "([\\d\\D]*?)" + "(</"
+                                    + nodeName + ">)";
+                            Pattern p4 = Pattern.compile(pattern);
+                            Matcher m4 = p4.matcher(coreXmlContent);
+                            if (m4.find())
+                            {
+                                String updated = m4.group(1) + wtInFooter + m4.group(3);
+                                coreXmlContent = StringUtil.replace(coreXmlContent, m4.group(),
+                                        updated);
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            FileUtil.writeFile(coreXml, coreXmlContent, "utf-8");
         }
     }
 
@@ -278,8 +342,7 @@ public class DocxStyleUtil extends StyleUtil
      */
     private void forHiddenStyles(String filePath) throws Exception
     {
-        if (!filePath.endsWith("document.xml")
-                && !filePath.endsWith("comments.xml"))
+        if (!filePath.endsWith("document.xml") && !filePath.endsWith("comments.xml"))
         {
             return;
         }
@@ -287,8 +350,7 @@ public class DocxStyleUtil extends StyleUtil
         String content = FileUtil.readFile(f, "utf-8");
         if (content.contains(OfficeXmlHelper.HIDDEN_MARK))
         {
-            content = StringUtil.replace(content, OfficeXmlHelper.HIDDEN_MARK,
-                    "");
+            content = StringUtil.replace(content, OfficeXmlHelper.HIDDEN_MARK, "");
             FileUtil.writeFile(f, content, "utf-8");
         }
     }
@@ -304,7 +366,8 @@ public class DocxStyleUtil extends StyleUtil
         String content = FileUtil.readFile(f, "utf-8");
 
         StringBuilder re = new StringBuilder();
-        re.append("(<w:pStyle w:val=\"[^\"]*\"></w:pStyle><w:lvlText w:val=\")([^%\"]*?)(\\s*%\\d+\"></w:lvlText>)");
+        re.append(
+                "(<w:pStyle w:val=\"[^\"]*\"></w:pStyle><w:lvlText w:val=\")([^%\"]*?)(\\s*%\\d+\"></w:lvlText>)");
         re.append(OfficeXmlHelper.NUMBERING_TAG_ADDED_START);
         // translation - m.group(4)
         re.append("([\\d\\D]*?)");
@@ -344,8 +407,7 @@ public class DocxStyleUtil extends StyleUtil
             content = content.replaceAll("<[/]?su[bp]?>", "");
 
             // For text not in node.
-            content = content.replaceAll("</>\\s*[^\\t\\n\\x0B\\f\\r<]\\s*<",
-                    "");
+            content = content.replaceAll("</>\\s*[^\\t\\n\\x0B\\f\\r<]\\s*<", "");
             FileUtil.writeFile(new File(filePath), content, "utf-8");
         }
         catch (IOException e)
@@ -369,8 +431,7 @@ public class DocxStyleUtil extends StyleUtil
         DOMSource source = new DOMSource(document);
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        OutputStreamWriter ou = new OutputStreamWriter(new FileOutputStream(
-                path), "UTF-8");
+        OutputStreamWriter ou = new OutputStreamWriter(new FileOutputStream(path), "UTF-8");
         StreamResult result = new StreamResult(ou);
         transformer.transform(source, result);
     }

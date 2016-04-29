@@ -1109,7 +1109,7 @@
 <!-- Restful APIs context -->
   <context-param>
     <param-name>resteasy.providers</param-name>
-    <param-value>com.globalsight.restful.RestWebServiceExceptionHandler, com.globalsight.restful.RestSecurityInterceptor</param-value>
+    <param-value>com.globalsight.restful.RestWebServiceExceptionHandler, com.globalsight.restful.RestSecurityInterceptor, com.globalsight.restful.RestContainerResponseFilter</param-value>
   </context-param>
 
   <welcome-file-list>

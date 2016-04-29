@@ -2101,7 +2101,7 @@ public class TmResource extends RestResource
      */
     @GET
     @Path("/{tmId}/export/{identifyKey}")
-    @Produces({MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN})
+    @Produces({"application/xml;charset=UTF-8"})
     public Response getTmExportFile(
             @HeaderParam("Authorization") List<String> authorization,
             @PathParam("companyName") String p_companyName,
@@ -2155,6 +2155,7 @@ public class TmResource extends RestResource
                                 File tmFile = new File(xmlPath);
                                 ResponseBuilder response = Response.ok((Object) tmFile);
                                 response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+                                response.encoding("gzip");
                                 return response.build();
                             }
                         }
@@ -2523,6 +2524,8 @@ public class TmResource extends RestResource
      *            -- Search text. Required.
      * @param p_sourceLocale
      *            -- source locale like "en_US". Required.
+     * @param p_targetLocale
+     *            -- target locale like "fr_FR". Optional.
      * @param p_escapeString
      *            -- Is convert all the escapable characters into their string
      *            (escaped) equivalents or not, available values: "true" or "false".
@@ -2542,6 +2545,7 @@ public class TmResource extends RestResource
             @QueryParam("tmProfileName") String p_tmProfileName,
             @QueryParam("searchText") String p_searchText,
             @QueryParam("sourceLocale") String p_sourceLocale,
+            @QueryParam("targetLocale") String p_targetLocale,
             @QueryParam("escapeString") String p_escapeString) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
@@ -2565,21 +2569,31 @@ public class TmResource extends RestResource
                 throw new RestWebServiceException("Empty source locale");
             GlobalSightLocale sourceLocale = getLocaleByName(p_sourceLocale);
 
+            GlobalSightLocale targetLocale = getLocaleByName(p_targetLocale);
+
             if (StringUtil.isEmpty(p_searchText))
                 throw new RestWebServiceException("Empty search text");
 
             LeveragingLocales levLocales = new LeveragingLocales();
             ArrayList<GlobalSightLocale> trgLocales = new ArrayList<GlobalSightLocale>();
-            Iterator it = ServerProxy.getLocaleManager().getSourceTargetLocalePairs().iterator();
-            while (it.hasNext())
+            if (targetLocale == null)
             {
-                LocalePair localePair = (LocalePair) it.next();
-                if (localePair.getSource().equals(sourceLocale))
+                Iterator it = ServerProxy.getLocaleManager().getSourceTargetLocalePairs().iterator();
+                while (it.hasNext())
                 {
-                    GlobalSightLocale targetLocale = localePair.getTarget();
-                    trgLocales.add(targetLocale);
-                    levLocales.setLeveragingLocale(targetLocale, null);
+                    LocalePair localePair = (LocalePair) it.next();
+                    if (localePair.getSource().equals(sourceLocale))
+                    {
+                        GlobalSightLocale trgLocale = localePair.getTarget();
+                        trgLocales.add(trgLocale);
+                        levLocales.setLeveragingLocale(trgLocale, null);
+                    }
                 }
+            }
+            else
+            {
+                trgLocales.add(targetLocale);
+                levLocales.setLeveragingLocale(targetLocale, null);
             }
 
             OverridableLeverageOptions levOptions = new OverridableLeverageOptions(tmp, levLocales);

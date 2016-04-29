@@ -461,6 +461,16 @@ function checkFilters()
 		}
 	}
 
+    tmp = ATrim($("#jobGroupIdFilter").val()); 
+    for (var x=0;x<tmp.length;x++)
+    {
+        if (!isInt.test(tmp.charAt(x)))
+        {
+            alert("Invalid Group ID, only integer numbers are allowed.");
+            return false;
+        }
+    }
+
 	tmp = ATrim($("#jobNameFilter").val()); 
 	if (hasSpecialChars(tmp)) {
 		alert("Invalid text for job name, wildcard characters and reguler experssions are not supported.");

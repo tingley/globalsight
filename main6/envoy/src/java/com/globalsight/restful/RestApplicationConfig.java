@@ -37,9 +37,6 @@ public class RestApplicationConfig extends Application
         singletons.add(new TmResource());
 
         singletons.add(new TmProfileResource());
-
-        // This is a "helper" resource, will be not published.
-        singletons.add(new LoginResource());
     }
 
     @Override

@@ -864,6 +864,10 @@ function generateBaseFilterList(filterTableName, filter)
 	{
 		str.append("style='width:200px'");
 	}
+	else if (filterTableName == "filter_json")
+	{
+		str.append("style='width:100%'");
+	}
 	else
 	{
 		str.append("class='xml_filter_select'");

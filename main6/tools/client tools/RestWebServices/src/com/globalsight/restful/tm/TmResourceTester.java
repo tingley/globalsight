@@ -36,7 +36,7 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import com.globalsight.restful.RestfulApiTestHelper;
-import com.globalsight.restful.URLEncoder;
+import com.globalsight.restful.util.URLEncoder;
 
 public class TmResourceTester extends RestfulApiTestHelper
 {
@@ -352,6 +352,9 @@ public class TmResourceTester extends RestfulApiTestHelper
         }
     }
 
+    /**
+     * http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms/{tmId}/export
+     */
     public String testExportTM()
     {
         CloseableHttpClient httpClient = getHttpClient();
@@ -394,6 +397,9 @@ public class TmResourceTester extends RestfulApiTestHelper
         return null;
     }
 
+    /**
+     * http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms/{tmId}/export/{identifyKey}
+     */
     public void testGetTmExportFile(String identifyKey)
     {
         CloseableHttpClient httpClient = getHttpClient();
@@ -515,6 +521,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             String searchText = "Welocalize - about us";
             String tmProfileName = "tmprofile_1";
             String sourceLocale = "en_US";
+            String targetLocale = "fr_FR";
             String escapeString = "true"; // or "false"
 
             StringBuffer url = new StringBuffer();
@@ -524,6 +531,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             url.append("&tmProfileName=").append(tmProfileName);
             url.append("&sourceLocale=").append(sourceLocale);
             // optional query params
+            url.append("&targetLocale=").append(targetLocale);
             url.append("&escapeString=").append(escapeString);
 
             HttpGet httpGet = getHttpGet(url.toString(), userName, password);

@@ -108,7 +108,7 @@ JsonFilter.prototype.generateDiv = function(topFilterId, color) {
 
 JsonFilter.prototype.generateElementPostFilter = function(filter) {
 	var str = new StringBuffer("<select id='elementPostFilter' class='xml_filter_select' style='width:100%'>");
-	str.append("<option value='-1'"+ ((filter && filter.elementPostFilter == "-1") ? " selected" : "")
+	str.append("<option value=''"+ ((filter && filter.elementPostFilter == "-1") ? " selected" : "")
 			+ ">" + jsChoose + "</option>");
 
 	str.append(jsonFilter.generateAvailableFilterOptions(filter,

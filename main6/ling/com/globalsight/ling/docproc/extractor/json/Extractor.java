@@ -49,7 +49,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 {
     static private final Logger s_logger = Logger.getLogger(Extractor.class);
     private String REGEX_COLON = ":[\\s|\\t|\\r|\\n]*\"";
-    private String REGEX_BRACKETS = ":[\\s|\\t|\\r|\\n]*\\[";
+    private String REGEX_BRACKETS = ":[\\s|\\t|\\r|\\n]*\\[[\\s|\\t|\\r|\\n]*\"";
     private Output m_output = null;
     private EFInputData m_input = null;
     private Filter m_elementPostFilter = null;
@@ -118,16 +118,21 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             int tempchar;
             boolean containColon = false;
             boolean tranChar = false;
+            boolean containBrackets = false;
             StringBuffer skeletonBuffer = new StringBuffer();
             StringBuffer colonBuffer = new StringBuffer();
             StringBuffer tranBuffer = new StringBuffer();
             String sid = null;
+            int countEscapes = 0;
             while ((tempchar = bufferReader.read()) != -1)
             {
                 char chr = (char) tempchar;
                 if (chr == ':')
-                {
                     containColon = true;
+                
+                if (tranChar && chr == '\\')
+                {
+                    countEscapes++;
                 }
 
                 if (containColon)
@@ -138,41 +143,51 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                         skeletonBuffer.append(colonBuffer);
                         m_output.addSkeleton(skeletonBuffer.toString());
                         if (isEnableSidSupport)
-                        {
-                            char[] skeletonArr = skeletonBuffer.toString().toCharArray();
-                            int firstIndex = -1;
-                            int lastIndex = -1;
-                            int count = 0;
-                            for (int i = skeletonArr.length - 1; i >= 0; i--)
-                            {
-                                if (skeletonArr[i] == '"')
-                                {
-                                    count++;
-                                    if (count == 2)
-                                    {
-                                        lastIndex = i;
-                                    }
-                                    else if (count == 3)
-                                    {
-                                        firstIndex = i;
-                                        break;
-                                    }
-                                }
-                            }
-                            sid = skeletonBuffer.substring(firstIndex + 1, lastIndex);
-                        }
+                            sid = getSid(skeletonBuffer.toString());
+                        
                         colonBuffer = new StringBuffer();
                         skeletonBuffer = new StringBuffer();
                         containColon = false;
                         tranChar = true;
                         continue;
                     }
+                    else if (bracketsP.matcher(colonBuffer.toString()).find())
+                    {
+                        skeletonBuffer.append(colonBuffer);
+                        m_output.addSkeleton(skeletonBuffer.toString());
+                        if (isEnableSidSupport)
+                            sid = getSid(skeletonBuffer.toString());
+                        
+                        colonBuffer = new StringBuffer();
+                        skeletonBuffer = new StringBuffer();
+                        containColon = false;
+                        containBrackets = true;
+                        tranChar = true;
+                        continue;
+                    }
+                }
+                else if (containBrackets && !tranChar)
+                {
+                    if (chr == '"')
+                    {
+                        tranChar = true;
+                        m_output.addSkeleton(skeletonBuffer.toString());
+                        skeletonBuffer = new StringBuffer();
+                    }
+                    else
+                    {
+                        skeletonBuffer.append(chr);
+                        if (chr == ']')
+                            containBrackets = false;
+                    }
                 }
                 else if (tranChar)
                 {
-                    if (chr != '"')
+                    if (chr != '"' || (countEscapes > 0 && chr == '"'))
                     {
                         tranBuffer.append(chr);
+                        if (countEscapes > 0 && chr == '"')
+                            countEscapes = 0;
                         continue;
                     }
                     else
@@ -189,8 +204,6 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                         {
                             // if translate segment is not empty
                             skeletonBuffer.append(chr);
-                            tranChar = false;
-
                             if (m_elementPostFilter != null)
                             {
                                 try
@@ -229,6 +242,31 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             s_logger.error(e);
             throw new ExtractorException(e);
         }
+    }
+    
+    private String getSid(String skeleton)
+    {
+        char[] skeletonArr = skeleton.toCharArray();
+        int firstIndex = -1;
+        int lastIndex = -1;
+        int count = 0;
+        for (int i = skeletonArr.length - 1; i >= 0; i--)
+        {
+            if (skeletonArr[i] == '"')
+            {
+                count++;
+                if (count == 2)
+                {
+                    lastIndex = i;
+                }
+                else if (count == 3)
+                {
+                    firstIndex = i;
+                    break;
+                }
+            }
+        }
+        return skeleton.substring(firstIndex + 1, lastIndex);
     }
 
     private void gotoPostFilter(String str, String sid)

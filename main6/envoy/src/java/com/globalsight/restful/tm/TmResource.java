@@ -27,6 +27,7 @@ import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.
 import java.io.File;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -40,6 +41,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -79,12 +81,16 @@ import com.globalsight.cxe.util.XmlUtil;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.edit.offline.page.TmxUtil;
 import com.globalsight.everest.foundation.LocalePair;
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.localemgr.LocaleManagerLocal;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
+import com.globalsight.everest.projecthandler.Project;
+import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.ProjectTM;
+import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.projecthandler.importer.ImportOptions;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -96,8 +102,10 @@ import com.globalsight.everest.tm.exporter.TmxWriter;
 import com.globalsight.everest.tm.importer.ImportManager;
 import com.globalsight.everest.tm.importer.ImportUtil;
 import com.globalsight.everest.tm.util.Tmx;
+import com.globalsight.everest.util.comparator.ProjectTMComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.tm.corpus.OverridableLeverageOptions;
 import com.globalsight.exporter.IExportManager;
 import com.globalsight.importer.IImportManager;
@@ -134,6 +142,7 @@ import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
 import com.globalsight.util.Replacer;
 import com.globalsight.util.SessionInfo;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -225,7 +234,7 @@ public class TmResource extends RestResource
             List<GetTmsResponse> tmsResponse = new ArrayList<GetTmsResponse>();
             Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
             long companyId = company.getId();
-            Collection<ProjectTM> tms = ServerProxy.getProjectHandler().getAllProjectTMs();
+            List<ProjectTM> tms = getTMs(userName, company);
             for (ProjectTM tm : tms)
             {
                 if (!tm.isActive() || tm.getCompanyId() != companyId)
@@ -254,6 +263,99 @@ public class TmResource extends RestResource
                 restStart.end();
             }
         }
+    }
+
+    // From "TmMainHandler::List<ProjectTM> getTMs(String userId, String cond)"
+    @SuppressWarnings("rawtypes")
+    private List<ProjectTM> getTMs(String userName, Company currentCompany) throws Exception
+    {
+        User user = ServerProxy.getUserManager().getUserByName(userName);
+        String userId = user.getUserId();
+        long currentCompanyId = currentCompany.getId();
+        boolean enableTMAccessControl = currentCompany.getEnableTMAccessControl();
+
+        boolean isSuperPM = UserUtil.isSuperPM(userId);
+        boolean isAdmin = UserUtil.isInPermissionGroup(userId, "Administrator");
+        boolean isSuperLP = UserUtil.isSuperLP(userId);
+
+        ProjectHandler projectHandler;
+        Collection<ProjectTM> allTMs = null;
+        Set<Long> tmsIds = new HashSet<Long>();
+        try
+        {
+            projectHandler = ServerProxy.getProjectHandler();
+            allTMs = projectHandler.getAllProjectTMs();
+            for (ProjectTM ptm : allTMs)
+            {
+                tmsIds.add(ptm.getIdAsLong());
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+        }
+
+        List<ProjectTM> tms = new ArrayList<ProjectTM>();
+        if (1 == currentCompanyId)
+        {
+            if (isSuperLP)
+            {
+                Set<Long> companyIds = new HashSet<Long>();
+                // Get all the companies the super translator worked for
+                List<Project> projectList = ServerProxy.getProjectHandler().getProjectsByUser(
+                        userId);
+                for (Project pj : projectList)
+                {
+                    companyIds.add(pj.getCompanyId());
+                }
+                for (ProjectTM tm : allTMs)
+                {
+                    if (companyIds.contains(tm.getCompanyId()))
+                    {
+                        tms.add(tm);
+                    }
+                }
+            }
+            else
+            {
+                // Super admin
+                tms.addAll(allTMs);
+            }
+        }
+        else
+        {
+            if (enableTMAccessControl && !isAdmin)
+            {
+                ProjectTMTBUsers projectTMTBUsers = new ProjectTMTBUsers();
+                List tmIdList = projectTMTBUsers.getTList(userId, "TM");
+                Iterator it = tmIdList.iterator();
+                while (it.hasNext())
+                {
+                    ProjectTM tm = ServerProxy.getProjectHandler().getProjectTMById(
+                            ((BigInteger) it.next()).longValue(), false);
+                    if (isSuperPM)
+                    {
+                        if (tm.getCompanyId() == currentCompanyId
+                                && tmsIds.contains(tm.getIdAsLong()))
+                        {
+                            tms.add(tm);
+                        }
+                    }
+                    else
+                    {
+                        if (tmsIds.contains(tm.getIdAsLong()))
+                            tms.add(tm);
+                    }
+                }
+            }
+            else
+            {
+                tms.addAll(allTMs);
+            }
+        }
+
+        SortUtil.sort(tms, new ProjectTMComparator(Locale.getDefault()));
+        return tms;
     }
 
     /**
@@ -326,6 +428,10 @@ public class TmResource extends RestResource
             String sid = clearSid(p_sid);
 
             boolean escape = Boolean.parseBoolean(escapeString);
+            if (StringUtil.isEmpty(p_sourceSegment))
+                throw new RestWebServiceException("Empty source segment");
+            if (StringUtil.isEmpty(p_targetSegment))
+                throw new RestWebServiceException("Empty target segment");
             p_sourceSegment = wrapSegment(p_sourceSegment, escape);
             p_targetSegment = wrapSegment(p_targetSegment, escape);
             if (!escape)
@@ -395,7 +501,7 @@ public class TmResource extends RestResource
             return "false";
         }
 
-        return "true";
+        return p_escapeString;
     }
 
     private String clearSid(String sid)
@@ -713,10 +819,10 @@ public class TmResource extends RestResource
                 return Response.status(200).entity("Unable to find TU by tuId: " + p_tuId).build();
             }
 
-            if (tm3Tu.getTm().getId() != Long.parseLong(p_tmId))
+            if (tm3Tu.getTm().getId() != ptm.getTm3Id())
             {
                 throw new RestWebServiceException("The tu Id " + p_tuId
-                        + " does not beong to tm: " + p_tmId);
+                        + " does not belong to tm: " + p_tmId);
             }
 
             TM3Attribute typeAttr = TM3Util.getAttr(tm, TYPE);
@@ -910,7 +1016,7 @@ public class TmResource extends RestResource
             StatementBuilder sb = new StatementBuilder();
             if (trgGSLocale != null)
             {
-                sb.append("SELECT tuv.tuId FROM ").append(tuvTable).append(" tuv,");
+                sb.append("SELECT distinct tuv.tuId FROM ").append(tuvTable).append(" tuv,");
                 sb.append(" (SELECT id FROM ").append(tuTable).append(" tu ")
                         .append("WHERE tu.tmid = ? ").addValue(ptm.getTm3Id())
                         .append(" AND tu.srcLocaleId = ? ").addValue(srcGSLocale.getId())
@@ -1351,11 +1457,11 @@ public class TmResource extends RestResource
 
             checkPermission(userName, Permission.TM_DELETE);
 
-            ProjectTM tm = checkTmId(p_tmId, p_companyName);
+            ProjectTM ptm = checkTmId(p_tmId, p_companyName);
 
             List<Long> tuIdList = checkTuIds(p_tuIds);
 
-            TM3Tm<GSTuvData> tm3tm = (new Tm3SegmentTmInfo()).getTM3Tm(tm.getTm3Id());
+            TM3Tm<GSTuvData> tm3tm = (new Tm3SegmentTmInfo()).getTM3Tm(ptm.getTm3Id());
             List<TM3Tu<GSTuvData>> tus = tm3tm.getTu(tuIdList);
             List<SegmentTmTu> resultList = new ArrayList<SegmentTmTu>();
             TM3Attribute typeAttr = TM3Util.getAttr(tm3tm, TYPE);
@@ -1366,22 +1472,22 @@ public class TmResource extends RestResource
             TM3Attribute projectAttr = TM3Util.getAttr(tm3tm, UPDATED_BY_PROJECT);
             for (TM3Tu<GSTuvData> tm3tu : tus)
             {
-                if (tm3tu.getTm().getId().equals(tm.getTm3Id()))
+                if (tm3tu.getTm().getId() == ptm.getTm3Id())
                 {
-                    SegmentTmTu segmentTmTu = TM3Util.toSegmentTmTu(tm3tu, tm.getId(), formatAttr,
+                    SegmentTmTu segmentTmTu = TM3Util.toSegmentTmTu(tm3tu, ptm.getId(), formatAttr,
                             typeAttr, sidAttr, fromWsAttr, translatableAttr, projectAttr);
                     resultList.add(segmentTmTu);
                 }
-                else
-                {
-                    throw new RestWebServiceException("Tu id (" + tm3tu.getId()
-                            + ") does not belong to current tm.");
-                }
+//                else
+//                {
+//                    throw new RestWebServiceException("Tu id (" + tm3tu.getId()
+//                            + ") does not belong to current tm.");
+//                }
             }
             if (resultList.size() > 0)
             {
                 TmCoreManager manager = LingServerProxy.getTmCoreManager();
-                manager.deleteSegmentTmTus(tm, resultList, false);
+                manager.deleteSegmentTmTus(ptm, resultList, false);
             }
         }
         catch (Exception e)
@@ -1413,16 +1519,35 @@ public class TmResource extends RestResource
         {
             if (StringUtil.isEmpty(tuId))
             {
-                throw new RestWebServiceException("Invaild tu Id(s): " + p_tuIds);
+                continue;
             }
 
             try
             {
-                for (String id : tuId.split("-"))
+                String[] ids = tuId.split("-");
+                if (ids.length == 1)
                 {
-                    id = id.trim();
-                    Assert.assertIsInteger(id);
-                    tuIdSet.add(Long.parseLong(id));                    
+                    tuIdSet.add(Long.parseLong(ids[0]));
+                }
+                else if (ids.length == 2)
+                {
+                    long start = Long.parseLong(ids[0]);
+                    long end = Long.parseLong(ids[1]);
+                    if (start <= end)
+                    {
+                        for (long i = start; i <= end; i++)
+                        {
+                            tuIdSet.add(i);
+                        }
+                    }
+                    else
+                    {
+                        throw new RestWebServiceException("Invaild tu Id(s): " + p_tuIds);
+                    }
+                }
+                else
+                {
+                    throw new RestWebServiceException("Invaild tu Id(s): " + p_tuIds);
                 }
             }
             catch (NumberFormatException e)

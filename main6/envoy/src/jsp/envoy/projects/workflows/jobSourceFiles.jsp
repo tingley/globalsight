@@ -44,6 +44,8 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="incontextreiview" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="addJobFiles" scope="request" 
+ class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <%
 	//jobSummary child page needed started.
 	ResourceBundle bundle = PageHandler.getBundle(session);
@@ -115,6 +117,7 @@
 	String showUpdateProgressURL = addSourceFilesURL + "&action="
 			+ AddSourceHandler.SHOW_UPDATE_PROGRESS;
 	String editFileProfileURL = editFileProfile.getPageURL();
+	String addJobFilesURL = addJobFiles.getPageURL();
 
 	SessionManager sessionMgr = (SessionManager) session
 			.getAttribute(WebAppConstants.SESSION_MANAGER);
@@ -138,61 +141,6 @@
 		httpProtocolToUse = WebAppConstants.PROTOCOL_HTTP;
 	}
 
-	StringBuffer appletcontent = new StringBuffer();
-	if (isIE)
-	{
-		appletcontent
-				.append("<OBJECT classid=\"clsid:CAFEEFAC-0018-0000-0045-ABCDEFFEDCBA\" width=\"920\" height=\"500\" ");
-		appletcontent.append("NAME = \"FSV\" codebase=\"");
-		appletcontent.append(httpProtocolToUse);
-		appletcontent
-				.append("://javadl.sun.com/webapps/download/AutoDL?BundleId=107109\"> ");
-		appletcontent
-				.append("<PARAM NAME = \"code\" VALUE = \"com.globalsight.EditSourceApplet\" > ");
-	}
-	else
-	{
-		appletcontent
-				.append("<APPLET style=\"display:inline\" type=\"application/x-java-applet;jpi-version=1.8.0_45\" width=\"920\" height=\"500\" code=\"com.globalsight.EditSourceApplet\" ");
-		appletcontent
-				.append("pluginspage=\"");
-		appletcontent.append(httpProtocolToUse);
-		appletcontent
-				.append("://www.java.com/en/download/manual.jsp\"> ");
-	}
-	appletcontent
-			.append("<PARAM NAME = \"cache_option\" VALUE = \"Plugin\" > ");
-	appletcontent
-			.append("<PARAM NAME = \"cache_archive\" VALUE = \"applet/lib/SelectFilesApplet.jar, applet/lib/commons-codec-1.3.jar, applet/lib/commons-httpclient-3.0-rc2.jar, applet/lib/commons-logging.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar\">");
-	appletcontent.append("<PARAM NAME = NAME VALUE = \"FSV\"> ");
-	appletcontent
-			.append("<PARAM NAME = \"scriptable\" VALUE=\"true\"> ");
-	appletcontent.append("<PARAM NAME = \"jobId\" value=\""
-			+ jobImpl.getJobId() + "\"> ");
-	appletcontent.append("<PARAM NAME = \"companyId\" value=\""
-			+ CompanyThreadLocal.getInstance().getValue() + "\"> ");
-	appletcontent.append("<PARAM NAME = \"pageLocale\" value=\""
-			+ bundle.getLocale() + "\"> ");
-	appletcontent.append("<PARAM NAME = \"projectId\" value=\""
-			+ jobImpl.getProjectId() + "\"> ");
-	appletcontent.append("<PARAM NAME = \"l10nProfileId\" value=\""
-			+ jobImpl.getL10nProfileId() + "\"> ");
-	appletcontent.append("<PARAM NAME = \"userName\" value=\""
-			+ user.getUserName() + "\"> ");
-	appletcontent.append("<PARAM NAME = \"password\" value=\""
-			+ user.getPassword() + "\"> ");
-	appletcontent
-			.append("<PARAM NAME = \"addToApplet\" value=\"MainAppletWillAddThis\"> ");
-
-	if (isIE)
-	{
-		appletcontent.append(" </OBJECT>");
-	}
-	else
-	{
-		appletcontent.append(" </APPLET>");
-	}
-	
 	boolean okForInContextReviewXml = PreviewPDFHelper.isXMLEnabled("" + jobImpl.getCompanyId());
 	boolean okForInContextReviewIndd = PreviewPDFHelper.isInDesignEnabled("" + jobImpl.getCompanyId());
 	boolean okForInContextReviewOffice = PreviewPDFHelper.isOfficeEnabled("" + jobImpl.getCompanyId());
@@ -904,19 +852,18 @@ function addSourceFiles()
 {
 	$.get("<%=beforeAddDeleteSourceURL%>",function(data){
 		if(data==""){
-			openAddSourceFilesWindow();
+			openwindow();
 		}else{
 			alert(data);
 		}
 	});
 }
 
-function openAddSourceFilesWindow()
+function openwindow()
 {
-	$("#addSourceDiv").dialog({width: "auto", resizable:false});
-	document.getElementById('addSourceDiv').parentNode.style.display = "inline";
-	document.getElementById('addSourceDiv').style.display = "inline";
-	document.getElementById('appletDiv').innerHTML = '<%=appletcontent.toString()%>';
+	var url ="<%=addJobFilesURL%>&jobId=${jobId}";
+	var ctlStr = "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600,left=300,top=80,resizable=no";
+	window.open(url,"aa",ctlStr);
 }
 
 function removeSourceFiles()

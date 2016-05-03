@@ -87,6 +87,14 @@ public class Hits
     // Members
     //
     private ArrayList m_hits;
+    private boolean m_isTerm = false;
+    
+    Hits(IndexSearcher searcher, ScoreDoc[] p_hits, int end, int begin, float p_minScore,
+            String text, boolean isTerm) throws IOException
+    {
+        m_isTerm = isTerm;
+        dealHits(searcher, p_hits, end, begin, p_minScore, text);
+    }
 
     /*package-private*/
     Hits (IndexSearcher searcher, ScoreDoc[] p_hits,
@@ -124,11 +132,21 @@ public class Hits
             
             String str = doc.get(IndexDocument.TEXT).toLowerCase();
 
-            if(text.indexOf(str) > -1 
-                    || str.indexOf(text) > -1) {
-                m_hits.add(new Hit(doc.get(IndexDocument.MAINID),
-                    doc.get(IndexDocument.SUBID), doc.get(IndexDocument.TEXT),
-                    score));
+            if (m_isTerm)
+            {
+                if (text.indexOf(str) > -1)
+                {
+                    m_hits.add(new Hit(doc.get(IndexDocument.MAINID), doc.get(IndexDocument.SUBID),
+                            doc.get(IndexDocument.TEXT), score));
+                }
+            }
+            else
+            {
+                if (text.indexOf(str) > -1 || str.indexOf(text) > -1)
+                {
+                    m_hits.add(new Hit(doc.get(IndexDocument.MAINID), doc.get(IndexDocument.SUBID),
+                            doc.get(IndexDocument.TEXT), score));
+                }
             }
         }
     }

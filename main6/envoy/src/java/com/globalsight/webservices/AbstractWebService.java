@@ -385,14 +385,14 @@ public abstract class AbstractWebService
 
             if (!ps.getPermissionFor(permission))
             {
-                String msg = "User " + user.getUserName()
-                        + " does not have enough permission";
+                String msg = "User '" + user.getUserName() + "' does not have permission '"
+                        + permission + "' to execute requested operation.";
                 throw new WebServiceException(msg);
             }
         }
         catch (Exception e)
         {
-            s_logger.error(e.getMessage(), e);
+            s_logger.warn(e.getMessage());
             throw new WebServiceException(e.getMessage());
         }
     }
@@ -417,8 +417,8 @@ public abstract class AbstractWebService
 
             if (!ps.getPermissionFor(permission))
             {
-                String msg = "User " + user.getUserName()
-                        + " does not have enough permission";
+                String msg = "User '" + user.getUserName() + "' does not have permission '"
+                        + permission + "' to execute requested operation.";
                 return msg;
             }
         }

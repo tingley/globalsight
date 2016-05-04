@@ -16,10 +16,11 @@
  */
 package com.globalsight.ling.common;
 
-public class JsonEnDecoder
-    extends NativeEnDecoder
+public class JsonEnDecoder extends NativeEnDecoder
 {
-
+    static private final String NCR_BEGIN = "&#x";
+    static private final String NCR_END = ";";
+    
     @Override
     public String decode(String p_nativeString) throws NativeEnDecoderException
     {
@@ -49,7 +50,7 @@ public class JsonEnDecoder
     @Override
     public String encodeWithEncodingCheck(String p_nativeString) throws NativeEnDecoderException
     {
-        return null;
+        return encodingCheck(p_nativeString);
     }
 
     @Override
@@ -57,4 +58,30 @@ public class JsonEnDecoder
             throws NativeEnDecoderException
     {
         return null;
-    }}
+    }
+    
+    private String encodingCheck(String p_nativeString)
+            throws NativeEnDecoderException
+        {
+            StringBuffer sbuf = new StringBuffer();
+
+            // If there are characters that cannot be converted to the
+            // specified encogind, they will be converted to character
+            // references.
+            for (int i = 0; i < p_nativeString.length(); i++)
+            {
+                char c = p_nativeString.charAt(i);
+
+                if (encChecker.canConvert(c))
+                {
+                    sbuf.append(c);
+                }
+                else
+                {
+                    sbuf.append(NCR_BEGIN + Integer.toHexString(c) + NCR_END);
+                }
+            }
+
+            return sbuf.toString();
+        }
+}

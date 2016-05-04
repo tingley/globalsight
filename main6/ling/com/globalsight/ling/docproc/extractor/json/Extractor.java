@@ -186,7 +186,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     if (chr != '"' || (countEscapes > 0 && chr == '"'))
                     {
                         tranBuffer.append(chr);
-                        if (countEscapes > 0 && chr == '"')
+                        if ((countEscapes == 1 && chr != '\\') || (countEscapes > 1 && chr != '\\'))
                             countEscapes = 0;
                         continue;
                     }

@@ -370,7 +370,7 @@ public class TmResource extends RestResource
      * @param p_companyName
      *            -- company name. Required.
      * @param p_tmId
-     *            -- TM ID to export. Required.
+     *            -- TM ID. Required.
      * @param p_sourceLocale
      *            -- the source locale. Required.
      * @param p_sourceSegment
@@ -780,7 +780,7 @@ public class TmResource extends RestResource
      * @param p_companyName
      *            -- company name.
      * @param p_tmId
-     *            -- TM ID to export. Required.
+     *            -- TM ID. Required.
      * @param p_tuId
      *            -- the TU id to query. Required.
      * 
@@ -885,7 +885,7 @@ public class TmResource extends RestResource
      * @param p_companyName
      *            -- company name. Required.
      * @param p_tmId
-     *            -- TM ID to export. Required.
+     *            -- TM ID. Required.
      * @param p_startId
      *            -- the start TU id (excluded). Optional. Default start with
      *            the first id.
@@ -1154,7 +1154,7 @@ public class TmResource extends RestResource
      * @param p_companyName
      *            -- company name. Required.
      * @param p_tmId
-     *            -- TM ID to export. Required.
+     *            -- TM ID. Required.
      * 
      * @return A success message
      * 
@@ -1376,25 +1376,25 @@ public class TmResource extends RestResource
                 tuv.setSegment(segmentString);
             }
             // Check the locale
-            List<SegmentTmTuv> savedTuvs = new ArrayList<SegmentTmTuv>();
-            for (BaseTmTuv savedTuv : tu.getTuvs())
+            List<SegmentTmTuv> tuvsInDb = new ArrayList<SegmentTmTuv>();
+            for (BaseTmTuv tuvInDb : tu.getTuvs())
             {
-                if (savedTuv.getLocale().equals(tuv.getLocale()))
+                if (tuvInDb.getLocale().equals(tuv.getLocale()))
                 {
-                    savedTuvs.add((SegmentTmTuv) savedTuv);
+                    tuvsInDb.add((SegmentTmTuv) tuvInDb);
                 }
             }
 
-            if (savedTuvs.size() > 1)
+            if (tuvsInDb.size() > 1)
             {
                 boolean find = false;
-                for (SegmentTmTuv savedTuv : savedTuvs)
+                for (SegmentTmTuv tuvInDb : tuvsInDb)
                 {
-                    if (savedTuv.getCreationDate().getTime() == tuv.getCreationDate().getTime())
+                    if (tuvInDb.getCreationDate().getTime() == tuv.getCreationDate().getTime())
                     {
                         find = true;
-                        savedTuv.merge(tuv);
-                        tuvsToBeUpdated.add(savedTuv);
+                        tuvInDb.merge(tuv);
+                        tuvsToBeUpdated.add(tuvInDb);
                     }
                 }
                 if (!find)
@@ -1406,7 +1406,7 @@ public class TmResource extends RestResource
             }
             else
             {
-                SegmentTmTuv savedTuv = savedTuvs.get(0);
+                SegmentTmTuv savedTuv = tuvsInDb.get(0);
                 savedTuv.merge(tuv);
                 tuvsToBeUpdated.add(savedTuv);
             }
@@ -1427,7 +1427,7 @@ public class TmResource extends RestResource
      * @param p_companyName
      *            -- company name. Required.
      * @param p_tmId
-     *            -- TM ID to export. Required.
+     *            -- TM ID. Required.
      * @param p_tuIds
      *            -- tu ids comma-separated, i.e "12,14,15" or "12,14-20,34". Required.
      * 
@@ -1575,7 +1575,7 @@ public class TmResource extends RestResource
      * @param p_companyName
      *            -- company name.
      * @param p_tmId
-     *            -- TM ID to export. Required.
+     *            -- TM ID. Required.
      * 
      * @return A success message
      * 
@@ -1643,7 +1643,7 @@ public class TmResource extends RestResource
             }
         }
 
-        return Response.status(200).entity("File is uploaded sucessfully.").build();
+        return Response.status(200).entity("File is uploaded successfully.").build();
     }
 
     // Get file name from content-disposition header info. A sample info is like:
@@ -1690,7 +1690,7 @@ public class TmResource extends RestResource
      * @param p_companyName
      *            -- company name. Required.
      * @param p_tmId
-     *            -- TM ID to export. Required.
+     *            -- TM ID. Required.
      * @param p_syncMode
      *            -- option to import data into TM: {merge, overwrite, discard}.
      *            Default "merge". Optional
@@ -1802,7 +1802,7 @@ public class TmResource extends RestResource
 
     /**
      * Export TM data. This will trigger a TM exporting event and return an
-     * identify key. Then user can use another API "getTmExportStatus" with this
+     * identify key. Then user can use another API "getTmExportFile" with this
      * identify key to check the export status.
      * 
      * Sample URL:
@@ -1815,7 +1815,7 @@ public class TmResource extends RestResource
      * @param p_companyName
      *            -- company name. Required.
      * @param p_tmId
-     *            -- TM ID to export. Required.
+     *            -- TM ID. Required.
      * @param p_languages
      *            -- languages to export like "de_DE,fr_FR" or "fr_FR".
      *            Optional. If be empty, export all.
@@ -2336,7 +2336,7 @@ public class TmResource extends RestResource
      * @param p_modifyFinishDate
      *            -- Tuv modify finish date in "yyyyMMdd" format. Optional.
      * 
-     * @return searched TM data in XML.
+     * @return Queried TM data in XML.
      * 
      * @throws RestWebServiceException
      */
@@ -2656,7 +2656,7 @@ public class TmResource extends RestResource
      *            (escaped) equivalents or not, available values: "true" or "false".
      *            Optional.
      * 
-     * @return searched TM data in XML.
+     * @return Queried TM data in XML.
      * 
      * @throws RestWebServiceException
      */

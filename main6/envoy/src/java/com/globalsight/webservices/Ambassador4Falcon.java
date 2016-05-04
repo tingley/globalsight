@@ -186,12 +186,12 @@ public class Ambassador4Falcon extends JsonTypeWebService
             if (StringUtil.isEmpty(p_accessToken) || p_intervalInMinute < 1)
             {
                 return makeErrorJson(GET_JOB_IDS_WITH_STATUS_CHANGED,
-                        "Invaild time range parameter.");
+                        "Invalid time range parameter.");
             }
 			if (StringUtil.isEmpty(p_companyName))
 			{
 				return makeErrorJson(GET_JOB_IDS_WITH_STATUS_CHANGED,
-						"Invaild comoany name parameter.");
+						"Invalid comoany name parameter.");
 			}
             // int hours = getHours(p_sinceTime);
             Calendar calendar = Calendar.getInstance();
@@ -205,7 +205,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 					&& !curCompanyName.equalsIgnoreCase(p_companyName))
 			{
 				return makeErrorJson(GET_JOB_IDS_WITH_STATUS_CHANGED,
-						"Invaild comoany name parameter.");
+						"Invalid comoany name parameter.");
 			}
             String sql = "SELECT DISTINCT workflow.JOB_ID FROM task_info, workflow, job "
                     + "WHERE workflow.COMPANY_ID = ? "
@@ -380,7 +380,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
             if (StringUtil.isEmpty(p_accessToken) || p_jobIds.length < 1)
             {
                 return makeErrorJson(GET_DETAILED_WORD_COUNTS,
-                        "Invaild jobIds parameter.");
+                        "Invalid jobIds parameter.");
             }
 
             User curUser = getUser(getUsernameFromSession(p_accessToken));
@@ -538,7 +538,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 			}
 			else
 			{
-				return makeErrorJson(ACCEPT_TASK, "Invaild task id.");
+				return makeErrorJson(ACCEPT_TASK, "Invalid task id.");
 			}
 		}
 		catch (Exception e)
@@ -605,7 +605,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 		{
 			task = taskManager.getTask(Long.parseLong(p_taskId));
 			if (task == null)
-				return makeErrorJson(COMPLETE_TASK, "Invaild task id.");
+				return makeErrorJson(COMPLETE_TASK, "Invalid task id.");
 		}
 		catch (RemoteException re)
 		{
@@ -829,7 +829,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 		if (StringUtil.isEmpty(p_companyName))
 		{
 			return makeErrorJson(GET_ALL_PROJECT_PROFILES,
-					"Invaild company name");
+					"Invalid company name");
 		}
 		String companyId = null;
 		try
@@ -2319,7 +2319,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
 				&& !curcompany.getName().equalsIgnoreCase(p_companyName))
 		{
 			return makeErrorJson(GET_WORKFLOW_TEMPLATE_INFO,
-					"Invaild comoany name parameter.");
+					"Invalid comoany name parameter.");
 		}
 		
         String json = "";

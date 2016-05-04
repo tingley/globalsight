@@ -595,7 +595,7 @@ public class Ambassador extends AbstractWebService
         {
             logger.error(e.getMessage(), e);
             return makeResponseXml("getFileProfileInformation", false,
-                    "Access token is invaild").toString();
+                    "Access token is Invalid").toString();
         }
 
         checkAccess(p_accessToken, "getFileProfileInformation");
@@ -4120,7 +4120,7 @@ public class Ambassador extends AbstractWebService
                 locale.append("_").append(countryCode);
 
                 String targetFileName = File.separator
-                        + replaceLocaleInFileName(fileName, exportSubDir,
+                        + replaceLocalInFileName(fileName, exportSubDir,
                                 locale.toString());
                 targetFileName = targetFileName.replace('\\', '/');
                 String encodedTargetFileName = "";
@@ -4774,7 +4774,7 @@ public class Ambassador extends AbstractWebService
                         workMap.put(targetGSLocale.getId(), dateMap);
                     }
                 }
-                // put workflow date paramter
+                // put workflow date parameter
                 paramter.put("estimatedDates", workMap);
             }
             catch (Exception e)
@@ -5634,7 +5634,7 @@ public class Ambassador extends AbstractWebService
     {
         if (StringUtil.isEmpty(p_accessToken) || StringUtil.isEmpty(jobIds))
             return makeErrorXml("getTasksInJobs(String, String, String)",
-                    "Invaild parameter.");
+                    "Invalid parameter.");
 
         try
         {
@@ -5846,7 +5846,7 @@ public class Ambassador extends AbstractWebService
             }
             else
             {
-                return makeErrorXml(ACCEPT_TASK, "Invaild task id.");
+                return makeErrorXml(ACCEPT_TASK, "Invalid task id.");
             }
         }
         catch (Exception e)
@@ -6643,18 +6643,18 @@ public class Ambassador extends AbstractWebService
             String p_companyName) throws WebServiceException
     {
         if (StringUtil.isEmpty(p_accessToken))
-            return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invaild access token");
+            return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invalid access token");
 
         checkAccess(p_accessToken, GET_FILEPROFILES_FOR_L10PROFILE);
 
         if (StringUtil.isEmpty(p_l10nProfileName))
         {
-            return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invaild l10Profile name.");
+            return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invalid l10Profile name.");
         }
 
         if (StringUtil.isEmpty(p_companyName))
         {
-            return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invaild company name.");
+            return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invalid company name.");
         }
 
         StringBuffer returnBuffer = new StringBuffer(
@@ -6677,7 +6677,7 @@ public class Ambassador extends AbstractWebService
                 company = ServerProxy.getJobHandler().getCompany(p_companyName);
                 if (company == null)
                 {
-                    return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invaild company name: "
+                    return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invalid company name: "
                             + p_companyName);
                 }
             }
@@ -6685,7 +6685,7 @@ public class Ambassador extends AbstractWebService
             {
                 if (!logUserCompany.getName().equalsIgnoreCase(p_companyName.trim()))
                 {
-                    return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invaild company name: "
+                    return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invalid company name: "
                             + p_companyName);
                 }
                 else
@@ -6761,7 +6761,7 @@ public class Ambassador extends AbstractWebService
             }
             else
             {
-                return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invaild l10Profile name: "
+                return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invalid l10Profile name: "
                         + p_l10nProfileName);
             }
 
@@ -7728,7 +7728,7 @@ public class Ambassador extends AbstractWebService
      * @param p_locale
      * @return
      */
-    private String replaceLocaleInFileName(String p_fileName,
+    private String replaceLocalInFileName(String p_fileName,
             String p_exportSubDir, String p_locale)
     {
         int index = p_fileName.indexOf('/');
@@ -12036,7 +12036,7 @@ public class Ambassador extends AbstractWebService
                 if (StringUtil.isEmpty(tuId))
                 {
                     return makeErrorXml(DELETE_TU_BY_TUID,
-                            "Invaild tu id(s): " + tuIds);
+                            "Invalid tu id(s): " + tuIds);
                 }
                 try
                 {
@@ -12046,7 +12046,7 @@ public class Ambassador extends AbstractWebService
                 catch (Exception e)
                 {
                     return makeErrorXml(DELETE_TU_BY_TUID,
-                            "Invaild tu id(s): " + tuIds);
+                            "Invalid tu id(s): " + tuIds);
                 }
             }
 
@@ -15910,7 +15910,7 @@ public class Ambassador extends AbstractWebService
     {
         if (StringUtil.isEmpty(p_accessToken) || StringUtil.isEmpty(jobIds))
             return makeErrorXml("fetchWorkflowRelevantInfoByJobs",
-                    "Invaild parameter");
+                    "Invalid parameter");
 
         checkAccess(p_accessToken, "fetchWorkflowRelevantInfoByJobs");
         try
@@ -17111,7 +17111,7 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            throw new WebServiceException(makeErrorXml("jobsSkipActivity",
+            throw new WebServiceException(makeErrorXml("jobsAddLanguages",
                     e.getMessage()));
         }
         finally
@@ -17326,7 +17326,7 @@ public class Ambassador extends AbstractWebService
             }
             catch (NumberFormatException nfe)
             {
-                return makeErrorXml("dispatchWorkflow", "Invaild workflow id: "
+                return makeErrorXml("dispatchWorkflow", "Invalid workflow id: "
                         + wfIdString + ",non-numeric chars.");
             }
         }
@@ -17355,7 +17355,7 @@ public class Ambassador extends AbstractWebService
                         {
                             return makeErrorXml(
                                     "dispatchWorkflow",
-                                    "Invaild workflow id: "
+                                    "Invalid workflow id: "
                                             + wfId
                                             + ", cost center attribute or required attributes are not set.");
                         }
@@ -17367,14 +17367,14 @@ public class Ambassador extends AbstractWebService
                         else
                         {
                             return makeErrorXml("dispatchWorkflow",
-                                    "Invaild workflow id: " + wfId
+                                    "Invalid workflow id: " + wfId
                                             + " for current user.");
                         }
                     }
                     else
                     {
                         return makeErrorXml("dispatchWorkflow",
-                                "Invaild workflow id: " + wfId
+                                "Invalid workflow id: " + wfId
                                         + ",does not exist.");
                     }
                 }
@@ -17473,7 +17473,7 @@ public class Ambassador extends AbstractWebService
                     || !validateTimeRange(startTime) || projectId < 0)
             {
                 return makeErrorXml("getJobsByTimeRange",
-                        "Invaild time range parameter.");
+                        "Invalid time range parameter.");
             }
             int hours = getHours(startTime);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -17938,7 +17938,7 @@ public class Ambassador extends AbstractWebService
             throws WebServiceException
     {
         if (StringUtil.isEmpty(accessToken))
-            return makeErrorXml("getAllL10NProfiles", "Invaild access token");
+            return makeErrorXml("getAllL10NProfiles", "Invalid access token");
 
         checkAccess(accessToken, "getAllL10NProfiles");
 
@@ -17989,7 +17989,7 @@ public class Ambassador extends AbstractWebService
             throws RemoteException, WebServiceException
     {
         if (StringUtil.isEmpty(p_accessToken))
-            return makeErrorXml("getWorkflowPath", "Invaild access token.");
+            return makeErrorXml("getWorkflowPath", "Invalid access token.");
         checkAccess(p_accessToken, "getWorkflowPath");
 
         String userName = getUsernameFromSession(p_accessToken);
@@ -18000,7 +18000,7 @@ public class Ambassador extends AbstractWebService
         if (wf == null)
         {
             return makeErrorXml("getWorkflowPath",
-                    "Invaild workflow which is not exist.");
+                    "Invalid workflow which is not exist.");
         }
 
         if (!isInSameCompany(userName, String.valueOf(wf.getCompanyId())))
@@ -18133,9 +18133,9 @@ public class Ambassador extends AbstractWebService
 
         if (StringUtil.isEmpty(accessToken))
             return makeErrorXml(DOWNLOAD_XLIFF_OFFLINE_FILE,
-                    "Invaild access token.");
+                    "Invalid access token.");
         if (StringUtil.isEmpty(taskId) || Long.parseLong(taskId) < 1)
-            return makeErrorXml(DOWNLOAD_XLIFF_OFFLINE_FILE, "Invaild task id.");
+            return makeErrorXml(DOWNLOAD_XLIFF_OFFLINE_FILE, "Invalid task id.");
 
         // Check access token
         checkAccess(accessToken, "downloadXliffOfflineFile");
@@ -19255,12 +19255,12 @@ public class Ambassador extends AbstractWebService
             String projectName, String sourceLocale) throws WebServiceException
     {
         if (StringUtil.isEmpty(p_accessToken))
-            return makeErrorXml(CREATE_JOB_GROUP, "Invaild access token.");
+            return makeErrorXml(CREATE_JOB_GROUP, "Invalid access token.");
         // Check access token
         checkAccess(p_accessToken, CREATE_JOB_GROUP);
 
         if (StringUtil.isEmpty(groupName))
-            return makeErrorXml(CREATE_JOB_GROUP, "Invaild group name.");
+            return makeErrorXml(CREATE_JOB_GROUP, "Invalid group name.");
 
         String name = groupName.trim();
         if (name.length() > 100)
@@ -19280,10 +19280,10 @@ public class Ambassador extends AbstractWebService
         }
 
         if (StringUtil.isEmpty(projectName))
-            return makeErrorXml(CREATE_JOB_GROUP, "Invaild project name.");
+            return makeErrorXml(CREATE_JOB_GROUP, "Invalid project name.");
 
         if (StringUtil.isEmpty(sourceLocale))
-            return makeErrorXml(CREATE_JOB_GROUP, "Invaild source locale.");
+            return makeErrorXml(CREATE_JOB_GROUP, "Invalid source locale.");
 
         User user = getUser(getUsernameFromSession(p_accessToken));
         long companyId = CompanyWrapper.getCompanyByName(user.getCompanyName())
@@ -19292,14 +19292,14 @@ public class Ambassador extends AbstractWebService
         Map<String, String> map = checkGroupName(companyId, groupName);
         if (map != null && map.size() > 0)
             return makeErrorXml(CREATE_JOB_GROUP,
-                    "Invaild group name,name already exists: " + groupName);
+                    "Invalid group name,name already exists: " + groupName);
         Project project = null;
         try
         {
             project = ServerProxy.getProjectHandler()
                     .getProjectByNameAndCompanyId(projectName, companyId);
             if (project == null)
-                return makeErrorXml(CREATE_JOB_GROUP, "Invaild project name: "
+                return makeErrorXml(CREATE_JOB_GROUP, "Invalid project name: "
                         + projectName);
         }
         catch (Exception e)
@@ -19309,7 +19309,7 @@ public class Ambassador extends AbstractWebService
         GlobalSightLocale locale = GSDataFactory.localeFromCode(sourceLocale
                 .trim());
         if (locale == null)
-            return makeErrorXml(CREATE_JOB_GROUP, "Invaild source locale.");
+            return makeErrorXml(CREATE_JOB_GROUP, "Invalid source locale.");
 
         String xml = saveJobGroup(groupName, project, locale, companyId,
                 user.getUserId());
@@ -19379,22 +19379,22 @@ public class Ambassador extends AbstractWebService
             String jobId) throws WebServiceException
     {
         if (StringUtil.isEmpty(p_accessToken))
-            return makeErrorXml(ADD_JOB_TO_GROUP, "Invaild access token.");
+            return makeErrorXml(ADD_JOB_TO_GROUP, "Invalid access token.");
         // Check access token
         checkAccess(p_accessToken, ADD_JOB_TO_GROUP);
 
         if (StringUtil.isEmpty(groupId))
-            return makeErrorXml(ADD_JOB_TO_GROUP, "Invaild group id.");
+            return makeErrorXml(ADD_JOB_TO_GROUP, "Invalid group id.");
 
         if (StringUtil.isEmpty(jobId))
-            return makeErrorXml(ADD_JOB_TO_GROUP, "Invaild job id.");
+            return makeErrorXml(ADD_JOB_TO_GROUP, "Invalid job id.");
 
         long projectId;
         JobGroup jobGroup = HibernateUtil.get(JobGroup.class,
                 Long.parseLong(groupId));
 
         if (jobGroup == null)
-            return makeErrorXml(ADD_JOB_TO_GROUP, "Invaild group id.");
+            return makeErrorXml(ADD_JOB_TO_GROUP, "Invalid group id.");
 
         projectId = jobGroup.getProject().getId();
         String[] jobIdArr = jobId.split(",");
@@ -19428,7 +19428,7 @@ public class Ambassador extends AbstractWebService
 
         if (errorJobId.trim().length() > 0)
         {
-            return makeErrorXml(ADD_JOB_TO_GROUP, "Invaild job id :"
+            return makeErrorXml(ADD_JOB_TO_GROUP, "Invalid job id :"
                     + errorJobId);
         }
 
@@ -19477,7 +19477,7 @@ public class Ambassador extends AbstractWebService
             throws WebServiceException
     {
         if (StringUtil.isEmpty(p_accessToken))
-            return makeErrorXml(TM_EXPORT_STATUS, "Invaild access token.");
+            return makeErrorXml(TM_EXPORT_STATUS, "Invalid access token.");
         // Check access token
         checkAccess(p_accessToken, TM_EXPORT_STATUS);
         WebServicesLog.Start activityStart = null;
@@ -19492,7 +19492,7 @@ public class Ambassador extends AbstractWebService
                     "getTmExportStatus", activityArgs);
 
             if (StringUtil.isEmpty(p_identifyKey))
-                return makeErrorXml(TM_EXPORT_STATUS, "Invaild identifyKey.");
+                return makeErrorXml(TM_EXPORT_STATUS, "Invalid identifyKey.");
 
             returnXml = new StringBuilder(XML_HEAD);
             String root = AmbassadorUtil.getCapLoginOrPublicUrl();
@@ -19627,7 +19627,7 @@ public class Ambassador extends AbstractWebService
             String p_projectNames) throws WebServiceException
     {
         if (StringUtil.isEmpty(p_accessToken))
-            return makeErrorXml(EXPORT_TM, "Invaild access token.");
+            return makeErrorXml(EXPORT_TM, "Invalid access token.");
         // Check access token
         checkAccess(p_accessToken, EXPORT_TM);
         WebServicesLog.Start activityStart = null;
@@ -19648,7 +19648,7 @@ public class Ambassador extends AbstractWebService
                     activityArgs);
 
             if (StringUtil.isEmpty(p_tmName))
-                return makeErrorXml(EXPORT_TM, "Invaild tm name.");
+                return makeErrorXml(EXPORT_TM, "Invalid tm name.");
 
             if (StringUtil.isNotEmpty(p_exportedFileName))
             {
@@ -19681,18 +19681,18 @@ public class Ambassador extends AbstractWebService
             }
             catch (Exception e)
             {
-                return makeErrorXml(EXPORT_TM, "Invaild tm name.");
+                return makeErrorXml(EXPORT_TM, "Invalid tm name.");
             }
             if (StringUtil.isEmpty(p_startDate))
             {
-                return makeErrorXml(EXPORT_TM, "Invaild start date.");
+                return makeErrorXml(EXPORT_TM, "Invalid start date.");
             }
             else
             {
                 startDate = checkDate(p_startDate);
                 if (startDate.equals("error"))
                 {
-                    return makeErrorXml(EXPORT_TM, "Invaild start date.");
+                    return makeErrorXml(EXPORT_TM, "Invalid start date.");
                 }
             }
 
@@ -19701,7 +19701,7 @@ public class Ambassador extends AbstractWebService
                 finishDate = checkDate(p_finishDate);
                 if (finishDate.equals("error"))
                 {
-                    return makeErrorXml(EXPORT_TM, "Invaild finish date.");
+                    return makeErrorXml(EXPORT_TM, "Invalid finish date.");
                 }
                 SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
                 try
@@ -19711,7 +19711,7 @@ public class Ambassador extends AbstractWebService
                     if (fshDate.before(staDate))
                     {
                         return makeErrorXml(EXPORT_TM,
-                                "Invaild start date and finish date.");
+                                "Invalid start date and finish date.");
                     }
                 }
                 catch (ParseException e)
@@ -19730,7 +19730,7 @@ public class Ambassador extends AbstractWebService
                             .localeFromCode(lang.trim());
                     if (locale == null)
                     {
-                        return makeErrorXml(EXPORT_TM, "Invaild language : "
+                        return makeErrorXml(EXPORT_TM, "Invalid language : "
                                 + lang);
                     }
                 }
@@ -19754,7 +19754,7 @@ public class Ambassador extends AbstractWebService
             if (StringUtil.isEmpty(p_exportFormat)
                     || !p_exportFormat.trim().equalsIgnoreCase("GMX")
                     && !p_exportFormat.trim().equalsIgnoreCase("TMX1.4b"))
-                return makeErrorXml(EXPORT_TM, "Invaild export format.");
+                return makeErrorXml(EXPORT_TM, "Invalid export format.");
 
             if (p_exportFormat.equalsIgnoreCase("GMX"))
             {
@@ -19836,7 +19836,7 @@ public class Ambassador extends AbstractWebService
             String p_companyName) throws WebServiceException
     {
         if (StringUtil.isEmpty(p_accessToken))
-            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild access token.");
+            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid access token.");
         // Check access token
         checkAccess(p_accessToken, TM_FULL_TEXT_SEARCH);
 
@@ -20031,36 +20031,36 @@ public class Ambassador extends AbstractWebService
             String p_companyName)
     {
         if (StringUtil.isEmpty(p_string))
-            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild search string.");
+            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid search string.");
 
         if (StringUtil.isEmpty(p_tmNames))
-            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild tm name.");
+            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid tm name.");
 
         if (StringUtil.isEmpty(p_sourceLocale))
-            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild source locale.");
+            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid source locale.");
 
         GlobalSightLocale sourceLocale = GSDataFactory
                 .localeFromCode(p_sourceLocale);
         if (sourceLocale == null)
-            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild source locale.");
+            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid source locale.");
 
         if (StringUtil.isEmpty(p_targetLocale))
-            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild target locale.");
+            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid target locale.");
 
         GlobalSightLocale targetLocale = GSDataFactory
                 .localeFromCode(p_targetLocale);
         if (targetLocale == null)
-            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild target locale.");
+            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid target locale.");
 
         if (StringUtil.isNotEmpty(p_dateType))
         {
             if (!p_dateType.equalsIgnoreCase("create")
                     && !p_dateType.equalsIgnoreCase("modify"))
-                return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild date type.");
+                return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid date type.");
         }
 
         if (StringUtil.isEmpty(p_companyName))
-            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invaild company name.");
+            return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid company name.");
 
         String userName = getUsernameFromSession(p_accessToken);
         Company logUserCompany = getCompanyInfo(userName);
@@ -20070,7 +20070,7 @@ public class Ambassador extends AbstractWebService
             if (!logUserCompany.getName().equalsIgnoreCase(p_companyName))
             {
                 return makeErrorXml(TM_FULL_TEXT_SEARCH,
-                        "Invaild company name.");
+                        "Invalid company name.");
             }
             else
             {
@@ -20082,7 +20082,7 @@ public class Ambassador extends AbstractWebService
                     if (projectTm == null)
                     {
                         return makeErrorXml(TM_FULL_TEXT_SEARCH, tmName
-                                + " is invaild tm name.");
+                                + " is Invalid tm name.");
                     }
                 }
             }
@@ -20100,7 +20100,7 @@ public class Ambassador extends AbstractWebService
                     if (projectTm == null)
                     {
                         return makeErrorXml(TM_FULL_TEXT_SEARCH, tmName
-                                + "is invaild tm name.");
+                                + "is Invalid tm name.");
                     }
                 }
             }
@@ -20117,7 +20117,7 @@ public class Ambassador extends AbstractWebService
             startDate = checkDate(p_startDate);
             if (startDate.equals("error"))
             {
-                return makeErrorXml(EXPORT_TM, "Invaild start date.");
+                return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid start date.");
             }
         }
 
@@ -20126,7 +20126,7 @@ public class Ambassador extends AbstractWebService
             finishDate = checkDate(p_finishDate);
             if (finishDate.equals("error"))
             {
-                return makeErrorXml(EXPORT_TM, "Invaild finish date.");
+                return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid finish date.");
             }
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
             try
@@ -20137,8 +20137,8 @@ public class Ambassador extends AbstractWebService
                     Date staDate = sdf.parse(startDate);
                     if (fshDate.before(staDate))
                     {
-                        return makeErrorXml(EXPORT_TM,
-                                "Invaild start date and finish date.");
+                        return makeErrorXml(TM_FULL_TEXT_SEARCH,
+                                "Invalid start date and finish date.");
                     }
                 }
             }

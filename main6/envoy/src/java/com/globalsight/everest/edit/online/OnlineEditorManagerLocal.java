@@ -1102,19 +1102,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         .operateForSegmentFilter(m_pageCache, sourceTuvs,
                                 targetTuvs, p_state, tuvMatchTypes, comments,
                                 p_excludedItemTypes, p_trgPageId, jobId);
-                if (filterResult == null)
-                {
-                    result = getTargetDisplayHtml2(sourceTuvs, targetTuvs, options,
-                            p_excludedItemTypes, targetPage, tuvMatchTypes,
-                            pageType, repetitions, p_state, p_searchMap, null);
-                }
-                else
-                {
-                    result = getTargetDisplayHtml2(sourceTuvs,
-                            targetTuvs, options,
-                            p_excludedItemTypes, targetPage, tuvMatchTypes,
-                            pageType, repetitions, p_state, p_searchMap, filterResult);
-                }
+
+                result = getTargetDisplayHtml2(sourceTuvs, targetTuvs, options,
+                        p_excludedItemTypes, targetPage, tuvMatchTypes, pageType, repetitions,
+                        p_state, p_searchMap, filterResult);
             }
             else
             {

@@ -693,7 +693,8 @@ abstract public class Index
                 }
 
                 // Store results in our own object.
-                Hits result = new Hits(searcher, topDocs.scoreDocs, end, begin, p_minScore, p_text);
+                boolean isTerm = (m_type == TYPE_TERM || CATEGORY_TB.equals(m_category));
+                Hits result = new Hits(searcher, topDocs.scoreDocs, end, begin, p_minScore, p_text, isTerm);
 
                 // Highlight query terms in long results.
                 if (m_type == TYPE_TEXT)

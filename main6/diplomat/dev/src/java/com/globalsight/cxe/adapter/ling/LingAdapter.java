@@ -72,6 +72,7 @@ public class LingAdapter extends BaseAdapter
         case CxeMessageType.MIF_IMPORTED_EVENT:
         case CxeMessageType.PASSOLO_IMPORTED_EVENT:
         case CxeMessageType.WINPE_IMPORTED_EVENT:
+        case CxeMessageType.JSON_IMPORTED_EVENT:
             return performExtraction(p_cxeMessage);
 
             //add all merging events here
@@ -81,6 +82,7 @@ public class LingAdapter extends BaseAdapter
         case CxeMessageType.RTF_LOCALIZED_EVENT:
         case CxeMessageType.XPTAG_LOCALIZED_EVENT:
         case CxeMessageType.MIF_LOCALIZED_EVENT:
+        case CxeMessageType.JSON_LOCALIZED_EVENT:
             return performMerging(p_cxeMessage);
 
         default:

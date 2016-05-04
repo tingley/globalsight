@@ -678,11 +678,12 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
     {
         boolean b = (!m_state.equals(TuvState.LOCALIZED.getName())
                 && !m_state.equals(TuvState.EXACT_MATCH_LOCALIZED.getName())
-                && !m_state
-                        .equals(TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED
-                                .getName())
-                && !m_state.equals(TuvState.COMPLETE.getName()) && !m_state
-                .equals(TuvState.ALIGNMENT_LOCALIZED.getName()));
+                && !m_state.equals(TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED.getName())
+                && !m_state.equals(TuvState.COMPLETE.getName())
+                && !m_state.equals(TuvState.ALIGNMENT_LOCALIZED.getName())
+                && !m_state.equals(TuvState.UNVERIFIED_EXACT_MATCH.getName())
+                && !m_state.equals(TuvState.APPROVED.getName()));
+
         return b;
     }
 

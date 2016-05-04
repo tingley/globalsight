@@ -1045,15 +1045,21 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         return name.substring(0, name.length() - 3) + "()";
     }
     
-    private boolean addLeverageMatch(String name, List<String> previous,  List<String> editorHistoryTask, LeverageMatch lm)
+    private boolean addLeverageMatch(String name, List<String> previous,
+            List<String> editorHistoryTask, LeverageMatch lm, long p_jobId, PseudoData pData,
+            Tuv targetTuv) throws Exception
     {
+        String dataType = targetTuv.getDataType(p_jobId);
+        pData.setAddables(dataType);
+        TmxPseudo.tmx2Pseudo(lm.getLeveragedTargetString(), pData);
+        String leverageMatch = pData.getPTagSourceString();
         if (name != null && name.toLowerCase().endsWith("_mt"))
         {
-            previous.add(lm.getLeveragedTargetString());
+            previous.add(leverageMatch);
             editorHistoryTask.add(getMtName(name));
             return true;
         }
-        
+
         return false;
     }
     
@@ -1088,7 +1094,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             });
 
             Types type = tuvMatchTypes.getTypes(sourceTuv.getId(), LeverageUtil.DUMMY_SUBID);
-            LeverageMatch lm= null;
+            LeverageMatch lm = null;
             if (type != null)
             {
                 lm = type.getLeverageMatch();
@@ -1096,16 +1102,17 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             if (lm != null)
             {
                 boolean isAddMatch = addLeverageMatch(targetTuv.getLastModifiedUser(), previous,
-                        editorHistoryTask, lm);
+                        editorHistoryTask, lm, p_jobId, pData, targetTuv);
                 if (!isAddMatch)
                 {
-                    isAddMatch = addLeverageMatch(lm.getMtName(), previous, editorHistoryTask, lm);
+                    isAddMatch = addLeverageMatch(lm.getMtName(), previous, editorHistoryTask, lm,
+                            p_jobId, pData, targetTuv);
                 }
 
                 if (!isAddMatch)
                 {
                     isAddMatch = addLeverageMatch(lm.getCreationUser(), previous,
-                            editorHistoryTask, lm);
+                            editorHistoryTask, lm, p_jobId, pData, targetTuv);
                 }
             }
             for (int k = 0; k < previousTaskTuvs.size(); k++)

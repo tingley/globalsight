@@ -343,10 +343,6 @@ public class FilterHelper
 
         List<Filter> list = getFilterByMapping(filterId, filterTableName);
         Filter filter = list.get(0);
-        if ("json_filter".equals(filterTableName))
-        {
-            filterTableName = "filter_json";
-        }
         String sql = "delete from " + filterTableName + " where id=" + filterId;
         HibernateUtil.executeSql(sql);
         OperationLog.log(m_userId, OperationLog.EVENT_DELETE,
@@ -359,10 +355,6 @@ public class FilterHelper
     {
         Filter filter = MapOfTableNameAndSpecialFilter
                 .getFilterInstance(filterTableName);
-        if ("json_filter".equals(filterTableName))
-        {
-            filterTableName = "filter_json";
-        }
         String sql = "select * from " + filterTableName + " where id = ?";
 
         return (List<Filter>) HibernateUtil.searchWithSql(filter.getClass(),

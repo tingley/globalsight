@@ -23,12 +23,8 @@
   -->
 
 <module xmlns="urn:jboss:module:1.1" name="org.jboss.resteasy.resteasy-cdi">
-    <properties>
-        <property name="jboss.api" value="private"/>
-    </properties>
-
     <resources>
-        <resource-root path="resteasy-cdi-2.3.10.Final-redhat-1.jar"/>
+        <resource-root path="resteasy-cdi-3.0.13.Final.jar"/>
         <!-- Insert resources here -->
     </resources>
 
@@ -37,8 +33,8 @@
         <module name="javax.enterprise.api"/>
         <module name="javax.servlet.api"/>
         <module name="javax.ws.rs.api"/>
-        <module name="org.javassist"/>
+        <module name="javax.validation.api"/>
         <module name="org.jboss.resteasy.resteasy-jaxrs"/>
-        <module name="org.jboss.weld.core"/>
+        <module name="org.jboss.logging"/>
     </dependencies>
 </module>

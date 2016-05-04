@@ -1265,7 +1265,9 @@ public class DownloadParams implements Serializable
     {
         if (m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED
-                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT)
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20)
             this.needCombined = false;
         else
             this.needCombined = needCombined;

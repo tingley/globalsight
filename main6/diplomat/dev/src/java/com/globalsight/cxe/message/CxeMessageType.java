@@ -96,6 +96,9 @@ public class CxeMessageType implements Serializable
     
     public static final int WINPE_LOCALIZED_EVENT = 34;
     public static final int WINPE_IMPORTED_EVENT = 35;
+    //JSON
+    public static final int JSON_IMPORTED_EVENT = 36;
+    public static final int JSON_LOCALIZED_EVENT = 37;
     
     // data source related constants
     public static final int FILE_SYSTEM_FILE_SELECTED_EVENT = 500;
@@ -170,7 +173,10 @@ public class CxeMessageType implements Serializable
         fillMaps(CAP_EXPORT_STATUS_EVENT,"CAP_EXPORT_STATUS_EVENT");
         fillMaps(CXE_IMPORT_ERROR_EVENT, "CXE_IMPORT_ERROR_EVENT");
         fillMaps(CAP_IMPORT_ERROR_EVENT, "CAP_IMPORT_ERROR_EVENT");
-
+        //JSON
+        fillMaps(JSON_IMPORTED_EVENT, "JSON_IMPORTED_EVENT");
+        fillMaps(JSON_LOCALIZED_EVENT, "JSON_LOCALIZED_EVENT");
+        
         //msoffice/pdf
         fillMaps(MSOFFICE_IMPORTED_EVENT,"MSOFFICE_IMPORTED_EVENT");
         fillMaps(MSOFFICE_LOCALIZED_EVENT,"MSOFFICE_LOCALIZED_EVENT");

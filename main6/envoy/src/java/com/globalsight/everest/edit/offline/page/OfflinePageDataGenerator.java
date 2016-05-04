@@ -311,6 +311,11 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         return AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT == m_fileFormatId;
     }
 
+    private boolean isDownloadForTTX()
+    {
+        return AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX == m_fileFormatId;
+    }
+
     /**
      * @return true if we can use Trados segment markup, false if we cannot.
      */
@@ -612,6 +617,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             state = m_matchTypeStats.getLingManagerMatchType(srcTuv.getId(),
                     "0");
         }
+        boolean isTopLeverageMatchFromMT = isTopLeverageMatchFromMT(fmList);
 
         List isProtectedChangeable = new ArrayList();
 
@@ -730,6 +736,10 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             // indicate to the user that it originally had a TM match.
             String topGxml = getTopLeveragedMatchGxml(fmList, srcTuv, trgTuv, 0);
             float topScore = getTopLeveragedMatchScore(fmList);
+            if (isTopLeverageMatchFromMT && isDownloadForTTX())
+            {
+                topScore = 60;// Trados standard practice (I think it is weird, right?)
+            }
 
             // if this tuv is not exact, and it has sub segment with exact
             // match,
@@ -796,6 +806,10 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 // GBS-3722, just use MT tagged target segment, do not use
                 // source
             }
+            else if (populate100 && TuvState.APPROVED.equals(trgTuv.getState()))
+            {
+
+            }
             else
             {
                 trgGxml = srgGxml;
@@ -806,6 +820,16 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         {
             srgGxml = IdmlHelper.formatForOfflineDownload(srgGxml);
             trgGxml = IdmlHelper.formatForOfflineDownload(trgGxml);
+        }
+
+        // GBS-4383: Set any MT segments that are populated into TTX as 60%
+        // leverage (Trados practice)
+        String modifyUser = trgTuv.getLastModifiedUser();
+        boolean isTrgMted = (modifyUser != null && modifyUser.toLowerCase().endsWith("_mt"));
+        if (isDownloadForTTX()
+                && ((populate100 && isTrgMted) || (!populate100 && isTopLeverageMatchFromMT)))
+        {
+            trgScore = 60;
         }
 
         // Then create/append offline parent seg
@@ -1637,6 +1661,28 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         }
 
         return p_levMatch.getScoreNum();
+    }
+
+    private boolean isTopLeverageMatchFromMT(ArrayList p_fuzzyList)
+    {
+        if (p_fuzzyList == null || p_fuzzyList.size() == 0)
+        {
+            return false;
+        }
+
+        LeverageMatch levMatch = (LeverageMatch) p_fuzzyList.get(0);
+        if (levMatch == null)
+        {
+            return false;
+        }
+
+        if (levMatch.getCreationUser() != null
+                && levMatch.getCreationUser().toLowerCase().endsWith("_mt"))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /**

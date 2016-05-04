@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import net.sf.json.JSONObject;
+import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -13,6 +15,8 @@ import com.globalsight.util.SortUtil;
 
 public class JsonFilter implements Filter
 {
+
+    private static final Logger log = Logger.getLogger(JsonFilter.class);
 
     private long id;
     private String filterName;
@@ -141,15 +145,22 @@ public class JsonFilter implements Filter
     public String toJSON(long companyId)
     {
         JSONObject json = new JSONObject();
-        json.put("id", id);
-        json.put("companyId", companyId);
-        json.put("filterName", filterName);
-        json.put("filterDescription", filterDescription);
-        json.put("enableSidSupport", enableSidSupport);
-        json.put("elementPostFilterId", elementPostFilterId);
-        json.put("elementPostFilterTableName", elementPostFilterTableName);
-        json.put("baseFilterId", baseFilterId);
-        json.put("filterTableName", FilterConstants.JSON_TABLENAME);
+        try
+        {
+            json.put("id", id);
+            json.put("companyId", companyId);
+            json.put("filterName", filterName);
+            json.put("filterDescription", filterDescription);
+            json.put("enableSidSupport", enableSidSupport);
+            json.put("elementPostFilterId", elementPostFilterId);
+            json.put("elementPostFilterTableName", elementPostFilterTableName);
+            json.put("baseFilterId", baseFilterId);
+            json.put("filterTableName", FilterConstants.JSON_TABLENAME);
+        }
+        catch (JSONException e)
+        {
+            log.error("Failure to construct JSON into jsonfilter. "+e);
+        }
         return json.toString();
     }
 

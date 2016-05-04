@@ -23,9 +23,9 @@
   -->
 
 <module xmlns="urn:jboss:module:1.1" name="org.jboss.resteasy.resteasy-jackson-provider">
-
     <resources>
-        <resource-root path="resteasy-jackson-provider-2.3.10.Final-redhat-1.jar"/>
+        <resource-root path="resteasy-jackson-provider-3.0.13.Final.jar"/>
+	<resource-root path="resteasy-jackson-provider-3.0.13.Final-jandex.jar"/>
         <!-- Insert resources here -->
     </resources>
 
@@ -33,7 +33,7 @@
         <module name="org.codehaus.jackson.jackson-core-asl" export="true"/>
         <module name="org.codehaus.jackson.jackson-jaxrs"/>
         <module name="org.codehaus.jackson.jackson-mapper-asl" export="true"/>
-        <module name="org.codehaus.jackson.jackson-xc"/>
+        <module name="org.codehaus.jackson.jackson-xc" export="true"/>
         <module name="javax.xml.bind.api"/>
         <module name="javax.api"/>
         <module name="javax.enterprise.api"/>

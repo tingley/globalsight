@@ -229,7 +229,7 @@ public class TermLeverager
                 {
                     termMatchFormatString = tuv.getTermMatchFormat();
                     Hitlist hits = tb.recognizeTerms(lang,
-                            termMatchFormatString, 10);
+                            termMatchFormatString, 30);
                     addSourceHits(p_result, tuv, hits, tbid);
 
                     ArrayList<Long> existedHits = new ArrayList<Long>();
@@ -249,7 +249,7 @@ public class TermLeverager
                         hits = tb.recognizeTerms(
                                 lang,
                                 ignoreInternalText(segment,
-                                        termMatchFormatString), 10);
+                                        termMatchFormatString), 30);
                         if (existedHits.size() == 0)
                             addSourceHits(p_result, tuv, hits, tbid);
                         else

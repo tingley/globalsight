@@ -23,9 +23,9 @@
   -->
 
 <module xmlns="urn:jboss:module:1.1" name="org.jboss.resteasy.resteasy-jsapi">
-
     <resources>
-        <resource-root path="resteasy-jsapi-2.3.10.Final-redhat-1.jar"/>
+        <resource-root path="resteasy-jsapi-3.0.13.Final.jar"/>
+	<resource-root path="resteasy-jsapi-3.0.13.Final-jandex.jar"/>
         <!-- Insert resources here -->
     </resources>
 
@@ -36,5 +36,6 @@
         <module name="javax.servlet.api"/>
         <module name="javax.ws.rs.api"/>
         <module name="org.jboss.resteasy.resteasy-jaxrs"/>
+        <module name="org.jboss.logging"/>
     </dependencies>
 </module>

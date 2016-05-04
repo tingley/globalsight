@@ -39,6 +39,7 @@ public class EventHandlerMap
     static
     {
         map.put("HTML_IMPORTED_EVENT", new ExtractorMDB());
+        map.put("JSON_IMPORTED_EVENT", new ExtractorMDB());
         map.put("XML_IMPORTED_EVENT", new ExtractorMDB());
         map.put("MSOFFICE_IMPORTED_EVENT", new MsOfficeSourceAdapterMDB());
         map.put("UNEXTRACTED_IMPORTED_EVENT", new CapTargetAdapterMDB());

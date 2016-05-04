@@ -843,7 +843,7 @@ function changeSelectWidth(selected){
         </td>
     </tr>
     <tr id="autoSendQAReportTR">
-        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_project_autoSendQAReport")%>:
+        <td>&nbsp;&nbsp;<%=bundle.getString("lb_project_autoSendQAReport")%>:
         <INPUT TYPE=checkbox id="autoSendQAReport" name="autoSendQAReport" <%=autoSendQAReport%> >
         </td>
     </tr>

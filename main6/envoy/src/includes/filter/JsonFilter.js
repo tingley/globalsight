@@ -1,7 +1,7 @@
 var jsonFilter = new JsonFilter();
 
 function JsonFilter() {
-	this.filterTableName = "json_filter";
+	this.filterTableName = "filter_json";
 
 //	this.checkedItemIds = new Array();
 //	this.optionInternalText = "0";
@@ -63,7 +63,7 @@ JsonFilter.prototype.generateDiv = function(topFilterId, color) {
 			+ jsFilterName + ":</td>");
 	str.append("<td ><input type='text' style='width:100%' maxlength='"
 			+ maxFilterNameLength
-			+ "' id='jsonFilterName' value='Json Filter'></input></td>");
+			+ "' id='jsonFilterName' value='JSON Filter'></input></td>");
 	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
 	str.append("</tr>");
 	str.append("<td class='specialFilter_dialog_label' VALIGN='bottom'>"+ jsFilterDesc + ":</td>");
@@ -84,12 +84,12 @@ JsonFilter.prototype.generateDiv = function(topFilterId, color) {
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td' nowrap>");
 	str.append(jsInternalTextPostFilter);
-	str.append(":</td>");
+	str.append("</td>");
 	str.append("<td class='htmlFilter_right_td'>"+ generateBaseFilterList(this.filterTableName) + "</td>");
 	str.append("</tr>");
 
 	str.append("<tr>");
-	str.append("<td class='htmlFilter_left_td'>" + jsElementPostFilter+ "</td>");
+	str.append("<td class='htmlFilter_left_td' nowrap>" + jsElementPostFilter+ "</td>");
 	str.append("<td class='htmlFilter_right_td'>"+ this.generateElementPostFilter() + "</td>");
 	str.append("</tr>");
 
@@ -107,8 +107,8 @@ JsonFilter.prototype.generateDiv = function(topFilterId, color) {
 }
 
 JsonFilter.prototype.generateElementPostFilter = function(filter) {
-	var str = new StringBuffer("<select id='elementPostFilter' class='xml_filter_select'>");
-	str.append("<option value='-1'"+ ((filter && filter.elementPostFilter == "-1") ? " selected" : "")
+	var str = new StringBuffer("<select id='elementPostFilter' class='xml_filter_select' style='width:100%'>");
+	str.append("<option value=''"+ ((filter && filter.elementPostFilter == "-1") ? " selected" : "")
 			+ ">" + jsChoose + "</option>");
 
 	str.append(jsonFilter.generateAvailableFilterOptions(filter,
@@ -179,7 +179,7 @@ function saveJson() {
 	var filterDesc = document.getElementById("jsonDesc").value;
 	var isSupportSid = document.getElementById("isSupportSid").checked;
 
-	var baseFilterSelect = document.getElementById("json_filter_baseFilterSelect");
+	var baseFilterSelect = document.getElementById("filter_json_baseFilterSelect");
 	var indexBase = baseFilterSelect.selectedIndex;
 	var baseFilterId = baseFilterSelect.options[indexBase].value;
 
@@ -194,7 +194,7 @@ function saveJson() {
 	
 	var obj = {
 		isNew : isNew,
-		filterTableName : "json_filter",
+		filterTableName : "filter_json",
 		filterId : filterId,
 		filterName : filterName,
 		filterDesc : filterDesc,
@@ -236,7 +236,7 @@ function saveJsonFilterCallback(data) {
 	if (filter) {
 		var jpFilter = new Object();
 		jpFilter.id = data - 0;
-		jpFilter.filterTableName = "json_filter";
+		jpFilter.filterTableName = "filter_json";
 		jpFilter.filterName = checkExistJsonCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistJsonCallback.obj.filterDesc;
 		jpFilter.enableSidSupport = checkExistJsonCallback.obj.isSupportSid;
@@ -258,7 +258,7 @@ function updateJsonFilterCallback(data)
 	{
 		var jpFilter = new Object();
 		jpFilter.id = filterId;
-		jpFilter.filterTableName = "json_filter";
+		jpFilter.filterTableName = "filter_json";
 		jpFilter.filterName = checkExistJsonCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistJsonCallback.obj.filterDesc;
 		jpFilter.enableSidSupport = checkExistJsonCallback.obj.isSupportSid;

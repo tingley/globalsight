@@ -43,7 +43,7 @@ public class FilterConstants
     public final static String FM_TABLENAME = "frame_maker_filter";
     public final static String PLAINTEXT_TABLENAME = "plain_text_filter";
     public final static String QA_TABLENAME = "qa_filter";
-    public final static String JSON_TABLENAME = "json_filter";
+    public final static String JSON_TABLENAME = "filter_json";
 
     public final static ArrayList<String> ALL_FILTER_TABLE_NAMES = new ArrayList<String>();
     public final static Map<String, String> FILTER_TABLE_NAMES_FORMAT = new HashMap<String, String>();

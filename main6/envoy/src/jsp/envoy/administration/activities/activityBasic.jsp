@@ -663,8 +663,8 @@ function doOnload()
                                   </select> 
                                   </div>
                                </td>
-                                <td width="50%" v-disable="monthCondition==2">
-                                <div v-disable="monthCondition==2">
+                                <td width="50%">
+                                <div>
                                   <select name="monthlyOnWeek" v-model="monthlyOnWeek" class="multipleSelector"  multiple data-placeholder="Your Selection" v-clean="scheduleType!=7" v-disable2="monthCondition!=2">
                                     <option value='0'><amb:lb key="lb_sunday"/></option>
                                     <option value='1'><amb:lb key="lb_monday"/></option>

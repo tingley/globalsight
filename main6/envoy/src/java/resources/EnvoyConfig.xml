@@ -1490,6 +1490,10 @@
         <PageLink linkName="jobScorecard" destinationPageName="SCORECARD"></PageLink>
         <PageLink linkName="incontextreiview" destinationPageName="inctxrvED1"></PageLink>
         <PageLink linkName="editFileProfile" destinationPageName="FPED"></PageLink>
+        <PageLink linkName="addJobFiles" destinationPageName="AJF"></PageLink>
+      </WebPage>
+      <WebPage pageName="AJF" isDefault="false" jspName="/envoy/projects/workflows/addJobFiles.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.AddSourceFilesHandler">
+      	<PageLink linkName="self" destinationPageName="AJF"></PageLink>	
       </WebPage>
       <WebPage pageName="COSTS" isDefault="false" jspName="/envoy/projects/workflows/jobCosts.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.JobCostsHandler">
         <PageLink linkName="jobDetails" destinationPageName="DTLS"></PageLink>

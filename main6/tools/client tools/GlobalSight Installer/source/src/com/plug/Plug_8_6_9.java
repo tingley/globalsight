@@ -65,8 +65,6 @@ public class Plug_8_6_9 implements Plug
         paths.add("org/jboss/resteasy/resteasy-jsapi/main/resteasy-jsapi-2.3.10.Final-redhat-1.jar");
         paths.add("org/jboss/resteasy/resteasy-multipart-provider/main/resteasy-multipart-provider-2.3.10.Final-redhat-1.jar");
         paths.add("org/jboss/resteasy/resteasy-yaml-provider/main/resteasy-yaml-provider-2.3.10.Final-redhat-1.jar");
-        // GBS-4369
-        paths.add("org/apache/commons/collections/main/commons-collections-3.2.1.redhat-3.jar");
 
         File jarFile = null;
         for (String path : paths)

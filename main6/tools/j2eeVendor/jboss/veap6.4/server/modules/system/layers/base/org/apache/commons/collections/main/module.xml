@@ -28,7 +28,7 @@
     </properties>
 
     <resources>
-        <resource-root path="commons-collections-3.2.1.redhat-3.jar"/>
+        <resource-root path="commons-collections-3.2.2.jar"/>
         <!-- Insert resources here -->
     </resources>
 

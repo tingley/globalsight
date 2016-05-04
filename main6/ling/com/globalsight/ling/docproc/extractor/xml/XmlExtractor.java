@@ -804,11 +804,6 @@ public class XmlExtractor extends AbstractExtractor
         }
         else
         {
-            // GBS-4336
-            if (!m_xmlFilterHelper.isBlankOrExblank(nodeValue))
-            {
-                nodeValue = preserveCarriageReturn(nodeValue);
-            }
             boolean parentInline = Rule.isInline(m_ruleMap, parentNode);
             if (parentInline)
             {

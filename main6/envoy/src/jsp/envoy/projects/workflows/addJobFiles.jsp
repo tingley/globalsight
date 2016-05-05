@@ -20,8 +20,8 @@
 <%
     // Lables
     ResourceBundle bundle = PageHandler.getBundle(session);
-    String createJobTitle = bundle.getString("title_add_source_file");
-    String title = bundle.getString("title_add_source_file");
+    String createJobTitle = bundle.getString("title_add_source_files");
+    String title = bundle.getString("title_add_source_files");
     Job jobImpl = (Job) request.getAttribute("Job");
     SessionManager sessionMgr = (SessionManager) session
             .getAttribute(WebAppConstants.SESSION_MANAGER);
@@ -134,7 +134,7 @@ $(document).ready(function(){
         $("[name='fileProfile']").attr("value", "");
         $("[name='fileProfile'] option").attr("disabled", false);
         mapped = false;
-        l10Nid = 0;
+        l10Nid = <%=jobImpl.getL10nProfileId()%>;
     });
     
     // *************************************action of create button*************************************
@@ -176,7 +176,11 @@ $(document).ready(function(){
         document.createJobForm.submit();
     });
     // *************************************cancel button*************************************
-    $("#cancel").click(function()
+        $("#cancel").click(function()
+    {
+        document.location.href="/globalsight/ControlServlet?linkName=addJobFiles&pageName=SOURCEFILES&jobId=<%=jobImpl.getJobId()%>";
+    });
+    $("#close").click(function()
     {
        window.close();
     });
@@ -361,20 +365,19 @@ function queryFileProfile(id)
 {
     $("#ProgressBar" + id).css("background-color", "grey");
     var profile = $("#bp" + id).find(".profileArea");
+    profile.html("<select id='fp" + id
+            + "' name='fileProfile' style='width:143;z-index:50;padding-top:2px;padding-bottom:2px;' " 
+            + "onchange='disableUnavailableFileProfiles(this)'><option value=''></option>"
+            + "</select>");
     var theFileName = $("#Hidden" + id).attr("value");
     $.get("/globalsight/ControlServlet?pageName=AJF&linkName=self", 
-            {"uploadAction":"queryFileProfile","fileName":theFileName,"l10Nid":l10Nid,"no":Math.random(), "userName":"<%=userName%>"}, 
+            {"uploadAction":"queryFileProfile","fileName":theFileName,"l10Nid":"<%=jobImpl.getL10nProfileId()%>","no":Math.random(), "userName":"<%=userName%>"}, 
             function(data){
                 profile.html("<select id='fp" + id
                         + "' name='fileProfile' style='width:143;z-index:50;padding-top:2px;padding-bottom:2px;' " 
                         + "onchange='disableUnavailableFileProfiles(this)'><option value=''></option>"
                         + data
                         + "</select>");
-                if (l10Nid == 0)
-                {
-                    l10Nid = getL10NFromSelectValue($("#fp"+id).children('option:selected').val());
-                }
-                disableUnavailableFileProfiles(document.getElementById("fp" + id));
                 if (!mapped && $("#fp" + id).val() != "") {
                     mapTargetLocales(document.getElementById("ProgressDiv" + id));
                 }
@@ -555,11 +558,8 @@ function removeFile(id, zipName, fileSize, filePath) {
             $.post("/globalsight/ControlServlet?pageName=AJF&linkName=self", 
                     {"uploadAction":"deleteFile",
                     "folder":tempFolder,"no":Math.random()});
-            $("#targetLocaleArea").show();
-            $("#targetLocaleArea").html("");
             mapped = false;
-            $("#tlControl").attr("checked", false);
-            l10Nid = 0;
+            l10Nid = <%=jobImpl.getL10nProfileId()%>;
         }
     });
 }
@@ -650,8 +650,10 @@ function mapTargetLocales(o)
 	                                <tr>
 	                                    <td width="25%" align="right">
                                				<input id="create" type="button" class="standardBtn_mouseout" style="width:90px;" value="<%=bundle.getString("lb_add")%>" title="<%=bundle.getString("lb_add")%>">
-                               				&nbsp;&nbsp;&nbsp;
+                               				&nbsp;&nbsp;
                            					<input id="cancel" type="button" class="standardBtn_mouseout" style="width:90px;" value="<%=bundle.getString("lb_cancel")%>" title="<%=bundle.getString("lb_cancel")%>">
+                           					&nbsp;&nbsp;
+                           					<input id="close" type="button" class="standardBtn_mouseout" style="width:90px;" value="<%=bundle.getString("lb_close")%>" title="<%=bundle.getString("lb_close")%>">
 	                                    </td>
 	                                </tr>
 	                            </table>

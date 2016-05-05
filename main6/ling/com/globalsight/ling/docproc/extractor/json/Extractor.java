@@ -135,7 +135,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     countEscapes++;
                 }
 
-                if (containColon)
+                //When value does not contain colons, go here
+                if (containColon && !tranChar)
                 {
                     colonBuffer.append(chr);
                     if (colonP.matcher(colonBuffer.toString()).find())
@@ -166,6 +167,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                         continue;
                     }
                 }
+                //When the key value is an array, go here
                 else if (containBrackets && !tranChar)
                 {
                     if (chr == '"')
@@ -186,6 +188,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     if (chr != '"' || (countEscapes > 0 && chr == '"'))
                     {
                         tranBuffer.append(chr);
+                        //When value contains double quotes or escapes, go here
                         if ((countEscapes == 1 && chr != '\\') || (countEscapes > 1 && chr != '\\'))
                             countEscapes = 0;
                         continue;
@@ -212,6 +215,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                                 }
                                 catch (Exception e)
                                 {
+                                    //When html filter parsing sentences wrong, go here
                                     m_output.addTranslatable(tranBuffer.toString(), sid);
                                 }
                             }

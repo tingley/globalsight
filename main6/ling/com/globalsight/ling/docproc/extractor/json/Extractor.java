@@ -173,7 +173,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     if (chr == '"')
                     {
                         tranChar = true;
-                        m_output.addSkeleton(skeletonBuffer.toString());
+                        m_output.addSkeleton(skeletonBuffer.append(chr).toString());
                         skeletonBuffer = new StringBuffer();
                     }
                     else

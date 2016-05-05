@@ -576,13 +576,13 @@ function doOnload()
                         </div>
                         <div v-show="scheduleType==5">
                             <div class="scheduleLab"><amb:lb key="lb_recur_every"/>:</div>
-                            <input type="number" class="number" v-model="dailyRecur" name="dailyRecur" id="dailyRecur" size="3"><amb:lb key="lb_days"/>                       
+                            <input type="number" class="number" v-model="dailyRecur" name="dailyRecur" id="dailyRecur" size="3" min="0"><amb:lb key="lb_days"/>                       
                         </div>
                         <div v-show="scheduleType==6">
                             <div class="scheduleLab"><amb:lb key="lb_recur_every"/>:</div>
                             <div style="float: left">
                                <div style="padding-bottom: 10px;">
-	                               <input type="number" class="number" name="weeklyRecur" v-model="weeklyRecur" id="weeklyRecur" size="3">
+	                               <input type="number" class="number" name="weeklyRecur" v-model="weeklyRecur" id="weeklyRecur" size="3" min="0">
 	                                 <amb:lb key="lb_weeks_on"/>:
 	                           </div>
 	                                 

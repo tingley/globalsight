@@ -14,8 +14,6 @@
 			column="FILTER_DESCRIPTION" type="string" not-null="false" unique="false" />
 		<property name="xmlRuleId" column="XML_RULE_ID" type="long"
 			not-null="true" unique="false" />
-		<property name="convertHtmlEntity" column="ENABLE_CONVERT_HTML_ENTITY" type="yes_no"
-			not-null="true" unique="false" />
 		<property name="useXmlRule" column="USE_XML_RULE" type="yes_no"
 			not-null="true" unique="false" />
 		<property name="configXml" column="CONFIG_XML" type="string"

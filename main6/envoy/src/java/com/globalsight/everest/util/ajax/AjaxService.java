@@ -1154,7 +1154,6 @@ public class AjaxService extends HttpServlet
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         long xmlRuleId = Long.parseLong(request.getParameter("xmlRuleId"));
-        boolean convertHtmlEntity = Boolean.parseBoolean(request.getParameter("convertHtmlEntity"));
 
         boolean useXmlRule = Boolean.parseBoolean(request.getParameter("useXmlRule"));
         String extendedWhitespaceChars = request.getParameter("extendedWhitespaceChars");
@@ -1163,6 +1162,7 @@ public class AjaxService extends HttpServlet
         int nonasciiAs = XmlFilterConfigParser.NON_ASCII_AS_CHARACTER;
         int wsHandleMode = XmlFilterConfigParser.WHITESPACE_HANDLE_COLLAPSE;
         int emptyTagFormat = XmlFilterConfigParser.EMPTY_TAG_FORMAT_PRESERVE;
+        int entityHandleMode = XmlFilterConfigParser.ENTITY_HANDLE_MODE_1;
         String elementPostFilter = request.getParameter("elementPostFilter");
         String elementPostFilterId = request.getParameter("elementPostFilterId");
         String cdataPostFilter = request.getParameter("cdataPostFilter");
@@ -1198,6 +1198,7 @@ public class AjaxService extends HttpServlet
             nonasciiAs = Integer.parseInt(request.getParameter("nonasciiAs"));
             wsHandleMode = Integer.parseInt(request.getParameter("wsHandleMode"));
             emptyTagFormat = Integer.parseInt(request.getParameter("emptyTagFormat"));
+            entityHandleMode = Integer.parseInt(request.getParameter("entityHandleMode"));
 
             jsonArrayPreserveWsTags = new JSONArray(preserveWsTags);
             jsonArrayEmbTags = new JSONArray(embTags);
@@ -1219,7 +1220,7 @@ public class AjaxService extends HttpServlet
         try
         {
             configXml = XmlFilterConfigParser.toXml(extendedWhitespaceChars, phConsolidationMode,
-                    phTrimMode, nonasciiAs, wsHandleMode, emptyTagFormat, elementPostFilter,
+                    phTrimMode, nonasciiAs, wsHandleMode, emptyTagFormat, entityHandleMode, elementPostFilter,
                     elementPostFilterId, cdataPostFilter, cdataPostFilterId, sidSupportTagName,
                     sidSupportAttName, isCheckWellFormed, isGerateLangInfo,
                     jsonArrayPreserveWsTags, jsonArrayEmbTags, jsonArrayTransAttrTags,
@@ -1232,8 +1233,7 @@ public class AjaxService extends HttpServlet
             CATEGORY.error("Update xml filter with error:", e);
         }
 
-        XMLRuleFilter filter = new XMLRuleFilter(filterName, filterDesc, xmlRuleId, companyId,
-                convertHtmlEntity);
+        XMLRuleFilter filter = new XMLRuleFilter(filterName, filterDesc, xmlRuleId, companyId);
         filter.setConfigXml(configXml);
         filter.setUseXmlRule(useXmlRule);
         return filter;

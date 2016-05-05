@@ -322,6 +322,13 @@ var jsQAFilterMsgTargetExpansionIsNotNumber = "<%= bundle.getString("lb_filter_q
 var jsQAFilterMsgRequiredException = "<%= bundle.getString("lb_filter_qafilter_msg_required_exception") %>";
 var jsQAFilterMsgExistException = "<%= bundle.getString("lb_filter_qafilter_msg_exist_exception") %>";
 
+var jsEntityHandleMode = "<%= bundle.getString("lb_filter_entityHandleMode") %>";
+var jsEntityHandleMode1 = "<%= bundle.getString("lb_filter_entityHandleMode_1") %>";
+var jsEntityHandleMode2 = "<%= bundle.getString("lb_filter_entityHandleMode_2") %>";
+var jsEntityHandleMode3 = "<%= bundle.getString("lb_filter_entityHandleMode_3") %>";
+var jsEntityHandleMode4 = "<%= bundle.getString("lb_filter_entityHandleMode_4") %>";
+var jsEntityHandleMode5 = "<%= bundle.getString("lb_filter_entityHandleMode_5") %>";
+
 <%
 java.util.Map<String, String> namemap = new java.util.HashMap<String, String>();
 namemap.put("java_properties_filter", "jsFilterNameJavaProperties");

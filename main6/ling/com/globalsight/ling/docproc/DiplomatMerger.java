@@ -247,6 +247,10 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
             targetSeg = targetSeg.replaceAll("&apos;", "\'");
             targetSeg = targetSeg.replaceAll("&quot;", "\"");
         }
+        else if (m_convertHtmlEntityForXml)
+        {
+            targetSeg = convertHtmlEntityForXml(targetSeg, m_convertHtmlEntityForXml);
+        }
 
         return targetSeg;
     }
@@ -1200,7 +1204,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                     {
                         // ignore
                     }
-                    m_convertHtmlEntityForXml = xmlFilter.isConvertHtmlEntity();
+                    m_convertHtmlEntityForXml = m_xmlFilterHelper.getEntityHandleMode() == 1;
                     getValueOfconvertHtmlEntity = true;
                     isXmlFilterConfigured = true;
                 }

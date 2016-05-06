@@ -35,6 +35,7 @@ import com.globalsight.cxe.entity.filterconfiguration.EscapingHelper;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
+import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConstants;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.everest.page.PageTemplate;
@@ -113,7 +114,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
     // GBS-4261
     private boolean m_addRtlDirectionality;
     private boolean m_convertHtmlEntityForHtml;
-    private boolean m_convertHtmlEntityForXml;
+    private int m_entityModeForXml;
     private long m_filterId;
     private String m_filterTableName;
     private BaseFilter m_baseFilter;
@@ -121,6 +122,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
     private boolean isXmlFilterConfigured = false;
     // For entity encoding issue
     private boolean m_isCDATA = false;
+    private boolean m_isAttr = false;
 
     // For secondary filter:if second parser(currently it is html parser) is
     // used,
@@ -234,22 +236,18 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
      * '&apos;' to single quote ''' Replace the '&quot;' to double quote '"'
      * Replace the '&gt;' to char '>'
      */
-    private String entityEncode(String sourceSeg)
+    private String entityEncodeForXML(String sourceSeg)
     {
         String targetSeg = sourceSeg;
 
-        if (m_isCDATA)
+        if (isXmlFilterConfigured)
         {
-            targetSeg = convertHtmlEntityForXml(targetSeg, m_convertHtmlEntityForXml);
+            targetSeg = convertHtmlEntityForXml(targetSeg);
         }
-        else if ((isXmlFilterConfigured && !m_convertHtmlEntityForXml) || !isXmlFilterConfigured)
+        else
         {
             targetSeg = targetSeg.replaceAll("&apos;", "\'");
             targetSeg = targetSeg.replaceAll("&quot;", "\"");
-        }
-        else if (m_convertHtmlEntityForXml)
-        {
-            targetSeg = convertHtmlEntityForXml(targetSeg, m_convertHtmlEntityForXml);
         }
 
         return targetSeg;
@@ -292,8 +290,24 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
 
         return s;
     }
+    
+    private String encoding3(String s)
+    {
+        HashMap<Character, String> map = new HashMap<Character, String>();
+        map.putAll(XmlEntities.m3CharToEntity);
+        map.remove(new Character('&'));
+        s = s.replace("&", "&amp;");
 
-    private String convertHtmlEntityForXml(String s, boolean convertHtmlEntityForXml)
+        for (Character key : map.keySet())
+        {
+            String value = map.get(key);
+            s = s.replace(key.toString(), value);
+        }
+
+        return s;
+    }
+
+    private String convertHtmlEntityForXml(String s)
     {
         if (s == null || s.length() == 0)
             return s;
@@ -301,9 +315,23 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
         s = decoding(s);
         s = decoding(s);
 
-        if (convertHtmlEntityForXml)
+        if (m_isAttr && m_entityModeForXml != XmlFilterConstants.ENTITY_HANDLE_MODE_5)
         {
-            s = encoding(s, convertHtmlEntityForXml);
+            s = encoding(s, false);
+        }
+        else if (m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_5)
+        {
+            s = encoding(s, true);
+        }
+        else if (m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_1
+                || m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_3)
+        {
+            s = encoding3(s);
+        }
+        else if (m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_2
+                || m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_4)
+        {
+            s = encoding(s, false);
         }
 
         return s;
@@ -677,7 +705,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
             {
                 if (isContent())
                 {
-                    tmp = convertHtmlEntityForXml(tmp, m_convertHtmlEntityForXml);
+                    tmp = convertHtmlEntityForXml(tmp);
                 }
             }
 
@@ -693,14 +721,16 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
 
                 if (FORMAT_HTML.equalsIgnoreCase(format))
                 {
-                    if ((isXmlFilterConfigured && !m_convertHtmlEntityForXml)
+                    if ((isXmlFilterConfigured
+                            && m_entityModeForXml != XmlFilterConstants.ENTITY_HANDLE_MODE_5)
                             || !isXmlFilterConfigured)
                     {
                         tmp = tmp.replaceAll("&apos;", "\'");
                         tmp = tmp.replaceAll("&quot;", "\"");
                     }
 
-                    if (m_isCDATA && isXmlFilterConfigured && m_convertHtmlEntityForXml)
+                    if (m_isCDATA && isXmlFilterConfigured
+                            && m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_5)
                     {
                         tmp = encode(tmp);
                         tmp = tmp.replace("&amp;amp;nbsp;", "&amp;nbsp;");
@@ -730,7 +760,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
             {
                 if (isContent())
                 {
-                    tmp = entityEncode(tmp);
+                    tmp = entityEncodeForXML(tmp);
                 }
                 else
                 {
@@ -1044,6 +1074,18 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                             tmp = StringUtil.replace(tmp, IdmlHelper.MARK_LineBreak_IDML,
                                     IdmlHelper.LINE_BREAK);
                         }
+                        
+                        // attribute end
+                        if (m_isAttr && (tmp.startsWith("\"") || tmp.startsWith("'")))
+                        {
+                            m_isAttr = false;
+                        }
+
+                        // attribute start
+                        if (!m_isAttr && tmp.matches(".*?[a-zA-Z]+[\\s]*=[\\s]*[\"']$"))
+                        {
+                            m_isAttr = true;
+                        }
                     }
                     // GBS-3997&GBS-4066
                     tmp = EmojiUtil.parseEmojiAliasToUnicode(tmp);
@@ -1204,7 +1246,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                     {
                         // ignore
                     }
-                    m_convertHtmlEntityForXml = m_xmlFilterHelper.getEntityHandleMode() == 1;
+                    m_entityModeForXml = m_xmlFilterHelper.getEntityHandleMode();
                     getValueOfconvertHtmlEntity = true;
                     isXmlFilterConfigured = true;
                 }
@@ -1223,13 +1265,13 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                     }
                     else if (isXmlFormat)
                     {
-                        m_convertHtmlEntityForXml = Boolean.valueOf(convertHtml.trim());
+                        m_entityModeForXml = XmlFilterConstants.ENTITY_HANDLE_MODE_1;
                     }
                 }
                 else
                 {
                     m_convertHtmlEntityForHtml = false;
-                    m_convertHtmlEntityForXml = false;
+                    m_entityModeForXml = XmlFilterConstants.ENTITY_HANDLE_MODE_1;
                 }
             }
 

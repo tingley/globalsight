@@ -51,6 +51,7 @@ import com.globalsight.cxe.entity.filterconfiguration.InternalText;
 import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConstants;
+import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.RegEx;
 import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.common.RegExMatchInterface;
@@ -1002,24 +1003,47 @@ public class XmlExtractor extends AbstractExtractor
         boolean isNbsp = "nbsp".equals(entityTag) ? true : false;
         String entityName = "&" + entityTag + ";";
         String entityRef = m_xmlEncoder.encodeStringBasic(entityName);
-
-        StringBuffer temp = new StringBuffer();
-        temp.append("<ph type=\"");
-        if (isNbsp)
+        
+        int entityHandleMode = m_xmlFilterHelper.getEntityHandleMode();
+        
+        String result = null;
+        if (!isNbsp && (entityHandleMode == XmlFilterConstants.ENTITY_HANDLE_MODE_3
+                || entityHandleMode == XmlFilterConstants.ENTITY_HANDLE_MODE_4
+                || entityHandleMode == XmlFilterConstants.ENTITY_HANDLE_MODE_5))
         {
-            temp.append("x-nbspace\"");
-            temp.append(" erasable=\"yes");
-        }
-        else
-        {
-            temp.append("entity-");
-            temp.append(entityTag);
-        }
-        temp.append("\">");
-        temp.append(entityRef);
-        temp.append("</ph>");
+            HashMap<String, Character> map = new HashMap<String, Character>();
+            map.putAll(HtmlEntities.mHtmlEntityToChar);
+            map.remove("&nbsp");
+            map.remove("&nbsp;");
 
-        return temp.toString();
+            if (map.containsKey(entityName))
+            {
+                result = map.get(entityName).toString();
+            }
+        }
+
+        if (result == null)
+        {
+            StringBuffer temp = new StringBuffer();
+            temp.append("<ph type=\"");
+            if (isNbsp)
+            {
+                temp.append("x-nbspace\"");
+                temp.append(" erasable=\"yes");
+            }
+            else
+            {
+                temp.append("entity-");
+                temp.append(entityTag);
+            }
+            temp.append("\">");
+            temp.append(entityRef);
+            temp.append("</ph>");
+            
+            result = temp.toString();
+        }
+
+        return result;
     }
 
     // For non-entity case such as "&amp;copy;" for protection purpose.

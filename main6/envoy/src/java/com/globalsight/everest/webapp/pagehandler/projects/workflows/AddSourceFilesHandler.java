@@ -242,35 +242,42 @@ public class AddSourceFilesHandler extends PageHandler
             Boolean fromDi = null;
             File root = AmbFileStoragePathUtils.getCxeDocDir();
             String[] filePaths = request.getParameterValues("jobFilePath");
-            for (String path : filePaths)
+            for (String filePath : filePaths)
             {
-                String filePath = path.substring(path.lastIndexOf("\\") + 1);
-                File sourceFile = new File(path);
+                filePath = convertFilePath(filePath);
+                if (filePath.contains(tmpFolderName))
+                {
+                    filePath = filePath.substring(filePath.indexOf(tmpFolderName) + tmpFolderName.length());
+                }
+                String currentLocation = root + File.separator + TMP_FOLDER_NAME + File.separator
+                        + tmpFolderName + File.separator + filePath;
                 String destinationLocation = locale + File.separator + job.getId() + File.separator
                         + filePath;
-                File descFile = new File(root + File.separator + destinationLocation);
-                try
+                
+                if (currentLocation.contains(TMP_FOLDER_NAME))
                 {
-                    FileUtil.copyFile(sourceFile, descFile);
+                    File sourceFile = new File(currentLocation);
+                    File descFile = new File(root + File.separator + destinationLocation);
+                    try
+                    {
+                        FileUtil.copyFile(sourceFile, descFile);
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
                 }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-                path = new StringBuffer(locale).append(File.separator).append(job.getJobId())
-                        .append(File.separator).append(filePath).toString();
-                File targetFile = new File(root, path);
-
+                File targetFile = new File(root + File.separator + destinationLocation);
                 if (!targetFile.exists())
                 {
                     String newPath = new StringBuffer(locale).append(File.separator)
-                            .append(job.getName()).append(File.separator).append(path).toString();
+                            .append(job.getName()).append(File.separator).append(destinationLocation).toString();
                     targetFile = new File(root, newPath);
                 }
                 else if (fromDi == null)
                 {
-                    path = path.replace("\\", "/");
-                    String[] nodes = path.split("/");
+                    destinationLocation = destinationLocation.replace("\\", "/");
+                    String[] nodes = destinationLocation.split("/");
                     fromDi = nodes.length > 1 && "webservice".equals(nodes[1]);
                 }
                 files.add(targetFile);

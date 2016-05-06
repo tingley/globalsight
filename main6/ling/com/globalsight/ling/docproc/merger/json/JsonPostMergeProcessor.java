@@ -22,22 +22,16 @@ import com.globalsight.ling.docproc.merger.PostMergeProcessor;
 import com.globalsight.ling.docproc.DiplomatMergerException;
 
 /**
- * This class post processes a merged plaintext document: every
- * Unix-style LF is replaced by Windows-style CRLF.
+ * This class post processes a merged JSON document.
  */
-public class JsonPostMergeProcessor
-    implements PostMergeProcessor
+public class JsonPostMergeProcessor implements PostMergeProcessor
 {
-    private static Logger c_category =
-        Logger.getLogger(
-                JsonPostMergeProcessor.class);
+    private static Logger logger = Logger.getLogger(JsonPostMergeProcessor.class);
 
-    /**
-     * @see com.globalsight.ling.document.merger.PostMergeProcessor#process(java.lang.String, java.lang.String)
-     */
-    public String process(String p_content, String p_IanaEncoding)
-        throws DiplomatMergerException
+    @Override
+    public String process(String p_content, String p_IanaEncoding) throws DiplomatMergerException
     {
         return null;
     }
+
 }

@@ -69,6 +69,7 @@ import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileStateConstants;
 import com.globalsight.ling.common.CodesetMapper;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
+import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
@@ -119,6 +120,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     static public final int INDICATE_NO_MATCH = 12;
 
     static public final float SCORE_UNKNOWN = -1;
+    static public final float MT_SCORE_FOR_OFFLINE_KIT = 60;
 
     static private ResourceBundle m_resources;
     static
@@ -323,6 +325,11 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     {
         return m_fileFormatId == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF
                 || m_fileFormatId == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED;
+    }
+
+    private boolean isDownloadForListRTF()
+    {
+        return AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_RTF == m_fileFormatId;
     }
 
     /**
@@ -617,13 +624,13 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             state = m_matchTypeStats.getLingManagerMatchType(srcTuv.getId(),
                     "0");
         }
-        boolean isTopLeverageMatchFromMT = isTopLeverageMatchFromMT(fmList);
+//        boolean isTopLeverageMatchFromMT = isTopLeverageMatchFromMT(fmList);
 
         List isProtectedChangeable = new ArrayList();
-
+//        long tuId = srcTuv.getTuId();
         // First, determine which gxml to use as the target and the
         // score indicator.
-        if (state == LeverageMatchLingManager.EXACT)
+        if (state == LeverageMatchLingManager.EXACT && !isMtTranslated(trgTuv))
         {
             // NOTE: The check above determines whether the parent is
             // an exact match type that has been leveraged on import
@@ -637,8 +644,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                         isProtectedChangeable);
             }
 
-            if (parentProtection
-                    && TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_100)
+            if (parentProtection && TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_100)
                 parentProtection = false;
 
             matchTypeDisplay = getDisplayMatchType(INDICATE_EXACT,
@@ -663,8 +669,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                     parentProtection, String.valueOf(trgScore));
             matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_UNVERIFIED_EXACT;
         }
-        else if (trgTuv.isNotLocalized() && isDownloadRequest()
-                && isDownloadForTrados())
+        else if (trgTuv.isNotLocalized() && isDownloadRequest() && isDownloadForTrados())
         {
             // This segment has not been touched by a human and we are
             // downloading for Trados. Insert the first fuzzy and its
@@ -731,15 +736,17 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             // we **always** use the current target.
             trgGxml = trgTuv.getGxmlExcludeTopTags();
             trgScore = 100; // must be set for Trados output
+            // to be safe, limit to below formats
+            if ((isDownloadForTrados() || isDownloadForListRTF() || isDownloadForTTX())
+                    && isMtTranslated(trgTuv))
+            {
+                trgScore = 60;
+            }
 
             // This segment has been touched by a human but we want to
             // indicate to the user that it originally had a TM match.
             String topGxml = getTopLeveragedMatchGxml(fmList, srcTuv, trgTuv, 0);
             float topScore = getTopLeveragedMatchScore(fmList);
-            if (isTopLeverageMatchFromMT && isDownloadForTTX())
-            {
-                topScore = 60;// Trados standard practice (I think it is weird, right?)
-            }
 
             // if this tuv is not exact, and it has sub segment with exact
             // match,
@@ -806,9 +813,10 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 // GBS-3722, just use MT tagged target segment, do not use
                 // source
             }
-            else if (populate100 && TuvState.APPROVED.equals(trgTuv.getState()))
+            else if ((populate100 || populateFuzzy) && isMtTranslated(trgTuv))
             {
-
+                // For MTed segment, whatever populate 100 or populateFuzzy, it
+                // cannot be set to source.
             }
             else
             {
@@ -820,16 +828,6 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         {
             srgGxml = IdmlHelper.formatForOfflineDownload(srgGxml);
             trgGxml = IdmlHelper.formatForOfflineDownload(trgGxml);
-        }
-
-        // GBS-4383: Set any MT segments that are populated into TTX as 60%
-        // leverage (Trados practice)
-        String modifyUser = trgTuv.getLastModifiedUser();
-        boolean isTrgMted = (modifyUser != null && modifyUser.toLowerCase().endsWith("_mt"));
-        if (isDownloadForTTX()
-                && ((populate100 && isTrgMted) || (!populate100 && isTopLeverageMatchFromMT)))
-        {
-            trgScore = 60;
         }
 
         // Then create/append offline parent seg
@@ -1653,14 +1651,23 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             return SCORE_UNKNOWN;
         }
 
-        LeverageMatch p_levMatch = (LeverageMatch) p_fuzzyList.get(0);
+        LeverageMatch levMatch = (LeverageMatch) p_fuzzyList.get(0);
 
-        if (p_levMatch == null)
+        if (levMatch == null)
         {
             return SCORE_UNKNOWN;
         }
 
-        return p_levMatch.getScoreNum();
+        // When offline download, MT match applies fixed score "60".
+        if (levMatch.getOrderNum() == TmCoreManager.LM_ORDER_NUM_START_MT
+                || levMatch.getOrderNum() == TmCoreManager.LM_ORDER_NUM_START_MT + 1)
+        {
+            return MT_SCORE_FOR_OFFLINE_KIT;
+        }
+        else
+        {
+            return levMatch.getScoreNum();
+        }
     }
 
     private boolean isTopLeverageMatchFromMT(ArrayList p_fuzzyList)
@@ -2155,4 +2162,9 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 || (p_targetScore > 0 && p_targetScore != 100 && !populateFuzzy);
     }
 
+    private boolean isMtTranslated(Tuv tuv)
+    {
+        String modifyUser = tuv.getLastModifiedUser();
+        return (modifyUser != null && modifyUser.toLowerCase().endsWith("_mt"));
+    }
 }

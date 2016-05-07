@@ -1453,6 +1453,17 @@ public abstract class RTFWriterUnicode extends RTFUnicode implements WriterInter
                     continue;
                 }
             }
+            else if (ch == NORMALIZED_LINEBREAK)
+            {
+                rtfRun.append(convertTag(false, "[LF]", p_tagStyle, p_segNativeFormat,
+                        p_wrapTagInFld, p_renderTags));
+
+                // Note: By this time, the string has been converted to ptag.
+                // Unprotected newlines were normalized for Rtf when we
+                // got the target text in writeTranslationUnit().
+                ++i_at;
+                continue;
+            }
             else if (p_isRtlLang && direction != DIR_LTR && ch != ' ' && !Text.isBidiChar(ch))
             {
                 // open left-to-right run

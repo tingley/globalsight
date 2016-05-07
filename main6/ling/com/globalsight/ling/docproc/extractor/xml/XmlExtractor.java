@@ -756,11 +756,6 @@ public class XmlExtractor extends AbstractExtractor
                     String temp = m_xmlFilterHelper.processText(nodeValue, isInline, isPreserveWS);
                     // GBS-3577
                     temp = StringUtil.replace(temp, "&amp;nbsp;", nbspPh());
-                    // GBS-4336
-                    if (!m_xmlFilterHelper.isBlankOrExblank(temp))
-                    {
-                        temp = preserveCarriageReturn(temp);
-                    }
                     outputExtractedStuff(temp, isTranslatable, isPreserveWS);
                 }
                 else
@@ -792,11 +787,6 @@ public class XmlExtractor extends AbstractExtractor
 
                     // GBS-3577
                     temp = StringUtil.replace(temp, "&amp;nbsp;", nbspPh());
-                    // GBS-4336
-                    if (!m_xmlFilterHelper.isBlankOrExblank(temp))
-                    {
-                        temp = preserveCarriageReturn(temp);
-                    }
                     outputExtractedStuff(temp, isTranslatable, isPreserveWS);
                 }
 
@@ -881,24 +871,18 @@ public class XmlExtractor extends AbstractExtractor
             }
             else
             {
-                String temp = nodeValue;
                 outputSkeleton("<![CDATA[");
                 // handle internal text for cdata
                 if (m_internalTexts != null && m_internalTexts.size() > 0)
                 {
-                    temp = handleInternalTextForCdata(nodeValue);
+                    String temp = handleInternalTextForCdata(nodeValue);
+                    outputExtractedStuff(temp, isTranslatable, false);
                 }
                 else
                 {
-                    temp = m_xmlEncoder.encodeStringBasic(nodeValue);
+                    outputExtractedStuff(m_xmlEncoder.encodeStringBasic(nodeValue), isTranslatable,
+                            false);
                 }
-                // GBS-4336
-                if (!m_xmlFilterHelper.isBlankOrExblank(temp))
-                {
-                    temp = preserveCarriageReturn(temp);
-                }
-                outputExtractedStuff(temp, isTranslatable, false);
-
                 outputSkeleton("]]>");
             }
         }
@@ -986,26 +970,14 @@ public class XmlExtractor extends AbstractExtractor
         return nbsp;
     }
 
-    /**
-     * Preserves carriage return "\n" by replacing "\n" with LF tag.
-     * 
-     * @since GBS-4336
-     */
-    private String preserveCarriageReturn(String string)
-    {
-        String replaced = "<ph type=\"x-lf\" erasable=\"yes\">\n</ph>";
-
-        return StringUtil.replace(string, "\n", replaced);
-    }
-
     private String wrapEntity(String entityTag)
     {
         boolean isNbsp = "nbsp".equals(entityTag) ? true : false;
         String entityName = "&" + entityTag + ";";
         String entityRef = m_xmlEncoder.encodeStringBasic(entityName);
-        
+
         int entityHandleMode = m_xmlFilterHelper.getEntityHandleMode();
-        
+
         String result = null;
         if (!isNbsp && (entityHandleMode == XmlFilterConstants.ENTITY_HANDLE_MODE_3
                 || entityHandleMode == XmlFilterConstants.ENTITY_HANDLE_MODE_4
@@ -1039,7 +1011,7 @@ public class XmlExtractor extends AbstractExtractor
             temp.append("\">");
             temp.append(entityRef);
             temp.append("</ph>");
-            
+
             result = temp.toString();
         }
 
@@ -2326,11 +2298,6 @@ public class XmlExtractor extends AbstractExtractor
         // &copy;
         chunk = StringUtil.replace(chunk, "_copyright_", wrapAsEntity("copy", "&copy;"));
         chunk = StringUtil.replace(chunk, "_ampcopyright_", wrapAsEntity("copy", "&amp;copy;"));
-        // GBS-4336
-        if (!m_xmlFilterHelper.isBlankOrExblank(chunk))
-        {
-            chunk = preserveCarriageReturn(chunk);
-        }
 
         if (isCdata)
         {

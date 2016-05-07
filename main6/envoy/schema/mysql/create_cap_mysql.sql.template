@@ -2859,7 +2859,7 @@ CREATE TABLE `xml_rule_filter` (
 
 LOCK TABLES `xml_rule_filter` WRITE;
 INSERT INTO `xml_rule_filter` VALUES
-(1,'XML Filter(Default)','The default xml filter',1,'N',1,'Y','');
+(1,'XML Filter(Default)','The default xml filter',1,1,'Y','');
 UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `html_filter`;

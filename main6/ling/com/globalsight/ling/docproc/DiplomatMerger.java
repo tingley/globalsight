@@ -133,7 +133,6 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
 
     private static Pattern repairOfficeXml = Pattern
             .compile("(<w:instrText[^>]*?>)(.*?)(</w:instrText>)");
-    // GBS-4336
     private XmlFilterHelper m_xmlFilterHelper = null;
 
     //
@@ -290,7 +289,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
 
         return s;
     }
-    
+
     private String encoding3(String s)
     {
         HashMap<Character, String> map = new HashMap<Character, String>();
@@ -628,7 +627,6 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
     {
         DiplomatParserState state = (DiplomatParserState) m_stateStack.peek();
         String type = state.getType();
-        boolean preserveWhiteSpace = state.isPreserveWhiteSpace();
         String format = null;
         String mainFormat = m_output.getDataFormat();
 
@@ -711,14 +709,6 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
 
             if (FORMAT_XML.equalsIgnoreCase(mainFormat))
             {
-                if ("\n".equals(tmp) && !isXmlTagPreserveWhitespace(preserveWhiteSpace))
-                {
-                    // GBS-4336, remove the line break if the xml filter
-                    // configures
-                    // not to preserve whitespace
-                    tmp = "";
-                }
-
                 if (FORMAT_HTML.equalsIgnoreCase(format))
                 {
                     if ((isXmlFilterConfigured
@@ -823,24 +813,6 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
         }
     }
 
-    /**
-     * Checks if the segment should be whitespace preserved or not according to
-     * the xml filter's settings.
-     * 
-     * @since GBS-4336
-     */
-    private boolean isXmlTagPreserveWhitespace(boolean thisTagPreserveWhiteSpace)
-    {
-        if (m_xmlFilterHelper != null)
-        {
-            if (!m_xmlFilterHelper.isPreserveWhiteSpaces())
-            {
-                return thisTagPreserveWhiteSpace;
-            }
-        }
-        return true;
-    }
-
     // For GBS-2521.
     private String repair(String s)
     {
@@ -916,8 +888,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                 case DocumentElement.TRANSLATABLE:
                     m_stateStack.push(new DiplomatParserState(de.type(),
                             ((TranslatableElement) de).getDataType(),
-                            ((TranslatableElement) de).getType(),
-                            ((TranslatableElement) de).isPreserveWhiteSpace()));
+                            ((TranslatableElement) de).getType()));
 
                     if (((TranslatableElement) de).getIsLocalized() != null)
                     {
@@ -1074,7 +1045,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                             tmp = StringUtil.replace(tmp, IdmlHelper.MARK_LineBreak_IDML,
                                     IdmlHelper.LINE_BREAK);
                         }
-                        
+
                         // attribute end
                         if (m_isAttr && (tmp.startsWith("\"") || tmp.startsWith("'")))
                         {

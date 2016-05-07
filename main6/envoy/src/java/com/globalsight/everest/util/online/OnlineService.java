@@ -57,11 +57,11 @@ public class OnlineService extends HttpServlet
     private PrintWriter writer;
     private long companyId;
     String m_userId;
-    
+
     private OnlineHelper helper = null;
     private SegmentView segmentView = null;
     private EditorState state = null;
-    
+
     /**
      * The base method.
      */
@@ -71,24 +71,22 @@ public class OnlineService extends HttpServlet
         boolean check = setCompanyId();
         HttpSession session = request.getSession(false);
         m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
-        
+
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
 
-        segmentView = (SegmentView) sessionMgr
-                .getAttribute(WebAppConstants.SEGMENTVIEW);
-        
-        state = (EditorState) sessionMgr
-                .getAttribute(WebAppConstants.EDITORSTATE);
-        
+        segmentView = (SegmentView) sessionMgr.getAttribute(WebAppConstants.SEGMENTVIEW);
+
+        state = (EditorState) sessionMgr.getAttribute(WebAppConstants.EDITORSTATE);
+
         if (segmentView != null)
         {
             helper = new OnlineHelper();
             try
             {
-                String target =  GxmlUtil.getInnerXml(segmentView.getTargetSegment());
+                String target = GxmlUtil.getInnerXml(segmentView.getTargetSegment());
                 helper.setInputSegment(target, "", segmentView.getDataType());
-                
+
                 if (EditorConstants.PTAGS_VERBOSE.equals(state.getPTagFormat()))
                 {
                     helper.getVerbose();
@@ -97,10 +95,10 @@ public class OnlineService extends HttpServlet
                 {
                     helper.getCompact();
                 }
-                
+
                 String seg = getSource();
                 helper.setInputSegment(seg, "", segmentView.getDataType());
-                
+
                 if (EditorConstants.PTAGS_VERBOSE.equals(state.getPTagFormat()))
                 {
                     helper.getVerbose();
@@ -127,8 +125,7 @@ public class OnlineService extends HttpServlet
             }
             else
             {
-                OnlineService.class.getMethod(method).invoke(
-                        OnlineService.this);
+                OnlineService.class.getMethod(method).invoke(OnlineService.this);
             }
         }
         catch (Exception e)
@@ -148,8 +145,7 @@ public class OnlineService extends HttpServlet
         {
             try
             {
-                companyId = ServerProxy.getJobHandler().getCompany(companyName)
-                        .getIdAsLong();
+                companyId = ServerProxy.getJobHandler().getCompany(companyName).getIdAsLong();
                 CompanyThreadLocal.getInstance().setIdValue("" + companyId);
                 return true;
             }
@@ -160,7 +156,7 @@ public class OnlineService extends HttpServlet
         }
         return false;
     }
-    
+
     /**
      * Write the string.
      */
@@ -169,9 +165,9 @@ public class OnlineService extends HttpServlet
         writer.write(s);
         writer.close();
     }
-    
+
     /**
-     * Gets ptag string  with OnlineHelper.
+     * Gets ptag string with OnlineHelper.
      * 
      * @throws DiplomatBasicParserException
      */
@@ -179,7 +175,7 @@ public class OnlineService extends HttpServlet
     {
         writeString(helper.getPtagString());
     }
-    
+
     /**
      * Get the source from the segment view.
      * 
@@ -187,9 +183,10 @@ public class OnlineService extends HttpServlet
      */
     private String getSource()
     {
-        return GxmlUtil.getInnerXml(segmentView.getSourceSegment());
+        String txt = GxmlUtil.getInnerXml(segmentView.getSourceSegment());
+        return LfUtil.addLf(txt);
     }
-    
+
     /**
      * Gets the target diplomat and write back.
      * 
@@ -198,10 +195,11 @@ public class OnlineService extends HttpServlet
     public void getTargetDiplomat() throws Exception
     {
         String text = getTarget();
+        text = LfUtil.removeLf(text);
         String seg = helper.getTargetDiplomat(text);
         writeString(seg);
     }
-    
+
     /**
      * Gets ptag to native map table and write back.
      * 
@@ -212,7 +210,7 @@ public class OnlineService extends HttpServlet
         String seg = helper.getPtagToNativeMappingTable();
         writeString(seg);
     }
-    
+
     /**
      * Gets html segment and write back.
      * 
@@ -222,8 +220,9 @@ public class OnlineService extends HttpServlet
     {
         String text = getTarget();
         String isFromTarget = request.getParameter("isFromTarget");
-        helper.setInputSegment(text, "", segmentView.getDataType(), Boolean.parseBoolean(isFromTarget));
-        
+        helper.setInputSegment(text, "", segmentView.getDataType(),
+                Boolean.parseBoolean(isFromTarget));
+
         String result = text;
         if (EditorConstants.PTAGS_VERBOSE.equals(state.getPTagFormat()))
         {
@@ -234,15 +233,16 @@ public class OnlineService extends HttpServlet
             result = helper.makeCompactColoredPtags(text);
         }
 
+        result = LfUtil.addHtlmLf(result);
         writeString(result);
     }
-    
+
     private String getTarget() throws UnsupportedEncodingException
     {
         String text = request.getParameter("text");
         return text;
     }
-    
+
     /**
      * Init the target
      */
@@ -250,7 +250,7 @@ public class OnlineService extends HttpServlet
     {
         String text = getTarget();
         String result = text;
-        
+
         OnlineTagHelper applet = new OnlineTagHelper();
         applet.setInputSegment(text, "", segmentView.getDataType());
         if (EditorConstants.PTAGS_VERBOSE.equals(state.getPTagFormat()))
@@ -269,10 +269,11 @@ public class OnlineService extends HttpServlet
                 result = applet.makeCompactColoredPtags(text);
             }
         }
-        
+
+        result = LfUtil.addHtlmLf(result);
         writeString(result);
     }
-    
+
     /**
      * Do error check and send the result back.
      * 
@@ -281,8 +282,10 @@ public class OnlineService extends HttpServlet
     public void doErrorCheck() throws Exception
     {
         String text = getTarget();
+
+        text = LfUtil.removeLf(text);
         Map<String, String> m = new HashMap<String, String>();
-        
+
         helper.setUntranslateStyle(SegmentUtil2.getTAGS());
         String msg = helper.errorCheck(text, getSource(), 0, "UTF8", 0, "UTF8");
         String internalTagMsg = helper.getInternalErrMsg();
@@ -295,19 +298,19 @@ public class OnlineService extends HttpServlet
                 newTarget = helper.getTargetDiplomat(newTarget);
             }
         }
-        
+
         if (msg != null)
             m.put("msg", msg);
-        
+
         if (internalTagMsg != null)
             m.put("internalTagMsg", internalTagMsg);
-        
+
         if (newTarget != null)
             m.put("newTarget", newTarget);
-        
+
         writeString(JsonUtil.toJson(m));
     }
-    
+
     /**
      * Do error check and send the result back. Note that this method only used
      * for save form richeditor with firefox. Because there are something wrong
@@ -319,7 +322,7 @@ public class OnlineService extends HttpServlet
     {
         String text = getTarget();
         Map<String, String> m = new HashMap<String, String>();
-        
+
         helper.setUntranslateStyle(SegmentUtil2.getTAGS());
         String msg = helper.errorCheck(text, getSource(), 0, "UTF8", 0, "UTF8");
         String internalTagMsg = helper.getInternalErrMsg();
@@ -328,19 +331,19 @@ public class OnlineService extends HttpServlet
         {
             newTarget = helper.getNewPTagTargetString();
         }
-        
+
         if (msg != null)
             m.put("msg", msg);
-        
+
         if (internalTagMsg != null)
             m.put("internalTagMsg", internalTagMsg);
-        
+
         if (newTarget == null || newTarget.length() == 0)
         {
             newTarget = helper.getTargetDiplomat(text);
         }
         m.put("newTarget", newTarget);
-        
+
         writeString(JsonUtil.toJson(m));
     }
 }

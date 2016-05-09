@@ -41,7 +41,6 @@ public class XMLRuleFilter implements Filter
     private String filterDescription;
     private long xmlRuleId;
     private long companyId;
-    private boolean convertHtmlEntity = false;
     private boolean useXmlRule = true;
     private String configXml = "";
 
@@ -50,20 +49,18 @@ public class XMLRuleFilter implements Filter
     }
 
     public XMLRuleFilter(String filterName, String filterDescription,
-            long xmlRuleId, long companyId, boolean convertHtmlEntity)
+            long xmlRuleId, long companyId)
     {
         this.filterName = filterName;
         this.filterDescription = filterDescription;
         this.xmlRuleId = xmlRuleId;
         this.companyId = companyId;
-        this.convertHtmlEntity = convertHtmlEntity;
     }
 
     public XMLRuleFilter(long id, String filterName, String filterDescription,
-            long xmlRuleId, long companyId, boolean convertHtmlEntity)
+            long xmlRuleId, long companyId)
     {
-        this(filterName, filterDescription, xmlRuleId, companyId,
-                convertHtmlEntity);
+        this(filterName, filterDescription, xmlRuleId, companyId);
         this.id = id;
     }
 
@@ -187,8 +184,6 @@ public class XMLRuleFilter implements Filter
         // base filter list
         // sb.append(BaseFilterManager.getAllBaseFiltersJson()).append(",");
         sb.append("\"xmlRuleId\":").append(xmlRuleId).append(",");
-        sb.append("\"convertHtmlEntity\":").append(convertHtmlEntity)
-                .append(",");
         sb.append("\"useXmlRule\":").append(useXmlRule).append(",");
         sb.append("\"extendedWhitespaceChars\":")
                 .append("\"")
@@ -211,6 +206,10 @@ public class XMLRuleFilter implements Filter
         sb.append("\"emptyTagFormat\":")
                 .append(isParsed ? parser.getEmptyTagFormat()
                         : XmlFilterConstants.EMPTY_TAG_FORMAT_PRESERVE)
+                .append(",");
+        sb.append("\"entityHandleMode\":")
+                .append(isParsed ? parser.getEntityHandleMode()
+                        : XmlFilterConstants.ENTITY_HANDLE_MODE_1)
                 .append(",");
         sb.append("\"elementPostFilter\":").append("\"")
                 .append(isParsed ? parser.getElementPostFilterTableName() : "")
@@ -359,16 +358,6 @@ public class XMLRuleFilter implements Filter
     public void setCompanyId(long companyId)
     {
         this.companyId = companyId;
-    }
-
-    public boolean isConvertHtmlEntity()
-    {
-        return convertHtmlEntity;
-    }
-
-    public void setConvertHtmlEntity(boolean convertHtmlEntity)
-    {
-        this.convertHtmlEntity = convertHtmlEntity;
     }
 
     public boolean isUseXmlRule()

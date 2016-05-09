@@ -43,9 +43,9 @@ public interface XmlFilterConstants
     public static final String NODE_INTERNAL_TAG = "internalTag";
     public static final String NODE_SRCCMT_XMLCOMMENT = "srcCmtXmlComment";
     public static final String NODE_SRCCMT_XMLTAG = "srcCmtXmlTag";
+    public static final String NODE_ENTITY_HANDLE_MODE = "entityHandleMode";
 
-    public static final String nullConfigXml = "<" + NODE_ROOT + ">" + "</"
-            + NODE_ROOT + ">";
+    public static final String nullConfigXml = "<" + NODE_ROOT + ">" + "</" + NODE_ROOT + ">";
 
     // xml filter config values
     public static final int PH_CONSOLIDATE_DONOT = 1;
@@ -75,4 +75,33 @@ public interface XmlFilterConstants
     public static final int PI_MARKUP_EMB = 1;
     public static final int PI_REMOVE = 2;
     public static final int PI_TRANSLATE = 3;
+
+    // GBS-4116 Update to XML Processing
+    /**
+     * 1. As xml <>& - Accept the 5 pre-defined entities on import, but on
+     * export, export <>& as escaped, but not quote or apostrophe
+     */
+    public static final int ENTITY_HANDLE_MODE_1 = 1;
+    /**
+     * 2. As xml <’>&” - Accept the 5 pre-defined entities on import but on
+     * export, export <’>&” as escaped entities
+     */
+    public static final int ENTITY_HANDLE_MODE_2 = 2;
+    /**
+     * 3. As xhtml <>& – accept html escaped entities as according to the xhtml
+     * standard of “Transitional”, and on export, do not escape any xhtml
+     * entities, including quote and apostrophe.
+     */
+    public static final int ENTITY_HANDLE_MODE_3 = 3;
+    /**
+     * 4. As xhtml <’>&” – accept html escaped entities as according to the
+     * xhtml standard of “Transitional”, and on export, do not escape any xhtml
+     * entities, excluding quote and apostrophe, which should be escaped.
+     */
+    public static final int ENTITY_HANDLE_MODE_4 = 4;
+    /**
+     * 5. As xhtml entities – accept html escaped entities as according to the
+     * xhtml standard of “Transitional”, and on export escape all entities.
+     */
+    public static final int ENTITY_HANDLE_MODE_5 = 5;
 }

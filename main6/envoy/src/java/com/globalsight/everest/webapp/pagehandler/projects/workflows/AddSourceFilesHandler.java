@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -243,35 +242,42 @@ public class AddSourceFilesHandler extends PageHandler
             Boolean fromDi = null;
             File root = AmbFileStoragePathUtils.getCxeDocDir();
             String[] filePaths = request.getParameterValues("jobFilePath");
-            for (String path : filePaths)
+            for (String filePath : filePaths)
             {
-                String filePath = path.substring(path.lastIndexOf("\\") + 1);
-                File sourceFile = new File(path);
+                filePath = convertFilePath(filePath);
+                if (filePath.contains(tmpFolderName))
+                {
+                    filePath = filePath.substring(filePath.indexOf(tmpFolderName) + tmpFolderName.length());
+                }
+                String currentLocation = root + File.separator + TMP_FOLDER_NAME + File.separator
+                        + tmpFolderName + File.separator + filePath;
                 String destinationLocation = locale + File.separator + job.getId() + File.separator
                         + filePath;
-                File descFile = new File(root + File.separator + destinationLocation);
-                try
+                
+                if (currentLocation.contains(TMP_FOLDER_NAME))
                 {
-                    FileUtil.copyFile(sourceFile, descFile);
+                    File sourceFile = new File(currentLocation);
+                    File descFile = new File(root + File.separator + destinationLocation);
+                    try
+                    {
+                        FileUtil.copyFile(sourceFile, descFile);
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
                 }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-                path = new StringBuffer(locale).append(File.separator).append(job.getJobId())
-                        .append(File.separator).append(filePath).toString();
-                File targetFile = new File(root, path);
-
+                File targetFile = new File(root + File.separator + destinationLocation);
                 if (!targetFile.exists())
                 {
                     String newPath = new StringBuffer(locale).append(File.separator)
-                            .append(job.getName()).append(File.separator).append(path).toString();
+                            .append(job.getName()).append(File.separator).append(destinationLocation).toString();
                     targetFile = new File(root, newPath);
                 }
                 else if (fromDi == null)
                 {
-                    path = path.replace("\\", "/");
-                    String[] nodes = path.split("/");
+                    destinationLocation = destinationLocation.replace("\\", "/");
+                    String[] nodes = destinationLocation.split("/");
                     fromDi = nodes.length > 1 && "webservice".equals(nodes[1]);
                 }
                 files.add(targetFile);
@@ -426,7 +432,7 @@ public class AddSourceFilesHandler extends PageHandler
                         Project fpProj = getProject(fp);
                         // get the project and check if it is in the group of
                         // user's projects
-                        if (projectsOfCurrentUser.contains(fpProj))
+                        if (projectsOfCurrentUser.contains(fpProj)&&fp.getL10nProfileId()==l10nId)
                         {
                             fileProfileListOfUser.add(fp);
                         }
@@ -466,7 +472,6 @@ public class AddSourceFilesHandler extends PageHandler
     private void setPageParameter(HttpServletRequest request, ResourceBundle bundle, User user,
             HttpSession session, String currentCompanyId)
     {
-        this.setLable(request, bundle);
         request.setAttribute("rand", session.getAttribute("UID_" + session.getId()));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
         String tmpFolderName = sdf.format(new Date()) + "-" + getRandomNumber();
@@ -977,75 +982,6 @@ public class AddSourceFilesHandler extends PageHandler
                 .append(file.getName().replace("'", "\\'")).append("',size:'").append(file.length())
                 .append("'}");
         return ret.toString();
-    }
-    
-    /**
-     * Set languages on the page according to locales
-     * 
-     * @param request
-     * @param bundle
-     */
-    private void setLable(HttpServletRequest request, ResourceBundle bundle)
-    {
-        setLableToJsp(request, bundle, "lb_name");// name
-        setLableToJsp(request, bundle, "lb_status");// status
-        setLableToJsp(request, bundle, "lb_size");// size
-        setLableToJsp(request, bundle, "lb_file_profile");// file profile
-        setLableToJsp(request, bundle, "lb_target_locales");// target locales
-        setLableToJsp(request, bundle, "lb_create_job");// create job
-        setLableToJsp(request, bundle, "lb_create_job_without_java");// create
-                                                                     // job(zip
-                                                                     // only)
-        setLableToJsp(request, bundle, "lb_add_files");// add files
-        setLableToJsp(request, bundle, "lb_browse");// Browse
-        setLableToJsp(request, bundle, "lb_cancel");// Cancel
-        setLableToJsp(request, bundle, "jsmsg_customer_job_name");
-        setLableToJsp(request, bundle, "jsmsg_invalid_job_name_1");
-        setLableToJsp(request, bundle, "jsmsg_choose_file_profiles_for_all_files");
-        setLableToJsp(request, bundle, "lb_import_select_target_locale");
-        setLableToJsp(request, bundle, "jsmsg_customer_job_name");
-        setLableToJsp(request, bundle, "jsmsg_customer_comment");
-        setLableToJsp(request, bundle, "jsmsg_comment_must_be_less");
-        setLableToJsp(request, bundle, "lb_total");// Total
-        setLableToJsp(request, bundle, "lb_uploaded");
-        setLableToJsp(request, bundle, "msg_failed");
-        setLableToJsp(request, bundle, "msg_job_add_files");
-        setLableToJsp(request, bundle, "helper_text_create_job");
-        setLableToJsp(request, bundle, "helper_text_create_job_without_java");
-        setLableToJsp(request, bundle, "msg_job_folder_confirm");
-        setLableToJsp(request, bundle, "help_create_job");
-        setLableToJsp(request, bundle, "msg_job_create_empty_file");
-        setLableToJsp(request, bundle, "msg_job_create_exist");
-        setLableToJsp(request, bundle, "msg_job_create_large_file");
-        setLableToJsp(request, bundle, "highest");
-        setLableToJsp(request, bundle, "major");
-        setLableToJsp(request, bundle, "normal");
-        setLableToJsp(request, bundle, "lower");
-        setLableToJsp(request, bundle, "lowest");
-        setLableToJsp(request, bundle, "lb_attachment");
-        setLableToJsp(request, bundle, "lb_reference_file");
-        setLableToJsp(request, bundle, "lb_uploaded_files");
-        setLableToJsp(request, bundle, "lb_clear_profile");
-        setLableToJsp(request, bundle, "msg_job_attachment_uploading");
-        setLableToJsp(request, bundle, "lb_create_job_uploaded_files_tip");
-        setLableToJsp(request, bundle, "lb_create_job_clean_map_tip");
-        setLableToJsp(request, bundle, "lb_create_job_add_file_tip");
-        setLableToJsp(request, bundle, "lb_create_job_browse_tip");
-        setLableToJsp(request, bundle, "lb_job_creating");
-        setLableToJsp(request, bundle, "lb_jobs_creating");
-        setLableToJsp(request, bundle, "lb_job_attributes");
-    }
-    
-    /**
-     * Set languages on the page according to locales
-     * 
-     * @param request
-     * @param bundle
-     */
-    private void setLableToJsp(HttpServletRequest request, ResourceBundle bundle, String msg)
-    {
-        String label = bundle.getString(msg);
-        request.setAttribute(msg, label);
     }
     
     /**

@@ -213,11 +213,8 @@ XMLRuleFilter.prototype.edit = function(filterId, color, specialFilters, topFilt
 	str.append("</tr>");
 	
 	str.append("<tr>");
-	str.append("<td class='htmlFilter_left_td'>" + jsConvertHTMLEntity + "" + "</td>");
-	str.append("<td class='htmlFilter_right_td'>");
-	var isCheckConvertHtmlEntity = (this.filter.convertHtmlEntity) ? "checked":"";
-	str.append("<input id='isEnableConvertHtmlEntity' type='checkbox' name='convertHtmlEntity' value='"+this.filter.convertHtmlEntity+"' "+isCheckConvertHtmlEntity+"></input>");
-	str.append("</td>");
+	str.append("<td class='htmlFilter_left_td'>" + jsEntityHandleMode + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generateEntityHandleMode(this.filter) + "</td>");
 	str.append("</tr>");
 	
 	var tempV = xmlFilter.getFormattedExtendWhiteSpace(this.filter.extendedWhitespaceChars);
@@ -343,10 +340,8 @@ XMLRuleFilter.prototype.generateDiv = function(topFilterId, color)
 	str.append("</tr>");
 	
 	str.append("<tr>");
-	str.append("<td class='htmlFilter_left_td'>" + jsConvertHTMLEntity + "" + "</td>");
-	str.append("<td class='htmlFilter_right_td'>");
-	str.append("<input id='isEnableConvertHtmlEntity' type='checkbox' name='convertHtmlEntity' value='false'"+"></input>");
-	str.append("</td>");
+	str.append("<td class='htmlFilter_left_td'>" + jsEntityHandleMode + "</td>");
+	str.append("<td class='htmlFilter_right_td'>" + this.generateEntityHandleMode() + "</td>");
 	str.append("</tr>");
 	
 	str.append("<tr>");
@@ -473,7 +468,6 @@ function saveXmlRuleFilter()
     var isNew = (saveXmlRuleFilter.edit) ? "false" : "true";
 	var filterDesc = document.getElementById("xmlRuleDesc").value;
 	var xmlRuleId = document.getElementById("xmlRuleSelect").value;
-	var convertHtmlEntity = document.getElementById("isEnableConvertHtmlEntity").checked;
 
 	var elementPostFilterIdTable = document.getElementById("elementPostFilter").value;
 	var splitedElementPostIdTable = splitByFirstIndex(elementPostFilterIdTable, "-");
@@ -495,6 +489,7 @@ function saveXmlRuleFilter()
 	var nonasciiAs = getRadioValue(fpForm.nonasciiAs);
 	var wsHandleMode = getRadioValue(fpForm.wsHandleMode);
 	var emptyTagFormat = getRadioValue(fpForm.emptyTagFormat);
+	var entityHandleMode = document.getElementById("entityHandleModeSelect").value;
 	var tempStr = new StringBuffer("");
 	tempStr.append(document.getElementById("sidSupportTagNameEle").value);
 	var sidSupportTagName = tempStr.trim();
@@ -525,10 +520,10 @@ function saveXmlRuleFilter()
 		xmlRuleId : xmlRuleId,
 		filterId : saveXmlRuleFilter.filterId,
 		companyId : companyId,
-		convertHtmlEntity : convertHtmlEntity,
 		useXmlRule : useXmlRule,
 		extendedWhitespaceChars : extendedWhitespaceChars,
 		phConsolidationMode : phConsolidationMode,
+		entityHandleMode : entityHandleMode,
 		phTrimMode : phTrimMode,
 		nonasciiAs : nonasciiAs,
 		wsHandleMode : wsHandleMode,
@@ -597,10 +592,10 @@ function updateXmlRuleFilterCallback(data)
 		xrFilter.filterTableName = "xml_rule_filter";
 		xrFilter.filterName = isFilterValidCallback.obj.filterName;
 		xrFilter.filterDescription = isFilterValidCallback.obj.filterDesc;
-		xrFilter.convertHtmlEntity = isFilterValidCallback.obj.convertHtmlEntity;
 		xrFilter.useXmlRule = isFilterValidCallback.obj.useXmlRule;
 		xrFilter.extendedWhitespaceChars = isFilterValidCallback.obj.extendedWhitespaceChars;
 		xrFilter.phConsolidationMode = isFilterValidCallback.obj.phConsolidationMode;
+		xrFilter.entityHandleMode = isFilterValidCallback.obj.entityHandleMode;
 		xrFilter.phTrimMode = isFilterValidCallback.obj.phTrimMode;
 		xrFilter.nonasciiAs = isFilterValidCallback.obj.nonasciiAs;
 		xrFilter.wsHandleMode = isFilterValidCallback.obj.wsHandleMode;
@@ -645,10 +640,10 @@ function saveXmlRuleFilterCallback(data)
 		xrFilter.filterTableName = "xml_rule_filter";
 		xrFilter.filterName = isFilterValidCallback.obj.filterName;
 		xrFilter.filterDescription = isFilterValidCallback.obj.filterDesc;
-		xrFilter.convertHtmlEntity = isFilterValidCallback.obj.convertHtmlEntity;
 		xrFilter.useXmlRule = isFilterValidCallback.obj.useXmlRule;
 		xrFilter.extendedWhitespaceChars = isFilterValidCallback.obj.extendedWhitespaceChars;
 		xrFilter.phConsolidationMode = isFilterValidCallback.obj.phConsolidationMode;
+		xrFilter.entityHandleMode = isFilterValidCallback.obj.entityHandleMode;
 		xrFilter.phTrimMode = isFilterValidCallback.obj.phTrimMode;
 		xrFilter.nonasciiAs = isFilterValidCallback.obj.nonasciiAs;
 		xrFilter.wsHandleMode = isFilterValidCallback.obj.wsHandleMode;
@@ -717,6 +712,18 @@ XMLRuleFilter.prototype.generatePhConsolidation = function (filter)
 	str.append("<option value='1'" + ((filter && filter.phConsolidationMode == "1") ? " selected" : "") + ">" + jsDonotConsolidation + "</option>");
 	str.append("<option value='2'" + ((filter && filter.phConsolidationMode == "2") ? " selected" : "") + ">" + jsDoPhConsolidation + "</option>");
 	str.append("<option value='3'" + ((filter && filter.phConsolidationMode == "3") ? " selected" : "") + ">" + jsDoPhConsolidationIgnoreSpace + "</option>");
+	str.append("</select>");
+	return str.toString();
+}
+
+XMLRuleFilter.prototype.generateEntityHandleMode = function (filter)
+{
+	var str = new StringBuffer("<select id='entityHandleModeSelect' class='xml_filter_select'>");
+	str.append("<option value='1'" + ((filter && filter.entityHandleMode == "1") ? " selected" : "") + ">" + jsEntityHandleMode1 + "</option>");
+	str.append("<option value='2'" + ((filter && filter.entityHandleMode == "2") ? " selected" : "") + ">" + jsEntityHandleMode2 + "</option>");
+	str.append("<option value='3'" + ((filter && filter.entityHandleMode == "3") ? " selected" : "") + ">" + jsEntityHandleMode3 + "</option>");
+	str.append("<option value='4'" + ((filter && filter.entityHandleMode == "4") ? " selected" : "") + ">" + jsEntityHandleMode4 + "</option>");
+	str.append("<option value='5'" + ((filter && filter.entityHandleMode == "5") ? " selected" : "") + ">" + jsEntityHandleMode5 + "</option>");
 	str.append("</select>");
 	return str.toString();
 }

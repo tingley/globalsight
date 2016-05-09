@@ -509,6 +509,17 @@ public class XmlFilterHelper
 
         return -1l;
     }
+    
+    public int getEntityHandleMode()
+    {
+        if (!isConfigParserNull())
+        {
+            int v = m_xmlFilterConfigParser.getEntityHandleMode();
+            return v;
+        }
+
+        return XmlFilterConfigParser.ENTITY_HANDLE_MODE_1;
+    }
 
     public String getCdataPostFormat()
     {

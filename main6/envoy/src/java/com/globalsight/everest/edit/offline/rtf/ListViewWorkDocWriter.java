@@ -33,10 +33,12 @@ import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.download.DownloadHelper;
+import com.globalsight.everest.edit.offline.page.OfflinePageDataGenerator;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.ling.common.RegExException;
+import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tw.HtmlTableWriter;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
 import com.globalsight.util.StringUtil;
@@ -637,21 +639,21 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
 
             if (p_osd.hasTMMatches())
             {
-                sb.append(!m_isTradosRtf ? ", "
+                sb.append(sb.length() > 0 ? ", "
                         + AmbassadorDwUpConstants.LABEL_LINK_TM
                         : AmbassadorDwUpConstants.LABEL_LINK_TM);
             }
 
             if (p_osd.hasTerminology())
             {
-                sb.append(p_osd.hasTMMatches() ? ", "
+                sb.append(sb.length() > 0 ? ", "
                         + AmbassadorDwUpConstants.LABEL_LINK_TERM
                         : AmbassadorDwUpConstants.LABEL_LINK_TERM);
             }
 
             if (p_osd.hasMTMatches())
             {
-            	sb.append(p_osd.hasTMMatches() ? ", "
+            	sb.append(sb.length() > 0 ? ", "
                         + AmbassadorDwUpConstants.LABEL_LINK_MT
                         : AmbassadorDwUpConstants.LABEL_LINK_MT);
             }
@@ -1267,9 +1269,14 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
         for (int i = 0; i < l2.size(); i++)
         {
             LeverageMatch lm = (LeverageMatch) l1.get(i);
-
+            float scoreNum = lm.getScoreNum();
+            if (lm.getOrderNum() == TmCoreManager.LM_ORDER_NUM_START_MT
+                    || lm.getOrderNum() == TmCoreManager.LM_ORDER_NUM_START_MT + 1)
+            {
+                scoreNum = OfflinePageDataGenerator.MT_SCORE_FOR_OFFLINE_KIT;
+            }
             sb.append((lm == null) ? "\\i [??] \\i0   " : "\\i ["
-                    + StringUtil.formatPercent(lm.getScoreNum(), 2)
+                    + StringUtil.formatPercent(scoreNum, 2)
                     + "%]\\i0   ");
 
             sb.append(formatSegmentText((String) l2.get(i), m_strInternalStyle,

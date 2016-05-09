@@ -20,6 +20,7 @@ package com.globalsight.restful.tm;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.apache.http.HttpEntity;
@@ -36,6 +37,7 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import com.globalsight.restful.RestfulApiTestHelper;
+import com.globalsight.restful.util.FileUtil;
 import com.globalsight.restful.util.URLEncoder;
 
 public class TmResourceTester extends RestfulApiTestHelper
@@ -406,13 +408,57 @@ public class TmResourceTester extends RestfulApiTestHelper
         HttpResponse httpResponse = null;
         try
         {
-            String url = "http://localhost:8080/globalsight/restfulServices/companies/York/tms/28/export/" + identifyKey;
+            String url = "http://localhost:8080/globalsight/restfulServices/companies/York/tms/4/export/" + identifyKey;
 
             HttpGet httpGet = getHttpGet(url, userName, password);
 
             httpResponse = httpClient.execute(httpGet);
 
-            printHttpResponse(httpResponse);
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
+            System.out.println("Status code: " + statusCode + "\r\n");
+
+            String res = httpResponse.getStatusLine().toString();
+            System.out.println("Status line: " + res + "\r\n");
+
+            InputStream is = httpResponse.getEntity().getContent();
+            
+            BufferedInputStream inputStream = null;
+            File file = new File("C:\\tmx.xml");
+            if (file.exists())
+            {
+                file.delete();
+            }
+            try
+            {
+                inputStream = new BufferedInputStream(is);
+                byte[] fileBytes = new byte[MAX_SEND_SIZE];
+                int count = inputStream.read(fileBytes);
+
+                while (count != -1 && count == MAX_SEND_SIZE)
+                {
+                    FileUtil.writeFile(file, fileBytes, true);
+                    fileBytes = new byte[MAX_SEND_SIZE];
+                    count = inputStream.read(fileBytes);
+                }
+
+                byte[] fileBytes2 = new byte[count];
+                for (int i = 0; i < count; i++)
+                {
+                    fileBytes2[i] = fileBytes[i];
+                }
+                FileUtil.writeFile(file, fileBytes2, true);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            finally
+            {
+                if (inputStream != null)
+                {
+                    inputStream.close();
+                }
+            }
         }
         catch (Exception e)
         {

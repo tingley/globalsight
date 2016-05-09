@@ -25,6 +25,8 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -486,7 +488,41 @@ public class OfflineSegmentData implements Serializable
      */
     public void setDisplayTargetText(String p_newTargetText)
     {
+        Pattern p = Pattern.compile("^\\s*0\\s*>.*?<\\s*\\}\\s*\\d+\\s*\\{\\s*>.*?<\\s*0\\s*\\}");
+        Matcher m = p.matcher(p_newTargetText);
+        if (m.find())
+            p_newTargetText = "{" + p_newTargetText;
+
+        p_newTargetText = changeLF(p_newTargetText, "[LF]");
+        p_newTargetText = changeLF(p_newTargetText, "[lF]");
+        p_newTargetText = changeLF(p_newTargetText, "[Lf]");
+        p_newTargetText = changeLF(p_newTargetText, "[lf]");
         m_displayTargetText = new StringBuffer(p_newTargetText);
+    }
+
+    private String changeLF(String s, String lf)
+    {
+        int i = s.indexOf(lf);
+        while (i > -1)
+        {
+            int x = i - 1;
+            for (; x > -1; x--)
+            {
+                if ('[' != s.charAt(x))
+                {
+                    break;
+                }
+            }
+
+            if ((i - x) % 2 != 0)
+            {
+                s = s.substring(0, i) + '\n' + s.substring(i + 4);
+            }
+
+            i = s.indexOf(lf, i + 1);
+        }
+
+        return s;
     }
 
     /**

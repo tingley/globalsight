@@ -4,10 +4,7 @@
  */
 package com.globalsight.ling.docproc.extractor.json;
 
-// Java
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.Enumeration;
@@ -17,11 +14,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
@@ -30,10 +22,8 @@ import com.globalsight.cxe.entity.filterconfiguration.JsonFilter;
 import com.globalsight.ling.common.PTEscapeSequence;
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.DocumentElement;
-import com.globalsight.ling.docproc.EFInputData;
 import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.ling.docproc.ExtractorExceptionConstants;
-import com.globalsight.ling.docproc.ExtractorInterface;
 import com.globalsight.ling.docproc.ExtractorRegistry;
 import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.Segmentable;
@@ -43,19 +33,20 @@ import com.globalsight.ling.docproc.extractor.plaintext.PTToken;
 import com.globalsight.ling.docproc.extractor.plaintext.Parser;
 import com.globalsight.util.StringUtil;
 
-
-public class Extractor extends AbstractExtractor implements ExtractorInterface,
-        EntityResolver, ExtractorExceptionConstants, ErrorHandler
+public class Extractor extends AbstractExtractor implements ExtractorExceptionConstants
 {
     static private final Logger s_logger = Logger.getLogger(Extractor.class);
+
     private String REGEX_COLON = ":[\\s|\\t|\\r|\\n]*\"";
     private String REGEX_BRACKETS = ":[\\s|\\t|\\r|\\n]*\\[[\\s|\\t|\\r|\\n]*\"";
+
     private Output m_output = null;
-    private EFInputData m_input = null;
     private Filter m_elementPostFilter = null;
     private String m_postFormat = null;
+
     private static String[] invalidHtmlTagCharacters = new String[]
     { "{", "}", "%", "^", "~", "!", "&", "*", "(", ")", "?" };
+
     private static final String PLACEHOLDER_LEFT_TAG = "GS_PLACEHOLDER_LEFT_TAG";
     private static final String PLACEHOLDER_RIGHT_TAG = "GS_PLACEHOLDER_RIGHT_TAG";
     private static final String PLACEHOLDER_LEFT_NATIVE = "GS_PLACEHOLDER_LEFT_NATIVE";
@@ -71,29 +62,21 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         setMainFormat(ExtractorRegistry.FORMAT_JSON);
     }
 
-    /**
-     * Extracts the input document.
-     * 
-     * Parses the XML File into DOM using xerces.
-     * 
-     * Skips the external entity (DTD, etc) by providing a null byte array.
-     * 
-     * Then invokes domNodeVisitor for the Document 'Node' ('virtual root') to
-     * traverse the DOM tree recursively, using the AbstractExtractor API to
-     * write out skeleton and segments.
-     */
     public void extract() throws ExtractorException
     {
         this.setFormat();
-        m_input = getInput();
+
         m_output = getOutput();
         try
         {
             Pattern colonP = Pattern.compile(REGEX_COLON);
             Pattern bracketsP = Pattern.compile(REGEX_BRACKETS);
             Filter mainFilter = getMainFilter();
-            JsonFilter jsonFilter = (mainFilter != null && mainFilter instanceof JsonFilter) ? (JsonFilter) mainFilter
-                    : null;
+            JsonFilter jsonFilter = null;
+            if (mainFilter != null && mainFilter instanceof JsonFilter)
+            {
+                jsonFilter = (JsonFilter) mainFilter;
+            }
             boolean isEnableSidSupport = false;
             long elementPostFilterId = -1;
             String elementPostFilterTableName = null;
@@ -173,7 +156,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     if (chr == '"')
                     {
                         tranChar = true;
-                        m_output.addSkeleton(skeletonBuffer.toString());
+                        m_output.addSkeleton(skeletonBuffer.append(chr).toString());
                         skeletonBuffer = new StringBuffer();
                     }
                     else
@@ -368,6 +351,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         p_vTokens.clear();
 
     }
+
     private String protectInvalidTags(String content)
     {
         Pattern p = Pattern.compile("<([^>]*?)>");
@@ -409,62 +393,10 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         return content;
     }
 
-    
-    /**
-     * This method is invoked by AbstractExractor framework. It is used to point
-     * the XML Extracator to the file containing the XML extraction rules.
-     * 
-     * If the path to Extraction Rules is not specified via
-     * Input.m_strProjectRules, it defaults to "file:/gsrules.xml". (CvdL: I
-     * think it defaults to a null string.)
-     */
+    @Override
     public void loadRules() throws ExtractorException
     {
+        
     }
 
-    /** Provide an alternate way to load rules */
-    public void loadRules(String p_rules) throws ExtractorException
-    {
-    }
-
-    /**
-     * Overrides EntityResolver#resolveEntity.
-     * 
-     * The purpose of this method is to read Schemarules.dtd from resource and
-     * feed it to the validating parser, but what it really does is returning a
-     * null byte array to the XML parser.
-     */
-    public InputSource resolveEntity(String publicId, String systemId)
-            throws SAXException, IOException
-    {
-        return new InputSource(new ByteArrayInputStream(new byte[0]));
-    }
-
-    // ErrorHandler interface methods
-
-    public void error(SAXParseException e) throws SAXException
-    {
-        String s = e.getMessage();
-        // ignore below errors
-        if (s.matches("Attribute .*? was already specified for element[\\s\\S]*"))
-        {
-            return;
-        }
-
-        throw new SAXException("XML parse error at\n  line "
-                + e.getLineNumber() + "\n  column " + e.getColumnNumber()
-                + "\n  Message:" + e.getMessage());
-    }
-
-    public void fatalError(SAXParseException e) throws SAXException
-    {
-        error(e);
-    }
-
-    public void warning(SAXParseException e)
-    {
-        System.err.println("XML parse warning at\n  line " + e.getLineNumber()
-                + "\n  column " + e.getColumnNumber() + "\n  Message:"
-                + e.getMessage());
-    }
 }

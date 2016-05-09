@@ -1,0 +1,2 @@
+# GBS-4116 Update to XML Processing
+ALTER TABLE xml_rule_filter DROP COLUMN ENABLE_CONVERT_HTML_ENTITY;

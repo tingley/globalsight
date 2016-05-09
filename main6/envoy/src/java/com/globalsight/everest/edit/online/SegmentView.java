@@ -31,6 +31,7 @@ import com.globalsight.everest.util.online.LfUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
+import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
 
@@ -365,7 +366,8 @@ public class SegmentView implements Serializable
                 seg = applet.makeCompactColoredPtags(seg);
             }
 
-            seg = LfUtil.addHtlmLf(seg);
+            if (!EditUtil.isWhitePreservingFormat(getDataType(), null))
+                seg = LfUtil.addHtlmLf(seg);
             return seg;
         }
         catch (Exception e)

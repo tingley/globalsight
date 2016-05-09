@@ -42,6 +42,7 @@ import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.PseudoParserException;
 import com.globalsight.util.JsonUtil;
 import com.globalsight.util.StringUtil;
+import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.edit.SegmentUtil2;
 
@@ -184,7 +185,9 @@ public class OnlineService extends HttpServlet
     private String getSource()
     {
         String txt = GxmlUtil.getInnerXml(segmentView.getSourceSegment());
-        return LfUtil.addLf(txt);
+        if (!EditUtil.isWhitePreservingFormat(segmentView.getDataType(), null))
+            txt = LfUtil.addLf(txt);
+        return txt;
     }
 
     /**
@@ -195,7 +198,8 @@ public class OnlineService extends HttpServlet
     public void getTargetDiplomat() throws Exception
     {
         String text = getTarget();
-        text = LfUtil.removeLf(text);
+        if (!EditUtil.isWhitePreservingFormat(segmentView.getDataType(), null))
+            text = LfUtil.removeLf(text);
         String seg = helper.getTargetDiplomat(text);
         writeString(seg);
     }
@@ -233,7 +237,9 @@ public class OnlineService extends HttpServlet
             result = helper.makeCompactColoredPtags(text);
         }
 
-        result = LfUtil.addHtlmLf(result);
+        if (!EditUtil.isWhitePreservingFormat(segmentView.getDataType(), null))
+            result = LfUtil.addHtlmLf(result);
+
         writeString(result);
     }
 
@@ -270,7 +276,9 @@ public class OnlineService extends HttpServlet
             }
         }
 
-        result = LfUtil.addHtlmLf(result);
+        if (!EditUtil.isWhitePreservingFormat(segmentView.getDataType(), null))
+            result = LfUtil.addHtlmLf(result);
+
         writeString(result);
     }
 
@@ -283,7 +291,9 @@ public class OnlineService extends HttpServlet
     {
         String text = getTarget();
 
-        text = LfUtil.removeLf(text);
+        if (!EditUtil.isWhitePreservingFormat(segmentView.getDataType(), null))
+            text = LfUtil.removeLf(text);
+
         Map<String, String> m = new HashMap<String, String>();
 
         helper.setUntranslateStyle(SegmentUtil2.getTAGS());

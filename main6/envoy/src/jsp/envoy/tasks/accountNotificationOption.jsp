@@ -484,7 +484,6 @@ function callBack(data)
       <tr><td>&nbsp;&nbsp;</td></tr>
       <tr><td id="message" style="display:none">message</td></tr>
       <tr><td><textarea rows="10" cols="80" id="messageText" style="display:none"></textarea></td></tr>
-      <tr><td><textarea rows="10" cols="80" id="messageTextUi" style="display:none"></textarea></td></tr>
       <tr><td style="padding-top:10px" colspan="3"><input type="button" value="Save" id="save" onClick="saveEdit()" style="display:none"><td></tr>
 </table>
 </table>

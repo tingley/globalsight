@@ -118,8 +118,10 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     static public final int INDICATE_FUZZY_NORMAL = 10;
     static public final int INDICATE_FUZZY_TRADOS = 11;
     static public final int INDICATE_NO_MATCH = 12;
+    static public final int INDICATE_MT_MATCH = 13;
 
     static public final float SCORE_UNKNOWN = -1;
+    // MT translation applies fixed score "60".
     static public final float MT_SCORE_FOR_OFFLINE_KIT = 60;
 
     static private ResourceBundle m_resources;
@@ -784,6 +786,11 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                     matchTypeDisplay = getDisplayMatchType(
                             INDICATE_FUZZY_NORMAL, parentProtection,
                             String.valueOf(topScore));
+                    if (topScore == 60 && fmList.size() == 1)
+                    {
+                        matchTypeDisplay = getDisplayMatchType(INDICATE_MT_MATCH, parentProtection,
+                                String.valueOf(topScore));
+                    }
                     matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_FUZZY;
                     // If populate 100, the "trgGxml" should be translated
                     // content and "trgScore" should be 100 always.
@@ -1884,6 +1891,9 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 break;
             case INDICATE_NO_MATCH:
                 msg = m_resources.getString(DisplayMatchTypeKeys.MSG_NOMATCH);
+                break;
+            case INDICATE_MT_MATCH:
+                msg = m_resources.getString(DisplayMatchTypeKeys.MSG_MACHINE_TRANSLATION);
                 break;
             default:
                 break;

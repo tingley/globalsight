@@ -262,7 +262,7 @@ function showUploadfileDialog(attributeName)
           else
           {
         	  initFileDialog(attributeName, returnData);
-        	  $("#uploadFormDiv").dialog({width: 600, height: 400, resizable:false});
+        	  $("#uploadFormDiv").dialog({width: 500, height: 400, resizable:false});
           }
 	   },
    	   error:function(error)

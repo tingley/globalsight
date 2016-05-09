@@ -242,6 +242,7 @@
   <permission id="<%=Permission.ACCOUNT_NOTIFICATION_GENERAL%>"/>
   <permission id="<%=Permission.ACCOUNT_NOTIFICATION_NOMATCHES%>"/>
   <permission id="<%=Permission.ACCOUNT_NOTIFICATION_REPETITIONS%>"/>
+  <permission id="<%=Permission.ACCOUNT_NOTIFICATION_EDITEMAILTEMPLATE%>"/>
 </category>
 <category id="lb_data_sources">
   <permission id="<%=Permission.FILE_PROFILES_VIEW%>">

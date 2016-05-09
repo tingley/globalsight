@@ -4,7 +4,20 @@
          com.globalsight.util.resourcebundle.ResourceBundleConstants,
          com.globalsight.everest.webapp.pagehandler.PageHandler,
          com.globalsight.config.UserParamNames,
+         com.globalsight.util.resourcebundle.SystemResourceBundle,
+         com.globalsight.util.mail.MailerLocal,
+         com.globalsight.everest.localemgr.LocaleManagerLocal,
+         com.globalsight.everest.servlet.util.SessionManager,
+         com.globalsight.everest.webapp.WebAppConstants,
+         com.globalsight.util.edit.EditUtil,
+         com.globalsight.everest.permission.PermissionSet,
+         com.globalsight.everest.permission.Permission,
+         com.globalsight.everest.foundation.User,
+         com.globalsight.everest.servlet.util.ServerProxy,
+         com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
          java.util.ArrayList,
+         java.util.Locale,
+         com.globalsight.util.mail.MailerConstants,
          java.util.List,
          java.util.ResourceBundle" 
          session="true" %>
@@ -34,12 +47,25 @@
             PageHandler.ADDED_NOTIFICATION_OPTIONS);
     String emailNotification = (String)request.getAttribute(UserParamNames.NOTIFICATION_ENABLED);
     String emailNotificationChecked = emailNotification.equals("0") ? "" : "CHECKED";
-    String disabled = emailNotification.equals("0") ? "DISABLED" : "";
+    String disabled = emailNotification.equals("0") ? "DISABLED" : ""; 
+    String selectedObj = request.getParameter("selectedObj");
+    String userId =(String) session.getAttribute(WebAppConstants.USER_NAME);
+    User user = ServerProxy.getUserManager().getUser(userId);
+    Locale uiLocale =(Locale)session.getAttribute(WebAppConstants.UILOCALE);
+    ResourceBundle emailBundle = SystemResourceBundle.getInstance()
+            .getEmailResourceBundle(MailerLocal.DEFAULT_RESOURCE_NAME,uiLocale,user.getCompanyName());
+    PermissionSet perms = (PermissionSet)session.getAttribute(WebAppConstants.PERMISSIONS);
+    boolean b_editEmailTemp=true;
+    if(!perms.getPermissionFor(Permission.ACCOUNT_NOTIFICATION_EDITEMAILTEMPLATE)){
+        b_editEmailTemp=false;
+    }
+
 %>
 <HTML>
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.9.1.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -205,6 +231,89 @@ function checkItems(notificationCheckbox)
    }
 }
 
+function doubleClick(obj)
+{
+    edit();
+}
+
+function selectValue(obj)
+{
+    var selectedObj = obj.value;
+    window.location="/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&selectedObj="+selectedObj;
+} 
+
+function edit()
+{
+	document.getElementById("subjectText").style.display = "block";
+	document.getElementById("messageText").style.display = "block";
+	document.getElementById("subject").style.display = "block";
+	document.getElementById("message").style.display = "block";
+	document.getElementById("save").style.display = "block";
+}
+
+function editEmailTemplate()
+{
+	var selected = "<%=selectedObj%>";
+	if(selected !="null")
+	{
+<%
+       String subject = MailerConstants.getEmailSubject(selectedObj);
+       String message = MailerConstants.getEmailMessage(selectedObj);
+       String subjectInfo = null;
+       String messageInfo = null;
+       String subjectHtml = null;
+       String messageHtml = null;
+       if(subject != null && message !=null)
+       {    
+           subjectInfo= emailBundle.getString(subject).replace("\"","&quot");
+           messageInfo= emailBundle.getString(message).replace("\"","&quot").replace("\r\n","\\r\\n");
+           subjectHtml = emailBundle.getString(subject);
+           messageHtml = emailBundle.getString(message);           
+       }
+%>  
+      document.getElementById("subjectText").innerHTML="<%=subjectInfo%>";
+      document.getElementById("messageText").innerHTML="<%=messageInfo%>";
+	}
+ 	else
+	{
+		return;
+	} 
+	
+}
+
+
+function saveEdit()
+{
+	$.ajax({
+		    type:'post',
+			url:"/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&action=save",
+			data:{'subjectText':document.getElementById("subjectText").value,
+	              'messageText':document.getElementById("messageText").value,
+	              'subjectKey':"<%=subject%>",
+	              'messageKey':"<%=message%>",
+	              },
+	              
+			dataType: "text", 
+			success:function(data){
+				callBack(data);
+			},
+			});	
+}
+
+function callBack(data)
+{
+	if(data != "Save Success")
+	{
+		alert(data);
+	}
+	else
+	{
+		alert(data);
+		window.location="/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&";
+	}
+
+}
+
 </SCRIPT>
 <style type="text/css">
 .list {
@@ -213,7 +322,7 @@ function checkItems(notificationCheckbox)
 </style>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
-    ONLOAD="loadGuides()">
+    ONLOAD="loadGuides();editEmailTemplate();">
 <%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
@@ -246,7 +355,7 @@ function checkItems(notificationCheckbox)
   </tr>
     <tr>
         <td width="20%">
-        <select name="from" <%=disabled%> multiple class="standardText" size=15 style="width:250">
+        <select name="from" <%=disabled%> multiple class="standardText" size=15 style="width:250" onChange="selectValue(this)" ondblclick="doubleClick()" >
 <%
             if (availableOptions != null)
             {
@@ -264,21 +373,55 @@ function checkItems(notificationCheckbox)
                 			   checkTag = true;
                 		   }
                 	   }
-                	   if(!checkTag)
-                	   {
-%>
-                		   <option value="<%=availableOption%>" ><%=bundle.getString(availableOption)%></option>
+            	       if(selectedObj != null)
+            	       {
+                	        if(!checkTag)
+                	        {
+                	            if(selectedObj.equals(availableOption))
+                	            {    
+%>                           
+                		           <option value="<%=availableOption%>"  selected><%=bundle.getString(availableOption)%></option>
 <%
+                	             }
+                	            else
+                	            {
+%>
+                	                <option value="<%=availableOption%>"><%=bundle.getString(availableOption)%></option>
+<%                 	            }
+                	         }
                 	   }
-                   }		       
+            	       else
+            	       {
+               	            if(!checkTag)
+               	            {   
+%>                           
+               		           <option value="<%=availableOption%>" ><%=bundle.getString(availableOption)%></option>
+<% 
+               	            }
+            	       }
+               	    }
 					else
 					{
 %>
-                   		<option value="<%=availableOption%>" ><%=bundle.getString(availableOption)%></option>
+<%             	       if(selectedObj != null)
+            	       {
+                	            if(selectedObj.equals(availableOption))
+                	            {    
+%>                           
+                		           <option value="<%=availableOption%>"  selected><%=bundle.getString(availableOption)%></option>
 <%
-                   	}
+                	             }
+                	    }
+            	       else
+            	       { 
+%>                           
+               		           <option value="<%=availableOption%>" ><%=bundle.getString(availableOption)%></option>
+<% 
+            	       }
+
+                  	}
+                   }		       
                 }
-            }
 %>
         </select>
         </td>
@@ -329,8 +472,21 @@ function checkItems(notificationCheckbox)
             onclick="submitForm('cancel')">    
           <input type="button" name="<%=doneButton %>" value="<%=doneButton %>"
             onclick="submitForm('saveOptions')">
+            <%if(b_editEmailTemp){%>
+          <input type="button" name="Edit" value="Edit" onclick="edit(this)">
+          <%}%>
         </td>
       </tr>
+<table>
+<tr><td>&nbsp;&nbsp;</td></tr>
+      <tr><td id="subject"  style="display:none">subject</td><tr>
+      <tr><td><textarea rows="1" cols="80" id="subjectText" style="display:none"></textarea><td></tr>
+      <tr><td>&nbsp;&nbsp;</td></tr>
+      <tr><td id="message" style="display:none">message</td></tr>
+      <tr><td><textarea rows="10" cols="80" id="messageText" style="display:none"></textarea></td></tr>
+      <tr><td><textarea rows="10" cols="80" id="messageTextUi" style="display:none"></textarea></td></tr>
+      <tr><td style="padding-top:10px" colspan="3"><input type="button" value="Save" id="save" onClick="saveEdit()" style="display:none"><td></tr>
+</table>
 </table>
 </form>
 </BODY>

@@ -80,6 +80,28 @@ public class SystemResourceBundle
     }
 
     /**
+     * Get the resource bundle based on the type and locale.
+     * 
+     * @param p_localeResource
+     *            The resource type. Email, UI, or Exception.
+     * @param p_locale
+     *            The locale to obtain the appropriate resource bundle.
+     * @return ResourceBundle
+     */
+    public ResourceBundle getEmailResourceBundle(String p_localeResource, Locale p_locale,
+            String companyName)
+    {
+        String key = p_localeResource + "_" + companyName + "_" + p_locale.toString();
+
+        if (!m_map.containsKey(key))
+        {
+            m_map.put(key, new MyEmailResourceBundle(p_localeResource, p_locale, companyName));
+        }
+
+        return (ResourceBundle) m_map.get(key);
+    }
+    
+    /**
      * Get the supported locales.
      * 
      * @return A Vector containing the supported locales.

@@ -102,6 +102,15 @@ public class SystemResourceBundle
     }
     
     /**
+     * Removes resource bundle key.
+     */
+    public void RemoveResourceBundleKey(String key)
+    {
+        ResourceBundle.clearCache();
+        m_map.remove(key);
+    }
+
+    /**
      * Get the supported locales.
      * 
      * @return A Vector containing the supported locales.

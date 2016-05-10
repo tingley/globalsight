@@ -48,16 +48,9 @@
     String emailNotification = (String)request.getAttribute(UserParamNames.NOTIFICATION_ENABLED);
     String emailNotificationChecked = emailNotification.equals("0") ? "" : "CHECKED";
     String disabled = emailNotification.equals("0") ? "DISABLED" : ""; 
-    String selectedObj = request.getParameter("selectedObj");
-    String userId =(String) session.getAttribute(WebAppConstants.USER_NAME);
-    User user = ServerProxy.getUserManager().getUser(userId);
-    Locale uiLocale =(Locale)session.getAttribute(WebAppConstants.UILOCALE);
-    ResourceBundle emailBundle = SystemResourceBundle.getInstance()
-            .getEmailResourceBundle(MailerLocal.DEFAULT_RESOURCE_NAME,uiLocale,user.getCompanyName());
     PermissionSet perms = (PermissionSet)session.getAttribute(WebAppConstants.PERMISSIONS);
     boolean b_editEmailTemp=true;
-    if(!perms.getPermissionFor(Permission.ACCOUNT_NOTIFICATION_EDIT_EMAIL_TEMPLATE))
-    {
+    if(!perms.getPermissionFor(Permission.ACCOUNT_NOTIFICATION_EDIT_EMAIL_TEMPLATE)){
         b_editEmailTemp=false;
     }
 
@@ -66,6 +59,7 @@
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
+<script type="text/javascript"src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.9.1.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
@@ -232,88 +226,61 @@ function checkItems(notificationCheckbox)
    }
 }
 
-function doubleClick(obj)
-{
-    edit();
-}
-
-function selectValue(obj)
-{
-    var selectedObj = obj.value;
-    window.location="/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&selectedObj="+selectedObj;
-} 
-
-function edit()
-{
-	document.getElementById("subjectText").style.display = "block";
-	document.getElementById("messageText").style.display = "block";
-	document.getElementById("subject").style.display = "block";
-	document.getElementById("message").style.display = "block";
-	document.getElementById("save").style.display = "block";
-}
-
-function editEmailTemplate()
-{
-	var selected = "<%=selectedObj%>";
-	if(selected !="null")
-	{
-<%
-       String subject = MailerConstants.getEmailSubject(selectedObj);
-       String message = MailerConstants.getEmailMessage(selectedObj);
-       String subjectInfo = null;
-       String messageInfo = null;
-       String subjectHtml = null;
-       String messageHtml = null;
-       if(subject != null && message !=null)
-       {    
-           subjectInfo= emailBundle.getString(subject).replace("\"","&quot");
-           messageInfo= emailBundle.getString(message).replace("\"","&quot").replace("\r\n","\\r\\n");
-           subjectHtml = emailBundle.getString(subject);
-           messageHtml = emailBundle.getString(message);           
-       }
-%>  
-      document.getElementById("subjectText").innerHTML="<%=subjectInfo%>";
-      document.getElementById("messageText").innerHTML="<%=messageInfo%>";
-	}
- 	else
-	{
-		return;
-	} 
+$(document).ready(function() {
 	
-}
+	$("#edit").click(function(){
+	    $.ajax({
+	    	type:'get',
+	    	url:"/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&action=edit",
+	        data:{
+	        	'selectFromValue':document.getElementById("from").value,
+	        	'selectToValue':document.getElementById("to").value,
+	        },
+	        dataType:"json",
+	        success:function(data)
+	        {
+	        	$("#subjectKey").val(data.subjectKey);
+	        	$("#messageKey").val(data.messageKey);
+	        	$("#subjectText").val(data.subjectText);
+	        	$("#messageText").val(data.messageText);
+	        	document.getElementById("editEmailTable").style.display="block";
+	        }
+	    });
+	})
 
-
-function saveEdit()
-{
-	$.ajax({
+	$("#save").click(function(){
+		$.ajax({
 		    type:'post',
 			url:"/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&action=save",
-			data:{'subjectText':document.getElementById("subjectText").value,
+			data:{
+				  'subjectText':document.getElementById("subjectText").value,
 	              'messageText':document.getElementById("messageText").value,
-	              'subjectKey':"<%=subject%>",
-	              'messageKey':"<%=message%>",
-	              },
-	              
+		          'subjectKey':document.getElementById("subjectKey").value,
+		          'messageKey':document.getElementById("messageKey").value,
+	              },              
 			dataType: "text", 
 			success:function(data){
-				callBack(data);
+				alert(data);
 			},
 			});	
-}
-
-function callBack(data)
-{
-	if(data != "Save Success")
-	{
-		alert(data);
-	}
-	else
-	{
-		alert(data);
-		window.location="/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&";
-	}
-
-}
+	})
+	
+ 	$("#from").click(function(){
+ 		var count=$("#to option").length;
+ 		for(var i=0;i<count;i++) 
+ 		{           
+ 		   $("#to ").get(0).options[i].selected = false; 
+ 		} 
+	}) 
+	
+ 	$("#to").click(function(){
+ 		var count=$("#from option").length;
+ 		for(var i=0;i<count;i++) 
+ 		{           
+ 		   $("#from ").get(0).options[i].selected = false; 
+ 		} 
+	}) 
+	})
 
 </SCRIPT>
 <style type="text/css">
@@ -323,16 +290,18 @@ function callBack(data)
 </style>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
-    ONLOAD="loadGuides();editEmailTemplate();">
+    ONLOAD="loadGuides();">
 <%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
     <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108; LEFT: 20px; RIGHT: 20px;">
     <span class="mainHeading"><%=title%></span>
     <p>    
-<form name="notifyForm" method="post">
+<form name="notifyForm" id="notifyForm" method="post">
 <input type="hidden" name="toField" >
 <input type="hidden" name="<%=UserParamNames.NOTIFICATION_ENABLED%>">
+<input type="hidden" id="subjectKey">
+<input type="hidden" id="messageKey">
 <table border="0" bordercolor="green" cellpadding="0" cellspacing="0" >      
   <TR>
     <TD>
@@ -356,7 +325,7 @@ function callBack(data)
   </tr>
     <tr>
         <td width="20%">
-        <select name="from" <%=disabled%> multiple class="standardText" size=15 style="width:250" onChange="selectValue(this)" ondblclick="doubleClick()" >
+        <select name="from"  id="from" <%=disabled%> class="standardText" size=15 style="width:250">
 <%
             if (availableOptions != null)
             {
@@ -374,53 +343,17 @@ function callBack(data)
                 			   checkTag = true;
                 		   }
                 	   }
-            	       if(selectedObj != null)
-            	       {
                 	        if(!checkTag)
-                	        {
-                	            if(selectedObj.equals(availableOption))
-                	            {    
+                	        {   
 %>                           
-                		           <option value="<%=availableOption%>"  selected><%=bundle.getString(availableOption)%></option>
-<%
-                	             }
-                	            else
-                	            {
-%>
-                	                <option value="<%=availableOption%>"><%=bundle.getString(availableOption)%></option>
-<%                 	            }
-                	         }
-                	   }
-            	       else
-            	       {
-               	            if(!checkTag)
-               	            {   
-%>                           
-               		           <option value="<%=availableOption%>" ><%=bundle.getString(availableOption)%></option>
-<% 
-               	            }
-            	       }
+                		       <option value="<%=availableOption%>"  selected><%=bundle.getString(availableOption)%></option>
+<%               	         }
                	    }
 					else
 					{
-%>
-<%             	       if(selectedObj != null)
-            	       {
-                	            if(selectedObj.equals(availableOption))
-                	            {    
-%>                           
-                		           <option value="<%=availableOption%>"  selected><%=bundle.getString(availableOption)%></option>
-<%
-                	             }
-                	    }
-            	       else
-            	       { 
-%>                           
-               		           <option value="<%=availableOption%>" ><%=bundle.getString(availableOption)%></option>
-<% 
-            	       }
-
-                  	}
+%>                       
+               		   <option value="<%=availableOption%>" ><%=bundle.getString(availableOption)%></option>
+<%               	}
                    }		       
                 }
 %>
@@ -444,7 +377,7 @@ function callBack(data)
           </table>
         </td>
         <td>
-            <select name="to" <%=disabled%> multiple class="standardText" size=15 style="width:250px">
+            <select name="to" id="to" <%=disabled%> class="standardText" size=15 style="width:250px">
 <%
                 if (addedOptions != null && addedOptions.size() != 0)
                 {
@@ -474,19 +407,19 @@ function callBack(data)
           <input type="button" name="<%=doneButton %>" value="<%=doneButton %>"
             onclick="submitForm('saveOptions')">
             <%if(b_editEmailTemp){%>
-          <input type="button" name="Edit" value="Edit" onclick="edit(this)">
+          <input type="button" id="edit" value="Edit">
           <%}%>
         </td>
       </tr>
-<table>
-<tr><td>&nbsp;&nbsp;</td></tr>
-      <tr><td id="subject"  style="display:none">subject</td><tr>
-      <tr><td><textarea rows="1" cols="80" id="subjectText" style="display:none"></textarea><td></tr>
-      <tr><td>&nbsp;&nbsp;</td></tr>
-      <tr><td id="message" style="display:none">message</td></tr>
-      <tr><td><textarea rows="10" cols="80" id="messageText" style="display:none"></textarea></td></tr>
-      <tr><td style="padding-top:10px" colspan="3"><input type="button" value="Save" id="save" onClick="saveEdit()" style="display:none"><td></tr>
 </table>
+<table id="editEmailTable" style="display:none">
+<tr><td>&nbsp;&nbsp;</td></tr>
+      <tr><td>subject</td><tr>
+      <tr><td><textarea rows="1" cols="80" id="subjectText"></textarea><td></tr>
+      <tr><td>&nbsp;&nbsp;</td></tr>
+      <tr><td>message</td></tr>
+      <tr><td><textarea rows="10" cols="80" id="messageText"></textarea></td></tr>
+      <tr><td style="padding-top:10px" colspan="3"><input type="button" value="Save" id="save"><td></tr>
 </table>
 </form>
 </BODY>

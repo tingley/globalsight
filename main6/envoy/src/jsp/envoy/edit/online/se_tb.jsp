@@ -126,6 +126,7 @@ String str_termSegments = term_segments.toString();
 %>
 <HTML>
 <HEAD>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.9.1.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" src="/globalsight/envoy/terminology/viewer/viewerAPI.js"></SCRIPT>
 <script src="/globalsight/includes/menu/js/menu4.js"></script>
@@ -142,12 +143,19 @@ A, A:hover, A:active, A:visited, A:link { color: blue; text-decoration: none; }
 var g_termIndex = 0;
 var g_selectedTerm = null;
 var g_defaultTermbaseId = "<%=l_defaultTermbaseId%>";
+var flag = false;
 
 function fnInit() {
     if (document.recalc) {
 		   sourceBoxTitle.style.setExpression("pixelWidth", "document.body.clientWidth");
 		   sourceBoxTitle.style.setExpression("pixelHeight", "document.body.clientHeight - 35");
 	  }
+    
+	var url = window.location;
+	if (url.href && url.href.indexOf("CE1") != -1){
+		$("#hr_line").hide();
+		flag = true;
+	}
 	  
 	  initSegmentTerm();
 	  ContextMenu.intializeContextMenu();
@@ -210,7 +218,7 @@ function showContextMenu(event)
             // find left and top
             var left = event.screenX || event.pageX;
             var top  = event.screenY || event.pageY;
-    
+
             termMenu.invalidate();
             termMenu.show(left, top);
         }
@@ -229,13 +237,22 @@ function showContextMenu(event)
         else {
             return;
         }
-         	
+
+        if (flag)
+        {
+        	var popupoptions = [
+        	  	  new ContextItem("<%=bundle.getString("lb_browse_term") %>",
+							function(){ browseTerm(event);})];
+        }
+        else
+        {
 		    var popupoptions = [
 			      new ContextItem("<%=bundle.getString("lb_insert_in_editor") %>",
 							function(){ copyTermToEditor();}),
 			      new ContextItem("<%=bundle.getString("lb_browse_term") %>",
 							function(){ browseTerm(event);})
     	  ];    	
+        }
     }
 
     ContextMenu.display(popupoptions, event); 
@@ -368,7 +385,8 @@ function termImgShow(divName) {
 </SCRIPT>
 </HEAD>
 <BODY>
-<HR COLOR="#0C1476" WIDTH="95%">
+<HR id="hr_line" COLOR="#0C1476" WIDTH="95%">
+<div ID="sourceBox"  STYLE="position: absolute; left: -2px; overflow: auto;">
 <TABLE WIDTH="100%" CELLPADDING="0" CELLSPACING="0" BORDER="0">
 <TR>
   <TD><IMG SRC="/globalsight/images/spacer.gif" WIDTH="5" HEIGHT="1"></TD>
@@ -401,6 +419,7 @@ function termImgShow(divName) {
   </TD>
 </TR>
 </TABLE>
+</div>
 <DIV ID="sourceBoxTitle"
      STYLE="position: absolute; top: 35px; left: 0px; overflow: auto;" >
 <TABLE CELLPADDING="3" CELLSPACING="0" BORDER="0" WIDTH="100%">

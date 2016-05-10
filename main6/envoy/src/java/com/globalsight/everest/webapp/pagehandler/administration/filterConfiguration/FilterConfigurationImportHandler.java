@@ -1077,6 +1077,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     // get new filter name
                     String newFilterName = checkFilterNameExists(name, "JsonFilter");
                     jsonFilter.setFilterName(newFilterName);
+                    jsonFilter.setBaseFilterId(baseFilterIdMap.get(jsonFilter.getBaseFilterId()));
 
                     // Judgment "json_Filter" are references "html_filter"
                     if (jsonFilter.getElementPostFilterTableName().equalsIgnoreCase(

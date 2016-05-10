@@ -505,6 +505,14 @@ public class Activity extends PersistentObject
             return;
         
         JSONObject json = (JSONObject) XmlUtil.xml2Json(getCompleteSchedule());
+        
+        Object ob = json.get("weeklyWeeks");
+        if (!(ob instanceof JSONArray))
+        {
+            JSONArray weeks = new JSONArray();
+            weeks.add(ob);
+            json.put("weeklyWeeks", weeks);
+        }
         js.putAll(json);
     }
 

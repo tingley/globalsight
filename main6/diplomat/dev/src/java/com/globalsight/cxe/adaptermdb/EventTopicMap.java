@@ -118,9 +118,9 @@ public class EventTopicMap
     // Private Members //
     // ////////////////////////////////////
     private static EventTopicMap s_instance = new EventTopicMap();
-    private HashMap m_map = new HashMap(25);
 
-    private HashMap m_classMap = new HashMap(25);
+    private HashMap<Integer, String> m_map = new HashMap<Integer, String>(25);
+    private HashMap<Integer, BaseAdapterMDB> m_classMap = new HashMap<Integer, BaseAdapterMDB>(25);
 
     /**
      * Constructor. Creates an EventTopicMap object and fills it with all the
@@ -255,6 +255,10 @@ public class EventTopicMap
         fillMap(CxeMessageType.WINPE_IMPORTED_EVENT, FOR_WINPE_SOURCE_ADAPTER);
         fillMap(CxeMessageType.WINPE_LOCALIZED_EVENT, FOR_WINPE_TARGET_ADAPTER);
 
+        // json
+        fillMap(CxeMessageType.JSON_IMPORTED_EVENT, FOR_EXTRACTOR);
+        fillMap(CxeMessageType.JSON_LOCALIZED_EVENT, FOR_MERGER);
+
         fillClassMap();
     }
 
@@ -262,7 +266,6 @@ public class EventTopicMap
      * Constructor. Creates an EventTopicMap object and fills it with all the
      * known event-topic mappings MDB.
      */
-    @SuppressWarnings("unchecked")
     private void fillClassMap()
     {
         // events for the FileSystemSource Adapter
@@ -412,17 +415,14 @@ public class EventTopicMap
     
     public static BaseAdapterMDB getBaseAdapterMDB(CxeMessageType p_cxeMessageType)
     {
-        BaseAdapterMDB mdb = (BaseAdapterMDB) s_instance.m_classMap.get(new Integer(
-                p_cxeMessageType.getValue()));
-
+        BaseAdapterMDB mdb = s_instance.m_classMap.get(new Integer(p_cxeMessageType.getValue()));
         if (mdb == null)
         {
             throw new java.util.NoSuchElementException(
-                    "There is no mapped base adapter MDB for event "
-                            + p_cxeMessageType.getName());
+                    "There is no mapped base adapter MDB for event " + p_cxeMessageType.getName());
         }
-        
-         return mdb;
+
+        return mdb;
     }
 
     // ////////////////////////////////////

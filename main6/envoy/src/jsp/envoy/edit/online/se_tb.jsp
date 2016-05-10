@@ -241,7 +241,7 @@ function showContextMenu(event)
         if (flag)
         {
         	var popupoptions = [
-        	  			      			      new ContextItem("<%=bundle.getString("lb_browse_term") %>",
+        	  	  new ContextItem("<%=bundle.getString("lb_browse_term") %>",
 							function(){ browseTerm(event);})];
         }
         else

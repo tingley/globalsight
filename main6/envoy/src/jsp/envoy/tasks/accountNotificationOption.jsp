@@ -56,7 +56,8 @@
             .getEmailResourceBundle(MailerLocal.DEFAULT_RESOURCE_NAME,uiLocale,user.getCompanyName());
     PermissionSet perms = (PermissionSet)session.getAttribute(WebAppConstants.PERMISSIONS);
     boolean b_editEmailTemp=true;
-    if(!perms.getPermissionFor(Permission.ACCOUNT_NOTIFICATION_EDITEMAILTEMPLATE)){
+    if(!perms.getPermissionFor(Permission.ACCOUNT_NOTIFICATION_EDIT_EMAIL_TEMPLATE))
+    {
         b_editEmailTemp=false;
     }
 

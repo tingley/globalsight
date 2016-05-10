@@ -34,6 +34,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
 import com.globalsight.everest.foundation.User;
@@ -55,8 +57,12 @@ import com.globalsight.webservices.AmbassadorUtil;
 /**
  * Page handler for adding/removing email notification settings to a user.
  */
+@SuppressWarnings("unchecked")
 public class AccountNotificationHandler extends PageHandler
 {
+    private static final Logger logger = Logger.getLogger(AccountNotificationHandler.class
+            .getName());
+
     private static List s_adminNotifications = new ArrayList();
     private static List s_pmAndWfmNotifications = new ArrayList();
     private static List s_generalNotifications = new ArrayList();
@@ -143,25 +149,22 @@ public class AccountNotificationHandler extends PageHandler
         preparePageInfo(request, session);
 
         String action = request.getParameter("action");
-        
-        if(action != null)
+
+        if ("save".equals(action))
         {
-            if(action.equals("save"))
-                try
-                {
-                    saveEditEmailTemplate(request,session,response);
-                }
-                catch (Exception e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+            try
+            {
+                saveEditEmailTemplate(request,session,response);
+            }
+            catch (Exception e)
+            {
+                logger.error(e);
+            }
+            return;
         }
-        else
-        {
-            // Call parent invokePageHandler() to set link beans and invoke JSP
-            super.invokePageHandler(pageDescriptor, request, response, context);
-        }
+
+        // Call parent invokePageHandler() to set link beans and invoke JSP
+        super.invokePageHandler(pageDescriptor, request, response, context);
     }
 
     // ////////////////////////////////////////////////////////////////////
@@ -187,23 +190,26 @@ public class AccountNotificationHandler extends PageHandler
         String subjectKey = p_request.getParameter("subjectKey");
         String messageKey = p_request.getParameter("messageKey");
         String subjectEdited = p_request.getParameter("subjectText");
-        String messageEdited = keepEscapeCharacter(p_request.getParameter("messageText").replace("\n", "\\r\\n\\\r\n"));
+        String messageEdited = keepEscapeCharacter(p_request.getParameter("messageText").replace(
+                "\n", "\\r\\n\\\r\n"));
         
         String subjectOri = emailBundle.getString(subjectKey);
-        String messageOri = keepEscapeCharacter(emailBundle.getString(messageKey).replace("\r\n", "\\r\\n\\\r\n"));
-         
-        List<ArrayList<String>> list = checkEmailTemplateContent(subjectOri,messageOri,subjectEdited,messageEdited);
+        String messageOri = keepEscapeCharacter(emailBundle.getString(messageKey).replace("\r\n",
+                "\\r\\n\\\r\n"));
+
+        List<ArrayList<String>> list = checkEmailTemplateContent(subjectOri, messageOri,
+                subjectEdited, messageEdited);
         if(list.size() != 0)
         {
-           if(list.get(0).size() !=0)
+            if (list.get(0).size() != 0)
            {
                String addErrorPlaceHold = AmbassadorUtil.listToString(list.get(0));
-               result.append("The follow place holds can not be added : " + addErrorPlaceHold+"\r\n");
+               result.append("The follow placeholders can not be added : " + addErrorPlaceHold+"\r\n");
            }
            if(list.get(1).size() != 0)
            {
                String missingPlaceHold = AmbassadorUtil.listToString(list.get(1));
-               result.append("The follow place holds are missing : " + missingPlaceHold);
+               result.append("The follow placeholders are missing : " + missingPlaceHold);
            }
            writer.write(result.toString());
            writer.flush();
@@ -217,15 +223,15 @@ public class AccountNotificationHandler extends PageHandler
                     RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties")
                     .getFile();
             String editTemplatePath = newFilepath.substring(1, newFilepath.lastIndexOf("/"));
-            File newFile = new File(editTemplatePath, "EmailMessageResource_" + user.getCompanyName() + "_"
-                    + uiLocale + ".properties");
+            File newFile = new File(editTemplatePath, "EmailMessageResource_"
+                    + user.getCompanyName() + "_" + uiLocale + ".properties");
 
             FileInputStream fis = null;
             if (newFile.exists())
             {
                 fis = (FileInputStream) getClass().getResourceAsStream(
-                        RESOURCE_LOCATION + "EmailMessageResource_" + user.getCompanyName() + "_" + uiLocale
-                                + ".properties");
+                        RESOURCE_LOCATION + "EmailMessageResource_" + user.getCompanyName() + "_"
+                                + uiLocale + ".properties");
             }
             else
             {
@@ -240,7 +246,6 @@ public class AccountNotificationHandler extends PageHandler
             writer.write("Save Success");
             writer.flush();
         }
-
     }
     
     /**
@@ -251,30 +256,31 @@ public class AccountNotificationHandler extends PageHandler
         return content.substring(0,content.lastIndexOf("\\"));
     }
 
-
-    
     /**
      * Checks if email template content that user edited is valid or not.
      */
-    private List<ArrayList<String>> checkEmailTemplateContent(String subjectOri, String messageOri, String subjectEdited, String messageEdited)
+    private List<ArrayList<String>> checkEmailTemplateContent(String subjectOri, String messageOri,
+            String subjectEdited, String messageEdited)
     {
         ArrayList<String> addedErrorPlaceHolds = new ArrayList<String>();
         ArrayList<String> missingPlaceHolds = new ArrayList<String>();
         List<ArrayList<String>> errorOption = new ArrayList<ArrayList<String>>();
-        
+
         ArrayList<String> subPlaceHoldersOri = getPlaceHolders(subjectOri);
-        ArrayList<String> subPlaceHoldersEdited = getPlaceHolders(subjectEdited);       
+        ArrayList<String> subPlaceHoldersEdited = getPlaceHolders(subjectEdited);
         ArrayList<String> msgPlaceHoldersOri = getPlaceHolders(messageOri);
         ArrayList<String> mesPlaceHoldersEdited = getPlaceHolders(messageEdited);
 
-        addErrorPlaceHoldes(subPlaceHoldersOri,subPlaceHoldersEdited,addedErrorPlaceHolds,missingPlaceHolds);
-        addErrorPlaceHoldes(msgPlaceHoldersOri,mesPlaceHoldersEdited,addedErrorPlaceHolds,missingPlaceHolds);
-        
-        if(addedErrorPlaceHolds.size()!=0 || missingPlaceHolds.size()!=0)
+        addErrorPlaceHoldes(subPlaceHoldersOri, subPlaceHoldersEdited, addedErrorPlaceHolds,
+                missingPlaceHolds);
+        addErrorPlaceHoldes(msgPlaceHoldersOri, mesPlaceHoldersEdited, addedErrorPlaceHolds,
+                missingPlaceHolds);
+
+        if (addedErrorPlaceHolds.size() != 0 || missingPlaceHolds.size() != 0)
         {
             errorOption.add(addedErrorPlaceHolds);
             errorOption.add(missingPlaceHolds);
-        }        
+        }
         return errorOption;
     }
     
@@ -316,6 +322,7 @@ public class AccountNotificationHandler extends PageHandler
         }
         return placeHolders;
     }
+
     /**
      * Get the notification flag value. The value will be retrieved from the
      * options hash if it has been updated (but not saved yet).

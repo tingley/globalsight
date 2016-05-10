@@ -43,6 +43,7 @@ import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.XliffConstants;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
+import com.globalsight.everest.edit.offline.page.OfflinePageDataGenerator;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Data;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.File;
@@ -1026,8 +1027,12 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
 
             Source s = new Source();
             m.setSource(s);
-            String score = StringUtil.formatPercent(
-                    leverageMatch.getScoreNum(), 2);
+            float scoreNum = leverageMatch.getScoreNum();
+            if (leverageMatch.isMtLeverageMatch())
+            {
+                scoreNum = OfflinePageDataGenerator.MT_SCORE_FOR_OFFLINE_KIT;
+            }
+            String score = StringUtil.formatPercent(scoreNum, 2);
             m.setMatchQuality(score);
             Tmx2Xliff20Handler handler = new Tmx2Xliff20Handler();
             handler.setSource(true);

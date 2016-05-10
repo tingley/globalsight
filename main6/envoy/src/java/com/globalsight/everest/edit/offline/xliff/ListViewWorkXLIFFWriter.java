@@ -42,6 +42,7 @@ import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.XliffConstants;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
+import com.globalsight.everest.edit.offline.page.OfflinePageDataGenerator;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.jobhandler.Job;
@@ -218,7 +219,12 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 
         // altFlag to flag the leverageMatch form alt-trans
         int altFlag = -100;
-        String score = StringUtil.formatPercent(leverageMatch.getScoreNum(), 2);
+        float scoreNum = leverageMatch.getScoreNum();
+        if (leverageMatch.isMtLeverageMatch())
+        {
+            scoreNum = OfflinePageDataGenerator.MT_SCORE_FOR_OFFLINE_KIT;
+        }
+        String score = StringUtil.formatPercent(scoreNum, 2);
 
         /**
          * Retrieve the source segment from TM if the leverage match is from

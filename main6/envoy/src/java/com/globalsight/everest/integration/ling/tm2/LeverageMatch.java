@@ -28,6 +28,7 @@ import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.tm.LingManagerException;
+import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.leverage.SidComparable;
 import com.globalsight.util.GlobalSightLocale;
@@ -604,6 +605,17 @@ public class LeverageMatch extends PersistentObject implements Comparable,
                 }
             }
         }
+    }
+
+    //Utility
+    public boolean isMtLeverageMatch()
+    {
+        if (m_orderNum == TmCoreManager.LM_ORDER_NUM_START_MT
+                || m_orderNum == TmCoreManager.LM_ORDER_NUM_START_MT + 1)
+        {
+            return true;
+        }
+        return false;
     }
 
     public boolean equals(Object p_obj)

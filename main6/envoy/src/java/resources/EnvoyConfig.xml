@@ -1789,6 +1789,7 @@
       <WebPage pageName="CE1" isDefault="false" jspName="/envoy/edit/online/ce_main.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.CommentEditorPageHandler">
         <PageLink linkName="self" destinationPageName="CE1"/>
         <PageLink linkName="imageUploader" destinationPageName="CEUPLOADER"/>
+        <PageLink linkName="tb" destinationPageName="SE10"></PageLink>
       </WebPage>
       
       <WebPage pageName="CEUPLOADER" isDefault="false" jspName="/envoy/edit/online/ce_image_upload.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.CommentEditorPageHandler">

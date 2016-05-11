@@ -1751,30 +1751,31 @@ public class FilterConfigurationImportHandler extends PageHandler
             map.put("companyId", Long.parseLong(companyId));
             List itList = HibernateUtil.search(hql, map);
 
-            if (itList.contains(filterName))
+            for (int i=0;i<itList.size();i++)
             {
-                for (int num = 1;; num++)
+                String name = (String)itList.get(i);
+                if (filterName.equalsIgnoreCase(name))
                 {
-                    String returnStr = null;
-                    if (filterName.contains("_import_"))
+                    for (int num = 1;; num++)
                     {
-                        returnStr = filterName.substring(0, filterName.lastIndexOf('_')) + "_"
-                                + num;
-                    }
-                    else
-                    {
-                        returnStr = filterName + "_import_" + num;
-                    }
-                    if (!itList.contains(returnStr))
-                    {
-                        return returnStr;
+                        String returnStr = null;
+                        if (filterName.contains("_import_"))
+                        {
+                            returnStr = filterName.substring(0, filterName.lastIndexOf('_')) + "_"
+                                    + num;
+                        }
+                        else
+                        {
+                            returnStr = filterName + "_import_" + num;
+                        }
+                        if (!itList.contains(returnStr))
+                        {
+                            return returnStr;
+                        }
                     }
                 }
             }
-            else
-            {
-                return filterName;
-            }
+            return filterName;
         }
 
         private FMFilter putDataIntoFMFilter(Map<String, String> valueMap)

@@ -715,8 +715,7 @@ function doOnload()
                 <td colspan=3>&nbsp;</td>
               </tr>
               <tr>
-                <td>&nbsp;</td>
-                <td colspan="2">
+                <td colspan="3">
                   <input type="button" class="standardText" name="<%=lbcancel%>" value="<%=lbcancel%>" onclick="submitForm('cancel')">
                   <input type="button" class="standardText" name="<%=lbsave%>" value="<%=lbsave%>" onclick="submitForm('save')">
                 </td>

@@ -55,6 +55,7 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.glossaries.GlossaryException;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
+import com.globalsight.everest.page.AddingSourcePage;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.request.BatchInfo;
 import com.globalsight.everest.request.Request;
@@ -208,6 +209,7 @@ public class AddSourceFilesHandler extends PageHandler
             Vector<FileProfileImpl> fileProfiles = new Vector<FileProfileImpl>();
             Vector<String> locales = new Vector<String>();
             Vector<File> files = new Vector<File>();
+            List<String> realPaths = new ArrayList<String>();
             long jobId = Long.valueOf(request.getParameter("jobId"));
             String tmpFolderName = request.getParameter("tmpFolderName");
             JobImpl job = HibernateUtil.get(JobImpl.class, jobId);
@@ -247,7 +249,8 @@ public class AddSourceFilesHandler extends PageHandler
                 filePath = convertFilePath(filePath);
                 if (filePath.contains(tmpFolderName))
                 {
-                    filePath = filePath.substring(filePath.indexOf(tmpFolderName) + tmpFolderName.length());
+                    filePath = filePath.substring(filePath.indexOf(tmpFolderName)
+                            + tmpFolderName.length() + 1);
                 }
                 String currentLocation = root + File.separator + TMP_FOLDER_NAME + File.separator
                         + tmpFolderName + File.separator + filePath;
@@ -281,7 +284,27 @@ public class AddSourceFilesHandler extends PageHandler
                     fromDi = nodes.length > 1 && "webservice".equals(nodes[1]);
                 }
                 files.add(targetFile);
+                realPaths.add(destinationLocation);
             }
+            try
+            {
+                for (int i = 0; i < realPaths.size(); i++)
+                {
+                    FileProfileImpl fp = HibernateUtil.get(FileProfileImpl.class, fpIds.get(i),
+                            false);
+                    AddingSourcePage page = new AddingSourcePage();
+                    page.setJobId(job.getJobId());
+                    page.setExternalPageId(realPaths.get(i));
+                    page.setL10nProfileId(fpIds.get(i));
+                    page.setDataSource(fp.getName());
+                    HibernateUtil.save(page);
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            
             String username = job.getCreateUser().getUserName();
             String jobName = job.getName();
 

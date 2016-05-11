@@ -27,6 +27,7 @@
             .getAttribute(WebAppConstants.SESSION_MANAGER);
     User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
     String companyIdWorkingFor = CompanyThreadLocal.getInstance().getValue();
+    String selfURL = self.getPageURL();
     String userName = "";
     if (user != null) {
         userName = user.getUserName();
@@ -172,17 +173,14 @@ $(document).ready(function(){
         $("#createJobForm").attr("target", "_self");
         $("#createJobForm").attr("enctype","application/x-www-form-urlencoded");
         $("#createJobForm").attr("encoding","application/x-www-form-urlencoded");
-        document.createJobForm.action += "&uploadAction=addFile&userName=<%=userName%>";
+        document.createJobForm.action = "<%=selfURL%>&uploadAction=addFile&userName=<%=userName%>";
         document.createJobForm.submit();
     });
-    // *************************************cancel button*************************************
-        $("#cancel").click(function()
-    {
-        document.location.href="/globalsight/ControlServlet?linkName=addJobFiles&pageName=SOURCEFILES&jobId=<%=jobImpl.getJobId()%>";
-    });
+    // *************************************close button*************************************
     $("#close").click(function()
     {
-       window.close();
+    	window.opener.location.reload();
+    	window.close();
     });
     
 });
@@ -285,11 +283,8 @@ function checkAndUpload(){
 			return false;
 		}
 	}
-	  var action = $("#createJobForm").attr("action");
-	    $("#createJobForm").attr("action", action+"&uploadAction=uploadSelectedFile&tempFolder="+tempFolder);
+	    $("#createJobForm").attr("action", "<%=selfURL%>&uploadAction=uploadSelectedFile&tempFolder="+tempFolder);
 		$("#createJobForm").submit();
-		$("#createJobForm").attr("action", action);
-		
 		
 		isUploading = true;
 		emptyFileValue();
@@ -370,7 +365,7 @@ function queryFileProfile(id)
             + "onchange='disableUnavailableFileProfiles(this)'><option value=''></option>"
             + "</select>");
     var theFileName = $("#Hidden" + id).attr("value");
-    $.get("/globalsight/ControlServlet?pageName=AJF&linkName=self", 
+    $.get("<%=selfURL%>", 
             {"uploadAction":"queryFileProfile","fileName":theFileName,"l10Nid":"<%=jobImpl.getL10nProfileId()%>","no":Math.random(), "userName":"<%=userName%>"}, 
             function(data){
                 profile.html("<select id='fp" + id
@@ -549,13 +544,13 @@ function removeFile(id, zipName, fileSize, filePath) {
         $("#fileNo").html(totalFileNo);
         $("#totalFileSize").html(parseNo(totalSize));
         // remove the file from system
-        $.post("/globalsight/ControlServlet?pageName=AJF&linkName=self", 
+        $.post("<%=selfURL%>", 
                 {"uploadAction":"deleteFile","filePath":filePath,
                 "folder":tempFolder,"no":Math.random()});
         var fileCount = $(".uploadifyQueueItem").length;
         if (fileCount == 0)
         {
-            $.post("/globalsight/ControlServlet?pageName=AJF&linkName=self", 
+            $.post("<%=selfURL%>", 
                     {"uploadAction":"deleteFile",
                     "folder":tempFolder,"no":Math.random()});
             mapped = false;
@@ -598,7 +593,7 @@ function mapTargetLocales(o)
     </div>
 
     <div id="createJobDiv" style="margin-left:0px; margin-top:0px; class="standardText">
-        <form name="createJobForm" id="createJobForm" method="post" action="/globalsight/ControlServlet?pageName=AJF&linkName=self" enctype="multipart/form-data" target="none_iframe">
+        <form name="createJobForm" id="createJobForm" method="post" action="" enctype="multipart/form-data" target="none_iframe">
            <input type="hidden" id="tmpFolderName" name="tmpFolderName" value="">
             <input type="hidden" id="fileMapFileProfile" name="fileMapFileProfile" value="" />
             <input type="hidden" id="userName" name="userName" value="<%=userName%>" />
@@ -650,9 +645,7 @@ function mapTargetLocales(o)
 	                                <tr>
 	                                    <td width="25%" align="right">
                                				<input id="create" type="button" class="standardBtn_mouseout" style="width:90px;" value="<%=bundle.getString("lb_add")%>" title="<%=bundle.getString("lb_add")%>">
-                               				&nbsp;&nbsp;
-                           					<input id="cancel" type="button" class="standardBtn_mouseout" style="width:90px;" value="<%=bundle.getString("lb_cancel")%>" title="<%=bundle.getString("lb_cancel")%>">
-                           					&nbsp;&nbsp;
+                               				&nbsp;&nbsp;&nbsp;
                            					<input id="close" type="button" class="standardBtn_mouseout" style="width:90px;" value="<%=bundle.getString("lb_close")%>" title="<%=bundle.getString("lb_close")%>">
 	                                    </td>
 	                                </tr>

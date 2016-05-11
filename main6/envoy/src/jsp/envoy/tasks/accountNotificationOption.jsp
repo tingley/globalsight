@@ -414,10 +414,10 @@ $(document).ready(function() {
 </table>
 <table id="editEmailTable" style="display:none">
 <tr><td>&nbsp;&nbsp;</td></tr>
-      <tr><td>subject</td><tr>
+      <tr><td class="standardText">Subject</td><tr>
       <tr><td><textarea rows="1" cols="80" id="subjectText"></textarea><td></tr>
       <tr><td>&nbsp;&nbsp;</td></tr>
-      <tr><td>message</td></tr>
+      <tr><td class="standardText">Message</td></tr>
       <tr><td><textarea rows="10" cols="80" id="messageText"></textarea></td></tr>
       <tr><td style="padding-top:10px" colspan="3"><input type="button" value="Save" id="save"><td></tr>
 </table>

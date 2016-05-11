@@ -47,9 +47,6 @@ public class ChangePermissionGroups extends BaseTestCase
         permissionGroupsFuncs.editPermissionGroups(selenium,
                 getProperty("permission.permissionGroup"), getProperty("permission.permissions"));
 
-        CommonFuncs.logoutSystem(selenium);
-        CommonFuncs.loginSystemWithAdmin(selenium);
-
         selenium.click(MainFrame.SETUP_MENU);
         Assert.assertEquals(
                 selenium.isElementPresent(MainFrame.ATTRIBUTES_SUBMENU), true);

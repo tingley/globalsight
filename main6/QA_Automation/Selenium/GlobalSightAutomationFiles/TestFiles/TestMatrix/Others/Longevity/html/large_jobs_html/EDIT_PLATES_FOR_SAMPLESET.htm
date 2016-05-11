@@ -1,0 +1,176 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:comment="Conditional text" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.Ready for Review" MadCap:lastBlockDepth="5" MadCap:lastHeight="2486" MadCap:lastWidth="882">
+    <head><title>Define Plates for Sample Set Method Dialog Box</title>
+    </head>
+    <body>
+        <h1>Define plates 
+ for Sample Set</h1>
+        <p class="para" MadCap:conditions="Primary.Empower">This dialog box appears when you click 
+ Define Plates from the Sample Set Method wizard, or when you select the 
+ Edit Plates tool or Plates command from the Edit menu in Run Samples, 
+ the Sample Set Method Editor, or the Alter Sample window. </p>
+        <p class="para">Use this dialog box to do these things:</p>
+        <ul>
+            <li class="listbull">Select the pre-defined 
+ plate types from which injections are to be made</li>
+            <li class="listbull">Select the position of 
+ the plates within the autosampler</li>
+            <li class="listbull">Activate the vial/well 
+ locations (from which injections are to be made) for each selected plate 
+ </li>
+            <li class="listbull">Specify the Plate Sequencing 
+ Mode (injection order) for the vial/well locations</li>
+            <li class="listbull">Insert or append active 
+ vial/well locations into the Samples table </li>
+            <li class="listbull">Optionally create a new 
+ plate type </li>
+        </ul>
+        <h2 MadCap:conditions="Primary.Empower">2790 layout check box</h2>
+        <p class="para" MadCap:conditions="Primary.Empower">Displays the Waters 2790 plate layout 
+ in the dialog box (the default setting). In this layout, the left section 
+ of the dialog box displays the four-position 2790 plate carrier. When 
+ deselected, the layout changes to a tabular view, typically used for autosamplers 
+ or systems other than the Waters 2790.</p>
+        <h2 MadCap:conditions="Primary.Empower">Create New Plate Type button</h2>
+        <p class="para" MadCap:conditions="Primary.Empower">Displays the New Plate Type dialog box, 
+ where you can create a new plate for your system (typically created from 
+ Configuration Manager).</p>
+        <h2>Clear Plates button</h2>
+        <p class="para">When you create a sample set method using the Sample Set 
+ Method wizard, this button clears the dialog box of any selected plates, 
+ allowing you to reselect plates, plate positions, and vial/well locations.</p>
+        <p class="para">When you manually create or modify a sample set method, this 
+ button displays a warning that continuing with the clear removes all injection 
+ rows from the Samples table. This button also clears the Define Plates 
+ for Sample Set Method dialog box of any selected plates, allowing you 
+ to reselect plates, plate positions, and vial/well locations.</p>
+        <h2>Plate Sequencing Mode buttons</h2>
+        <p class="para">Specifies the injection order for the selected vials in the 
+ displayed plate. This injection order of selected vials is transferred 
+ to Samples table rows when you click Insert or Append. Sequencing selections 
+ are: </p>
+        <ul>
+            <li style="font-size: 9pt;" class="listbull">
+                <img src="../pics/horizdisc.gif" alt="image\horizdisc.gif" style="width: 35px;height: 34px;border-style: none;border-style: none;" width="35" height="34" border="0" /> (Horizontal 
+ Discontinuous) – Injections occur from left to right across each row, 
+ starting at the top of the plate.</li>
+            <li style="font-size: 9pt;" class="listbull">
+                <img src="../pics/horizcont.gif" alt="image\horizcont.gif" style="width: 35px;height: 34px;border-style: none;border-style: none;" width="35" height="34" border="0" /> (Horizontal 
+ Serpentine) – Injections occur from left to right until the end of the 
+ row, then right to left starting at the next row.</li>
+            <li style="font-size: 9pt;" class="listbull">
+                <img src="../pics/vertdisc.gif" alt="image\vertdisc.gif" style="width: 35px;height: 34px;border-style: none;border-style: none;" width="35" height="34" border="0" /> (Vertical 
+ Discontinuous) – Injections occur from top to bottom, starting at the 
+ left of the plate.</li>
+            <li style="font-size: 9pt;" class="listbull">
+                <img src="../pics/vertcont.gif" alt="image\vertcont.gif" style="width: 35px;height: 34px;border-style: none;border-style: none;" width="35" height="34" border="0" /> (Vertical 
+ Serpentine) – Injections occur from top to bottom until the end of the 
+ column, then bottom to top starting at the next column.</li>
+        </ul>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ The Plate Sequencing Mode buttons have no effect on how the vials are 
+ labeled (referenced). You set vial reference in the Referencing tab when 
+ creating a plate type. Plate sequencing affects only the order of the 
+ vials once inserted or appended into the Samples table. The Samples table 
+ defines the vial injection order.</p>
+        <h2>Plate type and position section</h2>
+        <p class="para" MadCap:conditions="Primary.Breeze">Select plate types and plate positions 
+ in this section of the dialog box. You can create a new plate type from 
+ this dialog box by clicking the Create New Plate Type button. Plate position 
+ refers to the position of the plate within the autosampler.</p>
+        <p class="para" MadCap:conditions="Primary.Empower">Select plate types and plate positions 
+ in this section of the dialog box. Plate types are usually created earlier 
+ in Configuration Manager. However, you can create a new plate type from 
+ this dialog box by clicking the Create New Plate Type button. Plate position 
+ refers to the position of the plate within the autosampler.</p>
+        <p class="para" MadCap:conditions="Primary.Empower">By default, this section of the dialog 
+ box displays the Waters 2790 layout, showing the four possible plate positions 
+ in the 2790 plate carrier. By deselecting the 2790 Layout check box, this 
+ section switches to a tabular layout (typically used for autosamplers 
+ or systems other than the Waters 2790). </p>
+        <p class="para" MadCap:conditions="Primary.Breeze">You select the plate type (from the drop-down 
+ list box) for each plate position from which injections are to be made. 
+ When you select a plate type, the plate/vial section to the right displays 
+ a graphical view of the plate and vials. Plate position is designated 
+ by the first number in the Vial (or Plate/Well) column of the Samples 
+ table.</p>
+        <p class="para" MadCap:conditions="Primary.Empower">In either layout, you select the plate 
+ type (from the drop-down list box) for each plate position from which 
+ injections are to be made. When you select a plate type, the plate/vial 
+ section to the right displays a graphical view of the plate and vials. 
+ Plate position is designated by the first number in the Vial (or Plate/Well) 
+ column of the Samples table.</p>
+        <p class="para"><span class="emphasisbold">Example:</span> 
+ 2:A,1 designates plate position 2.</p>
+        <h2>Plate/Vial section</h2>
+        <p class="para">For each selected plate, select the vial/well locations from 
+ which injections are to be made. Selected locations appear in color. </p>
+        <p class="caption">To select:</p>
+        <ul>
+            <li class="listbull">Individual vial/well, 
+ click the vial/well</li>
+            <li class="listbull">Single group of vial/wells, 
+ drag the selection box around the desired group</li>
+            <li class="listbull">Multiple groups of vial/wells, 
+ press Ctrl and drag the selection box around each desired group</li>
+            <li class="listbull">All wells, right-click, 
+ then select Activate All Wells from the context menu</li>
+        </ul>
+        <p class="caption">To deselect:</p>
+        <ul>
+            <li class="listbull">Individual vial/well, 
+ click the vial/well</li>
+            <li class="listbull">Group of vial/wells, 
+ press Shift and drag the selection box around the desired group</li>
+            <li class="listbull">All wells, right-click, 
+ then select Clear All Activate Wells (see above) from the context menu</li>
+        </ul>
+        <h3>Selection differences</h3>
+        <p class="para" MadCap:conditions="Primary.Breeze">Vial/well selection differs according 
+ to whether you accessed the Define Plates for Sample Set Method dialog 
+ box from the Sample Set Method wizard or from the Samples table.</p>
+        <p class="para" MadCap:conditions="Primary.Empower">Vial/well selection differs according 
+ to whether you accessed the Define Plates for Sample Set Method dialog 
+ box from the Sample Set Method wizard, from the Samples table, from the 
+ Run Samples Only mode in Open Access, or from the Run Samples Using a 
+ Template mode in Open Access.</p>
+        <p class="para" MadCap:conditions="Primary.Breeze">When you access this dialog box from the 
+ wizard, the vial/wells that you select represent a range of locations 
+ available for injection. Later, in a wizard page, you specify the actual 
+ vial/well locations that are to be injected. When you access this dialog 
+ box from the Samples table, the vial/wells that you select are the actual 
+ locations from which injections are made.</p>
+        <p class="para" MadCap:conditions="Primary.Empower">When you access this dialog box from 
+ the wizard or from the Run Samples Using a Template mode in Open Access, 
+ the vial/wells that you select represent a range of locations available 
+ for injection. Later, in a wizard page, you specify the actual vial/well 
+ locations that are to be injected. When you access this dialog box from 
+ the Samples table or from the Run Samples Only mode in Open Access, the 
+ vial/wells that you select are the actual locations from which injections 
+ are made.</p>
+        <h2>Inject pull-down menu, Insert button, Append button</h2>
+        <p class="para">When you make a selection from the inject pull-down menu 
+ (Inject Standards, for example), then click the Insert or Append button, 
+ the active well/vial locations are inserted or appended into the Samples 
+ table (with the Inject function appearing in the Function column). </p>
+        <p class="para" MadCap:conditions="Primary.Breeze"><span class="emphasisbold">Note:</span> 
+ These controls are not available when this dialog box is accessed from 
+ the Sample Set Method wizard.</p>
+        <p class="para" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Note:</span> 
+ These controls are not available when this dialog box is accessed from 
+ the Sample Set Method wizard or Open Access.</p>
+        <p class="caption">To insert or append active well/vial locations:</p>
+        <ul>
+            <li class="listbull">Insert or append into 
+ an empty Samples table, click Insert or Append.</li>
+            <li class="listbull">Append to existing rows 
+ at the end of the Samples table, click Append.</li>
+            <li class="listbull">Insert within existing 
+ rows of the Samples table, close this dialog box. In the Samples table, 
+ click the row number immediately below where you want to insert active 
+ vial/wells. Select Plates from the Edit menu to reopen this dialog box. 
+ If necessary, select the vial/well locations and an inject function, then 
+ click Insert.</li>
+        </ul>
+    </body>
+</html>

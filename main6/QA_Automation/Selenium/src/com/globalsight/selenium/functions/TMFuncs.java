@@ -17,6 +17,7 @@ import org.testng.Assert;
 import org.testng.Reporter;
 
 import com.globalsight.selenium.pages.TMManagement;
+import com.globalsight.selenium.pages.TMProfile;
 import com.globalsight.selenium.testcases.ConfigUtil;
 import com.thoughtworks.selenium.Selenium;
 
@@ -29,9 +30,8 @@ public class TMFuncs extends BasicFuncs {
 	
 	public String newTM(Selenium selenium, String TMProfiles) throws Exception {
 
-		selenium.click(TMManagement.New_BUTTON);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-
+		
+		
 		String[] iTMProfiles = TMProfiles.split(",");
 		String iTMName = null;
 
@@ -42,8 +42,19 @@ public class TMFuncs extends BasicFuncs {
 				String iFieldValue = ivalue[1].trim();
 
 				if (iFieldName.equals("name")) {
-					selenium.type(TMManagement.Name_TEXT_FIELD, iFieldValue);
-					iTMName = iFieldValue;
+					
+					selenium.type(TMManagement.TM_SEARCH_CONTENT_TEXT, iFieldValue);
+			    	selenium.keyDown(TMManagement.TM_SEARCH_CONTENT_TEXT, "\\13");
+			    	selenium.keyUp(TMManagement.TM_SEARCH_CONTENT_TEXT, "\\13");
+//			    	selenium.waitForFrameToLoad("css=table.listborder", "1000");
+
+			    	if (!(selenium.isElementPresent("link=" + iFieldValue))){
+			    		selenium.click(TMManagement.New_BUTTON);
+			    		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+			    		selenium.type(TMManagement.Name_TEXT_FIELD, iFieldValue);
+			    		iTMName = iFieldValue;
+			    	}
+			    	else break;
 				} else if (iFieldName.equals("domain")) {
 					selenium.type(TMManagement.DOMAIN_TEXT, iFieldValue);
 				} else if (iFieldName.equals("organization")) {
@@ -61,7 +72,9 @@ public class TMFuncs extends BasicFuncs {
 			}
 
 		}
-		selenium.click(TMManagement.SAVE_BUTTON);
+		if (selenium.isElementPresent(TMManagement.SAVE_BUTTON)) {
+			selenium.click(TMManagement.SAVE_BUTTON);
+		}
 
         if (selenium.isAlertPresent())
         {
@@ -74,6 +87,31 @@ public class TMFuncs extends BasicFuncs {
 					TMManagement.TM_MANAGEMENT_TABLE, iTMName), true);
 		}
 		return iTMName;
+    	
+	}
+	
+	public void newTM(Selenium selenium, String tMName, String description, String index) throws Exception {
+
+		selenium.type(TMManagement.TM_SEARCH_CONTENT_TEXT, tMName);
+    	selenium.keyDown(TMManagement.TM_SEARCH_CONTENT_TEXT, "\\13");
+    	selenium.keyUp(TMManagement.TM_SEARCH_CONTENT_TEXT, "\\13");
+//    	selenium.waitForFrameToLoad("css=table.listborder", "1000");
+
+    	if (!(selenium.isElementPresent("link=" + tMName))){
+    		selenium.click(TMManagement.New_BUTTON);
+    		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+
+		selenium.type(TMManagement.Name_TEXT_FIELD, tMName.trim());
+		selenium.type(TMManagement.DESCRIPTION_TEXT, description);
+		if (index.equalsIgnoreCase("yes")) selenium.check(TMManagement.TM_INDEX_TARGET_CHECKBOX);
+		selenium.click(TMManagement.SAVE_BUTTON);
+
+        if (selenium.isAlertPresent())
+        {
+			selenium.getAlert();
+			selenium.click(TMManagement.Cancel_BUTTON);
+		}
+	 }
 	}
 	
 	public void importTM(Selenium selenium, String TMProfiles) throws Exception {
@@ -97,7 +135,7 @@ public class TMFuncs extends BasicFuncs {
                 
                 String filePath = ConfigUtil.getConfigData("Base_Path");
                 filePath = filePath + File.separator + "TM" + File.separator + iFieldValue;
-                selenium.type(TMManagement.import_path, filePath);
+                selenium.type(TMManagement.import_path_TEXT, filePath);
             } else if (iFieldName.equals("sourceTmName")) {
                 selenium.type("sourceTmName",iFieldValue);
             } else if (iFieldName.equals("fileFormat")) {
@@ -129,5 +167,51 @@ public class TMFuncs extends BasicFuncs {
         tbfunc.clickForModalDialog(selenium, TMManagement.Statistics_BUTTON);
 
     }
+    
+    public void importTM(Selenium selenium, String tMName, String filePath) throws Exception {
+	    
+//	    boolean selected = selectRadioButtonFromTable(selenium, TMManagement.TM_MANAGEMENT_TABLE, tMName);
+//            if (!selected)
+//               {
+//                    Reporter.log("Cannot find a tm to import.");
+//                    return;
+//                }
+//        Thread.sleep(15000);
+    	
+    	selenium.type(TMManagement.TM_SEARCH_CONTENT_TEXT, tMName);
+    	selenium.keyDown(TMManagement.TM_SEARCH_CONTENT_TEXT, "\\13");
+    	selenium.keyUp(TMManagement.TM_SEARCH_CONTENT_TEXT, "\\13");
+//    	selenium.waitForFrameToLoad("css=table.listborder", "1000");
+
+    	 if (!(selenium.isElementPresent("link=" + tMName))){
+    		 newTM(selenium, tMName);
+    		 selenium.type(TMManagement.TM_SEARCH_CONTENT_TEXT, tMName);
+    		 selenium.keyDown(TMManagement.TM_SEARCH_CONTENT_TEXT, "\\13");
+    		 selenium.keyUp(TMManagement.TM_SEARCH_CONTENT_TEXT, "\\13");
+    	 }
+    	 
+    	 boolean selected = selectRadioButtonFromTable(selenium, TMManagement.TM_MANAGEMENT_TABLE, tMName);
+    	 if (!selected)
+           {
+                Reporter.log("Cannot find a tm to import.");
+                return;
+            }
+    	 Thread.sleep(15000);
+		 clickAndWait(selenium,TMManagement.Import_BUTTON);        
+	     selenium.click(TMManagement.Browse_BUTTON);
+	     selenium.type(TMManagement.import_path_TEXT, filePath);
+	     clickAndWait(selenium, TMManagement.Next_BUTTON);
+		 Thread.sleep(15000);
+		 clickAndWait(selenium, "Import");
+		   
+		 String importDone = "var pro = window.document.getElementById('idProgress').innerHTML;" +
+	     "pro.indexOf('100%')!=-1;";
+		 selenium.waitForCondition(importDone, CommonFuncs.LONG_WAIT);
+	     // import done
+	     clickAndWait(selenium, "idCancelOk");
+    	  
+	    
+	}
+	
 
 }

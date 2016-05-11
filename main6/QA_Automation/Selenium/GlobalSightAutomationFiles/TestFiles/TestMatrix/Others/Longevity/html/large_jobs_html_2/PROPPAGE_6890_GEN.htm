@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:id="com_inse\PROPPAGE_6890_GEN.htm" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="2032" MadCap:lastWidth="571">
+    <head><title>General Tab (6890)</title>
+    </head>
+    <body>
+        <h1>General 
+ tab (6890)</h1>
+        <p class="para">Use this tab to define detector and inlet types, and to set 
+ the enable states of the injectors, columns, detectors, and channels in 
+ the 6890 GC system.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ When creating an instrument method for Dual Tower operation, you must 
+ enable both injectors/inlets, columns, detectors, and channels.</p>
+        <h2>Configuration parameters</h2>
+        <h3>Inlet type (front and back)</h3>
+        <p class="para">Type of inlet used in the 6890 GC system.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ None, CIS4 (Gerstel PTV inlet with auxiliary temperature control), COC 
+ (Cool on-column, non-EPC), COC EPC (Cool on-column, EPC), PP (Purged packed, 
+ non-EPC), PP EPC (Purged packed, EPC), PTV (Programmed Temperature Vaporization, 
+ EPC), S/SL (Split/Splitless, non-EPC), S/SL EPC (Split/Splitless, EPC), 
+ Volatiles Interface, and Unknown (used for other inlet types). You can 
+ also set Inlet type in the Front and Back Inlet tabs.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ For the PTV, you can set only the front inlet.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ None </p>
+        <h3>Lit offset</h3>
+        <p class="para">Threshold you can set to initiate igniting a FID or FPD detector. 
+ If the detector goes below this value, the flame is out and the detector 
+ will try to relight itself. </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 2.0 (pA). If two attempts to re-ignite fail, the GC performs a safe shutdown 
+ and shuts off the gas flow to the detector.</p>
+        <h3>Detector type (front and back)</h3>
+        <p class="para">Type of detectors used in the 6890 GC system.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Unknown (used for other detector types), None, FID (flame ionization), 
+ TCD (thermal conductivity), ECD (electron capture), NPD (nitrogen phosphorous), 
+ FPD (flame photometric), and µECD (micro electron capture). You can also 
+ select detector types in the Front and Back Detector tabs.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ None</p>
+        <h2>Enable parameters</h2>
+        <h3>Injector (front and back)</h3>
+        <p class="para">Enables the injector (front and/or back). After enabling 
+ an injector, define its parameters in the corresponding Front and/or Back 
+ Injector tabs.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ If you enable an injector, you must enable the corresponding inlet.</p>
+        <h3>Inlet (front and back)</h3>
+        <p class="para">Enables the inlet (front and/or back). After enabling an 
+ inlet, define its parameters in the corresponding Front and/or Back Inlet 
+ tabs.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <h3>Column (column 1 and column 2)</h3>
+        <p class="para">Enables column 1 and column 2. After enabling a column, define 
+ its pneumatic parameters in the corresponding Column tab.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Use the GC front panel to verify that the Columns are programmed for connection 
+ to the correct detectors. They should be connected as you want the Empower 
+ instrument method to be.</p>
+        <h3>Detector (front and back)</h3>
+        <p class="para">Enables the front detector and/or back detector in the 6890 
+ GC system. After enabling a detector, enter its parameters in the corresponding 
+ Detector tab.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Enable the front and/or back detector before specifying detector parameters 
+ in the corresponding detector tab. If you specify detector parameters 
+ in the Detector tab without first enabling the detector, the parameter 
+ settings do not take effect.</p>
+        <h3>Channel (1 and 2)</h3>
+        <p class="para">Specifies that the channels transmit digital data through 
+ the 6890 GC system RS-232 port to the Empower workstation. After enabling 
+ a digital channel, define the Source and Units parameters in the appropriate 
+ channel tab.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> Enabled</p>
+        <p class="caption">Notes:</p>
+        <ul>
+            <li class="listbull">If you are injecting 
+ on inlet 1, channel 1 should be set to the detector to which inlet 1 (column 
+ 1) is linked. The same rule applies to channel 2 and inlet 2.</li>
+            <li class="listbull">You can simultaneously 
+ transmit digital data (RS-232 port on the 6890 GC system) and analog data 
+ (Signal 1 and Signal 2 terminals on the 6890 GC system) to an Empower 
+ workstation. You need not enable the analog outputs; they are always active. 
+ The analog outputs must be converted to digital signals by an A/D converter 
+ (typically a busSAT/IN or SerialSAT/IN 2 Module) before they are transmitted 
+ to the Empower workstation. See the <span style="font-style: italic;">Empower 
+ System Installation and Configuration</span><span style="font-weight: bold;font-style: italic;"> <![CDATA[ ]]></span><span style="font-style: italic;">Guide</span> for information 
+ on connecting your 6890 GC system to an Empower workstation through a 
+ busSAT/IN or busSAT/IN 2 Module.</li>
+        </ul>
+    </body>
+</html>

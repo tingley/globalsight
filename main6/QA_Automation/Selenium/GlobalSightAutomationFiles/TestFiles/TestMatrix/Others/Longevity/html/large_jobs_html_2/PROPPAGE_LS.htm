@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1480" MadCap:lastWidth="571">
+    <head><title>LS Instrument Properties Tab</title>
+    </head>
+    <body>
+        <h1>LS 
+ Instrument Properties tab</h1>
+        <p class="para">Use this tab to specify parameters for creating an LS channel 
+ set used with a GPC or GPCV channel set. Although the LS detector is not 
+ an instrument that physically exists in a system, this "virtual" 
+ instrument allows you to define instrument method parameters to use to 
+ create an LS channel set. After specifying parameters here (and parameters 
+ for other instruments in your GPC/V-LS system), save them as an instrument 
+ method. If you later define an LS channel set in the Method Set wizard, 
+ the LS parameters you set here transfer to corresponding fields in the 
+ Define LS Channel Set wizard page.</p>
+        <p class="caption">Notes:</p>
+        <ul>
+            <li class="listbull">The LS instrument is 
+ available only if the Light Scattering and either GPC or GPCV options 
+ are installed on your system.</li>
+            <li class="listbull">These LS parameters are 
+ used only for <span style="font-style: italic;">processing</span> LS data, 
+ not acquiring LS data.</li>
+            <li class="listbull">You can add the LS instrument 
+ to the instrument method using the Add Instrument command or tool in the 
+ Instrument Method Editor. If the instrument method contains the LS instrument, 
+ click the LS instrument icon to display this tab.</li>
+        </ul>
+        <h2>Concentration detector parameters</h2>
+        <h3>Channel</h3>
+        <p class="para">Concentration channel for your system. Select the channel 
+ from the list. You can select a PDA channel for this field.</p>
+        <h3>Flow rate (ml/min)</h3>
+        <p class="para">Flow rate used to calculate retention times. This is the 
+ flow rate you must enter in your processing method when the x-axis of 
+ the calibration is set to elution volume. This parameter is used only 
+ for processing purposes, not defining the flow rate for data acquisition.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ None</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ The value entered here is used for reference. It is transferred only to 
+ the Flow Rate field in your processing method when you create a new processing 
+ method. To create a new processing method, select Process &gt; Calibrate 
+ Light Scattering System or Process &gt; GPC-LS Data or Process &gt; GPCV-LS 
+ Data or Process &gt; GPCV Data in Review. Otherwise, you must enter the 
+ correct flow rate value in your processing method. Click for details on 
+ defining the flow rate in a GPC/V/LS processing method.</p>
+        <h3>Connected to RI detector</h3>
+        <p class="para">Specifies that the concentration channel is connected to 
+ an RI detector.</p>
+        <h3>RI calibration constant</h3>
+        <p class="para">Calibration constant for the RI detector in units of 1/µV. 
+ This field is active only if Connected to RI Detector is enabled. Default: 
+ None.</p>
+        <h2>LS detector parameters</h2>
+        <h3>Name</h3>
+        <p class="para">Identifies the type of LS detector for your system. Select 
+ the name from the list.</p>
+        <h3>Interdetector time (min)</h3>
+        <p class="para">Time offset for data points in the LS channel.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.000 min</p>
+        <h3>Detector type</h3>
+        <p class="para">Specifies the LS detector manufacturer. </p>
+        <h3>Laser wavelength</h3>
+        <p class="para">Specifies the wavelength, in nm, of the laser used in the 
+ LS detector.</p>
+        <h3>Glass refractive index</h3>
+        <p class="para">Enabled when you select Wyatt or Unknown from the Detector 
+ Type field. Specifies the refractive index of the glass used in the flow 
+ cell of the LS detector.</p>
+        <h2>Description</h2>
+        <p class="para">Optional description for the LS instrument parameters that 
+ define the LS channel set.</p>
+    </body>
+</html>

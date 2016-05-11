@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:ignoredWords="intersample;microvolts;mV;result(s;Intersample;AVE(Amount;abc;set(s;ssmethod;AutoArchive;tableshpace;Offline;Signoff;signoff;SDMS;SS;ApexTrack;GXP;Tablespace;QuickStart;N;UserA\Backup;subdirectory;n;tablespace;EXP;INF;PDA;inf;c;reselect;Photodiode;GPC;CE;LS;Project(s;field(s;project(s;Sum(Area*LTE(%Area;interpeak;Bool;Enum;COM;Toolkit;intrapeak;Min;MB;lifespan;ENUM;ENUM(LT(Area;LT(Area;GTE(Area;LotNumber;nonnumeric;ENUM(EQI;mL;EQ;Ctrl;CField;Column_type;Chem_name;Exp_num;Grad_student;LIMS_ID;Assay_name;Batch_num;Cost_per_analysis;Lot_num;Jaz;ABS(absolute;COS(cosine;ENUM(enumeration;EQ(equal;EQI(equal;GT(greater;GTE(greater;LN(natural;LOG(regular;LT(less;LTE(less;NEQ(not;NEQI(not;RANGE(range;ROUND(field;SIN(sine;SQRT(square;YValue;AVE(average;MAX(maximum;MIN(minimum;SUM(summation;SUM(Slice;g;ABS;ABS(Height;LOG(Area+Height;MIN;SUM(%;MIN(Area;AVE(Area;EQI;NEQ;NEQI;SampleName;Yvalue;Y-axis;N.D.;BDL;BPQL;name[field;K;Uracil[K;uracil;LT;GTE;GXPs;ES;Logon;PDF;Login;ADMIN;ALL_ROWS;ARCHIVELOG;AUTOEXTEND;BFILE;BITMAP;CHAR_CS;CLOB;CLOSED_CACHE_;OPEN_CURSORS;COMPOSITE_LIMIT;CONNECT_TIME;CPU_PER_;CURRENT_SCHEMA;ENUM(;ABS(;COS(;LN(;LOG(;SIN(;SQRT(;AVE(;LTE;BigVial;RRF;TotalCorrectedArea;SCorrectedArea;SUM(CA;TotalCA;NormAmount(;CorrectedArea(;NormAmt;ARF;MAX(;MIN(;SUM(;RSD;PROD(;ROUND(;EQ(;GT(;GTE(;LT(;LTE(;NEQ(;RANGE(;NEQI(;TotalAmountByHeight;SUM(Amount;InterTotalAmountByHeight;TotalArea;MW;Mn;Number_Density_Mn;Sum(Number;Mw;Number_Density_Mw;Density*Slice;Area*LTE(Cumulative;Area*GTE(Cumulative;number(s;login;Aug;writeable;E;CD-RW;offline" MadCap:id="html\NEW_PROJ1.htm" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1322" MadCap:lastWidth="708">
+    <head><title>New Project Wizard – Tablespace Page</title>
+    </head>
+    <body>
+        <h1>New Project Wizard - Tablespace page</h1>
+        <p class="para">Use this page to specify these settings for this project:</p>
+        <ul>
+            <li class="listbull">the amount of tablespace 
+ you want to allocate</li>
+            <li class="listbull">full audit trail</li>
+            <li class="listbull">data processing integration, 
+ ApexTrack or Traditional</li>
+        </ul>
+        <h2>TableSpace</h2>
+        <p class="para">Define the amount of tablespace reserved in the database 
+ for the project. After you create the project, you can increase or decrease 
+ the tablespace quota in the Project Properties dialog box if you have 
+ the Alter Any Project privilege.</p>
+        <p class="para"><span class="emphasisbold">Tips:</span>
+        </p>
+        <ul>
+            <li class="listbull">The minimum project quota 
+ is 50 MB.</li>
+            <li class="listbull">A project's tablespace 
+ is allocated from the main project tablespace, which is controlled by 
+ settings in the Database Properties dialog box.</li>
+        </ul>
+        <h2>TableSpace 
+ available</h2>
+        <p class="para">The amount of unused tablespace that is available to the 
+ project.</p>
+        <h2>Full Audit Trail Support</h2>
+        <p class="para">Empower automatically tracks system-level activities using 
+ secure, time-and-date stamped audit trail records. If desired, you can 
+ also set up Empower to monitor the history of certain project-level activities, 
+ including the creation, modification, or deletion of objects, such as 
+ samples, methods, and results. When you create a project, you determine 
+ the full audit trail setting. The full audit trail setting is preserved 
+ when you back up, clone, or restore a project.</p>
+        <p class="para"><span class="emphasisbold">Restrictions</span>
+        </p>
+        <p class="para">The following New Project<span class="emphasisbold"> <![CDATA[ ]]></span>System 
+ Policies (View &gt; System Policies &gt; New Project Policies) affect 
+ whether you an change the default Full Audit Trail settings when creating 
+ a project.</p>
+        <ul>
+            <li class="listbull">If the "Don't Allow 
+ User to Change Default Full Audit Trail Support Setting" is enabled, 
+ you cannot change the default setting for "Full Audit Trail Support" 
+ when creating a project. </li>
+            <li class="listbull">If the "Don't Allow 
+ User to Change Default 'Require User Comments On' Setting" is enabled, 
+ you cannot change the default settings for comment and password requirements. 
+ &#160;</li>
+        </ul>
+        <p class="para" style="margin-left: 0px;">If you have the View Audit Trail privilege, 
+ you can view the project audit trail in the Audit Trails tab of the Project 
+ window.</p>
+        <p class="caption">To specify that users enter comments and/or their password 
+ when they create, modify, and/or delete a method, result, or sample within 
+ a project:</p>
+        <ol>
+            <li class="listnum">In the Project Audit Trail 
+ Policies table, click the Comment column for the Method, Result, Sample, 
+ or Deletion row, and then select one of the following choices: </li>
+            <li class="listbull2">To require that users 
+ do not enter a comment when they create, modify, and/or delete a method, 
+ result, or sample, select Silent. </li>
+            <li class="listbull2">To require that users 
+ enter a pre-defined comment when they create, modify, and/or delete a 
+ method, result, or sample, select Restricted.</li>
+            <li class="listbull2">To require that users 
+ enter a free form comment when they create, modify, and/or delete a method, 
+ result, or sample, select Unrestricted.</li>
+        </ol>
+        <ol start="2">
+            <li class="listnum">To require that users enter 
+ their password when they create, modify, and/or delete a method, result, 
+ or sample, select the Confirm Identity checkbox. </li>
+        </ol>
+        <h2>Data Processing Techniques</h2>
+        <p class="para">Choose the type of data processing integration, ApexTrack 
+ or Traditional, to be used as the default algorithm.</p>
+        <p class="para"><span class="emphasisbold">Requirement:</span> 
+ You must enable ApexTrack 
+ before you can use it in your project. Select View &gt; System Policies 
+ and then select the Data Processing tab. Select the option to Allow the 
+ use of ApexTrack 
+ Integration. </p>
+    </body>
+</html>

@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:id="com_smpt\SSWIZ_6.htm" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1232" MadCap:lastWidth="577">
+    <head><title>New Sample Set Method Wizard - Enter Optional Information</title>
+    </head>
+    <body>
+        <h1>New Sample 
+ Set Method wizard – Enter Optional Information page</h1>
+        <p class="para">Use this page to enter optional standards/sample information. 
+ Even if you choose not to enter or modify any of the parameters in this 
+ page, they appear as columns in the Samples table listed with their default 
+ values. The Enter Optional Information page contains the parameters described 
+ below.</p>
+        <h2>Sample weight</h2>
+        <p class="para">Displays the factor used for adjusting the calculated component 
+ amount to compensate for differences in the prepared solutions used for 
+ calibration and analysis. The default value of 1.000 provides no factoring.</p>
+        <p class="para">During calibration, the software <span style="font-style: italic;">multiplies</span> 
+ the calculated amount of each standard component by the Sample Weight 
+ value.</p>
+        <p class="para">During quantitation, the software <span style="font-style: italic;">divides</span> 
+ the amount read from the calibration curve (of the standard components) 
+ by the Sample Weight value to calculate amounts for each unknown sample.</p>
+        <h2>Dilution</h2>
+        <p class="para">Displays the factor used for adjusting the calculated component 
+ amount to compensate for differences in the prepared solutions used for 
+ calibration and analysis. The default value of 1.000 provides no factoring.</p>
+        <p class="para">During calibration, the software <span style="font-style: italic;">divides</span> 
+ the calculated amount of each standard component by the Dilution value.</p>
+        <p class="para">During quantitation, the software <span style="font-style: italic;">multiplies</span> 
+ the amount read from the calibration curve (of the standard components) 
+ by the Dilution value to calculate amounts for each unknown sample.</p>
+        <p class="para">When you finish entering information into the table, click 
+ Next to advance to the next wizard page.</p>
+        <h2>Data start</h2>
+        <p class="para">Specifies the time (in minutes) after injection start time 
+ that data collection is to begin. Data Start allows you to delay the start 
+ of acquisition to control the size of the datafile, and is useful for 
+ eliminating eluent fronts from the file. Refer to the Data Start/Next 
+ Injection Delay Sequence below.</p>
+        <p class="caption">Notes:</p>
+        <ul>
+            <li class="listbull">If your laboratory operates 
+ under regulatory guidelines, verify with the applicable agency that you 
+ can use this parameter.</li>
+            <li class="listbull" MadCap:conditions="Primary.Empower">If you are creating a 
+ sample set method for dual tower GC operation, you must select the same 
+ value for Data Start for both the Front and Back tower to allow for simultaneous 
+ injections. To create a dual tower sample set method, you use the wizard 
+ twice, once for each tower.</li>
+        </ul>
+        <h2>Next injection delay</h2>
+        <p class="para">Specifies the delay time in minutes that is added to the 
+ end of data acquisition and before the start of setup for the next injection. 
+ Next Injection Delay allows you to wash away undesired peaks and stabilize 
+ the conditions of a gradient run before the next injection. </p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Using the Data Start and Next Injection Delay options does not affect 
+ timing of programmed gradient changes or timed events.</p>
+        <p class="para" MadCap:conditions="Primary.Empower">If you are creating a sample set method 
+ for dual tower GC operation, you must select the same value for Next Injection 
+ Delay for both the Front and Back tower to allow for simultaneous injections. 
+ To create a dual tower sample set method, you use the wizard twice, once 
+ for each tower.</p>
+        <p class="para">After making your selections, click Next to advance to the 
+ next wizard page.</p>
+    </body>
+</html>

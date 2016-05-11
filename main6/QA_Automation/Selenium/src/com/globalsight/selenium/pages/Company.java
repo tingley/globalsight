@@ -14,9 +14,11 @@ public class Company
 
     // New Company page
     public static final String Name_TEXT_FIELD = "nameField";
-    public static final String Save_BUTTON = "save";
+    public static final String Save_BUTTON = "name=Save";
     public static final String Cancel_BUTTON = "cancel";
     public static final String ENABLE_IP_FILTER = "enableIPFilterId";
     public static final String Next_BUTTON = "Next";
+    
+    public static final String Name_Filter_ID = "id=companyNameFilter";
 
 }

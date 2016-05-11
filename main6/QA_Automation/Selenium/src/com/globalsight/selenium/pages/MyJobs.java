@@ -9,13 +9,13 @@ public class MyJobs {
 	public static final String MyJobs_TABLE="//div[@id='contentLayer']/table[2]/tbody/tr[2]/td/table/tbody/tr[1]/td/form/table/tbody[2]";
 	public static final String MyJobs_Ready_TABLE="//div[@id='contentLayer']/table[2]/tbody/tr[2]/td/table/tbody/tr/td/form/table/tbody";
 	public static final String MyJobs_InProgress_TABLE="//div[@id='contentLayer']/table[2]/tbody/tr[2]/td/table/tbody/tr/td/form/table/tbody";
-	public static final String MyJobs_AllStatus_TABLE="//div[@id='contentLayer']/table[2]/tbody/tr[2]/td/form/table/tbody[2]";
+	public static final String MyJobs_AllStatus_TABLE="//div[@id='contentLayer']/table/tbody/tr[2]/td/table/tbody";
 			
 
 	//My Jobs-Ready
 	public static final String Status_SELECTION="sto";
 	public static final String JobName_SELECTION="no";
-	public static final String SEARCH_JOB_NAME_TEXT="nf";
+	public static final String SEARCH_JOB_NAME_TEXT="jobNameFilter";
 	public static final String SEARCH_BUTTON="Search";
 	public static final String SEARCH_AND_REPLACE_BUTTON="search";
 	public static final String CHANGE_WF_MANAGER_BUTTON="ChangeWFMgr";

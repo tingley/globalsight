@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dita>
+<p>See also <book name="Book One"><i>Open File</i></book></p>
+<p>See also <book name="Book One">Open File2</book></p>
+<p>See also <book>Open File3</book></p>
+<p>See also <i>Open File</i></p>
+<p>See also <Cook2>Open File3</Cook2></p>
+<data></data>
+<t/>
+</dita>

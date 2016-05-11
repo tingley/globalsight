@@ -17,10 +17,12 @@ public class RemoveWFofLocalizationProfile extends BaseTestCase
         openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
                 MainFrame.LOCALIZATION_PROFILES_SUBMENU);
 
-        String iLocName = getProperty("localization.name");
-        String iWFName = getProperty("localization.workflow");
-
-        localizationFuncs.removeWorkflow(selenium, iLocName, iWFName);
+        String iLocName = getProperty("localization.name").trim();
+        String iWFName = getProperty("localization.workflow").trim();
+        String iWFLangCode=getProperty("localization.workflow.targetCode").trim();
+        
+        
+        localizationFuncs.removeWorkflow(selenium, iLocName, iWFLangCode, iWFName);
 
     }
 }

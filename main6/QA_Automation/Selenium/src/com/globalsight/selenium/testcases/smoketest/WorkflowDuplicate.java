@@ -20,12 +20,12 @@ public class WorkflowDuplicate extends BaseTestCase
         openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
                 MainFrame.WORKFLOWS_SUBMENU);
 
-        workflowsFuncs.duplicateWorkFlow(selenium,
-                getProperty("workflow.duplicate.prefix"),
-                getProperty("workflow.export.workflowTemplate"));
+//        workflowsFuncs.duplicateWorkFlow(selenium,
+//                getProperty("workflow.duplicate.prefix"),
+//                getProperty("workflow.export.workflowTemplate"));
 
-        Assert.assertTrue(basicFuncs.isPresentInTable(selenium,
-                Workflows.Workflows_TABLE,
-                getProperty("workflow.duplicate.newName")));
+        Assert.assertTrue(basicFuncs.selectRadioButtonFromTable(selenium,true, 
+        		Workflows.SearchName_TEXT_FIELD,
+        		getProperty("workflow.duplicate.newName"))); 
     }
 }

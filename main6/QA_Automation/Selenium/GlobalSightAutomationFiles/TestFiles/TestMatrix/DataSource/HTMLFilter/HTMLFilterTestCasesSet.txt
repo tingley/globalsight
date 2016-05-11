@@ -1,0 +1,13 @@
+Index	File_Profile_name	Name	Option	Base_Text_Filter_Internal_Text	Base_Text_Filter_Escaping	Convert_HTML_Entity_Export	Ignore_Invalid_HTML_Tags	Add_rtl_directionality	White_HandHandling	Localize_Function	Base_Text_post_filter	Embeddable_Tags	Internal_Tag	Paired_Tags	Switch_Tag_Map	Translatable_Attribute	Unpaired_Tags	White_Preserving_Tags	HTMLSourceFile
+Case_1	HTML_All_options	HTML_All_options	All_options	Welocalize,the integration	",',\	o	x	o	Preserve	L10n	Base_Text_Filter	EMBTag1,EMBTag2,EMBTag3,UnpairedTag1,UnpairedTag2	InternalTag1,InternalTag2	EMBTag1,EMBTag2,EMBTag3,InternalTag1,InternalTag2	SwitchTag1;Map1,SwitchTag2;Map2	style	UnpairedTag1,UnpairedTag2	p	TestMatrix\DataSource\HTMLfilter\Welocalize_Company_HTML_All_options.html
+Case_2	HTML_Add_rtl_directionality_YES	HTML_Add_rtl_directionality_YES	RTL_YES	x	x	x	x	o	x	x	x	x	x	x	x	x	x	x	TestMatrix\DataSource\HTMLfilter\10188_en_US.html
+Case_3	HTML_Add_rtl_directionality_No	HTML_Add_rtl_directionality_No	RTL_NO	x	x	x	x	x	x	x	x	x	x	x	x	x	x	x	TestMatrix\DataSource\HTMLfilter\10188_en_US.html
+Case_4	HTML_White_Collapse	HTML_White_Collapse	Collapse	X	X	X	X	x	X	X	X	X	X	X	X	X	X	X	TestMatrix\DataSource\HTMLfilter\Welocalize_Company.html
+Case_5	HTML_White_Preserve	HTML_White_Preserve	Preserve	X	X	X	X	x	X	X	X	X	X	X	X	X	X	X	TestMatrix\DataSource\HTMLfilter\Welocalize_Company.html
+Case_6	HTML_White_Collapse_White_Tag	HTML_White_Collapse_White_Tag	Collapse_Tag	X	X	X	X	x	X	X	X	X	X	X	X	X	X	X	TestMatrix\DataSource\HTMLfilter\Welocalize_Company.html
+Case_7	HTML_White_Preserve_White_Tag	HTML_White_Preserve_White_Tag	Preserve_Tag	X	X	X	X	x	X	X	X	X	X	X	X	X	X	X	TestMatrix\DataSource\HTMLfilter\Welocalize_Company.html
+Case_8	HTML_Invalid_HTML_Tags_YES	HTML_Invalid_HTML_Tags_YES	Invalid_YES	X	X	X	X	x	X	X	X	X	X	X	X	X	X	X	TestMatrix\DataSource\HTMLfilter\EpsilonUI_HTML_Page_Invalid_HTML_Tags.htm
+Case_9	HTML_Invalid_HTML_Tags_NO	HTML_Invalid_HTML_Tags_NO	Invalid_NO	X	X	X	X	x	X	X	X	X	X	X	X	X	X	X	TestMatrix\DataSource\HTMLfilter\EpsilonUI_HTML_Page_Invalid_HTML_Tags.htm
+Case_10	HTML_Default_Options	HTML_Default_Options	Default_Options	X	X	X	X	x	X	X	X	X	X	X	X	X	X	X	TestMatrix\DataSource\HTMLfilter\Welocalize_Company.html
+Case_11	HTML_Default_filter	HTML_Filter(Default)	Default	X	X	X	X	x	X	X	X	X	X	X	X	X	X	X	TestMatrix\DataSource\HTMLfilter\Welocalize_Company.html
+Case_12	HTML_No_filter	Choose...	No_filter	X	X	X	X	x	X	X	X	X	X	X	X	X	X	X	TestMatrix\DataSource\HTMLfilter\Welocalize_Company.html

@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:id="com_inse\PROPPAGE_996_CHAN1.htm" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1792" MadCap:lastWidth="571">
+    <head><title>Channel 1 Tab (2996 PDA)</title>
+    </head>
+    <body>
+        <h1>Channel 
+ 1 tab (2996 PDA)</h1>
+        <p class="para">Use this tab to define characteristics of analog output channel 
+ 1 for the 2996 PDA Detector. </p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Enable the Analog Ch 1 Enable parameter in the 2996 PDA General tab.</p>
+        <h2>Output mode</h2>
+        <p class="para">How data is to be read (as it is sent to the analog output 
+ channels). Choices:</p>
+        <ul>
+            <li class="listbull">Off – 
+ No output (Default).</li>
+            <li class="listbull">Absorbance – Output represents 
+ absorbance at the wavelength specified by the Output Wavelength parameter 
+ (see below).</li>
+        </ul>
+        <p class="paraindent"><span class="emphasisbold">Note:</span> Ratio Wavelength, Ratio Threshold, Ratio Minimum, and Ratio Maximum parameters 
+ are not accessible when you select Absorbance mode.</p>
+        <ul>
+            <li class="listbull">Ratio – Output represents 
+ the ratio of absorbances at two wavelengths. The numerator wavelength 
+ is specified by the Output Wavelength parameter, and the denominator wavelength 
+ is specified by the Ratio Wavelength parameter (see below).</li>
+        </ul>
+        <h2>Bandwidth (absorbance and ratio modes)</h2>
+        <p class="para">Spectral bandwidth of the analog output channel.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 4.8 nm</p>
+        <h2>Output wavelength (absorbance and ratio modes)</h2>
+        <p class="para">Output wavelength. In Ratio mode, the absorbance at the Output 
+ Wavelength is used to calculate ratio in the formula:</p>
+        <p class="para">Ratio = Absorbance at Output Wavelength/Absorbance at Ratio 
+ Wavelength </p>
+        <p class="para">Output Wavelength must be within the wavelength range specified 
+ by the Start Wavelength and End Wavelength parameters in the 2996 PDA 
+ General tab.</p>
+        <p class="para"><span class="emphasisbold">Range when 
+ Bandwidth is set to 1.2:</span> Start Wavelength to End Wavelength</p>
+        <p class="para"><span class="emphasisbold">Range at 
+ all other Bandwidth settings:</span> Start Wavelength + (Bandwidth/2) 
+ to End Wavelength – (Bandwidth/2)</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 254.0 nm</p>
+        <h2>Offset (absorbance and ratio modes)</h2>
+        <p class="para">Adds an optional constant offset in AU to the analog output 
+ signal.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.0 AU</p>
+        <h2>Ratio wavelength (ratio mode)</h2>
+        <p class="para">Denominator wavelength (in nanometers) for the analog output 
+ channel. Ratio Wavelength must be within the wavelength range specified 
+ by the Start Wavelength and End Wavelength parameters in the 2996 General 
+ tab.</p>
+        <p class="para"><span class="emphasisbold">Range when 
+ Bandwidth is set to 1.2:</span> Start Wavelength to End Wavelength</p>
+        <p class="para"><span class="emphasisbold">Range at 
+ all other Bandwidth settings:</span> Start Wavelength + (Bandwidth/2) 
+ to End Wavelength – (Bandwidth/2)</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 254.0 nm</p>
+        <h2>Ratio threshold (ratio mode)</h2>
+        <p class="para">Absorbance threshold for the numerator and denominator wavelength 
+ channels. A ratio is plotted only when the absorbance in both channels 
+ is above this value. Otherwise, the output is 0.0 V plus the Offset value.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.001 AU</p>
+        <h2>Ratio minimum (ratio mode)</h2>
+        <p class="para">Lower limit of the ratio output. This setting is equal to 
+ 0.0 V on the output scale.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 0.001 ratio units/V </p>
+        <h2>Ratio maximum (ratio mode)</h2>
+        <p class="para">Upper (full-scale) limit of the ratio output. </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 100.00 ratio units/V</p>
+        <h2>Filter type (absorbance and ratio modes)</h2>
+        <p class="para">Filter type used on the analog output channel. The Hamming 
+ filter is designed to create the same degree of peak-height degradation 
+ as the RC filter for the same response time, but enhances filtering of 
+ high-frequency noise.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Hamming or RC</p>
+        <p class="para"><span class="emphasisbold">Default:</span> Hamming</p>
+        <h2>Filter response (absorbance and ratio modes)</h2>
+        <p class="para">Response time in seconds for the Filter Type specified above.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0</p>
+    </body>
+</html>

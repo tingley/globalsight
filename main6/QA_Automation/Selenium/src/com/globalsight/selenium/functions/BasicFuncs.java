@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import jodd.util.StringUtil;
 
+import org.testng.Assert;
 import org.testng.Reporter;
 
 import com.globalsight.selenium.pages.BasePage;
@@ -17,7 +18,62 @@ public class BasicFuncs
      * 
      * Author:Jester
      */
-    public boolean isElementPresent(Selenium selenium, String element)
+    public static boolean isElementPresent(Selenium selenium, String element)
+            throws Exception
+    {
+        if (StringUtil.isEmpty(element))
+            return false;
+
+        element = element.trim();
+
+        try
+        {
+           
+            return selenium.isElementPresent(element);
+        }
+        catch (Exception e)
+        {
+            Reporter.log(e.toString());
+        }
+
+        return false;
+    }
+    
+    public boolean isElementPresent_original(Selenium selenium, String element)
+            throws Exception
+    {
+        if (StringUtil.isEmpty(element))
+            return false;
+
+        element = element.trim();
+
+        try
+        {
+            if (selenium.isElementPresent(BasePage.FIRST_PAGE_LINK))
+            {
+                selenium.click(BasePage.FIRST_PAGE_LINK);
+            }
+
+            while (selenium.isElementPresent(BasePage.NEXT_PAGE_LINK))
+            {
+                if (selenium.isElementPresent(element))
+                {
+                    return true;
+                }
+                selenium.click(BasePage.NEXT_PAGE_LINK);
+            }
+
+            return selenium.isElementPresent(element);
+        }
+        catch (Exception e)
+        {
+            Reporter.log(e.toString());
+        }
+
+        return false;
+    }
+    
+    public boolean isElementPresent(Selenium selenium, boolean filter, String element)
             throws Exception
     {
         if (StringUtil.isEmpty(element))
@@ -135,7 +191,7 @@ public class BasicFuncs
      * 
      * Author:Jester
      */
-    public boolean selectRadioButtonFromTable(Selenium selenium, String table,
+    public static boolean selectRadioButtonFromTable(Selenium selenium, String table,
             String name) throws Exception
     {
 
@@ -169,8 +225,68 @@ public class BasicFuncs
 
         return false;
     }
+    
+    /**
+     * This Method is designed to check the radio button with no value
+     * specified.
+     * 
+     * But you must provided the table string and the name string.
+     * 
+     * Author:Jester
+     */
+    
+    
+    /**
+     * This Method is designed to check the check box with filter function with no value
+     * specified.
+     * 
+     * But you must provided the table string and the name string.
+     * 
+     * Author:Jester
+     */
+    public static boolean selectRadioButtonFromTable(Selenium selenium, boolean filter, String filter_id, String name) throws Exception
+    {
 
-    private boolean selectRadioButton(Selenium selenium, String table,
+    
+    		
+        if (StringUtil.isEmpty(filter_id) || StringUtil.isEmpty(name))
+            return false;
+
+        filter_id = filter_id.trim();
+        name = name.trim();
+
+        try
+        {
+    
+        	if(filter)
+        	{
+        		selenium.type("id="+filter_id, name);
+        		selenium.keyDown("id="+filter_id, "13");
+        		selenium.keyUp("id="+filter_id, "13");
+        		
+        		if (isElementPresent(selenium, "link=" + name))
+        			return true;
+        		else
+        			return false;
+        		
+        	}
+        	else selectRadioButtonFromTable(selenium,filter_id,name);
+        		
+             		
+        	
+        }
+        catch (Exception e)
+        {
+            Reporter.log(e.toString());
+        }
+
+        return false;
+        
+    }
+
+
+
+    private static boolean selectRadioButton(Selenium selenium, String table,
             String name)
     {
         String element = getElementInTable(selenium, table, name);
@@ -182,8 +298,24 @@ public class BasicFuncs
         else
             return false;
     }
+    
+    public static String selectRadioButton_String(Selenium selenium, String table,
+            String name)
+    {
+        String element = getElementInTable(selenium, table, name);
+        if (StringUtil.isNotEmpty(element))
+        {
+            selenium.click(element);
+            int first = element.indexOf("tr[");
+            int second = element.indexOf("]//td[");
+            String result = element.substring(first+3,second);
+            return result;
+        }
+        else
+            return element;
+    }
 
-    public String getElementInTable(Selenium selenium, String table, String name)
+    public static String getElementInTable(Selenium selenium, String table, String name)
     {
         if (StringUtil.isEmpty(table) || StringUtil.isEmpty(name)
                 || !selenium.isTextPresent(name))
@@ -192,7 +324,7 @@ public class BasicFuncs
         return getElementInTable(selenium, table, name, null);
     }
 
-    public String getElementInTable(Selenium selenium, String table,
+    public static String getElementInTable(Selenium selenium, String table,
             String name, String cellIndex)
     {
         if (StringUtil.isEmpty(table) || StringUtil.isEmpty(name)
@@ -302,6 +434,35 @@ public class BasicFuncs
         return elementValue;
     }
 
+    public Integer getCheckBoxLineValueInTable(Selenium selenium, String table,
+            String name, String cellIndex)
+    {
+        if (StringUtil.isEmpty(table) || StringUtil.isEmpty(name)
+                || !selenium.isTextPresent(name))
+            return null;
+
+        String prefix = table + "//tr[";
+        String suffix = "]";
+        String textCell = "//td[" + (cellIndex == null ? "2" : cellIndex)
+                + "]";
+
+        int index = 1;
+        
+        String textField = "", elementField = "", elementValue = "";
+        textField = prefix + index + suffix + textCell;
+        while (selenium.isElementPresent(textField))
+        {
+            textField = prefix + index + suffix + textCell;
+            if (name.equals(selenium.getText(textField)))
+            {
+            break;
+             }
+            
+            index++;
+        }
+
+        return index;
+    }
     public String getRadioValueFromTable(Selenium selenium, String table,
             String text) throws Exception
     {
@@ -374,6 +535,7 @@ public class BasicFuncs
             return false;
     }
 
+    
     /**
      * This Method is designed to check if the item presents in the table.
      * 
@@ -400,6 +562,7 @@ public class BasicFuncs
 
         return selenium.isTextPresent(iName);
     }
+
 
     /**
      * This Method is designed to check if the item presents in the table.
@@ -640,6 +803,38 @@ public class BasicFuncs
 
         return null;
     }
+    
+    public String jobgetWordCount(Selenium selenium, boolean noNextLink, String iTable,
+            String iName, int iTd) throws Exception
+    {
+
+        iName = iName.trim();
+        iTable = iTable.trim();
+
+      
+        try
+        {
+            int i = 1;
+            while (selenium.isElementPresent(iTable + "//tr[" + i + "]"))
+            {
+                if (selenium.getText(iTable + "//tr[" + i + "]//td[" + 4 + "]")
+                        .equals(iName))
+                {
+                    return selenium.getText(iTable + "//tr[" + i + "]//td["
+                            + iTd + "]");
+                }
+                i++;
+            }
+        }
+        catch (Exception e)
+        {
+            Reporter.log(e.toString());
+            return null;
+        }
+
+        return null;
+    }
+
 
     /**
      * author:Shenyang Use arraylist to get jobname;

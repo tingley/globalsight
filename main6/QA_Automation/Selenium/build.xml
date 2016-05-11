@@ -31,12 +31,25 @@
 	</target>
 	
 	<target name="run_tests">
-		 <mkdir dir="${output.dir}/smoketest"/>
+		 <mkdir dir="${output.dir}/TestMatrix_DataSource"/>
+		<testng classpathref="compile.path" outputdir="${output.dir}/TestMatrix_DataSource" failureproperty="test.failed">
+					<xmlfileset dir="${suite.dir}">
+						<include name="TestMatrix_DataSource.xml"/>
+					</xmlfileset>
+				</testng> 
+		<!--	<mkdir dir="${output.dir}/Word_Excel_Powerpoint_Filters"/>
+				<testng classpathref="compile.path" outputdir="${output.dir}/Word_Excel_Powerpoint_Filters" failureproperty="test.failed">
+							<xmlfileset dir="${suite.dir}">
+								<include name="Word_Excel_Powerpoint_Filters.xml"/>
+							</xmlfileset>
+						</testng>-->
+		<!--
 		<testng classpathref="compile.path" outputdir="${output.dir}/smoketest" failureproperty="test.failed">
 			<xmlfileset dir="${suite.dir}">
 				<include name="smoketest.xml"/>
 			</xmlfileset>
 		</testng>
+		-->
 		
 	<!--    <mkdir dir="${output.dir}/prepare"/>
 		<testng classpathref="compile.path" outputdir="${output.dir}/prepare" failureproperty="test.failed">

@@ -4,9 +4,10 @@
 <suite name="TestMatrix" parallel="none">
 
   
-  <test name="testMatrixJobPrepare" preserve-order="true">
+  <test name="TestMatrixJobPrepare" preserve-order="true">
     <classes>
-      <class name="com.globalsight.selenium.testcases.testmatrix.testMatrixJobPrepare"/>
+      <class name="com.globalsight.selenium.testcases.testmatrix.TestMatrixJobPrepare"/>
+
     </classes>
   </test> 
   

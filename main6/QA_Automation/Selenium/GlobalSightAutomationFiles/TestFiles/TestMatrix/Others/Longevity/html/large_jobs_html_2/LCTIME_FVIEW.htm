@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="942" MadCap:lastWidth="577">
+    <head><title>Timed Groups Tab</title>
+    </head>
+    <body>
+        <h1>Timed Groups 
+ tab</h1>
+        <p class="para">Use this tab to group all components in a start and stop 
+ time range (specified in the Timed Groups table) and analyze this group 
+ as a single component. The resulting single component is identified under 
+ the Name field of the Timed Groups table. The calculated response, area, 
+ height, and amount for the group are listed in the Peaks table (in the 
+ Results window) under the timed group and identified as Group in the Type 
+ field.</p>
+        <p class="para">If required, these system can calibrate the response of the 
+ entire group named in the Name field against the calibration curve of 
+ the component in the Curve Reference field (in the Components table). 
+ The system quantitates all detected components known and unknown within 
+ the defined time window by comparing them to the Curve Reference component. 
+ </p>
+        <h2>Timed groups table</h2>
+        <h3>Name</h3>
+        <p class="para">Up to 30 alphanumeric characters (including spaces) for the 
+ name of the timed component group. </p>
+        <h3>Start, stop</h3>
+        <p class="para">Time window (in minutes) that includes all peaks in the chromatogram 
+ that you want grouped. If you leave the Stop time cell blank, Empower 
+ software groups all peaks to the end of the run.</p>
+        <h3>Source of X value</h3>
+        <p class="para">Source of the calibration curve data point’s amount or concentration 
+ for the timed component group. Choices:</p>
+        <ul>
+            <li class="listbull" style="font-weight: normal;">User Entered 
+ – Reads the amount or concentration for the calibration curve point for 
+ the Timed Group from the sample (as entered during sample loading) or 
+ from the Default Amounts tab. </li>
+            <li class="listbull" style="font-weight: normal;">Sum Peaks 
+ – Calculates the amount and concentration for the calibration curve point 
+ for the Timed Group as the sum of the values (amounts and concentrations) 
+ of all peaks in the group.</li>
+        </ul>
+        <p class="para"><span class="emphasisbold">Notes:</span> 
+ If you select User Entered and have not entered default amounts or concentrations 
+ for the timed group being calibrated, enter this information in the Default 
+ Amounts tab (of the Processing Method window).</p>
+        <p class="para">You can override the Source of X Value field by selecting 
+ a component as a Curve Reference in the Components table (Components tab). 
+ Empower software uses the identified Curve reference component’s calibration 
+ curve and ignores the Source of X Value field.</p>
+        <h3>Exclude known peaks</h3>
+        <p class="para">Exclude from the group all known (named) peaks found in the 
+ region of the timed group. The check box is cleared by default to include 
+ all known peaks in the group.</p>
+    </body>
+</html>

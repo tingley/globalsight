@@ -24,6 +24,7 @@ import com.globalsight.selenium.testcases.ConfigUtil;
 import com.globalsight.selenium.testcases.dataprepare.smoketest.job.CreatedJob;
 import com.globalsight.www.webservices.Ambassador;
 import com.globalsight.www.webservices.AmbassadorServiceLocator;
+import com.thoughtworks.selenium.Selenium;
 
 public class CreateJobsFuncs extends BasicFuncs
 {
@@ -35,6 +36,9 @@ public class CreateJobsFuncs extends BasicFuncs
      * @param fileProfileNamesStr
      * @param targetLocales
      */
+	
+	private ArrayList<String> propertyNameArray = new ArrayList<String>();
+	
     public String createJob(String jobName, String filesStr,
             String fileProfileNamesStr, String targetLocales)
     {
@@ -58,19 +62,28 @@ public class CreateJobsFuncs extends BasicFuncs
             AmbassadorServiceLocator loc = new AmbassadorServiceLocator();
             Ambassador service = loc.getAmbassadorWebService(new URL(wsdlUrl));
             String token = service.login(
-                    ConfigUtil.getConfigData("adminName"),
-                    ConfigUtil.getConfigData("adminPassword"));
+                    ConfigUtil.getConfigData("pmName"),
+                    ConfigUtil.getConfigData("pmPassword"));
             String profileInfoEx = service.getFileProfileInfoEx(token);
             // Get fileprofileIds by file profile name
             Map<String, String> fileProfileNameIdMap = getFileProfileNameIdMap(profileInfoEx);
             ArrayList<String> fileProfileIds = getFileProfileIds(
                     fileProfileNames, fileProfileNameIdMap);
-
+            if ((fileProfileNames.length==1) && (jobFiles.length>1)){
+            	int fileProfileNamesLength = fileProfileNames.length;
+            	int jobFilesLength = jobFiles.length;
+            	String fileProfileId_0 =  fileProfileIds.get(0);
+            	for (int i = 0; i < jobFiles.length-1; i++) {
+            		fileProfileIds.add(fileProfileId_0);
+            	}
+            }
+ 
             if (autoGenerateJobName)
                 newJobName = jobName + sdf.format(Calendar.getInstance().getTime());
             else
                 newJobName = jobName;
-            
+//            ArrayList<String> fileProfileIds2 = new ArrayList<String>();
+//            fileProfileIds2.add("1179");
             // before creating jobs, files must be uploaded first.
             boolean uploaded = uploadFileToServer(service, token, newJobName,
                     jobFiles, fileProfileIds);
@@ -107,6 +120,197 @@ public class CreateJobsFuncs extends BasicFuncs
         return newJobName;
     }
 
+    
+    public String createJob(String username, String password, String jobName, String filesStr,
+            String fileProfileNamesStr, String targetLocales)
+    {
+    	SimpleDateFormat sdf = new SimpleDateFormat("_yyyyMMdd_HHmm");
+    	if (StringUtil.isEmpty(jobName))
+    		return null;
+    	
+    	String autoGenerateJobNameStr = ConfigUtil.getConfigData("autoGenerateJobName").trim();
+    	boolean autoGenerateJobName = "true".equalsIgnoreCase(autoGenerateJobNameStr);
+    	
+    	//Generate a new job name suffix with time stamp for repeated test running
+    	String newJobName = null;
+        try
+        {
+            String[] jobFiles = filesStr.split(",");
+            String[] fileProfileNames = fileProfileNamesStr.split(",");
+
+            String wsdlUrl = ConfigUtil.getConfigData("serverUrl")
+                    + "/globalsight/services/AmbassadorWebService?wsdl";
+
+            AmbassadorServiceLocator loc = new AmbassadorServiceLocator();
+            Ambassador service = loc.getAmbassadorWebService(new URL(wsdlUrl));
+            String token = service.login(username, password);
+                    
+            String profileInfoEx = service.getFileProfileInfoEx(token);
+            // Get fileprofileIds by file profile name
+            Map<String, String> fileProfileNameIdMap = getFileProfileNameIdMap(profileInfoEx);
+            ArrayList<String> fileProfileIds = getFileProfileIds(
+                    fileProfileNames, fileProfileNameIdMap);
+            if ((fileProfileNames.length==1) && (jobFiles.length>1)){
+            	int fileProfileNamesLength = fileProfileNames.length;
+            	int jobFilesLength = jobFiles.length;
+            	String fileProfileId_0 =  fileProfileIds.get(0);
+            	for (int i = 0; i < jobFiles.length-1; i++) {
+            		fileProfileIds.add(fileProfileId_0);
+            	}
+            }
+ 
+            if (autoGenerateJobName)
+                newJobName = jobName + sdf.format(Calendar.getInstance().getTime());
+            else
+                newJobName = jobName;
+//            ArrayList<String> fileProfileIds2 = new ArrayList<String>();
+//            fileProfileIds2.add("1179");
+            // before creating jobs, files must be uploaded first.
+            boolean uploaded = uploadFileToServer(service, token, newJobName,
+                    jobFiles, fileProfileIds);
+            if (uploaded)
+            {
+                try
+                {
+                    String basePath = ConfigUtil.getConfigData("Base_Path");
+                    for(int i=0;i<jobFiles.length;i++)
+                    {
+                        jobFiles[i] = basePath + jobFiles[i];
+                    }
+                    // create job
+                    service.createJob(token, newJobName, "",
+                            deleteDir(getStrWithStrike(jobFiles)),
+                            getStrWithStrike(fileProfileIds),
+                            getStrWithStrike(jobFiles.length, targetLocales));
+                    
+                    CreatedJob.addCreatedJob(jobName, newJobName);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    Reporter.log(e.getMessage());
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Reporter.log(e.getMessage());
+        }
+        
+        return newJobName;
+    }
+    
+    
+//    public void setup(ArrayList<String> propertyNameArray)
+//    {
+//        this.propertyNameArray = propertyNameArray;
+//    }
+//
+//    /**
+//     * Create new file profiles
+//     * 
+//     * @param selenium
+//     * @param testCaseName
+//     */
+//    public String createJob(String jobName, 
+//            String fileProfileNamesStr, String targetLocales)
+//    {
+//        String fileProfileNames = propertyNameArray.get(0);
+//        String descriptions = propertyNameArray.get(1);
+//        String localProfiles = propertyNameArray.get(2);
+//        String sourceFormats = propertyNameArray.get(3);
+//        String filters = propertyNameArray.get(4);
+//        String qa_filter = propertyNameArray.get(5);
+//        String extensions = propertyNameArray.get(6);
+//        
+//        
+//
+//        String[] fileProfileNameArray = fileProfileNames.split(",");
+//        String[] descriptionArray = descriptions.split(",");
+//        String[] localProfileArray = localProfiles.split(",");
+//        String[] sourceFormatArray = sourceFormats.split(",");
+//        String[] filterArray = filters.split(",");
+//        String[] qa_filterArray = qa_filter.split(",");
+//        String[] extensionArray = extensions.split(",");
+//        
+//    
+//    	SimpleDateFormat sdf = new SimpleDateFormat("_yyyyMMdd_HHmm");
+//    	if (StringUtil.isEmpty(jobName))
+//    		return null;
+//    	
+//    	String autoGenerateJobNameStr = ConfigUtil.getConfigData("autoGenerateJobName").trim();
+//    	boolean autoGenerateJobName = "true".equalsIgnoreCase(autoGenerateJobNameStr);
+//    	
+//    	//Generate a new job name suffix with time stamp for repeated test running
+//    	String newJobName = null;
+//        try
+//        {
+//            String[] jobFiles = filesStr.split(",");
+//            String[] fileProfileNames = fileProfileNamesStr.split(",");
+//
+//            String wsdlUrl = ConfigUtil.getConfigData("serverUrl")
+//                    + "/globalsight/services/AmbassadorWebService?wsdl";
+//
+//            AmbassadorServiceLocator loc = new AmbassadorServiceLocator();
+//            Ambassador service = loc.getAmbassadorWebService(new URL(wsdlUrl));
+//            String token = service.login(
+//                    ConfigUtil.getConfigData("pmName"),
+//                    ConfigUtil.getConfigData("pmPassword"));
+//            String profileInfoEx = service.getFileProfileInfoEx(token);
+//            // Get fileprofileIds by file profile name
+//            Map<String, String> fileProfileNameIdMap = getFileProfileNameIdMap(profileInfoEx);
+//            ArrayList<String> fileProfileIds = getFileProfileIds(
+//                    fileProfileNames, fileProfileNameIdMap);
+//            if ((fileProfileNames.length==1) && (jobFiles.length>1)){
+//            	int fileProfileNamesLength = fileProfileNames.length;
+//            	int jobFilesLength = jobFiles.length;
+//            	String fileProfileId_0 =  fileProfileIds.get(0);
+//            	for (int i = 0; i < jobFiles.length-1; i++) {
+//            		fileProfileIds.add(fileProfileId_0);
+//            	}
+//            }
+// 
+//            if (autoGenerateJobName)
+//                newJobName = jobName + sdf.format(Calendar.getInstance().getTime());
+//            else
+//                newJobName = jobName;
+//            
+//            // before creating jobs, files must be uploaded first.
+//            boolean uploaded = uploadFileToServer(service, token, newJobName,
+//                    jobFiles, fileProfileIds);
+//            if (uploaded)
+//            {
+//                try
+//                {
+//                    String basePath = ConfigUtil.getConfigData("Base_Path");
+//                    for(int i=0;i<jobFiles.length;i++)
+//                    {
+//                        jobFiles[i] = basePath + jobFiles[i];
+//                    }
+//                    // create job
+//                    service.createJob(token, newJobName, "",
+//                            deleteDir(getStrWithStrike(jobFiles)),
+//                            getStrWithStrike(fileProfileIds),
+//                            getStrWithStrike(jobFiles.length, targetLocales));
+//                    
+//                    CreatedJob.addCreatedJob(jobName, newJobName);
+//                }
+//                catch (Exception e)
+//                {
+//                    e.printStackTrace();
+//                    Reporter.log(e.getMessage());
+//                }
+//            }
+//        }
+//        catch (Exception e)
+//        {
+//            e.printStackTrace();
+//            Reporter.log(e.getMessage());
+//        }
+//        
+//        return newJobName;
+//    }
     /**
      * Get needed parameter
      * 

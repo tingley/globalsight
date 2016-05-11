@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1363" MadCap:lastWidth="577">
+    <head><title>Named Groups Tab</title>
+    </head>
+    <body>
+        <h1>Named Groups 
+ tab</h1>
+        <p class="para">Use this tab to group components in the Components table 
+ whose peaks are to be analyzed as a single peak. The software sums the 
+ peak areas and heights of the components under a new named group to produce 
+ the results for the group. The calculated response, area, height, and 
+ amount for the group are in the Peaks table (in the Results window) under 
+ the named group and identified as Group in the Type field.</p>
+        <p class="para">If required, the system can calibrate the response of the 
+ entire group named in the Name field against the calibration curve of 
+ the component in the Curve Reference field (in the Components table). 
+ The system quantitates all detected components known and unknown within 
+ the defined group comparing them to the Curve Reference component. </p>
+        <h2>Named groups tree</h2>
+        <p class="para">The individual peak components in the Single Peak Components 
+ tree on the left side of the tab and the named components group. Named 
+ groups are added only after you identify the component group in the Name 
+ column (of the Named Groups table).</p>
+        <p class="para">Fill a selected named group by either:</p>
+        <ul>
+            <li class="listbull">Dragging the individual 
+ components from the Single Peak Components tree to the appropriate named 
+ group in the Named Groups tree. The components are added to the Named 
+ Groups list.</li>
+            <li class="listbull">Right-clicking the Named 
+ Groups tree, then selecting Fill With All Components. All components from 
+ the Single Peak Components tree are added under the Named Groups tree 
+ list.</li>
+        </ul>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ To remove one or more components from the Named Groups tree, select the 
+ components to be removed, right-click the tree, then select Delete.</p>
+        <h2>Named groups table</h2>
+        <h3>Name</h3>
+        <p class="para">Up to 30 alphanumeric characters including spaces for the 
+ name of the component group. This name appears under the Named Groups 
+ tree at the left side of the tab. </p>
+        <h3>Reported RT</h3>
+        <p class="para">Reported retention time for the named component group. Choices:</p>
+        <ul>
+            <li class="listbull" style="font-weight: normal;">None – 
+ No retention time is reported.</li>
+        </ul>
+        <ul>
+            <li class="listbull" style="font-weight: normal;">First 
+ Peak – First peak in the group.</li>
+            <li class="listbull" style="font-weight: normal;">Last Peak 
+ – Last peak in the group. If a processing method contains a named group 
+ with a “last peak” for reported RT, the last peak on the list is used 
+ to integrate and quantitate regardless of the retention time order of 
+ the components.</li>
+        </ul>
+        <ul>
+            <li class="listbull" style="font-weight: normal;">Largest 
+ Area – Peak with the largest calculated area in the group.</li>
+            <li class="listbull" style="font-weight: normal;">Largest 
+ Height – Peak with the largest calculated height in the group.</li>
+        </ul>
+        <h3>Source of X value</h3>
+        <p class="para">Source of the calibration curve data point’s amount or concentration 
+ for the named component group. Choices:</p>
+        <ul>
+            <li class="listbull" style="font-weight: normal;">User Entered 
+ – Reads the amount or concentration for the calibration curve point for 
+ the Named Group from the sample (entered during sample loading in Run 
+ Samples or Alter Samples) or from the Default Amounts tab. </li>
+            <li class="listbull">Sum Peaks – Calculates 
+ the amount and concentration for the calibration curve point for the Named 
+ Group as the sum of the values (amounts and concentrations) of all of 
+ the peaks in the group.</li>
+        </ul>
+        <p class="para"><span class="emphasisbold">Notes:</span> 
+ If you select User Entered and have not entered default amounts or concentrations 
+ for the named group being calibrated, enter this information in the Default 
+ Amounts tab (of the Processing Method window). </p>
+        <p class="para">You can override the Source of X Value field by selecting 
+ a component as a Curve Reference in the Components table (Components tab). 
+ Empower software uses the identified Curve reference component’s calibration 
+ curve and ignores the Source of X Value field.</p>
+    </body>
+</html>

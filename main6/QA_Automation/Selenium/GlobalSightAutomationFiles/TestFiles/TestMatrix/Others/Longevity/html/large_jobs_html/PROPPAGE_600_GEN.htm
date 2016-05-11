@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1214" MadCap:lastWidth="515">
+    <head><title>General Tab (600)</title>
+    </head>
+    <body>
+        <h1>General 
+ tab (600)</h1>
+        <p class="para">Use this tab to define general pump and analog data parameters 
+ for your 600 Series Controller.</p>
+        <h2>Pump type</h2>
+        <p class="para">Current pump type. If the W600 is part of a configured chromatographic 
+ system, Empower software reads the pump type and displays it in this field 
+ as a read-only status. If you are adding the W600 to your instrument method 
+ using the Add Instrument tool (<img src="../pics/addins.gif" alt="image\addins.gif" style="width: 19px;height: 19px;border-style: none;border-style: none;" width="19" height="19" border="0" />) (when creating an instrument 
+ method without specifying a system), select the appropriate pump type 
+ from this list:</p>
+        <ul>
+            <li class="listbull">600E (Default, indicates 
+ a 600 or 610)</li>
+            <li class="listbull">600</li>
+            <li class="listbull">650E</li>
+            <li class="listbull">610E</li>
+            <li class="listbull">616</li>
+            <li class="listbull">626</li>
+            <li class="listbull">625 (indicates a 625 
+ LC or an ActION Analyzer)</li>
+            <li class="listbull">2000 (indicates a Delta 
+ Prep or Prep LC)</li>
+            <li class="listbull">3000 (indicates a Delta 
+ Prep or Prep LC)</li>
+            <li class="listbull">4000 (indicates a Delta 
+ Prep or Prep LC)</li>
+        </ul>
+        <h2>Head volume</h2>
+        <p class="para">Pump head volume. If the W600 is part of a configured chromatographic 
+ system, Empower software reads the pump head volume and displays it in 
+ this field as a read-only status. If you are adding the W600 to your instrument 
+ method using the Add Instrument tool (<img src="../pics/addins.gif" alt="image\addins.gif" style="width: 19px;height: 19px;border-style: none;border-style: none;" width="19" height="19" border="0" />) (when creating an 
+ instrument method without specifying a system), select the appropriate 
+ pump head volume from this list.</p>
+        <h2>SILK enable</h2>
+        <p class="para">Smoothes solvent flow in 616, 625, and 626 Pumps by eliminating 
+ pulses and surges. Enable SILK for applications that are sensitive to 
+ flow rate and pressure and that use flow rates of 2.00 mL/min or less.</p>
+        <p class="caption">Notes:</p>
+        <ul>
+            <li class="listbull">Disable SILK when you 
+ perform flow-path maintenance or when you purge an autosampler. Always 
+ enable SILK for applications with flow rates less than 0.5 mL/min.</li>
+            <li class="listbull">You cannot control the 
+ SILK control of the 625 using Empower software. You must use the 625 Controller's 
+ front panel to control the SILK. </li>
+        </ul>
+        <h2>Chart out</h2>
+        <p class="para">Type of analog data sent to the chart recorder through the 
+ 10-mV output on the rear panel of the instrument.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Off, %A, %B, %C, %D, Flow, Temperature (applies to the 600E, 616, 625 
+ LC, and 626 Pumps only)</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ %A</p>
+    </body>
+</html>

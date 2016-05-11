@@ -1,0 +1,65 @@
+Index	Translate Header Information	Translate ToolTips	Translate Table Of Content	Content post-filter	Internal Text post-filter	unextractableWordParagraphStyles	unextractableWordCharacterStyles	selectedInternalTextStyles	End Of Line
+Case 1	O	O	O	2114html	2114	MyHeading2,MyHeading3,DoNotTrans	test1,test2	test3,test4	1
+Case 2	O	O	O	2114html	2114		test1,test2	test3,test4	1
+Case 3	O	O	O	2114html		MyHeading2,MyHeading3,DoNotTrans	test1,test2	test3,test4	1
+Case 4	O	O	O	2114html			test1,test2	test3,test4	1
+Case 5	O	O	O		2114	MyHeading2,MyHeading3,DoNotTrans	test1,test2	test3,test4	1
+Case 6	O	O	O		2114		test1,test2	test3,test4	1
+Case 7	O	O	O			MyHeading2,MyHeading3,DoNotTrans	test1,test2	test3,test4	1
+Case 8	O	O	O				test1,test2	test3,test4	1
+Case 9	O	O	X	2114html	2114	MyHeading2,MyHeading3,DoNotTrans			1
+Case 10	O	O	X	2114html	2114				1
+Case 11	O	O	X	2114html		MyHeading2,MyHeading3,DoNotTrans			1
+Case 12	O	O	X	2114html					1
+Case 13	O	O	X		2114	MyHeading2,MyHeading3,DoNotTrans			1
+Case 14	O	O	X		2114				1
+Case 15	O	O	X			MyHeading2,MyHeading3,DoNotTrans			1
+Case 16	O	O	X						1
+Case 17	O	X	O	2114html	2114	MyHeading2,MyHeading3,DoNotTrans			1
+Case 18	O	X	O	2114html	2114				1
+Case 19	O	X	O	2114html		MyHeading2,MyHeading3,DoNotTrans			1
+Case 20	O	X	O	2114html					1
+Case 21	O	X	O		2114	MyHeading2,MyHeading3,DoNotTrans			1
+Case 22	O	X	O		2114				1
+Case 23	O	X	O			MyHeading2,MyHeading3,DoNotTrans			1
+Case 24	O	X	O						1
+Case 25	O	X	X	2114html	2114	MyHeading2,MyHeading3,DoNotTrans			1
+Case 26	O	X	X	2114html	2114				1
+Case 27	O	X	X	2114html		MyHeading2,MyHeading3,DoNotTrans			1
+Case 28	O	X	X	2114html					1
+Case 29	O	X	X		2114	MyHeading2,MyHeading3,DoNotTrans			1
+Case 30	O	X	X		2114				1
+Case 31	O	X	X			MyHeading2,MyHeading3,DoNotTrans			1
+Case 32	O	X	X						1
+Case 33	X	O	O	2114html	2114	MyHeading2,MyHeading3,DoNotTrans			1
+Case 34	X	O	O	2114html	2114				1
+Case 35	X	O	O	2114html		MyHeading2,MyHeading3,DoNotTrans			1
+Case 36	X	O	O	2114html					1
+Case 37	X	O	O		2114	MyHeading2,MyHeading3,DoNotTrans			1
+Case 38	X	O	O		2114				1
+Case 39	X	O	O			MyHeading2,MyHeading3,DoNotTrans			1
+Case 40	X	O	O						1
+Case 41	X	O	X	2114html	2114	MyHeading2,MyHeading3,DoNotTrans			1
+Case 42	X	O	X	2114html	2114				1
+Case 43	X	O	X	2114html		MyHeading2,MyHeading3,DoNotTrans			1
+Case 44	X	O	X	2114html					1
+Case 45	X	O	X		2114	MyHeading2,MyHeading3,DoNotTrans			1
+Case 46	X	O	X		2114				1
+Case 47	X	O	X			MyHeading2,MyHeading3,DoNotTrans			1
+Case 48	X	O	X						1
+Case 49	X	X	O	2114html	2114	MyHeading2,MyHeading3,DoNotTrans			1
+Case 50	X	X	O	2114html	2114				1
+Case 51	X	X	O	2114html		MyHeading2,MyHeading3,DoNotTrans			1
+Case 52	X	X	O	2114html					1
+Case 53	X	X	O		2114	MyHeading2,MyHeading3,DoNotTrans			1
+Case 54	X	X	O		2114				1
+Case 55	X	X	O			MyHeading2,MyHeading3,DoNotTrans			1
+Case 56	X	X	O						1
+Case 57	X	X	X	2114html	2114	MyHeading2,MyHeading3,DoNotTrans			1
+Case 58	X	X	X	2114html	2114				1
+Case 59	X	X	X	2114html		MyHeading2,MyHeading3,DoNotTrans			1
+Case 60	X	X	X	2114html					1
+Case 61	X	X	X		2114	MyHeading2,MyHeading3,DoNotTrans			1
+Case 62	X	X	X		2114				1
+Case 63	X	X	X			MyHeading2,MyHeading3,DoNotTrans			1
+Case 64	X	X	X						1

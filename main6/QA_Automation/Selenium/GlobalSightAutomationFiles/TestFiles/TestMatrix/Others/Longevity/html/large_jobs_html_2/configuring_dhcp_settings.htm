@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:ignoredWords="intersample;microvolts;mV;result(s;Intersample;AVE(Amount;abc;set(s;ssmethod;AutoArchive;tableshpace;Offline;Signoff;signoff;SDMS;SS;ApexTrack;GXP;Tablespace;QuickStart;N;UserA\Backup;subdirectory;n;tablespace;EXP;INF;PDA;inf;c;reselect;Photodiode;GPC;CE;LS;Project(s;field(s;project(s;Sum(Area*LTE(%Area;interpeak;Bool;Enum;COM;Toolkit;intrapeak;Min;MB;lifespan;ENUM;ENUM(LT(Area;LT(Area;GTE(Area;LotNumber;nonnumeric;ENUM(EQI;mL;EQ;Ctrl;CField;Column_type;Chem_name;Exp_num;Grad_student;LIMS_ID;Assay_name;Batch_num;Cost_per_analysis;Lot_num;Jaz;ABS(absolute;COS(cosine;ENUM(enumeration;EQ(equal;EQI(equal;GT(greater;GTE(greater;LN(natural;LOG(regular;LT(less;LTE(less;NEQ(not;NEQI(not;RANGE(range;ROUND(field;SIN(sine;SQRT(square;YValue;AVE(average;MAX(maximum;MIN(minimum;SUM(summation;SUM(Slice;g;ABS;ABS(Height;LOG(Area+Height;MIN;SUM(%;MIN(Area;AVE(Area;EQI;NEQ;NEQI;SampleName;Yvalue;Y-axis;N.D.;BDL;BPQL;name[field;K;Uracil[K;uracil;LT;GTE;GXPs;ES;Logon;PDF;Login;ADMIN;ALL_ROWS;ARCHIVELOG;AUTOEXTEND;BFILE;BITMAP;CHAR_CS;CLOB;CLOSED_CACHE_;OPEN_CURSORS;COMPOSITE_LIMIT;CONNECT_TIME;CPU_PER_;CURRENT_SCHEMA;ENUM(;ABS(;COS(;LN(;LOG(;SIN(;SQRT(;AVE(;LTE;BigVial;RRF;TotalCorrectedArea;SCorrectedArea;SUM(CA;TotalCA;NormAmount(;CorrectedArea(;NormAmt;ARF;MAX(;MIN(;SUM(;RSD;PROD(;ROUND(;EQ(;GT(;GTE(;LT(;LTE(;NEQ(;RANGE(;NEQI(;TotalAmountByHeight;SUM(Amount;InterTotalAmountByHeight;TotalArea;MW;Mn;Number_Density_Mn;Sum(Number;Mw;Number_Density_Mw;Density*Slice;Area*LTE(Cumulative;Area*GTE(Cumulative;number(s;login;Aug;writeable;E;CD-RW;offline;LDAP;username;group(s;font(s;type(s;XXX;account(s;DN;Admin;Quantitation;Reinject;datafile;Bkgnd;OpenAccess;C;DFS;busLAC;XP;E.hex;Empower\InstrumentServer;SMTP;tablespaces;E³²;BusLAC;Agilent;LAC;DHCP;IP;Ethernet;subnet;Hewlett-Packard" MadCap:lastBlockDepth="5" MadCap:lastHeight="3218" MadCap:lastWidth="577">
+    <head><title>Configuring DHCP settings</title>
+    </head>
+    <body>
+        <h1>Configuring 
+ DHCP settings</h1>
+        <p class="para">The Waters DHCP Server automatically assigns IP addresses 
+ to Ethernet instruments that are attached to an instrument network card 
+ in the acquisition server. When the Waters DHCP Server assigns an IP address 
+ to an instrument, it is given that IP address for 30 days (its lease time). 
+ &#160;If the 
+ instrument is powered on, the lease time will be automatically renewed 
+ and it will continue to use the same IP address (even if the instrument 
+ is off for short periods, it will still use the same IP address). &#160;If 
+ the instrument is powered off for a long period of time (for example, 
+ until the lease time expires) then the IP address is available to be reused 
+ if another instrument requests an IP address.</p>
+        <p class="para"><span class="emphasisbold">Tip:</span> 
+ Most of these activities take place without user intervention; however, 
+ some tools will need to be accessed occasionally. &#160;</p>
+        <p class="caption">To access the Waters DHCP Server tools:</p>
+        <ol>
+            <li class="listnum" MadCap:conditions="Primary.Empower">Access Configuration Manager 
+ in the Acquisition Servers view.</li>
+            <li class="listnum" MadCap:conditions="Primary.Breeze">Click Manage &gt; Systems.</li>
+            <li class="listnum" MadCap:conditions="Primary.Breeze">In the Manage System dialog 
+ box, select a chromatographic system and then click Node Properties.</li>
+            <li class="listnum" MadCap:conditions="Primary.Empower">Right-click the row to 
+ select the appropriate acquisition server in the View table, and then 
+ click Properties.</li>
+            <li class="listnum" MadCap:conditions="Primary.Empower">In the Acquisition Server 
+ Properties dialog box, open the Configure DHCP tab. </li>
+            <li class="listnum" MadCap:conditions="Primary.Breeze">In the Breeze 2 Node Properties 
+ dialog box, open the Configure DHCP tab.</li>
+            <li class="listnum">Click the Configure DHCP 
+ button.</li>
+        </ol>
+        <p class="paraindent" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Rule:</span> 
+ If you have the system policy “Require User Comments on Changes to System 
+ Objects” enabled, you must enter a comment after clicking the Configure 
+ DHCP button. &#160;A 
+ modified acquisition server audit message is created, and a called DHCP 
+ entry is entered in the Details column in the System Audit Trail (in addition 
+ to the user-entered reason).</p>
+        <ol start="5" style="list-style: decimal;list-style-type: decimal;">
+            <li class="listnum">From the Server menu, do 
+ one of the following:</li>
+        </ol>
+        <ul>
+            <li class="listbullindent">Click Server 
+ &gt; Configuration Wizard … to select the instrument network card and 
+ set its IP address.</li>
+            <li class="listbullindent">Click Server 
+ &gt; MAC Address Configuration … to add, remove, or restore the default 
+ MAC addresses.</li>
+            <li class="listbullindent">Click Server 
+ &gt; Errors … to view a list of errors or to clear errors (if any errors 
+ have been found).</li>
+        </ul>
+        <h2>Configuring Network Connections and IP Addresses</h2>
+        <p class="para">The Configuration Wizard sets an IP address for an instrument 
+ network card. &#160;</p>
+        <p class="caption">To set the IP address for an instrument network card:</p>
+        <ol>
+            <li class="listnum">Select &#160;Server 
+ &gt; Configuration Wizard.</li>
+            <li class="listnum">Select an instrument network 
+ card and click Next.</li>
+            <li class="listnum">Click Default (192.168.0.1), 
+ then click Next.</li>
+        </ol>
+        <p class="paraindent" style="font-weight: bold;color: #425085;">Tips:</p>
+        <ol start="4">
+            <li class="listbullindent">The IP address 
+ will be assigned to the instrument network card. If the default and alternate 
+ IP addresses are already assigned to another network card, contact Waters 
+ Technical Service for custom settings.</li>
+            <li class="listbullindent">The subnet 
+ mask of 255.255.255.0, which is not shown in the wizard, is automatically 
+ set.</li>
+            <li class="listbullindent" MadCap:conditions="Primary.Empower">A second 
+ IP address of 64.1.1.1 is assigned to the instrument network card in order 
+ to be available for use with Waters mass detectors.</li>
+            <li class="listbullindent">If you select 
+ Custom to assign the IP address, the first IP address assigned to an Ethernet 
+ instrument will be incremented by 1. &#160;For 
+ example, if a custom IP address of 192.168.1.99 is assigned to the instrument 
+ network card then the first IP address assigned by the Waters DHCP Server 
+ is 192.168.1.100.</li>
+        </ol>
+        <ol start="4">
+            <li class="listnum">Click Finish. </li>
+            <li class="listnum">Click Yes. The acquisition 
+ server reboots. If the IP address for an acquisition server is being set 
+ from a remote client, the acquisition server properties window must be 
+ closed. Click OK on the message that appears.</li>
+        </ol>
+        <p class="paraindent"><span class="emphasisbold">Tip:</span> 
+ If you click No in the Waters DHCP Server Configuration dialog box, a 
+ message appears to remind you to reboot the computer.</p>
+        <ol start="6" style="list-style: decimal;list-style-type: decimal;">
+            <li class="listnum">After you set the IP address 
+ and the acquisition server has rebooted, restart the Configuration wizard 
+ to verify the IP address information.</li>
+        </ol>
+        <p class="paraindent" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Tip:</span> 
+ The second IP address is for Waters mass detectors and is automatically 
+ assigned, regardless of whether or not the acquisition server controls 
+ a Waters mass detector.</p>
+        <ol start="7" style="list-style: decimal;list-style-type: decimal;">
+            <li class="listnum">Click Cancel to exit the 
+ wizard.</li>
+        </ol>
+        <h3>Configuring MAC Addresses</h3>
+        <p class="para" MadCap:conditions="Primary.Breeze">The DHCP server supplies IP addresses 
+ for Waters MAC addresses. Use the MAC Address Configuration utility to 
+ add, remove, or restore the default MAC addresses.</p>
+        <p class="para" MadCap:conditions="Primary.Empower">The DHCP server supplies IP addresses 
+ for Waters, National Instruments, Hewlett-Packard, and Agilent MAC addresses. 
+ Use the MAC Address Configuration utility to add, remove, or restore the 
+ default MAC addresses.</p>
+        <p class="caption">To add:</p>
+        <ol>
+            <li class="listnum">Click Add to add a MAC 
+ address that is not included in the MAC address list.</li>
+            <li class="listnum">Enter the first six digits 
+ of the MAC address.</li>
+            <li class="listnum">Enter a company name (if 
+ applicable).</li>
+            <li class="listnum">Click OK.</li>
+        </ol>
+        <p class="paraindent"><span class="emphasisbold">Result:</span> 
+ The MAC address is added to the list.</p>
+        <h3>To remove:</h3>
+        <ol>
+            <li class="listnum">Select the MAC address 
+ you want to remove and click Remove.</li>
+            <li class="listnum">Click Yes to confirm deletion.</li>
+            <li class="listnum">Click OK.</li>
+        </ol>
+        <p class="paraindent"><span class="emphasisbold">Result:</span> 
+ The MAC address is removed from the list.</p>
+        <h3>Restore Defaults</h3>
+        <p class="para">Click Restore Defaults to return to the default addresses.</p>
+        <h3>Errors …</h3>
+        <p class="para">Use the Errors list to view a list of errors (if any errors 
+ have been found). Use the Clear Errors button to remove the errors from 
+ the table.</p>
+        <h2>Changing Information in the Waters DHCP Server Configuration Table</h2>
+        <p class="para">The IP Address, MAC Address, Type, and Name fields are blank 
+ until IP addresses are assigned by the Waters DHCP Server or entered manually. 
+ If IP addresses are assigned, the table will be filled in with the applicable 
+ information. </p>
+        <h3>To add:</h3>
+        <ol>
+            <li class="listnum">Click Add to manually add 
+ a new IP address. </li>
+            <li class="listnum">In the Add IP Address dialog 
+ box, enter the following:</li>
+            <li class="listbullindent">IP address 
+ </li>
+            <li class="listbullindent">MAC address 
+ (the instrument’s unique hardware number)</li>
+            <li class="listbullindent">Instrument 
+ Type (if applicable)</li>
+            <li class="listbullindent">Serial Number 
+ or Unique Name (if applicable)</li>
+        </ol>
+        <ol start="3">
+            <li class="listnum">Click OK.</li>
+            <li class="listnum">Power cycle the instrument 
+ so that it receives the manual IP address.</li>
+        </ol>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ If you manually add an IP address, it will never be used by another instrument 
+ and it will not be removed from the table unless the Remove button is 
+ used.</p>
+        <p class="caption">To edit:</p>
+        <ol>
+            <li class="listnum">Select the IP address you 
+ want to modify and click Edit.</li>
+            <li class="listnum">Change the appropriate 
+ information and click OK.</li>
+        </ol>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Waters instruments that have IP addresses automatically assigned through 
+ the Waters DHCP server do not require association with an instrument type 
+ or a unique name. If you select an automatically assigned address and 
+ click Edit, only the Instrument Type and Serial Number/Unique Name fields 
+ are accessible for editing.</p>
+        <h2>Remove</h2>
+        <p class="para">Use the Remove button to remove IP addresses from the table 
+ that are no longer being used. If an IP address is entered manually, it 
+ will never be removed from the table except by using the Remove button.</p>
+        <p class="para">To remove an IP address from the table, click on the IP address 
+ and then click Remove. The IP address is removed from the table and is 
+ available for other instruments to use.</p>
+    </body>
+</html>

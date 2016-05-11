@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemarules>
+    <ruleset schema="Page">
+	<dont-translate path='//*' priority='9' />
+	<translate path='/Page/Page_Display_Properties/Title' priority='8' />
+	<translate path='/Page/Page_Display_Properties/Description' priority='8' />
+	<translate path='/Page/Page_Display_Properties/Keywords' priority='8' />
+	<translate path='//Option/Display' priority='8' />
+	<translate path="//Datum[(@Type='Textarea' or @Type='String') and not(@ID='SEPARATOR' or @ID='HELPER_TYPE' or @ID='NAVIGATION_DCR' or @ID='SEARCH_DCR') ]" priority='8' />
+    </ruleset>
+</schemarules>

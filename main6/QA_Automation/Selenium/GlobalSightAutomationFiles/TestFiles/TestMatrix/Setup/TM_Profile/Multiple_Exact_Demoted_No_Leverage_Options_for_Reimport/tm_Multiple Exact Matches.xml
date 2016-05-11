@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE tmx SYSTEM "tmx-gs.dtd" >
+<tmx version="1.0 GS">
+<header creationtool="Welocalize GlobalSight" creationtoolversion="6.0" segtype="sentence" o-tmf="gxml" adminlang="EN-US" srclang="EN-US" datatype="html" creationdate="20111221T012304Z" creationid="elanyone" changedate="20111221T014311Z" >
+</header>
+<body>
+<tu tuid="6598349">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg><it type="x-span" pos="begin" x="1"></it>Our services include globalization consulting, translation, localization, and testing solutions for business materials and systems including software, multimedia, learning services, and mobile applications. </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013642Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><it type="x-span" pos="begin" x="1"></it>Nos services incluent la mondialisation consulting, traduction, localisation et des solutions de tests pour les matériaux de l&apos;entreprise et de systèmes, y compris les logiciels, multimédia, des services d&apos;apprentissage et des applications mobiles. 4th </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><it type="x-span" pos="begin" x="1"></it>Nos services incluent la mondialisation consulting, traduction, localisation et des solutions de tests pour les matériaux de l&apos;entreprise et de systèmes, y compris les logiciels, multimédia, des services d&apos;apprentissage et des applications mobiles. 6th </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><it type="x-span" pos="begin" x="1"></it>Nos services incluent la mondialisation consulting, traduction, localisation et des solutions de tests pour les matériaux de l&apos;entreprise et de systèmes, y compris les logiciels, multimédia, des services d&apos;apprentissage et des applications mobiles. 5th </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><it type="x-span" pos="begin" x="1"></it>Nos services incluent la mondialisation consulting, traduction, localisation et des solutions de tests pour les matériaux de l&apos;entreprise et de systèmes, y compris les logiciels, multimédia, des services d&apos;apprentissage et des applications mobiles. 3rd </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013031Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><it type="x-span" pos="begin" x="1"></it>Nos services incluent la mondialisation consulting, traduction, localisation et des solutions de tests pour les matériaux de l&apos;entreprise et de systèmes, y compris les logiciels, multimédia, des services d&apos;apprentissage et des applications mobiles. 2nd </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012709Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><it type="x-span" pos="begin" x="1"></it>Nos services incluent la mondialisation consulting, traduction, localisation et des solutions de tests pour les matériaux de l&apos;entreprise et de systèmes, y compris les logiciels, multimédia, des services d&apos;apprentissage et des applications mobiles. 1st </seg>
+</tuv>
+</tu>
+<tu tuid="6598350">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg><it type="x-span" pos="begin" x="1"></it>We work with our clients to create a framework and methodology for expanding globally that produce scalable, predictable results. </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013031Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><it type="x-span" pos="begin" x="1"></it>Nous travaillons avec nos clients afin de créer un cadre et une méthodologie pour l&apos;expansion à l&apos;échelle mondiale qui produisent des résultats prévisibles, évolutives. 2nd </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><it type="x-span" pos="begin" x="1"></it>Nous travaillons avec nos clients afin de créer un cadre et une méthodologie pour l&apos;expansion à l&apos;échelle mondiale qui produisent des résultats prévisibles, évolutives. 5th </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><it type="x-span" pos="begin" x="1"></it>Nous travaillons avec nos clients afin de créer un cadre et une méthodologie pour l&apos;expansion à l&apos;échelle mondiale qui produisent des résultats prévisibles, évolutives. 6th </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013642Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><it type="x-span" pos="begin" x="1"></it>Nous travaillons avec nos clients afin de créer un cadre et une méthodologie pour l&apos;expansion à l&apos;échelle mondiale qui produisent des résultats prévisibles, évolutives. 4th </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><it type="x-span" pos="begin" x="1"></it>Nous travaillons avec nos clients afin de créer un cadre et une méthodologie pour l&apos;expansion à l&apos;échelle mondiale qui produisent des résultats prévisibles, évolutives. 3rd </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012709Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><it type="x-span" pos="begin" x="1"></it>Nous travaillons avec nos clients afin de créer un cadre et une méthodologie pour l&apos;expansion à l&apos;échelle mondiale qui produisent des résultats prévisibles, évolutives. 1st </seg>
+</tuv>
+</tu>
+<tu tuid="6598351">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg>Welocalize specializes in the <bpt i="2" type="bold" x="1"></bpt>Enterprise Applications<ept i="2"></ept>, <bpt i="3" type="bold" x="2"></bpt>eLearning<ept i="3"></ept>, <bpt i="4" type="bold" x="3"></bpt>Life Sciences<ept i="4"></ept>, and <bpt i="5" type="bold" x="4"></bpt>Media &amp; Telecommunications<ept i="5"></ept> industries.<it pos="end" x="5"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Welocalize est spécialisée dans la<bpt i="2" type="bold" x="1"></bpt>Applications d&apos;entreprise<ept i="2"></ept>,<bpt i="3" type="bold" x="2"></bpt>eLearning<ept i="3"></ept>,<bpt i="4" type="bold" x="3"></bpt>Sciences de la vie<ept i="4"></ept>, et<bpt i="5" type="bold" x="4"></bpt>Médias &amp; télécommunications<ept i="5"></ept>industries. 5th<it pos="end" x="5"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Welocalize est spécialisée dans la<bpt i="2" type="bold" x="1"></bpt>Applications d&apos;entreprise<ept i="2"></ept>,<bpt i="3" type="bold" x="2"></bpt>eLearning<ept i="3"></ept>,<bpt i="4" type="bold" x="3"></bpt>Sciences de la vie<ept i="4"></ept>, et<bpt i="5" type="bold" x="4"></bpt>Médias &amp; télécommunications<ept i="5"></ept>industries. 6th<it pos="end" x="5"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Welocalize est spécialisée dans la<bpt i="2" type="bold" x="1"></bpt>Applications d&apos;entreprise<ept i="2"></ept>,<bpt i="3" type="bold" x="2"></bpt>eLearning<ept i="3"></ept>,<bpt i="4" type="bold" x="3"></bpt>Sciences de la vie<ept i="4"></ept>, et<bpt i="5" type="bold" x="4"></bpt>Médias &amp; télécommunications<ept i="5"></ept>industries. 3rd<it pos="end" x="5"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013642Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Welocalize est spécialisée dans la<bpt i="2" type="bold" x="1"></bpt>Applications d&apos;entreprise<ept i="2"></ept>,<bpt i="3" type="bold" x="2"></bpt>eLearning<ept i="3"></ept>,<bpt i="4" type="bold" x="3"></bpt>Sciences de la vie<ept i="4"></ept>, et<bpt i="5" type="bold" x="4"></bpt>Médias &amp; télécommunications<ept i="5"></ept>industries. 4th<it pos="end" x="5"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013031Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Welocalize est spécialisée dans la<bpt i="2" type="bold" x="1"></bpt>Applications d&apos;entreprise<ept i="2"></ept>,<bpt i="3" type="bold" x="2"></bpt>eLearning<ept i="3"></ept>,<bpt i="4" type="bold" x="3"></bpt>Sciences de la vie<ept i="4"></ept>, et<bpt i="5" type="bold" x="4"></bpt>Médias &amp; télécommunications<ept i="5"></ept>industries. 2nd<it pos="end" x="5"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012709Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Welocalize est spécialisée dans la<bpt i="2" type="bold" x="1"></bpt>Applications d&apos;entreprise<ept i="2"></ept>,<bpt i="3" type="bold" x="2"></bpt>eLearning<ept i="3"></ept>,<bpt i="4" type="bold" x="3"></bpt>Sciences de la vie<ept i="4"></ept>, et<bpt i="5" type="bold" x="4"></bpt>Médias &amp; télécommunications<ept i="5"></ept>industries. 1st<it pos="end" x="5"></it></seg>
+</tuv>
+</tu>
+<tu tuid="6598352">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="x-span" x="1"></bpt>&lt;By GlobalSight &quot;Team&quot;&gt;<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="x-span" x="1"></bpt>&lt;By globalsight=&quot;&quot; &quot;team&quot;=&quot;&quot;&gt;&lt;/By&gt; 6th<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013032Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="x-span" x="1"></bpt>&lt;By globalsight=&quot;&quot; &quot;team&quot;=&quot;&quot;&gt;&lt;/By&gt; 2nd<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012710Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="x-span" x="1"></bpt>&lt;By globalsight=&quot;&quot; &quot;team&quot;=&quot;&quot;&gt;&lt;/By&gt; 1st<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013642Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="x-span" x="1"></bpt>&lt;By globalsight=&quot;&quot; &quot;team&quot;=&quot;&quot;&gt;&lt;/By&gt; 4th<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="x-span" x="1"></bpt>&lt;By globalsight=&quot;&quot; &quot;team&quot;=&quot;&quot;&gt;&lt;/By&gt; 5th<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="x-span" x="1"></bpt>&lt;By globalsight=&quot;&quot; &quot;team&quot;=&quot;&quot;&gt;&lt;/By&gt; 3rd<ept i="1"></ept></seg>
+</tuv>
+</tu>
+<tu tuid="6598353">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="bold" x="1"></bpt>Welocalize - About Us<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="bold" x="1"></bpt>Welocalize - qui sommes-nous 5th <ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012709Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="bold" x="1"></bpt>Welocalize - qui sommes-nous 1st <ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="bold" x="1"></bpt>Welocalize - qui sommes-nous 3rd <ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013641Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="bold" x="1"></bpt>Welocalize - qui sommes-nous 4th <ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013031Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="bold" x="1"></bpt>Welocalize - qui sommes-nous 2nd <ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="bold" x="1"></bpt>Welocalize - qui sommes-nous 6th <ept i="1"></ept></seg>
+</tuv>
+</tu>
+<tu tuid="6598354">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg>We have over 400 staff members in 12 offices located in the <bpt i="4" type="bold" x="1"></bpt>USA<ept i="4"></ept>, <bpt i="5" type="bold" x="2"></bpt>Ireland<ept i="5"></ept>, <bpt i="6" type="bold" x="3"></bpt>Germany<ept i="6"></ept>, <bpt i="7" type="bold" x="4"></bpt>The Netherlands<ept i="7"></ept>, <bpt i="8" type="bold" x="5"></bpt>China<ept i="8"></ept> and <bpt i="9" type="bold" x="6"></bpt>Japan<ept i="9"></ept>. </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013031Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Nous avons des membres de plus de 400 employés dans 12 bureaux situés dans la<bpt i="4" type="bold" x="1"></bpt>USA<ept i="4"></ept>,<bpt i="5" type="bold" x="2"></bpt>Irlande<ept i="5"></ept>,<bpt i="6" type="bold" x="3"></bpt>Allemagne<ept i="6"></ept>,<bpt i="7" type="bold" x="4"></bpt>Les pays-bas<ept i="7"></ept>,<bpt i="8" type="bold" x="5"></bpt>Chine<ept i="8"></ept>et<bpt i="9" type="bold" x="6"></bpt>Japon 2nd<ept i="9"></ept>. </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012709Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Nous avons des membres de plus de 400 employés dans 12 bureaux situés dans la<bpt i="4" type="bold" x="1"></bpt>USA<ept i="4"></ept>,<bpt i="5" type="bold" x="2"></bpt>Irlande<ept i="5"></ept>,<bpt i="6" type="bold" x="3"></bpt>Allemagne<ept i="6"></ept>,<bpt i="7" type="bold" x="4"></bpt>Les pays-bas<ept i="7"></ept>,<bpt i="8" type="bold" x="5"></bpt>Chine<ept i="8"></ept>et<bpt i="9" type="bold" x="6"></bpt>Japon 1st<ept i="9"></ept>. </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013642Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Nous avons des membres de plus de 400 employés dans 12 bureaux situés dans la<bpt i="4" type="bold" x="1"></bpt>USA<ept i="4"></ept>,<bpt i="5" type="bold" x="2"></bpt>Irlande<ept i="5"></ept>,<bpt i="6" type="bold" x="3"></bpt>Allemagne<ept i="6"></ept>,<bpt i="7" type="bold" x="4"></bpt>Les pays-bas<ept i="7"></ept>,<bpt i="8" type="bold" x="5"></bpt>Chine<ept i="8"></ept>et<bpt i="9" type="bold" x="6"></bpt>Japon 4th<ept i="9"></ept>. </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Nous avons des membres de plus de 400 employés dans 12 bureaux situés dans la<bpt i="4" type="bold" x="1"></bpt>USA<ept i="4"></ept>,<bpt i="5" type="bold" x="2"></bpt>Irlande<ept i="5"></ept>,<bpt i="6" type="bold" x="3"></bpt>Allemagne<ept i="6"></ept>,<bpt i="7" type="bold" x="4"></bpt>Les pays-bas<ept i="7"></ept>,<bpt i="8" type="bold" x="5"></bpt>Chine<ept i="8"></ept>et<bpt i="9" type="bold" x="6"></bpt>Japon 5th<ept i="9"></ept>. </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Nous avons des membres de plus de 400 employés dans 12 bureaux situés dans la<bpt i="4" type="bold" x="1"></bpt>USA<ept i="4"></ept>,<bpt i="5" type="bold" x="2"></bpt>Irlande<ept i="5"></ept>,<bpt i="6" type="bold" x="3"></bpt>Allemagne<ept i="6"></ept>,<bpt i="7" type="bold" x="4"></bpt>Les pays-bas<ept i="7"></ept>,<bpt i="8" type="bold" x="5"></bpt>Chine<ept i="8"></ept>et<bpt i="9" type="bold" x="6"></bpt>Japon 6th<ept i="9"></ept>. </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Nous avons des membres de plus de 400 employés dans 12 bureaux situés dans la<bpt i="4" type="bold" x="1"></bpt>USA<ept i="4"></ept>,<bpt i="5" type="bold" x="2"></bpt>Irlande<ept i="5"></ept>,<bpt i="6" type="bold" x="3"></bpt>Allemagne<ept i="6"></ept>,<bpt i="7" type="bold" x="4"></bpt>Les pays-bas<ept i="7"></ept>,<bpt i="8" type="bold" x="5"></bpt>Chine<ept i="8"></ept>et<bpt i="9" type="bold" x="6"></bpt>Japon 3rd<ept i="9"></ept>. </seg>
+</tuv>
+</tu>
+<tu tuid="6598355">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg>With the integration of our product and service family into the development environment, our clients are able to achieve much faster international time-to-market.<it pos="end" x="1"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Avec l&apos;intégration de notre famille de produits et de services dans l&apos;environnement de développement, nos clients sont en mesure d&apos;atteindre beaucoup plus rapide de temps-à-marché international. 5th<it pos="end" x="1"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Avec l&apos;intégration de notre famille de produits et de services dans l&apos;environnement de développement, nos clients sont en mesure d&apos;atteindre beaucoup plus rapide de temps-à-marché international. 6th<it pos="end" x="1"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013031Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Avec l&apos;intégration de notre famille de produits et de services dans l&apos;environnement de développement, nos clients sont en mesure d&apos;atteindre beaucoup plus rapide de temps-à-marché international. 2nd<it pos="end" x="1"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012709Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Avec l&apos;intégration de notre famille de produits et de services dans l&apos;environnement de développement, nos clients sont en mesure d&apos;atteindre beaucoup plus rapide de temps-à-marché international. 1st<it pos="end" x="1"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013642Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Avec l&apos;intégration de notre famille de produits et de services dans l&apos;environnement de développement, nos clients sont en mesure d&apos;atteindre beaucoup plus rapide de temps-à-marché international. 4th<it pos="end" x="1"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Avec l&apos;intégration de notre famille de produits et de services dans l&apos;environnement de développement, nos clients sont en mesure d&apos;atteindre beaucoup plus rapide de temps-à-marché international. 3rd<it pos="end" x="1"></it></seg>
+</tuv>
+</tu>
+<tu tuid="6598356">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg>GlobalSight embraces an ecosystem of enterprise clients, translators, language service providers, technology suppliers, universities, research institutions and individuals alike!<it pos="end" x="1"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013642Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>GlobalSight embrasse un écosystème des clients de l&apos;entreprise, traducteurs, prestataires de services linguistiques, fournisseurs de technologies, universités, instituts de recherche et individus ! 4th<it pos="end" x="1"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>GlobalSight embrasse un écosystème des clients de l&apos;entreprise, traducteurs, prestataires de services linguistiques, fournisseurs de technologies, universités, instituts de recherche et individus ! 3rd<it pos="end" x="1"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012710Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>GlobalSight embrasse un écosystème des clients de l&apos;entreprise, traducteurs, prestataires de services linguistiques, fournisseurs de technologies, universités, instituts de recherche et individus ! 1st<it pos="end" x="1"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>GlobalSight embrasse un écosystème des clients de l&apos;entreprise, traducteurs, prestataires de services linguistiques, fournisseurs de technologies, universités, instituts de recherche et individus ! 5th<it pos="end" x="1"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>GlobalSight embrasse un écosystème des clients de l&apos;entreprise, traducteurs, prestataires de services linguistiques, fournisseurs de technologies, universités, instituts de recherche et individus ! 6th<it pos="end" x="1"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013032Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>GlobalSight embrasse un écosystème des clients de l&apos;entreprise, traducteurs, prestataires de services linguistiques, fournisseurs de technologies, universités, instituts de recherche et individus ! 2nd<it pos="end" x="1"></it></seg>
+</tuv>
+</tu>
+<tu tuid="6598357">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>GlobalSight<ept i="2"></ept><ept i="1"></ept><it type="x-span" pos="begin" x="3"></it> is a collaborative, open source initiative to develop a flexible and sustainable Translation Management System (TMS) that leverages the best ideas and addresses the true needs of the industry.<ph type="x-nbspace" x="4"></ph> </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>GlobalSight<ept i="2"></ept><ept i="1"></ept><it type="x-span" pos="begin" x="3"></it>est une initiative de collaboration open source pour développer un souple et durable Translation Management System (TMS) qui exploite les meilleures idées et répond aux besoins véritables de l&apos;industrie. 5th<ph type="x-nbspace" x="4"></ph> </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013642Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>GlobalSight<ept i="2"></ept><ept i="1"></ept><it type="x-span" pos="begin" x="3"></it>est une initiative de collaboration open source pour développer un souple et durable Translation Management System (TMS) qui exploite les meilleures idées et répond aux besoins véritables de l&apos;industrie. 4th<ph type="x-nbspace" x="4"></ph> </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012710Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>GlobalSight<ept i="2"></ept><ept i="1"></ept><it type="x-span" pos="begin" x="3"></it>est une initiative de collaboration open source pour développer un souple et durable Translation Management System (TMS) qui exploite les meilleures idées et répond aux besoins véritables de l&apos;industrie. 1st<ph type="x-nbspace" x="4"></ph> </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013032Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>GlobalSight<ept i="2"></ept><ept i="1"></ept><it type="x-span" pos="begin" x="3"></it>est une initiative de collaboration open source pour développer un souple et durable Translation Management System (TMS) qui exploite les meilleures idées et répond aux besoins véritables de l&apos;industrie. 2nd<ph type="x-nbspace" x="4"></ph> </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>GlobalSight<ept i="2"></ept><ept i="1"></ept><it type="x-span" pos="begin" x="3"></it>est une initiative de collaboration open source pour développer un souple et durable Translation Management System (TMS) qui exploite les meilleures idées et répond aux besoins véritables de l&apos;industrie. 6th<ph type="x-nbspace" x="4"></ph> </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>GlobalSight<ept i="2"></ept><ept i="1"></ept><it type="x-span" pos="begin" x="3"></it>est une initiative de collaboration open source pour développer un souple et durable Translation Management System (TMS) qui exploite les meilleures idées et répond aux besoins véritables de l&apos;industrie. 3rd<ph type="x-nbspace" x="4"></ph> </seg>
+</tuv>
+</tu>
+<tu tuid="6598358">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg>In <bpt i="13" type="bold" x="1"></bpt>2005<ept i="13"></ept>, <bpt i="14" type="bold" x="2"></bpt>2006<ept i="14"></ept>, <bpt i="15" type="bold" x="3"></bpt>2007<ept i="15"></ept> and <bpt i="16" type="bold" x="4"></bpt>2008<ept i="16"></ept> Welocalize earned a place on the <bpt i="17" type="italic" x="5"></bpt>INC 500<ept i="17"></ept> list of fastest growing private companies in the U.S..<it pos="end" x="6"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Dans<bpt i="13" type="bold" x="1"></bpt>2005<ept i="13"></ept>,<bpt i="14" type="bold" x="2"></bpt>2006<ept i="14"></ept>,<bpt i="15" type="bold" x="3"></bpt>2007<ept i="15"></ept>et<bpt i="16" type="bold" x="4"></bpt>2008<ept i="16"></ept>Welocalize a valu une place sur le<bpt i="17" type="italic" x="5"></bpt>INC 500<ept i="17"></ept>Liste des sociétés privées à croissance rapide aux États-Unis. 6th<it pos="end" x="6"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Dans<bpt i="13" type="bold" x="1"></bpt>2005<ept i="13"></ept>,<bpt i="14" type="bold" x="2"></bpt>2006<ept i="14"></ept>,<bpt i="15" type="bold" x="3"></bpt>2007<ept i="15"></ept>et<bpt i="16" type="bold" x="4"></bpt>2008<ept i="16"></ept>Welocalize a valu une place sur le<bpt i="17" type="italic" x="5"></bpt>INC 500<ept i="17"></ept>Liste des sociétés privées à croissance rapide aux États-Unis. 3rd<it pos="end" x="6"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Dans<bpt i="13" type="bold" x="1"></bpt>2005<ept i="13"></ept>,<bpt i="14" type="bold" x="2"></bpt>2006<ept i="14"></ept>,<bpt i="15" type="bold" x="3"></bpt>2007<ept i="15"></ept>et<bpt i="16" type="bold" x="4"></bpt>2008<ept i="16"></ept>Welocalize a valu une place sur le<bpt i="17" type="italic" x="5"></bpt>INC 500<ept i="17"></ept>Liste des sociétés privées à croissance rapide aux États-Unis. 5th<it pos="end" x="6"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013642Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Dans<bpt i="13" type="bold" x="1"></bpt>2005<ept i="13"></ept>,<bpt i="14" type="bold" x="2"></bpt>2006<ept i="14"></ept>,<bpt i="15" type="bold" x="3"></bpt>2007<ept i="15"></ept>et<bpt i="16" type="bold" x="4"></bpt>2008<ept i="16"></ept>Welocalize a valu une place sur le<bpt i="17" type="italic" x="5"></bpt>INC 500<ept i="17"></ept>Liste des sociétés privées à croissance rapide aux États-Unis. 4th<it pos="end" x="6"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013031Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Dans<bpt i="13" type="bold" x="1"></bpt>2005<ept i="13"></ept>,<bpt i="14" type="bold" x="2"></bpt>2006<ept i="14"></ept>,<bpt i="15" type="bold" x="3"></bpt>2007<ept i="15"></ept>et<bpt i="16" type="bold" x="4"></bpt>2008<ept i="16"></ept>Welocalize a valu une place sur le<bpt i="17" type="italic" x="5"></bpt>INC 500<ept i="17"></ept>Liste des sociétés privées à croissance rapide aux États-Unis. 2nd<it pos="end" x="6"></it></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012709Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Dans<bpt i="13" type="bold" x="1"></bpt>2005<ept i="13"></ept>,<bpt i="14" type="bold" x="2"></bpt>2006<ept i="14"></ept>,<bpt i="15" type="bold" x="3"></bpt>2007<ept i="15"></ept>et<bpt i="16" type="bold" x="4"></bpt>2008<ept i="16"></ept>Welocalize a valu une place sur le<bpt i="17" type="italic" x="5"></bpt>INC 500<ept i="17"></ept>Liste des sociétés privées à croissance rapide aux États-Unis. 1st<it pos="end" x="6"></it></seg>
+</tuv>
+</tu>
+<tu tuid="6598359">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="x-span" x="1"></bpt>Sample Document<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="x-span" x="1"></bpt>Document de l&apos;échantillon 3rd<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="x-span" x="1"></bpt>Document de l&apos;échantillon 6th<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013641Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="x-span" x="1"></bpt>Document de l&apos;échantillon 4th<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012709Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="x-span" x="1"></bpt>Document de l&apos;échantillon 1st<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="x-span" x="1"></bpt>Document de l&apos;échantillon 5th<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013031Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="x-span" x="1"></bpt>Document de l&apos;échantillon 2nd<ept i="1"></ept></seg>
+</tuv>
+</tu>
+<tu tuid="6598360">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg>For the past eight years running<bpt i="10" type="bold" x="1"></bpt>, Deloitte &amp; Touche<ept i="10"></ept> has ranked <bpt i="11" type="italic" x="2"></bpt>Welocalize<ept i="11"></ept> as one of the fastest growing technology companies in North America in their annual <bpt i="12" type="italic" x="3"></bpt>Maryland Technology Fast 50<ept i="12"></ept> ranking. </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013642Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Pour les huit dernières années en cours d&apos;exécution<bpt i="10" type="bold" x="1"></bpt>Deloitte &amp; Touche<ept i="10"></ept>a classé<bpt i="11" type="italic" x="2"></bpt>Welocalize<ept i="11"></ept>comme l&apos;une des sociétés de technologie croissance la plus rapide en Amérique du Nord dans leur annual<bpt i="12" type="italic" x="3"></bpt>Maryland Technology Fast 50<ept i="12"></ept>classement. 4th </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012709Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Pour les huit dernières années en cours d&apos;exécution<bpt i="10" type="bold" x="1"></bpt>Deloitte &amp; Touche<ept i="10"></ept>a classé<bpt i="11" type="italic" x="2"></bpt>Welocalize<ept i="11"></ept>comme l&apos;une des sociétés de technologie croissance la plus rapide en Amérique du Nord dans leur annual<bpt i="12" type="italic" x="3"></bpt>Maryland Technology Fast 50<ept i="12"></ept>classement. 1st </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Pour les huit dernières années en cours d&apos;exécution<bpt i="10" type="bold" x="1"></bpt>Deloitte &amp; Touche<ept i="10"></ept>a classé<bpt i="11" type="italic" x="2"></bpt>Welocalize<ept i="11"></ept>comme l&apos;une des sociétés de technologie croissance la plus rapide en Amérique du Nord dans leur annual<bpt i="12" type="italic" x="3"></bpt>Maryland Technology Fast 50<ept i="12"></ept>classement. 5th </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Pour les huit dernières années en cours d&apos;exécution<bpt i="10" type="bold" x="1"></bpt>Deloitte &amp; Touche<ept i="10"></ept>a classé<bpt i="11" type="italic" x="2"></bpt>Welocalize<ept i="11"></ept>comme l&apos;une des sociétés de technologie croissance la plus rapide en Amérique du Nord dans leur annual<bpt i="12" type="italic" x="3"></bpt>Maryland Technology Fast 50<ept i="12"></ept>classement. 6th </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013031Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Pour les huit dernières années en cours d&apos;exécution<bpt i="10" type="bold" x="1"></bpt>Deloitte &amp; Touche<ept i="10"></ept>a classé<bpt i="11" type="italic" x="2"></bpt>Welocalize<ept i="11"></ept>comme l&apos;une des sociétés de technologie croissance la plus rapide en Amérique du Nord dans leur annual<bpt i="12" type="italic" x="3"></bpt>Maryland Technology Fast 50<ept i="12"></ept>classement. 2nd </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg>Pour les huit dernières années en cours d&apos;exécution<bpt i="10" type="bold" x="1"></bpt>Deloitte &amp; Touche<ept i="10"></ept>a classé<bpt i="11" type="italic" x="2"></bpt>Welocalize<ept i="11"></ept>comme l&apos;une des sociétés de technologie croissance la plus rapide en Amérique du Nord dans leur annual<bpt i="12" type="italic" x="3"></bpt>Maryland Technology Fast 50<ept i="12"></ept>classement. 3rd </seg>
+</tuv>
+</tu>
+<tu tuid="6598361">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="bold" x="1"></bpt>About GlobalSight:<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013642Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="bold" x="1"></bpt>Sur GlobalSight : 4th<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013031Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="bold" x="1"></bpt>Sur GlobalSight : 2nd<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="bold" x="1"></bpt>Sur GlobalSight : 6th<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="bold" x="1"></bpt>Sur GlobalSight : 3rd<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="bold" x="1"></bpt>Sur GlobalSight : 5th<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012710Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="bold" x="1"></bpt>Sur GlobalSight : 1st<ept i="1"></ept></seg>
+</tuv>
+</tu>
+<tu tuid="6598362">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>Welocalize<ept i="2"></ept><ept i="1"></ept><it type="x-span" pos="begin" x="3"></it> was founded in 1997, and is a privately held, venture backed company. </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>Welocalize<ept i="2"></ept><ept i="1"></ept><it type="x-span" pos="begin" x="3"></it>a été fondée en 1997, et est une privée, venture company sauvegardé. 6th </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013031Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>Welocalize<ept i="2"></ept><ept i="1"></ept><it type="x-span" pos="begin" x="3"></it>a été fondée en 1997, et est une privée, venture company sauvegardé. 2nd </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>Welocalize<ept i="2"></ept><ept i="1"></ept><it type="x-span" pos="begin" x="3"></it>a été fondée en 1997, et est une privée, venture company sauvegardé. 5th </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012709Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>Welocalize<ept i="2"></ept><ept i="1"></ept><it type="x-span" pos="begin" x="3"></it>a été fondée en 1997, et est une privée, venture company sauvegardé. 1st </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013641Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>Welocalize<ept i="2"></ept><ept i="1"></ept><it type="x-span" pos="begin" x="3"></it>a été fondée en 1997, et est une privée, venture company sauvegardé. 4th </seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>Welocalize<ept i="2"></ept><ept i="1"></ept><it type="x-span" pos="begin" x="3"></it>a été fondée en 1997, et est une privée, venture company sauvegardé. 3rd </seg>
+</tuv>
+</tu>
+<tu tuid="6598363">
+<prop type="x-sourcetmname">16</prop>
+<tuv xml:lang="EN-US" creationdate="20111221T012417Z" creationid="gselpm" changedate="20111221T014057Z" changeid="gselpm" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>Welocalize<ept i="2"></ept><ept i="1"></ept><bpt i="3" type="x-span" x="3"></bpt> also offers the unique, open-source Translation Management System - <bpt i="4" type="bold" x="4"></bpt>GlobalSight<ept i="4"></ept>.<ept i="3"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T012710Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>Welocalize<ept i="2"></ept><ept i="1"></ept><bpt i="3" type="x-span" x="3"></bpt>offre également le système de gestion-traduction unique, open source-<bpt i="4" type="bold" x="4"></bpt>GlobalSight 1st<ept i="4"></ept>.<ept i="3"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014005Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>Welocalize<ept i="2"></ept><ept i="1"></ept><bpt i="3" type="x-span" x="3"></bpt>offre également le système de gestion-traduction unique, open source-<bpt i="4" type="bold" x="4"></bpt>GlobalSight 5th<ept i="4"></ept>.<ept i="3"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013031Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>Welocalize<ept i="2"></ept><ept i="1"></ept><bpt i="3" type="x-span" x="3"></bpt>offre également le système de gestion-traduction unique, open source-<bpt i="4" type="bold" x="4"></bpt>GlobalSight 2nd<ept i="4"></ept>.<ept i="3"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013642Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>Welocalize<ept i="2"></ept><ept i="1"></ept><bpt i="3" type="x-span" x="3"></bpt>offre également le système de gestion-traduction unique, open source-<bpt i="4" type="bold" x="4"></bpt>GlobalSight 4th<ept i="4"></ept>.<ept i="3"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T013352Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>Welocalize<ept i="2"></ept><ept i="1"></ept><bpt i="3" type="x-span" x="3"></bpt>offre également le système de gestion-traduction unique, open source-<bpt i="4" type="bold" x="4"></bpt>GlobalSight 3rd<ept i="4"></ept>.<ept i="3"></ept></seg>
+</tuv>
+<tuv xml:lang="FR-FR" creationdate="20111221T014214Z" creationid="elanyone" >
+<prop type="x-creationproject">test</prop>
+<seg><bpt i="1" type="italic" x="1"></bpt><bpt i="2" type="x-span" x="2"></bpt>Welocalize<ept i="2"></ept><ept i="1"></ept><bpt i="3" type="x-span" x="3"></bpt>offre également le système de gestion-traduction unique, open source-<bpt i="4" type="bold" x="4"></bpt>GlobalSight 6th<ept i="4"></ept>.<ept i="3"></ept></seg>
+</tuv>
+</tu>
+</body>
+</tmx>

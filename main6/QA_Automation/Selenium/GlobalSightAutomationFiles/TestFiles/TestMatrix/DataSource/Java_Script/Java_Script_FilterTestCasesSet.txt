@@ -1,0 +1,5 @@
+Index	File_Profile_name	Filter_Name	JSFunctionText	Enable_Unicode_Escape	Base_Text_post_filter	Base_Text_Filter_Internal_Text	Base_Text_Filter_Escaping	Java_Script_SourceFile
+Case_1	Java_Script_Empty	Java_Script_Empty	l10n	x	x	x	x	TestMatrix\DataSource\Java_Script\Empty_filter\webreg_validate_strings_en_US.js
+Case_2	Java_Script_JSFunctionText	Java_Script_JSFunctionText	l10n	x	x	x	x	TestMatrix\DataSource\Java_Script\JSFunctionText\webreg_validate_strings_en_US.js
+Case_3	Java_Script_Enable_Unicode_Escape	Java_Script_Enable_Unicode_Escape	l10n	o	x	x	x	TestMatrix\DataSource\Java_Script\Enable_Unicode_Escape\webreg_validate_strings_en_US.js
+Case_4	Java_Script_Base_Text_post_filter	Java_Script_Base_Text_post_filter	l10n	x	Base Text Filter For Java Script	Please make sure the Postal,Security	\	TestMatrix\DataSource\Java_Script\Base_Text_post_filter\webreg_validate_strings_en_US.js

@@ -1,5 +1,10 @@
 package com.globalsight.selenium.testcases.testmatrix;
 
+import org.testng.annotations.Test;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
+import org.testng.AssertJUnit;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -8,8 +13,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import junit.framework.Assert;
+import org.testng.Reporter;
 import org.testng.annotations.Test;
+
 import com.globalsight.selenium.functions.BasicFuncs;
 import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.CreateJobsFuncs;
@@ -17,13 +23,16 @@ import com.globalsight.selenium.functions.FilterConfigurationFuncs;
 import com.globalsight.selenium.pages.FileProfile;
 import com.globalsight.selenium.pages.MainFrame;
 import com.globalsight.selenium.pages.MyJobs;
+import com.globalsight.selenium.pages.TMManagement;
 import com.globalsight.selenium.testcases.ConfigUtil;
 import com.globalsight.selenium.testcases.BaseTestCase;
+import com.globalsight.selenium.testcases.PropertyFileConfiguration;
 import com.globalsight.selenium.testcases.util.SeleniumUtils;
+import com.thoughtworks.selenium.Selenium;
 
 public class WordFilterTest extends BaseTestCase {
 	private FilterConfigurationFuncs iFilterConfig = new FilterConfigurationFuncs();
-
+	private static String testMatrixFile = PropertyFileConfiguration.TestMatrix_PROPERTIES;
 
 	public static String getStringToday() {
 		Date currentTime = new Date();
@@ -39,16 +48,16 @@ public class WordFilterTest extends BaseTestCase {
                 MainFrame.DATA_SOURCES_MENU,
                 MainFrame.FILTER_CONFIGURATION_SUBMENU);
 
-        String internaltagname = getDataInCase("AddTags");
-        String interName = getDataInCase("InternalFilterName");
-        String iFilterName = getDataInCase("HTMLFilterName");
-        String cpf = getDataInCase("InternalTextPostFilter");
-        String str = getDataInCase("AddingTag");
-        String wFilterName = getDataInCase("wordFilterName");
-        String fpname = getDataInCase("fileProfileNamesStr");
+        String internaltagname = getProperty(testMatrixFile,"AddTags");
+        String interName = getProperty(testMatrixFile,"InternalFilterName");
+        String iFilterName = getProperty(testMatrixFile,"HTMLFilterName");
+        String cpf = getProperty(testMatrixFile,"InternalTextPostFilter");
+        String str = getProperty(testMatrixFile,"AddingTag");
+        String wFilterName = getProperty(testMatrixFile,"wordFilterName");
+        String fpname = getProperty(testMatrixFile,"fileProfileNamesStr");
         String wordCountResultPath_jobDetails = ConfigUtil
                 .getConfigData("Base_Path_Result")
-                + getDataInCase("WordCountPath");
+                + getProperty(testMatrixFile,"WordCountPath");
         String[] fp = fpname.split(",");
 
         iFilterConfig.InternalText(selenium, internaltagname, interName);
@@ -59,7 +68,7 @@ public class WordFilterTest extends BaseTestCase {
 		selenium.click(MainFrame.DATA_SOURCES_MENU);
 		selenium.click(MainFrame.FILE_PROFILES_SUBMENU);
 		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		SeleniumUtils.selectRadioButtonFromTable(selenium, FileProfile.MAIN_TABLE, fp[0]);
+		BasicFuncs.selectRadioButtonFromTable(selenium, true, FileProfile.SEARCH_CONTENT_TEXT, fp[0]);
 		selenium.click("link=" + fp[0]);
 		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		selenium.select(FileProfile.FILTER_SELECT, "label=" + wFilterName);
@@ -70,9 +79,9 @@ public class WordFilterTest extends BaseTestCase {
 		// corresponding filter.
 		ArrayList<String[]> testCases = new ArrayList<String[]>();
 		String filePath = ConfigUtil.getConfigData("Base_Path")
-				+ ConfigUtil.getDataInCase(getClassName(), "FilterTestCasePath");
+				+ getProperty(testMatrixFile,"FilterTestCasePath");
 		File file = new File(filePath);
-		Assert.assertTrue(file.exists());
+		AssertJUnit.assertTrue(file.exists());
 		BufferedReader br = new BufferedReader(new FileReader(file));
 		String line;
 		while ((line = br.readLine()) != null) {
@@ -86,6 +95,8 @@ public class WordFilterTest extends BaseTestCase {
 		String tableofContent;
 		String contentPostFilter;
 		String internalTextPostFilter;
+		String base_Text_Filter_Internal_Text;
+		String base_Text_Filter_Escaping;
 		String unextractableWordParagraphStyles;
 		String unextractableWordCharacterStyles;
 		String selectedInternalTextStyles;
@@ -107,17 +118,21 @@ public class WordFilterTest extends BaseTestCase {
 			tableofContent = testCases.get(i)[3];
 			contentPostFilter = testCases.get(i)[4];
 			internalTextPostFilter = testCases.get(i)[5];
-			unextractableWordParagraphStyles = testCases.get(i)[6];
-			unextractableWordCharacterStyles = testCases.get(i)[7];
-			selectedInternalTextStyles = testCases.get(i)[8];
+			base_Text_Filter_Internal_Text = testCases.get(i)[6];
+			base_Text_Filter_Escaping =testCases.get(i)[7];
+			unextractableWordParagraphStyles = testCases.get(i)[8];
+			unextractableWordCharacterStyles = testCases.get(i)[9];
+			selectedInternalTextStyles = testCases.get(i)[10];
 
 			selenium.click(MainFrame.DATA_SOURCES_MENU);
 			selenium.click(MainFrame.FILTER_CONFIGURATION_SUBMENU);
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
 			iFilterConfig.wordFilterOperation(selenium, wFilterName, headerInfo, toolTips, tableofContent,
-					contentPostFilter, internalTextPostFilter, unextractableWordParagraphStyles,
+					contentPostFilter, internalTextPostFilter, base_Text_Filter_Internal_Text, base_Text_Filter_Escaping,
+		            unextractableWordParagraphStyles,
 					unextractableWordCharacterStyles, selectedInternalTextStyles);
+			
 
 			tmp.createJob(filterJob + i, ConfigUtil.getDataInCase(getClassName(), "SourceFile"),
 					ConfigUtil.getDataInCase(getClassName(), "fileProfileNamesStr"),
@@ -126,26 +141,29 @@ public class WordFilterTest extends BaseTestCase {
 			jobNames[i] = filterJob + i;
 
 		}
+//		for (int i = 1; i < testCases.size(); i++) {
+//			jobNames[i]="wordJob201407-02-155555"+i;
+//		}
+//
+//		// for (int i=1; i<testCases.size(); i++)
+//		// {
+//		// jobNames[i]="wordJob201110-18-130859"+i;
+//		// }
 
-		// for (int i=1; i<testCases.size(); i++)
-		// {
-		// jobNames[i]="wordJob201110-18-130859"+i;
-		// }
+		selenium.click(MainFrame.MY_JOBS_MENU);
+		selenium.click(MainFrame.MY_JOBS_ALL_STATUS_SUBMENU);
+		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
+		
 		for (int i = 1; i < testCases.size(); i++) {
 
-			selenium.click(MainFrame.MY_JOBS_MENU);
-			selenium.click(MainFrame.MY_JOBS_ALL_STATUS_SUBMENU);
-			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-
-			selenium.select(MyJobs.JobName_SELECTION, MyJobs.JobName_Slection_Ends_With);
-			selenium.type("name=" + MyJobs.SEARCH_JOB_NAME_TEXT, jobNames[i]);
-			selenium.click(MyJobs.SEARCH_BUTTON);
-			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+	
+				
 
 			BasicFuncs basic = new BasicFuncs();
+			basic.selectRadioButtonFromTable(selenium, true, MyJobs.SEARCH_JOB_NAME_TEXT, jobNames[i]);
 			if (selenium.isElementPresent("link=" + jobNames[i])) {
-				String wordCountGot = basic.jobgetWordCount(selenium, MyJobs.MyJobs_AllStatus_TABLE, jobNames[i], 7);
+				String wordCountGot = basic.jobgetWordCount(selenium, true, MyJobs.MyJobs_AllStatus_TABLE, jobNames[i], 7);
 
 				wordcount = wordcount + " \r\n" + jobNames[i] + ", " + wordCountGot;
 			}

@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:id="com_inse\PROPPAGE_6890_OVEN.htm" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1864" MadCap:lastWidth="571">
+    <head><title>Oven Tab (6890)</title>
+    </head>
+    <body>
+        <h1>Oven 
+ tab (6890)</h1>
+        <p class="para">Use this tab to define operating parameters for the oven 
+ in the 6890 GC system. </p>
+        <h2>6890 considerations</h2>
+        <p class="para">Keep these considerations in mind:</p>
+        <ul>
+            <li class="listbull">The 6890 GC system measure 
+ run time by the length of the oven time. It will not accept data after 
+ the oven time expires.</li>
+            <li class="listbull">Although you can physically 
+ set times to 999.99 on the 6890 instrument, when the instrument is under 
+ Empower control, the maximum time entry is 650.00. </li>
+        </ul>
+        <h2>Oven enable</h2>
+        <p class="para">Turns on the oven. Enable this parameter before any oven 
+ temperature settings take effect. </p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Enabled</p>
+        <h2>Cryo enable</h2>
+        <p class="para">Enables use of cryogenic cooling.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Set the cryo type through the instrument front panel.</p>
+        <h2>
+            <MadCap:concept term="Temperature Ramp" />Temperature ramp enable</h2>
+        <p class="para">Enables use of the Temperature Ramp table.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> Disabled</p>
+        <h2>Maximum temperature</h2>
+        <p class="para">Maximum oven operating temperature. Set Initial Temperature 
+ to a value no greater than the Maximum Temperature value. Enable Oven 
+ Enable for this setting to take effect.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 70.0 °C</p>
+        <h2>Equilibrium time</h2>
+        <p class="para">Time required for the oven temperature to equilibrate whenever 
+ the temperature is modified from one run to the next. Equilibrium time 
+ begins when the actual oven temperature comes within 1 °C of the Initial Temperature setting.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.00 min</p>
+        <h2>Initial temperature</h2>
+        <p class="para">Initial oven temperature at the start of the run. This temperature 
+ value is retained for the length of time defined in the Initial Time parameter. 
+ Once the Total Time value expires at the end of the run, the oven returns 
+ to the Initial Temperature value.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 70 °C</p>
+        <h2>Initial time</h2>
+        <p class="para">Length of time that the oven remains at the Initial Temperature 
+ once the run has started.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 60.00 min</p>
+        <h2>Temperature ramp table</h2>
+        <p class="para">Allows you to program up to six oven temperature ramps during 
+ a run. In each row of the table, define:</p>
+        <ul>
+            <li class="listbull">Rate – 
+ Rate at which the oven is heated or cooled to Final (temperature) in °C/min.</li>
+        </ul>
+        <p class="paraindent"><span class="emphasisbold">Default:</span> 
+ 0.0 °C/min</p>
+        <ul>
+            <li class="listbull">Final 
+ (temperature) – Temperature the oven reaches at the end of the heating 
+ or cooling ramp. Final (temperature) is maintained for the Hold Time duration 
+ (see below). </li>
+            <li class="listbull">Hold Time 
+ – Time in minutes that the oven temperature is held at the current Final 
+ Temperature before starting the next ramp or terminating the run. </li>
+            <li class="listbull">Total Time – Total time 
+ as <span style="font-style: italic;">calculated</span> by Empower software. 
+ Total Time displayed in the first row is derived from the difference between 
+ the Initial Temperature (at the start of the ramp) and the Final temperature 
+ (at the end of the ramp) divided by the Rate, plus Hold Time plus the 
+ Initial Time. Total Time displayed for subsequent rows is derived from 
+ the difference between the Final temperature from the previous row and 
+ the Final temperature for the current row divided by the Rate, plus Hold 
+ Time plus the Total Time from the previous row. </li>
+        </ul>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Empower software only collects data from the 6890 during the time the 
+ oven temperature is programmed. Guidelines:</p>
+        <ul>
+            <li class="listbull">For non-ramped methods, 
+ this is the initial time.</li>
+            <li class="listbull">For ramped methods, this 
+ is the total time.</li>
+        </ul>
+    </body>
+</html>

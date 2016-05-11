@@ -17,8 +17,9 @@ public class AddWFofLocalizationProfile extends BaseTestCase
                 MainFrame.LOCALIZATION_PROFILES_SUBMENU);
         
         String iLocName = getProperty("localization.name");
-        String localeName = getProperty("localization.workflow.targetLocale");
+        String addtargetLocale = getProperty("localization.workflow.addtargetLocale");
+        String addTargetCode = getProperty("localization.workflow.addTargetCode");
         
-        localizationFuncs.addWorkflow(selenium, iLocName, localeName);
+        localizationFuncs.addWorkflow(selenium, iLocName, addtargetLocale, addTargetCode);
     }
 }

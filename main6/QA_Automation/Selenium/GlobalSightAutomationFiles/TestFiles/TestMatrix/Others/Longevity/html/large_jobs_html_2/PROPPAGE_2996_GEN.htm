@@ -1,0 +1,163 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="3241" MadCap:lastWidth="519">
+    <head><title>General Tab (2996 PDA)</title>
+    </head>
+    <body>
+        <h1>General 
+ tab (2996 PDA)</h1>
+        <p class="para">Use this tab to define data acquisition and instrument control 
+ parameters for the 2996 PDA Detector.</p>
+        <h2>Data collection</h2>
+        <p class="para">Select either option for data collection and enter the data 
+ acquisition parameters for that type of collection:</p>
+        <ul>
+            <li class="listbull">2D Data 
+ Collection – Accesses a table where you can specify the method channel 
+ lambda and method channel bandwidth for up to eight discrete channels. 
+ </li>
+            <li class="listbull">3D Data Collection – 
+ Collects 3D data. </li>
+        </ul>
+        <h2>Data acquisition – 2D</h2>
+        <h3>Method channel lambda</h3>
+        <p class="para">Click the cell in the table to enter the lambda for the channel. 
+ Range: 190.0 nm to 800.0 nm.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 190 nm</p>
+        <h3>Method channel bandwidth</h3>
+        <p class="para">Click the cell in the table to enter the bandwidth for the 
+ channel.</p>
+        <p class="para"><span class="emphasisbold">Range:</span> 
+ 1.2 nm to 600 nm</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 1.2 nm</p>
+        <p class="para">The allowable bandwidth depends on the Method Channel Lambda 
+ (wavelength) value. The value of both [Lambda – (Bandwidth/2)] and [Lambda 
+ + (Bandwidth/2)] must fall in the detector’s operating range of 189.4 
+ to 800.6 nm. For instance, a 10 nm bandwidth is invalid for a Method Channel 
+ Lambda of 190 nm because [Lambda – (Bandwidth/2)] yields a value of 185 
+ nm, which is below the operating range of the detector.</p>
+        <h3>Sampling rate</h3>
+        <p class="para">Acquisition rate in spectra per second. For reproducible 
+ integration, acquire at least 12 to 15 data points across a peak.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 10, 5, 2, 1, 0.5, 0.25, 0.1, 0.05, and 0.017 data points/sec</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 1 data points/sec</p>
+        <h2>Data acquisition – 3D</h2>
+        <h3>Start wavelength</h3>
+        <p class="para">Starting wavelength of each acquired spectrum. This value 
+ applies to all spectra collected during the run. </p>
+        <p class="para"><span class="emphasisbold">Range with 
+ Resolution set to 1.2:</span> 190.0 nm to 800.0 nm</p>
+        <p class="para"><span style="font-weight: bold;color: #425085;" class="emphasisbold">Range at 
+ all other Resolution settings:</span> 190.0 + (Resolution/2) to 800.0 
+ – (Resolution/2)</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 210.0 nm</p>
+        <h3>End wavelength</h3>
+        <p class="para">Ending wavelength of each acquired spectrum. This value applies 
+ to all spectra collected during the run.</p>
+        <p class="para"><span class="emphasisbold">Range with 
+ Resolution set to 1.2:</span> Start Wavelength to 800.0 nm</p>
+        <p class="para"><span class="emphasisbold">Range at 
+ all other Resolution settings:</span> Start Wavelength + Resolution to 
+ 800.0 nm – Resolution/2</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 400.0 nm</p>
+        <h3>Sampling rate</h3>
+        <p class="para">Acquisition rate in spectra per second. For reproducible 
+ integration, acquire at least 12 to 15 spectra across a peak. For peak 
+ purity you need at least 12 data points.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ 10, 5, 2, 1, 0.5, 0.25, 0.1, 0.05, and 0.017 spectra/sec</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 1 spectra/sec</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ To calculate peak purity, acquire at least 12 spectra across each peak.</p>
+        <h3>Resolution</h3>
+        <p class="para">Number of diodes that are averaged together as a single spectral 
+ data point. To differentiate closely related spectra and obtain greater 
+ spectral resolution, use a small resolution number. Be aware, however, 
+ that a small resolution value generates more data points and therefore 
+ requires more disk space than a large resolution value. Find a resolution 
+ value just small enough to identify spectral features.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 1.2 nm</p>
+        <h3>Data delay:</h3>
+        <ul>
+            <li class="listbull">Select this check box 
+ to enable a 6 second delay before acquiring data.</li>
+            <li class="listbull">Clear this check box 
+ to begin acquiring data immediately (600 ms delay).</li>
+        </ul>
+        <h2>Instrument control</h2>
+        <h3>Auto exposure</h3>
+        <p class="para">Enables the 2996 PDA Detector optics to calculate the optimum 
+ exposure time needed to recharge the diodes based on the lamp energy, 
+ the lamp spectrum, and the selected wavelength range and mobile phase 
+ absorbances.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Enabled</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Enable Auto Exposure for most routine analyses.</p>
+        <h3>Exposure time</h3>
+        <p class="para">Length of time in milliseconds (ms) that the photodiodes 
+ are exposed to light before they are read. This parameter is dimmed if 
+ Auto Exposure is enabled.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 15.00 ms</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Not all selections are available. The detector will attempt to use the 
+ value, but will adjust to the next, closest available number.</p>
+        <h3>Digital filter:</h3>
+        <ul>
+            <li class="listbull">Clear this check box 
+ to set the filter response to 0 for noise angle determination based on 
+ total system noise.</li>
+            <li class="listbull">Select this check box 
+ to enable the digital filter and specify a value in the Filter Response 
+ field. You cannot specify a value of 0 in the Filter Response field. To 
+ set the filter response to 0, clear this check box.</li>
+        </ul>
+        <h3>Filter response</h3>
+        <p class="para">If the digital filter is enabled, enter the response time 
+ for filtering acquired data. The filter is an enhanced rolling average 
+ filter applied to absorbance data from the PDA detector before the data 
+ is sent to the Empower workstation. The filter reduces high-frequency 
+ noise across the entire wavelength range specified for the acquisition. 
+ High values decrease peak response. </p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 0.1 to 3.0</p>
+        <h3>Interpolate 656 nm</h3>
+        <p class="para">Instructs the detector to ignore the signal from the photodiode 
+ at 656 nm and interpolate a value from the adjacent diodes. This prevents 
+ oversaturation of the detector at 656 nm (Balmer line for deuterium).</p>
+        <p class="para">When you disable this parameter, the detector reports the 
+ signal from the photodiode at 656 nm. Disable this parameter only if you 
+ are working with compounds that absorb in the 656-nm range.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Enabled</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ If this parameter is disabled, the deuterium lamp high emission line at 
+ 656 nm may cause spectral artifacts and autoexposure errors.</p>
+        <h2>Analog outputs</h2>
+        <h3>Analog channel 1 enable/Analog channel 2 enable</h3>
+        <p class="para">Enables Analog Channel 1 and/or Analog Channel 2. After enabling 
+ a channel, specify the operating parameters for that channel in its corresponding 
+ Chan 1 or Chan 2 tab.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Ch 1 and Ch 2, Disabled</p>
+        <h2>Event settings</h2>
+        <h3>Events enable</h3>
+        <p class="para">Enables the events in the Events table.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+    </body>
+</html>

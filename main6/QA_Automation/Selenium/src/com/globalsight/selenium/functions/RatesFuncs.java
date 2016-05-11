@@ -13,6 +13,7 @@ package com.globalsight.selenium.functions;
 import org.testng.Assert;
 import org.testng.Reporter;
 
+import com.globalsight.selenium.pages.Currency;
 import com.globalsight.selenium.pages.Rates;
 import com.globalsight.selenium.pages.Users;
 import com.thoughtworks.selenium.Selenium;
@@ -86,8 +87,8 @@ public class RatesFuncs extends BasicFuncs {
 		for(String name:array) {
 			if(name.length()==0)
 				continue;
-            Assert.assertEquals(isPresentInTable(selenium, Rates.Rates_TABLE,
-                    iRateName+ "_" + name), true);
+            Assert.assertEquals(selectRadioButtonFromTable(selenium,true, Rates.rateNameFilter, iRateName+ "_" + name), true);
+            		
 		}
 //		Assert.assertEquals(isPresentInTable(selenium, Rates.Rates_TABLE,
 //                    iRateName), true);
@@ -122,14 +123,13 @@ public class RatesFuncs extends BasicFuncs {
 	public void editRate(Selenium selenium, String iRateName,
 			String newRateName, String newCurrency, String newRateType)
 			throws Exception {
-		boolean selected = selectRadioButtonFromTable(selenium,
-				Rates.Rates_TABLE, iRateName);
+		boolean selected = selectRadioButtonFromTable(selenium,true, Rates.rateNameFilter, iRateName);
 		if (!selected) {
 			Reporter.log("Cannot find a proper Rate to edit.");
 			return;
 		}
 		try {
-			//selenium.click(Rates.Edit_BUTTON);
+
 			selenium.click("link=" + iRateName);
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 			selenium.type(Rates.Name_TEXT_FIELD, newRateName);
@@ -163,8 +163,7 @@ public class RatesFuncs extends BasicFuncs {
 			selenium.click(Rates.Save_BUTTON);
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 			// Verify if the change has been applied
-			Assert.assertEquals(this.isPresentInTable(selenium,
-					Rates.Rates_TABLE, newRateName), true);
+			Assert.assertEquals(this.selectRadioButtonFromTable(selenium,true, Rates.rateNameFilter, newRateName), true);
 			Assert.assertEquals(this.getColumnText(selenium, Rates.Rates_TABLE,
 					newRateName, 6), newCurrency);
 			Assert.assertEquals(this.getColumnText(selenium, Rates.Rates_TABLE,
@@ -189,7 +188,6 @@ public class RatesFuncs extends BasicFuncs {
 //		}
 		try {
 			selenium.click("link=" + iUserName);
-//			selenium.click(Users.EDIT_BUTTON);
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 			selenium.click(Users.ROLES_BUTTON);
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);

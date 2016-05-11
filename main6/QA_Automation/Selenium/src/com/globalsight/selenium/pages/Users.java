@@ -20,7 +20,7 @@ public class Users implements BasePage
     public static final String USER_SEARCH_NAME_OPTION_CONTAIN = "contains";
     
     public static final String USER_SEARCH_NAME_TEXT = "uNameFilter";
-    public static final String USER_ROLES_TABLE = "//div[@id='contentLayer']/table/tbody/tr[2]/td/table/tbody";
+    public static final String USER_ROLES_TABLE = "//div[@id='contentLayer']/table/tbody/tr/td/form/table/tbody";
 
     // New User-Basic Information
     public static final String TITLE_TEXT = "title";
@@ -42,10 +42,12 @@ public class Users implements BasePage
     // New Roles
     public static final String SOURCE_LOCALE_SELECT = "//div[@id='contentLayer']/table/tbody/tr/td/form/table/tbody/tr/td[2]/select";
     public static final String TARGET_LOCALE_SELECT = "//div[@id='contentLayer']/table/tbody/tr/td/form/table/tbody/tr[2]/td[2]/select";
+    public static final String TARGET_LOCALE_SELECT2 = "name=targetLocale";
 
     public static final String SrcLocale_SELECT = "selectSourceLocale";
     public static final String TarLocale_SELECT = "selectTargetLocale";
 
+    public static final String SelectAll_CHECKBOX = "selectAll";
     public static final String Dtp1Type_CHECKBOX = "Dtp1_1118Cost";
     public static final String Dtp1Type_SELECT = "Dtp1_1118_expense";
     public static final String LAN_ADD = "Add";
@@ -73,16 +75,19 @@ public class Users implements BasePage
     public static final String NewRole_TABLE_NewUser = "//div[@id='contentLayer']/table[3]/tbody";
 
     // Activities Types
-    public static final String Activities_Types1 = "activity_10";
-    public static final String Activities_Types2 = "activity_11";
+    public static final String Activities_Types1 = "activity_22";
+    public static final String Activities_Types2 = "activity_27";
+    public static final String Activities_Types3 = "activity_11";
 
     // Edit user
-    public static final String Edit_Roles_BUTTON = "//input[@value='Roles...']";
+    public static final String Edit_Roles_BUTTON = "name=Roles";
     public static final String Edit_ContactInfo_BUTTON = "//input[@value='Contact Info...']";
     public static final String Edit_Calendar_BUTTON = "//input[@value='Calendar...']";
     public static final String Edit_Project_BUTTON = "//input[@value='Projects...']";
     public static final String Edit_Security_BUTTON = "//input[@value='Security...']";
     public static final String Edit_Permissions_BUTTON = "//input[@value='Permissions...']";
+        
+
 
     // Edit Project
     public static final String AllProject_CHECKBOX = "idAllProjects";
@@ -90,4 +95,7 @@ public class Users implements BasePage
     // Edit Role
     public static final String Role_TABLE_Activity = "//div[@id='contentLayer']/form/table/tbody/tr[2]/td/table/tbody/tr[3]/td/table/tbody/tr[3]/td/table/tbody";
     public static final String Edit_Role_LocalPairs_TABLE = "//div[@id='contentLayer']/table/tbody/tr[2]/td/table/tbody";
+    
+    //Filter box
+    public static final String User_Filter = "uNameFilter";
 }

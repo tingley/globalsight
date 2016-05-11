@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:id="com_inse\PROPPAGE_TCM.htm" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="944" MadCap:lastWidth="571">
+    <head><title>Waters TCM Properties</title>
+    </head>
+    <body>
+        <h1>Waters 
+ TCM properties</h1>
+        <p class="para">Use the TCM tab to define parameters for controlling the 
+ temperatures of up to three column heaters regulated by a Waters Temperature 
+ Control Module. Column heaters are attached to the External Device Connections 
+ (Units 1, 2, and 3) on the rear panel of the TCM.</p>
+        <p class="para" MadCap:conditions="Primary.Empower"><span style="font-weight: bold;color: #425085;" class="emphasisbold">Note:</span> 
+ Set the column heater operating parameters for a Waters 600 Series Controller 
+ (600E, 616, 625, or 626) in the Temperature tab for the Waters 600 Series 
+ Controller.</p>
+        <h2>Zone 1 enable to zone 3 enable</h2>
+        <p class="para">Enables the specific column heater (1, 2, or 3).</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <h2>Zone 1 set point to zone 3 set point</h2>
+        <p class="para">Operating temperature in °C for column 
+ heater 1, 2, or 3. This value must be less than or equal to the corresponding 
+ High Limit value and greater than or equal to the corresponding Low Limit 
+ value. </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.0 °C</p>
+        <h2>Zone 1 high limit to zone 3 high limit</h2>
+        <p class="para">High-temperature limit for column heater 1, 2, or 3. This 
+ value must be greater than or equal to the corresponding Set Point value. 
+ </p>
+        <p class="para">If the heater temperature exceeds this limit, the TCM shuts 
+ off the heater and sounds the alarm. The "OVER" LED on the TCM 
+ illuminates.</p>
+        <p class="para"><span class="emphasisbold">Caution:</span> 
+ To avoid damaging your column, set the High Limit parameter to a value 
+ no greater than the maximum limit for the corresponding column.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 110.0</p>
+        <p class="para"><span class="emphasisbold">Recommended 
+ setting:</span> Within 5 °C of the Set Point 
+ setting.</p>
+        <h2 style="font-weight: bold;">Zone 1 low limit to zone 3 low limit</h2>
+        <p class="para">Low-temperature limit for column heater 1, 2, or 3. This 
+ value must be less than or equal to the corresponding Set Point value.</p>
+        <p class="para">If the heater temperature falls below this limit, the TCM 
+ sounds an alarm, <span style="font-style: italic;">but does not turn off 
+ the heater</span>. The alarm continues to sound until the condition is 
+ corrected.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.0 °C</p>
+    </body>
+</html>

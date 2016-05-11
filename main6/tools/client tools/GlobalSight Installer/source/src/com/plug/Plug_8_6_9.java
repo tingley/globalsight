@@ -34,46 +34,68 @@ public class Plug_8_6_9 implements Plug
 
     public DbUtil dbUtil = DbUtilFactory.getDbUtil();
 
+    private static final String PATH_MODULE_BASE = "/jboss/server/modules/system/layers/base";
+
     @Override
     public void run()
     {
         removeOldVersionJars();
 
-        // GBS-4355: old localization profiles not disabled 
+        // GBS-4355: old localization profiles not disabled
         fixDirtyDataForL10nProfile();
     }
- 
+
     // For GBS-4123: upgrade RestEasy bundled in Jboss.
     private void removeOldVersionJars()
     {
         List<String> paths = new ArrayList<String>();
-        paths.add("javax/annotation/api/main/jboss-annotations-api_1.1_spec-1.0.1.Final-redhat-3.jar");
-        paths.add("javax/ws/rs/api/main/jboss-jaxrs-api_1.1_spec-1.0.1.Final-redhat-3.jar");
-        paths.add("org/codehaus/jackson/jackson-core-asl/main/jackson-core-asl-1.9.9.redhat-4.jar");
-        paths.add("org/codehaus/jackson/jackson-jaxrs/main/jackson-jaxrs-1.9.9.redhat-4.jar");
-        paths.add("org/codehaus/jackson/jackson-mapper-asl/main/jackson-mapper-asl-1.9.9.redhat-4.jar");
-        paths.add("org/codehaus/jackson/jackson-xc/main/jackson-xc-1.9.9.redhat-4.jar");
-        paths.add("org/codehaus/jettison/main/jettison-1.3.1.redhat-4.jar");
-        paths.add("org/jboss/resteasy/resteasy-atom-provider/main/resteasy-atom-provider-2.3.10.Final-redhat-1.jar");
-        paths.add("org/jboss/resteasy/resteasy-cdi/main/resteasy-cdi-2.3.10.Final-redhat-1.jar");
-        paths.add("org/jboss/resteasy/resteasy-hibernatevalidator-provider/main/resteasy-hibernatevalidator-provider-2.3.10.Final-redhat-1.jar");
-        paths.add("org/jboss/resteasy/resteasy-jackson-provider/main/resteasy-jackson-provider-2.3.10.Final-redhat-1.jar");
-        paths.add("org/jboss/resteasy/resteasy-jaxb-provider/main/resteasy-jaxb-provider-2.3.10.Final-redhat-1.jar");
-        paths.add("org/jboss/resteasy/resteasy-jaxrs/main/async-http-servlet-3.0-2.3.10.Final-redhat-1.jar");
-        paths.add("org/jboss/resteasy/resteasy-jaxrs/main/resteasy-jaxrs-2.3.10.Final-redhat-1.jar");
-        paths.add("org/jboss/resteasy/resteasy-jettison-provider/main/resteasy-jettison-provider-2.3.10.Final-redhat-1.jar");
-        paths.add("org/jboss/resteasy/resteasy-jsapi/main/resteasy-jsapi-2.3.10.Final-redhat-1.jar");
-        paths.add("org/jboss/resteasy/resteasy-multipart-provider/main/resteasy-multipart-provider-2.3.10.Final-redhat-1.jar");
-        paths.add("org/jboss/resteasy/resteasy-yaml-provider/main/resteasy-yaml-provider-2.3.10.Final-redhat-1.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/javax/annotation/api/main/jboss-annotations-api_1.1_spec-1.0.1.Final-redhat-3.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/javax/ws/rs/api/main/jboss-jaxrs-api_1.1_spec-1.0.1.Final-redhat-3.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/codehaus/jackson/jackson-core-asl/main/jackson-core-asl-1.9.9.redhat-4.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/codehaus/jackson/jackson-jaxrs/main/jackson-jaxrs-1.9.9.redhat-4.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/codehaus/jackson/jackson-mapper-asl/main/jackson-mapper-asl-1.9.9.redhat-4.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/codehaus/jackson/jackson-xc/main/jackson-xc-1.9.9.redhat-4.jar");
+        paths.add(PATH_MODULE_BASE + "/org/codehaus/jettison/main/jettison-1.3.1.redhat-4.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/jboss/resteasy/resteasy-atom-provider/main/resteasy-atom-provider-2.3.10.Final-redhat-1.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/jboss/resteasy/resteasy-cdi/main/resteasy-cdi-2.3.10.Final-redhat-1.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/jboss/resteasy/resteasy-hibernatevalidator-provider/main/resteasy-hibernatevalidator-provider-2.3.10.Final-redhat-1.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/jboss/resteasy/resteasy-jackson-provider/main/resteasy-jackson-provider-2.3.10.Final-redhat-1.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/jboss/resteasy/resteasy-jaxb-provider/main/resteasy-jaxb-provider-2.3.10.Final-redhat-1.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/jboss/resteasy/resteasy-jaxrs/main/async-http-servlet-3.0-2.3.10.Final-redhat-1.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/jboss/resteasy/resteasy-jaxrs/main/resteasy-jaxrs-2.3.10.Final-redhat-1.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/jboss/resteasy/resteasy-jettison-provider/main/resteasy-jettison-provider-2.3.10.Final-redhat-1.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/jboss/resteasy/resteasy-jsapi/main/resteasy-jsapi-2.3.10.Final-redhat-1.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/jboss/resteasy/resteasy-multipart-provider/main/resteasy-multipart-provider-2.3.10.Final-redhat-1.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/jboss/resteasy/resteasy-yaml-provider/main/resteasy-yaml-provider-2.3.10.Final-redhat-1.jar");
         // GBS-4369
-        paths.add("org/apache/commons/collections/main/commons-collections-3.2.1.redhat-3.jar");
+        paths.add(PATH_MODULE_BASE
+                + "/org/apache/commons/collections/main/commons-collections-3.2.1.redhat-3.jar");
+        paths.add(
+                "/jboss/server/standalone/deployments/globalsight.ear/globalsightServices.war/WEB-INF/lib/commons-collections-3.1.jar");
 
         File jarFile = null;
         for (String path : paths)
         {
             try
             {
-                jarFile = new File(ServerUtil.getPath() + "/jboss/server/modules/system/layers/base/" + path);
+                jarFile = new File(ServerUtil.getPath() + path);
                 if (jarFile.exists() && jarFile.isFile())
                 {
                     jarFile.delete();
@@ -86,7 +108,8 @@ public class Plug_8_6_9 implements Plug
         }
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     private void fixDirtyDataForL10nProfile()
     {
         try

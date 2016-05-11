@@ -386,7 +386,7 @@ function termImgShow(divName) {
 </HEAD>
 <BODY>
 <HR id="hr_line" COLOR="#0C1476" WIDTH="95%">
-<div ID="sourceBox"  STYLE="position: absolute; left: -2px; overflow: auto;">
+<div ID="sourceBox"  STYLE="position: absolute; left: -2px; overflow: hidden;">
 <TABLE WIDTH="100%" CELLPADDING="0" CELLSPACING="0" BORDER="0">
 <TR>
   <TD><IMG SRC="/globalsight/images/spacer.gif" WIDTH="5" HEIGHT="1"></TD>

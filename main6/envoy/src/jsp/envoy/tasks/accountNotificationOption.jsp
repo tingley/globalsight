@@ -346,7 +346,7 @@ $(document).ready(function() {
                 	        if(!checkTag)
                 	        {   
 %>                           
-                		       <option value="<%=availableOption%>"  selected><%=bundle.getString(availableOption)%></option>
+                		       <option value="<%=availableOption%>"><%=bundle.getString(availableOption)%></option>
 <%               	         }
                	    }
 					else

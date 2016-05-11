@@ -59,8 +59,7 @@
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
-<script type="text/javascript"src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.9.1.js"></SCRIPT>
+<script type="text/javascript"src="/globalsight/jquery/jquery-1.9.1.min.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -253,10 +252,10 @@ $(document).ready(function() {
 		    type:'post',
 			url:"/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&action=save",
 			data:{
-				  'subjectText':document.getElementById("subjectText").value,
-	              'messageText':document.getElementById("messageText").value,
-		          'subjectKey':document.getElementById("subjectKey").value,
-		          'messageKey':document.getElementById("messageKey").value,
+				  'subjectText':$("#subjectText").val(),
+	              'messageText':$("#messageText").val(),
+		          'subjectKey':$("#subjectKey").val(),
+		          'messageKey':$("#messageKey").val(),
 	              },              
 			dataType: "text", 
 			success:function(data){
@@ -266,19 +265,60 @@ $(document).ready(function() {
 	})
 	
  	$("#from").click(function(){
- 		var count=$("#to option").length;
- 		for(var i=0;i<count;i++) 
- 		{           
- 		   $("#to ").get(0).options[i].selected = false; 
- 		} 
+ 		var countTo=$("#to option").length;
+ 		var countFrom=$("#from option").length;
+ 		var i=0;
+ 		
+ 		for(var j=0;j<countTo;j++)
+ 		{
+ 			$("#to").get(0).options[j].selected = false;
+ 		}
+ 		
+ 		for(var j=0;j<countFrom;j++) 
+ 		{  
+ 		   if($("#from").get(0).options[j].selected)
+ 		   {
+ 			   i++;
+ 		   }
+ 		}
+ 		
+ 		if(i>1 || i==0)
+ 		{
+ 			document.getElementById("edit").disabled=true;
+ 		}
+ 		else
+ 		{
+ 			document.getElementById("edit").disabled=false;
+ 		}
+ 		
 	}) 
 	
  	$("#to").click(function(){
- 		var count=$("#from option").length;
- 		for(var i=0;i<count;i++) 
- 		{           
- 		   $("#from ").get(0).options[i].selected = false; 
- 		} 
+ 		var countTo=$("#to option").length;
+ 		var countFrom=$("#from option").length;
+ 		var i=0;
+ 		
+ 		for(var j=0;j<countFrom;j++)
+ 		{
+ 			$("#from").get(0).options[j].selected = false;
+ 		}
+ 		
+ 		for(var j=0;j<countTo;j++) 
+ 		{  
+ 		   if($("#to").get(0).options[j].selected)
+ 		   {
+ 			   i++;
+ 		   }
+ 		}
+ 		
+ 		if(i>1 || i==0)
+ 		{
+ 			document.getElementById("edit").disabled=true;
+ 		}
+ 		else
+ 		{
+ 			document.getElementById("edit").disabled=false;
+ 		}
 	}) 
 	})
 
@@ -325,7 +365,7 @@ $(document).ready(function() {
   </tr>
     <tr>
         <td width="20%">
-        <select name="from"  id="from" <%=disabled%> class="standardText" size=15 style="width:250">
+        <select name="from"  id="from" <%=disabled%> class="standardText" multiple size=15 style="width:250">
 <%
             if (availableOptions != null)
             {
@@ -377,7 +417,7 @@ $(document).ready(function() {
           </table>
         </td>
         <td>
-            <select name="to" id="to" <%=disabled%> class="standardText" size=15 style="width:250px">
+            <select name="to" id="to" <%=disabled%> class="standardText" multiple size=15 style="width:250px">
 <%
                 if (addedOptions != null && addedOptions.size() != 0)
                 {
@@ -407,7 +447,7 @@ $(document).ready(function() {
           <input type="button" name="<%=doneButton %>" value="<%=doneButton %>"
             onclick="submitForm('saveOptions')">
             <%if(b_editEmailTemp){%>
-          <input type="button" id="edit" value="Edit">
+          <input type="button" id="edit" disabled value="Edit">
           <%}%>
         </td>
       </tr>

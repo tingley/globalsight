@@ -136,7 +136,7 @@ public class MailerLocal implements Mailer
         }
         
         ResourceBundle bundle = SystemResourceBundle.getInstance()
-                .getResourceBundle(DEFAULT_RESOURCE_NAME, p_recipientEmailInfo.getEmailLocale());
+                .getEmailResourceBundle(DEFAULT_RESOURCE_NAME, p_recipientEmailInfo.getEmailLocale(),p_companyIdStr);
         p_messageArguments = handleMessageArgments(p_messageArguments);
         // get the subject and message
         String subject = MessageFormat.format(
@@ -207,7 +207,7 @@ public class MailerLocal implements Mailer
         p_messageArguments = handleMessageArgments(p_messageArguments);
         
         ResourceBundle bundle = SystemResourceBundle.getInstance()
-                .getResourceBundle(DEFAULT_RESOURCE_NAME, p_recipientEmailInfo.getEmailLocale());        
+                .getEmailResourceBundle(DEFAULT_RESOURCE_NAME, p_recipientEmailInfo.getEmailLocale(),String.valueOf(p_companyId));        
         // get the subject and message
         String subject = MessageFormat.format(bundle.getString(p_subjectKey),
                 p_messageArguments);
@@ -337,7 +337,7 @@ public class MailerLocal implements Mailer
         }
 
         ResourceBundle bundle = SystemResourceBundle.getInstance()
-                .getResourceBundle(DEFAULT_RESOURCE_NAME, Locale.getDefault());
+                .getEmailResourceBundle(DEFAULT_RESOURCE_NAME, Locale.getDefault(),p_companyIdStr);
         String[] messageArguments = handleMessageArgments(p_messageArguments);
         // get the subject and message
         String subject = MessageFormat.format(
@@ -462,7 +462,7 @@ public class MailerLocal implements Mailer
     		p_messageArguments = buildMessageArguments(p_messageArguments);
     	}
         ResourceBundle bundle = SystemResourceBundle.getInstance()
-                .getResourceBundle(DEFAULT_RESOURCE_NAME, p_userLocale);
+                .getEmailResourceBundle(DEFAULT_RESOURCE_NAME, p_userLocale,p_companyIdStr);
         String from = null;
         try
         {

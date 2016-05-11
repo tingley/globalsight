@@ -51,6 +51,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.mail.MailerConstants;
 import com.globalsight.util.mail.MailerLocal;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
@@ -239,12 +240,12 @@ public class AccountNotificationHandler extends PageHandler
         String subjectKey = p_request.getParameter("subjectKey");
         String messageKey = p_request.getParameter("messageKey");
         String subjectEdited = p_request.getParameter("subjectText");
-        String messageEdited = keepEscapeCharacter(p_request.getParameter("messageText").replace(
-                "\n", "\\r\\n\\\r\n"));
+        String messageEdited = keepEscapeCharacter(StringUtil.replace(
+                p_request.getParameter("messageText"), "\n", "\\r\\n\\\r\n"));
 
         String subjectOri = emailBundle.getString(subjectKey);
-        String messageOri = keepEscapeCharacter(emailBundle.getString(messageKey).replace("\r\n",
-                "\\r\\n\\\r\n"));
+        String messageOri = keepEscapeCharacter(StringUtil.replace(
+                emailBundle.getString(messageKey), "\r\n", "\\r\\n\\\r\n"));
 
         List<ArrayList<String>> list = checkEmailTemplateContent(subjectOri, messageOri,
                 subjectEdited, messageEdited);
@@ -288,11 +289,9 @@ public class AccountNotificationHandler extends PageHandler
             }
 
             String content = FileUtil.readFile(fis, "utf-8");
-            int i = content.indexOf(subjectOri);
-            System.out.print(i);
-            content = content.replace(subjectOri, subjectEdited).replace(messageOri, messageEdited);
+            content = StringUtil.replace(content, subjectKey+"="+subjectOri, subjectKey+"="+subjectEdited);
+            content = StringUtil.replace(content, messageOri, messageEdited);
             FileUtil.writeFile(newFile, content);
-
             SystemResourceBundle.getInstance().RemoveResourceBundleKey(key);
             writer.write("Save successful");
             writer.flush();
@@ -336,23 +335,23 @@ public class AccountNotificationHandler extends PageHandler
     }
     
     /**
-     * Adds missing placeholds or invalid placeholds into arraylist.
+     * Adds missing placeholders or invalid placeholders into arraylist.
      */
-    private void addErrorPlaceHoldes(ArrayList<String> PlaceHoldersOri,
-            ArrayList<String> PlaceHoldersEdited, ArrayList<String> addErrorPlaceHoldes,
+    private void addErrorPlaceHoldes(ArrayList<String> placeHoldersOri,
+            ArrayList<String> placeHoldersEdited, ArrayList<String> addErrorPlaceHoldes,
             ArrayList<String> missingPlaceHolds)
     {
-        for (String ph : PlaceHoldersEdited)
+        for (String ph : placeHoldersEdited)
         {
-            if (!PlaceHoldersOri.contains(ph))
+            if (!placeHoldersOri.contains(ph))
             {
                 addErrorPlaceHoldes.add(ph);
             }
         }
 
-        for (String ph : PlaceHoldersOri)
+        for (String ph : placeHoldersOri)
         {
-            if (!PlaceHoldersEdited.contains(ph))
+            if (!placeHoldersEdited.contains(ph))
             {
                 missingPlaceHolds.add(ph);
             }

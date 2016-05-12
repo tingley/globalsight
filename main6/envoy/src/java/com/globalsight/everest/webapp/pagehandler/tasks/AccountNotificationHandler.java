@@ -289,13 +289,15 @@ public class AccountNotificationHandler extends PageHandler
             }
 
             String content = FileUtil.readFile(fis, "utf-8");
-            content = StringUtil.replace(content, subjectKey+"="+subjectOri, subjectKey+"="+subjectEdited);
+            content = content.replaceFirst(subjectKey + "\\s*=([^\r\n]*)", subjectKey + "="
+                    + subjectEdited);
             content = StringUtil.replace(content, messageOri, messageEdited);
             FileUtil.writeFile(newFile, content);
-            SystemResourceBundle.getInstance().RemoveResourceBundleKey(key);
+            SystemResourceBundle.getInstance().removeResourceBundleKey(key);
             writer.write("Save successful");
             writer.flush();
         }
+        writer.close();
     }
     
     /**

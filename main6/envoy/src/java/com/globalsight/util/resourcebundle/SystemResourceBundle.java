@@ -104,7 +104,7 @@ public class SystemResourceBundle
     /**
      * Removes resource bundle key.
      */
-    public void RemoveResourceBundleKey(String key)
+    public void removeResourceBundleKey(String key)
     {
         ResourceBundle.clearCache();
         m_map.remove(key);

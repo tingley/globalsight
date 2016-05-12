@@ -34,6 +34,7 @@ import com.globalsight.cxe.entity.filterconfiguration.Escaping;
 import com.globalsight.cxe.entity.filterconfiguration.EscapingHelper;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
+import com.globalsight.cxe.entity.filterconfiguration.JsonFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConstants;
 import com.globalsight.cxe.message.CxeMessage;
@@ -114,6 +115,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
     // GBS-4261
     private boolean m_addRtlDirectionality;
     private boolean m_convertHtmlEntityForHtml;
+    private boolean m_convertHtmlEntityForJson;
     private int m_entityModeForXml;
     private long m_filterId;
     private String m_filterTableName;
@@ -677,7 +679,8 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
             }
 
             if (isContent() && !FORMAT_XLIFF.equals(format) && !FORMAT_XLIFF20.equals(format)
-                    && !FORMAT_PO.equals(mainFormat) && !FORMAT_HTML.equals(mainFormat))
+                    && !FORMAT_PO.equals(mainFormat) && !FORMAT_HTML.equals(mainFormat)
+                    && !FORMAT_JSON.equals(mainFormat))
             {
                 // Do not encode CDATA content from XML and passing HTML.
                 if (!(ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat)
@@ -685,6 +688,34 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                 {
                     tmp = applyNativeEncoding(tmp, mainFormat, format, type,
                             m_l10nContent.getLastChar());
+                }
+            }
+            
+            if (isContent() && FORMAT_JSON.equals(mainFormat)
+                    && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format))
+            {
+                //"Convert HTML Entity For Export" is selected
+                if (m_convertHtmlEntityForJson)
+                {
+                    tmp = encoding(tmp, false);
+                }
+              //"Convert HTML Entity For Export" is not selected
+                else
+                {
+                    StringBuffer strBuffer = new StringBuffer();
+                    char[] chrArr = tmp.toCharArray();
+                    for (int i = 0; i < chrArr.length; i++)
+                    {
+                        if (chrArr[i] == '"')
+                        {
+                            if (i == 0 || (i > 0 && chrArr[i - 1] != '\\'))
+                            {
+                                strBuffer.append("\\");
+                            }
+                        }
+                        strBuffer.append(chrArr[i]);
+                    }
+                    tmp = strBuffer.toString();
                 }
             }
 
@@ -1191,7 +1222,8 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
             String format = getDocumentFormat();
             boolean isXmlFormat = ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(format);
             boolean isHtmlFormat = ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format);
-
+            boolean isJsonFormat = ExtractorRegistry.FORMAT_JSON.equalsIgnoreCase(format);
+            
             if (isHtmlFormat)
             {
                 HtmlFilter htmlFilter = FilterHelper.getHtmlFilter(m_filterId);
@@ -1200,6 +1232,22 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                     m_convertHtmlEntityForHtml = htmlFilter.isConvertHtmlEntry();
                     m_addRtlDirectionality = htmlFilter.isAddRtlDirectionality();
                     getValueOfconvertHtmlEntity = true;
+                }
+            }
+
+            if (isJsonFormat)
+            {
+                JsonFilter jsonFilter = FilterHelper.getJsonFilter(m_filterId);
+                if (jsonFilter != null)
+                {
+                    if (jsonFilter.getElementPostFilterId() != -1
+                            && jsonFilter.getElementPostFilterTableName() != null)
+                    {
+                        HtmlFilter htmlFilter = FilterHelper.getHtmlFilter(jsonFilter
+                                .getElementPostFilterId());
+                        m_convertHtmlEntityForJson = htmlFilter.isConvertHtmlEntry();
+                        getValueOfconvertHtmlEntity = true;
+                    }
                 }
             }
 

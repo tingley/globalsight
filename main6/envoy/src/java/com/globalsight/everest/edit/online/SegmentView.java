@@ -27,17 +27,18 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.tda.TdaHelper;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.util.online.LfUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
+import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
 
 /**
  * A data object that holds the viewing elements for segment editor.
  */
-public class SegmentView
-    implements Serializable
+public class SegmentView implements Serializable
 {
     private static final long serialVersionUID = 7558068750222384152L;
     private GxmlElement m_sourceSegment = null;
@@ -59,15 +60,13 @@ public class SegmentView
     private Collection m_tbMatchResults = null;
     /** A list of {@link SegmentVersion} objects. */
     private ArrayList m_segmentVersions = null;
-    
+
     private String xliffTarget = null;
     private Set xliffAlt = null;
     private Tuv targetTuv = null;
     private String pagePath = "";
-    
-    static private final Logger s_logger = Logger
-            .getLogger(SegmentView.class);
-    
+
+    static private final Logger s_logger = Logger.getLogger(SegmentView.class);
 
     //////////////////////////////////////////////////////////////////
     // Constructors
@@ -77,9 +76,8 @@ public class SegmentView
     {
     }
 
-    public SegmentView(GxmlElement p_sourceSegment,
-        GxmlElement p_targetSegment, String p_dataType, String p_itemType,
-        ArrayList p_tmMatchResults, ArrayList p_segmentVersions)
+    public SegmentView(GxmlElement p_sourceSegment, GxmlElement p_targetSegment, String p_dataType,
+            String p_itemType, ArrayList p_tmMatchResults, ArrayList p_segmentVersions)
     {
         m_sourceSegment = p_sourceSegment;
         m_targetSegment = p_targetSegment;
@@ -89,10 +87,9 @@ public class SegmentView
         m_segmentVersions = p_segmentVersions;
     }
 
-    public SegmentView(GxmlElement p_sourceSegment,
-        GxmlElement p_targetSegment, String p_dataType, String p_itemType,
-        String p_sourceImageUrl, String p_targetImageUrl, int p_wordCount,
-        ArrayList p_tmMatchResults, ArrayList p_segmentVersions)
+    public SegmentView(GxmlElement p_sourceSegment, GxmlElement p_targetSegment, String p_dataType,
+            String p_itemType, String p_sourceImageUrl, String p_targetImageUrl, int p_wordCount,
+            ArrayList p_tmMatchResults, ArrayList p_segmentVersions)
     {
         m_sourceSegment = p_sourceSegment;
         m_targetSegment = p_targetSegment;
@@ -138,10 +135,10 @@ public class SegmentView
     {
         return m_targetSegment;
     }
-    
+
     public void setSubId(long p_subId)
     {
-    	m_subId = p_subId;
+        m_subId = p_subId;
     }
 
     public long getSubId()
@@ -200,9 +197,10 @@ public class SegmentView
     }
 
     /**
-     * <p>Sets the best matches for the segment being edited. The
-     * argument must be a list of {@see SegmentMatchResult}
-     * objects.</p>
+     * <p>
+     * Sets the best matches for the segment being edited. The argument must be
+     * a list of {@see SegmentMatchResult} objects.
+     * </p>
      */
     public void setTmMatchResults(ArrayList p_matchResults)
     {
@@ -210,7 +208,9 @@ public class SegmentView
     }
 
     /**
-     * <p>Returns the best TM matches for the segment being edited.</p>
+     * <p>
+     * Returns the best TM matches for the segment being edited.
+     * </p>
      *
      * @return a List of {@see SegmentMatchResult} objects, or null.
      */
@@ -220,9 +220,10 @@ public class SegmentView
     }
 
     /**
-     * <p>Sets the best terminology matches for the segment being
-     * edited. The argument is a collection of {@see
-     * TermLeverageMatchResult} objects.</p>
+     * <p>
+     * Sets the best terminology matches for the segment being edited. The
+     * argument is a collection of {@see TermLeverageMatchResult} objects.
+     * </p>
      */
     public void setTbMatchResults(Collection p_matchResults)
     {
@@ -230,7 +231,9 @@ public class SegmentView
     }
 
     /**
-     * <p>Returns the best TB matches for the segment being edited.</p>
+     * <p>
+     * Returns the best TB matches for the segment being edited.
+     * </p>
      *
      * @return a List of {@see SegmentMatchResult} objects, or null.
      */
@@ -240,8 +243,10 @@ public class SegmentView
     }
 
     /**
-     * <p>Sets the previous versions of a segment in the same workflow
-     * if there are any.</p>
+     * <p>
+     * Sets the previous versions of a segment in the same workflow if there are
+     * any.
+     * </p>
      */
     public void setSegmentVersions(ArrayList p_segmentVersions)
     {
@@ -249,8 +254,10 @@ public class SegmentView
     }
 
     /**
-     * <p>Returns the previous versions of a segment in the same
-     * workflow if there are any.</p>
+     * <p>
+     * Returns the previous versions of a segment in the same workflow if there
+     * are any.
+     * </p>
      *
      * @return a List of {@see SegmentVersion} objects, or null.
      */
@@ -268,31 +275,38 @@ public class SegmentView
     {
         m_wordCount = p_wordCount;
     }
-    
-    public void setXliffAlt(Set p_alt) {
+
+    public void setXliffAlt(Set p_alt)
+    {
         this.xliffAlt = p_alt;
     }
-    
-    public List getXliffAlt() {
-        if(xliffAlt != null) {
+
+    public List getXliffAlt()
+    {
+        if (xliffAlt != null)
+        {
             return orderAltByMatchPercent();
         }
-        
+
         return null;
     }
-    
-    private List orderAltByMatchPercent() {
+
+    private List orderAltByMatchPercent()
+    {
         Object[] al = xliffAlt.toArray();
-        
-        for(int i = 0; i < al.length - 1; i++) {
-            XliffAlt alt1 = (XliffAlt)al[i];
+
+        for (int i = 0; i < al.length - 1; i++)
+        {
+            XliffAlt alt1 = (XliffAlt) al[i];
             double percent1 = TdaHelper.PecentToDouble(alt1.getQuality());
-            
-            for(int j = i + 1 ; j < xliffAlt.size(); j++) {
-                XliffAlt alt2 = (XliffAlt)al[j];
+
+            for (int j = i + 1; j < xliffAlt.size(); j++)
+            {
+                XliffAlt alt2 = (XliffAlt) al[j];
                 double percent2 = TdaHelper.PecentToDouble(alt2.getQuality());
-                
-                if(percent1 < percent2) {
+
+                if (percent1 < percent2)
+                {
                     al[i] = alt2;
                     al[j] = alt1;
                     alt1 = alt2;
@@ -300,40 +314,44 @@ public class SegmentView
                 }
             }
         }
-        
+
         return Arrays.asList(al);
     }
-    
-    public void setTargetTuv(Tuv p_tuv) {
+
+    public void setTargetTuv(Tuv p_tuv)
+    {
         this.targetTuv = p_tuv;
     }
-    
-    public Tuv getTargetTuv() {
+
+    public Tuv getTargetTuv()
+    {
         return this.targetTuv;
     }
 
-	public String getPagePath() 
-	{
-		return pagePath;
-	}
+    public String getPagePath()
+    {
+        return pagePath;
+    }
 
-	public void setPagePath(String pagePath) 
-	{
-		this.pagePath = pagePath;
-	}
+    public void setPagePath(String pagePath)
+    {
+        this.pagePath = pagePath;
+    }
 
-	public void setTargetLocaleId(long targetLocaleId) {
-		this.m_targetLocaleId = targetLocaleId;
-	}
+    public void setTargetLocaleId(long targetLocaleId)
+    {
+        this.m_targetLocaleId = targetLocaleId;
+    }
 
-	public long getTargetLocaleId() {
-		return m_targetLocaleId;
-	}
-	
-	public String getSourceHtmlString(String pTagFormat) 
-	{
-	    OnlineTagHelper applet = new OnlineTagHelper();
-	    String seg = GxmlUtil.getInnerXml(getSourceSegment());
+    public long getTargetLocaleId()
+    {
+        return m_targetLocaleId;
+    }
+
+    public String getSourceHtmlString(String pTagFormat)
+    {
+        OnlineTagHelper applet = new OnlineTagHelper();
+        String seg = GxmlUtil.getInnerXml(getSourceSegment());
         try
         {
             applet.setInputSegment(seg, "", getDataType());
@@ -347,47 +365,51 @@ public class SegmentView
                 applet.getCompact();
                 seg = applet.makeCompactColoredPtags(seg);
             }
+
+            if (!EditUtil.isWhitePreservingFormat(getDataType(), null))
+                seg = LfUtil.addHtlmLf(seg);
             return seg;
         }
         catch (Exception e)
         {
             s_logger.info("getSourceHtmlString Error.", e);
         }
-        
+
         return seg;
-	}
-	
-	   public String getTargetHtmlString(String pTagFormat, boolean colorPtags) 
-	    {
-	        OnlineTagHelper applet = new OnlineTagHelper();
-	        String seg = GxmlUtil.getInnerXml(getTargetSegment());
-	        String result = seg;	        	       
-	        
-	        try
-	        {
-	            applet.setInputSegment(seg, "", getDataType());
-	            if (EditorConstants.PTAGS_VERBOSE.equals(pTagFormat))
-	            {
-	                result = applet.getVerbose();
-	                if (colorPtags)
-	                {
-	                    result = applet.makeVerboseColoredPtags(seg);
-	                }
-	            }
-	            else
-	            {
-	                result = applet.getCompact();
-	                if (colorPtags)
-                    {
-	                    result = applet.makeCompactColoredPtags(seg);
-                    }
-	            }
-	        }
-	        catch (Exception e)
-	        {
-	            s_logger.info("getTargetHtmlString Error.", e);
-	        }
-	        
-	        return result;
-	    }
+    }
+
+    public String getTargetHtmlString(String pTagFormat, boolean colorPtags)
+    {
+        OnlineTagHelper applet = new OnlineTagHelper();
+        String seg = GxmlUtil.getInnerXml(getTargetSegment());
+        String result = seg;
+
+        try
+        {
+            applet.setInputSegment(seg, "", getDataType());
+            if (EditorConstants.PTAGS_VERBOSE.equals(pTagFormat))
+            {
+                result = applet.getVerbose();
+                if (colorPtags)
+                {
+                    result = applet.makeVerboseColoredPtags(seg);
+                }
+            }
+            else
+            {
+                result = applet.getCompact();
+                if (colorPtags)
+                {
+                    result = applet.makeCompactColoredPtags(seg);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            s_logger.info("getTargetHtmlString Error.", e);
+        }
+
+        result = LfUtil.addLf(result);
+        return result;
+    }
 }

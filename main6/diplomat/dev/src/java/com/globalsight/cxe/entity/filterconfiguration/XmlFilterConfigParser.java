@@ -78,6 +78,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
     private String m_sidAttrName = null;
     private String m_isCheckWellFormed = null;
     private String m_isGerateLangInfo = null;
+    private int m_entityExportMode = -1;
 
     public XmlFilterConfigParser(XMLRuleFilter xmlFilter)
     {
@@ -97,17 +98,14 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
     // {tagName : "name1", itemid : 1, attributes : [{itemid : 0, aName :
     // "name1", aOp : "equal", aValue : "vvv1"}]}
-    public static String toXml(String exWhiteSpaceChars, int phConsolidation,
-            int phTrimMode, int nonasciiAs, int wsHandleMode,
-            int emptyTagFormat, String elementPostFilter,
-            String elementPostFilterId, String cdataPostFilter,
+    public static String toXml(String exWhiteSpaceChars, int phConsolidation, int phTrimMode,
+            int nonasciiAs, int wsHandleMode, int emptyTagFormat, int entityHandleMode,
+            String elementPostFilter, String elementPostFilterId, String cdataPostFilter,
             String cdataPostFilterId, String sidTagName, String sidAttrName,
-            String isCheckWellFormed, String isGerateLangInfo,
-            JSONArray preserveWsTags, JSONArray embTags,
-            JSONArray transAttrTags, JSONArray contentInclTags,
-            JSONArray cdataPostfilterTags, JSONArray entities,
-            JSONArray processIns, JSONArray internalTag,
-            JSONArray srcCmtXmlComment, JSONArray srcCmtXmlTag)
+            String isCheckWellFormed, String isGerateLangInfo, JSONArray preserveWsTags,
+            JSONArray embTags, JSONArray transAttrTags, JSONArray contentInclTags,
+            JSONArray cdataPostfilterTags, JSONArray entities, JSONArray processIns,
+            JSONArray internalTag, JSONArray srcCmtXmlComment, JSONArray srcCmtXmlTag)
             throws Exception
     {
         StringBuffer sb = new StringBuffer();
@@ -131,6 +129,9 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         sb.append("<").append(NODE_EMPTY_TAG_FORMAT).append(">");
         sb.append(emptyTagFormat);
         sb.append("</").append(NODE_EMPTY_TAG_FORMAT).append(">");
+        sb.append("<").append(NODE_ENTITY_HANDLE_MODE).append(">");
+        sb.append(entityHandleMode);
+        sb.append("</").append(NODE_ENTITY_HANDLE_MODE).append(">");
         sb.append("<").append(NODE_ELEMENT_POST_FILTER).append(">");
         sb.append(elementPostFilter);
         sb.append("</").append(NODE_ELEMENT_POST_FILTER).append(">");
@@ -338,6 +339,27 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         }
 
         return m_nonasciiAs;
+    }
+    
+    public int getEntityHandleMode()
+    {
+        if (m_entityExportMode == -1)
+        {
+            int result = ENTITY_HANDLE_MODE_1;
+            String v = getSingleElementValue(NODE_ENTITY_HANDLE_MODE);
+            try
+            {
+                result = Integer.parseInt(v);
+            }
+            catch (Exception e)
+            {
+                result = ENTITY_HANDLE_MODE_1;
+            }
+
+            m_entityExportMode = result;
+        }
+
+        return m_entityExportMode;
     }
 
     public int getWhiteSpaceHanldeMode()

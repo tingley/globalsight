@@ -134,13 +134,12 @@ public class MailerLocal implements Mailer
         {
             return;
         }
-        
-        ResourceBundle bundle = SystemResourceBundle.getInstance()
-                .getResourceBundle(DEFAULT_RESOURCE_NAME, p_recipientEmailInfo.getEmailLocale());
+        String companyName = CompanyWrapper.getCompanyNameById(p_companyIdStr);
+        ResourceBundle bundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
+                DEFAULT_RESOURCE_NAME, p_recipientEmailInfo.getEmailLocale(), companyName);
         p_messageArguments = handleMessageArgments(p_messageArguments);
         // get the subject and message
-        String subject = MessageFormat.format(
-            bundle.getString(p_subjectKey), p_messageArguments);
+        String subject = MessageFormat.format(bundle.getString(p_subjectKey), p_messageArguments);
         
         PermissionSet perSet = Permission.getPermissionManager().
         getPermissionSetForUser(p_recipientEmailInfo.getUserId());
@@ -205,9 +204,9 @@ public class MailerLocal implements Mailer
 
         // Operates message arguments, e.g. URL.
         p_messageArguments = handleMessageArgments(p_messageArguments);
-        
-        ResourceBundle bundle = SystemResourceBundle.getInstance()
-                .getResourceBundle(DEFAULT_RESOURCE_NAME, p_recipientEmailInfo.getEmailLocale());        
+        String companyName = CompanyWrapper.getCompanyNameById(String.valueOf(p_companyId));
+        ResourceBundle bundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
+                DEFAULT_RESOURCE_NAME, p_recipientEmailInfo.getEmailLocale(), companyName);      
         // get the subject and message
         String subject = MessageFormat.format(bundle.getString(p_subjectKey),
                 p_messageArguments);
@@ -336,14 +335,13 @@ public class MailerLocal implements Mailer
             return;
         }
 
-        ResourceBundle bundle = SystemResourceBundle.getInstance()
-                .getResourceBundle(DEFAULT_RESOURCE_NAME, Locale.getDefault());
+        String companyName = CompanyWrapper.getCompanyNameById(p_companyIdStr);
+        ResourceBundle bundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
+                DEFAULT_RESOURCE_NAME, Locale.getDefault(), companyName);
         String[] messageArguments = handleMessageArgments(p_messageArguments);
         // get the subject and message
-        String subject = MessageFormat.format(
-            bundle.getString(p_subjectKey), messageArguments);
-        String message = MessageFormat.format(
-            bundle.getString(p_messageKey),messageArguments);
+        String subject = MessageFormat.format(bundle.getString(p_subjectKey), messageArguments);
+        String message = MessageFormat.format(bundle.getString(p_messageKey), messageArguments);
 
         sendMail(from, to, null, null, subject, message, p_attachments);
     }
@@ -461,8 +459,9 @@ public class MailerLocal implements Mailer
     	{
     		p_messageArguments = buildMessageArguments(p_messageArguments);
     	}
-        ResourceBundle bundle = SystemResourceBundle.getInstance()
-                .getResourceBundle(DEFAULT_RESOURCE_NAME, p_userLocale);
+        String companyName = CompanyWrapper.getCompanyNameById(p_companyIdStr);
+        ResourceBundle bundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
+                DEFAULT_RESOURCE_NAME, p_userLocale, companyName);
         String from = null;
         try
         {

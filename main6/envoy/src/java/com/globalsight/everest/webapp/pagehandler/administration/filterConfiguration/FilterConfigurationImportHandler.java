@@ -1077,6 +1077,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                     // get new filter name
                     String newFilterName = checkFilterNameExists(name, "JsonFilter");
                     jsonFilter.setFilterName(newFilterName);
+                    jsonFilter.setBaseFilterId(baseFilterIdMap.get(jsonFilter.getBaseFilterId()));
 
                     // Judgment "json_Filter" are references "html_filter"
                     if (jsonFilter.getElementPostFilterTableName().equalsIgnoreCase(
@@ -1750,30 +1751,31 @@ public class FilterConfigurationImportHandler extends PageHandler
             map.put("companyId", Long.parseLong(companyId));
             List itList = HibernateUtil.search(hql, map);
 
-            if (itList.contains(filterName))
+            for (int i=0;i<itList.size();i++)
             {
-                for (int num = 1;; num++)
+                String name = (String)itList.get(i);
+                if (filterName.equalsIgnoreCase(name))
                 {
-                    String returnStr = null;
-                    if (filterName.contains("_import_"))
+                    for (int num = 1;; num++)
                     {
-                        returnStr = filterName.substring(0, filterName.lastIndexOf('_')) + "_"
-                                + num;
-                    }
-                    else
-                    {
-                        returnStr = filterName + "_import_" + num;
-                    }
-                    if (!itList.contains(returnStr))
-                    {
-                        return returnStr;
+                        String returnStr = null;
+                        if (filterName.contains("_import_"))
+                        {
+                            returnStr = filterName.substring(0, filterName.lastIndexOf('_')) + "_"
+                                    + num;
+                        }
+                        else
+                        {
+                            returnStr = filterName + "_import_" + num;
+                        }
+                        if (!itList.contains(returnStr))
+                        {
+                            return returnStr;
+                        }
                     }
                 }
             }
-            else
-            {
-                return filterName;
-            }
+            return filterName;
         }
 
         private FMFilter putDataIntoFMFilter(Map<String, String> valueMap)
@@ -2739,10 +2741,10 @@ public class FilterConfigurationImportHandler extends PageHandler
                 {
                     xmlRuleFilter.setXmlRuleId(Long.parseLong(valueField));
                 }
-                else if (keyField.equalsIgnoreCase("ENABLE_CONVERT_HTML_ENTITY"))
-                {
-                    xmlRuleFilter.setConvertHtmlEntity(Boolean.parseBoolean(valueField));
-                }
+                // else if (keyField.equalsIgnoreCase("ENABLE_CONVERT_HTML_ENTITY"))
+                // {
+                // xmlRuleFilter.setConvertHtmlEntity(Boolean.parseBoolean(valueField));
+                // }
                 // else if (keyField.equalsIgnoreCase("SECOND_FILTER_ID"))
                 // {
                 // xmlRuleFilter.setSecondFilterId(Long.parseLong(valueField));

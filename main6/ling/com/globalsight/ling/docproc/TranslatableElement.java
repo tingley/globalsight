@@ -31,10 +31,6 @@ public class TranslatableElement extends Segmentable implements DocumentElement
         }
 
         segments.add(p_segment);
-        if (!isPreserveWhiteSpace())
-        {
-            setPreserveWhiteSpace(p_segment.isPreserveWhiteSpace());
-        }
     }
 
     public ArrayList getSegments()

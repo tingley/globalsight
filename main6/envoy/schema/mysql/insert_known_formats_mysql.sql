@@ -330,7 +330,7 @@ INSERT INTO KNOWN_FORMAT_TYPE VALUES (
 );
 
 INSERT INTO KNOWN_FORMAT_TYPE VALUES (
-57, 'Json','JavaScript Object Notation','json',
+57, 'JSON','JavaScript Object Notation','json',
    'JSON_IMPORTED_EVENT',
    'JSON_LOCALIZED_EVENT'
 );

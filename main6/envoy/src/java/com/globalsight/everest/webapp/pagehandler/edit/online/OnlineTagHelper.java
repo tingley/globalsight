@@ -16,20 +16,20 @@
  */
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
-import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.DiplomatBasicParser;
-import com.globalsight.ling.tw.HtmlTableWriter;
+import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.HtmlEntities;
+import com.globalsight.ling.tw.HtmlTableWriter;
+import com.globalsight.ling.tw.PseudoBaseHandler;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.PseudoErrorChecker;
 import com.globalsight.ling.tw.PseudoOverrideItemException;
 import com.globalsight.ling.tw.PseudoParser;
-import com.globalsight.ling.tw.PseudoBaseHandler;
 import com.globalsight.ling.tw.PseudoParserException;
+import com.globalsight.ling.tw.Tmx2HtmlPreviewHandler;
 import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.ling.tw.XmlEntities;
-import com.globalsight.ling.tw.Tmx2HtmlPreviewHandler;
 
 /**
  * Provides access to PTag API for the editor(Copy of "OnlineApplet.java").
@@ -66,8 +66,8 @@ public class OnlineTagHelper implements PseudoBaseHandler
     private StringBuffer m_coloredPtags = null;
     private PseudoParser m_ptagParser = null;
 
-    private static final String PTAG_COLOR_START = "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=true>";
-    private static final String PTAG_COLOR_END = "</SPAN>";
+    public static final String PTAG_COLOR_START = "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=true>";
+    public static final String PTAG_COLOR_END = "</SPAN>";
     private PseudoErrorChecker m_errChecker = null;
 
     public OnlineTagHelper()
@@ -113,8 +113,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
         }
         else
         {
-            throw new Exception(
-                    "Should call setLocale() or setInputSegment() first.");
+            throw new Exception("Should call setLocale() or setInputSegment() first.");
         }
     }
 
@@ -122,8 +121,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
      * Get the current source string with maximally compressed p-tags. This
      * string would then be displayed as the initial target string.
      */
-    public String getCompact() throws DiplomatBasicParserException,
-            PseudoParserException
+    public String getCompact() throws DiplomatBasicParserException, PseudoParserException
     {
         if (m_bPTagResourcesInitialized)
         {
@@ -137,8 +135,8 @@ public class OnlineTagHelper implements PseudoBaseHandler
         }
     }
 
-    public String getNewPTagTargetString() throws DiplomatBasicParserException,
-            PseudoParserException
+    public String getNewPTagTargetString()
+            throws DiplomatBasicParserException, PseudoParserException
     {
         if (m_errChecker != null)
         {
@@ -151,13 +149,11 @@ public class OnlineTagHelper implements PseudoBaseHandler
     /**
      * Generate the HTML table (rows only) containing the p-tag to native map.
      */
-    public String getPtagToNativeMappingTable()
-            throws DiplomatBasicParserException
+    public String getPtagToNativeMappingTable() throws DiplomatBasicParserException
     {
         if (m_bPTagResourcesInitialized)
         {
-            return m_HtmlTableWriter.getSortedHtmlRows(m_withPtags
-                    .getPseudo2NativeMap());
+            return m_HtmlTableWriter.getSortedHtmlRows(m_withPtags.getPseudo2NativeMap());
         }
         else
         {
@@ -173,8 +169,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
     {
         if (m_bPTagResourcesInitialized)
         {
-            return m_HtmlTableWriter.getPtagString(m_withPtags
-                    .getPseudo2NativeMap());
+            return m_HtmlTableWriter.getPtagString(m_withPtags.getPseudo2NativeMap());
         }
         else
         {
@@ -187,8 +182,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
      * Get the current source string with descriptive p-tags. This string would
      * then be displayed as the initial target string.
      */
-    public String getVerbose() throws DiplomatBasicParserException,
-            PseudoParserException
+    public String getVerbose() throws DiplomatBasicParserException, PseudoParserException
     {
         if (m_bPTagResourcesInitialized)
         {
@@ -205,8 +199,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
     /**
      * Get the translated target string encoded with Diplomat tags.
      */
-    public String getTargetDiplomat(String p_target)
-            throws PseudoParserException
+    public String getTargetDiplomat(String p_target) throws PseudoParserException
     {
         // Empty strings arrive as NULL pointer somehow, so fix that
         if (p_target == null)
@@ -227,8 +220,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
         }
         else
         {
-            throw new PseudoParserException(
-                    "Should call setLocale() or setInputSegment() first.");
+            throw new PseudoParserException("Should call setLocale() or setInputSegment() first.");
         }
 
     }
@@ -268,8 +260,8 @@ public class OnlineTagHelper implements PseudoBaseHandler
      * @param p_segmentFormat String - an empty, null or otherwise incorrect
      * value disables addables.
      */
-    public void setInputSegment(String p_source, String p_encoding,
-            String p_segmentFormat) throws PseudoOverrideItemException
+    public void setInputSegment(String p_source, String p_encoding, String p_segmentFormat)
+            throws PseudoOverrideItemException
     {
         // Empty strings arrive as NULL pointer somehow, so fix that
         if (p_source == null)
@@ -291,7 +283,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
 
         m_withPtags.setAddables(p_segmentFormat);
     }
-    
+
     /*
      * Set the Diplomat input string and convert it to p-tags internally. After
      * setting the string, you can getCompact() or getVerbose().
@@ -303,9 +295,8 @@ public class OnlineTagHelper implements PseudoBaseHandler
      * @param p_segmentFormat String - an empty, null or otherwise incorrect
      * value disables addables.
      */
-    public void setInputSegment(String p_source, String p_encoding,
-            String p_segmentFormat, boolean p_isFromSourceTargetPanel)
-            throws PseudoOverrideItemException
+    public void setInputSegment(String p_source, String p_encoding, String p_segmentFormat,
+            boolean p_isFromSourceTargetPanel) throws PseudoOverrideItemException
     {
         // Empty strings arrive as NULL pointer somehow, so fix that
         if (p_source == null)
@@ -352,8 +343,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
      * 
      * @param
      */
-    public void setDataType(String p_dataType)
-            throws PseudoOverrideItemException
+    public void setDataType(String p_dataType) throws PseudoOverrideItemException
     {
         // we must init things here because we cannot throw exceptions
         // from the applets init() method.
@@ -368,11 +358,9 @@ public class OnlineTagHelper implements PseudoBaseHandler
 
     /**
      */
-    public void processTag(String tagName, String originalString)
-            throws PseudoParserException
+    public void processTag(String tagName, String originalString) throws PseudoParserException
     {
-        m_coloredPtags.append(PTAG_COLOR_START + originalString
-                + PTAG_COLOR_END);
+        m_coloredPtags.append(PTAG_COLOR_START + originalString + PTAG_COLOR_END);
     }
 
     /**
@@ -385,8 +373,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
     /**
      */
     public String makeCompactColoredPtags(String p_diplomat)
-            throws DiplomatBasicParserException, PseudoOverrideItemException,
-            PseudoParserException
+            throws DiplomatBasicParserException, PseudoOverrideItemException, PseudoParserException
     {
         // Empty strings arrive as NULL pointer somehow, so fix that
         if (p_diplomat == null)
@@ -407,8 +394,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
     /**
      */
     public String makeVerboseColoredPtags(String p_diplomat)
-            throws DiplomatBasicParserException, PseudoOverrideItemException,
-            PseudoParserException
+            throws DiplomatBasicParserException, PseudoOverrideItemException, PseudoParserException
     {
         // Empty strings arrive as NULL pointer somehow, so fix that
         if (p_diplomat == null)
@@ -427,8 +413,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
     }
 
     public String makeInlineVerboseColoredPtags(String p_diplomat)
-            throws DiplomatBasicParserException, PseudoOverrideItemException,
-            PseudoParserException
+            throws DiplomatBasicParserException, PseudoOverrideItemException, PseudoParserException
     {
         // Empty strings arrive as NULL pointer somehow, so fix that
         if (p_diplomat == null)
@@ -449,8 +434,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
     /**
      * Returns an HTML string ready to be displayed in a target preview frame.
      */
-    public String getTargetPreview(String p_tmxString)
-            throws DiplomatBasicParserException
+    public String getTargetPreview(String p_tmxString) throws DiplomatBasicParserException
     {
         // Empty strings arrive as NULL pointer somehow, so fix that
         if (p_tmxString == null)
@@ -519,9 +503,8 @@ public class OnlineTagHelper implements PseudoBaseHandler
      *            database if empty string or null, exception is thrown.
      * @throws Exception
      */
-    public String errorCheck(String p_target, String p_sourceWithSubContent,
-            int p_gxmlMaxLen, String p_gxmlStorageEncoding,
-            int p_nativeContentMaxLen, String p_nativeStorageEncoding)
+    public String errorCheck(String p_target, String p_sourceWithSubContent, int p_gxmlMaxLen,
+            String p_gxmlStorageEncoding, int p_nativeContentMaxLen, String p_nativeStorageEncoding)
             throws Exception
     {
         // We now allow for an empty target string. If the user
@@ -544,14 +527,12 @@ public class OnlineTagHelper implements PseudoBaseHandler
             // compact/verbose mode.
             m_withPtags.setPTagTargetString(p_target);
 
-            return m_errChecker.check(m_withPtags, p_sourceWithSubContent,
-                    p_gxmlMaxLen, p_gxmlStorageEncoding, p_nativeContentMaxLen,
-                    p_nativeStorageEncoding);
+            return m_errChecker.check(m_withPtags, p_sourceWithSubContent, p_gxmlMaxLen,
+                    p_gxmlStorageEncoding, p_nativeContentMaxLen, p_nativeStorageEncoding);
         }
         else
         {
-            throw new Exception(
-                    "Should call setLocale() or setInputSegment() first.");
+            throw new Exception("Should call setLocale() or setInputSegment() first.");
         }
     }
 
@@ -562,7 +543,7 @@ public class OnlineTagHelper implements PseudoBaseHandler
             m_errChecker.setStyles(styles);
         }
     }
-    
+
     public static void main(String[] args)
     {
         try

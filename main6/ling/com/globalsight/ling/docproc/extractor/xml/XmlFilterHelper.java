@@ -17,6 +17,7 @@
 package com.globalsight.ling.docproc.extractor.xml;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConstants;
+import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.common.srccomment.SrcCmtXmlComment;
@@ -40,11 +42,20 @@ public class XmlFilterHelper
 {
     private static final String NUMBER_ENTITY_START = "&#";
     private static final String NUMBER_ENTITY_END = ";";
+    private static HashMap<Character, String> ENTITY_MAP = null;
+    
     private XmlFilterConfigParser m_xmlFilterConfigParser = null;
     private XmlEntities m_entities = null;
     private String m_extendedWhiteSpaceChars = null;
     private XmlFilterTags tags = null;
 
+    
+    static
+    {
+        ENTITY_MAP = new HashMap<Character, String>();
+        ENTITY_MAP.putAll(HtmlEntities.mDefaultCharToEntity);
+        ENTITY_MAP.putAll(HtmlEntities.mHtmlCharToEntity);
+    }
     /**
      * Constructor
      * 
@@ -508,6 +519,17 @@ public class XmlFilterHelper
         }
 
         return -1l;
+    }
+    
+    public int getEntityHandleMode()
+    {
+        if (!isConfigParserNull())
+        {
+            int v = m_xmlFilterConfigParser.getEntityHandleMode();
+            return v;
+        }
+
+        return XmlFilterConfigParser.ENTITY_HANDLE_MODE_1;
     }
 
     public String getCdataPostFormat()
@@ -1164,7 +1186,7 @@ public class XmlFilterHelper
                 // Document doc = parser.getDocument();
                 // domNodeVisitor(doc);
 
-                String xml = saveNonAsciiAsNumberEntity(p_src);
+                String xml = saveNonAsciiAsNumberEntity(p_src, configParser.getEntityHandleMode());
                 return xml;
             }
         }
@@ -1242,7 +1264,7 @@ public class XmlFilterHelper
     // private static
     // ////////////////////////////////////////////////////////
 
-    private static String saveNonAsciiAsNumberEntity(String p_src)
+    private static String saveNonAsciiAsNumberEntity(String p_src, int entityHandleMode)
     {
         if (p_src == null || p_src.length() == 0 || p_src.trim().length() == 0)
         {
@@ -1260,7 +1282,7 @@ public class XmlFilterHelper
             {
                 ret.append(c);
             }
-            else if (isEncodeable(src, i))
+            else if (isEncodeable(src, i, entityHandleMode))
             {
                 ret.append(NUMBER_ENTITY_START).append(ci)
                         .append(NUMBER_ENTITY_END);
@@ -1274,8 +1296,16 @@ public class XmlFilterHelper
         return ret.toString();
     }
 
-    private static boolean isEncodeable(StringBuffer p_src, int index)
+    private static boolean isEncodeable(StringBuffer p_src, int index, int entityHandleMode)
     {
+        // ignore html entities
+        Character ch = new Character(p_src.charAt(index));
+
+        if (ENTITY_MAP.containsKey(ch))
+        {
+            return false;
+        }
+        
         // white space
         boolean blank = false;
         boolean lt = false;

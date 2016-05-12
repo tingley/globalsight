@@ -1259,12 +1259,14 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             throw new LingManagerException(e);
         }
 
-        Map<Long, String> srcTuvId2SidMap = getTuvId2SidMap(p_sourcePage);
-
+        Map<Long, Tuv> srcTuvId2TuvMap = new HashMap<Long, Tuv>();
+        if (leverageOptions.getUniqueFromMultipleTranslation())
+        {
+            srcTuvId2TuvMap = getTuvId2TuvMap(p_sourcePage);
+        }
         while (itLeverageMatches != null && itLeverageMatches.hasNext())
         {
-            LeverageMatches levMatches = (LeverageMatches) itLeverageMatches
-                    .next();
+            LeverageMatches levMatches = (LeverageMatches) itLeverageMatches.next();
 
             // walk through all target locales in the LeverageMatches
             Iterator itLocales = levMatches.targetLocaleIterator(jobId);
@@ -1272,14 +1274,12 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             {
                 try
                 {
-                    GlobalSightLocale targetLocale = (GlobalSightLocale) itLocales
-                            .next();
+                    GlobalSightLocale targetLocale = (GlobalSightLocale) itLocales.next();
 
                     // walk through all matches in the locale
-                    Collection<LeverageMatch> subNonClobMatches = getNonClobMatches(
-                            p_connection, levMatches, targetLocale,
-                            leverageOptions, p_sourcePage, null,
-                            srcTuvId2SidMap);
+                    Collection<LeverageMatch> subNonClobMatches = getNonClobMatches(p_connection,
+                            levMatches, targetLocale, leverageOptions, p_sourcePage, null,
+                            srcTuvId2TuvMap);
                     nonClobMatches.addAll(subNonClobMatches);
                 }
                 catch (Exception e)
@@ -1297,21 +1297,22 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         }
     }
 
-    public void saveLeverageResults(Connection p_connection,
-            long p_sourcePageId,
-            Map<Long, LeverageMatches> p_leverageMatchesMap,
-            GlobalSightLocale p_targetLocale, LeverageOptions p_leverageOptions)
-            throws LingManagerException
+    public void saveLeverageResults(Connection p_connection, long p_sourcePageId,
+            Map<Long, LeverageMatches> p_leverageMatchesMap, GlobalSightLocale p_targetLocale,
+            LeverageOptions p_leverageOptions) throws LingManagerException
     {
         Set<LeverageMatch> nonClobMatches = new HashSet<LeverageMatch>();
 
         SourcePage srcPage = null;
-        Map<Long, String> srcTuvId2SidMap = null;
+        Map<Long, Tuv> srcTuvId2TuvMap = new HashMap<Long, Tuv>();
         long jobId = -1;
         try
         {
             srcPage = ServerProxy.getPageManager().getSourcePage(p_sourcePageId);
-            srcTuvId2SidMap = getTuvId2SidMap(srcPage);
+            if (p_leverageOptions.getUniqueFromMultipleTranslation())
+            {
+                srcTuvId2TuvMap = getTuvId2TuvMap(srcPage);
+            }
             jobId = srcPage.getJobId();
         }
         catch (Exception e)
@@ -1320,18 +1321,16 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     + p_sourcePageId);
         }
 
-        for (Map.Entry<Long, LeverageMatches> entry : p_leverageMatchesMap
-                .entrySet())
+        for (Map.Entry<Long, LeverageMatches> entry : p_leverageMatchesMap.entrySet())
         {
             Long originalSourceTuvId = (Long) entry.getKey();
             LeverageMatches levMatches = (LeverageMatches) entry.getValue();
 
             try
             {
-                Collection<LeverageMatch> matches = getNonClobMatches(
-                        p_connection, levMatches, p_targetLocale,
-                        p_leverageOptions, srcPage, originalSourceTuvId,
-                        srcTuvId2SidMap);
+                Collection<LeverageMatch> matches = getNonClobMatches(p_connection, levMatches,
+                        p_targetLocale, p_leverageOptions, srcPage, originalSourceTuvId,
+                        srcTuvId2TuvMap);
                 nonClobMatches.addAll(matches);
             }
             catch (Exception e)
@@ -1576,12 +1575,10 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
      * 
      */
     @SuppressWarnings({ "rawtypes"})
-    private Collection<LeverageMatch> getNonClobMatches(
-            Connection p_connection, LeverageMatches p_levMatches,
-            GlobalSightLocale p_targetLocale,
-            LeverageOptions p_leverageOptions, SourcePage p_sourcePage,
-            Long p_originalSourceTuvId, Map<Long, String> p_srcTuvId2SidMap)
-            throws Exception
+    private Collection<LeverageMatch> getNonClobMatches(Connection p_connection,
+            LeverageMatches p_levMatches, GlobalSightLocale p_targetLocale,
+            LeverageOptions p_leverageOptions, SourcePage p_sourcePage, Long p_originalSourceTuvId,
+            Map<Long, Tuv> p_srcTuvId2TuvMap) throws Exception
     {
         Collection<LeverageMatch> allLeverageMatches = new ArrayList<LeverageMatch>();
 
@@ -1688,15 +1685,18 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         }
 
         Collection<LeverageMatch> results = new ArrayList<LeverageMatch>();
+        if (allLeverageMatches.size() == 0)
+        {
+            return results;
+        }
+
         // If "Get Unique from Multiple Exact Matches" is checked in TM profile...
         if (p_leverageOptions.getUniqueFromMultipleTranslation())
         {
-            int mode = UpdateLeverageHelper.getMode(p_leverageOptions
-                    .getTmProfile());
-            boolean isTmProcedence = p_leverageOptions.getTmProfile()
-                    .isTmProcendence();
-            filterMatchesForMultipleTranslations(results, allLeverageMatches,
-                    p_srcTuvId2SidMap, isTmProcedence, mode, p_sourcePage);
+            int mode = UpdateLeverageHelper.getMode(p_leverageOptions.getTmProfile());
+            boolean isTmProcedence = p_leverageOptions.getTmProfile().isTmProcendence();
+            filterMatchesForMultipleTranslations(results, allLeverageMatches, p_srcTuvId2TuvMap,
+                    isTmProcedence, mode, p_sourcePage);
         }
         else
         {
@@ -1715,20 +1715,16 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
      * @param mode
      * @throws Exception 
      */
-    private void filterMatchesForMultipleTranslations(
-            Collection<LeverageMatch> results,
-            Collection<LeverageMatch> allLeverageMatches,
-            Map<Long, String> p_srcTuvId2SidMap, boolean isTmProcedence,
-            int mode, SourcePage sourcePage) throws Exception
+    private void filterMatchesForMultipleTranslations(Collection<LeverageMatch> results,
+            Collection<LeverageMatch> allLeverageMatches, Map<Long, Tuv> p_srcTuvId2TuvMap,
+            boolean isTmProcedence, int mode, SourcePage sourcePage) throws Exception
     {
-    	ArrayList<Tuv> srcTuvs = SegmentTuvUtil.getSourceTuvs(sourcePage);
-    	Map<Long, Tuv> srcTuvMap = new HashMap<Long, Tuv>();
-    	for (Tuv tuv : srcTuvs)
-    	{
-    		srcTuvMap.put(tuv.getIdAsLong(), tuv);
-    	}
-
-    	// SourceTuvId_subId : List<LeverageMatch>
+        // Just in case
+        if (p_srcTuvId2TuvMap == null || p_srcTuvId2TuvMap.size() == 0)
+        {
+            p_srcTuvId2TuvMap = getTuvId2TuvMap(sourcePage);
+        }
+        // SourceTuvId_subId : List<LeverageMatch>
         Map<String, List<LeverageMatch>> map = new HashMap<String, List<LeverageMatch>>();
         for (LeverageMatch lm : allLeverageMatches)
         {
@@ -1794,8 +1790,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
 
                     // Check to see if there is SID matched leverage match.
                     LeverageMatch sidMatchedLM = null;
-                    String tuvSID = p_srcTuvId2SidMap.get(
-                            listForOne.get(0).getOriginalSourceTuvId());
+                    String tuvSID = p_srcTuvId2TuvMap.get(
+                            listForOne.get(0).getOriginalSourceTuvId()).getSid();
                     if (tuvSID != null)
                     {
                         sidMatchedLM = getSidMatchedLeverageMatchData(tuvSID,
@@ -1804,9 +1800,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
 
                     if (sidMatchedLM != null)
                     {
-                        sidMatchedLM
-                                .setMatchType(MatchState.SEGMENT_TM_EXACT_MATCH
-                                        .getName());
+                        sidMatchedLM.setMatchType(MatchState.SEGMENT_TM_EXACT_MATCH.getName());
                         results.add(sidMatchedLM);
                     }
                     else
@@ -1814,7 +1808,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     	boolean flag = false;
                     	for (LeverageMatch lm : listForOne)
                     	{
-                    		Tuv srcTuv = srcTuvMap.get(lm.getOriginalSourceTuvId());
+                    		Tuv srcTuv = p_srcTuvId2TuvMap.get(lm.getOriginalSourceTuvId());
                     		if (srcTuv.getPreviousHash() != -1 && srcTuv.getNextHash() != -1 
                     				&& srcTuv.getPreviousHash() == lm.getPreviousHash()
                     				&& srcTuv.getNextHash() == lm.getNextHash())
@@ -1940,26 +1934,22 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         }
     }
 
-    private Map<Long, String> getTuvId2SidMap(SourcePage p_sourcePage)
+    private Map<Long, Tuv> getTuvId2TuvMap(SourcePage p_sourcePage)
     {
-        Map<Long, String> srcTuvId2SidMap = new HashMap<Long, String>();
+        Map<Long, Tuv> srcTuvId2TuvMap = new HashMap<Long, Tuv>();
         try
         {
-            ArrayList<Tuv> tuvs = SegmentTuvUtil.getSourceTuvs(p_sourcePage,
-                    false);
+            ArrayList<Tuv> tuvs = SegmentTuvUtil.getSourceTuvs(p_sourcePage, false);
             for (Tuv srcTuv : tuvs)
             {
-                if (srcTuv.getSid() != null)
-                {
-                    srcTuvId2SidMap.put(srcTuv.getIdAsLong(), srcTuv.getSid());
-                }
-            }            
+                srcTuvId2TuvMap.put(srcTuv.getIdAsLong(), srcTuv);
+            }
         }
         catch (Exception e)
         {
             
         }
-        return srcTuvId2SidMap;
+        return srcTuvId2TuvMap;
     }
 
     /**

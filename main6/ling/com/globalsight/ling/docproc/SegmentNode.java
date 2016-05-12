@@ -25,8 +25,6 @@ public class SegmentNode implements Cloneable
     private boolean isLeadingWS = false;
     private boolean isTrailingWS = false;
     private String m_srcComment = null;
-    // GBS-4336
-    private boolean m_preserveWhiteSpace = false;
 
     /**
      * SegmentNode constructor comment.
@@ -121,16 +119,6 @@ public class SegmentNode implements Cloneable
     public void setIsTrailingWS(boolean isTrailingWS)
     {
         this.isTrailingWS = isTrailingWS;
-    }
-
-    public boolean isPreserveWhiteSpace()
-    {
-        return m_preserveWhiteSpace;
-    }
-
-    public void setPreserveWhiteSpace(boolean p_preserveWhiteSpace)
-    {
-        m_preserveWhiteSpace = p_preserveWhiteSpace;
     }
 
     public boolean outputToSkeleton()

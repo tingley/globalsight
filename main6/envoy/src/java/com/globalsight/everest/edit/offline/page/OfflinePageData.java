@@ -42,8 +42,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -246,8 +244,6 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
     // For XLF/OmegaT translation kit, store its tuID to target "state"
     // attribute value.
     private HashMap<String, String> tuId2XlfTrgStateMap = new HashMap<String, String>();
-    // GBS-4336
-    private final static Pattern P_LF = Pattern.compile("<ph type=\"x-lf\"[^>]*?>\n</ph>");
 
     /**
      * Constructor.
@@ -2488,15 +2484,12 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
 
     private String convertLf(String s, int tmxLevel)
     {
-        Matcher m = P_LF.matcher(s);
-        while (m.find())
+        String replace = "";
+        if (tmxLevel != TmxUtil.TMX_LEVEL_ONE)
         {
-            if (tmxLevel == TmxUtil.TMX_LEVEL_ONE)
-            {
-                s = StringUtil.replace(s, m.group(), "");
-            }
+            replace = "<ph type=\"LF\">[LF]</ph>";
         }
-        return s;
+        return s.replace("\n", replace);
     }
 
     public void writeOfflineTmxFile(OutputStreamWriter p_outputStream, DownloadParams p_params,

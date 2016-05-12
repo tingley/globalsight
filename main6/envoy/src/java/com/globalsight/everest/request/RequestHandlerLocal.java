@@ -78,7 +78,7 @@ public class RequestHandlerLocal implements RequestHandler
 
     // used for email messages - keys into property file
     // subject and message keys for all import failures
-    private static final String IMPORT_FAILED_MESSAGE = "importFailedMessage";
+    public static final String IMPORT_FAILED_MESSAGE = "importFailedMessage";
 
     // max size (in bytes) of the job name
     public static final int MAX_JOBNAME_SIZE = 320;

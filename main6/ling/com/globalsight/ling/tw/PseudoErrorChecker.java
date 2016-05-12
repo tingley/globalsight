@@ -822,7 +822,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
                 // mapped to.
                 m_TrgTagList.setElementAt(firstUnusedErasable, m_TrgTagList.indexOf(strTrgTagName));
             }
-            else if (m_PseudoData.isAddableAllowed(strTrgTagName))
+            else if (m_PseudoData.isAddableAllowed())
             {
                 // search addable tags (when allowed)
                 String mapKey = m_PseudoData.isAddableTag(strTrgTagName);

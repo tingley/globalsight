@@ -25,8 +25,6 @@ public class DiplomatParserState
     private int m_elementType = -1;
     private String m_format = null;
     private String m_type = null;
-    // GBS-4336
-    private boolean m_preserveWhiteSpace = false;
 
     /**
      * Set our element and format types.
@@ -36,13 +34,6 @@ public class DiplomatParserState
         m_elementType = p_elementType;
         m_format = p_format;
         m_type = p_type;
-    }
-
-    public DiplomatParserState(int p_elementType, String p_format, String p_type,
-            boolean p_preserveWhiteSpace)
-    {
-        this(p_elementType, p_format, p_type);
-        m_preserveWhiteSpace = p_preserveWhiteSpace;
     }
 
     /**
@@ -80,10 +71,5 @@ public class DiplomatParserState
     public String getType()
     {
         return m_type;
-    }
-
-    public boolean isPreserveWhiteSpace()
-    {
-        return m_preserveWhiteSpace;
     }
 }

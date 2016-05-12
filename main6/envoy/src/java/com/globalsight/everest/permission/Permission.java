@@ -347,6 +347,7 @@ public class Permission
     static public final String ACCOUNT_NOTIFICATION_GENERAL = "account.notification.general";
     static public final String ACCOUNT_NOTIFICATION_NOMATCHES = "account.notification.noMatchesInJobEmail";
     static public final String ACCOUNT_NOTIFICATION_REPETITIONS = "account.notification.repetitionsInJobEmail";
+    static public final String ACCOUNT_NOTIFICATION_EDIT_EMAIL_TEMPLATE = "account.notification.editEmailTemplate";
     static public final String SOURCE_PAGE_EDIT = "sourcepage.edit";
     static public final String COMMENT_ACCESS_RESTRICTED = "comment.access.restricted";
     static public final String JOB_SOURCE_WORDCOUNT_TOTAL = "job.source.wordcount.total";
@@ -1106,6 +1107,8 @@ public class Permission
         added = addPermission(425, BASE_TEXT_FILTER_INTERNAL_TEXT) || added;
         added = addPermission(426, BASE_TEXT_FILTER_ESCAPING) || added;
 
+        added = addPermission(427, ACCOUNT_NOTIFICATION_EDIT_EMAIL_TEMPLATE) || added;
+        
         return added;
     }
 

@@ -33,6 +33,7 @@ import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.download.DownloadHelper;
+import com.globalsight.everest.edit.offline.page.OfflinePageDataGenerator;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
@@ -562,8 +563,7 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
 
         String src_atn = "";
         boolean has_src_atn = false;
-        boolean atnEnabled = (m_segmentCounter <= m_page
-                .getAnnotationThreshold());
+        boolean atnEnabled = (m_segmentCounter <= m_page.getAnnotationThreshold());
 
         m_outputStream.write("{" + m_strExternalStyle
                 + AmbassadorDwUpConstants.SEGMENT_RESOURCE_KEY + " ");
@@ -592,9 +592,9 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
                 String term_atn = null;
                 boolean has_term_atn = false;
 
-                tm_atn = makeTMAnnotation(
-                        AmbassadorDwUpConstants.LABEL_ANNOTATION_ID_TM,
-                        AmbassadorDwUpConstants.LABEL_ANNOTATION_ID_TM, p_osd);
+                // TM and MT annotations are together, maybe we need add separate "makeMTAnnotation".
+                String resourcesLink = getResourcesAnnotationLink(p_osd);
+                tm_atn = makeTMAnnotation(resourcesLink, resourcesLink, p_osd);
                 boolean has_tm_atn = (tm_atn.length() > 0);
 
                 if (p_osd.hasTerminology())
@@ -627,34 +627,7 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
         else
         // insert single hyperlink to resource page
         {
-            StringBuffer sb = new StringBuffer();
-
-            // make link name
-            if (!m_isTradosRtf)
-            {
-                sb.append(AmbassadorDwUpConstants.LABEL_LINK_SOURCE);
-            }
-
-            if (p_osd.hasTMMatches())
-            {
-                sb.append(!m_isTradosRtf ? ", "
-                        + AmbassadorDwUpConstants.LABEL_LINK_TM
-                        : AmbassadorDwUpConstants.LABEL_LINK_TM);
-            }
-
-            if (p_osd.hasTerminology())
-            {
-                sb.append(p_osd.hasTMMatches() ? ", "
-                        + AmbassadorDwUpConstants.LABEL_LINK_TERM
-                        : AmbassadorDwUpConstants.LABEL_LINK_TERM);
-            }
-
-            if (p_osd.hasMTMatches())
-            {
-            	sb.append(p_osd.hasTMMatches() ? ", "
-                        + AmbassadorDwUpConstants.LABEL_LINK_MT
-                        : AmbassadorDwUpConstants.LABEL_LINK_MT);
-            }
+            String resourcesLink = getResourcesLink(p_osd);
 
             String pageid = p_osd.getPageId() == -1 ? m_page.getPageId() : "" + p_osd.getPageId();
             // escaped for rtf
@@ -674,11 +647,67 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
 
             m_outputStream.write(makeMsWordHyperLink(url,
                     p_osd.getDisplaySegmentID(),
-                    AmbassadorDwUpConstants.LINK_TIP_RESPAGE, sb.toString(),
+                    AmbassadorDwUpConstants.LINK_TIP_RESPAGE, resourcesLink,
                     m_strExternalStyle, COLOR_GREY));
             // See Trados Note in header
             m_outputStream.write("}\\par" + m_strEOL);
         }
+    }
+
+    
+    // "Annotations" IS checked
+    private String getResourcesAnnotationLink(OfflineSegmentData p_osd)
+    {
+        StringBuffer sb = new StringBuffer();
+        if (p_osd.hasTMMatches())
+        {
+            sb.append(sb.length() > 0 ? ", "
+                    + AmbassadorDwUpConstants.LABEL_LINK_TM
+                    : AmbassadorDwUpConstants.LABEL_LINK_TM);
+        }
+
+        if (p_osd.hasMTMatches())
+        {
+            sb.append(sb.length() > 0 ? ", "
+                    + AmbassadorDwUpConstants.LABEL_LINK_MT
+                    : AmbassadorDwUpConstants.LABEL_LINK_MT);
+        }
+
+        return sb.toString();
+    }
+
+    // "Annotations" is NOT checked
+    private String getResourcesLink(OfflineSegmentData p_osd)
+    {
+        StringBuffer sb = new StringBuffer();
+        // make link name
+        if (!m_isTradosRtf)
+        {
+            sb.append(AmbassadorDwUpConstants.LABEL_LINK_SOURCE);
+        }
+
+        if (p_osd.hasTMMatches())
+        {
+            sb.append(sb.length() > 0 ? ", "
+                    + AmbassadorDwUpConstants.LABEL_LINK_TM
+                    : AmbassadorDwUpConstants.LABEL_LINK_TM);
+        }
+
+        if (p_osd.hasMTMatches())
+        {
+            sb.append(sb.length() > 0 ? ", "
+                    + AmbassadorDwUpConstants.LABEL_LINK_MT
+                    : AmbassadorDwUpConstants.LABEL_LINK_MT);
+        }
+
+        if (p_osd.hasTerminology())
+        {
+            sb.append(sb.length() > 0 ? ", "
+                    + AmbassadorDwUpConstants.LABEL_LINK_TERM
+                    : AmbassadorDwUpConstants.LABEL_LINK_TERM);
+        }
+
+        return sb.toString();
     }
 
     /**
@@ -1267,10 +1296,13 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
         for (int i = 0; i < l2.size(); i++)
         {
             LeverageMatch lm = (LeverageMatch) l1.get(i);
-
+            float scoreNum = lm.getScoreNum();
+            if (lm.isMtLeverageMatch())
+            {
+                scoreNum = OfflinePageDataGenerator.MT_SCORE_FOR_OFFLINE_KIT;
+            }
             sb.append((lm == null) ? "\\i [??] \\i0   " : "\\i ["
-                    + StringUtil.formatPercent(lm.getScoreNum(), 2)
-                    + "%]\\i0   ");
+                    + StringUtil.formatPercent(scoreNum, 2) + "%]\\i0   ");
 
             sb.append(formatSegmentText((String) l2.get(i), m_strInternalStyle,
                     m_targetIsRtlLang, false, p_osd.getDisplaySegmentFormat(),

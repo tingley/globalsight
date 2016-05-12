@@ -105,7 +105,7 @@ function deletermImgOver() {
 <html>
 <head>
 <style>
-BODY, #idTable, #idTable2 { font-family: verdana; font-size: 10pt; }
+BODY, #idTable, #idTable2 { font-family: Arial; font-size: 9pt; }
 BODY { margin: 0; }
 #idTable { margin-left: 10px; margin-right: 10px; }
 

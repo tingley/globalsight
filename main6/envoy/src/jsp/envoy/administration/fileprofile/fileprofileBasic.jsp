@@ -1161,7 +1161,7 @@ function isPO()
 
 function isJson(format)
 {
-	return isSpecialFormat("Json");
+	return isSpecialFormat("JSON");
 }
 
 function isJavaScript()

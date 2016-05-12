@@ -40,10 +40,11 @@ public class XmlEntities
 
     // These objects must be Hashtables since this class gets loaded
     // by the Online Editor Applet.
-    private static final Hashtable
-        mDefaultCharToEntity = mapXmlDefaultCharToEntity();
-    private static final Hashtable
-        mDefaultEntityToChar = mapXmlDefaultEntityToChar();
+    public static final Hashtable<Character, String> mDefaultCharToEntity = mapXmlDefaultCharToEntity();
+    public static final Hashtable<String, Character> mDefaultEntityToChar = mapXmlDefaultEntityToChar();
+
+    public static final Hashtable<Character, String> m3CharToEntity = mapXml3CharToEntity();
+    public static final Hashtable<String, Character> m3EntityToChar = mapXml3EntityToChar();
 
 
     /**
@@ -314,9 +315,9 @@ public class XmlEntities
     }
 
 
-    private static Hashtable mapXmlDefaultCharToEntity()
+    private static Hashtable<Character, String> mapXmlDefaultCharToEntity()
     {
-        Hashtable h = new Hashtable();
+        Hashtable<Character, String> h = new Hashtable<Character, String>();
         h.put(new Character('<'), "&lt;");
         h.put(new Character('>'), "&gt;");
         h.put(new Character('&'), "&amp;");
@@ -326,14 +327,33 @@ public class XmlEntities
     }
 
 
-    private static Hashtable mapXmlDefaultEntityToChar()
+    private static Hashtable<String, Character> mapXmlDefaultEntityToChar()
     {
-        Hashtable h = new Hashtable();
+        Hashtable<String, Character> h = new Hashtable<String, Character>();
         h.put("&lt;", new Character('<'));
         h.put("&gt;", new Character('>'));
         h.put("&amp;", new Character('&'));
         h.put("&apos;", new Character('\''));
         h.put("&quot;", new Character('"'));
+        return h;
+    }
+    
+    private static Hashtable<Character, String> mapXml3CharToEntity()
+    {
+        Hashtable<Character, String> h = new Hashtable<Character, String>();
+        h.put(new Character('<'), "&lt;");
+        h.put(new Character('>'), "&gt;");
+        h.put(new Character('&'), "&amp;");
+        return h;
+    }
+
+
+    private static Hashtable<String, Character> mapXml3EntityToChar()
+    {
+        Hashtable<String, Character> h = new Hashtable<String, Character>();
+        h.put("&lt;", new Character('<'));
+        h.put("&gt;", new Character('>'));
+        h.put("&amp;", new Character('&'));
         return h;
     }
 

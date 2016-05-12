@@ -323,7 +323,7 @@ public class ActivityMainHandler extends PageHandler implements
         boolean isEditable = true;
         int typeValue = Integer.parseInt(p_request.getParameter(ActivityConstants.TYPE));
 
-        if (typeValue == Activity.TYPE_REVIEW_EDITABLE)
+        if (typeValue == Activity.TYPE_REVIEW)
         {
             isEditable = false;
         }

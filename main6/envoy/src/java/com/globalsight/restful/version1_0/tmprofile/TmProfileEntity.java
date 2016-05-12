@@ -15,7 +15,7 @@
  *
  */
 
-package com.globalsight.restful.tmprofile;
+package com.globalsight.restful.version1_0.tmprofile;
 
 import java.io.Serializable;
 import java.util.ArrayList;

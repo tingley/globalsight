@@ -15,7 +15,7 @@
  *
  */
 
-package com.globalsight.restful.tm;
+package com.globalsight.restful.version1_0.tm;
 
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.FORMAT;
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.FROM_WORLDSERVER;
@@ -148,7 +148,7 @@ import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.webservices.WebServiceException;
 
-@Path("/companies/{companyName}/tms")
+@Path("/1.0/companies/{companyName}/tms")
 public class TmResource extends RestResource
 {
     public static final String GET_TMS = "getTms";

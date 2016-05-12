@@ -720,8 +720,8 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
             }
 
             // For "Entity Encode issue"
-            if (ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format)
-                    && m_convertHtmlEntityForHtml)
+            if (ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format) && m_convertHtmlEntityForHtml
+                    && (!ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat)))
             {
                 if (isContent())
                 {
@@ -735,27 +735,6 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                 if (isContent())
                 {
                     tmp = convertHtmlEntityForXml(tmp);
-                }
-            }
-
-            if (FORMAT_XML.equalsIgnoreCase(mainFormat))
-            {
-                if (FORMAT_HTML.equalsIgnoreCase(format))
-                {
-                    if ((isXmlFilterConfigured
-                            && m_entityModeForXml != XmlFilterConstants.ENTITY_HANDLE_MODE_5)
-                            || !isXmlFilterConfigured)
-                    {
-                        tmp = tmp.replaceAll("&apos;", "\'");
-                        tmp = tmp.replaceAll("&quot;", "\"");
-                    }
-
-                    if (m_isCDATA && isXmlFilterConfigured
-                            && m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_5)
-                    {
-                        tmp = encode(tmp);
-                        tmp = tmp.replace("&amp;amp;nbsp;", "&amp;nbsp;");
-                    }
                 }
             }
 
@@ -777,7 +756,8 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                 }
             }
 
-            if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(format))
+            if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(format)
+                    || ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat))
             {
                 if (isContent())
                 {
@@ -1084,7 +1064,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                         }
 
                         // attribute start
-                        if (!m_isAttr && tmp.matches(".*?[a-zA-Z]+[\\s]*=[\\s]*[\"']$"))
+                        if (!m_isAttr && tmp.matches("(?s).*?[a-zA-Z]+[\\s]*=[\\s]*[\"']$"))
                         {
                             m_isAttr = true;
                         }

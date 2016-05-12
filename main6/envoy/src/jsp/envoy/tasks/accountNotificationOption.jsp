@@ -247,6 +247,26 @@ $(document).ready(function() {
 	    });
 	})
 
+	$("#reset").click(function(){
+		$.ajax({
+			type:'get',
+			url:"/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&action=reset",
+	        data:{
+		          'subjectKey':$("#subjectKey").val(),
+		          'messageKey':$("#messageKey").val(),
+	        },
+		    dataType:"json",
+		    success:function(data)
+		    {
+		    	alert("Reset successful");
+	        	$("#subjectKey").val(data.subjectKey);
+	        	$("#messageKey").val(data.messageKey);
+	        	$("#subjectText").val(data.subjectText);
+	        	$("#messageText").val(data.messageText);
+		    }
+		});
+	})
+	
 	$("#save").click(function(){
 		$.ajax({
 		    type:'post',
@@ -459,7 +479,10 @@ $(document).ready(function() {
       <tr><td>&nbsp;&nbsp;</td></tr>
       <tr><td class="standardText">Message</td></tr>
       <tr><td><textarea rows="10" cols="80" id="messageText"></textarea></td></tr>
-      <tr><td style="padding-top:10px" colspan="3"><input type="button" value="Save" id="save"><td></tr>
+      <tr><td style="padding-top:10px" colspan="3">
+           <input type="button" value="Save" id="save">
+           <input type="button" value="Reset" id="reset">
+      <td></tr>
 </table>
 </form>
 </BODY>

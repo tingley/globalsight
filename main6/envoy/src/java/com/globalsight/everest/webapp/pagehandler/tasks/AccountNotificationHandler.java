@@ -178,6 +178,18 @@ public class AccountNotificationHandler extends PageHandler
             }
             return;
         }
+        else if ("reset".equals(action))
+        {
+            try
+            {
+                resetEmailTemplate(request, session, response);
+            }
+            catch (Exception e)
+            {
+                logger.error(e);
+            }
+            return;
+        }
         // Call parent invokePageHandler() to set link beans and invoke JSP
         super.invokePageHandler(pageDescriptor, request, response, context);
     }
@@ -185,6 +197,69 @@ public class AccountNotificationHandler extends PageHandler
     // ////////////////////////////////////////////////////////////////////
     // Begin: Local Methods
     // ////////////////////////////////////////////////////////////////////
+
+    /**
+     * Resets email content template to the most origin template.
+     */
+    private void resetEmailTemplate(HttpServletRequest p_request, HttpSession p_session,
+            HttpServletResponse response) throws Exception
+    {
+        PrintWriter writer = response.getWriter();
+        String subjectKey = p_request.getParameter("subjectKey");
+        String messageKey = p_request.getParameter("messageKey");
+
+        String userId = (String) p_session.getAttribute(WebAppConstants.USER_NAME);
+        User user = ServerProxy.getUserManager().getUser(userId);
+        Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
+        ResourceBundle resetBundle = SystemResourceBundle.getInstance().getResourceBundle(
+                MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale);
+        ResourceBundle emailBundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
+                MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale, user.getCompanyName());
+
+        String subjectReset = resetBundle.getString(subjectKey);
+        String messageReset = keepEscapeCharacter(StringUtil.replace(
+                resetBundle.getString(messageKey), "\r\n", "\\r\\n\\\r\n"));
+        String messageCur = keepEscapeCharacter(StringUtil.replace(
+                emailBundle.getString(messageKey), "\r\n", "\\r\\n\\\r\n"));
+
+        String newFilepath = getClass().getResource(
+                RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties").getFile();
+        String editTemplatePath = newFilepath.substring(1, newFilepath.lastIndexOf("/"));
+        File newFile = new File(editTemplatePath, "EmailMessageResource_" + user.getCompanyName()
+                + "_" + uiLocale + ".properties");
+
+        FileInputStream fis = null;
+        if (newFile.exists())
+        {
+            fis = (FileInputStream) getClass().getResourceAsStream(
+                    RESOURCE_LOCATION + "EmailMessageResource_" + user.getCompanyName() + "_"
+                            + uiLocale + ".properties");
+        }
+        else
+        {
+            newFile.getParentFile().mkdirs();
+            fis = (FileInputStream) getClass().getResourceAsStream(
+                    RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties");
+        }
+
+        String content = FileUtil.readFile(fis, "utf-8");
+        content = content.replaceFirst(subjectKey + "\\s*=([^\r\n]*)", subjectKey + "="
+                + subjectReset);
+        content = StringUtil.replace(content, messageCur, messageReset);
+        FileUtil.writeFile(newFile, content);
+        String key = MailerLocal.DEFAULT_RESOURCE_NAME + "_" + user.getCompanyName() + "_"
+                + uiLocale;
+        SystemResourceBundle.getInstance().removeResourceBundleKey(key);
+        JSONObject json = new JSONObject();
+        json.put("subjectKey", subjectKey);
+        json.put("messageKey", messageKey);
+        json.put("subjectText", subjectReset);
+        json.put("messageText", messageReset);
+
+        writer.write(json.toString());
+        writer.flush();
+        writer.close();
+    }
 
     /**
      * Edits email content template.
@@ -214,6 +289,9 @@ public class AccountNotificationHandler extends PageHandler
         json.put("messageText", messageText);
         writer.write(json.toString());
         writer.flush();
+        writer.close();
+        
+        
     }
     
     /**

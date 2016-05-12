@@ -819,7 +819,7 @@ public class TmResource extends RestResource
                 return Response.status(200).entity("Unable to find TU by tuId: " + p_tuId).build();
             }
 
-            if (tm3Tu.getTm().getId() != ptm.getTm3Id())
+            if (!tm3Tu.getTm().getId().equals(ptm.getTm3Id()))
             {
                 throw new RestWebServiceException("The tu Id " + p_tuId
                         + " does not belong to tm: " + p_tmId);
@@ -1472,17 +1472,12 @@ public class TmResource extends RestResource
             TM3Attribute projectAttr = TM3Util.getAttr(tm3tm, UPDATED_BY_PROJECT);
             for (TM3Tu<GSTuvData> tm3tu : tus)
             {
-                if (tm3tu.getTm().getId() == ptm.getTm3Id())
+                if (tm3tu.getTm().getId().equals(ptm.getTm3Id()))
                 {
                     SegmentTmTu segmentTmTu = TM3Util.toSegmentTmTu(tm3tu, ptm.getId(), formatAttr,
                             typeAttr, sidAttr, fromWsAttr, translatableAttr, projectAttr);
                     resultList.add(segmentTmTu);
                 }
-//                else
-//                {
-//                    throw new RestWebServiceException("Tu id (" + tm3tu.getId()
-//                            + ") does not belong to current tm.");
-//                }
             }
             if (resultList.size() > 0)
             {
@@ -1527,12 +1522,12 @@ public class TmResource extends RestResource
                 String[] ids = tuId.split("-");
                 if (ids.length == 1)
                 {
-                    tuIdSet.add(Long.parseLong(ids[0]));
+                    tuIdSet.add(Long.parseLong(ids[0].trim()));
                 }
                 else if (ids.length == 2)
                 {
-                    long start = Long.parseLong(ids[0]);
-                    long end = Long.parseLong(ids[1]);
+                    long start = Long.parseLong(ids[0].trim());
+                    long end = Long.parseLong(ids[1].trim());
                     if (start <= end)
                     {
                         for (long i = start; i <= end; i++)

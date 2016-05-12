@@ -690,16 +690,16 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                             m_l10nContent.getLastChar());
                 }
             }
-            
+
             if (isContent() && FORMAT_JSON.equals(mainFormat)
                     && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format))
             {
-                //"Convert HTML Entity For Export" is selected
+                // "Convert HTML Entity For Export" is selected
                 if (m_convertHtmlEntityForJson)
                 {
                     tmp = encoding(tmp, false);
                 }
-              //"Convert HTML Entity For Export" is not selected
+                // "Convert HTML Entity For Export" is not selected
                 else
                 {
                     StringBuffer strBuffer = new StringBuffer();
@@ -965,9 +965,6 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                                     IdmlHelper.LINE_BREAK);
                         }
                     }
-                    // GBS-3997&GBS-4066
-                    chunk = EmojiUtil.parseEmojiTagToAlias(chunk);
-
                     // GBS-3722
                     chunk = MTHelper.cleanMTTagsForExport(chunk);
                     String escapingChars = null;
@@ -980,6 +977,9 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
 
                     String newchunk = EscapingHelper.handleString4Export(chunk, m_escapings,
                             srcDataType, false, true, escapingChars, isInCDATA);
+
+                    // GBS-3997&GBS-4066
+                    newchunk = EmojiUtil.parseEmojiTagToAlias(newchunk);
 
                     parseDiplomatSnippet(addSpanRtl(newchunk));
                     m_stateStack.pop();
@@ -1203,7 +1203,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
             boolean isXmlFormat = ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(format);
             boolean isHtmlFormat = ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format);
             boolean isJsonFormat = ExtractorRegistry.FORMAT_JSON.equalsIgnoreCase(format);
-            
+
             if (isHtmlFormat)
             {
                 HtmlFilter htmlFilter = FilterHelper.getHtmlFilter(m_filterId);
@@ -1223,8 +1223,8 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                     if (jsonFilter.getElementPostFilterId() != -1
                             && jsonFilter.getElementPostFilterTableName() != null)
                     {
-                        HtmlFilter htmlFilter = FilterHelper.getHtmlFilter(jsonFilter
-                                .getElementPostFilterId());
+                        HtmlFilter htmlFilter = FilterHelper
+                                .getHtmlFilter(jsonFilter.getElementPostFilterId());
                         m_convertHtmlEntityForJson = htmlFilter.isConvertHtmlEntry();
                         getValueOfconvertHtmlEntity = true;
                     }

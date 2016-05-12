@@ -10,7 +10,6 @@ import java.io.StringReader;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Vector;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
@@ -43,14 +42,6 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
     private Output m_output = null;
     private Filter m_elementPostFilter = null;
     private String m_postFormat = null;
-
-    private static String[] invalidHtmlTagCharacters = new String[]
-    { "{", "}", "%", "^", "~", "!", "&", "*", "(", ")", "?" };
-
-    private static final String PLACEHOLDER_LEFT_TAG = "GS_PLACEHOLDER_LEFT_TAG";
-    private static final String PLACEHOLDER_RIGHT_TAG = "GS_PLACEHOLDER_RIGHT_TAG";
-    private static final String PLACEHOLDER_LEFT_NATIVE = "GS_PLACEHOLDER_LEFT_NATIVE";
-    private static final String PLACEHOLDER_RIGHT_NATIVE = "GS_PLACEHOLDER_RIGHT_NATIVE";
 
     public Extractor()
     {
@@ -258,7 +249,6 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
 
     private void gotoPostFilter(String str, String sid)
     {
-        str = protectInvalidTags(str);
         Output output = switchExtractor(str, m_postFormat, m_elementPostFilter);
         Iterator it = output.documentElementIterator();
         while (it.hasNext())
@@ -270,11 +260,6 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
                 case DocumentElement.LOCALIZABLE:
                     Segmentable segmentableElement = (Segmentable) element;
                     String chunk = segmentableElement.getChunk();
-                    chunk = StringUtil.replace(chunk, "<", PLACEHOLDER_LEFT_TAG);
-                    chunk = StringUtil.replace(chunk, ">", PLACEHOLDER_RIGHT_TAG);
-                    // m_output.addTranslatableTmx(segmentableElement.getChunk(),
-                    // sid, true,
-                    // m_postFormat);
                     extractString(new StringReader(chunk), true,sid);
                     break;
 
@@ -288,11 +273,7 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
     
     private void extractString(Reader p_input, boolean p_postFiltered, String sid)
     {
-        int cVECTORSTART = 200;
-        int cVECTORINC = 50;
-
-        Vector vTokenBuf = new Vector(cVECTORSTART, cVECTORINC);
-
+        Vector vTokenBuf = new Vector(200, 50);
         Parser parser = new Parser(p_input);
         PTToken token = parser.getNextToken();
 
@@ -302,7 +283,7 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
             token = parser.getNextToken();
         }
 
-        addTokensToOutput(vTokenBuf, sid,p_postFiltered);
+        addTokensToOutput(vTokenBuf, sid, p_postFiltered);
     }
    
     private void addTokensToOutput(Vector p_vTokens,String sid, boolean p_postFiltered)
@@ -310,10 +291,7 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
         PTTmxController TmxCtrl = new PTTmxController();
         PTEscapeSequence PTEsc = new PTEscapeSequence();
 
-        // we must apply the rules to the tokens once before building
-        // any tags
         TmxCtrl.applyRules(p_vTokens);
-
         Enumeration en = p_vTokens.elements();
         while (en.hasMoreElements())
         {
@@ -324,10 +302,6 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
                 String content = Tok.m_strContent;
                 if (p_postFiltered)
                 {
-                    content = StringUtil.replace(content, PLACEHOLDER_LEFT_TAG, "<");
-                    content = StringUtil.replace(content, PLACEHOLDER_RIGHT_TAG, ">");
-                    content = StringUtil.replace(content, PLACEHOLDER_LEFT_NATIVE, "&lt;");
-                    content = StringUtil.replace(content, PLACEHOLDER_RIGHT_NATIVE, "&gt;");
                     m_output.addTranslatableTmx(content, sid, true, m_postFormat);
                 }
             }
@@ -350,47 +324,6 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
 
         p_vTokens.clear();
 
-    }
-
-    private String protectInvalidTags(String content)
-    {
-        Pattern p = Pattern.compile("<([^>]*?)>");
-        Matcher m = p.matcher(content);
-        while (m.find())
-        {
-            boolean isInvalidTag = false;
-            String tag = m.group(1);
-            if (StringUtil.isEmpty(tag))
-            {
-                isInvalidTag = true;
-            }
-            else
-            {
-                for (int i = 0; i < tag.length(); i++)
-                {
-                    char c = tag.charAt(i);
-                    if (StringUtil.isIncludedInArray(invalidHtmlTagCharacters,
-                            String.valueOf(c)))
-                    {
-                        isInvalidTag = true;
-                        break;
-                    }
-                }
-            }
-            if (isInvalidTag)
-            {
-                StringBuilder replaced = new StringBuilder();
-                replaced.append(content.substring(0, m.start()));
-                replaced.append(PLACEHOLDER_LEFT_NATIVE);
-                replaced.append(tag);
-                replaced.append(PLACEHOLDER_RIGHT_NATIVE);
-                replaced.append(content.substring(m.end()));
-
-                content = replaced.toString();
-                m = p.matcher(content);
-            }
-        }
-        return content;
     }
 
     @Override

@@ -969,18 +969,11 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             m_outputStream.write(m_strEOL);
         }
 
-        Workflow wf = null; 
-        String[] workflowIds = m_page.getWorkflowId().split(",");
-        int wordCount = 0;
-        for (String workflowId : workflowIds)
-        {
-            wf = ServerProxy.getWorkflowManager().getWorkflowById(
-                    Long.parseLong(workflowId.trim()));
-            wordCount = wordCount + wf.getInContextMatchWordCount();
-        }
+        Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
+                Long.parseLong(m_page.getWorkflowId()));
         m_outputStream.write(XliffConstants.HASH_MARK);
         m_outputStream.write("In-Context Match word count:");
-        m_outputStream.write(wordCount + "");
+        m_outputStream.write(wf.getInContextMatchWordCount() + "");
         m_outputStream.write(m_strEOL);
 
         m_outputStream.write(XliffConstants.HASH_MARK);

@@ -735,13 +735,13 @@ public class TaskListHandler extends PageHandler
         HashMap<Long, Long> allPSF_tasks = new HashMap<Long, Long>();
         HashMap<Long, Long> allSTF_tasks = new HashMap<Long, Long>();
         HashMap<Long, Long> allPage_tasks = new HashMap<Long, Long>();
-        List<Long> workflowIdList = new ArrayList<Long>();
 
         Vector excludeTypes = null;
         int downloadEditAll = 0;
         GlobalSightLocale srcLocale = null;
         GlobalSightLocale targetLocale = null;
         String targetLocaleStr = null;
+        long workflowId = -1;
 
         String taskIds = request.getParameter("taskParam");
         Set<Long> selectedTaskIds = getSelectedTaskIds(taskIds);
@@ -796,11 +796,10 @@ public class TaskListHandler extends PageHandler
                 allpageNameList.addAll(pageNameList);
                 allcanUseUrlList.addAll(canUseUrlList);
             }
-            long workflowId = task.getWorkflow().getId();
-            workflowIdList.add(workflowId);
 
             if (excludeTypes == null)
             {
+                workflowId = task.getWorkflow().getId();
                 L10nProfile l10nProfile = task.getWorkflow().getJob()
                         .getL10nProfile();
                 if (l10nProfile.getTmChoice() == LocProfileStateConstants.ALLOW_EDIT_TM_USAGE)
@@ -853,17 +852,13 @@ public class TaskListHandler extends PageHandler
             allsupportFileList = null;
 
         // create combined offline files
-        String workflowIds = workflowIdList.toString();
-        if (workflowIds !=null && workflowIds.length() > 1)
-        {
-            workflowIds = workflowIds.substring(1, workflowIds.length()-1);
-        }
         DownloadParams downloadParams = new DownloadParams(jobName, null, "",
-                workflowIds, null, allpageIdList,allpageNameList, 
-                allcanUseUrlList, allprimarySourceFiles,allstfList,
-                editorId, platformId, encoding, ptagFormat,uiLocale, 
-                srcLocale, targetLocale, true, fileFormat,excludeTypes,
-                downloadEditAll, allsupportFileList, resInsMode,user);
+                Long.toString(workflowId), null, allpageIdList,
+                allpageNameList, allcanUseUrlList, allprimarySourceFiles,
+                allstfList, editorId, platformId, encoding, ptagFormat,
+                uiLocale, srcLocale, targetLocale, true, fileFormat,
+                excludeTypes, downloadEditAll, allsupportFileList, resInsMode,
+                user);
         downloadParams.setConsolidateTmxFiles(true);
         downloadParams.setConsolidateTermFiles(true);
         downloadParams.setTermFormat(terminology);

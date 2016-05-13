@@ -31,6 +31,7 @@ import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.importer.ImportUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 import com.globalsight.webservices.WebServiceException;
 
 public class RestResource
@@ -124,15 +125,19 @@ public class RestResource
      */
     protected GlobalSightLocale getLocaleByName(String name) throws RestWebServiceException
     {
-        name = ImportUtil.normalizeLocale(name.trim());
+        if (StringUtil.isEmpty(name))
+            return null;
+
         try
         {
+            name = ImportUtil.normalizeLocale(name.trim());
             return ImportUtil.getLocaleByName(name);
         }
         catch (Exception e)
         {
             logger.warn("getLocaleByName() : Fail to get GlobalSightLocale by locale name: " + name);
-            throw new RestWebServiceException("Unable to get locale by name: " + name);
+//            throw new RestWebServiceException("Unable to get locale by name: " + name);
+            return null;
         }
     }
 

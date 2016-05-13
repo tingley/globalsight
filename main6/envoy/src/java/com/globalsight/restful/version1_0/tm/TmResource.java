@@ -451,7 +451,12 @@ public class TmResource extends RestResource
             targetTuv.setTu(tu);
 
             GlobalSightLocale sourceLocale = getLocaleByName(p_sourceLocale);
+            if (sourceLocale == null)
+                throw new RestWebServiceException("Empty or invalid source locale: " + p_sourceLocale);
             GlobalSightLocale targetLocale = getLocaleByName(p_targetLocale);
+            if (targetLocale == null)
+                throw new RestWebServiceException("Empty or invalid target locale: " + p_targetLocale);
+
             tu.setSourceLocale(sourceLocale);
             sourceTuv.setLocale(sourceLocale);
             targetTuv.setLocale(targetLocale);
@@ -937,18 +942,13 @@ public class TmResource extends RestResource
             long startId = checkStartId(p_startId);
             int offset = checkOffset(p_offset);
 
-            if (StringUtil.isEmpty(p_sourceLocale))
-            {
-                throw new RestWebServiceException("Empty source locale");
-            }
-            GlobalSightLocale srcGSLocale = getLocaleByName(p_sourceLocale);
-            GlobalSightLocale trgGSLocale = null;
-            if (p_targetLocale != null && p_targetLocale.length() > 0)
-            {
-                trgGSLocale = getLocaleByName(p_targetLocale);
-            }
+            GlobalSightLocale sourceLocale = getLocaleByName(p_sourceLocale);
+            if (sourceLocale == null)
+                throw new RestWebServiceException("Empty or invalid source locale: " + p_sourceLocale);
+            // optional
+            GlobalSightLocale targetLocale = getLocaleByName(p_targetLocale);
 
-            tuXml = nextTm3Tus(tm, srcGSLocale, trgGSLocale, startId, offset);
+            tuXml = nextTm3Tus(tm, sourceLocale, targetLocale, startId, offset);
         }
         catch (Exception e)
         {
@@ -2685,10 +2685,9 @@ public class TmResource extends RestResource
 
             TranslationMemoryProfile tmp = checkTmProfileName(p_tmProfileName, p_companyName);
 
-            if (StringUtil.isEmpty(p_sourceLocale))
-                throw new RestWebServiceException("Empty source locale");
             GlobalSightLocale sourceLocale = getLocaleByName(p_sourceLocale);
-
+            if (sourceLocale == null)
+                throw new RestWebServiceException("Empty or invalid source locale: " + p_sourceLocale);
             GlobalSightLocale targetLocale = getLocaleByName(p_targetLocale);
 
             if (StringUtil.isEmpty(p_searchText))

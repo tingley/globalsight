@@ -2370,6 +2370,10 @@ public class TmResource extends RestResource
             restArgs.put("modifyFinishDate", p_modifyFinishDate);
             restStart = RestWebServiceLog.start(TmResource.class, FULL_TEXT_SEARCH, restArgs);
 
+            if (p_sourceLocale != null)
+                p_sourceLocale = p_sourceLocale.replace("-", "_");
+            if (p_targetLocale != null)
+                p_targetLocale = p_targetLocale.replace("-", "_");
             checkParamters(userName, p_companyName, p_tmIds, p_searchText, p_sourceLocale,
                     p_targetLocale, p_creationStartDate, p_creationFinishDate, p_modifyStartDate,
                     p_modifyFinishDate);

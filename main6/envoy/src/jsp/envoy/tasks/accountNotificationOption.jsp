@@ -258,7 +258,7 @@ $(document).ready(function() {
 		    dataType:"json",
 		    success:function(data)
 		    {
-		    	alert("Reset successful");
+		    	alert("Reset successfully");
 	        	$("#subjectKey").val(data.subjectKey);
 	        	$("#messageKey").val(data.messageKey);
 	        	$("#subjectText").val(data.subjectText);

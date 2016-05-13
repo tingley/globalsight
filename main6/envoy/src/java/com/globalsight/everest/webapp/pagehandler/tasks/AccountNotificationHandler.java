@@ -148,12 +148,15 @@ public class AccountNotificationHandler extends PageHandler
             ServletContext context) throws EnvoyServletException, ServletException, IOException
     {
         HttpSession session = request.getSession(false);
-
-        preparePageInfo(request, session);
-
+        
         String action = request.getParameter("action");
 
-        if ("save".equals(action))
+        if ("notifycation".equals(action))
+        {
+            preparePageInfo(request, session);
+        }
+
+        else if ("save".equals(action))
         {
             try
             {
@@ -165,7 +168,7 @@ public class AccountNotificationHandler extends PageHandler
             }
             return;
         }
-        
+
         else if ("edit".equals(action))
         {
             try
@@ -215,7 +218,7 @@ public class AccountNotificationHandler extends PageHandler
                 MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale);
         ResourceBundle emailBundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
                 MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale, user.getCompanyName());
-
+        
         String subjectReset = resetBundle.getString(subjectKey);
         String messageReset = keepEscapeCharacter(StringUtil.replace(
                 resetBundle.getString(messageKey), "\r\n", "\\r\\n\\\r\n"));
@@ -372,7 +375,7 @@ public class AccountNotificationHandler extends PageHandler
             content = StringUtil.replace(content, messageOri, messageEdited);
             FileUtil.writeFile(newFile, content);
             SystemResourceBundle.getInstance().removeResourceBundleKey(key);
-            writer.write("Save successful");
+            writer.write("Save successfully");
             writer.flush();
         }
         writer.close();

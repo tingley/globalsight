@@ -713,7 +713,6 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         OfflinePageData repPageData = new OfflinePageData();
         boolean isConsolidate = false;
         boolean isCombined = false;
-        Workflow wf = null;
         List<String> addedRepeatedDisplaySegmentIDs = new ArrayList<String>();
 
         if (m_downloadParams.hasPrimaryFiles())
@@ -800,10 +799,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     if (m_firstPage)
                     {
                         pageData = OPD;
-                        wf = ServerProxy.getWorkflowManager().getWorkflowById(
-                                Long.parseLong(OPD.getWorkflowId()));
-                        pageData.setInContextMatchWordCount(wf
-                                .getInContextMatchWordCount());
+                        int count =  calculateInContextMatchWordCount(OPD);
+                        pageData.setInContextMatchWordCount(count);
                     }
                     // Add tmx file before formatting, because formating will
                     // cause native code missing.
@@ -929,13 +926,10 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                             repPageData.setNoMatchWordCount(repPageData
                                     .getNoMatchWordCount()
                                     + OPD.getNoMatchWordCount());
-                            wf = ServerProxy
-                                    .getWorkflowManager()
-                                    .getWorkflowById(
-                                            Long.parseLong(OPD.getWorkflowId()));
+                            int inContextMatchWordCount = calculateInContextMatchWordCount(OPD);
                             repPageData.setInContextMatchWordCount(repPageData
                                     .getInContextMatchWordCount()
-                                    + wf.getInContextMatchWordCount());
+                                    + inContextMatchWordCount);
 
                             repPageData.setPageName(job.getJobName());
                             repPageData.setSourceLocaleName(OPD
@@ -991,13 +985,9 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                             pageData.setNoMatchWordCount(pageData
                                     .getNoMatchWordCount()
                                     + OPD.getNoMatchWordCount());
-                            wf = ServerProxy
-                                    .getWorkflowManager()
-                                    .getWorkflowById(
-                                            Long.parseLong(OPD.getWorkflowId()));
+                            int wordCount = calculateInContextMatchWordCount(OPD);
                             pageData.setInContextMatchWordCount(pageData
-                                    .getInContextMatchWordCount()
-                                    + wf.getInContextMatchWordCount());
+                                    .getInContextMatchWordCount() + wordCount);
                         }
                         OPD.setPageName(job.getJobName());
                         curTargetFname = job.getJobName();
@@ -1105,6 +1095,26 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         }
     }
 
+    private int calculateInContextMatchWordCount(OfflinePageData OPD)
+    {
+        Workflow wf = null;
+        String[] workflowIds = OPD.getWorkflowId().split(",");
+        int WordCount = 0;
+        for (String workflowId : workflowIds)
+        {
+            try
+            {
+                wf = ServerProxy.getWorkflowManager().getWorkflowById(Long.parseLong(workflowId.trim()));
+                WordCount = WordCount + wf.getInContextMatchWordCount();
+            }
+            catch (Exception e)
+            {
+                CATEGORY.error("get Workflow fail." + e);;
+            }
+        }
+        return WordCount;
+    }
+    
     /**
      * Checks if all the segments in the offline page are fully leveraged or
      * not.

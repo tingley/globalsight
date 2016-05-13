@@ -211,59 +211,11 @@ public class AccountNotificationHandler extends PageHandler
         PrintWriter writer = response.getWriter();
         String subjectKey = p_request.getParameter("subjectKey");
         String messageKey = p_request.getParameter("messageKey");
-
-        String userId = (String) p_session.getAttribute(WebAppConstants.USER_NAME);
-        User user = ServerProxy.getUserManager().getUser(userId);
-        String companyName = null;
-        if (UserUtil.isSuperPM(userId))
-        {
-            companyName = (String) p_session
-                    .getAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM);
-        }
-        else
-        {
-            companyName = user.getCompanyName();
-        }
         Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
         ResourceBundle resetBundle = SystemResourceBundle.getInstance().getResourceBundle(
                 MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale);
-        ResourceBundle emailBundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
-                MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale, companyName);
 
         String subjectReset = resetBundle.getString(subjectKey);
-        String messageReset = keepEscapeCharacter(StringUtil.replace(
-                resetBundle.getString(messageKey), "\r\n", "\\r\\n\\\r\n"));
-        String messageCur = keepEscapeCharacter(StringUtil.replace(
-                emailBundle.getString(messageKey), "\r\n", "\\r\\n\\\r\n"));
-
-        String newFilepath = getClass().getResource(
-                RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties").getFile();
-        String editTemplatePath = newFilepath.substring(1, newFilepath.lastIndexOf("/"));
-        File newFile = new File(editTemplatePath, "EmailMessageResource_" + user.getCompanyName()
-                + "_" + uiLocale + ".properties");
-
-        FileInputStream fis = null;
-        if (newFile.exists())
-        {
-            fis = (FileInputStream) getClass().getResourceAsStream(
-                    RESOURCE_LOCATION + "EmailMessageResource_" + user.getCompanyName() + "_"
-                            + uiLocale + ".properties");
-        }
-        else
-        {
-            newFile.getParentFile().mkdirs();
-            fis = (FileInputStream) getClass().getResourceAsStream(
-                    RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties");
-        }
-
-        String content = FileUtil.readFile(fis, "utf-8");
-        content = content.replaceFirst(subjectKey + "\\s*=([^\r\n]*)", subjectKey + "="
-                + subjectReset);
-        content = StringUtil.replace(content, messageCur, messageReset);
-        FileUtil.writeFile(newFile, content);
-        String key = MailerLocal.DEFAULT_RESOURCE_NAME + "_" + user.getCompanyName() + "_"
-                + uiLocale;
-        SystemResourceBundle.getInstance().removeResourceBundleKey(key);
         JSONObject json = new JSONObject();
         json.put("subjectKey", subjectKey);
         json.put("messageKey", messageKey);
@@ -349,7 +301,7 @@ public class AccountNotificationHandler extends PageHandler
 
         String subjectKey = p_request.getParameter("subjectKey");
         String messageKey = p_request.getParameter("messageKey");
-        String subjectEdited = p_request.getParameter("subjectText");
+        String subjectEdited = p_request.getParameter("subjectText").replace("\\","\\");
         String messageEdited = keepEscapeCharacter(StringUtil.replace(
                 p_request.getParameter("messageText"), "\n", "\\r\\n\\\r\n"));
 
@@ -364,7 +316,7 @@ public class AccountNotificationHandler extends PageHandler
             if (list.get(0).size() != 0)
             {
                 String addErrorPlaceHold = AmbassadorUtil.listToString(list.get(0));
-                result.append("The follow placeholders can not be added : " + addErrorPlaceHold
+                result.append("The follow placeholders can no be added : " + addErrorPlaceHold
                         + "\r\n");
             }
             if (list.get(1).size() != 0)
@@ -401,8 +353,14 @@ public class AccountNotificationHandler extends PageHandler
             String content = FileUtil.readFile(fis, "utf-8");
             content = content.replaceFirst(subjectKey + "\\s*=([^\r\n]*)", subjectKey + "="
                     + subjectEdited);
-            content = StringUtil.replace(content, messageOri, messageEdited);
-            FileUtil.writeFile(newFile, content);
+            StringBuffer document = new StringBuffer();
+            String contentPartOne = content.substring(0,content.indexOf(messageKey));
+            document.append(contentPartOne).append(messageKey+"=").append(messageEdited); 
+            String contentPartOpt = content.substring(content.indexOf(messageKey));
+            String contentPartTwo = contentPartOpt.substring(contentPartOpt.indexOf("##########"));            
+            document.append("\r\n"+contentPartTwo);
+            
+            FileUtil.writeFile(newFile, document.toString());
             SystemResourceBundle.getInstance().removeResourceBundleKey(key);
             writer.write("Save successfully");
             writer.flush();

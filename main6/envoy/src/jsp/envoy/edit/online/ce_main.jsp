@@ -638,7 +638,7 @@ function doOnLoad()
          </div>
       </td>
   </tr>
-  <tr align="left"><td colSpan=4><IFRAME ID=IFrame2 FRAMEBORDER=0 SCROLLING=NO SRC="<%=url_tb%>" width="100%" height="100"></IFRAME></td></tr>
+  <tr align="left"><td colSpan=4><IFRAME ID=IFrame2 FRAMEBORDER=0 SCROLLING="auto" SRC="<%=url_tb%>" width="100%" height="100"></IFRAME></td></tr>
     <tr >
       <td colspan="4">
          <div class = "lineStyle">

@@ -14,7 +14,7 @@
  * the License.
  *
  */
-package com.globalsight.restful.tm;
+package com.globalsight.restful.version1_0.tm;
 
 import java.util.ArrayList;
 import java.util.List;

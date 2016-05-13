@@ -14,7 +14,7 @@
  * the License.
  *
  */
-package com.globalsight.restful.tmprofile;
+package com.globalsight.restful.version1_0.tmprofile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +43,7 @@ import com.globalsight.restful.RestResource;
 import com.globalsight.restful.RestWebServiceException;
 import com.globalsight.restful.RestWebServiceLog;
 
-@Path("/companies/{companyName}/tmprofiles")
+@Path("/1.0/companies/{companyName}/tmprofiles")
 public class TmProfileResource extends RestResource
 {
     private static final Logger logger = Logger.getLogger(TmProfileResource.class);

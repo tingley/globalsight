@@ -128,11 +128,19 @@
 	<target name="globalsight.jar" depends="compile">
 		<echo message="**** Creating globalsight.jar ****" />
 		<jar update="true" duplicate="preserve" filesonly="true" destfile="${globalsight_home}/globalsight.jar">
-			<fileset dir="${serverclassesDest}" includes="**/*.class" />
+			<fileset dir="${serverclassesDest}" includes="**/*.class" 
+				excludes="com/globalsight/restful/version1_0/**/*.class" />
 		</jar>
 	</target>
 
-	<target name="zip" depends="all, globalsight.jar, globalsightServices, installer, distdir">
+	<target name="restResources_1_0" depends="compile">
+		<echo message="**** Creating restResources_1_0.jar ****" />
+		<jar update="true" duplicate="preserve" filesonly="true" destfile="${globalsight_home}/lib/restResources_1_0.jar">
+			<fileset dir="${serverclassesDest}" includes="com/globalsight/restful/version1_0/**/*.class"/>
+		</jar>
+	</target>
+
+	<target name="zip" depends="all, globalsight.jar, restResources_1_0, globalsightServices, installer, distdir">
 		<ant antfile="zip.xml" target="zip" />
 	</target>
 

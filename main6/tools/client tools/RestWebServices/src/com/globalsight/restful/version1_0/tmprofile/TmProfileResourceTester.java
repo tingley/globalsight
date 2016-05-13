@@ -15,7 +15,7 @@
  *
  */
 
-package com.globalsight.restful.tmprofile;
+package com.globalsight.restful.version1_0.tmprofile;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -35,11 +35,11 @@ public class TmProfileResourceTester extends RestfulApiTestHelper
     }
 
     /**
-     * http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tmprofiles/{id}
+     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/tmprofiles/{id}
      */
     public void testGetTMProfile()
     {
-        String url = "http://localhost:8080/globalsight/restfulServices/companies/York/tmprofiles/1";
+        String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tmprofiles/1";
 
         CloseableHttpClient httpClient = getHttpClient();
         HttpResponse httpResponse = null;
@@ -63,11 +63,11 @@ public class TmProfileResourceTester extends RestfulApiTestHelper
     }
 
     /**
-     * http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tmprofiles
+     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/tmprofiles
      */
     public void testGetAllTmProfiles()
     {
-        String url = "http://localhost:8080/globalsight/restfulServices/companies/York/tmprofiles";
+        String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tmprofiles";
 
         CloseableHttpClient httpClient = getHttpClient();
         HttpResponse httpResponse = null;

@@ -136,8 +136,7 @@ public class RestResource
         catch (Exception e)
         {
             logger.warn("getLocaleByName() : Fail to get GlobalSightLocale by locale name: " + name);
-//            throw new RestWebServiceException("Unable to get locale by name: " + name);
-            return null;
+            throw new RestWebServiceException("Unable to get locale by name: " + name);
         }
     }
 

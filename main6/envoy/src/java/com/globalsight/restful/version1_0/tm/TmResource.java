@@ -452,10 +452,10 @@ public class TmResource extends RestResource
 
             GlobalSightLocale sourceLocale = getLocaleByName(p_sourceLocale);
             if (sourceLocale == null)
-                throw new RestWebServiceException("Empty or invalid source locale: " + p_sourceLocale);
+                throw new RestWebServiceException("Empty source locale");
             GlobalSightLocale targetLocale = getLocaleByName(p_targetLocale);
             if (targetLocale == null)
-                throw new RestWebServiceException("Empty or invalid target locale: " + p_targetLocale);
+                throw new RestWebServiceException("Empty target locale");
 
             tu.setSourceLocale(sourceLocale);
             sourceTuv.setLocale(sourceLocale);
@@ -944,7 +944,7 @@ public class TmResource extends RestResource
 
             GlobalSightLocale sourceLocale = getLocaleByName(p_sourceLocale);
             if (sourceLocale == null)
-                throw new RestWebServiceException("Empty or invalid source locale: " + p_sourceLocale);
+                throw new RestWebServiceException("Empty source locale");
             // optional
             GlobalSightLocale targetLocale = getLocaleByName(p_targetLocale);
 
@@ -2687,7 +2687,7 @@ public class TmResource extends RestResource
 
             GlobalSightLocale sourceLocale = getLocaleByName(p_sourceLocale);
             if (sourceLocale == null)
-                throw new RestWebServiceException("Empty or invalid source locale: " + p_sourceLocale);
+                throw new RestWebServiceException("Empty source locale");
             GlobalSightLocale targetLocale = getLocaleByName(p_targetLocale);
 
             if (StringUtil.isEmpty(p_searchText))

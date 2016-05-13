@@ -48,6 +48,7 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.SortUtil;
@@ -213,12 +214,22 @@ public class AccountNotificationHandler extends PageHandler
 
         String userId = (String) p_session.getAttribute(WebAppConstants.USER_NAME);
         User user = ServerProxy.getUserManager().getUser(userId);
+        String companyName = null;
+        if (UserUtil.isSuperPM(userId))
+        {
+            companyName = (String) p_session
+                    .getAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM);
+        }
+        else
+        {
+            companyName = user.getCompanyName();
+        }
         Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
         ResourceBundle resetBundle = SystemResourceBundle.getInstance().getResourceBundle(
                 MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale);
         ResourceBundle emailBundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
-                MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale, user.getCompanyName());
-        
+                MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale, companyName);
+
         String subjectReset = resetBundle.getString(subjectKey);
         String messageReset = keepEscapeCharacter(StringUtil.replace(
                 resetBundle.getString(messageKey), "\r\n", "\\r\\n\\\r\n"));
@@ -257,7 +268,7 @@ public class AccountNotificationHandler extends PageHandler
         json.put("subjectKey", subjectKey);
         json.put("messageKey", messageKey);
         json.put("subjectText", subjectReset);
-        json.put("messageText", messageReset);
+        json.put("messageText", resetBundle.getString(messageKey));
 
         writer.write(json.toString());
         writer.flush();
@@ -273,9 +284,19 @@ public class AccountNotificationHandler extends PageHandler
         PrintWriter writer = response.getWriter();
         String userId = (String) p_session.getAttribute(WebAppConstants.USER_NAME);
         User user = ServerProxy.getUserManager().getUser(userId);
+        String companyName = null;
+        if (UserUtil.isSuperPM(userId))
+        {
+            companyName = (String) p_session
+                    .getAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM);
+        }
+        else
+        {
+            companyName = user.getCompanyName();
+        }
         Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
         ResourceBundle emailBundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
-                MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale, user.getCompanyName());
+                MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale, companyName);
 
         String selectFromValue = p_request.getParameter("selectFromValue");
         String selectToValue = p_request.getParameter("selectToValue");
@@ -292,9 +313,7 @@ public class AccountNotificationHandler extends PageHandler
         json.put("messageText", messageText);
         writer.write(json.toString());
         writer.flush();
-        writer.close();
-        
-        
+        writer.close();    
     }
     
     /**
@@ -310,13 +329,23 @@ public class AccountNotificationHandler extends PageHandler
         StringBuffer result = new StringBuffer();
         PrintWriter writer = response.getWriter();
 
+        String companyName = null;
         String userId = (String) p_session.getAttribute(WebAppConstants.USER_NAME);
         User user = ServerProxy.getUserManager().getUser(userId);
+        if (UserUtil.isSuperPM(userId))
+        {
+            companyName = (String) p_session
+                    .getAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM);
+        }
+        else
+        {
+            companyName = user.getCompanyName();
+        }
         Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
-        String key = MailerLocal.DEFAULT_RESOURCE_NAME + "_" + user.getCompanyName() + "_"
-                + uiLocale;
+        String key = MailerLocal.DEFAULT_RESOURCE_NAME + "_" + companyName + "_" + uiLocale;
+
         ResourceBundle emailBundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
-                MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale, user.getCompanyName());
+                MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale, companyName);
 
         String subjectKey = p_request.getParameter("subjectKey");
         String messageKey = p_request.getParameter("messageKey");
@@ -352,15 +381,15 @@ public class AccountNotificationHandler extends PageHandler
                     RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties")
                     .getFile();
             String editTemplatePath = newFilepath.substring(1, newFilepath.lastIndexOf("/"));
-            File newFile = new File(editTemplatePath, "EmailMessageResource_"
-                    + user.getCompanyName() + "_" + uiLocale + ".properties");
+            File newFile = new File(editTemplatePath, "EmailMessageResource_" + companyName + "_"
+                    + uiLocale + ".properties");
 
             FileInputStream fis = null;
             if (newFile.exists())
             {
                 fis = (FileInputStream) getClass().getResourceAsStream(
-                        RESOURCE_LOCATION + "EmailMessageResource_" + user.getCompanyName() + "_"
-                                + uiLocale + ".properties");
+                        RESOURCE_LOCATION + "EmailMessageResource_" + companyName + "_" + uiLocale
+                                + ".properties");
             }
             else
             {
@@ -386,7 +415,16 @@ public class AccountNotificationHandler extends PageHandler
      */
     private String keepEscapeCharacter(String content)
     {
-        return content.substring(0,content.lastIndexOf("\\"));
+        String str = null;
+        if (content.lastIndexOf("\\") == -1)
+        {
+            str = content;
+        }
+        else
+        {
+            str = content.substring(0, content.lastIndexOf("\\"));
+        }
+        return str;
     }
 
     /**

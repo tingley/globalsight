@@ -461,14 +461,18 @@ function checkFilters()
 		}
 	}
 
-    tmp = ATrim($("#jobGroupIdFilter").val()); 
-    for (var x=0;x<tmp.length;x++)
+    var jobGroupIdFilterValue = $("#jobGroupIdFilter").val();
+    if (jobGroupIdFilterValue)
     {
-        if (!isInt.test(tmp.charAt(x)))
-        {
-            alert("Invalid Group ID, only integer numbers are allowed.");
-            return false;
-        }
+		tmp = ATrim(jobGroupIdFilterValue);
+	    for (var x = 0; x < tmp.length; x++)
+	    {
+	        if (!isInt.test(tmp.charAt(x)))
+	        {
+	            alert("Invalid Group ID, only integer numbers are allowed.");
+	            return false;
+	        }
+	    }
     }
 
 	tmp = ATrim($("#jobNameFilter").val()); 

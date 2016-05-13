@@ -127,9 +127,20 @@ public interface WebService4AEM
      */
     public String getJobExportWorkflowFiles(String p_accessToken,
             String p_jobName, String workflowLocale) throws WebServiceException;
+    
+    /**
+     * Get job status by job name - GlobalSight Connector
+     * 
+     * @param p_accessToken
+     * @param p_jobName
+     * @return
+     * @throws WebServiceException
+     */
+    public String getJobStatus(String p_accessToken, String p_jobName)
+            throws WebServiceException;
 
     /**
-     * Get job status by job name.
+     * Get job status by job name - GlobalSight Translator
      * 
      * @param p_accessToken
      * @param p_jobName

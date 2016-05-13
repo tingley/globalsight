@@ -308,9 +308,31 @@ public class DocxStyleUtil extends StyleUtil
                         // e.g. propertyName = "creator"
                         String propertyName = xpath.substring(idx1 + 5, idx2);
                         Pattern p3 = Pattern.compile(
-                                "<w:sdtContent>[\\d\\D]*?<w:t>([\\d\\D]*?)</w:t>[\\d\\D]*?</w:sdtContent>");
+                                "<w:sdtContent>[\\d\\D]*?<w:t [^>]*?>([\\d\\D]*?)</w:t>[\\d\\D]*?</w:sdtContent>");
                         Matcher m3 = p3.matcher(sdtContent);
-                        if (m3.find())
+                        if (!m3.find())
+                        {
+                            p3 = Pattern.compile(
+                                    "<w:sdtContent>[\\d\\D]*?<w:t>([\\d\\D]*?)</w:t>[\\d\\D]*?</w:sdtContent>");
+                            m3 = p3.matcher(sdtContent);
+                            if (m3.find())
+                            {
+                                String wtInFooter = m3.group(1);
+                                // e.g. dc:creator
+                                String nodeName = "dc:" + propertyName;
+                                String pattern = "(<" + nodeName + ">)" + "([\\d\\D]*?)" + "(</"
+                                        + nodeName + ">)";
+                                Pattern p4 = Pattern.compile(pattern);
+                                Matcher m4 = p4.matcher(coreXmlContent);
+                                if (m4.find())
+                                {
+                                    String updated = m4.group(1) + wtInFooter + m4.group(3);
+                                    coreXmlContent = StringUtil.replace(coreXmlContent, m4.group(),
+                                            updated);
+                                }
+                            }
+                        }
+                        else
                         {
                             String wtInFooter = m3.group(1);
                             // e.g. dc:creator
@@ -327,7 +349,6 @@ public class DocxStyleUtil extends StyleUtil
                             }
                         }
                     }
-
                 }
             }
 

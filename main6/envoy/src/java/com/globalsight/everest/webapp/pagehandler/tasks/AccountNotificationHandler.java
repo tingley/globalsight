@@ -316,13 +316,13 @@ public class AccountNotificationHandler extends PageHandler
             if (list.get(0).size() != 0)
             {
                 String addErrorPlaceHold = AmbassadorUtil.listToString(list.get(0));
-                result.append("The follow placeholders can no be added : " + addErrorPlaceHold
+                result.append("The following placeholders can no be added : " + addErrorPlaceHold
                         + "\r\n");
             }
             if (list.get(1).size() != 0)
             {
                 String missingPlaceHold = AmbassadorUtil.listToString(list.get(1));
-                result.append("The follow placeholders are missing : " + missingPlaceHold);
+                result.append("The following placeholders are missing : " + missingPlaceHold);
             }
             writer.write(result.toString());
             writer.flush();
@@ -375,7 +375,7 @@ public class AccountNotificationHandler extends PageHandler
 
             FileUtil.writeFile(newFile, document.toString());
             SystemResourceBundle.getInstance().removeResourceBundleKey(key);
-            writer.write("Save successfully");
+            writer.write("Save successfully.");
             writer.flush();
         }
         writer.close();

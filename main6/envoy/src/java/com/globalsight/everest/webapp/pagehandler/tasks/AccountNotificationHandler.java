@@ -20,8 +20,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -45,12 +47,14 @@ import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.GeneralException;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.mail.MailerConstants;
@@ -233,26 +237,14 @@ public class AccountNotificationHandler extends PageHandler
     private void editEmailTemplate(HttpServletRequest p_request, HttpSession p_session,
             HttpServletResponse response) throws Exception
     {
-        PrintWriter writer = response.getWriter();
-        String userId = (String) p_session.getAttribute(WebAppConstants.USER_NAME);
-        User user = ServerProxy.getUserManager().getUser(userId);
-        String companyName = null;
-        if (UserUtil.isSuperPM(userId))
-        {
-            companyName = (String) p_session
-                    .getAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM);
-        }
-        else
-        {
-            companyName = user.getCompanyName();
-        }
+        String companyName = getCompanyName(p_session);
         Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
         ResourceBundle emailBundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
                 MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale, companyName);
 
         String selectFromValue = p_request.getParameter("selectFromValue");
         String selectToValue = p_request.getParameter("selectToValue");
-        String selectValue = (!selectFromValue.equals("")) ? selectFromValue : selectToValue;
+        String selectValue = (!"".equals(selectFromValue)) ? selectFromValue : selectToValue;
         String subjectKey = MailerConstants.getEmailSubject(selectValue);
         String messageKey = MailerConstants.getEmailMessage(selectValue);
         String subjectText = emailBundle.getString(subjectKey);
@@ -263,11 +255,13 @@ public class AccountNotificationHandler extends PageHandler
         json.put("messageKey", messageKey);
         json.put("subjectText", subjectText);
         json.put("messageText", messageText);
+
+        PrintWriter writer = response.getWriter();
         writer.write(json.toString());
         writer.flush();
-        writer.close();    
+        writer.close();
     }
-    
+
     /**
      * Save content that user edit email template
      * 
@@ -278,21 +272,9 @@ public class AccountNotificationHandler extends PageHandler
     private void saveEditEmailTemplate(HttpServletRequest p_request, HttpSession p_session,
             HttpServletResponse response) throws Exception
     {
-        StringBuffer result = new StringBuffer();
         PrintWriter writer = response.getWriter();
 
-        String companyName = null;
-        String userId = (String) p_session.getAttribute(WebAppConstants.USER_NAME);
-        User user = ServerProxy.getUserManager().getUser(userId);
-        if (UserUtil.isSuperPM(userId))
-        {
-            companyName = (String) p_session
-                    .getAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM);
-        }
-        else
-        {
-            companyName = user.getCompanyName();
-        }
+        String companyName = getCompanyName(p_session);
         Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
         String key = MailerLocal.DEFAULT_RESOURCE_NAME + "_" + companyName + "_" + uiLocale;
 
@@ -301,18 +283,21 @@ public class AccountNotificationHandler extends PageHandler
 
         String subjectKey = p_request.getParameter("subjectKey");
         String messageKey = p_request.getParameter("messageKey");
-        String subjectEdited = p_request.getParameter("subjectText").replace("\\","\\");
-        String messageEdited = keepEscapeCharacter(StringUtil.replace(
-                p_request.getParameter("messageText"), "\n", "\\r\\n\\\r\n"));
-    
+        String subjectEdited = p_request.getParameter("subjectText");
+        String messageEdited = p_request.getParameter("messageText");
+        String messagekeepBackslash = keepBsMessage(messageEdited);
+        messageEdited = StringUtil.replace(messagekeepBackslash, "\n", "\\r\\n\\\r\n");
+        messageEdited = keepEscapeCharacter(messageEdited);
+
         String subjectOri = emailBundle.getString(subjectKey);
         String messageOri = keepEscapeCharacter(StringUtil.replace(
                 emailBundle.getString(messageKey), "\r\n", "\\r\\n\\\r\n"));
 
-        List<ArrayList<String>> list = checkEmailTemplateContent(subjectOri, messageOri,
+        List<HashSet<String>> list = checkEmailTemplateContent(subjectOri, messageOri,
                 subjectEdited, messageEdited);
         if (list.size() != 0)
         {
+            StringBuffer result = new StringBuffer();
             if (list.get(0).size() != 0)
             {
                 String addErrorPlaceHold = AmbassadorUtil.listToString(list.get(0));
@@ -349,23 +334,11 @@ public class AccountNotificationHandler extends PageHandler
                 fis = (FileInputStream) getClass().getResourceAsStream(
                         RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties");
             }
-            
-            StringBuffer keepBackslash = new StringBuffer();
-            for(int i=0;i<subjectEdited.length();i++)
-            {
-                char c = subjectEdited.charAt(i);
-                if(c == '\\')
-                {
-                    keepBackslash.append("\\\\\\\\");
-                }
-                else
-                {
-                    keepBackslash.append(c);
-                }
-            }
+
+            String subjectkeepBackslash = keepBsSubject(subjectEdited);
             String content = FileUtil.readFile(fis, "utf-8");
             content = content.replaceFirst(subjectKey + "\\s*=([^\r\n]*)", subjectKey + "="
-                    + keepBackslash.toString());
+                    + subjectkeepBackslash);
             StringBuffer document = new StringBuffer();
             String contentPartOne = content.substring(0, content.indexOf(messageKey));
             document.append(contentPartOne).append(messageKey + "=").append(messageEdited);
@@ -380,7 +353,49 @@ public class AccountNotificationHandler extends PageHandler
         }
         writer.close();
     }
-    
+
+    /**
+     * Keeps the backslash of the email template content.
+     */
+    private String keepBsSubject(String content)
+    {
+        StringBuffer keepBackslash = new StringBuffer();
+        for (int i = 0; i < content.length(); i++)
+        {
+            char c = content.charAt(i);
+            if (c == '\\')
+            {
+                keepBackslash.append("\\\\\\\\");
+            }
+            else
+            {
+                keepBackslash.append(c);
+            }
+        }
+        return keepBackslash.toString();
+    }
+
+    /**
+     * Keeps the backslash of the email template content.
+     */
+    private String keepBsMessage(String content)
+    {
+        StringBuffer keepBackslash = new StringBuffer();
+        for (int i = 0; i < content.length(); i++)
+        {
+            char c = content.charAt(i);
+            if (c == '\\')
+            {
+                keepBackslash.append("\\\\");
+            }
+            else
+            {
+                keepBackslash.append(c);
+            }
+        }
+        return keepBackslash.toString();
+    }
+
     /**
      * Keeps the escape character of string .
      */
@@ -396,17 +411,17 @@ public class AccountNotificationHandler extends PageHandler
     /**
      * Checks if email template content that user edited is valid or not.
      */
-    private List<ArrayList<String>> checkEmailTemplateContent(String subjectOri, String messageOri,
+    private List<HashSet<String>> checkEmailTemplateContent(String subjectOri, String messageOri,
             String subjectEdited, String messageEdited)
     {
-        ArrayList<String> addedErrorPlaceHolds = new ArrayList<String>();
-        ArrayList<String> missingPlaceHolds = new ArrayList<String>();
-        List<ArrayList<String>> errorOption = new ArrayList<ArrayList<String>>();
+        HashSet<String> addedErrorPlaceHolds = new HashSet<String>();
+        HashSet<String> missingPlaceHolds = new HashSet<String>();
+        List<HashSet<String>> errorOption = new ArrayList<HashSet<String>>();
 
-        ArrayList<String> subPlaceHoldersOri = getPlaceHolders(subjectOri);
-        ArrayList<String> subPlaceHoldersEdited = getPlaceHolders(subjectEdited);
-        ArrayList<String> msgPlaceHoldersOri = getPlaceHolders(messageOri);
-        ArrayList<String> mesPlaceHoldersEdited = getPlaceHolders(messageEdited);
+        HashSet<String> subPlaceHoldersOri = getPlaceHolders(subjectOri);
+        HashSet<String> subPlaceHoldersEdited = getPlaceHolders(subjectEdited);
+        HashSet<String> msgPlaceHoldersOri = getPlaceHolders(messageOri);
+        HashSet<String> mesPlaceHoldersEdited = getPlaceHolders(messageEdited);
 
         addErrorPlaceHoldes(subPlaceHoldersOri, subPlaceHoldersEdited, addedErrorPlaceHolds,
                 missingPlaceHolds);
@@ -420,40 +435,40 @@ public class AccountNotificationHandler extends PageHandler
         }
         return errorOption;
     }
-    
+
     /**
      * Adds missing placeholders or invalid placeholders into arraylist.
      */
-    private void addErrorPlaceHoldes(ArrayList<String> placeHoldersOri,
-            ArrayList<String> placeHoldersEdited, ArrayList<String> addErrorPlaceHoldes,
-            ArrayList<String> missingPlaceHolds)
+    private void addErrorPlaceHoldes(HashSet<String> subPlaceHoldersOri,
+            HashSet<String> subPlaceHoldersEdited, HashSet<String> addedErrorPlaceHolds,
+            HashSet<String> missingPlaceHolds)
     {
-        for (String ph : placeHoldersEdited)
+        for (String ph : subPlaceHoldersEdited)
         {
-            if (!placeHoldersOri.contains(ph))
+            if (!subPlaceHoldersOri.contains(ph))
             {
-                addErrorPlaceHoldes.add(ph);
+                addedErrorPlaceHolds.add(ph);
             }
         }
 
-        for (String ph : placeHoldersOri)
+        for (String ph : subPlaceHoldersOri)
         {
-            if (!placeHoldersEdited.contains(ph))
+            if (!subPlaceHoldersEdited.contains(ph))
             {
                 missingPlaceHolds.add(ph);
             }
         }
     }
-    
+
     /**
-     * Gets place holders of email template content. 
+     * Gets place holders of email template content.
      */
-    private ArrayList<String> getPlaceHolders(String text)
+    private HashSet<String> getPlaceHolders(String text)
     {
         Pattern p = Pattern.compile("\\{\\d+\\}");
         Matcher m = p.matcher(text);
-        ArrayList<String> placeHolders = new ArrayList<String>();
-        while(m.find())
+        HashSet<String> placeHolders = new HashSet<String>();
+        while (m.find())
         {
             placeHolders.add(m.group());
         }
@@ -580,6 +595,25 @@ public class AccountNotificationHandler extends PageHandler
 
         return availableOptions;
     }
+
+    private String getCompanyName(HttpSession p_session) throws UserManagerException,
+            RemoteException, GeneralException
+    {
+        String companyName = null;
+        String userId = (String) p_session.getAttribute(WebAppConstants.USER_NAME);
+        User user = ServerProxy.getUserManager().getUser(userId);
+        if (UserUtil.isSuperPM(userId))
+        {
+            companyName = (String) p_session
+                    .getAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM);
+        }
+        else
+        {
+            companyName = user.getCompanyName();
+        }
+        return companyName;
+    }
+
     // ////////////////////////////////////////////////////////////////////
     // End: Local Methods
     // ////////////////////////////////////////////////////////////////////

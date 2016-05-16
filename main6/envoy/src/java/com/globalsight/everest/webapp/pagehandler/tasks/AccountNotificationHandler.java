@@ -304,7 +304,7 @@ public class AccountNotificationHandler extends PageHandler
         String subjectEdited = p_request.getParameter("subjectText").replace("\\","\\");
         String messageEdited = keepEscapeCharacter(StringUtil.replace(
                 p_request.getParameter("messageText"), "\n", "\\r\\n\\\r\n"));
-
+    
         String subjectOri = emailBundle.getString(subjectKey);
         String messageOri = keepEscapeCharacter(StringUtil.replace(
                 emailBundle.getString(messageKey), "\r\n", "\\r\\n\\\r\n"));
@@ -349,17 +349,30 @@ public class AccountNotificationHandler extends PageHandler
                 fis = (FileInputStream) getClass().getResourceAsStream(
                         RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties");
             }
-
+            
+            StringBuffer keepBackslash = new StringBuffer();
+            for(int i=0;i<subjectEdited.length();i++)
+            {
+                char c = subjectEdited.charAt(i);
+                if(c == '\\')
+                {
+                    keepBackslash.append("\\\\\\\\");
+                }
+                else
+                {
+                    keepBackslash.append(c);
+                }
+            }
             String content = FileUtil.readFile(fis, "utf-8");
             content = content.replaceFirst(subjectKey + "\\s*=([^\r\n]*)", subjectKey + "="
-                    + subjectEdited);
+                    + keepBackslash.toString());
             StringBuffer document = new StringBuffer();
-            String contentPartOne = content.substring(0,content.indexOf(messageKey));
-            document.append(contentPartOne).append(messageKey+"=").append(messageEdited); 
+            String contentPartOne = content.substring(0, content.indexOf(messageKey));
+            document.append(contentPartOne).append(messageKey + "=").append(messageEdited);
             String contentPartOpt = content.substring(content.indexOf(messageKey));
-            String contentPartTwo = contentPartOpt.substring(contentPartOpt.indexOf("##########"));            
-            document.append("\r\n"+contentPartTwo);
-            
+            String contentPartTwo = contentPartOpt.substring(contentPartOpt.indexOf("##########"));
+            document.append("\r\n" + contentPartTwo);
+
             FileUtil.writeFile(newFile, document.toString());
             SystemResourceBundle.getInstance().removeResourceBundleKey(key);
             writer.write("Save successfully");
@@ -373,16 +386,11 @@ public class AccountNotificationHandler extends PageHandler
      */
     private String keepEscapeCharacter(String content)
     {
-        String str = null;
-        if (content.lastIndexOf("\\") == -1)
+        if (content.indexOf("\\") != -1 && content.endsWith("\\\r\n"))
         {
-            str = content;
+            content = content.substring(0, content.lastIndexOf("\\"));
         }
-        else
-        {
-            str = content.substring(0, content.lastIndexOf("\\"));
-        }
-        return str;
+        return content;
     }
 
     /**

@@ -169,6 +169,8 @@ public class XmlExtractor extends AbstractExtractor
 
     // XML encoder
     private XmlEntities m_xmlEncoder = new XmlEntities();
+    private XmlEntities m_xmlEncoderNoDefault = new XmlEntities();
+    private char[] m_postEntityChar = { '&' };
 
     // for extractor switching
     private String m_switchExtractionBuffer = new String();
@@ -241,6 +243,9 @@ public class XmlExtractor extends AbstractExtractor
             // Set the main format depending on which (derived) class
             // we're called in.
             setFormat();
+            
+            // set use default xml entities to no
+            m_xmlEncoderNoDefault.setUseDefaultXmlEncoderChar(false);
 
             // init for xml filter
             Filter mainFilter = getMainFilter();
@@ -950,7 +955,7 @@ public class XmlExtractor extends AbstractExtractor
             {
                 if (switchesExtraction || m_isElementPost)
                 {
-                    m_switchExtractionBuffer += m_xmlEncoder.encodeStringBasic(name);
+                    m_switchExtractionBuffer += name;
                 }
                 else
                 {
@@ -2280,7 +2285,7 @@ public class XmlExtractor extends AbstractExtractor
         }
         else
         {
-            replaced = StringUtil.replace(replaced, "&copy;", "_copyright_");
+            //replaced = StringUtil.replace(replaced, "&copy;", "_copyright_");
             replaced = StringUtil.replace(replaced, "&nbsp;", "_amp_amp_nbsp_");
         }
 

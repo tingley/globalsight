@@ -746,10 +746,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
             if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat)
                     && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format) && m_isCDATA)
             {
-                if (isContent())
-                {
-                    tmp = convertHtmlEntityForXml(tmp);
-                }
+                tmp = convertHtmlEntityForXml(tmp);
             }
 
             // Always encode basic HTML entities regardless of setting.

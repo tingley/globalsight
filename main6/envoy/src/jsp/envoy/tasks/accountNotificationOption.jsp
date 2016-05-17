@@ -301,7 +301,7 @@ $(document).ready(function() {
  		   }
  		}
  		
- 		if(i>1 || i==0)
+ 		if(i>1)
  		{
  			document.getElementById("edit").disabled=true;
  		}
@@ -330,7 +330,7 @@ $(document).ready(function() {
  		   }
  		}
  		
- 		if(i>1 || i==0)
+ 		if(i>1)
  		{
  			document.getElementById("edit").disabled=true;
  		}
@@ -466,7 +466,7 @@ $(document).ready(function() {
           <input type="button" name="<%=doneButton %>" value="<%=doneButton %>"
             onclick="submitForm('saveOptions')">
             <%if(b_editEmailTemp){%>
-          <input type="button" id="edit" disabled value="Edit">
+          <input type="button" id="edit" value="Edit">
           <%}%>
         </td>
       </tr>
@@ -479,8 +479,8 @@ $(document).ready(function() {
       <tr><td class="standardText">Message</td></tr>
       <tr><td><textarea rows="10" cols="80" id="messageText"></textarea></td></tr>
       <tr><td style="padding-top:10px" colspan="3">
-           <input type="button" value="Save" id="save">
            <input type="button" value="Reset" id="reset">
+           <input type="button" value="Save" id="save">
       <td></tr>
 </table>
 </form>

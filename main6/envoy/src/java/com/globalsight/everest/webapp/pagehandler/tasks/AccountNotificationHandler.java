@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -285,6 +286,17 @@ public class AccountNotificationHandler extends PageHandler
         String messageKey = p_request.getParameter("messageKey");
         String subjectEdited = p_request.getParameter("subjectText");
         String messageEdited = p_request.getParameter("messageText");
+        try
+        {
+            MessageFormat checkPatternMessage = new MessageFormat(messageEdited);
+            MessageFormat checkPatternSubject = new MessageFormat(messageEdited);
+        }
+        catch (Exception e)
+        {
+            writer.write("Please check whether the character is invalid : '{'");
+            logger.error(e);
+            return;
+        }
         String messagekeepBackslash = keepBsMessage(messageEdited);
         messageEdited = StringUtil.replace(messagekeepBackslash, "\n", "\\r\\n\\\r\n");
         messageEdited = keepEscapeCharacter(messageEdited);
@@ -301,7 +313,7 @@ public class AccountNotificationHandler extends PageHandler
             if (list.get(0).size() != 0)
             {
                 String addErrorPlaceHold = AmbassadorUtil.listToString(list.get(0));
-                result.append("The following placeholders can no be added : " + addErrorPlaceHold
+                result.append("The following placeholders cannot be added : " + addErrorPlaceHold
                         + "\r\n");
             }
             if (list.get(1).size() != 0)
@@ -337,15 +349,13 @@ public class AccountNotificationHandler extends PageHandler
 
             String subjectkeepBackslash = keepBsSubject(subjectEdited);
             String content = FileUtil.readFile(fis, "utf-8");
-            content = content.replaceFirst(subjectKey + "\\s*=([^\r\n]*)", subjectKey + "="
-                    + subjectkeepBackslash);
             StringBuffer document = new StringBuffer();
-            String contentPartOne = content.substring(0, content.indexOf(messageKey));
-            document.append(contentPartOne).append(messageKey + "=").append(messageEdited);
+            String contentPartOne = content.substring(0, content.indexOf(subjectKey));
+            document.append(contentPartOne).append(subjectKey + "=").append(subjectkeepBackslash);
+            document.append("\r\n" + messageKey + "=").append(messageEdited);
             String contentPartOpt = content.substring(content.indexOf(messageKey));
             String contentPartTwo = contentPartOpt.substring(contentPartOpt.indexOf("##########"));
             document.append("\r\n" + contentPartTwo);
-
             FileUtil.writeFile(newFile, document.toString());
             SystemResourceBundle.getInstance().removeResourceBundleKey(key);
             writer.write("Save successfully.");

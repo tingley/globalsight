@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -285,6 +286,24 @@ public class AccountNotificationHandler extends PageHandler
         String messageKey = p_request.getParameter("messageKey");
         String subjectEdited = p_request.getParameter("subjectText");
         String messageEdited = p_request.getParameter("messageText");
+        try
+        {
+            new MessageFormat(subjectEdited);
+        }
+        catch (Exception e)
+        {
+            writer.write("Subject fails to apply pattern: unmatched braces.");
+            return;
+        }
+        try
+        {
+            new MessageFormat(messageEdited);
+        }
+        catch (Exception e)
+        {
+            writer.write("Message fails to apply pattern: unmatched braces.");
+            return;
+        }
         String messagekeepBackslash = keepBsMessage(messageEdited);
         messageEdited = StringUtil.replace(messagekeepBackslash, "\n", "\\r\\n\\\r\n");
         messageEdited = keepEscapeCharacter(messageEdited);
@@ -301,13 +320,8 @@ public class AccountNotificationHandler extends PageHandler
             if (list.get(0).size() != 0)
             {
                 String addErrorPlaceHold = AmbassadorUtil.listToString(list.get(0));
-                result.append("The following placeholders can no be added : " + addErrorPlaceHold
+                result.append("The following placeholders cannot be added : " + addErrorPlaceHold
                         + "\r\n");
-            }
-            if (list.get(1).size() != 0)
-            {
-                String missingPlaceHold = AmbassadorUtil.listToString(list.get(1));
-                result.append("The following placeholders are missing : " + missingPlaceHold);
             }
             writer.write(result.toString());
             writer.flush();
@@ -337,17 +351,21 @@ public class AccountNotificationHandler extends PageHandler
 
             String subjectkeepBackslash = keepBsSubject(subjectEdited);
             String content = FileUtil.readFile(fis, "utf-8");
-            content = content.replaceFirst(subjectKey + "\\s*=([^\r\n]*)", subjectKey + "="
-                    + subjectkeepBackslash);
             StringBuffer document = new StringBuffer();
-            String contentPartOne = content.substring(0, content.indexOf(messageKey));
-            document.append(contentPartOne).append(messageKey + "=").append(messageEdited);
+
+            String contentPartOne = content.substring(0, content.indexOf(subjectKey));
+            document.append(contentPartOne);
+            document.append(subjectKey).append("=").append(subjectkeepBackslash).append("\r\n");
+            document.append(messageKey).append("=").append(messageEdited);
+
             String contentPartOpt = content.substring(content.indexOf(messageKey));
             String contentPartTwo = contentPartOpt.substring(contentPartOpt.indexOf("##########"));
             document.append("\r\n" + contentPartTwo);
 
             FileUtil.writeFile(newFile, document.toString());
+            
             SystemResourceBundle.getInstance().removeResourceBundleKey(key);
+
             writer.write("Save successfully.");
             writer.flush();
         }
@@ -415,7 +433,6 @@ public class AccountNotificationHandler extends PageHandler
             String subjectEdited, String messageEdited)
     {
         HashSet<String> addedErrorPlaceHolds = new HashSet<String>();
-        HashSet<String> missingPlaceHolds = new HashSet<String>();
         List<HashSet<String>> errorOption = new ArrayList<HashSet<String>>();
 
         HashSet<String> subPlaceHoldersOri = getPlaceHolders(subjectOri);
@@ -423,39 +440,27 @@ public class AccountNotificationHandler extends PageHandler
         HashSet<String> msgPlaceHoldersOri = getPlaceHolders(messageOri);
         HashSet<String> mesPlaceHoldersEdited = getPlaceHolders(messageEdited);
 
-        addErrorPlaceHoldes(subPlaceHoldersOri, subPlaceHoldersEdited, addedErrorPlaceHolds,
-                missingPlaceHolds);
-        addErrorPlaceHoldes(msgPlaceHoldersOri, mesPlaceHoldersEdited, addedErrorPlaceHolds,
-                missingPlaceHolds);
+        addErrorPlaceHoldes(subPlaceHoldersOri, subPlaceHoldersEdited, addedErrorPlaceHolds);
+        addErrorPlaceHoldes(msgPlaceHoldersOri, mesPlaceHoldersEdited, addedErrorPlaceHolds);
 
-        if (addedErrorPlaceHolds.size() != 0 || missingPlaceHolds.size() != 0)
+        if (addedErrorPlaceHolds.size() != 0)
         {
             errorOption.add(addedErrorPlaceHolds);
-            errorOption.add(missingPlaceHolds);
         }
         return errorOption;
     }
 
     /**
-     * Adds missing placeholders or invalid placeholders into arraylist.
+     * Adds invalid placeholders into arraylist.
      */
     private void addErrorPlaceHoldes(HashSet<String> subPlaceHoldersOri,
-            HashSet<String> subPlaceHoldersEdited, HashSet<String> addedErrorPlaceHolds,
-            HashSet<String> missingPlaceHolds)
+            HashSet<String> subPlaceHoldersEdited, HashSet<String> addedErrorPlaceHolds)
     {
         for (String ph : subPlaceHoldersEdited)
         {
             if (!subPlaceHoldersOri.contains(ph))
             {
                 addedErrorPlaceHolds.add(ph);
-            }
-        }
-
-        for (String ph : subPlaceHoldersOri)
-        {
-            if (!subPlaceHoldersEdited.contains(ph))
-            {
-                missingPlaceHolds.add(ph);
             }
         }
     }

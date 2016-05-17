@@ -255,11 +255,16 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
     }
 
     @SuppressWarnings("unchecked")
-    private String decoding(String s)
+    private String decoding(String s, boolean handleHtmlEntity)
     {
         HashMap<String, Character> map = new HashMap<String, Character>();
-        map.putAll(HtmlEntities.mHtmlEntityToChar);
         map.putAll(HtmlEntities.mDefaultEntityToChar);
+
+        if (handleHtmlEntity)
+        {
+            map.putAll(HtmlEntities.mHtmlEntityToChar);
+        }
+
         map.remove("&nbsp");
         map.remove("&nbsp;");
         for (String key : map.keySet())
@@ -312,9 +317,13 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
     {
         if (s == null || s.length() == 0)
             return s;
+        
+        boolean handleHtmlEntity = (m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_3
+                || m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_4
+                || m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_5);
 
-        s = decoding(s);
-        s = decoding(s);
+        s = decoding(s, handleHtmlEntity);
+        s = decoding(s, handleHtmlEntity);
 
         if (m_isAttr && m_entityModeForXml != XmlFilterConstants.ENTITY_HANDLE_MODE_5)
         {

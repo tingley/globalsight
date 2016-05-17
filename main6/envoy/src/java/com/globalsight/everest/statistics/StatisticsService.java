@@ -142,7 +142,7 @@ public class StatisticsService
                     // touch to load target TUVs
                     SegmentTuvUtil.getTargetTuvs(targetPage);
                     updateRepetitionInfoToTu(splittedTuvs, matches, uniqueSegments2, cachedTus,
-                            targetLocaleId, jobId);
+                            sourcePage.getLocaleId(), targetLocaleId, jobId);
 
                     trgPageCount++;
                     if (trgPageCount % 50 == 0)
@@ -804,8 +804,8 @@ public class StatisticsService
     @SuppressWarnings(
     { "unchecked", "rawtypes" })
     private static void updateRepetitionInfoToTu(ArrayList<BaseTmTuv> sTuvs,
-            MatchTypeStatistics p_matches, Map p_uniqueSegments,
-            Map<Long, TuImpl> p_cachedTus, long p_targetLocaleId, long p_jobId)
+            MatchTypeStatistics p_matches, Map p_uniqueSegments, Map<Long, TuImpl> p_cachedTus,
+            long p_sourceLocaleId, long p_targetLocaleId, long p_jobId)
     {
         Set<TuvImpl> repetitionTuvSet = new HashSet<TuvImpl>();
         Set<TuvImpl> unRepetitionTuvSet = new HashSet<TuvImpl>();
@@ -818,7 +818,7 @@ public class StatisticsService
                     .getStatisticsMatchType();
             long tuId = curSrcTmTuv.getTu().getId();
             TuImpl curTu = getTuFromCache(p_cachedTus, tuId, p_jobId);
-            TuvImpl curSrcTuv = curTu.getSourceTuv();
+            TuvImpl curSrcTuv = (TuvImpl) curTu.getTuv(p_sourceLocaleId, p_jobId);
             TuvImpl curTrgTuv = (TuvImpl) curTu.getTuv(p_targetLocaleId, p_jobId);
 
             ArrayList identicalSegments = null;

@@ -267,6 +267,8 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
 
         map.remove("&nbsp");
         map.remove("&nbsp;");
+        map.remove("&amp;");
+        map.remove("&AMP;");
         for (String key : map.keySet())
         {
             String value = map.get(key).toString();
@@ -317,13 +319,15 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
     {
         if (s == null || s.length() == 0)
             return s;
-        
-        boolean handleHtmlEntity = (m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_3
-                || m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_4
-                || m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_5);
+
+        boolean handleHtmlEntity = (m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_5);
 
         s = decoding(s, handleHtmlEntity);
         s = decoding(s, handleHtmlEntity);
+
+        // replace &amp; for decoding not handled
+        s = s.replace("&amp;", "&");
+        s = s.replace("&AMP;", "&");
 
         if (m_isAttr && m_entityModeForXml != XmlFilterConstants.ENTITY_HANDLE_MODE_5)
         {
@@ -332,6 +336,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
         else if (m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_5)
         {
             s = encoding(s, true);
+            s = s.replace("&#160;", "&nbsp;");
         }
         else if (m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_1
                 || m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_3)

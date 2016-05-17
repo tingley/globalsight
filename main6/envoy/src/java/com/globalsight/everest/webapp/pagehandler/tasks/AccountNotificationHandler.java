@@ -312,14 +312,14 @@ public class AccountNotificationHandler extends PageHandler
         String messageOri = keepEscapeCharacter(StringUtil.replace(
                 emailBundle.getString(messageKey), "\r\n", "\\r\\n\\\r\n"));
 
-        List<HashSet<String>> list = checkEmailTemplateContent(subjectOri, messageOri,
-                subjectEdited, messageEdited);
+        HashSet<String> list = checkEmailTemplateContent(subjectOri, messageOri, subjectEdited,
+                messageEdited);
         if (list.size() != 0)
         {
             StringBuffer result = new StringBuffer();
-            if (list.get(0).size() != 0)
+            if (list.size() != 0)
             {
-                String addErrorPlaceHold = AmbassadorUtil.listToString(list.get(0));
+                String addErrorPlaceHold = AmbassadorUtil.listToString(list);
                 result.append("The following placeholders cannot be added : " + addErrorPlaceHold
                         + "\r\n");
             }
@@ -429,36 +429,34 @@ public class AccountNotificationHandler extends PageHandler
     /**
      * Checks if email template content that user edited is valid or not.
      */
-    private List<HashSet<String>> checkEmailTemplateContent(String subjectOri, String messageOri,
+    private HashSet<String> checkEmailTemplateContent(String subjectOri, String messageOri,
             String subjectEdited, String messageEdited)
     {
         HashSet<String> addedErrorPlaceHolds = new HashSet<String>();
-        List<HashSet<String>> errorOption = new ArrayList<HashSet<String>>();
+        HashSet<String> placeHoldersOri = new HashSet<String>();
+        HashSet<String> subPlaceHoldersEdited = new HashSet<String>();
+        HashSet<String> mesPlaceHoldersEdited = new HashSet<String>();
 
-        HashSet<String> subPlaceHoldersOri = getPlaceHolders(subjectOri);
-        HashSet<String> subPlaceHoldersEdited = getPlaceHolders(subjectEdited);
-        HashSet<String> msgPlaceHoldersOri = getPlaceHolders(messageOri);
-        HashSet<String> mesPlaceHoldersEdited = getPlaceHolders(messageEdited);
+        getPlaceHolders(subjectOri, placeHoldersOri);
+        getPlaceHolders(messageOri, placeHoldersOri);
+        getPlaceHolders(subjectEdited, subPlaceHoldersEdited);
+        getPlaceHolders(messageEdited, mesPlaceHoldersEdited);
 
-        addErrorPlaceHoldes(subPlaceHoldersOri, subPlaceHoldersEdited, addedErrorPlaceHolds);
-        addErrorPlaceHoldes(msgPlaceHoldersOri, mesPlaceHoldersEdited, addedErrorPlaceHolds);
+        addErrorPlaceHoldes(placeHoldersOri, subPlaceHoldersEdited, addedErrorPlaceHolds);
+        addErrorPlaceHoldes(placeHoldersOri, mesPlaceHoldersEdited, addedErrorPlaceHolds);
 
-        if (addedErrorPlaceHolds.size() != 0)
-        {
-            errorOption.add(addedErrorPlaceHolds);
-        }
-        return errorOption;
+        return addedErrorPlaceHolds;
     }
 
     /**
      * Adds invalid placeholders into arraylist.
      */
-    private void addErrorPlaceHoldes(HashSet<String> subPlaceHoldersOri,
-            HashSet<String> subPlaceHoldersEdited, HashSet<String> addedErrorPlaceHolds)
+    private void addErrorPlaceHoldes(HashSet<String> placeHoldersOri,
+            HashSet<String> placeHoldersEdited, HashSet<String> addedErrorPlaceHolds)
     {
-        for (String ph : subPlaceHoldersEdited)
+        for (String ph : placeHoldersEdited)
         {
-            if (!subPlaceHoldersOri.contains(ph))
+            if (!placeHoldersOri.contains(ph))
             {
                 addedErrorPlaceHolds.add(ph);
             }
@@ -468,16 +466,14 @@ public class AccountNotificationHandler extends PageHandler
     /**
      * Gets place holders of email template content.
      */
-    private HashSet<String> getPlaceHolders(String text)
+    private void getPlaceHolders(String text, HashSet<String> placeholdersOri)
     {
         Pattern p = Pattern.compile("\\{\\d+\\}");
         Matcher m = p.matcher(text);
-        HashSet<String> placeHolders = new HashSet<String>();
         while (m.find())
         {
-            placeHolders.add(m.group());
+            placeholdersOri.add(m.group());
         }
-        return placeHolders;
     }
 
     /**

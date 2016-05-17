@@ -301,7 +301,7 @@ $(document).ready(function() {
  		   }
  		}
  		
- 		if(i>1)
+ 		if(i>1 || i==0)
  		{
  			document.getElementById("edit").disabled=true;
  		}
@@ -330,7 +330,7 @@ $(document).ready(function() {
  		   }
  		}
  		
- 		if(i>1)
+ 		if(i>1 || i==0)
  		{
  			document.getElementById("edit").disabled=true;
  		}
@@ -339,6 +339,14 @@ $(document).ready(function() {
  			document.getElementById("edit").disabled=false;
  		}
 	}) 
+	
+	$("#addButton").click(function(){
+		document.getElementById("edit").disabled=true;
+	})
+	
+	$("#removeButton").click(function(){
+		document.getElementById("edit").disabled=true;
+	})
 	})
 
 </SCRIPT>
@@ -422,14 +430,14 @@ $(document).ready(function() {
           <table>
             <tr>
               <td>
-                <input type="button" name="addButton" <%=disabled%> value=" >> "
+                <input type="button" name="addButton" id="addButton" <%=disabled%> value=" >> "
                     onclick="addOption()"><br>
               </td>
             </tr>
             <tr><td>&nbsp;</td></tr>
             <tr>
                 <td>
-                <input type="button" name="removedButton" <%=disabled%> value=" << "
+                <input type="button" name="removedButton" id="removeButton" <%=disabled%> value=" << "
                     onclick="removeOption()">
               </td>
             </tr>
@@ -466,7 +474,7 @@ $(document).ready(function() {
           <input type="button" name="<%=doneButton %>" value="<%=doneButton %>"
             onclick="submitForm('saveOptions')">
             <%if(b_editEmailTemp){%>
-          <input type="button" id="edit" value="Edit">
+          <input type="button" disabled id="edit" value="Edit">
           <%}%>
         </td>
       </tr>

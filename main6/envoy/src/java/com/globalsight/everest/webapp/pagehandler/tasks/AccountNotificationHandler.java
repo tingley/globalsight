@@ -317,12 +317,10 @@ public class AccountNotificationHandler extends PageHandler
         if (list.size() != 0)
         {
             StringBuffer result = new StringBuffer();
-            if (list.size() != 0)
-            {
-                String addErrorPlaceHold = AmbassadorUtil.listToString(list);
-                result.append("The following placeholders cannot be added : " + addErrorPlaceHold
-                        + "\r\n");
-            }
+            String addErrorPlaceHold = AmbassadorUtil.listToString(list);
+            result.append("The following placeholders cannot be added : " + addErrorPlaceHold
+                    + "\r\n");
+
             writer.write(result.toString());
             writer.flush();
         }

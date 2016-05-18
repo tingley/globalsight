@@ -319,15 +319,6 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
     {
         if (s == null || s.length() == 0)
             return s;
-        
-        if (m_isCDATA)
-        {
-            s = decoding(s, false);
-            s = s.replace("&amp;", "&");
-            s = s.replace("&AMP;", "&");
-            
-            return s;
-        }
 
         boolean handleHtmlEntity = (m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_5);
 
@@ -755,10 +746,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
             if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat)
                     && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format) && m_isCDATA)
             {
-                if (isContent())
-                {
-                    tmp = convertHtmlEntityForXml(tmp);
-                }
+                tmp = convertHtmlEntityForXml(tmp);
             }
 
             // Always encode basic HTML entities regardless of setting.

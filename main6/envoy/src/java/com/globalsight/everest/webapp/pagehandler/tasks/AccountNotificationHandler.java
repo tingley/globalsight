@@ -327,7 +327,7 @@ public class AccountNotificationHandler extends PageHandler
             String newFilepath = getClass().getResource(
                     RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties")
                     .getFile();
-            String editTemplatePath = newFilepath.substring(1, newFilepath.lastIndexOf("/"));
+            String editTemplatePath = newFilepath.substring(1, newFilepath.lastIndexOf(File.separator));
             File newFile = new File(editTemplatePath, "EmailMessageResource_" + companyName + "_"
                     + uiLocale + ".properties");
 

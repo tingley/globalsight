@@ -278,9 +278,8 @@ public class AccountNotificationHandler extends PageHandler
         String companyName = getCompanyName(p_session);
         Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
         String key = MailerLocal.DEFAULT_RESOURCE_NAME + "_" + companyName + "_" + uiLocale;
-
-        ResourceBundle emailBundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
-                MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale, companyName);
+        ResourceBundle resourceBundle = SystemResourceBundle.getInstance().getResourceBundle(
+                MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale);
 
         String subjectKey = p_request.getParameter("subjectKey");
         String messageKey = p_request.getParameter("messageKey");
@@ -308,12 +307,11 @@ public class AccountNotificationHandler extends PageHandler
         messageEdited = StringUtil.replace(messagekeepBackslash, "\n", "\\r\\n\\\r\n");
         messageEdited = keepEscapeCharacter(messageEdited);
 
-        String subjectOri = emailBundle.getString(subjectKey);
-        String messageOri = keepEscapeCharacter(StringUtil.replace(
-                emailBundle.getString(messageKey), "\r\n", "\\r\\n\\\r\n"));
+        String subjectKeyOri = resourceBundle.getString(subjectKey);
+        String messageKeyOri = resourceBundle.getString(messageKey);
 
-        HashSet<String> list = checkEmailTemplateContent(subjectOri, messageOri, subjectEdited,
-                messageEdited);
+        HashSet<String> list = checkEmailTemplateContent(subjectKeyOri, messageKeyOri,
+                subjectEdited, messageEdited);
         if (list.size() != 0)
         {
             StringBuffer result = new StringBuffer();
@@ -361,7 +359,7 @@ public class AccountNotificationHandler extends PageHandler
             document.append("\r\n" + contentPartTwo);
 
             FileUtil.writeFile(newFile, document.toString());
-            
+
             SystemResourceBundle.getInstance().removeResourceBundleKey(key);
 
             writer.write("Save successfully.");

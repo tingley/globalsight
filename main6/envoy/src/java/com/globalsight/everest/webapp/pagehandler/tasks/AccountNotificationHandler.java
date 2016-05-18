@@ -149,54 +149,33 @@ public class AccountNotificationHandler extends PageHandler
      * @throws ServletException 
      * @throws EnvoyServletException 
      */
-    public void invokePageHandler(WebPageDescriptor pageDescriptor,
-            HttpServletRequest request, HttpServletResponse response,
-            ServletContext context) throws EnvoyServletException, ServletException, IOException
+    public void invokePageHandler(WebPageDescriptor pageDescriptor, HttpServletRequest request,
+            HttpServletResponse response, ServletContext context) throws EnvoyServletException,
+            ServletException, IOException
     {
         HttpSession session = request.getSession(false);
-        
-        String action = request.getParameter("action");
 
+        String action = request.getParameter("action");
         if ("notification".equals(action))
         {
             preparePageInfo(request, session);
         }
         else if ("save".equals(action))
         {
-            try
-            {
-                saveEditEmailTemplate(request, session, response);
-            }
-            catch (Exception e)
-            {
-                logger.error(e);
-            }
+            saveEditEmailTemplate(request, session, response);
             return;
         }
         else if ("edit".equals(action))
         {
-            try
-            {
-                editEmailTemplate(request, session, response);
-            }
-            catch (Exception e)
-            {
-                logger.error(e);
-            }
+            editEmailTemplate(request, session, response);
             return;
         }
         else if ("reset".equals(action))
         {
-            try
-            {
-                resetEmailTemplate(request, session, response);
-            }
-            catch (Exception e)
-            {
-                logger.error(e);
-            }
+            resetEmailTemplate(request, session, response);
             return;
         }
+
         super.invokePageHandler(pageDescriptor, request, response, context);
     }
 
@@ -208,56 +187,70 @@ public class AccountNotificationHandler extends PageHandler
      * Resets email content template to the most origin template.
      */
     private void resetEmailTemplate(HttpServletRequest p_request, HttpSession p_session,
-            HttpServletResponse response) throws Exception
+            HttpServletResponse response)
     {
-        PrintWriter writer = response.getWriter();
-        String subjectKey = p_request.getParameter("subjectKey");
-        String messageKey = p_request.getParameter("messageKey");
-        Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
-        ResourceBundle resetBundle = SystemResourceBundle.getInstance().getResourceBundle(
-                MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale);
+        try
+        {
+            PrintWriter writer = response.getWriter();
+            String subjectKey = p_request.getParameter("subjectKey");
+            String messageKey = p_request.getParameter("messageKey");
+            Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
+            ResourceBundle resetBundle = SystemResourceBundle.getInstance().getResourceBundle(
+                    MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale);
 
-        String subjectReset = resetBundle.getString(subjectKey);
-        JSONObject json = new JSONObject();
-        json.put("subjectKey", subjectKey);
-        json.put("messageKey", messageKey);
-        json.put("subjectText", subjectReset);
-        json.put("messageText", resetBundle.getString(messageKey));
+            String subjectReset = resetBundle.getString(subjectKey);
+            JSONObject json = new JSONObject();
+            json.put("subjectKey", subjectKey);
+            json.put("messageKey", messageKey);
+            json.put("subjectText", subjectReset);
+            json.put("messageText", resetBundle.getString(messageKey));
 
-        writer.write(json.toString());
-        writer.flush();
-        writer.close();
+            writer.write(json.toString());
+            writer.flush();
+            writer.close();
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+        }
     }
 
     /**
      * Edits email content template.
      */
     private void editEmailTemplate(HttpServletRequest p_request, HttpSession p_session,
-            HttpServletResponse response) throws Exception
+            HttpServletResponse response)
     {
-        String companyName = getCompanyName(p_session);
-        Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
-        ResourceBundle emailBundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
-                MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale, companyName);
+        try
+        {
+            String companyName = getCompanyName(p_session);
+            Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
+            ResourceBundle emailBundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
+                    MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale, companyName);
 
-        String selectFromValue = p_request.getParameter("selectFromValue");
-        String selectToValue = p_request.getParameter("selectToValue");
-        String selectValue = (!"".equals(selectFromValue)) ? selectFromValue : selectToValue;
-        String subjectKey = MailerConstants.getEmailSubject(selectValue);
-        String messageKey = MailerConstants.getEmailMessage(selectValue);
-        String subjectText = emailBundle.getString(subjectKey);
-        String messageText = emailBundle.getString(messageKey);
+            String selectFromValue = p_request.getParameter("selectFromValue");
+            String selectToValue = p_request.getParameter("selectToValue");
+            String selectValue = (!"".equals(selectFromValue)) ? selectFromValue : selectToValue;
+            String subjectKey = MailerConstants.getEmailSubject(selectValue);
+            String messageKey = MailerConstants.getEmailMessage(selectValue);
+            String subjectText = emailBundle.getString(subjectKey);
+            String messageText = emailBundle.getString(messageKey);
 
-        JSONObject json = new JSONObject();
-        json.put("subjectKey", subjectKey);
-        json.put("messageKey", messageKey);
-        json.put("subjectText", subjectText);
-        json.put("messageText", messageText);
+            JSONObject json = new JSONObject();
+            json.put("subjectKey", subjectKey);
+            json.put("messageKey", messageKey);
+            json.put("subjectText", subjectText);
+            json.put("messageText", messageText);
 
-        PrintWriter writer = response.getWriter();
-        writer.write(json.toString());
-        writer.flush();
-        writer.close();
+            PrintWriter writer = response.getWriter();
+            writer.write(json.toString());
+            writer.flush();
+            writer.close();
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+        }
     }
 
     /**
@@ -265,19 +258,19 @@ public class AccountNotificationHandler extends PageHandler
      * @param content
      * @return
      */
-    private String checkApplyPattern(String content)
+    private boolean checkApplyPattern(String content)
     {
-        StringBuffer sb = new StringBuffer();
         try
         {
             new MessageFormat(content);
         }
         catch (Exception e)
         {
-            sb.append(" fails to apply pattern: unmatched braces.");
+            return false;
         }
-        return sb.toString();
+        return true;
     }
+
     /**
      * Save content that user edit email template
      * 
@@ -286,98 +279,119 @@ public class AccountNotificationHandler extends PageHandler
      * @throws ServletException
      */
     private void saveEditEmailTemplate(HttpServletRequest p_request, HttpSession p_session,
-            HttpServletResponse response) throws Exception
+            HttpServletResponse response)
     {
-        PrintWriter writer = response.getWriter();
-
-        String companyName = getCompanyName(p_session);
-        Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
-        String key = MailerLocal.DEFAULT_RESOURCE_NAME + "_" + companyName + "_" + uiLocale;
-        ResourceBundle resourceBundle = SystemResourceBundle.getInstance().getResourceBundle(
-                MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale);
-
-        String subjectKey = p_request.getParameter("subjectKey");
-        String messageKey = p_request.getParameter("messageKey");
-        String subjectEdited = p_request.getParameter("subjectText");
-        String messageEdited = p_request.getParameter("messageText");
-
-        String applyPatternExcSub = checkApplyPattern(subjectEdited);
-        if (!"".equals(applyPatternExcSub))
+        PrintWriter writer = null;
+        try
         {
-            writer.write("Subject" + applyPatternExcSub);
-            return;
-        }
-        String applyPatternExcMes = checkApplyPattern(messageEdited);
-        if (!"".equals(applyPatternExcMes))
-        {
-            writer.write("Message" + applyPatternExcMes);
-            return;
-        }
-        
-        String subjectkeepBackslash = keepBsSubject(subjectEdited);
-        String messagekeepBackslash = keepBsMessage(messageEdited);
-        messageEdited = StringUtil.replace(messagekeepBackslash, "\n", "\\r\\n\\\r\n");
-        messageEdited = keepEscapeCharacter(messageEdited);
+            writer = response.getWriter();
 
-        String subjectOri = resourceBundle.getString(subjectKey);
-        String messageOri = resourceBundle.getString(messageKey);
+            String companyName = getCompanyName(p_session);
+            Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
+            String key = MailerLocal.DEFAULT_RESOURCE_NAME + "_" + companyName + "_" + uiLocale;
+            ResourceBundle resourceBundle = SystemResourceBundle.getInstance().getResourceBundle(
+                    MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale);
 
-        HashSet<String> list = checkEmailTemplateContent(subjectOri, messageOri,
-                subjectEdited, messageEdited);
-        if (list.size() != 0)
-        {
-            StringBuffer result = new StringBuffer();
-            String addErrorPlaceHold = AmbassadorUtil.listToString(list);
-            result.append("The following placeholders cannot be added : " + addErrorPlaceHold
-                    + "\r\n");
+            String subjectKey = p_request.getParameter("subjectKey");
+            String messageKey = p_request.getParameter("messageKey");
+            String subjectEdited = p_request.getParameter("subjectText");
+            String messageEdited = p_request.getParameter("messageText");
 
-            writer.write(result.toString());
-            writer.flush();
-        }
-        else
-        {
-            String newFilepath = getClass().getResource(
-                    RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties")
-                    .getFile();
-            newFilepath = newFilepath.replace("/","\\");
-            String editTemplatePath = newFilepath.substring(1, newFilepath.lastIndexOf(File.separator));
-            File newFile = new File(editTemplatePath, "EmailMessageResource_" + companyName + "_"
-                    + uiLocale + ".properties");
-
-            FileInputStream fis = null;
-            if (newFile.exists())
+            // check subject and message pattern
+            if (!checkApplyPattern(subjectEdited))
             {
-                fis = (FileInputStream) getClass().getResourceAsStream(
-                        RESOURCE_LOCATION + "EmailMessageResource_" + companyName + "_" + uiLocale
-                                + ".properties");
+                writer.write("Subject fails to apply pattern: unmatched braces.");
+                return;
+            }
+            if (!checkApplyPattern(messageEdited))
+            {
+                writer.write("Message fails to apply pattern: unmatched braces.");
+                return;
+            }
+
+            subjectEdited = keepBsSubject(subjectEdited);
+            messageEdited = handleMessage(messageEdited);
+            String subjectOri = resourceBundle.getString(subjectKey);
+            String messageOri = resourceBundle.getString(messageKey);
+            // check place-holders
+            HashSet<String> list = checkPlaceHolders(subjectOri, messageOri, subjectEdited,
+                    messageEdited);
+            if (list.size() != 0)
+            {
+                StringBuffer result = new StringBuffer();
+                String addErrorPlaceHold = AmbassadorUtil.listToString(list);
+                result.append("The following placeholders cannot be added : " + addErrorPlaceHold
+                        + "\r\n");
+
+                writer.write(result.toString());
+                writer.flush();
             }
             else
             {
-                newFile.getParentFile().mkdirs();
-                fis = (FileInputStream) getClass().getResourceAsStream(
-                        RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties");
+                String oriLocaleFilePath = getClass().getResource(
+                        RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties")
+                        .getFile();
+                oriLocaleFilePath = oriLocaleFilePath.replace("\\", "/");
+                oriLocaleFilePath = oriLocaleFilePath.substring(1,
+                        oriLocaleFilePath.lastIndexOf("/"));
+                String newEmailTemplateFileName = "EmailMessageResource_" + companyName + "_"
+                        + uiLocale + ".properties";
+                File newFile = new File(oriLocaleFilePath, newEmailTemplateFileName);
+
+                FileInputStream fis = null;
+                if (newFile.exists())
+                {
+                    fis = (FileInputStream) getClass().getResourceAsStream(
+                            RESOURCE_LOCATION + "EmailMessageResource_" + companyName + "_" + uiLocale
+                                    + ".properties");
+                }
+                else
+                {
+                    newFile.getParentFile().mkdirs();
+                    fis = (FileInputStream) getClass().getResourceAsStream(
+                            RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties");
+                }
+
+                String content = FileUtil.readFile(fis, "utf-8");
+                StringBuffer document = new StringBuffer();
+
+                String contentPartOne = content.substring(0, content.indexOf(subjectKey));
+                document.append(contentPartOne);
+                document.append(subjectKey).append("=").append(subjectEdited).append("\r\n");
+                document.append(messageKey).append("=").append(messageEdited);
+
+                String contentPartOpt = content.substring(content.indexOf(messageKey));
+                String contentPartTwo = contentPartOpt.substring(contentPartOpt.indexOf("##########"));
+                document.append("\r\n" + contentPartTwo);
+
+                FileUtil.writeFile(newFile, document.toString());
+
+                SystemResourceBundle.getInstance().removeResourceBundleKey(key);
+
+                writer.write("Save successfully.");
+                writer.flush();
             }
-
-            String content = FileUtil.readFile(fis, "utf-8");
-            StringBuffer document = new StringBuffer();
-
-            String contentPartOne = content.substring(0, content.indexOf(subjectKey));
-            document.append(contentPartOne);
-            document.append(subjectKey).append("=").append(subjectkeepBackslash).append("\r\n");
-            document.append(messageKey).append("=").append(messageEdited);
-
-            String contentPartOpt = content.substring(content.indexOf(messageKey));
-            String contentPartTwo = contentPartOpt.substring(contentPartOpt.indexOf("##########"));
-            document.append("\r\n" + contentPartTwo);
-
-            FileUtil.writeFile(newFile, document.toString());
-
-            SystemResourceBundle.getInstance().removeResourceBundleKey(key);
-
-            writer.write("Save successfully.");
-            writer.flush();
         }
-        writer.close();
+        catch (Exception e)
+        {
+            logger.error("Error when save email template.", e);
+        }
+        finally
+        {
+            if (writer != null)
+            {
+                writer.close();                
+            }
+        }
+    }
+
+    private String handleMessage(String messageEdited)
+    {
+        messageEdited = keepBsMessage(messageEdited);
+
+        messageEdited = StringUtil.replace(messageEdited, "\n", "\\r\\n\\\r\n");
+
+        return ignoreLastBackSlash(messageEdited);
     }
 
     /**
@@ -423,9 +437,9 @@ public class AccountNotificationHandler extends PageHandler
     }
 
     /**
-     * Keeps the escape character of string .
+     * Remove the last "\" in message body to keep consistent with that in original properties.
      */
-    private String keepEscapeCharacter(String content)
+    private String ignoreLastBackSlash(String content)
     {
         if (content.indexOf("\\") != -1 && content.endsWith("\\\r\n"))
         {
@@ -437,7 +451,7 @@ public class AccountNotificationHandler extends PageHandler
     /**
      * Checks if email template content that user edited is valid or not.
      */
-    private HashSet<String> checkEmailTemplateContent(String subjectOri, String messageOri,
+    private HashSet<String> checkPlaceHolders(String subjectOri, String messageOri,
             String subjectEdited, String messageEdited)
     {
         HashSet<String> addedErrorPlaceHolds = new HashSet<String>();

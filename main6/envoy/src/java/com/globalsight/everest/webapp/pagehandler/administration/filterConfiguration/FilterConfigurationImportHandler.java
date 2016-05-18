@@ -982,9 +982,8 @@ public class FilterConfigurationImportHandler extends PageHandler
                                 .getXmlRuleId()));
                     }
 
-                    String configXmlStr = xmlRuleFilter.getConfigXml();
                     XmlFilterConfigParser xmlFilterConfigParser = new XmlFilterConfigParser(
-                            configXmlStr);
+                            xmlRuleFilter);
                     xmlFilterConfigParser.parserXml();
 
                     // elementPostFilterId

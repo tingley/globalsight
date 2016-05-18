@@ -422,9 +422,8 @@ public class ExportFilterHelper
                         {
                             try
                             {
-                                String configXmlStr = xmlRuleFilter.getConfigXml();
                                 XmlFilterConfigParser xmlFilterConfigParser = new XmlFilterConfigParser(
-                                        configXmlStr);
+                                        xmlRuleFilter);
                                 xmlFilterConfigParser.parserXml();
                                 String postFilterTableName = xmlFilterConfigParser
                                         .getElementPostFilterTableName();
@@ -535,9 +534,8 @@ public class ExportFilterHelper
                 {
                     try
                     {
-                        String configXmlStr = xmlRuleFilter.getConfigXml();
                         XmlFilterConfigParser xmlFilterConfigParser = new XmlFilterConfigParser(
-                                configXmlStr);
+                                xmlRuleFilter);
                         xmlFilterConfigParser.parserXml();
                         String postFilterTableName = xmlFilterConfigParser
                                 .getElementPostFilterTableName();

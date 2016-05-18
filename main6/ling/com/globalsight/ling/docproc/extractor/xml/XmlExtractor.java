@@ -2195,7 +2195,7 @@ public class XmlExtractor extends AbstractExtractor
                             skeleton = postReplaceForSkeletonElement(skeleton);
                             if (isCdata)
                             {
-                                skeleton = StringUtil.replace(skeleton, "�", "&nbsp;");
+                                skeleton = StringUtil.replace(skeleton, "\u00A0", "&nbsp;");
                             }
 
                             if (isCdata)
@@ -2755,7 +2755,7 @@ public class XmlExtractor extends AbstractExtractor
             Node att = attrs.item(i);
             String attname = att.getNodeName();
             String value = att.getNodeValue();
-            m_switchExtractionBuffer += " " + attname + "=&quot;" + value + "&quot;";
+            m_switchExtractionBuffer += " " + attname + "=&quot;" + m_xmlEncoder.encodeStringBasic(m_xmlEncoder.encodeStringBasic(value)) + "&quot;";
         }
         m_switchExtractionBuffer += "&gt;</bpt>";
         outputExtractedStuffForInternalTag(isTranslatable, isPreserveWS);
@@ -2782,7 +2782,7 @@ public class XmlExtractor extends AbstractExtractor
             Node att = attrs.item(i);
             String attname = att.getNodeName();
             String value = att.getNodeValue();
-            m_switchExtractionBuffer += " " + attname + "=\"" + value + "\"";
+            m_switchExtractionBuffer += " " + attname + "=\"" + m_xmlEncoder.encodeStringBasic(value) + "\"";
         }
 
         if (isEmptyTag)

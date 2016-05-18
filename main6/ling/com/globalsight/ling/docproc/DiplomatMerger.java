@@ -125,6 +125,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
     // For entity encoding issue
     private boolean m_isCDATA = false;
     private boolean m_isAttr = false;
+    private boolean m_isSubAttr = false;
 
     // For secondary filter:if second parser(currently it is html parser) is
     // used,
@@ -329,14 +330,15 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
         s = s.replace("&amp;", "&");
         s = s.replace("&AMP;", "&");
 
-        if (m_isAttr && m_entityModeForXml != XmlFilterConstants.ENTITY_HANDLE_MODE_5)
+        if ((m_isAttr || m_isSubAttr)
+                && m_entityModeForXml != XmlFilterConstants.ENTITY_HANDLE_MODE_5)
         {
             s = encoding(s, false);
         }
         else if (m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_5)
         {
             s = encoding(s, true);
-            s = s.replace("&#160;", "&nbsp;");
+            // s = s.replace("&#160;", "&nbsp;");
         }
         else if (m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_1
                 || m_entityModeForXml == XmlFilterConstants.ENTITY_HANDLE_MODE_3)
@@ -645,6 +647,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
         String type = state.getType();
         String format = null;
         String mainFormat = m_output.getDataFormat();
+        boolean isSub = (m_tmxStateStack.size() > 0 ? m_tmxStateStack.get(m_tmxStateStack.size() - 1) == s_SUB : false);
 
         // non-subflow context
         if (state.getFormat() != null)
@@ -680,6 +683,22 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
         }
 
         String tmp = decode(p_text);
+        
+        if (m_isSubAttr && (tmp.startsWith("\"") || tmp.startsWith("'")))
+        {
+            m_isSubAttr = false;
+        }
+        
+        if (isSub)
+        {
+            String content = m_l10nContent.getL10nContent();
+
+            // attribute start
+            if (!m_isSubAttr && content.matches("(?s).*?[a-zA-Z]+[\\s]*=[\\s]*[\"']$"))
+            {
+                m_isSubAttr = true;
+            }
+        }
 
         try
         {

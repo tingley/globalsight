@@ -157,11 +157,10 @@ public class AccountNotificationHandler extends PageHandler
         
         String action = request.getParameter("action");
 
-        if ("notifycation".equals(action))
+        if ("notification".equals(action))
         {
             preparePageInfo(request, session);
         }
-
         else if ("save".equals(action))
         {
             try
@@ -174,7 +173,6 @@ public class AccountNotificationHandler extends PageHandler
             }
             return;
         }
-
         else if ("edit".equals(action))
         {
             try
@@ -199,7 +197,6 @@ public class AccountNotificationHandler extends PageHandler
             }
             return;
         }
-        // Call parent invokePageHandler() to set link beans and invoke JSP
         super.invokePageHandler(pageDescriptor, request, response, context);
     }
 
@@ -264,6 +261,24 @@ public class AccountNotificationHandler extends PageHandler
     }
 
     /**
+     * Checks apply pattern of subject or message.
+     * @param content
+     * @return
+     */
+    private String checkApplyPattern(String content)
+    {
+        StringBuffer sb = new StringBuffer();
+        try
+        {
+            new MessageFormat(content);
+        }
+        catch (Exception e)
+        {
+            sb.append(" fails to apply pattern: unmatched braces.");
+        }
+        return sb.toString();
+    }
+    /**
      * Save content that user edit email template
      * 
      * @return
@@ -285,32 +300,29 @@ public class AccountNotificationHandler extends PageHandler
         String messageKey = p_request.getParameter("messageKey");
         String subjectEdited = p_request.getParameter("subjectText");
         String messageEdited = p_request.getParameter("messageText");
-        try
+
+        String applyPatternExcSub = checkApplyPattern(subjectEdited);
+        if (!"".equals(applyPatternExcSub))
         {
-            new MessageFormat(subjectEdited);
-        }
-        catch (Exception e)
-        {
-            writer.write("Subject fails to apply pattern: unmatched braces.");
+            writer.write("Subject" + applyPatternExcSub);
             return;
         }
-        try
+        String applyPatternExcMes = checkApplyPattern(messageEdited);
+        if (!"".equals(applyPatternExcMes))
         {
-            new MessageFormat(messageEdited);
-        }
-        catch (Exception e)
-        {
-            writer.write("Message fails to apply pattern: unmatched braces.");
+            writer.write("Message" + applyPatternExcMes);
             return;
         }
+        
+        String subjectkeepBackslash = keepBsSubject(subjectEdited);
         String messagekeepBackslash = keepBsMessage(messageEdited);
         messageEdited = StringUtil.replace(messagekeepBackslash, "\n", "\\r\\n\\\r\n");
         messageEdited = keepEscapeCharacter(messageEdited);
 
-        String subjectKeyOri = resourceBundle.getString(subjectKey);
-        String messageKeyOri = resourceBundle.getString(messageKey);
+        String subjectOri = resourceBundle.getString(subjectKey);
+        String messageOri = resourceBundle.getString(messageKey);
 
-        HashSet<String> list = checkEmailTemplateContent(subjectKeyOri, messageKeyOri,
+        HashSet<String> list = checkEmailTemplateContent(subjectOri, messageOri,
                 subjectEdited, messageEdited);
         if (list.size() != 0)
         {
@@ -327,7 +339,8 @@ public class AccountNotificationHandler extends PageHandler
             String newFilepath = getClass().getResource(
                     RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties")
                     .getFile();
-            String editTemplatePath = newFilepath.substring(1, newFilepath.lastIndexOf("/"));
+            newFilepath = newFilepath.replace("/","\\");
+            String editTemplatePath = newFilepath.substring(1, newFilepath.lastIndexOf(File.separator));
             File newFile = new File(editTemplatePath, "EmailMessageResource_" + companyName + "_"
                     + uiLocale + ".properties");
 
@@ -345,7 +358,6 @@ public class AccountNotificationHandler extends PageHandler
                         RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties");
             }
 
-            String subjectkeepBackslash = keepBsSubject(subjectEdited);
             String content = FileUtil.readFile(fis, "utf-8");
             StringBuffer document = new StringBuffer();
 

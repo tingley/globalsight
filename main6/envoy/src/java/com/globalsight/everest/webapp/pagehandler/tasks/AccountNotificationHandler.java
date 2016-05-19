@@ -331,8 +331,7 @@ public class AccountNotificationHandler extends PageHandler
                 String oriLocaleFilePath = getClass().getResource(
                         RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties")
                         .getFile();
-                oriLocaleFilePath = oriLocaleFilePath.replace("\\", "/");
-                oriLocaleFilePath = oriLocaleFilePath.substring(1,
+                oriLocaleFilePath = oriLocaleFilePath.substring(0,
                         oriLocaleFilePath.lastIndexOf("/"));
                 String newEmailTemplateFileName = "EmailMessageResource_" + companyName + "_"
                         + uiLocale + ".properties";

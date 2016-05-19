@@ -289,6 +289,7 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
             map.putAll(HtmlEntities.mHtmlCharToEntity);
         }
         map.remove(new Character('&'));
+        map.remove(new Character('\u00A0'));
         s = s.replace("&", "&amp;");
 
         for (Character key : map.keySet())

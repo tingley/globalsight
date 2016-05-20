@@ -150,7 +150,7 @@
 			    <td class="tableHeadingBasic myTableHeading"><input id="selectAllWorkflows" type="checkbox" onclick="selectAllWorkflows()"></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_target_locale")%>&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading" style="text-align:center"><%=bundle.getString("lb_word_count")%>&nbsp;&nbsp;&nbsp;</td>
-			    <td class="tableHeadingBasic myTableHeading" style="text-align:center"><span class="whiteBold">&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_percent_complete")%>&nbsp;&nbsp;&nbsp;</span></td>
+		<!--    <td class="tableHeadingBasic myTableHeading" style="text-align:center"><span class="whiteBold">&nbsp;&nbsp;&nbsp;123456789<%=bundle.getString("lb_percent_complete")%>&nbsp;&nbsp;&nbsp;</span></td>  --> 
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_state")%>&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_current_activity")%>&nbsp;&nbsp;&nbsp;</span></td>
 			    <c:if test="${customerAccessGroupIsDell}">
@@ -171,6 +171,27 @@
 				<c:when test="${(item.workflow.state == 'EXPORT_FAILED') || (item.workflow.state == 'IMPORT_FAILED')}">
 					<tr class="warningText">
 				</c:when>
+				<c:when test="${item.stateBundleString == 'Pending'}">
+				    <tr class="warningText">
+				</c:when>
+				<c:when test="${item.stateBundleString == 'Ready to be dispatched'}">
+				    <tr class="standardText">
+				</c:when>
+				<c:when test="${item.stateBundleString == 'Inprogress'}">
+				    <tr style="font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt;font-weight:bold;">
+				</c:when>
+				<c:when test="${item.stateBundleString == 'Localized'}">
+				    <tr style="font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:blue;">
+				</c:when>
+				<c:when test="${item.stateBundleString == 'Exported'}">
+				    <tr class="greenText">
+				</c:when>
+				<c:when test="${item.stateBundleString == 'Export Failed'}">
+				    <tr style="font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:red;font-weight:bold;">
+				</c:when>
+				<c:when test="${item.stateBundleString == 'Archived'}">
+				    <tr style="font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:#888888;">
+				</c:when>
 				<c:otherwise>
 					<tr class="standardText">
 				</c:otherwise>
@@ -190,7 +211,7 @@
 						</a>
 					</amb:permission>
 				</td>
-				<td style="text-align:center">${item.workflow.percentageCompletion}%</td>
+			<!--<td style="text-align:center">${item.workflow.percentageCompletion}%</td> -->
 				<td>${item.stateBundleString}</td>
 				<td>${item.taskDisplayName}</td>
 				<c:if test="${customerAccessGroupIsDell}">

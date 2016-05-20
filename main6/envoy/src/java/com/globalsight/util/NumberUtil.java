@@ -18,24 +18,22 @@
 package com.globalsight.util;
 
 /**
- * Utility class for number converting
- * @author Vincent Yan
- * @since 8.2
- * @date 2011/08/08
- *
+ * Utility class for number converting.
  */
 public class NumberUtil
 {
     public static int DEFAULT_INTEGER_VALUE = -1;
-    
-    public static int convertToInt(String p_param) {
+
+    public static int convertToInt(String p_param)
+    {
         return convertToInt(p_param, DEFAULT_INTEGER_VALUE);
     }
-    
-    public static int convertToInt(String p_param, int p_default) {
+
+    public static int convertToInt(String p_param, int p_default)
+    {
         if (StringUtil.isEmpty(p_param))
             return p_default;
-        
+
         try
         {
             int result = Integer.parseInt(p_param);
@@ -46,14 +44,46 @@ public class NumberUtil
             return p_default;
         }
     }
-    
-    /**
-     * @param args
-     */
-    public static void main(String[] args)
-    {
-        // TODO Auto-generated method stub
 
+    /*
+     * Remove the "%" from string and parse it into Integer.
+     */
+    public static int PecentToInt(String percentValue)
+    {
+        percentValue = percentValue.replaceAll("%", "");
+        int newValue = 0;
+
+        try
+        {
+            double temp = Double.parseDouble(percentValue);
+            newValue = Integer.parseInt(new java.text.DecimalFormat("0").format(temp));
+        }
+        catch (Exception e)
+        {
+        }
+
+        return newValue;
     }
 
+    /*
+     * Remove the "%" from string and parse it into Double.
+     */
+    public static double PecentToDouble(String percentValue)
+    {
+        double newValue = 0;
+
+        try
+        {
+            if (StringUtil.isNotEmpty(percentValue))
+            {
+                percentValue = percentValue.replaceAll("%", "");
+                newValue = Double.parseDouble(percentValue);
+            }
+        }
+        catch (Exception e)
+        {
+        }
+
+        return newValue;
+    }
 }

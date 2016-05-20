@@ -484,13 +484,6 @@ public interface SystemConfigParamNames
     public static final String GLOBALSIGHT_HOME_DIRECTORY = "globalsight.home";
     public static final String INSTALLATION_DATA_DIRECTORY = "install.data.dir";
 
-    // The first three parameters have been moved to TMProfileConstants.java,
-    // only the last one is left here for now
-    // public static final String
-    // MT_OVERRIDE_MATCHES="machineTranslation.overrideNonExactMatches";
-    // public static final String MT_ENGINE = "machineTranslation.engine";
-    // public static final String MT_AUTOCOMMIT_TO_TM =
-    // "machineTranslation.autoCommitToTM";
     public static final String MT_SHOW_IN_EDITOR = "machineTranslation.showInEditor";
 
     /** Process Runner related properties **/

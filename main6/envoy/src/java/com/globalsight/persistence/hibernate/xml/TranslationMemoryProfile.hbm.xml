@@ -147,8 +147,6 @@
                 class="com.globalsight.everest.projecthandler.LeverageProjectTM" />
         </set>
 
-        <one-to-one name="tdatm" class="com.globalsight.everest.foundation.TDATM" property-ref="translationMemoryProfile"/> 
-
         <set name="attributes" inverse="true" cascade="all">
 			<key column="TMP_ID" />
 			<one-to-many

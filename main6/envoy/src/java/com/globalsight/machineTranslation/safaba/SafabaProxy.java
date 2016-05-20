@@ -9,7 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.projecthandler.MachineTranslationProfile;
-import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileConstants;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileConstants;
 import com.globalsight.machineTranslation.AbstractTranslator;
 import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.machineTranslation.MachineTranslationException;
@@ -38,11 +38,11 @@ public class SafabaProxy extends AbstractTranslator implements MachineTranslator
             Locale targetLocale) throws MachineTranslationException
     {
         Map paramMap = getMtParameterMap();
-        String host = (String) paramMap.get(TMProfileConstants.MT_SAFA_HOST);
-        String port = (String) paramMap.get(TMProfileConstants.MT_SAFA_PORT);
-        String companyName = (String) paramMap.get(TMProfileConstants.MT_SAFA_COMPANY_NAME);
-        String password = (String) paramMap.get(TMProfileConstants.MT_SAFA_PASSWORD);
-        String client = (String) paramMap.get(TMProfileConstants.MT_SAFA_CLIENT);
+        String host = (String) paramMap.get(MTProfileConstants.MT_SAFA_HOST);
+        String port = (String) paramMap.get(MTProfileConstants.MT_SAFA_PORT);
+        String companyName = (String) paramMap.get(MTProfileConstants.MT_SAFA_COMPANY_NAME);
+        String password = (String) paramMap.get(MTProfileConstants.MT_SAFA_PASSWORD);
+        String client = (String) paramMap.get(MTProfileConstants.MT_SAFA_CLIENT);
 
         String langPair = SafabaTranslateUtil.getLocalePairs(sourceLocale, targetLocale);
         try
@@ -73,11 +73,11 @@ public class SafabaProxy extends AbstractTranslator implements MachineTranslator
         try
         {
             Map paramMap = getMtParameterMap();
-            String host = (String) paramMap.get(TMProfileConstants.MT_SAFA_HOST);
-            String port = (String) paramMap.get(TMProfileConstants.MT_SAFA_PORT);
-            String companyName = (String) paramMap.get(TMProfileConstants.MT_SAFA_COMPANY_NAME);
-            String password = (String) paramMap.get(TMProfileConstants.MT_SAFA_PASSWORD);
-            String client = (String) paramMap.get(TMProfileConstants.MT_SAFA_CLIENT);
+            String host = (String) paramMap.get(MTProfileConstants.MT_SAFA_HOST);
+            String port = (String) paramMap.get(MTProfileConstants.MT_SAFA_PORT);
+            String companyName = (String) paramMap.get(MTProfileConstants.MT_SAFA_COMPANY_NAME);
+            String password = (String) paramMap.get(MTProfileConstants.MT_SAFA_PASSWORD);
+            String client = (String) paramMap.get(MTProfileConstants.MT_SAFA_CLIENT);
             
             String langPair = SafabaTranslateUtil.getLocalePairs(sourceLocale, targetLocale);
             
@@ -123,11 +123,11 @@ public class SafabaProxy extends AbstractTranslator implements MachineTranslator
         try
         {
             Map paramMap = getMtParameterMap();
-            String host = (String) paramMap.get(TMProfileConstants.MT_SAFA_HOST);
-            String port = (String) paramMap.get(TMProfileConstants.MT_SAFA_PORT);
-            String companyName = (String) paramMap.get(TMProfileConstants.MT_SAFA_COMPANY_NAME);
-            String password = (String) paramMap.get(TMProfileConstants.MT_SAFA_PASSWORD);
-            String client = (String) paramMap.get(TMProfileConstants.MT_SAFA_CLIENT);
+            String host = (String) paramMap.get(MTProfileConstants.MT_SAFA_HOST);
+            String port = (String) paramMap.get(MTProfileConstants.MT_SAFA_PORT);
+            String companyName = (String) paramMap.get(MTProfileConstants.MT_SAFA_COMPANY_NAME);
+            String password = (String) paramMap.get(MTProfileConstants.MT_SAFA_PASSWORD);
+            String client = (String) paramMap.get(MTProfileConstants.MT_SAFA_CLIENT);
             String langPair = SafabaTranslateUtil.getLocalePairs(sourceLocale, targetLocale);
             MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap
                     .get(MachineTranslator.MT_PROFILE);
@@ -240,11 +240,11 @@ public class SafabaProxy extends AbstractTranslator implements MachineTranslator
         try
         {
             Map paramMap = getMtParameterMap();
-            String host = (String) paramMap.get(TMProfileConstants.MT_SAFA_HOST);
-            String port = (String) paramMap.get(TMProfileConstants.MT_SAFA_PORT);
-            String companyName = (String) paramMap.get(TMProfileConstants.MT_SAFA_COMPANY_NAME);
-            String password = (String) paramMap.get(TMProfileConstants.MT_SAFA_PASSWORD);
-            String client = (String) paramMap.get(TMProfileConstants.MT_SAFA_CLIENT);
+            String host = (String) paramMap.get(MTProfileConstants.MT_SAFA_HOST);
+            String port = (String) paramMap.get(MTProfileConstants.MT_SAFA_PORT);
+            String companyName = (String) paramMap.get(MTProfileConstants.MT_SAFA_COMPANY_NAME);
+            String password = (String) paramMap.get(MTProfileConstants.MT_SAFA_PASSWORD);
+            String client = (String) paramMap.get(MTProfileConstants.MT_SAFA_CLIENT);
             String langPair = SafabaTranslateUtil.getLocalePairs(sourceLocale, targetLocale);
             MachineTranslationProfile mtProfile = (MachineTranslationProfile) paramMap
                     .get(MachineTranslator.MT_PROFILE);

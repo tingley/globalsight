@@ -16,11 +16,7 @@
  */
 package com.globalsight.everest.page.pageimport;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -33,8 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.apache.log4j.Logger;
 
@@ -54,8 +48,6 @@ import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.tda.LeverageTDAResult;
-import com.globalsight.everest.tda.TdaHelper;
 import com.globalsight.everest.tuv.IXliffProcessor;
 import com.globalsight.everest.tuv.PoProcessor;
 import com.globalsight.everest.tuv.Tu;
@@ -88,8 +80,6 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageResult;
 import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecordList;
 import com.globalsight.terminology.termleverager.replacer.TermReplacer;
-import com.globalsight.util.AmbFileStoragePathUtils;
-import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
@@ -289,23 +279,7 @@ public abstract class AbstractTargetPagePersistence implements
                         unAppliedTus, appliedTuTuvMap);
             }
 
-            /****** Priority 3 : Handle TDA hitting ******/
-            boolean isSupportByTDA = false;
-            TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
-            if ((tmProfile.getTdatm() != null)
-                    && (tmProfile.getTdatm().getEnable() == 1))
-            {
-                isSupportByTDA = true;
-            }
-            if (isSupportByTDA)
-            {
-                unAppliedTus.removeAll(appliedTuTuvMap.keySet());
-                appliedTuTuvMap = applyTDAMatches(p_sourcePage, p_sourceTuvMap,
-                        sourceLocale, p_targetLocale, unAppliedTus,
-                        appliedTuTuvMap);
-            }
-
-            /****** Priority 4 : Handle MT hitting ******/
+            /****** Priority 3 : Handle MT hitting ******/
             if (mtProfile != null && mtProfile.isActive())
             {
                 String mtEngine = mtProfile.getMtEngine();
@@ -346,7 +320,7 @@ public abstract class AbstractTargetPagePersistence implements
                 machineTranslator = null;
             }
 
-            /****** Priority 5 : remove all internal text segments match ******/
+            /****** Priority 4 : remove all internal text segments match ******/
             Set<Tu> internalTextTus = new HashSet<Tu>();
             if (appliedTuTuvMap != null && appliedTuTuvMap.size() > 0)
             {
@@ -373,7 +347,7 @@ public abstract class AbstractTargetPagePersistence implements
                 }
             }
 
-            /****** Priority 6 : Handle Rest TUs ******/
+            /****** Priority 5 : Handle Rest TUs ******/
             if (p_sourceTuvMap.size() > appliedTuTuvMap.size())
             {
                 unAppliedTus.removeAll(appliedTuTuvMap.keySet());
@@ -399,7 +373,7 @@ public abstract class AbstractTargetPagePersistence implements
                 }
             }
 
-            /****** Priority 7 : add source comment ******/
+            /****** Priority 6 : add source comment ******/
             Iterator iter = p_sourceTuvMap.entrySet().iterator();
             iter = p_sourceTuvMap.entrySet().iterator();
             while (iter.hasNext())
@@ -471,7 +445,7 @@ public abstract class AbstractTargetPagePersistence implements
                 .getMtProfileBySourcePage(p_sourcePage, p_targetLocale);
         long threshold = getThresholdForMatchDataSources(mtProfile, tmProfile);
 
-        // 2. Loop to add target TUVs that don't need go through local TM/TDA/MT
+        // 2. Loop to add target TUVs that don't need go through local TM/MT
         // matches into "p_appliedTuTuvMap".
         Collection<LeverageMatch> lmCollection = new ArrayList<LeverageMatch>();
         for (Iterator it = p_unAppliedTus.iterator(); it.hasNext();)
@@ -878,165 +852,6 @@ public abstract class AbstractTargetPagePersistence implements
 		}
 		return false;
 	}
-
-	/**
-     * Hit TDA to get matches for un-applied segments. TDA matches will be
-     * stored in DB (As TDA won't return 100% match, so no matches will be
-     * populated into target TUVs.)
-     */
-    private HashMap<Tu, Tuv> applyTDAMatches(SourcePage p_sourcePage,
-            HashMap<Tu, Tuv> p_sourceTuvMap, GlobalSightLocale p_sourceLocale,
-            GlobalSightLocale p_targetLocale, Set<Tu> p_unAppliedTus,
-            HashMap<Tu, Tuv> p_appliedTuTuvMap) throws Exception
-    {
-        if (p_unAppliedTus == null || p_unAppliedTus.size() == 0)
-        {
-            return p_appliedTuTuvMap;
-        }
-
-        long jobId = p_sourcePage.getJobId();
-
-        TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
-        long tmProfileThreshold = tmProfile.getFuzzyMatchThreshold();
-
-        HashMap<Tu, Tuv> needHitTDAMap = new HashMap<Tu, Tuv>();
-        needHitTDAMap = formTuTuvMap(p_unAppliedTus, p_sourceTuvMap,
-                p_targetLocale, jobId);
-
-        if (needHitTDAMap != null && needHitTDAMap.size() > 0)
-        {
-            TdaHelper tdaHelper = new TdaHelper();
-            String directory = AmbFileStoragePathUtils
-                    .getFileStorageDirPath(p_sourcePage.getCompanyId());
-
-            String filepath = directory + File.separator + "TDA"
-                    + File.separator + p_targetLocale;
-            File originalPath = new File(filepath + File.separator + "original");
-
-            if (!originalPath.exists())
-            {
-                originalPath.mkdirs();
-            }
-
-            File resultPath = new File(filepath + File.separator + "TDAResult");
-
-            if (!resultPath.exists())
-            {
-                resultPath.mkdirs();
-            }
-
-            // Generate the xliff file that send to TDA server
-            File temp = new File(originalPath, p_sourcePage.getId() + ".xlf");
-
-            FileOutputStream fos = new FileOutputStream(temp);
-            BufferedOutputStream bos = new BufferedOutputStream(fos, 4096);
-            OutputStreamWriter osw = new OutputStreamWriter(bos, FileUtil.UTF8);
-            tdaHelper.WriteTDAXliffFile(osw, p_sourceLocale.toString(),
-                    p_targetLocale.toString(), needHitTDAMap);
-            osw.flush();
-            osw.close();
-            bos.close();
-            fos.close();
-
-            // package the xliff file into zip file
-            String strZipName = filepath + File.separator + "original"
-                    + File.separator + p_sourcePage.getId() + ".zip";
-            ZipOutputStream zipout = new ZipOutputStream(new FileOutputStream(
-                    strZipName));
-
-            FileInputStream xliffStream = new FileInputStream(temp);
-            zipout.putNextEntry(new ZipEntry(p_sourcePage.getId() + ".xlf"));
-            byte[] buffer = new byte[1024];
-            int len;
-
-            while ((len = xliffStream.read(buffer)) > 0)
-            {
-                zipout.write(buffer, 0, len);
-            }
-
-            zipout.closeEntry();
-            zipout.flush();
-            zipout.close();
-            xliffStream.close();
-
-            File zipFile = new File(strZipName);
-
-            tdaHelper.leverageTDA(tmProfile.getTdatm(), zipFile, filepath
-                    + File.separator + "TDAResult", p_sourcePage.getId()
-                    + ".xlf", p_sourceLocale.toString().replace("_", "-"),
-                    p_targetLocale.toString().replace("_", "-"));
-
-            File leverageFile = new File(filepath + File.separator
-                    + "TDAResult" + File.separator + p_sourcePage.getId()
-                    + ".xlf");
-
-            if (leverageFile.exists())
-            {
-                FileInputStream file = new FileInputStream(leverageFile);
-                ArrayList matchList = tdaHelper.extract(file,
-                        tmProfileThreshold);
-
-                if (matchList != null && matchList.size() > 0)
-                {
-                    TuvManager tuvMgr = ServerProxy.getTuvManager();
-                    Collection<LeverageMatch> lmCollection = new ArrayList<LeverageMatch>();
-                    for (int i = 0; i < matchList.size(); i++)
-                    {
-                        LeverageTDAResult tdaResult = (LeverageTDAResult) matchList
-                                .get(i);
-                        Tu currentTu = tuvMgr.getTuForSegmentEditor(
-                                tdaResult.getTuid(), jobId);
-                        Tuv newTuv = (Tuv) needHitTDAMap.get(currentTu);
-
-                        // save TDA matches into "leverage_match"
-                        Tuv sourceTuv = (Tuv) p_sourceTuvMap.get(currentTu);
-
-                        LeverageMatch lm = new LeverageMatch();
-                        lm.setSourcePageId(p_sourcePage.getIdAsLong());
-                        lm.setOriginalSourceTuvId(sourceTuv.getIdAsLong());
-                        lm.setSubId("0");
-
-                        String startTag = newTuv.getGxmlElement().getStartTag();
-                        String endTag = newTuv.getGxmlElement().getEndTag();
-
-                        String tmpSegment = startTag
-                                + tdaResult.getResultText() + endTag;
-                        lm.setMatchedText(tmpSegment);
-                        lm.setMatchedClob(null);
-                        lm.setTargetLocale(newTuv.getGlobalSightLocale());
-                        lm.setOrderNum((short) tdaResult.getOrderNum());
-                        lm.setScoreNum((float) TdaHelper
-                                .PecentToDouble(tdaResult.getMatchPercent()));
-                        lm.setMatchType(MatchState.TDA_MATCH.getName());
-                        lm.setMatchedTuvId(-1);
-                        lm.setProjectTmIndex(Leverager.TDA_TM_PRIORITY);
-                        lm.setTmId(0);
-                        lm.setTmProfileId(tmProfile.getIdAsLong());
-                        lm.setMtName(null);
-                        lm.setMatchedOriginalSource(tdaResult.getSourceText());
-
-                        lm.setSid(sourceTuv.getSid());
-                        lm.setCreationUser(sourceTuv.getCreatedUser());
-                        lm.setCreationDate(sourceTuv.getLastModified());
-                        lm.setModifyDate(sourceTuv.getLastModified());
-
-                        lmCollection.add(lm);
-
-                        newTuv.setMatchType(MatchState.TDA_MATCH.getName());
-                        newTuv.setLastModifiedUser(IFormatNames.FORMAT_TDA);
-                        newTuv.setState(TuvState.NOT_LOCALIZED);
-                        currentTu.addTuv(newTuv);
-                        p_appliedTuTuvMap.put((TuImpl) currentTu, newTuv);
-                    }
-
-                    LingServerProxy.getLeverageMatchLingManager()
-                            .saveLeveragedMatches(lmCollection, jobId);
-                }
-            }
-        }
-
-        return p_appliedTuTuvMap;
-    }
 
     /**
      * Hit MT to get matches for un-applied segments. MT matches will be stored

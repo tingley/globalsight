@@ -59,7 +59,7 @@
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
-<script type="text/javascript"src="/globalsight/jquery/jquery-1.9.1.min.js"></script>
+<script type="text/javascript"src="/globalsight/jquery/jquery-1.11.3.min.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -229,7 +229,7 @@ $(document).ready(function() {
 	
 	$("#edit").click(function(){
 	    $.ajax({
-	    	type:'get',
+	    	type:'post',
 	    	url:"/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&action=edit",
 	        data:{
 	        	'selectFromValue':document.getElementById("from").value,
@@ -249,7 +249,7 @@ $(document).ready(function() {
 
 	$("#reset").click(function(){
 		$.ajax({
-			type:'get',
+			type:'post',
 			url:"/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&action=reset",
 	        data:{
 		          'subjectKey':$("#subjectKey").val(),

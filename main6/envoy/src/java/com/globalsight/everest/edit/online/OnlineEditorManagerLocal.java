@@ -2196,10 +2196,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 {
                     tmName = "Remote TM";
                 }
-                else if (match.getTmIndex() == Leverager.TDA_TM_PRIORITY)
-                {
-                    tmName = "TDA";
-                }
                 else if (match.getTmIndex() == Leverager.PO_TM_PRIORITY)
                 {
                     tmName = IFormatNames.FORMAT_PO.toUpperCase();
@@ -5475,9 +5471,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             String name = tuv.getLastModifiedUser();
 
-            if (name != null && !name.equals("") && !name.equals("Xliff")
-                    && !name.equals("po") && !name.equals("TDA")
-                    & (name.indexOf("_MT") < 0))
+            if (name != null && !name.equals("") && !name.equals("Xliff") && !name.equals("po")
+                    && (name.indexOf("_MT") < 0))
             {
                 if (!result.contains(name))
                 {

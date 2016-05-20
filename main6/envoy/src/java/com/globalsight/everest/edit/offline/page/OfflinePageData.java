@@ -62,7 +62,6 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.tda.TdaHelper;
 import com.globalsight.everest.tm.exporter.TmxChecker;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
@@ -83,6 +82,7 @@ import com.globalsight.ling.tw.offline.parser.AmbassadorDwUpParser;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.NumberUtil;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -2371,12 +2371,6 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                 {
                 }
             }
-            // TDA matches
-            else if (match.getProjectTmIndex() == Leverager.TDA_TM_PRIORITY)
-            {
-                userId = "TDA";
-                sourceText = getMatchedOriginalSource(match, sourceText);
-            }
             // PO matches
             else if (match.getProjectTmIndex() == Leverager.PO_TM_PRIORITY)
             {
@@ -3044,7 +3038,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                 LeverageMatch lm = new LeverageMatch();
                 lm.setMatchedOriginalSource(EditUtil.decodeXmlEntities(alt.getSourceSegment()));
                 lm.setMatchedText(EditUtil.decodeXmlEntities(alt.getSegment()));
-                float score = (float) TdaHelper.PecentToDouble(alt.getQuality());
+                float score = (float) NumberUtil.PecentToDouble(alt.getQuality());
                 lm.setScoreNum(score);
                 lm.setProjectTmIndex(-100);
                 lm.setOriginalSourceTuvId(0);

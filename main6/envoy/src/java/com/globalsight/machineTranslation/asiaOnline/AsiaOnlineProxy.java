@@ -296,7 +296,7 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
         writeXlfHeader(m_outputStream);
         String srcLocale = getLocaleName(p_sourceLocale);
         String trgLocale = getLocaleName(p_targetLocale);
-        writeTDADocumentHeader(m_outputStream, srcLocale, trgLocale);
+        writeFileHeader(m_outputStream, srcLocale, trgLocale);
         writeTranslationUnit(m_outputStream, p_segments);
         writeXlfEnd(m_outputStream);
     }
@@ -329,7 +329,7 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
         m_outputStream.write(m_strEOL);
     }
     
-    private void writeTDADocumentHeader(OutputStreamWriter m_outputStream,
+    private void writeFileHeader(OutputStreamWriter m_outputStream,
             String sLocale, String tLocale) throws IOException
     {
         String m_strEOL = "\r\n";

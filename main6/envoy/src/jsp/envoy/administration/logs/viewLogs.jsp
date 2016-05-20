@@ -352,6 +352,13 @@ TR.trodd {
 				<TD><%=bundle.getString("log_tb_audit")%></TD>
 			</TR>
 -->
+            <TR>
+                <td>
+                  <input type="checkbox" id="restWebservices" name="restWebservices" value="restWebservices.log" />
+                </td>
+                <TD>RestWebservices.log</TD>
+                <TD>Restful webservices log which contains logs for restful APIs.</TD>
+            </TR>
 		</TABLE>
         </form>
 </BODY>

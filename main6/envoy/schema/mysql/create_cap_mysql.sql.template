@@ -3219,7 +3219,6 @@ CREATE INDEX INDEX_SPID_WFID ON
 
 -- --  Close Target_Page
 
--- -- - Begin Source_Page
 
 CREATE INDEX INDEX_ID_DST ON SOURCE_PAGE(ID,DATA_SOURCE_TYPE);
 
@@ -3227,13 +3226,7 @@ CREATE INDEX INDEX_ID_TS_EPID ON SOURCE_PAGE(ID, TIMESTAMP, EXTERNAL_PAGE_ID);
 
 CREATE INDEX INDEX_EPID ON SOURCE_PAGE(EXTERNAL_PAGE_ID);
 
--- --  Close Source_Page
-
--- -- Begin Xliff_Alt
 CREATE INDEX INDEX_TUV_ID ON XLIFF_ALT(TUV_ID);
--- -- Close Xliff_Alt
-
--- -- - Begin Job-- -
 
 CREATE INDEX INDEX_ID_STATE ON JOB(ID, STATE);
 
@@ -3241,28 +3234,13 @@ CREATE INDEX INDEX_JOB_NAME ON JOB(NAME);
 
 CREATE INDEX INDEX_STATE_TIMESTAMP ON JOB(STATE, TIMESTAMP);
 
--- -- - Close Job-- --
-
--- -- - Begin Workflow -- --
-
 CREATE INDEX INDEX_WFIDSTATE ON WORKFLOW(IFLOW_INSTANCE_ID, STATE);
 
 CREATE INDEX INDEX_WFIDTLID ON WORKFLOW (IFLOW_INSTANCE_ID, TARGET_LOCALE_ID);
 
--- -- --  Close Workflow-- -- -
-
--- -- - Begin Workflow_Owner -- --
 CREATE INDEX INDEX_WFID ON WORKFLOW_OWNER(WORKFLOW_ID);
 
--- -- --  Close Workflow_Owner -- -- -
-
--- -- -- - Begin Project
-
 CREATE INDEX INDEX_ID_USERID ON PROJECT(PROJECT_SEQ, MANAGER_USER_ID);
-
--- -- -- - Close Project-- -
-
--- -- -- Begin Request-- --
 
 CREATE INDEX INDEX_ID_BATCHID ON REQUEST(ID,BATCH_ID);
 
@@ -3274,39 +3252,19 @@ CREATE INDEX INDEX_REQUEST_JOBID ON REQUEST(JOB_ID);
 
 CREATE INDEX INDEX_REQUEST_BATCHID ON REQUEST(BATCH_ID);
 
--- -- - Close Request
-
--- -- -- - Begin locale
-
 CREATE INDEX INDEX_IS_UI_LOCALE ON LOCALE(IS_UI_LOCALE);
 
 CREATE INDEX INDEX_ISO_COUNTRY_LANG ON LOCALE(ISO_COUNTRY_CODE,ISO_LANG_CODE);
 
--- -- -- -Close Locale
-
--- -- -- -Begin locale_pair
-
 CREATE INDEX INDEX_SL_ACTIVE ON LOCALE_PAIR (IS_ACTIVE, SOURCE_LOCALE_ID);
-
--- -- - Close locale_pair
-
--- -- --  Begin task_tuv
 
 CREATE INDEX INDEX_CTUVID ON TASK_TUV(CURRENT_TUV_ID);
 
 CREATE INDEX IDX_TASK_TUV_PREV_TUVID ON TASK_TUV( PREVIOUS_TUV_ID );
 
--- -- --  Close task_tuv
-
--- -- -- -- - Begin L10n_Profile
-
 CREATE INDEX INDEX_SLID ON L10N_PROFILE(SOURCE_LOCALE_ID);
 
 CREATE INDEX INDEX_IDNAME ON L10N_PROFILE(ID, NAME);
-
--- -- --  Close l10n_file
-
--- -- - Begin Issue and IssueHistory
 
 CREATE INDEX INDEX_LKEY_OTYPE ON ISSUE(LOGICAL_KEY, ISSUE_OBJECT_TYPE);
 
@@ -3318,333 +3276,22 @@ CREATE INDEX INDEX_TARGET_PAGE_ID ON ISSUE(TARGET_PAGE_ID);
 
 CREATE INDEX INDEX_IID ON ISSUE_HISTORY(ISSUE_ID);
 
--- -- -- - Close Issue and IssueHistory
-
--- -- -- - Begin Image Replace File Map
-
-CREATE INDEX INDEX_TPID_TUVID_SUBID ON
-   IMAGE_REPLACE_FILE_MAP(TARGET_PAGE_ID, TUV_ID, SUB_ID);
+CREATE INDEX INDEX_TPID_TUVID_SUBID ON IMAGE_REPLACE_FILE_MAP(TARGET_PAGE_ID, TUV_ID, SUB_ID);
 
 CREATE INDEX INDEX_IMAGEMAP_TPID ON IMAGE_REPLACE_FILE_MAP(TARGET_PAGE_ID);
 
 CREATE INDEX IDX_IMAGE_REP_FM_TUVID ON IMAGE_REPLACE_FILE_MAP(TUV_ID);
 
--- -- --  Close Image Replace File Map
+CREATE INDEX IDX_RESERVED_TIME ON RESERVED_TIME (USER_CALENDAR_ID, TASK_ID, START_TIME, END_TIME);
 
--- -- -- - Begin Calendaring table indexes
+CREATE INDEX IDX_L10N_PROJID_ID ON L10N_PROFILE (PROJECT_ID, ID);
 
-CREATE INDEX IDX_RESERVED_TIME
-    ON RESERVED_TIME
-    (USER_CALENDAR_ID, TASK_ID, START_TIME, END_TIME);
+CREATE INDEX IDX_REQUEST_L10NID_JOB ON REQUEST(L10N_PROFILE_ID, JOB_ID);
 
--- -- -- - Close Calendaring table indexes
+CREATE INDEX IDX_WORKFLOW_JOB ON WORKFLOW(JOB_ID);
 
--- -- -- -- --  Close Indexes
+CREATE INDEX IDX_WORKFLOW_STATE_JOB ON WORKFLOW(STATE, JOB_ID);
 
---  PROCEDURES -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
+CREATE INDEX IDX_TASK_INFO_WORKFLOW_ID ON TASK_INFO (WORKFLOW_ID);
 
---  PROC_INSERT_LOCALE_PAIR
---
--- create or replace procedure proc_insert_locale_pair
--- (
---   lp_id int,
---   source int,
---   target int,
---   company int
--- ) is
--- begin
---   update locale_pair
---   set is_active = 'Y'
---   where source_locale_id = source
---    AND  target_locale_id = target
---    AND  company_id = company;
---   --
---   if SQL%NOTFOUND then
---     insert into locale_pair (id, source_locale_id, target_locale_id, company_id, is_active)
---     values (lp_id, source, target, company, 'Y');
---   end if;
---   --
---   commit;
--- end;
--- /
-
-DROP PROCEDURE IF EXISTS PROC_INSERT_LOCALE_PAIR;
-DELIMITER //
-CREATE PROCEDURE PROC_INSERT_LOCALE_PAIR
-(
-  LP_ID INT,
-  SOURCE INT,
-  TARGET INT,
-  COMPANY INT
-)
-BEGIN
-  DECLARE NUM INT DEFAULT 0;
-
-  SELECT COUNT(*) INTO NUM FROM LOCALE_PAIR
-  WHERE SOURCE_LOCALE_ID = SOURCE
-   AND  TARGET_LOCALE_ID = TARGET
-   AND  COMPANY_ID = COMPANY;
-
-  IF NUM > 0
-  THEN
-    UPDATE LOCALE_PAIR
-    SET IS_ACTIVE = 'Y'
-    WHERE SOURCE_LOCALE_ID = SOURCE
-      AND  TARGET_LOCALE_ID = TARGET
-     AND  COMPANY_ID = COMPANY;
-  ELSE
-    INSERT INTO LOCALE_PAIR (ID, SOURCE_LOCALE_ID, TARGET_LOCALE_ID, COMPANY_ID, IS_ACTIVE)
-           VALUES (LP_ID, SOURCE, TARGET, COMPANY, 'Y');
-   END IF;
-
-  COMMIT;
-END;
-//
-DELIMITER ;
-
---  PROC_DELETE_LOCALE_PAIR
---
-/*
-create or replace procedure proc_delete_locale_pair
-(
-  lp_id int,
-  source int,
-  target int,
-  company int
-) is
-begin
-  update locale_pair
-  set is_active = 'N'
-  where source_locale_id = source
-   AND  target_locale_id = target
-   AND  company_id = company;
-  --
-  if SQL%NOTFOUND then
-    null;
-  end if;
-  --
-  commit;
-end;
-/
-*/
-DROP PROCEDURE IF EXISTS PROC_DELETE_LOCALE_PAIR;
-DELIMITER //
-CREATE PROCEDURE PROC_DELETE_LOCALE_PAIR
-(
-  LP_ID INT,
-  SOURCE INT,
-  TARGET INT,
-  COMPANY INT
-)
-BEGIN
-  DECLARE NUM INT DEFAULT 0;
-
-  SELECT COUNT(*) INTO NUM FROM LOCALE_PAIR
-  WHERE SOURCE_LOCALE_ID = SOURCE
-   AND  TARGET_LOCALE_ID = TARGET
-   AND  COMPANY_ID = COMPANY;
-
-  IF NUM > 0
-  THEN
-    UPDATE LOCALE_PAIR
-    SET IS_ACTIVE = 'N'
-    WHERE SOURCE_LOCALE_ID = SOURCE
-      AND  TARGET_LOCALE_ID = TARGET
-     AND  COMPANY_ID = COMPANY;
-   END IF;
-
-  COMMIT;
-END;
-//
-DELIMITER ;
-
-
---  PROC_INSERT_LOCALE_PAIR_DEBUG
---
---   SET SERVEROUTPUT ON SIZE 1000000;
---   SET ECHO OFF VERIFY OFF FEEDBACK OFF TRIMSPOOL ON PAGES 0 LINES 512;
---   SET TERMOUT ON;
-/*
-create or replace procedure proc_insert_locale_pair_debug
-(
-  id int,
-  source int,
-  target int,
-  company int
-) is
-begin
-  DBMS_OUTPUT.ENABLE(100000);
-    DBMS_OUTPUT.PUT('DBMS_OUTPUT.PUT_LINE:');
-    DBMS_OUTPUT.PUT('source locale pair localeId:');
-    DBMS_OUTPUT.PUT(source);
-    DBMS_OUTPUT.PUT(' target locale pair localeId:');
-    DBMS_OUTPUT.PUT(target);
-    DBMS_OUTPUT.NEW_LINE;
-  update locale_pair
-  set is_active = 'Y'
-  where source_locale_id = source
-    and target_locale_id = target
-    and company_id = company;
-  --
-  if SQL%NOTFOUND then
-    DBMS_OUTPUT.PUT('DBMS_OUTPUT.PUT_LINE:');
-    DBMS_OUTPUT.PUT('inserting source locale id:');
-    DBMS_OUTPUT.PUT(source);
-    DBMS_OUTPUT.PUT(' inserting target locale id:');
-    DBMS_OUTPUT.PUT(target);
-    DBMS_OUTPUT.NEW_LINE;
-    insert into locale_pair (id, source_locale_id, target_locale_id, company_id)
-    values (id, source, target, company);
-  end if;
-EXCEPTION
-   WHEN OTHERS
-   THEN
-        DBMS_OUTPUT.PUT_LINE (SQLERRM );
-        DBMS_OUTPUT.PUT('exception for source:');
-        DBMS_OUTPUT.PUT(source);
-        DBMS_OUTPUT.PUT(' exception for target:');
-        DBMS_OUTPUT.PUT(target);
-        DBMS_OUTPUT.NEW_LINE;
-  --
-  commit;
-end;
-/
-*/
-
---  The new proceduer in MySql just call the procedure PROC_INSERT_LOCALE_PAIR, there is nothing done for debug.
-DROP PROCEDURE IF EXISTS PROC_INSERT_LOCALE_PAIR_DEBUG;
-DELIMITER //
-CREATE PROCEDURE PROC_INSERT_LOCALE_PAIR_DEBUG
-(
-  ID INT,
-  SOURCE INT,
-  TARGET INT,
-  COMPANY INT
-)
-BEGIN
-  CALL PROC_INSERT_LOCALE_PAIR(ID, SOURCE, TARGET, COMPANY);
-END;
-//
-DELIMITER ;
-
---  @DELETE This procedure is not migrated into MySql. Do nothing in this procedure. Or it is just for waiting a short time.
---  PROC_GET_LINES
---
-/*
-create or replace procedure proc_get_lines
-is
-BEGIN
-    DBMS_OUTPUT.ENABLE(100000);
-    DECLARE
-        return_value varchar(255);
-        get_status int;
-    BEGIN
-        FOR i IN 1..10 LOOP
-            DBMS_OUTPUT.GET_LINE (return_value, get_status);
-            IF get_status = 0
-            THEN
-                EXIT;
-            END IF;
-        END LOOP;
-    END;
-end;
-/
-*/
-
-
---  Indexes for Job Management Performance
--- DROP INDEX IDX_L10N_PROJID_ID ON L10N_PROFILE;
-CREATE INDEX IDX_L10N_PROJID_ID
-     ON L10N_PROFILE
-        (PROJECT_ID, ID);
-
--- DROP INDEX IDX_REQUEST_L10NID_JOB ON REQUEST;
-CREATE INDEX IDX_REQUEST_L10NID_JOB
-     ON REQUEST
-        (L10N_PROFILE_ID, JOB_ID);
-
--- DROP INDEX IDX_WORKFLOW_JOB ON WORKFLOW;
-CREATE INDEX IDX_WORKFLOW_JOB
-     ON WORKFLOW
-        (JOB_ID);
-
--- DROP INDEX IDX_WORKFLOW_STATE_JOB ON WORKFLOW;
-CREATE INDEX IDX_WORKFLOW_STATE_JOB
-     ON WORKFLOW
-        (STATE, JOB_ID);
-
--- - index for Performance issue
--- DROP INDEX IDX_TASK_INFO_WORKFLOW_ID ON TASK_INFO;
-CREATE INDEX IDX_TASK_INFO_WORKFLOW_ID
-     ON TASK_INFO
-        (WORKFLOW_ID);
-
--- DROP INDEX IDX_COST_BY_WORD_COUNT_COST_ID ON COST_BY_WORD_COUNT;
-CREATE INDEX IDX_COST_BY_WORD_COUNT_COST_ID
-     ON COST_BY_WORD_COUNT
-        (COST_ID);
-
--- - Reports -- -
-/*
-CREATE OR REPLACE function date_diff (p_date1 IN DATE, p_date2 IN DATE) return varchar
-AS
-  v_diff NUMBER := 0;
-  v_days NUMBER := 0;
-  v_hrs NUMBER := 0;
-  v_min NUMBER := 0;
-  v_sec NUMBER := 0;
-  v_ret varchar(100);
-BEGIN
-  If p_date1 = Null or p_date2 = Null Then Return '' ; End If ;
-  v_diff := ABS(p_date2 - p_date1);
-  v_days := TRUNC(v_diff,0);
-  v_diff := (v_diff - TRUNC(v_diff, 0))*24;
-  v_hrs := TRUNC(v_diff, 0);
-  v_diff := (v_diff - TRUNC(v_diff, 0))*60;
-  v_min := Round(v_diff, 0);  --  whole mins
-  If v_days > 0 then   v_ret := v_days || ' Days ' ;  End If;
-  If v_hrs > 0 then   v_ret := v_ret || v_hrs || ' Hours '  ;  End If ;
-  If v_min > 0 then   v_ret := v_ret || v_min || ' Minutes '  ;  End If ;
-  Return  v_ret;
-END date_diff;
-/
-*/
-
---  This function return a string to discribe the time clearance between first parameter and the other one.
---  If each of the parameters a null, return blank string.
---  If the first parameter is earlier than the second one return blank string.
---  If the first parameter is later than the second one, return the clearance time.
-DROP FUNCTION IF EXISTS DATE_DIFF;
-DELIMITER //
-CREATE FUNCTION DATE_DIFF (P_DATE1 TIMESTAMP, P_DATE2 TIMESTAMP)
-RETURNS VARCHAR(100)
-BEGIN
-  DECLARE V_DAYS INT DEFAULT 0; --  THE VALUE OF EACH TYPE ARE INTEGER.
-  DECLARE V_HRS INT DEFAULT 0;
-  DECLARE V_MIN INT DEFAULT 0;
-  DECLARE V_SEC INT DEFAULT 0; --  NEVER BEEN USED. THIS IS USED TO STORE SECOND VALUE.
-  DECLARE V_RET VARCHAR(100) DEFAULT '';
-
-  --  If each of them is null, return blank string
-  IF P_DATE1 = NULL OR P_DATE2 = NULL
-     THEN RETURN '' ;
-  END IF ;
-
-  SELECT TIMESTAMPDIFF(DAY, P_DATE1, P_DATE2) INTO V_DAYS;
-  SELECT TIMESTAMPDIFF(HOUR, P_DATE1, P_DATE2) INTO V_HRS;
-  SELECT TIMESTAMPDIFF(MINUTE, P_DATE1, P_DATE2) INTO V_MIN;
-
-  IF V_DAYS > 0
-    THEN   SELECT CONCAT(V_DAYS, ' DAYS ') INTO V_RET;
-  END IF;
-  IF V_HRS > 0
-    THEN   SELECT CONCAT(V_RET, V_HRS, ' HOURS ') INTO V_RET;
-  END IF ;
-  IF V_MIN > 0
-    THEN   SELECT CONCAT(V_RET, V_MIN, ' MINUTES ') INTO V_RET;
-  END IF ;
-
-  RETURN  V_RET;
-END;
-//
-DELIMITER ;
+CREATE INDEX IDX_COST_BY_WORD_COUNT_COST_ID ON COST_BY_WORD_COUNT(COST_ID);

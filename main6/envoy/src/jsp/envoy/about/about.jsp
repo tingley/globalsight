@@ -19,6 +19,7 @@
     String lbVisitGlobalsight = bundle.getString("lb_visit_globalsight");
     String lbClose = bundle.getString("lb_close");
     String buildNumber = ServerUtil.getVersion();
+    String buildDate = ServerUtil.getBuildDate();
 %>
 <HTML>
 <HEAD>
@@ -37,7 +38,7 @@
 
 <TABLE WIDTH="100%">
 <TR>
-	<TD ALIGN="LEFT"><SPAN CLASS="standardText"><B><%=lbVersion%> <%=buildNumber%></B></SPAN></TD>
+	<TD ALIGN="LEFT"><SPAN CLASS="standardText"><B><%=lbVersion%> <%=buildNumber%></B>&nbsp;&nbsp;&nbsp;<%=buildDate %></SPAN></TD>
 	<% if (b_catalyst) {%>
 	<TD ALIGN="RIGHT"><IMG SRC="/globalsight/images/logo_alchemy.gif"/></TD>
 	<% } %>

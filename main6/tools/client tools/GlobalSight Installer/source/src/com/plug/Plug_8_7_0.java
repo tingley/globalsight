@@ -1,15 +1,20 @@
 package com.plug;
 
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.log4j.Logger;
 
 import com.util.db.DbUtil;
 import com.util.db.DbUtilFactory;
 
 public class Plug_8_7_0 implements Plug
 {
-	public DbUtil dbUtil = DbUtilFactory.getDbUtil();
+    private static Logger log = Logger.getLogger(Plug_8_7_0.class);
+
+    public DbUtil dbUtil = DbUtilFactory.getDbUtil();
 
 	@Override
 	public void run()
@@ -20,17 +25,19 @@ public class Plug_8_7_0 implements Plug
 	private void executeCreateIndexSql()
 	{
 		List<String> sqlList = getSqlList();
-		String sql = "";
-		for (int i = 0; i < sqlList.size(); i++)
+		for (String sql : sqlList)
 		{
 			try
 			{
-				sql = sqlList.get(i);
 				dbUtil.update(sql);
 			}
-			catch (Exception e)
+			catch (SQLException e)
 			{
-				continue;
+			    // ignore "duplicate key name" case, log others
+			    if (e.getMessage().indexOf("Duplicate key name") == -1)
+			    {
+			        log.error("Failed to execute sql: " + sql, e);
+			    }
 			}
 		}
 	}

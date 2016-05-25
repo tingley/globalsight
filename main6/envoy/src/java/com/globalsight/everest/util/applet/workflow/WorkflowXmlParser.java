@@ -257,7 +257,7 @@ public class WorkflowXmlParser
 
         TaskInfoBean taskInfo = new TaskInfoBean(w2.getTaskId(), estimatedHours, actualHours,
                 expenseRate, revenueRate, w2.getRateSelectionCriteria(), w2.getActivityName(),
-                w2.getReportUploadCheck());
+                w2.getReportUploadCheck(),w2.getActivityCommentUploadCheck());
 
         if (taskInfo.getTaskId() == WorkflowTask.ID_UNSET)
         {
@@ -280,6 +280,7 @@ public class WorkflowXmlParser
 
             w1.setActivity(w2.getActivity());
             w1.setReportUploadCheck(w2.getReportUploadCheck());
+            w1.setActivityCommentUploadCheck(w2.getActivityCommentUploadCheck());
             w1.setRoles(w2.getRoles());
             w1.setAcceptedTime(w2.getAcceptTime());
             w1.setCompletedTime(w2.getCompletedTime());
@@ -432,6 +433,7 @@ public class WorkflowXmlParser
     private void updateAssignment(WorkflowTaskInstance wt, Map<String, String> m)
     {
         wt.setReportUploadCheck(Integer.parseInt(m.get("report_upload_check")));
+        wt.setActivityCommentUploadCheck(Integer.parseInt(m.get("activity_comment_upload_check")));
         wt.setRoles(m.get("roles").split(","));
         wt.setAcceptedTime(Long.parseLong(m.get("accepted_time")));
         wt.setCompletedTime(Long.parseLong(m.get("completed_time")));

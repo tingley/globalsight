@@ -24,6 +24,7 @@
       com.globalsight.everest.permission.Permission,
       com.globalsight.everest.permission.PermissionSet,
       com.globalsight.everest.secondarytargetfile.SecondaryTargetFile,
+      com.globalsight.everest.webapp.pagehandler.administration.comment.CommentUploadHandler,
       com.globalsight.everest.servlet.util.ServerProxy,
       com.globalsight.everest.servlet.util.SessionManager,
       com.globalsight.everest.taskmanager.Task,
@@ -352,6 +353,11 @@ private static String toggleBgColor(int p_rowNumber)
     TaskImpl taskImpl = (TaskImpl)theTask;
     int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
     int isUploaded = taskImpl.getIsReportUploaded();
+    String labelActivitiesCommentUploadCheckWarning = "Activity comment not upload";
+    String labelActivitiesCommentUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_comment_upload_check");
+    int isActivityCommentUploaded = taskImpl.getIsActivityCommentUploaded();
+    int isActivityCommentUploadCheck = taskImpl.getIsActivityCommentUploadCheck();
+    CommentUploadHandler.completeUploadingComment(theTask);
     WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;

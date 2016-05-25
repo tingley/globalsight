@@ -29,11 +29,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 
+import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 public class CommentUpload
@@ -144,6 +147,7 @@ public class CommentUpload
         }
     }
 
+    
     /**
      * Main method: reads file 
      * and saves it to the file system.

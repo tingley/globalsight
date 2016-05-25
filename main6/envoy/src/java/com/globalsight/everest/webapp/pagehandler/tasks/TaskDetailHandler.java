@@ -52,6 +52,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
+import com.globalsight.everest.comment.CommentFile;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
@@ -330,6 +331,17 @@ public class TaskDetailHandler extends PageHandler
             int taskState = TaskHelper.getInt(taskStateParam, -10);
             
             Task task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
+            ArrayList<CommentFile> commentReferences = (ArrayList<CommentFile>) sessionMgr
+                    .getAttribute("commentReferences");
+            if (commentReferences != null && commentReferences.size() > 0)
+            {
+                task.setIsActivityCommentUploaded(1);
+            }
+            else
+            {
+                task.setIsActivityCommentUploaded(0);
+            }
+            HibernateUtil.update(task);
             TaskHelper.storeObject(httpSession, WORK_OBJECT, task);
         }
         else if(TASK_ACTION_SCORECARD.equals(action))

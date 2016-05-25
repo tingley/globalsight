@@ -44,6 +44,7 @@
       com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
       com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator,
       com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper,
+      com.globalsight.everest.webapp.pagehandler.administration.comment.CommentUploadHandler,
       com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler,
       com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHelper,
       com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
@@ -217,6 +218,8 @@
     String labelSelectionWarning = bundle.getString("jsmsg_my_activities_Warning");
     String labelReportUploadCheckWarning = "Translation Edit Report not uploaded";
     String labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_translation_edit_report_upload_check");
+    String labelActivitiesCommentUploadCheckWarning = "Activity comment not upload";
+    String labelActivitiesCommentUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_comment_upload_check");
     List<String> trgPageIdBatches = new ArrayList<String>();
     int translatedTextCount = 10;
     //use to get the translated text
@@ -229,6 +232,9 @@
     TaskImpl taskImpl = (TaskImpl)theTask;
     int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
     int isUploaded = taskImpl.getIsReportUploaded();
+    int isActivityCommentUploaded = taskImpl.getIsActivityCommentUploaded();
+    int isActivityCommentUploadCheck = taskImpl.getIsActivityCommentUploadCheck();
+    CommentUploadHandler.completeUploadingComment(theTask);
     WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;

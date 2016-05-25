@@ -34,6 +34,7 @@
             com.globalsight.everest.webapp.javabean.NavigationBean,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.webapp.pagehandler.administration.glossaries.GlossaryState,
+            com.globalsight.everest.webapp.pagehandler.administration.comment.CommentUploadHandler,
             com.globalsight.everest.webapp.pagehandler.offline.download.DownloadPageHandler,
             com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,
             com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
@@ -393,6 +394,9 @@
 	TaskImpl taskImpl = (TaskImpl)theTask;
 	int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
 	int isUploaded = taskImpl.getIsReportUploaded();
+    int isActivityCommentUploaded = taskImpl.getIsActivityCommentUploaded();
+    int isActivityCommentUploadCheck = taskImpl.getIsActivityCommentUploadCheck();
+    CommentUploadHandler.completeUploadingComment(task);
 	WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
 	ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
 	boolean needScore = false;
@@ -404,6 +408,8 @@
     }
 	String labelReportUploadCheckWarning = "Translation Edit Report not uploaded";
     String labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_translation_edit_report_upload_check");
+    String labelActivitiesCommentUploadCheckWarning = "Activity comment not upload";
+    String labelActivitiesCommentUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_comment_upload_check");
     if(theTask.isType(Task.TYPE_REVIEW))
     {
     	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";

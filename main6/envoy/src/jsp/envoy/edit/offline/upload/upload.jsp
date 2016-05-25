@@ -19,6 +19,7 @@
                 com.globalsight.everest.webapp.javabean.NavigationBean,
                 com.globalsight.everest.webapp.pagehandler.PageHandler,
                 com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,
+                com.globalsight.everest.webapp.pagehandler.administration.comment.CommentUploadHandler,
                 com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
                 com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler, 
                 com.globalsight.everest.projecthandler.ProjectImpl,
@@ -291,6 +292,11 @@ $(document).ready(function(){
 	TaskImpl taskImpl = (TaskImpl)theTask;
     isReportUploadCheck = taskImpl.getIsReportUploadCheck();
     isUploaded = taskImpl.getIsReportUploaded();
+    String labelActivitiesCommentUploadCheckWarning = "Activity comment not upload";
+    String labelActivitiesCommentUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_comment_upload_check");
+    int isActivityCommentUploaded = taskImpl.getIsActivityCommentUploaded();
+    int isActivityCommentUploadCheck = taskImpl.getIsActivityCommentUploadCheck();
+    CommentUploadHandler.completeUploadingComment(theTask);
 	WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;

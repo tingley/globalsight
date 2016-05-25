@@ -73,6 +73,13 @@
             column="IS_REPORT_UPLOAD_CHECK" type="int" not-null="true"
             unique="false" />
 
+        <property name="isActivityCommentUploaded"
+            column="IS_ACTIVITY_COMMENT_UPLOADED" type="int" not-null="true"
+            unique="false" />
+
+        <property name="isActivityCommentUploadCheck" 
+            column="IS_ACTIVITY_COMMENT_UPLOAD_CHECK"   type="int" not-null="true" unique="false"/>
+          
         <property name="qualityAssessment" column="QUALITY_ASSESSMENT"
 				type="string" not-null="false" unique="false"/>
 				

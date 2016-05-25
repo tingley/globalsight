@@ -23,6 +23,7 @@
       com.globalsight.everest.page.TargetPage,
       com.globalsight.everest.page.UnextractedFile,
       com.globalsight.everest.page.pageexport.ExportHelper,
+      com.globalsight.everest.webapp.pagehandler.administration.comment.CommentUploadHandler,
       com.globalsight.everest.permission.Permission,
       com.globalsight.everest.permission.PermissionSet,
       com.globalsight.everest.secondarytargetfile.SecondaryTargetFile,
@@ -341,6 +342,11 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     TaskImpl taskImpl = (TaskImpl)theTask;
     int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
     int isUploaded = taskImpl.getIsReportUploaded();
+    String labelActivitiesCommentUploadCheckWarning = "Activity comment not upload";
+    String labelActivitiesCommentUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_comment_upload_check");
+    int isActivityCommentUploaded = taskImpl.getIsActivityCommentUploaded();
+    int isActivityCommentUploadCheck = taskImpl.getIsActivityCommentUploadCheck();
+    CommentUploadHandler.completeUploadingComment(theTask);
     WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;

@@ -171,10 +171,15 @@ public class WorkflowConstants
     public static final String FIELD_ACTIVITY = "activity";
     
     /**
+     * Constant used for activity_comment_upload_check field for a task node in jbpm template xml.
+     */
+    public static final String FIELD_ACTIVITY_COMMENT_UPLOAD_CHECK = "activity_comment_upload_check";
+
+    /**
      * Constant used for report_upload_check field for a task node in jbpm template xml.
      */
     public static final String FIELD_REPORT_UPLOAD_CHECK = "report_upload_check";
-
+    
     /**
      * Constant used for roles field for a task node in jbpm template xml.
      */
@@ -511,6 +516,8 @@ public class WorkflowConstants
     public static final int USE_ONLY_SELECTED_RATE = 1;
     
     public static final int REPORT_UPLOAD_CHECK = 0;
+    
+    public static final int ACTIVITY_COMMENT_UPLOAD_CHECK = 0;
 
     public static final int USE_SELECTED_RATE_UNTIL_ACCEPTANCE = 2;
 

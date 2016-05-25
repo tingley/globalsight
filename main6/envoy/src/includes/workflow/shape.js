@@ -736,6 +736,7 @@ function ActivityNode() {
 				    "assignment": {			     
 					     "activity": "",
 					     "report_upload_check": "0",
+					     "activity_comment_upload_check":"0",
 					     "roles": "",
 					     "accepted_time": "86400000",
 					     "completed_time": "86400000",

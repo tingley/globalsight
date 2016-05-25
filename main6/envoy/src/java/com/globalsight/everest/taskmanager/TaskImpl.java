@@ -117,6 +117,8 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     //for gbs-3574
     private int m_isReportUploaded = 0;//0:not upload; 1: uploaded.
     private int m_isReportUploadCheck = 0;//0:not check; 1: check.
+    private int m_isActivityCommentUploaded = 0;//0:not check; 1: check.
+    private int m_isActivityCommentUploadCheck = 0;//0:not check; 1: check.
     
     private String m_qualityAssessment = null;
     private String m_marketSuitability = null;
@@ -149,6 +151,24 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
 		return this.m_isReportUploadCheck;
 	}
 
+	public void setIsActivityCommentUploadCheck(int p_isActivityCommentCheck){
+	    this.m_isActivityCommentUploadCheck = p_isActivityCommentCheck;
+	}
+	
+	public int getIsActivityCommentUploadCheck(){
+	    return this.m_isActivityCommentUploadCheck;
+	}
+	
+    public void setIsActivityCommentUploaded(int p_isActivityCommentUpload)
+    {
+        this.m_isActivityCommentUploaded = p_isActivityCommentUpload;
+    }
+
+    public int getIsActivityCommentUploaded()
+    {
+        return this.m_isActivityCommentUploaded;
+    }
+	
 	public void setIsReportUploaded(int p_isReportUploaded) {
 		this.m_isReportUploaded = p_isReportUploaded;
 	}
@@ -723,9 +743,11 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         if(m_state == STATE_ACTIVE)
         {
         	setIsReportUploaded(0);
+        	setIsActivityCommentUploaded(0);
         }
     }
 
+    
     /**
      * To get the name of the task.
      * 
@@ -1250,6 +1272,7 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         if(m_state == STATE_ACTIVE)
         {
         	setIsReportUploaded(0);
+        	setIsActivityCommentUploaded(0);
         }
     }
 

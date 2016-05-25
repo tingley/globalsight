@@ -106,7 +106,13 @@ var Dialog = {
 		} else {
 			$("#uploadCheckbox").attr("checked", 'true');
 		}
-
+        var activityCommentCheck = node.getAssignmentValue("activity_comment_upload_check");
+        if(activityCommentCheck == 0){
+			$("#activityCommentCheckbox").removeAttr("checked");// //
+		} else {
+			$("#activityCommentCheckbox").attr("checked", 'true');
+		}
+		
 		var time = getTime(node.getAssignmentValue("accepted_time"));
 		$("#accept_d").val(time.d);
 		$("#accept_h").val(time.h);
@@ -250,6 +256,11 @@ var Dialog = {
 			node.updateAssignmentValue("report_upload_check", 1);
 		} else {
 			node.updateAssignmentValue("report_upload_check", 0);
+		}
+		if($("#activityCommentCheckbox")[0].checked){
+			node.updateAssignmentValue("activity_comment_upload_check",1);
+		}else{
+			node.updateAssignmentValue("activity_comment_upload_check",0);
 		}
 		
 		node.updateAssignmentValue("accepted_time", acceptTime);

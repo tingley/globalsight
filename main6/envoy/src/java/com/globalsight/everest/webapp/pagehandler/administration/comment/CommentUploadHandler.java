@@ -23,7 +23,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 
 import javax.servlet.ServletContext;
@@ -35,11 +34,9 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 
 import com.globalsight.diplomat.util.database.ConnectionPool;
-import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.comment.CommentException;
 import com.globalsight.everest.comment.CommentFile;
-import com.globalsight.everest.comment.CommentImpl;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.CommentUpload;
 import com.globalsight.everest.company.CompanyThreadLocal;

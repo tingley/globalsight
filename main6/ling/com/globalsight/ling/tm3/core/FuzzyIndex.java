@@ -230,11 +230,11 @@ abstract class FuzzyIndex<T extends TM3Data>
 
         if (this instanceof MultilingualFuzzyIndex)
         {
-            sb.append(" AND idx.localeId = ?").addValue(keyLocale.getId());            
+            sb.append(" AND idx.localeId = ?").addValue(keyLocale.getId());
         }
         if (!lookupTarget)
         {
-            sb.append(" AND isSource = 1");
+            sb.append(" AND idx.isSource = 1");
         }
         if (!inlineAttrs.isEmpty())
         {

@@ -42,6 +42,7 @@ import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
 import com.globalsight.ling.tm3.integration.GSTuvData;
 import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.StringUtil;
 
 /**
  * Access to TU and TUV persistence.
@@ -658,16 +659,18 @@ abstract class TuStorage<T extends TM3Data>
                 .fromSerializedForm(locale, rawData.content));
         TM3Event firstEvent = null;
         if (rawData.firstEventId > 0)
-        { // Check for null value
-            firstEvent = (TM3Event) HibernateUtil.get(TM3Event.class,
-                    rawData.firstEventId, false);
+        {
+            // Check for null value (Is not used at all, set null for performance)
+//            firstEvent = (TM3Event) HibernateUtil.get(TM3Event.class,
+//                    rawData.firstEventId, false);
         }
         tuv.setFirstEvent(firstEvent);
         TM3Event latestEvent = null;
         if (rawData.lastEventId > 0)
-        { // Check for null value
-            latestEvent = (TM3Event) HibernateUtil.get(TM3Event.class,
-                    rawData.lastEventId, false);
+        {
+            // Check for null value (Is not used at all, set null for performance)
+//            latestEvent = (TM3Event) HibernateUtil.get(TM3Event.class,
+//                    rawData.lastEventId, false);
         }
         tuv.setLatestEvent(latestEvent);
 
@@ -847,30 +850,52 @@ abstract class TuStorage<T extends TM3Data>
 			TM3Locale srcLocale, List<Long> tm3TmIds, long preHash,
 			long nextHash, String sid)
     {
-		StatementBuilder sb = new StatementBuilder(
-				"SELECT tuv.id, tuv.tuId FROM ")
-				.append(getStorage().getTuvTableName()).append(" AS tuv, ")
-				.append(getStorage().getTuvExtTableName()).append(" AS ext");
-		sb.append(" WHERE tuv.id = ext.tuvId")
-				.append(" AND tuv.tuId = ext.tuId")
-				.append(" AND tuv.fingerprint = ?").addValue(key.getFingerprint())
-				.append(" AND tuv.localeId = ?").addValue(srcLocale.getId());
-		if (preHash != -1)
-		{
-			sb.append(" AND ext.previousHash = ?").addValue(preHash);
-		}
-		if (nextHash != -1)
-		{
-			sb.append(" AND ext.nextHash = ?").addValue(nextHash);
-		}
-		if (sid != null && sid.trim().length() > 0)
-		{
-			sb.append(" AND ext.sid = ?").addValue(sid);
-		}
-		sb.append(" AND tuv.tmId IN").append(SQLUtil.longGroup(tm3TmIds));
-		sb.append(" LIMIT 20");
+        StatementBuilder sb = new StatementBuilder();
+        boolean joinExtTable = joinExtTable(preHash, nextHash, sid);
+        if (joinExtTable)
+        {
+            sb.append("SELECT tuv.id, tuv.tuId FROM ")
+                    .append(getStorage().getTuvTableName()).append(" AS tuv, ")
+                    .append(getStorage().getTuvExtTableName()).append(" AS ext");
+            sb.append(" WHERE tuv.id = ext.tuvId")
+                    .append(" AND tuv.tuId = ext.tuId")
+                    .append(" AND tuv.fingerprint = ?").addValue(key.getFingerprint())
+                    .append(" AND tuv.localeId = ?").addValue(srcLocale.getId());
+            if (preHash != -1)
+            {
+                sb.append(" AND ext.previousHash = ?").addValue(preHash);
+            }
+            if (nextHash != -1)
+            {
+                sb.append(" AND ext.nextHash = ?").addValue(nextHash);
+            }
+            if (sid != null && sid.trim().length() > 0)
+            {
+                sb.append(" AND ext.sid = ?").addValue(sid);
+            }
+        }
+        // for performance
+        else
+        {
+            sb.append("SELECT tuv.id, tuv.tuId FROM ")
+                    .append(getStorage().getTuvTableName()).append(" AS tuv");
+            sb.append(" WHERE tuv.fingerprint = ?").addValue(key.getFingerprint())
+                    .append(" AND tuv.localeId = ?").addValue(srcLocale.getId());
+        }
+        sb.append(" AND tuv.tmId IN").append(SQLUtil.longGroup(tm3TmIds));
+        sb.append(" LIMIT 20");
 
-		return sb;
+        return sb;
+    }
+
+    private boolean joinExtTable(long preHash, long nextHash, String sid)
+    {
+        if (preHash == -1 && nextHash == -1 && StringUtil.isEmpty(sid))
+        {
+            return false;
+        }
+
+        return true;
     }
 
     /**

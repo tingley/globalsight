@@ -104,23 +104,6 @@ public class ServerUtil
         return version;
     }
 
-    public static String getBuildDate()
-    {
-        String date = "";
-        try
-        {
-            DateFormat df = new SimpleDateFormat("yyyyMMdd");
-            Date dateInfo = df.parse(BuildVersion.BUILD_DATE);
-            DateFormat df2 = new SimpleDateFormat("yyyy-MM-dd");
-            date = df2.format(dateInfo);
-        }
-        catch (ParseException e)
-        {
-            logger.error(e.getMessage(), e);
-        }
-        return date;
-    }
-
     // Gets the Server Login URL from Database.
     public static String getServerURL()
     {

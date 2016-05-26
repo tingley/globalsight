@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8"
          import="java.util.*,com.globalsight.everest.webapp.pagehandler.PageHandler,
                  com.globalsight.util.modules.Modules,
+                 com.globalsight.BuildVersion,
                  java.util.Calendar,
                  java.text.MessageFormat,
                  com.globalsight.util.ServerUtil,
@@ -13,13 +14,14 @@
     ResourceBundle bundle = PageHandler.getBundle(session);
     String lbAboutGlobalsightSystem = bundle.getString("lb_about_globalsight_system4");
 	String lbVersion = bundle.getString("lb_version");
+	String lbBuild = bundle.getString("lb_build");
 	Object[] args = {String.valueOf(Calendar.getInstance().get(Calendar.YEAR))};
     String lbCopyright = MessageFormat.format(bundle.getString("lb_copyright"), args);
     String lbTrademark = bundle.getString("lb_trademark");
     String lbVisitGlobalsight = bundle.getString("lb_visit_globalsight");
     String lbClose = bundle.getString("lb_close");
     String buildNumber = ServerUtil.getVersion();
-    String buildDate = ServerUtil.getBuildDate();
+    String buildDate = BuildVersion.BUILD_DATE;
 %>
 <HTML>
 <HEAD>
@@ -38,7 +40,7 @@
 
 <TABLE WIDTH="100%">
 <TR>
-	<TD ALIGN="LEFT"><SPAN CLASS="standardText"><B><%=lbVersion%> <%=buildNumber%></B>&nbsp;&nbsp;&nbsp;<%=buildDate %></SPAN></TD>
+	<TD ALIGN="LEFT"><SPAN CLASS="standardText"><B><%=lbVersion%> <%=buildNumber%>&nbsp;&nbsp;<%=lbBuild %>&nbsp;<%=buildDate %></B></SPAN></TD>
 	<% if (b_catalyst) {%>
 	<TD ALIGN="RIGHT"><IMG SRC="/globalsight/images/logo_alchemy.gif"/></TD>
 	<% } %>

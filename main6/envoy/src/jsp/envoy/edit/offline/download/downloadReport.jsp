@@ -21,7 +21,6 @@
                 com.globalsight.everest.projecthandler.ProjectImpl,
                 com.globalsight.everest.workflowmanager.WorkflowImpl,
                 com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
-                com.globalsight.everest.webapp.pagehandler.administration.comment.CommentUploadHandler,
                 com.globalsight.everest.webapp.pagehandler.PageHandler,
                 com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,
                 com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,

@@ -30,7 +30,6 @@
                 com.globalsight.everest.servlet.util.SessionManager,
                 com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
                 com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
-                com.globalsight.everest.comment.CommentManagerLocal,
                 com.globalsight.everest.workflow.ConditionNodeTargetInfo,
                 com.globalsight.everest.page.TargetPage,
                 com.globalsight.everest.util.system.SystemConfigParamNames,

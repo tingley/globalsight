@@ -18,10 +18,6 @@
 package com.globalsight.everest.webapp.pagehandler.administration.comment;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -33,7 +29,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.comment.CommentException;
 import com.globalsight.everest.comment.CommentFile;
@@ -53,9 +48,7 @@ import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHan
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
-
 
 /**
  * <p>
@@ -111,12 +104,10 @@ public class CommentUploadHandler extends PageHandler implements
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
         String commentStr = (String) p_request.getParameter("taskComment");
-    	if (commentStr != null)
-    		sessionMgr.setAttribute("taskComment", commentStr);
+        if (commentStr != null)
+            sessionMgr.setAttribute("taskComment", commentStr);
 
         User user = TaskHelper.getUser(session);
-        
-        Task taskone = null;
         
         if (m_state == null)
         {
@@ -126,28 +117,28 @@ public class CommentUploadHandler extends PageHandler implements
         String toJob = p_request.getParameter("toJob");
         if(toTask != null)
         {
-        	String taskIdParam = p_request.getParameter(TASK_ID);
-        	String taskStateParam = p_request.getParameter(TASK_STATE);
-        	long taskId = TaskHelper.getLong(taskIdParam);
-        	int taskState = TaskHelper.getInt(taskStateParam, -10);// -10 as
-        	
-            taskone = TaskHelper.getTask(user.getUserId(), taskId,taskState);
-        	// Save the task to session
-    		TaskHelper.storeObject(session, WORK_OBJECT, taskone);
+            String taskIdParam = p_request.getParameter(TASK_ID);
+            String taskStateParam = p_request.getParameter(TASK_STATE);
+            long taskId = TaskHelper.getLong(taskIdParam);
+            int taskState = TaskHelper.getInt(taskStateParam, -10);// -10 as
+            
+            Task task = TaskHelper.getTask(user.getUserId(), taskId,taskState);
+            // Save the task to session
+            TaskHelper.storeObject(session, WORK_OBJECT, task);
         }
         else if (toJob != null)
         {
-        	String jobId = p_request.getParameter("jobId");
-        	long contextMenuJobId = Long.valueOf(jobId);
-        	Job contextMenuJob = WorkflowHandlerHelper
-        			.getJobById(contextMenuJobId);
-        	TaskHelper.storeObject(session, WebAppConstants.WORK_OBJECT,
-        			contextMenuJob);
+            String jobId = p_request.getParameter("jobId");
+            long contextMenuJobId = Long.valueOf(jobId);
+            Job contextMenuJob = WorkflowHandlerHelper
+                    .getJobById(contextMenuJobId);
+            TaskHelper.storeObject(session, WebAppConstants.WORK_OBJECT,
+                    contextMenuJob);
         }
         String commentId = p_request.getParameter("commentId");
         if(commentId != null && commentId != ""){
-        	Comment comment = TaskHelper.getComment(session, Long.parseLong(commentId));
-        	sessionMgr.setAttribute("comment", comment);
+            Comment comment = TaskHelper.getComment(session, Long.parseLong(commentId));
+            sessionMgr.setAttribute("comment", comment);
         }
         
         WorkObject wo = (WorkObject) TaskHelper.retrieveObject(session,
@@ -242,84 +233,6 @@ public class CommentUploadHandler extends PageHandler implements
                 p_context);
     }
 
-    /**
-     * Update activity comment upload status to finished.
-     */
-    public static void completeUploadingComment(Task p_task) throws CommentException,
-            RemoteException
-    {
-        ArrayList<String> commentIds = getCommentIds(p_task);
-        int count = 0;
-        for (String commentId : commentIds)
-        {
-            String access = WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS;
-            CommentManager commentManager = ServerProxy.getCommentManager();
-            ArrayList<CommentFile> commentReferences = commentManager.getCommentReferences(
-                    commentId, access, true);
-            if (commentReferences != null && commentReferences.size() > 0)
-            {
-                count++;
-            }
-
-        }
-        if (count != 0)
-        {
-            p_task.setIsActivityCommentUploaded(1);
-        }
-        else
-        {
-            p_task.setIsActivityCommentUploaded(0);
-        }
-        HibernateUtil.update(p_task);
-    }
-    
-    /**
-     * Gets comment ids by JDBC.
-     * @param p_task
-     * @return
-     */
-    public static ArrayList<String> getCommentIds(Task p_task)
-    {
-        ArrayList<String> commentIds = new ArrayList<String>();
-        Connection connection = null;
-        PreparedStatement query = null;
-        String sql = "select ID from comments where COMMENT_OBJECT_ID =" + p_task.getId();
-        try
-        {
-            connection = ConnectionPool.getConnection();
-            query = connection.prepareStatement(sql);
-            ResultSet rs = query.executeQuery();
-            while (rs.next())
-            {
-                String commentId = rs.getString(1);
-                commentIds.add(commentId);
-            }
-        }
-        catch (Exception e)
-        {
-            if (CATEGORY.isDebugEnabled())
-            {
-                CATEGORY.debug("Could not search Comment Id: " + e);
-            }
-        }
-        finally
-        {
-            try
-            {
-                query.close();
-                ConnectionPool.returnConnection(connection);
-            }
-            catch (Exception cpe)
-            {
-                if (CATEGORY.isDebugEnabled())
-                {
-                    CATEGORY.debug(cpe);
-                }
-            }
-        }
-        return commentIds;
-    }
-    
     /**
      * Some references are in the tmp dir, some in the permanent dir. This will
      * get both.

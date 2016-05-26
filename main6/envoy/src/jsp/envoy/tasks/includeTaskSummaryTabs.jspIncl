@@ -261,6 +261,22 @@ var dialogParam2={
         buttons: {
             OK: function () {
                 $(this).dialog("close");
+                checkActivityCommentAttaches(this);
+            },
+			Cancel: function () {
+				$(this).dialog("close");
+                document.location.replace($(this).prop("urlCancel"));
+            }
+        }
+    };
+var dialogParam3={
+        modal: true,
+		autoOpen: false,
+		width: 550,
+		minHeight: 110,
+        buttons: {
+            OK: function () {
+                $(this).dialog("close");
                 document.location.replace($(this).prop("urlSent"));
             },
 			Cancel: function () {
@@ -269,6 +285,7 @@ var dialogParam2={
             }
         }
     };
+
 $(function () {
 	for(var i=0;i<popDialogId.length;i++){
 		var temp=$(popDiv).clone(true);
@@ -278,9 +295,13 @@ $(function () {
 		{
 			temp.dialog(dialogParam1);
 		}
-		else if(i == popDialogId.length - 1 || i == popDialogId.length - 2)
+		else if(i == popDialogId.length - 2)
 		{
 			temp.dialog(dialogParam2);
+		}
+		else if(i == popDialogId.length - 1)
+		{
+		    temp.dialog(dialogParam3);
 		}
 		else
 		{
@@ -300,6 +321,28 @@ $(function () {
  * 4) Check un-closed comments
  * 5) Other
  */
+ 
+function checkActivityCommentAttaches(obj)
+{
+    var urlSent = "<%= finishUrl %>";
+	var isActivityCommentUploadCheck = <%=isActivityCommentUploadCheck%>;
+	var isActivityCommentUploaded = <%=isActivityCommentUploaded%>;
+	var labelActivityCommentUploadCheckWarningMessage ="<%=labelActivitiesCommentUploadCheckWarningMessage%>";
+    if(isActivityCommentUploadCheck==1 &&
+				         isActivityCommentUploaded !=1)
+	{
+	    var urlCancel = "<%=commentUrl%>";
+		$("#dialog-activityCommentUploadCheck").html(labelActivityCommentUploadCheckWarningMessage);
+		$("#dialog-activityCommentUploadCheck").prop("urlSent", urlSent);
+		$("#dialog-activityCommentUploadCheck").prop("urlCancel", urlCancel);
+		$("#dialog-activityCommentUploadCheck").dialog("open").height("auto");
+	}
+	else
+	{
+        document.location.replace($(obj).prop("urlSent"));
+    }
+}
+
 function doFinished(urlSent) {
 	var isReportUploadCheck = <%=isReportUploadCheck%>;
 	var isUploaded = <%=isUploaded%>;

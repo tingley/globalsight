@@ -6,7 +6,8 @@
       com.globalsight.config.UserParamNames,      
       com.globalsight.config.UserParameter,
       com.globalsight.cxe.entity.fileprofile.FileProfile,
-      com.globalsight.everest.comment.CommentFile,      
+      com.globalsight.everest.comment.CommentFile,
+      com.globalsight.everest.comment.CommentManagerLocal,      
       com.globalsight.everest.comment.CommentManager,
       com.globalsight.everest.company.CompanyThreadLocal,
       com.globalsight.everest.company.CompanyWrapper,
@@ -353,11 +354,15 @@ private static String toggleBgColor(int p_rowNumber)
     TaskImpl taskImpl = (TaskImpl)theTask;
     int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
     int isUploaded = taskImpl.getIsReportUploaded();
-    String labelActivitiesCommentUploadCheckWarning = "Activity comment not upload";
+    String labelActivitiesCommentUploadCheckWarning = "Activity comment attachments is not upload";
     String labelActivitiesCommentUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_comment_upload_check");
-    int isActivityCommentUploaded = taskImpl.getIsActivityCommentUploaded();
     int isActivityCommentUploadCheck = taskImpl.getIsActivityCommentUploadCheck();
-    CommentUploadHandler.completeUploadingComment(theTask);
+    int isActivityCommentUploaded = 0;
+    ArrayList<CommentFile> cf =  CommentManagerLocal.getActivityCommentAttachments(theTask);
+    if(cf != null && cf.size()>0)
+    {
+        isActivityCommentUploaded =1;
+    }
     WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;

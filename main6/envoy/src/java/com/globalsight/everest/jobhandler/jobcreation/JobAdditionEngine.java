@@ -684,7 +684,6 @@ public class JobAdditionEngine
                 task.setIsReportUploadCheck(wti.getReportUploadCheck());
                 task.setIsActivityCommentUploadCheck(wti.getActivityCommentUploadCheck());
                 task.setIsReportUploaded(0);
-                task.setIsActivityCommentUploaded(0);
                 // if an expense rate is specified
                 if (wti.getExpenseRateId() > 0)
                 {

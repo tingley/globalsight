@@ -17,7 +17,6 @@
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -26,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.globalsight.everest.comment.Comment;
-import com.globalsight.everest.comment.CommentFile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -36,7 +34,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class AddCommentHandler extends PageHandler
 {
@@ -51,7 +48,6 @@ public class AddCommentHandler extends PageHandler
         
         String toJob = p_request.getParameter("toJob");
         String toTask = p_request.getParameter("toTask");
-        Task task = null;
         if(toJob != null ){
         	String jobId = p_request.getParameter("jobId");
         	if(jobId != null)
@@ -70,7 +66,7 @@ public class AddCommentHandler extends PageHandler
             	long taskId = TaskHelper.getLong(taskIdParam);
             	int taskState = TaskHelper.getInt(taskStateParam, -10);
             	User user = TaskHelper.getUser(session);
-            	task = TaskHelper.getTask(user.getUserId(), taskId,taskState);
+            	Task task = TaskHelper.getTask(user.getUserId(), taskId,taskState);
             	
             	TaskHelper.storeObject(session, WORK_OBJECT, task);
             }
@@ -97,17 +93,7 @@ public class AddCommentHandler extends PageHandler
             sessionMgr.setAttribute("comment", comment);
             sessionMgr.setAttribute("taskComment", comment.getComment());
         }
-        ArrayList<CommentFile> commentReferences = (ArrayList<CommentFile>) sessionMgr
-                .getAttribute("commentReferences");
-        if (commentReferences != null && commentReferences.size() > 0)
-        {
-            task.setIsActivityCommentUploaded(1);
-        }
-        else
-        {
-            task.setIsActivityCommentUploaded(0);
-        }
-        HibernateUtil.update(task);
+        
         super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 }

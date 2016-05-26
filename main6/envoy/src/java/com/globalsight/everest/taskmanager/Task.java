@@ -655,10 +655,5 @@ public interface Task extends WorkObject
     public void setMarketSuitability(String marketSuitabilty);
     
     public String getMarketSuitability();
-
-    public void setIsActivityCommentUploaded(int p_isActivityCommentUpload);
     
-    public int getIsActivityCommentUploaded();
-    
-
 }

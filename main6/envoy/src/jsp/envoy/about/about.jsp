@@ -13,6 +13,7 @@
     ResourceBundle bundle = PageHandler.getBundle(session);
     String lbAboutGlobalsightSystem = bundle.getString("lb_about_globalsight_system4");
 	String lbVersion = bundle.getString("lb_version");
+	String lbBuild = bundle.getString("lb_build");
 	Object[] args = {String.valueOf(Calendar.getInstance().get(Calendar.YEAR))};
     String lbCopyright = MessageFormat.format(bundle.getString("lb_copyright"), args);
     String lbTrademark = bundle.getString("lb_trademark");
@@ -38,7 +39,7 @@
 
 <TABLE WIDTH="100%">
 <TR>
-	<TD ALIGN="LEFT"><SPAN CLASS="standardText"><B><%=lbVersion%> <%=buildNumber%></B>&nbsp;&nbsp;&nbsp;<%=buildDate %></SPAN></TD>
+	<TD ALIGN="LEFT"><SPAN CLASS="standardText"><B><%=lbVersion%> </B> <%=buildNumber%>&nbsp;&nbsp;&nbsp;<B><%=lbBuild %></B>&nbsp;<%=buildDate %></SPAN></TD>
 	<% if (b_catalyst) {%>
 	<TD ALIGN="RIGHT"><IMG SRC="/globalsight/images/logo_alchemy.gif"/></TD>
 	<% } %>

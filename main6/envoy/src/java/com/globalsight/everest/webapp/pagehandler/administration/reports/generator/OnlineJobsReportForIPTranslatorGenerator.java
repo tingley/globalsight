@@ -3028,37 +3028,9 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                         .getNoUseInContextMatchWordCount();
                 data.totalWordCount = w.getTotalWordCount();
                 data.mtTotalWordCount = w.getMtTotalWordCount();
-                int mtExactMatchWordCount = w.getMtExactMatchWordCount();
                 int mtFuzzyNoMatchWordCount = w.getMtFuzzyNoMatchWordCount();
-                if (mtConfidenceScore == 100)
-                {
-                    data.segmentTmWordCount -=  mtExactMatchWordCount;
-                }
-                else if (mtConfidenceScore < 100 && mtConfidenceScore >= threshold)
-                {
-                    if (mtConfidenceScore >= 95)
-                    {
-                        data.hiFuzzyMatchWordCount -= mtFuzzyNoMatchWordCount;
-                    }
-                    else if (mtConfidenceScore < 95 && mtConfidenceScore >= 85)
-                    {
-                        data.medHiFuzzyMatchWordCount -= mtFuzzyNoMatchWordCount;
-                    }
-                    else if (mtConfidenceScore < 85 && mtConfidenceScore >= 75)
-                    {
-                        data.medFuzzyMatchWordCount -= mtFuzzyNoMatchWordCount;
-                    }
-                    else if (mtConfidenceScore < 75)
-                    {
-                        data.noMatchWordCount -= mtFuzzyNoMatchWordCount;
-                    }
-                    data.repetitionWordCount -= mtRepetitionsWordCount;
-                }
-                else if (mtConfidenceScore < threshold)
-                {
-                    data.noMatchWordCount -= mtFuzzyNoMatchWordCount;
-                    data.repetitionWordCount -= mtRepetitionsWordCount;
-                }
+                data.noMatchWordCount -= mtFuzzyNoMatchWordCount;
+                data.repetitionWordCount -= mtRepetitionsWordCount;
                 
                 /*
                  * Date da1 = new Date(); // They must be in front of calculate

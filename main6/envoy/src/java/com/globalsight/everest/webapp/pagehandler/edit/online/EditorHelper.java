@@ -72,6 +72,7 @@ import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvManager;
+import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -2278,12 +2279,14 @@ public class EditorHelper implements EditorConstants
         }
         else
         {
-            int tuvState = p_matchTypes.getLingManagerMatchType(
-                    p_srcTuv.getId(), subid);
-            
-            if (tuvState == LeverageMatchLingManager.EXACT)
+            if (!p_targetTuv.getState().equals(TuvState.NOT_LOCALIZED))
             {
-                result = true;
+                int tuvState = p_matchTypes.getLingManagerMatchType(p_srcTuv.getId(), subid);
+
+                if (tuvState == LeverageMatchLingManager.EXACT)
+                {
+                    result = true;
+                }
             }
         }
 

@@ -610,7 +610,7 @@ function initButtonActions() {
             }
             if(!isFinishUnUploadActivityCommentTak)
             {
-            	if (data.isFinishedReportUploadTaskId) {
+            	if (data.isFinishedActivityCommentUploadTaskId) {
                 	var confirmInfo = "The activities you selected will be completed and go to the next one. Are you sure to continue?"; 
                     for(var i=0;i<rowsPerPage;i++)
                     {
@@ -624,7 +624,7 @@ function initButtonActions() {
 	            		$.post(selfUrl, {
 	            			state:currentTaskState,
 	            			taskAction:"completeActivity",
-	            			taskParam:data.isFinishedReportUploadTaskId
+	            			taskParam:data.isFinishedActivityCommentUploadTaskId
 	            		}, function(data) {
 	            			submitSearch();
 	            		});
@@ -759,7 +759,7 @@ function initButtonActions() {
             }
             if(!isFinishUnUploadActivityCommentTak)
             {
-            	if (data.isFinishedReportUploadTaskId) {
+            	if (data.isFinishedActivityCommentUploadTaskId) {
                 	var confirmInfo = "The activities you selected will be completed and go to the next one. Are you sure to continue?"; 
                     for(var i=0;i<rowsPerPage;i++)
                     {
@@ -773,7 +773,7 @@ function initButtonActions() {
 	            		$.post(selfUrl, {
 	            			state:currentTaskState,
 	            			taskAction:"completeWorkflow",
-	            			taskParam:data.isFinishedReportUploadTaskId
+	            			taskParam:data.isFinishedActivityCommentUploadTaskId
 	            		}, function(data) {
 	            			submitSearch();
 	            		});

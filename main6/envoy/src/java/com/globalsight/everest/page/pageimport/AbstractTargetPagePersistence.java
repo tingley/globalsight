@@ -871,7 +871,6 @@ public abstract class AbstractTargetPagePersistence implements
         MachineTranslationProfile mtProfile = MTProfileHandlerHelper
                 .getMtProfileBySourcePage(p_sourcePage, p_targetLocale);
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
-//        long mtConfidenceScore = mtProfile.getMtConfidenceScore();
 
         HashMap<Tu, Tuv> needHitMTTuTuvMap = new HashMap<Tu, Tuv>();
         needHitMTTuTuvMap = formTuTuvMap(p_unAppliedTus, p_sourceTuvMap,
@@ -1005,15 +1004,6 @@ public abstract class AbstractTargetPagePersistence implements
                 lm.setOrderNum((short) TmCoreManager.LM_ORDER_NUM_START_MT);
                 lm.setScoreNum(MachineTranslator.MT_SCORE);
                 lm.setMatchType(MatchState.MACHINE_TRANSLATION.getName());
-//                lm.setScoreNum(mtConfidenceScore);
-//                if (mtConfidenceScore == 100)
-//                {
-//                    lm.setMatchType(MatchState.MT_EXACT_MATCH.getName());
-//                }
-//                else
-//                {
-//                    lm.setMatchType(MatchState.FUZZY_MATCH.getName());
-//                }
                 lm.setMatchedTuvId(-1);
                 lm.setProjectTmIndex(Leverager.MT_PRIORITY);
                 lm.setTmId(0);
@@ -1077,17 +1067,6 @@ public abstract class AbstractTargetPagePersistence implements
                     lm.setOrderNum((short) (TmCoreManager.LM_ORDER_NUM_START_MT + 1));
                     lm.setScoreNum(MachineTranslator.MT_SCORE);
                     lm.setMatchType(MatchState.MACHINE_TRANSLATION.getName());
-//                    lm.setScoreNum(mtConfidenceScore);
-//                    if (mtConfidenceScore == 100)
-//                    {
-//                        // Add "MT_EXACT_MATCH" as one new MatchState --
-//                        // SEGMENT_TM_EXACT_MATCH
-//                        lm.setMatchType(MatchState.MT_EXACT_MATCH.getName());
-//                    }
-//                    else
-//                    {
-//                        lm.setMatchType(MatchState.FUZZY_MATCH.getName());
-//                    }
                     lm.setMatchedTuvId(-1);
                     lm.setProjectTmIndex(Leverager.MT_PRIORITY);
                     lm.setTmId(0);

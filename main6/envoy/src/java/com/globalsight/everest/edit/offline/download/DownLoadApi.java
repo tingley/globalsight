@@ -1245,11 +1245,11 @@ public class DownLoadApi implements AmbassadorDwUpConstants
     {
         long jobId = opd.getJobId();
         Vector vector = opd.getSegmentList();
-        List<Tuv> targetPage = new ArrayList<Tuv>();
+        List<Tuv> targetTuvs = new ArrayList<Tuv>();
         for (int i = 0; i < vector.size(); i++)
         {
             OfflineSegmentData segment = (OfflineSegmentData) vector.get(i);
-            targetPage.add(segment.getTargetTuv());
+            targetTuvs.add(segment.getTargetTuv());
         }
         
         Vector excludedTypes = m_downloadParams.getExcludedTypeNames();
@@ -1265,9 +1265,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
             if (segment.isProtectedChangeable())
             {
-                opd.getSegmentList();
 				int iceType = LeverageUtil.getIsIncontextMatchType(i,
-						splittedTuvs, targetPage, matchs, new Vector(), subId, jobId);
+						splittedTuvs, targetTuvs, matchs, new Vector(), subId, jobId);
 				if (iceType > 0)
 				{
 	                segment = (OfflineSegmentData) vector.get(i);
@@ -1309,7 +1308,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         {
         	String subId = getSubId(i, splittedTuvs);
 			int iceType = LeverageUtil.getIsIncontextMatchType(i, splittedTuvs,
-			        targetPage, matchs, excludedTypes, subId, jobId);
+			        targetTuvs, matchs, excludedTypes, subId, jobId);
             if (iceType > 0)
             {
                 long id = ((SegmentTmTuv) splittedTuvs.get(i)).getId();

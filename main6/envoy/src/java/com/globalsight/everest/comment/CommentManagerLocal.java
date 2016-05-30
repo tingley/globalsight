@@ -161,72 +161,38 @@ public class CommentManagerLocal implements CommentManager
     }
 
     /**
-     * Gets activity comment ids by JDBC.
+     * Gets activity comment ids by searchWithSql().
      */
-    public static ArrayList<String> getActivityCommentIds(Task p_task)
+    public ArrayList<String> getActivityCommentIds(Task p_task)
     {
-        ArrayList<String> commentIds = new ArrayList<String>();
-        Connection connection = null;
-        PreparedStatement query = null;
-        String sql = "select ID from comments where COMMENT_OBJECT_ID = " + p_task.getId()
+        ArrayList<String> arr = new ArrayList<String>(); 
+        String sql = "select ID from comments where COMMENT_OBJECT_ID = :COID"
                 + " and COMMENT_OBJECT_TYPE='T'";
-        try
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("COID", p_task.getId());
+        List<?> list =  HibernateUtil.searchWithSql(sql, map);
+        for(Object s : list)
         {
-            connection = ConnectionPool.getConnection();
-            query = connection.prepareStatement(sql);
-            ResultSet rs = query.executeQuery();
-            while (rs.next())
-            {
-                String commentId = rs.getString(1);
-                commentIds.add(commentId);
-            }
+            arr.add(s.toString());
         }
-        catch (Exception e)
-        {
-            if (CATEGORY.isDebugEnabled())
-            {
-                CATEGORY.debug("Could not search Comment Id: " + e);
-            }
-        }
-        finally
-        {
-            try
-            {
-                query.close();
-                ConnectionPool.returnConnection(connection);
-            }
-            catch (Exception cpe)
-            {
-                if (CATEGORY.isDebugEnabled())
-                {
-                    CATEGORY.debug(cpe);
-                }
-            }
-        }
-        return commentIds;
+        return arr;
     }
-    
+
     /**
      * Update activity comment upload status to finished.
      */
-    public static ArrayList<CommentFile> getActivityCommentAttachments(Task p_task) throws CommentException,
-            RemoteException
+    public ArrayList<CommentFile> getActivityCommentAttachments(Task p_task)
+            throws CommentException, RemoteException
     {
         ArrayList<CommentFile> commentFiles = new ArrayList<CommentFile>();
         ArrayList<String> commentIds = getActivityCommentIds(p_task);
         for (String commentId : commentIds)
         {
             String access = WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS;
-            CommentManager commentManager = ServerProxy.getCommentManager();
-            ArrayList<CommentFile> commentReferences = commentManager.getCommentReferences(
-                    commentId, access, true);
-            if (commentReferences != null && commentReferences.size() > 0)
-            {
-                for(CommentFile f : commentReferences)
-                {
-                    commentFiles.add(f);
-                }
-            }
+            commentFiles.addAll(getCommentReferences(commentId, access, true));
+
+            access = WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS;
+            commentFiles.addAll(getCommentReferences(commentId, access, true));
         }
         return commentFiles;
     }

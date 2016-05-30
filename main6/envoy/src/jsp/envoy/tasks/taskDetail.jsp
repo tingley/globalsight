@@ -231,11 +231,10 @@
     TaskImpl taskImpl = (TaskImpl)theTask;
     int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
     int isUploaded = taskImpl.getIsReportUploaded();
-    String labelActivitiesCommentUploadCheckWarning = "Activity comment attachments is not upload";
     String labelActivitiesCommentUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_comment_upload_check");
     int isActivityCommentUploadCheck = taskImpl.getIsActivityCommentUploadCheck();
     int isActivityCommentUploaded = 0;
-    ArrayList<CommentFile> cf =  CommentManagerLocal.getActivityCommentAttachments(theTask);
+    ArrayList<CommentFile> cf =  ServerProxy.getCommentManager().getActivityCommentAttachments(theTask);
     if(cf != null && cf.size()>0)
     {
         isActivityCommentUploaded =1;

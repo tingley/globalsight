@@ -239,18 +239,14 @@ function previousForm()
                         </td>
                     </tr>
                     <tr class="tableRowOddTM">
-                        <td>
+                        <td colspan="2">
                             <b><%=bundle.getString("lb_report_upload_check")%>:</b>
-                        </td>
-                        <td>
                             <input type="checkbox" id="uploadCheckbox">
                         </td>
                     </tr>
                     <tr class="tableRowEvenTM">
-                        <td>
+                        <td colspan="2">
                             <b><%=bundle.getString("lb_activity_comment_upload_check")%>:</b>
-                        </td>
-                        <td>
                             <input type="checkbox" id="activityCommentCheckbox">
                         </td>
                     </tr>

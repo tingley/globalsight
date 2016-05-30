@@ -50,6 +50,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
+import com.globalsight.everest.comment.CommentFile;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -1396,7 +1397,9 @@ public class TaskListHandler extends PageHandler
         StringBuffer isFinishedTaskId = new StringBuffer();
         StringBuffer isUploadingJobName = new StringBuffer();
         StringBuffer isNeedScoreTaskId = new StringBuffer();
+        StringBuffer isNeedActivityCommentCheckTaskId = new StringBuffer();
         StringBuffer isNeedReportUploadCheckTaskId = new StringBuffer();
+        StringBuffer isFinishedActivityCommentUploadTaskId = new StringBuffer();
         StringBuffer isFinishedReportUploadTaskId = new StringBuffer();
         StringBuffer unTranslatedTaskId = new StringBuffer();
         int percentage = 0;
@@ -1411,6 +1414,15 @@ public class TaskListHandler extends PageHandler
 
                 if (task != null)
                 {
+                    //GBS-4309
+                    int isActivityCommentUploaded = 0;
+                    ArrayList<CommentFile> cf = ServerProxy.getCommentManager()
+                            .getActivityCommentAttachments(task);
+                    if (cf != null && cf.size() > 0)
+                    {
+                        isActivityCommentUploaded = 1;
+                    }
+                    
                     if (task.getIsUploading() == 'Y')
                     {
                         isUploadingJobName.append("[JobID:")
@@ -1465,6 +1477,20 @@ public class TaskListHandler extends PageHandler
                                             .append(task.getJobName())
                                             .append("],");
                                 }
+
+                                if (task.getIsActivityCommentUploadCheck() == 0
+                                        || (task.getIsActivityCommentUploadCheck() == 1 && isActivityCommentUploaded == 1))
+                                {
+                                    isFinishedActivityCommentUploadTaskId.append(taskId)
+                                            .append(" ");
+                                }
+                                if (task.getIsActivityCommentUploadCheck() == 1
+                                        && isActivityCommentUploaded == 0)
+                                {
+                                    isNeedActivityCommentCheckTaskId.append("[JobID:")
+                                            .append(task.getJobId()).append(",JobName:")
+                                            .append(task.getJobName()).append("],");
+                                }
                             }
                             else
                             {
@@ -1475,6 +1501,20 @@ public class TaskListHandler extends PageHandler
                         {
                             isFinishedTaskId.append(taskId).append(" ");
 
+                            if (task.getIsActivityCommentUploadCheck() == 0
+                                    || (task.getIsActivityCommentUploadCheck() == 1 && isActivityCommentUploaded == 1))
+                            {
+                                isFinishedActivityCommentUploadTaskId.append(taskId)
+                                        .append(" ");
+                            }
+                            if (task.getIsActivityCommentUploadCheck() == 1
+                                    && isActivityCommentUploaded == 0)
+                            {
+                                isNeedActivityCommentCheckTaskId.append("[JobID:")
+                                        .append(task.getJobId()).append(",JobName:")
+                                        .append(task.getJobName()).append("],");
+                            }
+                            
                             if (task.getIsReportUploadCheck() == 0
                                     || (task.getIsReportUploadCheck() == 1 && task
                                             .getIsReportUploaded() == 1))
@@ -1527,7 +1567,19 @@ public class TaskListHandler extends PageHandler
                 result = result + "\"isFinishedReportUploadTaskId\":\""
                         + isFinishedReportUploadTaskId.toString().trim()
                         + "\",";
+            }            
+            if (isNeedActivityCommentCheckTaskId.length() != 0)
+            {
+                result = result + "\"isNeedActivityCommentCheckTaskId\":\""
+                        + isNeedActivityCommentCheckTaskId.toString().trim()
+                        + "\",";
             }
+            if (isFinishedActivityCommentUploadTaskId.length() != 0)
+            {
+                result = result + "\"isFinishedActivityCommentUploadTaskId\":\""
+                        + isFinishedActivityCommentUploadTaskId.toString().trim()
+                        + "\",";
+            }          
             if (unTranslatedTaskId.length() != 0)
             {
                 result = result + "\"unTranslatedTaskId\":\""

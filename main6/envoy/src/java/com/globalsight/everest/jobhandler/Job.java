@@ -41,6 +41,7 @@ public interface Job extends WorkObject
     // Job states
     public static final String AUTOMATIC = "AUTOMATIC";
     public static final String MANUAL = "MANUAL";
+
     public static final String BATCHRESERVED = "BATCH_RESERVED";
     public static final String CANCELLED = "CANCELLED";
     public static final String DISPATCHED = "DISPATCHED";
@@ -53,8 +54,10 @@ public interface Job extends WorkObject
     public static final String READY_TO_BE_DISPATCHED = "READY_TO_BE_DISPATCHED";
     public static final String ARCHIVED = "ARCHIVED";
     public static final String ALLSTATUS = "ALL_STATUS";
+
     public static final String IN_CONTEXT = "in-context";
     public static final String EXACT_ONLY = "exact";
+
     public static final String ADD_FILE = "ADDING_FILES";
     public static final String DELETE_FILE = "DELETING_FILES";
     public static final String UPLOADING = "UPLOADING";

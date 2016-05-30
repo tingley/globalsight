@@ -2888,7 +2888,6 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             String companyId = String.valueOf(j.getCompanyId());
             String companyName = CompanyWrapper.getCompanyNameById(companyId);
 
-            int threshold = j.getLeverageMatchThreshold();
             @SuppressWarnings("unchecked")
             List<FileProfile> allFileProfiles = j.getAllFileProfiles();
 
@@ -2946,12 +2945,11 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             {
                 int mtConfidenceScore = w.getMtConfidenceScore();
                 int tmEngineWordCounts = w.getMtEngineWordCount();
-                int mtRepetitionsWordCount = w.getMtRepetitionsWordCount();
                 String state = w.getState();
                 // skip certain workflows
-                if (Workflow.IMPORT_FAILED.equals(w.getState())
-                        || Workflow.CANCELLED.equals(w.getState())
-                        || Workflow.BATCHRESERVED.equals(w.getState()))
+                if (Workflow.IMPORT_FAILED.equals(state)
+                        || Workflow.CANCELLED.equals(state)
+                        || Workflow.BATCHRESERVED.equals(state))
                 {
                     continue;
                 }
@@ -3022,15 +3020,13 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                         + w.getThresholdLowFuzzyWordCount();
 
                 data.segmentTmWordCount = (isInContextMatch) ? w.getSegmentTmWordCount() : w.getTotalExactMatchWordCount();
-                data.contextMatchWordCount = 0;
                 data.inContextMatchWordCount = (isInContextMatch) ? w
                         .getInContextMatchWordCount() : w
                         .getNoUseInContextMatchWordCount();
                 data.totalWordCount = w.getTotalWordCount();
                 data.mtTotalWordCount = w.getMtTotalWordCount();
-                int mtFuzzyNoMatchWordCount = w.getMtFuzzyNoMatchWordCount();
-                data.noMatchWordCount -= mtFuzzyNoMatchWordCount;
-                data.repetitionWordCount -= mtRepetitionsWordCount;
+                data.noMatchWordCount -= w.getMtFuzzyNoMatchWordCount();
+                data.repetitionWordCount -= w.getMtRepetitionsWordCount();
                 
                 /*
                  * Date da1 = new Date(); // They must be in front of calculate
@@ -3346,8 +3342,6 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         public long medHiFuzzyMatchWordCount = 0;
 
         public long hiFuzzyMatchWordCount = 0;
-
-        public long contextMatchWordCount = 0;
 
         public long inContextMatchWordCount = 0;
 

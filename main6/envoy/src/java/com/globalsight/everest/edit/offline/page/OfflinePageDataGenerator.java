@@ -74,6 +74,7 @@ import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.machineTranslation.MTHelper;
+import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResultSet;
 import com.globalsight.util.GeneralException;
@@ -121,8 +122,9 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     static public final int INDICATE_MT_MATCH = 13;
 
     static public final float SCORE_UNKNOWN = -1;
+
     // MT translation applies fixed score "60".
-    static public final float MT_SCORE_FOR_OFFLINE_KIT = 60;
+    static public final float MT_SCORE_FOR_OFFLINE_KIT = MachineTranslator.MT_SCORE;
 
     static private ResourceBundle m_resources;
     static

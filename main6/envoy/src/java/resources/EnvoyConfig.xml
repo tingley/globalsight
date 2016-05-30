@@ -351,7 +351,6 @@
         <PageLink linkName="modify" destinationPageName="MTMP"></PageLink>
         <PageLink linkName="self" destinationPageName="TMP"></PageLink>
         <PageLink linkName="remove" destinationPageName="TMP"></PageLink>
-        <PageLink linkName="tda_edit" destinationPageName="TDA"></PageLink>
       </WebPage>
       <WebPage pageName="CTMP" isDefault="false" jspName="/envoy/administration/tmprofile/newTMProfile.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.tmprofile.CreateTMProfileHandler">  
         <PageLink linkName="save" destinationPageName="TMP"></PageLink>
@@ -360,12 +359,6 @@
       <WebPage pageName="MTMP" isDefault="false" jspName="/envoy/administration/tmprofile/modifyTMProfile.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.tmprofile.ModifyTMProfileHandler">  
         <PageLink linkName="save" destinationPageName="TMP"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TMP"></PageLink>
-      </WebPage>
-      <WebPage pageName="TDA" isDefault="false" jspName="/envoy/administration/tmprofile/TDAOptions.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.tmprofile.ModifyTDAOptionsHandler">
-        <PageLink linkName="saveTDAOptions" destinationPageName="TDA"></PageLink>
-        <PageLink linkName="cancelTDAOptions" destinationPageName="TMP"></PageLink>
-        <PageLink linkName="self" destinationPageName="TDA"></PageLink>
-        <PageLink linkName="main" destinationPageName="TMP"></PageLink>
       </WebPage>
    </WebActivity>
   </WebModule>
@@ -377,7 +370,6 @@
         <PageLink linkName="modify" destinationPageName="MTD"></PageLink>
         <PageLink linkName="self" destinationPageName="MTP"></PageLink>
         <PageLink linkName="remove" destinationPageName="MTP"></PageLink>
-        <PageLink linkName="mt_active" destinationPageName="MTP"></PageLink>
         <PageLink linkName="export" destinationPageName="MTP"></PageLink>
         <PageLink linkName="mtpImport" destinationPageName="MTPIMPORT"></PageLink>
       </WebPage>

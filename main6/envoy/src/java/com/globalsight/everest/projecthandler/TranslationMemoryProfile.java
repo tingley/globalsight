@@ -29,7 +29,6 @@ import java.util.Vector;
 
 import com.globalsight.cxe.entity.customAttribute.TMPAttribute;
 import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.everest.foundation.TDATM;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
@@ -173,8 +172,6 @@ public class TranslationMemoryProfile extends PersistentObject
 
     private boolean autoRepair = true;
     
-    private TDATM tdatm;
-
     private boolean uniqueFromMultipleTranslation = false;
 
     private long m_companyId = -1;
@@ -838,16 +835,6 @@ public class TranslationMemoryProfile extends PersistentObject
         return mode;
     }
 
-    public TDATM getTdatm()
-    {
-        return this.tdatm;
-    }
-
-    public void setTdatm(TDATM P_TDATM)
-    {
-        this.tdatm = P_TDATM;
-    }
-    
     public List<TMPAttribute> getAllTMPAttributes()
     {
         List<TMPAttribute> atts = new ArrayList<TMPAttribute>();

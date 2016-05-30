@@ -25,12 +25,12 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.tda.TdaHelper;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.util.online.LfUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
+import com.globalsight.util.NumberUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
@@ -298,12 +298,12 @@ public class SegmentView implements Serializable
         for (int i = 0; i < al.length - 1; i++)
         {
             XliffAlt alt1 = (XliffAlt) al[i];
-            double percent1 = TdaHelper.PecentToDouble(alt1.getQuality());
+            double percent1 = NumberUtil.PecentToDouble(alt1.getQuality());
 
             for (int j = i + 1; j < xliffAlt.size(); j++)
             {
                 XliffAlt alt2 = (XliffAlt) al[j];
-                double percent2 = TdaHelper.PecentToDouble(alt2.getQuality());
+                double percent2 = NumberUtil.PecentToDouble(alt2.getQuality());
 
                 if (percent1 < percent2)
                 {

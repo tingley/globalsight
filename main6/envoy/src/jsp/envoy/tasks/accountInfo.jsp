@@ -139,7 +139,7 @@ function submitForm(button) {
     } 
     else if (button == "notification")
     {
-        theForm.action = "<%=notificationUrl%>"+"&&action=notifycation";
+        theForm.action = "<%=notificationUrl%>&action=notification";
     } 
     else if (button == 'downloadOption')
     {

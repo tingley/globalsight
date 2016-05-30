@@ -55,6 +55,8 @@ public class XmlFilterHelper
         ENTITY_MAP = new HashMap<Character, String>();
         ENTITY_MAP.putAll(HtmlEntities.mDefaultCharToEntity);
         ENTITY_MAP.putAll(HtmlEntities.mHtmlCharToEntity);
+        
+        ENTITY_MAP.remove(new Character('\u00A0'));
     }
     /**
      * Constructor

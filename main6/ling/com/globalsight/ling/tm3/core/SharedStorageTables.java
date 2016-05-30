@@ -113,11 +113,12 @@ class SharedStorageTables {
                         .append(attr.getValueType().getSqlType())
                         .append(", ");
                 }
-                stmt.append("PRIMARY KEY (id)");
+                stmt.append("PRIMARY KEY (id), ");
+                stmt.append("KEY (tmId) ");
                 stmt.append(") ENGINE=InnoDB");
-                SQLUtil.exec(conn, stmt.toString());        	
+                SQLUtil.exec(conn, stmt.toString());
        	}
-        
+
         // Now create the TUV table.  Note the denormalized tmId
         // (to avoid an extra join during fuzzy lookup)
         String tuvTableName = getTuvTableName(poolId);
@@ -148,12 +149,7 @@ class SharedStorageTables {
 
 			// Create index on TUV table
 			stmt = new StringBuilder();
-			stmt.append("CREATE INDEX INDEX_").append(tuvTableName)
-					.append("_TMID ON ").append(tuvTableName).append(" (tmId)");
-			SQLUtil.exec(conn, stmt.toString());
-
-			stmt = new StringBuilder();
-			stmt.append("CREATE INDEX INDEX_LOCALE_ID ON ")
+			stmt.append("CREATE INDEX IDX_LOCALE_ID ON ")
 					.append(tuvTableName).append(" (localeId)");
 			SQLUtil.exec(conn, stmt.toString());
 		}

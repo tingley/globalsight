@@ -982,9 +982,8 @@ public class FilterConfigurationImportHandler extends PageHandler
                                 .getXmlRuleId()));
                     }
 
-                    String configXmlStr = xmlRuleFilter.getConfigXml();
                     XmlFilterConfigParser xmlFilterConfigParser = new XmlFilterConfigParser(
-                            configXmlStr);
+                            xmlRuleFilter);
                     xmlFilterConfigParser.parserXml();
 
                     // elementPostFilterId
@@ -2741,10 +2740,10 @@ public class FilterConfigurationImportHandler extends PageHandler
                 {
                     xmlRuleFilter.setXmlRuleId(Long.parseLong(valueField));
                 }
-                // else if (keyField.equalsIgnoreCase("ENABLE_CONVERT_HTML_ENTITY"))
-                // {
-                // xmlRuleFilter.setConvertHtmlEntity(Boolean.parseBoolean(valueField));
-                // }
+                else if (keyField.equalsIgnoreCase("ENABLE_CONVERT_HTML_ENTITY"))
+                {
+                    xmlRuleFilter.setConvertHtmlEntity(Boolean.parseBoolean(valueField));
+                }
                 // else if (keyField.equalsIgnoreCase("SECOND_FILTER_ID"))
                 // {
                 // xmlRuleFilter.setSecondFilterId(Long.parseLong(valueField));

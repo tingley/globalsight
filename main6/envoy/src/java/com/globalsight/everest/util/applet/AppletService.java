@@ -925,6 +925,7 @@ public class AppletService extends HttpServlet
             task.put("assignment", assignment);
             
             assignment.put("activity", wt.getActivityName());
+            assignment.put("activity_comment_upload_check", wt.getActivityCommentUploadCheck());
             assignment.put("report_upload_check", wt.getReportUploadCheck());
             assignment.put("roles", wt.getRolesAsString());
             assignment.put("accepted_time", wt.getAcceptTime());

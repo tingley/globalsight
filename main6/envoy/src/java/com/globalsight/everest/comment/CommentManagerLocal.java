@@ -22,6 +22,7 @@ import java.io.FileFilter;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -36,6 +37,7 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
@@ -43,6 +45,7 @@ import com.globalsight.everest.jobhandler.JobPersistenceAccessor;
 import com.globalsight.everest.persistence.comment.CommentQueryResultHandler;
 import com.globalsight.everest.persistence.comment.CommentUnnamedQueries;
 import com.globalsight.everest.persistence.comment.IssueUnnamedQueries;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.taskmanager.TaskPersistenceAccessor;
@@ -157,6 +160,77 @@ public class CommentManagerLocal implements CommentManager
         }
     }
 
+    /**
+     * Gets activity comment ids by JDBC.
+     */
+    public static ArrayList<String> getActivityCommentIds(Task p_task)
+    {
+        ArrayList<String> commentIds = new ArrayList<String>();
+        Connection connection = null;
+        PreparedStatement query = null;
+        String sql = "select ID from comments where COMMENT_OBJECT_ID = " + p_task.getId()
+                + " and COMMENT_OBJECT_TYPE='T'";
+        try
+        {
+            connection = ConnectionPool.getConnection();
+            query = connection.prepareStatement(sql);
+            ResultSet rs = query.executeQuery();
+            while (rs.next())
+            {
+                String commentId = rs.getString(1);
+                commentIds.add(commentId);
+            }
+        }
+        catch (Exception e)
+        {
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.debug("Could not search Comment Id: " + e);
+            }
+        }
+        finally
+        {
+            try
+            {
+                query.close();
+                ConnectionPool.returnConnection(connection);
+            }
+            catch (Exception cpe)
+            {
+                if (CATEGORY.isDebugEnabled())
+                {
+                    CATEGORY.debug(cpe);
+                }
+            }
+        }
+        return commentIds;
+    }
+    
+    /**
+     * Update activity comment upload status to finished.
+     */
+    public static ArrayList<CommentFile> getActivityCommentAttachments(Task p_task) throws CommentException,
+            RemoteException
+    {
+        ArrayList<CommentFile> commentFiles = new ArrayList<CommentFile>();
+        ArrayList<String> commentIds = getActivityCommentIds(p_task);
+        for (String commentId : commentIds)
+        {
+            String access = WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS;
+            CommentManager commentManager = ServerProxy.getCommentManager();
+            ArrayList<CommentFile> commentReferences = commentManager.getCommentReferences(
+                    commentId, access, true);
+            if (commentReferences != null && commentReferences.size() > 0)
+            {
+                for(CommentFile f : commentReferences)
+                {
+                    commentFiles.add(f);
+                }
+            }
+        }
+        return commentFiles;
+    }
+    
     /**
      * Deletes the specified comment reference file.
      */

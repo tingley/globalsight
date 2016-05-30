@@ -58,15 +58,18 @@ public interface TmCoreManager
 
     /** The "ORDER_NUM" for local TM matches starts from 1. */
     public static final int LM_ORDER_NUM_START_LOCAL_TM = 1;
+
     /** The "ORDER_NUM" for remote TM matches starts from 101. */
     public static final int LM_ORDER_NUM_START_REMOTE_TM = 101;
-    /** The "ORDER_NUM" for TDA matches starts from 201. */
-    public static final int LM_ORDER_NUM_START_TDA = 201;
+
+    /** The "ORDER_NUM" for TDA matches starts from 201. (ABAONDED) */
+
     /**
      * The "ORDER_NUM" for MT matches starts from 301. Commonly they are 301 and
      * 302 as MT returns at most 2 matches for one segment.
      */
     public static final int LM_ORDER_NUM_START_MT = 301;
+
     /** The "ORDER_NUM" for XLF/PO matches is -1. */
     public static final int LM_ORDER_NUM_START_XLF_PO_TARGET = -1;
 

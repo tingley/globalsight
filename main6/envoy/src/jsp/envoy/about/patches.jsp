@@ -120,7 +120,7 @@ public class PatchComparator implements Comparator {
     List<Hotfix> hs = ServerUtil.getInstalledPatches();
     for (Hotfix h : hs)
     {
-    	values.add(h.getName().trim() + ": " + h.getDescription().trim());
+    	values.add(h.getName().trim() + ": " + h.getDescription().trim()+" ("+h.getDate()+")");
     }
 %>
 

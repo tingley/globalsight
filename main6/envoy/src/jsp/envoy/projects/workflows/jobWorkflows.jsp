@@ -150,7 +150,6 @@
 			    <td class="tableHeadingBasic myTableHeading"><input id="selectAllWorkflows" type="checkbox" onclick="selectAllWorkflows()"></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_target_locale")%>&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading" style="text-align:center"><%=bundle.getString("lb_word_count")%>&nbsp;&nbsp;&nbsp;</td>
-			    <td class="tableHeadingBasic myTableHeading" style="text-align:center"><span class="whiteBold">&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_percent_complete")%>&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_state")%>&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_current_activity")%>&nbsp;&nbsp;&nbsp;</span></td>
 			    <c:if test="${customerAccessGroupIsDell}">
@@ -169,7 +168,25 @@
 		<c:forEach items="${JobWorkflowDisplayList}" var="item">
 			 <c:choose>
 				<c:when test="${(item.workflow.state == 'EXPORT_FAILED') || (item.workflow.state == 'IMPORT_FAILED')}">
-					<tr class="warningText">
+					<tr style="font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:red;font-weight:bold;">
+				</c:when>
+				<c:when test="${item.workflow.state == 'PENDING'}">
+				    <tr class="warningText">
+				</c:when>
+				<c:when test="${item.workflow.state == 'READY_TO_BE_DISPATCHED'}">
+				    <tr class="standardText">
+				</c:when>
+				<c:when test="${item.workflow.state  == 'DISPATCHED'}">
+				    <tr style="font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt;font-weight:bold;">
+				</c:when>
+				<c:when test="${item.workflow.state  == 'LOCALIZED'}">
+				    <tr style="font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:blue;">
+				</c:when>
+				<c:when test="${item.workflow.state  == 'EXPORTED'}">
+				    <tr class="greenText">
+				</c:when>
+				<c:when test="${item.workflow.state  == 'ARCHIVED'}">
+				    <tr style="font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:#888888;">
 				</c:when>
 				<c:otherwise>
 					<tr class="standardText">
@@ -190,7 +207,6 @@
 						</a>
 					</amb:permission>
 				</td>
-				<td style="text-align:center">${item.workflow.percentageCompletion}%</td>
 				<td>${item.stateBundleString}</td>
 				<td>${item.taskDisplayName}</td>
 				<c:if test="${customerAccessGroupIsDell}">

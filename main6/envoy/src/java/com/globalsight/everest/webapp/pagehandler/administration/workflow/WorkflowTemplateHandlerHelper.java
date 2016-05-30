@@ -1072,6 +1072,7 @@ public class WorkflowTemplateHandlerHelper
         array[35] = p_bundle.getString("lb_Overdue_user") + "* " + colon;
 
         array[36] = p_bundle.getString("lb_report_upload_check") + colon;
+        array[37] = p_bundle.getString("lb_activity_comment_upload_check") + colon;
               
         return array;
     }

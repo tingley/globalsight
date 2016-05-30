@@ -451,7 +451,12 @@ public class TmResource extends RestResource
             targetTuv.setTu(tu);
 
             GlobalSightLocale sourceLocale = getLocaleByName(p_sourceLocale);
+            if (sourceLocale == null)
+                throw new RestWebServiceException("Empty source locale");
             GlobalSightLocale targetLocale = getLocaleByName(p_targetLocale);
+            if (targetLocale == null)
+                throw new RestWebServiceException("Empty target locale");
+
             tu.setSourceLocale(sourceLocale);
             sourceTuv.setLocale(sourceLocale);
             targetTuv.setLocale(targetLocale);
@@ -937,18 +942,13 @@ public class TmResource extends RestResource
             long startId = checkStartId(p_startId);
             int offset = checkOffset(p_offset);
 
-            if (StringUtil.isEmpty(p_sourceLocale))
-            {
+            GlobalSightLocale sourceLocale = getLocaleByName(p_sourceLocale);
+            if (sourceLocale == null)
                 throw new RestWebServiceException("Empty source locale");
-            }
-            GlobalSightLocale srcGSLocale = getLocaleByName(p_sourceLocale);
-            GlobalSightLocale trgGSLocale = null;
-            if (p_targetLocale != null && p_targetLocale.length() > 0)
-            {
-                trgGSLocale = getLocaleByName(p_targetLocale);
-            }
+            // optional
+            GlobalSightLocale targetLocale = getLocaleByName(p_targetLocale);
 
-            tuXml = nextTm3Tus(tm, srcGSLocale, trgGSLocale, startId, offset);
+            tuXml = nextTm3Tus(tm, sourceLocale, targetLocale, startId, offset);
         }
         catch (Exception e)
         {
@@ -2370,6 +2370,10 @@ public class TmResource extends RestResource
             restArgs.put("modifyFinishDate", p_modifyFinishDate);
             restStart = RestWebServiceLog.start(TmResource.class, FULL_TEXT_SEARCH, restArgs);
 
+            if (p_sourceLocale != null)
+                p_sourceLocale = p_sourceLocale.replace("-", "_");
+            if (p_targetLocale != null)
+                p_targetLocale = p_targetLocale.replace("-", "_");
             checkParamters(userName, p_companyName, p_tmIds, p_searchText, p_sourceLocale,
                     p_targetLocale, p_creationStartDate, p_creationFinishDate, p_modifyStartDate,
                     p_modifyFinishDate);
@@ -2685,10 +2689,9 @@ public class TmResource extends RestResource
 
             TranslationMemoryProfile tmp = checkTmProfileName(p_tmProfileName, p_companyName);
 
-            if (StringUtil.isEmpty(p_sourceLocale))
-                throw new RestWebServiceException("Empty source locale");
             GlobalSightLocale sourceLocale = getLocaleByName(p_sourceLocale);
-
+            if (sourceLocale == null)
+                throw new RestWebServiceException("Empty source locale");
             GlobalSightLocale targetLocale = getLocaleByName(p_targetLocale);
 
             if (StringUtil.isEmpty(p_searchText))

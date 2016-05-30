@@ -223,8 +223,8 @@ function getScrollableDiv(p_html, p_dataArr) {
     return result;
 }
 
-var popTile=["There are some failed or in-progress status of target files","Not 100% translated primary target files","Activity is uploading","<%=labelFinishWarning%>","<%=labelReportUploadCheckWarning%>"];
-var popDialogId=["dialog-fileState","dialog-unTranslated","dialog-taskIsUploading","dialog-complActivity","dialog-reportUploadCheck"]
+var popTile=["There are some failed or in-progress status of target files","Not 100% translated primary target files","Activity is uploading","<%=labelFinishWarning%>","<%=labelReportUploadCheckWarning%>","<%=labelActivitiesCommentUploadCheckWarning%>"];
+var popDialogId=["dialog-fileState","dialog-unTranslated","dialog-taskIsUploading","dialog-complActivity","dialog-reportUploadCheck","dialog-activityCommentUploadCheck"]
 var popDiv="<div style='display:none' class='detailText'></div>";
 var popArray=new Array();
 var dialogParam={
@@ -261,6 +261,22 @@ var dialogParam2={
         buttons: {
             OK: function () {
                 $(this).dialog("close");
+                checkActivityCommentAttaches(this);
+            },
+			Cancel: function () {
+				$(this).dialog("close");
+                document.location.replace($(this).prop("urlCancel"));
+            }
+        }
+    };
+var dialogParam3={
+        modal: true,
+		autoOpen: false,
+		width: 550,
+		minHeight: 110,
+        buttons: {
+            OK: function () {
+                $(this).dialog("close");
                 document.location.replace($(this).prop("urlSent"));
             },
 			Cancel: function () {
@@ -269,18 +285,23 @@ var dialogParam2={
             }
         }
     };
+
 $(function () {
 	for(var i=0;i<popDialogId.length;i++){
 		var temp=$(popDiv).clone(true);
 		temp.attr("id",popDialogId[i]);
 		temp.attr("title",popTile[i]);
-		if(i< popDialogId.length - 2)
+		if(i< popDialogId.length - 3)
 		{
 			temp.dialog(dialogParam1);
 		}
-		else if(i == popDialogId.length - 1)
+		else if(i == popDialogId.length - 2)
 		{
 			temp.dialog(dialogParam2);
+		}
+		else if(i == popDialogId.length - 1)
+		{
+		    temp.dialog(dialogParam3);
 		}
 		else
 		{
@@ -300,12 +321,37 @@ $(function () {
  * 4) Check un-closed comments
  * 5) Other
  */
+ 
+function checkActivityCommentAttaches(obj)
+{
+    var urlSent = "<%= finishUrl %>";
+	var isActivityCommentUploadCheck = <%=isActivityCommentUploadCheck%>;
+	var isActivityCommentUploaded = <%=isActivityCommentUploaded%>;
+	var labelActivityCommentUploadCheckWarningMessage ="<%=labelActivitiesCommentUploadCheckWarningMessage%>";
+    if(isActivityCommentUploadCheck==1 &&
+				         isActivityCommentUploaded !=1)
+	{
+	    var urlCancel = "<%=commentUrl%>";
+		$("#dialog-activityCommentUploadCheck").html(labelActivityCommentUploadCheckWarningMessage);
+		$("#dialog-activityCommentUploadCheck").prop("urlSent", urlSent);
+		$("#dialog-activityCommentUploadCheck").prop("urlCancel", urlCancel);
+		$("#dialog-activityCommentUploadCheck").dialog("open").height("auto");
+	}
+	else
+	{
+        document.location.replace($(obj).prop("urlSent"));
+    }
+}
+
 function doFinished(urlSent) {
 	var isReportUploadCheck = <%=isReportUploadCheck%>;
 	var isUploaded = <%=isUploaded%>;
+	var labelReportUploadCheckWarningMessage = "<%=labelReportUploadCheckWarningMessage%>";
+	var isActivityCommentUploadCheck = <%=isActivityCommentUploadCheck%>;
+	var isActivityCommentUploaded = <%=isActivityCommentUploaded%>;
     var stfStatusMessage = "<%=stfStatusMessage%>";
     var isExportSTF = "<%=isExportSTF%>";
-    var labelReportUploadCheckWarningMessage = "<%=labelReportUploadCheckWarningMessage%>";
+    var labelActivityCommentUploadCheckWarningMessage ="<%=labelActivitiesCommentUploadCheckWarningMessage%>";
     if (stfStatusMessage != "null" && isExportSTF == "true") {
         if (stfStatusMessage == "inprogress") {
             alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_inprogress")%>');
@@ -413,7 +459,16 @@ function doFinished(urlSent) {
 					$("#dialog-reportUploadCheck").prop("urlCancel", urlCancel);
 					$("#dialog-reportUploadCheck").dialog("open").height("auto");
 				}
-				else
+				else if(isActivityCommentUploadCheck==1 &&
+				         isActivityCommentUploaded !=1)
+				{
+				    var urlCancel = "<%=commentUrl%>";
+					$("#dialog-activityCommentUploadCheck").html(labelActivityCommentUploadCheckWarningMessage);
+					$("#dialog-activityCommentUploadCheck").prop("urlSent", urlSent);
+					$("#dialog-activityCommentUploadCheck").prop("urlCancel", urlCancel);
+					$("#dialog-activityCommentUploadCheck").dialog("open").height("auto");
+				}
+				else 
 				{
 					$("#dialog-complActivity").html(warningMessage);
 					$("#dialog-complActivity").prop("urlSent", urlSent);

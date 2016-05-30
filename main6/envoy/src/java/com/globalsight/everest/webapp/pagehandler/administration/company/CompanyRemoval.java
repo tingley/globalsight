@@ -217,7 +217,6 @@ public class CompanyRemoval
     private static final String SQL_DELETE_TB_SCHEDULED_JOBS = "delete from TB_SCHEDULED_JOBS where TBid in ";
     private static final String SQL_DELETE_TB_TERM = "delete from TB_TERM where TBID in ";
     private static final String SQL_DELETE_TB_USER_DATA = "delete from TB_USER_DATA where TBID in ";
-    private static final String SQL_DELETE_TDA_TM = "delete from TDA_TM where TM_FIPROFILE_ID in ";
     private static final String SQL_DELETE_TERM_LEVERAGE_MATCH = "delete from TERM_LEVERAGE_MATCH where TERMBASE_ID in ";
     private static final String SQL_DELETE_TEMPLATE = "delete from TEMPLATE where ID in ";
     private static final String SQL_DELETE_TEMPLATE_PART = "delete from TEMPLATE_PART where ID in ";
@@ -3511,14 +3510,6 @@ public class CompanyRemoval
         logEnd("TB_USER_DATA");
     }
 
-    private void removeTdaTm(Connection conn, List<List<Object>> tmProfileIds)
-            throws SQLException
-    {
-        logStart("TDA_TM");
-        exec(conn, SQL_DELETE_TDA_TM, tmProfileIds);
-        logEnd("TDA_TM");
-    }
-
     private void removeTermLeverageMatch(Connection conn,
             List<List<Object>> tbIds) throws SQLException
     {
@@ -3551,7 +3542,6 @@ public class CompanyRemoval
         if (tmProfileIds.size() > 0)
         {
             removeTmProfileAttribute(conn, tmProfileIds);
-            removeTdaTm(conn, tmProfileIds);
         }
         logStart("TM_PROFILE");
         exec(conn, SQL_DELETE_TM_PROFILE, projectTmIds);

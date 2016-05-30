@@ -327,7 +327,6 @@
   <permission id="<%=Permission.BLAISE_CONNECTOR%>"/>
   <permission id="<%=Permission.COTI_JOB%>"/>
   <permission id="<%=Permission.GIT_CONNECTOR%>"/>
-  <permission id="<%=Permission.MIND_TOUCH%>"/>
   <permission id="<%=Permission.ELOQUA%>"/>
   <permission id="<%=Permission.RSS_READER%>"/>
   <category id="lb_cvs">

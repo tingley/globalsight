@@ -104,8 +104,8 @@ public class CommentUploadHandler extends PageHandler implements
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
         String commentStr = (String) p_request.getParameter("taskComment");
-    	if (commentStr != null)
-    		sessionMgr.setAttribute("taskComment", commentStr);
+        if (commentStr != null)
+            sessionMgr.setAttribute("taskComment", commentStr);
 
         User user = TaskHelper.getUser(session);
         
@@ -117,28 +117,28 @@ public class CommentUploadHandler extends PageHandler implements
         String toJob = p_request.getParameter("toJob");
         if(toTask != null)
         {
-        	String taskIdParam = p_request.getParameter(TASK_ID);
-        	String taskStateParam = p_request.getParameter(TASK_STATE);
-        	long taskId = TaskHelper.getLong(taskIdParam);
-        	int taskState = TaskHelper.getInt(taskStateParam, -10);// -10 as
-        	
-        	Task task = TaskHelper.getTask(user.getUserId(), taskId,taskState);
-        	// Save the task to session
-    		TaskHelper.storeObject(session, WORK_OBJECT, task);
+            String taskIdParam = p_request.getParameter(TASK_ID);
+            String taskStateParam = p_request.getParameter(TASK_STATE);
+            long taskId = TaskHelper.getLong(taskIdParam);
+            int taskState = TaskHelper.getInt(taskStateParam, -10);// -10 as
+            
+            Task task = TaskHelper.getTask(user.getUserId(), taskId,taskState);
+            // Save the task to session
+            TaskHelper.storeObject(session, WORK_OBJECT, task);
         }
         else if (toJob != null)
         {
-        	String jobId = p_request.getParameter("jobId");
-        	long contextMenuJobId = Long.valueOf(jobId);
-        	Job contextMenuJob = WorkflowHandlerHelper
-        			.getJobById(contextMenuJobId);
-        	TaskHelper.storeObject(session, WebAppConstants.WORK_OBJECT,
-        			contextMenuJob);
+            String jobId = p_request.getParameter("jobId");
+            long contextMenuJobId = Long.valueOf(jobId);
+            Job contextMenuJob = WorkflowHandlerHelper
+                    .getJobById(contextMenuJobId);
+            TaskHelper.storeObject(session, WebAppConstants.WORK_OBJECT,
+                    contextMenuJob);
         }
         String commentId = p_request.getParameter("commentId");
         if(commentId != null && commentId != ""){
-        	Comment comment = TaskHelper.getComment(session, Long.parseLong(commentId));
-        	sessionMgr.setAttribute("comment", comment);
+            Comment comment = TaskHelper.getComment(session, Long.parseLong(commentId));
+            sessionMgr.setAttribute("comment", comment);
         }
         
         WorkObject wo = (WorkObject) TaskHelper.retrieveObject(session,

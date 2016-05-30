@@ -57,9 +57,9 @@ import com.globalsight.util.SortUtil;
  */
 public class XmlFilterConfigParser implements XmlFilterConstants
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(XmlFilterConfigParser.class);
+    private static final Logger CATEGORY = Logger.getLogger(XmlFilterConfigParser.class);
 
+    private XMLRuleFilter m_xmlFilter;
     private Document m_document = null;
     private Element m_rootElement = null;
     private String m_configXml = null;
@@ -82,11 +82,9 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
     public XmlFilterConfigParser(XMLRuleFilter xmlFilter)
     {
-        this(xmlFilter == null ? null : xmlFilter.getConfigXml());
-    }
+        m_xmlFilter = xmlFilter;
 
-    public XmlFilterConfigParser(String configXml)
-    {
+        String configXml = (xmlFilter == null ? null : xmlFilter.getConfigXml());
         m_configXml = (configXml == null || "".equals(configXml.trim())) ? nullConfigXml
                 : configXml;
     }
@@ -111,8 +109,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         StringBuffer sb = new StringBuffer();
         sb.append("<").append(NODE_ROOT).append(">");
         sb.append("<").append(NODE_EXTENDED_WHITESPACE_CHARS).append(">");
-        sb.append(exWhiteSpaceChars == null ? "" : XmlUtil
-                .escapeString(exWhiteSpaceChars));
+        sb.append(exWhiteSpaceChars == null ? "" : XmlUtil.escapeString(exWhiteSpaceChars));
         sb.append("</").append(NODE_EXTENDED_WHITESPACE_CHARS).append(">");
         sb.append("<").append(NODE_PH_CONSOLIDATION).append(">");
         sb.append(phConsolidation);
@@ -202,16 +199,14 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         m_rootElement = m_document.getDocumentElement();
     }
 
-    public String getNewConfigXmlStr(String p_elementName, String p_value)
-            throws Exception
+    public String getNewConfigXmlStr(String p_elementName, String p_value) throws Exception
     {
         setSingleElementValue(p_elementName, p_value);
         String newConfigXmlStr = documentToStr();
         return newConfigXmlStr;
     }
 
-    public String getNewConfigXmlStr(Map<Long, Long> htmlFilterIdMap)
-            throws Exception
+    public String getNewConfigXmlStr(Map<Long, Long> htmlFilterIdMap) throws Exception
     {
         Element cdataPostfilterTagsNode = getSingleElement(NODE_CDATA_POST_FILTER_TAGS);
         NodeList arrayNodes = cdataPostfilterTagsNode.getChildNodes();
@@ -222,16 +217,13 @@ public class XmlFilterConfigParser implements XmlFilterConstants
             if (list != null && list.getLength() > 0)
             {
                 Element postFilterIdElement = (Element) list.item(0);
-                if (postFilterIdElement != null
-                        || postFilterIdElement.getFirstChild() != null)
+                if (postFilterIdElement != null || postFilterIdElement.getFirstChild() != null)
                 {
-                    String postFilterId = postFilterIdElement.getFirstChild()
-                            .getNodeValue();
-                    if (htmlFilterIdMap.containsKey(Long
-                            .parseLong(postFilterId)))
+                    String postFilterId = postFilterIdElement.getFirstChild().getNodeValue();
+                    if (htmlFilterIdMap.containsKey(Long.parseLong(postFilterId)))
                     {
-                        String newId = String.valueOf(htmlFilterIdMap.get(Long
-                                .parseLong(postFilterId)));
+                        String newId = String
+                                .valueOf(htmlFilterIdMap.get(Long.parseLong(postFilterId)));
                         postFilterIdElement.getFirstChild().setNodeValue(newId);
                     }
                 }
@@ -256,8 +248,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
             t.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             t.transform(new DOMSource(m_rootElement), strResult);
             String result = strResult.getWriter().toString().trim();
-            returnStr = result.substring(result.indexOf("<xmlFilterConfig>"),
-                    result.length());
+            returnStr = result.substring(result.indexOf("<xmlFilterConfig>"), result.length());
             strWtr.close();
         }
         catch (Exception e)
@@ -340,20 +331,36 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
         return m_nonasciiAs;
     }
-    
+
     public int getEntityHandleMode()
     {
         if (m_entityExportMode == -1)
         {
             int result = ENTITY_HANDLE_MODE_1;
             String v = getSingleElementValue(NODE_ENTITY_HANDLE_MODE);
-            try
+
+            // upgrade from 8.6.9 - ConvertHtmlEntity
+            if (v == null && m_xmlFilter != null)
             {
-                result = Integer.parseInt(v);
+                if (m_xmlFilter.isConvertHtmlEntity())
+                {
+                    result = ENTITY_HANDLE_MODE_5;
+                }
+                else
+                {
+                    result = ENTITY_HANDLE_MODE_1;
+                }
             }
-            catch (Exception e)
+            else
             {
-                result = ENTITY_HANDLE_MODE_1;
+                try
+                {
+                    result = Integer.parseInt(v);
+                }
+                catch (Exception e)
+                {
+                    result = ENTITY_HANDLE_MODE_1;
+                }
             }
 
             m_entityExportMode = result;
@@ -500,10 +507,8 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         for (int i = 0; i < arrayNodes.getLength(); i++)
         {
             Element arrayElement = (Element) arrayNodes.item(i);
-            String postFilterId = getSingleElementValue(arrayElement,
-                    "postFilterId");
-            String postFilterTableName = getSingleElementValue(arrayElement,
-                    "postFilterTableName");
+            String postFilterId = getSingleElementValue(arrayElement, "postFilterId");
+            String postFilterTableName = getSingleElementValue(arrayElement, "postFilterTableName");
             returnList.add(postFilterId + "," + postFilterTableName);
         }
         return returnList;
@@ -514,8 +519,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         try
         {
             Element element = getSingleElement(NODE_WHITESPACE_PRESERVE_TAGS);
-            String[] toArray =
-            { "\"attributes\":{", "\"transAttributes\":{" };
+            String[] toArray = { "\"attributes\":{", "\"transAttributes\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -530,8 +534,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         try
         {
             Element element = getSingleElement(NODE_EMBEDDED_TAGS);
-            String[] toArray =
-            { "\"attributes\":{", "\"transAttributes\":{" };
+            String[] toArray = { "\"attributes\":{", "\"transAttributes\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -546,8 +549,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         try
         {
             Element element = getSingleElement(NODE_TRANSLATE_ATTRIBUTE_TAGS);
-            String[] toArray =
-            { "\"attributes\":{", "\"transAttributes\":{" };
+            String[] toArray = { "\"attributes\":{", "\"transAttributes\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -562,8 +564,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         try
         {
             Element element = getSingleElement(NODE_CONTENT_INCLUTION_TAGS);
-            String[] toArray =
-            { "\"attributes\":{", "\"transAttributes\":{" };
+            String[] toArray = { "\"attributes\":{", "\"transAttributes\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -578,8 +579,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         try
         {
             Element element = getSingleElement(NODE_CDATA_POST_FILTER_TAGS);
-            String[] toArray =
-            { "\"cdataConditions\":{" };
+            String[] toArray = { "\"cdataConditions\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -609,8 +609,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         try
         {
             Element element = getSingleElement(NODE_PROCESS_INS);
-            String[] toArray =
-            { "\"piTransAttributes\":{" };
+            String[] toArray = { "\"piTransAttributes\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -625,8 +624,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         try
         {
             Element element = getSingleElement(NODE_INTERNAL_TAG);
-            String[] toArray =
-            { "\"attributes\":{" };
+            String[] toArray = { "\"attributes\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -641,8 +639,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         try
         {
             Element element = getSingleElement(NODE_SRCCMT_XMLCOMMENT);
-            String[] toArray =
-            { "\"attributes\":{" };
+            String[] toArray = { "\"attributes\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -657,8 +654,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         try
         {
             Element element = getSingleElement(NODE_SRCCMT_XMLTAG);
-            String[] toArray =
-            { "\"attributes\":{" };
+            String[] toArray = { "\"attributes\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -693,12 +689,10 @@ public class XmlFilterConfigParser implements XmlFilterConstants
      *            -- the element whose value to get
      * @return the value of the element
      */
-    public static String getSingleElementValue(Element p_rootElement,
-            String p_elementName)
+    public static String getSingleElementValue(Element p_rootElement, String p_elementName)
     {
         Element e = getSingleElement(p_rootElement, p_elementName);
-        return (e == null || e.getFirstChild() == null) ? null : e
-                .getFirstChild().getNodeValue();
+        return (e == null || e.getFirstChild() == null) ? null : e.getFirstChild().getNodeValue();
     }
 
     /**
@@ -713,8 +707,8 @@ public class XmlFilterConfigParser implements XmlFilterConstants
      *            -- the single value for this element
      * @return the old value of the element
      */
-    public static String setSingleElementValue(Element p_rootElement,
-            String p_elementName, String p_value)
+    public static String setSingleElementValue(Element p_rootElement, String p_elementName,
+            String p_value)
     {
         Element e = getSingleElement(p_rootElement, p_elementName);
         String originalValue = e.getFirstChild().getNodeValue();
@@ -729,16 +723,13 @@ public class XmlFilterConfigParser implements XmlFilterConstants
      *            -- the name of the element to get
      * @return the Element
      */
-    protected static Element getSingleElement(Element p_rootElement,
-            String p_elementName)
+    protected static Element getSingleElement(Element p_rootElement, String p_elementName)
     {
         NodeList list = p_rootElement.getElementsByTagName(p_elementName);
-        return (list != null && list.getLength() > 0) ? (Element) list.item(0)
-                : null;
+        return (list != null && list.getLength() > 0) ? (Element) list.item(0) : null;
     }
 
-    private static String tagsXmlToJsonArray(Element element, String[] toArray)
-            throws JSONException
+    private static String tagsXmlToJsonArray(Element element, String[] toArray) throws JSONException
     {
         if (element == null)
         {
@@ -762,8 +753,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
             innerXml = innerXml + it.next() + "</array>";
         }
 
-        StringBuffer ret = new StringBuffer(
-                (XML.toJSONObject(innerXml)).toString());
+        StringBuffer ret = new StringBuffer((XML.toJSONObject(innerXml)).toString());
 
         if (ret.indexOf("{\"array\":") == 0)
         {
@@ -788,8 +778,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         return ret.toString();
     }
 
-    private static void tagsXmlToJsonArrayFixObject(StringBuffer ret,
-            String keyWord)
+    private static void tagsXmlToJsonArrayFixObject(StringBuffer ret, String keyWord)
     {
         int keyLen = keyWord.length();
         int index = ret.lastIndexOf(keyWord);
@@ -829,8 +818,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         }
     }
 
-    private static String jsonArrayToXml(JSONArray jsonArrayPreserveWsTags)
-            throws Exception
+    private static String jsonArrayToXml(JSONArray jsonArrayPreserveWsTags) throws Exception
     {
         // XmlUtil.escapeString(exWhiteSpaceChars)
         String ret = XML.toString(jsonArrayPreserveWsTags);

@@ -24,9 +24,9 @@
 
 			<!-- The install directory -->
 			<zipfileset dir="${installclasses}" prefix="${product}/install" />
-			<zipfileset dir="../install" prefix="${product}/install" includes="Install.bat, Install.sh, MergeProperties.bat, MergeProperties.sh" />
-            <zipfileset dir="${commonJarLib}" prefix="${product}/install" includes="commons-codec-1.3.jar" />
-            <zipfileset dir="${commonJarLib}" prefix="${product}/install" includes="ant.jar" />
+			<zipfileset dir="../install" prefix="${product}/install" includes="Install.bat, Install.sh, MergeProperties.bat, MergeProperties.sh, log4j.xml" />
+			<zipfileset dir="../install/lib" prefix="${product}/install/lib" includes="log4j.jar" />
+            <zipfileset dir="${commonJarLib}" prefix="${product}/install/lib" includes="commons-codec-1.3.jar, ant.jar, dom4j.jar" />
 
 			<zipfileset dir="../../envoy/schema" prefix="${product}/install/data" excludes="**/design/*, ebay.sql" />
 

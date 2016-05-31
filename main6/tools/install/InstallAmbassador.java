@@ -53,12 +53,17 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.ToolTipManager;
 
+import org.apache.log4j.Logger;
+
 import util.JarSignUtil;
 import util.Utilities;
 
 public class InstallAmbassador extends InstallerFrame implements
         ActionListener, WindowListener
 {
+    
+    static Logger logger = Logger.getLogger(InstallAmbassador.class.getName());
+    
     private static final long serialVersionUID = -1970811861866186170L;
 
     // Constants
@@ -177,7 +182,7 @@ public class InstallAmbassador extends InstallerFrame implements
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+            logger.error(ex);
             showErrorDialogAndQuit(ex.toString());
         }
     }
@@ -287,6 +292,7 @@ public class InstallAmbassador extends InstallerFrame implements
         }
         catch (IOException ex)
         {
+            logger.error(ex);
             // If the value type properties file is not found, do
             // nothing, and the default type will be used for the
             // parameters.
@@ -382,8 +388,7 @@ public class InstallAmbassador extends InstallerFrame implements
             }
             catch (Exception e)
             {
-                System.err.println("Problem reading install display key: "
-                        + controlKey);
+                logger.error("Problem reading install display key: " + controlKey, e);
                 throw e;
             }
             // Get the value
@@ -402,6 +407,7 @@ public class InstallAmbassador extends InstallerFrame implements
                     // The type of control for this parameter is
                     // not defined, so the default type will be
                     // used.
+                    logger.error(ex);
                     typesList = null;
                 }
             }
@@ -612,7 +618,7 @@ public class InstallAmbassador extends InstallerFrame implements
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+            logger.error(ex);
             showErrorDialogAndQuit(saveFailureText + "\n" + ex.toString());
         }
     }
@@ -753,7 +759,7 @@ public class InstallAmbassador extends InstallerFrame implements
                     }
                     catch (IOException ex)
                     {
-                        System.out.println(ex);
+                        logger.error(ex);
                     }
                 }
             }
@@ -846,7 +852,7 @@ public class InstallAmbassador extends InstallerFrame implements
                 }
                 catch (Exception ex)
                 {
-                    ex.printStackTrace();
+                    logger.error(ex);
                     showErrorDialogAndQuit(installationFailureText + "\n"
                             + ex.toString());
                 }
@@ -909,7 +915,7 @@ public class InstallAmbassador extends InstallerFrame implements
                     }
                     catch (IOException ex)
                     {
-                        ex.printStackTrace();
+                        logger.error(ex);
                         showErrorDialog(ex.toString());
                     }
                 }
@@ -995,6 +1001,7 @@ public class InstallAmbassador extends InstallerFrame implements
 
     public static void main(String[] args)
     {
+        logger.info("Installer is starting...");
         Utilities.requireJava14();
 
         boolean useUI = true;
@@ -1040,11 +1047,12 @@ public class InstallAmbassador extends InstallerFrame implements
                     System.in.read();
                 } catch (IOException e)
                 {
-                    e.printStackTrace();
+                    logger.error(e);
                 }
                 System.exit(1);
             }
             Install.main(args);
         }
+        logger.info("Installer is done");
     }
 }

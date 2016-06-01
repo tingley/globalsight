@@ -50,7 +50,7 @@ public class FilterConfiguration implements BasePage
     public static final String FM_9_FILTER_NAME_TEXT = "fmFilterName";
     public static final String FM_9_FILTER_DESCRIPTION_TEXT = "fmDesc";
     public static final String FM_9_FILTER_CANCEL_BUTTON = "xpath=(//input[@id='exit'])[50]";
-    public static final String FM_9_FILTER_SAVE_BUTTON = "xpath=(//input[@value='Save'])[48]";
+    public static final String FM_9_FILTER_SAVE_BUTTON = "xpath=(//input[@value='Save'])[49]";
     public static final String FM_9_TRANSLATE_LEFT_MASTER_PAGE_CHECKBOX = "id=checkLeftMasterPage";
     public static final String FM_9_TRANSLATE_RIGHT_MASTER_PAGE_CHECKBOX = "id=checkRightMasterPage";
     public static final String FM_9_TRANSLATE_OTHER_MASTER_PAGE_CHECKBOX = "id=checkOtherMasterPage";
@@ -61,15 +61,15 @@ public class FilterConfiguration implements BasePage
     public static final String HTML_FILTER_SAVE_BUTTON = "//input[@value='Save' and @type='button' and @onclick='saveHtmlFilter()']";
     public static final String HTML_FILTER_CHECK_ALL_CHECKBOX = "id=checkAll";
     public static final String HTML_FILTER_TAG_SAVE_BUTTON = "//input[@value='Save' and @type='button' and @onclick='htmlFilter.deleteTags()']";
-    public static final String HTML_FILTER_TAG_SAVE_BUTTON_SWITCHTAG = "xpath=(//input[@value='Save'])[35]";
-    public static final String HTML_FILTER_TAG_SAVE_BUTTON_INTERNAL = "xpath=(//input[@value='Save'])[34]";
+    public static final String HTML_FILTER_TAG_SAVE_BUTTON_SWITCHTAG = "xpath=(//input[@value='Save'])[36]";
+    public static final String HTML_FILTER_TAG_SAVE_BUTTON_INTERNAL = "xpath=(//input[@value='Save'])[35]";
     public static final String HTML_FILTER_BASE_FONT_CHECKBOX = "tags_4";  
     public static final String HTML_FILTER_A_CHECKBOX = "tags_0";
     public static final String HTML_FILTER_TAG1_CHECKBOX = "tags_1";
     public static final String HTML_FILTER_INTERNAL_TEXT_POST_FILTER_SELECT = "html_filter_baseFilterSelect";
     public static final String HTML_FILTER_TAG_TYPE_SELECT = "id=htmlTranslateRule";
     public static final String HTML_FILTER_TAG_ADD_BUTTON = "//input[@value='Add' and @type='button' and @onclick='htmlFilter.addTag()']";
-    public static final String HTML_FILTER_TAG_ADD_BUTTON_2 = "xpath=(//input[@value='Add'])[21]";
+    public static final String HTML_FILTER_TAG_ADD_BUTTON_2 = "xpath=(//input[@value='Add'])[22]";
     public static final String HTML_FILTER_TAG_NAME_TEXT = "id=singleTagNameToAdd";
     public static final String HTML_FILTER_TAG_INTERNAL_NAME_TEXT = "InternalTagToAdd";
     public static final String HTML_FILTER_TAG_INTERNAL_ADD_BUTTON = "//input[@value='Save' and @type='button' and @onclick='htmlFilter.addInternalTag()']";
@@ -97,7 +97,7 @@ public class FilterConfiguration implements BasePage
     public static final String INDD_FILTER_NAME_TEXT = "inddFilterName";
     public static final String INDD_FILTER_DESCRIPTION_TEXT = "id=inddFilterDesc";
     public static final String INDD_FILTER_CANCEL_BUTTON = "xpath=(//input[@id='exit'])[51]]";
-    public static final String INDD_FILTER_SAVE_BUTTON = "xpath=(//input[@value='Save'])[49]";
+    public static final String INDD_FILTER_SAVE_BUTTON = "xpath=(//input[@value='Save'])[50]";
     public static final String INDD_FILTER_TRANSLATE_HIDDEN_LAYERS_CHECKBOX = "//*[@id='transInddHiddenLayer']";
     public static final String INDD_FILTER_TRANSLATE_MASTER_LAYERS_CHECKBOX = "//*[@id='transInddMasterLayer']";
     public static final String INDD_FILTER_TRANSLATE_FILE_INFO_CHECKBOX = "//*[@id='transInddFileInfo']";
@@ -177,7 +177,7 @@ public class FilterConfiguration implements BasePage
     public static final String OFFICE_2010_FILTER_CONTENT_POST_FILTER_SELECT = "id=office2010ContentPostFilterSelect";
     public static final String OFFICE_2010_FILTER_TAG_CDATA_POST_FILTER_DEFAULT_FILTER_LABEL = "label=HTML_Filter(Default)";
     public static final String OFFICE_2010_FILTER_BASE_TEXT_POST_FILTER_SELECT = "id=office2010_filter_baseFilterSelect";
-    public static final String OFFICE_2010_FILTER_BASE_TEXT_POST_FILTER_MESSAGE = "Only the Base Text post-filter setting will be used for the base text function. Base Text settings from other secondary filter or post-filter will be ignored";
+    public static final String OFFICE_2010_FILTER_BASE_TEXT_POST_FILTER_MESSAGE = "Only the Base Text post-filter setting will be used for the base text function. Base Text settings from other secondary filter or post-filter will be ignored.";
     public static final String OFFICE_2010_FILTER_TAG_TYPE_SELECT = "id=O2010UnextractableRule";
     public static final String OFFICE_2010_FILTER_TAG_UNEXTRACTABLE_WORD_PARAGRAPH_STYLES_LABEL = "label=Unextractable Word Paragraph Styles";
     public static final String OFFICE_2010_FILTER_TAG_UNEXTRACTABLE_WORD_CHARACTER_STYLES_LABEL = "label=Unextractable Word Character Styles";
@@ -304,7 +304,7 @@ public class FilterConfiguration implements BasePage
 	public static final String PLAIN_TEXT_FILTER_CUSTOM_SID_RULE_FINISH_OCCURRENCE_LAST_RADIO_BUTTON = "id=plainTextFilter_customSidRule_finishOcc2";
 	public static final String PLAIN_TEXT_FILTER_CUSTOM_SID_RULE_FINISH_OCCURRENCE_CUSTOM_RADIO_BUTTON = "id=plainTextFilter_customSidRule_finishOcc3";
 	public static final String PLAIN_TEXT_FILTER_CUSTOM_SID_RULE_FINISH_OCCURRENCE_CUSTOM_TEXT = "id=plainTextFilter_customSidRule_finishOccTimes";
-	public static final String PLAIN_TEXT_FILTER_CUSTOM_SID_RULE_SAVE_BUTTON = "xpath=(//input[@value='Save'])[27]";
+	public static final String PLAIN_TEXT_FILTER_CUSTOM_SID_RULE_SAVE_BUTTON = "xpath=(//input[@value='Save'])[26]";
 	
 	
     

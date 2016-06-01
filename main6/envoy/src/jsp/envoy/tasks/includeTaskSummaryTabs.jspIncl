@@ -223,7 +223,7 @@ function getScrollableDiv(p_html, p_dataArr) {
     return result;
 }
 
-var popTile=["There are some failed or in-progress status of target files","Not 100% translated primary target files","Activity is uploading","<%=labelFinishWarning%>","<%=labelReportUploadCheckWarning%>","<%=labelActivitiesCommentUploadCheckWarning%>"];
+var popTile=["There are some failed or in-progress status of target files","Not 100% translated primary target files","Activity is uploading","<%=labelFinishWarning%>","<%=labelReportUploadCheckWarning%>","No activity comment attachment is uploaded"];
 var popDialogId=["dialog-fileState","dialog-unTranslated","dialog-taskIsUploading","dialog-complActivity","dialog-reportUploadCheck","dialog-activityCommentUploadCheck"]
 var popDiv="<div style='display:none' class='detailText'></div>";
 var popArray=new Array();

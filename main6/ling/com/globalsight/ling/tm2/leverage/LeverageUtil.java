@@ -633,7 +633,7 @@ public class LeverageUtil
 				p_matchTypes, p_subId);
 		if (lm == null)
 			return false;
-
+		//(GBS-4360) Online and offline, determine the status of the target tuv
 	     if (lm.getMatchState().equals(MatchState.MULTIPLE_TRANSLATION))
          {
              Tuv targetTuv = (Tuv) p_targetTuvs.get(index);

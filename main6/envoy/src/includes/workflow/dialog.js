@@ -106,11 +106,14 @@ var Dialog = {
 		} else {
 			$("#uploadCheckbox").attr("checked", 'true');
 		}
+		
         var activityCommentCheck = node.getAssignmentValue("activity_comment_upload_check");
         if(activityCommentCheck == 0){
 			$("#activityCommentCheckbox").removeAttr("checked");// //
-		} else {
+		} else if(activityCommentCheck == 1){
 			$("#activityCommentCheckbox").attr("checked", 'true');
+		}else{
+			$("#activityCommentCheckbox").removeAttr("checked");// undefined.
 		}
 		
 		var time = getTime(node.getAssignmentValue("accepted_time"));

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.globalsight.everest.foundation.WorkObject;
+import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.util.system.RemoteServer;
 
 public class CommentManagerWLRMIImpl extends RemoteServer implements
@@ -276,4 +277,12 @@ public class CommentManagerWLRMIImpl extends RemoteServer implements
     {
         return m_localInstance.getCommentReferences(id, p_access, companyId);
     }
+
+    @Override
+    public ArrayList<CommentFile> getActivityCommentAttachments(Task p_task)
+            throws CommentException, RemoteException
+    {
+        return m_localInstance.getActivityCommentAttachments(p_task);
+    }
+    
 }

@@ -783,9 +783,18 @@ public class StatisticsService
 
         // Set ICE word-count
         long jobId = p_targetPage.getSourcePage().getJobId();
-        int inContextMatchWordCount = onePageInContextMatchWordCounts(
-                pageWordCount, p_splittedSourceTuvs, p_matches,
-                p_excludedTuTypes, jobId);
+        List<Tuv> targetTuvs = null;
+        try
+        {
+            targetTuvs = new ArrayList<Tuv>(ServerProxy.getTuvManager().getTargetTuvsForStatistics(
+                    p_targetPage));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        int inContextMatchWordCount = onePageInContextMatchWordCounts(pageWordCount,
+                p_splittedSourceTuvs, targetTuvs, p_matches, p_excludedTuTypes, jobId);
         pageWordCount.setInContextWordCount(inContextMatchWordCount);
 
         // Count "context-match word counts" into "segment-TM word counts"
@@ -1011,16 +1020,15 @@ public class StatisticsService
      *            The tm matches in the TM
      * @return The in context match
      */
-    private static int onePageInContextMatchWordCounts(
-            PageWordCounts wordCount, ArrayList<BaseTmTuv> splitSourceTuvs,
-            MatchTypeStatistics matches, Vector<String> p_excludedTuTypes,
-            long p_jobId)
+    private static int onePageInContextMatchWordCounts(PageWordCounts wordCount,
+            ArrayList<BaseTmTuv> splitSourceTuvs, List<Tuv> targetTuvs,
+            MatchTypeStatistics matches, Vector<String> p_excludedTuTypes, long p_jobId)
     {
         int inContextMatchWordCount = 0;
 
         for (int i = 0, max = splitSourceTuvs.size(); i < max; i++)
         {
-            if (LeverageUtil.isIncontextMatch(i, splitSourceTuvs, null,
+            if (LeverageUtil.isIncontextMatch(i, splitSourceTuvs, targetTuvs,
                     matches, p_excludedTuTypes, p_jobId))
             {
                 inContextMatchWordCount += ((SegmentTmTuv) splitSourceTuvs

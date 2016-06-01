@@ -690,11 +690,14 @@ public abstract class AbstractTargetPagePersistence implements
 							// If there is only one hash matched match in
 							// multiple exact matches, target TUV state should
 							// be exact match instead of not_localized for
-							// multiple translation.
+							// multiple translation.     
+                            //GBS-4360: Part of ICE matches can't be locked in offline file
                             if (hashMatchedNum == 1
-                            		&& isHashValueMatched(sourceTuv, segment))
+                                    && isHashValueMatched(sourceTuv, segment)
+                                    && !segment.getMatchType().equals(
+                                            MatchState.MULTIPLE_TRANSLATION.getName()))
                             {
-                            	targetTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
+                                targetTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
                             }
                             break;
                         }
@@ -714,10 +717,13 @@ public abstract class AbstractTargetPagePersistence implements
                                 segment.setSegment(segment2);
                                 targetTuv = modifyTUV(targetTuv, segment);
                                 tuvGotChanged = true;
-								if (hashMatchedNum == 1
-										&& isHashValueMatched(sourceTuv, segment))
+                              //GBS-4360: Part of ICE matches can't be locked in offline file
+                                if (hashMatchedNum == 1
+                                        && isHashValueMatched(sourceTuv, segment)
+                                        && !segment.getMatchType().equals(
+                                                MatchState.MULTIPLE_TRANSLATION.getName()))
                                 {
-                                	targetTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
+                                    targetTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
                                 }
                                 break;
                             }

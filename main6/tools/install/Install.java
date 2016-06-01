@@ -44,6 +44,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
 
 import util.Action;
 import util.FileUtil;
@@ -54,6 +55,8 @@ import util.Page;
 
 public class Install extends installer.EventBroadcaster
 {
+    static Logger logger = Logger.getLogger(Install.class.getName());
+
     private static final String SERVICE_NAME = "\"GlobalSight Service\"";
 
     private static final String BACKSLASH = "\\";
@@ -251,8 +254,7 @@ public class Install extends installer.EventBroadcaster
             }
             catch (Exception e)
             {
-                System.err.println("Problem running installer.");
-                e.printStackTrace();
+                logger.error("Problem running installer.", e);
             }
         }
     };
@@ -298,9 +300,9 @@ public class Install extends installer.EventBroadcaster
                 }
                 catch (IOException e)
                 {
-                    System.out.println(RESOURCE
+                    logger.error(RESOURCE
                             .getString("error_settings_path")
-                            + file.getAbsolutePath());
+                            + file.getAbsolutePath(), e);
                 }
             }
 
@@ -327,8 +329,7 @@ public class Install extends installer.EventBroadcaster
         }
         catch (Exception e)
         {
-            System.err.println("Problem running installer.");
-            e.printStackTrace();
+            logger.error("Problem running installer.", e);
         }
     }
 
@@ -554,7 +555,7 @@ public class Install extends installer.EventBroadcaster
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            logger.error(e);
         }
     }
 
@@ -683,7 +684,7 @@ public class Install extends installer.EventBroadcaster
 				} 
                 catch (IOException e) 
                 {
-					e.printStackTrace();
+                    logger.error(e);
 				}
             	
             	return false;
@@ -993,16 +994,15 @@ public class Install extends installer.EventBroadcaster
                     // Previously saved values do not exist, so the
                     // default values remain.
                     lastSettingsFileLoaded = false;
-                    System.out
-                            .println("Using default (first time) installation values.");
+                    logger.error("Using default (first time) installation values.", exception2);
                 }
             }
 
         }
         catch (IOException e)
         {
-            System.out.println("Error reading Install values "
-                    + DEFAULT_INSTALL_VALUES_PROPERTIES_FILE);
+            logger.error("Error reading Install values "
+                    + DEFAULT_INSTALL_VALUES_PROPERTIES_FILE, e);
             throw e;
         }
 
@@ -1043,8 +1043,8 @@ public class Install extends installer.EventBroadcaster
         }
         catch (IOException e)
         {
-            System.out.println("Error reading Install order "
-                    + INSTALL_ORDER_PROPERTIES_FILE);
+            logger.error("Error reading Install order "
+                    + INSTALL_ORDER_PROPERTIES_FILE, e);
             throw e;
         }
     }
@@ -1062,7 +1062,7 @@ public class Install extends installer.EventBroadcaster
         }
         catch (IOException e)
         {
-            System.out.println("Error reading Install display strings " + dir);
+            logger.error("Error reading Install display strings " + dir, e);
             throw e;
         }
     }
@@ -1080,8 +1080,8 @@ public class Install extends installer.EventBroadcaster
         }
         catch (IOException e)
         {
-            System.out.println("Error reading Install display strings "
-                    + installDisplayProperties);
+            logger.error("Error reading Install display strings "
+                    + installDisplayProperties, e);
             throw e;
         }
     }
@@ -1112,6 +1112,7 @@ public class Install extends installer.EventBroadcaster
 
         if (exception != null)
         {
+            logger.error(exception);
             throw exception;
         }
     }
@@ -1145,7 +1146,7 @@ public class Install extends installer.EventBroadcaster
         }
         catch (IOException e)
         {
-            System.out.println("Error saving your settings " + p_fileName);
+            logger.error("Error saving your settings " + p_fileName, e);
             throw e;
         }
     }
@@ -1627,7 +1628,7 @@ public class Install extends installer.EventBroadcaster
         }
         catch (IOException e)
         {
-            System.out.println("Error processing file.");
+            logger.error("Error processing file.", e);
             throw e;
         }
 
@@ -1878,7 +1879,7 @@ public class Install extends installer.EventBroadcaster
         }
         catch (IOException e)
         {
-            System.out.println("Error executing system command.");
+            logger.error("Error executing system command.",e);
             throw e;
         }
     }
@@ -2001,6 +2002,7 @@ public class Install extends installer.EventBroadcaster
             }
             catch (UnknownHostException e)
             {
+                logger.error(e);
             }
         }
         // String proxyServer = getInstallValue("proxy_server_name");
@@ -2151,7 +2153,7 @@ public class Install extends installer.EventBroadcaster
         }
         catch (IOException ioe)
         {
-            ioe.printStackTrace();
+            logger.error(ioe);
         }
     }
 
@@ -2224,7 +2226,7 @@ public class Install extends installer.EventBroadcaster
         }
         catch (NoSuchAlgorithmException e)
         {
-            System.err.println("Can not find the MD5 ALGORITHM.");
+            logger.error("Can not find the MD5 ALGORITHM.", e);
             return null;
         }
     }

@@ -63,6 +63,7 @@ import com.globalsight.everest.tuv.PageSegmentsException;
 import com.globalsight.everest.tuv.SegmentPair;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvState;
+import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
@@ -628,13 +629,12 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             state = m_matchTypeStats.getLingManagerMatchType(srcTuv.getId(),
                     "0");
         }
-//        boolean isTopLeverageMatchFromMT = isTopLeverageMatchFromMT(fmList);
 
         List isProtectedChangeable = new ArrayList();
 //        long tuId = srcTuv.getTuId();
         // First, determine which gxml to use as the target and the
         // score indicator.
-        if (state == LeverageMatchLingManager.EXACT && !isMtTranslated(trgTuv))
+        if (state == LeverageMatchLingManager.EXACT)
         {
             // NOTE: The check above determines whether the parent is
             // an exact match type that has been leveraged on import
@@ -1679,27 +1679,6 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         }
     }
 
-    private boolean isTopLeverageMatchFromMT(ArrayList p_fuzzyList)
-    {
-        if (p_fuzzyList == null || p_fuzzyList.size() == 0)
-        {
-            return false;
-        }
-
-        LeverageMatch levMatch = (LeverageMatch) p_fuzzyList.get(0);
-        if (levMatch == null)
-        {
-            return false;
-        }
-
-        if (levMatch.getCreationUser() != null
-                && levMatch.getCreationUser().toLowerCase().endsWith("_mt"))
-        {
-            return true;
-        }
-
-        return false;
-    }
 
     /**
      * Determines lock protection based on the state of the download edit all
@@ -2034,24 +2013,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         if (result != null)
         {
             // make the order according to the score number
-            SortUtil.sort(result, new Comparator<LeverageMatch>()
-            {
-                public int compare(LeverageMatch l1, LeverageMatch l2)
-                {
-                    if (l1 != null && l2 != null)
-                    {
-                        if (l1.getScoreNum() > l2.getScoreNum())
-                        {
-                            return -1;
-                        }
-                        else
-                        {
-                            return 1;
-                        }
-                    }
-                    return 0;
-                }
-            });
+            SortUtil.sort(result, new LeverageMatchComparator());
         }
 
         return result;
@@ -2178,5 +2140,44 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     {
         String modifyUser = tuv.getLastModifiedUser();
         return (modifyUser != null && modifyUser.toLowerCase().endsWith("_mt"));
+    }
+    
+    private class LeverageMatchComparator extends StringComparator
+    {
+        private static final long serialVersionUID = -729929686418029804L;
+
+        public LeverageMatchComparator()
+        {
+            super(Locale.ENGLISH);
+        }
+
+        public int compare(Object p_A, Object p_B)
+        {
+            LeverageMatch a = (LeverageMatch) p_A;
+            LeverageMatch b = (LeverageMatch) p_B;
+
+            int result = 0;
+            // "MACHINE_TRANSLATION" matches have top priority.
+            String mtMatch1 = a.getMatchType();
+            String mtMatch2 = b.getMatchType();
+            if (mtMatch1 == null || !MatchState.MACHINE_TRANSLATION.getName().equals(mtMatch1))
+            {
+                mtMatch1 = "";
+            }
+            if (mtMatch2 == null || !MatchState.MACHINE_TRANSLATION.getName().equals(mtMatch2))
+            {
+                mtMatch2 = "";
+            }
+            result = super.compareStrings(mtMatch1, mtMatch2);
+            if (result != 0)
+            {
+                return -result;
+            }
+
+            // compare score
+            result = (int) (b.getScoreNum() - a.getScoreNum());
+            return result;
+
+        }
     }
 }

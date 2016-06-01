@@ -445,6 +445,11 @@ public class LeverageDataCenter
         {
             jobTuvState = LeverageMatchType.UNVERIFIED_EXACT_MATCH_NAME;
         }
+        // GBS-4360: Part of ICE matches can't be locked in offline file
+        else if (p_matchState.equals(MatchState.MULTIPLE_TRANSLATION.getName()))
+        {
+            jobTuvState = p_matchState;
+        }
 
         return jobTuvState;
     }

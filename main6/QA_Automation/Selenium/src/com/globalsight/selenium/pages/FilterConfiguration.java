@@ -3,7 +3,7 @@ package com.globalsight.selenium.pages;
 public class FilterConfiguration implements BasePage
 {
 
-    // Filter Configuration for test selenium
+    // Filter Configuration for test selenium aaa
     public static final String CHECK_ALL_CHECKBOX = "//input[@type='checkbox']";
     public static final String EXPAND_ALL_BUTTON = "//input[@id='expandAllFilters']";
     public static final String COLLAPSE_ALL_BUTTON = "collapseAllFilters";

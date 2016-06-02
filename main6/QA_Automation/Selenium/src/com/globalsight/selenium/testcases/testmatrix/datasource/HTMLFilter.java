@@ -127,7 +127,7 @@ public class HTMLFilter extends BaseTestCase {
 
 		
 		//Create Filter
-		for (int i = 1; i < testCases.size(); i++) {
+		for (int i = 2; i < testCases.size(); i++) {
 			File_Profile_name = testCases.get(i)[1];
 			Filter_Name = testCases.get(i)[2];
 			Option = testCases.get(i)[3];
@@ -148,61 +148,61 @@ public class HTMLFilter extends BaseTestCase {
 			White_Preserving_Tags = testCases.get(i)[18];
 			Source_File = testCases.get(i)[19];
 			
-//
-//			selenium.click(MainFrame.DATA_SOURCES_MENU);
-//			selenium.click(MainFrame.FILTER_CONFIGURATION_SUBMENU);
-//			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-//			
-//			if (Option.equalsIgnoreCase("RTL_YES") || Option.equalsIgnoreCase("RTL_NO"))
-//			{
-//				
-//			}
-//			else if (Option.equalsIgnoreCase("All_options"))
-//			{
-//				iFilterConfig.HTMLfilterOperation(selenium, Filter_Name, Base_Text_Filter_Internal_Text, Base_Text_Filter_Escaping, Convert_HTML_Entity_For_Export, 
-//						Ignore_Invalid_HTML_Tags, Add_rtl_directionality,
-//						Whitespace_Handling, Localize_Function, Base_Text_post_filter, Embeddable_Tags, Internal_Tag,
-//						Paired_Tags, Switch_Tag_Map, Translatable_Attribute, Unpaired_Tags, White_Preserving_Tags);
-//			} else if(!(Option.isEmpty()))
-//			{
-//				iFilterConfig.HTMLfilterOperation(selenium, Filter_Name, Option, White_Preserving_Tags);
-//			}
-//			
-//			
-//			// create File Profile
-////	        SeleniumUtils.
-//	        openMenuItemAndWait(selenium, MainFrame.DATA_SOURCES_MENU,
-//	                MainFrame.FILE_PROFILES_SUBMENU);
-//
-//	        ArrayList<String> array = new ArrayList<String>();
-//	        array.add(File_Profile_name);
-//	        array.add("Description: html filter test");
-//	        array.add(getProperty(testMatrixFile,"HTMLFitler.localizationProfiles"));
-//	        array.add("HTML");
-//	        array.add(Filter_Name);
-//	        array.add("x");
-//	        array.add("htm;html");
-//	        
-//
-//	        fileProfileFuncs.setup(array);
-//	        fileProfileFuncs.create(selenium);
-//	        
-//            jobNames[i] = i + "_" + Filter_Name + "_" + filterJob;
-            jobNames[i] = i + "_" + Filter_Name + "_" + "201604-20-093739";
 
-//            if (Option.equalsIgnoreCase("RTL_YES") || Option.equalsIgnoreCase("RTL_NO"))
-//			{
-//            	tmp.createJob(jobNames[i], Source_File, 
-//    					File_Profile_name, getProperty(testMatrixFile,"HTMLRTL.targetLocalesForAR"));
-//			}
-//			else 
-//			{
-//				tmp.createJob(jobNames[i], Source_File, 
+			selenium.click(MainFrame.DATA_SOURCES_MENU);
+			selenium.click(MainFrame.FILTER_CONFIGURATION_SUBMENU);
+			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+			
+			if (Option.equalsIgnoreCase("RTL_YES") || Option.equalsIgnoreCase("RTL_NO"))
+			{
+				iFilterConfig.HTMLfilterOperation(selenium, Filter_Name, Option, White_Preserving_Tags);
+			}
+			else if (Option.equalsIgnoreCase("All_options"))
+			{
+				iFilterConfig.HTMLfilterOperation(selenium, Filter_Name, Base_Text_Filter_Internal_Text, Base_Text_Filter_Escaping, Convert_HTML_Entity_For_Export, 
+						Ignore_Invalid_HTML_Tags, Add_rtl_directionality,
+						Whitespace_Handling, Localize_Function, Base_Text_post_filter, Embeddable_Tags, Internal_Tag,
+						Paired_Tags, Switch_Tag_Map, Translatable_Attribute, Unpaired_Tags, White_Preserving_Tags);
+			} else if(!(Option.isEmpty()))
+			{
+				iFilterConfig.HTMLfilterOperation(selenium, Filter_Name, Option, White_Preserving_Tags);
+			}
+			
+			
+			// create File Profile
+//	        SeleniumUtils.
+	        openMenuItemAndWait(selenium, MainFrame.DATA_SOURCES_MENU,
+	                MainFrame.FILE_PROFILES_SUBMENU);
+
+	        ArrayList<String> array = new ArrayList<String>();
+	        array.add(File_Profile_name);
+	        array.add("Description: html filter test");
+	        array.add(getProperty(testMatrixFile,"HTMLFitler.localizationProfiles"));
+	        array.add("HTML");
+	        array.add(Filter_Name);
+	        array.add("x");
+	        array.add("htm;html");
+	        
+
+	        fileProfileFuncs.setup(array);
+	        fileProfileFuncs.create(selenium);
+	        
+            jobNames[i] = i + "_" + Filter_Name + "_" + filterJob;
+//            jobNames[i] = i + "_" + Filter_Name + "_" + "201604-20-093739";
+
+            if (Option.equalsIgnoreCase("RTL_YES") || Option.equalsIgnoreCase("RTL_NO"))
+			{
+            	tmp.createJob(jobNames[i], Source_File, 
+    					File_Profile_name, getProperty(testMatrixFile,"HTMLRTL.targetLocalesForAR"));
+			}
+			else 
+			{
+				tmp.createJob(jobNames[i], Source_File, 
+					File_Profile_name, getProperty(testMatrixFile,"HTMLtargetLocales"));
+//			tmp.createJob(filterJob + i, getProperty(testMatrixFile,"HTMLSourceFile"),
 //					File_Profile_name, getProperty(testMatrixFile,"HTMLtargetLocales"));
-////			tmp.createJob(filterJob + i, getProperty(testMatrixFile,"HTMLSourceFile"),
-////					File_Profile_name, getProperty(testMatrixFile,"HTMLtargetLocales"));
-//			}
-//			Thread.sleep(1000);
+			}
+			Thread.sleep(1000);
 			
 
 		}

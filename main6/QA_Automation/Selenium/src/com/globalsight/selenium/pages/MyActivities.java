@@ -16,6 +16,7 @@ public class MyActivities implements BasePage
     public static final String SEARCH_ACTIVITY_NAME_TEXT = "af";
     public static final String SEARCH_STATUS_SELECT = "sto";
     public static final String SEARCH_COMPANY_SELECT = "comanyo";
+    public static final String SEARCH_ACTIVITY_JOB_NAME_TEXT = "id=jobNameFilter";
 
     public static final String SEARCH_JOB_CONDITION_BEGIN_WITH = "begins with";
     public static final String SEARCH_JOB_CONDITION_END_WITH = "ends with";
@@ -41,7 +42,10 @@ public class MyActivities implements BasePage
     public static final String CANCEL_OK_DOWNLOAD_BUTTON = "idCancelOkDownload";
     
     public static final String MYACTIVITIES_LIST_TARGET_LOCALE_FILTER_SELECT = "id=targetLocaleFilter";
-
+    public static final String MYACTIVITIES_ALL_CHECKBOX = "id=selectAllCbx";
+    public static final String MYACTIVITIES_DOWNLOAD_COMBINED_BUTTON = "id=downloadCombinedBtn";
+    public static final String MYACTIVITIES_OFFLINE_DOWNLOAD_BUTTON = "id=downloadBtn";
+   
 
     // MyActivities Available
     public static final String CHECK_ALL_LINK = "link=Check All";

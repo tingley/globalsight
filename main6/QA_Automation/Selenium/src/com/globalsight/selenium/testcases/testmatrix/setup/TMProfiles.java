@@ -308,7 +308,7 @@ public class TMProfiles extends BaseTestCase {
 					      MainFrame.FILTER_CONFIGURATION_SUBMENU);
 			
 			iFilterConfig.XMLfilterOperation(selenium, getProperty(testMatrixFile,"TMP.XML_Filter_Name"), XML_Rule,
-					"x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x",
+					"x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x",
 					getProperty(testMatrixFile,"TMP.XML_InternalTag"),"x","x","x");
 	    	}
 	    	

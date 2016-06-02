@@ -325,6 +325,71 @@ public class LocalizationFuncs extends BasicFuncs
     	
         
     }
+    public void create(Selenium selenium, String l10nName, String tmProfile, String projects,
+    		String priority, String sourceLocal, String usingTranslationMemory, 
+    		boolean isAutoDispatch,	String targetLocalCodes, String workflowName, String mtName
+            ) throws Exception
+    {
+    	String[] itargetLocalCodes = targetLocalCodes.split(",");
+        String[] iWFName = workflowName.split(",");
+        
+    	try {
+    		selenium.type(LocalizationElements.LOCALIZATION_PROFILE_SEARCH_CONTENT_TEXT, l10nName);
+        	selenium.keyDown(LocalizationElements.LOCALIZATION_PROFILE_SEARCH_CONTENT_TEXT, "\\13");
+        	selenium.keyUp(LocalizationElements.LOCALIZATION_PROFILE_SEARCH_CONTENT_TEXT, "\\13");
+//        	selenium.waitForFrameToLoad("css=table.listborder", "1000");
+
+        	if (!(selenium.isElementPresent("link=" + l10nName))){
+        		
+	            clickAndWait(selenium, LocalizationElements.MAIN_NEW_BUTTON);
+	            
+	            // input info
+	            selenium.type(LocalizationElements.NEW_NAME_TEXT, l10nName);
+	            selenium.select(LocalizationElements.NEW_TMP_SELECT, "label=" + tmProfile);
+	            selenium.select(LocalizationElements.NEW_PROJECT_SELECT, "label=" + projects);
+	            selenium.select(LocalizationElements.NEW_SOURCE_LOCALE_SELECT, "lable=" + sourceLocal);
+	            		
+	            // Default selection is Automatic Dispatch
+	            if (isAutoDispatch)
+	            {
+	                selenium.select(LocalizationElements.WF_Dispatch,
+	                        "label=Automatic");
+	            }
+	            else
+	            {
+	                selenium.select(LocalizationElements.WF_Dispatch,
+	                        "label=Manual");
+	            }
+	    		
+	        for (int i = 0; i < itargetLocalCodes.length; i++)
+	        {
+	        	
+		            selenium.select("id="+itargetLocalCodes[i], "label="+iWFName[i].trim());	
+		            if (!(mtName.isEmpty()))
+		            	selenium.select("document.LocalizationPccrofiles.TargetLocaleId_" + targetLocalCodes + "[1]", mtName);
+
+		            
+	        }  
+		            
+		  
+		            clickAndWait(selenium, LocalizationElements.ATTACH_SAVE_BUTTON);
+	        	
+		        	selenium.type(LocalizationElements.LOCALIZATION_PROFILE_SEARCH_CONTENT_TEXT, l10nName);
+		        	selenium.keyDown(LocalizationElements.LOCALIZATION_PROFILE_SEARCH_CONTENT_TEXT, "\\13");
+		        	selenium.keyUp(LocalizationElements.LOCALIZATION_PROFILE_SEARCH_CONTENT_TEXT, "\\13");
+		        	if (selenium.isElementPresent("link=" + l10nName))
+		        		Reporter.log("The L10nProfile was created successfully.");
+	        	
+	        	
+	        }
+    	}
+    	catch (Exception e)
+        {
+            Reporter.log(e.toString());
+        }
+    	
+        
+    }
     
 	// added by ShenYang 2011-06-25
 

@@ -34,9 +34,9 @@ public class PermissionGroups {
 	public static final String MY_ACTIVITIES_VIEW_EXPAND = "//div[@id='Activities (View)295']/a/img";
 	
 //	public static final String DATA_SOURCE_EXPAND = "//div[@id='Data Sources162']/a/img";
-	public static final String DATA_SOURCE_EXPAND = "//div[@id='Data Sources154']/a/img";
+	public static final String DATA_SOURCE_EXPAND = "//div[@id='Data Sources138']/a/img";
 //	public static final String DATA_SOURCE_FILTER_CONFIGURATION_EXPAND =  "//div[@id='Filter Configuration(View)168']/a/img";
-	public static final String DATA_SOURCE_FILTER_CONFIGURATION_EXPAND =  "//div[@id='Filter Configuration(View)160']/a/img";
+	public static final String DATA_SOURCE_FILTER_CONFIGURATION_EXPAND =  "//div[@id='Filter Configuration(View)144']/a/img";
 
 	
 	public static final String EXPORT_DOWNLOAD_CHECKBOX = "id=perm.activities.export.download";

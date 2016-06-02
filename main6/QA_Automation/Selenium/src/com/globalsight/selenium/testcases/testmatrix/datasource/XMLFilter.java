@@ -153,8 +153,8 @@ public class XMLFilter extends BaseTestCase {
 
 		BasicFuncs basic = new BasicFuncs();
 		//Create Filter
-//		for (int i = 1; i < testCases.size(); i++) {
-		for (int i = 5; i < 10; i++) {
+		for (int i = 1; i < testCases.size(); i++) {
+//		for (int i = 33; i < 43; i++) {
 			File_Profile_name = testCases.get(i)[1];
 			Filter_Name = testCases.get(i)[2];
 			Option = testCases.get(i)[3];
@@ -302,14 +302,24 @@ public class XMLFilter extends BaseTestCase {
         		jobNames[i][0] = i + "_" + Filter_Name + "_" + filterJob;
             	jobNames[i][1] = i + "_" + Filter_Name + "_Empty_Filter"+ "_" + filterJob;
         		jobNames[i][2] = i + "_" + Filter_Name + "_Filter_2_"+ "_" + filterJob;
-        	} else if (Filter_Name.substring(0, 22).equalsIgnoreCase("Import_Export_Entities")){
-        		jobNames[i] = new String[1];
-        		jobNames[i][0] = i + "_" + Filter_Name + "_" + filterJob;
-        	}  	else {
+        	} else if (Filter_Name.length()>=22)
+        	{
+        		if (Filter_Name.substring(0, 22).equalsIgnoreCase("Import_Export_Entities")){
+            		jobNames[i] = new String[1];
+            		jobNames[i][0] = i + "_" + Filter_Name + "_" + filterJob;
+            	}  	else {
+            		jobNames[i] = new String[2];
+            		jobNames[i][0] = i + "_" + Filter_Name + "_" + filterJob;
+                	jobNames[i][1] = i + "_" + Filter_Name + "_Empty_Filter"+ "_" + filterJob;
+            	} 
+        	}
+        	else 
+        	{
         		jobNames[i] = new String[2];
         		jobNames[i][0] = i + "_" + Filter_Name + "_" + filterJob;
             	jobNames[i][1] = i + "_" + Filter_Name + "_Empty_Filter"+ "_" + filterJob;
-        	}
+        	} 
+        	
 	        
 //	        jobNames[i] = "XML_" + Filter_Name + "_" + filterJob + i;
         	if ((!(Source_File.isEmpty())) && (!(Source_File.equalsIgnoreCase("x")))){
@@ -364,7 +374,7 @@ public class XMLFilter extends BaseTestCase {
 						
 						
 					}
-					Thread.sleep(1000);	
+					Thread.sleep(3000);	
 					}
 					
         	}
@@ -375,8 +385,8 @@ public class XMLFilter extends BaseTestCase {
 
 		
 		
-//		for (int i =1; i < testCases.size(); i++) {
-		for (int i =5; i < 10; i++) {
+		for (int i =1; i < testCases.size(); i++) {
+//		for (int i =33; i < 43; i++) {
 						for (int j=0; j<jobNames[i].length; j++){
 							export.exportWorkflow(jobNames[i][j], getProperty(testMatrixFile,"XMLtargetLocales"));
 						}

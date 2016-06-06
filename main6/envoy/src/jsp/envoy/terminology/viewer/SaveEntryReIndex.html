@@ -29,15 +29,15 @@ LABEL {
 <script type="text/javascript">
 function fnOnClick(type)
 {
-	window.returnValue=type;
+	window.opener.SaveEntryDialog(type);
 	window.close();
 }
 
 function doLoad()
 {
-  var str = window.dialogArguments;
-  document.getElementById("idMsg").innerHTML = str;
-  document.getElementById("idYes").focus();
+	var str=window.opener.saveEntryParams;
+    document.getElementById("idMsg").innerHTML = str;
+    document.getElementById("idYes").focus();
 }
 </script>
 </head>

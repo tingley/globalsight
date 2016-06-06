@@ -29,7 +29,8 @@ LABEL {
 }
 </style>
 <SCRIPT language="Javascript">
-var g_langlocs;
+var o=window.opener;
+var g_langlocs = o.getLangLocsNotInEntry();
 
 function initLangLocs()
 {
@@ -66,11 +67,7 @@ function doClose(ok)
     }
 
     langloc.setTerm(term);
-    window.returnValue = langloc;
-  }
-  else
-  {
-    window.returnValue = null;
+    o.addTermLanguage(langloc);
   }
 
   window.close();
@@ -92,8 +89,6 @@ function doKeypress()
 
 function doLoad()
 {
-  g_langlocs = window.dialogArguments;
-
   initLangLocs();
 }
 </script>

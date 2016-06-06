@@ -78,6 +78,18 @@ TD
 <SCRIPT src="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT src="/globalsight/envoy/terminology/management/objects_js.jsp"></SCRIPT>
 <SCRIPT>
+
+function   centerWindow()   
+{
+    var xMax = screen.width;
+    var yMax = screen.height;
+    
+    window.moveTo(xMax/2 - 300, yMax/2 - 100 - 80);
+}
+  
+centerWindow();  
+
+var o=window.opener;
 var g_isModify = false;
 var g_definedFields;
 var g_currentField;
@@ -106,11 +118,15 @@ function doClose(ok)
       return;
     }
 
-    window.returnValue = new Field(name, type, format, system, values);
-  }
-  else
-  {
-    window.returnValue = null;
+    var f = new Field(name, type, format, system, values);
+    if (o.isNew)
+   	{
+   	    o.newFieldDialog(f);
+   	}
+    else
+    {
+    	o.modifyFieldDialog(f);
+    }	
   }
 
   window.close();
@@ -248,7 +264,7 @@ function doLoad()
   initTypes();
   idSystem.disabled = true;
 
-  var arg = window.dialogArguments;
+  var arg = o.fieldParams;
   g_definedFields = arg.fields;
   g_currentField = arg.field;
 

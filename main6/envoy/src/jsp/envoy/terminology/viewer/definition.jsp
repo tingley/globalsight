@@ -1,5 +1,5 @@
 <%@ page
-    contentType="text/xml; charset=UTF-8"
+    contentType="text/plain; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
     import="java.util.*,com.globalsight.everest.webapp.webnavigation.LinkHelper,
         com.globalsight.everest.servlet.util.SessionManager,
@@ -15,7 +15,7 @@
 
 ResourceBundle bundle = PageHandler.getBundle(session);
 
-String xml;
+String json;
 try
 {
     ITermbase termbase = (ITermbase)session.getAttribute(
@@ -28,14 +28,14 @@ try
       termbase = (ITermbase)sessionMgr.getAttribute(WebAppConstants.TERMBASE);
     }
 
-    xml = termbase.getDefinition();
+    json = termbase.getDefinitionJson();
 }
 catch (TermbaseException ex)
 {
     // TODO: error handling
-    xml = "";
+    json = "";
 }
 
 PrintWriter writer = response.getWriter();
-writer.write(xml);
+writer.write(json);
 %>

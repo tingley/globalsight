@@ -5,10 +5,10 @@ function drag(o,s)
     
     var flag = false ; 
     o.orig_index = o.style.zIndex; 
-    o.style.cursor = "move";   
+    o.style.cursor = "w-resize";   
     
     function down(a){
-        this.style.cursor = "move";  
+        this.style.cursor = "w-resize";  
         this.style.zIndex = 10000;  
 
         if(!a)a=window.event;

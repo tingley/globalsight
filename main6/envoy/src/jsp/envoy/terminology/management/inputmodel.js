@@ -93,16 +93,21 @@ function haveObject(p_objects, p_object)
     return false;
 }
 
+var isNew = true;
+var objectParams = null;
 function newObject(p_system)
 {
-    var args = new UserObject(g_objectType,
+	isNew = true;
+	objectParams = new UserObject(g_objectType,
         (p_system ? "*" : userId), "", "", false);
 
-    var o = window.showModalDialog(g_editorUrl, args,
-        "dialogHeight:500px; dialogWidth:600px; center:yes; " +
-        "resizable:no; status:no;");
+    window.open(g_editorUrl, 
+    		"New", "height=500, width=600, toolbar =no, menubar=no, location=no, status=no");       
+}
 
-    if (o != null && o.value)
+function newObjectDialog(o)
+{
+	if (o != null && o.value)
     {
        createInputModel(o.type, o.username, o.name, o.value);
     }
@@ -178,8 +183,11 @@ function modifyInputModel(id, type, user, name, value) {
    });
 }
 
+var modelId = null;
 function loadToModifyInputModel(id) {
 
+	modelId = id;
+	isNew = false;
     dojo.xhrPost(
     {
        url:ControllerURL,
@@ -203,18 +211,12 @@ function loadToModifyInputModel(id) {
                    showError(error);
                }
                else {
-                  var args = new UserObject(
+            	   objectParams = new UserObject(
                     returnData.type, returnData.userName, returnData.name, 
                     returnData.value, returnData.isDefault);
 
-                  var o = window.showModalDialog(g_editorUrl, args,
-                      "dialogHeight:500px; dialogWidth:600px; center:yes; " +
-                      "resizable:no; status:no;");
-       
-                  if (o != null && o.value)
-                  {
-                      modifyInputModel(id, o.type, o.username, o.name, o.value);
-                  }
+                  window.open(g_editorUrl,
+                		  "Modify", "height=500, width=600, toolbar =no, menubar=no, location=no, status=no");       
                }
            }
        },
@@ -222,6 +224,14 @@ function loadToModifyInputModel(id) {
        {
        }
    });
+}
+
+function modifyObjectDialog(o)
+{
+	if (o != null && o.value)
+    {
+        modifyInputModel(modelId, o.type, o.username, o.name, o.value);
+    }
 }
 
 function modifyObject()
@@ -385,18 +395,12 @@ function unsetDefaultObject() {
 
 function showError(error)
 {
-    window.showModalDialog("/globalsight/envoy/terminology/management/error.jsp",
-        error,
-        "center:yes; help:no; resizable:yes; status:no; " +
-        "dialogWidth: 450px; dialogHeight: 300px; ");
+	alert(message);
 }
 
 // This should be turned into a MsgBox-style window with different
 // icons for warnings, informational messages, errors etc.
 function showWarning(message)
 {
-    window.showModalDialog("/globalsight/envoy/terminology/management/warning.jsp",
-        message,
-        "center:yes; help:no; resizable:yes; status:no; " +
-        "dialogWidth: 450px; dialogHeight: 300px; ");
+	alert(message);
 }

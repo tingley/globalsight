@@ -113,7 +113,7 @@ if (tbMatches != null && tbMatches.size() > 0){
             term_segments.append("] = { data: \"");
             term_segments.append(EditUtil.toJavascript(hit.getTerm()));
             term_segments.append("\", text: \"");
-            term_segments.append(sourceHit.getTerm() + "<br><div class='targetTerm' cid='" + l_conceptId +"' tid='"+ l_termId+"'><b>&nbsp;&nbsp;" + str_target + "</b>&nbsp;&nbsp;"+ EditUtil.toJavascript(termImgLink ) +"<div>");
+            term_segments.append(EditUtil.toJavascript(sourceHit.getTerm()) + "<br><div class='targetTerm' cid='" + l_conceptId +"' tid='"+ l_termId+"'><b>&nbsp;&nbsp;" + EditUtil.toJavascript(str_target) + "</b>&nbsp;&nbsp;"+ EditUtil.toJavascript(termImgLink ) +"<div>");
             term_segments.append("\", label: \"");
             term_segments.append("");
             

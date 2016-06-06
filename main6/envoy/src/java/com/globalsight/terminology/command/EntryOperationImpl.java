@@ -367,6 +367,9 @@ public class EntryOperationImpl implements EntryOperation
         try
         {
             TbConcept tConcept = HibernateUtil.get(TbConcept.class, p_entryId);
+            if (tConcept == null)
+                return "";
+            
             result.append("<conceptGrp>");
             String conceptXml = ConceptHelper.fixConceptXml(tConcept.getXml(),
                     p_entryId);
@@ -628,7 +631,7 @@ public class EntryOperationImpl implements EntryOperation
                         + p_session.getUserDisplayName());
             }
 
-            result = myLock.asXML();
+            result = myLock.asJson();
         }
 
         return result;
@@ -703,7 +706,7 @@ public class EntryOperationImpl implements EntryOperation
         EntryUtils.pruneEntry(entry);
         result = Validator.validate(entry, m_definition, tb_id);
 
-        return result.asXML();
+        return result.asJson();
     }
 
     /**

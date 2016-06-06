@@ -307,8 +307,8 @@ function InitSource(objLanguages)
         for (i = 0; i < objLanguages.length; i++)
         {
             var lang = objLanguages[i];
-            var strLanguage = $(lang).find('name').text();
-            var strLocale   = $(lang).find('locale').text();
+            var strLanguage = lang.name;
+            var strLocale   = lang.locale;
             
             SourceAddLanguage(strLanguage, strLocale, i == 0 ? true : false);
         }
@@ -324,8 +324,8 @@ function InitTarget(objLanguages)
         for (i = 0; i < objLanguages.length; i++)
         {
             var lang = objLanguages[i];
-            var strLanguage = $(lang).find('name').text();
-            var strLocale   = $(lang).find('locale').text();
+            var strLanguage = lang.name;
+            var strLocale   = lang.locale;
             TargetAddLanguage(strLanguage, strLocale, i == 1 ? true : false);
         }
     }
@@ -337,23 +337,9 @@ function InitLanguages()
     {
         try
         {
-            
-            // For natural languages only: "//language[hasterms='true']"
-            //var objLanguages = objDefinition.selectNodes('//language');
-            var objLanguages = $(objDefinition).find("language");
-            var langs = new Array();
-            
-            if(!document.all){
-                langs = objLanguages;
-            }
-            else {
-                for (i = 0; i < objLanguages.length; i++)
-                {
-                    langs.push(objLanguages[i]);
-                }
-            }
-            InitSource(langs);
-            InitTarget(langs);
+            var objLanguages = objDefinition.languages;
+            InitSource(objLanguages);
+            InitTarget(objLanguages);
         }
         catch (ex)
         {
@@ -425,7 +411,8 @@ function SetEntryFeedback(message)
 
 function SetDefinition()
 {
-    objDefinition = loadXML('/globalsight/envoy/terminology/viewer/definition.jsp');
+	objDefinition=$.ajax({url:"/globalsight/envoy/terminology/viewer/definition.jsp",async:false, cache:false}).responseText;
+	objDefinition = eval("(" + objDefinition + ")");
 
     if (bInitialized){
         InitLanguages(); 
@@ -451,12 +438,12 @@ function ClearEntry(feedback)
     SetEntryFeedback(feedback);
 }
 
-function SetEntry(obj)
+function SetEntry(obj,objJson)
 {
     try
     {
         idBody.style.cursor = 'auto'; 
-        objEntry = obj;
+        objEntry = objJson;
 
         g_loading = false;
 
@@ -478,7 +465,7 @@ function SetEntry(obj)
         {
             try
             {
-                var strHTML = XmlToHtml(objEntry, new MappingContext(
+                var strHTML = XmlToHtml(objJson, new MappingContext(
                     g_termbaseFields, aFieldTypes, "viewer"));
 
                 ConceptId = nCid;
@@ -543,10 +530,7 @@ function SetHitlist(obj, changePage, direction)
         {
             try
             {
-                //var hits = objHitlist.selectNodes('//hit');
-            	var hits = $(objHitlist).find('hit');
-
-                if (hits.length == 0)
+                if (objHitlist.hits.length == 0)
                 {
                     if(changePage) {
                         if(direction == 0) {
@@ -566,12 +550,8 @@ function SetHitlist(obj, changePage, direction)
                 {
                     var strHTML;
                     var locale = getSourceLocale();
-                       
-                    //strHTML = objHitlist.transformNode(objHitlistStylesheet);
-                    //var sss = (new XMLSerializer()).serializeToString(objHitlist);
-                    var xlsFile = "/globalsight/envoy/terminology/viewer/hitlist.xsl";
 
-                    strHTML = getHtml(objHitlist,xlsFile);
+                    strHTML = getHtml(objHitlist, "hitlistTemplate");
 
                     InitHitlist(strHTML);
                 }
@@ -679,6 +659,18 @@ function searchHitList(source, target, query, type, direction)
        handleAs: "text",
        load:function(data)
        {
+    	   g_searching = false;
+    	   if(data=="(isLast)") {
+    	       alert("The page is last page!")
+    	       idBody.style.cursor = 'auto';
+    	       return;
+    	   }
+    	   else if(data=="(isFirst)") {
+    	       alert("The page is first page!")
+    	       idBody.style.cursor = 'auto';
+    	       return;
+    	   }
+    	   
            var returnData = eval(data);
 
            if (returnData.error)
@@ -687,21 +679,8 @@ function searchHitList(source, target, query, type, direction)
            }
            else
            {
-        	   if(returnData.hitlist=="isLast") {
-        	       alert("The page is last page!")
-        	       idBody.style.cursor = 'auto';
-        	       g_searching = false;
-        	   }
-        	   else if(returnData.hitlist =="isFirst") {
-        	       alert("The page is first page!")
-        	       idBody.style.cursor = 'auto';
-        	       g_searching = false;
-        	   }
-        	   else {
-        	       var rData = StrToXML(returnData.hitlist);
-        	       SetHitlist(rData);
-        	       idBody.style.cursor = 'auto';
-        	   }
+        	   SetHitlist(returnData);
+    	       idBody.style.cursor = 'auto';
            }
        },
        error:function(error)
@@ -748,7 +727,7 @@ function searchEntry(source, target, CONCEPTID, TERMID)
            else
            {
         	   var rData = StrToXML(returnData.entry);
-        	   SetEntry(rData);
+        	   SetEntry(rData, returnData.json);
            }
        },
        error:function(error)
@@ -850,6 +829,7 @@ function sendRequest(xml)
     return xmlhttp.responseXML;
 }
 
+var statisticsData = null;
 function ShowStatistics()
 {
     idBody.style.cursor = 'wait';
@@ -864,24 +844,15 @@ function ShowStatistics()
 
            if (returnData.error)
            {
-        	     alert(returnData.error);
+        	   TermbaseError("lock entry failed", false);
            }
            else
            {
-        	     var result = returnData.result;
-        	     if (result == 'error')
-               {
-                   TermbaseError("lock entry failed", false);
-               }
-               else {
-        	         window.showModalDialog('/globalsight/envoy/terminology/viewer/Statistics.html', 
-        	         StrToXML(result),
-                   'menubar:no;location:no;resizable:yes;center:yes;toolbar:no;' +
-                   'status:no;dialogHeight:400px;dialogWidth:400px;');
-               }
-               
-               idBody.style.cursor = 'auto';
-        	 }
+        	   statisticsData = returnData;
+		       window.open('/globalsight/envoy/terminology/viewer/Statistics.html', 
+		    		   "Info", "height=400, width=400, toolbar =no, menubar=no, location=no, status=no");
+                 idBody.style.cursor = 'auto';
+           }
        },
        error:function(error)
        {
@@ -939,6 +910,7 @@ function DeleteEntry()
         return;
     }
 
+    RemoveEntry(g_conceptId, nTid);
     StopEditingForDelete();
 
     editorDeleteEntry(g_conceptId);
@@ -988,13 +960,14 @@ function editorDeleteEntry(p_conceptId)
 
 function ViewSaveEntry(conceptId, xml, lock, isReIndex)
 {
+	
     idBody.style.cursor = 'wait';
     
     dojo.xhrPost(
     {
        url:ControllerURL,
        handleAs: "text",
-       content: {action:"updateEntry",conceptId:conceptId, entryXML:xml, lock:lock, isReIndex:isReIndex},
+       content: {action:"updateEntry",conceptId:conceptId, entryXML:xml, lock:JSON.stringify(lock), isReIndex:isReIndex},
        load:function(data)
        {
            var returnData = eval(data);
@@ -1025,8 +998,10 @@ function ViewSaveEntry(conceptId, xml, lock, isReIndex)
    });
 }
 
+var saveEntryParams = null;
 function SaveEntry(confirmStr)
 {
+	saveEntryParams = confirmStr;
 	var langs = getLanguageNamesInEntry();
     if (langs.length == 0)
     {
@@ -1034,14 +1009,15 @@ function SaveEntry(confirmStr)
             "Please add at least one term.");
         return;
     }
-    
-    //idSaving.style.display = '';
-	
-    var res = window.showModalDialog(
-    		  "/globalsight/envoy/terminology/viewer/SaveEntryReIndex.html", confirmStr,
-    		  "dialogWidth:410px; dialogHeight:200px; center:yes; resizable:no; status:no; help:no;"); 
-    
-    if("yes" == res)
+ 	
+    window.open(
+    		  "/globalsight/envoy/terminology/viewer/SaveEntryReIndex.html", 
+    		  "Save Entry Re-Index", "height=200, width=410, toolbar =no, menubar=no, location=no, status=no");
+}
+
+function SaveEntryDialog(res)
+{
+	if("yes" == res)
     {
     	SaveEntry2(true);
     }
@@ -1087,7 +1063,7 @@ function SaveEntry2(isReIndex)
         }
         else
         {
-            ViewSaveEntry(g_conceptId, xml, g_lock.xml, isReIndex);
+            ViewSaveEntry(g_conceptId, xml, g_lock, isReIndex);
         }
 
         g_dirty = false;
@@ -1178,23 +1154,16 @@ function ValidateEntry()
            }
            else
            {
-        	   var result = returnData.result;
+        	   var result = returnData;
         	     
         	   if (result == 'error')
                {
                    TermbaseError("valadate entry failed", false);
                }
                
-               VlalidateParams = new ValidationParameters(StrToXML(result));
-               /*
-               g_validationWindow = window.showModalDialog(
-                  '/globalsight/envoy/terminology/viewer/Validation.html',
-                  params, "dialogHeight:400px; dialogWidth:600px; center:yes; " +
-                  "resizable:yes; status:no;");
-                  */
-                               
+               VlalidateParams = new ValidationParameters(result);
                window.open ("/globalsight/envoy/terminology/viewer/Validation.html", 
-               "newwindow", "height=400, width=600, toolbar =no, menubar=no, location=no, status=no");
+               "Validation", "height=400, width=600, toolbar =no, menubar=no, location=no, status=no");
                idBody.style.cursor = 'auto';
            }
        },
@@ -1408,58 +1377,9 @@ function execute(){
     idQuery.focus();  
 }
 
-function getHtml(xmlDoc, xsltFile){
-    var text;
-    var isFirefox = window.navigator.userAgent.indexOf("Firefox")>0;
-    var isChrome = window.navigator.userAgent.indexOf("Chrome")>0;
-    if(typeof(window.ActiveXObject) != 'undefined'){
-        //IE
-        try{
-            var xslDoc = loadXML(xsltFile);
-            text = xmlDoc.transformNode(xslDoc);
-        }catch(e){
-            alert(e.name + ": " + e.message);          
-        }
-        
-    }else if(isFirefox){  
-        try {
-            var oParser = new DOMParser();       
-            var xslDoc = document.implementation.createDocument("", "", null);
-            xslDoc.async = false;  
-            xslDoc.load(xsltFile);
-
-            // define XSLTProcessor object
-            var xsltProcessor = new XSLTProcessor();
-            xsltProcessor.importStylesheet(xslDoc);  
-
-            var result = xsltProcessor.transformToDocument(xmlDoc);
-            var xmls = new XMLSerializer();
-            text = xmls.serializeToString(result);
-            text = text.replace('<?xml version="1.0" encoding="UTF-8"?>','');
-        }
-        catch(e)  {
-           if (isDebug) alert(e.name + ": " + e.message);
-           alert("Unable to do xml/xsl processing");           
-        }
-    }else if(isChrome){  
-	    try {
-	    	var xslDoc = loadXML(xsltFile);
-	        // define XSLTProcessor object
-	        var xsltProcessor = new XSLTProcessor();
-	        xsltProcessor.importStylesheet(xslDoc);  
-	
-	        var result = xsltProcessor.transformToDocument(xmlDoc);
-	        var xmls = new XMLSerializer();
-	        text = xmls.serializeToString(result);
-	        text = text.replace('<?xml version="1.0" encoding="UTF-8"?>','');
-	    }
-	    catch(e)  {
-	       if (isDebug) alert(e.name + ": " + e.message);
-	       alert("Unable to do xml/xsl processing");           
-	    }
-	} 
-    
-    return text;
+function getHtml(data, templateId){
+	var endTemplate = $("#"+templateId).html();
+	return Mustache.render(endTemplate, data); 
 }
 
 function TransHtml(xmlDoc) {

@@ -19,7 +19,8 @@
   //-->  
 </SCRIPT>
 <SCRIPT>
-var g_args;
+var o=window.opener;
+var g_args=o.approveParams;
 
 function init()
 {
@@ -46,12 +47,7 @@ function doClose(ok)
     }
 
     g_args.setStatus(state);
-
-    window.returnValue = g_args;
-  }
-  else
-  {
-    window.returnValue = null;
+    o.approveDialog(g_args);
   }
 
   window.close();
@@ -73,8 +69,6 @@ function doKeypress()
 
 function doLoad()
 {
-  g_args = window.dialogArguments;
-
   init();
 }
 </script>
@@ -130,7 +124,7 @@ function doLoad()
 <BR>
 
 <DIV ALIGN="CENTER">
-<INPUT id="idOk" TYPE=BUTTON VALUE=" Ok " TABINDEX="3" onclick="doClose(true);">
+<INPUT id="idOk" TYPE=BUTTON VALUE=" OK " TABINDEX="3" onclick="doClose(true);">
 <INPUT TYPE=BUTTON VALUE="Cancel" TABINDEX="4" onclick="doClose(false);">
 </DIV>
 

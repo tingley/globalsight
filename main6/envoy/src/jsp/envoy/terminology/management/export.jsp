@@ -393,14 +393,14 @@ function SetFilterConditions(filters)
   }
 }
 
+var advancedFilterParamets = null;
 function advancedFilters()
 {
-  var arg = new FilterParameters(g_advancedFilter);
+	advancedFilterParamets = new FilterParameters(g_advancedFilter);
 
-  var temp = window.showModalDialog(
-    "/globalsight/envoy/terminology/management/exportFilter.jsp", arg,
-    "dialogHeight:400px; dialogWidth:500px; " +
-    "center:yes; resizable:no; status:no; help:no;");
+  window.open(
+    "/globalsight/envoy/terminology/management/exportFilter.jsp", 
+    "Exort Filter", "height=400, width=500, toolbar =no, menubar=no, location=no, status=no");       
 
   // return value set with SetFilterConditions()
 }

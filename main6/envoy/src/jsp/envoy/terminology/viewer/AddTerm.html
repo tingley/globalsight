@@ -20,7 +20,8 @@
   //-->  
 </SCRIPT>
 <SCRIPT language="Javascript">
-var g_langlocs;
+var o=window.opener;
+var g_langlocs = o.addTermParams;
 
 function initLangLocs()
 {
@@ -64,11 +65,7 @@ function doClose(ok)
     }
 
     langloc.setTerm(term);
-    window.returnValue = langloc;
-  }
-  else
-  {
-    window.returnValue = null;
+    o.addTermInDialog(langloc);
   }
 
   window.close();
@@ -102,8 +99,6 @@ function doKeypress(e)
 
 function doLoad()
 {
-  g_langlocs = window.dialogArguments;
-
   initLangLocs();
 
   dojo.byId("idTerm").focus();
@@ -140,7 +135,7 @@ function doLoad()
 <BR>
 
 <DIV ALIGN="CENTER">
-<INPUT id="idOk" TYPE=BUTTON VALUE=" Ok " TABINDEX="3" onclick="doClose(true);">
+<INPUT id="idOk" TYPE=BUTTON VALUE=" OK " TABINDEX="3" onclick="doClose(true);">
 <INPUT TYPE=BUTTON VALUE="Cancel" TABINDEX="4" onclick="doClose(false);">
 </DIV>
 

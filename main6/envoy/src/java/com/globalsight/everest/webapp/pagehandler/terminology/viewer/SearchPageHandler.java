@@ -28,6 +28,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
+import com.globalsight.cxe.util.XmlUtil;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
@@ -39,6 +40,8 @@ import com.globalsight.terminology.IUserdataManager;
 import com.globalsight.terminology.indexer.IIndexManager;
 import com.globalsight.util.SessionInfo;
 import com.globalsight.util.edit.EditUtil;
+
+import net.sf.json.JSONObject;
 
 public class SearchPageHandler extends PageActionHandler
 {
@@ -138,8 +141,9 @@ public class SearchPageHandler extends PageActionHandler
         }
         finally
         {
-            returnValue.put("hitlist", hitlist);
-            out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
+            JSONObject ob = new JSONObject();
+            ob.put("hitlist", hitlist);
+            out.write(("(" + hitlist + ")").getBytes("UTF-8"));
             out.close();
             pageReturn();
         }
@@ -166,11 +170,8 @@ public class SearchPageHandler extends PageActionHandler
         
         String conceptId = (String)request.getParameter(
                 WebAppConstants.TERMBASE_CONCEPTID);
-        String termId = (String)request.getParameter(
-                WebAppConstants.TERMBASE_TERMID);
         
         String result = "";
-        Map<String, String> returnValue = new HashMap<String, String>();
         ServletOutputStream out = response.getOutputStream();
 
         // fix for the sort order for the entries, related to GBS-1693
@@ -180,14 +181,20 @@ public class SearchPageHandler extends PageActionHandler
         termbase.setSession(sessionInfo);
         try {
             result = termbase.getEntryForBrowser(Long.parseLong(conceptId));
+            if (result == null || result.equals(""))
+            {
+                result = "<root><nodeName>noresult</nodeName></root>";
+            }
         }
         catch(Exception e) {
-            result = "<noresult></noresult>";
+            result = "<root><nodeName>noresult</nodeName></root>";
         }
         finally
         {
-            returnValue.put("entry", result);
-            out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
+            JSONObject ob = new JSONObject();
+            ob.put("entry", result);
+            ob.put("json", XmlUtil.xml2Json(result));
+            out.write(("(" + ob.toString() + ")").getBytes("UTF-8"));
             out.close();
             pageReturn();
         }
@@ -298,7 +305,6 @@ public class SearchPageHandler extends PageActionHandler
             HttpServletResponse response, Object form) throws Exception
     {
         String result = "";
-        Map<String, String> returnValue = new HashMap<String, String>();
         ServletOutputStream out = response.getOutputStream();
         
         try
@@ -311,12 +317,13 @@ public class SearchPageHandler extends PageActionHandler
         }
         catch (Exception e)
         {
-            result = "error";
+            JSONObject ob = new JSONObject();
+            ob.put("error", "valadate entry failed");
+            result = ob.toString();
         }
         finally
         {
-            returnValue.put("result", result);
-            out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
+            out.write(("(" + result + ")").getBytes("UTF-8"));
             out.close();
             pageReturn();
         }
@@ -364,7 +371,6 @@ public class SearchPageHandler extends PageActionHandler
         String result = "";
         long conceptId = Long.parseLong(request.getParameter("conceptId"));
         boolean steal = Boolean.parseBoolean(request.getParameter("steal"));
-        Map<String, String> returnValue = new HashMap<String, String>();
         ServletOutputStream out = response.getOutputStream();
         
         try
@@ -385,8 +391,7 @@ public class SearchPageHandler extends PageActionHandler
         }
         finally
         {
-            returnValue.put("result", result);
-            out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
+            out.write(("(" + result + ")").getBytes("UTF-8"));
             out.close();
             pageReturn();
         }
@@ -428,7 +433,6 @@ public class SearchPageHandler extends PageActionHandler
             HttpServletResponse response, Object form) throws Exception
     {
         String result = "";
-        Map<String, String> returnValue = new HashMap<String, String>();
         ServletOutputStream out = response.getOutputStream();
         
         try
@@ -440,12 +444,13 @@ public class SearchPageHandler extends PageActionHandler
         }
         catch (Exception e)
         {
-            result = "error";
+            JSONObject ob = new JSONObject();
+            ob.put("error", "error");
+            result = ob.toString();
         }
         finally
         {
-            returnValue.put("result", result);
-            out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
+            out.write(("(" + result + ")").getBytes("UTF-8"));
             out.close();
             pageReturn();
         }

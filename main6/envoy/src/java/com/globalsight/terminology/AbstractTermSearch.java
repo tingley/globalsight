@@ -59,4 +59,21 @@ public abstract class AbstractTermSearch implements TermSearch
             return result.getXml();
         }
     }
+    
+    @Override
+    public String getJSONResults(String srcLan, String trgLan, String p_query,
+            int maxHits, int begin) throws TermbaseException
+    {
+        Hitlist result = getHitListResults(srcLan, trgLan, p_query,
+                maxHits, begin);
+        
+        if (flag != null && !flag.equals(""))
+        {
+            return flag;
+        }
+        else
+        {
+            return result.getJson().toString();
+        }
+    }
 }

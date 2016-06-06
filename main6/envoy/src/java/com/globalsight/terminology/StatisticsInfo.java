@@ -17,10 +17,10 @@
 
 package com.globalsight.terminology;
 
-import com.globalsight.terminology.TermbaseException;
-import com.globalsight.terminology.TermbaseExceptionMessages;
-
 import java.util.ArrayList;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 /**
  * A data class holding termbase statistics: number of languages,
@@ -277,5 +277,30 @@ public class StatisticsInfo
         result.append("</statistics>");
 
         return result.toString();
+    }
+    
+    public String asJson()
+    {
+        JSONObject ob = new JSONObject();
+        ob.put("termbase", m_termbase);
+        ob.put("concepts", m_concepts);
+        ob.put("terms", m_terms);
+        ob.put("indexstatus", m_indexStatus);
+        ob.put("fulltextcount", m_fulltextCount);
+        
+        JSONArray indexes = new JSONArray();
+        
+        for (int i = 0; i < m_languageInfo.size(); ++i)
+        {
+            LanguageInfo linfo = (LanguageInfo)m_languageInfo.get(i);
+            JSONObject index = new JSONObject();
+            index.put("language", linfo.getLanguage());
+            index.put("terms", linfo.getTerms());
+            index.put("fuzzycount", linfo.getFuzzyIndexedCount());
+            index.put("fulltextcount", linfo.getFulltextIndexedCount());
+            indexes.add(index);
+        }
+        ob.put("indexes", indexes);
+        return ob.toString();
     }
 }

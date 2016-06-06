@@ -72,6 +72,9 @@ public interface ITermbase
      */
     String getDefinition()
         throws TermbaseException, RemoteException;
+    
+    String getDefinitionJson()
+            throws TermbaseException, RemoteException;
 
     /**
      * Given a language name, returns that language's locale as string.

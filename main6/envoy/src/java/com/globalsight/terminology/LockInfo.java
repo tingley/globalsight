@@ -24,6 +24,8 @@ import com.globalsight.terminology.util.XmlParser;
 
 import com.globalsight.util.edit.EditUtil;
 
+import net.sf.json.JSONObject;
+
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -240,6 +242,19 @@ public class LockInfo
         result.append("</lock>");
 
         return result.toString();
+    }
+    
+    public String asJson()
+    {
+        JSONObject ob = new JSONObject();
+        ob.put("termbase", m_termbase);
+        ob.put("conceptid", m_conceptId);
+        ob.put("who", m_user);
+        ob.put("email", m_email);
+        ob.put("cookie", m_cookie);
+        ob.put("when", UTC.valueOf(m_date));
+
+        return ob.toString();
     }
 
     public boolean equals(Object p_other)

@@ -129,4 +129,20 @@ public class TermLeveragingSearch extends AbstractTermSearch
 
         return null;
     }
+
+    @Override
+    public String getJSONResults(String srcLan, String trgLan, String p_query,
+            int maxHits, int begin) throws TermbaseException
+    {
+        if (flag != null && !flag.equals(""))
+        {
+            return flag;
+        }
+        else
+        {
+            Hitlist result = getHitListResults(srcLan, trgLan, p_query,
+                    maxHits, begin);
+            return result.getJson().toString();
+        }
+    }
 }

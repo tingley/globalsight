@@ -17,6 +17,7 @@
 
 package com.globalsight.terminology;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 import com.globalsight.exporter.IExportManager;
@@ -101,6 +102,14 @@ public class ITermbaseImpl implements ITermbase,TermbaseExceptionMessages
         throws TermbaseException
     {
         return m_termbase.getDefinition();
+    }
+    
+    @Override
+    public String getDefinitionJson() throws TermbaseException, RemoteException
+    {
+        // TODO Auto-generated method stub
+        return m_termbase.getDefinitionJson()
+                ;
     }
 
     /**

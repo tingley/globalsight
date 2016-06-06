@@ -46,6 +46,7 @@ public class TPWordCountComparator extends StringComparator
     public static final int NO_USE_IN_CONTEXT   = 12;
     public static final int TOTAL_EXACT        = 13;
     public static final int DEFAULT_CONTEXT_EXACT = 14;
+    public static final int TM_TOTAL              = 15;
     
     public TPWordCountComparator(Locale p_locale)
     {
@@ -249,6 +250,17 @@ public class TPWordCountComparator extends StringComparator
                 rv = -1;
             break;
 
+        case TM_TOTAL:    
+            aInt = aCounts.getMtTotalWordCount();
+            bInt = bCounts.getMtTotalWordCount();
+            if (aInt > bInt)
+                rv = 1;
+            else if (aInt == bInt)
+                rv = 0;
+            else
+                rv = -1;
+            break;
+            
         case TOTAL_FUZZY:
             aInt = (aCounts.getLowFuzzyWordCount() + 
                         aCounts.getMedFuzzyWordCount() + 

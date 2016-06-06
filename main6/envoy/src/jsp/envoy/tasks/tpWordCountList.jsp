@@ -50,6 +50,7 @@
         jobName = title + ": " + wf.getJob().getJobName();
     }
     
+    boolean flag = WordCountHandler.isMatchineTranslation(tp);
     String detailedStatistics = bundle.getString("lb_detailed_statistics");
     String summaryStatistics = bundle.getString("lb_summary_statistics");
     String leverageMatchThreshold = bundle.getString("lb_leverage_match_threshold") + 
@@ -194,12 +195,36 @@ $(document).ready(function(){
       <amb:column label="lb_85" width="60px" sortBy="<%=TPWordCountComparator.BAND2%>"><%=targetPage.getWordCount().getMedHiFuzzyWordCount()%></amb:column>
       <amb:column label="lb_75" width="60px" sortBy="<%=TPWordCountComparator.BAND3%>"><%=targetPage.getWordCount().getMedFuzzyWordCount()%></amb:column>
       <amb:column label="lb_50" width="60px" sortBy="<%=TPWordCountComparator.BAND4%>"><%=targetPage.getWordCount().getLowFuzzyWordCount()%></amb:column>
-      <amb:column label="lb_no_match" width="60px" sortBy="<%=TPWordCountComparator.NO_MATCH%>"><%=targetPage.getWordCount().getNoMatchWordCount()%></amb:column>
-      <amb:column label="lb_repetition_word_cnt" width="70px" sortBy="<%=TPWordCountComparator.REPETITIONS%>"><%=targetPage.getWordCount().getRepetitionWordCount()%></amb:column>
+      <amb:column label="lb_no_match" width="60px" sortBy="<%=TPWordCountComparator.NO_MATCH%>">
+      <%
+          int lowFuzzyWordCount = targetPage.getWordCount().getThresholdLowFuzzyWordCount();
+          int noMatchWordCount = targetPage.getWordCount().getThresholdNoMatchWordCount();
+          int mtFuzzyNoMatchWordCount = targetPage.getWordCount().getMtFuzzyNoMatchWordCount();
+          int noMatchWorcCountForDisplay = lowFuzzyWordCount + noMatchWordCount;
+          if(flag)
+          {
+              noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+          }
+          out.print(noMatchWorcCountForDisplay);
+      %>
+      </amb:column>
+      <amb:column label="lb_repetition_word_cnt" width="70px" sortBy="<%=TPWordCountComparator.REPETITIONS%>">
+      <%   
+      int repetitionsWordCount = targetPage.getWordCount().getRepetitionWordCount();
+      int mtRepetitionsWordCount = targetPage.getWordCount().getMtRepetitionsWordCount();
+      if(flag)
+      {    
+          repetitionsWordCount -= mtRepetitionsWordCount;
+      }
+      out.print(repetitionsWordCount);
+      %>
+      </amb:column>
       <% if(isInContextMatch) { %>
 	    <amb:column label="lb_in_context_tm" width="100px" sortBy="<%=TPWordCountComparator.IN_CONTEXT%>"><%=targetPage.getWordCount().getInContextWordCount()%></amb:column>
 	  <% } %>
-
+	  <%if(flag){%>
+      <amb:column label="lb_tm_mt" width="70px" sortBy="<%=TPWordCountComparator.TM_TOTAL%>"><%=targetPage.getWordCount().getMtTotalWordCount()%></amb:column>
+      <% }%>
 	 <% if (n++ == targetPages.size()) { %>
 	  <tr><td colspan="100" style="height:1px; background:#0C1476"></td></tr>
 	  <tr>
@@ -267,6 +292,17 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
       dataClass="com.globalsight.everest.page.TargetPage" pageUrl="self"
       emptyTableMsg="">
       <%
+      int lowFuzzyWordCount = wf.getThresholdLowFuzzyWordCount();
+      int noMatchWordCount = wf.getThresholdNoMatchWordCount();
+      int repetitionsWordCount = wf.getRepetitionWordCount();
+      int mtFuzzyNoMatchWordCount = wf.getMtFuzzyNoMatchWordCount();
+      int mtRepetitionsWordCount = wf.getMtRepetitionsWordCount();
+      int noMatchWorcCountForDisplay = lowFuzzyWordCount + noMatchWordCount;
+      if(flag)
+      {
+          noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+          repetitionsWordCount -= mtRepetitionsWordCount;
+      }
           int totalFuzzy = 0;
             if (isDell)
             {
@@ -337,12 +373,14 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
       <% if (lmt < 75) { %>
         <amb:column label="lb_74_and_below" width="60px" sortBy="<%=TPWordCountComparator.BAND4%>"><%=targetPage.getWordCount().getThresholdLowFuzzyWordCount()%></amb:column>
       <% } %>
-      <amb:column label="lb_no_match" width="60px" sortBy="<%=TPWordCountComparator.NO_MATCH%>"><%=targetPage.getWordCount().getThresholdNoMatchWordCount()%></amb:column>
-      <amb:column label="lb_repetition_word_cnt" width="70px" sortBy="<%=TPWordCountComparator.REPETITIONS%>"><%=targetPage.getWordCount().getRepetitionWordCount()%></amb:column>
+      <amb:column label="lb_no_match" width="60px" sortBy="<%=TPWordCountComparator.NO_MATCH%>"><%=noMatchWorcCountForDisplay%></amb:column>
+      <amb:column label="lb_repetition_word_cnt" width="70px" sortBy="<%=TPWordCountComparator.REPETITIONS%>"><%=repetitionsWordCount%></amb:column>
       <% if (isInContextMatch) { %>
         <amb:column label="lb_in_context_tm" width="100px" sortBy="<%=TPWordCountComparator.IN_CONTEXT%>"><%=targetPage.getWordCount().getInContextWordCount()%></amb:column>
       <% } %>
-
+	  <%if(flag){%>
+      <amb:column label="lb_tm_mt" width="70px" sortBy="<%=TPWordCountComparator.TM_TOTAL%>"><%=targetPage.getWordCount().getMtTotalWordCount()%></amb:column>
+      <% }%>
       <%
           if (m++ == targetPages.size()) {
       %>

@@ -2681,7 +2681,16 @@ public class Ambassador extends AbstractWebService
                 tmp = ServerProxy.getProjectHandler()
                         .getL10nProfile(l10nprofile)
                         .getTranslationMemoryProfile();
-
+                
+                int lowFuzzyWordCount = w.getThresholdLowFuzzyWordCount();
+                int noMatchWordCount = w.getThresholdNoMatchWordCount();
+                int repetitionsWordCount = w.getRepetitionWordCount();
+                int mtFuzzyNoMatchWordCount = w.getMtFuzzyNoMatchWordCount();
+                int mtRepetitionsWordCount = w.getMtRepetitionsWordCount();
+                int noMatchWorcCountForDisplay = lowFuzzyWordCount + noMatchWordCount;
+                noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+                repetitionsWordCount -= mtRepetitionsWordCount;
+                
                 xml.append("\t\t\t<isInContextMatch>")
                         .append(tmp.getIsContextMatchLeveraging())
                         .append("</isInContextMatch>\r\n");
@@ -2709,9 +2718,9 @@ public class Ambassador extends AbstractWebService
                         .append(w.getHiFuzzyMatchWordCount())
                         .append("</hiFuzzyMatch>\r\n");
                 xml.append("\t\t\t\t<repetitionMatch>")
-                        .append(w.getRepetitionWordCount())
+                        .append(repetitionsWordCount)
                         .append("</repetitionMatch>\r\n");
-                xml.append("\t\t\t\t<noMatch>").append(w.getNoMatchWordCount())
+                xml.append("\t\t\t\t<noMatch>").append(noMatchWorcCountForDisplay)
                         .append("</noMatch>\r\n");
                 xml.append("\t\t\t\t<noExactMatch>")
                         .append(w.getTotalExactMatchWordCount())
@@ -2719,6 +2728,9 @@ public class Ambassador extends AbstractWebService
                 xml.append("\t\t\t\t<inContextMatch>")
                         .append(w.getInContextMatchWordCount())
                         .append("</inContextMatch>\r\n");
+                xml.append("\t\t\t\t<MT>")
+                        .append(w.getMtTotalWordCount())
+                        .append("</MT>\r\n");
                 xml.append("\t\t\t</targetWordCount>\r\n");
                 xml.append("\t\t</workflow>\r\n");
             }
@@ -15720,6 +15732,16 @@ public class Ambassador extends AbstractWebService
             {
 
             }
+            
+            int lowFuzzyWordCount = wf.getThresholdLowFuzzyWordCount();
+            int noMatchWordCount = wf.getThresholdNoMatchWordCount();
+            int repetitionsWordCount = wf.getRepetitionWordCount();
+            int mtFuzzyNoMatchWordCount = wf.getMtFuzzyNoMatchWordCount();
+            int mtRepetitionsWordCount = wf.getMtRepetitionsWordCount();
+            int noMatchWorcCountForDisplay = lowFuzzyWordCount + noMatchWordCount;
+            noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+            repetitionsWordCount -= mtRepetitionsWordCount;
+            
             xml.append("\t\t<leverageOption>").append(leverageOption)
                     .append("</leverageOption>\r\n");
             // 100%
@@ -15747,11 +15769,10 @@ public class Ambassador extends AbstractWebService
                     .append("</75%-84%>\r\n");
             // noMatch (50%-74%)
             xml.append("\t\t<noMatch>")
-                    .append(wf.getThresholdNoMatchWordCount()
-                            + wf.getThresholdLowFuzzyWordCount())
+                    .append(noMatchWorcCountForDisplay)
                     .append("</noMatch>\r\n");
             // Repetitions
-            xml.append("\t\t<repetitions>").append(wf.getRepetitionWordCount())
+            xml.append("\t\t<repetitions>").append(repetitionsWordCount)
                     .append("</repetitions>\r\n");
             // In Context Matches
             if (isInContextMatch)
@@ -15760,6 +15781,9 @@ public class Ambassador extends AbstractWebService
                         .append(wf.getInContextMatchWordCount())
                         .append("</InContextMatches>\r\n");
             }
+            //MT
+            xml.append("\t\t<MT>").append(wf.getMtTotalWordCount())
+            .append("</MT>\r\n");
             // total
             xml.append("\t\t<total>").append(wf.getTotalWordCount())
                     .append("</total>\r\n");

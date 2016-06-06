@@ -19,6 +19,7 @@ package com.globalsight.everest.webapp.pagehandler.tasks;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
@@ -34,6 +35,8 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -46,6 +49,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 
 /**
@@ -299,5 +303,25 @@ public class WordCountHandler extends PageHandler
 
         p_request.setAttribute(SystemConfigParamNames.IS_DELL,
             new Boolean(isSpecialCustomer));
+    }
+    
+    /**
+     * check workflow whether its type is MatchineTranslation.
+     */
+    public static boolean isMatchineTranslation(TargetPage tp)
+    {
+        SourcePage c = tp.getSourcePage();
+        long sourcePageId = c.getId();
+        boolean flag = false;
+        String sql = "select ORIGINAL_SOURCE_TUV_ID from LEVERAGE_MATCH_" + tp.getCompanyId()
+                + "  where MATCH_TYPE = 'MACHINE_TRANSLATION' and SOURCE_PAGE_ID = :sourcePageId";
+        HashMap<String, Long> map = new HashMap<String, Long>();
+        map.put("sourcePageId", sourcePageId);
+        List result = HibernateUtil.searchWithSql(sql, map);
+        if (result != null && result.size() > 0)
+        {
+            flag = true;
+        }
+        return flag;
     }
 }

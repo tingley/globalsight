@@ -726,6 +726,7 @@
 <script type="text/javascript" src="/globalsight/includes/utilityScripts.js"></script>
 <SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/downloadOpt.js"></SCRIPT>
 <SCRIPT>
+var tmEditTypeParamter = <%=TMEditType%>;
 var taskId = <%=task_id%>;
 var needWarning = false;
 var objectName = "";

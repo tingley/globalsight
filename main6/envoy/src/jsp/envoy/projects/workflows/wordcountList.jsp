@@ -155,7 +155,10 @@ var helpFile = "<%=bundle.getString("help_job_wordcounts")%>";
            int noMatchWordCount = wf.getThresholdNoMatchWordCount();
            int mtFuzzyNoMatchWordCount = wf.getMtFuzzyNoMatchWordCount();
            int noMatchWorcCountForDisplay = lowFuzzyWordCount + noMatchWordCount;
-           noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+           if(WordCountHandler.isMatchineTranslation(wf))
+           {
+               noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+           }
            out.print(noMatchWorcCountForDisplay);
         %>
         </amb:column>
@@ -164,7 +167,10 @@ var helpFile = "<%=bundle.getString("help_job_wordcounts")%>";
         <%
            int mtRepetitionsWordCount = wf.getMtRepetitionsWordCount();
            int repetitionsWordCount = wf.getRepetitionWordCount();
-           repetitionsWordCount -= mtRepetitionsWordCount;
+           if(WordCountHandler.isMatchineTranslation(wf))
+           {
+               repetitionsWordCount -= mtRepetitionsWordCount;
+           }
            out.print(repetitionsWordCount);
         %>     
         </amb:column>

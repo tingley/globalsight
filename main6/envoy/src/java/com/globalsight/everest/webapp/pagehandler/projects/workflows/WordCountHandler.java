@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
@@ -34,7 +33,6 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -44,7 +42,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 
 /**
@@ -168,8 +165,8 @@ public class WordCountHandler extends PageHandler
         p_sessionMgr.setAttribute(WebAppConstants.IS_USE_IN_CONTEXT, isUseInContext);
         p_sessionMgr.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, exactMatchOnly);
         p_sessionMgr.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch);
-		String wfids = (String) p_request
-				.getParameter(JobManagementHandler.WF_ID);
+        String wfids = (String) p_request
+                .getParameter(JobManagementHandler.WF_ID);
 
         Hashtable hash = new Hashtable();
         StringTokenizer st = new StringTokenizer(wfids, " ");
@@ -249,26 +246,6 @@ public class WordCountHandler extends PageHandler
 
         p_request.setAttribute(SystemConfigParamNames.IS_DELL,
             new Boolean(isSpecialCustomer));
-    }
-    
-    /**
-     * check workflow whether its type is MatchineTranslation.
-     */
-    public static boolean isMatchineTranslation(Workflow wf)
-    {
-        List<SourcePage> c = (List<SourcePage>) wf.getJob().getSourcePages();
-        long sourcePageId = c.get(0).getId();
-        boolean flag = false;
-        String sql = "select ORIGINAL_SOURCE_TUV_ID from LEVERAGE_MATCH_" + wf.getCompanyId()
-                + "  where MATCH_TYPE = 'MACHINE_TRANSLATION' and SOURCE_PAGE_ID = :sourcePageId";
-        HashMap<String, Long> map = new HashMap<String, Long>();
-        map.put("sourcePageId", sourcePageId);
-        List result = HibernateUtil.searchWithSql(sql, map);
-        if (result != null && result.size() > 0)
-        {
-            flag = true;
-        }
-        return flag;
     }
 }
 

@@ -2682,13 +2682,11 @@ public class Ambassador extends AbstractWebService
                         .getL10nProfile(l10nprofile)
                         .getTranslationMemoryProfile();
                 
-                int lowFuzzyWordCount = w.getThresholdLowFuzzyWordCount();
-                int noMatchWordCount = w.getThresholdNoMatchWordCount();
+                int noMatchWordCount = w.getNoMatchWordCount();
                 int repetitionsWordCount = w.getRepetitionWordCount();
                 int mtFuzzyNoMatchWordCount = w.getMtFuzzyNoMatchWordCount();
                 int mtRepetitionsWordCount = w.getMtRepetitionsWordCount();
-                int noMatchWorcCountForDisplay = lowFuzzyWordCount + noMatchWordCount;
-                noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+                noMatchWordCount -= mtFuzzyNoMatchWordCount;
                 repetitionsWordCount -= mtRepetitionsWordCount;
                 
                 xml.append("\t\t\t<isInContextMatch>")
@@ -2720,7 +2718,7 @@ public class Ambassador extends AbstractWebService
                 xml.append("\t\t\t\t<repetitionMatch>")
                         .append(repetitionsWordCount)
                         .append("</repetitionMatch>\r\n");
-                xml.append("\t\t\t\t<noMatch>").append(noMatchWorcCountForDisplay)
+                xml.append("\t\t\t\t<noMatch>").append(noMatchWordCount)
                         .append("</noMatch>\r\n");
                 xml.append("\t\t\t\t<noExactMatch>")
                         .append(w.getTotalExactMatchWordCount())

@@ -47,7 +47,10 @@
     {
         tp = (TargetPage)targetPages.get(0);
         wf = tp.getWorkflowInstance();
-        flag = (wf.getTotalWordCount()>0);
+        if(wf.getTotalWordCount()>0)
+        {
+           flag = true;
+        }
         lmt = wf.getJob().getLeverageMatchThreshold();
         jobName = title + ": " + wf.getJob().getJobName();
     }
@@ -365,7 +368,7 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
       <% if (lmt < 75) { %>
         <amb:column label="lb_74_and_below" width="60px" sortBy="<%=TPWordCountComparator.BAND4%>"><%=targetPage.getWordCount().getThresholdLowFuzzyWordCount()%></amb:column>
       <% } %>
-      <amb:column label="lb_no_match" width="60px" sortBy="<%=TPWordCountComparator.NO_MATCH%>"><%=noMatchWorcCountForDisplay%>></amb:column>
+      <amb:column label="lb_no_match" width="60px" sortBy="<%=TPWordCountComparator.NO_MATCH%>"><%=noMatchWorcCountForDisplay%></amb:column>
       <amb:column label="lb_repetition_word_cnt" width="70px" sortBy="<%=TPWordCountComparator.REPETITIONS%>"><%=repetitionsWordCount%></amb:column>
       <% if (isInContextMatch) { %>
         <amb:column label="lb_in_context_tm" width="100px" sortBy="<%=TPWordCountComparator.IN_CONTEXT%>"><%=targetPage.getWordCount().getInContextWordCount()%></amb:column>

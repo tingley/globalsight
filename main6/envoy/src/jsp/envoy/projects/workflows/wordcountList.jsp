@@ -180,7 +180,7 @@ var helpFile = "<%=bundle.getString("help_job_wordcounts")%>";
 	            <%=wf.getInContextMatchWordCount()%>
 	        </amb:column>
         <%  } %>
-        <amb:column label="lb_tm_mt" width="60px" sortBy="<%=WorkflowComparator.TOTAL_MT %>"><%=wf.getMtTotalWordCount()%></amb:column>
+        <amb:column label="lb_tm_mt" width="60px" sortBy="<%=WorkflowComparator.MT_TOTAL %>"><%=wf.getMtTotalWordCount()%></amb:column>
         <amb:column label="lb_total" width="60px" sortBy="<%=WorkflowComparator.WC_TOTAL%>"><%=wf.getTotalWordCount()%></amb:column>
       </amb:table>
     </td>

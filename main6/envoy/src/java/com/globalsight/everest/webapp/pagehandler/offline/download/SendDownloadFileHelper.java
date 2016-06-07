@@ -715,8 +715,7 @@ public class SendDownloadFileHelper implements WebAppConstants
     private int getEditAllState(HttpServletRequest p_request,
             L10nProfile p_l10nProfile) throws EnvoyServletException
     {
-        String editExact = p_request
-                .getParameter(OfflineConstants.TM_EDIT_TYPE);
+        String editExact = p_request.getParameter(OfflineConstants.TM_EDIT_TYPE);
         return getEditAllState(editExact, p_l10nProfile);
     }
 
@@ -724,12 +723,30 @@ public class SendDownloadFileHelper implements WebAppConstants
     {
         try
         {
-            return StringUtil.isNotEmpty(editExact) ? Integer
-                    .parseInt(editExact) : p_l10nProfile.getTMEditType();
+            if (StringUtil.isNotEmpty(editExact))
+            {
+                return Integer.parseInt(editExact);
+            }
+            else
+            {
+                return mapTmEditType(p_l10nProfile);
+            }
         }
         catch (Exception e)
         {
-            return AmbassadorDwUpConstants.TM_EDIT_TYPE_NONE;
+            return mapTmEditType(p_l10nProfile);
+        }
+    }
+
+    private int mapTmEditType(L10nProfile p_l10nProfile)
+    {
+        if (p_l10nProfile.getTMEditType() == 0 || p_l10nProfile.getTMEditType() == 1)
+        {
+            return AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY; // 4
+        }
+        else
+        {
+            return AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH; // 1
         }
     }
 

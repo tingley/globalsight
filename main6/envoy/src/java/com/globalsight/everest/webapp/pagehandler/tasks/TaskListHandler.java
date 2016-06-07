@@ -738,7 +738,7 @@ public class TaskListHandler extends PageHandler
         HashMap<Long, Long> allPage_tasks = new HashMap<Long, Long>();
 
         Vector excludeTypes = null;
-        int downloadEditAll = 0;
+        int downloadEditAll = 4;
         GlobalSightLocale srcLocale = null;
         GlobalSightLocale targetLocale = null;
         String targetLocaleStr = null;
@@ -1016,7 +1016,7 @@ public class TaskListHandler extends PageHandler
             long workflowId = task.getWorkflow().getId();
             L10nProfile l10nProfile = task.getWorkflow().getJob()
                     .getL10nProfile();
-            int downloadEditAll = 4;
+            int downloadEditAll = LocProfileStateConstants.TM_EDIT_TYPE_DENY;// 4
             if (l10nProfile.getTmChoice() == LocProfileStateConstants.ALLOW_EDIT_TM_USAGE)
             {
                 downloadEditAll = help.getEditAllState(

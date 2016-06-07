@@ -191,7 +191,7 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
         <%
 	        }
 	    %>
-        <amb:column label="lb_tm_mt" width="60px" sortBy="<%=TaskComparator.TOTAL_MT %>"><%=task.getWorkflow().getMtTotalWordCount()%></amb:column>
+        <amb:column label="lb_tm_mt" width="60px" sortBy="<%=TaskComparator.MT_TOTAL %>"><%=task.getWorkflow().getMtTotalWordCount()%></amb:column>
         <amb:column label="lb_total" width="60px" sortBy="<%=TaskComparator.WC_TOTAL%>"><%=task.getWorkflow().getTotalWordCount()%></amb:column>
       </amb:table>
     </td>

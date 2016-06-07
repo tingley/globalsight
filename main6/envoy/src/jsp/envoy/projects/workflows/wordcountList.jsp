@@ -276,7 +276,7 @@ if (userPerms.getPermissionFor(Permission.JOB_WORKFLOWS_SUMMARY_STATISTICS)){
 		        <amb:column label="lb_in_context_tm" width="100px" sortBy="<%=WorkflowComparator.IN_CONTEXT%>"><%= wf.getInContextMatchWordCount() %></amb:column>
 	        <%} %>
         <%}%>
-        <amb:column label="lb_tm_mt" width="60px" sortBy="<%=WorkflowComparator.TOTAL_MT %>"><%=wf.getMtTotalWordCount()%></amb:column>
+        <amb:column label="lb_tm_mt" width="60px" sortBy="<%=WorkflowComparator.MT_TOTAL %>"><%=wf.getMtTotalWordCount()%></amb:column>
         <amb:column label="lb_total" width="60px" sortBy="<%=WorkflowComparator.WC_TOTAL%>"><%= wf.getTotalWordCount() %></amb:column>
       </amb:table>
     </td>

@@ -53,7 +53,7 @@ public class TaskComparator extends StringComparator
     public static final int MEDHIFUZZYREPETITION   = 21;
     public static final int MEDFUZZYREPETITION   = 22;
     public static final int COMPLETE_DATE = 23;
-    public static final int TOTAL_MT = 24;
+    public static final int MT_TOTAL = 24;
 
 	/**
 	* Creates a TaskComparator with the given locale.
@@ -277,7 +277,7 @@ public class TaskComparator extends StringComparator
                rv = -1;
 			break;
 
-        case TOTAL_MT:
+        case MT_TOTAL:
             aint = a.getWorkflow().getMtTotalWordCount();
             bint = b.getWorkflow().getMtTotalWordCount();
             if (aint > bint)

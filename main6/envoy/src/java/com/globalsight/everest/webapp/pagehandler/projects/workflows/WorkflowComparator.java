@@ -44,7 +44,7 @@ public class WorkflowComparator extends StringComparator
     public static final int WC_TOTAL            = 11;
     public static final int TOTAL_FUZZY         = 14;
     public static final int TARG_LOCALE_SIMPLE  = 24;
-    public static final int TOTAL_MT            = 25;
+    public static final int MT_TOTAL            = 25;
 
     // For sla report issue
     public static final int ESTIMATED_COMP_DATE = 15;
@@ -262,7 +262,7 @@ public class WorkflowComparator extends StringComparator
                     rv = -1;
                 break;
 
-            case TOTAL_MT:
+            case MT_TOTAL:
                 aInt = a.getMtTotalWordCount();     
                 bInt = b.getMtTotalWordCount();
                 if (aInt > bInt)

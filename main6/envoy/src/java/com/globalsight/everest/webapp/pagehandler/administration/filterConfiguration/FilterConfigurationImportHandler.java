@@ -1076,7 +1076,11 @@ public class FilterConfigurationImportHandler extends PageHandler
                     // get new filter name
                     String newFilterName = checkFilterNameExists(name, "JsonFilter");
                     jsonFilter.setFilterName(newFilterName);
-                    jsonFilter.setBaseFilterId(baseFilterIdMap.get(jsonFilter.getBaseFilterId()));
+                    if (baseFilterIdMap.get(jsonFilter.getBaseFilterId()) != null)
+                    {
+                        jsonFilter
+                                .setBaseFilterId(baseFilterIdMap.get(jsonFilter.getBaseFilterId()));
+                    }
 
                     // Judgment "json_Filter" are references "html_filter"
                     if (jsonFilter.getElementPostFilterTableName().equalsIgnoreCase(
@@ -1100,7 +1104,7 @@ public class FilterConfigurationImportHandler extends PageHandler
             catch (Exception e)
             {
                 // TODO Auto-generated catch block
-                String msg = "Upload Java Properties Filter data failed !";
+                String msg = "Upload Json Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
             }

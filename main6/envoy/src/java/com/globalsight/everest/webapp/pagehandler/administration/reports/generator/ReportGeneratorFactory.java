@@ -44,7 +44,8 @@ public class ReportGeneratorFactory
     {
         reportGeneratorMap.put(ReportConstants.ACTIVITY_DURATION_REPORT,
                 ActivityDurationReportGenerator.class.getName());
-        reportGeneratorMap.put(ReportConstants.ONLINE_JOBS_REPORT, OnlineJobsReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.ONLINE_JOBS_REPORT,
+                OnlineJobsReportGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.ONLINE_JOBS_REPORT_FOR_IPTRANSLATOR,
                 OnlineJobsReportForIPTranslatorGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.DETAILED_WORDCOUNTS_REPORT,
@@ -58,14 +59,19 @@ public class ReportGeneratorFactory
         reportGeneratorMap.put(ReportConstants.SCORECARD_REPORT,
                 ScorecardReportGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.IMPLEMENTED_COMMENTS_CHECK_REPORT,
-        		ImplementedCommentsCheckReportGenerator.class.getName());
-        reportGeneratorMap.put(ReportConstants.CHARACTER_COUNT_REPORT, CharacterCountReportGenerator.class.getName());
+                ImplementedCommentsCheckReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.CHARACTER_COUNT_REPORT,
+                CharacterCountReportGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.TRANSLATIONS_EDIT_REPORT,
                 TranslationsEditReportGenerator.class.getName());
-        reportGeneratorMap.put(ReportConstants.SUMMARY_REPORT, SummaryReportGenerator.class.getName());
-        reportGeneratorMap.put(ReportConstants.POST_REVIEW_QA_REPORT, PostReviewQAReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.SUMMARY_REPORT,
+                SummaryReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.POST_REVIEW_QA_REPORT,
+                PostReviewQAReportGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.TRANSLATION_VERIFICATION_REPORT,
                 TranslationVerificationReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.MT_POST_EDIT_DISTANCE_REPORT,
+                MTPostEditDistanceReportGenerator.class.getName());
     }
 
     public static ReportGenerator getReportGenerator(String p_reportType,

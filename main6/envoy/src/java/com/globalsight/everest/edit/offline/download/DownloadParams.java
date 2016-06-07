@@ -276,6 +276,10 @@ public class DownloadParams implements Serializable
         m_createZip = p_createZip;
         m_fileFormat = p_fileFormat;
         TMEditType = p_TMEditType;
+        if (p_TMEditType == 0)
+        {
+            TMEditType = 4; // its available values are "1, 2, 3, 4", no "0".
+        }
         m_excludeTypeNames = p_excludeTypes;
         m_supportFiles = p_supportFiles;
         m_resourceOption = p_resourceOption;
@@ -1607,6 +1611,10 @@ public class DownloadParams implements Serializable
     public void setTMEditType(int tMEditType)
     {
         TMEditType = tMEditType;
+        if (tMEditType == 0)
+        {
+            TMEditType = 4; // its available values are "1, 2, 3, 4", no "0".
+        }
     }
 
     public void setConsolidateFileType(String consolidateFileType)

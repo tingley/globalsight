@@ -682,6 +682,7 @@ public class JobAdditionEngine
                 task.setTaskType(p_wf.getWorkflowType());
                 task.setRateSelectionCriteria(wti.getRateSelectionCriteria());
                 task.setIsReportUploadCheck(wti.getReportUploadCheck());
+                task.setIsActivityCommentUploadCheck(wti.getActivityCommentUploadCheck());
                 task.setIsReportUploaded(0);
                 // if an expense rate is specified
                 if (wti.getExpenseRateId() > 0)

@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="996" MadCap:lastWidth="571">
+    <head><title>Derived Channels – Filter/Offset Tab</title>
+    </head>
+    <body>
+        <h1>Derived Channels 
+ – Filter/Offset tab</h1>
+        <p class="para">Use this tab to apply functions (smoothing, derivative, retention 
+ time offset, or scaling) to a derived channel, based on the settings in 
+ the First (Only) Channel and Second Channel tabs.</p>
+        <h2>Smoothing</h2>
+        <p class="para">Averages a defined number of data points (using Savitsky-Golay 
+ filtering) to decrease noise.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ None, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, or 31.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ None.</p>
+        <h2>Derivative</h2>
+        <p class="para">Performs a first-, second-, third-, or fourth-level derivative 
+ of the derived channel.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> None, First, Second, Third, or Fourth.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ None.</p>
+        <h2>RT offset</h2>
+        <p class="para">Adds a positive or negative offset (in minutes) to the data 
+ points in the derived channel. For example, if you apply a 2-minute RT 
+ Offset to a derived channel, all data points in the derived channel, including 
+ the retention times of all peaks in the derived channel, are increased 
+ by 2 minutes.</p>
+        <p class="para">Selecting RT Offset disables RT Offset Scaling parameters 
+ (see below).</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ –500.000 to 500.000 minutes.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0 minutes.</p>
+        <h2>RT offset scaling</h2>
+        <p class="para">Select the parameters in this section to map a pair of starting 
+ and ending retention times for the original channel to an adjusted pair 
+ of starting and ending times for the derived channel. This is useful when 
+ you compare chromatograms run on different systems or under different 
+ conditions (where applying a single retention time offset fails).</p>
+        <h3>Original start time/end time</h3>
+        <p class="para">Specifies the x-axis start and end times for the original 
+ channel.</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ –500.000 to 500.000 minutes. </p>
+        <h3>Derived start time/end time</h3>
+        <p class="para">Specifies the adjusted x-axis start and end times for the 
+ derived channel.</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ –500.000 to 500.000 minutes. </p>
+    </body>
+</html>

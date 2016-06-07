@@ -10,6 +10,8 @@
                 com.globalsight.everest.costing.Rate,
                 com.globalsight.everest.permission.Permission,
                 com.globalsight.everest.permission.PermissionSet,
+                com.globalsight.everest.comment.CommentFile,
+                com.globalsight.everest.comment.CommentManagerLocal,
                 com.globalsight.everest.edit.offline.OfflineEditManager,
                 com.globalsight.everest.secondarytargetfile.SecondaryTargetFile,
                 com.globalsight.everest.util.system.SystemConfigParamNames,
@@ -181,6 +183,14 @@
     TaskImpl taskImpl = (TaskImpl)theTask;
     int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
     int isUploaded = taskImpl.getIsReportUploaded();
+    String labelActivitiesCommentUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_comment_upload_check");
+    int isActivityCommentUploadCheck = taskImpl.getIsActivityCommentUploadCheck();
+    int isActivityCommentUploaded = 0;
+    ArrayList<CommentFile> cf =  ServerProxy.getCommentManager().getActivityCommentAttachments(theTask);
+    if(cf != null && cf.size()>0)
+    {
+        isActivityCommentUploaded =1;
+    }
     WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;

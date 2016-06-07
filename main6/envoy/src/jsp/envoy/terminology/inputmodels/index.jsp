@@ -64,6 +64,7 @@ if (PageHandler.getUser(session) != null)
 
 <script src="/globalsight/envoy/terminology/viewer/SelectableFields.js"></script>
 <script src="/globalsight/envoy/terminology/viewer/editor.js" ></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <script src="/globalsight/envoy/terminology/inputmodels/editor_js.jsp"></script>
 
 <script>
@@ -91,16 +92,23 @@ function showHelpEditor()
     helpWindow.focus();
 }
 
-var g_args;
+var o = window.opener;
+var g_args = o.objectParams;
 
 function SetResultValue(value)
 {
   var result = g_args;
-
   result.setName(idEntryName.value);
   result.setValue(value);
-
-  window.returnValue = result;
+  
+  if (o.isNew)
+  {
+	  o.newObjectDialog(result);
+  }
+  else
+  {
+	  o.modifyObjectDialog(result);
+  }  
 
   window.close();
 }
@@ -109,9 +117,6 @@ function doLoad()
 {
     resizeWindow()
     SetEditiorDefinition();
-  // Dialog argument is a UserObject object.
-  g_args = window.dialogArguments;
-
   idEntryName.value = g_args.name;
 
   if (g_args.value && g_args.value != "")

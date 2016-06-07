@@ -66,7 +66,7 @@ public class FuzzySearch extends AbstractTermSearch
 
         try
         {
-            hits = index.search(p_query, (begin + maxHits), begin, threshold);
+            hits = index.search(p_query, Integer.MAX_VALUE, 0, threshold);
 
             if (CATEGORY.isDebugEnabled())
             {
@@ -76,14 +76,24 @@ public class FuzzySearch extends AbstractTermSearch
                         + hits.size() + " results");
             }
 
+            int n = 0;
             for (int i = 0, max = hits.size(); i < max; i++)
             {
                 // Allow empty or null target language
                 if (trgLan == null || "".equals(trgLan.trim())
                         || TbUtil.ConceptIfHasTrcLan(hits.getMainId(i), trgLan))
                 {
-                    result.add(hits.getText(i), hits.getMainId(i), hits
-                            .getSubId(i), (int) (hits.getScore(i) * 100.0), "");
+                    n++;
+                    if (n >= begin)
+                    {
+                        result.add(hits.getText(i), hits.getMainId(i), hits
+                                .getSubId(i), (int) (hits.getScore(i) * 100.0), "");
+                    }
+                    
+                    if (n >= (maxHits + begin - 1))
+                    {
+                        break;
+                    }
                 }
             }
         }

@@ -1,0 +1,5 @@
+Index	File_Profile_name	Filter_Name	QA_Rule	Source_equal_to_Target	Target_string_expansion_of_or_more	QA_SourceFile
+Case_1	QA_Empty	QA_Empty	x	x	x	TestMatrix\DataSource\QA_Filter\Welocalize_Company.html
+Case_2	QA_Rule	QA_Rule	Check:=Welocalize;Check_Is_RegEx:=yes;Description:=Welocalize_Description;Priority:=1;Exceptions:=welocalize2:::yes:::French (France) [fr_FR]:_:welocalize3:::yes:::French (France) [fr_FR],Check:=Welocalize2;Check_Is_RegEx:=yes;Description:=Welocalize2_Description;Priority:=2;Exceptions:=welocalize2:::yes:::French (France) [fr_FR]:_:welocalize3:::yes:::French (France) [fr_FR]	x	x	TestMatrix\DataSource\QA_Filter\Welocalize_Company.html
+Case_3	QA_Source_equal_to_Target	QA_Source_equal_to_Target	x	o	x	TestMatrix\DataSource\QA_Filter\Welocalize_Company.html
+Case_4	QA_Target_string_expansion_of_or_more	QA_Target_string_expansion_of_or_more	x	x	o	TestMatrix\DataSource\QA_Filter\Welocalize_Company.html

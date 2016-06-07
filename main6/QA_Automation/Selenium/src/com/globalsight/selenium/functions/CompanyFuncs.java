@@ -39,19 +39,23 @@ public class CompanyFuncs extends BasicFuncs
         {
             selenium.check(Company.ENABLE_IP_FILTER);
         }
-        selenium.click(Company.Next_BUTTON);
-        if(selenium.isAlertPresent())
-        { 
-            clickAndWait(selenium, Company.Cancel_BUTTON);           
-         }
-        else
-        {   
+//        selenium.click(Company.Next_BUTTON);
+//        if(selenium.isAlertPresent())
+//        { 
+//            clickAndWait(selenium, Company.Cancel_BUTTON);           
+//         }
+//        else
+//        {   
             selenium.click(Company.Save_BUTTON);
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);           
-         }
+//         }
+            
+        selenium.type(Company.Name_Filter_ID, iCompanyName);
+        selenium.keyDown(Company.Name_Filter_ID, "13");
+        selenium.keyUp(Company.Name_Filter_ID, "13");
       
         Assert.assertEquals(this.isElementPresent(selenium,
-                "//input[@name='radioBtn' and @value='" + iCompanyName + "']"),
+                "link=" + iCompanyName),
                 true);
     }
 }

@@ -7,14 +7,16 @@ package com.globalsight.selenium.pages;
 public class MyActivities implements BasePage
 {
 
+	public static final String TABLE_TABLE="//table[@id='dataList']/tbody";
     // My Activities -Search
-    public static final String SEARCH_JOB_NAME_TEXT = "nf";
+    public static final String SEARCH_JOB_NAME_TEXT = "jobNameFilter";
     public static final String SEARCH_JOB_CONDITION_SELECT = "no";
     public static final String SEARCH_JOB_ID_SELECT = "io";
     public static final String SEARCH_JOB_ID_TEXT = "idf";
     public static final String SEARCH_ACTIVITY_NAME_TEXT = "af";
     public static final String SEARCH_STATUS_SELECT = "sto";
     public static final String SEARCH_COMPANY_SELECT = "comanyo";
+    public static final String SEARCH_ACTIVITY_JOB_NAME_TEXT = "id=jobNameFilter";
 
     public static final String SEARCH_JOB_CONDITION_BEGIN_WITH = "begins with";
     public static final String SEARCH_JOB_CONDITION_END_WITH = "ends with";
@@ -31,9 +33,19 @@ public class MyActivities implements BasePage
     public static final String ACCEPT_ALL_BUTTON = "AcceptAllButton";
     public static final String DETAILED_WORD_COUNTS_BUTTON = "WordCountButton";
     public static final String EXPORT_BUTTON = "ExportButton";
+    public static final String EXPORT_DOWNLOAD_BUTTON = "exportDownloadBtn";
+    public static final String EXPORT_DOWNLOAD_CANCEL_OK_BUTTON = "idExportDownloadCancelOkDownload";
+
     public static final String DOWNLOAD_BUTTON = "DownloadButton";
     public static final String SEARCH_AND_REPLACE_BUTTON = "SearchButton";
     public static final String MY_ACTIVITIES_TABLE = "//div[@id='contentLayer']/table[2]/tbody/tr[2]/td/form/table/tbody[2]";
+    public static final String CANCEL_OK_DOWNLOAD_BUTTON = "idCancelOkDownload";
+    
+    public static final String MYACTIVITIES_LIST_TARGET_LOCALE_FILTER_SELECT = "id=targetLocaleFilter";
+    public static final String MYACTIVITIES_ALL_CHECKBOX = "id=selectAllCbx";
+    public static final String MYACTIVITIES_DOWNLOAD_COMBINED_BUTTON = "id=downloadCombinedBtn";
+    public static final String MYACTIVITIES_OFFLINE_DOWNLOAD_BUTTON = "id=downloadBtn";
+   
 
     // MyActivities Available
     public static final String CHECK_ALL_LINK = "link=Check All";
@@ -62,4 +74,7 @@ public class MyActivities implements BasePage
     public static final String SUMMARY_STATISTICS_TABLE = "//div[@id='contentLayer']/form/p[2]/table/tbody/tr[2]/td/table/tbody";
 
     public static final String BACK_TO_ACTIVITIES_FROM_WORD_COUNT_BUTTON = "//input[@value='Back to Activities']";
+    
+    public static final String TASK_ID_CHECKBOX = "taskId";
+    public static final String DOWNLOAD_BUTTON_ACTIVITY_LIST = "downloadBtn";
 }

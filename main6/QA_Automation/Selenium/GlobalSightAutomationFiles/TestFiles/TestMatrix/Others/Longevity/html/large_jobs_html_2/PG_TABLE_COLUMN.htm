@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:comment="Conditional text" MadCap:id="com_page\PG_TABLE_COLUMN.htm" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.Ready for Review" MadCap:lastBlockDepth="5" MadCap:lastHeight="1952" MadCap:lastWidth="577">
+    <head><title>Column Properties Dialog Box</title>
+    </head>
+    <body>
+        <h1>Column 
+ Properties dialog box</h1>
+        <p class="para">Use this dialog box to modify column attributes specified 
+ in the Table tab. To modify attributes of a table column, select the corresponding 
+ column from the Table Template, then click Column Properties to access 
+ the Column Properties dialog box (or double-click the table column). After 
+ redefining column attributes, click OK to return to the Table tab.</p>
+        <h2>Original name</h2>
+        <p class="para">Unedited, original name of the selected table column (in 
+ the Table Template).</p>
+        <h3><span style="font-weight: bold;">Data Type</span>
+        </h3>
+        <p class="para">Type of the field included in the table (Double Precision 
+ Float, String, Integer, Date, Enumerated, Characters, or Boolean Value).</p>
+        <h3><span style="font-weight: bold;">Field Type</span>
+        </h3>
+        <p class="para">Type of database field for the selected table column (for 
+ example, the %Amount column is a Peak database field).</p>
+        <h3><span style="font-weight: bold;">Field Name</span>
+        </h3>
+        <p class="para">Allows you to label the information in the report with something 
+ other than the original field name. The column width in the table is determined 
+ by the number of characters in the Field Name <span style="font-style: italic;">if</span> 
+ the number of characters exceeds the specified Data Width (see below). 
+ For example, a column containing the Channel field is about seven characters 
+ wide.</p>
+        <h2>Data precision</h2>
+        <p class="para">Number of digits reported to the right of the decimal. If 
+ the reported precision is less than the precision of the stored result, 
+ the reported result is rounded. If the reported field width or precision 
+ affects the validity of the result, the width is ignored and the entire 
+ result is printed.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ The software displays a maximum of 14 significant digits for real numbers. 
+ If the sum of the number of digits to the left of the decimal place plus 
+ the precision is greater that 14, the number will be displayed in exponential 
+ notation, whether or not the Use Exponential Notation check box is selected. 
+ </p>
+        <h2>Use exponential notation</h2>
+        <p class="para">Exponential notation for fields in reports.</p>
+        <h2>Alignment</h2>
+        <p class="para">Position of the data in the table column within the report. 
+ </p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Left, Center, Right</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Left</p>
+        <h2 MadCap:conditions="Primary.Empower">Summary functions to apply</h2>
+        <p class="para" MadCap:conditions="Primary.Empower">Summary functions, which enable you to 
+ summarize columns in a table to generate statistical data for a specific 
+ field. You can apply more than one function to a table column. To select 
+ a summary function, double-click (or drag) the function in the list, and 
+ a column is added to the Summary Function table. </p>
+        <p class="para" MadCap:conditions="Primary.Empower">Summary functions:</p>
+        <ul MadCap:conditions="Primary.Empower">
+            <li class="listbull">None – No function performed</li>
+            <li class="listbull">Min – Minimum value</li>
+            <li class="listbull">Max – Maximum value</li>
+            <li class="listbull">Sum – Sum of all values</li>
+            <li class="listbull">Count – Total number 
+ of rows in the table with data in the specific column</li>
+            <li class="listbull">Mean – Mean average of 
+ all selected values</li>
+            <li class="listbull">%RSD – Percent relative 
+ standard deviation</li>
+            <li class="listbull">Std. Dev. – Standard 
+ deviation around the mean</li>
+        </ul>
+        <p class="para" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Note:</span> 
+ Verify that your minimum value is not greater than your maximum value. 
+ In some cases you can enter a minimum value that is greater than a maximum 
+ value without receiving a prompt warning you of the error.</p>
+        <h2 MadCap:conditions="Primary.Empower">Summary function table</h2>
+        <p class="para" MadCap:conditions="Primary.Empower">Summary functions used for the specified 
+ table column. Summary functions are positioned in the order in which you 
+ selected them from the Summary Functions list. Summary Function columns 
+ are:</p>
+        <ul>
+            <li class="listbull" MadCap:conditions="Primary.Empower">Summary Function – Selected 
+ summary function. When a summary function is listed in the table, this 
+ cell becomes a list, from which you can select the summary function.</li>
+            <li class="listbull" MadCap:conditions="Primary.Empower">Min Limit – Minimum limit 
+ to report for the specified summary function.</li>
+            <li class="listbull" MadCap:conditions="Primary.Empower">Max Limit – Maximum limit 
+ to report for the specified summary function.</li>
+            <li class="listbull" MadCap:conditions="Primary.Empower">Precision – Number of 
+ digits reported to the right of the decimal. If the reported precision 
+ is less than the precision of the stored result, the reported result is 
+ rounded. If the reported field width or precision affects the validity 
+ of the result, the width is ignored and the entire result is printed.</li>
+        </ul>
+        <h2>Revert (Review main window only)</h2>
+        <p class="para">Resets changes currently made to the table column to the 
+ last-saved changes. These last-saved changes appear in the Column Properties 
+ dialog box. To apply the last-saved changes to the table, click Apply.</p>
+        <h2>Previous column and next column</h2>
+        <p class="para">Displays data in the Column Properties dialog box from the 
+ next or previous column in the selected table.</p>
+    </body>
+</html>

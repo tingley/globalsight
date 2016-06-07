@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<filters preserveSpaces="true" removeSpacesNonseg="false" removeTags="false">
+    <filter enabled="true" className="org.omegat.filters2.text.TextFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.txt"/>
+        <files targetEncoding="ISO-8859-1" sourceEncoding="ISO-8859-1" targetFilenamePattern="${filename}" sourceFilenameMask="*.txt1"/>
+        <files targetEncoding="ISO-8859-2" sourceEncoding="ISO-8859-2" targetFilenamePattern="${filename}" sourceFilenameMask="*.txt2"/>
+        <files targetEncoding="UTF-8" sourceEncoding="UTF-8" targetFilenamePattern="${filename}" sourceFilenameMask="*.utf8"/>
+        <files targetEncoding="UTF-16LE" sourceEncoding="UTF-16LE" targetFilenamePattern="${filename}" sourceFilenameMask="*.utf16"/>
+        <option value="EMPTYLINES" name="segmentOn"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters2.po.PoFilter">
+        <files targetEncoding="UTF-8" sourceEncoding="UTF-8" targetFilenamePattern="${filename}" sourceFilenameMask="*.po"/>
+        <files targetEncoding="UTF-8" sourceEncoding="UTF-8" targetFilenamePattern="${filename}" sourceFilenameMask="*.pot"/>
+        <option value="true" name="autoFillInPluralStatement"/>
+        <option value="false" name="disallowBlank"/>
+        <option value="true" name="skipHeader"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters2.text.bundles.ResourceBundleFilter">
+        <files targetFilenamePattern="${nameOnly}_${targetLocale}.${extension}" sourceFilenameMask="*.properties"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.xhtml.XHTMLFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.html"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.xhtml"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.php"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.xht"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.xml"/>
+        <option value="" name="ignoreTags"/>
+        <option value="true" name="paragraphOnBr"/>
+        <option value="http-equiv=Content-Type,http-equiv=refresh,name=robots,name=revisit-after,http-equiv=expires,http-equiv=content-style-type,http-equiv=content-script-type,name=generator" name="skipMeta"/>
+        <option value="" name="skipRegExp"/>
+        <option value="false" name="translateButtonValue"/>
+        <option value="false" name="translateHref"/>
+        <option value="false" name="translateHreflang"/>
+        <option value="false" name="translateLang"/>
+        <option value="false" name="translateSrc"/>
+        <option value="false" name="translateValue"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters2.html2.HTMLFilter2">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.htm"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.html"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.xhtml"/>
+        <files targetEncoding="UTF-8" sourceEncoding="UTF-8" targetFilenamePattern="${filename}" sourceFilenameMask="*.langx"/>
+        <files targetEncoding="UTF-8" sourceEncoding="UTF-8" targetFilenamePattern="${filename}" sourceFilenameMask="*.pnsl"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.xht"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.xmlx"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.php"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.aspx"/>
+        <option value="false" name="compressWhitespace"/>
+        <option value="" name="ignoreTags"/>
+        <option value="true" name="paragraphOnBr"/>
+        <option value="false" name="removeComments"/>
+        <option value="IFHEADER" name="rewriteEncoding"/>
+        <option value="http-equiv=refresh,name=robots,name=revisit-after,http-equiv=expires,http-equiv=content-style-type,http-equiv=content-script-type,name=generator" name="skipMeta"/>
+        <option value="" name="skipRegExp"/>
+        <option value="false" name="translateButtonValue"/>
+        <option value="false" name="translateHref"/>
+        <option value="false" name="translateHreflang"/>
+        <option value="false" name="translateLang"/>
+        <option value="false" name="translateSrc"/>
+        <option value="false" name="translateValue"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.opendoc.OpenDocFilter">
+        <files targetFilenamePattern="${nameOnly}-${targetLanguageCode}.${extension}" sourceFilenameMask="*.sx?"/>
+        <files targetFilenamePattern="${nameOnly}-${targetLanguageCode}.${extension}" sourceFilenameMask="*.st?"/>
+        <files targetFilenamePattern="${nameOnly}-${targetLanguageCode}.${extension}" sourceFilenameMask="*.od?"/>
+        <files targetFilenamePattern="${nameOnly}-${targetLanguageCode}.${extension}" sourceFilenameMask="*.ot?"/>
+        <option value="false" name="translateBookmarkRefs"/>
+        <option value="false" name="translateBookmarks"/>
+        <option value="false" name="translateComments"/>
+        <option value="false" name="translateIndexes"/>
+        <option value="false" name="translateLinks"/>
+        <option value="false" name="translateNotes"/>
+        <option value="true" name="translatePresNotes"/>
+        <option value="false" name="translateSheetNames"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters2.text.ini.INIFilter">
+        <files targetEncoding="UTF-8" sourceEncoding="UTF-8" targetFilenamePattern="${filename}" sourceFilenameMask="*.ini"/>
+        <files targetEncoding="UTF-16LE" sourceEncoding="UTF-16LE" targetFilenamePattern="${filename}" sourceFilenameMask="*.rdkf"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.pnstag"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.isl"/>
+        <files targetEncoding="UTF-8" sourceEncoding="UTF-8" targetFilenamePattern="${filename}" sourceFilenameMask="*.lang"/>
+        <files targetEncoding="UTF-8" sourceEncoding="UTF-8" targetFilenamePattern="${filename}" sourceFilenameMask="*.WDTrad"/>
+        <files targetEncoding="windows-1252" sourceEncoding="windows-1252" targetFilenamePattern="${filename}" sourceFilenameMask="*.msg"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.docbook.DocBookFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.xml"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.dbk"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters2.hhc.HHCFilter2">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.hhc"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.hhk"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.openxml.OpenXMLFilter">
+        <files targetFilenamePattern="${nameOnly}-${targetLanguageCode}.${extension}" sourceFilenameMask="*.doc?"/>
+        <files targetFilenamePattern="${nameOnly}-${targetLanguageCode}.${extension}" sourceFilenameMask="*.xls?"/>
+        <files targetFilenamePattern="${nameOnly}-${targetLanguageCode}.${extension}" sourceFilenameMask="*.ppt?"/>
+        <option value="true" name="aggregateTags"/>
+        <option value="true" name="preserveSpaces"/>
+        <option value="true" name="translateCharts"/>
+        <option value="true" name="translateComments"/>
+        <option value="true" name="translateDiagrams"/>
+        <option value="true" name="translateDrawings"/>
+        <option value="false" name="translateEndnotes"/>
+        <option value="true" name="translateExcelComments"/>
+        <option value="true" name="translateFooters"/>
+        <option value="false" name="translateFootnotes"/>
+        <option value="true" name="translateHeaders"/>
+        <option value="false" name="translateHiddenText"/>
+        <option value="false" name="translateSheetNames"/>
+        <option value="true" name="translateSlideComments"/>
+        <option value="false" name="translateSlideLayouts"/>
+        <option value="false" name="translateSlideMasters"/>
+        <option value="false" name="translateWordArt"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.xliff.XLIFFFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.xlf"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.tox"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.sdlxliff"/>
+        <option name="compatibility26" value="false"/>
+        <option name="forceshortcut2f" value="true"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters2.subtitles.SrtFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.srt"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters2.xtagqxp.XtagFilter">
+        <files targetEncoding="UTF-16LE" sourceEncoding="UTF-16LE" targetFilenamePattern="${filename}" sourceFilenameMask="*.tag"/>
+        <files targetEncoding="UTF-16LE" sourceEncoding="UTF-16LE" targetFilenamePattern="${filename}" sourceFilenameMask="*.xtg"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.resx.ResXFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.resx"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.android.AndroidFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.xml"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters2.latex.LatexFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.tex"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.latex"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.typo3.Typo3Filter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.xml"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters2.rc.RcFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.rc"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.helpandmanual.HelpAndManualFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.xml"/>
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.hmxp"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters2.text.dokuwiki.DokuWikiFilter">
+        <files targetEncoding="UTF-8" sourceEncoding="UTF-8" targetFilenamePattern="${filename}" sourceFilenameMask="*.txt"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.wix.WiXFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.wxl"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters2.mozdtd.MozillaDTDFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.dtd"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.svg.SvgFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.svg"/>
+    </filter>
+    <filter enabled="true" className="net.sf.okapi.lib.omegat.JSONFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.json"/>
+    </filter>
+    <filter enabled="true" className="net.sf.okapi.lib.omegat.TSFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.ts"/>
+    </filter>
+    <filter enabled="true" className="net.sf.okapi.lib.omegat.TTXFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.ttx"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.l10nmgr.L10nmgrFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.xml"/>
+    </filter>
+    <filter enabled="true" className="net.sf.okapi.lib.omegat.IDMLFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.idml"/>
+    </filter>
+    <filter enabled="true" className="net.sf.okapi.lib.omegat.TransifexFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.txp"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.infix.InfixFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.xml"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.flash.FlashFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.xml"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.txml.TXMLFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.txml"/>
+    </filter>
+    <filter enabled="false" className="net.sf.okapi.lib.omegat.TXMLFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.txml"/>
+    </filter>
+    <filter enabled="true" className="net.sf.okapi.lib.omegat.TTXFilter2">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.ttx"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters2.text.magento.MagentoFilter">
+        <files targetEncoding="UTF-8" targetFilenamePattern="${filename}" sourceFilenameMask="*.csv"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.camtasiawindows.CamtasiaWindowsFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.camproj"/>
+    </filter>
+    <filter enabled="true" className="org.omegat.filters3.xml.visio.VisioFilter">
+        <files targetFilenamePattern="${filename}" sourceFilenameMask="*.vdx"/>
+    </filter>
+</filters>

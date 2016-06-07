@@ -93,7 +93,7 @@ public class AddCommentHandler extends PageHandler
             sessionMgr.setAttribute("comment", comment);
             sessionMgr.setAttribute("taskComment", comment.getComment());
         }
-
+        
         super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 }

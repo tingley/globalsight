@@ -114,14 +114,6 @@ public class MTProfileHandler extends PageHandler
                 return;
             removeMT(p_request, mtProfile);
         }
-        if (MTProfileConstants.MT_ACTIVE_ACTION.equals(action))
-        {
-            MachineTranslationProfile mtProfile = getMTProfile(p_request,
-                    p_response);
-            if (null == mtProfile)
-                return;
-            active(p_request, mtProfile);
-        }
         if (MTProfileConstants.EXPORT_ACTION.equals(action))
         {
             exportMTP(p_request, p_response, sessionManager);
@@ -287,13 +279,6 @@ public class MTProfileHandler extends PageHandler
                 .append(".").append(mteInfo.getId()).append(".end")
                 .append(NEW_LINE).append(NEW_LINE);
         writeToFile(propertyFile, buffer.toString().getBytes());
-    }
-
-    private void active(HttpServletRequest p_request,
-            MachineTranslationProfile mtProfile)
-    {
-        MTProfileHandlerHelper.activeMTProfile(mtProfile);
-
     }
 
     private MachineTranslationProfile getMTProfile(

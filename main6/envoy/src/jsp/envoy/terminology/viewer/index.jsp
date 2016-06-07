@@ -127,6 +127,7 @@ if (str_termid == null)
 <script src="/globalsight/envoy/terminology/viewer/viewer.js" ></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/Ajax.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/dojo.js"></SCRIPT>
+<SCRIPT SRC="/globalsight/includes/workflow/mustache.js" type="text/javascript"></SCRIPT>
 
 <script>
 ////////////localize content////////////////
@@ -525,6 +526,18 @@ function doEditorKeydown(event)
     var idEditorEntry = document.getElementById("idEditorEntry");
     var idEditorEntryHeader = document.getElementById("idEditorEntryHeader");
     var idEditorArea = document.getElementById("idEditorArea");
+</script>
+
+<script type="text/x-mustache" id="hitlistTemplate">
+<UL>
+{{#hits}}
+<LI>
+<SPAN CLASS="clsTerm" onclick="onHitClick('{{conceptid}}','{{termid}}')" cid='{{conceptid}}' tid='{{termid}}'>
+    {{term}}
+</SPAN>
+</LI>
+{{/hits}}
+</UL>
 </script>
 </body>
 </html>

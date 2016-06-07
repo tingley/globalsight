@@ -28,6 +28,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
+import com.globalsight.cxe.util.XmlUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
@@ -35,6 +36,8 @@ import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.MTTranslationHandler;
 import com.globalsight.terminology.IUserdataManager;
 import com.globalsight.terminology.java.InputModel;
+
+import net.sf.json.JSONObject;
 
 public class InputModelPageHandler extends PageActionHandler
 {
@@ -74,28 +77,26 @@ public class InputModelPageHandler extends PageActionHandler
     @ActionHandler(action = WebAppConstants.TERMBASE_ACTION_LOAD_OBJECT, formClass = "")
     public void loadModel(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception {
-        String result = "";
-        Map returnValue = new HashMap();
         ServletOutputStream out = response.getOutputStream();
+        JSONObject ob = new JSONObject();
         
         try {
             InputModel model = manager.getObject(Long.parseLong(id));
-            returnValue.put("id", model.getId());
-            returnValue.put("userName", model.getUserName());
-            returnValue.put("name", model.getName());
-            returnValue.put("type", model.getType());
-            returnValue.put("value", model.getValue());
-            returnValue.put("isDefault", model.getIsDefault());
-            returnValue.put("result", "sucess");
+            ob.put("id", model.getId());
+            ob.put("userName", model.getUserName());
+            ob.put("name", model.getName());
+            ob.put("type", model.getType());
+            ob.put("value", XmlUtil.xml2Json(model.getValue()));
+            ob.put("isDefault", model.getIsDefault());
+            ob.put("result", "sucess");
         }
         catch(Exception e) {
-            returnValue.put("result", "error");
-            result = "error";
+            ob.put("result", "error");
             CATEGORY.error("Exception", e);
         }
         finally
         {
-            out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
+            out.write(("(" + ob.toString() + ")").getBytes("UTF-8"));
             out.close();
             pageReturn();
         }

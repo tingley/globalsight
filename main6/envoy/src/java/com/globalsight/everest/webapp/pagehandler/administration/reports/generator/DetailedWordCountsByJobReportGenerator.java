@@ -559,47 +559,17 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         int totalWords = pageWC.getTotalWordCount();
         // MT
         int mtTotalWordCount = pageWC.getMtTotalWordCount();
-        int mtExactMatchWordCount = pageWC.getMtExactMatchWordCount();
         int mtFuzzyNoMatchWordCount = pageWC.getMtFuzzyNoMatchWordCount();
         int mtRepetitionsWordCount = pageWC.getMtRepetitionsWordCount();
 
         int noMatchWorcCountForDisplay = lowFuzzyWordCount + noMatchWordCount;
-        // If include MT column, need adjust word count according to threshold
-        // and MT confidence score.
+        // If include MT column, need adjust word count 
         if (data.inludeMtColumn)
         {
-            if (mtConfidenceScore == 100)
-            {
-                _100MatchWordCount = _100MatchWordCount - mtExactMatchWordCount;
-            }
-            else if (mtConfidenceScore < 100 && mtConfidenceScore >= threshold)
-            {
-                if (mtConfidenceScore >= 95)
-                {
-                    hiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 95 && mtConfidenceScore >= 85)
-                {
-                    medHiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 85 && mtConfidenceScore >= 75)
-                {
-                    medFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 75)
-                {
-                    noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
-                }
-                repetitionsWordCount -= mtRepetitionsWordCount;
-            }
-            else if (mtConfidenceScore < threshold)
-            {
-                noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
-                repetitionsWordCount -= mtRepetitionsWordCount;
-            }
+            noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+            repetitionsWordCount -= mtRepetitionsWordCount;
         }
 
-        
         // write the information of word count
         int cursor = wordCountCol;
         Row row = getRow(p_sheet, p_row.value);
@@ -1326,44 +1296,15 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         int totalWords = pageWC.getTotalWordCount();
         // MT
         int mtTotalWordCount = pageWC.getMtTotalWordCount();
-        int mtExactMatchWordCount = pageWC.getMtExactMatchWordCount();
         int mtFuzzyNoMatchWordCount = pageWC.getMtFuzzyNoMatchWordCount();
         int mtRepetitionsWordCount = pageWC.getMtRepetitionsWordCount();
 
         int noMatchWorcCountForDisplay = lowFuzzyWordCount + noMatchWordCount;
-        // If include MT column, need adjust word count according to threshold
-        // and MT confidence score.
+        // If include MT column, need adjust word count 
         if (data.inludeMtColumn)
         {
-            if (mtConfidenceScore == 100)
-            {
-                _100MatchWordCount = _100MatchWordCount - mtExactMatchWordCount;
-            }
-            else if (mtConfidenceScore < 100 && mtConfidenceScore >= threshold)
-            {
-                if (mtConfidenceScore >= 95)
-                {
-                    hiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 95 && mtConfidenceScore >= 85)
-                {
-                    medHiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 85 && mtConfidenceScore >= 75)
-                {
-                    medFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 75)
-                {
-                    noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
-                }
-                repetitionsWordCount -= mtRepetitionsWordCount;
-            }
-            else if (mtConfidenceScore < threshold)
-            {
-                noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
-                repetitionsWordCount -= mtRepetitionsWordCount;
-            }
+            noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+            repetitionsWordCount -= mtRepetitionsWordCount;
         }
 
         // write the information of word count

@@ -723,6 +723,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         }
     }
 
+    // Be careful to use this method in a loop (performance)!!!
     public TuvImpl getSourceTuv()
     {
     	if (this.getLeverageGroupId() < 1)
@@ -733,18 +734,16 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
 				.getLeverageGroupId());
     	if (sp == null)
     		return null;
-    	
-    	try 
+
+    	try
     	{
-    	    long jobId = sp.getJobId();
-			return SegmentTuvUtil.getTuvByTuIdLocaleId(this.getId(),
-					sp.getLocaleId(), jobId);
+    	    return (TuvImpl) getTuv(sp.getLocaleId(), sp.getJobId());
 		}
     	catch (Exception e) 
     	{
 			logger.error(e.getMessage(), e);
 		}
-    	
+
     	return null;
     }
 

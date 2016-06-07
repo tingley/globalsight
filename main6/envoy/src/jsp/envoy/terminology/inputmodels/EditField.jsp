@@ -43,7 +43,8 @@ LABEL,
 }
 </style>
 <SCRIPT language="Javascript">
-var g_args;
+var o=window.opener;
+var g_args=o.editTermParams;
 
 var g_currentFields;
 var g_currentField;
@@ -236,11 +237,7 @@ function doClose(ok)
 
     g_args.setValue(value);
 
-    window.returnValue = g_args;
-  }
-  else
-  {
-    window.returnValue = null;
+    o.editTermDialog(g_args);
   }
 
   window.close();
@@ -262,8 +259,6 @@ function doKeypress()
 
 function doLoad()
 {
-  g_args = window.dialogArguments;
-
   var level = g_args.getLevel();
   var type = g_args.getType();
   var value = g_args.getValue();

@@ -72,7 +72,9 @@ public class WorkflowAssignment implements AssignmentHandler
 
     private String point;
 
-    private String report_upload_check;
+    private String report_upload_check;  
+    
+    private String activity_comment_upload_check;
 
     public void assign(Assignable arg0, ExecutionContext arg1) throws Exception
     {
@@ -310,5 +312,15 @@ public class WorkflowAssignment implements AssignmentHandler
     public String getReport_upload_check()
     {
         return report_upload_check;
+    }
+    
+    public void setActivity_comment_upload_check(String activity_comment_upload_check)
+    {
+        this.activity_comment_upload_check = activity_comment_upload_check;
+    }
+
+    public String getActivity_comment_upload_check()
+    {
+        return activity_comment_upload_check;
     }
 }

@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="970" MadCap:lastWidth="571">
+    <head><title>Flow Tab (PCM/15XX)</title>
+    </head>
+    <body>
+        <h1>Flow 
+ tab (PCM/15XX)</h1>
+        <p class="para">Use this tab to define operating parameters that control 
+ up to three Waters 500 Series Pumps or 1500 Series Pumps (1515 and 1525), 
+ attached to a PCM. </p>
+        <h2>Pump enable</h2>
+        <p class="para">Read-only status box that displays the on/off status of the 
+ pump (checked equals on).</p>
+        <h2>Pump pressure limits</h2>
+        <p class="para">Sets high-pressure and low-pressure limits for the pumps 
+ attached to the PCM. These limits apply to the total pressure for all 
+ pumps in the system, not to pressure for an individual pump.</p>
+        <h3>High pressure limit</h3>
+        <p class="para">If system pressure exceeds this limit for 1.2 seconds, the 
+ system shuts down.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 4000 psi</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ When determining the high-pressure limit for your system, remember the 
+ pressure limitations of your column; see the column manual. When using 
+ extended-flow pump heads, adjust the high-pressure limit accordingly.</p>
+        <h3>Low pressure limit</h3>
+        <p class="para">If system pressure falls below this limit for 60 seconds, 
+ the system shuts down.</p>
+        <p class="para"><span class="emphasisbold">Range:</span> 
+ 0 to 6000 psi (for 100-µL heads), 0 to 3000 psi (for 225-µL heads)</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.0 psi </p>
+        <h2>Pump mode</h2>
+        <p class="para">Specifies the pump operating mode, which can be one of the 
+ following:</p>
+        <ul>
+            <li class="listbull">Isocratic (displays Flow 
+ and %A–%C text boxes)</li>
+            <li class="listbull">Gradient (displays the 
+ gradient table)</li>
+        </ul>
+        <h2 class="para">Flow</h2>
+        <p class="para">Percentage of solvent flow from each reservoir. The total 
+ of all solvents in each gradient segment must equal 100%. The system calculates 
+ individual flow rates when you enter the percentage value for each solvent. 
+ The software automatically fills in the solvent column in the next column 
+ to the right so that the total percentage of the current row yields 100%. 
+ For examples of how the autofill feature works, see the related topic 
+ link.</p>
+        <p class="reltopimg">
+            <img src="../pics/reltop.gif" style="border: none;width: 147px;height: 22px;float: none;border-style: none;border-style: none;" width="147" height="22" border="0" />
+        </p>
+        <p class="reltop">
+            <img src="../pics/rellink.gif" style="border: none;width: 13px;height: 7px;float: none;border-style: none;border-style: none;" width="13" height="7" border="0" /><a href="dataacquisition.chm::/Defining_Methods/Creating_instrument_methods.htm">Creating 
+ instrument methods</a>
+        </p>
+    </body>
+</html>

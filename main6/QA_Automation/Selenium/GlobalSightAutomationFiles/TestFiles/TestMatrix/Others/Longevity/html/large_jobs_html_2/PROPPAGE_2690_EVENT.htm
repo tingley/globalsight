@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="2179" MadCap:lastWidth="571">
+    <head><title>Events Tab (2690/2695, 2690D/2695D, and 2790/2795)</title>
+    </head>
+    <body>
+        <h1>Events 
+ tab (2690/2695, 2690D/2695D, and 2790/2795)</h1>
+        <p class="para">Use this tab to program multiple events (both external and 
+ internal) in the Events table. The external events are triggered by four 
+ TTL output terminals (S1–S4) on the 2690/2695, 2690D/2695D, or 2790/2795 
+ Module. The internal events are used to control the alert (internal alarm), 
+ to change reservoir sparge rates (2690/2695 and 2690D/2695D), sample compartment 
+ temperature, column heater temperature, and column position (2690D/2695D 
+ and 2790/2795), and toggle an optional Column Regeneration Valve in the 
+ 2690D/2695D and 2790/2795. Events can be triggered more than once and 
+ multiple events can be triggered simultaneously.</p>
+        <p class="para">Program the time, type, function, and the value of each event 
+ in the Events table.</p>
+        <h2>Enable events (initial events)</h2>
+        <p class="para">Enables the events in the Events table.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <h2>Switch 1– switch 4 </h2>
+        <p class="para">Initial state of output switches S1 through S4. At the beginning 
+ of each injection cycle, each switch returns to this initial state. You 
+ can set these initial switch states:</p>
+        <ul>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">No Change 
+ – Maintains the current switch position (Default).</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">On – Sets 
+ the switch to the On (closed) position.</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Off – 
+ Sets the switch to the Off (open) position.</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Pulse 
+ – Transmits one On/Off pulse for 0.10 min. </li>
+            <li style="font-size: 9pt;" class="listbull">Toggle – Changes the 
+ current switch position to the alternate position.</li>
+        </ul>
+        <p class="para"><span class="emphasisbold">Exception:</span> 
+ Empower software does not support Pulse and Toggle as <span style="font-style: italic;">initial</span> 
+ events for the 2790/2795 Module. Pulse and Toggle are supported as programmable 
+ events for the 2790/2795 Module. The Pulse and Toggle initial states are 
+ supported for the 2690/2695 and the 2690D/2695D Modules.</p>
+        <h2>Events table columns (programmable events)</h2>
+        <p class="para">Program operating parameters in these columns.</p>
+        <h3>Time</h3>
+        <p class="para">Time when the event starts. Event rows are sorted by time. 
+ You can program different events to occur at once. </p>
+        <h3>Event</h3>
+        <p class="para">Type of event signal: one of the four TTL-level output switches 
+ (S1–S4), or one of the internal events (alert, sparge, column heater temperature, 
+ sample compartment temperature, column position, or toggle). Choose from 
+ these event types to program up to 15 total events. You can program the 
+ same event more than once. Choices:</p>
+        <ul>
+            <li class="listbull">Switch 
+ 1 through Switch 4 – Corresponds to terminal strip positions S1–S4 on 
+ the rear of the separations module. Activating a Switch event triggers 
+ a contact closure for controlling an external device. Select On, Off, 
+ Pulse, Toggle, or No Change in the Function cell when programming a Switch 
+ event.</li>
+            <li class="listbull">Alert – Controls the 
+ audible alert for the separations module. When turned On, the audible 
+ alert sounds until it receives an Off signal. Select On, Off, or No Change 
+ in the Function cell when programming the Alert event.</li>
+        </ul>
+        <p class="paraindent"><span class="emphasisbold">Exception:</span> 
+ This event is not an option for the 2790.</p>
+        <ul>
+            <li class="listbull">Sparge All (2690/2695 
+ and 2690D/2695D only) – Sparge rate for reservoirs in a separations module. 
+ Enter a sparge rate of 0 to 100 mL/min in the Value cell when programming 
+ a Sparge All event. Set the initial sparge rate in the Degas tab.</li>
+            <li class="listbull">Sparge A to Sparge D 
+ (2690/2695 and 2690D/2695D only) – Sparge rate for the selected reservoir 
+ in a separations module. Enter a sparge rate of 0 to 100 mL/min in the 
+ Value cell when programming a Sparge All event. For this function to take 
+ effect, set the initial sparge rate in the Degas tab.</li>
+            <li class="listbull">Column Temperature – 
+ Temperature of an optional column heater. Enter a temperature in °C in the Value cell when programming the Column 
+ Heater Temperature event. </li>
+            <li class="listbull">Sample Temperature – 
+ Temperature of an optional sample compartment heater/cooler. Enter a temperature 
+ in °C in the Value cell when programming the 
+ Sample Compartment Temperature event.</li>
+            <li class="listbull">Column 1 to Column 3, 
+ or Column 1 to Column 6 (2690D/2695D and 2790/2795 only) – Column flow 
+ direction through an optional 3- or 6-column selection valve.</li>
+            <li class="listbull">Toggle (2690D/2695D and 
+ 2790/2795 only) – Change in column flow direction (to column 1 or column 
+ 2, whichever is currently inactive) through an optional column regeneration 
+ valve.</li>
+        </ul>
+        <h3>Function</h3>
+        <p class="para">Function of the event. Function selections apply <span style="font-style: italic;">only</span> 
+ to the four external switch events (S1–S4). Choices:</p>
+        <ul>
+            <li class="listbull">On – Turns on a contact 
+ closure that triggers an external or internal event. With this function, 
+ the contact closure remains closed until an Off function is sent.</li>
+            <li class="listbull">Off – Turns off the contact 
+ closure for the event. With this function, the contact closure is broken.</li>
+            <li class="listbull">Pulse – Transmits one 
+ On/Off pulse. The contact closure is maintained for the number of minutes 
+ that you set in the Value column. </li>
+            <li class="listbull">Toggle – Changes the 
+ current state of the switch.</li>
+            <li class="listbull">No Change – Leaves the 
+ switch in its current state.</li>
+        </ul>
+        <h3>Value</h3>
+        <p class="para">Value for the Event and/or Function selections you make for 
+ the row. For example, if you selected Column Temp as the Event, you would 
+ set a temperature value (in °C) in the Value cell. If you selected Switch 
+ 1 for the Event and Pulse for the Function, you would set a pulse length 
+ (in seconds) in the Value cell.</p>
+        <h3>Comments</h3>
+        <p class="para">Description of the programmed event. The description can 
+ be up to 256 characters in length.</p>
+    </body>
+</html>

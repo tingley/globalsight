@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.tasks;
 
 import java.rmi.RemoteException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,7 +46,6 @@ import com.globalsight.everest.page.ExtractedFile;
 import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
@@ -82,7 +80,6 @@ import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.machineTranslation.MTHelper2;
 import com.globalsight.machineTranslation.MachineTranslator;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
@@ -771,12 +768,12 @@ public class UpdateLeverageHandler extends PageActionHandler
         //3.Re-save target tuv
         if (sourceTuvs.size() > 0)
         {
-            applyMTMatches(p_wf, p_sourcePage, sourceLocale, targetLocale, untranslatedSrcTuvs);
+            applyMTMatches(p_sourcePage, sourceLocale, targetLocale, untranslatedSrcTuvs);
         }
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void applyMTMatches(Workflow p_wf, SourcePage p_sourcePage, GlobalSightLocale p_sourceLocale,
+    private void applyMTMatches(SourcePage p_sourcePage, GlobalSightLocale p_sourceLocale,
             GlobalSightLocale p_targetLocale, Collection<Tuv> untranslatedSrcTuvs) throws Exception
     {
         MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileBySourcePage(
@@ -807,7 +804,6 @@ public class UpdateLeverageHandler extends PageActionHandler
         List<TuvImpl> tuvsToBeUpdated = new ArrayList<TuvImpl>();
         long jobId = p_sourcePage.getJobId();
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
-        long mtConfidenceScore = mtProfile.getMtConfidenceScore();
 
         HashMap<Tu, Tuv> needHitMTTuTuvMap = new HashMap<Tu, Tuv>();
         needHitMTTuTuvMap = formTuTuvMap(untranslatedSrcTuvs, sourceTuvMap, p_targetLocale, jobId);
@@ -912,15 +908,8 @@ public class UpdateLeverageHandler extends PageActionHandler
                 lm.setTargetLocale(currentNewTuv.getGlobalSightLocale());
                 // This is the first MT matches,its order number is 301.
                 lm.setOrderNum((short) TmCoreManager.LM_ORDER_NUM_START_MT);
-                lm.setScoreNum(mtConfidenceScore);
-                if (mtConfidenceScore == 100)
-                {
-                    lm.setMatchType(MatchState.MT_EXACT_MATCH.getName());
-                }
-                else
-                {
-                    lm.setMatchType(MatchState.FUZZY_MATCH.getName());
-                }
+                lm.setScoreNum(MachineTranslator.MT_SCORE);
+                lm.setMatchType(MatchState.MACHINE_TRANSLATION.getName());
                 lm.setMatchedTuvId(-1);
                 lm.setProjectTmIndex(Leverager.MT_PRIORITY);
                 lm.setTmId(0);
@@ -949,9 +938,6 @@ public class UpdateLeverageHandler extends PageActionHandler
 
         // Populate into target TUVs
         SegmentTuvUtil.updateTuvs(tuvsToBeUpdated, jobId);
-
-        updateMtScoreFields(mtConfidenceScore, p_sourcePage.getId(), p_targetLocale.getId(),
-                machineTranslator.getEngineName() + "_MT", p_wf);
     }
 
     private HashMap<Tu, Tuv> formTuTuvMap(Collection<Tuv> untranslatedSrcTuvs,
@@ -1106,41 +1092,6 @@ public class UpdateLeverageHandler extends PageActionHandler
         }
 
         return result;
-    }
-
-    /**
-     * When update leverage multiple times with different MT threshold, we apply
-     * the last MT threshold to all MT matches.
-     */
-    private void updateMtScoreFields(long mtConfidenceScore, long srcPageId, long trgLocaleId,
-            String mtEngineName, Workflow p_wf) throws Exception
-    {
-        Connection connection = null;
-        PreparedStatement ps = null;
-        try
-        {
-            connection = DbUtil.getConnection();
-
-            StringBuilder buffer = new StringBuilder();
-            buffer.append("UPDATE ").append(BigTableUtil.getLMTableJobDataInBySourcePageId(srcPageId));
-            buffer.append(" SET score_num = ? ");
-            buffer.append(" WHERE source_page_id = ? AND target_locale_id = ? AND mt_name = ?");
-
-            ps = connection.prepareStatement(buffer.toString());
-            ps.setLong(1, mtConfidenceScore);
-            ps.setLong(2, srcPageId);
-            ps.setLong(3, trgLocaleId);
-            ps.setString(4, mtEngineName);
-            ps.execute();
-        }
-        finally
-        {
-            DbUtil.silentClose(ps);
-            DbUtil.silentReturnConnection(connection);
-        }
-
-        p_wf.setMtConfidenceScore((int) mtConfidenceScore);
-        HibernateUtil.saveOrUpdate(p_wf);
     }
 
     @Override

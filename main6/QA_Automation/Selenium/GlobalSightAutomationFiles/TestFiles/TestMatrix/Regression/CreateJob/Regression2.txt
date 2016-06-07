@@ -1,0 +1,3 @@
+Index	File_Profile_name	SourceFile
+Case_1	GBS-4322_api_create_job_file_profile_1	TestMatrix\Regression\CreateJob\Simple.html
+Case_2	GBS-4322_api_create_job_file_profile_2	TestMatrix\Regression\CreateJob\Simple.html

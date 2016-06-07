@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="2644" MadCap:lastWidth="571">
+    <head><title>Extraction Table Tab</title>
+    </head>
+    <body>
+        <h1>Extraction 
+ Table tab</h1>
+        <p class="para">Use this tab to identify spectral extractions to include 
+ in your report.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Because of differences in the computed precision used in Review and Report 
+ Publisher, you might see minor differences in reported values between 
+ the Spectrum Points table in Spectrum Review and the Extraction Table 
+ report group in Report Publisher when baseline correction is enabled.</p>
+        <h2>Table title</h2>
+        <p class="para">Title displayed directly above the table. The table title 
+ can have up to 250 alphanumeric characters without restrictions. If multiple 
+ lines are required, press Ctrl+Enter to force the title onto multiple 
+ lines. </p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ When you specify a table title, ensure that it is not wider than the potential 
+ table width. If the title is longer than the generated table, the title 
+ is truncated. Avoid this problem by shortening the title or forcing it 
+ onto multiple lines.</p>
+        <h3>Alignment</h3>
+        <p class="para">Position of the title above the table. </p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Left Alignment, Center Alignment, Right Alignment </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Center Alignment</p>
+        <h2>Spectral range</h2>
+        <p class="para">Minimum and maximum X value range (in nm or m/z) of the spectra 
+ to include in the Spectra table. All remaining spectral points outside 
+ this range are not included in the report. </p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 0.0 to 3000.00 </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Blank</p>
+        <h2>Spectra extraction table</h2>
+        <p class="para">Individual spectral extractions to report. Columns are described 
+ below.</p>
+        <h3>Apply to PDA channel</h3>
+        <p class="para">Enables or disables the reporting of extracted spectra for 
+ the associated PDA channel.</p>
+        <h3>Apply to MS channel</h3>
+        <p class="para">Enables or disables the reporting of extracted spectra for 
+ the associated MS channel.</p>
+        <h3>Extraction time (min)</h3>
+        <p class="para">Specific time markers of the extracted spectra you want reported. 
+ </p>
+        <h3>Subtract (min) (MS)</h3>
+        <p class="para">Enter the baseline correction spectrum.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ MS continuum data never has negative intensities, even after performing 
+ baseline subtraction.</p>
+        <h3>Peak separation (Da) (MS centroid data only)</h3>
+        <p class="para">When binning combined spectra, enter the peak separation 
+ in Daltons.</p>
+        <h3>Baseline multiplier (MS centroid data only)</h3>
+        <p class="para">Enter the value to multiply the baseline spectrum by before 
+ performing baseline correction.</p>
+        <h3>Num. spectra to average</h3>
+        <p class="para">Number of spectra to be averaged to produce the extraction. 
+ When spectra are extracted, they can be averaged over a series of scans 
+ to reduce the noise level in the spectra. For example, a value of 1 indicates 
+ no averaging (spectrum is averaged with itself). A value of 3 averages 
+ the extracted spectrum with the spectrum on each side of the extracted 
+ spectrum.</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 1 to 30000</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 1.</p>
+        <h3>Noise threshold (%) (MS)</h3>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ The Threshold parameter does not permanently affect the original spectral 
+ data.</p>
+        <p class="para">Removes noise from spectral data before a library search. 
+ The threshold value is applied as a percentage of the Base Peak intensity. 
+ Mass intensity values in the sample spectrum that are less than the Threshold 
+ value are set to 0. During a library search, the PBM algorithm ignores 
+ the ion masses with intensity values of 0. You can apply the Threshold 
+ parameter to any spectrum in Spectrum Review, then view the result in 
+ the Spectral plot or in your report.</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 0.000 to 100.000</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.100</p>
+        <h3>Combine type (MS)</h3>
+        <p class="para">Select Sum or Average as the combine type.</p>
+        <h3>Multiple averages</h3>
+        <p class="para">For display purposes only. Do not use this column in your 
+ report.</p>
+        <h3>MS offset (min)</h3>
+        <p class="para">Time value that is added to MS extractions to compensate 
+ for dead volume between the PDA Detector and the MS detector.</p>
+        <h3>Baseline correct</h3>
+        <p class="para">Compares spectra with or without baseline correction (PDA 
+ and MS). You can perform baseline correction only if the spectra are within 
+ peak limits.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ MS continuum data will never have negative intensities, even after performing 
+ baseline subtraction.</p>
+        <h3>Spline (PDA)</h3>
+        <p class="para">Turns cubic splining on and off to enhance the spectral display 
+ (PDA). When a spectrum is splined, it reappears as a spectrum that extends 
+ from its ideal low wavelength to its ideal high wavelength with a resolution 
+ of 0.2 nm, regardless of its actual wavelengths and resolution. The interpolated 
+ points are calculated by performing a cubic spline operation. A low-resolution 
+ spectrum that was splined can produce a more accurate wavelength of maximum 
+ absorbance. </p>
+        <h3>Derivative (PDA)</h3>
+        <p class="para">Number of times the derivative algorithm is applied to the 
+ spectra (PDA). </p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ None, First, Second, Third, Fourth</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ None</p>
+        <h3>Smoothing</h3>
+        <p class="para">Controls the level of smoothing by specifying the length 
+ of the Savitsky-Golay filter applied to the spectra for both smoothing 
+ and derivatives (PDA). Use the lowest smoothing number to avoid over distortion 
+ of the spectra. </p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ None, and odd values (except 1 and 3) None to 31 </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ None</p>
+        <p class="para">Smoothing is not performed if the number of points in the 
+ spectrum is less than the smoothing number plus 5.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ If Smoothing is set to None, setting Derivative to First, Second, Third, 
+ Fourth applies a smoothing number of 5.</p>
+    </body>
+</html>

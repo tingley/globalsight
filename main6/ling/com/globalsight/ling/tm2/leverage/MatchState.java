@@ -56,7 +56,8 @@ public class MatchState
         = new MatchState(15, "TDA_MATCH", 13);
     static public final MatchState PO_EXACT_MATCH
         = new MatchState(16, "PO_EXACT_MATCH", 14);
-    
+    static public final MatchState MACHINE_TRANSLATION
+        = new MatchState(16, "MACHINE_TRANSLATION", 15);
 
     // map for getting MatchState object by looking up its name
     // Key: state name
@@ -67,42 +68,26 @@ public class MatchState
     {
         HashMap<String, MatchState> map = new HashMap<String, MatchState>();
         
-        map.put(IN_PROGRESS_TM_EXACT_MATCH.getName(),
-            IN_PROGRESS_TM_EXACT_MATCH);
-        map.put(UNVERIFIED_EXACT_MATCH.getName(),
-            UNVERIFIED_EXACT_MATCH);
-        map.put(PAGE_TM_EXACT_MATCH.getName(),
-            PAGE_TM_EXACT_MATCH);
-        map.put(SEGMENT_TM_EXACT_MATCH.getName(),
-            SEGMENT_TM_EXACT_MATCH);
-        map.put(MULTIPLE_TRANSLATION.getName(),
-            MULTIPLE_TRANSLATION);
-        map.put(TYPE_DIFFERENT.getName(),
-            TYPE_DIFFERENT);
-        map.put(CASE_DIFFERENT.getName(),
-            CASE_DIFFERENT);
-        map.put(WHITESPACE_DIFFERENT.getName(),
-            WHITESPACE_DIFFERENT);
-        map.put(CODE_DIFFERENT.getName(),
-            CODE_DIFFERENT);
-        map.put(FUZZY_MATCH.getName(),
-            FUZZY_MATCH);
-        map.put(STATISTICS_MATCH.getName(),
-            STATISTICS_MATCH);
-        map.put(NOT_A_MATCH.getName(),
-            NOT_A_MATCH);
-        map.put(MT_EXACT_MATCH.getName(),
-        		MT_EXACT_MATCH);
-        map.put(XLIFF_EXACT_MATCH.getName(),
-                XLIFF_EXACT_MATCH);
-        map.put(TDA_MATCH.getName(),
-                TDA_MATCH);
-        map.put(PO_EXACT_MATCH.getName(),
-                PO_EXACT_MATCH);
+        map.put(IN_PROGRESS_TM_EXACT_MATCH.getName(), IN_PROGRESS_TM_EXACT_MATCH);
+        map.put(UNVERIFIED_EXACT_MATCH.getName(), UNVERIFIED_EXACT_MATCH);
+        map.put(PAGE_TM_EXACT_MATCH.getName(), PAGE_TM_EXACT_MATCH);
+        map.put(SEGMENT_TM_EXACT_MATCH.getName(), SEGMENT_TM_EXACT_MATCH);
+        map.put(MULTIPLE_TRANSLATION.getName(), MULTIPLE_TRANSLATION);
+        map.put(TYPE_DIFFERENT.getName(), TYPE_DIFFERENT);
+        map.put(CASE_DIFFERENT.getName(), CASE_DIFFERENT);
+        map.put(WHITESPACE_DIFFERENT.getName(), WHITESPACE_DIFFERENT);
+        map.put(CODE_DIFFERENT.getName(), CODE_DIFFERENT);
+        map.put(FUZZY_MATCH.getName(), FUZZY_MATCH);
+        map.put(STATISTICS_MATCH.getName(), STATISTICS_MATCH);
+        map.put(NOT_A_MATCH.getName(), NOT_A_MATCH);
+        map.put(MT_EXACT_MATCH.getName(), MT_EXACT_MATCH);
+        map.put(XLIFF_EXACT_MATCH.getName(), XLIFF_EXACT_MATCH);
+        map.put(TDA_MATCH.getName(), TDA_MATCH);
+        map.put(PO_EXACT_MATCH.getName(), PO_EXACT_MATCH);
+        map.put(MACHINE_TRANSLATION.getName(), MACHINE_TRANSLATION);
 
         return map;
     }
-
     
     private int m_id;
     private String m_name;

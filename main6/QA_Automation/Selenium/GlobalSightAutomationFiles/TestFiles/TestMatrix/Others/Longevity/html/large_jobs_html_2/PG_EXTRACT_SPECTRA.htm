@@ -1,0 +1,202 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="3779" MadCap:lastWidth="571">
+    <head><title>Extract Spectra Tab</title>
+    </head>
+    <body>
+        <h1>Extract 
+ spectra tab</h1>
+        <p class="para">Use this tab to identify spectral extractions to include 
+ in your report.</p>
+        <h2>Label spectra</h2>
+        <p class="para">Specified labels above individual spectra. </p>
+        <h2>Reference spectra</h2>
+        <p class="para">Reference spectra above the individual spectra.</p>
+        <h3>UV labels:</h3>
+        <ul>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Upper 
+ Right – Places all labels in the upper-right corner of the plot. </li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Lambda 
+ Max – Places each label above the lambda maximum of each spectrum.</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Multiple 
+ Lambda Max – Places labels at all wavelengths of maximum absorbance.</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">UV Label 
+ – Label to 
+ display:</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Retention 
+ Time – Time 
+ at which a peak elutes.</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">ID Number 
+ – Relative number assigned to the spectrum when it is brought into Spectrum 
+ Review.</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Wavelength 
+ – Wavelength 
+ of maximum absorbance.</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Absorbance 
+ – Absorbance 
+ at the wavelength of maximum absorbance.</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Spectrum 
+ Name – Name 
+ of spectrum in the library.</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Match 
+ Angle – Result of Library Matching (blank if no match).</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Match 
+ Number – Relative number of the match, where 1 is the best match (blank 
+ if no match).</li>
+            <li style="font-size: 9pt;" class="listbull">Lambda Max Window – Sets 
+ the wavelength window around each lambda max when you select Lambda Max 
+ or Multiple Lambda Max. This value sets a window around each point in 
+ the spectrum. The maximally absorbed wavelength within the window around 
+ each point is labeled.</li>
+        </ul>
+        <h3>MS labels:</h3>
+        <ul>
+            <li class="listbull" style="font-weight: normal;">Upper 
+ Right – Places all labels in the upper-right corner of the plot.</li>
+            <li class="listbull" style="font-weight: normal;">Base Peak 
+ Mass – Places a label above the most abundant ion of each spectrum.</li>
+            <li class="listbull" style="font-weight: normal;">Multiple 
+ Masses – Places labels only at masses with an intensity equal to or greater 
+ than the value specified in the Intensity Label Level parameter.</li>
+            <li class="listbull" style="font-weight: normal;">MS Label 
+ – Label to 
+ display.</li>
+            <li class="listbull" style="font-weight: normal;">Retention 
+ Time – Time 
+ at which a peak eluted.</li>
+            <li class="listbull" style="font-weight: normal;">ID Number 
+ – Relative number assigned to the spectrum when it was brought into Spectrum 
+ Review.</li>
+            <li class="listbull" style="font-weight: normal;">Mass – 
+ Mass of maximum 
+ intensity.</li>
+            <li class="listbull" style="font-weight: normal;">Intensity 
+ – Height (y-axis) of the peak.</li>
+            <li class="listbull" style="font-weight: normal;">Spectrum 
+ Name – Name 
+ of the spectrum in the library.</li>
+            <li class="listbull" style="font-weight: normal;">Match 
+ PBM Fit – Result of spectrum matching (blank if no match).</li>
+            <li class="listbull" style="font-weight: normal;">Match 
+ Number – Relative number of the match, where 1 is the best match (blank 
+ if no match).</li>
+            <li class="listbull">Intensity Label Level 
+ – Intensity threshold value that is a percentage of the intensity of the 
+ base peak. The software labels the last point in a spectrum that has an 
+ intensity value greater than the intensity threshold value you enter. 
+ Entries: 0.0 to 100.0. Default: 50.0.</li>
+        </ul>
+        <h2>Spectral extraction table</h2>
+        <p class="para">Identifies individual spectra extractions to report. Table 
+ columns are described below.</p>
+        <h3>Apply to PDA channel</h3>
+        <p class="para">Enables or disables reporting of extracted spectra for the 
+ associated PDA channel.</p>
+        <h3>Apply to MS channel</h3>
+        <p class="para">Enables or disables reporting of extracted spectra for the 
+ associated MS channel.</p>
+        <h3>Extraction time (min) (PDA and MS)</h3>
+        <p class="para">Enter the average time in minutes for the peak spectrum.</p>
+        <h3>Baseline Correct (PDA and MS)</h3>
+        <p class="para">Compares spectra with or without baseline correction. You 
+ can perform baseline correction only if the spectra are within the peak 
+ limits.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ MS continuum data never has negative intensities, even after performing 
+ baseline subtraction.</p>
+        <h3>Spline (PDA)</h3>
+        <p class="para">Turns cubic splining on and off to enhance the spectral display. 
+ When a spectrum is splined, it reappears as a spectrum that extends from 
+ its ideal low wavelength to its ideal high wavelength with a resolution 
+ of 0.2 nm, regardless of its actual wavelengths and resolution. The interpolated 
+ points are calculated by performing a cubic spline operation. A low-resolution 
+ spectrum that was splined can produce a more accurate wavelength of maximum 
+ absorbance.</p>
+        <h3>Derivative (PDA)</h3>
+        <p class="para">Sets the number of times the derivative algorithm is applied 
+ to the spectra (PDA). </p>
+        <p class="paraindent"><span class="emphasisbold">Choices:</span> 
+ None, First, Second, Third, Fourth</p>
+        <p class="paraindent"><span class="emphasisbold">Default:</span> 
+ None</p>
+        <h3>Smoothing</h3>
+        <p class="para">Controls the level of smoothing by specifying the length 
+ of the Savitsky-Golay filter applied to the spectra for both smoothing 
+ and derivatives (PDA). Use the lowest smoothing number possible to avoid 
+ over distortion of the spectra.</p>
+        <p class="paraindent"><span class="emphasisbold">Choices:</span> 
+ None, 5,7,9,11,13,15,17,19,21,23,25,27,29,31.</p>
+        <p class="paraindent"><span class="emphasisbold">Default:</span> 
+ None.</p>
+        <p class="para">Smoothing is not performed if the number of points in the 
+ spectrum is less than the smoothing number plus 5.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ If you set Smoothing to None, setting Derivative to 1, 2, 3, or 4 applies 
+ a smoothing number of 5.</p>
+        <h3>MS offset (min)</h3>
+        <p class="para">Time value that is added to MS extractions to compensate 
+ for dead volume between the 2996 PDA Detector and the MS detector.</p>
+        <h3>Subtract (min) (MS)</h3>
+        <p class="para">Enter the baseline correction spectrum.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ MS continuum data never has negative intensities, even after performing 
+ baseline subtraction.</p>
+        <h3>Peak separation (Da) (MS centroid data only)</h3>
+        <p class="para">When binning combined spectra, enter the peak separation 
+ in Daltons.</p>
+        <h3>Baseline Multiplier (MS centroid data only)</h3>
+        <p class="para">Enter the value that you want to multiply the baseline spectrum 
+ by before performing baseline correction.</p>
+        <h3>Spectra to average (MS)</h3>
+        <p class="para">If the Peak Spectra is a single time and the Baseline Spectra 
+ field is blank, enter the number of spectra to average when extracting.</p>
+        <h3>Noise threshold (%)</h3>
+        <p class="para">Value of the Noise Threshold parameter used to remove electronic 
+ noise from spectra data before a library search.</p>
+        <h3>Combine type (MS)</h3>
+        <p class="para">Select Sum or Average as the combine type.</p>
+        <h3>Extraction time</h3>
+        <p class="para">Specific time markers of the extracted spectra you want reported.</p>
+        <h3>MS threshold (%)</h3>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ The Threshold parameter does not permanently affect the original spectral 
+ data.</p>
+        <p class="para">Removes noise from spectral data before a library search. 
+ The threshold value is applied as a percentage of the Base Peak intensity. 
+ Mass intensity values in the sample spectrum that are less than the Threshold 
+ value are set to 0. During a library search, the PBM algorithm ignores 
+ the ion masses with intensity values of 0. You can apply the Threshold 
+ parameter to any spectrum in Spectrum Review, then view the result in 
+ the Spectral plot or in your report. </p>
+        <p class="paraindent"><span class="emphasisbold">Entries:</span> 
+ 0.000 to 100.0000 </p>
+        <p class="paraindent"><span class="emphasisbold">Default:</span> 
+ 0.100</p>
+        <h3 class="para">MS Smoothing type</h3>
+        <p class="para">Select None, Savitsky-Golay, or Mean as the smoothing type.</p>
+        <p class="para">Use Savitsky-Golay filtering to average a specified number 
+ of continuum data points and thus smooth an MS spectrum. The Savitsky-Golay 
+ filter has been modified to handle unevenly spaced continuum spectrum.</p>
+        <p class="para">Mean smoothing calculates the mathematical mean.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ You can smooth only continuum data.</p>
+        <h3>MS smoothing window (Da)</h3>
+        <p class="para">Enter a value for the smoothing factor. Use the lowest value 
+ possible that does not distort the spectrum.</p>
+        <p class="paraindent"><span class="emphasisbold">Range: 
+ </span>0 to 4000 (with a precision of 2)</p>
+        <p class="paraindent"><span class="emphasisbold">Default:</span> 
+ None</p>
+        <p class="paraindent"><span class="emphasisbold">Units:</span> 
+ Daltons</p>
+        <p class="caption">To use Savitsky-Golay &#160;or 
+ Mean smoothing: </p>
+        <ol>
+            <li class="listnum">Click<span style="font-weight: bold;"> <![CDATA[ ]]></span>Apply to MS Channel to activate the row.</li>
+            <li class="listnum">Select the MS Smoothing 
+ Type, either Savitsky-Golay or Mean.</li>
+            <li class="listnum">Specify a smoothing factor 
+ in the MS Smoothing Window cell. &#160;</li>
+        </ol>
+        <p class="paraindent">&#160;</p>
+    </body>
+</html>

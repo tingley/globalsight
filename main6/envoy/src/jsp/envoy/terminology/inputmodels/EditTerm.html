@@ -5,7 +5,8 @@
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT language="Javascript">
-var g_args;
+var o=window.opener;
+var g_args=o.editTermParams;
 
 function doClose(ok)
 {
@@ -28,12 +29,7 @@ function doClose(ok)
     }
 
     g_args.setTerm(value);
-
-    window.returnValue = g_args;
-  }
-  else
-  {
-    window.returnValue = null;
+    o.editTermDialog(g_args);
   }
 
   window.close();
@@ -55,8 +51,6 @@ function doKeypress()
 
 function doLoad()
 {
-  g_args = window.dialogArguments;
-
   idTerm.innerText = g_args.isMainTerm() ? "Main Term" : "Synonyms";
   idTermVerb.innerText = g_args.isMainTerm() ? "is:" : "are:";
   idLanguage.innerText = g_args.getLanguage();
@@ -120,7 +114,7 @@ function doLoad()
 <BR>
 
 <DIV ALIGN="CENTER">
-<INPUT id="idOk" TYPE=BUTTON VALUE=" Ok " TABINDEX="4" onclick="doClose(true);">
+<INPUT id="idOk" TYPE=BUTTON VALUE=" OK " TABINDEX="4" onclick="doClose(true);">
 <INPUT TYPE=BUTTON VALUE="Cancel" TABINDEX="5" onclick="doClose(false);">
 </DIV>
 

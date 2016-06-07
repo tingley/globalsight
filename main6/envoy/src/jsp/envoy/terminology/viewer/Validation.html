@@ -45,29 +45,29 @@ function parseValidationResults(dom)
   var nodes, node, nodes2, node2, nodes3, node3;
   var language, dupLanguage, term, dupTerm, cid, tid;
 
-  nodes = dom.selectNodes('//validation/duplicates');
+  nodes = dom.validation;
   for (var i = 0; i < nodes.length; ++i)
   {
     node = nodes[i];
 
-    language = node.selectSingleNode('original/language').text;
-    term = node.selectSingleNode('original/term').text;
+    language = node.original.language;
+    term = node.original.term;
 
-    nodes2 = node.selectNodes('others/other');
+    nodes2 = node.others;
     for (var j = 0; j < nodes2.length; ++j)
     {
       node2 = nodes2[j];
 
-      dupLanguage = node2.selectSingleNode('language').text;
+      dupLanguage = node2.language;
 
-      nodes3 = node2.selectNodes('term');
+      nodes3 = node2.terms;
       for (var k = 0; k < nodes3.length; ++k)
       {
         node3 = nodes3[k];
 
-        dupTerm = node3.text;
-        cid = node3.attributes.getNamedItem('cid').value;
-        tid = node3.attributes.getNamedItem('tid').value;
+        dupTerm = node3.term;
+        cid = node3.cid;
+        tid = node3.tid;
 
         g_duplicates.push(new Duplicate(language, term,
           dupLanguage, dupTerm, cid, tid));

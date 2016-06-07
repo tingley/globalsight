@@ -1,0 +1,10 @@
+Index	Translate Header Information	Translate ToolTips	Translate Table Of Content	Content post-filter	Internal Text post-filter	unextractableWordParagraphStyles	unextractableWordCharacterStyles	selectedInternalTextStyles	End Of Line
+Case 1	O	O	O	2114html	2114	MyHeading2,MyHeading3,DoNotTrans	test1,test2	test3,test4	1
+Case 2	X	X	X					test3,test4	1
+Case 3	X	X	X				test1,test2		1
+Case 4	X	X	X			MyHeading2,MyHeading3,DoNotTrans			1
+Case 5	X	X	X		2114				1
+Case 6	X	X	O						1
+Case 7	X	O	X						1
+Case 8	O	X	X						1
+Case 9	X	X	X						1

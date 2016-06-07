@@ -4,6 +4,7 @@ import org.testng.Assert;
 import org.testng.Reporter;
 
 import com.globalsight.selenium.pages.ActivityType;
+import com.globalsight.selenium.pages.BasePage;
 import com.thoughtworks.selenium.Selenium;
 
 public class ActivityTypeFuncs extends BasicFuncs
@@ -42,8 +43,14 @@ public class ActivityTypeFuncs extends BasicFuncs
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         }
 
-        Assert.assertTrue(this.isPresentInTable(selenium,
-                ActivityType.ACTIVITY_TABLE, name));
+        selenium.type("ID="+ActivityType.activityNameFilter, name);
+        selenium.keyDown("ID="+ActivityType.activityNameFilter, "13");
+        selenium.keyUp("ID="+ActivityType.activityNameFilter, "13");
+//        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+
+        Assert.assertTrue(this.isElementPresent(selenium, "link="+name));
+//        Assert.assertTrue(this.isPresentInTable(selenium,
+//                ActivityType.ACTIVITY_TABLE, name));
     }
 
     // author Shenyang 2011-6-22
@@ -51,17 +58,30 @@ public class ActivityTypeFuncs extends BasicFuncs
             String description, String newActivityType) throws Exception
     {
 
-        boolean selected = selectRadioButtonFromTable(selenium,
-                ActivityType.ACTIVITY_TABLE, activtiyName);
-        if (!selected)
+    	selenium.type(ActivityType.activityNameFilter, activtiyName);
+        selenium.keyDown(ActivityType.activityNameFilter, "13");
+        selenium.keyUp(ActivityType.activityNameFilter, "13");
+        
+//        boolean selected = selectRadioButtonFromTable(selenium,
+//                ActivityType.ACTIVITY_TABLE, activtiyName);
+        
+        if (!selenium.isElementPresent("link=" + activtiyName))
+
         {
-            Reporter.log("Cannot find a proper ActivityType to edit.");
+        	Reporter.log("Cannot find a proper ActivityType to edit.");
             return;
         }
+        	
+//        if (!selected)
+//        {
+//            Reporter.log("Cannot find a proper ActivityType to edit.");
+//            return;
+//        }
 
         try
         {
-            selenium.click("link=" + activtiyName);
+        	selenium.click("link=" + activtiyName);
+//            selenium.click("link=" + activtiyName);
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
             selenium.type(ActivityType.DESCRIPTION_TEXT, description);
@@ -75,8 +95,18 @@ public class ActivityTypeFuncs extends BasicFuncs
             Reporter.log(e.getMessage());
             //selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         }
-        Assert.assertEquals(this.getColumnText(selenium,
-                ActivityType.ACTIVITY_TABLE, activtiyName, 3), description);
+//        Assert.assertEquals(this.getColumnText(selenium,
+//                ActivityType.ACTIVITY_TABLE, activtiyName, 3), description);
+        
+        selenium.type(ActivityType.activityNameFilter, activtiyName);
+        selenium.keyDown(ActivityType.activityNameFilter, "13");
+        selenium.keyUp(ActivityType.activityNameFilter, "13");
+        Thread.sleep(10000);
+        
+        
+//        Assert.assertEquals(this.getColumnText(selenium,
+//              ActivityType.ACTIVITY_TABLE, activtiyName, 3), description);
+        
     }
 
     // author Shenyang 2011-6-22

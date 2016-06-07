@@ -175,7 +175,6 @@ function doPrev()
         dom = $.parseXML(xmlImportOptions);
         
         var node = $(dom).find("importOptions fileOptions fileType");
-		alert("doPrev--node.text()="+node.text());
         if (node.text() == "<%=ImportOptions.TYPE_XML%>" ||
             node.text() == "<%=ImportOptions.TYPE_MTF%>")
         {

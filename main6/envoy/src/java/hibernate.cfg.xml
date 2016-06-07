@@ -145,7 +145,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/UpdatedSourcePage.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/AddingSourcePage.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/MSOfficePPTFilter.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/TDATM.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/SSOUserMapping.hbm.xml" />
 		<mapping resource="com/globalsight/ling/tm3/core/persistence/xml/BaseTm.hbm.xml" />
 		<mapping resource="com/globalsight/ling/tm3/core/persistence/xml/TM3Attribute.hbm.xml" />

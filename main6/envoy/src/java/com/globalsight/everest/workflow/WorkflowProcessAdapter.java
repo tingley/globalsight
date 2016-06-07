@@ -891,6 +891,10 @@ public class WorkflowProcessAdapter extends WorkflowHelper
                 WorkflowConstants.FIELD_REPORT_UPLOAD_CHECK,
                 WorkflowConstants.REPORT_UPLOAD_CHECK);
 
+        int activityCommentUploadCheck = p_param.getIntAttribute(
+                WorkflowConstants.FIELD_ACTIVITY_COMMENT_UPLOAD_CHECK,
+                WorkflowConstants.ACTIVITY_COMMENT_UPLOAD_CHECK);
+        
         String rolePreference = p_param
                 .getAttribute(WorkflowConstants.FIELD_ROLE_PREFERENCE);
 
@@ -909,6 +913,7 @@ public class WorkflowProcessAdapter extends WorkflowHelper
         p_wti.setCompletedTime(timeToComplete);
         p_wti.setOverdueToPM(overduePM);
         p_wti.setOverdueToUser(overdueUser);
+        p_wti.setActivityCommentUploadCheck(activityCommentUploadCheck);
         p_wti.setReportUploadCheck(reportUploadCheck);
         p_wti.setDisplayRoleName(UserUtil.getUserNamesByIds(displayRoleName));
     }
@@ -1720,6 +1725,11 @@ public class WorkflowProcessAdapter extends WorkflowHelper
         nodePara.setAttribute(WorkflowConstants.FIELD_REPORT_UPLOAD_CHECK,
                 Integer.toString(reportUploadCheck));
 
+        // update activity comment upload check
+        int activityCommentUploadCheck =  p_wfTask.getActivityCommentUploadCheck();
+        nodePara.setAttribute(WorkflowConstants.FIELD_ACTIVITY_COMMENT_UPLOAD_CHECK,
+                Integer.toString(activityCommentUploadCheck));
+        
         // update role name UDA
         String role_name = p_wfTask.getDisplayRoleName();
         nodePara.setAttribute(WorkflowConstants.FIELD_ROLE_NAME,

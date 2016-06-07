@@ -14,73 +14,86 @@
  *  limitations under the License.
  *  
  */
-package com.globalsight.everest.util.comparator;    
+package com.globalsight.everest.util.comparator;
 
-import java.util.Comparator;
-import com.globalsight.everest.jobhandler.Job;
-import java.util.Locale;
 import java.util.Date;
+import java.util.Locale;
+
+import com.globalsight.everest.jobhandler.Job;
 
 /**
-* This class can be used to compare Job objects
-*/
+ * This class can be used to compare Job objects
+ */
 public class JobComparator extends StringComparator
 {
-	//types of comparison
-	public static final int NAME = 0;
+    private static final long serialVersionUID = 5720539487126602270L;
 
-	/**
-	* Creates a JobComparator with the given type and locale.
-	* If the type is not a valid type, then the default comparison
-	* is done by name
-	*/
-	public JobComparator(int p_type,Locale p_locale)
-	{
-	    super(p_type, p_locale);
-	}
+    // types of comparison
+    public static final int NAME = 0;
+    public static final int JOB_ID = 1;
 
-	public JobComparator(Locale p_locale)
-	{
-	    super(p_locale);
-	}
+    /**
+     * Creates a JobComparator with the given type and locale. If the type is
+     * not a valid type, then the default comparison is done by name
+     */
+    public JobComparator(int p_type, Locale p_locale)
+    {
+        super(p_type, p_locale);
+    }
 
-	/**
-	* Performs a comparison of two Job objects.
-	*/
-	public int compare(java.lang.Object p_A, java.lang.Object p_B) {
-		Job a = (Job) p_A;
-		Job b = (Job) p_B;
+    public JobComparator(Locale p_locale)
+    {
+        super(p_locale);
+    }
 
-		String aValue;
-		String bValue;
-		int rv;
+    /**
+     * Performs a comparison of two Job objects.
+     */
+    public int compare(java.lang.Object p_A, java.lang.Object p_B)
+    {
+        Job a = (Job) p_A;
+        Job b = (Job) p_B;
 
-		switch (m_type)
-		{
-		case NAME:
-			aValue = a.getJobName();
-			bValue = b.getJobName();
-			rv = this.compareStrings(aValue,bValue);
-                        if (rv == 0)
-                        {
-                            //compare by dates since the names are the same
-                            Date aDate = a.getCreateDate();
-                            Date bDate = b.getCreateDate();
-                            if (aDate.after(bDate))
-                                rv = 1;
-                            else if (aDate.equals(bDate))
-                                rv = 0;
-                            else
-                                rv = -1;
-                        }
-    			break;
-		default:
-			aValue = a.getJobName();
-			bValue = b.getJobName();
-			rv = this.compareStrings(aValue,bValue);
-			break;
-		}
+        String aValue;
+        String bValue;
+        int rv;
 
-		return rv;
-	}
+        switch (m_type)
+        {
+            case NAME:
+                aValue = a.getJobName();
+                bValue = b.getJobName();
+                rv = this.compareStrings(aValue, bValue);
+                if (rv == 0)
+                {
+                    // compare by dates since the names are the same
+                    Date aDate = a.getCreateDate();
+                    Date bDate = b.getCreateDate();
+                    if (aDate.after(bDate))
+                        rv = 1;
+                    else if (aDate.equals(bDate))
+                        rv = 0;
+                    else
+                        rv = -1;
+                }
+                break;
+            case JOB_ID:
+                long aLong = a.getJobId();
+                long bLong = b.getJobId();
+                if (aLong > bLong)
+                    rv = 1;
+                else if (aLong == bLong)
+                    rv = 0;
+                else
+                    rv = -1;
+                break;
+            default:
+                aValue = a.getJobName();
+                bValue = b.getJobName();
+                rv = this.compareStrings(aValue, bValue);
+                break;
+        }
+
+        return rv;
+    }
 }

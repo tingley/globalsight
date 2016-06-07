@@ -1,0 +1,433 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="6" MadCap:lastHeight="5532" MadCap:lastWidth="695">
+    <head>
+        <link href="../Resources/TableStyles/WMouseOver.css" rel="stylesheet" MadCap:stylesheetType="table" /><title>General Tab (2790/2795)</title>
+    </head>
+    <body>
+        <h1>General 
+ tab (2790/2795)</h1>
+        <p class="para">Use this tab to define system, column, injector, autosampler, 
+ wash, and rapid equilibration parameters for the 2790/2795 separations 
+ module.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Values in some fields could change depending on the type of column switching 
+ valve you have connected to the 2790/2795 Module.</p>
+        <h2>General system parameters</h2>
+        <h3>Stroke volume (µL)</h3>
+        <p class="para">Sets the volume of solvent delivered with each piston stroke. 
+ Select one of these manual stroke volume settings based on the flow rate 
+ that you need for your analysis:</p>
+        <p class="caption">Suggested flow rate range for manual settings:</p>
+        <table style="border-spacing: 0px;caption-side: top;mc-table-style: url('../Resources/TableStyles/WMouseOver.css');" cellspacing="0" class="TableStyle-WMouseOver">
+            <col class="Column-Column1" />
+            <col class="Column-Column1" />
+            <thead>
+                <tr class="Head-Header1">
+                    <th class="HeadE-Column1-Header1">
+                        <p class="tablehead">Stroke volume</p>
+                    </th>
+                    <th class="HeadD-Column1-Header1">
+                        <p class="tablehead">Flow rate range</p>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr valign="top" class="Body-Body1">
+                    <td width="25%" class="BodyE-Column1-Body1">
+                        <p class="tabledata">25 <span style="font-family: Symbol;">m</span>L</p>
+                    </td>
+                    <td width="75%" class="BodyD-Column1-Body1">
+                        <p class="tabledata">0.010 to 0.530 mL/min</p>
+                    </td>
+                </tr>
+                <tr valign="top" class="Body-Body1">
+                    <td width="25%" class="BodyE-Column1-Body1">
+                        <p class="tabledata">50 <span style="font-family: Symbol;">m</span>L</p>
+                    </td>
+                    <td width="75%" class="BodyD-Column1-Body1">
+                        <p class="tabledata">0.531 to 1.230 mL/min</p>
+                    </td>
+                </tr>
+                <tr valign="top" class="Body-Body1">
+                    <td colspan="1" rowspan="1" width="25%" class="BodyE-Column1-Body1">
+                        <p class="tabledata">100 <span style="font-family: Symbol;">m</span>L</p>
+                    </td>
+                    <td colspan="1" rowspan="1" width="75%" class="BodyD-Column1-Body1">
+                        <p class="tabledata">1.231 to 3.030 mL/min</p>
+                    </td>
+                </tr>
+                <tr valign="top" class="Body-Body1">
+                    <td colspan="1" rowspan="1" width="25%" class="BodyB-Column1-Body1">
+                        <p class="tabledata">130 <span style="font-family: Symbol;">m</span>L </p>
+                    </td>
+                    <td colspan="1" rowspan="1" width="75%" class="BodyA-Column1-Body1">
+                        <p class="tabledata">3.031 - 10.000 mL/min</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ If you choose a flow rate value greater than the suggested range for a 
+ given manual stroke volume, the software automatically adjusts the stroke 
+ volume to a higher value.</p>
+        <h3>Pre column volume (µL)</h3>
+        <p class="para">Specifies the volume of mobile phase delivered to the system 
+ after the gradient starts, but before an injection is made. </p>
+        <p class="para">Use this parameter when you use a method from a system that 
+ has a delay volume smaller than that of the 2790/2795 separations module. 
+ You can also use this parameter to reduce the delay volume of the 2790/2795 
+ separations module for narrow or microbore columns or for high-throughput 
+ separations, because the sample is held in the sample loop (if desired) 
+ until the gradient front reaches the sample loop.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.0 µL</p>
+        <h3>Bubble detect</h3>
+        <p class="para">Specifies that the system look for air bubbles in the flow 
+ path and respond by displaying an error message and by performing a bubble 
+ recovery procedure.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Enabled</p>
+        <h3>Syringe draw rate (µL/sec)</h3>
+        <p class="para">Draw rate of the syringe to accommodate viscous samples. 
+ The rate for each selection automatically adjusts to the size of the installed 
+ syringe. Selections: Fast, Normal, Slow, and Custom. Selecting Custom 
+ activates the Custom Draw Rate field.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Normal</p>
+        <p class="para">This table shows the draw rate for each selection using a 
+ 250-<span style="font-family: Symbol;">m</span>L syringe.</p>
+        <p class="caption">Suggested flow rate range for manual settings:</p>
+        <table style="border-spacing: 0px;caption-side: top;mc-table-style: url('../Resources/TableStyles/WMouseOver.css');" cellspacing="0" class="TableStyle-WMouseOver">
+            <col class="Column-Column1" />
+            <col class="Column-Column1" />
+            <thead>
+                <tr class="Head-Header1">
+                    <th class="HeadE-Column1-Header1">
+                        <p class="tablehead">Selection</p>
+                    </th>
+                    <th class="HeadD-Column1-Header1">
+                        <p class="tablehead">Draw Rate for a 250-<span style="font-family: Symbol;">m</span>L Syringe 
+ (<span style="font-family: Symbol;">m</span>L/sec)</p>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr valign="top" class="Body-Body1">
+                    <td width="25%" class="BodyE-Column1-Body1">
+                        <p class="tabledata">Fast</p>
+                    </td>
+                    <td width="75%" class="BodyD-Column1-Body1">
+                        <p class="tabledata">5.0</p>
+                    </td>
+                </tr>
+                <tr valign="top" class="Body-Body1">
+                    <td width="25%" class="BodyE-Column1-Body1">
+                        <p class="tabledata">Normal</p>
+                    </td>
+                    <td width="75%" class="BodyD-Column1-Body1">
+                        <p class="tabledata">2.5</p>
+                    </td>
+                </tr>
+                <tr valign="top" class="Body-Body1">
+                    <td colspan="1" rowspan="1" width="25%" class="BodyE-Column1-Body1">
+                        <p class="tabledata">Slow</p>
+                    </td>
+                    <td colspan="1" rowspan="1" width="75%" class="BodyD-Column1-Body1">
+                        <p class="tabledata">1.0</p>
+                    </td>
+                </tr>
+                <tr valign="top" class="Body-Body1">
+                    <td colspan="1" rowspan="1" width="25%" class="BodyB-Column1-Body1">
+                        <p class="tabledata">Custom</p>
+                    </td>
+                    <td colspan="1" rowspan="1" width="75%" class="BodyA-Column1-Body1">
+                        <p class="tabledata">(See table below)</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <h3>Custom draw rate</h3>
+        <p class="para">User-selected syringe draw rate. To activate this field, 
+ select Custom in the Syringe Draw Rate field.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 1.0 <span style="font-family: Symbol;">m</span>L/sec</p>
+        <p class="para">This table shows custom draw rate ranges for different syringe 
+ sizes.</p>
+        <p class="caption">Custom draw rate ranges:</p>
+        <table style="border-spacing: 0px;mc-table-style: url('../Resources/TableStyles/WMouseOver.css');margin-left: 0;margin-right: auto;caption-side: top;" cellspacing="0" class="TableStyle-WMouseOver">
+            <col class="Column-Column1" style="width: 163px;" />
+            <col class="Column-Column1" style="width: 173px;" />
+            <col class="Column-Column1" style="width: 153px;" />
+            <thead>
+                <tr class="Head-Header1">
+                    <th class="HeadE-Column1-Header1">
+                        <p class="tablehead">Syringe Size (<span style="font-family: Symbol;">m</span>L)</p>
+                    </th>
+                    <th class="HeadE-Column1-Header1">
+                        <p class="tablehead">Minimum Rate (<span style="font-family: Symbol;">m</span>L/sec)</p>
+                    </th>
+                    <th class="HeadD-Column1-Header1">
+                        <p class="tablehead">Maximum Rate<br />(<span style="font-family: Symbol;">m</span>L/sec)</p>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr valign="top" class="Body-Body1">
+                    <td colspan="1" rowspan="1" class="BodyE-Column1-Body1">
+                        <p class="tabledata">100</p>
+                    </td>
+                    <td colspan="1" rowspan="1" class="BodyE-Column1-Body1">
+                        <p class="tabledata">0.4</p>
+                    </td>
+                    <td colspan="1" rowspan="1" class="BodyD-Column1-Body1">
+                        <p class="tabledata">8.0</p>
+                    </td>
+                </tr>
+                <tr valign="top" class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">250</p>
+                    </td>
+                    <td colspan="1" rowspan="1" class="BodyE-Column1-Body1">
+                        <p class="tabledata">1.0</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">20.0</p>
+                    </td>
+                </tr>
+                <tr valign="top" class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">500</p>
+                    </td>
+                    <td colspan="1" rowspan="1" class="BodyE-Column1-Body1">
+                        <p class="tabledata">2.0</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">40.0</p>
+                    </td>
+                </tr>
+                <tr valign="top" class="Body-Body1">
+                    <td colspan="1" rowspan="1" class="BodyE-Column1-Body1">
+                        <p class="tabledata">1000</p>
+                    </td>
+                    <td colspan="1" rowspan="1" class="BodyE-Column1-Body1">
+                        <p class="tabledata">4.0</p>
+                    </td>
+                    <td colspan="1" rowspan="1" class="BodyD-Column1-Body1">
+                        <p class="tabledata">40.0</p>
+                    </td>
+                </tr>
+                <tr valign="top" class="Body-Body1">
+                    <td colspan="1" rowspan="1" class="BodyB-Column1-Body1">
+                        <p class="tabledata">2500</p>
+                    </td>
+                    <td colspan="1" rowspan="1" class="BodyB-Column1-Body1">
+                        <p class="tabledata">10.0</p>
+                    </td>
+                    <td colspan="1" rowspan="1" class="BodyA-Column1-Body1">
+                        <p class="tabledata">50.0</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <h3>Depth of needle (mm)</h3>
+        <p class="para">Depth of the needle tip from the bottom of the vial to accommodate 
+ for sedimented samples or nonstandard vials.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.0 mm</p>
+        <h3>Chart out</h3>
+        <p class="para">Type of analog signal transmitted from the Chart Out terminals 
+ on the rear of the 2790 Module. Choices:</p>
+        <ul>
+            <li class="listbull">Flow Rate</li>
+            <li class="listbull">System Pressure</li>
+            <li class="listbull">%A (default), %B, %C, 
+ or %D (each is a separate selection)</li>
+            <li class="listbull">Column Temperature</li>
+            <li class="listbull">Sample Temperature</li>
+            <li class="listbull">Loop Pressure</li>
+            <li class="listbull">Primary Pressure</li>
+            <li class="listbull">Vacuum Level</li>
+        </ul>
+        <h2>Injection parameters</h2>
+        <h3>Injection mode</h3>
+        <p class="para">One of two modes:</p>
+        <ul>
+            <li class="listbull">Sequential 
+ – Sample aspiration and loop fill occur at the start of each injection 
+ cycle, after completion of the previous injection.</li>
+            <li class="listbull">Parallel – Sample aspiration 
+ and loop fill occur concurrently with other separation method functions 
+ for higher throughput.</li>
+        </ul>
+        <h3>Loop offline (min) </h3>
+        <p class="para">When Parallel Injection mode is selected, specifies the time 
+ after an injection when the next sample is preloaded into the sample loop. 
+ Preloading the sample into the loop can cause a small decrease in injection-to-injection 
+ cycle time.</p>
+        <p class="para">The value of 0.00 ensures that the next sample will not be 
+ preloaded into the sample loop. Values greater than 0.00 and less than 
+ or equal to the method run time will cause the next sample to be preloaded 
+ into the sample loop at the given time. However, the time entered should 
+ not be less than the time needed for the current sample to leave the sample 
+ loop (based on the size of the sample loop and the current flow rate).</p>
+        <p class="para">In Sequential mode, there is no "preload" of sample, 
+ but the loop can be brought offline to achieve a decrease in delay volume 
+ during the separation.</p>
+        <h3>Pre-sample air gap (µL)</h3>
+        <p class="para">Volume of air aspirated into the holding loop (before sample 
+ aspiration) to minimize sample diffusion.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 3.0 <span style="font-family: Symbol;">m</span>L</p>
+        <h3>Loop option</h3>
+        <p class="para">The way sample is placed in the sample loop: </p>
+        <ul>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Full loop 
+ – Does not allow you to control the injection volume in the Sample Set 
+ Editor. Full-loop injections provide the best peak area reproducibility.</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Partial 
+ loop – Allows full control of the injection volume in the Sample Set Editor 
+ or Single Inject page in Run Samples, including the option to revert to 
+ Full-loop operation.</li>
+        </ul>
+        <p class="para"><span class="emphasisbold">Attention:</span> 
+ After saving an instrument method with a full-loop injection mode and 
+ a designated number of loop overfills, you cannot make partial-loop injections 
+ in Run Samples using that instrument method. Similarly, an instrument 
+ method with a partial-loop injection mode cannot be used for full-loop 
+ injections in Run Samples. Waters recommends naming instrument methods 
+ to designate them as either full- or partial-loop methods.</p>
+        <h3>Full-loop overfill </h3>
+        <p class="para">Excess volume (expressed as a multiple of the sample loop 
+ volume) of sample drawn when you select the Full-loop option (see above), 
+ or when you override the Partial-loop option in the Sample Set Editor.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 4.0<span style="font-style: italic;">x</span></p>
+        <h3>Post-sample air gap (µL)</h3>
+        <p class="para">Volume of air aspirated into the holding loop (after sample 
+ aspiration) to minimize sample diffusion.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 3.0 <span style="font-family: Symbol;">m</span>L</p>
+        <h2>Column parameters</h2>
+        <h3>Position </h3>
+        <p class="para">Solvent flow direction. Solvent flow can be directed to a 
+ different column or to a restrictor bypass to a mass spectrometer. The 
+ No Change selection maintains the current position. Choices:</p>
+        <ul>
+            <li class="listbull">No Change (default).</li>
+            <li class="listbull">Position 1 to 3, or 1 
+ to 6 (available only when an optional 3- or 6-column selection valve is 
+ installed).</li>
+            <li class="listbull">Automatic (available 
+ only when an optional column regeneration valve is installed) – Switches 
+ column position, allowing for LC operations using one column while the 
+ second column is undergoing regeneration by a second solvent delivery 
+ system.</li>
+        </ul>
+        <h3>Equilibration time (min)</h3>
+        <p class="para">When a column Position change occurs at the start of a run, 
+ specifies the time in minutes that the 2790 Module runs at initial conditions 
+ before performing an injection.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.00 min</p>
+        <h2>Rapid equilibration parameters</h2>
+        <p class="para">These parameters allow for rapid equilibration by switching 
+ the column offline, purging the system at a high flow rate, then loading 
+ the next sample during column reequilibration.</p>
+        <h3>Path</h3>
+        <p class="para">Direction for rapid equilibration flow. Flow can be redirected 
+ to a different column or to waste. No Change maintains the current position. 
+ Choices:</p>
+        <ul>
+            <li class="listbull">Off (default) </li>
+            <li class="listbull">Injector Waste (liquid 
+ flows through the inject valve to waste)</li>
+            <li class="listbull">No Change </li>
+            <li class="listbull">Position 1 to 3, or 1 
+ to 6 (available only when an optional 3- or 6-column selection valve is 
+ installed)</li>
+        </ul>
+        <h3>Duration (mins)</h3>
+        <p class="para">Rapid equilibration flow time for the system.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.2 min</p>
+        <p class="para">This parameter is disabled if the Path parameter is set to 
+ Off.</p>
+        <h3>Flow (mL/min)</h3>
+        <p class="para">System flow rate for rapid equilibration.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 5.0 mL/min</p>
+        <p class="para">This parameter is disabled if the Path parameter is set to 
+ Off.</p>
+        <h3>Column re-equil time (mins) </h3>
+        <p class="para">Time after system equilibration to reequilibrate the column.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.0 min</p>
+        <p class="para">This parameter is disabled if the Path parameter is set to 
+ Off.</p>
+        <h2>Autosampler parameters</h2>
+        <h3>Seek well bottom</h3>
+        <p class="para">Specifies that the needle locate the well bottom at the well 
+ position defined for the first injection. This location is stored for 
+ subsequent injections from the same plate. When the carrier advances to 
+ the next plate, a new well-bottom measurement occurs.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <h3>Check plate height</h3>
+        <p class="para">Specifies that the needle locate the plate corner nearest 
+ the injector port (before the first injection). The plate height value 
+ is recorded and checked against an acceptable range for the plate type.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <h2>Autosampler wash parameters</h2>
+        <h3>Frequency</h3>
+        <p class="para">When an inject port and needle wash are to occur. The inject 
+ port and interior and exterior of the sample needle are washed with wash 
+ solvent, then replaced with degassed purge solvent (using the volume specified 
+ in the Purge Solvent Volume parameter, below). Choices:</p>
+        <ul>
+            <li class="listbull">Never </li>
+            <li class="listbull">Every Injection (default)</li>
+            <li class="listbull">Every Well</li>
+        </ul>
+        <h3>Wash sequence</h3>
+        <p class="para">Select one of these wash sequences:</p>
+        <ul>
+            <li class="listbull">Wash Purge 
+ – Performs a needle wash then a purge before the injection. This is the 
+ default.</li>
+            <li class="listbull">Purge 
+ Wash Purge – Performs a purge, a needle wash, and another purge before 
+ the injection.</li>
+        </ul>
+        <h3>Wash cycles</h3>
+        <p class="para">Number of inject port/needle wash cycles to be performed.</p>
+        <p><span class="emphasisbold">Default:</span> 1</p>
+        <h3>Inj port wash time (sec)</h3>
+        <p class="para">Number of seconds to wash the inject port.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 6 sec</p>
+        <h3>Needle wash time (sec) </h3>
+        <p class="para">Number of seconds to wash the needle interior and exterior.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 15 sec</p>
+        <h3>Purge cycles</h3>
+        <p class="para">Number of times that the syringe is refreshed with degassed 
+ purge solvent (using the volume specified in Purge Solvent Volume, below).</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 1</p>
+        <h3>Purge solvent volume (µL)</h3>
+        <p class="para">Volume needed to replace wash solvent with degassed purge 
+ solvent (when performing a needle/inject port wash), or to replace old 
+ solvent, clear bubbles, or prime the syringe with degassed purge solvent 
+ (when performing a refresh syringe). Click for details on using a Wash 
+ Needle or Refresh Syringe function in a sample set method.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 600.0 µL</p>
+    </body>
+</html>

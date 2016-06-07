@@ -117,15 +117,6 @@ $(document).ready(function(){
     }).mouseout(function(){
         $(this).removeClass("standardBtn_mouseover").addClass("standardBtn_mouseout");
     }).css("width","90px");
-    <%
-    Collection<SourcePage> collection = jobImpl.getSourcePages();
-    List<String> nameList = new ArrayList<String>();
-    for (SourcePage sourcePage : collection)
-    {
-        String pageName = sourcePage.getFile().getName();%>
-        uploadedFiles.push("<%=pageName%>");
-    <%}
-    %>
     // action of cleanmap button
     $("#cleanMap").click(function()
     {
@@ -185,10 +176,22 @@ $(document).ready(function(){
     
 });
 
+function showDuplicate(pageArray)
+{
+	alert("Below files are already in the uploaded list, ignored: \n\n" + pageArray);
+}
+
 function addDivForNewFile(paramArray) 
 {
 	var objs = eval(paramArray);
     var tempId = "";
+    if(objs=="")
+    {
+    	emptyFileValue();
+    	isUploading = false;
+    	$("#tmpFolderName").val(tempFolder);
+		return false;
+    }
     for (var i = 0; i < objs.length; i++) {
         var id = objs[i].id;
         var zipName = objs[i].zipName;
@@ -240,55 +243,12 @@ function checkAndUpload(){
 		emptyFileValue();
 		return false;
 	}
-	var tempFiles = document.getElementById( "selectedSourceFile" );
-	var tempFileName;
-	var dupFiles = new Array();
-	var temp;
-	for (var j = 0; j < tempFiles.files.length; j++)
-	{
-		temp = tempFiles.files[j];
-		tempFileName = temp.name;
-		var flag = true;
-		if (uploadedFiles.length > 0)
-		{
-			for (i = 0; i < uploadedFiles.length; i++)
-			{
-				if (uploadedFiles[i] == tempFileName)
-				{
-					dupFiles.push(tempFileName);
-					flag = false;
-				}
-			}
-		}
-		if (flag)
-		{
-			addTempDivElement(tempFileName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
-			uploadedFiles.push(tempFileName);
-		}
-	}
-	if (dupFiles.length > 0)
-	{
-		var result = dupFiles.join("\n");
-		if (dupFiles.length > 1)
-		{
-			alert("Below files are already in the uploaded list, ignored: \n\n" + result);
-		}
-		else
-		{
-			alert("Below file is already in the uploaded list, ignored: \n\n" + result);
-		}
-		if (dupFiles.length == tempFiles.files.length)
-		{
-			emptyFileValue();
-			return false;
-		}
-	}
-	    $("#createJobForm").attr("action", "<%=selfURL%>&uploadAction=uploadSelectedFile&tempFolder="+tempFolder);
-		$("#createJobForm").submit();
-		
-		isUploading = true;
-		emptyFileValue();
-		$("#selectedSourceFile").prop('disabled', false);
+    $("#createJobForm").attr("action", "<%=selfURL%>&uploadAction=uploadSelectedFile&tempFolder="+tempFolder);
+	$("#createJobForm").submit();
+	
+	isUploading = true;
+	emptyFileValue();
+	$("#selectedSourceFile").prop('disabled', false);
 }
 
 function emptyFileValue()
@@ -305,30 +265,6 @@ function isIE() { //ie?
         return true;  
     else  
         return false;  
-}
-
-function addTempDivElement(fileName) {
-	var id = $.md5(fileName);
-	$("#fileQueue").append('<div id="bp' + id + '" class="uploadifyQueueItem">' 
-            // div of progress bar container
-            + '<div id="ProgressDiv' + id + '" class="uploadifyProgress">'
-            // div of file name
-            + '<div class="fileInfo" id="FileInfo' + id + '" onclick="mapTargetLocales(ProgressDiv' + id + ')">' 
-            + fileName + '<input type="hidden" id="Hidden' + id + '" name="jobWholeName" value="' + id + '">'
-            + '<input type="hidden" name="jobFilePath" value="">' 
-            + '<input type="hidden" name="isSwitched" value=""></div>'
-            // div of file profile select
-            + '<div class="profile" onclick="mapTargetLocales(ProgressDiv' + id + ')"><span class="profileArea"></span></div>'
-            // div of cancel button
-            + '<div class="cancel"><img style="padding-top:3px" src="/globalsight/images/createjob/delete.png" border="0"/></div>'
-            // div of progress bar
-            + '<div class="uploadifyProgressBar" id="ProgressBar' + id + '"></div>'
-            + '</div></div>'
-            + '<div id="bptip' + id + '" class="tip_cj" style="display:none">' + fileName + '</div>');
-	runProgress(id, 15, "normal",false);
-	runProgress(id, 30, "normal",false);
-	runProgress(id, 45, "normal",false);
-    runProgress(id, 60, "normal",false);
 }
 
 function runProgress(id, percentage, speed, isSwitched) {

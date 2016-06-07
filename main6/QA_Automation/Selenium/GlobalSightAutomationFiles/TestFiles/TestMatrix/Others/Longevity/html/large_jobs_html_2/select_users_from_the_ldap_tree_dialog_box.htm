@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:lastBlockDepth="5" MadCap:lastHeight="790" MadCap:lastWidth="879">
+    <head><title>Select users from the LDAP tree dialog box</title>
+    </head>
+    <body>
+        <h1>Select 
+ users from the LDAP tree dialog box</h1>
+        <p class="para">In this dialog box you can create one or more Empower user 
+ accounts by selecting LDAP user names. You can select multiple user name 
+ nodes from the displayed forests. When you click Create Users, one account 
+ is created for each user selected in the tree. All accounts are active 
+ Empower user accounts with the same user type (associated privileges) 
+ and Empower software interface access. The Empower user account's full 
+ name is identical to the LDAP full name and the user name is identical 
+ to the LDAP login name.</p>
+        <p class="para"><span class="emphasisbold">Prerequisite:</span> LDAP Authentication 
+ enabled (View &gt; System Policies &gt; User Account tab &gt; Authentication 
+ &gt; LDAP)</p>
+        <p class="para">You can access this dialog box by creating a new Empower 
+ user account (File &gt; New User or right-click New &gt; User).</p>
+        <p class="para"><span class="emphasisbold">Requirement:</span> Create Users 
+ privilege or Administrator privilege</p>
+        <p class="caption">To create an Empower user account:</p>
+        <ol>
+            <li class="listnum">Select multiple user names 
+ or an individual user name from the LDAP Directory tree and then click 
+ Add <img src="../PICS/rightarrow.gif" style="border: none;width: 23px;height: 24px;float: none;border-style: none;border-style: none;" width="23" height="24" border="0" /> to move them to the New Users pane.</li>
+        </ol>
+        <p class="paraindent"><span class="emphasisbold">Tips:</span>
+        </p>
+        <ol start="2">
+            <li class="listbull2">You can 
+ search for an LDAP user name by entering the user's name in the LDAP directory 
+ list field and then clicking Search <img src="../PICS/magnifyglass.gif" style="border: none;width: 21px;height: 24px;float: none;border-style: none;border-style: none;" width="21" height="24" border="0" />. To remove a user 
+ from the New Users pane, click Remove <img src="../PICS/leftarrow.gif" style="border: none;width: 22px;height: 25px;float: none;border-style: none;border-style: none;" width="22" height="25" border="0" />. </li>
+            <li class="listbull2">The LDAP 
+ Directory tree contains both active and disabled user accounts that reside 
+ on the LDAP server.</li>
+        </ol>
+        <ol start="2" style="list-style: decimal;list-style-type: decimal;">
+            <li class="listnum">Click Create Users. </li>
+        </ol>
+        <p class="paraindent"><span class="emphasisbold">Result:</span> The New User dialog 
+ box appears but does not populate the User Name or Full Name data fields. 
+ Each account is created with the same user type(s) and Empower software 
+ interface access.</p>
+        <p class="paraindent"><span class="emphasisbold">Exception:</span>
+        </p>
+        <p class="paraindent">The User Name and Full Name fields are blank unless one of 
+ these conditions apply:</p>
+        <ul>
+            <li class="listbull2indent">an existing Empower user 
+ name matches the LDAP user name</li>
+            <li class="listbull2indent">the LDAP log in name 
+ contains invalid characters for an Empower user name</li>
+            <li class="listbull2indent">the LDAP log in contains 
+ too few or too many characters. </li>
+        </ul>
+        <p class="paraindent">In any of these cases, you can edit the User Name of the 
+ problematic user account. &#160;&#160;</p>
+    </body>
+</html>

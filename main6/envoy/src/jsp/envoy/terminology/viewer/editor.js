@@ -267,6 +267,7 @@ function removeSpecialChars(s)
 
 function setSelectedItem()
 {
+	g_fields = this;
     g_selected = g_fields.getSelectedItems();
 
     updateMenu();
@@ -352,7 +353,7 @@ function updateMenu()
             idAddFieldAfter.disabled = false;
             idAddFieldAfter.className = "menuSubItem";
 
-            if (sel.firstChild.type == 'note')
+            if (sel.firstChild.getAttribute("type") == 'note')
             {
                 idAddFieldTo.disabled = true;
                 idAddFieldTo.className = "menuSubItemD";
@@ -467,9 +468,14 @@ function updateValidateAndApproveEntry()
     }
 }
 
+var editTermParams = null;
+var fieldType = "";
+var editTermField = null;
+
 function doEdit(field, event)
 {
-    var fieldType = getFieldType(field);
+	editTermField = field;
+    fieldType = getFieldType(field);
 
     if (fieldType == 'conceptGrp' || fieldType == 'languageGrp')
     {
@@ -485,7 +491,7 @@ function doEdit(field, event)
     var type;
     // var value = field.children(1).innerHTML; // returns expanded urls
     var value = getXhtml(field.children[1]);
-    var newValue = null;
+   
 
     value = fixHtmlEntities(value);
 
@@ -501,21 +507,15 @@ function doEdit(field, event)
         
         var termId = field.children[1].getAttribute("termId");
 
-        var params = new EditTermParameters(language, value);
+        editTermParams = new EditTermParameters(language, value);
         
         if(termId != null) {
-            params = new EditTermParameters(language, value, termId);
+        	editTermParams = new EditTermParameters(language, value, termId);
         }
 
-        var res = window.showModalDialog(
-            '/globalsight/envoy/terminology/viewer/EditTerm.html', params,
-            "dialogHeight:200px; dialogWidth:350px; center:yes; " +
-            "resizable:no; status:no; help:no;");
-
-        if (res != null)
-        {
-            newValue = removeSpecialChars(normalizeWS(res.getTerm()));
-        }
+        window.open(
+            '/globalsight/envoy/terminology/viewer/EditTerm.html', 
+            "Edit Term", "height=200, width=350, toolbar =no, menubar=no, location=no, status=no");
     }
     else if (fieldType == 'fieldGrp')
     {
@@ -532,23 +532,15 @@ function doEdit(field, event)
 
         var language = getParentLanguage(field);
 
-        var params = new FieldParameters();
-        params.setLevel(level);
-        params.setType(type);
-        params.setValue(value);
-        params.setLanguage(language);
+        editTermParams = new FieldParameters();
+        editTermParams.setLevel(level);
+        editTermParams.setType(type);
+        editTermParams.setValue(value);
+        editTermParams.setLanguage(language);
 
-        // EditField.html: 400h x 370w
-        var res = window.showModalDialog(
-            '/globalsight/envoy/terminology/viewer/EditField2.html', params,
-            "dialogHeight:600px; dialogWidth:520px; center:yes; " +
-            "resizable:yes; status:no; help:no; ");
-
-        if (res != null)
-        {
-            // debug(res.getValue());
-            newValue = normalizeWS(res.getValue());
-        }
+        window.open(
+            '/globalsight/envoy/terminology/viewer/EditField2.html',
+            "Edit Term", "height=600, width=520, toolbar =no, menubar=no, location=no, status=no");
     }
     else
     {
@@ -557,14 +549,26 @@ function doEdit(field, event)
 
         var newValue = prompt("Enter new value for " + type + ":", value);
     }
+}
 
-    if (newValue != null)
+function editTermDialog(res)
+{
+	var newValue = null;
+	 
+	if (fieldType == 'fakeTermGrp')
     {
-        field.children[1].innerHTML = newValue;
+		newValue = removeSpecialChars(normalizeWS(res.getTerm()));
+    }
+	else
+	{
+		newValue = normalizeWS(res.getValue());
+	}	
+	
+	if (newValue != null)
+    {
+		editTermField.children[1].innerHTML = newValue;
         g_dirty = true;
     }
-
-    return cancelEvent(event);
 }
 
 function doDelete(field)
@@ -808,18 +812,11 @@ function compareLangLocs(a,b)
 
 function setTermbaseLanguages(p_definition)
 {
-    // compute cached array of allowed languages
-    //var nodes = p_definition.selectNodes("//language");
-	var nodes = $(p_definition).find("language");
-
+	var nodes = p_definition.languages;
     for (i = 0; i < nodes.length; i++)
     {
         var node = nodes[i];
-
-        //var langloc = new LangLoc(node.selectSingleNode("name").text,
-            //node.selectSingleNode("locale").text);
-        var langloc = new LangLoc($(node).find("name").text(),$(node).find("locale").text());
-
+        var langloc = new LangLoc(node.name,node.locale);
         g_termbaseLanguages.push(langloc);
     }
 
@@ -828,25 +825,20 @@ function setTermbaseLanguages(p_definition)
 
 function setTermbaseFields(p_definition)
 {
-    // compute cached array of known fields
-    //var nodes = p_definition.selectNodes("/definition/fields/field");
-	var nodes = $(p_definition).find("definition fields field");
+	var nodes = p_definition.fields;
     for (var i = 0; i < nodes.length; i++)
     {
         var node = nodes[i];
 
-        var name = $(node).find("name").text();
-        var type = $(node).find("type").text();
+        var name = node.name;
+        var type = node.type;
         var system =
-          ($(node).find("system").text() == "true" ? true : false);
-        var values = $(node).find("values").text();
+          (node.system == "true" ? true : false);
+        var values = node.values;
         var format = getFieldFormatByType(type);
-
         var field = new Field(name, type, format, system, values);
-
         g_termbaseFields.push(field);
     }
-    //debug(g_termbaseFields);
 }
 
 function setEditorEntry2(xmlDocument)
@@ -884,6 +876,7 @@ function setCanAddLanguage()
     }
 }
 
+var approveParams = null;
 function ApproveEntry()
 {
     var xml = HtmlToXml(g_entry);
@@ -893,14 +886,15 @@ function ApproveEntry()
         return;
     }
     
-    var params = new ApprovalParameters('');
+    approveParams = new ApprovalParameters('');
+    window.open(
+        '/globalsight/envoy/terminology/viewer/Approve.html',
+        "Approve", "height=200, width=350, toolbar =no, menubar=no, location=no, status=no");       
+}
 
-    var res = window.showModalDialog(
-        '/globalsight/envoy/terminology/viewer/Approve.html', params,
-        "dialogHeight:200px; dialogWidth:350px; center:yes; " +
-        "resizable:no; status:no; help:no;"); 
-
-    if (res != null && res.getStatus() != '')
+function approveDialog(res)
+{
+	if (res != null && res.getStatus() != '')
     {
         setApprovalStatus(res.getStatus());
     }
@@ -1041,19 +1035,18 @@ function LockEntry(p_createNew)
            }
            else
            {
-        	     var result = returnData.result;
+        	     var result = returnData;
         	     
         	     if (result == 'error')
                {
                    TermbaseError("lock entry failed", false);
                }
                else {
-                   g_lock = StrToXML(result);
-                   
-                   if (g_lock != null)
+            	   g_lock = result;
+                   if (result != null)
                     {
-                        g_lockOwner = g_lock.selectSingleNode('//who').text;
-                        g_lockOwnerEmail = g_lock.selectSingleNode('//email').text;
+                        g_lockOwner = g_lock.who;
+                        g_lockOwnerEmail = g_lock.email;
                     }
                     else
                     {
@@ -1061,7 +1054,7 @@ function LockEntry(p_createNew)
                         g_lockOwnerEmail = "unknown";
                     }
 
-                    if (g_lock == null || g_lock.selectSingleNode('//cookie') == null)
+                    if (g_lock == null || g_lock.cookie == null)
                     {
                         if (confirm("This entry is being edited by: " + g_lockOwner +
                             ".\nDo you want to override this user's lock?"))
@@ -1098,19 +1091,17 @@ function LockEntry2(p_createNew)
            }
            else
            {
-        	     var result = returnData.result;
-        	     
+        	     var result = returnData;
+        	     g_lock = result;
         	     if (result == 'error')
                {
                    TermbaseError("lock entry failed", false);
                }
                else {
-                   g_lock = StrToXML(result);
-                   
                    if (g_lock != null)
                     {
-                        g_lockOwner = g_lock.selectSingleNode('//who').text;
-                        g_lockOwnerEmail = g_lock.selectSingleNode('//email').text;
+                        g_lockOwner = g_lock.who;
+                        g_lockOwnerEmail = g_lock.email;
                     }
                     else
                     {
@@ -1118,7 +1109,7 @@ function LockEntry2(p_createNew)
                         g_lockOwnerEmail = "unknown";
                     }
                 
-                    if (g_lock == null || g_lock.selectSingleNode('//cookie') == null)
+                    if (g_lock == null || g_lock.cookie == null)
                     {
                         alert("The lock held by " + g_lockOwner +
                             " cannot be overridden.");
@@ -1162,6 +1153,7 @@ function UnlockEntry()
     }
 }
 
+var printargs = null;
 function PrintEntry(b_fromEditor)
 {
     var termbase = strTermbase;
@@ -1184,12 +1176,11 @@ function PrintEntry(b_fromEditor)
 
     // debug("Printing entry " + xml);
 
-    var printargs = new PrintArgs(termbase, cid, xml);
+    printargs = new PrintArgs(termbase, cid, xml);
 
-    window.showModalDialog(
-        '/globalsight/envoy/terminology/viewer/print.html', printargs,
-        "dialogHeight:500px; dialogWidth:600px; center:yes; " +
-        "resizable:yes; status:no; help:no;");
+    window.open(
+        '/globalsight/envoy/terminology/viewer/print.html',
+        "Print", "height=500, width=600, toolbar =no, menubar=no, location=no, status=no");       
 }
 
 // public methods for structural entry editing
@@ -1206,12 +1197,15 @@ function AddLanguage()
     //debug("avail: " + availLangLocs);
 
     // Show dialog to select one of the languages and enter a term
-    var res = window.showModalDialog(
-        '/globalsight/envoy/terminology/viewer/AddLanguage.html', availLangLocs,
-        "dialogHeight:200px; dialogWidth:350px; center:yes; " +
-        "resizable:no; status:no; help:no;");
+    window.open(
+        '/globalsight/envoy/terminology/viewer/AddLanguage.html', "Add Language",
+        "modal=yes, height=200, width=350, top=0,left=0, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no"
+        );
+}
 
-    if (res != null && res.getTerm() != '')
+function addTermLanguage(res)
+{
+	if (res != null && res.getTerm() != '')
     {
         var newValue = removeSpecialChars(normalizeWS(res.getTerm()));
 
@@ -1259,6 +1253,7 @@ function RemoveLanguage()
     updateMenu();
 }
 
+var addTermParams = null;
 function AddTerm(inputmodel)
 {
     var language = null;
@@ -1270,8 +1265,8 @@ function AddTerm(inputmodel)
     {
         // Entry has no language yet: delegate to AddLanguage().
         return AddLanguage();
-    }
-
+    }    
+    
     // Find the default language for the term.
     if (g_selected)
     {
@@ -1308,12 +1303,15 @@ function AddTerm(inputmodel)
         langlocs.unshift(langloc);
     }
 
-    var res = window.showModalDialog(
-        '/globalsight/envoy/terminology/viewer/AddTerm.html', langlocs,
-        "dialogHeight:200px; dialogWidth:350px; center:yes; " +
-        "resizable:no; status:no; help:no;");
+    addTermParams = langlocs;
+    var res = window.open(
+        '/globalsight/envoy/terminology/viewer/AddTerm.html', "Add Term",
+        "modal=yes, height=200, width=350, top=0,left=0, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no");
+}
 
-    if (res == null)
+function addTermInDialog(res)
+{
+	if (res == null)
     {
         return;
     }
@@ -1367,48 +1365,54 @@ function RemoveTerm()
     updateMenu();
 }
 
+var addFieldParams = null;
+var isToCurrent = true;
+var fieldLevel = null;
+var fieldSel = null;
 function AddFieldToCurrent()
 {
+	isToCurrent = true;
     if (g_selected == null || idAddFieldTo.disabled == true)
     {
         return;
     }
 
     // Determine where in the structure we are
-    var sel = g_selected[0];
-    var level = getLevel(sel);
+    fieldSel = g_selected[0];
+    fieldLevel = getLevel(fieldSel);
     var type = null;
 
-    if (level == 'field')
+    if (fieldLevel == 'field')
     {
-        type = sel.firstChild.getAttribute("type");
+        type = fieldSel.firstChild.getAttribute("type");
     }
-    else if (level == 'term' && getFieldType(sel) == 'fakeTermGrp')
+    else if (fieldLevel == 'term' && getFieldType(fieldSel) == 'fakeTermGrp')
     {
-        sel = sel.parentElement || sel.parentNode;
+    	fieldSel = fieldSel.parentElement || fieldSel.parentNode;
     }
 
-    var language = getParentLanguage(sel);
+    var language = getParentLanguage(fieldSel);
 
-    var params = new FieldParameters();
-    params.setLevel(level);
-    params.setType(type);
-    params.setLanguage(language);
+    addFieldParams = new FieldParameters();
+    addFieldParams.setLevel(fieldLevel);
+    addFieldParams.setType(type);
+    addFieldParams.setLanguage(language);
 
     // AddField.html: 400hx370w
-    var res = window.showModalDialog(
-        '/globalsight/envoy/terminology/viewer/AddField2.html', params,
-        "dialogHeight:600px; dialogWidth:520px; center:yes; " +
-        "resizable:no; status:no; help:no;");
+    window.open(
+        '/globalsight/envoy/terminology/viewer/AddField2.html', 
+        "Add Field", "height=600, width=520, toolbar =no, menubar=no, location=no, status=no");       
+}
 
-    if (res == null)
+function AddFieldToCurrentDialog(res)
+{
+	if (res == null)
     {
         return;
     }
 
     var name = getFieldNameByType(res.getType(), g_termbaseFields);
-
-    insertFieldInCurrent(sel, level, name, res.getType(), res.getValue());
+    insertFieldInCurrent(fieldSel, fieldLevel, name, res.getType(), res.getValue());
 }
 
 // Situations:
@@ -1418,35 +1422,36 @@ function AddFieldToCurrent()
 // 4) embedded in fieldGrp (must be source, note (transac)), add in field
 function AddFieldAfterCurrent()
 {
+	isToCurrent = false;
     if (g_selected == null || idAddFieldAfter.disabled == true)
     {
         return;
     }
 
     // Determine where in the structure we are
-    var sel = g_selected[0];
-    var level = getParentLevel(sel);
+    fieldSel = g_selected[0];
+    fieldLevel = getParentLevel(fieldSel);
 
-    var language = getParentLanguage(sel);
+    var language = getParentLanguage(fieldSel);
 
-    var params = new FieldParameters();
-    params.setLevel(level);
-    params.setLanguage(language);
+    addFieldParams = new FieldParameters();
+    addFieldParams.setLevel(fieldLevel);
+    addFieldParams.setLanguage(language);
 
-    // AddField.html: 400hx370w
-    var res = window.showModalDialog(
-        '/globalsight/envoy/terminology/viewer/AddField2.html', params,
-        "dialogHeight:600px; dialogWidth:500px; center:yes; " +
-        "resizable:no; status:no; help:no;");
+    window.open(
+        '/globalsight/envoy/terminology/viewer/AddField2.html', 
+        "Add Field", "height=600, width=500, toolbar =no, menubar=no, location=no, status=no");       
+}
 
+function AddFieldAfterCurrentDialog(res)
+{
     if (res == null)
     {
         return;
     }
 
     var name = getFieldNameByType(res.getType(), g_termbaseFields);
-
-    insertFieldAfterCurrent(sel, name, res.getType(), res.getValue());
+    insertFieldAfterCurrent(fieldSel, name, res.getType(), res.getValue());
 }
 
 function EditField()
@@ -1842,20 +1847,19 @@ function initSelection()
 
 function getEmptyEntry(model)
 {
-    var result = XmlDocument.create();
-    result.async = false;
-
     if (!model)
     {
-        result.loadXML('<conceptGrp><concept>0</concept></conceptGrp>');
+    	return {
+                concept:0
+            };
     }
-    else
-    {
-        result.loadXML(model.xml);
+    
+	var result = XmlDocument.create();
+    result.async = false;
+    result.loadXML(model.xml);
 
-        // Convert Input Model instructions to display values
-        ImToXml(result);
-    }
+    // Convert Input Model instructions to display values
+    ImToXml(result);
     return result;
 }
 

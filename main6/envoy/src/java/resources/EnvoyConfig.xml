@@ -351,7 +351,6 @@
         <PageLink linkName="modify" destinationPageName="MTMP"></PageLink>
         <PageLink linkName="self" destinationPageName="TMP"></PageLink>
         <PageLink linkName="remove" destinationPageName="TMP"></PageLink>
-        <PageLink linkName="tda_edit" destinationPageName="TDA"></PageLink>
       </WebPage>
       <WebPage pageName="CTMP" isDefault="false" jspName="/envoy/administration/tmprofile/newTMProfile.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.tmprofile.CreateTMProfileHandler">  
         <PageLink linkName="save" destinationPageName="TMP"></PageLink>
@@ -360,12 +359,6 @@
       <WebPage pageName="MTMP" isDefault="false" jspName="/envoy/administration/tmprofile/modifyTMProfile.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.tmprofile.ModifyTMProfileHandler">  
         <PageLink linkName="save" destinationPageName="TMP"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TMP"></PageLink>
-      </WebPage>
-      <WebPage pageName="TDA" isDefault="false" jspName="/envoy/administration/tmprofile/TDAOptions.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.tmprofile.ModifyTDAOptionsHandler">
-        <PageLink linkName="saveTDAOptions" destinationPageName="TDA"></PageLink>
-        <PageLink linkName="cancelTDAOptions" destinationPageName="TMP"></PageLink>
-        <PageLink linkName="self" destinationPageName="TDA"></PageLink>
-        <PageLink linkName="main" destinationPageName="TMP"></PageLink>
       </WebPage>
    </WebActivity>
   </WebModule>
@@ -377,7 +370,6 @@
         <PageLink linkName="modify" destinationPageName="MTD"></PageLink>
         <PageLink linkName="self" destinationPageName="MTP"></PageLink>
         <PageLink linkName="remove" destinationPageName="MTP"></PageLink>
-        <PageLink linkName="mt_active" destinationPageName="MTP"></PageLink>
         <PageLink linkName="export" destinationPageName="MTP"></PageLink>
         <PageLink linkName="mtpImport" destinationPageName="MTPIMPORT"></PageLink>
       </WebPage>
@@ -2872,15 +2864,6 @@
     <WebActivity webActivityName="xlsReportSlaPerformance">
       <WebPage pageName="SLA" isDefault="true" jspName="/envoy/administration/reports/slaXlsReportWebForum.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
-    <WebActivity webActivityName="customizeReports">
-      <WebPage pageName="JOBRANGE" isDefault="true" jspName="/envoy/administration/reports/customizeReportsJobRangeParam.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.customize.CustomizeReportsMainHandler">
-        <PageLink linkName="next" destinationPageName="JOBINFO"></PageLink>
-      </WebPage>
-      <WebPage pageName="JOBINFO" isDefault="false" jspName="/envoy/administration/reports/customizeReportsJobInfoParam.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.customize.CustomizeReportsMainHandler">
-        <PageLink linkName="done" destinationPageName="JOBINFO"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="REP"></PageLink>
-      </WebPage>      
-    </WebActivity>
     <WebActivity webActivityName="xlsReportLanguageSignOff">
       <WebPage pageName="REVIEWERLISAQA" isDefault="true" jspName="/envoy/administration/reports/LisaQALanguageSignOffReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
@@ -2917,6 +2900,9 @@
     <WebActivity webActivityName="xlsReportCharacterCount">
       <WebPage pageName="CharacterCount" isDefault="true" jspName="/envoy/administration/reports/characterCountReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
+    <WebActivity webActivityName="MTPostEditDistanceReport">
+      <WebPage pageName="mtPostED" isDefault="true" jspName="/envoy/administration/reports/mtPostEditDistanceReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+    </WebActivity>
     <WebActivity webActivityName="jobAttributeReport">
       <WebPage pageName="JobAttributeReport" isDefault="true" jspName="/envoy/administration/reports/JobAttributeReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.JobAttributeReportHandler"></WebPage>
     </WebActivity>
@@ -2928,6 +2914,15 @@
     </WebActivity>
     <WebActivity webActivityName="ditaReports">
       <WebPage pageName="ditaReports" isDefault="true" jspName="/envoy/administration/reports/recentDitaReports.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.qachecks.DitaQaReportsHandler"></WebPage>
+    </WebActivity>
+    <WebActivity webActivityName="customizeReports">
+      <WebPage pageName="JOBRANGE" isDefault="true" jspName="/envoy/administration/reports/customizeReportsJobRangeParam.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.customize.CustomizeReportsMainHandler">
+        <PageLink linkName="next" destinationPageName="JOBINFO"></PageLink>
+      </WebPage>
+      <WebPage pageName="JOBINFO" isDefault="false" jspName="/envoy/administration/reports/customizeReportsJobInfoParam.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.customize.CustomizeReportsMainHandler">
+        <PageLink linkName="done" destinationPageName="JOBINFO"></PageLink>
+        <PageLink linkName="cancel" destinationPageName="REP"></PageLink>
+      </WebPage>
     </WebActivity>
   </WebModule>
 

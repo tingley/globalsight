@@ -31,22 +31,24 @@ sessionMgr.removeElement(WebAppConstants.TERMBASE_STATISTICS);
 <SCRIPT TYPE="text/javascript">
 function parseStatistics()
 {
-  var xmlStr = "<%=xmlStatistics.replace("\n","").replace("\r","").trim()%>";
-  var $xml = $( $.parseXML( xmlStr ) );
+  var jsonObj = eval('(<%=xmlStatistics%>)');
   
   var language, number; 
-  $("#idTermbaseName").html($xml.find("statistics > termbase").text()); 
-  $("#idTermbaseEntries").html($xml.find("statistics > concepts").text()); 
-  $("#idTermbaseTerms").html($xml.find("statistics > terms").text()); 
+  $("#idTermbaseName").html(jsonObj.termbase); 
+  $("#idTermbaseEntries").html(jsonObj.concepts); 
+  $("#idTermbaseTerms").html(jsonObj.terms); 
   
   $("#idTableBody").html("");
-  $xml.find("statistics > indexes > index").each(function(){
-	  language = $(this).find("language").text();
-	  number = $(this).find("terms").text();
-	  html = "<tr><td>" + language + "</td><td align='right' colspan=2>" 
-	  		 + number + "</td></tr>";
-	  $("#idTableBody").append(html);
-  });
+  jsonObj.indexes
+  
+  for (var i = 0; i < jsonObj.indexes.length; i++){
+	  var index = jsonObj.indexes[i];
+	  language = index.language;
+      number = index.terms;
+      html = "<tr><td>" + language + "</td><td align='right' colspan=2>" 
+             + number + "</td></tr>";
+      $("#idTableBody").append(html);
+  }
 }
 
 function init()

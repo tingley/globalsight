@@ -380,11 +380,14 @@ function saveUserOptions(formSent)
     var cookieValResInsMode = resInsModeSelect.options[resInsModeSelect.selectedIndex].value;
     var cookieValTerm = terminologySelect.options[terminologySelect.selectedIndex].value;
     
-    
     var editExactSelect = formSent.TMEditType;
     var cookieValEditExact = 0;
 	if (editExactSelect) {
 		cookieValEditExact = editExactSelect.options[editExactSelect.selectedIndex].value;
+	}else{
+		if(tmEditTypeParamter == 1){
+			cookieValEditExact = 4;
+		}
 	}
 
 	downloadForm.action += buildParams(cookieValFileFormat,  cookieValPtagFormat, cookieValResInsMode,cookieValEditExact, cookieValTerm);

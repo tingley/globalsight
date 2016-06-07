@@ -1,0 +1,1719 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Page ID="1295559038790" Version="3.1.1.0" Private="false" Template="false">
+  <Description/>
+  <InternalProperties/>
+  <PageTemplates>
+    <PageTemplate ID="1" Version="17" PageEditVisibility="visible">
+      <Description/>
+      <Name>Product_Category_Page</Name>
+      <VPath><![CDATA[johndeere/enterprise/Product_Category_Page.template]]></VPath>
+    </PageTemplate>
+  </PageTemplates>
+  <Page_Display_Properties Class="com.interwoven.livesite.model.page.PageProperties">
+    <Title>Motor Graders from John Deere</Title>
+    <BGColor/>
+    <Background/>
+    <Center>false</Center>
+    <PageType>
+      <Id>htmlQuirksMode</Id>
+      <Layout canvas-path="Full-Hero-without-Background-with-Line-Layout.xml">fixed-layout</Layout>
+    </PageType>
+    <Description>motor graders</Description>
+    <Keywords>motor graders</Keywords>
+    <Controllers>
+      <Pre/>
+      <Post/>
+    </Controllers>
+    <Resources>
+      <Resource Type="0" Enabled="true" IsSiteResource="true" MimeType="text/css">
+        <Path>common/deere-resources/css/constructionModules.css</Path>
+      </Resource>
+      <Resource Type="1" Enabled="false" IsSiteResource="true" MimeType="text/javascript">
+        <Path>common/deere-resources/js/jquery.nyroModal-1.6.2.js</Path>
+      </Resource>
+    </Resources>
+  </Page_Display_Properties>
+  <Page_Content>
+    <Component ID="1295559038791" Version="3.1.1.0" PageID="1" TemplateComponentID="1292397475421" CanBeActive="true">
+      <Description/>
+      <SelectedSkin>Default</SelectedSkin>
+      <DisplayName>Header Breadcrumb</DisplayName>
+      <Name>Header Breadcrumb</Name>
+      <BaseComponent Version="4"><![CDATA[johndeere/enterprise/Header/Header Breadcrumb.component]]></BaseComponent>
+      <ContainerProperties ID="1295559038791" locked="false">
+        <FixedLayoutArea ID="row-1-area-1" index="0"/>
+        <CacheTime>-1</CacheTime>
+        <BGColor/>
+        <Width>600</Width>
+        <Height>700</Height>
+        <Top>10</Top>
+        <Left>10</Left>
+        <ZIndex>0</ZIndex>
+        <RenderInRuntime>true</RenderInRuntime>
+      </ContainerProperties>
+      <InternalProperties/>
+      <Locks>
+        <ContainerProperties locked="false" Changed="false"/>
+        <Properties locked="false" Changed="false"/>
+        <Data locked="false" Changed="false"/>
+      </Locks>
+      <Segments>
+        <Segment ID="0">
+          <Properties ComponentID="1295559038791">
+            <Datum ID="SEPARATOR" Label="Separator Character(s)" Name="Separator" Type="String"> / </Datum>
+          </Properties>
+          <Data>
+            <External>
+              <Object Scope="local">com.interwoven.livesite.external.impl.Breadcrumb</Object>
+              <Method>displayBreadcrumb</Method>
+            </External>
+          </Data>
+        </Segment>
+      </Segments>
+      <Stylesheet Default="true" PageType="" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Default</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;  &lt;!-- Skin: Default (Default Browser Type) --&gt;  &lt;xsl:template match="/"&gt;     &lt;script language='JavaScript' type='text/javascript'&gt;      if(typeof dataObj == 'undefined'){ dataObj = {}; }      dataObj.breadcrumbs = new Array();    &lt;/script&gt;      &lt;p class="MOD_NO_8"&gt;          &lt;xsl:apply-templates select="//Node"/&gt;      &lt;/p&gt;  &lt;/xsl:template&gt;  &lt;xsl:template match="Node"&gt;  &lt;script language='JavaScript' type='text/javascript'&gt;     &lt;xsl:for-each select="Label"&gt;	dataObj.breadcrumbs.push("&lt;xsl:value-of select="."/&gt;");   &lt;/xsl:for-each&gt;  &lt;/script&gt;  &lt;xsl:if test="@VisibleInBreadcrumbs = 'true'"&gt;      &lt;xsl:choose&gt;      &lt;xsl:when test="position() != last()"&gt;          &lt;xsl:choose&gt;            &lt;xsl:when test="Link/@Type = 'page'"&gt;              &lt;xsl:variable name="linkValue"&gt;                &lt;xsl:value-of select="Link/Url"/&gt;                 &lt;/xsl:variable&gt;                &lt;a href="{$linkValue}"&gt;              &lt;xsl:value-of select="Label"/&gt;&lt;/a&gt;          &lt;xsl:value-of select="/Properties/Datum[@ID='SEPARATOR']" disable-output-escaping="yes"/&gt;            &lt;/xsl:when&gt;          &lt;/xsl:choose&gt;      &lt;/xsl:when&gt;      &lt;xsl:otherwise&gt;         &lt;span&gt; &lt;xsl:value-of select="Label"/&gt;&lt;/span&gt;       &lt;div class="MOD_GC_1a"&gt;            &lt;xsl:value-of select="Label"/&gt;       &lt;/div&gt;      &lt;/xsl:otherwise&gt;    &lt;/xsl:choose&gt;&lt;/xsl:if&gt;&lt;/xsl:template&gt;&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+    </Component>
+    <Component ID="1295559038792" Version="3.1.1.0" PageID="1" TemplateComponentID="1292470619117" CanBeActive="true">
+      <Description/>
+      <SelectedSkin>Default</SelectedSkin>
+      <DisplayName>Hero with Automated Product Explorer</DisplayName>
+      <Name>Hero with Automated Product Explorer</Name>
+      <BaseComponent Version="13"><![CDATA[johndeere/enterprise/Hero/Hero with Automated Product Explorer.component]]></BaseComponent>
+      <ContainerProperties ID="1295559038792" locked="false">
+        <FixedLayoutArea ID="row-2-area-1" index="0"/>
+        <CacheTime>0</CacheTime>
+        <BGColor/>
+        <Width>942</Width>
+        <Height>458</Height>
+        <Top>0</Top>
+        <Left>0</Left>
+        <ZIndex>0</ZIndex>
+        <RenderInRuntime>true</RenderInRuntime>
+      </ContainerProperties>
+      <InternalProperties/>
+      <Locks>
+        <ContainerProperties locked="false" Changed="false"/>
+        <Properties locked="false" Changed="false"/>
+        <Data locked="false" Changed="false"/>
+      </Locks>
+      <Segments>
+        <Segment ID="0">
+          <Properties ComponentID="1295559038792">
+            <Datum ID="TRANSITION_TIME" Type="String" Name="Transition Time">2000</Datum>
+            <Datum ID="TRANSPARENCY_VALUE" Type="SelectSingle" Name="Transparency Value">
+              <Option>
+                <Display>20</Display>
+                <Value>20</Value>
+              </Option>
+              <Option>
+                <Display>30</Display>
+                <Value>30</Value>
+              </Option>
+              <Option>
+                <Display>40</Display>
+                <Value>40</Value>
+              </Option>
+              <Option>
+                <Display>50</Display>
+                <Value>50</Value>
+              </Option>
+              <Option>
+                <Display>60</Display>
+                <Value>60</Value>
+              </Option>
+              <Option>
+                <Display>70</Display>
+                <Value>70</Value>
+              </Option>
+              <Option Selected="true">
+                <Display>80</Display>
+                <Value>80</Value>
+              </Option>
+              <Option>
+                <Display>90</Display>
+                <Value>90</Value>
+              </Option>
+              <Option>
+                <Display>100</Display>
+                <Value>100</Value>
+              </Option>
+            </Datum>
+          </Properties>
+          <Data>
+            <External>
+              <Parameters>
+                <Datum Changed="true" ID="PRODUCT_DCR" Type="DCR" Name="HERO EXPLORER DCR *">
+                  <DCR Category="product" Type="hero_explorer">templatedata/product/hero_explorer/data/en_R3/construction/motorgrader_category.dcr</DCR>
+                </Datum>
+                <Datum Changed="true" ID="D01" Type="Number" Name="Height of Parsing">1</Datum>
+              </Parameters>
+              <Object Scope="local">com.johndeere.livesite.component.external.ProductExplorer</Object>
+              <Method>handleRequest</Method>
+            </External>
+          </Data>
+        </Segment>
+      </Segments>
+      <Stylesheet Default="true" PageType="" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Default</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;	&lt;!-- Skin: Default XSL --&gt;	&lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl" /&gt;	&lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl" /&gt;	&lt;xsl:template match="/"&gt;		&lt;script type="text/javascript"&gt;                        var rotationTime ="&lt;xsl:value-of select="/Properties/Datum[@ID='TRANSITION_TIME']"/&gt;";			if(typeof ProductExplorer=="undefined")			{			var varPrdExplorer='Explore Product';			}			else			{			var varPrdExplorer=ProductExplorer;			}    &lt;/script&gt;		&lt;xsl:variable name="transparency" select="Properties/Datum[@ID='TRANSPARENCY_VALUE']/Option[@Selected='true']/Value"/&gt;	&lt;xsl:variable name="transparencyClass" select="concat('trans',$transparency)"/&gt;			&lt;xsl:choose&gt;			&lt;xsl:when test="/Properties/Data/External/Parameters/Datum[@Name='HERO EXPLORER DCR *'] =''"&gt;				&lt;div class="errMsg"&gt;Please Select or Create a Product Hero Explorer DCR&lt;/div&gt;			&lt;/xsl:when&gt;			&lt;xsl:otherwise&gt;				&lt;xsl:if test="/Properties/Data/Result/hero_explorer_container/product_explorer_include = 'yes'"&gt;					&lt;xsl:choose&gt;						&lt;xsl:when test="/Properties/Data/Result/hero_explorer_container/error[@message!='']"&gt;							&lt;div class="errMsg"&gt;								&lt;xsl:value-of select="/Properties/Data/Result/hero_explorer_container/error/@message" /&gt;							&lt;/div&gt;						&lt;/xsl:when&gt;					&lt;/xsl:choose&gt;					&lt;div class="MOD_GC_12_5"&gt;						&lt;div id="hero-banner"&gt;							&lt;xsl:choose&gt;								&lt;xsl:when test="(Properties/Data/Result/hero_explorer_container/select_content_type = 'image')"&gt;									&lt;ul id="banner"&gt;										&lt;xsl:attribute name="class"&gt;											&lt;xsl:value-of select="$transparencyClass"/&gt;										&lt;/xsl:attribute&gt;										&lt;xsl:for-each select="/Properties/Data/Result/hero_explorer_container/heroImageContainer"&gt;											&lt;li&gt;												&lt;xsl:variable name="image_link_URL" select="image_link_url" /&gt;												&lt;a&gt;												 &lt;xsl:if test="$image_link_URL != ''"&gt;													&lt;xsl:attribute name="href"&gt;				&lt;xsl:if test="starts-with($image_link_URL,'/')"&gt;				 &lt;xsl:variable name="url" select="substring-after(substring-after(substring-after($image_link_URL,'/'),'/'),'/')" /&gt;				 &lt;xsl:variable name="urls" select="substring-before($url,'.')" /&gt;				 &lt;xsl:variable name="dest" select="concat('$PAGE_LINK[',$urls,']')" /&gt;				 &lt;xsl:value-of select="$dest" /&gt;				&lt;/xsl:if&gt;				&lt;xsl:if test="starts-with($image_link_URL,'/sites')=false"&gt;				 &lt;xsl:value-of select="$image_link_URL" /&gt;				&lt;/xsl:if&gt;			      &lt;/xsl:attribute&gt;			      &lt;/xsl:if&gt;				&lt;img&gt;					&lt;xsl:attribute name="src"&gt;$URL_PREFIX&lt;xsl:value-of select="image_url" /&gt;&lt;/xsl:attribute&gt;					&lt;xsl:attribute name="alt"&gt;&lt;xsl:value-of select="image_url_alt_text" /&gt;&lt;/xsl:attribute&gt;					&lt;xsl:attribute name="title"&gt;&lt;xsl:value-of select="image_url_alt_text" /&gt;&lt;/xsl:attribute&gt;				&lt;/img&gt;					&lt;/a&gt;		&lt;xsl:choose&gt;		&lt;xsl:when test="image_headline_sub_text = '' and  image_calltoaction_text = '' and image_headline_text = ''"&gt;		 &lt;div class="banner-text-block_new blank"&gt;		 &lt;/div&gt;         &lt;/xsl:when&gt;				  &lt;xsl:otherwise&gt;					&lt;div class="banner-text-block_new"&gt;					&lt;xsl:if test="image_headline_text != ''"&gt;					&lt;h2&gt;						&lt;xsl:value-of select="image_headline_text" /&gt;					&lt;/h2&gt;					&lt;/xsl:if&gt;					&lt;xsl:if test="image_headline_sub_text != '' or  image_calltoaction_text != ''"&gt;					&lt;p&gt;					&lt;xsl:if test="image_headline_sub_text != ''"&gt;						&lt;xsl:value-of select="image_headline_sub_text" /&gt;						&lt;/xsl:if&gt;						&lt;xsl:if test="image_calltoaction_text != ''"&gt;							&lt;a&gt;							&lt;xsl:if test="$image_link_URL != ''"&gt;								&lt;xsl:attribute name="href"&gt;					&lt;xsl:if test="starts-with($image_link_URL,'/')"&gt;					 &lt;xsl:variable name="url" select="substring-after(substring-after(substring-after($image_link_URL,'/'),'/'),'/')" /&gt;					 &lt;xsl:variable name="urls" select="substring-before($url,'.')" /&gt;					 &lt;xsl:variable name="dest" select="concat('$PAGE_LINK[',$urls,']')" /&gt;					 &lt;xsl:value-of select="$dest" /&gt;					&lt;/xsl:if&gt;					&lt;xsl:if test="starts-with($image_link_URL,'/sites')=false"&gt;					 &lt;xsl:value-of select="$image_link_URL" /&gt;					&lt;/xsl:if&gt;		                &lt;/xsl:attribute&gt;				&lt;/xsl:if&gt;					&lt;xsl:value-of select="image_calltoaction_text" /&gt;				&lt;/a&gt;							&lt;/xsl:if&gt;						&lt;/p&gt;						&lt;/xsl:if&gt;					&lt;/div&gt;					&lt;/xsl:otherwise&gt;		  &lt;/xsl:choose&gt;				&lt;/li&gt;			&lt;/xsl:for-each&gt;		&lt;/ul&gt;		&lt;xsl:variable name="iCount" select="count(/Properties/Data/Result/hero_explorer_container/heroImageContainer)" /&gt;		&lt;xsl:if test="$iCount &amp;gt; 1"&gt;			&lt;div id="pager"&gt;				&lt;div id="pager-numbers"&gt;&lt;!-- Pager gets populated here --&gt;				&lt;/div&gt;				&lt;span class="pause-resume pause"&gt;&amp;#32;				&lt;/span&gt;			&lt;/div&gt;		&lt;/xsl:if&gt;		&lt;/xsl:when&gt;		&lt;xsl:otherwise&gt;		&lt;div class="flash_banner"&gt;			&lt;object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" wmode="transparent" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=5,0,0,0"&gt;				&lt;xsl:apply-templates select="/Properties/Data/Result/hero_explorer_container/richMediaContainer/flashParamContainer" mode="embed-attr" /&gt;				&lt;param&gt;					&lt;xsl:attribute name="name"&gt;movie&lt;/xsl:attribute&gt;					&lt;xsl:attribute name="value"&gt;$URL_PREFIX&lt;xsl:value-of select="Properties/Data/Result/hero_explorer_container/richMediaContainer/media_file" /&gt;&lt;/xsl:attribute&gt;				&lt;/param&gt;				&lt;xsl:apply-templates select="/Properties/Data/Result/hero_explorer_container/richMediaContainer/flashParamContainer" mode="param" /&gt;				&lt;param value="transparent" name="wmode" /&gt;				&lt;embed&gt;					&lt;xsl:attribute name="src"&gt;$URL_PREFIX&lt;xsl:value-of select="Properties/Data/Result/hero_explorer_container/richMediaContainer/media_file" /&gt;&lt;/xsl:attribute&gt;					&lt;xsl:attribute name="type"&gt;application/x-shockwave-flash&lt;/xsl:attribute&gt;					&lt;xsl:attribute name="wmode"&gt;transparent&lt;/xsl:attribute&gt;					&lt;xsl:attribute name="pluginspage"&gt;http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash&lt;/xsl:attribute&gt;					&lt;xsl:apply-templates select="/Properties/Data/Result/hero_explorer_container/richMediaContainer/flashParamContainer" mode="embed-attr" /&gt;				&lt;/embed&gt;			&lt;/object&gt;		&lt;/div&gt;		&lt;/xsl:otherwise&gt;	&lt;/xsl:choose&gt;							&lt;div id="product-navigation"&gt;								&lt;xsl:variable select="count(/Properties/Data/Result/hero_explorer_container/productExplorerContainer)" name="count" /&gt;								&lt;xsl:if test="$count &amp;gt;= 1"&gt;									&lt;div id="product-navigation-trigger"&gt;										&lt;a href="javascript:void(0)" class="open"&gt;											&lt;span&gt;												&lt;script&gt;document.write(varPrdExplorer);&lt;/script&gt;											&lt;/span&gt;										&lt;/a&gt;									&lt;/div&gt;								&lt;/xsl:if&gt;								&lt;!--xsl:if test="(/Properties/Data/Result/hero_explorer_container/select_content_type 									= 'image')" --&gt;								&lt;xsl:if test="Properties/Data/Result/hero_explorer_container/productExplorerContainer[position() &amp;lt;= 15]"&gt;									&lt;ul class="col-1"&gt;										&lt;xsl:for-each select="Properties/Data/Result/hero_explorer_container/productExplorerContainer[position() &amp;lt;= 15]"&gt;											&lt;li&gt;												&lt;xsl:variable name="product_link_URL" select="product_link_url" /&gt;												&lt;xsl:if test="starts-with($product_link_URL,'/')"&gt;													&lt;a name="product-navigation-link"&gt;														&lt;xsl:attribute name="href"&gt;				&lt;xsl:variable name="url" select="substring-after(substring-after(substring-after($product_link_URL,'/'),'/'),'/')" /&gt;				&lt;xsl:variable name="urls" select="substring-before($url,'.')" /&gt;				&lt;xsl:variable name="dest" select="concat('$PAGE_LINK[',$urls,']')" /&gt;				&lt;xsl:value-of select="$dest" /&gt;			      &lt;/xsl:attribute&gt;														&lt;xsl:attribute name="model"&gt;			      &lt;xsl:value-of select="product_name" /&gt;			      &lt;/xsl:attribute&gt;			      &lt;xsl:if test="0 != string-length(thumbnail_image_url) or 0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;				&lt;span class="flyout"&gt;					&lt;xsl:choose&gt;						&lt;xsl:when test="(0 != string-length(thumbnail_image_url))"&gt;							&lt;img&gt;								&lt;xsl:attribute name="src"&gt;$URL_PREFIX&lt;xsl:value-of select="thumbnail_image_url" /&gt;&lt;/xsl:attribute&gt;							&lt;/img&gt;						&lt;/xsl:when&gt;					&lt;/xsl:choose&gt;					&lt;xsl:if						test="0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;						&lt;div class="text-block"&gt;							&lt;xsl:choose&gt;								&lt;xsl:when test="(0 != string-length(thumbnail_product_name))"&gt;									&lt;h6&gt;										&lt;xsl:value-of select="thumbnail_product_name" /&gt;									&lt;/h6&gt;								&lt;/xsl:when&gt;							&lt;/xsl:choose&gt;							&lt;xsl:choose&gt;								&lt;xsl:when test="(0 != string-length(thumbnail_product_description))"&gt;									&lt;p&gt;										&lt;xsl:value-of select="thumbnail_product_description" /&gt;									&lt;/p&gt;								&lt;/xsl:when&gt;							&lt;/xsl:choose&gt;						&lt;/div&gt; &lt;!-- /text-block --&gt;					&lt;/xsl:if&gt;				&lt;/span&gt;				&lt;/xsl:if&gt;				&lt;xsl:value-of select="product_name" /&gt;							&lt;/a&gt;		&lt;/xsl:if&gt;		&lt;xsl:if test="starts-with($product_link_URL,'/sites')=false"&gt;			&lt;a name="product-navigation-link"&gt;				&lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="$product_link_URL" /&gt;&lt;/xsl:attribute&gt;														&lt;xsl:attribute name="model"&gt;						&lt;xsl:value-of select="product_name" /&gt;					&lt;/xsl:attribute&gt;					&lt;xsl:if test="0 != string-length(thumbnail_image_url) or 0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;						&lt;span class="flyout"&gt;							&lt;xsl:choose&gt;								&lt;xsl:when test="(0 != string-length(thumbnail_image_url))"&gt;									&lt;img&gt;										&lt;xsl:attribute name="src"&gt;$URL_PREFIX&lt;xsl:value-of select="thumbnail_image_url" /&gt;&lt;/xsl:attribute&gt;									&lt;/img&gt;								&lt;/xsl:when&gt;							&lt;/xsl:choose&gt;							&lt;xsl:if test="0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;								&lt;div class="text-block"&gt;									&lt;xsl:choose&gt;										&lt;xsl:when											test="(0 != string-length(thumbnail_product_name))"&gt;											&lt;h6&gt;												&lt;xsl:value-of select="thumbnail_product_name" /&gt;											&lt;/h6&gt;										&lt;/xsl:when&gt;									&lt;/xsl:choose&gt;									&lt;xsl:choose&gt;										&lt;xsl:when test="(0 != string-length(thumbnail_product_description))"&gt;											&lt;p&gt;												&lt;xsl:value-of select="thumbnail_product_description" /&gt;											&lt;/p&gt;										&lt;/xsl:when&gt;									&lt;/xsl:choose&gt;								&lt;/div&gt; &lt;!-- /text-block --&gt;							&lt;/xsl:if&gt;						&lt;/span&gt;					&lt;/xsl:if&gt;					&lt;xsl:value-of select="product_name" /&gt;									&lt;/a&gt;			&lt;/xsl:if&gt;		&lt;/li&gt;	&lt;/xsl:for-each&gt;&lt;/ul&gt;&lt;/xsl:if&gt;&lt;xsl:if test="Properties/Data/Result/hero_explorer_container/productExplorerContainer[position() &amp;gt; 15 and position() &amp;lt;= 30]"&gt;&lt;ul class="col-2"&gt;&lt;xsl:for-each select="Properties/Data/Result/hero_explorer_container/productExplorerContainer[position() &amp;gt; 15 and position() &amp;lt;= 30]"&gt;	&lt;li&gt;		&lt;xsl:variable name="product_link_URL" select="product_link_url" /&gt;		&lt;xsl:if test="starts-with($product_link_URL,'/')"&gt;			&lt;a name="product-navigation-link"&gt;				&lt;xsl:attribute name="href"&gt;			      &lt;xsl:variable name="url" select="substring-after(substring-after(substring-after($product_link_URL,'/'),'/'),'/')" /&gt;			      &lt;xsl:variable name="urls" select="substring-before($url,'.')" /&gt;                 	      &lt;xsl:variable name="dest" select="concat('$PAGE_LINK[',$urls,']')" /&gt;			      &lt;xsl:value-of select="$dest" /&gt;			    &lt;/xsl:attribute&gt;  			   &lt;xsl:attribute name="model"&gt;				&lt;xsl:value-of select="product_name" /&gt;			&lt;/xsl:attribute&gt;			&lt;xsl:value-of select="product_name" /&gt;			&lt;xsl:if test="0 != string-length(thumbnail_image_url) or 0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;				&lt;span class="flyout"&gt;					&lt;xsl:choose&gt;						&lt;xsl:when test="(0 != string-length(thumbnail_image_url))"&gt;							&lt;img&gt;								&lt;xsl:attribute name="src"&gt;$URL_PREFIX&lt;xsl:value-of select="thumbnail_image_url" /&gt;&lt;/xsl:attribute&gt;							&lt;/img&gt;						&lt;/xsl:when&gt;					&lt;/xsl:choose&gt;					&lt;xsl:if test="0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;						&lt;div class="text-block"&gt;							&lt;xsl:choose&gt;								&lt;xsl:when test="(0 != string-length(thumbnail_product_name))"&gt;									&lt;h6&gt;										&lt;xsl:value-of select="thumbnail_product_name" /&gt;									&lt;/h6&gt;								&lt;/xsl:when&gt;							&lt;/xsl:choose&gt;							&lt;xsl:choose&gt;								&lt;xsl:when test="(0 != string-length(thumbnail_product_description))"&gt;									&lt;p&gt;										&lt;xsl:value-of select="thumbnail_product_description" /&gt;									&lt;/p&gt;								&lt;/xsl:when&gt;							&lt;/xsl:choose&gt;						&lt;/div&gt; &lt;!-- /text-block --&gt;					&lt;/xsl:if&gt;				&lt;/span&gt;			&lt;/xsl:if&gt;		&lt;/a&gt;	&lt;/xsl:if&gt;	&lt;xsl:if test="starts-with($product_link_URL,'/sites')=false"&gt;		&lt;a name="product-navigation-link"&gt;			&lt;xsl:attribute name="href"&gt; 			      &lt;xsl:value-of select="$product_link_URL" /&gt;			&lt;/xsl:attribute&gt;			&lt;xsl:attribute name="model"&gt;				&lt;xsl:value-of select="product_name" /&gt;			&lt;/xsl:attribute&gt;			&lt;xsl:value-of select="product_name" /&gt;				&lt;xsl:if test="0 != string-length(thumbnail_image_url) or 0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;					&lt;span class="flyout"&gt;						&lt;xsl:choose&gt;							&lt;xsl:when test="(0 != string-length(thumbnail_image_url))"&gt;								&lt;img&gt;									&lt;xsl:attribute name="src"&gt;$URL_PREFIX&lt;xsl:value-of select="thumbnail_image_url" /&gt;&lt;/xsl:attribute&gt;								&lt;/img&gt;							&lt;/xsl:when&gt;						&lt;/xsl:choose&gt;						&lt;xsl:if test="0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;							&lt;div class="text-block"&gt;								&lt;xsl:choose&gt;									&lt;xsl:when test="(0 != string-length(thumbnail_product_name))"&gt;										&lt;h6&gt;											&lt;xsl:value-of select="thumbnail_product_name" /&gt;										&lt;/h6&gt;									&lt;/xsl:when&gt;								&lt;/xsl:choose&gt;								&lt;xsl:choose&gt;									&lt;xsl:when test="(0 != string-length(thumbnail_product_description))"&gt;										&lt;p&gt;											&lt;xsl:value-of select="thumbnail_product_description" /&gt;										&lt;/p&gt;									&lt;/xsl:when&gt;								&lt;/xsl:choose&gt;							&lt;/div&gt; &lt;!-- /text-block --&gt;						&lt;/xsl:if&gt;					&lt;/span&gt;				&lt;/xsl:if&gt;			&lt;/a&gt;		&lt;/xsl:if&gt;	&lt;/li&gt;&lt;/xsl:for-each&gt;	&lt;/ul&gt;&lt;/xsl:if&gt;&lt;xsl:if test="Properties/Data/Result/hero_explorer_container/productExplorerContainer[position() &amp;gt; 30 and position() &amp;lt;= 45]"&gt;	&lt;ul class="col-3"&gt;		&lt;xsl:for-each select="Properties/Data/Result/hero_explorer_container/productExplorerContainer[position() &amp;gt; 30 and position() &amp;lt;= 45]"&gt;			&lt;li&gt;				&lt;xsl:variable name="product_link_URL" select="product_link_url" /&gt;				&lt;xsl:if test="starts-with($product_link_URL,'/')"&gt;					&lt;a name="product-navigation-link"&gt;						&lt;xsl:attribute name="href"&gt;&lt;xsl:variable name="url" select="substring-after(substring-after(substring-after($product_link_URL,'/'),'/'),'/')" /&gt;&lt;xsl:variable name="urls" select="substring-before($url,'.')" /&gt;&lt;xsl:variable name="dest" select="concat('$PAGE_LINK[',$urls,']')" /&gt;&lt;xsl:value-of select="$dest" /&gt;&lt;/xsl:attribute&gt;	&lt;xsl:attribute name="model"&gt;		&lt;xsl:value-of select="product_name" /&gt;	&lt;/xsl:attribute&gt;	&lt;xsl:value-of select="product_name" /&gt;	&lt;xsl:if test="0 != string-length(thumbnail_image_url) or 0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;		&lt;span class="flyout"&gt;			&lt;xsl:choose&gt;				&lt;xsl:when test="(0 != string-length(thumbnail_image_url))"&gt;					&lt;img&gt;						&lt;xsl:attribute name="src"&gt;$URL_PREFIX&lt;xsl:value-of select="thumbnail_image_url" /&gt;&lt;/xsl:attribute&gt;					&lt;/img&gt;				&lt;/xsl:when&gt;			&lt;/xsl:choose&gt;			&lt;xsl:if test="0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;				&lt;div class="text-block"&gt;					&lt;xsl:choose&gt;						&lt;xsl:when test="(0 != string-length(thumbnail_product_name))"&gt;							&lt;h6&gt;								&lt;xsl:value-of select="thumbnail_product_name" /&gt;							&lt;/h6&gt;						&lt;/xsl:when&gt;					&lt;/xsl:choose&gt;					&lt;xsl:choose&gt;						&lt;xsl:when test="(0 != string-length(thumbnail_product_description))"&gt;							&lt;p&gt;								&lt;xsl:value-of select="thumbnail_product_description" /&gt;							&lt;/p&gt;						&lt;/xsl:when&gt;					&lt;/xsl:choose&gt;				&lt;/div&gt; &lt;!-- /text-block --&gt;			&lt;/xsl:if&gt;		&lt;/span&gt;	&lt;/xsl:if&gt;&lt;/a&gt;&lt;/xsl:if&gt;&lt;xsl:if test="starts-with($product_link_URL,'/sites')=false"&gt;	&lt;a name="product-navigation-link"&gt;		&lt;xsl:attribute name="href"&gt; &lt;xsl:value-of select="$product_link_URL" /&gt;&lt;/xsl:attribute&gt;		&lt;xsl:attribute name="model"&gt;	&lt;xsl:value-of select="product_name" /&gt;&lt;/xsl:attribute&gt;		&lt;xsl:value-of select="product_name" /&gt;	&lt;xsl:if test="0 != string-length(thumbnail_image_url) or 0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;	&lt;span class="flyout"&gt;		&lt;xsl:choose&gt;			&lt;xsl:when test="(0 != string-length(thumbnail_image_url))"&gt;				&lt;img&gt;					&lt;xsl:attribute name="src"&gt;$URL_PREFIX&lt;xsl:value-of select="thumbnail_image_url" /&gt;&lt;/xsl:attribute&gt;				&lt;/img&gt;			&lt;/xsl:when&gt;		&lt;/xsl:choose&gt;		&lt;xsl:if test="0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;			&lt;div class="text-block"&gt;				&lt;xsl:choose&gt;					&lt;xsl:when test="(0 != string-length(thumbnail_product_name))"&gt;						&lt;h6&gt;							&lt;xsl:value-of select="thumbnail_product_name" /&gt;						&lt;/h6&gt;					&lt;/xsl:when&gt;				&lt;/xsl:choose&gt;				&lt;xsl:choose&gt;					&lt;xsl:when test="(0 != string-length(thumbnail_product_description))"&gt;						&lt;p&gt;							&lt;xsl:value-of select="thumbnail_product_description" /&gt;						&lt;/p&gt;					&lt;/xsl:when&gt;				&lt;/xsl:choose&gt;			&lt;/div&gt; &lt;!-- /text-block --&gt;		&lt;/xsl:if&gt;	&lt;/span&gt;	&lt;/xsl:if&gt;&lt;/a&gt;&lt;/xsl:if&gt;&lt;/li&gt;&lt;/xsl:for-each&gt;&lt;/ul&gt;&lt;/xsl:if&gt;&lt;xsl:if test="Properties/Data/Result/hero_explorer_container/productExplorerContainer[position() &amp;gt; 45 and position() &amp;lt;= 60]"&gt;	&lt;ul class="col-4"&gt;		&lt;xsl:for-each select="Properties/Data/Result/hero_explorer_container/productExplorerContainer[position() &amp;gt; 45 and position() &amp;lt;= 60]"&gt;			&lt;li&gt;				&lt;xsl:variable name="product_link_URL" select="product_link_url" /&gt;				&lt;xsl:if test="starts-with($product_link_URL,'/')"&gt;					&lt;a name="product-navigation-link"&gt;						&lt;xsl:attribute name="href"&gt;					&lt;xsl:variable name="url" select="substring-after(substring-after(substring-after($product_link_URL,'/'),'/'),'/')" /&gt;					&lt;xsl:variable name="urls" select="substring-before($url,'.')" /&gt;					&lt;xsl:variable name="dest" select="concat('$PAGE_LINK[',$urls,']')" /&gt;					&lt;xsl:value-of select="$dest" /&gt;				&lt;/xsl:attribute&gt;														&lt;xsl:attribute name="model"&gt;					&lt;xsl:value-of select="product_name" /&gt;				&lt;/xsl:attribute&gt;														&lt;xsl:value-of select="product_name" /&gt;														&lt;xsl:if test="0 != string-length(thumbnail_image_url) or 0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;															&lt;span class="flyout"&gt;																&lt;xsl:choose&gt;																	&lt;xsl:when test="(0 != string-length(thumbnail_image_url))"&gt;																		&lt;img&gt;																			&lt;xsl:attribute name="src"&gt;$URL_PREFIX&lt;xsl:value-of select="thumbnail_image_url" /&gt;&lt;/xsl:attribute&gt;																		&lt;/img&gt;																	&lt;/xsl:when&gt;																&lt;/xsl:choose&gt;																&lt;xsl:if test="0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;																	&lt;div class="text-block"&gt;																		&lt;xsl:choose&gt;																			&lt;xsl:when test="(0 != string-length(thumbnail_product_name))"&gt;																				&lt;h6&gt;																					&lt;xsl:value-of select="thumbnail_product_name" /&gt;																				&lt;/h6&gt;																			&lt;/xsl:when&gt;																		&lt;/xsl:choose&gt;																		&lt;xsl:choose&gt;																			&lt;xsl:when test="(0 != string-length(thumbnail_product_description))"&gt;																				&lt;p&gt;																					&lt;xsl:value-of select="thumbnail_product_description" /&gt;																				&lt;/p&gt;																			&lt;/xsl:when&gt;																		&lt;/xsl:choose&gt;																	&lt;/div&gt; &lt;!-- /text-block --&gt;																&lt;/xsl:if&gt;															&lt;/span&gt;														&lt;/xsl:if&gt;													&lt;/a&gt;												&lt;/xsl:if&gt;												&lt;xsl:if test="starts-with($product_link_URL,'/sites')=false"&gt;													&lt;a name="product-navigation-link"&gt;														&lt;xsl:attribute name="href"&gt; &lt;xsl:value-of select="$product_link_URL" /&gt;&lt;/xsl:attribute&gt;														&lt;xsl:attribute name="model"&gt;	&lt;xsl:value-of select="product_name" /&gt;&lt;/xsl:attribute&gt;														&lt;xsl:value-of select="product_name" /&gt;														&lt;xsl:if test="0 != string-length(thumbnail_image_url) or 0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;															&lt;span class="flyout"&gt;																&lt;xsl:choose&gt;																	&lt;xsl:when test="(0 != string-length(thumbnail_image_url))"&gt;																		&lt;img&gt;																			&lt;xsl:attribute name="src"&gt;$URL_PREFIX&lt;xsl:value-of select="thumbnail_image_url" /&gt;&lt;/xsl:attribute&gt;																		&lt;/img&gt;																	&lt;/xsl:when&gt;																&lt;/xsl:choose&gt;																&lt;xsl:if test="0 != string-length(thumbnail_product_name) or 0 != string-length(thumbnail_product_description)"&gt;																	&lt;div class="text-block"&gt;																		&lt;xsl:choose&gt;																			&lt;xsl:when test="(0 != string-length(thumbnail_product_name))"&gt;																				&lt;h6&gt;																					&lt;xsl:value-of select="thumbnail_product_name" /&gt;																				&lt;/h6&gt;																			&lt;/xsl:when&gt;																		&lt;/xsl:choose&gt;																		&lt;xsl:choose&gt;																			&lt;xsl:when test="(0 != string-length(thumbnail_product_description))"&gt;																				&lt;p&gt;																					&lt;xsl:value-of select="thumbnail_product_description" /&gt;																				&lt;/p&gt;																			&lt;/xsl:when&gt;																		&lt;/xsl:choose&gt;																	&lt;/div&gt; &lt;!-- /text-block --&gt;																&lt;/xsl:if&gt;															&lt;/span&gt;														&lt;/xsl:if&gt;													&lt;/a&gt;												&lt;/xsl:if&gt;											&lt;/li&gt;										&lt;/xsl:for-each&gt;									&lt;/ul&gt;								&lt;/xsl:if&gt;								&lt;!--/xsl:if --&gt;							&lt;/div&gt;&lt;!-- /product-navigation --&gt;							&lt;div id="slideShowOverlay" class="hideOverlay"&gt;&lt;/div&gt;						&lt;/div&gt;&lt;!-- /hero-banner --&gt;					&lt;/div&gt;				&lt;/xsl:if&gt;				&lt;xsl:if test="(/Properties/Data/Result/hero_explorer_container/product_explorer_include = 'no') and (/Properties/Data/Result/hero_explorer_container/select_content_type = 'image')"&gt;					&lt;div class="MOD_GC_12_5a"&gt;						&lt;div id="hero-banner"&gt;							&lt;ul id="banner"&gt;								&lt;xsl:attribute name="class"&gt;									&lt;xsl:value-of select="$transparencyClass"/&gt;								&lt;/xsl:attribute&gt;								&lt;xsl:for-each select="/Properties/Data/Result/hero_explorer_container/heroImageContainer"&gt;									&lt;li&gt;										&lt;xsl:variable name="image_link_URL" select="image_link_url" /&gt;										&lt;a&gt;										 &lt;xsl:if test="$image_link_URL != ''"&gt;											&lt;xsl:attribute name="href"&gt;	      &lt;xsl:if test="starts-with($image_link_URL,'/')"&gt; 		&lt;xsl:variable name="url" select="substring-after(substring-after(substring-after($image_link_URL,'/'),'/'),'/')" /&gt; 		&lt;xsl:variable name="urls" select="substring-before($url,'.')" /&gt; 		&lt;xsl:variable name="dest" select="concat('$PAGE_LINK[',$urls,']')" /&gt; 		&lt;xsl:value-of select="$dest" /&gt; 	      &lt;/xsl:if&gt; 	      &lt;xsl:if test="starts-with($image_link_URL,'/sites')=false"&gt; 	        &lt;xsl:value-of select="$image_link_URL" /&gt; 	      &lt;/xsl:if&gt; 	    &lt;/xsl:attribute&gt;	    &lt;/xsl:if&gt;											&lt;img&gt;												&lt;xsl:attribute name="src"&gt;$URL_PREFIX&lt;xsl:value-of select="image_url" /&gt;&lt;/xsl:attribute&gt;												&lt;xsl:attribute name="alt"&gt;&lt;xsl:value-of select="image_url_alt_text" /&gt;&lt;/xsl:attribute&gt;												&lt;xsl:attribute name="title"&gt;&lt;xsl:value-of select="image_url_alt_text" /&gt;&lt;/xsl:attribute&gt;											&lt;/img&gt;										&lt;/a&gt;		&lt;xsl:choose&gt;		&lt;xsl:when test="image_headline_sub_text = '' and  image_calltoaction_text = '' and image_headline_text = ''"&gt;		 &lt;div class="banner-text-block_new blank"&gt;		 &lt;/div&gt;         &lt;/xsl:when&gt;				  &lt;xsl:otherwise&gt;										&lt;div class="banner-text-block_new"&gt;											&lt;xsl:if test="image_headline_text != ''"&gt;											&lt;h2&gt;												&lt;xsl:value-of select="image_headline_text" /&gt;											&lt;/h2&gt;											&lt;/xsl:if&gt;											&lt;xsl:if test="image_headline_sub_text != '' or image_calltoaction_text!=''"&gt;											&lt;p&gt;											&lt;xsl:if test="image_headline_sub_text != ''"&gt;												&lt;xsl:value-of select="image_headline_sub_text" /&gt;												&lt;/xsl:if&gt;												&lt;xsl:if test="image_calltoaction_text != ''"&gt;													&lt;a&gt;													&lt;xsl:if test="$image_link_URL != ''"&gt;														&lt;xsl:attribute name="href"&gt;	        &lt;xsl:if test="starts-with($image_link_URL,'/')"&gt; 		  &lt;xsl:variable name="url" select="substring-after(substring-after(substring-after($image_link_URL,'/'),'/'),'/')" /&gt; 		  &lt;xsl:variable name="urls" select="substring-before($url,'.')" /&gt; 		  &lt;xsl:variable name="dest" select="concat('$PAGE_LINK[',$urls,']')" /&gt; 		  &lt;xsl:value-of select="$dest" /&gt; 	        &lt;/xsl:if&gt; 	        &lt;xsl:if test="starts-with($image_link_URL,'/sites')=false"&gt; 	          &lt;xsl:value-of select="$image_link_URL" /&gt; 	        &lt;/xsl:if&gt; 	      &lt;/xsl:attribute&gt;	      &lt;/xsl:if&gt;														&lt;xsl:value-of select="image_calltoaction_text" /&gt;													&lt;/a&gt;												&lt;/xsl:if&gt;											&lt;/p&gt;											&lt;/xsl:if&gt;										&lt;/div&gt;										&lt;/xsl:otherwise&gt;		  &lt;/xsl:choose&gt;									&lt;/li&gt;								&lt;/xsl:for-each&gt;							&lt;/ul&gt;							&lt;xsl:variable name="iCount" select="count(/Properties/Data/Result/hero_explorer_container/heroImageContainer)" /&gt;							&lt;xsl:if test="$iCount &amp;gt; 1"&gt;								&lt;div id="pager"&gt;									&lt;div id="pager-numbers"&gt;&lt;!-- Pager gets populated here --&gt;									&lt;/div&gt;									&lt;span class="pause-resume pause"&gt;&amp;#32;&lt;/span&gt;						&lt;/div&gt;&lt;/xsl:if&gt;&lt;/div&gt;&lt;!-- /hero-banner --&gt;&lt;/div&gt;&lt;!-- /MOD_GC_12_5a --&gt;&lt;/xsl:if&gt;&lt;xsl:if test="(Properties/Data/Result/hero_explorer_container/product_explorer_include = 'no') and (Properties/Data/Result/hero_explorer_container/select_content_type = 'flash')"&gt;&lt;div class="MOD_GC_8"&gt;&lt;object wmode="transparent" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=5,0,0,0"&gt;&lt;xsl:apply-templates select="//Properties/Data/Result/hero_explorer_container/richMediaContainer/flashParamContainer" mode="embed-attr" /&gt;&lt;param&gt;&lt;xsl:attribute name="name"&gt;movie&lt;/xsl:attribute&gt;&lt;xsl:attribute name="value"&gt;$URL_PREFIX&lt;xsl:value-of select="/Properties/Data/Result/hero_explorer_container/richMediaContainer/media_file" /&gt;&lt;/xsl:attribute&gt;&lt;/param&gt;&lt;xsl:apply-templates select="//Properties/Data/Result/hero_explorer_container/richMediaContainer/flashParamContainer" mode="param" /&gt;&lt;param value="transparent" name="wmode" /&gt;&lt;embed&gt;&lt;xsl:attribute name="src"&gt;$URL_PREFIX&lt;xsl:value-of select="/Properties/Data/Result/hero_explorer_container/richMediaContainer/media_file" /&gt;&lt;/xsl:attribute&gt;&lt;xsl:attribute name="type"&gt;application/x-shockwave-flash&lt;/xsl:attribute&gt;&lt;xsl:attribute name="wmode"&gt;transparent&lt;/xsl:attribute&gt;&lt;xsl:attribute name="pluginspage"&gt;http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash&lt;/xsl:attribute&gt;&lt;xsl:apply-templates select="//Properties/Data/Result/hero_explorer_container/richMediaContainer/flashParamContainer" mode="embed-attr" /&gt;&lt;/embed&gt;&lt;/object&gt;&lt;/div&gt;&lt;!-- /MOD_GC_8 --&gt;&lt;/xsl:if&gt;&lt;/xsl:otherwise&gt;&lt;/xsl:choose&gt;&lt;/xsl:template&gt;&lt;xsl:template match="//Properties/Data/Result/hero_explorer_container/richMediaContainer/flashParamContainer" mode="param"&gt;  &lt;xsl:if test="flash_param_name != ''"&gt;    &lt;param&gt;      &lt;xsl:attribute name="name"&gt;&lt;xsl:value-of select="flash_param_name" /&gt;&lt;/xsl:attribute&gt;      &lt;xsl:attribute name="value"&gt;&lt;xsl:value-of select="flash_param_value" /&gt;&lt;/xsl:attribute&gt;    &lt;/param&gt;  &lt;/xsl:if&gt;&lt;/xsl:template&gt;&lt;xsl:template match="//Properties/Data/Result/hero_explorer_container/richMediaContainer/flashParamContainer" mode="embed-attr"&gt;  &lt;xsl:if test="flash_param_name != ''"&gt;    &lt;xsl:attribute name="{flash_param_name}"&gt;&lt;xsl:value-of select="flash_param_value" /&gt;&lt;/xsl:attribute&gt;  &lt;/xsl:if&gt;&lt;/xsl:template&gt;&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+    </Component>
+    <Component ID="1295559038793" Version="3.1.1.0" PageID="1" TemplateComponentID="1294103998837" CanBeActive="true">
+      <Description>The Global Header module provides consistent header navigation across all pages. </Description>
+      <SelectedSkin>Default</SelectedSkin>
+      <DisplayName>Global Header</DisplayName>
+      <Name>Global Header</Name>
+      <BaseComponent Version="14"><![CDATA[johndeere/enterprise/Header/Global Header.component]]></BaseComponent>
+      <ContainerProperties ID="1295559038793" locked="false">
+        <FixedLayoutArea ID="header-area-1" index="0"/>
+        <CacheTime>0</CacheTime>
+        <BGColor/>
+        <Width>2004</Width>
+        <Height>3004</Height>
+        <Top>10</Top>
+        <Left>10</Left>
+        <ZIndex>0</ZIndex>
+        <RenderInRuntime>true</RenderInRuntime>
+      </ContainerProperties>
+      <InternalProperties/>
+      <Locks>
+        <ContainerProperties locked="false" Changed="false"/>
+        <Properties locked="false" Changed="false"/>
+        <Data locked="false" Changed="false"/>
+      </Locks>
+      <Segments>
+        <Segment ID="0">
+          <Properties ComponentID="1295559038793"/>
+          <Data>
+            <External>
+              <Parameters>
+                <Datum ID="NAVIGATION_DCR" Type="String" Name="Global Navigation DCR *">templatedata/navigation/global_header/data/$CustomContext{locale}/global_navigation.dcr</Datum>
+                <Datum ID="SEARCH_DCR" Type="String" Name="Search DCR *" Exposed="false">templatedata/lookup/searchParameters/data/$CustomContext{locale}/globalSearch.dcr</Datum>
+                <Datum ID="HELPER_TYPE" Type="String" Name="Helper Type *" Exposed="false">Simple</Datum>
+              </Parameters>
+              <Object Scope="local">com.johndeere.livesite.component.external.GenericHeaderExternal</Object>
+              <Method>handleRequest</Method>
+            </External>
+          </Data>
+        </Segment>
+      </Segments>
+      <Stylesheet Default="true" PageType="" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Default</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"                version="1.0"&gt;  &lt;!-- Skin: Default XSL --&gt;  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl" /&gt;  &lt;xsl:include      href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl" /&gt;  &lt;xsl:template match="/"&gt;	&lt;xsl:apply-templates select="/Properties/Data/Result/root"/&gt;	&lt;xsl:apply-templates select="/Properties/Data/Result/root/error"/&gt;  &lt;/xsl:template&gt;     &lt;xsl:template match="/Properties/Data/Result/root/error"&gt;	&lt;div class="errMsg"&gt;			&lt;xsl:value-of select="/Properties/Data/Result/root/error"/&gt;    &lt;/div&gt;  &lt;/xsl:template&gt;    &lt;xsl:template match="/Properties/Data/Result/root"&gt;    &lt;xsl:comment&gt;Search Base URL: &lt;xsl:value-of select="/Properties/Data/Result/root/searchParameters/SearchBaseUrl" /&gt;&lt;/xsl:comment&gt;    &lt;xsl:variable name="localeCountry" select="/Properties/Data/Result/root/global_header/locale_country"/&gt;    &lt;xsl:variable name="searchBaseUrl" select="/Properties/Data/Result/root/searchParameters/SearchBaseUrl"/&gt;    &lt;xsl:variable name="searchProject" select="/Properties/Data/Result/root/searchParameters/SearchProjectName"/&gt;    &lt;script type="text/javascript"&gt;      function LogoAltText()      {				      //Calling the Variable from locale specific java script      document.getElementById("Ghid000001").title=Logo_Alt_Txt;      }    &lt;/script&gt;    &lt;div&gt;      &lt;div class="MOD_NO_6 green"&gt;        &lt;!-- Logo image section START --&gt;        &lt;xsl:variable name="imageAltText"                      select="/Properties/Data/Result/root/global_header/logo_alt_text" /&gt;        &lt;a class="logo" onMouseover="javascript:LogoAltText()"&gt;           &lt;xsl:attribute name="href"&gt;            &lt;xsl:value-of select="'http://www.deere.com'" /&gt;          &lt;/xsl:attribute&gt;					          &lt;!-- Adding an ID attribute for Global Header Component--&gt;          &lt;xsl:attribute name="id"&gt;&lt;xsl:value-of select="'Ghid000001'"/&gt;&lt;/xsl:attribute&gt;        &lt;/a&gt;        &lt;!-- Logo image section END --&gt;        &lt;!-- Top Navigation section START --&gt;        &lt;div id="topNav"&gt;          &lt;ul id="utilityNav"&gt;            &lt;!-- Country/language section START --&gt;            &lt;xsl:variable name="country" select="/Properties/Data/Result/root/global_header/country_selector_text" /&gt;            &lt;xsl:variable name="countryLink" select="/Properties/Data/Result/root/global_header/country_selector_link" /&gt;            &lt;xsl:if test="$country!= ''"&gt;              &lt;li&gt;                &lt;a class=""&gt;                  &lt;xsl:attribute name="href"&gt;                    &lt;xsl:value-of select="$countryLink" /&gt;                  &lt;/xsl:attribute&gt;                  &lt;!-- Analytics Start --&gt;                  &lt;xsl:attribute name="onclick"&gt;                    if(omniEvents)omniEvents.country(this, '&lt;xsl:value-of                    select="translate($country,&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;');                  &lt;/xsl:attribute&gt;                  &lt;!-- Analytics End --&gt;                  &lt;xsl:value-of select="$country" /&gt;                &lt;/a&gt;              &lt;/li&gt;            &lt;/xsl:if&gt;            &lt;!-- Country/language section END --&gt;            &lt;li&gt;|&lt;/li&gt;            &lt;!-- Dealer locator section START --&gt;            &lt;xsl:variable name="dealerText" select="/Properties/Data/Result/root/global_header/dealer_locator_selector_text" /&gt;            &lt;xsl:variable name="dealerLink" select="/Properties/Data/Result/root/global_header/dealer_locator_selector_link" /&gt;            &lt;li&gt;              &lt;a&gt;                &lt;xsl:attribute name="href"&gt;                  &lt;xsl:value-of select="$dealerLink" /&gt;                &lt;/xsl:attribute&gt;                &lt;xsl:value-of select="$dealerText" /&gt;              &lt;/a&gt;            &lt;/li&gt;            &lt;!-- Dealer locator section END --&gt;            &lt;!-- Account section START --&gt;            &lt;xsl:variable name="accountText" select="/Properties/Data/Result/root/global_header/my_account_selector_text" /&gt;            &lt;xsl:variable name="accountLink" select="/Properties/Data/Result/root/global_header/my_account_selector_link" /&gt;            &lt;xsl:if test="$accountText!= ''"&gt;              &lt;li&gt;|&lt;/li&gt;              &lt;li&gt;                &lt;a&gt;                  &lt;xsl:attribute name="href"&gt;                    &lt;xsl:value-of select="$accountLink" /&gt;                  &lt;/xsl:attribute&gt;                  &lt;xsl:value-of select="$accountText" /&gt;                &lt;/a&gt;              &lt;/li&gt;            &lt;/xsl:if&gt;            &lt;!-- Account section END --&gt;          &lt;/ul&gt;          &lt;!-- Search Section START --&gt;          &lt;div id="search"&gt;            &lt;script type="text/javascript"&gt;              configureSearch("&lt;xsl:value-of select="$searchBaseUrl" /&gt;", "&lt;xsl:value-of select="$searchProject" /&gt;");            &lt;/script&gt;				          &lt;/div&gt;        &lt;/div&gt;        &lt;!-- Search Section END --&gt;        &lt;div id="mainNav"&gt;			&lt;div id="mainNav_byName"&gt;				&lt;div class="rightBg"&gt;				&lt;h3 id="mainNav_byName_title"&gt;						  &lt;xsl:value-of select="/Properties/Data/Result/root/global_header/products_by/products_by_label" /&gt;				&lt;/h3&gt;				&lt;ul&gt;												&lt;!-- Industry Tab menu START --&gt;						&lt;li class="seperator"&gt;						  &lt;xsl:call-template name="addProductsByIndustries" /&gt;						&lt;/li&gt;						&lt;!-- Industry Tab menu END --&gt;												&lt;!-- Name tab menu START --&gt;						&lt;li&gt;						  &lt;xsl:call-template name="addProductsByName" /&gt;						&lt;/li&gt;						&lt;!-- Name menu tab END --&gt;				&lt;/ul&gt;				&lt;/div&gt;			&lt;/div&gt;          &lt;ul id="mainNav_m"&gt;            &lt;!-- Parts menu tab START --&gt;            &lt;xsl:variable name="partsPath" select="/Properties/Data/Result/root/global_header/parts_site_node"/&gt;            &lt;xsl:variable name="servicesPath" select="/Properties/Data/Result/root/global_header/services_site_node"/&gt;	            &lt;xsl:variable name="buyingPath" select="/Properties/Data/Result/root/global_header/buying_site_node"/&gt;	            &lt;xsl:variable name="companyPath" select="/Properties/Data/Result/root/global_header/company_site_node"/&gt;	            &lt;li&gt;			                &lt;xsl:call-template name="addNonIndustryNode"&gt;                &lt;xsl:with-param name="nPath"                                select="/Properties/Data/Result/root/global_header/parts_site_node" /&gt;                &lt;xsl:with-param name="styleClass" select="'submenu parts'" /&gt;              &lt;/xsl:call-template&gt;            &lt;/li&gt;            &lt;!-- Parts menu tab END --&gt;               &lt;xsl:if test="(/Properties/Data/Result/root/sitemap/node[@name=$partsPath])"&gt;					&lt;xsl:if test="(/Properties/Data/Result/root/sitemap/node[@name=$servicesPath]) or (/Properties/Data/Result/root/sitemap/node[@name=$buyingPath]) or (/Properties/Data/Result/root/sitemap/node[@name=$companyPath])"&gt;						&lt;li&gt;|&lt;/li&gt;					&lt;/xsl:if&gt;						&lt;/xsl:if&gt;            &lt;!-- Services &amp; Support menu tab START --&gt;                        &lt;li&gt;			              &lt;xsl:call-template name="addNonIndustryNode"&gt;                &lt;xsl:with-param name="nPath"                                select="/Properties/Data/Result/root/global_header/services_site_node" /&gt;                &lt;xsl:with-param name="styleClass" select="'submenu services'" /&gt;              &lt;/xsl:call-template&gt;            &lt;/li&gt;            &lt;!-- Services &amp; Support menu tab END --&gt;            &lt;xsl:if test="(/Properties/Data/Result/root/sitemap/node[@name=$servicesPath])"&gt;              &lt;xsl:if test="(/Properties/Data/Result/root/sitemap/node[@name=$buyingPath]) or (/Properties/Data/Result/root/sitemap/node[@name=$companyPath])"&gt;					&lt;li&gt;|&lt;/li&gt;			  &lt;/xsl:if&gt;            &lt;/xsl:if&gt;            &lt;!-- Buying &amp; Financing menu tab START --&gt;                        &lt;li&gt;                            &lt;xsl:call-template name="addNonIndustryNode"&gt;                &lt;xsl:with-param name="nPath"                                select="/Properties/Data/Result/root/global_header/buying_site_node" /&gt;                &lt;xsl:with-param name="styleClass" select="'submenu buying'" /&gt;              &lt;/xsl:call-template&gt;            &lt;/li&gt;            &lt;!-- Buying &amp; Financing menu tab END --&gt;            &lt;xsl:if test="(/Properties/Data/Result/root/sitemap/node[@name=$buyingPath]) and (/Properties/Data/Result/root/sitemap/node[@name=$companyPath])"&gt;              &lt;li&gt;|&lt;/li&gt;            &lt;/xsl:if&gt;            &lt;!-- Our Company menu tab START --&gt;            &lt;li&gt;              &lt;xsl:call-template name="addNonIndustryNode"&gt;                &lt;xsl:with-param name="nPath"                                select="/Properties/Data/Result/root/global_header/company_site_node" /&gt;                &lt;xsl:with-param name="styleClass" select="'submenu company'" /&gt;              &lt;/xsl:call-template&gt;            &lt;/li&gt;            &lt;!-- Our Company menu tab END --&gt;          &lt;/ul&gt;        &lt;/div&gt;      &lt;/div&gt;    &lt;/div&gt;  &lt;/xsl:template&gt;  &lt;!-- This template adds the products by name       Group list nodes like Popular/Featured product groups  --&gt;  &lt;xsl:template name="addNameGroupNode"&gt;    &lt;xsl:param name="groupXpath"/&gt;    &lt;xsl:param name="nameTabName"/&gt;    &lt;xsl:for-each select="$groupXpath"&gt;      &lt;ul&gt;        &lt;xsl:if test="position() = last()"&gt;          &lt;xsl:attribute name="class"&gt;last&lt;/xsl:attribute&gt;        &lt;/xsl:if&gt;        &lt;li&gt;          &lt;h4&gt;            &lt;xsl:value-of select="group_title" /&gt;          &lt;/h4&gt;        &lt;/li&gt;        &lt;xsl:for-each select="group_list"&gt;          &lt;xsl:variable name="linkText"                        select="link_text" /&gt;          &lt;xsl:variable name="linkUrl"                        select="link_url" /&gt;          &lt;li&gt;            &lt;a&gt;              &lt;xsl:attribute name="href"&gt;                &lt;xsl:call-template name="addLink"&gt;                  &lt;xsl:with-param name="linkUrl" select="link_url" /&gt;                &lt;/xsl:call-template&gt;              &lt;/xsl:attribute&gt;              &lt;!-- Analytics Start --&gt;              &lt;xsl:attribute name="onclick"&gt;                if(omniEvents)omniEvents.globalNav(this, 'header:&lt;xsl:value-of                select="translate($nameTabName,&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;:&lt;xsl:value-of                select="translate(link_text,&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;');              &lt;/xsl:attribute&gt;              &lt;!-- Analytics End --&gt;              &lt;xsl:value-of select="link_text" /&gt;            &lt;/a&gt;          &lt;/li&gt;        &lt;/xsl:for-each&gt;      &lt;/ul&gt;    &lt;/xsl:for-each&gt;  &lt;/xsl:template&gt;  &lt;!--      This template adds the products by name top navigation.  --&gt;  &lt;xsl:template name="addProductsByName"&gt;     &lt;xsl:variable name="nameTabName"                  select="/Properties/Data/Result/root/global_header/products_by_name/menu_name" /&gt;    &lt;xsl:variable name="nameTabUrl"                  select="/Properties/Data/Result/root/global_header/products_by_name/name_menu_link_url" /&gt;    &lt;a&gt;      &lt;xsl:attribute name="href"&gt;        &lt;xsl:call-template name="addLink"&gt;          &lt;xsl:with-param name="linkUrl" select="$nameTabUrl" /&gt;        &lt;/xsl:call-template&gt;      &lt;/xsl:attribute&gt;      &lt;xsl:attribute name="onclick"&gt;        if(omniEvents)omniEvents.globalNav(this, 'header:&lt;xsl:value-of        select="translate($nameTabName,&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;:&lt;xsl:value-of        select="translate($nameTabName,&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;');      &lt;/xsl:attribute&gt;      &lt;xsl:value-of select="$nameTabName" /&gt;    &lt;/a&gt;    &lt;div class="submenu name" style="display: none; "&gt;      &lt;div class="extra"&gt;        &lt;xsl:call-template name="addNameGroupNode"&gt;          &lt;xsl:with-param name="groupXpath" select="/Properties/Data/Result/root/global_header/products_by_name/name_group"/&gt;          &lt;xsl:with-param name="nameTabName" select="$nameTabName"/&gt;        &lt;/xsl:call-template&gt;      &lt;/div&gt;      &lt;xsl:variable name="seeAll"                    select="/Properties/Data/Result/root/global_header/products_by_name/see_all_name" /&gt;      &lt;div style="text-align:center"&gt;        &lt;a class="btn_140x21"&gt;          &lt;xsl:attribute name="href"&gt;            &lt;xsl:call-template name="addLink"&gt;              &lt;xsl:with-param name="linkUrl" select="$nameTabUrl" /&gt;            &lt;/xsl:call-template&gt;          &lt;/xsl:attribute&gt;          &lt;!-- Analytics Start --&gt;          &lt;xsl:attribute name="onclick"&gt;            if(omniEvents)omniEvents.globalNav(this, 'header:&lt;xsl:value-of            select="translate($nameTabName,&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;:&lt;xsl:value-of            select="translate($seeAll,&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;');          &lt;/xsl:attribute&gt;          &lt;!-- Analytics End --&gt;          &lt;xsl:value-of select="$seeAll" /&gt;        &lt;/a&gt;      &lt;/div&gt;    &lt;/div&gt;  &lt;/xsl:template&gt;  &lt;!--        This template adds the products by name industry top navigation nodes.  --&gt;  &lt;xsl:template name="addProductsByIndustries"&gt;    &lt;!-- Storing the heading as this is required for analytics --&gt;    &lt;xsl:variable name="industryTabName"                  select="/Properties/Data/Result/root/global_header/products_by_industry/industry_group/industry_group_title" /&gt;    &lt;a&gt;      &lt;xsl:value-of select="$industryTabName" /&gt;    &lt;/a&gt;    &lt;div class="submenu industry" style="display: none;"&gt;      &lt;ul&gt;        &lt;!-- Iterating over all the industry nodes --&gt;        &lt;xsl:if test="not(/Properties/Data/Result/root/sitemap/node[@name=/Properties/Data/Result/root/global_header/industry_site_node])"&gt;          &lt;div class="errMsg"&gt;Invalid Industries Node&lt;/div&gt;        &lt;/xsl:if&gt;        &lt;xsl:for-each            select="/Properties/Data/Result/root/sitemap/node[@name=/Properties/Data/Result/root/global_header/industry_site_node]"&gt;          &lt;xsl:call-template name="addNavigationNodes"&gt;            &lt;xsl:with-param name="tabName" select="$industryTabName" /&gt;          &lt;/xsl:call-template&gt;        &lt;/xsl:for-each&gt;        &lt;!-- Need to Add specialized --&gt;        &lt;xsl:variable name="industrySplGroupName"                      select="/Properties/Data/Result/root/global_header/products_by_industry/specialized_group/title" /&gt;		&lt;xsl:if test= "string-length($industrySplGroupName) !=0"&gt;		   &lt;li&gt;          &lt;h4&gt;            &lt;xsl:value-of select="$industrySplGroupName" /&gt;          &lt;/h4&gt;        &lt;/li&gt;        &lt;!-- Adding the specialized group nodes --&gt;         &lt;xsl:for-each            select="/Properties/Data/Result/root/global_header/products_by_industry/specialized_group/group_list"&gt;          &lt;xsl:variable name="industryGroupText"                        select="link_text" /&gt;          &lt;li&gt;            &lt;a&gt;              &lt;xsl:attribute name="href"&gt;                &lt;xsl:call-template name="addLink"&gt;                  &lt;xsl:with-param name="linkUrl" select="link_url" /&gt;                &lt;/xsl:call-template&gt;              &lt;/xsl:attribute&gt;              &lt;!-- Analytics Start --&gt;              &lt;xsl:attribute name="onclick"&gt;                if(omniEvents)omniEvents.globalNav(this, 'header:&lt;xsl:value-of                select="translate($industryTabName,&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;:&lt;xsl:value-of                select="translate($industryGroupText,&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;');              &lt;/xsl:attribute&gt;              &lt;!-- Analytics End --&gt;              &lt;xsl:value-of select="$industryGroupText" /&gt;            &lt;/a&gt;          &lt;/li&gt;        &lt;/xsl:for-each&gt;		&lt;/xsl:if&gt;      &lt;/ul&gt;    &lt;/div&gt;  &lt;/xsl:template&gt;  &lt;!--        This template adds a non industry node from the site map, it iterates over the first children of the given site map node path.  --&gt;  &lt;xsl:template name="addNonIndustryNode"&gt;    &lt;xsl:param name="nPath" /&gt;    &lt;xsl:param name="styleClass" /&gt;        &lt;xsl:for-each select="/Properties/Data/Result/root/sitemap/node[@name=$nPath]"&gt;      &lt;xsl:if test="/Properties/Data/Result/root/sitemap/node[@name=$nPath]"&gt;        &lt;xsl:variable name="tabName" select="@name" /&gt;        &lt;a class=""&gt;          &lt;xsl:attribute name="href"&gt;            &lt;xsl:call-template name="addLink"&gt;              &lt;xsl:with-param name="linkUrl"                              select="@url" /&gt;            &lt;/xsl:call-template&gt;          &lt;/xsl:attribute&gt;          &lt;xsl:value-of select="$tabName" /&gt;        &lt;/a&gt;	         &lt;xsl:variable name="nodeCount" select="count(./node)"/&gt;                &lt;xsl:if test="$nodeCount &amp;gt;0"&gt;          &lt;div class="submenu company" style="display: none; "&gt;            &lt;xsl:attribute name="class"&gt;&lt;xsl:value-of select="$styleClass" /&gt;&lt;/xsl:attribute&gt;            &lt;ul&gt;                       &lt;xsl:call-template name="addNavigationNodes"&gt;                &lt;xsl:with-param name="tabName" select="$tabName" /&gt;              &lt;/xsl:call-template&gt;            &lt;/ul&gt;          &lt;/div&gt;        &lt;/xsl:if&gt;      &lt;/xsl:if&gt;      &lt;/xsl:for-each&gt;      &lt;/xsl:template&gt;  &lt;!--        This template adds a navigation node, this adds the name, the URL and also the the analytics code for a given node.  --&gt;  &lt;xsl:template name="addNavigationNodes"&gt;    &lt;xsl:param name="tabName" /&gt;    &lt;xsl:for-each select="./node"&gt;      &lt;li&gt;        &lt;a&gt;          &lt;xsl:variable name="nodeName" select="@name" /&gt;          &lt;xsl:attribute name="href"&gt;            &lt;xsl:call-template name="addLink"&gt;              &lt;xsl:with-param name="linkUrl"                              select="@url" /&gt;            &lt;/xsl:call-template&gt;          &lt;/xsl:attribute&gt;          &lt;!-- Analytics Start --&gt;          &lt;xsl:attribute name="onclick"&gt;            if(omniEvents)omniEvents.globalNav(this, 'header:&lt;xsl:value-of            select="translate($tabName,&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;:&lt;xsl:value-of            select="translate($nodeName,&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;');          &lt;/xsl:attribute&gt;          &lt;!-- Analytics End --&gt;          &lt;xsl:value-of select="$nodeName" /&gt;        &lt;/a&gt;      &lt;/li&gt;    &lt;/xsl:for-each&gt;  &lt;/xsl:template&gt;  &lt;!--        This template adds normalizes the link, it handles the cases where the link       could be in the form of http://, /sites/en_US/ (when browsed from DCR) or direct page links when retrieved from the site map.  --&gt;  &lt;xsl:template name="addLink"&gt;    &lt;xsl:param name="linkUrl" /&gt;    &lt;xsl:choose&gt;      &lt;xsl:when test="starts-with($linkUrl,'http')"&gt;        &lt;xsl:value-of select="$linkUrl" /&gt;      &lt;/xsl:when&gt;      &lt;xsl:when test="starts-with($linkUrl,'https')"&gt;        &lt;xsl:value-of select="$linkUrl" /&gt;      &lt;/xsl:when&gt;                 &lt;xsl:otherwise&gt;        &lt;xsl:value-of select="concat('$PAGE_LINK[',$linkUrl,']')" /&gt;      &lt;/xsl:otherwise&gt;    &lt;/xsl:choose&gt;  &lt;/xsl:template&gt;&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+    </Component>
+    <Component ID="1295559038794" Version="3.1.1.0" PageID="1" TemplateComponentID="1294103998838" CanBeActive="true">
+      <Description>The Global Footer module provides a consistent footer across all pages.</Description>
+      <SelectedSkin>Default</SelectedSkin>
+      <DisplayName>Global Footer</DisplayName>
+      <Name>Global Footer</Name>
+      <BaseComponent Version="10"><![CDATA[johndeere/enterprise/Footer/Global Footer.component]]></BaseComponent>
+      <ContainerProperties ID="1295559038794" locked="false">
+        <FixedLayoutArea ID="footer-area-1" index="0"/>
+        <CacheTime>0</CacheTime>
+        <BGColor/>
+        <Width>1000</Width>
+        <Height>200</Height>
+        <Top>10</Top>
+        <Left>10</Left>
+        <ZIndex>0</ZIndex>
+        <RenderInRuntime>true</RenderInRuntime>
+      </ContainerProperties>
+      <InternalProperties/>
+      <Locks>
+        <ContainerProperties locked="false" Changed="false"/>
+        <Properties locked="false" Changed="false"/>
+        <Data locked="false" Changed="false"/>
+      </Locks>
+      <Segments>
+        <Segment ID="0">
+          <Properties ComponentID="1295559038794"/>
+          <Data>
+            <Datum ID="FOOTER_DCR" Type="DCR" Name="Global Footer DCR *">
+              <DCR Category="navigation" Type="global_footer">templatedata/navigation/global_footer/data/en_R3/footer-4links.dcr</DCR>
+            </Datum>
+          </Data>
+        </Segment>
+      </Segments>
+      <Stylesheet Default="true" PageType="" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Default</Name>
+        <XSL>	&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;	&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;	  &lt;!-- Skin: Default XSL --&gt;	  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;	  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;	  &lt;xsl:template match="/"&gt;		&lt;div class="MOD_NO_7"&gt;                  &lt;xsl:if test="not(/Properties/Data/Datum/DCR/global_footer)"&gt;                     &lt;span class="errMsg"&gt;Please select a Footer DCR, from templatedata\navigation\global_footer\data\&lt;/span&gt;                  &lt;/xsl:if&gt;                  &lt;xsl:apply-templates select="/Properties/Data/Datum/DCR/global_footer/copyright_text" /&gt;		  &lt;p class="links"&gt;                      &lt;!-- Add the footer links --&gt;		      &lt;xsl:apply-templates select="/Properties/Data/Datum/DCR/global_footer/footer_links" /&gt;                      &lt;!-- Add the Social Media links --&gt;		      &lt;xsl:apply-templates select="/Properties/Data/Datum/DCR/global_footer/social_footer_links" /&gt;		  &lt;/p&gt;		&lt;/div&gt;				&lt;!-- SiteCatalyst code version: H.22.1.		Copyright 1996-2010 Adobe, Inc. All Rights Reserved		More info available at http://www.omniture.com --&gt;		&lt;script language="JavaScript" type="text/javascript" src="/common/deere-resources/js/s_code.js"&gt;&lt;/script&gt;		&lt;script language="JavaScript" type="text/javascript"&gt;&lt;!--		if(navigator.appVersion.indexOf('MSIE')&gt;=0)document.write(unescape('%3C')+'\!-'+'-')		//--&gt;&lt;/script&gt;&lt;noscript&gt;&lt;img src="http://deere.112.2o7.net/b/ss/deerepoc/1/H.22.1--NS/0"		height="1" width="1" border="0" alt="" /&gt;&lt;/noscript&gt;&lt;!--/DO NOT REMOVE/--&gt;		&lt;!-- End SiteCatalyst code version: H.22.1. --&gt;	  &lt;/xsl:template&gt;          &lt;!-- Template to add the copyright text --&gt;	  &lt;xsl:template match="/Properties/Data/Datum/DCR/global_footer/copyright_text"&gt;	      &lt;p class="copy"&gt;&lt;xsl:value-of select="." disable-output-escaping="yes"/&gt;&lt;/p&gt;	  &lt;/xsl:template&gt;          &lt;!-- Template to add the Footer links --&gt;	  &lt;xsl:template match="/Properties/Data/Datum/DCR/global_footer/footer_links"&gt;	      &lt;xsl:for-each select="footer_link"&gt;	          &lt;xsl:if test="position() != 1"&gt;	           |	          &lt;/xsl:if&gt;	          &lt;a&gt;	              &lt;xsl:attribute name="href"&gt;	                  &lt;xsl:call-template name="addLink"&gt;	                      &lt;xsl:with-param name="linkUrl" select="link_url" /&gt;	                  &lt;/xsl:call-template&gt;	              &lt;/xsl:attribute&gt;	              &lt;xsl:attribute name="onclick"&gt;	                  if(omniEvents)omniEvents.globalNav(this, 'footer:&lt;xsl:value-of select="translate(link_label,&amp;quot;'&amp;quot;,'&amp;quot;')"/&gt;');	              &lt;/xsl:attribute&gt;	              &lt;xsl:value-of select="link_label"/&gt;	          &lt;/a&gt;	      &lt;/xsl:for-each&gt;	  &lt;/xsl:template&gt;	  &lt;!-- Template to add the Social Media links  --&gt;	  &lt;xsl:template match="/Properties/Data/Datum/DCR/global_footer/social_footer_links"&gt;		      | &lt;span&gt;&lt;xsl:value-of select="social_link_label"/&gt;&lt;/span&gt;	    	      &lt;xsl:for-each select="social_links"&gt;	          &lt;a&gt;			  &lt;xsl:attribute name="target"&gt;					&lt;xsl:value-of select ="'_blank'" /&gt;			  &lt;/xsl:attribute&gt;		      &lt;xsl:attribute name="href"&gt;	                  &lt;xsl:call-template name="addLink"&gt;	                      &lt;xsl:with-param name="linkUrl" select="link_url" /&gt;	                  &lt;/xsl:call-template&gt;						      &lt;/xsl:attribute&gt;		      &lt;img height="16" width="16"&gt;		          &lt;xsl:attribute name="src"&gt;		              &lt;xsl:value-of select="image_url"/&gt;		          &lt;/xsl:attribute&gt;		          &lt;xsl:attribute name="alt"&gt;&lt;xsl:value-of select="alt_text" /&gt;&lt;/xsl:attribute&gt;		          &lt;xsl:attribute name="title"&gt;&lt;xsl:value-of select="alt_text" /&gt;&lt;/xsl:attribute&gt;		      &lt;/img&gt;	          &lt;/a&gt;	      &lt;/xsl:for-each&gt;	  &lt;/xsl:template&gt;        &lt;!--            This template adds normalizes the link, it handles the cases where the link           could be in the form of http://, /sites/en_US/ (when browsed from DCR) or direct page links when retrieved from the site map.        --&gt;	&lt;xsl:template name="addLink"&gt;		&lt;xsl:param name="linkUrl" /&gt;		&lt;xsl:choose&gt;			&lt;xsl:when test="starts-with($linkUrl,'http')"&gt;				&lt;xsl:value-of select="$linkUrl" /&gt;			&lt;/xsl:when&gt;			&lt;xsl:when test="starts-with($linkUrl,'https')"&gt;				&lt;xsl:value-of select="$linkUrl" /&gt;			&lt;/xsl:when&gt;            &lt;xsl:when test="starts-with($linkUrl,'/sites/')"&gt;				&lt;xsl:value-of select="concat('$PAGE_LINK[', substring-before(substring-after(substring-after($linkUrl,'/sites/'), '/'), '.page'), ']')"/&gt;            &lt;/xsl:when&gt;			&lt;xsl:otherwise&gt;				&lt;xsl:value-of select="concat('http://',$linkUrl)" /&gt;			&lt;/xsl:otherwise&gt;		&lt;/xsl:choose&gt;	&lt;/xsl:template&gt;	&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+    </Component>
+    <Component ID="1295559038797" Version="3.1.1.0" PageID="0" TemplateComponentID="0" CanBeActive="true">
+      <Description>The Featured Link List module provides up to 10 links on the right rail to supplement information on a page.</Description>
+      <SelectedSkin>Default</SelectedSkin>
+      <DisplayName>Featured Link List</DisplayName>
+      <Name>Featured Link List</Name>
+      <BaseComponent Version="8"><![CDATA[johndeere/enterprise/Right Rail/Featured Link List.component]]></BaseComponent>
+      <ContainerProperties ID="0" locked="false">
+        <FixedLayoutArea ID="row-3-area-1" index="1"/>
+        <CacheTime>-1</CacheTime>
+        <BGColor/>
+        <Width>200</Width>
+        <Height>200</Height>
+        <Top>10</Top>
+        <Left>10</Left>
+        <ZIndex>0</ZIndex>
+        <RenderInRuntime>true</RenderInRuntime>
+      </ContainerProperties>
+      <InternalProperties/>
+      <Locks>
+        <ContainerProperties locked="false" Changed="false"/>
+        <Properties locked="false" Changed="false"/>
+        <Data locked="false" Changed="false"/>
+      </Locks>
+      <Segments>
+        <Segment ID="0">
+          <Properties ComponentID="1295559038797"/>
+          <Data>
+            <!-- Analytics module tracking start -->
+            <Datum ID="TRACK_MODULE" Type="SelectSingle" Name="Do you want to track this module for analytics?">
+              <Option>
+                <Display>Yes</Display>
+                <Value>Yes</Value>
+              </Option>
+              <Option Selected="true">
+                <Display>No</Display>
+                <Value>No</Value>
+              </Option>
+            </Datum>
+            <Datum ID="MODULE_NAME" Type="String" Name="Enter module name" Max="75" Min="0"/>
+            <!-- Analytics module tracking end -->
+            <Datum Changed="true" ID="HEADING" Name="Heading" Type="String" Max="100">YOU MAY ALSO BE INTERESTED IN ...</Datum>
+            <Group ID="FEATURED_CALLOUT_LIST-5" Name="Featured Callout List" Replicatable="true" CloneGroupID="gfuhme33">
+              <Datum ID="FEATURED_CALLOUT_TITLE-5" Name="Featured Callout Title *" Type="String" Max="100" Min="3" Changed="true">Backhoe Loaders</Datum>
+              <Datum ID="FEATURED_CALLOUT_LINK-5" Name="Featured Callout Link *" Type="PageLink" Changed="true"><![CDATA[$PAGE_LINK[products/equipment/backhoe_loaders/backhoe_loaders]]]></Datum>
+              <Datum ID="FEATURED_CALLOUT_DESC-5" Name="Featured Callout Description" Type="String" Max="100" Changed="true"/>
+            </Group>
+            <Group ID="FEATURED_CALLOUT_LIST-7" Name="Featured Callout List" Replicatable="true" CloneGroupID="gfuhme33">
+              <Datum ID="FEATURED_CALLOUT_TITLE-7" Name="Featured Callout Title *" Type="String" Max="100" Min="3" Changed="true">Crawler Dozers</Datum>
+              <Datum ID="FEATURED_CALLOUT_LINK-7" Name="Featured Callout Link *" Type="PageLink" Changed="true"><![CDATA[$PAGE_LINK[products/equipment/crawler_dozers/crawler_dozers]]]></Datum>
+              <Datum ID="FEATURED_CALLOUT_DESC-7" Name="Featured Callout Description" Type="String" Max="100" Changed="true"/>
+            </Group>
+            <Group ID="FEATURED_CALLOUT_LIST-6" Name="Featured Callout List" Replicatable="true" CloneGroupID="gfuhme33">
+              <Datum ID="FEATURED_CALLOUT_TITLE-6" Name="Featured Callout Title *" Type="String" Max="100" Min="3" Changed="true">Excavators</Datum>
+              <Datum ID="FEATURED_CALLOUT_LINK-6" Name="Featured Callout Link *" Type="PageLink" Changed="true"><![CDATA[$PAGE_LINK[products/equipment/excavators/excavators]]]></Datum>
+              <Datum ID="FEATURED_CALLOUT_DESC-6" Name="Featured Callout Description" Type="String" Max="100" Changed="true"/>
+            </Group>
+            <Group ID="FEATURED_CALLOUT_LIST-1" Name="Featured Callout List" Replicatable="true" CloneGroupID="gfuhme33">
+              <Datum ID="FEATURED_CALLOUT_TITLE-1" Name="Featured Callout Title *" Type="String" Max="100" Min="3" Changed="true">Motor Graders</Datum>
+              <Datum ID="FEATURED_CALLOUT_LINK-1" Name="Featured Callout Link *" Type="PageLink" Changed="true"><![CDATA[$PAGE_LINK[products/equipment/motor_graders/motor_graders]]]></Datum>
+              <Datum ID="FEATURED_CALLOUT_DESC-1" Name="Featured Callout Description" Type="String" Max="100" Changed="true"/>
+            </Group>
+            <Group ID="FEATURED_CALLOUT_LIST-0" Name="Featured Callout List" Replicatable="true" CloneGroupID="gfuhme33">
+              <Datum ID="FEATURED_CALLOUT_TITLE-0" Name="Featured Callout Title *" Type="String" Max="100" Min="3" Changed="true">Wheel Loaders</Datum>
+              <Datum ID="FEATURED_CALLOUT_LINK-0" Name="Featured Callout Link *" Type="PageLink" Changed="true"><![CDATA[$PAGE_LINK[products/equipment/wheel_loaders/wheel_loaders]]]></Datum>
+              <Datum ID="FEATURED_CALLOUT_DESC-0" Name="Featured Callout Description" Type="String" Max="100" Changed="true"/>
+            </Group>
+          </Data>
+        </Segment>
+      </Segments>
+      <Stylesheet Default="true" PageType="" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Default</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;  &lt;!-- Skin: Default XSL --&gt;  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;  &lt;!-- Analytics code start --&gt;  &lt;xsl:variable name="TrackModule" select="/Properties/Data/Datum[@ID='TRACK_MODULE']/Option[@Selected='true']/Value"/&gt;    &lt;xsl:variable name="ModuleName" select="translate(/Properties/Data/Datum[@ID='MODULE_NAME'],&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;  &lt;!-- Analytics code end --&gt;  &lt;xsl:template match="/"&gt;    &lt;div class="MOD_NO_1T_S"&gt;      &lt;!-- Analytics code start --&gt;      &lt;module type="Featured Link List" name="{$ModuleName}" trackingenabled="{$TrackModule}"&gt;      &lt;!-- Analytics code end --&gt;      &lt;h5&gt; &lt;xsl:value-of select="/Properties/Data/Datum[@ID='HEADING']" disable-output-escaping="yes"/&gt;&lt;/h5&gt;      &lt;ul&gt;       &lt;xsl:variable name="rCount" select="count(/Properties/Data/Group)"/&gt;       &lt;xsl:variable name="linklistCount" select="$rCount"/&gt;         &lt;xsl:for-each select="/Properties/Data/Group"&gt;                    &lt;xsl:variable name="iCount" select="position()" /&gt;          &lt;xsl:if test="$iCount &amp;lt;= 10"&gt;            &lt;xsl:choose&gt;              &lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='Featured Callout Link *'] = ''"&gt;                &lt;div class="errMsg"&gt;Missing Featured Callout Link for: &lt;xsl:value-of select="/Properties/Data/Group[$iCount]/Datum[@Name='Featured Callout Title *']" disable-output-escaping="yes" /&gt;&lt;/div&gt;              &lt;/xsl:when&gt;              &lt;xsl:otherwise&gt;                &lt;li&gt;		&lt;xsl:if test="$iCount=$linklistCount"&gt;			&lt;xsl:attribute name="class"&gt;lstBottom&lt;/xsl:attribute&gt;			&lt;/xsl:if&gt;                  &lt;a&gt;                    &lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="/Properties/Data/Group[$iCount]/Datum[@Name='Featured Callout Link *']"/&gt;&lt;/xsl:attribute&gt;                    &lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;                    &lt;span&gt;&lt;xsl:value-of select="/Properties/Data/Group[$iCount]/Datum[@Name='Featured Callout Title *']" disable-output-escaping="yes"/&gt;&lt;/span&gt;&amp;nbsp;                    &lt;xsl:value-of select="/Properties/Data/Group[$iCount]/Datum[@Name='Featured Callout Description']" disable-output-escaping="yes"/&gt;                  &lt;/a&gt;                &lt;/li&gt;              &lt;/xsl:otherwise&gt;            &lt;/xsl:choose&gt;	          &lt;/xsl:if&gt;        &lt;/xsl:for-each&gt;      &lt;/ul&gt;      &lt;!-- Analytics code start --&gt;      &lt;/module&gt;      &lt;!-- Analytics code end --&gt;    &lt;/div&gt;  &lt;/xsl:template&gt;&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+    </Component>
+    <Component ID="1297772941884" Version="3.1.1.0" PageID="0" TemplateComponentID="0" CanBeActive="true">
+      <Description>Separator to classify the boundary between components.It come with 2 variations -Dotted &amp; Solid line</Description>
+      <SelectedSkin>Dotted</SelectedSkin>
+      <DisplayName>Separator</DisplayName>
+      <Name>Separator</Name>
+      <BaseComponent Version="3"><![CDATA[johndeere/enterprise/Generic/Design Elements/Separator.component]]></BaseComponent>
+      <ContainerProperties ID="0" locked="false">
+        <FixedLayoutArea index="0" ID="nest-colnpwl-1-row-2-area-1"/>
+        <CacheTime>-1</CacheTime>
+        <BGColor/>
+        <Width>200</Width>
+        <Height>200</Height>
+        <Top>10</Top>
+        <Left>10</Left>
+        <ZIndex>0</ZIndex>
+        <RenderInRuntime>true</RenderInRuntime>
+      </ContainerProperties>
+      <InternalProperties/>
+      <Locks>
+        <ContainerProperties locked="false" Changed="false"/>
+        <Properties locked="false" Changed="false"/>
+        <Data locked="false" Changed="false"/>
+      </Locks>
+      <Segments>
+        <Segment ID="0">
+          <Properties ComponentID="1297772941884"/>
+          <Data/>
+        </Segment>
+      </Segments>
+      <Stylesheet Default="false" PageType="htmlQuirksMode" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Solid</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;  &lt;!-- Skin: Default XSL --&gt;  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;  &lt;xsl:template match="/"&gt;            &lt;div class="separatorSolid"&gt;&lt;/div&gt;   &lt;/xsl:template&gt;&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+      <Stylesheet Default="true" PageType="htmlQuirksMode" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Dotted</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;  &lt;!-- Skin: Dotted --&gt;  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;  &lt;xsl:template match="/"&gt;    &lt;div class="separator"&gt;&lt;/div&gt;  &lt;/xsl:template&gt;&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+    </Component>
+    <Component ID="1298487954782" Version="3.1.1.0" PageID="0" TemplateComponentID="0" CanBeActive="true">
+      <Description>The Generic Copy Block Simple module provides a rich text area on the body of the page.</Description>
+      <SelectedSkin Changed="true">Left Align</SelectedSkin>
+      <DisplayName>Generic Copy Block-Simple</DisplayName>
+      <Name>Generic Copy Block-Simple</Name>
+      <BaseComponent Version="13"><![CDATA[johndeere/enterprise/Generic/Content Modules/Generic Copy Block-Simple.component]]></BaseComponent>
+      <ContainerProperties ID="0" locked="false">
+        <FixedLayoutArea index="1" ID="nest-colnpwl-1-row-2-area-1"/>
+        <CacheTime>-1</CacheTime>
+        <BGColor/>
+        <Width>400</Width>
+        <Height>350</Height>
+        <Top>10</Top>
+        <Left>10</Left>
+        <ZIndex>0</ZIndex>
+        <RenderInRuntime>true</RenderInRuntime>
+      </ContainerProperties>
+      <InternalProperties/>
+      <Locks>
+        <ContainerProperties locked="false" Changed="false"/>
+        <Properties locked="false" Changed="false"/>
+        <Data locked="false" Changed="false"/>
+      </Locks>
+      <Segments>
+        <Segment ID="0">
+          <Properties ComponentID="1298487954782">
+            <Datum ID="CAPTION_WIDTH" Type="String" Name="Caption Width">264px</Datum>
+          </Properties>
+          <Data>
+            <!-- Analytics module tracking start -->
+            <Datum ID="TRACK_MODULE" Type="SelectSingle" Name="Do you want to track this module for analytics?">
+              <Option>
+                <Display>Yes</Display>
+                <Value>Yes</Value>
+              </Option>
+              <Option Selected="true">
+                <Display>No</Display>
+                <Value>No</Value>
+              </Option>
+            </Datum>
+            <Datum ID="MODULE_NAME" Type="String" Name="Enter module name" Max="75" Min="0"/>
+            <!-- Analytics module tracking end -->
+            <Datum ID="HEADING" Name="Heading" Type="String" Max="500"/>
+            <Datum Changed="true" ID="IMAGE_URL" Type="Image" Name="Image URL (264 X 178)">
+              <Image Width="150" Height="150">
+                <Path>$URL_PREFIX/common/media/images/product/motor_graders/jd504218_ce_264x178.jpg</Path>
+                <Description/>
+              </Image>
+            </Datum>
+            <Datum Changed="true" ID="ALT_TEXT" Name="Alt Text" Type="String" Max="500">Motor Graders</Datum>
+            <Datum Changed="true" ID="BODY_COPY" Name="Body Copy*" Type="Textarea" Min="3" Max="15000">&lt;h2&gt;&lt;span style="font-size: small;"&gt;So many options, one obvious choice. &lt;/span&gt;&lt;/h2&gt;
+&lt;h2&gt;&lt;span style="font-size: small;"&gt;&lt;/span&gt;&lt;/h2&gt;
+&lt;span style="font-size: small;"&gt;Offering one-of-a-kind advantages and unequalled options, our grader lineup lets you decide how the works gets done. Loaded for bear, or barely loaded, each of these brawny blades comes standard equipped with the same heavy-duty durability and uptime-boosting features.&lt;br /&gt;&lt;/span&gt;</Datum>
+          </Data>
+        </Segment>
+      </Segments>
+      <Stylesheet Default="false" PageType="htmlQuirksMode" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Large Text</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;  &lt;!-- Skin: Large Copy Block --&gt;  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;  &lt;xsl:template match="/"&gt;    &lt;div class="MOD_GC_19"&gt;        &lt;div&gt;                 &lt;xsl:variable name="descCount" select="string-length(/Properties/Data/Datum[@ID='BODY_COPY'])"/&gt;                 &lt;xsl:if test="$descCount &amp;lt; 3"&gt;                      &lt;div class="errMsg"&gt;Length of Body Copy field should be greater than 3.&lt;/div&gt;                 &lt;/xsl:if&gt;                 &lt;xsl:if test="$descCount &amp;gt; 15000"&gt;                      &lt;div class="errMsg"&gt;Length of Body Copy field should be less than 15000.&lt;/div&gt;                 &lt;/xsl:if&gt;                 &lt;xsl:if test="$descCount &amp;gt;=3 and $descCount &amp;lt;=15000"&gt;                      &lt;xsl:value-of select="/Properties/Data/Datum[@ID='BODY_COPY']" disable-output-escaping="yes"/&gt;                 &lt;/xsl:if&gt;         &lt;/div&gt;    &lt;/div&gt;  &lt;/xsl:template&gt;&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+      <Stylesheet Default="false" PageType="htmlQuirksMode" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Left Align With Caption</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;&lt;!-- Skin: Default XSL --&gt;&lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;&lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;  &lt;!-- Analytics code start --&gt;  &lt;xsl:variable name="TrackModule" select="/Properties/Data/Datum[@ID='TRACK_MODULE']/Option[@Selected='true']/Value"/&gt;  &lt;xsl:variable name="ModuleName" select="translate(/Properties/Data/Datum[@ID='MODULE_NAME'],&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;    &lt;!-- Analytics code end --&gt;&lt;xsl:template match="/"&gt;  &lt;!-- Analytics code start --&gt;  &lt;module type="Generic Copy Block-Simple" name="{$ModuleName}" trackingenabled="{$TrackModule}"&gt;  &lt;!-- Analytics code end --&gt;	&lt;div class="MOD_GC_3"&gt;         &lt;xsl:if test="/Properties/Data/Datum[@ID='HEADING'] != ''"&gt;  	  &lt;h4&gt;&lt;xsl:value-of select="/Properties/Data/Datum[@ID='HEADING']" disable-output-escaping ="yes"/&gt;&lt;/h4&gt;         &lt;/xsl:if&gt;	     &lt;xsl:if test="/Properties/Data/Datum[@ID='IMAGE_URL']/Image/Path != ''"&gt;           &lt;div class="captionLeft" &gt;&lt;xsl:attribute name="style"&gt;width:&lt;xsl:value-of select="/Properties/Datum[@ID='CAPTION_WIDTH']"/&gt;;&lt;/xsl:attribute&gt;						 			 				 &lt;xsl:text disable-output-escaping="yes"&gt;&amp;lt;img src="&lt;/xsl:text&gt;				 &lt;xsl:value-of select="/Properties/Data/Datum[@ID='IMAGE_URL']/Image/Path"/&gt;				 &lt;xsl:text&gt;"&lt;/xsl:text&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;title="&lt;/xsl:text&gt;				 &lt;xsl:value-of disable-output-escaping ="yes" select="/Properties/Data/Datum[@ID='ALT_TEXT']"/&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;" alt="&lt;/xsl:text&gt;				 &lt;xsl:value-of disable-output-escaping ="yes" select="/Properties/Data/Datum[@ID='ALT_TEXT']"/&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;"&lt;/xsl:text&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;&amp;gt;&lt;/xsl:text&gt;					 				 	&lt;xsl:if test="/Properties/Data/Datum[@ID='IMAGE_URL']/Image/Description != ''"&gt;	&lt;p &gt;&lt;xsl:value-of select="/Properties/Data/Datum[@ID='IMAGE_URL']/Image/Description" disable-output-escaping ="yes"/&gt;&lt;/p&gt;&lt;/xsl:if&gt;&lt;/div&gt;                 &lt;xsl:if test="/Properties/Data/Datum[@ID='ALT_TEXT'] = ''"&gt;  	          &lt;div class="errMsg"&gt;Alt Text is Missing.&lt;/div&gt;                 &lt;/xsl:if&gt;	       &lt;/xsl:if&gt;                 &lt;xsl:variable name="descCount" select="string-length(/Properties/Data/Datum[@ID='BODY_COPY'])"/&gt;                 &lt;xsl:if test="$descCount &amp;lt; 3"&gt;                      &lt;div class="errMsg"&gt;Length of Body Copy field should be greater than 3.&lt;/div&gt;                 &lt;/xsl:if&gt;                 &lt;xsl:if test="$descCount &amp;gt; 15000"&gt;                      &lt;div class="errMsg"&gt;Length of Body Copy field should be less than 15000.&lt;/div&gt;                 &lt;/xsl:if&gt;                 &lt;xsl:if test="$descCount &amp;gt;=3 and $descCount &amp;lt;=15000"&gt;                      &lt;xsl:value-of select="/Properties/Data/Datum[@ID='BODY_COPY']" disable-output-escaping="yes"/&gt;                 &lt;/xsl:if&gt;	                &lt;/div&gt;  &lt;!-- Analytics code start --&gt;  &lt;/module&gt;  &lt;!-- Analytics code end --&gt;&lt;/xsl:template&gt;&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+      <Stylesheet Default="true" PageType="htmlQuirksMode" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Left Align</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;&lt;!-- Skin: Default XSL --&gt;&lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;&lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;  &lt;!-- Analytics code start --&gt;  &lt;xsl:variable name="TrackModule" select="/Properties/Data/Datum[@ID='TRACK_MODULE']/Option[@Selected='true']/Value"/&gt;  &lt;xsl:variable name="ModuleName" select="translate(/Properties/Data/Datum[@ID='MODULE_NAME'],&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;    &lt;!-- Analytics code end --&gt;&lt;xsl:template match="/"&gt;  &lt;!-- Analytics code start --&gt;  &lt;module type="Generic Copy Block-Simple" name="{$ModuleName}" trackingenabled="{$TrackModule}"&gt;  &lt;!-- Analytics code end --&gt;	&lt;div class="MOD_GC_3"&gt;         &lt;xsl:if test="/Properties/Data/Datum[@ID='HEADING'] != ''"&gt;  	  &lt;h4&gt;&lt;xsl:value-of select="/Properties/Data/Datum[@ID='HEADING']" disable-output-escaping="yes"/&gt;&lt;/h4&gt;         &lt;/xsl:if&gt;	     &lt;xsl:if test="/Properties/Data/Datum[@ID='IMAGE_URL']/Image/Path != ''"&gt;                 				 				 &lt;xsl:text disable-output-escaping="yes"&gt;&amp;lt;img class="fltLeft" src="&lt;/xsl:text&gt;				 &lt;xsl:value-of select="/Properties/Data/Datum[@ID='IMAGE_URL']/Image/Path"/&gt;				 &lt;xsl:text&gt;"&lt;/xsl:text&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;title="&lt;/xsl:text&gt;				 &lt;xsl:value-of disable-output-escaping ="yes" select="/Properties/Data/Datum[@ID='ALT_TEXT']"/&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;" alt="&lt;/xsl:text&gt;				 &lt;xsl:value-of disable-output-escaping ="yes" select="/Properties/Data/Datum[@ID='ALT_TEXT']"/&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;"&lt;/xsl:text&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;&amp;gt;&lt;/xsl:text&gt;								 				 				                  &lt;xsl:if test="/Properties/Data/Datum[@ID='ALT_TEXT'] = ''"&gt;  	          &lt;div class="errMsg"&gt;Alt Text is Missing.&lt;/div&gt;                 &lt;/xsl:if&gt;	       &lt;/xsl:if&gt;                 &lt;xsl:variable name="descCount" select="string-length(/Properties/Data/Datum[@ID='BODY_COPY'])"/&gt;                 &lt;xsl:if test="$descCount &amp;lt; 3"&gt;                      &lt;div class="errMsg"&gt;Length of Body Copy field should be greater than 3.&lt;/div&gt;                 &lt;/xsl:if&gt;                 &lt;xsl:if test="$descCount &amp;gt; 15000"&gt;                      &lt;div class="errMsg"&gt;Length of Body Copy field should be less than 15000.&lt;/div&gt;                 &lt;/xsl:if&gt;                 &lt;xsl:if test="$descCount &amp;gt;=3 and $descCount &amp;lt;=15000"&gt;                      &lt;xsl:value-of select="/Properties/Data/Datum[@ID='BODY_COPY']" disable-output-escaping="yes"/&gt;                 &lt;/xsl:if&gt;	                &lt;/div&gt;  &lt;!-- Analytics code start --&gt;  &lt;/module&gt;  &lt;!-- Analytics code end --&gt;&lt;/xsl:template&gt;&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+      <Stylesheet Default="false" PageType="htmlQuirksMode" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Right Align</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;&lt;!-- Skin: Default XSL --&gt;&lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;&lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;&lt;xsl:template match="/"&gt;	&lt;div class="MOD_GC_3"&gt;         &lt;xsl:if test="/Properties/Data/Datum[@ID='HEADING'] != ''"&gt;  	  &lt;h4&gt;&lt;xsl:value-of select="/Properties/Data/Datum[@ID='HEADING']" disable-output-escaping="yes" /&gt;&lt;/h4&gt;         &lt;/xsl:if&gt;  &lt;xsl:if test="/Properties/Data/Datum[@ID='IMAGE_URL']/Image/Path != ''"&gt;                				 				 &lt;xsl:text disable-output-escaping="yes"&gt;&amp;lt;img class="fltRight" src="&lt;/xsl:text&gt;				 &lt;xsl:value-of select="/Properties/Data/Datum[@ID='IMAGE_URL']/Image/Path"/&gt;				 &lt;xsl:text&gt;"&lt;/xsl:text&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;title="&lt;/xsl:text&gt;				 &lt;xsl:value-of disable-output-escaping ="yes" select="/Properties/Data/Datum[@ID='ALT_TEXT']"/&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;" alt="&lt;/xsl:text&gt;				 &lt;xsl:value-of disable-output-escaping ="yes" select="/Properties/Data/Datum[@ID='ALT_TEXT']"/&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;"&lt;/xsl:text&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;&amp;gt;&lt;/xsl:text&gt;					                   &lt;xsl:if test="/Properties/Data/Datum[@ID='ALT_TEXT'] = ''"&gt;  	          &lt;div class="errMsg"&gt;Alt Text is Missing.&lt;/div&gt;                     &lt;/xsl:if&gt;	         &lt;/xsl:if&gt;                 &lt;xsl:variable name="descCount" select="string-length(/Properties/Data/Datum[@ID='BODY_COPY'])"/&gt;                 &lt;xsl:if test="$descCount &amp;lt; 3"&gt;                      &lt;div class="errMsg"&gt;Length of Body Copy field should be greater than 3.&lt;/div&gt;                 &lt;/xsl:if&gt;                 &lt;xsl:if test="$descCount &amp;gt; 15000"&gt;                      &lt;div class="errMsg"&gt;Length of Body Copy field should be less than 15000.&lt;/div&gt;                 &lt;/xsl:if&gt;                 &lt;xsl:if test="$descCount &amp;gt;=3 and $descCount &amp;lt;=15000"&gt;                      &lt;xsl:value-of select="/Properties/Data/Datum[@ID='BODY_COPY']" disable-output-escaping="yes"/&gt;                 &lt;/xsl:if&gt;            &lt;/div&gt;&lt;/xsl:template&gt;&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+      <Stylesheet Default="false" PageType="htmlQuirksMode" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Right Align With Caption</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;&lt;!-- Skin: Default XSL --&gt;&lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;&lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;&lt;xsl:template match="/"&gt;	&lt;div class="MOD_GC_3"&gt;         &lt;xsl:if test="/Properties/Data/Datum[@ID='HEADING'] != ''"&gt;  	  &lt;h4&gt;&lt;xsl:value-of select="/Properties/Data/Datum[@ID='HEADING']" disable-output-escaping="yes" /&gt;&lt;/h4&gt;         &lt;/xsl:if&gt;  &lt;xsl:if test="/Properties/Data/Datum[@ID='IMAGE_URL']/Image/Path != ''"&gt;&lt;div  class="captionRight"&gt;&lt;xsl:attribute name="style"&gt;width:&lt;xsl:value-of select="/Properties/Datum[@ID='CAPTION_WIDTH']"/&gt;;&lt;/xsl:attribute&gt;	                				 				 &lt;xsl:text disable-output-escaping="yes"&gt;&amp;lt;img src="&lt;/xsl:text&gt;				 &lt;xsl:value-of select="/Properties/Data/Datum[@ID='IMAGE_URL']/Image/Path"/&gt;				 &lt;xsl:text&gt;"&lt;/xsl:text&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;title="&lt;/xsl:text&gt;				 &lt;xsl:value-of disable-output-escaping ="yes" select="/Properties/Data/Datum[@ID='ALT_TEXT']"/&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;" alt="&lt;/xsl:text&gt;				 &lt;xsl:value-of disable-output-escaping ="yes" select="/Properties/Data/Datum[@ID='ALT_TEXT']"/&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;"&lt;/xsl:text&gt;				 &lt;xsl:text disable-output-escaping="yes"&gt;&amp;gt;&lt;/xsl:text&gt;					 &lt;xsl:if test="/Properties/Data/Datum[@ID='IMAGE_URL']/Image/Description != ''"&gt;&lt;p &gt;&lt;xsl:value-of select="/Properties/Data/Datum[@ID='IMAGE_URL']/Image/Description" disable-output-escaping="yes"/&gt;&lt;/p&gt;&lt;/xsl:if&gt;&lt;/div&gt;                  &lt;xsl:if test="/Properties/Data/Datum[@ID='ALT_TEXT'] = ''"&gt;  	          &lt;div class="errMsg"&gt;Alt Text is Missing.&lt;/div&gt;                     &lt;/xsl:if&gt;	         &lt;/xsl:if&gt;                 &lt;xsl:variable name="descCount" select="string-length(/Properties/Data/Datum[@ID='BODY_COPY'])"/&gt;                 &lt;xsl:if test="$descCount &amp;lt; 3"&gt;                      &lt;div class="errMsg"&gt;Length of Body Copy field should be greater than 3.&lt;/div&gt;                 &lt;/xsl:if&gt;                 &lt;xsl:if test="$descCount &amp;gt; 15000"&gt;                      &lt;div class="errMsg"&gt;Length of Body Copy field should be less than 15000.&lt;/div&gt;                 &lt;/xsl:if&gt;                 &lt;xsl:if test="$descCount &amp;gt;=3 and $descCount &amp;lt;=15000"&gt;                      &lt;xsl:value-of select="/Properties/Data/Datum[@ID='BODY_COPY']" disable-output-escaping="yes"/&gt;                 &lt;/xsl:if&gt;            &lt;/div&gt;&lt;/xsl:template&gt;&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+    </Component>
+    <Component ID="1299816161889" Version="3.1.1.0" PageID="0" TemplateComponentID="0" CanBeActive="true">
+      <Description>The Featured Callout module provides visual emphasis on specific pages - Industry, Sub-Industry and Category Page.</Description>
+      <SelectedSkin Changed="true">Vertical Layout</SelectedSkin>
+      <DisplayName>Featured Callout</DisplayName>
+      <Name>Featured Callout</Name>
+      <BaseComponent Version="14"><![CDATA[johndeere/enterprise/Generic/Content Modules/Featured Callout.component]]></BaseComponent>
+      <ContainerProperties ID="0" locked="false">
+        <FixedLayoutArea ID="nest-colnpwl-2-row-1-area-1" index="0"/>
+        <CacheTime>0</CacheTime>
+        <BGColor/>
+        <Width>800</Width>
+        <Height>400</Height>
+        <Top>10</Top>
+        <Left>10</Left>
+        <ZIndex>0</ZIndex>
+        <RenderInRuntime>true</RenderInRuntime>
+      </ContainerProperties>
+      <InternalProperties/>
+      <Locks>
+        <ContainerProperties locked="false" Changed="false"/>
+        <Properties locked="false" Changed="false"/>
+        <Data locked="false" Changed="false"/>
+      </Locks>
+      <Segments>
+        <Segment ID="0">
+          <Properties ComponentID="1299816161889"/>
+          <Data>
+            <!-- Analytics module tracking start -->
+            <Datum ID="TRACK_MODULE" Type="SelectSingle" Name="Do you want to track this module for analytics?">
+              <Option>
+                <Display>Yes</Display>
+                <Value>Yes</Value>
+              </Option>
+              <Option Selected="true">
+                <Display>No</Display>
+                <Value>No</Value>
+              </Option>
+            </Datum>
+            <Datum ID="MODULE_NAME" Type="String" Name="Enter module name" Max="75" Min="0"/>
+            <!-- Analytics module tracking end -->
+            <Group ID="DCR_Group-1" Name="featured_callout" Replicatable="true" CloneGroupID="gev6h6ii">
+              <Datum ID="DCR_PATH-1" Type="DCR" Name="DCR Path *" Changed="true">
+                <DCR Category="common" Type="featured_callout">templatedata/common/featured_callout/data/en_R3/products/motor_graders/motorgraders_670g.dcr</DCR>
+              </Datum>
+            </Group>
+            <Group ID="DCR_Group-3" Name="featured_callout" Replicatable="true" CloneGroupID="gev6h6ii">
+              <Datum ID="DCR_PATH-3" Type="DCR" Name="DCR Path *" Changed="true">
+                <DCR Category="common" Type="featured_callout">templatedata/common/featured_callout/data/en_R3/products/motor_graders/motorgraders_770g.dcr</DCR>
+              </Datum>
+            </Group>
+          </Data>
+        </Segment>
+      </Segments>
+      <Stylesheet Default="false" PageType="htmlQuirksMode" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Horizontal Text</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+  &lt;!-- Skin: Default XSL --&gt;
+
+  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;
+  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;
+
+  &lt;xsl:template match="/"&gt;
+   &lt;ul class="clrfix MOD_NO_5_1"&gt;
+   &lt;xsl:variable name="replicantCount" select="count(/Properties/Data/Group)"/&gt;
+   &lt;xsl:choose&gt;
+		&lt;xsl:when test="$replicantCount = 2"&gt;&lt;div class="errMsg"&gt;1 or 3 Replicants is supported.&lt;/div&gt;&lt;/xsl:when&gt;
+		&lt;xsl:otherwise&gt;
+   &lt;xsl:for-each select="/Properties/Data/Group"&gt;
+        &lt;xsl:variable name="iCount" select="position()" /&gt;
+	&lt;xsl:if test="$iCount &amp;lt;= 3"&gt;
+	
+	&lt;li&gt;
+	&lt;xsl:choose&gt;
+		&lt;xsl:when test="$iCount= 3"&gt;
+			&lt;xsl:attribute name="class"&gt;
+			lst&lt;/xsl:attribute&gt;
+			&lt;/xsl:when&gt;
+		&lt;xsl:when test="$replicantCount=1" &gt;
+			&lt;xsl:attribute name="class"&gt;
+			lst&lt;/xsl:attribute&gt;
+			&lt;/xsl:when&gt;
+		&lt;/xsl:choose&gt;
+	&lt;div class="MOD_GC_11b"&gt;
+	&lt;xsl:variable name="desc" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/text"/&gt;
+	&lt;xsl:variable name="link_text" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/link_text"/&gt;
+	&lt;xsl:variable name="link_URL" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/link_URL"/&gt;
+	&lt;xsl:if test="string-length($link_text )&amp;lt;1"&gt;
+		&lt;div class="errMsg"&gt;Please select a DCR .&lt;/div&gt;
+		&lt;/xsl:if&gt;
+	&lt;p class="MOD_GC_11_Title"&gt;&lt;strong&gt;&lt;xsl:value-of select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/title" disable-output-escaping = "yes"/&gt;&lt;/strong&gt;&lt;/p&gt;
+
+	&lt;xsl:if test="$desc= ''"&gt;
+		&lt;div class="errMsg"&gt;Text is mandatory.&lt;/div&gt;
+		&lt;/xsl:if&gt;
+	&lt;xsl:if test="$desc!= ''"&gt;
+                &lt;xsl:if test="string-length($desc) &amp;lt; 3"&gt;
+			&lt;div class="errMsg"&gt;Minimum charater limit allowed is 3 for text .&lt;/div&gt;
+			&lt;/xsl:if&gt;
+		&lt;p class="MOD_GC_11_Cont"&gt;&lt;xsl:value-of select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/text" disable-output-escaping = "yes"/&gt;&lt;/p&gt;
+		&lt;/xsl:if&gt;
+	&lt;xsl:if test="$link_text!=''"&gt;
+	&lt;xsl:choose&gt;
+		&lt;xsl:when test="starts-with($link_URL,'/')"&gt;
+			&lt;a&gt;&lt;xsl:attribute name="class"&gt;seeall&lt;/xsl:attribute&gt;
+			&lt;xsl:attribute name="href"&gt; 
+			&lt;xsl:variable name="url" select="substring-after(substring-after(substring-after($link_URL,'/'),'/'),'/')"/&gt;
+			&lt;xsl:variable name="urls" select="substring-before($url,'.')"/&gt;
+			&lt;xsl:variable name="dest" select="concat('$PAGE_LINK[',$urls,']')"/&gt;
+			&lt;xsl:value-of select="$dest"/&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+			&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes"/&gt;
+			&lt;/a&gt;
+		&lt;/xsl:when&gt;
+		&lt;xsl:when test="starts-with($link_URL,'http') or starts-with($link_URL,'Http') or starts-with($link_URL,'Https') or starts-with($link_URL,'https')"&gt;
+			&lt;a&gt;&lt;xsl:attribute name="class"&gt;more external
+			&lt;/xsl:attribute&gt;
+			&lt;xsl:attribute name="href"&gt;
+			&lt;xsl:value-of select="$link_URL"/&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_self'"&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+			&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes"/&gt;
+			&lt;/a&gt;
+			&lt;a&gt;
+				&lt;xsl:attribute name="class"&gt;externalLinkImg&lt;/xsl:attribute&gt;
+				&lt;xsl:attribute name="href"&gt;
+					&lt;xsl:value-of select="$link_URL" /&gt;
+				&lt;/xsl:attribute&gt;
+				&lt;xsl:choose&gt;
+				&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_self'"&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+			&lt;/a&gt;
+		&lt;/xsl:when&gt;
+		&lt;xsl:otherwise&gt;
+			&lt;a&gt;&lt;xsl:attribute name="class"&gt;seeall&lt;/xsl:attribute&gt;
+			&lt;xsl:attribute name="href"&gt; 
+			&lt;xsl:value-of select="$link_URL"/&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+			&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes"/&gt;
+			&lt;/a&gt;
+		&lt;/xsl:otherwise&gt;
+	&lt;/xsl:choose&gt;
+	&lt;/xsl:if&gt;
+	&lt;/div&gt;
+	&lt;/li&gt;
+	&lt;/xsl:if&gt;
+	&lt;/xsl:for-each&gt;
+	&lt;/xsl:otherwise&gt;
+	&lt;/xsl:choose&gt;
+	&lt;/ul&gt;
+	&lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+      <Stylesheet Default="false" PageType="htmlQuirksMode" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Vertical Layout</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+  &lt;!-- Skin: Default XSL --&gt;
+
+  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;
+  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;
+
+  &lt;xsl:template match="/"&gt;
+   &lt;ul class="clrfix MOD_NO_5_1"&gt;
+   &lt;xsl:variable name="replicantCount" select="count(/Properties/Data/Group)"/&gt;
+   		
+   &lt;xsl:for-each select="/Properties/Data/Group"&gt;
+        &lt;xsl:variable name="iCount" select="position()" /&gt;
+	&lt;xsl:if test="$iCount &amp;lt;= 3"&gt;
+	&lt;li&gt;
+	&lt;xsl:choose&gt;
+		&lt;xsl:when test="$iCount= 3"&gt;
+			&lt;xsl:attribute name="class"&gt;
+			lst&lt;/xsl:attribute&gt;
+			&lt;/xsl:when&gt;
+		&lt;xsl:when test="$replicantCount=1" &gt;
+			&lt;xsl:attribute name="class"&gt;
+			lst&lt;/xsl:attribute&gt;
+			&lt;/xsl:when&gt;
+		&lt;/xsl:choose&gt;
+	&lt;div class="MOD_GC_11_Vertical"&gt;
+	&lt;xsl:variable name="desc" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/text"/&gt;
+	
+	&lt;xsl:variable name="imageValue" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/image_URL"/&gt;
+	
+	&lt;xsl:variable name="altTextValue" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/image_alt_text"/&gt;
+	&lt;xsl:variable name="link_text" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/link_text"/&gt;
+	&lt;xsl:variable name="link_URL" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/link_URL"/&gt;
+	&lt;xsl:variable name="url" select="substring-after(substring-after(substring-after($link_URL,'/'),'/'),'/')"/&gt;
+	&lt;xsl:variable name="urls" select="substring-before($url,'.')"/&gt;
+	&lt;xsl:variable name="dest" select="concat('$PAGE_LINK[',$urls,']')"/&gt;
+	
+
+	
+
+	&lt;xsl:if test="string-length($link_text )&amp;lt;1"&gt;
+		&lt;div class="errMsg"&gt;Please select a DCR .&lt;/div&gt;
+		&lt;/xsl:if&gt;
+
+	&lt;xsl:if test="$imageValue!= ''"&gt;
+		 &lt;xsl:if test="$altTextValue= ''"&gt;
+			&lt;div class="errMsg"&gt;Missing Alt for the image&lt;/div&gt;
+		 &lt;/xsl:if&gt;
+	&lt;a&gt;
+	&lt;xsl:if test="starts-with($link_URL,'/')"&gt;
+	&lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="$dest" /&gt;&lt;/xsl:attribute&gt;
+	&lt;xsl:choose&gt;
+		&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+			&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+		&lt;/xsl:when&gt;
+		&lt;xsl:otherwise&gt;
+			&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+		&lt;/xsl:otherwise&gt;
+	&lt;/xsl:choose&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:if test="starts-with($link_URL,'/sites')=false"&gt;
+	&lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="$link_URL" /&gt;&lt;/xsl:attribute&gt;
+	&lt;xsl:choose&gt;
+		&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+			&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+		&lt;/xsl:when&gt;
+		&lt;xsl:otherwise&gt;
+			&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+		&lt;/xsl:otherwise&gt;
+	&lt;/xsl:choose&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:if test="starts-with($link_URL,'http') or starts-with($link_URL,'Http') 
+	or starts-with($link_URL,'Https') or starts-with($link_URL,'https')"&gt;
+		&lt;xsl:attribute name="href"&gt;
+		&lt;xsl:value-of select="$link_URL"/&gt;&lt;/xsl:attribute&gt;
+		&lt;xsl:choose&gt;
+			&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_self'"&gt;
+				&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+			&lt;/xsl:when&gt;
+			&lt;xsl:otherwise&gt;
+				&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+			&lt;/xsl:otherwise&gt;
+		&lt;/xsl:choose&gt;
+	&lt;/xsl:if&gt;
+	
+	&lt;xsl:text disable-output-escaping="yes"&gt;&amp;lt;img src="&lt;/xsl:text&gt;
+	&lt;xsl:value-of select="$imageValue"/&gt;
+	&lt;xsl:text&gt;"&lt;/xsl:text&gt;
+	&lt;xsl:if test="$altTextValue!= ''"&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;title="&lt;/xsl:text&gt;
+	&lt;xsl:value-of disable-output-escaping ="yes" select="$altTextValue"/&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;" alt="&lt;/xsl:text&gt;
+	&lt;xsl:value-of disable-output-escaping ="yes" select="$altTextValue"/&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;"&lt;/xsl:text&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;&amp;gt;&amp;lt;/a&amp;gt;&lt;/xsl:text&gt;
+
+
+	
+	&lt;/a&gt;
+	&lt;/xsl:if&gt;
+  	&lt;p class="MOD_GC_11_Title"&gt;&lt;strong&gt;
+        &lt;xsl:value-of select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/title" disable-output-escaping = "yes"/&gt;
+        &lt;/strong&gt;&lt;/p&gt;
+        &lt;xsl:if test="$desc= ''"&gt;
+		&lt;div class="errMsg"&gt;Text is Mandatory for this variation.&lt;/div&gt;
+		&lt;/xsl:if&gt;
+	&lt;xsl:if test="$desc!= ''"&gt;
+	&lt;xsl:if test="string-length($desc)&amp;lt;3"&gt;
+		&lt;div class="errMsg"&gt;Minimum charater limit is 3 for Text.&lt;/div&gt;
+		&lt;/xsl:if&gt;
+		&lt;/xsl:if&gt;
+        &lt;xsl:if test="$desc!= ''"&gt;
+		&lt;p class="MOD_GC_11_Cont"&gt;&lt;xsl:value-of select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/text" disable-output-escaping = "yes"/&gt;
+		&lt;/p&gt;
+		&lt;/xsl:if&gt;
+	&lt;xsl:if test="$link_text!=''"&gt;
+	&lt;xsl:if test="starts-with($link_URL,'/')"&gt;
+	&lt;a&gt;
+	&lt;xsl:attribute name="class"&gt;
+	&lt;xsl:call-template name="substring-after-last"&gt;
+		&lt;xsl:with-param name="string" select="$link_URL" /&gt;
+		&lt;xsl:with-param name="delimiter" select="'.'" /&gt;
+		&lt;/xsl:call-template&gt;
+	&lt;/xsl:attribute&gt;
+	&lt;xsl:choose&gt;
+              &lt;xsl:when test="starts-with($link_URL,'/sites') and contains($link_URL,'.page')"&gt;
+	      &lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="$dest"/&gt;&lt;/xsl:attribute&gt;
+	      &lt;xsl:choose&gt;
+			&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+				&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+			&lt;/xsl:when&gt;
+			&lt;xsl:otherwise&gt;
+				&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+			&lt;/xsl:otherwise&gt;
+		&lt;/xsl:choose&gt;
+		&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes"/&gt;
+	      &lt;/xsl:when&gt;
+              &lt;xsl:otherwise&gt;
+	      &lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="$link_URL"/&gt;&lt;/xsl:attribute&gt;
+	       &lt;xsl:choose&gt;
+			&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+				&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+			&lt;/xsl:when&gt;
+			&lt;xsl:otherwise&gt;
+				&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+			&lt;/xsl:otherwise&gt;
+		&lt;/xsl:choose&gt;
+		&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes" /&gt;
+	      &lt;/xsl:otherwise&gt;
+        &lt;/xsl:choose&gt;
+	&lt;/a&gt;
+        &lt;/xsl:if&gt;
+	&lt;xsl:if test="starts-with($link_URL,'http') or starts-with($link_URL,'Http') 
+				or starts-with($link_URL,'Https') or starts-with($link_URL,'https')"&gt;
+	&lt;a&gt;&lt;xsl:attribute name="class"&gt;more external
+	&lt;/xsl:attribute&gt;
+	&lt;xsl:attribute name="href"&gt;
+	&lt;xsl:value-of select="$link_URL"/&gt;&lt;/xsl:attribute&gt;
+	 &lt;xsl:choose&gt;
+		&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_self'"&gt;
+			&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+		&lt;/xsl:when&gt;
+		&lt;xsl:otherwise&gt;
+			&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+		&lt;/xsl:otherwise&gt;
+	&lt;/xsl:choose&gt;
+
+	&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes" /&gt;
+	&lt;/a&gt;
+	&lt;a&gt;
+				&lt;xsl:attribute name="class"&gt;externalLinkImg&lt;/xsl:attribute&gt;
+				&lt;xsl:attribute name="href"&gt;
+					&lt;xsl:value-of select="$link_URL" /&gt;
+				&lt;/xsl:attribute&gt;
+				 &lt;xsl:choose&gt;
+					&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_self'"&gt;
+						&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+					&lt;/xsl:when&gt;
+					&lt;xsl:otherwise&gt;
+						&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+					&lt;/xsl:otherwise&gt;
+				&lt;/xsl:choose&gt;
+
+	&lt;/a&gt;
+    &lt;/xsl:if&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:for-each select="./Datum[@Name='DCR Path *']/DCR/callToAction_root_container/link_container"&gt;
+			&lt;xsl:variable name="linkCount" select="position()" /&gt;
+			&lt;xsl:if test="$linkCount = 1"&gt;
+			&lt;br/&gt;
+			&lt;/xsl:if&gt;
+			&lt;xsl:variable name="link_container_text" select="./Link_text"/&gt;
+			&lt;xsl:variable name="link_container_URL" select="./Link_URL"/&gt;
+			&lt;xsl:variable name="container_url" select="substring-after(substring-after(substring-after($link_container_URL,'/'),'/'),'/')"/&gt;
+			&lt;xsl:variable name="finalurl" select="substring-before($container_url,'.')"/&gt;
+			&lt;xsl:variable name="container_dest" select="concat('$PAGE_LINK[',$finalurl,']')"/&gt;
+
+			&lt;xsl:if test="$link_container_text!=''"&gt;
+				&lt;xsl:if test="starts-with($link_container_URL,'/')"&gt;
+				&lt;a&gt;&lt;xsl:attribute name="class"&gt;&lt;xsl:call-template name="substring-after-last-child"&gt;
+				&lt;xsl:with-param name="string" select="$link_container_URL" /&gt;
+				&lt;xsl:with-param name="delimiter" select="'.'" /&gt;
+				&lt;/xsl:call-template&gt;&lt;/xsl:attribute&gt;
+				&lt;xsl:choose&gt;
+					&lt;xsl:when test="starts-with($link_container_URL,'/sites') and contains($link_container_URL,'.page')"&gt;
+						&lt;xsl:attribute name="href"&gt; 
+						&lt;xsl:value-of select="$container_dest"/&gt;&lt;/xsl:attribute&gt;
+						 &lt;xsl:choose&gt;
+							&lt;xsl:when test="./target_type = '_blank'"&gt;
+								&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+							&lt;/xsl:when&gt;
+							&lt;xsl:otherwise&gt;
+								&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+							&lt;/xsl:otherwise&gt;
+						&lt;/xsl:choose&gt;
+						&lt;xsl:value-of select="$link_container_text" disable-output-escaping = "yes" /&gt;
+						&lt;/xsl:when&gt;
+					&lt;xsl:otherwise&gt;
+						&lt;xsl:attribute name="href"&gt; 
+						&lt;xsl:value-of select="$link_container_URL"/&gt;&lt;/xsl:attribute&gt;
+						&lt;xsl:choose&gt;
+							&lt;xsl:when test="./target_type = '_blank'"&gt;
+								&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+							&lt;/xsl:when&gt;
+							&lt;xsl:otherwise&gt;
+								&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+							&lt;/xsl:otherwise&gt;
+						&lt;/xsl:choose&gt;
+						&lt;xsl:value-of select="$link_container_text" disable-output-escaping = "yes"/&gt;
+						&lt;/xsl:otherwise&gt;
+				&lt;/xsl:choose&gt;
+				&lt;/a&gt;
+				&lt;xsl:if test="position()!=last()"&gt;
+				&lt;br /&gt;
+				&lt;/xsl:if&gt;
+			&lt;/xsl:if&gt;
+			&lt;xsl:if test="starts-with($link_container_URL,'http') or starts-with($link_container_URL,'Http') 
+				or starts-with($link_container_URL,'Https') or starts-with($link_container_URL,'https')"&gt;
+			&lt;a&gt;&lt;xsl:attribute name="class"&gt;more external&lt;/xsl:attribute&gt;
+			&lt;xsl:attribute name="href"&gt;
+			&lt;xsl:value-of select="$link_container_URL"/&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="./target_type = '_self'"&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+			&lt;xsl:value-of select="$link_container_text" disable-output-escaping = "yes" /&gt;
+			&lt;/a&gt;
+			&lt;a&gt;
+				&lt;xsl:attribute name="class"&gt;externalLinkImg&lt;/xsl:attribute&gt;
+				&lt;xsl:attribute name="href"&gt;
+					&lt;xsl:value-of select="$link_container_URL" /&gt;
+				&lt;/xsl:attribute&gt;
+				&lt;xsl:choose&gt;
+					&lt;xsl:when test="./target_type = '_self'"&gt;
+						&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+					&lt;/xsl:when&gt;
+					&lt;xsl:otherwise&gt;
+						&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+					&lt;/xsl:otherwise&gt;
+				&lt;/xsl:choose&gt;
+			&lt;/a&gt;
+			&lt;xsl:if test="position()!=last()"&gt;
+			&lt;br /&gt;
+			&lt;/xsl:if&gt;
+			&lt;/xsl:if&gt;
+			&lt;/xsl:if&gt;
+	        &lt;/xsl:for-each&gt;
+
+	&lt;/div&gt;
+	&lt;/li&gt;
+	&lt;/xsl:if&gt;
+	&lt;/xsl:for-each&gt;
+	&lt;/ul&gt;
+	&lt;/xsl:template&gt;
+
+	&lt;xsl:template name="substring-after-last"&gt;
+	&lt;xsl:param name="string" /&gt;
+	&lt;xsl:param name="delimiter" /&gt;
+	&lt;xsl:choose&gt;
+	&lt;xsl:when test="contains($string, $delimiter)"&gt;
+	&lt;xsl:call-template name="substring-after-last"&gt;
+        &lt;xsl:with-param name="string"
+          select="substring-after($string, $delimiter)" /&gt;
+        &lt;xsl:with-param name="delimiter" select="$delimiter" /&gt;
+      &lt;/xsl:call-template&gt;
+    &lt;/xsl:when&gt;
+    &lt;xsl:otherwise&gt;
+    &lt;xsl:variable name="className" select="concat('more ','more_',$string)" /&gt;
+    &lt;xsl:value-of select="$className" /&gt;&lt;/xsl:otherwise&gt;
+  &lt;/xsl:choose&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template name="substring-after-last-child"&gt;
+	&lt;xsl:param name="string" /&gt;
+	&lt;xsl:param name="delimiter" /&gt;
+	&lt;xsl:choose&gt;
+	&lt;xsl:when test="contains($string, $delimiter)"&gt;
+	&lt;xsl:call-template name="substring-after-last"&gt;
+        &lt;xsl:with-param name="string"
+          select="substring-after($string, $delimiter)" /&gt;
+        &lt;xsl:with-param name="delimiter" select="$delimiter" /&gt;
+      &lt;/xsl:call-template&gt;
+    &lt;/xsl:when&gt;
+    &lt;xsl:otherwise&gt;
+    &lt;xsl:variable name="className" select="concat('more ','more_',$string)" /&gt;
+    &lt;xsl:value-of select="$className" /&gt;&lt;/xsl:otherwise&gt;
+  &lt;/xsl:choose&gt;
+&lt;/xsl:template&gt;
+
+&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+      <Stylesheet Default="false" PageType="htmlQuirksMode" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Super Horizontal</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+  &lt;!-- Skin: Default XSL --&gt;
+
+  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;
+  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;
+
+  &lt;!-- Analytics code start --&gt;
+  &lt;xsl:variable name="TrackModule" select="/Properties/Data/Datum[@ID='TRACK_MODULE']/Option[@Selected='true']/Value"/&gt;
+  &lt;xsl:variable name="ModuleName" select="translate(/Properties/Data/Datum[@ID='MODULE_NAME'],&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;
+  &lt;!-- Analytics code end --&gt;
+
+  &lt;xsl:template match="/"&gt;
+  &lt;!-- Analytics code start --&gt;
+  &lt;module type="Featured Callout" name="{$ModuleName}" trackingenabled="{$TrackModule}"&gt;
+  &lt;!-- Analytics code end --&gt;
+
+  &lt;div class="clrfix MOD_GC_11_2"&gt;
+   &lt;xsl:for-each select="/Properties/Data/Group"&gt;
+        &lt;xsl:variable name="iCount" select="position()" /&gt;
+	&lt;xsl:if test="$iCount = 1"&gt;
+        &lt;xsl:variable name="desc" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/text"/&gt;
+	&lt;xsl:variable name="imageValue" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/image_URL"/&gt;
+	&lt;xsl:variable name="altTextValue" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/image_alt_text"/&gt;
+	&lt;xsl:variable name="title" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/title"/&gt;
+	&lt;xsl:variable name="link_text" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/link_text"/&gt;
+	&lt;xsl:variable name="link_URL" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/link_URL"/&gt;
+	&lt;xsl:variable name="url" select="substring-after(substring-after(substring-after($link_URL,'/'),'/'),'/')"/&gt;
+	&lt;xsl:variable name="urls" select="substring-before($url,'.')"/&gt;
+	&lt;xsl:variable name="dest" select="concat('$PAGE_LINK[',$urls,']')"/&gt;
+	&lt;xsl:if test="string-length($link_text )&amp;lt;1"&gt;
+		&lt;div class="errMsg"&gt;Please select a DCR .&lt;/div&gt;
+		&lt;/xsl:if&gt;
+	
+	&lt;xsl:if test="$imageValue= ''"&gt;&lt;div class="errMsg"&gt;Image is mandatory for this variation.&lt;/div&gt;&lt;/xsl:if&gt;
+	
+	&lt;xsl:if test="$imageValue!= ''"&gt;
+		 &lt;xsl:if test="$altTextValue= ''"&gt;
+			&lt;div class="errMsg"&gt;Missing Alt for the image&lt;/div&gt;
+		 &lt;/xsl:if&gt;
+
+	&lt;a&gt;
+	&lt;xsl:choose&gt;
+		&lt;xsl:when test="starts-with($link_URL,'/')"&gt;
+			&lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="$dest" /&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+		&lt;/xsl:when&gt;
+		&lt;xsl:when test="starts-with($link_URL,'http') or starts-with($link_URL,'Http') or starts-with($link_URL,'Https') or starts-with($link_URL,'https')"&gt;
+			&lt;xsl:attribute name="href"&gt;
+			&lt;xsl:value-of select="$link_URL"/&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_self'"&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+		&lt;/xsl:when&gt;
+		&lt;xsl:otherwise&gt;
+			&lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="$link_URL" /&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+		&lt;/xsl:otherwise&gt;
+	&lt;/xsl:choose&gt;
+
+	
+	&lt;xsl:text disable-output-escaping="yes"&gt;&amp;lt;img class="imageLeft" src="&lt;/xsl:text&gt;
+	&lt;xsl:value-of select="$imageValue"/&gt;
+	&lt;xsl:text&gt;"&lt;/xsl:text&gt;
+	&lt;xsl:if test="$altTextValue!= ''"&gt;
+	&lt;xsl:if test="string-length($altTextValue) &amp;lt; 3"&gt;
+		&lt;div class="errMsg"&gt;Minimum charater limit allowed is 3 for Alt Text .&lt;/div&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;title="&lt;/xsl:text&gt;
+	&lt;xsl:value-of disable-output-escaping ="yes" select="$altTextValue"/&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;" alt="&lt;/xsl:text&gt;
+	&lt;xsl:value-of disable-output-escaping ="yes" select="$altTextValue"/&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;"&lt;/xsl:text&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;&amp;gt;&amp;lt;/a&amp;gt;&lt;/xsl:text&gt;
+
+	
+	&lt;/a&gt;
+	&lt;/xsl:if&gt;
+        &lt;div class="content_pan"&gt;
+	&lt;p class="MOD_GC_11 title"&gt;&lt;strong&gt;&lt;xsl:value-of select="$title" disable-output-escaping = "yes"/&gt;&lt;/strong&gt;&lt;/p&gt;
+	&lt;xsl:if test="$desc= ''"&gt;&lt;div class="errMsg"&gt;Text is Mandatory for this variation.&lt;/div&gt;
+        &lt;/xsl:if&gt;
+        &lt;xsl:if test="$desc!= ''"&gt;
+		&lt;xsl:if test="string-length($desc) &amp;lt; 3"&gt;
+			&lt;div class="errMsg"&gt;Minimum charater limit allowed is 3 for text .&lt;/div&gt;
+			&lt;/xsl:if&gt;
+	        &lt;p class="MOD_GC_11_Cont"&gt;&lt;xsl:value-of select="$desc" disable-output-escaping = "yes"/&gt;&lt;/p&gt;
+        &lt;/xsl:if&gt;
+	&lt;xsl:if test="$link_text!=''"&gt;
+	&lt;xsl:choose&gt;
+		&lt;xsl:when test="starts-with($link_URL,'/')"&gt;
+			&lt;a&gt;&lt;xsl:attribute name="class"&gt;more&lt;/xsl:attribute&gt;
+			&lt;xsl:attribute name="href"&gt; 
+			&lt;xsl:value-of select="$dest"/&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+			&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes" /&gt;
+			&lt;/a&gt;
+		&lt;/xsl:when&gt;
+		&lt;xsl:when test="starts-with($link_URL,'http') or starts-with($link_URL,'Http') 
+		or starts-with($link_URL,'Https') or starts-with($link_URL,'https')"&gt;
+			&lt;a class="more external"&gt;
+			&lt;xsl:attribute name="href"&gt;
+			&lt;xsl:value-of select="$link_URL"/&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_self'"&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+			&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes" /&gt;
+			&lt;/a&gt;
+			&lt;a&gt;
+				&lt;xsl:attribute name="class"&gt;externalLinkImg&lt;/xsl:attribute&gt;
+				&lt;xsl:attribute name="href"&gt;
+					&lt;xsl:value-of select="$link_URL" /&gt;
+				&lt;/xsl:attribute&gt;
+				&lt;xsl:choose&gt;
+					&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_self'"&gt;
+						&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+					&lt;/xsl:when&gt;
+					&lt;xsl:otherwise&gt;
+						&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+					&lt;/xsl:otherwise&gt;
+				&lt;/xsl:choose&gt;
+			&lt;/a&gt;
+		&lt;/xsl:when&gt;
+		  &lt;xsl:otherwise&gt;
+			&lt;a&gt;&lt;xsl:attribute name="class"&gt;seeall&lt;/xsl:attribute&gt;
+			&lt;xsl:attribute name="href"&gt; 
+			&lt;xsl:value-of select="$link_URL"/&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+			&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes" /&gt;
+			&lt;/a&gt;
+		  &lt;/xsl:otherwise&gt;
+		&lt;/xsl:choose&gt;
+	&lt;/xsl:if&gt;
+        &lt;/div&gt;
+        &lt;/xsl:if&gt;
+	&lt;/xsl:for-each&gt;
+	&lt;/div&gt;
+  &lt;!-- Analytics code start --&gt;
+  &lt;/module&gt;
+  &lt;!-- Analytics code end --&gt;
+  &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+      <Stylesheet Default="false" PageType="htmlQuirksMode" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Series Block Layout</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+  &lt;!-- Skin: Default XSL --&gt;
+
+  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;
+  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;
+
+  &lt;xsl:template match="/"&gt;
+   &lt;ul class="clrfix MOD_NO_5_1"&gt;
+   &lt;xsl:variable name="replicantCount" select="count(/Properties/Data/Group)"/&gt;
+   &lt;xsl:choose&gt;
+		&lt;xsl:when test="$replicantCount = 2"&gt;&lt;div class="errMsg"&gt;1 or 3 Replicants is supported.&lt;/div&gt;&lt;/xsl:when&gt;
+		&lt;xsl:otherwise&gt;
+   &lt;xsl:for-each select="/Properties/Data/Group"&gt;
+        &lt;xsl:variable name="iCount" select="position()" /&gt;
+	&lt;xsl:if test="$iCount &amp;lt;= 3"&gt;
+	&lt;li&gt;
+	&lt;xsl:choose&gt;
+		&lt;xsl:when test="$iCount= 3"&gt;
+			&lt;xsl:attribute name="class"&gt;
+			lst&lt;/xsl:attribute&gt;
+			&lt;/xsl:when&gt;
+		&lt;xsl:when test="$replicantCount=1" &gt;
+			&lt;xsl:attribute name="class"&gt;
+			lst&lt;/xsl:attribute&gt;
+			&lt;/xsl:when&gt;
+		&lt;/xsl:choose&gt;
+	&lt;div class="MOD_GC_11b"&gt;
+	&lt;xsl:variable name="imageValue" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/image_URL"/&gt;
+	&lt;xsl:variable name="altTextValue" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/image_alt_text"/&gt;
+	&lt;xsl:variable name="title" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/title"/&gt;
+	&lt;xsl:variable name="link_text" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/link_text"/&gt;
+	&lt;xsl:variable name="link_URL" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/link_URL"/&gt;
+	&lt;xsl:variable name="url" select="substring-after(substring-after(substring-after($link_URL,'/'),'/'),'/')"/&gt;
+	&lt;xsl:variable name="urls" select="substring-before($url,'.')"/&gt;
+	&lt;xsl:variable name="dest" select="concat('$PAGE_LINK[',$urls,']')"/&gt;
+	&lt;h5&gt;&lt;xsl:value-of select="$title" disable-output-escaping = "yes"/&gt;&lt;/h5&gt;
+
+	&lt;xsl:if test="string-length($link_text )&amp;lt;1"&gt;
+		&lt;div class="errMsg"&gt;Please select a DCR .&lt;/div&gt;
+		&lt;/xsl:if&gt;
+	&lt;xsl:if test="$imageValue= ''"&gt;&lt;div class="errMsg"&gt;Image is mandatory for this variation.&lt;/div&gt;&lt;/xsl:if&gt;
+	
+	&lt;xsl:if test="$imageValue!= ''"&gt;
+		 &lt;xsl:if test="$altTextValue= ''"&gt;
+			&lt;div class="errMsg"&gt;Missing Alt for the image&lt;/div&gt;
+		 &lt;/xsl:if&gt;
+
+		 &lt;a&gt;
+
+
+		 &lt;xsl:choose&gt;
+			&lt;xsl:when test="starts-with($link_URL,'/')"&gt;
+				&lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="$dest" /&gt;&lt;/xsl:attribute&gt;
+				&lt;xsl:choose&gt;
+					&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+						&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+					&lt;/xsl:when&gt;
+					&lt;xsl:otherwise&gt;
+						&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+					&lt;/xsl:otherwise&gt;
+				&lt;/xsl:choose&gt;
+			&lt;/xsl:when&gt;
+			&lt;xsl:when test="starts-with($link_URL,'http') or starts-with($link_URL,'Http') or starts-with($link_URL,'Https') or starts-with($link_URL,'https')"&gt;
+				&lt;xsl:attribute name="href"&gt;
+				&lt;xsl:value-of select="$link_URL"/&gt;&lt;/xsl:attribute&gt;
+				&lt;xsl:choose&gt;
+					&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_self'"&gt;
+						&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+					&lt;/xsl:when&gt;
+					&lt;xsl:otherwise&gt;
+						&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+					&lt;/xsl:otherwise&gt;
+				&lt;/xsl:choose&gt;
+			&lt;/xsl:when&gt;
+			&lt;xsl:otherwise&gt;
+				&lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="$link_URL" /&gt;&lt;/xsl:attribute&gt;
+				&lt;xsl:choose&gt;
+					&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+						&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+					&lt;/xsl:when&gt;
+					&lt;xsl:otherwise&gt;
+						&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+					&lt;/xsl:otherwise&gt;
+				&lt;/xsl:choose&gt;
+			&lt;/xsl:otherwise&gt;
+		&lt;/xsl:choose&gt;
+	
+	
+	&lt;xsl:text disable-output-escaping="yes"&gt;&amp;lt;img src="&lt;/xsl:text&gt;
+	&lt;xsl:value-of select="$imageValue"/&gt;
+	&lt;xsl:text&gt;"&lt;/xsl:text&gt;
+	&lt;xsl:if test="$altTextValue!= ''"&gt;
+	&lt;xsl:if test="string-length($altTextValue) &amp;lt; 3"&gt;
+		&lt;div class="errMsg"&gt;Minimum charater limit allowed is 3 for Alt Text .&lt;/div&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;title="&lt;/xsl:text&gt;
+	&lt;xsl:value-of disable-output-escaping ="yes" select="$altTextValue"/&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;" alt="&lt;/xsl:text&gt;
+	&lt;xsl:value-of disable-output-escaping ="yes" select="$altTextValue"/&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;"&lt;/xsl:text&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;&amp;gt;&amp;lt;/a&amp;gt;&lt;/xsl:text&gt;
+	
+	
+	&lt;/a&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:if test="$link_text!=''"&gt;
+	&lt;xsl:choose&gt;
+		&lt;xsl:when test="starts-with($link_URL,'/')"&gt;
+			&lt;a&gt;&lt;xsl:attribute name="class"&gt;more&lt;/xsl:attribute&gt;
+			&lt;xsl:attribute name="href"&gt; 
+			&lt;xsl:value-of select="$dest"/&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+			&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes"/&gt;
+			&lt;/a&gt;
+		&lt;/xsl:when&gt;
+		&lt;xsl:when test="starts-with($link_URL,'http') or starts-with($link_URL,'Http') or starts-with($link_URL,'Https') or starts-with($link_URL,'https')"&gt;
+			&lt;a class="more external"&gt;
+			&lt;xsl:attribute name="href"&gt;
+			&lt;xsl:value-of select="$link_URL"/&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_self'"&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+			&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes"/&gt;
+			&lt;/a&gt;
+			&lt;a&gt;
+				&lt;xsl:attribute name="class"&gt;externalLinkImg&lt;/xsl:attribute&gt;
+				&lt;xsl:attribute name="href"&gt;
+					&lt;xsl:value-of select="$link_URL" /&gt;
+				&lt;/xsl:attribute&gt;
+				&lt;xsl:choose&gt;
+					&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_self'"&gt;
+						&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+					&lt;/xsl:when&gt;
+					&lt;xsl:otherwise&gt;
+						&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+					&lt;/xsl:otherwise&gt;
+				&lt;/xsl:choose&gt;
+			&lt;/a&gt;
+		&lt;/xsl:when&gt;
+		&lt;xsl:otherwise&gt;
+			&lt;a&gt;&lt;xsl:attribute name="class"&gt;more&lt;/xsl:attribute&gt;
+			&lt;xsl:attribute name="href"&gt; 
+			&lt;xsl:value-of select="$link_URL"/&gt;&lt;/xsl:attribute&gt;	
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+			&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes"/&gt;
+			&lt;/a&gt;
+		&lt;/xsl:otherwise&gt;
+	&lt;/xsl:choose&gt;
+	&lt;/xsl:if&gt;
+	&lt;/div&gt;
+	&lt;/li&gt;
+	&lt;/xsl:if&gt;
+	&lt;/xsl:for-each&gt;
+	&lt;/xsl:otherwise&gt;
+	&lt;/xsl:choose&gt;
+	&lt;/ul&gt;
+	&lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+      <Stylesheet Default="true" PageType="htmlQuirksMode" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Horizontal Image Layout</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+  &lt;!-- Skin: Default XSL --&gt;
+
+  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;
+  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;
+
+  &lt;xsl:template match="/"&gt;
+   
+  
+   &lt;xsl:for-each select="/Properties/Data/Group"&gt;
+        &lt;xsl:variable name="iCount" select="position()" /&gt;
+	&lt;xsl:if test="$iCount &amp;lt;= 1"&gt;
+	
+	&lt;div class="MOD_GC_11_Horizontal"&gt;
+	
+	&lt;xsl:variable name="desc" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/text"/&gt;
+	&lt;xsl:variable name="imageValue" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/image_URL"/&gt;
+	&lt;xsl:variable name="altTextValue" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/image_alt_text"/&gt;
+	&lt;xsl:variable name="title" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/title"/&gt;
+	&lt;xsl:variable name="link_text" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/link_text"/&gt;
+	&lt;xsl:variable name="link_URL" select="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/link_URL"/&gt;
+	&lt;xsl:variable name="url" select="substring-after(substring-after(substring-after($link_URL,'/'),'/'),'/')"/&gt;
+	&lt;xsl:variable name="urls" select="substring-before($url,'.')"/&gt;
+	&lt;xsl:variable name="dest" select="concat('$PAGE_LINK[',$urls,']')"/&gt;
+
+	&lt;xsl:if test="string-length($link_text )&amp;lt;1"&gt;
+		&lt;div class="errMsg"&gt;Please select a DCR .&lt;/div&gt;
+		&lt;/xsl:if&gt;
+	&lt;xsl:if test="$imageValue !=''"&gt;
+		&lt;xsl:if test="$altTextValue= ''"&gt;
+		&lt;div class="errMsg"&gt;Missing Alt Text for the image&lt;/div&gt;
+		&lt;/xsl:if&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:if test="$desc =''"&gt;
+		&lt;div class="errMsg"&gt;Text is mandatory&lt;/div&gt;
+	&lt;/xsl:if&gt;
+	
+	
+	
+	&lt;xsl:if test="$imageValue!= ''"&gt;
+	&lt;a&gt;
+	&lt;xsl:if test="starts-with($link_URL,'/sites')"&gt;
+	&lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="$dest" /&gt;&lt;/xsl:attribute&gt;
+	&lt;xsl:choose&gt;
+		&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+			&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+		&lt;/xsl:when&gt;
+		&lt;xsl:otherwise&gt;
+			&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+		&lt;/xsl:otherwise&gt;
+	&lt;/xsl:choose&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:if test="starts-with($link_URL,'/sites')=false"&gt;
+	&lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="$link_URL" /&gt;&lt;/xsl:attribute&gt;
+	&lt;xsl:choose&gt;
+		&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+			&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+		&lt;/xsl:when&gt;
+		&lt;xsl:otherwise&gt;
+			&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+		&lt;/xsl:otherwise&gt;
+	&lt;/xsl:choose&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:if test="starts-with($link_URL,'http') or starts-with($link_URL,'Http') 
+	or starts-with($link_URL,'Https') or starts-with($link_URL,'https')"&gt;
+		&lt;xsl:attribute name="href"&gt;
+		&lt;xsl:value-of select="$link_URL"/&gt;&lt;/xsl:attribute&gt;
+		&lt;xsl:choose&gt;
+		&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_self'"&gt;
+			&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+		&lt;/xsl:when&gt;
+		&lt;xsl:otherwise&gt;
+			&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+		&lt;/xsl:otherwise&gt;
+	&lt;/xsl:choose&gt;
+	&lt;/xsl:if&gt;
+	
+
+	&lt;xsl:text disable-output-escaping="yes"&gt;&amp;lt;img src="&lt;/xsl:text&gt;
+	&lt;xsl:value-of select="$imageValue"/&gt;
+	&lt;xsl:text&gt;"&lt;/xsl:text&gt;
+	&lt;xsl:if test="$altTextValue!= ''"&gt;
+	&lt;xsl:if test="string-length($altTextValue) &amp;lt; 3"&gt;
+		&lt;div class="errMsg"&gt;Minimum charater limit allowed is 3 for Alt Text .&lt;/div&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;title="&lt;/xsl:text&gt;
+	&lt;xsl:value-of disable-output-escaping ="yes" select="$altTextValue"/&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;" alt="&lt;/xsl:text&gt;
+	&lt;xsl:value-of disable-output-escaping ="yes" select="$altTextValue"/&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;"&lt;/xsl:text&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:text disable-output-escaping="yes"&gt;&amp;gt;&amp;lt;/a&amp;gt;&lt;/xsl:text&gt;
+
+
+
+
+
+	&lt;/a&gt;
+	&lt;/xsl:if&gt;
+	&lt;div class="rightPane"&gt;
+	&lt;p class="MOD_GC_11_Title"&gt;&lt;strong&gt;&lt;xsl:value-of select="$title" disable-output-escaping = "yes"/&gt;&lt;/strong&gt;&lt;/p&gt;
+
+	&lt;xsl:if test="$desc= ''"&gt;
+		&lt;div class="errMsg"&gt;Text is mandatory.&lt;/div&gt;
+		&lt;/xsl:if&gt;
+	
+	&lt;xsl:if test="$desc!= ''"&gt;
+                &lt;xsl:if test="string-length($desc) &amp;lt; 3"&gt;
+			&lt;div class="errMsg"&gt;Minimum charater limit allowed is 3 for text .&lt;/div&gt;
+			&lt;/xsl:if&gt;
+		&lt;p class="MOD_GC_11_Cont"&gt;&lt;xsl:value-of select="$desc" disable-output-escaping = "yes"/&gt;&lt;/p&gt;
+		&lt;/xsl:if&gt;
+	
+	&lt;xsl:if test="$link_text!=''"&gt;
+	&lt;xsl:if test="starts-with($link_URL,'/')"&gt;
+	&lt;a&gt;
+	&lt;xsl:attribute name="class"&gt;
+	&lt;xsl:call-template name="substring-after-last"&gt;
+		&lt;xsl:with-param name="string" select="$link_URL" /&gt;
+		&lt;xsl:with-param name="delimiter" select="'.'" /&gt;
+		&lt;/xsl:call-template&gt;
+	&lt;/xsl:attribute&gt;
+	&lt;xsl:choose&gt;
+              &lt;xsl:when test="starts-with($link_URL,'/sites') and contains($link_URL,'.page')"&gt;
+	      &lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="$dest"/&gt;&lt;/xsl:attribute&gt;
+	      &lt;xsl:choose&gt;
+			&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+				&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+			&lt;/xsl:when&gt;
+			&lt;xsl:otherwise&gt;
+				&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+			&lt;/xsl:otherwise&gt;
+		&lt;/xsl:choose&gt;
+		&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes" /&gt;
+	      &lt;/xsl:when&gt;
+              &lt;xsl:otherwise&gt;
+	      &lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="$link_URL"/&gt;&lt;/xsl:attribute&gt;
+	      &lt;xsl:choose&gt;
+			&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_blank'"&gt;
+				&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+			&lt;/xsl:when&gt;
+			&lt;xsl:otherwise&gt;
+				&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+			&lt;/xsl:otherwise&gt;
+		&lt;/xsl:choose&gt;
+		&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes" /&gt;
+	      &lt;/xsl:otherwise&gt;
+        &lt;/xsl:choose&gt;
+	&lt;/a&gt;
+        &lt;/xsl:if&gt;
+	&lt;xsl:if test="starts-with($link_URL,'http') or starts-with($link_URL,'Http') 
+		or starts-with($link_URL,'Https') or starts-with($link_URL,'https')"&gt;
+	&lt;a&gt;&lt;xsl:attribute name="class"&gt;more external
+	&lt;/xsl:attribute&gt;
+	&lt;xsl:attribute name="href"&gt;
+	&lt;xsl:value-of select="$link_URL"/&gt;&lt;/xsl:attribute&gt;
+	&lt;xsl:choose&gt;
+		&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_self'"&gt;
+			&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+		&lt;/xsl:when&gt;
+		&lt;xsl:otherwise&gt;
+			&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+		&lt;/xsl:otherwise&gt;
+	&lt;/xsl:choose&gt;
+	&lt;xsl:value-of select="$link_text" disable-output-escaping = "yes" /&gt;
+	&lt;/a&gt;	
+		&lt;a&gt;
+			&lt;xsl:attribute name="class"&gt;externalLinkImg&lt;/xsl:attribute&gt;
+				&lt;xsl:attribute name="href"&gt;
+					&lt;xsl:value-of select="$link_URL"/&gt;
+				&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='DCR Path *']/DCR/callToAction_root_container/target_type = '_self'"&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+		&lt;/a&gt;									
+
+    &lt;/xsl:if&gt;
+	&lt;/xsl:if&gt;
+	&lt;xsl:for-each select="./Datum[@Name='DCR Path *']/DCR/callToAction_root_container/link_container"&gt;
+			&lt;xsl:variable name="linkCount" select="position()" /&gt;
+			&lt;xsl:if test="$linkCount = 1"&gt;
+			&lt;br/&gt;
+			&lt;/xsl:if&gt;
+			&lt;xsl:variable name="link_container_text" select="./Link_text"/&gt;
+			&lt;xsl:variable name="link_container_URL" select="./Link_URL"/&gt;
+			&lt;xsl:variable name="container_url" select="substring-after(substring-after(substring-after($link_container_URL,'/'),'/'),'/')"/&gt;
+			&lt;xsl:variable name="finalurl" select="substring-before($container_url,'.')"/&gt;
+			&lt;xsl:variable name="container_dest" select="concat('$PAGE_LINK[',$finalurl,']')"/&gt;
+
+			&lt;xsl:if test="$link_container_text!=''"&gt;
+			&lt;xsl:if test="starts-with($link_container_URL,'/')"&gt;
+			&lt;a&gt;&lt;xsl:attribute name="class"&gt;&lt;xsl:call-template name="substring-after-last-child"&gt;
+			&lt;xsl:with-param name="string" select="$link_container_URL" /&gt;
+			&lt;xsl:with-param name="delimiter" select="'.'" /&gt;
+			&lt;/xsl:call-template&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="starts-with($link_container_URL,'/sites') and contains($link_container_URL,'.page')"&gt;
+				&lt;xsl:attribute name="href"&gt; 
+				&lt;xsl:value-of select="$container_dest"/&gt;&lt;/xsl:attribute&gt;
+				&lt;xsl:choose&gt;
+					&lt;xsl:when test="./target_type = '_blank'"&gt;
+						&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+					&lt;/xsl:when&gt;
+					&lt;xsl:otherwise&gt;
+						&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+					&lt;/xsl:otherwise&gt;
+				&lt;/xsl:choose&gt;
+				&lt;xsl:value-of select="$link_container_text" disable-output-escaping = "yes" /&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+				&lt;xsl:attribute name="href"&gt; 
+				&lt;xsl:value-of select="$link_container_URL"/&gt;&lt;/xsl:attribute&gt;
+				&lt;xsl:choose&gt;
+					&lt;xsl:when test="./target_type = '_blank'"&gt;
+						&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+					&lt;/xsl:when&gt;
+					&lt;xsl:otherwise&gt;
+						&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+					&lt;/xsl:otherwise&gt;
+				&lt;/xsl:choose&gt;
+				&lt;xsl:value-of select="$link_container_text" disable-output-escaping = "yes" /&gt;
+				&lt;/xsl:otherwise&gt;
+				&lt;/xsl:choose&gt;
+				&lt;/a&gt;
+			&lt;xsl:if test="position()!=last()"&gt;
+			&lt;br /&gt;
+			&lt;/xsl:if&gt;
+			&lt;/xsl:if&gt;
+			&lt;xsl:if test="starts-with($link_container_URL,'http') or starts-with($link_container_URL,'Http') 
+				or starts-with($link_container_URL,'Https') or starts-with($link_container_URL,'https')"&gt;
+			&lt;a&gt;&lt;xsl:attribute name="class"&gt;&lt;xsl:call-template name="substring-after-last-child"&gt;
+			&lt;xsl:with-param name="string" select="$link_container_URL" /&gt;
+			&lt;xsl:with-param name="delimiter" select="'.'" /&gt;
+			&lt;/xsl:call-template&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:attribute name="href"&gt;
+			&lt;xsl:value-of select="$link_container_URL"/&gt;&lt;/xsl:attribute&gt;
+			&lt;xsl:choose&gt;
+				&lt;xsl:when test="./target_type = '_blank'"&gt;
+					&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+				&lt;/xsl:when&gt;
+				&lt;xsl:otherwise&gt;
+					&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+				&lt;/xsl:otherwise&gt;
+			&lt;/xsl:choose&gt;
+			&lt;xsl:value-of select="$link_container_text" disable-output-escaping = "yes" /&gt;
+			&lt;/a&gt;
+			&lt;a&gt;
+				&lt;xsl:attribute name="class"&gt;externalLinkImg&lt;/xsl:attribute&gt;
+				&lt;xsl:attribute name="href"&gt;
+					&lt;xsl:value-of select="$link_container_URL"/&gt;
+				&lt;/xsl:attribute&gt;
+				&lt;xsl:choose&gt;
+					&lt;xsl:when test="./target_type = '_blank'"&gt;
+						&lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+					&lt;/xsl:when&gt;
+					&lt;xsl:otherwise&gt;
+						&lt;xsl:attribute name="target"&gt;_self&lt;/xsl:attribute&gt;
+					&lt;/xsl:otherwise&gt;
+				&lt;/xsl:choose&gt;
+			&lt;/a&gt;
+			
+			&lt;xsl:if test="position()!=last()"&gt;
+			&lt;br /&gt;
+			&lt;/xsl:if&gt;
+			&lt;/xsl:if&gt;
+			&lt;/xsl:if&gt;
+	        &lt;/xsl:for-each&gt;
+	&lt;/div&gt;
+	&lt;/div&gt;
+	&lt;/xsl:if&gt;
+	
+	&lt;/xsl:for-each&gt;
+	&lt;/xsl:template&gt;
+
+&lt;xsl:template name="substring-after-last"&gt;
+	&lt;xsl:param name="string" /&gt;
+	&lt;xsl:param name="delimiter" /&gt;
+	&lt;xsl:choose&gt;
+	&lt;xsl:when test="contains($string, $delimiter)"&gt;
+	&lt;xsl:call-template name="substring-after-last"&gt;
+        &lt;xsl:with-param name="string"
+          select="substring-after($string, $delimiter)" /&gt;
+        &lt;xsl:with-param name="delimiter" select="$delimiter" /&gt;
+      &lt;/xsl:call-template&gt;
+    &lt;/xsl:when&gt;
+    &lt;xsl:otherwise&gt;
+    &lt;xsl:variable name="className" select="concat('more ','more_',$string)" /&gt;
+    &lt;xsl:value-of select="$className" /&gt;&lt;/xsl:otherwise&gt;
+  &lt;/xsl:choose&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template name="substring-after-last-child"&gt;
+	&lt;xsl:param name="string" /&gt;
+	&lt;xsl:param name="delimiter" /&gt;
+	&lt;xsl:choose&gt;
+	&lt;xsl:when test="contains($string, $delimiter)"&gt;
+	&lt;xsl:call-template name="substring-after-last"&gt;
+        &lt;xsl:with-param name="string"
+          select="substring-after($string, $delimiter)" /&gt;
+        &lt;xsl:with-param name="delimiter" select="$delimiter" /&gt;
+      &lt;/xsl:call-template&gt;
+    &lt;/xsl:when&gt;
+    &lt;xsl:otherwise&gt;
+    &lt;xsl:variable name="className" select="concat('more ','more_',$string)" /&gt;
+    &lt;xsl:value-of select="$className" /&gt;&lt;/xsl:otherwise&gt;
+  &lt;/xsl:choose&gt;
+&lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</XSL>
+      </Stylesheet>
+    </Component>
+    <Component ID="1327288148222" Version="3.1.1.0" PageID="0" TemplateComponentID="0" CanBeActive="true">
+      <Description>The Featured Link List module provides up to 10 links on the right rail to supplement information on a page.</Description>
+      <SelectedSkin>Default</SelectedSkin>
+      <DisplayName>Featured Link List</DisplayName>
+      <Name>Featured Link List</Name>
+      <BaseComponent Version="8"><![CDATA[johndeere/enterprise/Right Rail/Featured Link List.component]]></BaseComponent>
+      <ContainerProperties ID="0" locked="false">
+        <FixedLayoutArea index="0" ID="row-3-area-1"/>
+        <CacheTime>-1</CacheTime>
+        <BGColor/>
+        <Width>200</Width>
+        <Height>200</Height>
+        <Top>10</Top>
+        <Left>10</Left>
+        <ZIndex>0</ZIndex>
+        <RenderInRuntime>true</RenderInRuntime>
+      </ContainerProperties>
+      <InternalProperties/>
+      <Locks>
+        <ContainerProperties locked="false" Changed="false"/>
+        <Properties locked="false" Changed="false"/>
+        <Data locked="false" Changed="false"/>
+      </Locks>
+      <Segments>
+        <Segment ID="0">
+          <Properties ComponentID="1327288148222"/>
+          <Data>
+            <!-- Analytics module tracking start -->
+            <Datum ID="TRACK_MODULE" Type="SelectSingle" Name="Do you want to track this module for analytics?">
+              <Option>
+                <Display>Yes</Display>
+                <Value>Yes</Value>
+              </Option>
+              <Option Selected="true">
+                <Display>No</Display>
+                <Value>No</Value>
+              </Option>
+            </Datum>
+            <Datum ID="MODULE_NAME" Type="String" Name="Enter module name" Max="75" Min="0" Changed="true">Resources</Datum>
+            <!-- Analytics module tracking end -->
+            <Datum ID="HEADING" Name="Heading" Type="String" Max="100" Changed="true">RESOURCES</Datum>
+            <Group ID="FEATURED_CALLOUT_LIST" Name="Featured Callout List" Replicatable="true" CloneGroupID="gfuhme33">
+              <Datum ID="FEATURED_CALLOUT_TITLE" Name="Featured Callout Title *" Type="String" Max="100" Min="3" Changed="true">Locate Your Dealer</Datum>
+              <Datum ID="FEATURED_CALLOUT_LINK" Name="Featured Callout Link *" Type="PageLink" Changed="true"><![CDATA[http://dealerlocator.deere.com/servlet/DealerLocator?command=home&locator=3&selectLocale=pt_BR&selectCountry=BRA&sessionId=8DeeVBqgOoVQLWY9ycnklen]]></Datum>
+              <Datum ID="FEATURED_CALLOUT_DESC" Name="Featured Callout Description" Type="String" Max="100">&lt;Please Enter Featured Callout Description&gt;</Datum>
+            </Group>
+          </Data>
+        </Segment>
+      </Segments>
+      <Stylesheet Default="true" PageType="" RequiredPageLayout="" ContentType="" RenderingEngine="xsl">
+        <Name>Default</Name>
+        <XSL>&lt;!DOCTYPE html-entities SYSTEM "http://www.interwoven.com/livesite/xsl/xsl-html.dtd"&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+  &lt;!-- Skin: Default XSL --&gt;
+  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/HTMLTemplates.xsl"/&gt;
+  &lt;xsl:include href="http://www.interwoven.com/livesite/xsl/StringTemplates.xsl"/&gt;
+
+  &lt;!-- Analytics code start --&gt;
+  &lt;xsl:variable name="TrackModule" select="/Properties/Data/Datum[@ID='TRACK_MODULE']/Option[@Selected='true']/Value"/&gt;
+  
+  &lt;xsl:variable name="ModuleName" select="translate(/Properties/Data/Datum[@ID='MODULE_NAME'],&amp;quot;'&amp;quot;,'&amp;quot;')" /&gt;
+  &lt;!-- Analytics code end --&gt;
+
+  &lt;xsl:template match="/"&gt;
+    &lt;div class="MOD_NO_1T_S"&gt;
+      &lt;!-- Analytics code start --&gt;
+      &lt;module type="Featured Link List" name="{$ModuleName}" trackingenabled="{$TrackModule}"&gt;
+      &lt;!-- Analytics code end --&gt;
+
+      &lt;h5&gt; &lt;xsl:value-of select="/Properties/Data/Datum[@ID='HEADING']" disable-output-escaping="yes"/&gt;&lt;/h5&gt;
+      &lt;ul&gt;
+       &lt;xsl:variable name="rCount" select="count(/Properties/Data/Group)"/&gt;
+       &lt;xsl:variable name="linklistCount" select="$rCount"/&gt;
+         &lt;xsl:for-each select="/Properties/Data/Group"&gt;
+          
+          &lt;xsl:variable name="iCount" select="position()" /&gt;
+          &lt;xsl:if test="$iCount &amp;lt;= 10"&gt;
+            &lt;xsl:choose&gt;
+              &lt;xsl:when test="/Properties/Data/Group[$iCount]/Datum[@Name='Featured Callout Link *'] = ''"&gt;
+                &lt;div class="errMsg"&gt;Missing Featured Callout Link for: &lt;xsl:value-of select="/Properties/Data/Group[$iCount]/Datum[@Name='Featured Callout Title *']" disable-output-escaping="yes" /&gt;&lt;/div&gt;
+              &lt;/xsl:when&gt;
+              &lt;xsl:otherwise&gt;
+                &lt;li&gt;
+		&lt;xsl:if test="$iCount=$linklistCount"&gt;
+			&lt;xsl:attribute name="class"&gt;lstBottom&lt;/xsl:attribute&gt;
+			&lt;/xsl:if&gt;
+                  &lt;a&gt;
+                    &lt;xsl:attribute name="href"&gt;&lt;xsl:value-of select="/Properties/Data/Group[$iCount]/Datum[@Name='Featured Callout Link *']"/&gt;&lt;/xsl:attribute&gt;
+                    &lt;xsl:attribute name="target"&gt;_blank&lt;/xsl:attribute&gt;
+                    &lt;span&gt;&lt;xsl:value-of select="/Properties/Data/Group[$iCount]/Datum[@Name='Featured Callout Title *']" disable-output-escaping="yes"/&gt;&lt;/span&gt;&amp;nbsp;
+                    &lt;xsl:value-of select="/Properties/Data/Group[$iCount]/Datum[@Name='Featured Callout Description']" disable-output-escaping="yes"/&gt;
+                  &lt;/a&gt;
+                &lt;/li&gt;
+              &lt;/xsl:otherwise&gt;
+            &lt;/xsl:choose&gt;	
+          &lt;/xsl:if&gt;
+        &lt;/xsl:for-each&gt;
+      &lt;/ul&gt;
+      &lt;!-- Analytics code start --&gt;
+      &lt;/module&gt;
+      &lt;!-- Analytics code end --&gt;
+    &lt;/div&gt;
+  &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;
+</XSL>      </Stylesheet>    </Component>  </Page_Content></Page>

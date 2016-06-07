@@ -1,0 +1,9 @@
+<?xml version="1.0"?> 
+<schemarules>     
+<ruleset schema="dita">         
+	<translate path="//b" inline="yes"/>         
+	<translate path="//i" inline="yes"/>         
+	<translate path="//href" inline="yes"/>         
+	<translate path="//book" inline="yes"/>     
+	</ruleset> 
+</schemarules>

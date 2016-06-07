@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:id="com_inse\PROPPAGE_6890_CHAN1.htm" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="3080" MadCap:lastWidth="519">
+    <head><title>Channel Tab (6890)</title>
+    </head>
+    <body>
+        <h1>Channel 
+ tab (6890)</h1>
+        <p class="para">Use this tab to define data channel 1 or data channel 2 parameters 
+ for the 6890 GC Systems.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Define <i>all</i> Channel tab parameters transmitting analog data through a busSAT/IN 
+ or busSAT/IN 2 Module. If you enabled the Ch 1 Enable or Ch 2 Enable parameter 
+ to transmit digital data through the RS-232 port, then define the Units 
+ and Source parameters (see below).</p>
+        <h2>Channel name</h2>
+        <p class="para">Software-designated name for data channel 1 or 2, which appears 
+ in the Active Channels table in the Instrument Method Editor.</p>
+        <h2>Description</h2>
+        <p class="para">Optional description for data channel 1 or 2 of the 6890 
+ GC System, up to 250 alphanumeric characters. The description appears 
+ in the Active Channels table in the Instrument Method Editor and in the 
+ Real-Time Plot pane in Run Samples. </p>
+        <h2>Source</h2>
+        <p class="para">GC output signal to be monitored by Empower software. Choices:</p>
+        <ul>
+            <li class="listbull">Front 
+ Detector - Signal from the front detector (default).</li>
+        </ul>
+        <p class="paraindent"><span class="emphasisbold">Note:</span> 
+ When configured for Dual Tower operation, specify the detector (Front 
+ or Back), which is connected to the Front Inlet by the column, as the 
+ source for Channel 1.</p>
+        <ul>
+            <li class="listbull">Back Detector 
+ - Signal from the back detector</li>
+        </ul>
+        <p class="paraindent"><span class="emphasisbold">Note:</span> 
+ When configured for Dual Tower operation, specify the detector (Front 
+ or Back), which is connected to the Back Inlet by the column, as the source 
+ for Channel 2.</p>
+        <ul>
+            <li class="listbull">Front–Back 
+ - Difference signal between two detectors of the same type (front detector 
+ signal minus back detector signal)</li>
+            <li class="listbull">Back–Front 
+ - Difference signal between two detectors of the same type (back detector 
+ signal minus front detector signal)</li>
+            <li class="listbull">Comp1 
+ - Signal from column compensation 1</li>
+            <li class="listbull">Comp2 
+ - Signal from column compensation 2</li>
+            <li class="listbull">Front–Comp1 
+ - Difference signal between the front detector and column compensation 
+ 1</li>
+            <li class="listbull">Back–Comp1 
+ - Difference signal between the back detector and column compensation 
+ 1</li>
+            <li class="listbull">Front–Comp2 
+ - Difference signal between the front detector and column compensation 
+ 2</li>
+            <li class="listbull">Back–Comp2 
+ - Difference signal between the back detector and column compensation 
+ 2</li>
+            <li class="listbull">Test Plot 
+ - Test signal (a stored chromatogram) for diagnostic use</li>
+            <li class="listbull">Oven Temperature 
+ - Current oven temperature in <span style="font-family: Symbol;">°</span>C</li>
+            <li class="listbull">Column 
+ 1 Flow - Current column 1 flow in mL/min</li>
+            <li class="listbull">Column 
+ 2 Flow - Current column 2 flow in mL/min</li>
+            <li class="listbull">Column 
+ 1 Pressure - Current column 1 pressure in psi</li>
+            <li class="listbull">Column 
+ 2 Pressure - Current column 2 pressure in psi</li>
+        </ul>
+        <h2>Sampling rate</h2>
+        <p class="para">Sampling rate used to collect GC data for channel 1 or 2 
+ when transmitting data through the RS-232 output.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10, 20, 50, 100, or 200 points per second</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.1 points per second</p>
+        <p class="caption">Notes:</p>
+        <ul>
+            <li class="listbull">Select a Sampling Rate 
+ of 200 points per second for single-channel acquisition only.</li>
+            <li class="listbull">Set the sampling rate 
+ for GC data collected through the analog channels in the busSAT/IN or 
+ the busSAT/IN 2 Module tabs, depending on which module is connected to 
+ the GC.</li>
+        </ul>
+        <h2>Range</h2>
+        <p class="para">Selects and adjusts a portion of the full dynamic range of 
+ the output analog signal. The selected portion is adjusted so that the 
+ highest possible value of the portion does not exceed the maximum voltage 
+ of the given output signal (+1 mV or +1 V output).</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0</p>
+        <p class="para">Range and Attenuation Value are used to keep peaks of interest 
+ on scale when using the analog data (busSAT/IN). See the <span style="font-style: italic;">Agilent 
+ 6890 Series Gas Chromatograph Operating Manual</span> for details on selecting 
+ range and setting signal attenuation.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> To minimize error, set Range to the lowest possible value, ensuring peaks 
+ of interest do not exceed 1 V.</p>
+        <h2>Fast peaks</h2>
+        <p class="para">Enables the recording of fast peaks when using FID or NPD 
+ detectors to send data to an integrator. To use this feature, ensure that 
+ your integrator or recorder operates at approximately 15 Hz, allowing 
+ for minimum peak widths of 0.004 minutes (8 Hz bandwidth). </p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <h2>Data sensitivity</h2>
+        <p class="para">Number of signal data decimal places to be transmitted from 
+ the 6890 GC to the Empower database.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ LOW (one decimal place), MEDIUM (three decimal places), or HIGH (five 
+ decimal places)</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ MEDIUM</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Higher sensitivity provides better definition of small features in the 
+ chromatogram, however the size of large features may be limited.</p>
+        <h2>Zero parameters</h2>
+        <h3>Enable</h3>
+        <p class="para">Enables the zeroing feature that corrects an elevated baseline. 
+ Zeroing affects only analog signals. Enable this check box before the 
+ Offset parameter takes effect (see below).</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <h3>Offset</h3>
+        <p class="para">Value to be subtracted from the detector signal to compensate 
+ for an undesired, constant background signal (typically caused by the 
+ detector, column bleed, or contaminants in the gas supply). The result 
+ is an increase in dynamic signal range.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0</p>
+        <p class="para">See the <span style="font-style: italic;">HP 6890 Series 
+ Gas Chromatograph Operating Manual</span> for information on zeroing signal 
+ output.</p>
+        <h2>Attenuation parameters</h2>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Attenuation <span style="font-style: italic;">must</span> be physically 
+ allowed or disallowed using the 6890 front panel by pressing Signal 1 
+ (or Signal 2) and selecting Attenuation On or Off. Empower software does 
+ not overwrite this value. </p>
+        <h3>Enable</h3>
+        <p class="para">Enables the attenuation feature. Enable this check box before 
+ the Attenuation parameter takes effect (see below).</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <h3>Attenuation</h3>
+        <p class="para">Selects and adjusts a portion of the ranged +1 mV output 
+ signal to ensure that the signal does not exceed 1 mV (see Range above). 
+ Each step to a higher Attenuation value reduces the output signal level 
+ by a factor of 2 (half the previous level).</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0</p>
+    </body>
+</html>

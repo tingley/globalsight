@@ -7,7 +7,8 @@
       com.globalsight.config.UserParameter,
       com.globalsight.cxe.entity.fileprofile.FileProfile,
       com.globalsight.cxe.entity.fileprofile.FileProfileUtil,
-      com.globalsight.everest.comment.CommentFile,      
+      com.globalsight.everest.comment.CommentFile,
+      com.globalsight.everest.comment.CommentManagerLocal,      
       com.globalsight.everest.comment.CommentManager,
       com.globalsight.everest.company.CompanyThreadLocal,
       com.globalsight.everest.company.CompanyWrapper,
@@ -44,6 +45,7 @@
       com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
       com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator,
       com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper,
+      com.globalsight.everest.webapp.pagehandler.administration.comment.CommentUploadHandler,
       com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler,
       com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHelper,
       com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
@@ -229,6 +231,14 @@
     TaskImpl taskImpl = (TaskImpl)theTask;
     int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
     int isUploaded = taskImpl.getIsReportUploaded();
+    String labelActivitiesCommentUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_comment_upload_check");
+    int isActivityCommentUploadCheck = taskImpl.getIsActivityCommentUploadCheck();
+    int isActivityCommentUploaded = 0;
+    ArrayList<CommentFile> cf =  ServerProxy.getCommentManager().getActivityCommentAttachments(theTask);
+    if(cf != null && cf.size()>0)
+    {
+        isActivityCommentUploaded =1;
+    }
     WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;

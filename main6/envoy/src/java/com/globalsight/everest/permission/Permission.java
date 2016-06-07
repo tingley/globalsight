@@ -392,6 +392,7 @@ public class Permission
 
     // For sla report issue
     static public final String REPORTS_SLA = "reports.sla";
+    static public final String REPORTS_MT_POST_EDIT_DISTANCE = "reports.MT.post.edit.distance";
 
     // For Segmentation Rule
     static public final String SEGMENTATIONRULE_VIEW = "segmentationrule.view";
@@ -537,7 +538,6 @@ public class Permission
     static public final String REPORTS_SCORECARD = "reports.scorecard";
     static public final String VIEW_SCORECARD = "viewScorecard";
     static public final String ELOQUA = "eloqua";
-    static public final String MIND_TOUCH = "mindtouch";
     static public final String GIT_CONNECTOR = "gitConnector";
     static public final String BLAISE_CONNECTOR = "blaiseConnector";
 
@@ -1096,7 +1096,6 @@ public class Permission
         added = addPermission(414, JOBS_REMOVEGROUP) || added;
         added = addPermission(415, JOBS_ADDJOBTOGROUP) || added;
         added = addPermission(416, JOBS_REMOVEJOBFROMGROUP) || added;
-        added = addPermission(417, MIND_TOUCH) || added;
         added = addPermission(418, REPORTS_POST_REVIEW_QA) || added;
         added = addPermission(419, GIT_CONNECTOR) || added;
         added = addPermission(420, REPORTS_TRANSLATIONS_VERIFICATION) || added;
@@ -1108,7 +1107,8 @@ public class Permission
         added = addPermission(426, BASE_TEXT_FILTER_ESCAPING) || added;
 
         added = addPermission(427, ACCOUNT_NOTIFICATION_EDIT_EMAIL_TEMPLATE) || added;
-        
+        added = addPermission(428, REPORTS_MT_POST_EDIT_DISTANCE) || added;
+
         return added;
     }
 

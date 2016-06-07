@@ -68,17 +68,27 @@ public class FileProfileFuncs extends BasicFuncs
     public void create(Selenium selenium)
     {
         String fileProfileNames = propertyNameArray.get(0);
-        String localProfiles = propertyNameArray.get(1);
-        String sourceFormats = propertyNameArray.get(2);
-        String extensions = propertyNameArray.get(3);
-        String descriptions = propertyNameArray.get(4);
+        String descriptions = propertyNameArray.get(1);
+        String localProfiles = propertyNameArray.get(2);
+        String sourceFormats = propertyNameArray.get(3);
+        String filters = propertyNameArray.get(4);
+        String qa_filter = propertyNameArray.get(5);
+        String extensions = propertyNameArray.get(6);
+        
+        
 
         String[] fileProfileNameArray = fileProfileNames.split(",");
+        String[] descriptionArray = descriptions.split(",");
         String[] localProfileArray = localProfiles.split(",");
         String[] sourceFormatArray = sourceFormats.split(",");
+        String[] filterArray = filters.split(",");
+        String[] qa_filterArray = qa_filter.split(",");
         String[] extensionArray = extensions.split(",");
+        
 
-        String[] descriptionArray = null;
+             
+
+       
 
         if (descriptions != null)
         {
@@ -87,7 +97,15 @@ public class FileProfileFuncs extends BasicFuncs
 
         for (int i = 0; i < fileProfileNameArray.length; i++)
         {
-            clickAndWait(selenium, FileProfile.NEW_BUTTON);
+        	selenium.type(FileProfile.SEARCH_CONTENT_TEXT, fileProfileNameArray[i]);
+        	selenium.keyDown(FileProfile.SEARCH_CONTENT_TEXT, "\\13");
+        	selenium.keyUp(FileProfile.SEARCH_CONTENT_TEXT, "\\13");
+//        	selenium.waitForFrameToLoad("css=table.listborder", "1000");
+
+        	 if (selenium.isElementPresent("link=" + fileProfileNameArray[i])){
+     			continue;
+     		} 
+        	clickAndWait(selenium, FileProfile.NEW_BUTTON);
             selenium.type(FileProfile.NAME_TEXT, fileProfileNameArray[i]);
 
             if (descriptionArray != null && (i < descriptionArray.length - 1))
@@ -98,7 +116,15 @@ public class FileProfileFuncs extends BasicFuncs
                     + localProfileArray[i]);
             selenium.select(FileProfile.SOURCE_FILE_FORMAT_SELECT, "label="
                     + sourceFormatArray[i]);
-            selenium.select(FileProfile.FILTER_SELECT, "label=" + "Choose...");
+            if (!(filterArray[i].equalsIgnoreCase("x"))){
+            	selenium.select(FileProfile.FILTER_SELECT, "label=" 
+                		+ filterArray[i]);	
+            }
+            if (!(qa_filterArray[i].equalsIgnoreCase("x"))){
+            	selenium.select(FileProfile.QA_FILTER_SELECT, "label=" 
+                		+ qa_filterArray[i]);	
+            }
+            
             selenium.select(FileProfile.SOURCE_FILE_ENCODING_SELECT,
                     "label=UTF-8");
 
@@ -333,8 +359,8 @@ public class FileProfileFuncs extends BasicFuncs
                 "fileExtensionType" + suffix));
         String tmp = ConfigUtil.getDataInCase(testCaseName,
                 "terminologyApproval" + suffix);
-        if (StringUtil.isNotEmpty(tmp))
-            fileProfile.setTerminologyApproval(BooleanConverter.valueOf(tmp));
+//        if (StringUtil.isNotEmpty(tmp))
+//            fileProfile.setTerminologyApproval(BooleanConverter.valueOf(tmp));
 
         return fileProfile;
     }

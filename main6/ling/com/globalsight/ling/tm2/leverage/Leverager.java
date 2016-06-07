@@ -40,7 +40,6 @@ import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm.TuvBasicInfo;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.ling.tm2.persistence.PageTmPersistence;
 import com.globalsight.ling.tm2.segmenttm.Tm2SegmentTmInfo;
 import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
 import com.globalsight.util.GlobalSightLocale;
@@ -51,8 +50,7 @@ import com.globalsight.util.GlobalSightLocale;
 
 public class Leverager
 {
-    private static final Logger c_logger = Logger.getLogger(Leverager.class
-            .getName());
+    private static final Logger c_logger = Logger.getLogger(Leverager.class.getName());
 
     private Session m_session;
 
@@ -68,7 +66,7 @@ public class Leverager
     /** Remote TM project TM index is -4 */
     public static final int REMOTE_TM_PRIORITY = -4;
     /** Remote TM project TM index is -5 */
-    public static final int TDA_TM_PRIORITY = -5;
+//    public static final int TDA_TM_PRIORITY = -5;
     /** PO TM project TM index is -6 */
     public static final int PO_TM_PRIORITY = -6;
     /** In Progress TM matches is -7 */

@@ -92,6 +92,8 @@ public interface ReportConstants
 
     public static final String JOB_ATTRIBUTE_REPORT = "JobAttributeReport";
 
+    public static final String MT_POST_EDIT_DISTANCE_REPORT = "MTPostEditDistanceReport";
+
     public static final String REPORT_QA_CHECKS_REPORT = "QAChecksReport";
     public static final String PREFIX_QA_CHECKS_REPORT = "QCR";
 

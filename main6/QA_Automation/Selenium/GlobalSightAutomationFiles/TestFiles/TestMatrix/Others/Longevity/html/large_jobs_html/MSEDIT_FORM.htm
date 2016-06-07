@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1492" MadCap:lastWidth="571">
+    <head><title>Method Set Editor</title>
+    </head>
+    <body>
+        <h1>Method 
+ Set Editor</h1>
+        <p class="para">
+            <MadCap:concept term="Method set editor" />Use the Method Set Editor from the Project window, Run Samples, 
+ or Review to:</p>
+        <ul>
+            <li class="listbull">Create or modify a method 
+ set by specifying an existing instrument method, processing method, report 
+ method, and/or export method. Method sets may contain different information 
+ depending on how they are used to perform specific operations. </li>
+            <li class="listbull">Create derived channels, 
+ which are chromatograms calculated using (or derived from) raw data from 
+ a detector, which are then manipulated during processing. </li>
+            <li class="listbull">Define a GPCV/LS channel 
+ set (GPCV, GPCV-LS, GPC-LS processing), which is a combination of data 
+ acquired from the concentration channel, up to two viscometer channels 
+ and LS channels used in a method set to process GPCV/LS data. The channel 
+ set allows you to process multiple channels of an injection for one GPCV/LS 
+ result.</li>
+        </ul>
+        <h2>Components</h2>
+        <p class="para">The Method Set Editor includes the following components:</p>
+        <ul>
+            <li class="listbull">Menu bar – Displays command 
+ menus for using the Method Set Editor.</li>
+        </ul>
+        <p class="paraindent"><span class="emphasisbold">Note:</span> 
+ When using the Method Set Editor from Review, it uses the menus in Review.</p>
+        <ul>
+            <li class="listbull">Toolbar 
+ – Displays shortcut icons for commonly used menu commands in the Method 
+ Set Editor.</li>
+            <li class="listbull">Method 
+ Set tree – An expandable and collapsible list of data channels, derived 
+ channels, and GPCV/LS channel sets (if the GPCV option is enabled). You 
+ can drag channels from the tree into the Channel table (as described below).</li>
+            <li class="listbull">Instrument 
+ method – Lists instrument methods in the project to use in the method 
+ set. The instrument method defines available data channels. If you modify 
+ the contents of the specified instrument method, the Edit button (to the 
+ right of the list) accesses the Instrument Method window.</li>
+            <li class="listbull">Default 
+ processing method – Lists processing methods in the project. The default 
+ processing method is used for all channels in the Method Set tree. Select 
+ the default processing method to use in the method set from this list. 
+ If you modify the contents of the specified processing method, the Edit 
+ button (to the right of the list in the Method Set Editor) accesses the 
+ Processing Method window.</li>
+            <li class="listbull">Default 
+ report methods – Lists report methods in the project (Individual and Summary 
+ By Injection report methods only). The default report method is used for 
+ all channels in the Method Set tree. Select the default report method 
+ to use in the method set from this list. If you modify the contents of 
+ the specified report method, the Edit button (to the right of the list) 
+ accesses the Report Publisher.</li>
+            <li class="listbull">Channel table – Allows 
+ you to process and generate reports for different data channels using 
+ different methods. The channels list associated with the selected instrument 
+ method (and displayed in the Method Set tree) includes data, derived channels, 
+ and GPCV/LS channel sets. The Channel table specifies individual channels 
+ along with processing and/or report methods to be applied to each selected 
+ channel. Selections in this table override the default processing method 
+ and/or report method selections. If this table is empty, all channel data 
+ is processed and reported using specified default methods. </li>
+        </ul>
+        <p class="paraindent"><span class="emphasisbold">Note:</span> 
+ If you enter a channel name in the Channel Name field instead of selecting 
+ one from the list, it must name an existing derived channel or one you 
+ derived and then saved. You cannot extract a chromatogram without a derived 
+ channel.</p>
+        <ul>
+            <li class="listbull">Export 
+ method – Specifies export data in ASCII, AIA, or Windows Metafile format.</li>
+            <li class="listbull">PDA 3D 
+ Blank Subtraction – Subtracts a labeled PDA 3D channel (a blank) from 
+ a PDA 3D standard or sample.</li>
+            <li class="listbull">Save Extracted 
+ Channels – Saves extracted 2D channels from 3D chromatograms. Processing 
+ occurs on the 2D extracted channel. 3D processing is not performed.</li>
+            <li class="listbull">Delete 3D Channel After 
+ Extraction – Saves extracted 2D channels from a 3D chromatogram, then 
+ deletes the 3D chromatogram from the Empower database.</li>
+            <li class="listbull">Expected mass processing 
+ – Specifies the processing method that contains the injection-based expected 
+ mass information this method set will use.</li>
+        </ul>
+    </body>
+</html>

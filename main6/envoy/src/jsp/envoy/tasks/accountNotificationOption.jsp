@@ -59,7 +59,7 @@
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
-<script type="text/javascript"src="/globalsight/jquery/jquery-1.9.1.min.js"></script>
+<script type="text/javascript"src="/globalsight/jquery/jquery-1.11.3.min.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -229,7 +229,7 @@ $(document).ready(function() {
 	
 	$("#edit").click(function(){
 	    $.ajax({
-	    	type:'get',
+	    	type:'post',
 	    	url:"/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&action=edit",
 	        data:{
 	        	'selectFromValue':document.getElementById("from").value,
@@ -249,7 +249,7 @@ $(document).ready(function() {
 
 	$("#reset").click(function(){
 		$.ajax({
-			type:'get',
+			type:'post',
 			url:"/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&action=reset",
 	        data:{
 		          'subjectKey':$("#subjectKey").val(),
@@ -258,7 +258,6 @@ $(document).ready(function() {
 		    dataType:"json",
 		    success:function(data)
 		    {
-		    	alert("Reset successful");
 	        	$("#subjectKey").val(data.subjectKey);
 	        	$("#messageKey").val(data.messageKey);
 	        	$("#subjectText").val(data.subjectText);
@@ -340,6 +339,14 @@ $(document).ready(function() {
  			document.getElementById("edit").disabled=false;
  		}
 	}) 
+	
+	$("#addButton").click(function(){
+		document.getElementById("edit").disabled=true;
+	})
+	
+	$("#removeButton").click(function(){
+		document.getElementById("edit").disabled=true;
+	})
 	})
 
 </SCRIPT>
@@ -423,14 +430,14 @@ $(document).ready(function() {
           <table>
             <tr>
               <td>
-                <input type="button" name="addButton" <%=disabled%> value=" >> "
+                <input type="button" name="addButton" id="addButton" <%=disabled%> value=" >> "
                     onclick="addOption()"><br>
               </td>
             </tr>
             <tr><td>&nbsp;</td></tr>
             <tr>
                 <td>
-                <input type="button" name="removedButton" <%=disabled%> value=" << "
+                <input type="button" name="removedButton" id="removeButton" <%=disabled%> value=" << "
                     onclick="removeOption()">
               </td>
             </tr>
@@ -467,7 +474,7 @@ $(document).ready(function() {
           <input type="button" name="<%=doneButton %>" value="<%=doneButton %>"
             onclick="submitForm('saveOptions')">
             <%if(b_editEmailTemp){%>
-          <input type="button" id="edit" disabled value="Edit">
+          <input type="button" disabled id="edit" value="Edit">
           <%}%>
         </td>
       </tr>
@@ -480,8 +487,8 @@ $(document).ready(function() {
       <tr><td class="standardText">Message</td></tr>
       <tr><td><textarea rows="10" cols="80" id="messageText"></textarea></td></tr>
       <tr><td style="padding-top:10px" colspan="3">
-           <input type="button" value="Save" id="save">
            <input type="button" value="Reset" id="reset">
+           <input type="button" value="Save" id="save">
       <td></tr>
 </table>
 </form>

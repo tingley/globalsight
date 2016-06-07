@@ -888,7 +888,7 @@ public class WorkflowManagerLocal implements WorkflowManager
 
         long workflowId = task.getWorkflow().getId();
         L10nProfile l10nProfile = task.getWorkflow().getJob().getL10nProfile();
-        int downloadEditAll = 0;
+        int downloadEditAll = 4;
         if (l10nProfile.getTmChoice() == LocProfileStateConstants.ALLOW_EDIT_TM_USAGE)
         {
             downloadEditAll = 1;
@@ -2345,6 +2345,8 @@ public class WorkflowManagerLocal implements WorkflowManager
 
         taskClone.setRateSelectionCriteria(p_tib.getRateSelectionCriteria());
         taskClone.setIsReportUploadCheck(p_tib.getIsReportUploadCheck());
+        taskClone.setIsActivityCommentUploadCheck(p_tib.getIsActivityCommentUploadCheck());
+        
         // update task name and type
         String taskName = p_tib.getActivityName();
         taskClone.setTaskName(taskName);

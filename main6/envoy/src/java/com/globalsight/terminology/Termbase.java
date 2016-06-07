@@ -52,7 +52,10 @@ import com.globalsight.terminology.entrycreation.IEntryCreation;
 import com.globalsight.terminology.indexer.IIndexManager;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.SessionInfo;
+import com.globalsight.util.UTC;
 import com.globalsight.util.edit.EditUtil;
+
+import net.sf.json.JSONObject;
 
 /**
  * <p>
@@ -614,6 +617,20 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             releaseReader();
         }
     }
+    
+    public String getDefinitionJson() throws TermbaseException
+    {
+        addReader();
+
+        try
+        {
+            return m_definition.getJson().toString();
+        }
+        finally
+        {
+            releaseReader();
+        }
+    }
 
     /**
      * Given a language name, returns that language's locale as string.
@@ -1061,7 +1078,7 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
     /**
      * Returns the lock information for an entry.
      * 
-     * @return the empty string if no lock has been set, or an xml string:
+     * @return the empty string if no lock has been set, or an json string:
      * 
      * <lock> <conceptid>1000</conceptid> <who>user name</who> <when>date</when>
      * <email>user's email address</email> </lock>
@@ -1076,12 +1093,12 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
         if (lock != null)
         {
             // return publicly accessible information only
-            result = lock.asPublicXML();
+            result = lock.asJson();
         }
 
         return result;
     }
-
+    
     /**
      * Helper method to return lock info as LockInfo object.
      */
@@ -1154,8 +1171,16 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             throw new TermbaseException(MSG_ENTRY_DOES_NOT_EXIST, null, null);
         }
 
+        JSONObject ob = JSONObject.fromObject(p_cookie);
         // Then check if it has been appropriately locked by the caller.
-        LockInfo myLock = new LockInfo(p_cookie);
+        LockInfo myLock = new LockInfo();
+        myLock.setTermbase(Long.parseLong(ob.getString("termbase")));
+        myLock.setConceptId(Long.parseLong(ob.getString("conceptid")));
+        myLock.setUser(ob.getString("who"));
+        myLock.setEmail(ob.getString("email"));
+        myLock.setDate(UTC.parse(ob.getString("when")));
+        myLock.setCookie(ob.getString("cookie"));
+        
         LockInfo lock = getLockInfoAsLock(p_entryId, p_session);
 
         if (lock == null)
@@ -1241,15 +1266,8 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
      * @param maxhits:
      *            specifies how many hits should be retrieved. 
      * 
-     * @return a hitlist as xml string of the form:
+     * @return a hitlist as json string of the form:
      * 
-     * <hitlist> <index>english</index> <expression>parl*m?nt</expression>
-     * <hits> <hit><score>100</score><term>parlamant</term><entry>10</entry></hit>
-     * <hit><score>100</score><term>parlament</term><entry>11</entry></hit>
-     * <homographs> <hit><score>100</score><term>parliament</term><entry>12</entry></hit>
-     * <hit><score>100</score><term>parliament</term><entry>13</entry></hit>
-     * </homographs> <hit><score>100</score><term>parlamont</term><entry>14</entry></hit>
-     * </hits> </hitlist>
      */
     public String search(String p_language, String target_language, 
             String p_query, String queryType, int p_maxHits, int begin)
@@ -1258,7 +1276,7 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
         // shortcut if no results requested
         if (p_maxHits <= 0)
         {
-            return "<hitlist><hits></hits></hitlist>";
+            return "{}";
         }
         
         try
@@ -1266,7 +1284,7 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             TermSearch termSearch = getTermSearch(p_language, p_query,
                     queryType);
 
-            String str = termSearch.getXmlResults(p_language, target_language,
+            String str = termSearch.getJSONResults(p_language, target_language,
                     p_query, p_maxHits, begin);
 
             return str;

@@ -25,4 +25,6 @@ public class ActivityType
 
     public static final String SAVE_BUTTON = "Save";
     public static final String Cancel_BUTTON = "Cancel";
+    
+    public static final String activityNameFilter = "activityNameFilter";
 }

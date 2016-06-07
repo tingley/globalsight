@@ -4,6 +4,7 @@ import org.testng.Assert;
 import org.testng.Reporter;
 
 import com.globalsight.selenium.pages.MainFrame;
+import com.globalsight.selenium.pages.Rates;
 import com.globalsight.selenium.pages.Users;
 import com.globalsight.selenium.testcases.ConfigUtil;
 import com.thoughtworks.selenium.Selenium;
@@ -428,11 +429,11 @@ public class UsersFuncs extends BasicFuncs
                 }
                 else if (iFieldName.equals("available"))
                 {
-                    selenium.select(Users.Available_SELECTION,
+                    selenium.select(Users.Available_SELECTION_Permission,
                             "label=" + iFieldValue);
-                    selenium.click(Users.Add_BUTTON);
                     selenium.click("//input[@value='Save']");
                     selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+                    
                 }
             }
             catch (Exception e)
@@ -445,14 +446,11 @@ public class UsersFuncs extends BasicFuncs
             selenium.click(MainFrame.SETUP_MENU);
             selenium.click(MainFrame.USERS_SUBMENU);
             selenium.type(Users.USER_SEARCH_NAME_TEXT, iuserName);
-            //selenium.click(Users.SEARCH_VALUE_BUTTON);
-
-            selenium.keyPressNative(Integer.toString(java.awt.event.KeyEvent.VK_ENTER));
-            //selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+            selenium.keyDown(Users.USER_SEARCH_NAME_TEXT, "13");
+            selenium.keyUp(Users.USER_SEARCH_NAME_TEXT, "13");
             Assert.assertEquals(
                     isElementPresent(selenium,
-                            "//input[@name='radioBtn' and @value='" + iuserName
-                                    + "']"), true);
+                            "link=" + iuserName), true);
         }
         else
         {
@@ -461,6 +459,7 @@ public class UsersFuncs extends BasicFuncs
         return iuserName;
     }
 
+    
     /**
      * 
      * Edit default roles for super users
@@ -469,15 +468,17 @@ public class UsersFuncs extends BasicFuncs
      * @return
      * @throws Exception
      */
-    public String editDefaultRoles(Selenium selenium, String iDefaulRole,
+    public String editDefaultRoles(Selenium selenium, String iDefaultRole,
             String Sourcelocale, String Targetlocale) throws Exception
     {
+    	
 
-        boolean result = basicfuncs.selectRadioButtonFromTable(selenium,
-                Users.USER_LIST_TABLE, iDefaulRole);
+//        boolean result = basicfuncs.selectRadioButtonFromTable(selenium,
+//                Users.USER_LIST_TABLE, iDefaulRole);
+        boolean result = basicfuncs.selectRadioButtonFromTable(selenium, true, Users.User_Filter, iDefaultRole);
         if (result)
         {
-            selenium.click(Users.EDIT_BUTTON);
+            selenium.click("link="+iDefaultRole);
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
             selenium.click(Users.DEFAULT_ROLES_VALUE_BUTTON);
@@ -489,10 +490,11 @@ public class UsersFuncs extends BasicFuncs
             selenium.select(Users.SOURCE_LOCALE_SELECT, "label=" + Sourcelocale);
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
             
-            selenium.addSelection(Users.TARGET_LOCALE_SELECT, "label="
+            selenium.addSelection(Users.TARGET_LOCALE_SELECT2, "label="
                     + Targetlocale);
             selenium.click(Users.Activities_Types1);
             selenium.click(Users.Activities_Types2);
+            selenium.click(Users.Activities_Types3);
             selenium.click(Users.DONE_VALUE_BUTTON);
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
             selenium.click(Users.DONE_BUTTON);
@@ -500,7 +502,7 @@ public class UsersFuncs extends BasicFuncs
             selenium.click(Users.SAVE_BUTTON);
         }
         
-        return iDefaulRole;
+        return iDefaultRole;
     }
 
     /**
@@ -511,22 +513,27 @@ public class UsersFuncs extends BasicFuncs
             String Sourcelocale, String Targetlocale) throws Exception
     {
 
-    	boolean result = basicfuncs.selectRadioButtonFromTable(selenium, Users.USER_LIST_TABLE, rolename);
+    	boolean result = basicfuncs.selectRadioButtonFromTable(selenium, true, Users.User_Filter, rolename);
+    	 
         if (result)
         {
             selenium.click("link=" + rolename);
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
-            selenium.click(Users.ROLES_BUTTON);
+            selenium.click(Users.DEFAULT_ROLES_VALUE_BUTTON);
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
             result = basicfuncs.selectRadioForRemove(selenium,
                     Users.USER_ROLES_TABLE, Sourcelocale, Targetlocale);
             if (result)
             {
                 Reporter.log("The default roles has been added to the roles");
+                return result;
             }
+            else 
+            	return false;
         }
-        return result;
+        return false;
+        
     }
 
     public String searchUsers(Selenium selenium, String UserProfiles)
@@ -1006,8 +1013,9 @@ public class UsersFuncs extends BasicFuncs
 
             if (iFieldName.equals("username"))
             {
-                searchUsers(selenium, iFieldName + "=" + cm + iFieldValue);
-               /* boolean selected = selectRadioButtonFromTable(selenium,
+//                searchUsers(selenium, iFieldName + "=" + cm + iFieldValue);
+                selectRadioButtonFromTable(selenium,true, Users.USER_SEARCH_NAME_TEXT, cm + iFieldValue);
+                /* boolean selected = selectRadioButtonFromTable(selenium,
                         Users.USER_LIST_TABLE, cm + iFieldValue);
                 if (!selected)
                 {
@@ -1039,6 +1047,51 @@ public class UsersFuncs extends BasicFuncs
         selenium.click(Users.DONE_VALUE_BUTTON);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         selenium.click(Users.SAVE_VALUE_BUTTON);
+
+        try
+        {
+            if (selenium.isAlertPresent())
+            {
+                Assert.assertTrue(false, selenium.getAlert());
+            }
+        }
+        catch (Exception e)
+        {
+
+            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        }
+
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+    }
+    
+    /*
+     * Edit User Add New role
+     */
+    public void editAddUserRoles(Selenium selenium, String user, String sourceLocal, String targetLocal)
+            throws Exception
+    {
+        
+    	selectRadioButtonFromTable(selenium, true, Users.USER_SEARCH_NAME_TEXT, user);
+    	clickAndWait(selenium,"link=" + user);
+    	clickAndWait(selenium, Users.Edit_Roles_BUTTON);
+
+    	clickAndWait(selenium, Users.NEW_VALUE_BUTTON);
+    	if (selenium.getText("name="+Users.SrcLocale_SELECT).contains(sourceLocal))
+    	{
+    		selenium.select(Users.SrcLocale_SELECT, "label=" + sourceLocal);
+    		if (selenium.getText("//select[@id='"+ Users.TarLocale_SELECT +"']/option").contains(targetLocal))
+    			selenium.select(Users.TarLocale_SELECT, "label=" + targetLocal);
+    	}
+
+    
+//    	selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        selenium.click(Users.SelectAll_CHECKBOX);
+
+
+        clickAndWait(selenium, Users.DONE_VALUE_BUTTON);
+        clickAndWait(selenium, Users.DONE_VALUE_BUTTON);
+        
+        clickAndWait(selenium, Users.SAVE_VALUE_BUTTON);
 
         try
         {

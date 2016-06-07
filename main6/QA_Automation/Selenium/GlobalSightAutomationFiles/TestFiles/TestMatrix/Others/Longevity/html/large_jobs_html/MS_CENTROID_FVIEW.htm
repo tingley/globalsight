@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1204" MadCap:lastWidth="577">
+    <head><title>MS Centroid Tab</title>
+    </head>
+    <body>
+        <h1>MS 
+ centroid tab</h1>
+        <p class="para">Use this tab to convert MS continuum data to centroid and 
+ identify how peaks are found and how they are centroided. </p>
+        <h2>Center</h2>
+        <p class="para">Select one of the following to specify how Empower software 
+ calculates the mass (m/z) of a peak (the position of the centered spectrum 
+ stick):</p>
+        <ul>
+            <li class="listbull">Top – 
+ Places the spectrum stick at the peak maximum.</li>
+            <li class="listbull">Centroid Top (%) – Places 
+ the spectrum stick at the centroid of the peak. This is the default. Enter 
+ the percentage of the resolved portion used to calculate the centroid 
+ in the percentage field.</li>
+        </ul>
+        <h3>Percentage Field</h3>
+        <p class="para">The percentage you specify dictates where the summation runs 
+ over the top of the peak.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 80%</p>
+        <p class="para"><span class="emphasisbold">Range:</span> 
+ 0 to 100 (good values to use are 60 to 95%)</p>
+        <p class="para">The centroid of the peak is calculated at:</p>
+        <p class="para">Sum of (intensity*(m/z)) / sum of (intensity)</p>
+        <p class="para"><span class="emphasisbold">Median:</span> 
+ Represents the mass of the peak. The spectrum stick divides the peak area 
+ in half.</p>
+        <h2>Intensity</h2>
+        <p class="para">Select either parameter to specify how Empower software calculates 
+ the intensity (height) of the spectrum stick:</p>
+        <ul>
+            <li class="listbull">Heights 
+ – Reads the intensity value from the continuum spectrum at the mass (m/z) 
+ of the spectrum stick.</li>
+            <li class="listbull">Areas – Reads the peak 
+ area as the intensity of the spectrum stick.</li>
+        </ul>
+        <h2>Peak detection</h2>
+        <p class="para">Use the following to specify how the peaks will be detected:</p>
+        <ul>
+            <li class="listbull">Minimum Peak Width at 
+ Half-height (Dalton) – Identifies the minimum range a peak should be visible 
+ in the expected shape across the peak top. Default: 0.500 Dalton. </li>
+        </ul>
+        <p class="paraindent"><span class="emphasisbold">Note:</span> 
+ If you set the value too low, too many peaks appear in the results. If 
+ you set the value too high, many continuum peaks may be misread as a single 
+ centroid peak.</p>
+        <ul>
+            <li class="listbull">Smooth – Smooths over 
+ a noise or oversampled spectrum before performing peak detection. </li>
+        </ul>
+        <h3>Interaction with Spectrum Review Table</h3>
+        <p class="para">The software performs smoothing based on the value in the 
+ Smoothing Window column in the Spectrum Review table. Choices: </p>
+        <ul>
+            <li class="listbull">No value in the Smoothing 
+ Window column and the Smooth check box is selected – Performs smoothing 
+ with the window size specified by the Minimum Peak Width at Half-height 
+ field on this tab.</li>
+            <li class="listbull">Value in the Smoothing 
+ Window column – Performs smoothing with the value in this column, overriding 
+ the Smooth check box.</li>
+        </ul>
+    </body>
+</html>

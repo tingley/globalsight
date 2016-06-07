@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="8" MadCap:lastHeight="868" MadCap:lastWidth="819">
+    <head>
+        <link href="../Resources/TableStyles/WMouseOver.css" rel="stylesheet" MadCap:stylesheetType="table" /><title>Bath A or B Components Page</title>
+    </head>
+    <body>
+        <h1>Bath 
+ A or B Components Page</h1>
+        <p class="para">Use this page to enter component parameters for Bath A and/or 
+ Bath B. This page appears only when you select a dissolution type in the 
+ Select Sample Set Method Type page of the Sample Set Method wizard.</p>
+        <p class="para">If both baths are specified in the Select Sample Set Method 
+ Type page, enter all Bath A parameters, followed by all Bath B parameters, 
+ including offsets.</p>
+        <h2>Method set</h2>
+        <p>Select an existing method set from the list. </p>
+        <p class="caption">To create a new method set:</p>
+        <ol>
+            <li class="listnum">From the Pro Interface, 
+ click Create New.</li>
+        </ol>
+        <p class="paraindent"><span class="emphasisbold">Result:</span> 
+ The Select Instrument Method page of the New Method Set wizard appears.</p>
+        <ol start="2" style="list-style: decimal;list-style-type: decimal;">
+            <li class="listnum">Create the method set. 
+ Upon completion, you are returned to the Bath A or B Components page.</li>
+        </ol>
+        <h2>Dissolution report method</h2>
+        <p class="para">Select the final report method for the dissolution test from 
+ the list.</p>
+        <p class="caption">Dissolution components table:</p>
+        <table class="TableStyle-WMouseOver" style="mc-table-style: url('../Resources/TableStyles/WMouseOver.css');" cellspacing="0">
+            <col class="Column-Column1" style="width: 106px;" />
+            <col class="Column-Column1" />
+            <thead>
+                <tr class="Head-Header1" onMouseOver="this.bgColor='#ebf3fe'" onMouseOut="this.bgColor='#ffffff'">
+                    <th class="HeadE-Column1-Header1">
+                        <p class="tablehead">Column</p>
+                    </th>
+                    <th class="HeadD-Column1-Header1">
+                        <p class="tablehead">Description</p>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="Body-Body1" onMouseOver="this.bgColor='#ebf3fe'" onMouseOut="this.bgColor='#ffffff'">
+                    <td class="BodyE-Column1-Body1">Row number</td>
+                    <td class="BodyD-Column1-Body1">Sequential number assigned by the software.</td>
+                </tr>
+                <tr class="Body-Body1" onMouseOver="this.bgColor='#ebf3fe'" onMouseOut="this.bgColor='#ffffff'">
+                    <td class="BodyE-Column1-Body1">Name</td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">Select the component name (from the list) included in your dissolution 
+ test. The name is from the previously created processing method. When 
+ you create a processing method for your sample set, you specify the components 
+ you want to test. A processing method generates a peak for each named 
+ component.</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1" onMouseOver="this.bgColor='#ebf3fe'" onMouseOut="this.bgColor='#ffffff'">
+                    <td class="BodyE-Column1-Body1">Claimed 
+ Amount</td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">Enter the amount (in milligrams) of the component that the manufacturer 
+ claims is in the tested dosage form (one tablet). Entries: 0.000000 to 
+ 100000000.000000. Typical entries: 0.0 to 1000.00.</p>
+                        <p class="tabledata"><span class="emphasisbold">Rule:</span> 
+ The Amounts page of the Component Editor must have comparable units (mg/mL) 
+ or (mcg/mL). In the Component Editor, enter standard concentration amounts.</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1" onMouseOver="this.bgColor='#ebf3fe'" onMouseOut="this.bgColor='#ffffff'">
+                    <td class="BodyE-Column1-Body1">Q Factor 
+ Minutes</td>
+                    <td class="BodyD-Column1-Body1">Select the length of time (in minutes) to illustrate the percent 
+ dissolved. You can select multiple Q factors. Entries: 0.0 to 999999.9. 
+ Typical entries: 5.0 to 600.00. The list shows the draw times you entered 
+ in the previous page (Samples) Transfer Times table.</td>
+                </tr>
+                <tr class="Body-Body1" onMouseOver="this.bgColor='#ebf3fe'" onMouseOut="this.bgColor='#ffffff'">
+                    <td class="BodyB-Column1-Body1">Q Factor % </td>
+                    <td class="BodyA-Column1-Body1">
+                        <p>Enter the 
+ percent of component expected to dissolve in the time allotted for the 
+ dissolution test (for example, 28% dissolution in 30 minutes). Entries: 
+ 0.00 to 100.00.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
+</html>

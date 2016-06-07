@@ -1,0 +1,19 @@
+"set": "<a href='http://www.globalsight.com'> Set</a>",
+
+"add": "A \\\\dd",
+
+"addNew": "Add 
+new",
+
+"addManully": "Add 
+manually",
+
+"set": "Set",
+
+"add": "Add",
+
+"addNew": "Add 
+new",
+
+"addManully": "Add manually",
+

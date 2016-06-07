@@ -165,8 +165,8 @@ public class WordCountHandler extends PageHandler
         p_sessionMgr.setAttribute(WebAppConstants.IS_USE_IN_CONTEXT, isUseInContext);
         p_sessionMgr.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, exactMatchOnly);
         p_sessionMgr.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch);
-		String wfids = (String) p_request
-				.getParameter(JobManagementHandler.WF_ID);
+        String wfids = (String) p_request
+                .getParameter(JobManagementHandler.WF_ID);
 
         Hashtable hash = new Hashtable();
         StringTokenizer st = new StringTokenizer(wfids, " ");

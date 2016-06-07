@@ -21,7 +21,8 @@ String title = bundle.getString("lb_term_input_model_add_synonym_constraint");
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
 <script LANGUAGE="JavaScript" src="/globalsight/envoy/terminology/management/FireFox.js"></script>
 <SCRIPT language="Javascript">
-var g_langlocs;
+var o=window.opener;
+var g_langlocs = o.addTermParams;
 
 function initLangLocs()
 {
@@ -60,11 +61,7 @@ function doClose(ok)
     }
 
     langloc.setTerm(term);
-    window.returnValue = langloc;
-  }
-  else
-  {
-    window.returnValue = null;
+    o.addTermInDialog(langloc);
   }
 
   window.close();
@@ -86,8 +83,6 @@ function doKeypress()
 
 function doLoad()
 {
-  g_langlocs = window.dialogArguments;
-
   initLangLocs();
 
   idLanguage.disabled = true;

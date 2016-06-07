@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<SimplePages xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="opencms://system/modules/com.salesforce.marketing/schemas/SimplePage.xsd">  
+  <SimplePage language="en_US"> 
+    <body> 
+      <htmlContent name="htmlContent0"> 
+        <links> 
+          <link name="link8" internal="false" type="OBJECT"> 
+            <target><![CDATA[http://www.youtube.com/v/NDDwIGUwIZo]]></target>  
+            <query><![CDATA[fs=1&hl=en_US]]></query> 
+          </link>  
+          <link name="link9" internal="true" type="A"> 
+            <target><![CDATA[/sites/sfdc/form/contact/contactme-crmcomparison.jsp]]></target>  
+            <uuid>0acccfa5-19e3-11e0-8fda-001ec9afedb5</uuid>  
+            <query><![CDATA[d=70130000000FpD2]]></query> 
+          </link>  
+          <link name="link6" internal="false" type="OBJECT"> 
+            <target><![CDATA[http://www.youtube.com/v/8GyfKi8vwAU]]></target>  
+            <query><![CDATA[fs=1&hl=en_US]]></query> 
+          </link>  
+          <link name="link7" internal="true" type="A"> 
+            <target><![CDATA[/sites/sfdc/form/contact/contactme-crmcomparison.jsp]]></target>  
+            <uuid>0acccfa5-19e3-11e0-8fda-001ec9afedb5</uuid>  
+            <query><![CDATA[d=70130000000FpD2]]></query> 
+          </link>  
+          <link name="link4" internal="false" type="OBJECT"> 
+            <target><![CDATA[http://www.youtube.com/v/EhiKQFbSnJQ]]></target>  
+            <query><![CDATA[fs=1&hl=en_US]]></query> 
+          </link>  
+          <link name="link5" internal="true" type="A"> 
+            <target><![CDATA[/sites/sfdc/form/contact/contactme-crmcomparison.jsp]]></target>  
+            <uuid>0acccfa5-19e3-11e0-8fda-001ec9afedb5</uuid>  
+            <query><![CDATA[d=70130000000FpD2]]></query> 
+          </link>  
+          <link name="link2" internal="false" type="OBJECT"> 
+            <target><![CDATA[http://www.youtube.com/v/qdEHfLDfi8w]]></target>  
+            <query><![CDATA[fs=1&hl=en_US]]></query> 
+          </link>  
+          <link name="link3" internal="true" type="A"> 
+            <target><![CDATA[/sites/sfdc/form/contact/contactme-crmcomparison.jsp]]></target>  
+            <uuid>0acccfa5-19e3-11e0-8fda-001ec9afedb5</uuid>  
+            <query><![CDATA[d=70130000000FpD2]]></query> 
+          </link>  
+          <link name="link0" internal="true" type="IMG"> 
+            <target><![CDATA[/sites/sfdc/common/assets/css/images/mobile-imgs.png]]></target>  
+            <uuid>9e511b6f-1aab-11e0-b9ce-001ec9afedb5</uuid> 
+          </link>  
+          <link name="link1" internal="true" type="IMG"> 
+            <target><![CDATA[/sites/sfdc/common/assets/css/images/on-arrow.png]]></target>  
+            <uuid>6b12f11c-1e82-11e0-8d30-001ec9afedb5</uuid> 
+          </link>  
+          <link name="link19" internal="true" type="IMG"> 
+            <target><![CDATA[/sites/sfdc/assets/images/cta_buttons/btm-promo-sfadvantage-2mid.png]]></target>  
+            <uuid>212fb203-1e9c-11e0-8d30-001ec9afedb5</uuid> 
+          </link>  
+          <link name="link18" internal="true" type="A"> 
+            <target><![CDATA[/sites/sfdc/form/pdf/pdf-crmcomparison.jsp]]></target>  
+            <uuid>892e692f-19e5-11e0-8fda-001ec9afedb5</uuid>  
+            <query><![CDATA[d=70130000000FpDC]]></query> 
+          </link>  
+          <link name="link17" internal="true" type="IMG"> 
+            <target><![CDATA[/sites/sfdc/assets/images/cta_buttons/btm-promo-sfadvantage-1left.png]]></target>  
+            <uuid>210d35df-1e9c-11e0-8d30-001ec9afedb5</uuid> 
+          </link>  
+          <link name="link13" internal="true" type="A"> 
+            <target><![CDATA[/sites/sfdc/form/contact/contactme-crmcomparison.jsp]]></target>  
+            <uuid>0acccfa5-19e3-11e0-8fda-001ec9afedb5</uuid>  
+            <query><![CDATA[d=70130000000FpD2]]></query> 
+          </link>  
+          <link name="link14" internal="false" type="OBJECT"> 
+            <target><![CDATA[http://www.youtube.com/v/bssrBAbe9gM]]></target>  
+            <query><![CDATA[fs=1&hl=en_US]]></query> 
+          </link>  
+          <link name="link15" internal="true" type="A"> 
+            <target><![CDATA[/sites/sfdc/form/contact/contactme-crmcomparison.jsp]]></target>  
+            <uuid>0acccfa5-19e3-11e0-8fda-001ec9afedb5</uuid>  
+            <query><![CDATA[d=70130000000FpD2]]></query> 
+          </link>  
+          <link name="link16" internal="true" type="A"> 
+            <target><![CDATA[/sites/sfdc/crmcomparison/crmcomparisonvideo.jsp]]></target>  
+            <uuid>722fe6c1-19e2-11e0-8fda-001ec9afedb5</uuid>  
+            <query><![CDATA[d=70130000000Fqoq]]></query> 
+          </link>  
+          <link name="link10" internal="false" type="OBJECT"> 
+            <target><![CDATA[http://www.youtube.com/v/T6XZvPr-DxE]]></target>  
+            <query><![CDATA[fs=1&hl=en_US]]></query> 
+          </link>  
+          <link name="link20" internal="true" type="A"> 
+            <target><![CDATA[/sites/sfdc/form/demo/crm-sales-indexpage-regLB_saladv.jsp]]></target>  
+            <uuid>6e9e3a5e-27fc-11e0-b15f-001ec9afedb5</uuid>  
+            <query><![CDATA[d=70130000000FpqE]]></query> 
+          </link>  
+          <link name="link11" internal="true" type="A"> 
+            <target><![CDATA[/sites/sfdc/form/contact/contactme-crmcomparison.jsp]]></target>  
+            <uuid>0acccfa5-19e3-11e0-8fda-001ec9afedb5</uuid>  
+            <query><![CDATA[d=70130000000FpD2]]></query> 
+          </link>  
+          <link name="link21" internal="true" type="IMG"> 
+            <target><![CDATA[/sites/sfdc/assets/images/cta_buttons/btm-promo-sfadvantage-3right.png]]></target>  
+            <uuid>214c3ab7-1e9c-11e0-8d30-001ec9afedb5</uuid> 
+          </link>  
+          <link name="link12" internal="false" type="OBJECT"> 
+            <target><![CDATA[http://www.youtube.com/v/UWLOG_zdP6M]]></target>  
+            <query><![CDATA[fs=1&hl=en_US]]></query> 
+          </link> 
+        </links>  
+        <content><![CDATA[<p><style type="text/css">
+	
+</style></p>
+<div id="smb_content">
+<div style="float: left; width: 600px; margin: 0pt 0pt 10px;">
+<h1>The Salesforce Advantage</h1>
+<p>In today&rsquo;s fast-paced world, CRM should work the way you work. You sell as a team, you&rsquo;re glued to your mobile device, and you need to stay on top of your business in real time. That&rsquo;s where the Salesforce Advantage can help. Salesforce is 100% cloud, which means no hardware, no software, and no headaches for you. Make the advantage yours, and join more than 92,000 successful customers around the world.</p>
+</div>
+<div style="float: right; padding-top: 20px; padding-right: 45px;"><img alt="mobile-imgs" src="%(link0)" /></div>
+</div>
+<div style="clear: both;">
+<div class="blue-top">&nbsp;</div>
+<div class="greybox-ml">
+<div class="greybox-mr">
+<div class="greybox-rt">
+<div id="promo-tv-content-lft">
+<div class="comp-cell-title">
+<div class="feature-title-l">Advantage</div>
+<div class="feature-title-m">Microsoft Dynamics CRM</div>
+<div class="feature-title-r">Salesforce</div>
+</div>
+<div class="comp-cell active" id="#tab-1">
+<div class="feature-desc-l"><img alt="on-arrow" src="%(link1)" class="arrow" />World's #1 Cloud CRM</div>
+<div class="feature-desc-m active">&nbsp;</div>
+<div class="feature-desc-r active">&nbsp;</div>
+</div>
+<div class="comp-cell" id="#tab-2">
+<div class="feature-desc-l">Real-time collaboration</div>
+<div class="feature-desc-m">&nbsp;</div>
+<div class="feature-desc-r">&nbsp;</div>
+</div>
+<div class="comp-cell" id="#tab-3">
+<div class="feature-desc-l">Any mobile device</div>
+<div class="feature-desc-m">&nbsp;</div>
+<div class="feature-desc-r">&nbsp;</div>
+</div>
+<div class="comp-cell" id="#tab-4">
+<div class="feature-desc-l">Automatic upgrades</div>
+<div class="feature-desc-m">&nbsp;</div>
+<div class="feature-desc-r">&nbsp;</div>
+</div>
+<div class="comp-cell" id="#tab-5">
+<div class="feature-desc-l">Open platform</div>
+<div class="feature-desc-m">&nbsp;</div>
+<div class="feature-desc-r">&nbsp;</div>
+</div>
+<div class="comp-cell" id="#tab-6">
+<div class="feature-desc-l">Easy to customize</div>
+<div class="feature-desc-m">&nbsp;</div>
+<div class="feature-desc-r">&nbsp;</div>
+</div>
+</div>
+<div id="promo-tv-content-rt">
+<div style="display: block;" id="tab-1" class="smb_placeholder">
+<div style="width: 330px;" id="topbannerflash"><object width="330" height="190">
+	<param name="movie" value="http://www.youtube.com/v/qdEHfLDfi8w?fs=1&amp;hl=en_US"></param> 
+	<http://www.youtube.com/v/qdEHfLDfi8w?fs=1&amp;hl=en_US> <param name="allowFullScreen" value="true"></param>
+	<param name="allowscriptaccess" value="always"></param>
+	<embed src="%(link2)" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="330" height="190"></embed></object></div>
+<div><script type="text/javascript">
+    var so = new SWFObject("/common/assets/swf/youtube/AS3playerMain.swf"
+          ,'youtubeplayer'
+          ,'330' 
+          ,'190'
+          ,'9'
+          ,'#FFFFFF');
+    so.useExpressInstall('/common/assets/js/swfobject/expressinstall.swf');
+    so.addParam('quality',     'high');
+    so.addParam('wmode',     'transparent');
+    so.addParam('allowScriptAccess', 'always');
+    so.addParam('flashvars', 'type=single330_190&myVid=qdEHfLDfi8w&segment='+Page.getSegment()+'&locale='+Page.getLocale()+'&visitorType='+vp.getType()+'&visitNumber='+vp.getVisitNumber()+'&pageName='+Page.getName());
+    so.addParam('allowFullScreen','true'); 
+    so.write('topbannerflash');
+   </script></div>
+<div class="tab-cont">
+<h2 style="">Succeed with the proven CRM leader</h2>
+<span style="font-size: 12px; line-height: 16px; display: block;">Increase your success by choosing the cloud CRM market leader. Trust in our 94% customer satisfaction rating across 92,000 customers &ndash; with proven results for companies of <br />
+all sizes.</span>
+<div id="smb_but"><a a="" class="target-lb" sfdc:dims="490x580" href="%(link3)" title="Contact me">Contact me</a></div>
+</div>
+</div>
+<div style="display: none;" id="tab-2" class="smb_placeholder">
+<div style="width: 330px;" id="topbannerflash2"><object width="330" height="190">
+	<param name="movie" value="http://www.youtube.com/v/EhiKQFbSnJQ?fs=1&amp;hl=en_US"></param> 
+	<http://www.youtube.com/v/EhiKQFbSnJQ?fs=1&amp;hl=en_US> <param name="allowFullScreen" value="true"></param>
+	<param name="allowscriptaccess" value="always"></param>
+	<embed src="%(link4)" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="330" height="190"></embed></object></div>
+<div><script type="text/javascript">
+    var so2 = new SWFObject("/common/assets/swf/youtube/AS3playerMain.swf"
+          ,'youtubeplayer'
+          ,'330' 
+          ,'190'
+          ,'9'
+          ,'#FFFFFF');
+    so2.useExpressInstall('/common/assets/js/swfobject/expressinstall.swf');
+    so2.addParam('quality',     'high');
+    so2.addParam('wmode',     'transparent');
+    so2.addParam('allowScriptAccess', 'always');
+    so2.addParam('flashvars', 'type=single330_190&myVid=EhiKQFbSnJQ&segment='+Page.getSegment()+'&locale='+Page.getLocale()+'&visitorType='+vp.getType()+'&visitNumber='+vp.getVisitNumber()+'&pageName='+Page.getName());
+    so2.addParam('allowFullScreen','true'); 
+    so2.write('topbannerflash2');
+   </script></div>
+<div class="tab-cont">
+<h2>Close deals faster with Chatter</h2>
+<span style="font-size: 12px; line-height: 16px; display: block;">With Chatter feeds, you can stay alert to changes in your business.  With Chatter group collaboration, you can share deal and case information with your team.</span>
+<div id="smb_but"><a a="" class="target-lb" sfdc:dims="490x580" href="%(link5)" title="Contact me">Contact me</a></div>
+</div>
+</div>
+<div style="display: none;" id="tab-3" class="smb_placeholder">
+<div style="width: 330px;" id="topbannerflash3"><object width="330" height="190">
+	<param name="movie" value="http://www.youtube.com/v/8GyfKi8vwAU?fs=1&amp;hl=en_US"></param> 
+	<http://www.youtube.com/v/8GyfKi8vwAU?fs=1&amp;hl=en_US> <param name="allowFullScreen" value="true"></param>
+	<param name="allowscriptaccess" value="always"></param>
+	<embed src="%(link6)" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="330 height="190"></embed></object></div>
+<div><script type="text/javascript">
+    var so3 = new SWFObject("/common/assets/swf/youtube/AS3playerMain.swf"
+          ,'youtubeplayer'
+          ,'330' 
+          ,'190'
+          ,'9'
+          ,'#FFFFFF');
+    so3.useExpressInstall('/common/assets/js/swfobject/expressinstall.swf');
+    so3.addParam('quality',     'high');
+    so3.addParam('wmode',     'transparent');
+    so3.addParam('allowScriptAccess', 'always');
+    so3.addParam('flashvars', 'type=single330_190&myVid=8GyfKi8vwAU&segment='+Page.getSegment()+'&locale='+Page.getLocale()+'&visitorType='+vp.getType()+'&visitNumber='+vp.getVisitNumber()+'&pageName='+Page.getName());
+    so3.addParam('allowFullScreen','true'); 
+    so3.write('topbannerflash3');
+   </script></div>
+<div class="tab-cont">
+<h2>Run your business from anywhere</h2>
+<span style="font-size: 12px; line-height: 16px; display: block;">Increase productivity and manage your customers from anywhere with our native mobile apps for iPad, iPhone, BlackBerry, and Android.</span>
+<div id="smb_but"><a a="" class="target-lb" sfdc:dims="490x580" href="%(link7)" title="Contact me">Contact me</a></div>
+</div>
+</div>
+<div style="display: none;" id="tab-4" class="smb_placeholder">
+<div style="width: 330px;" id="topbannerflash4"><object width="330" height="190">
+	<param name="movie" value="http://www.youtube.com/v/NDDwIGUwIZo?fs=1&amp;hl=en_US"></param> 
+	<http://www.youtube.com/v/NDDwIGUwIZo?fs=1&amp;hl=en_US> <param name="allowFullScreen" value="true"></param>
+	<param name="allowscriptaccess" value="always"></param>
+	<embed src="%(link8)" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="330" height="190"></embed></object></div>
+<div><script type="text/javascript">
+    var so4 = new SWFObject("/common/assets/swf/youtube/AS3playerMain.swf"
+          ,'youtubeplayer'
+          ,'330' 
+          ,'190'
+          ,'9'
+          ,'#FFFFFF');
+    so4.useExpressInstall('/common/assets/js/swfobject/expressinstall.swf');
+    so4.addParam('quality',     'high');
+    so4.addParam('wmode',     'transparent');
+    so4.addParam('allowScriptAccess', 'always');
+    so4.addParam('flashvars', 'type=single330_190&myVid=NDDwIGUwIZo&segment='+Page.getSegment()+'&locale='+Page.getLocale()+'&visitorType='+vp.getType()+'&visitNumber='+vp.getVisitNumber()+'&pageName='+Page.getName());
+    so4.addParam('allowFullScreen','true'); 
+    so4.write('topbannerflash4');
+   </script></div>
+<div class="tab-cont">
+<h2>Focus on business, not technology</h2>
+<span style="font-size: 12px; line-height: 16px; display: block;">Take advantage of the latest features with three product releases each year &ndash; with no downtime or manual implementation. 100% multitenant cloud means it&rsquo;s automatic for every customer.</span>
+<div id="smb_but"><a a="" class="target-lb" sfdc:dims="490x580" href="%(link9)" title="Contact me">Contact me</a></div>
+</div>
+</div>
+<div style="display: none;" id="tab-5" class="smb_placeholder">
+<div style="width: 330px;" id="topbannerflash5"><object width="330" height="190">
+	<param name="movie" value="http://www.youtube.com/v/T6XZvPr-DxE?fs=1&amp;hl=en_US"></param> 
+	<http://www.youtube.com/v/T6XZvPr-DxE?fs=1&amp;hl=en_US> <param name="allowFullScreen" value="true"></param>
+	<param name="allowscriptaccess" value="always"></param>
+	<embed src="%(link10)" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="330" height="190"></embed></object></div>
+<div><script type="text/javascript">
+    var so5 = new SWFObject("/common/assets/swf/youtube/AS3playerMain.swf"
+          ,'youtubeplayer'
+          ,'330' 
+          ,'190'
+          ,'9'
+          ,'#FFFFFF');
+    so5.useExpressInstall('/common/assets/js/swfobject/expressinstall.swf');
+    so5.addParam('quality',     'high');
+    so5.addParam('wmode',     'transparent');
+    so5.addParam('allowScriptAccess', 'always');
+    so5.addParam('flashvars', 'type=single330_190&myVid=T6XZvPr-DxE&segment='+Page.getSegment()+'&locale='+Page.getLocale()+'&visitorType='+vp.getType()+'&visitNumber='+vp.getVisitNumber()+'&pageName='+Page.getName());
+    so5.addParam('allowFullScreen','true'); 
+    so5.write('topbannerflash5');
+   </script></div>
+<div class="tab-cont">
+<h2>Extend your success</h2>
+<span style="font-size: 12px; line-height: 16px; display: block;">Our open platform and partner ecosystem of more than 1,100 pre-integrated applications means that Salesforce gives you the choice of add-on capabilities that are right for your business.</span>
+<div id="smb_but"><a a="" class="target-lb" sfdc:dims="490x580" href="%(link11)" title="Contact me">Contact me</a></div>
+</div>
+</div>
+<div style="display: none;" id="tab-6" class="smb_placeholder">
+<div style="width: 330px;" id="topbannerflash6"><object width="330" height="190">
+	<param name="movie" value="http://www.youtube.com/v/UWLOG_zdP6M?fs=1&amp;hl=en_US"></param> 
+	<http://www.youtube.com/v/UWLOG_zdP6M?fs=1&amp;hl=en_US> <param name="allowFullScreen" value="true"></param>
+	<param name="allowscriptaccess" value="always"></param>
+	<embed src="%(link12)" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="330" height="190"></embed></object></div>
+<div><script type="text/javascript">
+    var so6 = new SWFObject("/common/assets/swf/youtube/AS3playerMain.swf"
+          ,'youtubeplayer'
+          ,'330' 
+          ,'190'
+          ,'9'
+          ,'#FFFFFF');
+    so6.useExpressInstall('/common/assets/js/swfobject/expressinstall.swf');
+    so6.addParam('quality',     'high');
+    so6.addParam('wmode',     'transparent');
+    so6.addParam('allowScriptAccess', 'always');
+    so6.addParam('flashvars', 'type=single330_190&myVid=UWLOG_zdP6M&segment='+Page.getSegment()+'&locale='+Page.getLocale()+'&visitorType='+vp.getType()+'&visitNumber='+vp.getVisitNumber()+'&pageName='+Page.getName());
+    so6.addParam('allowFullScreen','true'); 
+    so6.write('topbannerflash6');
+   </script></div>
+<div class="tab-cont">
+<h2>Meet your unique needs</h2>
+<span style="font-size: 12px; line-height: 16px; display: block;">Salesforce maps to your business, not the other way around. Reduce costs and support your unique business with easy customization and integration &ndash; using clicks,<br />
+not code. </span>
+<div id="smb_but"><a a="" class="target-lb" sfdc:dims="490x580" href="%(link13)" title="Contact me">Contact me</a></div>
+</div>
+</div>
+<div style="display: none;" id="tab-7" class="smb_placeholder">
+<div style="width: 330px;" id="topbannerflash7"><object width="330" height="190">
+	<param name="movie" value="http://www.youtube.com/v/bssrBAbe9gM?fs=1&amp;hl=en_US"></param> 
+	<http://www.youtube.com/v/bssrBAbe9gM?fs=1&amp;hl=en_US> <param name="allowFullScreen" value="true"></param>
+	<param name="allowscriptaccess" value="always"></param>
+	<embed src="%(link14)" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="330" height="190"></embed></object></div>
+<div><script type="text/javascript">
+    var so7 = new SWFObject("/common/assets/swf/youtube/AS3playerMain.swf"
+          ,'youtubeplayer'
+          ,'330' 
+          ,'190'
+          ,'9'
+          ,'#FFFFFF');
+    so7.useExpressInstall('/common/assets/js/swfobject/expressinstall.swf');
+    so7.addParam('quality',     'high');
+    so7.addParam('wmode',     'transparent');
+    so7.addParam('allowScriptAccess', 'always');
+    so7.addParam('flashvars', 'type=single330_190&myVid=bssrBAbe9gM&segment='+Page.getSegment()+'&locale='+Page.getLocale()+'&visitorType='+vp.getType()+'&visitNumber='+vp.getVisitNumber()+'&pageName='+Page.getName());
+    so7.addParam('allowFullScreen','true'); 
+    so7.write('topbannerflash7');
+   </script></div>
+<div class="tab-cont">
+<h2>Work the way you want</h2>
+<span style="font-size: 12px; line-height: 16px; display: block;">Salesforce for Outlook integration lets your team work in Outlook or Salesforce. Emails, contacts, leads, accounts, support cases, and custom objects are synced, with no duplicated effort.</span>
+<div id="smb_but"><a a="" class="target-lb" sfdc:dims="490x580" href="%(link15)" title="Contact me">Contact me</a></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="blue-btm-comp-cell" id="#tab-7">
+<div class="feature-desc-l">Outlook integration</div>
+<div class="feature-desc-r">&nbsp;</div>
+<div class="feature-desc-r">&nbsp;</div>
+</div>
+<div style="clear: both;">&nbsp;</div>
+<!-- /bluebox -->
+<div id="promos"><a class="target-lb" sfdc:dims="800x550" href="%(link16)">    <img src="%(link17)" alt="See why a Microsoft Gold Partner uses Salesforce- Watch Video" /></a>    <a href="%(link18)" class="target-lb" sfdc:dims="413x564">   <img src="%(link19)" alt="Microsoft Dynamics CRM 2011 vs. Salesforce CRM: a comparison - get the PDF" /></a>            <a href="%(link20)" class="target-lb" sfdc:dims="850x500">  <img src="%(link21)" alt="Sales Cloud demo: take a look at how Salesforce works - see it in action" /></a></div>
+<script type="text/javascript">
+			$(document).ready(function(){
+				$('#tabs div.smb_placeholder').hide();
+				$('#tabs div:first').show(); // Show the first div
+				$('#tabs ul li:first').addClass('active'); // Set the class of the first link to active
+				$('.comp-cell, .blue-btm-comp-cell').click(function(){ //When any link is clicked
+				//alert('ding');
+					$('.comp-cell, .blue-btm-comp-cell').removeClass('active'); // Remove active class from all links
+					$('.comp-cell, .blue-btm-comp-cell').children().removeClass('active'); // Remove active class from all links			
+					$(this).addClass('active'); //Set clicked link class to active
+					$(this).children().addClass('active'); //Set clicked link class to active
+					$('.arrow').remove();
+					$(this).children('.feature-desc-l').prepend('<img class="arrow" src="/common/assets/css/images/on-arrow.png" />');		 					
+					var currentTab = $(this).attr('id'); // Set variable currentTab to value of href attribute of clicked link
+ 					$('#promo-tv-content-rt div.smb_placeholder').hide(); // Hide all divs 					
+					$(currentTab).show(); // Show div with id equal to variable currentTab 					
+				// updates for Omniture tracking
+ 					if ($(this).attr('name')) { 
+						var newPage = Page.getName() + ($(this).attr('href') == '#tab-1' ? '' : ':' + 
+						$(this).attr('name').toLowerCase());
+	 					if (newPage != s.pageName) {
+	 						s.pageName = newPage;
+ 							s.t();
+ 						}
+ 					}
+ 					return false;
+ 				});
+ 			});
+		</script></div>
+</div>]]></content> 
+      </htmlContent> 
+    </body> 
+  </SimplePage> 
+</SimplePages>

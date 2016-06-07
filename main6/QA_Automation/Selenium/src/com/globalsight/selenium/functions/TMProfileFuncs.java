@@ -19,6 +19,8 @@ import com.thoughtworks.selenium.Selenium;
  */
 
 public class TMProfileFuncs extends BasicFuncs {
+	private SeleniumUtils iSelniumUtils = new SeleniumUtils();
+
 
 	/*
 	 * Create a new TM Profile, but first check if the TM is exists. If the TM
@@ -26,9 +28,7 @@ public class TMProfileFuncs extends BasicFuncs {
 	 */
 	public String newTMProfile(Selenium selenium, String TMProfiles)
 			throws Exception {
-		selenium.click(TMProfile.NEW_VALUE_BUTTON);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-
+		
 		String[] iTMProfiles = TMProfiles.split(",");
 		String iTMProfileName = null;
 
@@ -38,8 +38,19 @@ public class TMProfileFuncs extends BasicFuncs {
 			String iFieldValue = ivalue[1].trim();
 
 			if (iFieldName.equals("name")) {
-				selenium.type(TMProfile.Name_TEXTFIELD, iFieldValue);
 				iTMProfileName = iFieldValue;
+				selenium.type(TMProfile.TMP_SEARCH_CONTENT_TEXT, iFieldValue);
+		    	selenium.keyDown(TMProfile.TMP_SEARCH_CONTENT_TEXT, "\\13");
+		    	selenium.keyUp(TMProfile.TMP_SEARCH_CONTENT_TEXT, "\\13");
+//		    	selenium.waitForFrameToLoad("css=table.listborder", "1000");
+
+		   	 if (!(selenium.isElementPresent("link=" + iFieldValue))){
+		   		selenium.click(TMProfile.NEW_VALUE_BUTTON);
+				selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+				selenium.type(TMProfile.Name_TEXTFIELD, iFieldValue);
+				
+		   	 }
+		   	 else break;
 			} else if (iFieldName.equals("SRXruleset")) {
 				selenium.select(TMProfile.SRXRuleSet_SELECT, "label="
 						+ iFieldValue);
@@ -62,19 +73,355 @@ public class TMProfileFuncs extends BasicFuncs {
 		
 		
 		try {
-			selenium.click(TMProfile.SAVE_BUTTON);
+			if (selenium.isElementPresent(TMProfile.SAVE_BUTTON))
+			{
+				selenium.click(TMProfile.SAVE_BUTTON);
 //			selenium.getAlert();
 //			selenium.click(TMProfile.Cancel_BUTTON);
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+			}
 		} catch (Exception e) {
 
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		}
-
+		if (iTMProfileName != null) {
 		Assert.assertEquals(this.isPresentInTable(selenium,
-				TMProfile.TM_PROFILE_LIST_TABLE, iTMProfileName), true);
+				TMProfile.TM_PROFILE_LIST_TABLE, iTMProfileName), true);}
 		return iTMProfileName;
 	}
+	
+	public void newTMProfile(Selenium selenium, String tm_Profile_Name,	
+		String description,
+		String sRX_Rule_Set,
+		String storage_TM,
+		String save_Unlocalized_Segments_to_TM,	
+		String save_Localized_Segments_to_TM,
+		String save_Wholly_Internal_Text_Segments_to_TM,
+		String save_Exact_Match_Segments_to_TM,	
+		String save_Approved_Segments_to_TM,
+		String save_Unlocalized_Segments_to_Page_TM,
+		String leverage_Localizables,
+		String leverage_Exact_Matches_Only,	
+		String apply_SID_ICE_Promotion_Only,	
+		String apply_SID_Hash_ICE_Promotion,
+		String apply_SID_Hash_Bracketed_ICE_Promotion,	
+		String leverage_Approved_translations_from_selected_Reference_TM,	
+		String leverage_In_progress_translations_from_the_Job,
+		String and_from_Jobs_that_write_to_the_Storage_TM,
+		String and_from_Jobs_that_write_to_selected_Reference_TM,	
+		String stop_search_after_hitting_100_match,
+		String reference_TM,
+		String type_sensitive_Leveraging,	
+		String case_sensitive_Leveraging,
+		String whitespace_sensitive_Leveraging,
+		String code_sensitive_Leveraging,	
+		String reference_TM_2,
+		String reference_TM_2_TM,	
+		String multilingual_Leveraging,	
+		String auto_Repair_Placeholders,	
+		String get_Unique_from_Multiple_Exact_Matches,	
+		String multiple_Exact_Matches,
+		String leverage_Match_Threshold,
+		String number_of_Matches,
+		String display_TM_Matches_by,	
+		String choose_Latest_Match,
+		String type_sensitive_Leveraging_2,	
+		String no_Multiple_Exact_Matches,
+		String tU_Attributes_Match_Prioritising_Rules	
+		        )
+    {
+		selenium.type(TMProfile.TMP_SEARCH_CONTENT_TEXT, tm_Profile_Name);
+    	selenium.keyDown(TMProfile.TMP_SEARCH_CONTENT_TEXT, "\\13");
+    	selenium.keyUp(TMProfile.TMP_SEARCH_CONTENT_TEXT, "\\13");
+//    	selenium.waitForFrameToLoad("css=table.listborder", "1000");
+
+   	 if (!(selenium.isElementPresent("link=" + tm_Profile_Name))){
+    	clickAndWait(selenium, TMProfile.TMP_NEW_BUTTON);
+        selenium.type(TMProfile.TMP_NAME_TEXT, tm_Profile_Name);
+        selenium.type(TMProfile.TMP_DESCRIPTION_TEXT, description);
+        
+        if ((sRX_Rule_Set.isEmpty()) || (sRX_Rule_Set.equalsIgnoreCase("x")) || 
+        		(sRX_Rule_Set.equalsIgnoreCase("o")) || (sRX_Rule_Set.equalsIgnoreCase("Default")))
+        	selenium.select(TMProfile.TMP_SRX_RULE_SET_SELECT, TMProfile.TMP_SRX_RULE_SET_DEFAULT_TEXT);
+        else 
+        	selenium.select(TMProfile.TMP_SRX_RULE_SET_SELECT, sRX_Rule_Set);
+			
+        
+        if ((!(storage_TM.isEmpty())) && (!(storage_TM.equalsIgnoreCase("x"))) 
+        		&& (!(storage_TM.equalsIgnoreCase("o"))) && (!(storage_TM.equalsIgnoreCase("Default"))))
+			selenium.select(TMProfile.TMP_STORAGE_TM_SELECT, storage_TM);
+        
+        if (save_Unlocalized_Segments_to_TM.equalsIgnoreCase("yes"))
+          	selenium.check(TMProfile.TMP_SAVE_UNLOCALIZED_SEGMENTS_TO_TM_CHECKBOX);
+        else if (save_Unlocalized_Segments_to_TM.equalsIgnoreCase("no"))
+        	selenium.uncheck(TMProfile.TMP_SAVE_UNLOCALIZED_SEGMENTS_TO_TM_CHECKBOX);
+        
+        if (save_Localized_Segments_to_TM.equalsIgnoreCase("yes"))
+          	selenium.check(TMProfile.TMP_SAVE_LOCALIZED_SEGMENTS_TO_TM_CHECKBOX);
+        else if (save_Localized_Segments_to_TM.equalsIgnoreCase("no"))
+          	selenium.uncheck(TMProfile.TMP_SAVE_LOCALIZED_SEGMENTS_TO_TM_CHECKBOX);
+        
+        if (save_Wholly_Internal_Text_Segments_to_TM.equalsIgnoreCase("yes"))
+          	selenium.check(TMProfile.TMP_SAVE_WHOLLY_INTERNAL_TEXT_SEGMENTS_TO_TM);
+        else if (save_Wholly_Internal_Text_Segments_to_TM.equalsIgnoreCase("no"))
+          	selenium.uncheck(TMProfile.TMP_SAVE_WHOLLY_INTERNAL_TEXT_SEGMENTS_TO_TM);
+        
+        if (save_Exact_Match_Segments_to_TM.equalsIgnoreCase("yes"))
+          	selenium.check(TMProfile.TMP_SAVE_EXACT_MATCH_SEGMENTS_TO_TM_CHECKBOX);
+        else if (save_Exact_Match_Segments_to_TM.equalsIgnoreCase("no"))
+          	selenium.uncheck(TMProfile.TMP_SAVE_EXACT_MATCH_SEGMENTS_TO_TM_CHECKBOX);
+        
+        if (save_Approved_Segments_to_TM.equalsIgnoreCase("yes"))
+          	selenium.check(TMProfile.TMP_SAVE_APPROVED_SEGMENTS_TO_TM_CHECKBOX);
+        else if (save_Approved_Segments_to_TM.equalsIgnoreCase("no"))
+          	selenium.uncheck(TMProfile.TMP_SAVE_APPROVED_SEGMENTS_TO_TM_CHECKBOX);
+        
+        if (save_Unlocalized_Segments_to_Page_TM.equalsIgnoreCase("yes"))
+          	selenium.check(TMProfile.TMP_SAVE_UNLOCALIZED_SEGMENTS_TO_PAGE_TM_CHECKBOX);
+        else if (save_Unlocalized_Segments_to_Page_TM.equalsIgnoreCase("no"))
+          	selenium.uncheck(TMProfile.TMP_SAVE_UNLOCALIZED_SEGMENTS_TO_PAGE_TM_CHECKBOX);      
+        
+        if (leverage_Localizables.equalsIgnoreCase("yes"))
+          	selenium.check(TMProfile.TMP_LEVERAGE_LOCALIZABLE_CHECKBOX);
+        else if (leverage_Localizables.equalsIgnoreCase("no"))
+          	selenium.uncheck(TMProfile.TMP_LEVERAGE_LOCALIZABLE_CHECKBOX); 
+        
+        if (leverage_Exact_Matches_Only.equalsIgnoreCase("yes"))
+          	selenium.check(TMProfile.TMP_LEVERAGE_EXACT_MATCHES_ONLY_RADIO_BUTTON);
+        
+        if (apply_SID_ICE_Promotion_Only.equalsIgnoreCase("yes"))
+        {
+         	selenium.check(TMProfile.TMP_LEVERAGE_IN_CONTEXT_MATCHES_RADIO_BUTTON);
+          	selenium.check(TMProfile.TMP_APPLY_SID_ICE_PROMOTION_ONLY_RADIO_BUTTON);
+        }
+        
+        if (apply_SID_Hash_ICE_Promotion.equalsIgnoreCase("yes"))
+        {
+         	selenium.check(TMProfile.TMP_LEVERAGE_IN_CONTEXT_MATCHES_RADIO_BUTTON);
+          	selenium.check(TMProfile.TMP_APPLY_SID_HASH_ICE_PROMOTION_RADIO_BUTTON);
+        }
+        
+        if (apply_SID_Hash_Bracketed_ICE_Promotion.equalsIgnoreCase("yes"))
+        {
+         	selenium.check(TMProfile.TMP_LEVERAGE_IN_CONTEXT_MATCHES_RADIO_BUTTON);
+          	selenium.check(TMProfile.TMP_APPLY_SID_HASH_BRACKETED_ICE_PROMOTION_RADIO_BUTTON);
+        }
+        
+        if (leverage_Approved_translations_from_selected_Reference_TM.equalsIgnoreCase("yes"))
+          	selenium.check(TMProfile.TMP_LEVERAGE_APPROVED_TRANSLATIONS_FROM_SELECTED_REFERENCE_TM_CHECKBOX);
+        else if (leverage_Approved_translations_from_selected_Reference_TM.equalsIgnoreCase("no"))
+          	selenium.uncheck(TMProfile.TMP_LEVERAGE_APPROVED_TRANSLATIONS_FROM_SELECTED_REFERENCE_TM_CHECKBOX); 
+        
+        if (leverage_In_progress_translations_from_the_Job.equalsIgnoreCase("yes")){
+        	selenium.check(TMProfile.TMP_LEVERAGE_IN_PROGRESS_TRANSLATION_FROM_THE_JOB_CHECKBOX);
+        	if (and_from_Jobs_that_write_to_the_Storage_TM.equalsIgnoreCase("yes"))
+        		selenium.check(TMProfile.TMP_AND_FROM_JOBS_THAT_WRITE_TO_THE_STORAGE_TM_CHECKBOX);
+        	else if (and_from_Jobs_that_write_to_the_Storage_TM.equalsIgnoreCase("yes"))
+        		selenium.uncheck(TMProfile.TMP_AND_FROM_JOBS_THAT_WRITE_TO_THE_STORAGE_TM_CHECKBOX);
+        	
+        	if (and_from_Jobs_that_write_to_selected_Reference_TM.equalsIgnoreCase("yes"))
+        		selenium.check(TMProfile.TMP_AND_FROM_JOBS_THAT_WRITE_TO_SELECTED_REFERENCE_TM_CHECKBOX);
+        	else if (and_from_Jobs_that_write_to_selected_Reference_TM.equalsIgnoreCase("no"))
+        		selenium.uncheck(TMProfile.TMP_AND_FROM_JOBS_THAT_WRITE_TO_SELECTED_REFERENCE_TM_CHECKBOX);
+        	}
+        else if (leverage_In_progress_translations_from_the_Job.equalsIgnoreCase("no"))
+          	selenium.uncheck(TMProfile.TMP_LEVERAGE_IN_PROGRESS_TRANSLATION_FROM_THE_JOB_CHECKBOX);    
+
+        if (stop_search_after_hitting_100_match.equalsIgnoreCase("yes"))
+          	selenium.check(TMProfile.TMP_STOP_SEARCH_AFTER_HITTING_100_MATCH_CHECKBOX);
+        else if (stop_search_after_hitting_100_match.equalsIgnoreCase("no"))
+          	selenium.uncheck(TMProfile.TMP_STOP_SEARCH_AFTER_HITTING_100_MATCH_CHECKBOX); 
+        
+        String[] iReference_TM = reference_TM.split(",");
+    	    	for (int i = 0; i < iReference_TM.length; i++) {
+    		selenium.addSelection(TMProfile.TMP_LEVERAGE_OPTIONS_FOR_INITIAL_IMPORT_COMBOBOX, iReference_TM[i]);
+    	}
+    	
+    	if (type_sensitive_Leveraging.equalsIgnoreCase("no"))
+    	    		selenium.uncheck(TMProfile.TMP_TYPE_SENSITIVE_LEVERAGING_CHECKBOX);
+    	else if ((!(type_sensitive_Leveraging.isEmpty())) && (!(type_sensitive_Leveraging.equalsIgnoreCase("x")))&& 
+    			(!(type_sensitive_Leveraging.equalsIgnoreCase("o"))) && (!(type_sensitive_Leveraging.equalsIgnoreCase("Default"))))
+    		{
+    			selenium.check(TMProfile.TMP_TYPE_SENSITIVE_LEVERAGING_CHECKBOX);
+    			selenium.type(TMProfile.TMP_TYPE_SENSITIVE_LEVERAGING_PERCENTAGE_TEXT, type_sensitive_Leveraging);
+    		}
+    	
+    	if (case_sensitive_Leveraging.equalsIgnoreCase("no"))
+    		selenium.uncheck(TMProfile.TMP_CASE_SENSITIVE_LEVERAGING_CHECKBOX);
+    	else if ((!(case_sensitive_Leveraging.isEmpty())) && (!(case_sensitive_Leveraging.equalsIgnoreCase("x")))&& 
+    			(!(case_sensitive_Leveraging.equalsIgnoreCase("o"))) && (!(case_sensitive_Leveraging.equalsIgnoreCase("Default"))))
+		{
+			selenium.check(TMProfile.TMP_CASE_SENSITIVE_LEVERAGING_CHECKBOX);
+			selenium.type(TMProfile.TMP_CASE_SENSITIVE_LEVERAGING_PERCENTAGE_TEXT, case_sensitive_Leveraging);
+		}
+
+    	if (whitespace_sensitive_Leveraging.equalsIgnoreCase("no"))
+    		selenium.uncheck(TMProfile.TMP_WHITESPACE_SENSITIVE_LEVERAGING_CHECKBOX);
+    	else if ((!(whitespace_sensitive_Leveraging.isEmpty())) && (!(whitespace_sensitive_Leveraging.equalsIgnoreCase("x")))&& 
+    			(!(whitespace_sensitive_Leveraging.equalsIgnoreCase("o"))) && (!(whitespace_sensitive_Leveraging.equalsIgnoreCase("Default"))))
+		{
+			selenium.check(TMProfile.TMP_WHITESPACE_SENSITIVE_LEVERAGING_CHECKBOX);
+			selenium.type(TMProfile.TMP_WHITESPACE_SENSITIVE_LEVERAGING_PERCENTAGE_TEXT, whitespace_sensitive_Leveraging);
+		}
+    	
+    	if (code_sensitive_Leveraging.equalsIgnoreCase("no"))
+    		selenium.uncheck(TMProfile.TMP_CODE_SENSITIVE_LEVERAGING_CHECKBOX);
+    	else if ((!(code_sensitive_Leveraging.isEmpty())) && (!(code_sensitive_Leveraging.equalsIgnoreCase("x")))&& 
+    			(!(code_sensitive_Leveraging.equalsIgnoreCase("o"))) && (!(code_sensitive_Leveraging.equalsIgnoreCase("Default"))))
+		{
+			selenium.check(TMProfile.TMP_CODE_SENSITIVE_LEVERAGING_CHECKBOX);
+			selenium.type(TMProfile.TMP_CODE_SENSITIVE_LEVERAGING_PERCENTAGE_TEXT, code_sensitive_Leveraging);
+		}
+    	
+    	if (reference_TM_2.equalsIgnoreCase("no"))
+    		selenium.uncheck(TMProfile.TMP_REFERENCT_TM_2_CHECKBOX);
+    	else if ((!(reference_TM_2.isEmpty())) && (!(reference_TM_2.equalsIgnoreCase("x")))&& 
+    			(!(reference_TM_2.equalsIgnoreCase("o"))) && (!(reference_TM_2.equalsIgnoreCase("Default"))))
+		{
+			selenium.check(TMProfile.TMP_REFERENCT_TM_2_CHECKBOX);
+			selenium.type(TMProfile.TMP_REFERENCT_TM_2_PERCENTAGE_TEXT, reference_TM_2);
+		}
+    	
+    	if ((!(reference_TM_2_TM.isEmpty())) && (!(reference_TM_2_TM.equalsIgnoreCase("x")))&& 
+    			(!(reference_TM_2_TM.equalsIgnoreCase("o"))) && (!(reference_TM_2_TM.equalsIgnoreCase("Default"))))
+    	{
+    		String[] iReference_TM_2_TM = reference_TM_2_TM.split(",");
+    		for (int j = 0; j < iReference_TM_2_TM.length; j++) 
+    		{
+    			selenium.addSelection(TMProfile.TMP_REFERENCT_TM_2_COMBO_BOX, iReference_TM_2_TM[j]);
+    		}
+    	}
+    	
+    	if (multilingual_Leveraging.equalsIgnoreCase("yes"))
+          	selenium.check(TMProfile.TMP_MULTILINGUAL_LEVERAGING_CHECKBOX);
+        else if (multilingual_Leveraging.equalsIgnoreCase("no"))
+          	selenium.uncheck(TMProfile.TMP_MULTILINGUAL_LEVERAGING_CHECKBOX); 
+    	
+    	if (auto_Repair_Placeholders.equalsIgnoreCase("yes"))
+          	selenium.check(TMProfile.TMP_AUTO_REPAIR_PLACEHOLDERS_CHECKBOX);
+        else if (auto_Repair_Placeholders.equalsIgnoreCase("no"))
+          	selenium.uncheck(TMProfile.TMP_AUTO_REPAIR_PLACEHOLDERS_CHECKBOX); 
+    	
+    	if (get_Unique_from_Multiple_Exact_Matches.equalsIgnoreCase("yes"))
+          	selenium.check(TMProfile.TMP_GET_UNIQUE_FROM_MULTIPLE_EXACT_MATCHES_CHECKBOX);
+        else if (get_Unique_from_Multiple_Exact_Matches.equalsIgnoreCase("no"))
+          	selenium.uncheck(TMProfile.TMP_GET_UNIQUE_FROM_MULTIPLE_EXACT_MATCHES_CHECKBOX); 
+    	
+    	if ((!(multiple_Exact_Matches.isEmpty())) && (!(multiple_Exact_Matches.equalsIgnoreCase("x")))&& 
+    			(!(multiple_Exact_Matches.equalsIgnoreCase("o"))) && (!(multiple_Exact_Matches.equalsIgnoreCase("Default"))))
+    	{
+    		String[] imultiple_Exact_Matches = multiple_Exact_Matches.split(",");
+    			if (imultiple_Exact_Matches[0].equalsIgnoreCase("latest"))
+    	          	selenium.check(TMProfile.TMP_MULTIPLE_EXACT_MATCHES_RADIO_BUTTON_LASTEST);
+    	        else if (imultiple_Exact_Matches[0].equalsIgnoreCase("oldest"))
+    	          	selenium.uncheck(TMProfile.TMP_MULTIPLE_EXACT_MATCHES_RADIO_BUTTON_OLDEST); 
+    	        else if (imultiple_Exact_Matches[0].equalsIgnoreCase("demoted"))
+    	        {
+    	        	selenium.uncheck(TMProfile.TMP_MULTIPLE_EXACT_MATCHES_RADIO_BUTTON_DEMOTED);
+    	        	selenium.type(TMProfile.TMP_MULTIPLE_EXACT_MATCHES_PENALTY_TEXT,imultiple_Exact_Matches[1]);
+    	        }
+    			
+    	}
+    	
+    	if ((!(leverage_Match_Threshold.isEmpty())) && (!(leverage_Match_Threshold.equalsIgnoreCase("x")))&& 
+    			(!(leverage_Match_Threshold.equalsIgnoreCase("o"))) && (!(leverage_Match_Threshold.equalsIgnoreCase("Default"))))
+		{
+			selenium.type(TMProfile.TMP_LEVERAGE_MATCH_THRESHOLD_TEXT, leverage_Match_Threshold);
+		}
+    	
+    	if ((!(number_of_Matches.isEmpty())) && (!(number_of_Matches.equalsIgnoreCase("x")))&& 
+    			(!(number_of_Matches.equalsIgnoreCase("o"))) && (!(number_of_Matches.equalsIgnoreCase("Default"))))
+		{
+			selenium.type(TMProfile.TMP_NUMBER_OF_MATCHES_TEXT, number_of_Matches);
+		}
+    	
+    	if (display_TM_Matches_by.equalsIgnoreCase("Matching_percentage"))
+    		selenium.click(TMProfile.TMP_DISPLAY_TM_MATCHES_BY_RADIO_BUTTON_MATCHING_PERCENTAGE);
+    	else if (display_TM_Matches_by.equalsIgnoreCase("TM_Precedence"))
+    		selenium.click(TMProfile.TMP_DISPLAY_TM_MATCHES_BY_RADIO_BUTTON_TM_PRECEDENCE);
+    	
+    	if (choose_Latest_Match.equalsIgnoreCase("yes"))
+    		selenium.check(TMProfile.TMP_DISPLAY_TM_CHOOSE_LATEST_MATCH);
+    	else if (choose_Latest_Match.equalsIgnoreCase("no"))
+    		selenium.uncheck(TMProfile.TMP_DISPLAY_TM_CHOOSE_LATEST_MATCH);
+		
+    	if (type_sensitive_Leveraging_2.equalsIgnoreCase("no"))
+    		selenium.uncheck(TMProfile.TMP_TYPE_SENSITIVE_LEVERAGING_CHECKBOX_2);
+    	else if ((!(type_sensitive_Leveraging_2.isEmpty())) && (!(type_sensitive_Leveraging_2.equalsIgnoreCase("x")))&& 
+		(!(type_sensitive_Leveraging_2.equalsIgnoreCase("o"))) && (!(type_sensitive_Leveraging_2.equalsIgnoreCase("Default"))))
+		{
+			selenium.check(TMProfile.TMP_TYPE_SENSITIVE_LEVERAGING_CHECKBOX_2);
+			selenium.type(TMProfile.TMP_TYPE_SENSITIVE_LEVERAGING_PERCENTAGE_TEXT_2, type_sensitive_Leveraging_2);
+		}
+    	
+    	if (no_Multiple_Exact_Matches.equalsIgnoreCase("no"))
+    		selenium.uncheck(TMProfile.TMP_NO_MULTIPLE_EXACT_MATCHES_CHECKBOX);
+    	else if ((!(no_Multiple_Exact_Matches.isEmpty())) && (!(no_Multiple_Exact_Matches.equalsIgnoreCase("x")))&& 
+		(!(no_Multiple_Exact_Matches.equalsIgnoreCase("o"))) && (!(no_Multiple_Exact_Matches.equalsIgnoreCase("Default"))))
+		{
+			selenium.check(TMProfile.TMP_NO_MULTIPLE_EXACT_MATCHES_CHECKBOX);
+			selenium.type(TMProfile.TMP_NO_MULTIPLE_EXACT_MATCHES_CHECKBOX, no_Multiple_Exact_Matches);
+		}
+    	
+    	if ((!(tU_Attributes_Match_Prioritising_Rules.isEmpty())) && (!(tU_Attributes_Match_Prioritising_Rules.equalsIgnoreCase("x")))&& 
+    			(!(tU_Attributes_Match_Prioritising_Rules.equalsIgnoreCase("o"))) && (!(tU_Attributes_Match_Prioritising_Rules.equalsIgnoreCase("Default"))))
+    	{
+    		String[] itU_Attributes_Match_Prioritising_Rules = tU_Attributes_Match_Prioritising_Rules.split(",");
+    		for (int k = 0; k < itU_Attributes_Match_Prioritising_Rules.length; k++) 
+    		{
+    			String[] k_itU_Attributes_Match_Prioritising_Rules = itU_Attributes_Match_Prioritising_Rules[k].split(";");
+    			for (int m = 0; m < k_itU_Attributes_Match_Prioritising_Rules.length; m++)
+    			{
+    				String[] n_k_itU_Attributes_Match_Prioritising_Rules = k_itU_Attributes_Match_Prioritising_Rules[m].split("=");
+    				switch (n_k_itU_Attributes_Match_Prioritising_Rules[0])
+					{
+						case "AndOr":
+						{
+							selenium.select(TMProfile.TMP_TU_ATTRIBUTES_MATCH_PRIORITISING_RULES_AND_OR_SELECT,
+									n_k_itU_Attributes_Match_Prioritising_Rules[1]);
+							break;
+						}
+						case "Attribute_Internal_name":
+						{
+							selenium.select(TMProfile.TMP_TU_ATTRIBUTES_MATCH_PRIORITISING_RULES_ATTRIBUTE_INTERNAL_NAME_AND_OR_SELECT,
+									n_k_itU_Attributes_Match_Prioritising_Rules[1]);
+							break;
+						}
+						case "Operator":
+						{
+							selenium.select(TMProfile.TMP_TU_ATTRIBUTES_MATCH_PRIORITISING_RULES_OPERATOR_SELECT,
+									n_k_itU_Attributes_Match_Prioritising_Rules[1]);
+							break;
+						}
+						
+						case "Value":
+						{
+							if (!(n_k_itU_Attributes_Match_Prioritising_Rules[1].equalsIgnoreCase("Value_from_Job_Attribute_of_same_name")))
+							selenium.select(TMProfile.TMP_TU_ATTRIBUTES_MATCH_PRIORITISING_RULES_VALUE_TYPE_SELECT,
+									"Input Value");
+							selenium.type(TMProfile.TMP_TU_ATTRIBUTES_MATCH_PRIORITISING_RULES_VALUE_TEXT,
+									n_k_itU_Attributes_Match_Prioritising_Rules[1]);
+							break;
+						}	
+						
+						default:
+							break;
+					}
+    				if (n_k_itU_Attributes_Match_Prioritising_Rules[0].equalsIgnoreCase("AndOr"))
+    					selenium.click(TMProfile.TMP_TU_ATTRIBUTES_MATCH_PRIORITISING_RULES_AND_OR_SELECT);
+    			}
+    			selenium.click(TMProfile.TMP_TU_ATTRIBUTES_MATCH_PRIORITISING_RULES_ADD_BUTTON);
+    		}
+    			
+    		
+    	}
+    	
+    	selenium.click(TMProfile.TMP_SAVE_BUTTON);
+        if (selenium.isAlertPresent()) 
+            selenium.getAlert();
+        
+   }
+  }
 	
 	public void createMTOptions(Selenium selenium, String MTOptionsProfiles, AsiaOnlineMT asiaOnlineMT)
 			throws Exception {

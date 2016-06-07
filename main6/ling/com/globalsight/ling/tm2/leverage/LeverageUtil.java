@@ -633,25 +633,26 @@ public class LeverageUtil
 				p_matchTypes, p_subId);
 		if (lm == null)
 			return false;
-
+		//(GBS-4360) Online and offline, determine the status of the target tuv
+	     if (lm.getMatchState().equals(MatchState.MULTIPLE_TRANSLATION))
+         {
+             Tuv targetTuv = (Tuv) p_targetTuvs.get(index);
+             if (targetTuv.getState().equals(TuvState.NOT_LOCALIZED))
+             {
+                 return false;
+             }
+         }
+	     
         long preHash = -1;
         long nextHash = -1;
         Object o = p_sourceTuvs.get(index);
     	if (isExactMatch(o, p_matchTypes))
-    	{
+        {
             if (o instanceof Tuv)
             {
-            	Tuv sourceTuv = (Tuv) o;
+                Tuv sourceTuv = (Tuv) o;
                 preHash = sourceTuv.getPreviousHash();
                 nextHash = sourceTuv.getNextHash();
-                if (lm.getMatchState().equals(MatchState.MULTIPLE_TRANSLATION))
-                {
-                    Tuv targetTuv = (Tuv) p_targetTuvs.get(index);
-                    if (targetTuv.getState().equals(TuvState.NOT_LOCALIZED))
-                    {
-                    	return false;
-                    }
-                }
             }
             else
             {
@@ -661,13 +662,12 @@ public class LeverageUtil
             }
 
             if (preHash != -1 && nextHash != -1 && preHash != BaseTmTuv.FIRST_HASH
-    				&& nextHash != BaseTmTuv.LAST_HASH
-    				&& preHash == lm.getPreviousHash()
-    				&& nextHash == lm.getNextHash())
-    		{
-    			return true;
-    		}
-    	}
+                    && nextHash != BaseTmTuv.LAST_HASH && preHash == lm.getPreviousHash()
+                    && nextHash == lm.getNextHash())
+            {
+                return true;
+            }
+        }
 
         return false;
     }

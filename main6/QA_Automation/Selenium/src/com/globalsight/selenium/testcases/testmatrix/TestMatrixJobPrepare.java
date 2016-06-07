@@ -26,20 +26,20 @@ public class TestMatrixJobPrepare extends BaseTestCase
         SeleniumUtils.openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
                 MainFrame.TRANSLATION_MEMORY_SUBMENU);
 
-        tmFuncs.newTM(selenium, getDataInCase("tm"));
-
-        // Create TMProfile
-        SeleniumUtils.openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
-                MainFrame.TRANSLATION_MEMORY_PROFILES_SUBMENU);
-
-        tmProfileFuncs
-                .newTMProfile(selenium, getDataInCase("tmProfile"));
-
-        // create Localization Profile
-        SeleniumUtils.openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
-                MainFrame.LOCALIZATION_PROFILES_SUBMENU);
-        localizationFuncs.create2(selenium,
-                getDataInCase("localizationProfile"));
+//        tmFuncs.newTM(selenium, getDataInCase("tm"));
+//
+//        // Create TMProfile
+//        SeleniumUtils.openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+//                MainFrame.TRANSLATION_MEMORY_PROFILES_SUBMENU);
+//
+//        tmProfileFuncs
+//                .newTMProfile(selenium, getDataInCase("tmProfile"));
+//
+//        // create Localization Profile
+//        SeleniumUtils.openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+//                MainFrame.LOCALIZATION_PROFILES_SUBMENU);
+//        localizationFuncs.create2(selenium,
+//                getDataInCase("localizationProfile"));
 
         // create File Profile
         SeleniumUtils.openMenuItemAndWait(selenium, MainFrame.DATA_SOURCES_MENU,

@@ -1,0 +1,347 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:id="New Custom Field Wizard – Source Selection Page" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="12" MadCap:lastHeight="2073" MadCap:lastWidth="767">
+    <head>
+        <link href="../Resources/TableStyles/WBasic.css" rel="stylesheet" MadCap:stylesheetType="table" />
+        <link href="../Resources/TableStyles/WMouseOver.css" rel="stylesheet" MadCap:stylesheetType="table" /><title>New Custom Field Wizard – Source Selection Page</title>
+    </head>
+    <body>
+        <h1>New 
+ Custom Field Wizard – Source Selection Page</h1>
+        <p class="para">Use this page to specify the source of the data for the custom 
+ field and if a user entry is required.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Some options might not be available depending on which field and data 
+ type were selected on the previous page.</p>
+        <table style="mc-table-style: url('../Resources/TableStyles/WMouseOver.css');caption-side: top;" class="TableStyle-WMouseOver" cellspacing="0">
+            <col class="Column-Column1" />
+            <col class="Column-Column1" />
+            <thead>
+                <tr class="Head-Header1">
+                    <th class="HeadE-Column1-Header1">
+                        <p class="tabledata">Field</p>
+                    </th>
+                    <th class="HeadD-Column1-Header1">
+                        <p class="tabledata">Description</p>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Data source</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <table class="TableStyle-WBasic" style="mc-table-style: url('../Resources/TableStyles/WBasic.css');" cellspacing="0">
+                            <col class="Column-Column1" />
+                            <col class="Column-Column1" />
+                            <thead>
+                                <tr class="Head-Header1">
+                                    <th class="HeadE-Column1-Header1">
+                                        <p class="tabledata"><span class="emphasisbold">Type</span>
+                                        </p>
+                                    </th>
+                                    <th class="HeadD-Column1-Header1">
+                                        <p class="tabledata"><span class="emphasisbold">Source of field value</span>
+                                        </p>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="Body-Body1">
+                                    <td class="BodyE-Column1-Body1">
+                                        <p class="tabledata">Keyboard</p>
+                                    </td>
+                                    <td class="BodyD-Column1-Body1">
+                                        <p class="tabledata">
+ keyboard entry</p>
+                                    </td>
+                                </tr>
+                                <tr class="Body-Body1">
+                                    <td class="BodyE-Column1-Body1">
+                                        <p class="tabledata">External</p>
+                                    </td>
+                                    <td class="BodyD-Column1-Body1">
+                                        <p class="tabledata">Outside 
+ the Empower database (for example, the Empower Toolkit)</p>
+                                    </td>
+                                </tr>
+                                <tr class="Body-Body1">
+                                    <td class="BodyB-Column1-Body1">
+                                        <p class="tabledata">Calculated</p>
+                                    </td>
+                                    <td class="BodyA-Column1-Body1">
+                                        <p class="tabledata">Calculated by Empower 
+ software using a formula that you define</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                <tr class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Data entry is required check box</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">Specifies that an entry is required in the custom field during 
+ sample loading (in Run Samples, the Sample Set Method Editor, or the Alter 
+ Sample window) or when you import data.</p>
+                        <p class="tabledata"> If an entry is required, you <span style="font-style: italic;">cannot</span> proceed with sample loading 
+ until you enter a value for the field.</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Default value</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">Enter a default value for a custom field. This default 
+ value appears in the custom field if a user entry is not required. If 
+ the data type is Bool 
+ or Enum, the 
+ default value appears at the top of the Translation column in the Translation 
+ Definition table.</p>
+                        <p class="tabledata"><span class="emphasisbold">Note:</span> 
+ For Bool and 
+ Enum data types, 
+ you can enter a default value (for example, "Not Set" or leave 
+ the default blank). If you leave both the default value and the first 
+ row of the Translation Definition table blank, you can enter information 
+ for the row at run time in the Sample Method editor, the Run Samples sample 
+ table, or the Alter Sample window. This is for a sample type custom field 
+ only.</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Search order</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">If you chose a Calculated data source (see above) and specified 
+ an intersample 
+ label, select in what order you want the database searched (Search results 
+ depend on both the combination of an intersample 
+ label used and the search order):</p>
+                        <table class="TableStyle-WBasic" style="mc-table-style: url('../Resources/TableStyles/WBasic.css');" cellspacing="0">
+                            <col class="Column-Column1" style="width: 116px;" />
+                            <col class="Column-Column1" />
+                            <thead>
+                                <tr class="Head-Header1">
+                                    <th class="HeadE-Column1-Header1">
+                                        <p class="tabledata"><span class="emphasisbold">Option</span>
+                                        </p>
+                                    </th>
+                                    <th class="HeadD-Column1-Header1">
+                                        <p><span class="emphasisbold">Function</span>
+                                        </p>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="Body-Body1">
+                                    <td class="BodyE-Column1-Body1">
+                                        <p class="tabledata">Result set first</p>
+                                    </td>
+                                    <td class="BodyD-Column1-Body1">
+                                        <p class="tabledata">An intersample 
+ search is performed on the current result set first. If a result which 
+ matches the current intersample 
+ label is found, the search stops (if it is not a summary search). If no 
+ result is found and the sample label is specified in an intersample 
+ label, the search continues outside the current result set to the current 
+ project. If the intersample 
+ calculation is a summary type (for example, SUM), the search continues 
+ both inside and outside of the current result set. If the label is not 
+ specified, the search ends with the current result set. &#160;</p>
+                                    </td>
+                                </tr>
+                                <tr class="Body-Body1">
+                                    <td class="BodyE-Column1-Body1">
+                                        <p class="tabledata">Result set only</p>
+                                    </td>
+                                    <td class="BodyD-Column1-Body1">
+                                        <p class="tabledata">Intersample 
+ calculations are performed <span style="font-style: italic;">only</span> 
+ within the current result set. If the current result is not part of a 
+ result set, the custom field will not produce a value.</p>
+                                    </td>
+                                </tr>
+                                <tr class="Body-Body1">
+                                    <td class="BodyE-Column1-Body1">
+                                        <p class="tabledata">Outside first</p>
+                                    </td>
+                                    <td class="BodyD-Column1-Body1">
+                                        <p class="tabledata">An intersample 
+ search is performed using results outside of the current result set <span style="font-style: italic;">first</span>. If an intersample 
+ label specifies a sample label, a search is performed on all results existing 
+ in the current project first. If no result is found, the search is performed 
+ on the current result set (if there is a current result set available). 
+ If the intersample 
+ calculation is a summary type (for example, SUM), the search continues 
+ both inside and outside of the current result set. If there is no label 
+ specified in an intersample 
+ label, the search is performed on the current result set only (if available). 
+ </p>
+                                    </td>
+                                </tr>
+                                <tr class="Body-Body1">
+                                    <td class="BodyB-Column1-Body1">
+                                        <p class="tabledata">Outside only</p>
+                                    </td>
+                                    <td class="BodyA-Column1-Body1">
+                                        <p class="tabledata">Intersample 
+ calculations are performed using results from outside of the current result 
+ set. If an intersample 
+ label does not specify a sample label, a search criteria conflict occurs 
+ and the custom field will not produce a value. Outside Only has no effect 
+ in this case.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                <tr class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">All or nothing check box</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">Select this check box if you do not want to generate a value 
+ on subtractions or additions unless all values are present.</p>
+                        <p class="tabledata"><span class="emphasisbold">Note:</span> 
+ If you are using a summary function, All or Nothing has no effect.</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Us as</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">If you specified a data type as either Enum 
+ or Bool in 
+ the Data and Type Selection page, select how you want to interpret or 
+ use the item you select or selected by a formula.</p>
+                        <table class="TableStyle-WBasic" style="mc-table-style: url('../Resources/TableStyles/WBasic.css');" cellspacing="0">
+                            <col class="Column-Column1" style="width: 115px;" />
+                            <col class="Column-Column1" />
+                            <thead>
+                                <tr class="Head-Header1">
+                                    <th class="HeadE-Column1-Header1">
+                                        <p class="tabledata"><span class="emphasisbold">List selection</span>
+                                        </p>
+                                    </th>
+                                    <th class="HeadD-Column1-Header1">
+                                        <p class="tabledata"><span class="emphasisbold">Description</span>
+                                        </p>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="Body-Body1">
+                                    <td class="BodyE-Column1-Body1">
+                                        <p class="tabledata">Position</p>
+                                    </td>
+                                    <td class="BodyD-Column1-Body1">
+                                        <p class="tabledata">Uses the position (index) of the selected item in the Translation 
+ definition table. It starts at 0. The first item of the translation definition 
+ table is at position 0. The second one is at position 1 and etc. When 
+ Use As of a custom field is set to Position, the selected item gets translated 
+ to a position. Specifying this kind of custom field in a subsequent formula 
+ enables the use of position based calculations.</p>
+                                    </td>
+                                </tr>
+                                <tr class="Body-Body1">
+                                    <td class="BodyE-Column1-Body1">
+                                        <p class="tabledata">Text</p>
+                                    </td>
+                                    <td class="BodyD-Column1-Body1">
+                                        <p class="tabledata">Uses the selected item as a text string. This choice is useful 
+ when you need a comparison based on the selected item. The item selected 
+ is treated as text. For example, a Peak type custom field’s formula, SUM(Area*EQ(ThisCustom, 
+ “too small”)), would give you the summation of Area values of those peaks 
+ each of which ThisCustom 
+ value is translated to “too small”. ThisCustom 
+ may be an ENUM 
+ type custom field, one of which translation is “too small”.</p>
+                                    </td>
+                                </tr>
+                                <tr class="Body-Body1">
+                                    <td class="BodyE-Column1-Body1">
+                                        <p class="tabledata">Value</p>
+                                    </td>
+                                    <td class="BodyD-Column1-Body1">
+                                        <p class="tabledata">Interprets the selected item as a value. Items entered to 
+ the translation definition table must be a number. The field values generated 
+ by a custom field of this type can be used in a subsequent formula.</p>
+                                        <p class="tabledata"><span class="emphasisbold">Note:</span> 
+ You can choose a value from the Translation definition table as the result 
+ of the calculation of the formula described in the field, or picking it 
+ from the list. </p>
+                                    </td>
+                                </tr>
+                                <tr class="Body-Body1">
+                                    <td class="BodyB-Column1-Body1">
+                                        <p class="tabledata">Field</p>
+                                    </td>
+                                    <td class="BodyA-Column1-Body1">
+                                        <p class="tabledata">Items listed in the Enum 
+ Definition table are interpreted as either an Empower field name, a formula, 
+ or as strings. A custom field of this type can be used in a formula as 
+ long as it is specified inside of a Boolean function. For example, EQ(ThisCustom,”too 
+ small”).</p>
+                                        <p class="tabledata"><span class="emphasisbold">Tips:</span>
+                                        </p>
+                                        <ul>
+                                            <li class="listbull">Field is available only 
+ if the Data Source is set to Calculated. A value generated by this custom 
+ field is stored as a string. That is the reason its usage is limited inside 
+ of a Boolean function.</li>
+                                            <li class="listbull">When you select Field, 
+ you can translate the value of the custom field using the Translation 
+ Definition Table page.</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                <tr class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Sample type</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">Provides the ability to calculate a custom field value selectively. 
+ Choose the Sample Type that you want to calculate on. If a formula references 
+ a field from another result, the sample from which the result is generated 
+ must match this type for the field value to be used.</p>
+                        <p class="tabledata"><span class="emphasisbold">Tip:</span> 
+ Sample Type is available only if the Data Source is set to Calculated. 
+ </p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Peak type</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">Provides the ability to calculate a custom field value selectively 
+ based on the current peak type. Choose the Peak Type that you want to 
+ calculate on. If a formula references a field from another peak, its type 
+ must match this type for the field value to be used. </p>
+                        <p class="tabledata"><span class="emphasisbold">Tip:</span> 
+ Peak Type is available only if the Data Source is set to Calculat</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1">
+                    <td class="BodyB-Column1-Body1">
+                        <p class="tabledata">Missing peak check box</p>
+                    </td>
+                    <td class="BodyA-Column1-Body1">
+                        <p class="tabledata">Select this option to perform calculations on missing peaks.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
+</html>

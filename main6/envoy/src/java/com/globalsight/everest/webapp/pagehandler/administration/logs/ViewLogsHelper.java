@@ -628,6 +628,8 @@ public class ViewLogsHelper
             filter = new OperationLogFilter();
         else if ("webservices.log".equals(logType))
             filter = new WebservicesLogFilter();
+        else if ("restWebservices.log".equals(logType))
+            filter = new RestWebservicesLogFilter();
         else if ("JBoss_GlobalSight.log".equals(logType))
             filter = new JBossLogFilter();
 
@@ -683,6 +685,19 @@ public class ViewLogsHelper
         public boolean accept(File pathname)
         {
             if (pathname.getName().startsWith("webservices.log"))
+                return true;
+            else
+                return false;
+        }
+    }
+
+    class RestWebservicesLogFilter implements FileFilter
+    {
+
+        @Override
+        public boolean accept(File pathname)
+        {
+            if (pathname.getName().startsWith("restWebservices.log"))
                 return true;
             else
                 return false;

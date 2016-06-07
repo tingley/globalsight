@@ -7,6 +7,7 @@ package com.globalsight.selenium.pages;
 public class Workflows {
 
 	//Workflows
+	public static final String MAIN_TABLE = "//div[@id='contentLayer']/form/table/tbody/tr[2]/td/table/tbody";
 	public static final String SearchName_SELECT="nameOptions";
 	public static final String SearchName_TEXT_FIELD="nameField";
 	public static final String Search_BUTTON="//input[@value='Search...']";

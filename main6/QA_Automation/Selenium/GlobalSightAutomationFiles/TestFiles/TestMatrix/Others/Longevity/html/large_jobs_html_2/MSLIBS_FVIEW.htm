@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="3301" MadCap:lastWidth="577">
+    <head><title>MS Library Search Tab</title>
+    </head>
+    <body>
+        <h1>MS 
+ Library Search tab</h1>
+        <p class="para">Use this tab to specify:</p>
+        <ul>
+            <li class="listbull">MS library match parameter 
+ values </li>
+            <li class="listbull">Extraction parameters 
+ for MCA spectra</li>
+        </ul>
+        <h2>Specifying MS library match parameter values</h2>
+        <h3>Search Mode</h3>
+        <p class="para">How the software searches the spectral libraries and compares 
+ the unknown spectrum with the library spectra. Click for details on the 
+ two search modes. </p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Pure or Mixture</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Pure</p>
+        <h3>Reference Set</h3>
+        <p class="para">Size of the set of library spectra used during the presearch 
+ phase of the library search.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ 1 or 3. A value of 3 increases the number of library spectra selected 
+ during the presearch phase of the library search.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 1.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ A value of 1 is adequate for most library searches. Increasing the number 
+ of library spectra increases the reliability of the search in approximately 
+ 7% of unknowns. However, a large Reference Set also slows the speed of 
+ the library search.</p>
+        <h3>Search depth</h3>
+        <p class="para">Maximum number of reported library matches you want the MS 
+ software to list in the results. </p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ 1, 2, or 3 </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 3</p>
+        <p class="para">For example, with a search depth of 3, the software performs 
+ all possible searches, then selects and reports the best three matches.</p>
+        <h3>Mass limit (m/z) start, end</h3>
+        <p class="para">Limits the search to library spectra with masses within the 
+ specified range. You use the m/z range, which should include at least 
+ the six most important peaks to focus on the spectral features of interest. 
+ Range is 2 to 4000.</p>
+        <p class="para"><span class="emphasisbold">Notes:</span> 
+ If you specify a value outside the range of the acquired data, Empower 
+ software uses the limits of the acquired data.</p>
+        <p class="para">The End Mass value must be greater than the Start Mass value.</p>
+        <h3>Search threshold (%)</h3>
+        <p class="para">The PBM Fit values that Empower MS software reports. The 
+ software discards matching spectra with a PBM Fit value less than the 
+ Search Threshold value. </p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 0.000 to 100.000</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 50.000</p>
+        <h3>Noise threshold (%)</h3>
+        <p class="para">Removes noise from spectral data before a library search. 
+ The threshold value is applied as a percentage of the Base Peak intensity. 
+ Mass intensity values in the sample spectrum less than the Threshold value 
+ are set to zero. During a library search, the PBM algorithm ignores ion 
+ masses with intensity values of zero. A blank field indicates no noise 
+ threshold.</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 0.000 to 100.000.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0. 000.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ The Threshold value does not affect the original spectral data. You can 
+ change the Noise Threshold value and perform additional searches on the 
+ same data.</p>
+        <h3>Spectra to average</h3>
+        <p class="para">Number of spectra to be averaged to produce the extraction. 
+ When spectra are extracted, they can be averaged over a series of scans 
+ to reduce the noise level in the spectra. For example, a value of 1 indicates 
+ no averaging. A value of 3 averages the extracted spectrum with the spectrum 
+ on each side of the extracted spectrum. </p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 1 to 30000</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 1</p>
+        <h3>Combine method</h3>
+        <p class="para">Indicate how to combine a spectrum:</p>
+        <ul>
+            <li class="listbull" style="font-weight: normal;">Average 
+ – Averages the intensities of the spectrum.</li>
+            <li class="listbull">Sum – Adds the intensities 
+ of the spectrum.</li>
+        </ul>
+        <h3>Noise baseline (min)</h3>
+        <p class="para">A value that specifies in minutes how Empower software calculates 
+ a baseline spectrum:</p>
+        <ul>
+            <li class="listbull">Null (Default) 
+ – When this field is clear, the peak start and ends define the baseline 
+ spectrum.</li>
+            <li class="listbull">Value – When you enter 
+ a value, Empower software uses the spectra collected during the times 
+ specified in this field to calculate the baseline spectrum. When you enter 
+ a range, Empower software averages all spectra in the specified time ranges 
+ to produce a noise spectrum, which is subtracted from any extracted spectra.</li>
+        </ul>
+        <p class="paraindent"><span class="emphasisbold">Entering 
+ values:</span> The format for entering minutes is T1:T2, T3:T4,… . For 
+ example, to specify a noise spectrum of 1 to 3 minutes and 5 to 7 minutes, 
+ enter the following: 1.0:3.0, 5.0:7.0. </p>
+        <h3>Multiplier</h3>
+        <p class="para">A value by which to multiply the Noise Baseline. </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 1.0</p>
+        <h3>Libraries</h3>
+        <p class="para">The library or libraries you want to search, including all 
+ spectral libraries in the current project. The list contains user-created 
+ project libraries and any optional commercial library (for example, Wiley 
+ for the MS software option) installed in the system.</p>
+        <p class="para">When you specify the spectral libraries:</p>
+        <ul>
+            <li class="listbull">Verify that both the 
+ user-created libraries and the unknown spectra span the mass range that 
+ contains all the characteristic ions of the analytes.</li>
+            <li class="listbull">Be aware of the effect 
+ of the mobile phase on the unknown spectra.</li>
+            <li class="listbull">Be aware that the best 
+ matches are based on library spectra acquired from your own standards.</li>
+        </ul>
+        <h3>Peak separation (da)</h3>
+        <p class="para">Binning value to apply to the baseline-corrected spectrum. 
+ Empower software bins the extracted and combined spectrum at the resolution 
+ in this field.</p>
+        <h3>Wiley duplicate spectra</h3>
+        <p class="para">Increases the likelihood of matching a library spectrum acquired 
+ under similar lab conditions if you are using the Wiley Library. For many 
+ compounds, the Wiley Registry contains multiple spectra acquired under 
+ a variety of conditions. However, the library search takes longer. </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <h3>Retention time presearch</h3>
+        <p class="para">Limits the search to spectra with retention times a specified 
+ range, thus reducing search time. Search spectra with retention times 
+ similar to your acquired spectrum. </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ This applies only to user-created libraries because the Wiley Registry 
+ spectra have no associated retention time information.</p>
+        <h3>RT window (%)</h3>
+        <p class="para">Range of acceptable retention times as a percentage of the 
+ actual retention time of the target spectrum. If you enable Retention 
+ Time Presearch, enter a retention time (RT) window value. </p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 0.0 to 100.0</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 10.0</p>
+        <h3>Specifying Extraction Parameters for MCA Spectra</h3>
+        <p class="para">Specify a section of an MCA spectrum for review and adjust 
+ its appearance with these parameters:</p>
+        <ul>
+            <li class="listbull">Start Mass Limit – Mass 
+ value that marks the beginning of the MCA spectrum section you want to 
+ review. The range should span at least six significant peaks.</li>
+            <li class="listbull">End Mass Limit – Mass 
+ value that marks the end of the MCA spectrum section you want to review. 
+ The range should span at least six significant peaks.</li>
+            <li class="listbull">Noise Threshold –Level 
+ of noise you allow in the section of interest.</li>
+            <li class="listbull">Peak Separation – A spectral 
+ mass binning value—a bin is a scan wide and a mass high—and the number 
+ of spectral points the software combines to constitute the spectrum. </li>
+        </ul>
+    </body>
+</html>

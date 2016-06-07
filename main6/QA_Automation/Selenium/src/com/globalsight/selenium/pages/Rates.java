@@ -38,5 +38,5 @@ public class Rates {
 	public static final String BaseRate_FIELD = "baserate";
 	public static final String Calculate_BUTTON="calculate";
 
-
+	public static final String rateNameFilter="rateNameFilter";
 }

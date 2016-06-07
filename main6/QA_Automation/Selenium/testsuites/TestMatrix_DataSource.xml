@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<suite name="TestMatrix_DataSource" >
+<!--  parallel="tests" -->
+<!-- 
+  <test name="testMatrixJobPrepare" preserve-order="true">
+     <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.DataSourcePrepare"/>
+    </classes>
+  </test>  
+
+
+  <test name="HTMLFilter" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.HTMLFilter"/>
+    </classes>
+  </test>
+-->   
+  <test name="XMLFilter" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.XMLFilter"/>
+    </classes>
+  </test>
+<!--     
+  <test name="Word_2010_Filter" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.Office_2010_Filter"/>
+    </classes>
+  </test>
+
+  
+   <test name="WordFilterTest" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.Word_2007_Filter"/>
+    </classes>
+  </test> 
+
+    <test name="ExcelFilterTest" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.Excel_2007_Filter"/>
+    </classes>
+  </test> 
+  
+  <test name="PowerPointFilterTest" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.PowerPoint_2007_Filter"/>
+    </classes>
+  </test>
+   
+ 
+  
+   <test name="FrameMaker_9_Filter" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.FrameMaker_9_Filter"/>
+    </classes>
+  </test>
+  
+  <test name="IDML_Filter" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.IDML_Filter"/>
+    </classes>
+  </test>
+  
+ 
+  <test name="Java_Properties_Filter" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.Java_Properties_Filter"/>
+    </classes>
+  </test>
+  
+  
+  <test name="Java_Script_Filter" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.Java_Script_Filter"/>
+    </classes>
+  </test>
+ 
+ 
+  
+  <test name="Jsp_Filter" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.Jsp_Filter"/>
+    </classes>
+     
+  </test>
+    --> 
+<!-- 
+<test name="OpenOffice_Filter" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.OpenOffice_Filter"/>
+    </classes>
+ </test>
+  
+ <test name="Plain_Text_Filter" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.Plain_Text_Filter"/>
+    </classes>
+ </test>
+
+  
+ <test name="PO_Filter" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.PO_Filter"/>
+    </classes>
+  </test>
+   
+  <test name="QA_Filter" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.datasource.QA_Filter"/>
+    </classes>
+  </test>
+  
+ 
+   <test name="TMProfiles" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.setup.TMProfiles"/>
+    </classes>
+  </test>
+  -->
+ <!-- 
+ <test name="Regression2" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.regression.Regression2"/>
+    </classes>
+  </test>
+
+  
+   
+ <test name="Longevity" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.others.Longevity"/>
+    </classes>
+  </test>
+   
+   
+    <test name="Longevity_OfflineUpload" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.others.Longevity_OfflineUpload"/>
+    </classes>
+  </test>
+  
+   
+   <test name="Longevity_OfflineUpload" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.others.Longevity_OfflineDownload"/>
+    </classes>
+  </test>
+   -->
+ </suite>

@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE tmx SYSTEM "tmx-gs.dtd" >
+<tmx version="1.0 GS">
+<header creationtool="Welocalize GlobalSight" creationtoolversion="6.0" segtype="sentence" o-tmf="gxml" adminlang="EN-US" srclang="EN-US" datatype="html" creationdate="20160229T174830Z" creationid="85all" changedate="20160229T175958Z" >
+</header>
+<body>
+<tu tuid="643901">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">-1012689159372732302</prop>
+<prop type="x-hash-next">7258790758401825858</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>This will let you know if the problem is the player or the TV.</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">-1012689159372732302</prop>
+<prop type="x-hash-next">7258790758401825858</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>هذا سوف تتيح لك معرفة إذا كانت المشكلة هي المشغل أو التلفزيون.</seg>
+</tuv>
+</tu>
+<tu tuid="643902">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">7788141301543067928</prop>
+<prop type="x-hash-next">-6635856282065982568</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>If you still experience frequent video issues after following these steps, please contact the manufacturer of your player for further assistance.</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">7788141301543067928</prop>
+<prop type="x-hash-next">-6635856282065982568</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>إذا واجهت مشاكل الفيديو المتكررة لا تزال بعد اتباع هذه الخطوات، الرجاء الاتصال بالشركة المصنعة للمشغل الخاص بك للحصول على مزيد من المساعدة.</seg>
+</tuv>
+</tu>
+<tu tuid="643903">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">3793482640768409670</prop>
+<prop type="x-hash-next">4667675667464841449</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>Bad video quality on a Blu-ray disc.</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">3793482640768409670</prop>
+<prop type="x-hash-next">4667675667464841449</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>سوء جودة الفيديو على قرص بلو رأي.</seg>
+</tuv>
+</tu>
+<tu tuid="643904">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">4343444575560899367</prop>
+<prop type="x-hash-next">7244253033552922738</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>If you&apos;re having poor video quality on a DVD or Blu-ray disc you got from Netflix, use this article to resolve the issue.</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">4343444575560899367</prop>
+<prop type="x-hash-next">7244253033552922738</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>إذا كنت تواجه ضعف جودة الفيديو على قرص DVD أو أقراص blu-ray التي حصلت عليها من نتفلياكس، استخدم هذه المقالة لحل هذه المشكلة.</seg>
+</tuv>
+</tu>
+<tu tuid="643905">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">-3722799565986199056</prop>
+<prop type="x-hash-next">7788141301543067928</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>If you&apos;ve completed the steps above and are still experiencing the issue, try playing the disc in another player. </seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">-3722799565986199056</prop>
+<prop type="x-hash-next">7788141301543067928</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>إذا كنت قمت بإكمال الخطوات المذكورة أعلاه ولا تزال تواجه المشكلة، حاول تشغيل القرص في لاعب آخر. </seg>
+</tuv>
+</tu>
+<tu tuid="643906">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">3817917829504722206</prop>
+<prop type="x-hash-next">4881497576849926326</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg><bpt i="1" type="em" x="1"></bpt><bpt i="2" type="strong" x="2"></bpt>Note:<ept i="2"></ept> DVDs and the Queue feature are only available in the US.<ept i="1"></ept></seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">3817917829504722206</prop>
+<prop type="x-hash-next">4881497576849926326</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg><bpt i="1" type="em" x="1"></bpt><bpt i="2" type="strong" x="2"></bpt> ملاحظة: <ept i="2"></ept> دي في دي وميزة قائمة انتظار متوفرة فقط في الولايات المتحدة-<ept i="1"></ept></seg>
+</tuv>
+</tu>
+<tu tuid="643907">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">4881497576849926326</prop>
+<prop type="x-hash-next">3793482640768409670</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>The picture is stretched out or cut off.</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">4881497576849926326</prop>
+<prop type="x-hash-next">3793482640768409670</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>تمتد الصورة أو قطع.</seg>
+</tuv>
+</tu>
+<tu tuid="643908">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">1586903157911064286</prop>
+<prop type="x-hash-next">-1854228882891403808</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>Switch from HDMI to a component or composite audio/video cable.</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">1586903157911064286</prop>
+<prop type="x-hash-next">-1854228882891403808</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>قم بالتبديل من HDMI إلى مكون أو كبل الصوت/الفيديو المركب.</seg>
+</tuv>
+</tu>
+<tu tuid="643909">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">-4275844543495893877</prop>
+<prop type="x-hash-next">-3722799565986199056</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>If the picture is stretched or cut off, changing the screen resolution on the TV or device may resolve the issue.</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">-4275844543495893877</prop>
+<prop type="x-hash-next">-3722799565986199056</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>إذا امتدت الصورة أو قطع، تغيير دقة الشاشة على التلفزيون أو جهاز قد حل المشكلة.</seg>
+</tuv>
+</tu>
+<tu tuid="643910">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">4667675667464841449</prop>
+<prop type="x-hash-next">8366783713736630964</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>Follow the troubleshooting steps below to resolve the issue.</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">4667675667464841449</prop>
+<prop type="x-hash-next">8366783713736630964</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>اتبع خطوات استكشاف الأخطاء وإصلاحها التالية لحل المشكلة.</seg>
+</tuv>
+</tu>
+<tu tuid="643911">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">7244253033552922738</prop>
+<prop type="x-hash-next">2499463732836987893</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>If you&apos;re experiencing any of the following:</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">7244253033552922738</prop>
+<prop type="x-hash-next">2499463732836987893</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>إذا كنت تعاني من أي مما يلي:</seg>
+</tuv>
+</tu>
+<tu tuid="643912">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">0</prop>
+<prop type="x-hash-next">3817917829504722206</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>I&apos;m having video quality issues with a Netflix DVD or Blu-ray disc.</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">0</prop>
+<prop type="x-hash-next">3817917829504722206</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>أواجه قضايا جودة الفيديو مع &quot;نتفلياكس دي في دي&quot; أو تقنية بلو رأي.</seg>
+</tuv>
+</tu>
+<tu tuid="643913">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">2499463732836987893</prop>
+<prop type="x-hash-next">2099316516031195802</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>The black levels are gray or washed out.</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">2499463732836987893</prop>
+<prop type="x-hash-next">2099316516031195802</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>مستويات أسود رمادي أو غسلها.</seg>
+</tuv>
+</tu>
+<tu tuid="643914">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">-1854228882891403808</prop>
+<prop type="x-hash-next">-1012689159372732302</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>Try zooming in or out, if your TV has that option.</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">-1854228882891403808</prop>
+<prop type="x-hash-next">-1012689159372732302</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>حاول التكبير أو التصغير، إذا كان جهاز التلفزيون لذلك الخيار.</seg>
+</tuv>
+</tu>
+<tu tuid="643915">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">7258790758401825858</prop>
+<prop type="x-hash-next">1</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>[view:rc_txt==2243/en]</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">7258790758401825858</prop>
+<prop type="x-hash-next">1</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>[عرض: rc_txt = = 2243/en]</seg>
+</tuv>
+</tu>
+<tu tuid="643916">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">2099316516031195802</prop>
+<prop type="x-hash-next">1649532461339300683</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>A green stripe running down every copy of a specific title.</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">2099316516031195802</prop>
+<prop type="x-hash-next">1649532461339300683</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>مجموعة شريطية أخضر يهرول كل نسخة من عنوان معين.</seg>
+</tuv>
+</tu>
+<tu tuid="643917">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">8366783713736630964</prop>
+<prop type="x-hash-next">-4275844543495893877</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>If you are using an HDMI cable, try reversing the ends or trying a new HDMI cable.</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">8366783713736630964</prop>
+<prop type="x-hash-next">-4275844543495893877</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>إذا كنت تستخدم كابل هدمي، حاول عكس الغايات أو محاولة كابل هدمي جديد.</seg>
+</tuv>
+</tu>
+<tu tuid="643918">
+<tuv xml:lang="EN-US" creationdate="20160229T175501Z" creationid="gs85pm" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">1649532461339300683</prop>
+<prop type="x-hash-next">1586903157911064286</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>Bypass any receivers or stereo equipment by connecting the device directly to the TV.</seg>
+</tuv>
+<tuv xml:lang="AR-EG" creationdate="20160229T175501Z" creationid="MS_Translator_MT" changeid="MS_Translator_MT" lastusagedate="20160229T175501Z" >
+<prop type="x-creationproject">p1</prop>
+<prop type="x-hash-prev">1649532461339300683</prop>
+<prop type="x-hash-next">1586903157911064286</prop>
+<prop type="x-creationjobid">7583</prop>
+<prop type="x-creationjobname">ar_eg_302257419</prop>
+<seg>تجاوز أية أجهزة أو معدات ستيريو بالاتصال مباشرة الجهاز التلفزيون.</seg>
+</tuv>
+</tu>
+</body>
+</tmx>

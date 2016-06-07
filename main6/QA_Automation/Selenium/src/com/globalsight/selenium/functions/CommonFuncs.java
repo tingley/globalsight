@@ -13,6 +13,9 @@ package com.globalsight.selenium.functions;
 
 import java.sql.Connection;
 
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+
 import jodd.db.pool.CoreConnectionPool;
 
 import com.globalsight.selenium.pages.Login;
@@ -20,6 +23,7 @@ import com.globalsight.selenium.pages.MainFrame;
 import com.globalsight.selenium.testcases.ConfigUtil;
 import com.thoughtworks.selenium.DefaultSelenium;
 import com.thoughtworks.selenium.Selenium;
+import com.thoughtworks.selenium.webdriven.WebDriverBackedSelenium;
 
 public class CommonFuncs extends BasicFuncs
 {
@@ -58,15 +62,27 @@ public class CommonFuncs extends BasicFuncs
     {
         if (selenium == null) {
             Selenium defaultSelenium = new DefaultSelenium(
-                    ConfigUtil.getConfigData("seleniumHost"),
-                    Integer.parseInt(ConfigUtil.getConfigData("seleniumPort")),
+                   ConfigUtil.getConfigData("seleniumHost"),
+                  Integer.parseInt(ConfigUtil.getConfigData("seleniumPort")),
                     ConfigUtil.getConfigData("browser"),
                     ConfigUtil.getConfigData("serverUrl"));
+
+                        
             defaultSelenium.start();
+            
             defaultSelenium.setSpeed(ConfigUtil.getConfigData("delayBetweenOperations"));
+            
+//            defaultSelenium.openWindow("", "StartID");
+//            defaultSelenium.selectWindow("StartID");
+            
             defaultSelenium.windowMaximize();
             
             selenium = defaultSelenium;
+            
+            
+//        	WebDriver driver = new FirefoxDriver();
+//            Selenium selenium = new WebDriverBackedSelenium(driver, ConfigUtil.getConfigData("serverUrl"));
+//            
         }
 
         return selenium;

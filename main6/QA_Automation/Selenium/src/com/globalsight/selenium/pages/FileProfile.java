@@ -12,7 +12,7 @@ public class FileProfile
     public static final String SAVE_BUTTON = "//input[@value='Save']";
     public static final String CANCEL_BUTTON = "//input[@value='Cancel']";
     
-    public static final String SEARCH_CONTENT_TEXT = "//input[@id='uNameFilter']";
+    public static final String SEARCH_CONTENT_TEXT = "id=uNameFilter";
     public static final String SEARCH_BUTTON = "//input[@value='Search...']";
 
     // detail page
@@ -21,6 +21,7 @@ public class FileProfile
     public static final String LOCALIZATION_PROFILE_SELECT = "locProfileId";
     public static final String SOURCE_FILE_FORMAT_SELECT = "formatSelector";
     public static final String FILTER_SELECT = "filterInfo";
+    public static final String QA_FILTER_SELECT = "id=qaFilterContent";
     public static final String SOURCE_FILE_ENCODING_SELECT = "codeSet";
     public static final String FILE_EXTENSION_TYPE_SELECT = "extension";
     public static final String DEFAULT_EXPORT_CHECKBOX = "exportFiles";

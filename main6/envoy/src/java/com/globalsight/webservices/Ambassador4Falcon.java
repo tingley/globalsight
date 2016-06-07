@@ -1057,7 +1057,6 @@ public class Ambassador4Falcon extends JsonTypeWebService
         int totalWords = pageWC.getTotalWordCount();
         // MT
         int mtTotalWordCount = pageWC.getMtTotalWordCount();
-        int mtExactMatchWordCount = pageWC.getMtExactMatchWordCount();
         int mtFuzzyNoMatchWordCount = pageWC.getMtFuzzyNoMatchWordCount();
         int mtRepetitionsWordCount = pageWC.getMtRepetitionsWordCount();
 
@@ -1066,35 +1065,8 @@ public class Ambassador4Falcon extends JsonTypeWebService
         // and MT confidence score.
         if (includeMTData)
         {
-            if (mtConfidenceScore == 100)
-            {
-                _100MatchWordCount = _100MatchWordCount - mtExactMatchWordCount;
-            }
-            else if (mtConfidenceScore < 100 && mtConfidenceScore >= threshold)
-            {
-                if (mtConfidenceScore >= 95)
-                {
-                    hiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 95 && mtConfidenceScore >= 85)
-                {
-                    medHiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 85 && mtConfidenceScore >= 75)
-                {
-                    medFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 75)
-                {
-                    noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
-                }
-                repetitionsWordCount -= mtRepetitionsWordCount;
-            }
-            else if (mtConfidenceScore < threshold)
-            {
-                noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
-                repetitionsWordCount -= mtRepetitionsWordCount;
-            }
+            noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+            repetitionsWordCount -= mtRepetitionsWordCount;
         }
 
         // write the information of word count

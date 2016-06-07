@@ -96,7 +96,7 @@ public class TbStaticImpl implements ITbaseStatic
 
     public String getStatisticsNoIndex(long m_id) throws TermbaseException
     {
-        return getStatisticsFromDatabase(m_id).asXML();
+        return getStatisticsFromDatabase(m_id).asJson();
     }
 
     @Override

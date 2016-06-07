@@ -821,6 +821,26 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             LeverageMatch b = (LeverageMatch) p_B;
 
             int result = 0;
+            // "MACHINE_TRANSLATION" matches have top priority.
+            String mtMatch1 = a.getMatchType();
+            String mtMatch2 = b.getMatchType();
+            if (mtMatch1 == null
+                    || !MatchState.MACHINE_TRANSLATION.getName().equals(
+                            mtMatch1))
+            {
+                mtMatch1 = "";
+            }
+            if (mtMatch2 == null
+                    || !MatchState.MACHINE_TRANSLATION.getName().equals(
+                            mtMatch2))
+            {
+                mtMatch2 = "";
+            }
+            result = super.compareStrings(mtMatch1, mtMatch2);
+            if (result != 0)
+            {
+                return -result;
+            }
 
             // compare score
             result = (int) (b.getScoreNum() - a.getScoreNum());

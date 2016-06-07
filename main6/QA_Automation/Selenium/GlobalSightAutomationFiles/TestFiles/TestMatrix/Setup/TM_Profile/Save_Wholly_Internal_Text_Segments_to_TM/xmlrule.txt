@@ -1,0 +1,13 @@
+<?xml version="1.0"?> 
+<schemarules> 
+    <ruleset schema="TranslationRequest"> 
+        <dont-translate path="//*"/>
+<translate path="//JobDescription" priority="9"/>  
+<translate path="//Comment" priority="9"/>  
+<translate path="//Attachments" priority="9"/>        
+<translate path="//EnglishMaster" priority="9"/>
+<translate path="//KeyName" priority="9"/>	
+<translate path="//Note" priority="9"/>
+<translate path="//Attributes" priority="9"/>
+    </ruleset> 
+</schemarules>

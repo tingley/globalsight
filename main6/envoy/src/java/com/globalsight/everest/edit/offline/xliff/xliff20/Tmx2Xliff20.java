@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.edit.offline.xliff.xliff20;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -30,6 +31,7 @@ import com.globalsight.everest.edit.offline.xliff.xliff20.document.Pc;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Ph;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Sc;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Segment;
+import com.globalsight.everest.edit.offline.xliff.xliff20.document.Source;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Target;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Unit;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Xliff;
@@ -496,16 +498,38 @@ public class Tmx2Xliff20
             Unit u = (Unit) o;
             Segment seg = (Segment) u.getSegmentOrIgnorable().get(0);
             Target t = seg.getTarget();
+            Map<String, String> subType = getSourceSubTypes(seg);
             String id = seg.getId();
             id = StringUtil.replace(id, ":-", ":[");
             id = StringUtil.replace(id, "-:", "]:");
             sb.append("# ").append(id).append("\r\n");
-            getContentAsString(t.getContent(), sb);
+            getContentAsString(t.getContent(), sb, subType);
             sb.append("\r\n");
         }
 
         sb.append("\r\n# END GlobalSight Download File");
         return sb.toString();
+    }
+    
+    private static Map<String, String> getSourceSubTypes(Segment seg)
+    {
+        Map<String, String> types = new HashMap<>();
+        
+        Source s = seg.getSource();
+        for (Object o : s.getContent())
+        {
+            if (o instanceof Pc)
+            {
+                Pc pc = (Pc) o;
+
+                if (pc.getSubType() != null && pc.getSubType().length() > 0)
+                {
+                    types.put(pc.getId(), pc.getSubType().trim());
+                }
+            }
+        }
+        
+        return types;
     }
 
     /**
@@ -515,7 +539,7 @@ public class Tmx2Xliff20
      * @param cs
      * @param sb
      */
-    private static void getContentAsString(List<Object> cs, StringBuffer sb)
+    private static void getContentAsString(List<Object> cs, StringBuffer sb, Map<String, String> subTypes)
     {
         for (Object o : cs)
         {
@@ -532,24 +556,32 @@ public class Tmx2Xliff20
             else if (o instanceof Pc)
             {
                 Pc pc = (Pc) o;
+                String id = pc.getId();
 
                 // is internal tag
                 if (YesNo.NO.equals(pc.getCanDelete()))
                 {
                     sb.append("[");
-                    getContentAsString(pc.getContent(), sb);
+                    getContentAsString(pc.getContent(), sb, subTypes);
                     sb.append("]");
                 }
                 else if (pc.getSubType() != null && pc.getSubType().length() > 0)
                 {
                     sb.append("[").append(pc.getSubType()).append("]");
-                    getContentAsString(pc.getContent(), sb);
+                    getContentAsString(pc.getContent(), sb, subTypes);
                     sb.append("[/").append(pc.getSubType()).append("]");
+                }
+                else if (subTypes.containsKey(id))
+                {
+                    String subType = subTypes.get(id);
+                    sb.append("[").append(subType).append("]");
+                    getContentAsString(pc.getContent(), sb, subTypes);
+                    sb.append("[/").append(subType).append("]");
                 }
                 else
                 {
                     sb.append("[g").append(pc.getId()).append("]");
-                    getContentAsString(pc.getContent(), sb);
+                    getContentAsString(pc.getContent(), sb, subTypes);
                     sb.append("[/g").append(pc.getId()).append("]");
                 }
 

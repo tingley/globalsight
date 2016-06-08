@@ -101,7 +101,7 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
             while ((tempchar = bufferReader.read()) != -1)
             {
                 char chr = (char) tempchar;
-                if (chr == ':')
+                if (chr == ':' && !containBrackets)
                     containColon = true;
                 
                 if (tranChar && chr == '\\')

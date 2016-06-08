@@ -526,6 +526,7 @@
     <permission id="<%=Permission.REPORTS_TRANSLATION_PROGRESS%>"/>
     <permission id="<%=Permission.REPORTS_IMPLEMENTED_COMMENTS_CHECK%>"/> 
     <permission id="<%=Permission.JOB_ATTRIBUTE_REPORT%>"/>
+    <permission id="<%=Permission.REPORTS_MT_POST_EDIT_DISTANCE%>"/>
     <category id="lb_reports_company_specific">
         <permission id="<%=Permission.REPORTS_DELL_JOB_STATUS%>"/>
         <permission id="<%=Permission.REPORTS_DELL_ACT_DUR%>"/>

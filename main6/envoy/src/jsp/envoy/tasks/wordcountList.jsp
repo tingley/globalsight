@@ -303,7 +303,7 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
         <amb:column label="lb_in_context_tm" width="120px" sortBy="<%=TaskComparator.IN_CONTEXT%>"><%= task.getWorkflow().getInContextMatchWordCount() %></amb:column>
         <%    }
           }%>
-        <amb:column label="lb_tm_mt" width="60px" sortBy="<%=TaskComparator.TOTAL_MT %>">
+        <amb:column label="lb_tm_mt" width="60px" sortBy="<%=TaskComparator.MT_TOTAL %>">
         <% 
             if(wf == null){
                out.print(0);

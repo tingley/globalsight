@@ -392,6 +392,7 @@ public class Permission
 
     // For sla report issue
     static public final String REPORTS_SLA = "reports.sla";
+    static public final String REPORTS_MT_POST_EDIT_DISTANCE = "reports.MT.post.edit.distance";
 
     // For Segmentation Rule
     static public final String SEGMENTATIONRULE_VIEW = "segmentationrule.view";
@@ -1106,7 +1107,8 @@ public class Permission
         added = addPermission(426, BASE_TEXT_FILTER_ESCAPING) || added;
 
         added = addPermission(427, ACCOUNT_NOTIFICATION_EDIT_EMAIL_TEMPLATE) || added;
-        
+        added = addPermission(428, REPORTS_MT_POST_EDIT_DISTANCE) || added;
+
         return added;
     }
 

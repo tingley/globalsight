@@ -55,12 +55,11 @@ import com.globalsight.util.SortUtil;
  */
 public class ExcelReportsMainHandler extends PageHandler
 {
-    private final String REPORTNAME = "activityName";
     private ArrayList<Project> projectList = null;
     private ArrayList<GlobalSightLocale> targetLocales = null;
     private Locale uiLocale = null;
-    private static Logger LOGGER = Logger
-            .getLogger(ExcelReportsMainHandler.class.getName());
+
+    private static Logger LOGGER = Logger.getLogger(ExcelReportsMainHandler.class.getName());
 
     // Some reports are using 6 job states (no "pending"), while the others are
     // using all 7 states, a bit strange. Do not change previous behavior for
@@ -131,29 +130,32 @@ public class ExcelReportsMainHandler extends PageHandler
         }
         else
         {
-        String activityName = (String) p_request.getParameter(REPORTNAME);
+            String activityName = (String) p_request.getParameter("activityName");
 
-        User curUser = getUser(session);
-        initData(curUser.getUserId(), activityName);
+            User curUser = getUser(session);
+            initData(curUser.getUserId(), activityName);
 
-        List<ReportJobInfo> reportJobInfoList = new ArrayList<ReportJobInfo>();
-        if (reportNameListUsing6States.contains(activityName))
-        {
-            reportJobInfoList = getReportJobInfoForSixStates();
-        }
-        else
-        {
-            reportJobInfoList = getReportJobInfoForSevenStates();
+            List<ReportJobInfo> reportJobInfoList = new ArrayList<ReportJobInfo>();
+            if (reportNameListUsing6States.contains(activityName))
+            {
+                reportJobInfoList = getReportJobInfoForSixStates();
+            }
+            else if ("MTPostEditDistanceReport".equals(activityName))
+            {
+                reportJobInfoList = getReportJobInfoForFiveStates();
+            }
+            else
+            {
+                reportJobInfoList = getReportJobInfoForSevenStates();
+            }
+
+            // Set into Request
+            p_request.setAttribute(ReportConstants.REPORTJOBINFO_LIST, reportJobInfoList);
+            p_request.setAttribute(ReportConstants.PROJECT_LIST, projectList);
+            p_request.setAttribute(ReportConstants.TARGETLOCALE_LIST, targetLocales);
         }
 
-        // Set into Request
-        p_request.setAttribute(ReportConstants.REPORTJOBINFO_LIST,
-                reportJobInfoList);
-        p_request.setAttribute(ReportConstants.PROJECT_LIST, projectList);
-        p_request.setAttribute(ReportConstants.TARGETLOCALE_LIST, targetLocales);
-        }
-        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
-                p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 
     /**
@@ -206,6 +208,23 @@ public class ExcelReportsMainHandler extends PageHandler
     {
         ArrayList<String> stateList = ReportHelper.getAllJobStatusList();
         stateList.remove(Job.PENDING);
+        List<ReportJobInfo> reportJobInfoList = new ArrayList<ReportJobInfo>(
+                ReportHelper.getJobInfo(stateList).values());
+        if (reportJobInfoList != null && !reportJobInfoList.isEmpty())
+        {
+            filterReportJobInfoByProject(reportJobInfoList);
+            SortUtil.sort(reportJobInfoList, new ReportJobInfoComparator(
+                    JobComparator.NAME, getUILocale()));
+        }
+
+        return reportJobInfoList;
+    }
+
+    private List<ReportJobInfo> getReportJobInfoForFiveStates()
+    {
+        ArrayList<String> stateList = ReportHelper.getAllJobStatusList();
+        stateList.remove(Job.PENDING);
+        stateList.remove(Job.READY_TO_BE_DISPATCHED);
         List<ReportJobInfo> reportJobInfoList = new ArrayList<ReportJobInfo>(
                 ReportHelper.getJobInfo(stateList).values());
         if (reportJobInfoList != null && !reportJobInfoList.isEmpty())

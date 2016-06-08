@@ -40,9 +40,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import com.globalsight.config.UserParamNames;
-import com.globalsight.config.UserParameter;
-import com.globalsight.config.UserParameterPersistenceManagerLocal;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
@@ -52,7 +49,6 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
-import com.globalsight.everest.webapp.pagehandler.tasks.TaskThread;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -62,9 +58,6 @@ import com.globalsight.util.SortUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 import com.globalsight.util.zip.ZipIt;
-//import jxl.write.NumberFormat;
-//import jxl.write.WritableCellFormat;
-//import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ReportUtil;
 
 public class ReportHelper
 {
@@ -690,8 +683,7 @@ public class ReportHelper
             allJobStatusList.add(Job.ARCHIVED);
         }
 
-        return (ArrayList<String>) ((ArrayList<String>) allJobStatusList)
-                .clone();
+        return (ArrayList<String>) ((ArrayList<String>) allJobStatusList).clone();
     }
 
 //    public static WritableCellFormat getMoneyFormat(String p_currencyName)

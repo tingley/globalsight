@@ -163,27 +163,11 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
         </amb:column>
         <amb:column label="lb_no_match" width="60px"
              sortBy="<%=TaskComparator.NO_MATCH%>">
-        <%
-            int noMatchWordCount = task.getWorkflow().getNoMatchWordCount();
-            int mtFuzzyNoMatchWordCount = task.getWorkflow().getMtFuzzyNoMatchWordCount();
-            if(task.getWorkflow().getTotalWordCount()>0)
-            {
-                noMatchWordCount -= mtFuzzyNoMatchWordCount;
-            }
-            out.print(noMatchWordCount);
-        %>
+            <%=task.getWorkflow().getNoMatchWordCount()%>
         </amb:column>
         <amb:column label="lb_repetition_word_cnt" width="70px"
              sortBy="<%=TaskComparator.REPETITIONS%>">
-        <%
-           int mtRepetitionsWordCount = task.getWorkflow().getMtRepetitionsWordCount();
-           int repetitionsWordCount = task.getWorkflow().getRepetitionWordCount();
-           if(task.getWorkflow().getTotalWordCount()>0)
-           {
-              repetitionsWordCount -= mtRepetitionsWordCount;
-           }
-           out.print(repetitionsWordCount);
-        %>
+            <%=task.getWorkflow().getRepetitionWordCount()%>
         </amb:column>
 
         <%  if(isInContextMatch) { %>
@@ -191,7 +175,7 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
         <%
 	        }
 	    %>
-        <amb:column label="lb_tm_mt" width="60px" sortBy="<%=TaskComparator.MT_TOTAL %>"><%=task.getWorkflow().getMtTotalWordCount()%></amb:column>
+        
         <amb:column label="lb_total" width="60px" sortBy="<%=TaskComparator.WC_TOTAL%>"><%=task.getWorkflow().getTotalWordCount()%></amb:column>
       </amb:table>
     </td>
@@ -266,52 +250,14 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
         <amb:column label="lb_74_and_below" width="60px" sortBy="<%=TaskComparator.BAND4%>"><%= wf == null ? 0 : wf.getThresholdLowFuzzyWordCount() %></amb:column>
         <%}%>
 
-        <amb:column label="lb_no_match" width="60px" sortBy="<%=TaskComparator.NO_MATCH%>">
-        <%
-            if(wf == null){
-                 out.print(0);
-            }else{
-                 int lowFuzzyWordCount = wf.getThresholdLowFuzzyWordCount();
-                 int noMatchWordCount = wf.getThresholdNoMatchWordCount();
-                 int mtFuzzyNoMatchWordCount = wf.getMtFuzzyNoMatchWordCount();
-                 int noMatchWorcCountForDisplay = lowFuzzyWordCount + noMatchWordCount;
-                 if(wf.getTotalWordCount()>0)
-                 {    
-                   noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
-                 }
-                 out.print(noMatchWorcCountForDisplay);
-                }
-        %>
-        </amb:column>
-        <amb:column label="lb_repetition_word_cnt" width="70px" sortBy="<%=TaskComparator.REPETITIONS%>">
-        <%
-        if(wf == null){
-            out.print(0);
-        }else{
-            int repetitionsWordCount = wf.getRepetitionWordCount();
-            int mtRepetitionsWordCount = wf.getMtRepetitionsWordCount();
-            if(wf.getTotalWordCount()>0)
-            {    
-                repetitionsWordCount -= mtRepetitionsWordCount;
-            }
-            out.print(repetitionsWordCount);
-        }
-        %>
-        </amb:column>
+        <amb:column label="lb_no_match" width="60px" sortBy="<%=TaskComparator.NO_MATCH%>"><%= wf == null ? 0 : wf.getThresholdNoMatchWordCount()%></amb:column>
+        <amb:column label="lb_repetition_word_cnt" width="70px" sortBy="<%=TaskComparator.REPETITIONS%>"><%= wf == null ? 0 : wf.getRepetitionWordCount()%></amb:column>
         <%if (!isDell) {%>
         <%    if(isInContextMatch) { %>
         <amb:column label="lb_in_context_tm" width="120px" sortBy="<%=TaskComparator.IN_CONTEXT%>"><%= task.getWorkflow().getInContextMatchWordCount() %></amb:column>
         <%    }
           }%>
-        <amb:column label="lb_tm_mt" width="60px" sortBy="<%=TaskComparator.MT_TOTAL %>">
-        <% 
-            if(wf == null){
-               out.print(0);
-            }else{
-               out.print(wf.getMtTotalWordCount());
-        }
-        %>
-        </amb:column>
+ 
         <amb:column label="lb_total" width="60px"
              sortBy="<%=TaskComparator.WC_TOTAL%>">
             <%= wf == null ? 0 : wf.getTotalWordCount() %>

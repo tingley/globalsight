@@ -434,8 +434,10 @@ public class Activity extends PersistentObject
 
     public int getCompleteType()
     {
+        // have not upgrade "complete_type" column
         if (completeType == -1)
         {
+            // Not auto complete activity, set to 0 to indicate it has been upgraded.
             if (!getAutoCompleteActivity())
             {
                 completeType = 0;
@@ -448,11 +450,11 @@ public class Activity extends PersistentObject
             {
                 completeType = COMPLETE_TYPE_AFTER_JOB_DISPATCH;
             }
-            else if (afterJobCreation != "" && afterJobCreation != null)
+            else if (afterActivityStart != "" && afterActivityStart != null)
             {
-                completeType = COMPLETE_TYPE_AFTER_JOB_CREATION;
+                completeType = COMPLETE_TYPE_AFTER_ACTIVITY_START;
             }
-            else
+            else if (completeSchedule != null && completeSchedule != "")
             {
                 completeType = COMPLETE_TYPE_SCHEDULE;
             }

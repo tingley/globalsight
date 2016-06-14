@@ -27,6 +27,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.globalsight.everest.edit.offline.xliff.xliff20.Tmx2Xliff20;
+import com.globalsight.everest.edit.offline.xliff.xliff20.Tmx2Xliff20Handler;
 import com.globalsight.ling.common.DiplomatBasicHandler;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.internal.InternalTag;
@@ -239,6 +240,37 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
 
         return false;
     }
+    
+    /**
+     * For xliff 2.0 issues. Add all attribtes from bpt to ept.
+     * 
+     * @param p_strTmxTagName
+     * @param p_hAttributes
+     */
+    private void updateAttributeForEpt(String p_strTmxTagName, Properties p_hAttributes)
+    {
+        if (p_strTmxTagName.equals("ept"))
+        {
+            Vector<TagNode> ns = m_PseudoData.getSrcCompleteTagList();
+            if (ns != null)
+            {
+                for (TagNode n : ns)
+                {
+                    Properties atts = (Properties) n.getAttributes();
+                    if (atts != null)
+                    {
+                        String i = Tmx2Xliff20Handler.getId(p_hAttributes);
+                        String i2 = Tmx2Xliff20Handler.getId(atts);
+                        if (i.equals(i2))
+                        {
+                            p_hAttributes.putAll(atts);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Start-tag event handler.
@@ -296,6 +328,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
             
             try
             {
+                updateAttributeForEpt(p_strTmxTagName, p_hAttributes);
                 // capture source data
                 m_PseudoData.addSourceTagItem(new TagNode(p_strTmxTagName,
                         PTag, p_hAttributes));

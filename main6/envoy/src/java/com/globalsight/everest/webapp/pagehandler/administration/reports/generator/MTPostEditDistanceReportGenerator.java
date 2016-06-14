@@ -332,7 +332,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         Cell cell_H = getCell(summaryHeaderRow, col);
         cell_H.setCellValue(m_bundle.getString("lb_average_edit_distance"));
         cell_H.setCellStyle(getHeaderStyle(p_workBook));
-        p_sheet.setColumnWidth(col, 25 * 256);
+        p_sheet.setColumnWidth(col, 30 * 256);
         col++;
 
         Cell cell_I = getCell(summaryHeaderRow, col);
@@ -375,7 +375,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         Cell cell_D = getCell(detailHeaderRow, col);
         cell_D.setCellValue(m_bundle.getString("lb_post_edit"));
         cell_D.setCellStyle(getHeaderStyle(p_workBook));
-        p_sheet.setColumnWidth(col, 10 * 256);
+        p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
         Cell cell_E = getCell(detailHeaderRow, col);
@@ -938,7 +938,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         { "-r", ref, "-h", hyp, "-o", "sum", "-n", "outputFileName", "-N" };
         boolean writeToFile = false;
         double totalTer = new TERtest().calculateTER(args, hypsegs, refsegs, writeToFile);
-        return this.get3DigitFormater().format(totalTer);
+        return this.get3DigitFormater().format(totalTer * 100);
     }
 
     private void setAllCellStyleNull()

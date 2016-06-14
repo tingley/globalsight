@@ -30,8 +30,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
+import org.apache.log4j.Logger;
+
 public class InstallUtil
 {
+    static Logger logger = Logger.getLogger(InstallUtil.class.getName());
     private static ResourceBundle RESOURCE_NO_UI = ResourceBundle
             .getBundle("data/installNoUI");
     private static ResourceBundle PAGE_PROPERTIES = ResourceBundle
@@ -185,7 +188,7 @@ public class InstallUtil
         }
         catch (IOException e)
         {
-            System.out.println(e.getMessage());
+            logger.error(e.getMessage());
         }
         return value.trim();
     }
@@ -197,7 +200,7 @@ public class InstallUtil
 
     public static String getInput(InputOption option, String Connector)
     {
-        System.out.print(option.getDesplayValue() + " " + Connector + " ");
+        logger.info(option.getDesplayValue() + " " + Connector + " ");
         String userInput = getString();
 
         if (userInput.length() == 0 || option.matches(userInput))
@@ -209,13 +212,13 @@ public class InstallUtil
         String message = MessageFormat.format(RESOURCE_NO_UI
                 .getString(ERROR_SELECT), option.getAcceptString());
 
-        System.out.println(message);
+        logger.info(message);
         return getInput(option, Connector);
     }
 
     public static File getSettingsFile()
     {
-        System.out.print(RESOURCE_NO_UI.getString(INPUT_FILE_PATH));
+        logger.info(RESOURCE_NO_UI.getString(INPUT_FILE_PATH));
         String userInput = getString();
         userInput = userInput.replace('\\', '/');
         if (userInput.length() > 0)
@@ -227,7 +230,7 @@ public class InstallUtil
                 List<File> files = getSettingsFile(file);
                 if (files.size() == 0)
                 {
-                    System.out.println(RESOURCE_NO_UI
+                    logger.info(RESOURCE_NO_UI
                             .getString(ERROR_SEARCH_FILE_PATH));
                 }
                 else
@@ -237,7 +240,7 @@ public class InstallUtil
                         for (int i = 0; i < files.size(); i++)
                         {
                             File f = (File) files.get(i);
-                            System.out.println("    " + (i + 1) + ". "
+                            logger.info("    " + (i + 1) + ". "
                                     + f.getAbsolutePath());
                         }
 
@@ -245,7 +248,7 @@ public class InstallUtil
 
                         while (true)
                         {
-                            System.out.println(RESOURCE_NO_UI
+                            logger.info(RESOURCE_NO_UI
                                     .getString(SELECT_SETTING_FILE));
                             String select = getString();
                             if (select.length() == 0)
@@ -273,7 +276,7 @@ public class InstallUtil
                             arguments.append(" ~ " + files.size());
                             message = MessageFormat.format(message, arguments
                                     .toString());
-                            System.out.println(message);
+                            logger.info(message);
                         }
 
                     }
@@ -282,7 +285,7 @@ public class InstallUtil
                 }
             }
 
-            System.out.println(RESOURCE_NO_UI.getString(ERROR_FILE_PATH));
+            logger.info(RESOURCE_NO_UI.getString(ERROR_FILE_PATH));
             return getSettingsFile();
         }
 
@@ -362,10 +365,10 @@ public class InstallUtil
                     arguments.append(actionKey.get(i));
                 }
                 message = MessageFormat.format(message, arguments.toString());
-                System.out.println(message);
+                logger.info(message);
             }
 
-            System.out.print(RESOURCE_NO_UI.getString(INPUT_SELECT));
+            logger.info(RESOURCE_NO_UI.getString(INPUT_SELECT));
             userInput = getString();
             for (int i = 0; i < actions.size(); i++)
             {

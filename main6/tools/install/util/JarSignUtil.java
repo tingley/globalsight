@@ -23,9 +23,12 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
+import org.apache.log4j.Logger;
+
 public class JarSignUtil 
 {
 
+    static Logger logger = Logger.getLogger(JarSignUtil.class.getName());
 	public static boolean updateMf(File f) 
 	{
 		try 
@@ -88,6 +91,7 @@ public class JarSignUtil
 		} 
 		catch (Exception e) 
 		{
+		    logger.error(e);
 			return false;
 		}
 		
@@ -132,7 +136,7 @@ public class JarSignUtil
 				}
 				else
 				{
-					System.out.println("Signing applet jar: " + f.getName());
+					logger.info("Signing applet jar: " + f.getName());
 				}
 				
 				updateJar(trg, JKS, keyPass, keyAlias);
@@ -142,6 +146,7 @@ public class JarSignUtil
 			catch (Exception e) 
 			{
 				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 		
@@ -160,6 +165,7 @@ public class JarSignUtil
 		catch (Exception e) 
 		{
 		    e.printStackTrace();
+		    logger.error(e);
 			return false;
 		}
 		
@@ -177,6 +183,7 @@ public class JarSignUtil
 		catch (Exception e) 
 		{
 		    e.printStackTrace();
+		    logger.error(e);
 			return false;
 		}
 		

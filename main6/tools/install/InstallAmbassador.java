@@ -255,6 +255,7 @@ public class InstallAmbassador extends InstallerFrame implements
 
     private static boolean checkInstallPath()
     {
+        logger.info("Check Install path is starting...");
         File f = new File(".");
         String path = f.getAbsolutePath();
         path = path.replace("\\", "/");
@@ -264,10 +265,11 @@ public class InstallAmbassador extends InstallerFrame implements
         {
             if (ALLOWD_PATH.indexOf(c) < 0)
             {
+                logger.warn("The Install path is wrong.");
                 return false;
             }
         }
-        
+        logger.info("Check Install path is done.");
         return true;
     }
      
@@ -848,7 +850,7 @@ public class InstallAmbassador extends InstallerFrame implements
                     startProgress("Sign applet jar");
                     signJar();
                     endProgress();
-                    System.out.println("\nDone.");
+                    logger.info("Done.");
                 }
                 catch (Exception ex)
                 {
@@ -1030,7 +1032,7 @@ public class InstallAmbassador extends InstallerFrame implements
         
         if (useUI)
         {
-            System.out.println("Call with -noUI to turn off the Install GUI");
+            logger.info("Call with -noUI to turn off the Install GUI");
             new InstallAmbassador();
         }
         else
@@ -1040,8 +1042,8 @@ public class InstallAmbassador extends InstallerFrame implements
 
             if (!checkInstallPath())
             {
-                System.out.println(bundle.getString("alert.path_containS_space"));
-                System.out.println(bundle.getString("alert.end"));
+                logger.info(bundle.getString("alert.path_containS_space"));
+                logger.info(bundle.getString("alert.end"));
                 try
                 {
                     System.in.read();
@@ -1053,6 +1055,5 @@ public class InstallAmbassador extends InstallerFrame implements
             }
             Install.main(args);
         }
-        logger.info("Installer is done");
     }
 }

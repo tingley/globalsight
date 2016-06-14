@@ -16,8 +16,12 @@
  */
 package util;
 
+import org.apache.log4j.Logger;
+
 public class Utilities
 {
+    static Logger logger = Logger.getLogger(Utilities.class.getName());
+
     public static void requireJava14()
     {
         String javaVersion = System.getProperty("java.version");
@@ -28,8 +32,8 @@ public class Utilities
                 secondDot));
         if (majorVersion < 1 || (majorVersion == 1 && minorVersion < 5))
         {
-            System.out.println("The current version of java is " + javaVersion);
-            System.out.println("This program requires java 1.5 or higher.");
+            logger.info("The current version of java is " + javaVersion);
+            logger.info("This program requires java 1.5 or higher.");
             System.exit(1);
         }
     }

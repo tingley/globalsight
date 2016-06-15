@@ -185,7 +185,7 @@ function doLoad()
 </script>
 </head>
 
-<body onload="doLoad()" onkeypress="doKeypress()">
+<body onload="doLoad()" onkeypress="doKeypress()" >
 
 <DIV ID="idHeading" CLASS="mainHeading">Validation Results</DIV>
 <BR>
@@ -202,7 +202,7 @@ the terms describe different concepts.
 (<B>This window will stay open.</B>)
 </DIV>
 <BR>
-
+<div STYLE="max-height:250px;overflow:auto;">
 <TABLE id="idTable" width="100%"
   CELLPADDING=1 CELLSPACING=0 BORDER=1 CLASS="standardText"
   style="border-style:solid">
@@ -226,6 +226,7 @@ the terms describe different concepts.
   </THEAD>
   <TBODY id="idTableBody"></TBODY>
 </TABLE>
+</div>
 </DIV>
 
 <BR>

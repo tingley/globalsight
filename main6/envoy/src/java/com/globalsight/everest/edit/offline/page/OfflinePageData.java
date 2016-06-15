@@ -42,6 +42,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -2478,12 +2480,39 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
 
     private String convertLf(String s, int tmxLevel)
     {
+        s = replaceWithRE(s);
         String replace = "";
         if (tmxLevel != TmxUtil.TMX_LEVEL_ONE)
         {
             replace = "<ph type=\"LF\">[LF]</ph>";
         }
-        return s.replace("\n", replace);
+        s = s.replace("\n", replace);
+        
+        return s.replace("[PHLF]", "\n");
+    }
+    
+    private String replaceWithRE(String src)
+    {
+        String re = "<ph[\\s].*?>[^<]*?</ph>";
+        Pattern p = Pattern.compile(re);
+        Matcher m = p.matcher(src);
+        StringBuilder output = new StringBuilder();
+        int start = 0;
+        String str = "";
+        while (m.find(start))
+        {
+            // Write out all characters before this matched region
+            output.append(src.substring(start, m.start()));
+            str = src.substring(m.start(), m.end());
+            //<ph> tag within a "\ n" is replaced with [PHLF]
+            str = str.replace("\n", "[PHLF]");
+            output.append(str);
+            start = m.end();
+        }
+        // Handle chars after the last match
+        output.append(src.substring(start));
+
+        return output.toString();
     }
 
     public void writeOfflineTmxFile(OutputStreamWriter p_outputStream, DownloadParams p_params,

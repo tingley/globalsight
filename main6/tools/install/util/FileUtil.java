@@ -28,12 +28,15 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 /**
  * A util class, let operate file more easy.
  * 
  */
 public class FileUtil
 {
+    static Logger logger = Logger.getLogger(FileUtil.class.getName());
     public static String lineSeparator = java.security.AccessController
             .doPrivileged(new sun.security.action.GetPropertyAction(
                     "line.separator"));
@@ -142,6 +145,7 @@ public class FileUtil
         catch (Exception e)
         {
         	e.printStackTrace();
+        	logger.error(e);
         }
         finally
         {
@@ -152,6 +156,7 @@ public class FileUtil
             catch (IOException e)
             {
             	e.printStackTrace();
+            	logger.error(e);
             }
         }
         

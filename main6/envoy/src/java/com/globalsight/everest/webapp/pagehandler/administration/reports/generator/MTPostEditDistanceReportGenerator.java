@@ -332,7 +332,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         Cell cell_H = getCell(summaryHeaderRow, col);
         cell_H.setCellValue(m_bundle.getString("lb_average_edit_distance"));
         cell_H.setCellStyle(getHeaderStyle(p_workBook));
-        p_sheet.setColumnWidth(col, 25 * 256);
+        p_sheet.setColumnWidth(col, 30 * 256);
         col++;
 
         Cell cell_I = getCell(summaryHeaderRow, col);
@@ -375,24 +375,30 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         Cell cell_D = getCell(detailHeaderRow, col);
         cell_D.setCellValue(m_bundle.getString("lb_post_edit"));
         cell_D.setCellStyle(getHeaderStyle(p_workBook));
-        p_sheet.setColumnWidth(col, 10 * 256);
+        p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
         Cell cell_E = getCell(detailHeaderRow, col);
-        cell_E.setCellValue(m_bundle.getString("lb_source"));
+        cell_E.setCellValue(m_bundle.getString("lb_translation_error_rate"));
         cell_E.setCellStyle(getHeaderStyle(p_workBook));
-        p_sheet.setColumnWidth(col, 80 * 256);
+        p_sheet.setColumnWidth(col, 20 * 256);
         col++;
 
         Cell cell_F = getCell(detailHeaderRow, col);
-        cell_F.setCellValue(m_bundle.getString("lb_tm_mt"));
+        cell_F.setCellValue(m_bundle.getString("lb_source"));
         cell_F.setCellStyle(getHeaderStyle(p_workBook));
         p_sheet.setColumnWidth(col, 80 * 256);
         col++;
 
         Cell cell_G = getCell(detailHeaderRow, col);
-        cell_G.setCellValue(m_bundle.getString("lb_translated_text"));
+        cell_G.setCellValue(m_bundle.getString("lb_tm_mt"));
         cell_G.setCellStyle(getHeaderStyle(p_workBook));
+        p_sheet.setColumnWidth(col, 80 * 256);
+        col++;
+
+        Cell cell_H = getCell(detailHeaderRow, col);
+        cell_H.setCellValue(m_bundle.getString("lb_translated_text"));
+        cell_H.setCellStyle(getHeaderStyle(p_workBook));
         p_sheet.setColumnWidth(col, 80 * 256);
         col++;
     }
@@ -522,6 +528,11 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             List<DetailedData> detailedDatas, IntHolder row, GlobalSightLocale sourceLocale,
             GlobalSightLocale targetLocale) throws Exception
     {
+        LinkedHashMap<String, ArrayList<String>> hypsegs = new LinkedHashMap<String, ArrayList<String>>();
+        LinkedHashMap<String, ArrayList<String>> refsegs = new LinkedHashMap<String, ArrayList<String>>();
+        ArrayList<String> hyps = new ArrayList<String>();
+        ArrayList<String> refs = new ArrayList<String>();
+
         boolean m_rtlSourceLocale = EditUtil.isRTLLocale(sourceLocale.toString());
         boolean m_rtlTargetLocale = EditUtil.isRTLLocale(targetLocale.toString());
         for (DetailedData data : detailedDatas)
@@ -549,28 +560,41 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             cell_D.setCellStyle(getContentStyle(p_workBook));
             col++;
 
+            hyps.clear();
+            refs.clear();
+            hypsegs.clear();
+            refsegs.clear();
             Cell cell_E = getCell(curRow, col);
-            String source = data.getSource();
-            cell_E.setCellValue(m_rtlSourceLocale ? EditUtil.toRtlString(source) : source);
-            CellStyle srcStyle = m_rtlSourceLocale ? getRtlContentStyle(p_workBook)
-                    : getContentStyle(p_workBook);
-            cell_E.setCellStyle(srcStyle);
+            hyps.add(data.getMt());
+            hypsegs.put(String.valueOf(data.getTuId()), hyps);
+            refs.add(data.getTarget());
+            refsegs.put(String.valueOf(data.getTuId()), refs);
+            cell_E.setCellValue(calculateTER(hypsegs, refsegs));
+            cell_E.setCellStyle(getContentStyle(p_workBook));
             col++;
 
             Cell cell_F = getCell(curRow, col);
-            String mt = data.getMt();
-            cell_F.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(mt) : mt);
-            CellStyle mtStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
+            String source = data.getSource();
+            cell_F.setCellValue(m_rtlSourceLocale ? EditUtil.toRtlString(source) : source);
+            CellStyle srcStyle = m_rtlSourceLocale ? getRtlContentStyle(p_workBook)
                     : getContentStyle(p_workBook);
-            cell_F.setCellStyle(mtStyle);
+            cell_F.setCellStyle(srcStyle);
             col++;
 
             Cell cell_G = getCell(curRow, col);
+            String mt = data.getMt();
+            cell_G.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(mt) : mt);
+            CellStyle mtStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
+                    : getContentStyle(p_workBook);
+            cell_G.setCellStyle(mtStyle);
+            col++;
+
+            Cell cell_H = getCell(curRow, col);
             String target = data.getTarget();
-            cell_G.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(target) : target);
+            cell_H.setCellValue(m_rtlTargetLocale ? EditUtil.toRtlString(target) : target);
             CellStyle targetStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
                     : getContentStyle(p_workBook);
-            cell_G.setCellStyle(targetStyle);
+            cell_H.setCellStyle(targetStyle);
 
             row.inc();
         }
@@ -936,9 +960,9 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         String hyp = "hyp.txt";
         String[] args = new String[]
         { "-r", ref, "-h", hyp, "-o", "sum", "-n", "outputFileName", "-N" };
-        boolean writeToFile = false;
+        boolean writeToFile = true;
         double totalTer = new TERtest().calculateTER(args, hypsegs, refsegs, writeToFile);
-        return this.get3DigitFormater().format(totalTer);
+        return this.get3DigitFormater().format(totalTer * 100);
     }
 
     private void setAllCellStyleNull()

@@ -430,12 +430,11 @@ public class Install extends installer.EventBroadcaster
             pageName.append(pageNum);
             pageName.append(")");
         }
-        System.out.print(pageName);
+        logger.info(pageName);
         for (int i = 0; i < WIDTH - pageName.length() - 2; i++)
         {
-            System.out.print("-");
+            logger.info("-");
         }
-        System.out.println("\n");
 
         for (int i = min; i < max; i++)
         {
@@ -450,24 +449,22 @@ public class Install extends installer.EventBroadcaster
                     storeProperty.put(option.getKey(), returnValue);
                 }
             }
-            System.out.println(i + 1 + " : " + option.getDesplayValue() + " = "
+            logger.info(i + 1 + " : " + option.getDesplayValue() + " = "
                     + value);
         }
 
-        System.out.println("");
+        logger.info("");
         for (int i = 0; i < actions.size(); i++)
         {
             Action action = (Action) actions.get(i);
 
-            System.out.print(action.toString());
+            logger.info(action.toString());
         }
 
-        System.out.println("\n");
         for (int i = 0; i < WIDTH; i++)
         {
-            System.out.print("-");
+            logger.info("-");
         }
-        System.out.println();
     }
 
     private void loadProperties() throws Exception
@@ -483,12 +480,11 @@ public class Install extends installer.EventBroadcaster
     void installSystem4() throws Exception
     {
         // boolean modifySystemParameterTable = false;
-        System.out.println("\n");
 
         if (!determineOperatingSystem())
         {
-            System.err.println("GlobalSight cannot be installed on this OS.");
-            System.err.println("Install aborted.");
+            logger.error("GlobalSight cannot be installed on this OS.");
+            logger.error("Install aborted.");
             System.exit(1);
         }
 
@@ -502,12 +498,11 @@ public class Install extends installer.EventBroadcaster
     {
         clear();
 
-        System.out.print("\n-- " + TITLE + " ");
+        logger.info("\n-- " + TITLE + " ");
         for (int i = 0; i < WIDTH - TITLE.length() - 4; i++)
         {
-            System.out.print("-");
+            logger.info("-");
         }
-        System.out.println("\n");
 
         List<Action> actions = new ArrayList<Action>();
 
@@ -515,21 +510,18 @@ public class Install extends installer.EventBroadcaster
         actions.add(LOAD_SETTINGS_ACTION);
         actions.add(NEXT_ACTION);
 
-        System.out.println(m_installAmbassador
+        logger.info(m_installAmbassador
                 .getProperty("pre_install_message_no_ui"));
-        System.out.println();
         for (int i = 0; i < actions.size(); i++)
         {
             Action action = (Action) actions.get(i);
-            System.out.print(action.toString());
+            logger.info(action.toString());
         }
 
-        System.out.println("\n");
         for (int i = 0; i < WIDTH; i++)
         {
-            System.out.print("-");
+            logger.info("-");
         }
-        System.out.println("\n");
 
         int inputValue = InstallUtil.getSelection(0, actions);
         for (int i = 0; i < actions.size(); i++)
@@ -675,9 +667,8 @@ public class Install extends installer.EventBroadcaster
             File r = new File(keyStore);
             if (!r.isFile())
             {
-            	System.out.println(m_installAmbassador
+            	logger.info(m_installAmbassador
                         .getProperty("error.keystore_file"));
-                System.out.println();
                 try 
                 {
 					System.in.read();
@@ -720,7 +711,7 @@ public class Install extends installer.EventBroadcaster
 
     private void install() throws Exception
     {
-        System.out.println("\nStoring properties...");
+        logger.info("Storing properties...");
         storeUserInput();
         
         if (!validateJarSign())
@@ -748,35 +739,29 @@ public class Install extends installer.EventBroadcaster
                 InstallUtil.GENERATE_CONFGURATEION_FILE);
         if (generate.equalsIgnoreCase("true"))
         {
-            System.out.println(INSTALL_OPTION_RESOURCE
+            logger.info(INSTALL_OPTION_RESOURCE
                     .getString(InstallUtil.GENERATE_CONFGURATEION_FILE));
-            System.out.println();
             processFiles();
-            System.out.println();
         }
 
         String createService = InstallUtil.getInstallOptions().getProperty(
                 InstallUtil.CREATE_NT_SERVICE);
         if (createService.equalsIgnoreCase("true"))
         {
-            System.out.println(INSTALL_OPTION_RESOURCE
+            logger.info(INSTALL_OPTION_RESOURCE
                     .getString(InstallUtil.CREATE_NT_SERVICE));
-            System.out.println();
             installGlobalSightService();
         }
 
         if (createDatabase.equalsIgnoreCase("true"))
         {
-            System.out.println();
-            System.out.println(INSTALL_OPTION_RESOURCE
+            logger.info(INSTALL_OPTION_RESOURCE
                     .getString(InstallUtil.CREATE_DATABASE));
-            System.out.println();
             createDatabaseTables();
         }
         else
         {
-            System.out.println();
-            System.out.println("Update tables");
+            logger.info("Update tables");
             updateDatabaseTables();
         }
 
@@ -791,8 +776,7 @@ public class Install extends installer.EventBroadcaster
 
         signJar();
         
-        System.out.println();
-        System.out.println(RESOURCE.getString("install_finish"));
+        logger.info(RESOURCE.getString("install_finish"));
         System.in.read();
     }
     
@@ -971,7 +955,7 @@ public class Install extends installer.EventBroadcaster
             }
             else
             {
-                System.err.println("Your OS is not supported.");
+                logger.error("Your OS is not supported.");
             }
 
             // Apply overrides from the environment
@@ -1122,8 +1106,7 @@ public class Install extends installer.EventBroadcaster
     {
         try
         {
-            System.out.print("\nSaving your settings to " + p_fileName
-                    + ".\n\n");
+            logger.info("Saving your settings to " + p_fileName);
             addAdditionalInstallValues();
             String p_fileName_forwardslash= replace(p_fileName.toString(), BACKSLASH, FORWARDSLASH);
             if (p_fileName_forwardslash
@@ -1149,6 +1132,7 @@ public class Install extends installer.EventBroadcaster
             logger.error("Error saving your settings " + p_fileName, e);
             throw e;
         }
+        logger.info("Saving your settings to " + p_fileName+" is done.");
     }
 
     // initializes the list of configuration files
@@ -1550,7 +1534,7 @@ public class Install extends installer.EventBroadcaster
         File sourceFile = new File(sourceFileStr);
         File destFile = new File(destFileStr);
 
-        System.out.print("\nProcessing " + sourceFile.getName() + "...");
+        logger.info("Processing " + sourceFile.getName() + "...");
         fireActionEvent(sourceFile.getName());
 
         destFile.getParentFile().mkdirs();
@@ -1632,7 +1616,7 @@ public class Install extends installer.EventBroadcaster
             throw e;
         }
 
-        System.out.println("done.");
+        logger.info("done.");
     }
 
     // Replacing Substrings in a String
@@ -1684,13 +1668,12 @@ public class Install extends installer.EventBroadcaster
         String ldapInstallDir = m_installValues.getProperty("ldap_install_dir");
         if (ldapInstallDir.startsWith("\\\\"))
         {
-            System.out
-                    .println("OpenLDAP is not installed in the local machine.");
+            logger.info("OpenLDAP is not installed in the local machine.");
             return;
         }
 
         String event = "Initializing OpenLDAP data.";
-        System.out.print("\n" + event);
+        logger.info(event);
 
         fireActionEvent(event);
 
@@ -1709,15 +1692,15 @@ public class Install extends installer.EventBroadcaster
         }
         else
         {
-            System.out.println("Your OS is not supported.");
+            logger.info("Your OS is not supported.");
         }
 
-        System.out.println("done.");
+        logger.info("done.");
     }
 
     public void createDatabaseTables() throws IOException
     {
-        System.out.println("\nDropping GlobalSight tables.");
+        logger.info("Dropping GlobalSight tables.");
 
         for (int i = 0, length = cleanSqlFiles.length; i < length; i++)
         {
@@ -1725,14 +1708,14 @@ public class Install extends installer.EventBroadcaster
                     + cleanSqlFiles[i]));
         }
 
-        System.out.println("\nCreating GlobalSight tables.");
+        logger.info("Creating GlobalSight tables.");
 
         for (int i = 0, length = creationSqlFiles.length; i < length; i++)
         {
             importSqlFile(concatPath(INSTALLATION_DATA_DIRECTORY, "/mysql/"
                     + creationSqlFiles[i]));
         }
-        System.out.println("\nCreating GlobalSight views.");
+        logger.info("Creating GlobalSight views.");
         importSqlFile(concatPath(INSTALLATION_DATA_DIRECTORY,
                 "/mysql/create_views_mysql.sql"));
 
@@ -1746,11 +1729,11 @@ public class Install extends installer.EventBroadcaster
 
     public void updateDatabaseTables() throws IOException
     {
-        System.out.println("\nUpdating SYSTEM_PARAMETER table.");
+        logger.info("Updating SYSTEM_PARAMETER table.");
         importSqlFile(concatPath(INSTALLATION_DATA_DIRECTORY,
                 "/mysql/insert_system_parameters_mysql.sql"));
 
-        System.out.println("\nUpdating EXPORT_LOCATION table.");
+        logger.info("Updating EXPORT_LOCATION table.");
         importSqlFile(concatPath(INSTALLATION_DATA_DIRECTORY,
                 "/mysql/update_exportlocation_mysql.sql"));
     }
@@ -1766,7 +1749,7 @@ public class Install extends installer.EventBroadcaster
         // Make a file just so we can append "quit;" to it
         File sqltemp = new File(sqlfile);
 
-        System.out.println("\nProcessing " + sqlfile + "...");
+        logger.info("Processing " + sqlfile + "...");
         fireActionEvent(sqlfile);
 
         if (m_operatingSystem == OS_LINUX)
@@ -1796,7 +1779,7 @@ public class Install extends installer.EventBroadcaster
             execute(sqlStmt);
         }
 
-        System.out.println("done.");
+        logger.info("done.");
     }
 
     // executes the command and spits output to stdout
@@ -1855,7 +1838,7 @@ public class Install extends installer.EventBroadcaster
             {
                 if (showCmdOutput)
                 {
-                    System.out.println(line);
+                    logger.info(line);
                 }
                 else if (showUIOutput)
                 {
@@ -1868,7 +1851,7 @@ public class Install extends installer.EventBroadcaster
             {
                 if (showError)
                 {
-                    System.out.println(line);
+                    logger.info(line);
                 }
             }
 
@@ -1890,8 +1873,8 @@ public class Install extends installer.EventBroadcaster
     private String readEntry(String prompt, String p_default)
             throws IOException
     {
-        System.out.print(prompt + "[" + p_default + "]: ");
-        System.out.flush();
+        logger.info(prompt + "[" + p_default + "]: ");
+//        System.out.flush();
         BufferedReader input = new BufferedReader(new InputStreamReader(
                 System.in));
         String userInput = input.readLine();
@@ -2120,7 +2103,7 @@ public class Install extends installer.EventBroadcaster
         else
         {
             goodOs = false;
-            System.out.println("Unsupported OS: " + os);
+            logger.info("Unsupported OS: " + os);
         }
 
         return goodOs;
@@ -2141,7 +2124,7 @@ public class Install extends installer.EventBroadcaster
         }
 
         String event = "Creating Start Menu...";
-        System.out.print("\n" + event);
+        logger.info(event);
         fireActionEvent(event);
 
         String cmdPath = concatPath(JBOSS_UTIL_BIN, "CreateStartMenu.cmd");
@@ -2149,7 +2132,7 @@ public class Install extends installer.EventBroadcaster
         try
         {
             Runtime.getRuntime().exec(cmdPath);
-            System.out.println("done.");
+            logger.info("done.");
         }
         catch (IOException ioe)
         {
@@ -2162,7 +2145,7 @@ public class Install extends installer.EventBroadcaster
         if (m_operatingSystem == OS_WINDOWS)
         {
             boolean is64Bit = is64Bit();
-            System.out.println("\nRemoving NT service " + SERVICE_NAME
+            logger.info("Removing NT service " + SERVICE_NAME
                     + " if it is installed...");
             String uninstallCommand = concatPath(JBOSS_UTIL_BIN,
                     "service-win32-uninstall.bat");
@@ -2172,11 +2155,11 @@ public class Install extends installer.EventBroadcaster
                         "service-win64-uninstall.bat");
             }
 
-            System.out.println("Executing " + uninstallCommand);
+            logger.info("Executing " + uninstallCommand);
             execute(uninstallCommand);
-            System.out.println("done.");
+            logger.info("done.");
 
-            System.out.println("\nAdding NT service " + SERVICE_NAME + "...");
+            logger.info("Adding NT service " + SERVICE_NAME + "...");
             String installCommand = concatPath(JBOSS_UTIL_BIN,
                     "service-win32-install.bat");
             if (is64Bit)
@@ -2184,9 +2167,9 @@ public class Install extends installer.EventBroadcaster
                 installCommand = concatPath(JBOSS_UTIL_BIN,
                         "service-win64-install.bat");
             }
-            System.out.println("Executing " + installCommand);
+            logger.info("Executing " + installCommand);
             execute(installCommand);
-            System.out.println("done.");
+            logger.info("done.");
         }
         else if (m_operatingSystem == OS_LINUX)
         {

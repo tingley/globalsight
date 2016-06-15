@@ -2345,7 +2345,6 @@ public class WorkflowManagerLocal implements WorkflowManager
 
         taskClone.setRateSelectionCriteria(p_tib.getRateSelectionCriteria());
         taskClone.setIsReportUploadCheck(p_tib.getIsReportUploadCheck());
-        taskClone.setIsActivityCommentUploadCheck(p_tib.getIsActivityCommentUploadCheck());
         
         // update task name and type
         String taskName = p_tib.getActivityName();

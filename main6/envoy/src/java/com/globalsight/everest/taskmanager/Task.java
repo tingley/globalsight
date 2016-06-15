@@ -643,8 +643,6 @@ public interface Task extends WorkObject
 	public void setIsReportUploaded(int p_isReportUploaded);
 
 	public int getIsReportUploaded();
-	
-	public void setIsActivityCommentUploadCheck(int p_isActivityCommentUploadCheck);
 
 	public int getIsActivityCommentUploadCheck();
 

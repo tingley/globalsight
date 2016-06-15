@@ -301,6 +301,7 @@ public interface SystemConfigParamNames
     public static final String INCTXRV_ENABLE_INDD = "incontext.review.enable.indd";
     public static final String INCTXRV_ENABLE_OFFICE = "incontext.review.enable.office";
     public static final String INCTXRV_ENABLE_XML = "incontext.review.enable.xml";
+    public static final String INCTXRV_ENABLE_HTML = "incontext.review.enable.html";
     public static final String INCTXRV_CONV_DIR_INDD = "incontext.review.dir.indd";
     public static final String INCTXRV_CONV_DIR_OFFICE = "incontext.review.dir.office";
 

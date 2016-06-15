@@ -144,6 +144,7 @@
 	boolean okForInContextReviewXml = PreviewPDFHelper.isXMLEnabled("" + jobImpl.getCompanyId());
 	boolean okForInContextReviewIndd = PreviewPDFHelper.isInDesignEnabled("" + jobImpl.getCompanyId());
 	boolean okForInContextReviewOffice = PreviewPDFHelper.isOfficeEnabled("" + jobImpl.getCompanyId());
+	boolean okForInContextReviewHTML = PreviewPDFHelper.isHTMLEnabled("" + jobImpl.getCompanyId());
 %>
 <html>
 <head>
@@ -1088,7 +1089,8 @@ for (int i = 0; i < jobSourcePageDisplayList.size(); i++)
 	FileProfile fp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(jobSourcePageDisplay.getSourcePage().getRequest().getDataSourceId());
 	
 	String pageNameLow = jobSourcePageDisplay.getSourcePage().getExternalPageId().toLowerCase();
-    boolean isXml = pageNameLow.endsWith(".xml");
+	boolean isXml = pageNameLow.endsWith(".xml");
+	boolean isHTML = pageNameLow.endsWith(".html") || pageNameLow.endsWith(".xhtml") || pageNameLow.endsWith(".htm");
     boolean isInDesign = pageNameLow.endsWith(".indd") || pageNameLow.endsWith(".idml");
     boolean isOffice = pageNameLow.endsWith(".docx") || pageNameLow.endsWith(".pptx") || pageNameLow.endsWith(".xlsx");
     
@@ -1104,6 +1106,10 @@ for (int i = 0; i < jobSourcePageDisplayList.size(); i++)
     if (isOffice)
     {
         enableInContextReivew = okForInContextReviewOffice;
+    }
+    if (isHTML)
+    {
+        enableInContextReivew = okForInContextReviewHTML;
     }
     {%>
        	pageNames[<%=i%>] = "<%=pageName%>";

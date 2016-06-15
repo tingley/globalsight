@@ -684,24 +684,6 @@
       </WebPage>
     </WebActivity>
 
-    <WebActivity webActivityName="mindtouch">
-      <WebPage pageName="mt" isDefault="true" jspName="/envoy/connecter/mindtouch/mindtouchMain.jsp" pageHandlerClassName="com.globalsight.connector.mindtouch.MindTouchMainHandler">
-        <PageLink linkName="self" destinationPageName="mt"></PageLink>
-        <PageLink linkName="new1" destinationPageName="mt2"></PageLink>
-        <PageLink linkName="edit" destinationPageName="mt2"></PageLink>
-        <PageLink linkName="remove" destinationPageName="mt"></PageLink>
-        <PageLink linkName="connect" destinationPageName="mt3"></PageLink>
-      </WebPage>
-      <WebPage pageName="mt2" isDefault="false" jspName="/envoy/connecter/mindtouch/mindtouchBasic.jsp" pageHandlerClassName="com.globalsight.connector.mindtouch.MindTouchBasicHandler">
-        <PageLink linkName="self" destinationPageName="mt2"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="mt"></PageLink>
-        <PageLink linkName="save" destinationPageName="mt"></PageLink>
-      </WebPage>
-      <WebPage pageName="mt3" isDefault="false" jspName="/envoy/connecter/mindtouch/mindtouchCreateJob.jsp" pageHandlerClassName="com.globalsight.connector.mindtouch.MindTouchCreateJobHandler">
-        <PageLink linkName="self" destinationPageName="mt3"></PageLink>
-      </WebPage>
-    </WebActivity>
-
     <WebActivity webActivityName="blaiseConnector">
       <WebPage pageName="blaiseMain" isDefault="true" jspName="/envoy/connecter/blaise/blaiseMain.jsp" pageHandlerClassName="com.globalsight.connector.blaise.BlaiseMainHandler">
         <PageLink linkName="self" destinationPageName="blaiseMain"></PageLink>

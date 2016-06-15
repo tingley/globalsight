@@ -164,7 +164,6 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 logger.error(e);
             }
         }
@@ -749,7 +748,6 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         }
     }
 
-    
     /**
      * To get the name of the task.
      * 
@@ -1394,5 +1392,4 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     {
         return m_marketSuitability;
     }
-
 }

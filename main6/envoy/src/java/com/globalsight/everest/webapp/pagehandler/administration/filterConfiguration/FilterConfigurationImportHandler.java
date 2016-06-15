@@ -1718,6 +1718,7 @@ public class FilterConfigurationImportHandler extends PageHandler
          * @param filterTableName
          * @param newFilterName
          * */
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         private String checkFilterNameExists(String filterName, String filterTableName)
         {
             String hql = null;
@@ -1734,14 +1735,14 @@ public class FilterConfigurationImportHandler extends PageHandler
             map.put("companyId", Long.parseLong(companyId));
             List itList = HibernateUtil.search(hql, map);
 
-            List<String> stringList = new ArrayList<String>();
-            for (int i=0;i<itList.size();i++)
+            List<String> existedNames = new ArrayList<String>();
+            for (int i = 0; i < itList.size(); i++)
             {
-                String name = (String)itList.get(i);
-                stringList.add(name.toLowerCase());
+                String name = (String) itList.get(i);
+                existedNames.add(name.toLowerCase());
             }
 
-            if (stringList.contains(filterName.toLowerCase()))
+            if (existedNames.contains(filterName.toLowerCase()))
             {
                 for (int num = 1;; num++)
                 {
@@ -1755,7 +1756,8 @@ public class FilterConfigurationImportHandler extends PageHandler
                     {
                         returnStr = filterName + "_import_" + num;
                     }
-                    if (!stringList.contains(returnStr.toLowerCase()))
+
+                    if (!existedNames.contains(returnStr.toLowerCase()))
                     {
                         return returnStr;
                     }

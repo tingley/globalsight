@@ -198,6 +198,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     private String mtProfileName = null;
     private String scorecardComment;
     private int scorecardShowType = -1;//-1:Not Showing,0:Optional,1:Required  
+    private boolean isSinceVersion87 = true;
 
     /**
      * Get name of the company this activity belong to.
@@ -1718,5 +1719,15 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     public void setMtProfileName(String mtProfileName)
     {
         this.mtProfileName = mtProfileName;
+    }
+
+    public boolean getIsSinceVersion87()
+    {
+        return isSinceVersion87;
+    }
+
+    public void setIsSinceVersion87(boolean isSinceVersion87)
+    {
+        this.isSinceVersion87 = isSinceVersion87;
     }
 }

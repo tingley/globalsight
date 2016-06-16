@@ -659,4 +659,8 @@ public interface Workflow extends WorkObject
     public String getMtProfileName();
 
     public void setMtProfileName(String mtProfileName);
+
+    public boolean getIsSinceVersion87();
+
+    public void setIsSinceVersion87(boolean isSinceVersion87);
 }

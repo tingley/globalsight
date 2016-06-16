@@ -24,7 +24,7 @@
 
 			<!-- The install directory -->
 			<zipfileset dir="${installclasses}" prefix="${product}/install" />
-			<zipfileset dir="../install" prefix="${product}/install" includes="Install.bat, Install.sh, MergeProperties.bat, MergeProperties.sh, log4j.xml" />
+			<zipfileset dir="../install" prefix="${product}/install" includes="Install.bat, Install.sh, MergeProperties.bat, MergeProperties.sh, log4j.properties" />
 			<zipfileset dir="../install/lib" prefix="${product}/install/lib" includes="log4j.jar" />
             <zipfileset dir="${commonJarLib}" prefix="${product}/install/lib" includes="commons-codec-1.3.jar, ant.jar" />
 

@@ -247,6 +247,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
     // attribute value.
     private HashMap<String, String> tuId2XlfTrgStateMap = new HashMap<String, String>();
 
+    private static Pattern convertLfPattern = Pattern.compile("<ph[\\s].*?>[^<]*?</ph>");
+
     /**
      * Constructor.
      */
@@ -2480,36 +2482,42 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
 
     private String convertLf(String s, int tmxLevel)
     {
-        s = replaceWithRE(s);
-        String replace = "";
-        if (tmxLevel != TmxUtil.TMX_LEVEL_ONE)
+        if (tmxLevel == TmxUtil.TMX_LEVEL_ONE)
         {
-            replace = "<ph type=\"LF\">[LF]</ph>";
+            return StringUtil.replace(s, "\n", "");
         }
-        s = s.replace("\n", replace);
-        
-        return s.replace("[PHLF]", "\n");
+        else
+        {
+            if (s.indexOf("\n") == -1)
+                return s;
+            else
+            {
+                s = protectLfWithinPh(s);
+                s = StringUtil.replace(s, "\n", "<ph type=\"LF\">[LF]</ph>");
+                return StringUtil.replace(s, "[PHLF]", "\n");
+            }
+        }
     }
-    
-    private String replaceWithRE(String src)
+
+    /**
+     * "PH" tag does not allow nested tags, so replace "\n" within "ph" element
+     * to "[PHLF]" then replace them back finally to protect them (GBS-4426).
+     */
+    private String protectLfWithinPh(String src)
     {
-        String re = "<ph[\\s].*?>[^<]*?</ph>";
-        Pattern p = Pattern.compile(re);
-        Matcher m = p.matcher(src);
+        Matcher m = convertLfPattern.matcher(src);
         StringBuilder output = new StringBuilder();
         int start = 0;
         String str = "";
         while (m.find(start))
         {
-            // Write out all characters before this matched region
             output.append(src.substring(start, m.start()));
             str = src.substring(m.start(), m.end());
-            //<ph> tag within a "\ n" is replaced with [PHLF]
+            // "\n" within "<ph>" tag is replaced to "[PHLF]".
             str = str.replace("\n", "[PHLF]");
             output.append(str);
             start = m.end();
         }
-        // Handle chars after the last match
         output.append(src.substring(start));
 
         return output.toString();

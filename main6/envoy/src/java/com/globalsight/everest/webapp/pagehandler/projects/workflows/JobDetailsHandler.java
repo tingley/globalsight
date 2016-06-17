@@ -1080,8 +1080,6 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         L10nProfile l10nProfile = LocProfileHandlerHelper
                 .getL10nProfile(profileId);
 
-        // boolean isUseInContext =
-        // l10nProfile.getTranslationMemoryProfile().getIsContextMatchLeveraging();
         boolean isInContextMatch = isInContextMatch(job);
         p_request.setAttribute(JobManagementHandler.L10NPROFILE_NAME_SCRIPTLET,
                 l10nProfile.getName());

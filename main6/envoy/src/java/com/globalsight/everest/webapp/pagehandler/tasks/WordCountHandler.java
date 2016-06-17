@@ -46,6 +46,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.GeneralException;
 
 /**
@@ -58,6 +59,7 @@ public class WordCountHandler extends PageHandler
     public static String TP_LIST = "targetPages";
     public static String TP_KEY = "targetPage";
     public static String LMT = "LevMatchThreshold";
+    public static String MT_COLUMN_FLAG = "hasMtColumnFlag";
 
     private static final Logger s_logger =
         Logger.getLogger(
@@ -119,11 +121,11 @@ public class WordCountHandler extends PageHandler
             Job job = task.getWorkflow().getJob();
             p_sessionMgr.setAttribute(LMT, job.getLeverageMatchThreshold());
 
-            boolean isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
-            boolean exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();
-            p_request.setAttribute(WebAppConstants.IS_USE_IN_CONTEXT, new Boolean(isUseInContext));
-            p_request.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, new Boolean(exactMatchOnly));
             p_request.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch(job));
+
+            List<Workflow> wfList = new ArrayList<Workflow>();
+            wfList.add(task.getWorkflow());
+            this.setMtColumnFlag(wfList, p_request);
 
             prepareTaskList(p_request, p_session, p_sessionMgr, tasks);
         }
@@ -201,13 +203,8 @@ public class WordCountHandler extends PageHandler
                 {
                     sublist.add(task);
                     Job job = task.getWorkflow().getJob();
-                    sessionMgr.setAttribute(LMT,
-                                job.getLeverageMatchThreshold());
+                    sessionMgr.setAttribute(LMT, job.getLeverageMatchThreshold());
 
-                    boolean isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
-                    boolean exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();
-                    p_request.setAttribute(WebAppConstants.IS_USE_IN_CONTEXT, new Boolean(isUseInContext));
-                    p_request.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, new Boolean(exactMatchOnly));
                     p_request.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch(job));
                 }
             }
@@ -218,13 +215,7 @@ public class WordCountHandler extends PageHandler
             sublist = list;
         }
 
-        /*setTableNavigation(p_request, session, sublist,
-                          new TaskComparator(uiLocale),
-                          10,
-                          TASK_LIST, TASK_KEY);*/
         prepareTaskList(p_request, session, sessionMgr, sublist);
-
-
     }
 
     private void targetPageList(HttpServletRequest p_request)
@@ -249,13 +240,12 @@ public class WordCountHandler extends PageHandler
 //            session, WebAppConstants.WORK_OBJECT);
         Job job = task.getWorkflow().getJob();
         sessionMgr.setAttribute(LMT, job.getLeverageMatchThreshold());
-        
-        boolean isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
-        boolean exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();
-        boolean isInContextMatch = isInContextMatch(job);
-        p_request.setAttribute(WebAppConstants.IS_USE_IN_CONTEXT, new Boolean(isUseInContext));
-        p_request.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, new Boolean(exactMatchOnly));
-        p_request.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch);
+
+        p_request.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch(job));
+
+        List<Workflow> wfList = new ArrayList<Workflow>();
+        wfList.add(task.getWorkflow());
+        this.setMtColumnFlag(wfList, p_request);
 
         ArrayList targetPgs = new ArrayList(task.getTargetPages());
         p_request.setAttribute(TASK_ID, taskIdParam);
@@ -299,5 +289,17 @@ public class WordCountHandler extends PageHandler
 
         p_request.setAttribute(SystemConfigParamNames.IS_DELL,
             new Boolean(isSpecialCustomer));
+    }
+
+    private void setMtColumnFlag(List<Workflow> wfList, HttpServletRequest p_request)
+    {
+        boolean hasMtColumnFlag = false;
+        for (Workflow wf : wfList)
+        {
+            hasMtColumnFlag = (wf.getIsSinceVersion87() && wf.getMtTotalWordCount() > 0);
+            if (hasMtColumnFlag)
+                break;
+        }
+        p_request.setAttribute(MT_COLUMN_FLAG, hasMtColumnFlag);
     }
 }

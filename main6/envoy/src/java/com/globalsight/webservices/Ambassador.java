@@ -2590,7 +2590,6 @@ public class Ambassador extends AbstractWebService
 
             xml.append("\t<workflowInfo>\r\n");
 
-            long l10nprofile = 0l;
             Workflow w = null;
             TranslationMemoryProfile tmp = null;
             TaskInstance taskInstance = null;
@@ -2600,12 +2599,11 @@ public class Ambassador extends AbstractWebService
             Timestamp ts = new Timestamp(Timestamp.DATE, timeZone);
             Locale uiLocale = new Locale(user.getDefaultUILocale());
             ts.setLocale(uiLocale);
-
+            boolean hasMtElementFlag = this.canHaveMtElement(wfs);
             for (Iterator wfi = wfs.iterator(); wfi.hasNext();)
             {
                 currentTaskName = "";
                 w = (Workflow) wfi.next();
-                l10nprofile = w.getJob().getL10nProfileId();
 
                 xml.append("\t\t<workflow>\r\n");
                 xml.append("\t\t\t<id>").append(w.getId()).append("</id>\r\n");
@@ -2678,12 +2676,8 @@ public class Ambassador extends AbstractWebService
                             .append("</completeDate>\r\n");
                 }
 
-                tmp = ServerProxy.getProjectHandler()
-                        .getL10nProfile(l10nprofile)
-                        .getTranslationMemoryProfile();
-
                 xml.append("\t\t\t<isInContextMatch>")
-                        .append(tmp.getIsContextMatchLeveraging())
+                        .append(PageHandler.isInContextMatch(job))
                         .append("</isInContextMatch>\r\n");
                 xml.append("\t\t\t<percentageComplete>")
                         .append(w.getPercentageCompletion())
@@ -2697,7 +2691,8 @@ public class Ambassador extends AbstractWebService
                         .append(w.getSegmentTmWordCount())
                         .append("</segmentTmMatch>\r\n");
                 xml.append("\t\t\t\t<lowFuzzyMatch>")
-                        .append(w.getLowFuzzyMatchWordCount())
+                        .append(hasMtElementFlag ? w.getLowFuzzyMatchWordCount()
+                                - w.getMtFuzzyNoMatchWordCount() : w.getLowFuzzyMatchWordCount())
                         .append("</lowFuzzyMatch>\r\n");
                 xml.append("\t\t\t\t<medFuzzyMatch>")
                         .append(w.getMedFuzzyMatchWordCount())
@@ -2709,7 +2704,8 @@ public class Ambassador extends AbstractWebService
                         .append(w.getHiFuzzyMatchWordCount())
                         .append("</hiFuzzyMatch>\r\n");
                 xml.append("\t\t\t\t<repetitionMatch>")
-                        .append(w.getRepetitionWordCount())
+                        .append(hasMtElementFlag ? w.getRepetitionWordCount()
+                                - w.getMtRepetitionsWordCount() : w.getRepetitionWordCount())
                         .append("</repetitionMatch>\r\n");
                 xml.append("\t\t\t\t<noMatch>").append(w.getNoMatchWordCount())
                         .append("</noMatch>\r\n");
@@ -2719,6 +2715,12 @@ public class Ambassador extends AbstractWebService
                 xml.append("\t\t\t\t<inContextMatch>")
                         .append(w.getInContextMatchWordCount())
                         .append("</inContextMatch>\r\n");
+                if (hasMtElementFlag)
+                {
+                    xml.append("\t\t\t\t<machineTranslated>")
+                            .append(w.getMtTotalWordCount())
+                            .append("</machineTranslated>\r\n");
+                }
                 xml.append("\t\t\t</targetWordCount>\r\n");
                 xml.append("\t\t</workflow>\r\n");
             }
@@ -15650,8 +15652,7 @@ public class Ambassador extends AbstractWebService
             }
 
             Job job = wf.getJob();
-            long l10nProfileId = wf.getJob().getFileProfile()
-                    .getL10nProfileId();
+            boolean hasMtElementFlag = canHaveMtElement(wf);
 
             /** Info of current workflow */
             xml.append("\t<workflowId>").append(p_workflowId)
@@ -15694,34 +15695,13 @@ public class Ambassador extends AbstractWebService
 
             /** Wordcount Summary */
             xml.append("\t<wordCountSummary>\r\n");
+
             // leverageOption
-            String leverageOption = "unknown";
-            boolean isInContextMatch = false;
-            try
-            {
-                TranslationMemoryProfile tmp = ServerProxy.getProjectHandler()
-                        .getL10nProfile(l10nProfileId)
-                        .getTranslationMemoryProfile();
-                if (tmp != null)
-                {
-                    isInContextMatch = tmp.getIsContextMatchLeveraging();
-                }
-
-                if (isInContextMatch)
-                {
-                    leverageOption = "Leverage in context matches";
-                }
-                else
-                {
-                    leverageOption = "100% match only";
-                }
-            }
-            catch (Exception e)
-            {
-
-            }
+            boolean isInContextMatch = PageHandler.isInContextMatch(job);
+            String leverageOption = isInContextMatch ? "Leverage in context matches" : "100% match only";
             xml.append("\t\t<leverageOption>").append(leverageOption)
                     .append("</leverageOption>\r\n");
+
             // 100%
             int wc = 0;
             if (isInContextMatch)
@@ -15745,14 +15725,21 @@ public class Ambassador extends AbstractWebService
             xml.append("\t\t<75%-84%>")
                     .append(wf.getThresholdMedFuzzyWordCount())
                     .append("</75%-84%>\r\n");
-            // noMatch (50%-74%)
-            xml.append("\t\t<noMatch>")
-                    .append(wf.getThresholdNoMatchWordCount()
-                            + wf.getThresholdLowFuzzyWordCount())
-                    .append("</noMatch>\r\n");
+
+            // noMatch (50%-74% & < 50)
+            int noMatch = wf.getThresholdLowFuzzyWordCount() + wf.getThresholdNoMatchWordCount();
+            if (hasMtElementFlag) {
+                noMatch -= wf.getMtFuzzyNoMatchWordCount();
+            }
+            xml.append("\t\t<noMatch>").append(noMatch).append("</noMatch>\r\n");
+
             // Repetitions
-            xml.append("\t\t<repetitions>").append(wf.getRepetitionWordCount())
-                    .append("</repetitions>\r\n");
+            int repetions = wf.getRepetitionWordCount();
+            if (hasMtElementFlag) {
+                repetions -= wf.getMtRepetitionsWordCount();
+            }
+            xml.append("\t\t<repetitions>").append(repetions).append("</repetitions>\r\n");
+
             // In Context Matches
             if (isInContextMatch)
             {
@@ -15760,9 +15747,15 @@ public class Ambassador extends AbstractWebService
                         .append(wf.getInContextMatchWordCount())
                         .append("</InContextMatches>\r\n");
             }
+
+            if (hasMtElementFlag) {
+                xml.append("\t\t<machineTranslated>")
+                        .append(wf.getMtTotalWordCount())
+                        .append("</machineTranslated>\r\n");
+            }
+
             // total
-            xml.append("\t\t<total>").append(wf.getTotalWordCount())
-                    .append("</total>\r\n");
+            xml.append("\t\t<total>").append(wf.getTotalWordCount()).append("</total>\r\n");
             xml.append("\t</wordCountSummary>\r\n");
 
             /** Job comments */
@@ -15986,11 +15979,12 @@ public class Ambassador extends AbstractWebService
                     workflows = new ArrayList<Workflow>(job.getWorkflows());
                     if (workflows != null && workflows.size() > 0)
                     {
+                        boolean hasMtElementFlag = this.canHaveMtElement(workflows);
                         xml.append("\t\t\t<workflows>\r\n");
                         for (Workflow workflow : workflows)
                         {
                             xml.append("\t\t\t\t<workflow>\r\n");
-                            xml.append(generateWorkflowInfo(workflow,
+                            xml.append(generateWorkflowInfo(workflow, hasMtElementFlag,
                                     "\t\t\t\t\t"));
                             xml.append("\t\t\t\t</workflow>\r\n");
                         }
@@ -16024,7 +16018,7 @@ public class Ambassador extends AbstractWebService
         return xml.toString();
     }
 
-    private String generateWorkflowInfo(Workflow workflow, String tab)
+    private String generateWorkflowInfo(Workflow workflow, boolean hasMtElementFlag, String tab)
     {
         StringBuilder xml = new StringBuilder();
 
@@ -16078,29 +16072,8 @@ public class Ambassador extends AbstractWebService
         xml.append(tab).append("<word_counts>\r\n");
 
         // leverageOption
-        String leverageOption = "unknown";
-        boolean isInContextMatch = false;
-        try
-        {
-            Job job = workflow.getJob();
-            if (PageHandler.isInContextMatch(job))
-            {
-                isInContextMatch = true;
-            }
-
-            if (isInContextMatch)
-            {
-                leverageOption = "Leverage in context matches";
-            }
-            else
-            {
-                leverageOption = "Match 100 Percent";
-            }
-        }
-        catch (Exception e)
-        {
-
-        }
+        boolean isInContextMatch = PageHandler.isInContextMatch(workflow.getJob());
+        String leverageOption = isInContextMatch ? "Leverage in context matches" : "100% match only";
         xml.append(tab).append("\t<leverage_option>").append(leverageOption)
                 .append("</leverage_option>\r\n");
 
@@ -16128,16 +16101,23 @@ public class Ambassador extends AbstractWebService
         xml.append(tab).append("\t<match_75_percent-84_percent>")
                 .append(workflow.getThresholdMedFuzzyWordCount())
                 .append("</match_75_percent-84_percent>\r\n");
-        // noMatch (50%-74%)
-        xml.append(tab)
-                .append("\t<no_match>")
-                .append(workflow.getThresholdNoMatchWordCount()
-                        + workflow.getThresholdLowFuzzyWordCount())
-                .append("</no_match>\r\n");
+
+        // noMatch (50%-74% & < 50)
+        int noMatch = workflow.getThresholdNoMatchWordCount()
+                + workflow.getThresholdLowFuzzyWordCount();
+        if (hasMtElementFlag) {
+            noMatch -= workflow.getMtFuzzyNoMatchWordCount();
+        }
+        xml.append(tab).append("\t<no_match>").append(noMatch).append("</no_match>\r\n");
+
         // Repetitions
-        xml.append(tab).append("\t<repetitions>")
-                .append(workflow.getRepetitionWordCount())
+        int repetions = workflow.getRepetitionWordCount();
+        if (hasMtElementFlag) {
+            repetions -= workflow.getMtRepetitionsWordCount();
+        }
+        xml.append(tab).append("\t<repetitions>").append(hasMtElementFlag)
                 .append("</repetitions>\r\n");
+
         // In Context Matches
         if (isInContextMatch)
         {
@@ -16145,6 +16125,13 @@ public class Ambassador extends AbstractWebService
                     .append(workflow.getInContextMatchWordCount())
                     .append("</in_context_match>\r\n");
         }
+
+        if (hasMtElementFlag) {
+            xml.append(tab).append("\t<machine_translated>")
+                    .append(workflow.getMtTotalWordCount())
+                    .append("</machine_translated>\r\n");
+        }
+
         // total
         xml.append(tab).append("\t<total>")
                 .append(workflow.getTotalWordCount()).append("</total>\r\n");
@@ -17652,19 +17639,18 @@ public class Ambassador extends AbstractWebService
                     .append("</word_count>\r\n");
 
             Collection wfs = job.getWorkflows();
-
+            boolean hasMtElementFlag = this.canHaveMtElement(wfs);
             xml.append("\t\t<workflows>\r\n");
 
             Workflow workflow = null;
             TaskInstance taskInstance = null;
             String currentTaskName = "", tmp = "";
-
             for (Iterator wfi = wfs.iterator(); wfi.hasNext();)
             {
                 currentTaskName = "";
                 workflow = (Workflow) wfi.next();
 
-                tmp = getWorkflowInfo(workflow, "\t\t\t");
+                tmp = getWorkflowInfo(workflow, hasMtElementFlag, "\t\t\t");
                 xml.append(tmp);
             }
             xml.append("\t\t</workflows>\r\n");
@@ -17690,7 +17676,7 @@ public class Ambassador extends AbstractWebService
      *            Tab string as prefix, such as '\t\t'
      * @return String workflow info in xml format
      */
-    private String getWorkflowInfo(Workflow workflow, String tab)
+    private String getWorkflowInfo(Workflow workflow, boolean hasMtElementFlag, String tab)
     {
         StringBuilder xml = new StringBuilder();
         TaskInstance taskInstance = null;
@@ -17761,30 +17747,11 @@ public class Ambassador extends AbstractWebService
 
         /** Wordcount Summary */
         xml.append(tab).append("\t<word_counts>\r\n");
+
         // leverageOption
-        String leverageOption = "unknown";
-        boolean isInContextMatch = false;
-        try
-        {
-            Job job = workflow.getJob();
-            if (PageHandler.isInContextMatch(job))
-            {
-                isInContextMatch = true;
-            }
-
-            if (isInContextMatch)
-            {
-                leverageOption = "Leverage in context matches";
-            }
-            else
-            {
-                leverageOption = "100% match only";
-            }
-        }
-        catch (Exception e)
-        {
-
-        }
+        Job job = workflow.getJob();
+        boolean isInContextMatch = PageHandler.isInContextMatch(job);
+        String leverageOption = isInContextMatch ? "Leverage in context matches" : "100% match only";
         xml.append(tab).append("\t\t<leverage_option>").append(leverageOption)
                 .append("</leverage_option>\r\n");
         // 100%
@@ -17811,16 +17778,22 @@ public class Ambassador extends AbstractWebService
         xml.append(tab).append("\t\t<match_75_percent-84_percent>")
                 .append(workflow.getThresholdMedFuzzyWordCount())
                 .append("</match_75_percent-84_percent>\r\n");
-        // noMatch (50%-74%)
-        xml.append(tab)
-                .append("\t\t<no_match>")
-                .append(workflow.getThresholdNoMatchWordCount()
-                        + workflow.getThresholdLowFuzzyWordCount())
-                .append("</no_match>\r\n");
+
+        // noMatch (50%-74% & < 50)
+        int noMatch = workflow.getThresholdNoMatchWordCount()
+                + workflow.getThresholdLowFuzzyWordCount();
+        if (hasMtElementFlag) {
+            noMatch -= workflow.getMtFuzzyNoMatchWordCount();
+        }
+        xml.append(tab).append("\t\t<no_match>").append(noMatch).append("</no_match>\r\n");
+
         // Repetitions
-        xml.append(tab).append("\t\t<repetitions>")
-                .append(workflow.getRepetitionWordCount())
-                .append("</repetitions>\r\n");
+        int repetions = workflow.getRepetitionWordCount();
+        if (hasMtElementFlag) {
+            repetions -= workflow.getMtRepetitionsWordCount();
+        }
+        xml.append(tab).append("\t\t<repetitions>").append(repetions).append("</repetitions>\r\n");
+
         // In Context Matches
         if (isInContextMatch)
         {
@@ -17828,9 +17801,14 @@ public class Ambassador extends AbstractWebService
                     .append(workflow.getInContextMatchWordCount())
                     .append("</in_context_matches>\r\n");
         }
+
+        if (hasMtElementFlag) {
+            xml.append(tab).append("\t\t<machine_translated>")
+                    .append(workflow.getMtTotalWordCount()).append("</machine_translated>\r\n");
+        }
+
         // total
-        xml.append(tab).append("\t\t<total>")
-                .append(workflow.getTotalWordCount()).append("</total>\r\n");
+        xml.append(tab).append("\t\t<total>").append(workflow.getTotalWordCount()).append("</total>\r\n");
         xml.append(tab).append("\t</word_counts>\r\n");
 
         if (workflow.getCompletedDate() != null)
@@ -20424,5 +20402,28 @@ public class Ambassador extends AbstractWebService
                 activityStart.end();
             }
         }
+    }
+
+    private boolean canHaveMtElement(Workflow wf)
+    {
+        List<Workflow> wfs = new ArrayList<Workflow>();
+        return canHaveMtElement(wfs);
+    }
+
+    /**
+     * If any workflow has MTed segments, return true.
+     */
+    private boolean canHaveMtElement(Collection<Workflow> wfs)
+    {
+        boolean flag = false;
+        for (Workflow wf : wfs)
+        {
+            flag = (wf.getIsSinceVersion87() && wf.getMtTotalWordCount() > 0);
+            if (flag)
+            {
+                break;
+            }
+        }
+        return flag;
     }
 }

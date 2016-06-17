@@ -19,7 +19,7 @@ public class GlobalSightJarUtil {
 			throws Exception {
 		if (PATH == null) {
 			String path = ServerUtil.getPath()
-					+ "/jboss/server/standalone/deployments/globalsight.ear/globalsight.jar";
+					+ "/jboss/server/standalone/deployments/globalsight.ear/lib/globalsight.jar";
 			File tempJar = unzip(path);
 			if (tempJar != null) {
 				PATH = tempJar.getAbsolutePath() + "/";

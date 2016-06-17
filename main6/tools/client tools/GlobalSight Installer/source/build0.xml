@@ -58,14 +58,9 @@
 				<include name="log4j.xml" />
 			</fileset>
 		</copy>
-		<copy verbose="${verbose}" overwrite="true" todir="installer_root">
-			<fileset dir=".">
-				<include name="config.properties" />
-			</fileset>
-		</copy>
 	</target>
 
-	<target name="buildPatch" depends="buildIstaller">
+	<target name="buildPatch" depends="buildInstaller">
 
 		<copy verbose="${verbose}" overwrite="true" todir="installer_root/installer/data">
 			<fileset dir="${patch}">
@@ -74,7 +69,7 @@
 		</copy>
 	</target>
 	
-	<target name="buildServer" depends="buildIstaller">
+	<target name="buildServer" depends="buildInstaller">
 
 			<copy verbose="${verbose}" overwrite="true" todir="${serverSysteminfo.dir}">
 				<fileset dir=".">

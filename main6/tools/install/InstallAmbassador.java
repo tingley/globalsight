@@ -1,3 +1,4 @@
+
 /**
  *  Copyright 2009 Welocalize, Inc. 
  *  
@@ -15,11 +16,6 @@
  *  
  */
 
-import installer.InputField;
-import installer.InstallerFrame;
-import installer.SwingWorker;
-import util.FileUtil;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -33,11 +29,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.Properties;
@@ -55,15 +49,16 @@ import javax.swing.ToolTipManager;
 
 import org.apache.log4j.Logger;
 
+import installer.InputField;
+import installer.InstallerFrame;
+import installer.SwingWorker;
 import util.JarSignUtil;
 import util.Utilities;
 
-public class InstallAmbassador extends InstallerFrame implements
-        ActionListener, WindowListener
+public class InstallAmbassador extends InstallerFrame implements ActionListener, WindowListener
 {
-    
     static Logger logger = Logger.getLogger(InstallAmbassador.class.getName());
-    
+
     private static final long serialVersionUID = -1970811861866186170L;
 
     // Constants
@@ -118,9 +113,9 @@ public class InstallAmbassador extends InstallerFrame implements
     private int m_appServerScreenNum;
 
     private String previousAmbassadorHome = "../..";
-    
+
     private static final String ALLOWD_PATH = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-0123456789./";
-    
+
     private String JKS, keyPass, keyAlias;
 
     public InstallAmbassador()
@@ -144,8 +139,7 @@ public class InstallAmbassador extends InstallerFrame implements
             // Set the dependency among the parameters
             setParameterDependency();
 
-            m_loadSettingsButton.setText(m_installAmbassadorProperties
-                    .getString("load_settings"));
+            m_loadSettingsButton.setText(m_installAmbassadorProperties.getString("load_settings"));
             m_loadSettingsButton.setFont(m_font.deriveFont(Font.PLAIN));
             buttonsPanel.add(m_loadSettingsButton, 1);
             m_loadSettingsButton.addActionListener(this);
@@ -156,8 +150,7 @@ public class InstallAmbassador extends InstallerFrame implements
             double maxWidth = 0;
             for (int i = 0; i < m_inputFieldList.size(); i++)
             {
-                Dimension curDim = ((InputField) m_inputFieldList.get(i))
-                        .getLabelPreferredSize();
+                Dimension curDim = ((InputField) m_inputFieldList.get(i)).getLabelPreferredSize();
 
                 if (maxWidth < curDim.getWidth())
                 {
@@ -167,12 +160,10 @@ public class InstallAmbassador extends InstallerFrame implements
 
             for (int i = 0; i < m_inputFieldList.size(); i++)
             {
-                Dimension curDim = ((InputField) m_inputFieldList.get(i))
-                        .getLabelPreferredSize();
+                Dimension curDim = ((InputField) m_inputFieldList.get(i)).getLabelPreferredSize();
 
                 curDim.setSize(maxWidth + 5, curDim.getHeight());
-                ((InputField) m_inputFieldList.get(i))
-                        .setLabelPreferredSize(curDim);
+                ((InputField) m_inputFieldList.get(i)).setLabelPreferredSize(curDim);
             }
             this.addWindowListener(this);
 
@@ -219,21 +210,21 @@ public class InstallAmbassador extends InstallerFrame implements
 
     private void initialize() throws IOException
     {
-        m_installAmbassadorProperties = ResourceBundle.getBundle(
-                INSTALL_UI_PROPERTIES, s_locale);
+        m_installAmbassadorProperties = ResourceBundle.getBundle(INSTALL_UI_PROPERTIES, s_locale);
 
         if (!checkInstallPath())
         {
-            showErrorDialogAndQuit(m_installAmbassadorProperties.getString("alert.path_containS_space"));
+            showErrorDialogAndQuit(
+                    m_installAmbassadorProperties.getString("alert.path_containS_space"));
         }
-        
+
         // Check the OS
         if (!m_installer.determineOperatingSystem())
         {
-            Object[] args = { System.getProperty("os.name") };
-            showErrorDialogAndQuit(MessageFormat.format(
-                    m_installAmbassadorProperties
-                            .getString("alert.unsupported_os"), args));
+            Object[] args =
+            { System.getProperty("os.name") };
+            showErrorDialogAndQuit(MessageFormat
+                    .format(m_installAmbassadorProperties.getString("alert.unsupported_os"), args));
         }
 
         // The order of the parameters
@@ -241,11 +232,9 @@ public class InstallAmbassador extends InstallerFrame implements
         // The default values
         m_installer.loadInstallValues();
 
-        m_groupProperties = m_installer
-                .loadProperties(INSTALL_GROUPS_PROPERTIES_FILE);
+        m_groupProperties = m_installer.loadProperties(INSTALL_GROUPS_PROPERTIES_FILE);
 
-        m_confirmAdvance = m_installAmbassadorProperties
-                .getString("alert.confirm_advance_screen");
+        m_confirmAdvance = m_installAmbassadorProperties.getString("alert.confirm_advance_screen");
         setVerticalGap(0);
         setHorizontalGap(0);
 
@@ -272,25 +261,23 @@ public class InstallAmbassador extends InstallerFrame implements
         logger.info("Check Install path is done.");
         return true;
     }
-     
+
     private void createInfoScreen()
     {
-        addScreen(createTextScreen(m_installAmbassadorProperties
-                .getString("pre_install_message")));
+        addScreen(createTextScreen(m_installAmbassadorProperties.getString("pre_install_message")));
     }
 
     private void createInstallParameterScreens() throws Exception
     {
         // Get the text of the parameters to display
-        ResourceBundle installDisplay = ResourceBundle.getBundle(
-                INSTALL_DISPLAY_PROPERTIES, s_locale);
+        ResourceBundle installDisplay = ResourceBundle.getBundle(INSTALL_DISPLAY_PROPERTIES,
+                s_locale);
         // The value types, which determine the type of control for
         // each parameter
         Properties installValueTypes;
         try
         {
-            installValueTypes = m_installer
-                    .loadProperties(INSTALL_VALUE_TYPES_PROPERTIES_FILE);
+            installValueTypes = m_installer.loadProperties(INSTALL_VALUE_TYPES_PROPERTIES_FILE);
         }
         catch (IOException ex)
         {
@@ -302,8 +289,8 @@ public class InstallAmbassador extends InstallerFrame implements
         }
 
         // Get the list of screens from the properties
-        ArrayList<String> screensFromProperties = parseList(m_groupProperties
-                .getProperty("screen_list"));
+        ArrayList<String> screensFromProperties = parseList(
+                m_groupProperties.getProperty("screen_list"));
 
         // Set the layout to put each item in a separate row. The
         // item's height is the default, while its width fills the
@@ -325,13 +312,11 @@ public class InstallAmbassador extends InstallerFrame implements
             // Check to see if the parameters are defined for this
             // screen, and throw an exception if not.
             keyExists(m_groupProperties, screenKey,
-                    "The list of parameters for the screen " + screenKey
-                            + " is not found.");
+                    "The list of parameters for the screen " + screenKey + " is not found.");
 
             // Get the controls in the current screen, and add them to
             // m_installOrder
-            ArrayList<String> parameterList = parseList(m_groupProperties
-                    .getProperty(screenKey));
+            ArrayList<String> parameterList = parseList(m_groupProperties.getProperty(screenKey));
 
             // Create the GUI for the current screen
             JPanel gridPanel = new JPanel(gridbag);
@@ -345,12 +330,10 @@ public class InstallAmbassador extends InstallerFrame implements
             JScrollPane scrollPane = new JScrollPane(innerPanel);
 
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
-            JPanel parameterScreen = titleAndPadPanel(scrollPane,
-                    parameterScreenTitle, "");
+            JPanel parameterScreen = titleAndPadPanel(scrollPane, parameterScreenTitle, "");
 
             // Add the controls to the current screen
-            addParametersToScreen(parameterList, installDisplay,
-                    installValueTypes, gridPanel);
+            addParametersToScreen(parameterList, installDisplay, installValueTypes, gridPanel);
 
             // Go through the controls and set their layout constraints
             Component[] params = gridPanel.getComponents();
@@ -376,8 +359,8 @@ public class InstallAmbassador extends InstallerFrame implements
     }
 
     private void addParametersToScreen(ArrayList<String> p_parameterList,
-            ResourceBundle p_installDisplay, Properties p_installValueTypes,
-            JPanel p_gridPanel) throws Exception
+            ResourceBundle p_installDisplay, Properties p_installValueTypes, JPanel p_gridPanel)
+            throws Exception
     {
         for (int i = 0; i < p_parameterList.size(); i++)
         {
@@ -401,8 +384,7 @@ public class InstallAmbassador extends InstallerFrame implements
             {
                 try
                 {
-                    typesList = parseList(p_installValueTypes
-                            .getProperty(controlKey));
+                    typesList = parseList(p_installValueTypes.getProperty(controlKey));
                 }
                 catch (java.util.MissingResourceException ex)
                 {
@@ -414,11 +396,10 @@ public class InstallAmbassador extends InstallerFrame implements
                 }
             }
 
-            InputField parameter = new InputField(installDisplay, typesList,
-                    installValue, getNumberOfScreens());
+            InputField parameter = new InputField(installDisplay, typesList, installValue,
+                    getNumberOfScreens());
 
-            if (controlKey.endsWith("install_key")
-                    || controlKey.endsWith("_adapters"))
+            if (controlKey.endsWith("install_key") || controlKey.endsWith("_adapters"))
             {
                 parameter.setValidationMode(InputField.DONT_VALIDATE);
                 parameter.setDefaultValue("0");
@@ -430,8 +411,7 @@ public class InstallAmbassador extends InstallerFrame implements
 
             try
             {
-                String toolTip = p_installDisplay.getString(
-                        controlKey + ".tooltip").trim();
+                String toolTip = p_installDisplay.getString(controlKey + ".tooltip").trim();
                 parameter.setToolTipText(toolTip);
             }
             catch (java.util.MissingResourceException ex)
@@ -450,8 +430,7 @@ public class InstallAmbassador extends InstallerFrame implements
 
     private void createInstallOptionsScreen()
     {
-        String optionsScreenTitle = m_installAmbassadorProperties
-                .getString("options_screen.title");
+        String optionsScreenTitle = m_installAmbassadorProperties.getString("options_screen.title");
         boolean needCreateNtServiceOption = false;
 
         // Only add the NT Service check box for Windows, which will be
@@ -473,33 +452,27 @@ public class InstallAmbassador extends InstallerFrame implements
         checkboxList.add(m_createDataBaseCheckBox);
 
         ArrayList<String> checkboxNameList = new ArrayList<String>();
-        checkboxNameList.add(m_installAmbassadorProperties
-                .getString("copy_configuration"));
-        checkboxNameList.add(m_installAmbassadorProperties
-                .getString("merge_properties"));
+        checkboxNameList.add(m_installAmbassadorProperties.getString("copy_configuration"));
+        checkboxNameList.add(m_installAmbassadorProperties.getString("merge_properties"));
         if (needCreateNtServiceOption)
         {
-            checkboxNameList.add(m_installAmbassadorProperties
-                    .getString("create_nt_service"));
+            checkboxNameList.add(m_installAmbassadorProperties.getString("create_nt_service"));
         }
-        checkboxNameList.add(m_installAmbassadorProperties
-                .getString("create_database"));
+        checkboxNameList.add(m_installAmbassadorProperties.getString("create_database"));
 
-        JPanel checkboxesInnerPanel = new JPanel(new GridLayout(checkboxList
-                .size(), 1));
+        JPanel checkboxesInnerPanel = new JPanel(new GridLayout(checkboxList.size(), 1));
         for (int i = 0; i < checkboxList.size(); i++)
         {
             JCheckBox checkbox = (JCheckBox) checkboxList.get(i);
             checkbox.setText((String) checkboxNameList.get(i));
-            checkbox.setSelected(checkbox != m_createDataBaseCheckBox
-                    && checkbox != m_mergePropertiesCheckBox);
+            checkbox.setSelected(
+                    checkbox != m_createDataBaseCheckBox && checkbox != m_mergePropertiesCheckBox);
             checkbox.setFont(m_font);
             checkbox.setBackground(m_bgColor);
             checkboxesInnerPanel.add(checkbox);
         }
 
-        JPanel checkboxesOutterPanel = new JPanel(new FlowLayout(
-                FlowLayout.LEFT));
+        JPanel checkboxesOutterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         checkboxesOutterPanel.add(checkboxesInnerPanel);
 
         // Add the progress bar and the two labels for the progress bar
@@ -507,8 +480,7 @@ public class InstallAmbassador extends InstallerFrame implements
         JPanel progressInnerPanel = new JPanel(new GridLayout(3, 1));
         m_progressBar = new JProgressBar();
 
-        m_fileCopyLabel.setFont(m_font.deriveFont(Font.PLAIN,
-                m_font.getSize() - 1));
+        m_fileCopyLabel.setFont(m_font.deriveFont(Font.PLAIN, m_font.getSize() - 1));
         m_groupCopyLabel.setFont(m_font.deriveFont(Font.PLAIN));
         m_progressBar.setPreferredSize(new Dimension(520, 20));
         m_progressBar.setOpaque(false);
@@ -525,13 +497,12 @@ public class InstallAmbassador extends InstallerFrame implements
         progressPanel.setSize(800, 30);
 
         JPanel checkboxAndProgressPanel = new JPanel(new BorderLayout());
-        checkboxAndProgressPanel
-                .add(checkboxesOutterPanel, BorderLayout.CENTER);
+        checkboxAndProgressPanel.add(checkboxesOutterPanel, BorderLayout.CENTER);
         checkboxAndProgressPanel.add(progressPanel, BorderLayout.SOUTH);
         setVerticalGap(30);
         setHorizontalGap(50);
-        JPanel installOptionsScreen = titleAndPadPanel(
-                checkboxAndProgressPanel, optionsScreenTitle, "");
+        JPanel installOptionsScreen = titleAndPadPanel(checkboxAndProgressPanel, optionsScreenTitle,
+                "");
         setVerticalGap(0);
         setHorizontalGap(0);
 
@@ -544,8 +515,7 @@ public class InstallAmbassador extends InstallerFrame implements
         addScreen(installOptionsScreen);
     }
 
-    private void setParameterDependency() throws IOException,
-            MissingResourceException
+    private void setParameterDependency() throws IOException, MissingResourceException
     {
         String parentList = m_groupProperties.getProperty("parent_controls");
 
@@ -557,8 +527,7 @@ public class InstallAmbassador extends InstallerFrame implements
             {
                 String key = (String) parentControls.get(i);
                 keyExists(m_groupProperties, key,
-                        "The list of parameters dependent on " + key
-                                + " is not found.");
+                        "The list of parameters dependent on " + key + " is not found.");
 
                 String group = m_groupProperties.getProperty(key);
                 if (group != null)
@@ -575,10 +544,8 @@ public class InstallAmbassador extends InstallerFrame implements
                     {
                         // Find the child control using the index of
                         // the parameter
-                        int index = m_installOrder
-                                .indexOf(((String) childControls.get(j)).trim());
-                        InputField child = (InputField) m_inputFieldList
-                                .get(index);
+                        int index = m_installOrder.indexOf(((String) childControls.get(j)).trim());
+                        InputField child = (InputField) m_inputFieldList.get(index);
                         parent.addChild(child);
                     }
 
@@ -588,21 +555,20 @@ public class InstallAmbassador extends InstallerFrame implements
         }
     }
 
-    private void keyExists(Properties p_properties, String p_key,
-            String p_message) throws MissingResourceException
+    private void keyExists(Properties p_properties, String p_key, String p_message)
+            throws MissingResourceException
     {
         if (!p_properties.containsKey(p_key))
         {
-            MissingResourceException ex = new MissingResourceException(
-                    p_message, getClass().getName(), p_key);
+            MissingResourceException ex = new MissingResourceException(p_message,
+                    getClass().getName(), p_key);
             throw ex;
         }
     }
 
     private void saveInstallValues()
     {
-        String saveFailureText = m_installAmbassadorProperties
-                .getString("save_param_failure");
+        String saveFailureText = m_installAmbassadorProperties.getString("save_param_failure");
 
         try
         {
@@ -611,8 +577,7 @@ public class InstallAmbassador extends InstallerFrame implements
                 InputField parameter = (InputField) m_inputFieldList.get(i);
 
                 String userInput = parameter.getValue();
-                m_installer.setInstallValue(m_installOrder.get(i).toString(),
-                        userInput);
+                m_installer.setInstallValue(m_installOrder.get(i).toString(), userInput);
             }
 
             m_installer.addAdditionalInstallValues();
@@ -627,8 +592,7 @@ public class InstallAmbassador extends InstallerFrame implements
 
     private void startProgress(String textLabel)
     {
-        String preparationText = m_installAmbassadorProperties
-                .getString("preparing");
+        String preparationText = m_installAmbassadorProperties.getString("preparing");
 
         m_groupCopyLabel.setText(textLabel);
         m_fileCopyLabel.setText(preparationText);
@@ -643,18 +607,18 @@ public class InstallAmbassador extends InstallerFrame implements
 
     private boolean validateJarSign()
     {
-    	boolean enable = "true".equalsIgnoreCase(m_installer.getInstallValue("jar_sign_enable"));
-    	if (enable)
-    	{
+        boolean enable = "true".equalsIgnoreCase(m_installer.getInstallValue("jar_sign_enable"));
+        if (enable)
+        {
             String keyStore = m_installer.getInstallValue("jar_sign_jks");
             keyStore = keyStore.trim();
             File r = new File(keyStore);
             if (!r.isFile())
             {
-            	showErrorDialog(m_installAmbassadorProperties.getString("error.keystore_file"));
-            	return false;
+                showErrorDialog(m_installAmbassadorProperties.getString("error.keystore_file"));
+                return false;
             }
-            
+
             keyStore = r.getAbsolutePath();
             String keyPass = m_installer.getInstallValue("jar_sign_pwd");
             String keyAlias = m_installer.getInstallValue("jar_sign_keyAlias");
@@ -668,8 +632,8 @@ public class InstallAmbassador extends InstallerFrame implements
             }
             else
             {
-                int confirmation = showQuestionDialog(m_installAmbassadorProperties
-                        .getString("alert.keystore_password"),
+                int confirmation = showQuestionDialog(
+                        m_installAmbassadorProperties.getString("alert.keystore_password"),
                         InstallerFrame.NO_OPTION);
 
                 if (confirmation == InstallerFrame.NO_OPTION)
@@ -677,11 +641,11 @@ public class InstallAmbassador extends InstallerFrame implements
                     return false;
                 }
             }
-    	}
-    	
-    	return true;
+        }
+
+        return true;
     }
-    
+
     private void doInstall()
     {
         final String confirmCreateDBText = m_installAmbassadorProperties
@@ -692,17 +656,16 @@ public class InstallAmbassador extends InstallerFrame implements
                 .getString("installation_failure");
         final String updateDatabaseText = m_installAmbassadorProperties
                 .getString("update_database");
-        
+
         if (!validateJarSign())
         {
-        	return;
+            return;
         }
 
         // If Create Database is selected, then confirm before executing
         if (m_createDataBaseCheckBox.isSelected())
         {
-            int confirmation = showQuestionDialog(confirmCreateDBText,
-                    InstallerFrame.NO_OPTION);
+            int confirmation = showQuestionDialog(confirmCreateDBText, InstallerFrame.NO_OPTION);
 
             if (confirmation == InstallerFrame.NO_OPTION)
             {
@@ -716,11 +679,13 @@ public class InstallAmbassador extends InstallerFrame implements
         {
             public void finished()
             {
-                StringBuilder gsUrl = new StringBuilder(m_installAmbassadorProperties.getString("login_message"));
+                StringBuilder gsUrl = new StringBuilder(
+                        m_installAmbassadorProperties.getString("login_message"));
 
-                
-                boolean enableSSL = "true".equalsIgnoreCase(m_installer.getInstallValue("server_ssl_enable"));
-                boolean usePublicUrl = "true".equalsIgnoreCase(m_installer.getInstallValue("cap_public_url_enable"));
+                boolean enableSSL = "true"
+                        .equalsIgnoreCase(m_installer.getInstallValue("server_ssl_enable"));
+                boolean usePublicUrl = "true"
+                        .equalsIgnoreCase(m_installer.getInstallValue("cap_public_url_enable"));
 
                 if (usePublicUrl)
                 {
@@ -744,8 +709,7 @@ public class InstallAmbassador extends InstallerFrame implements
                     gsUrl.append("/globalsight");
                 }
 
-                m_fileCopyLabel.setFont(m_font.deriveFont(Font.PLAIN, m_font
-                        .getSize()));
+                m_fileCopyLabel.setFont(m_font.deriveFont(Font.PLAIN, m_font.getSize()));
                 m_fileCopyLabel.setText(gsUrl.toString());
                 m_groupCopyLabel.setText(installationSuccessText);
                 m_quitButton.setText("Close");
@@ -756,8 +720,7 @@ public class InstallAmbassador extends InstallerFrame implements
                     setVisible(false);
                     try
                     {
-                        new MergePropertiesGUI(previousAmbassadorHome,
-                                Install.GS_HOME);
+                        new MergePropertiesGUI(previousAmbassadorHome, Install.GS_HOME);
                     }
                     catch (IOException ex)
                     {
@@ -777,8 +740,7 @@ public class InstallAmbassador extends InstallerFrame implements
             private void createDatabase() throws Exception
             {
                 startProgress(m_createDataBaseCheckBox.getText());
-                m_progressBar.setMaximum(m_installer
-                        .countCreateDatabaseCommands());
+                m_progressBar.setMaximum(m_installer.countCreateDatabaseCommands());
                 m_installer.createDatabaseTables();
 
                 // Verify that the LEV_MATCH and FUZZY_IDX stored procedures are
@@ -795,24 +757,23 @@ public class InstallAmbassador extends InstallerFrame implements
             private void updateDatabase() throws Exception
             {
                 startProgress(updateDatabaseText);
-                m_progressBar.setMaximum(m_installer
-                        .countUpdateDatabaseCommands());
+                m_progressBar.setMaximum(m_installer.countUpdateDatabaseCommands());
                 m_installer.updateDatabaseTables();
                 endProgress();
             }
-            
+
             private void signJar()
             {
-            	if (JKS != null)
-            	{
-            		File root = new File(
-                			Install.GS_HOME
-            						+ "/jboss/server/standalone/deployments/globalsight.ear/globalsight-web.war/applet/lib");
-            		JarSignUtil.updateJars(root, JKS, keyPass, keyAlias, m_fileCopyLabel, m_progressBar);
-            	}
+                if (JKS != null)
+                {
+                    File root = new File(Install.GS_HOME
+                            + "/jboss/server/standalone/deployments/globalsight.ear/globalsight-web.war/applet/lib");
+                    JarSignUtil.updateJars(root, JKS, keyPass, keyAlias, m_fileCopyLabel,
+                            m_progressBar);
+                }
             }
 
-            private void createNtService() throws IOException
+            private void createNtService() throws Exception
             {
                 m_installer.installGlobalSightService();
             }
@@ -845,7 +806,7 @@ public class InstallAmbassador extends InstallerFrame implements
                     {
                         updateDatabase();
                     }
-                    //Create start menu in windows.
+                    // Create start menu in windows.
                     m_installer.createStartMenu();
                     startProgress("Sign applet jar");
                     signJar();
@@ -855,8 +816,7 @@ public class InstallAmbassador extends InstallerFrame implements
                 catch (Exception ex)
                 {
                     logger.error(ex);
-                    showErrorDialogAndQuit(installationFailureText + "\n"
-                            + ex.toString());
+                    showErrorDialogAndQuit(installationFailureText + "\n" + ex.toString());
                 }
 
                 return null;
@@ -874,14 +834,11 @@ public class InstallAmbassador extends InstallerFrame implements
     private void loadValues()
     {
         JFileChooser chooser = new JFileChooser();
-        chooser
-                .setDialogTitle("Please select the previous Ambassador home directory");
+        chooser.setDialogTitle("Please select the previous Ambassador home directory");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        if (previousAmbassadorHome.equals("")
-                || previousAmbassadorHome.equals("../.."))
+        if (previousAmbassadorHome.equals("") || previousAmbassadorHome.equals("../.."))
         {
-            chooser.setCurrentDirectory((new File(Install.GS_HOME))
-                    .getParentFile());
+            chooser.setCurrentDirectory((new File(Install.GS_HOME)).getParentFile());
         }
         else
         {
@@ -891,27 +848,24 @@ public class InstallAmbassador extends InstallerFrame implements
         int returnVal = chooser.showDialog(this, "Select");
         if (returnVal == JFileChooser.APPROVE_OPTION)
         {
-            previousAmbassadorHome = chooser.getSelectedFile()
-                    .getAbsolutePath();
+            previousAmbassadorHome = chooser.getSelectedFile().getAbsolutePath();
             if (!previousAmbassadorHome.equals(""))
             {
-                File installValues = new File(previousAmbassadorHome
-                        + "/install/data/installValues.properties");
+                File installValues = new File(
+                        previousAmbassadorHome + "/install/data/installValues.properties");
                 if (installValues.exists())
                 {
-                    Install.setLastInstallValuesLocation(previousAmbassadorHome
-                            + "/install/data/installValues.properties");
+                    Install.setLastInstallValuesLocation(
+                            previousAmbassadorHome + "/install/data/installValues.properties");
                     try
                     {
                         m_installer.loadInstallValues();
                         for (int i = 0; i < m_inputFieldList.size(); i++)
                         {
-                            InputField parameter = (InputField) m_inputFieldList
-                                    .get(i);
+                            InputField parameter = (InputField) m_inputFieldList.get(i);
 
-                            parameter.setValue(m_installer
-                                    .getInstallValue(m_installOrder.get(i)
-                                            .toString()));
+                            parameter.setValue(
+                                    m_installer.getInstallValue(m_installOrder.get(i).toString()));
                             parameter.validateLabel();
                         }
                     }
@@ -923,13 +877,12 @@ public class InstallAmbassador extends InstallerFrame implements
                 }
                 else
                 {
-                    showErrorDialog(installValues.getAbsolutePath()
-                            + " does not exist.");
+                    showErrorDialog(installValues.getAbsolutePath() + " does not exist.");
                 }
             }
         }
     }
-    
+
     public void actionPerformed(ActionEvent e)
     {
         Object source = e.getSource();
@@ -942,7 +895,7 @@ public class InstallAmbassador extends InstallerFrame implements
             }
             else if (source.equals(m_installButton))
             {
-            	
+
                 saveInstallValues();
                 m_installer.addAdditionalInstallValues();
                 doInstall();
@@ -959,10 +912,8 @@ public class InstallAmbassador extends InstallerFrame implements
                     boolean needCreateNtServiceOption = m_installer
                             .getOperatingSystem() == Install.OS_WINDOWS;
 
-                    m_createNtServiceCheckBox
-                            .setEnabled(needCreateNtServiceOption);
-                    m_createNtServiceCheckBox
-                            .setSelected(needCreateNtServiceOption);
+                    m_createNtServiceCheckBox.setEnabled(needCreateNtServiceOption);
+                    m_createNtServiceCheckBox.setSelected(needCreateNtServiceOption);
                 }
 
                 boolean canAdvance = true;
@@ -1029,7 +980,7 @@ public class InstallAmbassador extends InstallerFrame implements
                 ++i;
             }
         }
-        
+
         if (useUI)
         {
             logger.info("Call with -noUI to turn off the Install GUI");
@@ -1037,8 +988,7 @@ public class InstallAmbassador extends InstallerFrame implements
         }
         else
         {
-            ResourceBundle bundle = ResourceBundle.getBundle(
-                    INSTALL_UI_PROPERTIES, s_locale);
+            ResourceBundle bundle = ResourceBundle.getBundle(INSTALL_UI_PROPERTIES, s_locale);
 
             if (!checkInstallPath())
             {
@@ -1047,7 +997,8 @@ public class InstallAmbassador extends InstallerFrame implements
                 try
                 {
                     System.in.read();
-                } catch (IOException e)
+                }
+                catch (IOException e)
                 {
                     logger.error(e);
                 }

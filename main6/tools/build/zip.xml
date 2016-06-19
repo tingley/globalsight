@@ -20,6 +20,7 @@
 			<zipfileset dir="${capclasses}" prefix="${product}/${deployment}" excludes="**/*.class" />
 			<zipfileset dir="${jbossUtilDir}" prefix="${product}/jboss/util" />
 			<zipfileset dir="${jbossServerDir}" prefix="${product}/jboss/server" />
+			<zipfileset dir="${jbossServerDir}/docs/contrib/scripts/service" prefix="${product}/jboss/server/bin/service" />
             <zipfileset dir="${dist}" prefix="${product}" includes="logs"/>
 
 			<!-- The install directory -->
@@ -28,7 +29,7 @@
 			<zipfileset dir="../install/lib" prefix="${product}/install/lib" includes="log4j.jar" />
             <zipfileset dir="${commonJarLib}" prefix="${product}/install/lib" includes="commons-codec-1.3.jar, ant.jar" />
 
-			<zipfileset dir="../../envoy/schema" prefix="${product}/install/data" excludes="**/design/*, ebay.sql" />
+			<zipfileset dir="../../envoy/schema" prefix="${product}/install/data" excludes="**/design/*, ebay.sql, **/openldap/**, **/openldap-linux/**" />
 
 			<zipfileset dir="../../envoy/src/java" prefix="${product}/install/data/key" includes="GS_key.pers" />
 

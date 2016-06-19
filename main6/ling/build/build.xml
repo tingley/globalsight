@@ -1,4 +1,4 @@
-<project name="Linguistics" default="build" basedir=".">
+<project name="Linguistics" default="compile" basedir=".">
 	<target name="init">
 		<echo message="***** Ling build file *****" />
 		<tstamp />
@@ -11,7 +11,6 @@
 		<property name="envoySrc" value="../../envoy/src" />
 
 		<!--  Build destination directories  -->
-		<property name="onlineJar" value="${appletLib}/online.jar" />
 		<property name="lingRoot" value="com/globalsight/ling" />
 		<property name="common" value="${lingRoot}/common" />
 		<property name="docproc" value="${lingRoot}/docproc" />
@@ -90,25 +89,6 @@
 			</fileset>
 		</copy>
 
-	</target>
-
-	<target name="build" depends="compile">
-		<echo message="***** Building LING jar files" />
-
-		<mkdir dir="${appletLib}" />
-		<jar update="true" duplicate="preserve" filesonly="true" jarfile="${onlineJar}">
-			<fileset dir="${serverclassesDest}" includes="${common}/DiplomatBasic*.class,
-                         ${docproc}/TmxTagGenerator.class,
-                         ${tw}/*.class,
-                         ${tw}/*.properties,
-                         ${tm}/*.class,
-                         ${tw}/internal/*.class,
-                         ${util}/*.class,
-                         ${applet}/OnlineApplet.class,
-                         com/globalsight/util/edit/SegmentUtil.class,
-                         com/globalsight/util/StringUtil.class,
-                         com/globalsight/cxe/adapter/openoffice/StringIndex.class" />
-		</jar>
 	</target>
 
 	<target name="precompile" depends="init">
@@ -285,7 +265,7 @@ public class ${segmenter_regexp}
 	</target>
 
 	<!--  Build the component from scratch  -->
-	<target name="cleanbuild" depends="clean, build" />
+	<target name="cleanbuild" depends="clean" />
 
 	<!-- TM3-specific build targets are all prefixed with tm3.*  These
      - allow a standalone form of TM3 to be build to ling/build/tm3.
@@ -344,7 +324,7 @@ public class ${segmenter_regexp}
 	<target name="tm3.javadoc" depends="tm3.init">
 		<echo message="src=${lingSrc}" />
 		<echo message="Generating javadoc in ${tm3.javadoc.dir}" />
-		<javadoc access="public" author="false" destdir="${tm3.javadoc.dir}" windowtitle="TM3 Javadoc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.6" sourcepath="${lingSrc}" packagenames="com.globalsight.ling.tm3.core" splitindex="true" use="true" version="true">
+		<javadoc access="public" author="false" destdir="${tm3.javadoc.dir}" windowtitle="TM3 Javadoc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="${javacsource}" sourcepath="${lingSrc}" packagenames="com.globalsight.ling.tm3.core" splitindex="true" use="true" version="true">
 			<link href="http://java.sun.com/javase/6/docs/api/" />
 			<doctitle>
 				<![CDATA[<h1>TM3</h1>]]></doctitle>
@@ -354,7 +334,7 @@ public class ${segmenter_regexp}
 <target name="tm3.standalone" depends="tm3.init">
 	<echo message="Compiling source from ${tm3.src.dir} to ${tm3.src.classes.dir}." />
 	<mkdir dir="${tm3.src.classes.dir}" />
-	<javac destdir="${tm3.src.classes.dir}" debug="on" optimize="on" deprecation="on" fork="yes" memoryMaximumSize="256m" encoding="UTF-8" source="1.6" target="1.6">
+	<javac destdir="${tm3.src.classes.dir}" debug="on" optimize="on" deprecation="on" fork="yes" memoryMaximumSize="256m" encoding="UTF-8" source="${javacsource}" target="${javactarget}">
 		<src path="${tm3.src.dir}" />
 		<src path="${tm3.tools.src.dir}" />
 		<classpath refid="tm3.standalone.classpath" />
@@ -365,7 +345,7 @@ public class ${segmenter_regexp}
 	<!-- Compile tests -->
 	<echo message="Compiling source from ${tm3.test.dir} to ${tm3.test.classes.dir}." />
 	<mkdir dir="${tm3.test.classes.dir}" />
-	<javac destdir="${tm3.test.classes.dir}" debug="on" optimize="on" deprecation="on" fork="yes" memoryMaximumSize="256m" encoding="UTF-8" source="1.6" target="1.6">
+	<javac destdir="${tm3.test.classes.dir}" debug="on" optimize="on" deprecation="on" fork="yes" memoryMaximumSize="256m" encoding="UTF-8" source="${javacsource}" target="${javactarget}">
 		<src path="${tm3.test.dir}" />
 		<classpath refid="tm3.test.classpath" />
 		<compilerarg value="-Xswitchcheck" compiler="modern" />

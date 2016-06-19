@@ -550,10 +550,6 @@ dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_coti_job"
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_eloqua")%>", "javascript:goToUrl('<%=eloquaUrl%>');", ""));
 <% } %>
 
-<% if (userPerms.getPermissionFor(Permission.MIND_TOUCH)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_mindtouch")%>", "javascript:goToUrl('<%=mindtouchUrl%>');", ""));
-<% } %>
-
 <% if (userPerms.getPermissionFor(Permission.GIT_CONNECTOR)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_git_connector")%>", "javascript:goToUrl('<%=gitconnectorUrl%>');", ""));
 <% } %>

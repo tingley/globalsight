@@ -20,6 +20,7 @@ package com.globalsight.everest.webapp.pagehandler.edit.online;
 import java.math.BigInteger;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -72,7 +73,6 @@ import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvManager;
-import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -102,6 +102,7 @@ public class EditorHelper implements EditorConstants
 {
     private static final Logger CATEGORY = Logger.getLogger(EditorHelper.class);
     public static List<Long> sourcePageIdList = null;
+
     /**
      * This class can not be instantiated.
      */
@@ -112,13 +113,11 @@ public class EditorHelper implements EditorConstants
     /**
      * Called by every pagehandler.
      */
-    static public void initEditorManager(EditorState p_state)
-            throws EnvoyServletException
+    static public void initEditorManager(EditorState p_state) throws EnvoyServletException
     {
         try
         {
-            p_state.setEditorManager(ServerProxy
-                    .getOnlineEditorManagerWLRemote());
+            p_state.setEditorManager(ServerProxy.getOnlineEditorManagerWLRemote());
         }
         catch (GeneralException e)
         {
@@ -131,8 +130,8 @@ public class EditorHelper implements EditorConstants
     /**
      * Called by every pagehandler.
      */
-    static public void initEditorOptions(EditorState p_state,
-            HttpSession p_session) throws EnvoyServletException
+    static public void initEditorOptions(EditorState p_state, HttpSession p_session)
+            throws EnvoyServletException
     {
         EditorState.Options options = p_state.getOptions();
 
@@ -151,8 +150,7 @@ public class EditorHelper implements EditorConstants
         try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-            p_state.setCanShowMt(sc
-                    .getBooleanParameter(SystemConfigParamNames.MT_SHOW_IN_EDITOR));
+            p_state.setCanShowMt(sc.getBooleanParameter(SystemConfigParamNames.MT_SHOW_IN_EDITOR));
         }
         catch (Exception ignore)
         {
@@ -161,16 +159,14 @@ public class EditorHelper implements EditorConstants
 
         UserParameter param;
 
-        param = PageHandler.getUserParameter(p_session,
-                UserParamNames.EDITOR_AUTO_SAVE_SEGMENT);
+        param = PageHandler.getUserParameter(p_session, UserParamNames.EDITOR_AUTO_SAVE_SEGMENT);
 
         if (param != null)
         {
             options.setAutoSave(param.getBooleanValue());
         }
 
-        param = PageHandler.getUserParameter(p_session,
-                UserParamNames.EDITOR_AUTO_UNLOCK);
+        param = PageHandler.getUserParameter(p_session, UserParamNames.EDITOR_AUTO_UNLOCK);
 
         if (param != null)
         {
@@ -182,8 +178,7 @@ public class EditorHelper implements EditorConstants
             }
         }
 
-        param = PageHandler.getUserParameter(p_session,
-                UserParamNames.EDITOR_AUTO_SYNC);
+        param = PageHandler.getUserParameter(p_session, UserParamNames.EDITOR_AUTO_SYNC);
 
         if (param != null)
         {
@@ -198,24 +193,21 @@ public class EditorHelper implements EditorConstants
             options.setAutoAdjustWhitespace(param.getBooleanValue());
         }
 
-        param = PageHandler.getUserParameter(p_session,
-                UserParamNames.EDITOR_LAYOUT);
+        param = PageHandler.getUserParameter(p_session, UserParamNames.EDITOR_LAYOUT);
 
         if (param != null)
         {
             layout.setLayout(param.getValue());
         }
 
-        param = PageHandler.getUserParameter(p_session,
-                UserParamNames.EDITOR_VIEWMODE);
+        param = PageHandler.getUserParameter(p_session, UserParamNames.EDITOR_VIEWMODE);
 
         if (param != null)
         {
             layout.setViewmode(param.getIntValue());
         }
 
-        param = PageHandler.getUserParameter(p_session,
-                UserParamNames.EDITOR_PTAGMODE);
+        param = PageHandler.getUserParameter(p_session, UserParamNames.EDITOR_PTAGMODE);
 
         if (param != null)
         {
@@ -223,40 +215,35 @@ public class EditorHelper implements EditorConstants
             p_state.setPTagFormat(param.getValue());
         }
 
-        param = PageHandler.getUserParameter(p_session,
-                UserParamNames.EDITOR_PTAGHILITE);
+        param = PageHandler.getUserParameter(p_session, UserParamNames.EDITOR_PTAGHILITE);
 
         if (param != null)
         {
             options.setHilitePtags(param.getBooleanValue());
         }
 
-        param = PageHandler.getUserParameter(p_session,
-                UserParamNames.EDITOR_SHOW_MT);
+        param = PageHandler.getUserParameter(p_session, UserParamNames.EDITOR_SHOW_MT);
 
         if (param != null)
         {
             options.setShowMt(param.getBooleanValue());
         }
 
-        param = PageHandler.getUserParameter(p_session,
-                UserParamNames.EDITOR_ITERATE_SUBS);
+        param = PageHandler.getUserParameter(p_session, UserParamNames.EDITOR_ITERATE_SUBS);
 
         if (param != null)
         {
             options.setIterateSubs(param.getBooleanValue());
         }
 
-        param = PageHandler.getUserParameter(p_session,
-                UserParamNames.TM_MATCHING_THRESHOLD);
+        param = PageHandler.getUserParameter(p_session, UserParamNames.TM_MATCHING_THRESHOLD);
 
         if (param != null)
         {
             options.setTmMatchingThreshold(param.getIntValue());
         }
 
-        param = PageHandler.getUserParameter(p_session,
-                UserParamNames.TB_MATCHING_THRESHOLD);
+        param = PageHandler.getUserParameter(p_session, UserParamNames.TB_MATCHING_THRESHOLD);
 
         if (param != null)
         {
@@ -277,29 +264,25 @@ public class EditorHelper implements EditorConstants
             styles = new EditorState.LinkStyles(color, active, visited);
         }
 
-        param = PageHandler.getUserParameter(p_session,
-                UserParamNames.HYPERLINK_COLOR_OVERRIDE);
+        param = PageHandler.getUserParameter(p_session, UserParamNames.HYPERLINK_COLOR_OVERRIDE);
 
         if (param != null && param.getBooleanValue() == true)
         {
-            param = PageHandler.getUserParameter(p_session,
-                    UserParamNames.HYPERLINK_COLOR);
+            param = PageHandler.getUserParameter(p_session, UserParamNames.HYPERLINK_COLOR);
 
             if (param != null)
             {
                 styles.m_A_color = param.getValue();
             }
 
-            param = PageHandler.getUserParameter(p_session,
-                    UserParamNames.ACTIVE_HYPERLINK_COLOR);
+            param = PageHandler.getUserParameter(p_session, UserParamNames.ACTIVE_HYPERLINK_COLOR);
 
             if (param != null)
             {
                 styles.m_A_active = param.getValue();
             }
 
-            param = PageHandler.getUserParameter(p_session,
-                    UserParamNames.VISITED_HYPERLINK_COLOR);
+            param = PageHandler.getUserParameter(p_session, UserParamNames.VISITED_HYPERLINK_COLOR);
 
             if (param != null)
             {
@@ -313,14 +296,12 @@ public class EditorHelper implements EditorConstants
     //
     // Initialize from Job
     //
-    static public void initializeFromJob(EditorState p_state, String p_jobId,
-            String p_srcPageId, Locale p_uiLocale, String p_userId,
-            PermissionSet p_perms) throws EnvoyServletException
+    static public void initializeFromJob(EditorState p_state, String p_jobId, String p_srcPageId,
+            Locale p_uiLocale, String p_userId, PermissionSet p_perms) throws EnvoyServletException
     {
         try
         {
-            Job job = ServerProxy.getJobHandler().getJobById(
-                    Long.parseLong(p_jobId));
+            Job job = ServerProxy.getJobHandler().getJobById(Long.parseLong(p_jobId));
             String companyId = String.valueOf(job.getCompanyId());
 
             setPagesInJob(p_state, job);
@@ -345,17 +326,16 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public void setPagesInJob(EditorState p_state, Job p_job)
-            throws EnvoyServletException
+    static public void setPagesInJob(EditorState p_state, Job p_job) throws EnvoyServletException
     {
         ArrayList pages = new ArrayList();
         Hashtable pagesHash = new Hashtable();
 
         Iterator it1, it2;
         SourcePage srcPage;
-        TargetPage trgPage, nextTrgPage = null, previousTargetPage = null;
+        TargetPage nextTrgPage = null, previousTargetPage = null;
         GlobalSightLocale srcLocale, trgLocale;
-        List unextractedTargetPages,extractedTargetPages;
+        List unextractedTargetPages, extractedTargetPages;
         EditorState.PagePair pair = null;
         String openEditorType = p_state.getOpenEditorType();
         // New: For target page lookup the source page. Add the source
@@ -364,8 +344,7 @@ public class EditorHelper implements EditorConstants
         try
         {
 
-            l_workflows: for (it1 = p_job.getWorkflows().iterator(); it1
-                    .hasNext();)
+            l_workflows: for (it1 = p_job.getWorkflows().iterator(); it1.hasNext();)
             {
                 Workflow workflow = (Workflow) it1.next();
                 trgLocale = workflow.getTargetLocale();
@@ -377,18 +356,18 @@ public class EditorHelper implements EditorConstants
                 {
                     continue l_workflows;
                 }
-       
-                unextractedTargetPages = getNewUnextractedList(workflow
-                        .getTargetPages(ExtractedSourceFile.UNEXTRACTED_FILE));
+
+                unextractedTargetPages = getNewUnextractedList(
+                        workflow.getTargetPages(ExtractedSourceFile.UNEXTRACTED_FILE));
                 extractedTargetPages = workflow.getTargetPages(ExtractedSourceFile.EXTRACTED_FILE);
-                
-                Vector<TargetPage> targetPages = workflow.getTargetPages();
+
+                Collection<TargetPage> targetPages = workflow.getTargetPages();
+                List<TargetPage> targetPageList = new ArrayList<TargetPage>(targetPages);
                 if (sourcePageIdList != null)
                 {
                     Vector<TargetPage> newTargetPages = new Vector<TargetPage>();
-                    for (int i = 0; i < targetPages.size(); i++)
+                    for (TargetPage trgPage : targetPages)
                     {
-                        trgPage = (TargetPage) targetPages.get(i);
                         srcPage = trgPage.getSourcePage();
                         if (sourcePageIdList.contains(srcPage.getId()))
                         {
@@ -401,13 +380,13 @@ public class EditorHelper implements EditorConstants
                         targetPages = newTargetPages;
                     }
                 }
-                
+
                 l_targetpages:
                 // retrieve just the pages with an extracted file associated
                 // with it
-                    for(int i=0 ; i < targetPages.size();i++)
+                for (int i = 0; i < targetPageList.size(); i++)
                 {
-                    trgPage =  targetPages.get(i);
+                    TargetPage trgPage = (TargetPage) targetPageList.get(i);
                     srcPage = trgPage.getSourcePage();
                     String state = srcPage.getPageState();
                     if (state.equals(PageState.IMPORT_FAIL))
@@ -418,19 +397,19 @@ public class EditorHelper implements EditorConstants
                         // happen?), ignore this target page.
                         continue l_targetpages;
                     }
-                    
+
                     if (i < targetPages.size() - 1)
                     {
                         nextTrgPage = getNextTargetPage(unextractedTargetPages,
-                                extractedTargetPages, targetPages, i);
+                                extractedTargetPages, targetPageList, i);
                     }
 
                     if (i > 0)
                     {
                         previousTargetPage = getPreviousTargetPage(unextractedTargetPages,
-                                extractedTargetPages, targetPages, i);
+                                extractedTargetPages, targetPageList, i);
                     }
-                    
+
                     if (pagesHash.containsKey(srcPage.getIdAsLong()))
                     {
                         ((EditorState.PagePair) (pagesHash.get(srcPage.getIdAsLong())))
@@ -447,8 +426,8 @@ public class EditorHelper implements EditorConstants
                                 String pageName = trgPage.getDisplayPageName();
                                 if (pageName.lastIndexOf(".") != -1)
                                 {
-                                    String fileExtension = pageName.substring(
-                                            pageName.lastIndexOf('.') + 1).toLowerCase();
+                                    String fileExtension = pageName
+                                            .substring(pageName.lastIndexOf('.') + 1).toLowerCase();
                                     if (WebAppConstants.FILE_EXTENSION_LIST.contains(fileExtension))
                                     {
                                         pair = new EditorState.PagePair(srcPage.getIdAsLong(),
@@ -456,7 +435,8 @@ public class EditorHelper implements EditorConstants
                                                 srcPage.getExternalPageId(), false,
                                                 workflow.getState(),
                                                 unextractedTargetPages.contains(nextTrgPage),
-                                                unextractedTargetPages.contains(previousTargetPage));
+                                                unextractedTargetPages
+                                                        .contains(previousTargetPage));
 
                                         pair.putTargetPage(trgLocale, trgPage.getIdAsLong());
                                         pagesHash.put(srcPage.getIdAsLong(), pair);
@@ -486,8 +466,8 @@ public class EditorHelper implements EditorConstants
             {
                 srcPage = (SourcePage) it1.next();
 
-                EditorState.PagePair pagepair = (EditorState.PagePair) pagesHash.get(srcPage
-                        .getIdAsLong());
+                EditorState.PagePair pagepair = (EditorState.PagePair) pagesHash
+                        .get(srcPage.getIdAsLong());
 
                 if (pagepair != null)
                 {
@@ -511,8 +491,8 @@ public class EditorHelper implements EditorConstants
         p_state.setExcludedItems(items);
     }
 
-    static private void setTermbaseFromJob(EditorState p_state, Job p_job,
-            String p_userId, String p_companyId) throws EnvoyServletException
+    static private void setTermbaseFromJob(EditorState p_state, Job p_job, String p_userId,
+            String p_companyId) throws EnvoyServletException
     {
         String name = p_job.getL10nProfile().getProject().getTermbaseName();
 
@@ -535,8 +515,7 @@ public class EditorHelper implements EditorConstants
     {
         try
         {
-            TranslationMemoryProfile tmp = p_job.getL10nProfile()
-                    .getTranslationMemoryProfile();
+            TranslationMemoryProfile tmp = p_job.getL10nProfile().getTranslationMemoryProfile();
             Vector tms = tmp.getProjectTMsToLeverageFrom();
             String[] tmNames = new String[tms.size()];
             for (int i = 0; i < tms.size(); i++)
@@ -559,16 +538,14 @@ public class EditorHelper implements EditorConstants
     // Initialize from Activity
     //
 
-    static public void initializeFromActivity(EditorState p_state,
-            HttpSession p_session, String p_userId, String p_taskId,
-            HttpServletRequest p_request, Locale p_uiLocale)
+    static public void initializeFromActivity(EditorState p_state, HttpSession p_session,
+            String p_userId, String p_taskId, HttpServletRequest p_request, Locale p_uiLocale)
             throws EnvoyServletException
     {
         try
         {
-            Task task = ServerProxy.getTaskManager()
-                    .getTask(p_userId, Long.parseLong(p_taskId),
-                            WorkflowConstants.TASK_ALL_STATES);
+            Task task = ServerProxy.getTaskManager().getTask(p_userId, Long.parseLong(p_taskId),
+                    WorkflowConstants.TASK_ALL_STATES);
             String companyId = String.valueOf(task.getCompanyId());
 
             p_state.setIsReviewActivity(task.isType(Activity.TYPE_REVIEW));
@@ -605,12 +582,11 @@ public class EditorHelper implements EditorConstants
         trgLocale = p_task.getTargetLocale();
         String openEditorType = p_state.getOpenEditorType();
         EditorState.PagePair pair = null;
-        
-        
-        List unextractedList = getNewUnextractedList(p_task
-                .getTargetPages(ExtractedSourceFile.UNEXTRACTED_FILE));
+
+        List unextractedList = getNewUnextractedList(
+                p_task.getTargetPages(ExtractedSourceFile.UNEXTRACTED_FILE));
         List extractedFileList = p_task.getTargetPages(ExtractedSourceFile.EXTRACTED_FILE);
-        
+
         List targetPages = p_task.getTargetPages();
         if (sourcePageIdList != null)
         {
@@ -630,12 +606,12 @@ public class EditorHelper implements EditorConstants
                 targetPages = newTargetPages;
             }
         }
-        
-        for(int i=0;i<targetPages.size();i++)
+
+        for (int i = 0; i < targetPages.size(); i++)
         {
-            trgPage = (TargetPage)targetPages.get(i);
+            trgPage = (TargetPage) targetPages.get(i);
             srcPage = trgPage.getSourcePage();
-            
+
             if (i < targetPages.size() - 1)
             {
                 nextTargetPage = getNextTargetPage(unextractedList, extractedFileList, targetPages,
@@ -647,7 +623,7 @@ public class EditorHelper implements EditorConstants
                 previousTargetPage = getPreviousTargetPage(unextractedList, extractedFileList,
                         targetPages, i);
             }
-            
+
             if (unextractedList != null && unextractedList.contains(trgPage))
             {
                 if (StringUtil.isNotEmpty(openEditorType)
@@ -674,26 +650,26 @@ public class EditorHelper implements EditorConstants
             else if (extractedFileList != null && extractedFileList.contains(trgPage))
             {
                 pair = new EditorState.PagePair(srcPage.getId(), srcLocale,
-                        srcPage.getExternalPageId(), getExtractedSourceFile(srcPage)
-                                .containGsTags(), Workflow.DISPATCHED,
+                        srcPage.getExternalPageId(),
+                        getExtractedSourceFile(srcPage).containGsTags(), Workflow.DISPATCHED,
                         unextractedList.contains(nextTargetPage),
                         unextractedList.contains(previousTargetPage));
-                
+
                 pair.putTargetPage(trgLocale, trgPage.getIdAsLong());
                 pages.add(pair);
             }
         }
-        
+
         p_state.setPages(pages);
     }
-    
+
     private static TargetPage getNextTargetPage(List unextractedList, List extractedFileList,
             List targetPages, int index)
     {
         TargetPage nextTargetPage = null;
-        for (int j = index + 1; j < targetPages.size(); j++)
+        for (int i = index + 1; i < targetPages.size(); i++)
         {
-            nextTargetPage = (TargetPage) targetPages.get(j);
+            nextTargetPage = (TargetPage) targetPages.get(i);
             if (!unextractedList.contains(nextTargetPage)
                     && !extractedFileList.contains(nextTargetPage))
             {
@@ -711,9 +687,9 @@ public class EditorHelper implements EditorConstants
             List targetPages, int index)
     {
         TargetPage previousTargetPage = null;
-        for (int j = index - 1; j >= 0; j--)
+        for (int i = index - 1; i >= 0; i--)
         {
-            previousTargetPage = (TargetPage) targetPages.get(j);
+            previousTargetPage = (TargetPage) targetPages.get(i);
             if (!unextractedList.contains(previousTargetPage)
                     && !extractedFileList.contains(previousTargetPage))
             {
@@ -726,7 +702,7 @@ public class EditorHelper implements EditorConstants
         }
         return previousTargetPage;
     }
-    
+
     private static List getNewUnextractedList(List unextractedList)
     {
         ArrayList targetPages = new ArrayList();
@@ -749,21 +725,18 @@ public class EditorHelper implements EditorConstants
         return targetPages;
     }
 
-    static public void setExcludedItemsFromActivity(EditorState p_state,
-            Task p_task)
+    static public void setExcludedItemsFromActivity(EditorState p_state, Task p_task)
     {
-        Vector items = getExcludedItemsFromL10nProfile(p_task.getWorkflow()
-                .getJob().getL10nProfile());
+        Vector items = getExcludedItemsFromL10nProfile(
+                p_task.getWorkflow().getJob().getL10nProfile());
 
         p_state.setExcludedItems(items);
     }
 
-    static public void setTermbaseFromActivity(EditorState p_state,
-            Task p_task, String p_userId, String p_companyId)
-            throws EnvoyServletException
+    static public void setTermbaseFromActivity(EditorState p_state, Task p_task, String p_userId,
+            String p_companyId) throws EnvoyServletException
     {
-        String name = p_task.getWorkflow().getJob().getL10nProfile()
-                .getProject().getTermbaseName();
+        String name = p_task.getWorkflow().getJob().getL10nProfile().getProject().getTermbaseName();
 
         if (name != null && name.length() > 0)
         {
@@ -779,8 +752,7 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public Vector<String> getExcludedItemsFromL10nProfile(
-            L10nProfile p_profile)
+    static public Vector<String> getExcludedItemsFromL10nProfile(L10nProfile p_profile)
     {
         TranslationMemoryProfile profile = (TranslationMemoryProfile) p_profile
                 .getTranslationMemoryProfile();
@@ -795,7 +767,7 @@ public class EditorHelper implements EditorConstants
     static private void setAllowEditAll(EditorState p_state, Task p_task)
     {
         int TMEditType = p_task.getWorkflow().getJob().getL10nProfile().getTMEditType();
-        
+
         p_state.setAllowEditAll(TMEditType == 2);
     }
 
@@ -803,13 +775,11 @@ public class EditorHelper implements EditorConstants
     // General initialization methods
     //
 
-    static private void setTermbaseNames(EditorState p_state,
-            Locale p_uiLocale, String p_userId, String p_companyId)
-            throws GeneralException, RemoteException
+    static private void setTermbaseNames(EditorState p_state, Locale p_uiLocale, String p_userId,
+            String p_companyId) throws GeneralException, RemoteException
     {
         ITermbaseManager manager = ServerProxy.getTermbaseManager();
-        p_state.setTermbaseNames(manager.getTermbases(p_uiLocale, p_userId,
-                p_companyId));
+        p_state.setTermbaseNames(manager.getTermbases(p_uiLocale, p_userId, p_companyId));
     }
 
     static private long getTermbaseIdByName(String p_name, String p_companyId)
@@ -851,10 +821,8 @@ public class EditorHelper implements EditorConstants
         // LOCALIZED, EXPORTED, EXPORT_FAILED, CANCELLED, ARCHIVED,
         // BATCHRESERVED, and READY_TO_BE_DISPATCHED.
 
-        if (state.equals(Workflow.READY_TO_BE_DISPATCHED)
-                || state.equals(Workflow.DISPATCHED)
-                || state.equals(Workflow.LOCALIZED)
-                || state.equals(Workflow.EXPORTED)
+        if (state.equals(Workflow.READY_TO_BE_DISPATCHED) || state.equals(Workflow.DISPATCHED)
+                || state.equals(Workflow.LOCALIZED) || state.equals(Workflow.EXPORTED)
                 || state.equals(Workflow.EXPORT_FAILED))
         {
             return true;
@@ -867,14 +835,13 @@ public class EditorHelper implements EditorConstants
      * Returns a list of TU ids in the page that have not been deleted by GSA
      * delete tags.
      */
-    static public HashSet getInterpretedTuIds(EditorState p_state,
-            Long p_srcPageId, GlobalSightLocale p_locale)
-            throws EnvoyServletException
+    static public HashSet getInterpretedTuIds(EditorState p_state, Long p_srcPageId,
+            GlobalSightLocale p_locale) throws EnvoyServletException
     {
         try
         {
-            return p_state.getEditorManager().getInterpretedTuIds(
-                    p_srcPageId.longValue(), p_locale);
+            return p_state.getEditorManager().getInterpretedTuIds(p_srcPageId.longValue(),
+                    p_locale);
         }
         catch (GeneralException e)
         {
@@ -890,13 +857,13 @@ public class EditorHelper implements EditorConstants
      * When called from an activity (task) that has not been accepted yet, the
      * target page must be displayed read-only.
      */
-    static public boolean getTaskIsReadOnly(String p_userId, String p_taskId,
-            int p_taskState) throws EnvoyServletException
+    static public boolean getTaskIsReadOnly(String p_userId, String p_taskId, int p_taskState)
+            throws EnvoyServletException
     {
         try
         {
-            Task task = ServerProxy.getTaskManager().getTask(p_userId,
-                    Long.parseLong(p_taskId), p_taskState);
+            Task task = ServerProxy.getTaskManager().getTask(p_userId, Long.parseLong(p_taskId),
+                    p_taskState);
 
             if (task.getState() == Task.STATE_ACCEPTED
                     || task.getState() == Task.STATE_TRANSLATION_COMPLETED)
@@ -921,8 +888,8 @@ public class EditorHelper implements EditorConstants
     /**
      * Returns a list of TU ids (Long) for a source page.
      */
-    static public ArrayList<Long> getTuIdsInPage(EditorState p_state,
-            Long p_srcPageId) throws EnvoyServletException
+    static public ArrayList<Long> getTuIdsInPage(EditorState p_state, Long p_srcPageId)
+            throws EnvoyServletException
     {
         try
         {
@@ -941,19 +908,17 @@ public class EditorHelper implements EditorConstants
     /**
      * For source page editing: returns the GXML of the source page.
      */
-    static public String getSourcePageGxml(EditorState p_state)
-            throws Exception
+    static public String getSourcePageGxml(EditorState p_state) throws Exception
     {
-        return p_state.getEditorManager().getSourcePageGxml(
-                p_state.getSourcePageId().longValue());
+        return p_state.getEditorManager().getSourcePageGxml(p_state.getSourcePageId().longValue());
     }
 
     /**
      * For source page editing: returns a list of validation error messages or
      * null.
      */
-    static public ArrayList validateSourcePageGxml(EditorState p_state,
-            String p_gxml) throws Exception
+    static public ArrayList validateSourcePageGxml(EditorState p_state, String p_gxml)
+            throws Exception
     {
         return p_state.getEditorManager().validateSourcePageGxml(p_gxml);
     }
@@ -962,8 +927,8 @@ public class EditorHelper implements EditorConstants
      * For source page editing: returns a preview of the page in the selected
      * target locale (snippets are interpreted).
      */
-    static public String getGxmlPreview(EditorState p_state, String p_gxml,
-            String p_locale) throws Exception
+    static public String getGxmlPreview(EditorState p_state, String p_gxml, String p_locale)
+            throws Exception
     {
         return p_state.getEditorManager().getGxmlPreview(p_gxml, p_locale);
     }
@@ -972,15 +937,15 @@ public class EditorHelper implements EditorConstants
      * For source page editing: returns a list of validation error messages or
      * null, in which case the page is getting updated in the background.
      */
-    static public ArrayList updateSourcePageGxml(EditorState p_state,
-            String p_gxml) throws Exception
+    static public ArrayList updateSourcePageGxml(EditorState p_state, String p_gxml)
+            throws Exception
     {
-        return p_state.getEditorManager().updateSourcePageGxml(
-                p_state.getSourcePageId().longValue(), p_gxml);
+        return p_state.getEditorManager()
+                .updateSourcePageGxml(p_state.getSourcePageId().longValue(), p_gxml);
     }
 
-    static public String getSourcePageView(EditorState p_state,
-            boolean p_dirtyTemplate) throws EnvoyServletException
+    static public String getSourcePageView(EditorState p_state, boolean p_dirtyTemplate)
+            throws EnvoyServletException
     {
         return getSourcePageView(p_state, p_dirtyTemplate, null);
     }
@@ -989,9 +954,8 @@ public class EditorHelper implements EditorConstants
      * Retrieves the source page view with add/delete instructions executed in
      * the given (target-page) locale.
      */
-    static public String getSourcePageView(EditorState p_state,
-            boolean p_dirtyTemplate, HashMap p_searchMap)
-            throws EnvoyServletException
+    static public String getSourcePageView(EditorState p_state, boolean p_dirtyTemplate,
+            HashMap p_searchMap) throws EnvoyServletException
     {
         try
         {
@@ -999,12 +963,11 @@ public class EditorHelper implements EditorConstants
             options.setNeedShowPTags(p_state.getNeedShowPTags());
 
             return p_state.getEditorManager().getSourcePageView(
-                    p_state.getSourcePageId().longValue(),
-                    options,
+                    p_state.getSourcePageId().longValue(), options,
                     // Sat Jun 08 17:33:53 2002 added for add/delete:
                     // always execute page in current target locale
-                    p_state.getTargetLocale(), p_dirtyTemplate,
-                    p_state.getPaginateInfo(), p_searchMap);
+                    p_state.getTargetLocale(), p_dirtyTemplate, p_state.getPaginateInfo(),
+                    p_searchMap);
         }
         catch (GeneralException e)
         {
@@ -1016,15 +979,14 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public String getTargetPageView(EditorState p_state,
-            boolean p_dirtyTemplate) throws EnvoyServletException
+    static public String getTargetPageView(EditorState p_state, boolean p_dirtyTemplate)
+            throws EnvoyServletException
     {
         return getTargetPageView(p_state, p_dirtyTemplate, null);
     }
 
-    static public String getTargetPageView(EditorState p_state,
-            boolean p_dirtyTemplate, HashMap p_searchMap)
-            throws EnvoyServletException
+    static public String getTargetPageView(EditorState p_state, boolean p_dirtyTemplate,
+            HashMap p_searchMap) throws EnvoyServletException
     {
         RenderingOptions options = p_state.getRenderingOptions();
 
@@ -1048,8 +1010,8 @@ public class EditorHelper implements EditorConstants
         try
         {
             return p_state.getEditorManager().getTargetPageView(
-                    p_state.getTargetPageId().longValue(), p_state,
-                    p_state.getExcludedItems(), p_dirtyTemplate, p_searchMap);
+                    p_state.getTargetPageId().longValue(), p_state, p_state.getExcludedItems(),
+                    p_dirtyTemplate, p_searchMap);
         }
         catch (GeneralException e)
         {
@@ -1061,9 +1023,8 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public SegmentView getSegmentView(EditorState p_state, long p_tuId,
-            long p_tuvId, long p_subId, long p_targetPageId,
-            long p_sourceLocaleId, long p_targetLocaleId)
+    static public SegmentView getSegmentView(EditorState p_state, long p_tuId, long p_tuvId,
+            long p_subId, long p_targetPageId, long p_sourceLocaleId, long p_targetLocaleId)
             throws EnvoyServletException
     {
         SegmentView result;
@@ -1071,21 +1032,20 @@ public class EditorHelper implements EditorConstants
         try
         {
             result = p_state.getEditorManager().getSegmentView(p_tuId, p_tuvId,
-                    String.valueOf(p_subId), p_targetPageId, p_sourceLocaleId,
-                    p_targetLocaleId, p_state.getTmNames(),
-                    p_state.getDefaultTermbaseName());
+                    String.valueOf(p_subId), p_targetPageId, p_sourceLocaleId, p_targetLocaleId,
+                    p_state.getTmNames(), p_state.getDefaultTermbaseName());
         }
         catch (GeneralException e)
         {
-            CATEGORY.error("getSegmentView(" + p_tuId + "," + p_tuvId + ","
-                    + p_subId + ") failed: ", e);
+            CATEGORY.error(
+                    "getSegmentView(" + p_tuId + "," + p_tuvId + "," + p_subId + ") failed: ", e);
 
             throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
-            CATEGORY.error("getSegmentView(" + p_tuId + "," + p_tuvId + ","
-                    + p_subId + ") failed: ", e);
+            CATEGORY.error(
+                    "getSegmentView(" + p_tuId + "," + p_tuvId + "," + p_subId + ") failed: ", e);
 
             throw new EnvoyServletException(EnvoyServletException.EX_REMOTE, e);
         }
@@ -1114,8 +1074,7 @@ public class EditorHelper implements EditorConstants
         // Show bidi editor if 1) target language is bidi 2) data type
         // is HTML 3) segment type is text.
         // (Bidi editor is not whitespace-save as of Jul 19 2002.)
-        else if ("text".equals(itemType)
-                && EditUtil.isRTLLocale(p_state.getTargetLocale())
+        else if ("text".equals(itemType) && EditUtil.isRTLLocale(p_state.getTargetLocale())
                 && EditUtil.isHtmlDerivedFormat(dataType))
         {
             p_state.setEditorType(SE_BIDIEDITOR);
@@ -1135,9 +1094,8 @@ public class EditorHelper implements EditorConstants
      * segment value points to a relative path and contains the filename of the
      * uploaded image (.gif vs. jpg!).
      */
-    static public void uploadImage(HttpServletRequest p_request,
-            EditorState p_state, SegmentView p_view)
-            throws EnvoyServletException, RemoteException
+    static public void uploadImage(HttpServletRequest p_request, EditorState p_state,
+            SegmentView p_view) throws EnvoyServletException, RemoteException
     {
         Long targetPageId = p_state.getTargetPageId();
         long jobId = p_state.getJobId();
@@ -1158,8 +1116,7 @@ public class EditorHelper implements EditorConstants
 
             o_upload.doUpload(p_request);
 
-            String diskName = o_upload.getSavedFilepath()
-                    + o_upload.getFilename();
+            String diskName = o_upload.getSavedFilepath() + o_upload.getFilename();
 
             // Fri Dec 20 16:54:38 2002 CvdL Must ignore the segment.
             // Uploading an image and modifying the segment are
@@ -1170,18 +1127,17 @@ public class EditorHelper implements EditorConstants
             String newSegment = ImageHelper.mergeSegmentAndFilename(oldSegment,
                     o_upload.getFilename());
 
-            p_state.getEditorManager().createImageMap(targetPageId, tuvId,
-                    subId, diskName, newSegment);
+            p_state.getEditorManager().createImageMap(targetPageId, tuvId, subId, diskName,
+                    newSegment);
 
-            p_state.getEditorManager().updateTUV(tuvId, strSubId, newSegment,
-                    jobId);
+            p_state.getEditorManager().updateTUV(tuvId, strSubId, newSegment, jobId);
         }
         catch (GeneralException e)
         {
             CATEGORY.error("Image upload failed: ", e);
 
-            throw new EnvoyServletException(
-                    EnvoyServletException.MSG_FAILED_TO_UPLOAD_IMAGE, null, e);
+            throw new EnvoyServletException(EnvoyServletException.MSG_FAILED_TO_UPLOAD_IMAGE, null,
+                    e);
         }
     }
 
@@ -1219,9 +1175,8 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public void updateSegment(EditorState p_state, SegmentView p_view,
-            String p_tuId, String p_tuvId, String p_subId, String p_gxml)
-            throws EnvoyServletException
+    static public void updateSegment(EditorState p_state, SegmentView p_view, String p_tuId,
+            String p_tuvId, String p_subId, String p_gxml) throws EnvoyServletException
     {
         try
         {
@@ -1231,8 +1186,8 @@ public class EditorHelper implements EditorConstants
 
             if (b_adjustWS)
             {
-                p_gxml = EditUtil.adjustWhitespace(p_gxml, p_view
-                        .getSourceSegment().getTextValue());
+                p_gxml = EditUtil.adjustWhitespace(p_gxml,
+                        p_view.getSourceSegment().getTextValue());
             }
 
             // update the image map if necessary, using null for tempName
@@ -1242,26 +1197,23 @@ public class EditorHelper implements EditorConstants
                 if (ImageHelper.hasProtocol(p_gxml))
                 {
                     // specify NO image map - remove if created
-                    p_state.getEditorManager().createImageMap(
-                            p_state.getTargetPageId(), Long.parseLong(p_tuvId),
-                            Long.parseLong(p_subId), null, null);
+                    p_state.getEditorManager().createImageMap(p_state.getTargetPageId(),
+                            Long.parseLong(p_tuvId), Long.parseLong(p_subId), null, null);
                 }
                 else
                 {
                     // New image url must have same extension as the
                     // uploaded file and must be a relative path.
-                    p_gxml = ImageHelper.mergeImages(p_view.getTargetSegment()
-                            .getTextValue(), p_gxml);
+                    p_gxml = ImageHelper.mergeImages(p_view.getTargetSegment().getTextValue(),
+                            p_gxml);
 
-                    p_state.getEditorManager().createImageMap(
-                            p_state.getTargetPageId(), Long.parseLong(p_tuvId),
-                            Long.parseLong(p_subId), null, p_gxml);
+                    p_state.getEditorManager().createImageMap(p_state.getTargetPageId(),
+                            Long.parseLong(p_tuvId), Long.parseLong(p_subId), null, p_gxml);
                 }
             }
 
             // update target segment
-            p_state.getEditorManager().updateTUV(Long.parseLong(p_tuvId),
-                    p_subId, p_gxml, jobId);
+            p_state.getEditorManager().updateTUV(Long.parseLong(p_tuvId), p_subId, p_gxml, jobId);
         }
         catch (GeneralException e)
         {
@@ -1273,9 +1225,9 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public void updateSegment(EditorState p_state, SegmentView p_view,
-            String p_tuId, String p_tuvId, String p_subId, String p_gxml,
-            String p_userId) throws EnvoyServletException
+    static public void updateSegment(EditorState p_state, SegmentView p_view, String p_tuId,
+            String p_tuvId, String p_subId, String p_gxml, String p_userId)
+            throws EnvoyServletException
     {
         try
         {
@@ -1285,8 +1237,8 @@ public class EditorHelper implements EditorConstants
 
             if (b_adjustWS)
             {
-                p_gxml = EditUtil.adjustWhitespace(p_gxml, p_view
-                        .getSourceSegment().getTotalTextValue());
+                p_gxml = EditUtil.adjustWhitespace(p_gxml,
+                        p_view.getSourceSegment().getTotalTextValue());
             }
 
             // update the image map if necessary, using null for tempName
@@ -1296,26 +1248,24 @@ public class EditorHelper implements EditorConstants
                 if (ImageHelper.hasProtocol(p_gxml))
                 {
                     // specify NO image map - remove if created
-                    p_state.getEditorManager().createImageMap(
-                            p_state.getTargetPageId(), Long.parseLong(p_tuvId),
-                            Long.parseLong(p_subId), null, null);
+                    p_state.getEditorManager().createImageMap(p_state.getTargetPageId(),
+                            Long.parseLong(p_tuvId), Long.parseLong(p_subId), null, null);
                 }
                 else
                 {
                     // New image url must have same extension as the
                     // uploaded file and must be a relative path.
-                    p_gxml = ImageHelper.mergeImages(p_view.getTargetSegment()
-                            .getTextValue(), p_gxml);
+                    p_gxml = ImageHelper.mergeImages(p_view.getTargetSegment().getTextValue(),
+                            p_gxml);
 
-                    p_state.getEditorManager().createImageMap(
-                            p_state.getTargetPageId(), Long.parseLong(p_tuvId),
-                            Long.parseLong(p_subId), null, p_gxml);
+                    p_state.getEditorManager().createImageMap(p_state.getTargetPageId(),
+                            Long.parseLong(p_tuvId), Long.parseLong(p_subId), null, p_gxml);
                 }
             }
 
             // update target segment
-            p_state.getEditorManager().updateTUV(Long.parseLong(p_tuvId),
-                    p_subId, p_gxml, p_userId, jobId);
+            p_state.getEditorManager().updateTUV(Long.parseLong(p_tuvId), p_subId, p_gxml, p_userId,
+                    jobId);
         }
         catch (GeneralException e)
         {
@@ -1327,31 +1277,27 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public void updateSegment(EditorState p_state, SegmentView p_view,
-            long p_tuId, long p_tuvId, long p_subId, String p_gxml)
-            throws EnvoyServletException
+    static public void updateSegment(EditorState p_state, SegmentView p_view, long p_tuId,
+            long p_tuvId, long p_subId, String p_gxml) throws EnvoyServletException
     {
-        updateSegment(p_state, p_view, String.valueOf(p_tuId),
-                String.valueOf(p_tuvId), String.valueOf(p_subId), p_gxml);
+        updateSegment(p_state, p_view, String.valueOf(p_tuId), String.valueOf(p_tuvId),
+                String.valueOf(p_subId), p_gxml);
     }
 
-    static public void updateSegment(EditorState p_state, SegmentView p_view,
-            long p_tuId, long p_tuvId, long p_subId, String p_gxml,
-            String p_userId) throws EnvoyServletException
+    static public void updateSegment(EditorState p_state, SegmentView p_view, long p_tuId,
+            long p_tuvId, long p_subId, String p_gxml, String p_userId) throws EnvoyServletException
     {
-        updateSegment(p_state, p_view, String.valueOf(p_tuId),
-                String.valueOf(p_tuvId), String.valueOf(p_subId), p_gxml,
-                p_userId);
+        updateSegment(p_state, p_view, String.valueOf(p_tuId), String.valueOf(p_tuvId),
+                String.valueOf(p_subId), p_gxml, p_userId);
     }
 
-    static public void splitSegments(EditorState p_state, String p_tuv1,
-            String p_tuv2, String p_location, long p_jobId)
-            throws EnvoyServletException
+    static public void splitSegments(EditorState p_state, String p_tuv1, String p_tuv2,
+            String p_location, long p_jobId) throws EnvoyServletException
     {
         try
         {
-            p_state.getEditorManager().splitSegments(Long.parseLong(p_tuv1),
-                    Long.parseLong(p_tuv2), p_location, p_jobId);
+            p_state.getEditorManager().splitSegments(Long.parseLong(p_tuv1), Long.parseLong(p_tuv2),
+                    p_location, p_jobId);
         }
         catch (GeneralException e)
         {
@@ -1363,13 +1309,13 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public void mergeSegments(EditorState p_state, String p_tuv1,
-            String p_tuv2, long p_jobId) throws EnvoyServletException
+    static public void mergeSegments(EditorState p_state, String p_tuv1, String p_tuv2,
+            long p_jobId) throws EnvoyServletException
     {
         try
         {
-            p_state.getEditorManager().mergeSegments(Long.parseLong(p_tuv1),
-                    Long.parseLong(p_tuv2), p_jobId);
+            p_state.getEditorManager().mergeSegments(Long.parseLong(p_tuv1), Long.parseLong(p_tuv2),
+                    p_jobId);
         }
         catch (GeneralException e)
         {
@@ -1385,20 +1331,20 @@ public class EditorHelper implements EditorConstants
     {
         try
         {
-            return p_state.getEditorManager().getCommentThreads(
-                    p_state.getTargetPageId().longValue());
+            return p_state.getEditorManager()
+                    .getCommentThreads(p_state.getTargetPageId().longValue());
         }
         catch (GeneralException e)
         {
-            CATEGORY.error("getComments("
-                    + p_state.getTargetPageId().longValue() + ") failed: ", e);
+            CATEGORY.error("getComments(" + p_state.getTargetPageId().longValue() + ") failed: ",
+                    e);
 
             // throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
-            CATEGORY.error("getComments("
-                    + p_state.getTargetPageId().longValue() + ") failed: ", e);
+            CATEGORY.error("getComments(" + p_state.getTargetPageId().longValue() + ") failed: ",
+                    e);
 
             // throw new EnvoyServletException(EnvoyServletException.EX_REMOTE,
             // e);
@@ -1407,26 +1353,25 @@ public class EditorHelper implements EditorConstants
         return null;
     }
 
-    static public CommentView getCommentView(EditorState p_state,
-            long p_commentId, long p_tuId, long p_tuvId, long p_subId)
+    static public CommentView getCommentView(EditorState p_state, long p_commentId, long p_tuId,
+            long p_tuvId, long p_subId)
     {
         try
         {
             return p_state.getEditorManager().getCommentView(p_commentId,
-                    p_state.getTargetPageId().longValue(), p_tuId, p_tuvId,
-                    p_subId);
+                    p_state.getTargetPageId().longValue(), p_tuId, p_tuvId, p_subId);
         }
         catch (GeneralException e)
         {
-            CATEGORY.error("getCommentView(" + p_tuId + "," + p_tuvId + ","
-                    + p_subId + ") failed: ", e);
+            CATEGORY.error(
+                    "getCommentView(" + p_tuId + "," + p_tuvId + "," + p_subId + ") failed: ", e);
 
             // throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
-            CATEGORY.error("getCommentView(" + p_tuId + "," + p_tuvId + ","
-                    + p_subId + ") failed: ", e);
+            CATEGORY.error(
+                    "getCommentView(" + p_tuId + "," + p_tuvId + "," + p_subId + ") failed: ", e);
 
             // throw new EnvoyServletException(EnvoyServletException.EX_REMOTE,
             // e);
@@ -1435,16 +1380,15 @@ public class EditorHelper implements EditorConstants
         return null;
     }
 
-    static public void createComment(EditorState p_state, CommentView p_view,
-            String p_title, String p_comment, String p_priority,
-            String p_status, String p_category, String p_user, boolean share,
-            boolean overwrite) throws EnvoyServletException
+    static public void createComment(EditorState p_state, CommentView p_view, String p_title,
+            String p_comment, String p_priority, String p_status, String p_category, String p_user,
+            boolean share, boolean overwrite) throws EnvoyServletException
     {
         try
         {
-            p_state.getEditorManager().createComment(p_view.getTuId(),
-                    p_view.getTuvId(), p_view.getSubId(), p_title, p_comment,
-                    p_priority, p_status, p_category, p_user, share, overwrite);
+            p_state.getEditorManager().createComment(p_view.getTuId(), p_view.getTuvId(),
+                    p_view.getSubId(), p_title, p_comment, p_priority, p_status, p_category, p_user,
+                    share, overwrite);
         }
         catch (GeneralException e)
         {
@@ -1456,16 +1400,15 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public void createComment(EditorState p_state, CommentView p_view,
-            String p_title, String p_comment, String p_priority,
-            String p_status, String p_category, String p_user)
+    static public void createComment(EditorState p_state, CommentView p_view, String p_title,
+            String p_comment, String p_priority, String p_status, String p_category, String p_user)
             throws EnvoyServletException
     {
         try
         {
-            p_state.getEditorManager().createComment(p_view.getTuId(),
-                    p_view.getTuvId(), p_view.getSubId(), p_title, p_comment,
-                    p_priority, p_status, p_category, p_user);
+            p_state.getEditorManager().createComment(p_view.getTuId(), p_view.getTuvId(),
+                    p_view.getSubId(), p_title, p_comment, p_priority, p_status, p_category,
+                    p_user);
         }
         catch (GeneralException e)
         {
@@ -1477,15 +1420,14 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public void editComment(EditorState p_state, CommentView p_view,
-            String p_title, String p_comment, String p_priority,
-            String p_status, String p_category, String p_user, boolean share,
-            boolean overwrite) throws EnvoyServletException
+    static public void editComment(EditorState p_state, CommentView p_view, String p_title,
+            String p_comment, String p_priority, String p_status, String p_category, String p_user,
+            boolean share, boolean overwrite) throws EnvoyServletException
     {
         try
         {
-            p_state.getEditorManager().editComment(p_view, p_title, p_comment,
-                    p_priority, p_status, p_category, p_user, share, overwrite);
+            p_state.getEditorManager().editComment(p_view, p_title, p_comment, p_priority, p_status,
+                    p_category, p_user, share, overwrite);
         }
         catch (GeneralException e)
         {
@@ -1497,15 +1439,14 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public void editComment(EditorState p_state, CommentView p_view,
-            String p_title, String p_comment, String p_priority,
-            String p_status, String p_category, String p_user)
+    static public void editComment(EditorState p_state, CommentView p_view, String p_title,
+            String p_comment, String p_priority, String p_status, String p_category, String p_user)
             throws EnvoyServletException
     {
         try
         {
-            p_state.getEditorManager().editComment(p_view, p_title, p_comment,
-                    p_priority, p_status, p_category, p_user);
+            p_state.getEditorManager().editComment(p_view, p_title, p_comment, p_priority, p_status,
+                    p_category, p_user);
         }
         catch (GeneralException e)
         {
@@ -1517,15 +1458,14 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public void addComment(EditorState p_state, CommentView p_view,
-            String p_title, String p_comment, String p_priority,
-            String p_status, String p_category, String p_user)
+    static public void addComment(EditorState p_state, CommentView p_view, String p_title,
+            String p_comment, String p_priority, String p_status, String p_category, String p_user)
             throws EnvoyServletException
     {
         try
         {
-            p_state.getEditorManager().addComment(p_view, p_title, p_comment,
-                    p_priority, p_status, p_category, p_user);
+            p_state.getEditorManager().addComment(p_view, p_title, p_comment, p_priority, p_status,
+                    p_category, p_user);
         }
         catch (GeneralException e)
         {
@@ -1537,15 +1477,14 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public void addComment(EditorState p_state, CommentView p_view,
-            String p_title, String p_comment, String p_priority,
-            String p_status, String p_category, String p_user, boolean share,
-            boolean overwrite) throws EnvoyServletException
+    static public void addComment(EditorState p_state, CommentView p_view, String p_title,
+            String p_comment, String p_priority, String p_status, String p_category, String p_user,
+            boolean share, boolean overwrite) throws EnvoyServletException
     {
         try
         {
-            p_state.getEditorManager().addComment(p_view, p_title, p_comment,
-                    p_priority, p_status, p_category, p_user, share, overwrite);
+            p_state.getEditorManager().addComment(p_view, p_title, p_comment, p_priority, p_status,
+                    p_category, p_user, share, overwrite);
         }
         catch (GeneralException e)
         {
@@ -1557,8 +1496,8 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public void closeAllComment(EditorState p_state,
-            ArrayList p_issueList, String p_user) throws EnvoyServletException
+    static public void closeAllComment(EditorState p_state, ArrayList p_issueList, String p_user)
+            throws EnvoyServletException
     {
         try
         {
@@ -1574,14 +1513,12 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public Tuv getTuv(String p_tuvId, long p_jobId)
-            throws EnvoyServletException
+    static public Tuv getTuv(String p_tuvId, long p_jobId) throws EnvoyServletException
     {
         return getTuv(Long.parseLong(p_tuvId), p_jobId);
     }
 
-    static public Tuv getTuv(long p_tuvId, long p_jobId)
-            throws EnvoyServletException
+    static public Tuv getTuv(long p_tuvId, long p_jobId) throws EnvoyServletException
     {
         Tuv result;
 
@@ -1603,8 +1540,8 @@ public class EditorHelper implements EditorConstants
         return result;
     }
 
-    static public Tuv getTuv(long p_tuId, GlobalSightLocale p_targetLocale,
-            long p_jobId) throws EnvoyServletException
+    static public Tuv getTuv(long p_tuId, GlobalSightLocale p_targetLocale, long p_jobId)
+            throws EnvoyServletException
     {
         Tuv result;
 
@@ -1612,8 +1549,7 @@ public class EditorHelper implements EditorConstants
         {
             TuvManager tuvMgr = ServerProxy.getTuvManager();
 
-            result = tuvMgr.getTuvForSegmentEditor(p_tuId,
-                    p_targetLocale.getId(), p_jobId);
+            result = tuvMgr.getTuvForSegmentEditor(p_tuId, p_targetLocale.getId(), p_jobId);
         }
         catch (GeneralException e)
         {
@@ -1650,8 +1586,7 @@ public class EditorHelper implements EditorConstants
      * templates need to be invalidated for snippets to be recalculated
      * correctly.
      */
-    static public void invalidateCachedTemplates(EditorState p_state)
-            throws EnvoyServletException
+    static public void invalidateCachedTemplates(EditorState p_state) throws EnvoyServletException
     {
         try
         {
@@ -1671,8 +1606,7 @@ public class EditorHelper implements EditorConstants
     // Online-Offline Synchronization Methods
     //
 
-    static public void clearSynchronizationStatus(EditorState p_state)
-            throws EnvoyServletException
+    static public void clearSynchronizationStatus(EditorState p_state) throws EnvoyServletException
     {
         try
         {
@@ -1680,9 +1614,8 @@ public class EditorHelper implements EditorConstants
 
             p_state.clearSynchronizationStatus();
 
-            p_state.setOldSynchronizationStatus(new SynchronizationStatus(
-                    p_state.getTargetPageId(), System.currentTimeMillis(),
-                    SynchronizationStatus.UNKNOWN));
+            p_state.setOldSynchronizationStatus(new SynchronizationStatus(p_state.getTargetPageId(),
+                    System.currentTimeMillis(), SynchronizationStatus.UNKNOWN));
         }
         catch (GeneralException ex)
         {
@@ -1694,13 +1627,11 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public void checkSynchronizationStatus(EditorState p_state)
-            throws EnvoyServletException
+    static public void checkSynchronizationStatus(EditorState p_state) throws EnvoyServletException
     {
         try
         {
-            SynchronizationStatus oldStatus = p_state
-                    .getOldSynchronizationStatus();
+            SynchronizationStatus oldStatus = p_state.getOldSynchronizationStatus();
             SynchronizationStatus newStatus = getSynchronizationManager()
                     .getStatus(p_state.getTargetPageId());
 
@@ -1735,13 +1666,12 @@ public class EditorHelper implements EditorConstants
      * pair and returns it in a GlossaryState object for use by the JSP page.
      */
     static public GlossaryState getGlossaryState(GlobalSightLocale p_srcLocale,
-            GlobalSightLocale p_trgLocale, String companyId)
-            throws EnvoyServletException
+            GlobalSightLocale p_trgLocale, String companyId) throws EnvoyServletException
     {
         GlossaryState glossaryState = new GlossaryState();
 
-        ArrayList glossaryFiles = (ArrayList) getGlossaries(p_srcLocale,
-                p_trgLocale, null, companyId);
+        ArrayList glossaryFiles = (ArrayList) getGlossaries(p_srcLocale, p_trgLocale, null,
+                companyId);
 
         glossaryState.setGlossaries(glossaryFiles);
         glossaryState.setSourceLocale(p_srcLocale);
@@ -1759,8 +1689,7 @@ public class EditorHelper implements EditorConstants
     {
         GlossaryState glossaryState = new GlossaryState();
 
-        ArrayList glossaryFiles = (ArrayList) getGlossaries(p_srcLocale,
-                p_trgLocale, null, null);
+        ArrayList glossaryFiles = (ArrayList) getGlossaries(p_srcLocale, p_trgLocale, null, null);
 
         glossaryState.setGlossaries(glossaryFiles);
         glossaryState.setSourceLocale(p_srcLocale);
@@ -1774,11 +1703,11 @@ public class EditorHelper implements EditorConstants
      * pair and updates the GlossaryState object's list with it.
      */
     static public GlossaryState updateGlossaryState(GlossaryState p_state,
-            GlobalSightLocale p_srcLocale, GlobalSightLocale p_trgLocale,
-            String companyId) throws EnvoyServletException
+            GlobalSightLocale p_srcLocale, GlobalSightLocale p_trgLocale, String companyId)
+            throws EnvoyServletException
     {
-        ArrayList glossaryFiles = (ArrayList) getGlossaries(p_srcLocale,
-                p_trgLocale, null, companyId);
+        ArrayList glossaryFiles = (ArrayList) getGlossaries(p_srcLocale, p_trgLocale, null,
+                companyId);
 
         p_state.setGlossaries(glossaryFiles);
         p_state.setSourceLocale(p_srcLocale);
@@ -1794,8 +1723,7 @@ public class EditorHelper implements EditorConstants
             GlobalSightLocale p_srcLocale, GlobalSightLocale p_trgLocale)
             throws EnvoyServletException
     {
-        ArrayList glossaryFiles = (ArrayList) getGlossaries(p_srcLocale,
-                p_trgLocale, null, null);
+        ArrayList glossaryFiles = (ArrayList) getGlossaries(p_srcLocale, p_trgLocale, null, null);
 
         p_state.setGlossaries(glossaryFiles);
         p_state.setSourceLocale(p_srcLocale);
@@ -1816,24 +1744,22 @@ public class EditorHelper implements EditorConstants
      * @return collection of GlossaryFile objects
      */
     static private ArrayList getGlossaries(GlobalSightLocale p_sourceLocale,
-            GlobalSightLocale p_targetLocale, String p_category,
-            String companyId) throws EnvoyServletException
+            GlobalSightLocale p_targetLocale, String p_category, String companyId)
+            throws EnvoyServletException
     {
         GlossaryManager mgr = null;
 
         try
         {
             mgr = ServerProxy.getGlossaryManager();
-            return mgr.getGlossaries(p_sourceLocale, p_targetLocale,
-                    p_category, companyId);
+            return mgr.getGlossaries(p_sourceLocale, p_targetLocale, p_category, companyId);
         }
         catch (Exception ex)
         {
             String args[] =
             { p_sourceLocale.toString(), p_targetLocale.toString(), p_category };
-            throw new EnvoyServletException(
-                    EnvoyServletException.MSG_FAILED_TO_GET_GLOSSARIES, args,
-                    null);
+            throw new EnvoyServletException(EnvoyServletException.MSG_FAILED_TO_GET_GLOSSARIES,
+                    args, null);
         }
     }
 
@@ -1867,8 +1793,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (Exception ex)
         {
-            CATEGORY.error(
-                    "Internal error: cannot receive offline/online synchronization messages",
+            CATEGORY.error("Internal error: cannot receive offline/online synchronization messages",
                     ex);
         }
 
@@ -1893,24 +1818,23 @@ public class EditorHelper implements EditorConstants
      * 
      * Wed Jun 18 23:14:14 2003 when in preview mode, don't show subs.
      */
-    public static void nextSegment(EditorState p_state)
-            throws EnvoyServletException
+    public static void nextSegment(EditorState p_state) throws EnvoyServletException
     {
         long currentTuId = p_state.getTuId();
         long currentTuvId = p_state.getTuvId();
         long currentSubId = p_state.getSubId();
         Vector excludedTypes = p_state.getExcludedItems();
 
-        TargetPage targetPage = (TargetPage) HibernateUtil.get(
-                TargetPage.class, p_state.getTargetPageId());
+        TargetPage targetPage = (TargetPage) HibernateUtil.get(TargetPage.class,
+                p_state.getTargetPageId());
         SourcePage sourcePage = targetPage.getSourcePage();
         long jobId = p_state.getJobId();
 
         HashSet includedTuIds = null;
         if (p_state.hasGsaTags())
         {
-            includedTuIds = EditorHelper.getInterpretedTuIds(p_state,
-                    p_state.getSourcePageId(), p_state.getTargetLocale());
+            includedTuIds = EditorHelper.getInterpretedTuIds(p_state, p_state.getSourcePageId(),
+                    p_state.getTargetLocale());
         }
 
         // Fri Mar 11 23:43:29 2005 Flag whether to include subs.
@@ -1948,17 +1872,14 @@ public class EditorHelper implements EditorConstants
         try
         {
             TuvManager tuvManager = ServerProxy.getTuvManager();
-            sourceTuvs = new ArrayList(
-                    tuvManager.getSourceTuvsForStatistics(sourcePage));
-            targetTuvs = new ArrayList(
-                    tuvManager.getTargetTuvsForStatistics(targetPage));
+            sourceTuvs = new ArrayList(tuvManager.getSourceTuvsForStatistics(sourcePage));
+            targetTuvs = new ArrayList(tuvManager.getTargetTuvsForStatistics(targetPage));
 
             long sourcePageId = sourcePage.getId();
             long targetLocaleId = targetPage.getGlobalSightLocale().getId();
             if (sourceTuvs.size() > 0)
             {
-                tuvMatchTypes = getMatchTypesForStatistics(p_state,
-                        sourcePageId, targetLocaleId);
+                tuvMatchTypes = getMatchTypesForStatistics(p_state, sourcePageId, targetLocaleId);
             }
         }
         catch (Exception e)
@@ -1986,34 +1907,29 @@ public class EditorHelper implements EditorConstants
 
                 currentTuIdLong = (Long) tus.get(i_index);
                 currentTuId = currentTuIdLong.longValue();
-                currentTuv = EditorHelper.getTuv(currentTuId, targetLocale,
-                        jobId);
-                Tuv srcTuv = EditorHelper.getTuv(currentTuId,
-                        p_state.getSourceLocale(), jobId);
+                currentTuv = EditorHelper.getTuv(currentTuId, targetLocale, jobId);
+                Tuv srcTuv = EditorHelper.getTuv(currentTuId, p_state.getSourceLocale(), jobId);
                 currentTuvId = currentTuv.getId();
                 currentSubId = 0;
 
                 // Look for the next tuv if this one is not contained
                 // in the GS-tagged page.
-                if (includedTuIds != null
-                        && !includedTuIds.contains(currentTuIdLong))
+                if (includedTuIds != null && !includedTuIds.contains(currentTuIdLong))
                 {
                     continue;
                 }
 
                 // Mon Sep 13 19:52:22 2004 Skip merged TUVs.
                 String mergeState = currentTuv.getMergeState();
-                if (mergeState.equals(Tuv.MERGE_MIDDLE)
-                        || mergeState.equals(Tuv.MERGE_END))
+                if (mergeState.equals(Tuv.MERGE_MIDDLE) || mergeState.equals(Tuv.MERGE_END))
                 {
                     continue;
                 }
 
                 // Wed Jun 18 23:20:42 2003 Skip localizable and
                 // non-text TUVs when in preview mode.
-                if (b_includeSubs == false
-                        && (currentTuv.isLocalizable(jobId) || !currentTuv
-                                .getTu(jobId).getTuType().equals("text")))
+                if (b_includeSubs == false && (currentTuv.isLocalizable(jobId)
+                        || !currentTuv.getTu(jobId).getTuType().equals("text")))
                 {
                     continue;
                 }
@@ -2029,9 +1945,8 @@ public class EditorHelper implements EditorConstants
                     break;
                 }
 
-                if (LeverageUtil.isIncontextMatch(srcTuv, sourceTuvs,
-                        targetTuvs, tuvMatchTypes, p_state.getExcludedItems(),
-                        jobId))
+                if (LeverageUtil.isIncontextMatch(srcTuv, sourceTuvs, targetTuvs, tuvMatchTypes,
+                        p_state.getExcludedItems(), jobId))
                 {
                     continue;
                 }
@@ -2076,8 +1991,7 @@ public class EditorHelper implements EditorConstants
      * 
      * Wed Jun 18 23:14:14 2003 when in preview mode, don't show subs.
      */
-    public static void previousSegment(EditorState p_state)
-            throws EnvoyServletException
+    public static void previousSegment(EditorState p_state) throws EnvoyServletException
     {
         long currentTuId = p_state.getTuId();
         long currentTuvId = p_state.getTuvId();
@@ -2087,8 +2001,8 @@ public class EditorHelper implements EditorConstants
 
         if (p_state.hasGsaTags())
         {
-            includedTuIds = EditorHelper.getInterpretedTuIds(p_state,
-                    p_state.getSourcePageId(), p_state.getTargetLocale());
+            includedTuIds = EditorHelper.getInterpretedTuIds(p_state, p_state.getSourcePageId(),
+                    p_state.getTargetLocale());
         }
 
         // Fri Mar 11 23:43:29 2005 Flag whether to include subs.
@@ -2097,8 +2011,8 @@ public class EditorHelper implements EditorConstants
         boolean b_includeSubs = p_state.getLayout().getTargetViewMode() != VIEWMODE_PREVIEW
                 || p_state.getOptions().getIterateSubs();
 
-        TargetPage targetPage = (TargetPage) HibernateUtil.get(
-                TargetPage.class, p_state.getTargetPageId());
+        TargetPage targetPage = (TargetPage) HibernateUtil.get(TargetPage.class,
+                p_state.getTargetPageId());
         SourcePage sourcePage = targetPage.getSourcePage();
         long jobId = p_state.getJobId();
 
@@ -2111,8 +2025,7 @@ public class EditorHelper implements EditorConstants
 
         if (b_includeSubs)
         {
-            prevId = findPreviousSub(currentTuv, currentSubId, excludedTypes,
-                    jobId);
+            prevId = findPreviousSub(currentTuv, currentSubId, excludedTypes, jobId);
         }
 
         if (prevId >= 0)
@@ -2134,17 +2047,14 @@ public class EditorHelper implements EditorConstants
         try
         {
             TuvManager tuvManager = ServerProxy.getTuvManager();
-            sourceTuvs = new ArrayList(
-                    tuvManager.getSourceTuvsForStatistics(sourcePage));
-            targetTuvs = new ArrayList(
-                    tuvManager.getTargetTuvsForStatistics(targetPage));
+            sourceTuvs = new ArrayList(tuvManager.getSourceTuvsForStatistics(sourcePage));
+            targetTuvs = new ArrayList(tuvManager.getTargetTuvsForStatistics(targetPage));
 
             long sourcePageId = sourcePage.getId();
             long targetLocaleId = targetPage.getGlobalSightLocale().getId();
             if (sourceTuvs.size() > 0)
             {
-                tuvMatchTypes = getMatchTypesForStatistics(p_state,
-                        sourcePageId, targetLocaleId);
+                tuvMatchTypes = getMatchTypesForStatistics(p_state, sourcePageId, targetLocaleId);
             }
         }
         catch (Exception e)
@@ -2172,34 +2082,29 @@ public class EditorHelper implements EditorConstants
 
                 currentTuIdLong = (Long) tus.get(i_index);
                 currentTuId = currentTuIdLong.longValue();
-                currentTuv = EditorHelper.getTuv(currentTuId, targetLocale,
-                        jobId);
-                Tuv srcTuv = EditorHelper.getTuv(currentTuId,
-                        p_state.getSourceLocale(), jobId);
+                currentTuv = EditorHelper.getTuv(currentTuId, targetLocale, jobId);
+                Tuv srcTuv = EditorHelper.getTuv(currentTuId, p_state.getSourceLocale(), jobId);
                 currentTuvId = currentTuv.getId();
                 currentSubId = 0;
 
                 // Look for the next tuv if this one is not contained
                 // in the GS-tagged page.
-                if (includedTuIds != null
-                        && !includedTuIds.contains(currentTuIdLong))
+                if (includedTuIds != null && !includedTuIds.contains(currentTuIdLong))
                 {
                     continue;
                 }
 
                 // Mon Sep 13 19:52:22 2004 Skip merged TUVs.
                 String mergeState = currentTuv.getMergeState();
-                if (mergeState.equals(Tuv.MERGE_MIDDLE)
-                        || mergeState.equals(Tuv.MERGE_END))
+                if (mergeState.equals(Tuv.MERGE_MIDDLE) || mergeState.equals(Tuv.MERGE_END))
                 {
                     continue;
                 }
 
                 // Wed Jun 18 23:20:42 2003 Skip localizable and
                 // non-text TUVs when in preview mode.
-                if (b_includeSubs == false
-                        && (currentTuv.isLocalizable(jobId) || !currentTuv
-                                .getTu(jobId).getTuType().equals("text")))
+                if (b_includeSubs == false && (currentTuv.isLocalizable(jobId)
+                        || !currentTuv.getTu(jobId).getTuType().equals("text")))
                 {
                     continue;
                 }
@@ -2213,9 +2118,8 @@ public class EditorHelper implements EditorConstants
                 {
                     break;
                 }
-                if (LeverageUtil.isIncontextMatch(srcTuv, sourceTuvs,
-                        targetTuvs, tuvMatchTypes, p_state.getExcludedItems(),
-                        jobId))
+                if (LeverageUtil.isIncontextMatch(srcTuv, sourceTuvs, targetTuvs, tuvMatchTypes,
+                        p_state.getExcludedItems(), jobId))
                 {
                     continue;
                 }
@@ -2226,11 +2130,10 @@ public class EditorHelper implements EditorConstants
                 {
                     break;
                 }
-                
-                if (b_includeSubs
-                        && EditHelper.isTuvInProtectedState(currentTuv, jobId)
-                        && !isRealExactMatchLocalied(srcTuv, currentTuv,
-                                tuvMatchTypes, "" + currentSubId, jobId))
+
+                if (b_includeSubs && EditHelper.isTuvInProtectedState(currentTuv, jobId)
+                        && !isRealExactMatchLocalied(srcTuv, currentTuv, tuvMatchTypes,
+                                "" + currentSubId, jobId))
                 {
                     break;
                 }
@@ -2256,20 +2159,18 @@ public class EditorHelper implements EditorConstants
             }
         }
     }
-    
+
     /**
      * For segment with sub, when sub is exact match
      */
-    public static boolean isRealExactMatchLocalied(Tuv p_srcTuv,
-            Tuv p_targetTuv, MatchTypeStatistics p_matchTypes, String subid,
-            long p_jobId)
+    public static boolean isRealExactMatchLocalied(Tuv p_srcTuv, Tuv p_targetTuv,
+            MatchTypeStatistics p_matchTypes, String subid, long p_jobId)
     {
         boolean result = p_targetTuv.isExactMatchLocalized(p_jobId);
 
         if (result)
         {
-            int tuvState = p_matchTypes.getLingManagerMatchType(
-                    p_srcTuv.getId(), subid);
+            int tuvState = p_matchTypes.getLingManagerMatchType(p_srcTuv.getId(), subid);
 
             if (tuvState == LeverageMatchLingManager.NO_MATCH
                     || tuvState == LeverageMatchLingManager.FUZZY)
@@ -2279,14 +2180,11 @@ public class EditorHelper implements EditorConstants
         }
         else
         {
-            if (!p_targetTuv.getState().equals(TuvState.NOT_LOCALIZED))
-            {
-                int tuvState = p_matchTypes.getLingManagerMatchType(p_srcTuv.getId(), subid);
+            int tuvState = p_matchTypes.getLingManagerMatchType(p_srcTuv.getId(), subid);
 
-                if (tuvState == LeverageMatchLingManager.EXACT)
-                {
-                    result = true;
-                }
+            if (tuvState == LeverageMatchLingManager.EXACT)
+            {
+                result = true;
             }
         }
 
@@ -2305,8 +2203,8 @@ public class EditorHelper implements EditorConstants
      * @param p_targetLocaleId
      * @return
      */
-    private static MatchTypeStatistics getMatchTypesForStatistics(
-            EditorState p_state, long p_sourcePageId, long p_targetLocaleId)
+    private static MatchTypeStatistics getMatchTypesForStatistics(EditorState p_state,
+            long p_sourcePageId, long p_targetLocaleId)
     {
         if (p_state == null)
         {
@@ -2323,8 +2221,7 @@ public class EditorHelper implements EditorConstants
             OnlineEditorManager oem = p_state.getEditorManager();
             if (oem != null)
             {
-                tuvMatchTypes = oem.getMatchTypes(p_sourcePageId,
-                        p_targetLocaleId);
+                tuvMatchTypes = oem.getMatchTypes(p_sourcePageId, p_targetLocaleId);
             }
 
             // This is not needed commonly. Anyway, put it here.
@@ -2340,8 +2237,8 @@ public class EditorHelper implements EditorConstants
                 {
                     lingManager.setIncludeMtMatches(false);
                 }
-                tuvMatchTypes = lingManager.getMatchTypesForStatistics(
-                        p_sourcePageId, p_targetLocaleId, 0);
+                tuvMatchTypes = lingManager.getMatchTypesForStatistics(p_sourcePageId,
+                        p_targetLocaleId, 0);
             }
         }
         catch (Exception e)
@@ -2367,8 +2264,7 @@ public class EditorHelper implements EditorConstants
      * @return -1 when no sub could be found, 0 for the top-level segment, and
      *         &gt; 0 for a sub-segment (i.e. the ID of the sub-segment).
      */
-    private static long findNextSub(Tuv p_tuv, long p_sub,
-            Vector p_excludedTypes, long p_jobId)
+    private static long findNextSub(Tuv p_tuv, long p_sub, Vector p_excludedTypes, long p_jobId)
     {
         if (p_tuv == null)
         {
@@ -2449,8 +2345,7 @@ public class EditorHelper implements EditorConstants
      * @return -1 when no sub could be found, 0 for the top-level segment, and
      *         &gt; 0 for a sub-segment (i.e. the ID of the sub-segment).
      */
-    private static long findPreviousSub(Tuv p_tuv, long p_sub,
-            Vector p_excludedTypes, long p_jobId)
+    private static long findPreviousSub(Tuv p_tuv, long p_sub, Vector p_excludedTypes, long p_jobId)
     {
         // No previous sub in this tuv when looking at top-level segment
         if (p_tuv == null || p_sub == 0)
@@ -2514,8 +2409,7 @@ public class EditorHelper implements EditorConstants
         tuType = currentNode.getAttribute("type");
 
         // if the last sub is a matching sub, return it
-        if (p_sub == -1
-                && !isExcludedNode(currentNode, tuType, p_excludedTypes))
+        if (p_sub == -1 && !isExcludedNode(currentNode, tuType, p_excludedTypes))
         {
             return Long.parseLong(currentNode.getAttribute("id"));
         }
@@ -2546,8 +2440,7 @@ public class EditorHelper implements EditorConstants
     private static boolean isExcludedNode(GxmlElement p_node, String p_tuType,
             Vector p_excludedTypes)
     {
-        return SegmentProtectionManager.isTuvExcluded(p_node, p_tuType,
-                p_excludedTypes);
+        return SegmentProtectionManager.isTuvExcluded(p_node, p_tuType, p_excludedTypes);
     }
 
     /**
@@ -2579,13 +2472,10 @@ public class EditorHelper implements EditorConstants
     private static boolean tbFilter(String p_userId, String tbName, long tbId)
     {
         boolean canAccessTB = true;
-        boolean isAdmin = UserUtil.isInPermissionGroup(p_userId,
-                "Administrator");
+        boolean isAdmin = UserUtil.isInPermissionGroup(p_userId, "Administrator");
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-        Company currentCompany = CompanyWrapper
-                .getCompanyById(currentCompanyId);
-        boolean enableTBAccessControl = currentCompany
-                .getEnableTBAccessControl();
+        Company currentCompany = CompanyWrapper.getCompanyById(currentCompanyId);
+        boolean enableTBAccessControl = currentCompany.getEnableTBAccessControl();
         if (!isAdmin && enableTBAccessControl)
         {
             ProjectTMTBUsers ptb = new ProjectTMTBUsers();

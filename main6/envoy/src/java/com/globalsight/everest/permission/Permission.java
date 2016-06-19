@@ -63,10 +63,14 @@ public class Permission
     static public final String ACTIVITY_TYPES_REMOVE = "activityTypes.remove";
     static public final String ACTIVITY_TYPES_EDIT = "activityTypes.edit";
     static public final String ACTIVITY_TYPES_NEW = "activityTypes.new";
-//    static public final String AUTOMATIC_ACTIONS_VIEW = "automaticActions.view";
-//    static public final String AUTOMATIC_ACTIONS_REMOVE = "automaticActions.remove";
-//    static public final String AUTOMATIC_ACTIONS_EDIT = "automaticActions.edit";
-//    static public final String AUTOMATIC_ACTIONS_NEW = "automaticActions.new";
+    // static public final String AUTOMATIC_ACTIONS_VIEW =
+    // "automaticActions.view";
+    // static public final String AUTOMATIC_ACTIONS_REMOVE =
+    // "automaticActions.remove";
+    // static public final String AUTOMATIC_ACTIONS_EDIT =
+    // "automaticActions.edit";
+    // static public final String AUTOMATIC_ACTIONS_NEW =
+    // "automaticActions.new";
     static public final String CURRENCY_VIEW = "currency.view";
     static public final String CURRENCY_EDIT = "currency.edit";
     static public final String CURRENCY_NEW = "currency.new";
@@ -193,14 +197,6 @@ public class Permission
     static public final String SERVICEWARE_IMPORT = "serviceware.import";
     static public final String SNIPPET_ADD = "snippet.add";
     static public final String SNIPPET_EDIT = "snippet.edit";
-//    static public final String TEAMSITE_SERVER_VIEW = "teamsiteserver.view";
-//    static public final String TEAMSITE_SERVER_REMOVE = "teamsiteserver.remove";
-//    static public final String TEAMSITE_SERVER_CREATE = "teamsiteserver.create";
-//    static public final String TEAMSITE_SERVER_EDIT = "teamsiteserver.edit";
-//    static public final String TEAMSITE_SERVER_NEW = "teamsiteserver.new";
-//    static public final String TEAMSITE_PROFILES_VIEW = "teamsiteprofiles.view";
-//    static public final String TEAMSITE_PROFILES_REMOVE = "teamsiteprofiles.remove";
-//    static public final String TEAMSITE_PROFILES_NEW = "teamsiteprofiles.new";
     static public final String DATABASE_INTEGRATION = "database.integration";
     static public final String EXPORT_LOC_VIEW = "exportloc.view";
     static public final String EXPORT_LOC_REMOVE = "exportloc.remove";
@@ -232,13 +228,12 @@ public class Permission
     static public final String JOBS_MAKE_READY = "jobs.makeready";
     static public final String JOBS_RECREATE = "jobs.recreate";
     static public final String JOBS_PLANNEDCOMPDATE = "jobs.plannedcompdate";
-    //GBS-3692
+    // GBS-3692
     static public final String JOBS_GROUP = "jobs.group";
     static public final String JOBS_NEWGROUP = "jobs.newgroup";
     static public final String JOBS_REMOVEGROUP = "jobs.removegroup";
     static public final String JOBS_ADDJOBTOGROUP = "jobs.addjobtogroup";
     static public final String JOBS_REMOVEJOBFROMGROUP = "jobs.removejobfromgroup";
-//    static public final String FILE_PROFILES_SEARCH = "fileprofiles.search";//GBS-2875
 
     // For sla report issue
     static public final String JOBS_ESTIMATEDCOMPDATE = "jobs.estimatedcompdate";
@@ -320,8 +315,6 @@ public class Permission
     static public final String ACTIVITIES_TM_SEARCH = "activities.tm.search";
     static public final String ACTIVITIES_TB_SEARCH = "activities.tb.search";
     static public final String REPORTS_MAIN = "reports.main";
-   // static public final String REPORTS_ADMIN = "reports.admin";
-   // static public final String REPORTS_COMPOSER = "reports.composer";
     static public final String REPORTS_CUSTOM_EXTERNAL = "reports.custom.external";
     static public final String REPORTS_CUSTOM = "reports.custom";
     static public final String VENDORS_NEW = "vendors.new";
@@ -341,7 +334,6 @@ public class Permission
     static public final String GET_PROJECTS_I_MANAGE = "projects.getmanage";
     static public final String GET_PROJECTS_I_BELONG = "projects.getbelong";
 
-//    static public final String ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES = "account.download.all.offline.files";
     static public final String ACCOUNT_NOTIFICATION_SYSTEM = "account.notification.system";
     static public final String ACCOUNT_NOTIFICATION_WFMGMT = "account.notification.wfmgmt";
     static public final String ACCOUNT_NOTIFICATION_GENERAL = "account.notification.general";
@@ -498,16 +490,11 @@ public class Permission
     static public final String BASE_TEXT_FILTER_VIEW = "base.text.filter.view";
     static public final String BASE_TEXT_FILTER_INTERNAL_TEXT = "base.text.filter.internal.text";
     static public final String BASE_TEXT_FILTER_ESCAPING = "base.text.filter.escaping";
-    
 
     static public final String GSEDITION_VIEW = "gsedition.view";
     static public final String GSEDITION_REMOVE = "gsedition.remove";
     static public final String GSEDITION_EDIT = "gsedition.edit";
     static public final String GSEDITION_NEW = "gsedition.new";
-//    static public final String GSEDITION_ACTIONS_VIEW = "gseditionActions.view";
-//    static public final String GSEDITION_ACTIONS_REMOVE = "gseditionActions.remove";
-//    static public final String GSEDITION_ACTIONS_EDIT = "gseditionActions.edit";
-//    static public final String GSEDITION_ACTIONS_NEW = "gseditionActions.new";
 
     static public final String ADD_SOURCE_FILES = "sourceFiles.add";
     static public final String DELETE_SOURCE_FILES = "sourceFiles.delete";
@@ -525,15 +512,15 @@ public class Permission
     static public final String JOB_UPDATE_LEVERAGE = "jobs.updateLeverage";
     static public final String JOB_UPDATE_WORD_COUNTS = "jobs.updateWordCounts";
     static public final String ACTIVITIES_UPDATE_LEVERAGE = "activities.updateLeverage";
-    
+
     // for COTI Api
     static public final String COTI_JOB = "coti.job";
 
     // For Job creation
     static public final String CREATE_JOB = "createjob";
     static public final String CREATE_JOB_NO_APPLET = "createJobNoApplet";
-    
-    //For Job Scorecard
+
+    // For Job Scorecard
     static public final String EDIT_SCORECARD = "editScorecard";
     static public final String REPORTS_SCORECARD = "reports.scorecard";
     static public final String VIEW_SCORECARD = "viewScorecard";
@@ -545,29 +532,23 @@ public class Permission
     // user can only edit below permissions.
     static public final String[] GLOBAL_LP_PERMS =
     { ACTIVITIES_VIEW, ACTIVITIES_ACCEPT, ACTIVITIES_REJECT_BEFORE_ACCEPTING,
-            ACTIVITIES_REJECT_AFTER_ACCEPTING, ACTIVITIES_WORKOFFLINE,
-            ACTIVITIES_SEARCHREPLACE, ACTIVITIES_FILES_VIEW,
-            ACTIVITIES_FILES_EDIT, ACTIVITIES_COMMENTS_VIEW,
-            ACTIVITIES_COMMENTS_EDIT, CONTENT_MANAGER,
-            ACCOUNT_NOTIFICATION_GENERAL, ACTIVITIES_EXPORT,
-            ACTIVITIES_EXPORT_INPROGRESS, ACTIVITIES_DOWNLOAD,
-            ACTIVITIES_ACCEPT_ALL, ACTIVITIES_DOWNLOAD_ALL,
-            ACTIVITIES_UPLOAD_SUPPORT_FILES, ACTIVITIES_DETAIL_STATISTICS,
-            ACTIVITIES_SUMMARY_STATISTICS, SOURCE_PAGE_EDIT,
-            COMMENT_ACCESS_RESTRICTED, ACTIVITIES_COMMENTS_NEW,
-            ACTIVITIES_COMMENTS_JOB, ACTIVITIES_COMMENTS_DOWNLOAD,
-            ACTIVITIES_SECONDARYTARGETFILE, USERS_VIEW, CHANGE_OWN_EMAIL,
-            ACTIVITIES_JOB_COMMENTS_VIEW, ACTIVITIES_JOB_COMMENTS_EDIT,
+            ACTIVITIES_REJECT_AFTER_ACCEPTING, ACTIVITIES_WORKOFFLINE, ACTIVITIES_SEARCHREPLACE,
+            ACTIVITIES_FILES_VIEW, ACTIVITIES_FILES_EDIT, ACTIVITIES_COMMENTS_VIEW,
+            ACTIVITIES_COMMENTS_EDIT, CONTENT_MANAGER, ACCOUNT_NOTIFICATION_GENERAL,
+            ACTIVITIES_EXPORT, ACTIVITIES_EXPORT_INPROGRESS, ACTIVITIES_DOWNLOAD,
+            ACTIVITIES_ACCEPT_ALL, ACTIVITIES_DOWNLOAD_ALL, ACTIVITIES_UPLOAD_SUPPORT_FILES,
+            ACTIVITIES_DETAIL_STATISTICS, ACTIVITIES_SUMMARY_STATISTICS, SOURCE_PAGE_EDIT,
+            COMMENT_ACCESS_RESTRICTED, ACTIVITIES_COMMENTS_NEW, ACTIVITIES_COMMENTS_JOB,
+            ACTIVITIES_COMMENTS_DOWNLOAD, ACTIVITIES_SECONDARYTARGETFILE, USERS_VIEW,
+            CHANGE_OWN_EMAIL, ACTIVITIES_JOB_COMMENTS_VIEW, ACTIVITIES_JOB_COMMENTS_EDIT,
             ACTIVITIES_JOB_COMMENTS_NEW, ACTIVITIES_JOB_COMMENTS_DOWNLOAD,
             REPORTS_TRANSLATIONS_EDIT, REPORTS_MAIN, REPORTS_LANGUAGE_SIGN_OFF,
-            REPORTS_LANGUAGE_SIGN_OFF_SIMPLE, REPORTS_CHARACTER_COUNT,
-            REPORTS_SCORECARD, REPORTS_DELL_FILE_LIST, ACTIVITY_DASHBOARD_VIEW,
-            ACTIVITIES_BATCH_COMPLETE_ACTIVITY,
+            REPORTS_LANGUAGE_SIGN_OFF_SIMPLE, REPORTS_CHARACTER_COUNT, REPORTS_SCORECARD,
+            REPORTS_DELL_FILE_LIST, ACTIVITY_DASHBOARD_VIEW, ACTIVITIES_BATCH_COMPLETE_ACTIVITY,
             ACTIVITIES_BATCH_COMPLETE_WORKFLOW, ACTIVITIES_UPDATE_LEVERAGE,
-            ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY, TM_VIEW, TM_SEARCH,
-            ACTIVITIES_TM_SEARCH, ACTIVITIES_TB_SEARCH, TERMINOLOGY_VIEW,
-            TERMINOLOGY_SEARCH, ACTIVITIES_DOWNLOAD_COMBINED,
-            ACTIVITIES_EXPORT_DOWNLOAD, REPORTS_POST_REVIEW_QA,
+            ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY, TM_VIEW, TM_SEARCH, ACTIVITIES_TM_SEARCH,
+            ACTIVITIES_TB_SEARCH, TERMINOLOGY_VIEW, TERMINOLOGY_SEARCH,
+            ACTIVITIES_DOWNLOAD_COMBINED, ACTIVITIES_EXPORT_DOWNLOAD, REPORTS_POST_REVIEW_QA,
             REPORTS_TRANSLATIONS_VERIFICATION };
 
     /**
@@ -692,14 +673,6 @@ public class Permission
         added = addPermission(105, SERVICEWARE_IMPORT) || added;
         added = addPermission(106, SNIPPET_ADD) || added;
         added = addPermission(107, SNIPPET_EDIT) || added;
-//        added = addPermission(108, TEAMSITE_SERVER_VIEW) || added;
-//        added = addPermission(109, TEAMSITE_SERVER_REMOVE) || added;
-//        added = addPermission(110, TEAMSITE_SERVER_CREATE) || added;
-//        added = addPermission(111, TEAMSITE_SERVER_EDIT) || added;
-//        added = addPermission(112, TEAMSITE_SERVER_NEW) || added;
-//        added = addPermission(113, TEAMSITE_PROFILES_VIEW) || added;
-//        added = addPermission(114, TEAMSITE_PROFILES_REMOVE) || added;
-//        added = addPermission(115, TEAMSITE_PROFILES_NEW) || added;
         added = addPermission(116, DATABASE_INTEGRATION) || added;
         added = addPermission(117, EXPORT_LOC_VIEW) || added;
         added = addPermission(118, EXPORT_LOC_REMOVE) || added;
@@ -759,8 +732,6 @@ public class Permission
         added = addPermission(172, ACTIVITIES_COMMENTS_VIEW) || added;
         added = addPermission(173, ACTIVITIES_COMMENTS_EDIT) || added;
         added = addPermission(174, REPORTS_MAIN) || added;
-        //added = addPermission(175, REPORTS_ADMIN) || added;
-        //added = addPermission(176, REPORTS_COMPOSER) || added;
         added = addPermission(177, VENDORS_NEW) || added;
         added = addPermission(178, VENDORS_VIEW) || added;
         added = addPermission(179, VENDORS_EDIT) || added;
@@ -842,9 +813,6 @@ public class Permission
         // issue
         added = addPermission(248, JOB_COSTING_REEDIT) || added;
 
-        // "File Profiles Search" is not required (GBS-2875)
-        //added = addPermission(249, FILE_PROFILES_SEARCH) || added;
-
         // For " Quotation process for WebEx " issue
         added = addPermission(250, JOB_QUOTE_APPROVE) || added;
         added = addPermission(251, JOB_QUOTE_PONUMBER_EDIT) || added;
@@ -901,8 +869,6 @@ public class Permission
 
         added = addPermission(284, FILE_EXT_REMOVE) || added;
 
-//        added = addPermission(285, ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES) || added;
-
         added = addPermission(286, JOB_FILES_DOWNLOAD) || added;
 
         added = addPermission(287, CONNECT_TO_CVS) || added;
@@ -917,8 +883,7 @@ public class Permission
 
         // For Filter configuration
         added = addPermission(292, FILTER_CONFIGURATION_VIEW) || added;
-        added = addPermission(293, FILTER_CONFIGURATION_REMOVE_FILTERS)
-                || added;
+        added = addPermission(293, FILTER_CONFIGURATION_REMOVE_FILTERS) || added;
         added = addPermission(294, FILTER_CONFIGURATION_ADD_FILTER) || added;
         added = addPermission(295, FILTER_CONFIGURATION_EDIT_FILTER) || added;
 
@@ -931,12 +896,6 @@ public class Permission
         added = addPermission(299, XMLDTD_REMOVE) || added;
         added = addPermission(300, CVS_ADMIN) || added;
         added = addPermission(301, CVS_OPERATE) || added;
-
-        // AUTOMATIC ACTION
-//        added = addPermission(302, AUTOMATIC_ACTIONS_VIEW) || added;
-//        added = addPermission(303, AUTOMATIC_ACTIONS_REMOVE) || added;
-//        added = addPermission(304, AUTOMATIC_ACTIONS_EDIT) || added;
-//        added = addPermission(305, AUTOMATIC_ACTIONS_NEW) || added;
 
         added = addPermission(306, JOB_WORKFLOWS_PRIORITY) || added;
 
@@ -975,12 +934,6 @@ public class Permission
         added = addPermission(332, GSEDITION_REMOVE) || added;
         added = addPermission(333, GSEDITION_EDIT) || added;
         added = addPermission(334, GSEDITION_NEW) || added;
-
-        // GSEdition ACTION
-//        added = addPermission(335, GSEDITION_ACTIONS_VIEW) || added;
-//        added = addPermission(336, GSEDITION_ACTIONS_REMOVE) || added;
-//        added = addPermission(337, GSEDITION_ACTIONS_EDIT) || added;
-//        added = addPermission(338, GSEDITION_ACTIONS_NEW) || added;
 
         added = addPermission(339, CVS_Servers) || added;
         added = addPermission(340, CVS_Servers_NEW) || added;
@@ -1027,8 +980,7 @@ public class Permission
         added = addPermission(369, JOB_UPDATE_LEVERAGE) || added;
 
         // For GBS-2393
-        added = addPermission(370, ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY)
-                || added;
+        added = addPermission(370, ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY) || added;
         added = addPermission(371, TM_SEARCH) || added;
 
         added = addPermission(372, TERMINOLOGY_SEARCH) || added;
@@ -1062,32 +1014,32 @@ public class Permission
         added = addPermission(390, MTP_EDIT) || added;
         added = addPermission(391, MTP_REMOVE) || added;
         added = addPermission(392, JOB_CHANGE_NAME) || added;
-        
+
         // For GBS-3339, New CreateJob feature that does not use Java applet
         added = addPermission(393, CREATE_JOB_NO_APPLET) || added;
         // GBS-3389: recreate job in pending job list
         added = addPermission(394, JOBS_RECREATE) || added;
-        //GBS-3450: Export/Import filter configurations from server to server.
+        // GBS-3450: Export/Import filter configurations from server to server.
         added = addPermission(395, FILTER_CONFIGURATION_EXPORT_FILTERS) || added;
         added = addPermission(396, FILTER_CONFIGURATION_IMPORT_FILTERS) || added;
-        
+
         added = addPermission(397, REPORTS_LANGUAGE_SIGN_OFF_SIMPLE) || added;
 
-        //Export/Import Locale Pairs from server to server.
+        // Export/Import Locale Pairs from server to server.
         added = addPermission(398, LOCALE_PAIRS_EXPORT) || added;
         added = addPermission(399, LOCALE_PAIRS_IMPORT) || added;
-        //Export/Import MachineTranslation Profiles from server to server.
+        // Export/Import MachineTranslation Profiles from server to server.
         added = addPermission(400, MTP_EXPORT) || added;
         added = addPermission(401, MTP_IMPORT) || added;
         added = addPermission(402, COTI_JOB) || added;
-        
+
         added = addPermission(403, EDIT_SCORECARD) || added;
         added = addPermission(404, REPORTS_SCORECARD) || added;
         added = addPermission(405, VIEW_SCORECARD) || added;
         added = addPermission(406, OPERATION_LOG_VIEW) || added;
         added = addPermission(407, ELOQUA) || added;
         added = addPermission(408, REPORTS_DELL_ONLINE_JOBS_FOR_IP_TRANSLATOR) || added;
-        
+
         added = addPermission(409, ACTIVITIES_EXPORT_DOWNLOAD) || added;
         added = addPermission(410, JOBS_EXPORT_DOWNLOAD) || added;
         added = addPermission(411, JOB_WORKFLOWS_EXPORT_DOWNLOAD) || added;
@@ -1101,7 +1053,7 @@ public class Permission
         added = addPermission(420, REPORTS_TRANSLATIONS_VERIFICATION) || added;
         added = addPermission(422, JOB_WORKFLOWS_TRANSLATED_TEXT) || added;
         added = addPermission(423, BLAISE_CONNECTOR) || added;
-        //GBS-4053
+        // GBS-4053
         added = addPermission(424, BASE_TEXT_FILTER_VIEW) || added;
         added = addPermission(425, BASE_TEXT_FILTER_INTERNAL_TEXT) || added;
         added = addPermission(426, BASE_TEXT_FILTER_ESCAPING) || added;
@@ -1174,8 +1126,7 @@ public class Permission
             loadPermissions();
         }
 
-        logger.info("Initialized to contain " + s_idMap.size()
-                + " flexible user permissions.");
+        logger.info("Initialized to contain " + s_idMap.size() + " flexible user permissions.");
     }
 
     /**
@@ -1195,22 +1146,16 @@ public class Permission
 
                 // http is ok for a reference to this host
                 StringBuffer permXmlUrl = new StringBuffer("http://");
-                permXmlUrl
-                        .append(sc
-                                .getStringParameter(SystemConfigParamNames.SERVER_HOST));
+                permXmlUrl.append(sc.getStringParameter(SystemConfigParamNames.SERVER_HOST));
                 permXmlUrl.append(":");
-                permXmlUrl
-                        .append(sc
-                                .getStringParameter(SystemConfigParamNames.SERVER_PORT));
+                permXmlUrl.append(sc.getStringParameter(SystemConfigParamNames.SERVER_PORT));
                 permXmlUrl.append(PERMISSION_XML_URL);
                 String companyId = CompanyThreadLocal.getInstance().getValue();
                 permXmlUrl.append("?companyId=").append(companyId);
-                logger.info("permXmlUrl : " + permXmlUrl);
 
                 URL u = new URL(permXmlUrl.toString());
                 InputStream is = u.openStream();
-                BufferedReader br = new BufferedReader(
-                        new InputStreamReader(is));
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
                 String s = null;
                 StringBuffer sb = new StringBuffer();
 
@@ -1223,7 +1168,7 @@ public class Permission
                 s_permissionXml = sb.toString();
                 if (logger.isDebugEnabled())
                 {
-                    logger.debug("s_permissionXml" + s_permissionXml);                    
+                    logger.debug("s_permissionXml" + s_permissionXml);
                 }
             }
             catch (Exception ex)
@@ -1259,15 +1204,13 @@ public class Permission
     }
 
     /** Returns the mapped integer value to the given permission. */
-    static int getBitValueForPermission(String p_perm)
-            throws PermissionException
+    static int getBitValueForPermission(String p_perm) throws PermissionException
     {
         Long id = (Long) s_idMap.get(p_perm);
 
         if (id == null)
         {
-            throw new PermissionException("Permission '" + p_perm
-                    + "' does not exist.");
+            throw new PermissionException("Permission '" + p_perm + "' does not exist.");
         }
 
         // possible impedance mismatch...
@@ -1455,8 +1398,7 @@ public class Permission
         }
         catch (Exception ex)
         {
-            logger.error("Failed to add permission" + p_perm
-                    + " to the database.", ex);
+            logger.error("Failed to add permission" + p_perm + " to the database.", ex);
             added = false;
         }
         finally

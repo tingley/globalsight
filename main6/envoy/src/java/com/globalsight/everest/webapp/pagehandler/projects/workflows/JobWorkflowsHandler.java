@@ -112,8 +112,7 @@ import com.globalsight.util.modules.Modules;
 
 public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(JobWorkflowsHandler.class);
+    private static final Logger CATEGORY = Logger.getLogger(JobWorkflowsHandler.class);
     protected static boolean s_isGxmlEditorEnabled = false;
     private static boolean s_isSpecialCustomer = false; // Dell specific!
     private static String s_downloadDelayTimeAfterExporting; // Dell specific!
@@ -126,8 +125,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
             s_isGxmlEditorEnabled = EditHelper.isGxmlEditorInstalled();
-            s_isSpecialCustomer = sc
-                    .getBooleanParameter(SystemConfiguration.IS_DELL);
+            s_isSpecialCustomer = sc.getBooleanParameter(SystemConfiguration.IS_DELL);
             s_downloadDelayTimeAfterExporting = sc
                     .getStringParameter(SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME);
         }
@@ -139,14 +137,12 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
     }
 
     @Override
-    public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-            HttpServletRequest p_request, HttpServletResponse p_response,
-            ServletContext p_context) throws ServletException, IOException,
-            RemoteException, EnvoyServletException
+    public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
+            HttpServletResponse p_response, ServletContext p_context)
+            throws ServletException, IOException, RemoteException, EnvoyServletException
     {
-		HttpSession httpSession = p_request.getSession(false);
-		SessionManager sessionMgr = (SessionManager) httpSession
-				.getAttribute(SESSION_MANAGER);
+        HttpSession httpSession = p_request.getSession(false);
+        SessionManager sessionMgr = (SessionManager) httpSession.getAttribute(SESSION_MANAGER);
         JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
         Job job = jobSummaryHelper.getJobByRequest(p_request);
         String scorecardFlag = "";
@@ -162,8 +158,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         else if (p_request.getParameter("changePriority") != null)
         {
             long wfId = Long.parseLong(p_request.getParameter("wfId"));
-            int priority = Integer.parseInt(p_request.getParameter("priority"
-                    + wfId));
+            int priority = Integer.parseInt(p_request.getParameter("priority" + wfId));
             WorkflowManagerLocal wfManager = new WorkflowManagerLocal();
             wfManager.updatePriority(wfId, priority);
             PrintWriter out = p_response.getWriter();
@@ -172,44 +167,43 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             out.close();
             return;
         }
-        else if(p_request.getParameter("checkIsUploadingForExport") != null)
+        else if (p_request.getParameter("checkIsUploadingForExport") != null)
         {
-        	String[] wfIds = p_request.getParameter("wfId").split(" ");
-        	for(String wfIdStr: wfIds)
-        	{
-        	    String result = "";
-        		long wfId = Long.parseLong(wfIdStr);
-        		Workflow workflow =  WorkflowHandlerHelper.getWorkflowById(wfId);
-        		if (WorkflowExportingHelper.isExporting(workflow.getId()))
+            String[] wfIds = p_request.getParameter("wfId").split(" ");
+            for (String wfIdStr : wfIds)
+            {
+                String result = "";
+                long wfId = Long.parseLong(wfIdStr);
+                Workflow workflow = WorkflowHandlerHelper.getWorkflowById(wfId);
+                if (WorkflowExportingHelper.isExporting(workflow.getId()))
                 {
-        		    result="exporting";
+                    result = "exporting";
                 }
-        		else
-        		{
-        		    Hashtable<Long, Task> tasks = workflow.getTasks();
-                    for(Long taskKey:  tasks.keySet())
+                else
+                {
+                    Hashtable<Long, Task> tasks = workflow.getTasks();
+                    for (Long taskKey : tasks.keySet())
                     {
-                        if(tasks.get(taskKey).getIsUploading() == 'Y')
+                        if (tasks.get(taskKey).getIsUploading() == 'Y')
                         {
                             result = "uploading";
                             break;
                         }
                     }
-        		}
-        		
-        		if(result.length() > 0)
-        		{
-        			PrintWriter out = p_response.getWriter();
-        			p_response.setContentType("text/html");
-        			out.write(result);
-        			out.close();
-        			break;
-        		}
-        	}
+                }
+
+                if (result.length() > 0)
+                {
+                    PrintWriter out = p_response.getWriter();
+                    p_response.setContentType("text/html");
+                    out.write(result);
+                    out.close();
+                    break;
+                }
+            }
             return;
         }
-        else if ("getUpdateWCPercentage".equals(p_request
-                .getParameter("action")))
+        else if ("getUpdateWCPercentage".equals(p_request.getParameter("action")))
         {
             getUpdateWordCountsPercentage(p_response, job.getJobId());
             return;
@@ -221,23 +215,21 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             // to see the updated value
             int p_unitOfWork = 3;
             long p_jobId = Long.parseLong(p_request.getParameter("jobId"));
-            int numPages = Integer
-                    .parseInt(p_request.getParameter("pageCount"));
+            int numPages = Integer.parseInt(p_request.getParameter("pageCount"));
             PrintWriter out = p_response.getWriter();
             p_response.setContentType("text/html");
             try
             {
                 JobHandler jh = ServerProxy.getJobHandler();
                 jh.updatePageCount(job, numPages);
-                ServerProxy.getCostingEngine().setEstimatedAmountOfWorkInJob(
-                        p_jobId, p_unitOfWork, numPages);
+                ServerProxy.getCostingEngine().setEstimatedAmountOfWorkInJob(p_jobId, p_unitOfWork,
+                        numPages);
                 out.write("OK");
             }
             catch (Exception e)
             {
                 out.write("Error");
-                throw new EnvoyServletException(
-                        EnvoyServletException.EX_GENERAL, e);
+                throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, e);
             }
             finally
             {
@@ -245,202 +237,198 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             }
             return;
         }
-        else if(("updateScorecard".equals(p_request.getParameter("action"))))
+        else if (("updateScorecard".equals(p_request.getParameter("action"))))
         {
-        	List<Select> categoryList = ScorecardScoreHelper.initSelectList(job.getCompanyId(),
-        			PageHandler.getBundle(p_request.getSession()));
-        	
-        	
-        	String userId = (String) p_request.getSession().
-        					getAttribute(WebAppConstants.USER_NAME);
-        	Long workflowId = Long.parseLong(p_request.getParameter("savedWorkflowId"));
-        	
-        	Session session = HibernateUtil.getSession();
-            Transaction tx = session.beginTransaction();
-        	try {
-        		for(Workflow workflow: job.getWorkflows())
-            	{
-        			if(workflow.getId() != workflowId)
-        				continue;
-        			storeScores(workflowId, session);
-            		for(Select select: categoryList)
-            		{
-            			ScorecardScore score = new ScorecardScore();
-            			score.setScorecardCategory(select.getValue());
-            			score.setScore(Integer.parseInt(
-            					p_request.getParameter(workflow.getId()+"."+select.getValue())));
-            			score.setWorkflowId(workflow.getId());
-            			score.setJobId(job.getId());
-            			score.setCompanyId(job.getCompanyId());
-            			score.setModifyUserId(userId);
-            			session.saveOrUpdate(score);
-            		}
-            		WorkflowImpl workflowImpl = (WorkflowImpl)workflow;
-            		String comment = p_request.getParameter(workflow.getId()+".scoreComment");
-            		if(!comment.equals(workflowImpl.getScorecardComment()))
-            		{
-            			workflowImpl.setScorecardComment(comment);
-            			session.saveOrUpdate(workflowImpl);
-            		}
-            	}
-        		tx.commit();
-			} catch (Exception e) {
-				tx.rollback();
-				e.printStackTrace();
-			}
-        	
-        	scorecardFlag = "scorecard";
-        }
-        
-        if("scorecard".equals(p_request.getParameter("action")) || 
-        		"scorecard".equals(scorecardFlag))
-        {
-        	List<Select> categoryList = ScorecardScoreHelper.initSelectList(job.getCompanyId(),
-        			PageHandler.getBundle(p_request.getSession()));
-        	
-        	HashMap<String, ScorecardScore> scoreMap = new HashMap<String, ScorecardScore>();
-        	setScore(job.getJobId(), scoreMap);
+            List<Select> categoryList = ScorecardScoreHelper.initSelectList(job.getCompanyId(),
+                    PageHandler.getBundle(p_request.getSession()));
 
-        	HashMap<String, String> tmpScoreMap = new HashMap<String, String>();
-        	List<ScorecardData> scorecardDataList = new ArrayList<ScorecardData>();
-        	HashMap<String, String> avgScoreMap = new HashMap<String, String>();
-        	HashMap<String, Integer> avgScoreSum = new HashMap<String, Integer>();
-        	HashMap<String, Integer> avgScoreNum = new HashMap<String, Integer>();
-        	DecimalFormat numFormat = new DecimalFormat("#.00");
-        	List<Workflow> workflows = new ArrayList<Workflow>(job.getWorkflows());
-        	Collections.sort(workflows, new WorkflowComparator(
-        			WorkflowComparator.TARG_LOCALE_SIMPLE, Locale.getDefault()));
-        	for(Workflow workflow: workflows)
-        	{
-        		if(workflow.getScorecardShowType() == -1)
-        			continue;
-        		
-        		ScorecardData scoreData = new ScorecardData();
-        		scoreData.setWorkflowId(workflow.getId());
-        		scoreData.setLocaleDisplayname(workflow.getTargetLocale().toString());
-        		if(StringUtil.isEmpty(((WorkflowImpl)workflow).getScorecardComment()))
-        		{
-        			scoreData.setScoreComment("");
-        		}
-        		else 
-        		{
-        			scoreData.setScoreComment(((WorkflowImpl)workflow).getScorecardComment());
-				}
-        		
-        		int localeSocreNum = 0;
-        		int localeScoreSum = 0;
-        		for(Select category: categoryList)
-        		{
-        			String mapKey = workflow.getId() + "." + category.getValue();
-        			if(scoreMap.get(mapKey) == null)
-        			{
-        				tmpScoreMap.put(mapKey, "--");
-        			}
-        			else
-        			{
-        				localeSocreNum++;
-        				localeScoreSum = localeScoreSum + scoreMap.get(mapKey).getScore();
-        				if(avgScoreSum.get(category.getValue()) == null)
-        				{
-        					avgScoreSum.put(category.getValue(), scoreMap.get(mapKey).getScore());
-        					avgScoreNum.put(category.getValue(), 1);
-        				}
-        				else
-        				{
-        					avgScoreSum.put(category.getValue(), 
-        							avgScoreSum.get(category.getValue()) 
-        							+ scoreMap.get(mapKey).getScore());
-        					avgScoreNum.put(category.getValue(), 
-        							avgScoreNum.get(category.getValue()) + 1);
-        				}
-        				tmpScoreMap.put(mapKey, scoreMap.get(mapKey).getScore() + "");
-        			}
-        		}
-        		
-        		if(localeSocreNum > 0)
-        		{
-        			Double avgScore = (double)localeScoreSum/localeSocreNum;
-        			scoreData.setAvgScore(numFormat.format(avgScore));
-        		}
-        		else
-        		{
-        			scoreData.setAvgScore("--");
-        		}
-        		scorecardDataList.add(scoreData);
-        	}
-        	
-        	int totalScoreSum = 0;
-        	int totalScoreNum = 0;
-        	for(Select category: categoryList)
-        	{
-        		if(avgScoreSum.get(category.getValue()) != null)
-        		{
-        			Double avgScore = (double)avgScoreSum.get(category.getValue())/
-        								avgScoreNum.get(category.getValue());
-        			totalScoreSum = totalScoreSum + avgScoreSum.get(category.getValue());
-        			totalScoreNum = totalScoreNum + avgScoreNum.get(category.getValue());
-        			avgScoreMap.put(category.getValue(), numFormat.format(avgScore));
-        		}
-        		else
-        		{
-        			avgScoreMap.put(category.getValue(), "--");
-        		}
-        	}
-        	if(totalScoreSum > 0)
-        	{
-    			Double avgScore = (double)totalScoreSum/totalScoreNum;
-        		avgScoreMap.put("avgScore", numFormat.format(avgScore));
-        	}
-        	else
-        	{
-        		avgScoreMap.put("avgScore", "--");
-        	}
-        	
-        	sessionMgr.setAttribute("avgScoreMap", avgScoreMap);
-        	sessionMgr.setAttribute("categoryList", categoryList);
-        	sessionMgr.setAttribute("scorecardDataList", scorecardDataList);
-        	sessionMgr.setAttribute("tmpScoreMap", tmpScoreMap);
-		}
-		else if ("checkDownloadQAReport".equals(p_request
-				.getParameter("action")))
-		{
-			ServletOutputStream out = p_response.getOutputStream();
-			String[] wfIds = p_request.getParameter("wfId").split(" ");
-			String jobId = p_request.getParameter("jobId");
-			long companyId = job.getCompanyId();
-			boolean checkQA = checkQAReport(sessionMgr, companyId, jobId, wfIds);
-			String download = "";
-			if (checkQA)
-			{
-				download = "success";
-			}
-			else
-			{
-				download = "fail";
-			}
-			Map<String, Object> returnValue = new HashMap<String, Object>();
-			returnValue.put("download", download);
-			out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
-			return;
-		}
-		else if ("downloadQAReport".equals(p_request.getParameter("action")))
-		{
-			Set<Long> jobIdSet = (Set<Long>) sessionMgr
-					.getAttribute("jobIdSet");
-			Set<File> exportFilesSet = (Set<File>) sessionMgr
-					.getAttribute("exportFilesSet");
-			Set<String> localesSet = (Set<String>) sessionMgr
-					.getAttribute("localesSet");
-			long companyId = (Long) sessionMgr.getAttribute("companyId");
-			WorkflowHandlerHelper.zippedFolder(p_request, p_response,
-					companyId, jobIdSet, exportFilesSet, localesSet);
+            String userId = (String) p_request.getSession().getAttribute(WebAppConstants.USER_NAME);
+            Long workflowId = Long.parseLong(p_request.getParameter("savedWorkflowId"));
+
+            Session session = HibernateUtil.getSession();
+            Transaction tx = session.beginTransaction();
+            try
+            {
+                for (Workflow workflow : job.getWorkflows())
+                {
+                    if (workflow.getId() != workflowId)
+                        continue;
+                    storeScores(workflowId, session);
+                    for (Select select : categoryList)
+                    {
+                        ScorecardScore score = new ScorecardScore();
+                        score.setScorecardCategory(select.getValue());
+                        score.setScore(Integer.parseInt(p_request
+                                .getParameter(workflow.getId() + "." + select.getValue())));
+                        score.setWorkflowId(workflow.getId());
+                        score.setJobId(job.getId());
+                        score.setCompanyId(job.getCompanyId());
+                        score.setModifyUserId(userId);
+                        session.saveOrUpdate(score);
+                    }
+                    WorkflowImpl workflowImpl = (WorkflowImpl) workflow;
+                    String comment = p_request.getParameter(workflow.getId() + ".scoreComment");
+                    if (!comment.equals(workflowImpl.getScorecardComment()))
+                    {
+                        workflowImpl.setScorecardComment(comment);
+                        session.saveOrUpdate(workflowImpl);
+                    }
+                }
+                tx.commit();
+            }
+            catch (Exception e)
+            {
+                tx.rollback();
+                e.printStackTrace();
+            }
+
+            scorecardFlag = "scorecard";
+        }
+
+        if ("scorecard".equals(p_request.getParameter("action"))
+                || "scorecard".equals(scorecardFlag))
+        {
+            List<Select> categoryList = ScorecardScoreHelper.initSelectList(job.getCompanyId(),
+                    PageHandler.getBundle(p_request.getSession()));
+
+            HashMap<String, ScorecardScore> scoreMap = new HashMap<String, ScorecardScore>();
+            setScore(job.getJobId(), scoreMap);
+
+            HashMap<String, String> tmpScoreMap = new HashMap<String, String>();
+            List<ScorecardData> scorecardDataList = new ArrayList<ScorecardData>();
+            HashMap<String, String> avgScoreMap = new HashMap<String, String>();
+            HashMap<String, Integer> avgScoreSum = new HashMap<String, Integer>();
+            HashMap<String, Integer> avgScoreNum = new HashMap<String, Integer>();
+            DecimalFormat numFormat = new DecimalFormat("#.00");
+            List<Workflow> workflows = new ArrayList<Workflow>(job.getWorkflows());
+            Collections.sort(workflows, new WorkflowComparator(
+                    WorkflowComparator.TARG_LOCALE_SIMPLE, Locale.getDefault()));
+            for (Workflow workflow : workflows)
+            {
+                if (workflow.getScorecardShowType() == -1)
+                    continue;
+
+                ScorecardData scoreData = new ScorecardData();
+                scoreData.setWorkflowId(workflow.getId());
+                scoreData.setLocaleDisplayname(workflow.getTargetLocale().toString());
+                if (StringUtil.isEmpty(((WorkflowImpl) workflow).getScorecardComment()))
+                {
+                    scoreData.setScoreComment("");
+                }
+                else
+                {
+                    scoreData.setScoreComment(((WorkflowImpl) workflow).getScorecardComment());
+                }
+
+                int localeSocreNum = 0;
+                int localeScoreSum = 0;
+                for (Select category : categoryList)
+                {
+                    String mapKey = workflow.getId() + "." + category.getValue();
+                    if (scoreMap.get(mapKey) == null)
+                    {
+                        tmpScoreMap.put(mapKey, "--");
+                    }
+                    else
+                    {
+                        localeSocreNum++;
+                        localeScoreSum = localeScoreSum + scoreMap.get(mapKey).getScore();
+                        if (avgScoreSum.get(category.getValue()) == null)
+                        {
+                            avgScoreSum.put(category.getValue(), scoreMap.get(mapKey).getScore());
+                            avgScoreNum.put(category.getValue(), 1);
+                        }
+                        else
+                        {
+                            avgScoreSum.put(category.getValue(),
+                                    avgScoreSum.get(category.getValue())
+                                            + scoreMap.get(mapKey).getScore());
+                            avgScoreNum.put(category.getValue(),
+                                    avgScoreNum.get(category.getValue()) + 1);
+                        }
+                        tmpScoreMap.put(mapKey, scoreMap.get(mapKey).getScore() + "");
+                    }
+                }
+
+                if (localeSocreNum > 0)
+                {
+                    Double avgScore = (double) localeScoreSum / localeSocreNum;
+                    scoreData.setAvgScore(numFormat.format(avgScore));
+                }
+                else
+                {
+                    scoreData.setAvgScore("--");
+                }
+                scorecardDataList.add(scoreData);
+            }
+
+            int totalScoreSum = 0;
+            int totalScoreNum = 0;
+            for (Select category : categoryList)
+            {
+                if (avgScoreSum.get(category.getValue()) != null)
+                {
+                    Double avgScore = (double) avgScoreSum.get(category.getValue())
+                            / avgScoreNum.get(category.getValue());
+                    totalScoreSum = totalScoreSum + avgScoreSum.get(category.getValue());
+                    totalScoreNum = totalScoreNum + avgScoreNum.get(category.getValue());
+                    avgScoreMap.put(category.getValue(), numFormat.format(avgScore));
+                }
+                else
+                {
+                    avgScoreMap.put(category.getValue(), "--");
+                }
+            }
+            if (totalScoreSum > 0)
+            {
+                Double avgScore = (double) totalScoreSum / totalScoreNum;
+                avgScoreMap.put("avgScore", numFormat.format(avgScore));
+            }
+            else
+            {
+                avgScoreMap.put("avgScore", "--");
+            }
+
+            sessionMgr.setAttribute("avgScoreMap", avgScoreMap);
+            sessionMgr.setAttribute("categoryList", categoryList);
+            sessionMgr.setAttribute("scorecardDataList", scorecardDataList);
+            sessionMgr.setAttribute("tmpScoreMap", tmpScoreMap);
+        }
+        else if ("checkDownloadQAReport".equals(p_request.getParameter("action")))
+        {
+            ServletOutputStream out = p_response.getOutputStream();
+            String[] wfIds = p_request.getParameter("wfId").split(" ");
+            String jobId = p_request.getParameter("jobId");
+            long companyId = job.getCompanyId();
+            boolean checkQA = checkQAReport(sessionMgr, companyId, jobId, wfIds);
+            String download = "";
+            if (checkQA)
+            {
+                download = "success";
+            }
+            else
+            {
+                download = "fail";
+            }
+            Map<String, Object> returnValue = new HashMap<String, Object>();
+            returnValue.put("download", download);
+            out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
+            return;
+        }
+        else if ("downloadQAReport".equals(p_request.getParameter("action")))
+        {
+            Set<Long> jobIdSet = (Set<Long>) sessionMgr.getAttribute("jobIdSet");
+            Set<File> exportFilesSet = (Set<File>) sessionMgr.getAttribute("exportFilesSet");
+            Set<String> localesSet = (Set<String>) sessionMgr.getAttribute("localesSet");
+            long companyId = (Long) sessionMgr.getAttribute("companyId");
+            WorkflowHandlerHelper.zippedFolder(p_request, p_response, companyId, jobIdSet,
+                    exportFilesSet, localesSet);
             sessionMgr.removeElement("jobIdSet");
             sessionMgr.removeElement("exportFilesSet");
             sessionMgr.removeElement("localesSet");
-			return;
-		}
-        else if ("retrieveTranslatedText".equals(p_request
-                .getParameter("action")))
+            return;
+        }
+        else if ("retrieveTranslatedText".equals(p_request.getParameter("action")))
         {
             String workflowId = p_request.getParameter("workflowId");
             Workflow workflow = ServerProxy.getWorkflowManager()
@@ -455,26 +443,25 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
             p_response.getWriter().write(jsonObject.toJSONString());
             return;
-		}
-		else if ("updatePriority".equals(p_request.getParameter("action")))
-		{
-			ServletOutputStream out = p_response.getOutputStream();
-			String jobId = p_request.getParameter("jobId");
-			String selectOption = p_request.getParameter("selectOption");
-			JobImpl jobImpl = HibernateUtil.get(JobImpl.class,
-					Long.parseLong(jobId));
-			jobImpl.setPriority(Integer.parseInt(selectOption));
-			HibernateUtil.merge(job);
+        }
+        else if ("updatePriority".equals(p_request.getParameter("action")))
+        {
+            ServletOutputStream out = p_response.getOutputStream();
+            String jobId = p_request.getParameter("jobId");
+            String selectOption = p_request.getParameter("selectOption");
+            JobImpl jobImpl = HibernateUtil.get(JobImpl.class, Long.parseLong(jobId));
+            jobImpl.setPriority(Integer.parseInt(selectOption));
+            HibernateUtil.merge(job);
 
-			Map<String, Object> returnValue = new HashMap<String, Object>();
-			returnValue.put("newPriority", jobImpl.getPriority());
-			out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
-			return;
-		}
+            Map<String, Object> returnValue = new HashMap<String, Object>();
+            returnValue.put("newPriority", jobImpl.getPriority());
+            out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
+            return;
+        }
         // deal with ajax request.End.
 
-        boolean isOk = jobSummaryHelper.packJobSummaryInfoView(p_request,
-                p_response, p_context, job);
+        boolean isOk = jobSummaryHelper.packJobSummaryInfoView(p_request, p_response, p_context,
+                job);
         if (!isOk)
         {
             return;
@@ -482,7 +469,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         parseRequestParameterDistribute(p_request, job);
         packJobWorkflowInfoView(p_request, job);
         packSessionMgrAttr(p_request);
-        
+
         if (Job.CANCELLED.equals(job.getState()))
         {
             jobSummaryHelper.jobNotFound(p_request, p_response, p_context, job);
@@ -490,57 +477,52 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         }
         // Update the session with this most recently used job
         jobSummaryHelper.updateMRUJob(p_request, job, p_response);
-        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
-                p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 
-    public boolean checkQAReport(SessionManager sessionMgr, long companyId,
-			String jobId, String[] wfIds)
-	{
-		Company company = CompanyWrapper.getCompanyById(companyId);
-		Set<File> exportFilesSet = new HashSet<File>();
-		Set<String> localesSet = new HashSet<String>();
-		Set<Long> jobIdSet = new HashSet<Long>();
-		jobIdSet.add(Long.parseLong(jobId));
-		try
-		{
-			if (company.getEnableQAChecks())
-			{
-				for (String wfIdStr : wfIds)
-				{
-					long wfId = Long.parseLong(wfIdStr);
-					Workflow workflow = WorkflowHandlerHelper
-							.getWorkflowById(wfId);
-					localesSet.add(workflow.getTargetLocale().getLocaleCode());
-					String filePath = WorkflowHandlerHelper
-							.getExportFilePath(workflow);
-					if (filePath != null)
-					{
-						exportFilesSet.add(new File(filePath));
-					}
-				}
-			}
+    public boolean checkQAReport(SessionManager sessionMgr, long companyId, String jobId,
+            String[] wfIds)
+    {
+        Company company = CompanyWrapper.getCompanyById(companyId);
+        Set<File> exportFilesSet = new HashSet<File>();
+        Set<String> localesSet = new HashSet<String>();
+        Set<Long> jobIdSet = new HashSet<Long>();
+        jobIdSet.add(Long.parseLong(jobId));
+        try
+        {
+            if (company.getEnableQAChecks())
+            {
+                for (String wfIdStr : wfIds)
+                {
+                    long wfId = Long.parseLong(wfIdStr);
+                    Workflow workflow = WorkflowHandlerHelper.getWorkflowById(wfId);
+                    localesSet.add(workflow.getTargetLocale().getLocaleCode());
+                    String filePath = WorkflowHandlerHelper.getExportFilePath(workflow);
+                    if (filePath != null)
+                    {
+                        exportFilesSet.add(new File(filePath));
+                    }
+                }
+            }
 
-			if (exportFilesSet != null && exportFilesSet.size() > 0)
-			{
-				sessionMgr.setAttribute("jobIdSet", jobIdSet);
-				sessionMgr.setAttribute("exportFilesSet", exportFilesSet);
-				sessionMgr.setAttribute("localesSet", localesSet);
-				sessionMgr.setAttribute("companyId", companyId);
-				return true;
-			}
-		}
-		catch (Exception e)
-		{
-			CATEGORY.error(e);
-		}
-		return false;
-	}
-	
-	
-	
-    private void getUpdateWordCountsPercentage(HttpServletResponse p_response,
-            long p_jobId) throws IOException
+            if (exportFilesSet != null && exportFilesSet.size() > 0)
+            {
+                sessionMgr.setAttribute("jobIdSet", jobIdSet);
+                sessionMgr.setAttribute("exportFilesSet", exportFilesSet);
+                sessionMgr.setAttribute("localesSet", localesSet);
+                sessionMgr.setAttribute("companyId", companyId);
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error(e);
+        }
+        return false;
+    }
+
+    private void getUpdateWordCountsPercentage(HttpServletResponse p_response, long p_jobId)
+            throws IOException
     {
         ServletOutputStream out = p_response.getOutputStream();
         try
@@ -562,12 +544,10 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         }
     }
 
-    private void parseRequestParameterDistribute(HttpServletRequest p_request,
-            Job job)
+    private void parseRequestParameterDistribute(HttpServletRequest p_request, Job job)
     {
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
         String wfIdParam = p_request.getParameter(JobManagementHandler.WF_ID);
         String wfId = null;
         if (isRefresh(sessionMgr, wfIdParam, JobManagementHandler.WF_ID)
@@ -585,11 +565,10 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             while (tokenizer.hasMoreTokens())
             {
                 wfId = tokenizer.nextToken();
-                String userId = ((User) sessionMgr
-                        .getAttribute(WebAppConstants.USER)).getUserId();
+                String userId = ((User) sessionMgr.getAttribute(WebAppConstants.USER)).getUserId();
 
-                WorkflowHandlerHelper.cancelWF(userId, WorkflowHandlerHelper
-                        .getWorkflowById(Long.parseLong(wfId)));
+                WorkflowHandlerHelper.cancelWF(userId,
+                        WorkflowHandlerHelper.getWorkflowById(Long.parseLong(wfId)));
             }
             sessionMgr.setAttribute(JobManagementHandler.ADDED_WORKFLOWS, null);
         }
@@ -601,15 +580,14 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             while (tokenizer.hasMoreTokens())
             {
                 wfId = tokenizer.nextToken();
-                WorkflowHandlerHelper.dispatchWF(WorkflowHandlerHelper
-                        .getWorkflowById(Long.parseLong(wfId)));
+                WorkflowHandlerHelper
+                        .dispatchWF(WorkflowHandlerHelper.getWorkflowById(Long.parseLong(wfId)));
             }
 
             sessionMgr.setAttribute(JobManagementHandler.WF_PREVIOUS_ACTION,
                     JobManagementHandler.DISPATCH_WF_PARAM);
         }
-        else if (p_request
-                .getParameter(JobManagementHandler.DISPATCH_ALL_WF_PARAM) != null)
+        else if (p_request.getParameter(JobManagementHandler.DISPATCH_ALL_WF_PARAM) != null)
         {
             String readyWorkflowIds = p_request
                     .getParameter(JobManagementHandler.ALL_READY_WORKFLOW_IDS);
@@ -617,13 +595,12 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             {
                 for (String id : readyWorkflowIds.split(","))
                 {
-                    WorkflowHandlerHelper.dispatchWF(WorkflowHandlerHelper
-                            .getWorkflowById(Long.parseLong(id)));
+                    WorkflowHandlerHelper
+                            .dispatchWF(WorkflowHandlerHelper.getWorkflowById(Long.parseLong(id)));
                 }
             }
         }
-        else if (p_request
-                .getParameter(JobManagementHandler.UPDATE_WORD_COUNTS) != null)
+        else if (p_request.getParameter(JobManagementHandler.UPDATE_WORD_COUNTS) != null)
         {
             if (wfIdParam != null)
             {
@@ -640,8 +617,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             while (tokenizer.hasMoreTokens())
             {
                 wfId = tokenizer.nextToken();
-                Workflow wf = WorkflowHandlerHelper.getWorkflowById(Long
-                        .parseLong(wfId));
+                Workflow wf = WorkflowHandlerHelper.getWorkflowById(Long.parseLong(wfId));
                 WorkflowHandlerHelper.archiveWorkflow(wf);
             }
 
@@ -650,8 +626,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         }
         else if (p_request.getParameter(JobManagementHandler.ASSIGN_PARAM) != null)
         {
-            if ("saveAssign".equalsIgnoreCase(p_request
-                    .getParameter(JobManagementHandler.ASSIGN_PARAM)))
+            if ("saveAssign"
+                    .equalsIgnoreCase(p_request.getParameter(JobManagementHandler.ASSIGN_PARAM)))
             {
                 doSaveAssign(p_request, sessionMgr);
             }
@@ -660,8 +636,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         }
         else if (p_request.getParameter(JobManagementHandler.SKIP_PARAM) != null)
         {
-            if (FormUtil.isNotDuplicateSubmisson(p_request,
-                    FormUtil.Forms.SKIP_ACTIVITIES))
+            if (FormUtil.isNotDuplicateSubmisson(p_request, FormUtil.Forms.SKIP_ACTIVITIES))
             {
                 doSkip(p_request, sessionMgr);
             }
@@ -669,8 +644,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         if (p_request.getParameter(JobManagementHandler.ADD_WF_PARAM) != null)
         {
             // Get a comma separated string of WorkflowTemplatInfo ids
-            String buf = p_request
-                    .getParameter(JobManagementHandler.ADD_WF_PARAM);
+            String buf = p_request.getParameter(JobManagementHandler.ADD_WF_PARAM);
             if (isRefresh(sessionMgr, buf, JobManagementHandler.ADDED_WORKFLOWS))
             {
                 return;
@@ -689,8 +663,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             }
             try
             {
-                WorkflowAdditionSender sender = new WorkflowAdditionSender(
-                        wfInfos, jobId);
+                WorkflowAdditionSender sender = new WorkflowAdditionSender(wfInfos, jobId);
                 sender.sendToAddWorkflows();
             }
             catch (Exception e)
@@ -700,12 +673,11 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             List<SourcePage> sps = new ArrayList<SourcePage>();
             try
             {
-                sps.addAll(ServerProxy.getJobHandler().getJobById(jobId)
-                        .getSourcePages());
+                sps.addAll(ServerProxy.getJobHandler().getJobById(jobId).getSourcePages());
             }
             catch (Exception e)
             {
-            	CATEGORY.error(e);
+                CATEGORY.error(e);
             }
 
             List<String> targetLocales = new ArrayList<String>();
@@ -714,12 +686,11 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 try
                 {
                     targetLocales.add(ServerProxy.getProjectHandler()
-                            .getWorkflowTemplateInfoById(workflowId)
-                            .getTargetLocale().toString());
+                            .getWorkflowTemplateInfoById(workflowId).getTargetLocale().toString());
                 }
                 catch (Exception e)
                 {
-                	CATEGORY.error(e);
+                    CATEGORY.error(e);
                 }
             }
 
@@ -762,18 +733,15 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                         Workflow wf = ServerProxy.getWorkflowManager()
                                 .getWorkflowById((Long) it.next());
 
-                        TranslationMemoryProfile tmProfile = wf.getJob()
-                                .getL10nProfile().getTranslationMemoryProfile();
-                        Vector<String> jobExcludeTuTypes = tmProfile
-                                .getJobExcludeTuTypes();
+                        TranslationMemoryProfile tmProfile = wf.getJob().getL10nProfile()
+                                .getTranslationMemoryProfile();
+                        Vector<String> jobExcludeTuTypes = tmProfile.getJobExcludeTuTypes();
 
-                        StatisticsService.calculateTargetPagesWordCount(wf,
-                                jobExcludeTuTypes);
+                        StatisticsService.calculateTargetPagesWordCount(wf, jobExcludeTuTypes);
 
                         List<Workflow> wfList = new ArrayList<Workflow>();
                         wfList.add(wf);
-                        StatisticsService.calculateWorkflowStatistics(wfList,
-                                jobExcludeTuTypes);
+                        StatisticsService.calculateWorkflowStatistics(wfList, jobExcludeTuTypes);
 
                         count++;
                         updateWordCountsPercentageMap.put(jobId,
@@ -798,8 +766,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         t.start();
     }
 
-    private boolean isSameAction(SessionManager p_sessionMgr,
-            HttpServletRequest p_request, String wfIdParam)
+    private boolean isSameAction(SessionManager p_sessionMgr, HttpServletRequest p_request,
+            String wfIdParam)
     {
         String preAction = (String) p_sessionMgr
                 .getAttribute(JobManagementHandler.WF_PREVIOUS_ACTION);
@@ -822,12 +790,10 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
     private void packSessionMgrAttr(HttpServletRequest p_request)
     {
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
         // fix the null pointer exception when going back to job detail page
         // after some operation.
-        sessionMgr.setAttribute("destinationPage",
-                JobManagementHandler.DETAILS_BEAN);
+        sessionMgr.setAttribute("destinationPage", JobManagementHandler.DETAILS_BEAN);
 
         sessionMgr.setAttribute(JobManagementHandler.EXPORT_INIT_PARAM,
                 JobManagementHandler.DETAILS_BEAN);
@@ -836,8 +802,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
     private String getLeftTime(HttpServletRequest p_request, Job job)
     {
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
         User user = (User) sessionMgr.getAttribute(USER);
         // Set the download delay time for this company
         sessionMgr.setAttribute(SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME,
@@ -874,10 +839,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
     private void packJobWorkflowInfoView(HttpServletRequest p_request, Job job)
     {
-        List<JobWorkflowDisplay> jobWorkflowDisplayList = getJobWorkflowDisplayList(
-                p_request, job);
-        p_request
-                .setAttribute("JobWorkflowDisplayList", jobWorkflowDisplayList);
+        List<JobWorkflowDisplay> jobWorkflowDisplayList = getJobWorkflowDisplayList(p_request, job);
+        p_request.setAttribute("JobWorkflowDisplayList", jobWorkflowDisplayList);
         // for AddWF button submit condition
         p_request.setAttribute("jobHasPassoloFiles", job.hasPassoloFiles());
         // for Dispatch button
@@ -889,29 +852,25 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 Modules.isVendorManagementInstalled());
         p_request.setAttribute("reimportOption", getReimportOption());
         // control Estimated Review Start column access permission
-        p_request
-                .setAttribute("customerAccessGroupIsDell", s_isSpecialCustomer);
+        p_request.setAttribute("customerAccessGroupIsDell", s_isSpecialCustomer);
         // tell UI if current job has been archived.
-        p_request.setAttribute("isJobMigrated", job.isMigrated() ? "true"
-                : "false");
+        p_request.setAttribute("isJobMigrated", job.isMigrated() ? "true" : "false");
         p_request.setAttribute("project", job.getProject());
-		try
-		{
-			Company company = ServerProxy.getJobHandler().getCompanyById(
-					job.getCompanyId());
-			p_request.setAttribute("company", company);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+        try
+        {
+            Company company = ServerProxy.getJobHandler().getCompanyById(job.getCompanyId());
+            p_request.setAttribute("company", company);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private boolean isSuperAdmin(HttpServletRequest p_request)
     {
         HttpSession session = p_request.getSession(false);
-        String userId = (String) session
-                .getAttribute(WebAppConstants.USER_NAME);
+        String userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
         return UserUtil.isSuperAdmin(userId);
     }
 
@@ -920,10 +879,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         int reimportOption = 0;
         try
         {
-            reimportOption = Integer.parseInt(ServerProxy
-                    .getSystemParameterPersistenceManager()
-                    .getSystemParameter(SystemConfigParamNames.REIMPORT_OPTION)
-                    .getValue());
+            reimportOption = Integer.parseInt(ServerProxy.getSystemParameterPersistenceManager()
+                    .getSystemParameter(SystemConfigParamNames.REIMPORT_OPTION).getValue());
         }
         catch (Exception ge)
         {
@@ -932,23 +889,20 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         return reimportOption;
     }
 
-    private List<JobWorkflowDisplay> getJobWorkflowDisplayList(
-            HttpServletRequest p_request, Job job)
+    private List<JobWorkflowDisplay> getJobWorkflowDisplayList(HttpServletRequest p_request,
+            Job job)
     {
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
         ResourceBundle bundle = getBundle(session);
-        PermissionSet perms = (PermissionSet) session
-                .getAttribute(WebAppConstants.PERMISSIONS);
+        PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
         User user = (User) sessionMgr.getAttribute(USER);
         Locale uiLocale = (Locale) session.getAttribute(UILOCALE);
         TimeZone timezone = (TimeZone) session.getAttribute(USER_TIME_ZONE);
         Timestamp ts = new Timestamp(Timestamp.DATE, timezone);
         ts.setLocale(uiLocale);
         List<Workflow> workflows = new ArrayList<Workflow>(job.getWorkflows());
-        Collections
-                .sort(workflows, new WorkflowComparator(Locale.getDefault()));
+        Collections.sort(workflows, new WorkflowComparator(Locale.getDefault()));
         List<JobWorkflowDisplay> jobWorkflowDisplayList = new ArrayList<JobWorkflowDisplay>();
         for (Workflow workflow : workflows)
         {
@@ -956,34 +910,29 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 continue;
             if (!perms.getPermissionFor(Permission.JOB_SCOPE_ALL)
                     && !perms.getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS)
-                    && (job.getProject().getProjectManagerId() != user
-                            .getUserId())
-                    && PageHandler.invalidForWorkflowOwner(user.getUserId(),
-                            perms, workflow))
+                    && (job.getProject().getProjectManagerId() != user.getUserId())
+                    && PageHandler.invalidForWorkflowOwner(user.getUserId(), perms, workflow))
                 continue;
 
-            JobWorkflowDisplay jobWorkflowDisplay = new JobWorkflowDisplay(
-                    workflow);
+            JobWorkflowDisplay jobWorkflowDisplay = new JobWorkflowDisplay(workflow);
             jobWorkflowDisplay.setIsUploading("No");
             Hashtable<Long, Task> tasks = workflow.getTasks();
-            for(Long taskKey:  tasks.keySet())
+            for (Long taskKey : tasks.keySet())
             {
-            	if(tasks.get(taskKey).getIsUploading() == 'Y')
-            	{
-            		jobWorkflowDisplay.setIsUploading("Yes");
-            		break;
-            	}
+                if (tasks.get(taskKey).getIsUploading() == 'Y')
+                {
+                    jobWorkflowDisplay.setIsUploading("Yes");
+                    break;
+                }
             }
-            jobWorkflowDisplay.setTargetLocaleDisplayName(workflow
-                    .getTargetLocale().getDisplayName(uiLocale));
+            jobWorkflowDisplay.setTargetLocaleDisplayName(
+                    workflow.getTargetLocale().getDisplayName(uiLocale));
             jobWorkflowDisplay.setTotalWordCount(getTotalWordCount(workflow));
-            jobWorkflowDisplay.setStateBundleString(bundle.getString(workflow
-                    .getState()));
-            jobWorkflowDisplay.setIsWorkflowEditable(isWorkflowEditable(perms,
-                    workflow));
+            jobWorkflowDisplay.setStateBundleString(bundle.getString(workflow.getState()));
+            jobWorkflowDisplay.setIsWorkflowEditable(isWorkflowEditable(perms, workflow));
             setJobWorkflowDisplayTaskDisplayName(workflow, jobWorkflowDisplay);
-            setJobWorkflowDisplayEstimaedTimestamp(perms, uiLocale, ts,
-                    workflow, jobWorkflowDisplay);
+            setJobWorkflowDisplayEstimaedTimestamp(perms, uiLocale, ts, workflow,
+                    jobWorkflowDisplay);
 
             jobWorkflowDisplayList.add(jobWorkflowDisplay);
         }
@@ -991,16 +940,14 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         return jobWorkflowDisplayList;
     }
 
-    private void setJobWorkflowDisplayEstimaedTimestamp(PermissionSet perms,
-            Locale uiLocale, Timestamp ts, Workflow workflow,
-            JobWorkflowDisplay jobWorkflowDisplay)
+    private void setJobWorkflowDisplayEstimaedTimestamp(PermissionSet perms, Locale uiLocale,
+            Timestamp ts, Workflow workflow, JobWorkflowDisplay jobWorkflowDisplay)
     {
         String str;
-        if (s_isSpecialCustomer
-                && perms.getPermissionFor(Permission.JOB_WORKFLOWS_ESTREVIEWSTART))
+        if (s_isSpecialCustomer && perms.getPermissionFor(Permission.JOB_WORKFLOWS_ESTREVIEWSTART))
         {
-            Date estimatedStart = getFirstReviewStartDate(workflow.getId(),
-                    workflow.getTasks(), workflow.getDispatchedDate());
+            Date estimatedStart = getFirstReviewStartDate(workflow.getId(), workflow.getTasks(),
+                    workflow.getDispatchedDate());
             if (estimatedStart != null)
             {
                 ts.setDate(estimatedStart);
@@ -1020,15 +967,12 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             {
                 str += "0";
             }
-            str += ts.getMinute() + " "
-                    + ts.getTimeZone().getDisplayName(uiLocale);
-            jobWorkflowDisplay
-                    .setEstimatedTranslateCompletionDateTimestamp(str);
+            str += ts.getMinute() + " " + ts.getTimeZone().getDisplayName(uiLocale);
+            jobWorkflowDisplay.setEstimatedTranslateCompletionDateTimestamp(str);
         }
         else
         {
-            jobWorkflowDisplay
-                    .setEstimatedTranslateCompletionDateTimestamp("--");
+            jobWorkflowDisplay.setEstimatedTranslateCompletionDateTimestamp("--");
         }
 
         if (workflow.getEstimatedCompletionDate() != null)
@@ -1039,8 +983,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             {
                 str += "0";
             }
-            str += ts.getMinute() + " "
-                    + ts.getTimeZone().getDisplayName(uiLocale);
+            str += ts.getMinute() + " " + ts.getTimeZone().getDisplayName(uiLocale);
             jobWorkflowDisplay.setEstimatedCompletionDateTimestamp(str);
         }
         else
@@ -1061,8 +1004,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
     {
         if (!Workflow.SKIPPING.equals(workflow.getState()))
         {
-            TaskInstance task = WorkflowManagerLocal.getCurrentTask(workflow
-                    .getId());
+            TaskInstance task = WorkflowManagerLocal.getCurrentTask(workflow.getId());
             if (task != null)
             {
                 String str = TaskJbpmUtil.getTaskDisplayName(task.getName());
@@ -1079,23 +1021,21 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
      * Need to display the start date of the first review-only activity in a
      * workflow's default path (ONLY when a system-wide flag is on).
      */
-    private Date getFirstReviewStartDate(long p_workflowId, Hashtable p_tasks,
-            Date p_startDate) throws EnvoyServletException
+    private Date getFirstReviewStartDate(long p_workflowId, Hashtable p_tasks, Date p_startDate)
+            throws EnvoyServletException
     {
         try
         {
             Date result = null;
 
             // get all the task ids for the path in the workflow
-            long[] taskIds = ServerProxy.getWorkflowServer()
-                    .taskIdsInDefaultPath(p_workflowId);
+            long[] taskIds = ServerProxy.getWorkflowServer().taskIdsInDefaultPath(p_workflowId);
 
             for (int i = 0; i < taskIds.length; i++)
             {
                 Task t = (Task) p_tasks.get(new Long(taskIds[i]));
 
-                if (t.isType(Task.TYPE_REVIEW)
-                        || t.isType(Task.TYPE_REVIEW_EDITABLE))
+                if (t.isType(Task.TYPE_REVIEW) || t.isType(Task.TYPE_REVIEW_EDITABLE))
                 {
                     result = p_startDate;
                     break;
@@ -1119,28 +1059,23 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
      */
     private boolean isWorkflowEditable(PermissionSet p_perms, Workflow p_wf)
     {
-        boolean canEditWorkflow = p_perms
-                .getPermissionFor(Permission.PROJECTS_MANAGE)
-                || p_perms
-                        .getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS);
-        return WorkflowHandlerHelper.isWorkflowModifiable(p_wf.getState())
-                && canEditWorkflow;
+        boolean canEditWorkflow = p_perms.getPermissionFor(Permission.PROJECTS_MANAGE)
+                || p_perms.getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS);
+        return WorkflowHandlerHelper.isWorkflowModifiable(p_wf.getState()) && canEditWorkflow;
     }
 
     /**
      * Get values from request and session. Assign the selected user to the
      * task.
      */
-    private void doSaveAssign(HttpServletRequest p_request,
-            SessionManager p_sessionMgr) throws EnvoyServletException
+    private void doSaveAssign(HttpServletRequest p_request, SessionManager p_sessionMgr)
+            throws EnvoyServletException
     {
         try
         {
             String srcLocale = (String) p_sessionMgr.getAttribute("srcLocale");
-            String targLocale = (String) p_sessionMgr
-                    .getAttribute("targLocale");
-            Hashtable taskUserHash = (Hashtable) p_sessionMgr
-                    .getAttribute("taskUserHash");
+            String targLocale = (String) p_sessionMgr.getAttribute("targLocale");
+            Hashtable taskUserHash = (Hashtable) p_sessionMgr.getAttribute("taskUserHash");
             String wfId = (String) p_sessionMgr.getAttribute("wfId");
             // If "F5" to refresh, wfId is null.
             if (wfId == null)
@@ -1152,9 +1087,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             {
                 Task task = (Task) keys.nextElement();
                 String taskId = String.valueOf(task.getId());
-                Activity activity = ServerProxy.getJobHandler()
-                        .getActivityByCompanyId(task.getTaskName(),
-                                String.valueOf(task.getCompanyId()));
+                Activity activity = ServerProxy.getJobHandler().getActivityByCompanyId(
+                        task.getTaskName(), String.valueOf(task.getCompanyId()));
                 ContainerRole containerRole = ServerProxy.getUserManager()
                         .getContainerRole(activity, srcLocale, targLocale);
                 String userParam = p_request.getParameter("users" + taskId);
@@ -1169,28 +1103,28 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                  * userInfos[1]=user2Name userInfos[0] = "userId3" and
                  * userInfos[1]=user3Name
                  */
-                if(userParam != null && userParam != ""){
-                	String[] users = userParam.split(":");
-                	String[] userInfos = null;
-                	Vector newAssignees = new Vector();
-                	String[] roles = new String[users.length];
-                	String displayRole = "";
-                	for (int k = 0; k < users.length; k++)
-                	{
-                		userInfos = users[k].split(",");
-                		roles[k] = containerRole.getName() + " " + userInfos[0];
-                		if (k == users.length - 1)
-                		{
-                			displayRole += userInfos[1];
-                		}
-                		else
-                		{
-                			displayRole += userInfos[1] + ",";
-                		}
-                	}
-                	newAssignees.addElement(new NewAssignee(roles, displayRole,
-                			true));
-                	roleMap.put(taskId, newAssignees);
+                if (!StringUtil.isEmpty(userParam))
+                {
+                    String[] users = userParam.split(":");
+                    String[] userInfos = null;
+                    Vector newAssignees = new Vector();
+                    String[] roles = new String[users.length];
+                    String displayRole = "";
+                    for (int k = 0; k < users.length; k++)
+                    {
+                        userInfos = users[k].split(",");
+                        roles[k] = containerRole.getName() + " " + userInfos[0];
+                        if (k == users.length - 1)
+                        {
+                            displayRole += userInfos[1];
+                        }
+                        else
+                        {
+                            displayRole += userInfos[1] + ",";
+                        }
+                    }
+                    newAssignees.addElement(new NewAssignee(roles, displayRole, true));
+                    roleMap.put(taskId, newAssignees);
                 }
             }
 
@@ -1205,8 +1139,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             for (int j = 0; j < sz; j++)
             {
                 WorkflowTaskInstance wti = (WorkflowTaskInstance) tasks.get(j);
-                Vector newAssignees = (Vector) roleMap.get(String.valueOf(wti
-                        .getTaskId()));
+                Vector newAssignees = (Vector) roleMap.get(String.valueOf(wti.getTaskId()));
 
                 if (newAssignees != null)
                 {
@@ -1229,8 +1162,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             if (shouldModifyWf)
             {
                 shouldModifyWf = false;
-                ServerProxy.getWorkflowManager().modifyWorkflow(null, wi, null,
-                        null);
+                ServerProxy.getWorkflowManager().modifyWorkflow(null, wi, null, null);
             }
         }
         catch (Exception e)
@@ -1250,8 +1182,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             // role, this can be ignored.
             String acceptUser = wti.getAcceptUser();
             String[] roles = na.m_roles;
-            if (na.m_isUserRole && roles != null && roles.length == 1
-                    && acceptUser != null && roles[0].endsWith(acceptUser))
+            if (na.m_isUserRole && roles != null && roles.length == 1 && acceptUser != null
+                    && roles[0].endsWith(acceptUser))
             {
                 result = false;
             }
@@ -1271,8 +1203,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
         boolean m_isUserRole = false;
 
-        NewAssignee(String[] p_roles, String p_displayRoleName,
-                boolean p_isUserRole)
+        NewAssignee(String[] p_roles, String p_displayRoleName, boolean p_isUserRole)
         {
             m_displayRoleName = p_displayRoleName;
             m_roles = p_roles;
@@ -1284,8 +1215,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
      * Determines whether the two array of roles contain the same set of role
      * names.
      */
-    private boolean areSameRoles(String[] p_workflowRoles,
-            String[] p_selectedRoles)
+    private boolean areSameRoles(String[] p_workflowRoles, String[] p_selectedRoles)
     {
         // First need to sort since Arrays.equals() requires
         // the parameters to be sorted
@@ -1301,12 +1231,11 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
      * @param p_sessionMgr
      * @throws EnvoyServletException
      */
-    private void doSkip(HttpServletRequest p_request,
-            SessionManager p_sessionMgr) throws EnvoyServletException
+    private void doSkip(HttpServletRequest p_request, SessionManager p_sessionMgr)
+            throws EnvoyServletException
     {
 
-        final User user = (User) p_sessionMgr
-                .getAttribute(WebAppConstants.USER);
+        final User user = (User) p_sessionMgr.getAttribute(WebAppConstants.USER);
         final List<Entry> list = getSkipParameter(p_request);
 
         if (list == null)
@@ -1328,8 +1257,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 // to be completed
                 try
                 {
-                    ServerProxy.getWorkflowManager().setSkip(list,
-                            user.getUserId());
+                    ServerProxy.getWorkflowManager().setSkip(list, user.getUserId());
                 }
                 catch (Exception e)
                 {
@@ -1350,15 +1278,15 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         for (Entry<String, String> entry : list)
         {
             String workflowId = entry.getKey();
-            Workflow workflow = (Workflow) HibernateUtil.get(
-                    WorkflowImpl.class, Long.valueOf(workflowId));
+            Workflow workflow = (Workflow) HibernateUtil.get(WorkflowImpl.class,
+                    Long.valueOf(workflowId));
             String state = workflow.getState();
             if (Workflow.SKIPPING.equals(state))
             {
                 // the workflow has been doing skipping, so return this
                 // duplicate action
-                CATEGORY.info("Ignored duplicate skip action as workflow "
-                        + workflowId + " is already being skipped.");
+                CATEGORY.info("Ignored duplicate skip action as workflow " + workflowId
+                        + " is already being skipped.");
                 return true;
             }
             JobCreationMonitor.updateWorkflowState(workflow, Workflow.SKIPPING);
@@ -1397,12 +1325,10 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
      * @param sourcePages
      * @param targetLocales
      */
-    private void copyFilesToTargetDir(List<SourcePage> sourcePages,
-            List<String> targetLocales)
+    private void copyFilesToTargetDir(List<SourcePage> sourcePages, List<String> targetLocales)
     {
         SystemConfiguration sc = SystemConfiguration.getInstance();
-        String fileStorageDir = sc.getStringParameter(
-                SystemConfigParamNames.FILE_STORAGE_DIR,
+        String fileStorageDir = sc.getStringParameter(SystemConfigParamNames.FILE_STORAGE_DIR,
                 CompanyWrapper.SUPER_COMPANY_ID);
         List<String> copiedFiles = new ArrayList<String>();
         for (SourcePage sp : sourcePages)
@@ -1424,8 +1350,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 copyFilesName = getAllCopiedFilesForOpenOffice(rootElement);
                 baseConv = fileStorageDir + File.separator + "OpenOffice-Conv";
             }
-            else if ("Office2010 document".equals(formatType) 
-            		|| formatType.contains("Office 2010"))
+            else if ("Office2010 document".equals(formatType) || formatType.contains("Office 2010"))
             {
                 // Office 2010
                 copyFilesName = getAllCopiedFilesForOffice2010(rootElement);
@@ -1436,8 +1361,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 // Word2007
                 copyFilesName = getAllCopiedFilesForMSOffice20032007(rootElement);
                 String office2007Conv = sc.getStringParameter(
-                        SystemConfigParamNames.MSOFFICE_CONV_DIR,
-                        CompanyWrapper.SUPER_COMPANY_ID);
+                        SystemConfigParamNames.MSOFFICE_CONV_DIR, CompanyWrapper.SUPER_COMPANY_ID);
                 baseConv = office2007Conv + File.separator + "word";
             }
             else if ("Excel2007".equals(formatType))
@@ -1445,8 +1369,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 // Excel2007
                 copyFilesName = getAllCopiedFilesForMSOffice20032007(rootElement);
                 String office2007Conv = sc.getStringParameter(
-                        SystemConfigParamNames.MSOFFICE_CONV_DIR,
-                        CompanyWrapper.SUPER_COMPANY_ID);
+                        SystemConfigParamNames.MSOFFICE_CONV_DIR, CompanyWrapper.SUPER_COMPANY_ID);
                 baseConv = office2007Conv + File.separator + "excel";
             }
             else if ("PowerPoint2007".equals(formatType))
@@ -1454,8 +1377,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 // PowerPoint2007
                 copyFilesName = getAllCopiedFilesForMSOffice20032007(rootElement);
                 String office2007Conv = sc.getStringParameter(
-                        SystemConfigParamNames.MSOFFICE_CONV_DIR,
-                        CompanyWrapper.SUPER_COMPANY_ID);
+                        SystemConfigParamNames.MSOFFICE_CONV_DIR, CompanyWrapper.SUPER_COMPANY_ID);
                 baseConv = office2007Conv + File.separator + "powerpoint";
             }
             else if ("Word2003".equals(formatType))
@@ -1488,8 +1410,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             else if ("InDesign Markup (IDML)".equals(formatType))
             {
                 // IDML
-                String safeBaseFileName = getSafeBaseFileName(rootElement,
-                        "IdmlAdapter");
+                String safeBaseFileName = getSafeBaseFileName(rootElement, "IdmlAdapter");
                 String filesDir = safeBaseFileName + ".unzip";
                 copyFilesName = new ArrayList<String>();
                 copyFilesName.add(filesDir);
@@ -1500,60 +1421,45 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             {
                 // INDD (CS5)
                 copyFilesName = getAllCopiedFilesForIndd(rootElement);
-                baseConv = sc.getStringParameter(
-                        SystemConfigParamNames.ADOBE_CONV_DIR_CS5,
-                        CompanyWrapper.SUPER_COMPANY_ID)
-                        + File.separator + "indd";
+                baseConv = sc.getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS5,
+                        CompanyWrapper.SUPER_COMPANY_ID) + File.separator + "indd";
             }
             else if ("INDD (CS4)".equals(formatType))
             {
                 // INDD (CS4)
                 copyFilesName = getAllCopiedFilesForIndd(rootElement);
-                baseConv = sc.getStringParameter(
-                        SystemConfigParamNames.ADOBE_CONV_DIR_CS4,
-                        CompanyWrapper.SUPER_COMPANY_ID)
-                        + File.separator + "indd";
+                baseConv = sc.getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS4,
+                        CompanyWrapper.SUPER_COMPANY_ID) + File.separator + "indd";
 
             }
             else if ("INDD (CS3)".equals(formatType))
             {
                 // INDD (CS3)
                 copyFilesName = getAllCopiedFilesForIndd(rootElement);
-                baseConv = sc.getStringParameter(
-                        SystemConfigParamNames.ADOBE_CONV_DIR_CS3,
-                        CompanyWrapper.SUPER_COMPANY_ID)
-                        + File.separator + "indd";
+                baseConv = sc.getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS3,
+                        CompanyWrapper.SUPER_COMPANY_ID) + File.separator + "indd";
             }
             else if ("INDD (CS5.5)".equals(formatType))
             {
                 // INDD (CS5.5)
                 copyFilesName = getAllCopiedFilesForIndd(rootElement);
-                baseConv = sc.getStringParameter(
-                        SystemConfigParamNames.ADOBE_CONV_DIR_CS5_5,
-                        CompanyWrapper.SUPER_COMPANY_ID)
-                        + File.separator + "indd";
+                baseConv = sc.getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS5_5,
+                        CompanyWrapper.SUPER_COMPANY_ID) + File.separator + "indd";
             }
             else if ("INX (CS3)".equals(formatType))
             {
                 // INX(CS3)
                 copyFilesName = getAllCopiedFilesForIndd(rootElement);
-                baseConv = sc.getStringParameter(
-                        SystemConfigParamNames.ADOBE_CONV_DIR_CS3,
-                        CompanyWrapper.SUPER_COMPANY_ID)
-                        + File.separator + "inx";
+                baseConv = sc.getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS3,
+                        CompanyWrapper.SUPER_COMPANY_ID) + File.separator + "inx";
             }
             else if ("Windows Portable Executable".equals(formatType))
             {
-                String companyName = CompanyWrapper.getCompanyNameById(sp
-                        .getCompanyId());
+                String companyName = CompanyWrapper.getCompanyNameById(sp.getCompanyId());
 
                 copyFilesName = getAllCopiedFilesForWinPE(rootElement);
-                baseConv = sc.getStringParameter(
-                        SystemConfigParamNames.WINDOWS_PE_DIR,
-                        CompanyWrapper.SUPER_COMPANY_ID)
-                        + File.separator
-                        + "winpe"
-                        + File.separator
+                baseConv = sc.getStringParameter(SystemConfigParamNames.WINDOWS_PE_DIR,
+                        CompanyWrapper.SUPER_COMPANY_ID) + File.separator + "winpe" + File.separator
                         + companyName;
             }
 
@@ -1562,8 +1468,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             {
                 for (String fileName : copyFilesName)
                 {
-                    String filePath = baseConv + File.separator + sourceLocale
-                            + File.separator + fileName;
+                    String filePath = baseConv + File.separator + sourceLocale + File.separator
+                            + fileName;
                     if (copiedFiles.contains(filePath))
                     {
                         continue;
@@ -1577,8 +1483,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                     {
                         if (file.exists())
                         {
-                            File target = new File(baseConv + File.separator
-                                    + targetLocale + File.separator + fileName);
+                            File target = new File(baseConv + File.separator + targetLocale
+                                    + File.separator + fileName);
                             try
                             {
                                 if (file.isDirectory())
@@ -1616,8 +1522,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         {
             fpPM = ServerProxy.getFileProfilePersistenceManager();
             fp = fpPM.getFileProfileById(fileProfileId, false);
-            formatType = fpPM.getKnownFormatTypeById(fp.getKnownFormatTypeId(),
-                    false).getName();
+            formatType = fpPM.getKnownFormatTypeById(fp.getKnownFormatTypeId(), false).getName();
         }
         catch (Exception e)
         {
@@ -1636,23 +1541,20 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
     private String getSafeBaseFileName(Element rootElement, String adapter)
     {
         String safeBaseFileName = "";
-        List categoryElements = XmlUtils.getChildElements(rootElement,
-                "category");
+        List categoryElements = XmlUtils.getChildElements(rootElement, "category");
         for (Iterator itor = categoryElements.iterator(); itor.hasNext();)
         {
             Element categoryElement = (Element) itor.next();
             if (adapter.equals(categoryElement.getAttribute("name")))
             {
-                List daElements = XmlUtils.getChildElements(categoryElement,
-                        "da");
+                List daElements = XmlUtils.getChildElements(categoryElement, "da");
                 for (Iterator it = daElements.iterator(); it.hasNext();)
                 {
                     Element daElement = (Element) it.next();
                     String name = daElement.getAttribute("name");
                     if ("safeBaseFileName".equals(name))
                     {
-                        safeBaseFileName = XmlUtils.getChildElementValue(
-                                daElement, "dv");
+                        safeBaseFileName = XmlUtils.getChildElementValue(daElement, "dv");
                         break;
                     }
                 }
@@ -1667,14 +1569,11 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
      * @param rootElement
      * @return
      */
-    private List<String> getAllCopiedFilesForMSOffice20032007(
-            Element rootElement)
+    private List<String> getAllCopiedFilesForMSOffice20032007(Element rootElement)
     {
         List<String> list = new ArrayList<String>();
-        String safeBaseFileName = getSafeBaseFileName(rootElement,
-                "MicrosoftApplicationAdapter");
-        String name = safeBaseFileName.substring(0,
-                safeBaseFileName.lastIndexOf("."));
+        String safeBaseFileName = getSafeBaseFileName(rootElement, "MicrosoftApplicationAdapter");
+        String name = safeBaseFileName.substring(0, safeBaseFileName.lastIndexOf("."));
         String htmlFile = name + ".html";
         String filesDir = name + "_files";
         String filesDir1 = name + ".files";
@@ -1693,8 +1592,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
     private List<String> getAllCopiedFilesForOpenOffice(Element rootElement)
     {
         List<String> list = new ArrayList<String>();
-        String safeBaseFileName = getSafeBaseFileName(rootElement,
-                "OpenOfficeAdapter");
+        String safeBaseFileName = getSafeBaseFileName(rootElement, "OpenOfficeAdapter");
         String fileDir;
         if (safeBaseFileName.endsWith("odp"))
         {
@@ -1722,10 +1620,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
     private List<String> getAllCopiedFilesForIndd(Element rootElement)
     {
         List<String> list = new ArrayList<String>();
-        String safeBaseFileName = getSafeBaseFileName(rootElement,
-                "AdobeAdapter");
-        String fileName = safeBaseFileName.substring(0,
-                safeBaseFileName.lastIndexOf("."));
+        String safeBaseFileName = getSafeBaseFileName(rootElement, "AdobeAdapter");
+        String fileName = safeBaseFileName.substring(0, safeBaseFileName.lastIndexOf("."));
         list.add(safeBaseFileName);
         list.add(fileName + ".pdf");
         list.add(fileName + ".xmp");
@@ -1741,8 +1637,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
     private List<String> getAllCopiedFilesForOffice2010(Element rootElement)
     {
         List<String> list = new ArrayList<String>();
-        String safeBaseFileName = getSafeBaseFileName(rootElement,
-                "OfficeXmlAdapter");
+        String safeBaseFileName = getSafeBaseFileName(rootElement, "OfficeXmlAdapter");
 
         String fileDir;
         if (safeBaseFileName.endsWith("docx"))
@@ -1771,31 +1666,30 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
     private List<String> getAllCopiedFilesForWinPE(Element rootElement)
     {
         List<String> list = new ArrayList<String>();
-        String safeBaseFileName = getSafeBaseFileName(rootElement,
-                "WindowsPEAdapter");
+        String safeBaseFileName = getSafeBaseFileName(rootElement, "WindowsPEAdapter");
 
         list.add(safeBaseFileName);
         return list;
     }
-    
-    private HashMap<String, ScorecardScore> setScore(long jobId, HashMap<String, ScorecardScore> scoreMap)
+
+    private HashMap<String, ScorecardScore> setScore(long jobId,
+            HashMap<String, ScorecardScore> scoreMap)
     {
-    	List<ScorecardScore> scoreList = ScorecardScoreHelper.getScoreByJobId(jobId);
-    	for(ScorecardScore score:scoreList)
-    	{
-    		scoreMap.put(score.getWorkflowId() + "." + score.getScorecardCategory(), 
-    				score);
-    	}
-    	return scoreMap;
+        List<ScorecardScore> scoreList = ScorecardScoreHelper.getScoreByJobId(jobId);
+        for (ScorecardScore score : scoreList)
+        {
+            scoreMap.put(score.getWorkflowId() + "." + score.getScorecardCategory(), score);
+        }
+        return scoreMap;
     }
-    
+
     private void storeScores(long workflowId, Session session)
     {
-    	List<ScorecardScore> scoreList = ScorecardScoreHelper.getScoreByWrkflowId(workflowId);
-    	for(ScorecardScore score:scoreList)
-    	{
-    		score.setIsActive(false);
-    		session.update(score);
-    	}
+        List<ScorecardScore> scoreList = ScorecardScoreHelper.getScoreByWrkflowId(workflowId);
+        for (ScorecardScore score : scoreList)
+        {
+            score.setIsActive(false);
+            session.update(score);
+        }
     }
 }

@@ -14,12 +14,9 @@
  *  limitations under the License.
  *  
  */
-
 package com.globalsight.everest.workflowmanager;
 
-//
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +32,7 @@ import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationException;
+import com.globalsight.everest.page.Page;
 import com.globalsight.everest.page.PagePersistenceAccessor;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -57,53 +55,89 @@ public class AddWorkflowPersistenceHandler
     private static final Logger c_logger = Logger
             .getLogger(AddWorkflowPersistenceHandler.class.getName());
 
-    public AddWorkflowPersistenceHandler()
-    {
-    }
-
-    @SuppressWarnings("unchecked")
-    public List createWorkflows(HashMap p_pages, Job p_job,
-            Collection p_workflowTemplates) throws WorkflowManagerException
+    public void addTargetPagesToWorkflows(Map<Long, Page> p_pages, List<Workflow> p_newWorkflows,
+            Job p_job) throws WorkflowManagerException
     {
         SourcePage sourcePage = null;
-        List listOfWorkflows = null;
-        List<Workflow> workflows = new ArrayList<Workflow>();
 
         Session session = null;
         Transaction transaction = null;
-
         try
         {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
 
-            HashMap targetPages = new HashMap(p_pages);
+            // get the source page from the map
+            sourcePage = (SourcePage) p_pages
+                    .remove(p_job.getL10nProfile().getSourceLocale().getId());
+            Vector targetPagesInDb = PagePersistenceAccessor.getTargetPages(sourcePage.getId());
+            Map<Long, TargetPage> mapTargetPages = convertVectorIntoMap(targetPagesInDb);
+
+            for (Workflow workflow : p_newWorkflows)
+            {
+                Workflow wfClone = (WorkflowImpl) session.load(WorkflowImpl.class,
+                        workflow.getIdAsLong());
+                TargetPage targetPage = (TargetPage) p_pages
+                        .get(workflow.getTargetLocale().getId());
+                TargetPage targetPageInDb = (TargetPage) mapTargetPages
+                        .get(targetPage.getIdAsLong());
+                TargetPage targetPageClone = (TargetPage) session.load(TargetPage.class,
+                        targetPageInDb.getIdAsLong());
+
+                wfClone.addTargetPage(targetPageClone);
+                session.update(wfClone);
+            }
+
+            transaction.commit();
+        }
+        catch (Exception pe)
+        {
+            if (transaction != null)
+            {
+                transaction.rollback();
+            }
+            c_logger.error("Unable to add workflows to given job.", pe);
+            String args[] = new String[1];
+            args[0] = Long.toString(sourcePage.getId());
+
+            throw new WorkflowManagerException(WorkflowManagerException.MSG_FAILED_TO_ADD_WORKFLOW,
+                    args, pe);
+        }
+    }
+
+    public List<Workflow> createWorkflows(Map<Long, Page> p_pages, Job p_job,
+            List<WorkflowTemplateInfo> p_workflowTemplates) throws WorkflowManagerException
+    {
+        SourcePage sourcePage = null;
+        List<Workflow> listOfWorkflows = new ArrayList<Workflow>();
+        List<Workflow> workflows = new ArrayList<Workflow>();
+
+        Session session = null;
+        Transaction transaction = null;
+        try
+        {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
 
             // get the source page from the map
-            sourcePage = (SourcePage) targetPages.remove(p_job.getL10nProfile()
-                    .getSourceLocale().getIdAsLong());
-            Vector toplinkTargetPages = PagePersistenceAccessor
-                    .getTargetPages(sourcePage.getId());
-            Map mapTargetPages = convertVectorIntoMap(toplinkTargetPages);
+            sourcePage = (SourcePage) p_pages
+                    .remove(p_job.getL10nProfile().getSourceLocale().getId());
+            Vector targetPagesInDb = PagePersistenceAccessor.getTargetPages(sourcePage.getId());
+            Map<Long, TargetPage> mapTargetPages = convertVectorIntoMap(targetPagesInDb);
 
-            listOfWorkflows = createWorkflowInstances(sourcePage.getRequest(),
-                    p_job, p_workflowTemplates);
+            listOfWorkflows = createWorkflowInstances(sourcePage.getRequest(), p_job,
+                    p_workflowTemplates);
 
-            JobImpl job = (JobImpl) session.get(JobImpl.class,
-                    new Long(p_job.getId()));
-            ;
-            Iterator it = listOfWorkflows.iterator();
-            while (it.hasNext())
+            JobImpl job = (JobImpl) session.get(JobImpl.class, new Long(p_job.getId()));
+            for (Workflow workflow : listOfWorkflows)
             {
-                Workflow workflow = (Workflow) it.next();
-
                 workflow.setJob(job);
                 job.addWorkflowInstance(workflow);
-                TargetPage targetPage = (TargetPage) (targetPages.get(workflow
-                        .getTargetLocale().getIdAsLong()));
-                TargetPage toplinkTargetPage = (TargetPage) (mapTargetPages
+                TargetPage targetPage = (TargetPage) (p_pages
+                        .get(workflow.getTargetLocale().getId()));
+                TargetPage targetPageInDb = (TargetPage) (mapTargetPages
                         .get(targetPage.getIdAsLong()));
-                workflow.addTargetPage(toplinkTargetPage);
+                workflow.addTargetPage(targetPageInDb);
                 workflows.add(workflow);
             }
             session.update(job);
@@ -115,28 +149,18 @@ public class AddWorkflowPersistenceHandler
             {
                 transaction.rollback();
             }
-
-            c_logger.error("Unable to create new workflows for given job "
-                    + jce);
+            c_logger.error("Unable to create new workflows for given job " + jce);
             String args[] = new String[1];
             args[0] = Long.toString(sourcePage.getId());
-            throw new WorkflowManagerException(
-                    WorkflowManagerException.MSG_FAILED_TO_ADD_WORKFLOW, args,
-                    jce);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                // session.close();
-            }
+            throw new WorkflowManagerException(WorkflowManagerException.MSG_FAILED_TO_ADD_WORKFLOW,
+                    args, jce);
         }
         return workflows;
     }
 
-    private Map convertVectorIntoMap(Vector p_toplinkTargetPages)
+    private Map<Long, TargetPage> convertVectorIntoMap(Vector p_targetPages)
     {
-        Iterator it = p_toplinkTargetPages.iterator();
+        Iterator it = p_targetPages.iterator();
         Map<Long, TargetPage> map = new HashMap<Long, TargetPage>();
         while (it.hasNext())
         {
@@ -146,21 +170,19 @@ public class AddWorkflowPersistenceHandler
         return map;
     }
 
-    /*
-     * Create the workflow instances that are part of the new job.
+    /**
+     * Creates the workflow instances that are part of the new job.
      */
-    private List createWorkflowInstances(Request p_request, Job p_job,
-            Collection p_workflowTemplates) throws JobCreationException
+    private List<Workflow> createWorkflowInstances(Request p_request, Job p_job,
+            List<WorkflowTemplateInfo> p_workflowTemplates) throws JobCreationException
     {
         List<Workflow> listOfWorkflows = new ArrayList<Workflow>();
         L10nProfile l10nProfile = p_request.getL10nProfile();
-        long lpId=l10nProfile.getId();
+        long lpId = l10nProfile.getId();
         try
         {
-            Iterator it = p_workflowTemplates.iterator();
-            while (it.hasNext())
+            for (WorkflowTemplateInfo wfInfo : p_workflowTemplates)
             {
-                WorkflowTemplateInfo wfInfo = (WorkflowTemplateInfo) it.next();
                 long wfTemplateId = wfInfo.getWorkflowTemplateId();
                 WorkflowInstance wfInstance = ServerProxy.getWorkflowServer()
                         .createWorkflowInstance(wfTemplateId);
@@ -190,18 +212,14 @@ public class AddWorkflowPersistenceHandler
                 wf.setMtProfileName(mtProfileName);
 
                 // set workflow owners (PM and WFM)
-                wf.addWorkflowOwner(new WorkflowOwner(wfInfo
-                        .getProjectManagerId(),
+                wf.addWorkflowOwner(new WorkflowOwner(wfInfo.getProjectManagerId(),
                         Permission.GROUP_PROJECT_MANAGER));
 
-                List wfmIds = wfInfo.getWorkflowManagerIds();
-                if (wfmIds != null)
+                List<String> wfmIds = wfInfo.getWorkflowManagerIds();
+                for (String wfmId : wfmIds)
                 {
-                    for (Iterator wfmii = wfmIds.iterator(); wfmii.hasNext();)
-                    {
-                        wf.addWorkflowOwner(new WorkflowOwner((String) wfmii
-                                .next(), Permission.GROUP_WORKFLOW_MANAGER));
-                    }
+                    wf.addWorkflowOwner(
+                            new WorkflowOwner(wfmId, Permission.GROUP_WORKFLOW_MANAGER));
                 }
 
                 // create the tasks and add them to the workflow
@@ -211,13 +229,12 @@ public class AddWorkflowPersistenceHandler
         }
         catch (Exception e)
         {
-            c_logger.error("Failed to create workflow instances for the new "
-                    + "of request " + p_request.getId(), e);
+            c_logger.error("Failed to create workflow instances for the new " + "of request "
+                    + p_request.getId(), e);
             String args[] = new String[1];
             args[0] = Long.toString(p_request.getId());
             throw new JobCreationException(
-                    JobCreationException.MSG_FAILED_TO_CREATE_WORKFLOW_INSTANCES,
-                    args, e);
+                    JobCreationException.MSG_FAILED_TO_CREATE_WORKFLOW_INSTANCES, args, e);
 
         }
         return listOfWorkflows;
@@ -250,17 +267,14 @@ public class AddWorkflowPersistenceHandler
                 {
                     try
                     {
-                        Rate r = ServerProxy.getCostingEngine().getRate(
-                                wti.getExpenseRateId());
+                        Rate r = ServerProxy.getCostingEngine().getRate(wti.getExpenseRateId());
                         task.setExpenseRate(r);
                     }
                     catch (Exception e)
                     {
                         // couldn't find the rate so left to be null
-                        c_logger.error("Couldn't find the expense rate for task "
-                                + wti.getTaskId()
-                                + " of workflow "
-                                + p_wf.getId());
+                        c_logger.error("Couldn't find the expense rate for task " + wti.getTaskId()
+                                + " of workflow " + p_wf.getId());
                     }
                 }
                 // if a revenuve rate is specified
@@ -268,16 +282,14 @@ public class AddWorkflowPersistenceHandler
                 {
                     try
                     {
-                        Rate r = ServerProxy.getCostingEngine().getRate(
-                                wti.getRevenueRateId());
+                        Rate r = ServerProxy.getCostingEngine().getRate(wti.getRevenueRateId());
                         task.setRevenueRate(r);
                     }
                     catch (Exception e)
                     {
                         // couldn't find the rate so left to be null
-                        c_logger.error("Couldn't find the rate for task "
-                                + wti.getTaskId() + " of workflow "
-                                + p_wf.getId());
+                        c_logger.error("Couldn't find the rate for task " + wti.getTaskId()
+                                + " of workflow " + p_wf.getId());
                     }
                 }
                 p_wf.addTask(task);
@@ -296,8 +308,7 @@ public class AddWorkflowPersistenceHandler
         int type = TaskImpl.TYPE_TRANSLATE;
         try
         {
-            Activity act = ServerProxy.getJobHandler().getActivity(
-                    p_activityName);
+            Activity act = ServerProxy.getJobHandler().getActivity(p_activityName);
             type = act.getType();
 
             // for sla report issue
@@ -325,8 +336,8 @@ public class AddWorkflowPersistenceHandler
         {
             // -1 indicates that the default path would begin from the
             // START node.
-            List wfTaskInfos = ServerProxy.getWorkflowServer()
-                    .timeDurationsInDefaultPath(null, wfi.getId(), -1);
+            List wfTaskInfos = ServerProxy.getWorkflowServer().timeDurationsInDefaultPath(null,
+                    wfi.getId(), -1);
 
             int size = wfTaskInfos.size();
             for (int i = 0; i < size; i++)
@@ -346,9 +357,7 @@ public class AddWorkflowPersistenceHandler
         catch (Exception e)
         {
             // if this fails just flag an error - and leave the cost at 0
-            c_logger.error(
-                    "Failed to calculate the cost for workflow " + wfi.getId(),
-                    e);
+            c_logger.error("Failed to calculate the cost for workflow " + wfi.getId(), e);
         }
         return minutes;
     }

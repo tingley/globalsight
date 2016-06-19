@@ -23,14 +23,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.util.terminology.TermbaseDeleterUtil;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.tm2.persistence.DbUtil;
@@ -44,8 +44,7 @@ import com.globalsight.util.SessionInfo;
  */
 public class TermbaseManager implements TermbaseExceptionMessages
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(TermbaseManager.class);
+    private static final Logger CATEGORY = Logger.getLogger(TermbaseManager.class);
 
     /** Description column width in database */
     public static final int MAX_DESCRIPTION_LEN = 4000;
@@ -62,8 +61,7 @@ public class TermbaseManager implements TermbaseExceptionMessages
     static public boolean isExtendedFeaturesEnabled()
     {
         // TBF-2284-1574583831
-        String expectedKey = "TBF-" + "GS".hashCode() + "-"
-                + "terminology-features".hashCode();
+        String expectedKey = "TBF-" + "GS".hashCode() + "-" + "terminology-features".hashCode();
 
         s_isExtendedFeaturesEnabled = SystemConfiguration
                 .isKeyValid(SystemConfigParamNames.TERMINOLOGY_FEATURES_INSTALL_KEY);
@@ -93,16 +91,14 @@ public class TermbaseManager implements TermbaseExceptionMessages
 
             try
             {
-                Termbase tb = new Termbase(tbase.getId(), tbase.getName(),
-                        tbase.getDescription(), tbase.getDefination(),
-                        companyId);
+                Termbase tb = new Termbase(tbase.getId(), tbase.getName(), tbase.getDescription(),
+                        tbase.getDefination(), companyId);
                 TermbaseList.add(tb.getCompanyId(), tb.getName(), tb);
             }
             catch (TermbaseException e)
             {
                 // A broken Termbase Definition, ignore and continue;
-                CATEGORY.error("Cannot start termbase `" + tbase.getName()
-                        + "'", e);
+                CATEGORY.error("Cannot start termbase `" + tbase.getName() + "'", e);
             }
 
             if (CATEGORY.isDebugEnabled())
@@ -139,8 +135,8 @@ public class TermbaseManager implements TermbaseExceptionMessages
      * Creates a new in-memory termbase object based on the supplied definition
      * and adds it to the TermbaseList.
      */
-    static protected Termbase createTermbase(String p_definition,
-            String p_companyId) throws TermbaseException
+    static protected Termbase createTermbase(String p_definition, String p_companyId)
+            throws TermbaseException
     {
         String name = null;
         String description = null;
@@ -185,16 +181,13 @@ public class TermbaseManager implements TermbaseExceptionMessages
                 {
                     String[] args =
                     { name };
-                    throw new TermbaseException(MSG_TB_ALREADY_EXISTS, args,
-                            null);
+                    throw new TermbaseException(MSG_TB_ALREADY_EXISTS, args, null);
                 }
 
                 // save definition in TB_TERMBASE table
-                long tbid = createPhysicalTermbase(name, description,
-                        definition, p_companyId);
+                long tbid = createPhysicalTermbase(name, description, definition, p_companyId);
 
-                tb = new Termbase(tbid, name, description, definition,
-                        p_companyId);
+                tb = new Termbase(tbid, name, description, definition, p_companyId);
 
                 TermbaseList.add(tb.getCompanyId(), tb.getName(), tb);
 
@@ -218,8 +211,7 @@ public class TermbaseManager implements TermbaseExceptionMessages
      * garbage-collected.
      * </p>
      */
-    static protected void deleteTermbase(String p_name)
-            throws TermbaseException
+    static protected void deleteTermbase(String p_name) throws TermbaseException
     {
         Termbase tb = null;
 
@@ -271,8 +263,7 @@ public class TermbaseManager implements TermbaseExceptionMessages
             {
                 tb.setRunning();
 
-                CATEGORY.error("Termbase `" + p_name
-                        + "' could not be deleted.", ex);
+                CATEGORY.error("Termbase `" + p_name + "' could not be deleted.", ex);
 
                 String[] args =
                 { p_name };
@@ -348,8 +339,7 @@ public class TermbaseManager implements TermbaseExceptionMessages
      * will need to request the termbase by it's new name.
      * </p>
      */
-    static protected void renameTermbase(String p_name, String p_newName)
-            throws TermbaseException
+    static protected void renameTermbase(String p_name, String p_newName) throws TermbaseException
     {
         Termbase tb = null;
 
@@ -428,8 +418,7 @@ public class TermbaseManager implements TermbaseExceptionMessages
         {
             notifyTermbaseRenamed(p_name, p_newName);
 
-            CATEGORY.info("Termbase `" + p_name + "' renamed to `" + p_newName
-                    + "'.");
+            CATEGORY.info("Termbase `" + p_name + "' renamed to `" + p_newName + "'.");
         }
     }
 
@@ -441,9 +430,8 @@ public class TermbaseManager implements TermbaseExceptionMessages
      * Helper method for createTermbase() that performs the necessary updates in
      * the SQL database.
      */
-    static private long createPhysicalTermbase(String p_name,
-            String p_description, Definition p_definition, String p_companyId)
-            throws TermbaseException
+    static private long createPhysicalTermbase(String p_name, String p_description,
+            Definition p_definition, String p_companyId) throws TermbaseException
     {
         String definition = p_definition.getXml();
 
@@ -469,8 +457,8 @@ public class TermbaseManager implements TermbaseExceptionMessages
         }
         catch (Exception e)
         {
-            CATEGORY.error("Termbase `" + p_name
-                    + "' could not be renamed to `" + p_name + "'.", e);
+            CATEGORY.error("Termbase `" + p_name + "' could not be renamed to `" + p_name + "'.",
+                    e);
 
             String[] args =
             { p_name, p_name };
@@ -486,7 +474,6 @@ public class TermbaseManager implements TermbaseExceptionMessages
      * performance.
      */
     static private void deletePhysicalTermbase(Termbase p_tb)
-            throws TermbaseException
     {
         // Delete the termbase info only.
         Connection conn = null;
@@ -501,7 +488,7 @@ public class TermbaseManager implements TermbaseExceptionMessages
         }
         catch (Exception e)
         {
-
+            CATEGORY.error("Failed to delete TB_TERMBASE info.", e);
         }
         finally
         {
@@ -510,38 +497,25 @@ public class TermbaseManager implements TermbaseExceptionMessages
         }
 
         // Delete real TB data from DB store in background.
-        try
-        {
-            HashMap params = new HashMap();
-            params.put(CompanyWrapper.CURRENT_COMPANY_ID, p_tb.getCompanyId());
-            params.put("action", "delete_termbase");
-            params.put("tbid", new Long(p_tb.getId()));
-
-            JmsHelper.sendMessageToQueue(params,
-                    JmsHelper.JMS_TERMBASE_DELETION_QUEUE);
-        }
-        catch (Exception ex)
-        {
-            CATEGORY.error(
-                    "Cannot tell JMS queue to delete termbase " + p_tb.getId()
-                            + ", must delete data manually.", ex);
-        }
+        Map<String, Long> data = new HashMap<String, Long>();
+        data.put("tbid", p_tb.getId());
+        // GBS-4400
+        TermbaseDeleterUtil.deleteTermbaseWithThread(data);
     }
 
     /**
      * Helper method for renameTermbase() that performs the necessary updates in
      * the SQL database.
      */
-    static private long renamePhysicalTermbase(Termbase p_termbase,
-            String p_name, Definition p_definition) throws TermbaseException
+    static private long renamePhysicalTermbase(Termbase p_termbase, String p_name,
+            Definition p_definition) throws TermbaseException
     {
         String definition = p_definition.getXml();
 
         try
         {
             com.globalsight.terminology.java.Termbase tbase = HibernateUtil
-                    .get(com.globalsight.terminology.java.Termbase.class,
-                            p_termbase.getId());
+                    .get(com.globalsight.terminology.java.Termbase.class, p_termbase.getId());
 
             tbase.setName(p_name);
             tbase.setDefination(definition);
@@ -568,16 +542,12 @@ public class TermbaseManager implements TermbaseExceptionMessages
         try
         {
             // Un-schedule the TB re-index event.
-            ServerProxy.getTermbaseScheduler().unscheduleEvent(
-                    new Long(p_termbase.getId()));
+            ServerProxy.getTermbaseScheduler().unscheduleEvent(new Long(p_termbase.getId()));
         }
         catch (Throwable ex)
         {
-            CATEGORY.warn(
-                    "The re-index schedule for termbase `"
-                            + p_termbase.getName() + "' (ID="
-                            + p_termbase.getId() + ") could not be deleted.",
-                    ex);
+            CATEGORY.warn("The re-index schedule for termbase `" + p_termbase.getName() + "' (ID="
+                    + p_termbase.getId() + ") could not be deleted.", ex);
         }
     }
 
@@ -589,8 +559,7 @@ public class TermbaseManager implements TermbaseExceptionMessages
     {
         try
         {
-            ServerProxy.getProjectEventObserver().notifyTermbaseRenamed(
-                    p_oldName, p_newName);
+            ServerProxy.getProjectEventObserver().notifyTermbaseRenamed(p_oldName, p_newName);
         }
         catch (Throwable ignore)
         {

@@ -30,6 +30,7 @@ import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.page.PrimaryFile;
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.request.WorkflowRequest;
@@ -41,7 +42,6 @@ public interface Job extends WorkObject
     // Job states
     public static final String AUTOMATIC = "AUTOMATIC";
     public static final String MANUAL = "MANUAL";
-
     public static final String BATCHRESERVED = "BATCH_RESERVED";
     public static final String CANCELLED = "CANCELLED";
     public static final String DISPATCHED = "DISPATCHED";
@@ -54,10 +54,8 @@ public interface Job extends WorkObject
     public static final String READY_TO_BE_DISPATCHED = "READY_TO_BE_DISPATCHED";
     public static final String ARCHIVED = "ARCHIVED";
     public static final String ALLSTATUS = "ALL_STATUS";
-
     public static final String IN_CONTEXT = "in-context";
     public static final String EXACT_ONLY = "exact";
-
     public static final String ADD_FILE = "ADDING_FILES";
     public static final String DELETE_FILE = "DELETING_FILES";
     public static final String UPLOADING = "UPLOADING";
@@ -73,7 +71,7 @@ public interface Job extends WorkObject
     public static final String JOB_TYPE_GIT = "git";
     public static final String JOB_TYPE_CVS = "cvs";
     public static final String JOB_TYPE_MINDTOUCH = "mindtouch";
-    public static final String JOB_TYPE_ELOQUA  = "eloqua";
+    public static final String JOB_TYPE_ELOQUA = "eloqua";
     public static final String JOB_TYPE_COTI = "coti";
     public static final String JOB_TYPE_RSS = "rss";
 
@@ -127,11 +125,11 @@ public interface Job extends WorkObject
     public void setCompanyId(long companyId);
 
     public long getCompanyId();
-    
+
     public Long getGroupId();
-    
+
     public void setGroupId(Long groupId);
-    
+
     public void setJobName(String p_jobName);
 
     public String getJobName();
@@ -218,7 +216,7 @@ public interface Job extends WorkObject
     /**
      * Return all the source pages in the job.
      */
-    public Collection getSourcePages();
+    public Collection<SourcePage> getSourcePages();
 
     /**
      * Return all the source pages in the job that contain the specified primary
@@ -445,19 +443,23 @@ public interface Job extends WorkObject
 
     public String getLmExtTable();
 
-	public void setLmExtTable(String lmExtTable);
+    public void setLmExtTable(String lmExtTable);
 
-	public String getLmExtArchiveTable();
+    public String getLmExtArchiveTable();
 
-	public void setLmExtArchiveTable(String lmExtArchiveTable);
+    public void setLmExtArchiveTable(String lmExtArchiveTable);
 
     public String getJobType();
 
     public void setJobType(String jobType);
 
     public boolean isBlaiseJob();
+
     public boolean isCotiJob();
+
     public boolean isEloquaJob();
+
     public boolean isGitJob();
+
     public boolean isMindTouchJob();
 }

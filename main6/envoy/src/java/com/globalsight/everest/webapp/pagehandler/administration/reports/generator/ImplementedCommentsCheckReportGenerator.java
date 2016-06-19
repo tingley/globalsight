@@ -19,6 +19,7 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.genera
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -461,7 +462,7 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
     private int writeSegmentInfo(Workbook p_workBook, Sheet p_sheet, Job p_job,
             GlobalSightLocale p_targetLocale, String p_dateFormat, int p_row) throws Exception
     {
-        Vector<TargetPage> targetPages = new Vector<TargetPage>();
+        Collection<TargetPage> targetPages = null;
 
         long companyId = p_job.getCompanyId();
 
@@ -504,14 +505,12 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
             Map<Long, Set<TermLeverageMatch>> termLeverageMatchResultMap = termLeverageManager
                     .getTermMatchesForPages(p_job.getSourcePages(), p_targetLocale);
 
-            TargetPage targetPage = null;
             SourcePage sourcePage = null;
             String sourceSegmentString = null;
             String targetSegmentString = null;
             String sid = null;
-            for (int i = 0; i < targetPages.size(); i++)
+            for (TargetPage targetPage : targetPages)
             {
-                targetPage = (TargetPage) targetPages.get(i);
                 sourcePage = targetPage.getSourcePage();
                 SegmentTuUtil.getTusBySourcePageId(sourcePage.getId());
                 List sourceTuvs = SegmentTuvUtil.getSourceTuvs(sourcePage);
@@ -521,8 +520,8 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
                 MatchTypeStatistics tuvMatchTypes = leverageMatchLingManager
                         .getMatchTypesForStatistics(sourcePage.getIdAsLong(),
                                 targetPage.getLocaleId(), p_job.getLeverageMatchThreshold());
-                Map<Long, LeverageSegment> exactMatches = leverageMatchLingManager.getExactMatches(
-                        sourcePage.getIdAsLong(), targetPage.getLocaleId());
+                Map<Long, LeverageSegment> exactMatches = leverageMatchLingManager
+                        .getExactMatches(sourcePage.getIdAsLong(), targetPage.getLocaleId());
                 Map<Long, Set<LeverageMatch>> fuzzyLeverageMatcheMap = leverageMatchLingManager
                         .getFuzzyMatches(sourcePage.getIdAsLong(), targetPage.getLocaleId());
 
@@ -714,8 +713,8 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
                 issuesMap = null;
             }
             // Add category failure drop down list here.
-            addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row,
-                    CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
+            addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row, CATEGORY_FAILURE_COLUMN,
+                    CATEGORY_FAILURE_COLUMN);
 
             termLeverageMatchResultMap = null;
         }
@@ -996,8 +995,8 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
                 cell.setCellValue(categories.get(i));
             }
 
-            String formula = firstSheet.getSheetName() + "!$AA$" + (SEGMENT_START_ROW + 1)
-                    + ":$AA$" + (SEGMENT_START_ROW + categories.size());
+            String formula = firstSheet.getSheetName() + "!$AA$" + (SEGMENT_START_ROW + 1) + ":$AA$"
+                    + (SEGMENT_START_ROW + categories.size());
             Name name = p_workbook.createName();
             name.setRefersToFormula(formula);
             name.setNameName(CATEGORY_FAILURE_DROP_DOWN_LIST);
@@ -1044,15 +1043,15 @@ public class ImplementedCommentsCheckReportGenerator implements ReportGenerator
     @Override
     public void setPercent(int p_finishedJobNum)
     {
-        ReportGeneratorHandler.setReportsMapByGenerator(m_userId, m_jobIDS, 100 * p_finishedJobNum
-                / m_jobIDS.size(), getReportType());
+        ReportGeneratorHandler.setReportsMapByGenerator(m_userId, m_jobIDS,
+                100 * p_finishedJobNum / m_jobIDS.size(), getReportType());
     }
 
     @Override
     public boolean isCancelled()
     {
-        ReportsData data = ReportGeneratorHandler
-                .getReportsMap(m_userId, m_jobIDS, getReportType());
+        ReportsData data = ReportGeneratorHandler.getReportsMap(m_userId, m_jobIDS,
+                getReportType());
         if (data != null)
             return data.isCancle();
 

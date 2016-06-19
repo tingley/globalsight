@@ -35,10 +35,8 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
-import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.util.fileExport.FileExportRunnable;
-import com.globalsight.cxe.util.fileExport.FileExportUtil;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.online.OnlineEditorConstants;
 import com.globalsight.everest.jobhandler.JobImpl;
@@ -59,7 +57,6 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.LeverageGroupImpl;
-import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.ling.tm.ExactMatchedSegments;
 import com.globalsight.ling.tm.TargetLocaleLgIdsMapper;
@@ -82,16 +79,13 @@ import com.globalsight.util.XmlParser;
  */
 public final class PageManagerLocal implements PageManager
 {
-    static private final Logger s_category = Logger
-            .getLogger(PageManagerLocal.class);
+    static private final Logger s_category = Logger.getLogger(PageManagerLocal.class);
 
     private static final String GET_SOURCE_PAGE_BY_LG_ID_SQL = "SELECT sp.* from source_page sp, source_page_leverage_group splg "
             + "WHERE sp.id = splg.sp_id " + "AND splg.lg_id = ?";
 
     private static final String GET_SOURCE_PAGE_BY_TU_ID_SQL = "SELECT sp.* from source_page sp, source_page_leverage_group splg, "
-            + TuvQueryConstants.TU_TABLE_PLACEHOLDER
-            + " tu "
-            + "WHERE sp.id = splg.sp_id "
+            + TuvQueryConstants.TU_TABLE_PLACEHOLDER + " tu " + "WHERE sp.id = splg.sp_id "
             + "AND splg.lg_id = tu.leverage_group_id " + "AND tu.id = ?";
 
     private static final int MAX_THREAD = 100;
@@ -142,8 +136,7 @@ public final class PageManagerLocal implements PageManager
                             break;
 
                         case PageManager.TARGET_PAGE:
-                            page = getTargetPage(pageId.longValue())
-                                    .getSourcePage();
+                            page = getTargetPage(pageId.longValue()).getSourcePage();
                             docName = getDocNameFromPage(page);
                             break;
                     }
@@ -188,8 +181,7 @@ public final class PageManagerLocal implements PageManager
                 Document doc = parser.parseXml(efxml);
                 Element root = doc.getRootElement();
 
-                Node tmp = root
-                        .selectSingleNode("/eventFlowXml/source/da[@name='Filename']/dv");
+                Node tmp = root.selectSingleNode("/eventFlowXml/source/da[@name='Filename']/dv");
 
                 if (tmp != null)
                 {
@@ -273,8 +265,7 @@ public final class PageManagerLocal implements PageManager
      * @exception RemoteException
      *                Network related exception.
      */
-    public SourcePage getSourcePage(long p_sourcePageId) throws PageException,
-            RemoteException
+    public SourcePage getSourcePage(long p_sourcePageId) throws PageException, RemoteException
     {
         return PagePersistenceAccessor.getSourcePageById(p_sourcePageId);
     }
@@ -290,8 +281,7 @@ public final class PageManagerLocal implements PageManager
      * @exception RemoteException
      *                Network related exception.
      */
-    public TargetPage getTargetPage(long p_targetPageId) throws PageException,
-            RemoteException
+    public TargetPage getTargetPage(long p_targetPageId) throws PageException, RemoteException
     {
         return getTargetPageById(p_targetPageId);
     }
@@ -311,8 +301,7 @@ public final class PageManagerLocal implements PageManager
     public TargetPage getTargetPage(long p_sourcePageId, long p_localeId)
             throws PageException, RemoteException
     {
-        return PagePersistenceAccessor
-                .getTargetPage(p_sourcePageId, p_localeId);
+        return PagePersistenceAccessor.getTargetPage(p_sourcePageId, p_localeId);
     }
 
     /**
@@ -326,8 +315,7 @@ public final class PageManagerLocal implements PageManager
     public List<TargetPage> filterTargetPages(Task p_task, String p_filertType)
     {
         List<TargetPage> tps = p_task.getTargetPages();
-        if (OnlineEditorConstants.SEGMENT_FILTER_NO_TRANSLATED
-                .equalsIgnoreCase(p_filertType))
+        if (OnlineEditorConstants.SEGMENT_FILTER_NO_TRANSLATED.equalsIgnoreCase(p_filertType))
         {
             return SegmentTuvUtil.filterUnTranslatedTargetPages(tps);
         }
@@ -340,9 +328,8 @@ public final class PageManagerLocal implements PageManager
      *      GlobalSightLocale, String, int, boolean, String)
      */
     public SourcePage getPageWithExtractedFileForImport(Request p_request,
-            GlobalSightLocale p_sourceLocale, String p_dataType,
-            int p_wordCount, boolean p_containGsTags, String p_gxmlVersion)
-            throws PageException
+            GlobalSightLocale p_sourceLocale, String p_dataType, int p_wordCount,
+            boolean p_containGsTags, String p_gxmlVersion) throws PageException
     {
         SourcePage page = null;
 
@@ -353,14 +340,13 @@ public final class PageManagerLocal implements PageManager
             if (page == null)
             {
                 // create a new page with a state of Importing
-                page = createNewPageWithExtractedFileForImport(p_request,
-                        p_sourceLocale, p_dataType, p_wordCount,
-                        p_containGsTags, p_gxmlVersion);
+                page = createNewPageWithExtractedFileForImport(p_request, p_sourceLocale,
+                        p_dataType, p_wordCount, p_containGsTags, p_gxmlVersion);
             }
             else
             {
-                page = getClonedPage(page, p_request, p_sourceLocale,
-                        p_dataType, p_wordCount, p_containGsTags, p_gxmlVersion);
+                page = getClonedPage(page, p_request, p_sourceLocale, p_dataType, p_wordCount,
+                        p_containGsTags, p_gxmlVersion);
             }
             page = persistSourcePage(p_request, page);
             page.setRequest(p_request);
@@ -370,8 +356,7 @@ public final class PageManagerLocal implements PageManager
             s_category.error("Unable to persist a page", e);
             String[] args =
             { Long.toString(p_request.getId()) };
-            throw new PageException(PageException.MSG_FAILED_TO_CREATE_PAGE,
-                    args, e);
+            throw new PageException(PageException.MSG_FAILED_TO_CREATE_PAGE, args, e);
         }
 
         return page;
@@ -382,19 +367,17 @@ public final class PageManagerLocal implements PageManager
      *      GlobalSightLocale, int)
      */
     public SourcePage getPageWithUnextractedFileForImport(Request p_request,
-            GlobalSightLocale p_sourceLocale, int p_wordCount)
-            throws PageException
+            GlobalSightLocale p_sourceLocale, int p_wordCount) throws PageException
     {
         String externalPageId = p_request.getExternalPageId();
         String dataSourceType = p_request.getDataSourceType();
 
-        SourcePage sp = new SourcePage(externalPageId, p_sourceLocale,
-                dataSourceType, p_wordCount, PrimaryFile.UNEXTRACTED_FILE);
+        SourcePage sp = new SourcePage(externalPageId, p_sourceLocale, dataSourceType, p_wordCount,
+                PrimaryFile.UNEXTRACTED_FILE);
         UnextractedFile uf = (UnextractedFile) sp.getPrimaryFile();
 
         // specify where to put the UnextractedFile
-        StringBuffer fileName = new StringBuffer(Long.toString(p_request
-                .getId()));
+        StringBuffer fileName = new StringBuffer(Long.toString(p_request.getId()));
         fileName.append(File.separator);
         fileName.append("PSF");
         fileName.append(File.separator);
@@ -412,8 +395,7 @@ public final class PageManagerLocal implements PageManager
 
             String args[] =
             { Long.toString(p_request.getId()) };
-            throw new PageException(PageException.MSG_FAILED_TO_CREATE_PAGE,
-                    args, pe);
+            throw new PageException(PageException.MSG_FAILED_TO_CREATE_PAGE, args, pe);
         }
 
         return sp;
@@ -428,8 +410,7 @@ public final class PageManagerLocal implements PageManager
      * @exception RemoteException
      *                Network related exception.
      */
-    public LeverageGroup createLeverageGroup() throws PageException,
-            RemoteException
+    public LeverageGroup createLeverageGroup() throws PageException, RemoteException
     {
         return new LeverageGroupImpl();
     }
@@ -439,10 +420,9 @@ public final class PageManagerLocal implements PageManager
      *      Collection, TermLeveragerResult, boolean, boolean,
      *      ExactMatchedSegments, ExactMatchedSegments)
      */
-    public Collection createTargetPagesWithExtractedFile(
-            SourcePage p_sourcePage, Collection p_targetLocales,
-            TermLeverageResult p_termMatches, boolean p_useLeveragedSegments,
-            boolean p_useLeveragedTerms,
+    public Collection createTargetPagesWithExtractedFile(SourcePage p_sourcePage,
+            Collection p_targetLocales, TermLeverageResult p_termMatches,
+            boolean p_useLeveragedSegments, boolean p_useLeveragedTerms,
             ExactMatchedSegments p_exactMatchedSegments) throws PageException
     {
         Collection pages = null;
@@ -452,17 +432,16 @@ public final class PageManagerLocal implements PageManager
 
             TargetPagePersistence tpPersistence = new TargetPageImportPersistence();
 
-            pages = tpPersistence.persistObjectsWithExtractedFile(p_sourcePage,
-                    p_targetLocales, p_termMatches, p_useLeveragedSegments,
-                    p_useLeveragedTerms, p_exactMatchedSegments);
+            pages = tpPersistence.persistObjectsWithExtractedFile(p_sourcePage, p_targetLocales,
+                    p_termMatches, p_useLeveragedSegments, p_useLeveragedTerms,
+                    p_exactMatchedSegments);
         }
         catch (PageException e)
         {
             s_category.error("Unable to create target pages", e);
             String args[] =
             { Long.toString(p_sourcePage.getId()) };
-            throw new PageException(PageException.MSG_FAILED_TO_CREATE_PAGE,
-                    args, e);
+            throw new PageException(PageException.MSG_FAILED_TO_CREATE_PAGE, args, e);
         }
 
         return pages;
@@ -472,9 +451,8 @@ public final class PageManagerLocal implements PageManager
      * @see PageManager.createTargetPagesWithUnextractedFile( SourcePage,
      *      Collection)
      */
-    public Collection createTargetPagesWithUnextractedFile(
-            SourcePage p_sourcePage, Collection p_targetLocales)
-            throws PageException
+    public Collection createTargetPagesWithUnextractedFile(SourcePage p_sourcePage,
+            Collection p_targetLocales) throws PageException
     {
         Collection pages = null;
 
@@ -483,16 +461,14 @@ public final class PageManagerLocal implements PageManager
 
             TargetPagePersistence tpPersistence = new TargetPageImportPersistence();
 
-            pages = tpPersistence.persistObjectsWithUnextractedFile(
-                    p_sourcePage, p_targetLocales);
+            pages = tpPersistence.persistObjectsWithUnextractedFile(p_sourcePage, p_targetLocales);
         }
         catch (PageException e)
         {
             s_category.error("Unable to create target pages", e);
             String args[] =
             { Long.toString(p_sourcePage.getId()) };
-            throw new PageException(PageException.MSG_FAILED_TO_CREATE_PAGE,
-                    args, e);
+            throw new PageException(PageException.MSG_FAILED_TO_CREATE_PAGE, args, e);
         }
 
         return pages;
@@ -502,16 +478,15 @@ public final class PageManagerLocal implements PageManager
      * @see PageManager.createFailedTargetPagesWithExtractedFile( SourcePage,
      *      Hashtable)
      */
-    public Collection createFailedTargetPagesWithExtractedFile(
-            SourcePage p_sourcePage, Hashtable p_targetLocaleInfo)
-            throws PageException
+    public Collection createFailedTargetPagesWithExtractedFile(SourcePage p_sourcePage,
+            Hashtable p_targetLocaleInfo) throws PageException
     {
         Collection pages = null;
 
         TargetPagePersistence tpPersistence = new TargetPageImportPersistence();
 
-        pages = tpPersistence.persistFailedObjectsWithExtractedFile(
-                p_sourcePage, p_targetLocaleInfo);
+        pages = tpPersistence.persistFailedObjectsWithExtractedFile(p_sourcePage,
+                p_targetLocaleInfo);
 
         return pages;
     }
@@ -530,11 +505,10 @@ public final class PageManagerLocal implements PageManager
      * @exception RemoteException
      *                Network related exception.
      */
-    public Collection getTemplatePartsForSourcePage(Long p_sourcePageId,
-            String p_pageTemplateType) throws PageException, RemoteException
+    public Collection getTemplatePartsForSourcePage(Long p_sourcePageId, String p_pageTemplateType)
+            throws PageException, RemoteException
     {
-        return PagePersistenceAccessor.getTemplateParts(p_sourcePageId,
-                p_pageTemplateType);
+        return PagePersistenceAccessor.getTemplateParts(p_sourcePageId, p_pageTemplateType);
     }
 
     /**
@@ -584,8 +558,7 @@ public final class PageManagerLocal implements PageManager
      * @exception RemoteException
      *                Network related exception.
      */
-    public boolean isExported(Collection p_pageIds) throws PageException,
-            RemoteException
+    public boolean isExported(Collection p_pageIds) throws PageException, RemoteException
     {
         Object[] pageIds = p_pageIds.toArray();
         int size = pageIds.length;
@@ -611,8 +584,7 @@ public final class PageManagerLocal implements PageManager
      * @exception RemoteException
      *                Network related exception.
      */
-    public HashMap importPage(Request p_request) throws PageException,
-            RemoteException
+    public HashMap importPage(Request p_request) throws PageException, RemoteException
     {
         HashMap pages = null;
 
@@ -624,8 +596,7 @@ public final class PageManagerLocal implements PageManager
         {
             String[] args = new String[1];
             args[0] = Long.toString(p_request.getId());
-            throw new PageException(PageException.MSG_FAILED_TO_IMPORT_PAGE,
-                    args, pie);
+            throw new PageException(PageException.MSG_FAILED_TO_IMPORT_PAGE, args, pie);
         }
 
         return pages;
@@ -649,23 +620,20 @@ public final class PageManagerLocal implements PageManager
      *                Network related exception.
      */
     public void exportPage(ExportParameters p_exportParameters, List p_pageIds,
-            boolean p_isTargetPage, long p_exportBatchId) throws PageException,
-            RemoteException
+            boolean p_isTargetPage, long p_exportBatchId) throws PageException, RemoteException
     {
-        performExport(p_exportParameters, new Integer(
-                p_isTargetPage ? TARGET_PAGE : SOURCE_PAGE), p_pageIds,
-                p_exportBatchId);
+        performExport(p_exportParameters, new Integer(p_isTargetPage ? TARGET_PAGE : SOURCE_PAGE),
+                p_pageIds, p_exportBatchId);
     }
 
     /**
      * @see PageManager.exportSecondaryTargetFiles(ExportParameters, List, long)
      */
-    public void exportSecondaryTargetFiles(ExportParameters p_exportParameters,
-            List p_stfIds, long p_exportBatchId) throws PageException,
-            RemoteException
+    public void exportSecondaryTargetFiles(ExportParameters p_exportParameters, List p_stfIds,
+            long p_exportBatchId) throws PageException, RemoteException
     {
-        performExport(p_exportParameters, new Integer(SECONDARY_TARGET_FILE),
-                p_stfIds, p_exportBatchId);
+        performExport(p_exportParameters, new Integer(SECONDARY_TARGET_FILE), p_stfIds,
+                p_exportBatchId);
     }
 
     /**
@@ -685,8 +653,8 @@ public final class PageManagerLocal implements PageManager
      * @exception RemoteException
      *                Network related exception.
      */
-    public String exportForPreview(long p_pageId, List p_tuvIds,
-            String p_uiLocale) throws PageException, RemoteException
+    public String exportForPreview(long p_pageId, List p_tuvIds, String p_uiLocale)
+            throws PageException, RemoteException
     {
         ExportHelper helper = new ExportHelper();
         return helper.exportForPreview(p_pageId, p_tuvIds, p_uiLocale);
@@ -695,11 +663,10 @@ public final class PageManagerLocal implements PageManager
     /**
      * @see PageManager.updateBaseHrefs(Page, String, String)
      */
-    public void updateBaseHrefs(Page p_page, String p_internalBaseHref,
-            String p_externalBaseHref) throws PageException, RemoteException
+    public void updateBaseHrefs(Page p_page, String p_internalBaseHref, String p_externalBaseHref)
+            throws PageException, RemoteException
     {
-        PagePersistenceAccessor.updateBaseHrefs(p_page, p_internalBaseHref,
-                p_externalBaseHref);
+        PagePersistenceAccessor.updateBaseHrefs(p_page, p_internalBaseHref, p_externalBaseHref);
     }
 
     /**
@@ -716,13 +683,11 @@ public final class PageManagerLocal implements PageManager
         try
         {
             PageImportQuery query = new PageImportQuery();
-            sourcePage = query
-                    .getLatestVersionOfSourcePage((RequestImpl) p_request);
+            sourcePage = query.getLatestVersionOfSourcePage((RequestImpl) p_request);
         }
         catch (Exception e)
         {
-            throw new PageException(
-            /* PageException.XXXXX, null, */e);
+            throw new PageException(/* PageException.XXXXX, null, */e);
         }
 
         return sourcePage;
@@ -732,22 +697,18 @@ public final class PageManagerLocal implements PageManager
      * @see PageManager.getActiveTargetPageByNameAndLocale(Request)
      * 
      */
-    public ArrayList getActiveTargetPagesByNameAndLocale(Request p_request)
-            throws PageException
+    public ArrayList getActiveTargetPagesByNameAndLocale(Request p_request) throws PageException
     {
         ArrayList targetPages = new ArrayList(0);
 
         String pageName = p_request.getExternalPageId();
-        GlobalSightLocale sourceLocale = p_request.getL10nProfile()
-                .getSourceLocale();
+        GlobalSightLocale sourceLocale = p_request.getL10nProfile().getSourceLocale();
         // go through all the target locales
-        GlobalSightLocale[] targetLocales = p_request
-                .getTargetLocalesToImport();
+        GlobalSightLocale[] targetLocales = p_request.getTargetLocalesToImport();
         for (int i = 0; i < targetLocales.length; i++)
         {
-            TargetPage tp = PagePersistenceAccessor
-                    .getActiveTargetPageByNameAndLocales(pageName,
-                            sourceLocale, targetLocales[i]);
+            TargetPage tp = PagePersistenceAccessor.getActiveTargetPageByNameAndLocales(pageName,
+                    sourceLocale, targetLocales[i]);
             // if there is a current page add to the array list
             if (tp != null)
             {
@@ -761,8 +722,7 @@ public final class PageManagerLocal implements PageManager
     /**
      * @see PageManager.getSourcePagesStillImporting()
      */
-    public Collection getSourcePagesStillImporting() throws PageException,
-            RemoteException
+    public Collection getSourcePagesStillImporting() throws PageException, RemoteException
     {
         return PagePersistenceAccessor.getSourcePagesStillImporting();
     }
@@ -770,8 +730,7 @@ public final class PageManagerLocal implements PageManager
     /**
      * @see PageManager.updateWordCount(HashMap)
      */
-    public void updateWordCount(HashMap p_pageWordCounts) throws PageException,
-            RemoteException
+    public void updateWordCount(HashMap p_pageWordCounts) throws PageException, RemoteException
     {
         PagePersistenceAccessor.updateWordCount(p_pageWordCounts);
     }
@@ -779,8 +738,7 @@ public final class PageManagerLocal implements PageManager
     /**
      * @see PageManager.updateUnextractedFileInfo(Page)
      */
-    public void updateUnextractedFileInfo(Page p_page) throws PageException,
-            RemoteException
+    public void updateUnextractedFileInfo(Page p_page) throws PageException, RemoteException
     {
         PagePersistenceAccessor.updateUnextractedFile(p_page);
     }
@@ -808,11 +766,8 @@ public final class PageManagerLocal implements PageManager
         }
         catch (Exception e)
         {
-            s_category.error(
-                    "Failed to clean-up the pages left in the UPDATING state.",
-                    e);
-            throw new PageException(
-                    PageException.MSG_PAGE_IN_UPDATING_STATE_ERROR, null, e);
+            s_category.error("Failed to clean-up the pages left in the UPDATING state.", e);
+            throw new PageException(PageException.MSG_PAGE_IN_UPDATING_STATE_ERROR, null, e);
         }
     }
 
@@ -821,10 +776,9 @@ public final class PageManagerLocal implements PageManager
     //
 
     // create a new source page with an extracted file for importing
-    private SourcePage createNewPageWithExtractedFileForImport(
-            Request p_request, GlobalSightLocale p_sourceLocale,
-            String p_dataType, int p_wordCount, boolean p_containGsTags,
-            String p_gxmlVersion)
+    private SourcePage createNewPageWithExtractedFileForImport(Request p_request,
+            GlobalSightLocale p_sourceLocale, String p_dataType, int p_wordCount,
+            boolean p_containGsTags, String p_gxmlVersion)
     {
         String externalPageId = p_request.getExternalPageId();
         String originalEncoding = p_request.getSourceEncoding();
@@ -861,9 +815,8 @@ public final class PageManagerLocal implements PageManager
 
         String dataSourceType = p_request.getDataSourceType();
 
-        SourcePage sp = new SourcePage(externalPageId, p_sourceLocale,
-                dataSourceType, p_wordCount, BOMType,
-                PrimaryFile.EXTRACTED_FILE);
+        SourcePage sp = new SourcePage(externalPageId, p_sourceLocale, dataSourceType, p_wordCount,
+                BOMType, PrimaryFile.EXTRACTED_FILE);
         ExtractedSourceFile esf = (ExtractedSourceFile) sp.getPrimaryFile();
 
         esf.setOriginalCodeSet(originalEncoding);
@@ -879,17 +832,15 @@ public final class PageManagerLocal implements PageManager
      * return the updated cloned page. Otherwise, return a new source page.
      */
     private SourcePage getClonedPage(SourcePage p_page, Request p_request,
-            GlobalSightLocale p_sourceLocale, String p_dataType,
-            int p_wordCount, boolean p_containsGsTag, String p_gxmlVersion)
-            throws RemoteException, PageException
+            GlobalSightLocale p_sourceLocale, String p_dataType, int p_wordCount,
+            boolean p_containsGsTag, String p_gxmlVersion) throws RemoteException, PageException
     {
         SourcePage page = findAcceptablePage(p_page, false);
 
         if (page == null)
         {
-            return createNewPageWithExtractedFileForImport(p_request,
-                    p_sourceLocale, p_dataType, p_wordCount, p_containsGsTag,
-                    p_gxmlVersion);
+            return createNewPageWithExtractedFileForImport(p_request, p_sourceLocale, p_dataType,
+                    p_wordCount, p_containsGsTag, p_gxmlVersion);
         }
         else
         // used for un-extracted pages only
@@ -899,8 +850,7 @@ public final class PageManagerLocal implements PageManager
 
             if (page.getPrimaryFileType() == ExtractedSourceFile.EXTRACTED_FILE)
             {
-                ExtractedSourceFile esf = (ExtractedSourceFile) page
-                        .getPrimaryFile();
+                ExtractedSourceFile esf = (ExtractedSourceFile) page.getPrimaryFile();
                 esf.containGsTags(p_containsGsTag);
                 esf.setGxmlVersion(p_gxmlVersion);
             }
@@ -914,8 +864,7 @@ public final class PageManagerLocal implements PageManager
      * setting the previousPageId. This is done just for a SourcePage with an
      * extracted file.
      */
-    private SourcePage createNewVersionOfPage(SourcePage p_page)
-            throws PageException
+    private SourcePage createNewVersionOfPage(SourcePage p_page) throws PageException
     {
         // clone the page and set the previousPageId to be the current
         // page's id
@@ -928,25 +877,23 @@ public final class PageManagerLocal implements PageManager
     /**
      * Make sure to return the page that is not in Not_Localized state.
      */
-    private SourcePage findAcceptablePage(SourcePage p_page,
-            boolean p_forLeverage) throws RemoteException, PageException
+    private SourcePage findAcceptablePage(SourcePage p_page, boolean p_forLeverage)
+            throws RemoteException, PageException
     {
         SourcePage acceptedPage = p_page;
 
         // if it isn't null but is a failure - look for the next one
-        if (acceptedPage != null
-                && !isPageReimportable(acceptedPage, p_forLeverage))
+        if (acceptedPage != null && !isPageReimportable(acceptedPage, p_forLeverage))
         {
-            acceptedPage = findAcceptablePage(
-                    getSourcePageById(acceptedPage.getPreviousPageId()),
+            acceptedPage = findAcceptablePage(getSourcePageById(acceptedPage.getPreviousPageId()),
                     p_forLeverage);
         }
 
         return acceptedPage;
     }
 
-    private SourcePage findAcceptablePrevPageByLocale(SourcePage p_page,
-            GlobalSightLocale p_locale) throws RemoteException, PageException
+    private SourcePage findAcceptablePrevPageByLocale(SourcePage p_page, GlobalSightLocale p_locale)
+            throws RemoteException, PageException
     {
         SourcePage acceptedPage = p_page;
         SourcePage prevPage = null;
@@ -974,9 +921,8 @@ public final class PageManagerLocal implements PageManager
             // if the page failed import, is currently being
             // imported or was successfully imported - can't
             // use as the previous page (nothing to leverage)
-            result = (!PageState.IMPORTING.equals(state)
-                    && !PageState.IMPORT_FAIL.equals(state) && !PageState.IMPORT_SUCCESS
-                    .equals(state));
+            result = (!PageState.IMPORTING.equals(state) && !PageState.IMPORT_FAIL.equals(state)
+                    && !PageState.IMPORT_SUCCESS.equals(state));
         }
 
         return result;
@@ -998,8 +944,7 @@ public final class PageManagerLocal implements PageManager
             String[] args =
             { String.valueOf(p_pageId) };
 
-            throw new PageException(PageException.MSG_FAILED_TO_GET_PAGE_BY_ID,
-                    args, e);
+            throw new PageException(PageException.MSG_FAILED_TO_GET_PAGE_BY_ID, args, e);
         }
 
         return sourcePage;
@@ -1037,15 +982,14 @@ public final class PageManagerLocal implements PageManager
         return p_page;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void performExport(ExportParameters exportParameters,
-            Integer p_genericPageType, List p_ids, long p_exportBatchId)
-            throws PageException
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
+    private void performExport(ExportParameters exportParameters, Integer p_genericPageType,
+            List p_ids, long p_exportBatchId) throws PageException
     {
         try
         {
-            PageToDocumentMap pageDocMap = new PageToDocumentMap(p_ids,
-                    p_genericPageType);
+            PageToDocumentMap pageDocMap = new PageToDocumentMap(p_ids, p_genericPageType);
 
             int pageCount = p_ids.size();
             ArrayList<Hashtable> slidesPages = new ArrayList<Hashtable>();
@@ -1063,8 +1007,7 @@ public final class PageManagerLocal implements PageManager
                 map.put(new Integer(EXPORT_PARAMETERS), eParameters);
                 map.put(new Integer(TARGET_PAGE), p_genericPageType);
                 map.put(new Integer(PAGE_COUNT), new Integer(pageCount));
-                map.put(ExportConstants.EXPORT_BATCH_ID, new Long(
-                        p_exportBatchId));
+                map.put(ExportConstants.EXPORT_BATCH_ID, new Long(p_exportBatchId));
                 CompanyWrapper.saveCurrentCompanyIdInMap(map, s_category);
 
                 Long pageId = (Long) p_ids.get(i);
@@ -1074,10 +1017,8 @@ public final class PageManagerLocal implements PageManager
                 // For Office documents in multi-format jobs, specify
                 // which sub-page of the doc this is, and how many in
                 // total there are to export.
-                map.put(new Integer(DOC_PAGE_NUM),
-                        pageDocMap.getPageNumberForDoc(pageId));
-                map.put(new Integer(DOC_PAGE_COUNT),
-                        pageDocMap.getPageCountForDoc(pageId));
+                map.put(new Integer(DOC_PAGE_NUM), pageDocMap.getPageNumberForDoc(pageId));
+                map.put(new Integer(DOC_PAGE_COUNT), pageDocMap.getPageCountForDoc(pageId));
 
                 SourcePage page = null;
                 SecondaryTargetFile secondaryTargetFile = null;
@@ -1087,24 +1028,19 @@ public final class PageManagerLocal implements PageManager
                 }
                 else if (TARGET_PAGE == p_genericPageType)
                 {
-                    TargetPage tpage = HibernateUtil.get(TargetPage.class,
-                            pageId);
+                    TargetPage tpage = HibernateUtil.get(TargetPage.class, pageId);
                     String exportSubDir = tpage.getExportSubDir();
                     // update target page only when export dir is changed.
-                    if (exportSubDir == null
-                            || !exportSubDir.equals(eParameters
-                                    .getLocaleSubDir()))
+                    if (exportSubDir == null || !exportSubDir.equals(eParameters.getLocaleSubDir()))
                     {
-                        tpage.setExportSubDir(eParameters
-                                .getLocaleSubDir());
+                        tpage.setExportSubDir(eParameters.getLocaleSubDir());
                         PagePersistenceAccessor.updateTargetPage(tpage);
                     }
                     page = tpage.getSourcePage();
                 }
                 else if (SECONDARY_TARGET_FILE == p_genericPageType)
                 {
-                    secondaryTargetFile = ServerProxy
-                            .getSecondaryTargetFileManager()
+                    secondaryTargetFile = ServerProxy.getSecondaryTargetFileManager()
                             .getSecondaryTargetFile(pageId);
                 }
 
@@ -1112,98 +1048,50 @@ public final class PageManagerLocal implements PageManager
                 if (page != null)
                 {
                     // GBS-3731
-                    if (exportCode
-                            .startsWith(JobManagementHandler.SAME_AS_SOURCE))
+                    if (exportCode.startsWith(JobManagementHandler.SAME_AS_SOURCE))
                     {
-                        eParameters.setExportCodeset(exportCode.replace(
-                                JobManagementHandler.SAME_AS_SOURCE, page.getRequest().getJob()
-                                        .getFileProfile().getCodeSet()));
+                        eParameters.setExportCodeset(
+                                exportCode.replace(JobManagementHandler.SAME_AS_SOURCE,
+                                        page.getRequest().getJob().getFileProfile().getCodeSet()));
                     }
 
-                    ExtractedSourceFile sfile = (ExtractedSourceFile) page
-                            .getExtractedFile();
+                    ExtractedSourceFile sfile = (ExtractedSourceFile) page.getExtractedFile();
                     path = page.getExternalPageId().toLowerCase();
-                    if (FileExportUtil.USE_JMS && path.endsWith(".pptx")
-                            && sfile != null
-                            && "office-xml".equals(sfile.getDataType()))
-                    {
-                        if (path.startsWith("(slide"))
-                        {
-                            slidesPages.add(map);
-                        }
-                        else if (path.startsWith("(notes"))
-                        {
-                            notesPages.add(map);
-                        }
-                        else
-                        {
-                            otherPages.add(map);
-                        }
-
-                        continue;
-                    }
                 }
                 else if (secondaryTargetFile != null)
                 {
                     if (exportCode.startsWith(JobManagementHandler.SAME_AS_SOURCE))
                     {
-                        eParameters.setExportCodeset(exportCode.replace(
-                                JobManagementHandler.SAME_AS_SOURCE, secondaryTargetFile
+                        eParameters.setExportCodeset(exportCode
+                                .replace(JobManagementHandler.SAME_AS_SOURCE, secondaryTargetFile
                                         .getWorkflow().getJob().getFileProfile().getCodeSet()));
                     }
                     path = secondaryTargetFile.getStoragePath();
                 }
 
-                if (FileExportUtil.USE_JMS)
+                if (path != null)
                 {
-                    JmsHelper.sendMessageToQueue(map,
-                            JmsHelper.JMS_EXPORTING_QUEUE);
+                    map.put("filePath", path);
+                    String key = p_exportBatchId + path + map.get(new Integer(PAGE_NUM));
+                    map.put("key", key);
                 }
-                else
+
+                int priority = 3;
+                if (page != null)
                 {
-                    if (path != null)
+                    long jobId = page.getJobId();
+                    JobImpl job = HibernateUtil.get(JobImpl.class, jobId);
+                    if (job != null)
                     {
-                        map.put("filePath", path);
-                        String key = p_exportBatchId + path
-                                + map.get(new Integer(PAGE_NUM));
-                        map.put("key", key);
+                        priority = job.getPriority();
                     }
-
-                    int priority = 3;
-                    if(page != null)
-                    {
-                        long jobId = page.getJobId();
-                        JobImpl job = HibernateUtil.get(JobImpl.class, jobId);
-                        if (job != null)
-                        {
-                            priority = job.getPriority();
-                        }
-                    }
-                    map.put("priority", priority);
-
-                    FileExportRunnable runnable = new FileExportRunnable(map);
-                    pool.execute(runnable);
                 }
+                map.put("priority", priority);
+
+                FileExportRunnable runnable = new FileExportRunnable(map);
+                pool.execute(runnable);
             }
             pool.shutdown();
-
-            if (slidesPages.size() > 0)
-            {
-                JmsHelper.sendMessageToQueue(slidesPages,
-                        JmsHelper.JMS_EXPORTING_QUEUE);
-            }
-
-            if (notesPages.size() > 0)
-            {
-                JmsHelper.sendMessageToQueue(notesPages,
-                        JmsHelper.JMS_EXPORTING_QUEUE);
-            }
-
-            if (otherPages.size() > 0)
-            {
-                JmsHelper.sendMessageToQueue(otherPages,
-                        JmsHelper.JMS_EXPORTING_QUEUE);
-            }
         }
         catch (Exception ex)
         {
@@ -1227,9 +1115,8 @@ public final class PageManagerLocal implements PageManager
      * @exception RemoteException
      *                Network related exception.
      */
-    public TargetLocaleLgIdsMapper getLocaleLgIdMapForReimportPage(
-            SourcePage p_sourcePage, Collection p_targetLocales)
-            throws PageException, RemoteException
+    public TargetLocaleLgIdsMapper getLocaleLgIdMapForReimportPage(SourcePage p_sourcePage,
+            Collection p_targetLocales) throws PageException, RemoteException
     {
         TargetLocaleLgIdsMapper localeLgIdMap = new TargetLocaleLgIdsMapper();
 
@@ -1239,8 +1126,7 @@ public final class PageManagerLocal implements PageManager
             while (it.hasNext())
             {
                 GlobalSightLocale locale = (GlobalSightLocale) it.next();
-                SourcePage page = findAcceptablePrevPageByLocale(p_sourcePage,
-                        locale);
+                SourcePage page = findAcceptablePrevPageByLocale(p_sourcePage, locale);
 
                 if (page != null)
                 {
@@ -1253,8 +1139,7 @@ public final class PageManagerLocal implements PageManager
             while (it.hasNext())
             {
                 Long pageId = (Long) it.next();
-                Collection lgIds = query
-                        .getLeverageGroupIds(pageId.longValue());
+                Collection lgIds = query.getLeverageGroupIds(pageId.longValue());
                 localeLgIdMap.addLgIds(pageId, lgIds);
             }
         }
@@ -1274,9 +1159,8 @@ public final class PageManagerLocal implements PageManager
      */
     public SourcePage getSourcePageByLeverageGroupId(long p_leverageGroupId)
     {
-        List<SourcePage> sourcePages = HibernateUtil.searchWithSql(
-                SourcePage.class, GET_SOURCE_PAGE_BY_LG_ID_SQL,
-                p_leverageGroupId);
+        List<SourcePage> sourcePages = HibernateUtil.searchWithSql(SourcePage.class,
+                GET_SOURCE_PAGE_BY_LG_ID_SQL, p_leverageGroupId);
 
         if (sourcePages != null && sourcePages.size() > 0)
         {

@@ -17,6 +17,7 @@
 package com.globalsight.everest.workflow;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -41,8 +42,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  */
 public class SystemActionPerformer
 {
-    private static final Logger logger = Logger
-            .getLogger(SystemActionPerformer.class);
+    private static final Logger logger = Logger.getLogger(SystemActionPerformer.class);
 
     /**
      * Performs system actions before an activity is reached as workflow goes
@@ -54,7 +54,7 @@ public class SystemActionPerformer
         {
             Task task = HibernateUtil.get(TaskImpl.class, taskId);
             Workflow wf = task.getWorkflow();
-            List<TargetPage> targetPages = wf.getTargetPages();
+            Collection<TargetPage> targetPages = wf.getTargetPages();
             List<Long> ids = new ArrayList<Long>();
             for (TargetPage tp : targetPages)
             {
@@ -64,31 +64,27 @@ public class SystemActionPerformer
                     + task.getTaskName());
             try
             {
-                long exportBatchId = createExportBatchId(wf, userId, ids,
-                        taskId);
-                ServerProxy.getPageManager().exportPage(
-                        new ExportParameters(wf), ids, true, exportBatchId);
+                long exportBatchId = createExportBatchId(wf, userId, ids, taskId);
+                ServerProxy.getPageManager().exportPage(new ExportParameters(wf), ids, true,
+                        exportBatchId);
             }
             catch (Exception e)
             {
-                logger.error(
-                        "Error performing system action 'Export Target Files'",
-                        e);
+                logger.error("Error performing system action 'Export Target Files'", e);
             }
         }
     }
 
-    private static long createExportBatchId(Workflow wf, String userId,
-            List<Long> ids, Long taskId) throws Exception
+    private static long createExportBatchId(Workflow wf, String userId, List<Long> ids, Long taskId)
+            throws Exception
     {
         ArrayList<Long> workflowIds = new ArrayList<Long>();
         workflowIds.add(wf.getIdAsLong());
         WorkflowExportingHelper.setAsExporting(workflowIds);
 
-        long exportBatchId = ExportEventObserverHelper
-                .notifyBeginExportTargetBatch(wf.getJob(),
-                        UserUtil.getUserById(userId), ids, workflowIds, taskId,
-                        ExportBatchEvent.INTERIM_PRIMARY);
+        long exportBatchId = ExportEventObserverHelper.notifyBeginExportTargetBatch(wf.getJob(),
+                UserUtil.getUserById(userId), ids, workflowIds, taskId,
+                ExportBatchEvent.INTERIM_PRIMARY);
 
         return exportBatchId;
     }

@@ -16,13 +16,10 @@
  */
 package com.globalsight.everest.workflowmanager;
 
-// globalsight
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.foundation.WorkObject;
@@ -95,7 +92,7 @@ public interface Workflow extends WorkObject
      * 
      * @return A map of tasks.
      */
-    Hashtable getTasks();
+    Hashtable<Long, Task> getTasks();
 
     /**
      * Set compnay id in request. It is used to create job, workflow, taskinfo.
@@ -136,18 +133,18 @@ public interface Workflow extends WorkObject
      * @return An array list of target pages or an empty collection if no target
      *         pages with that primary file type exist.
      */
-    public ArrayList getTargetPages(int p_primaryFileType);
+    public List<TargetPage> getTargetPages(int p_primaryFileType);
 
     /**
      * Return the target pages of the workflow that can be worked on (not
      * IMPORT_FAIL pages).
      */
-    public Vector<TargetPage> getTargetPages();
+    public List<TargetPage> getTargetPages();
 
     /**
      * Return ALL the target pages no matter what their state.
      */
-    public Vector<TargetPage> getAllTargetPages();
+    public List<TargetPage> getAllTargetPages();
 
     /**
      * Get a list of secondary target files associated with this workflow.
@@ -233,21 +230,21 @@ public interface Workflow extends WorkObject
      * is a workflow-level HI fuzzy word count calculated by
      * StatisticsService.calculateWorkflowStatistics().
      */
-//    public int getHiFuzzyRepetitionWordCount();
+    // public int getHiFuzzyRepetitionWordCount();
 
     /**
      * Retuns the workflow total Med HI Fuzzy Repetition word count (85-94%).
      * This is a workflow-level HI fuzzy word count calculated by
      * StatisticsService.calculateWorkflowStatistics().
      */
-//    public int getMedHiFuzzyRepetitionWordCount();
+    // public int getMedHiFuzzyRepetitionWordCount();
 
     /**
      * Retuns the workflow total Med Fuzzy Repetition word count (75-84%). This
      * is a workflow-level HI fuzzy word count calculated by
      * StatisticsService.calculateWorkflowStatistics().
      */
-//    public int getMedFuzzyRepetitionWordCount();
+    // public int getMedFuzzyRepetitionWordCount();
 
     /**
      * Get the word count for the sub-leverage-match category. See
@@ -255,7 +252,7 @@ public interface Workflow extends WorkObject
      * 
      * @return The sub-leverage-match category word counts.
      */
-//    int getSubLevMatchWordCount();
+    // int getSubLevMatchWordCount();
 
     /**
      * Get the repetition word count for the sub-leverage-match category. See
@@ -263,7 +260,7 @@ public interface Workflow extends WorkObject
      * 
      * @return The sub-leverage-match-repetition word counts.
      */
-//    int getSubLevRepetitionWordCount();
+    // int getSubLevRepetitionWordCount();
 
     /*
      * Retuns the workflow total noMatch word count. This is a
@@ -332,7 +329,8 @@ public interface Workflow extends WorkObject
      * 
      * @param p_hiFuzzyRepetitionWordCount
      */
-//    public void setMedFuzzyRepetitionWordCount(int p_medFuzzyRepetitionWordCount);
+    // public void setMedFuzzyRepetitionWordCount(int
+    // p_medFuzzyRepetitionWordCount);
 
     /**
      * Sets the workflow's total MED_HI fuzzy word count (85-94%) as calculated
@@ -346,8 +344,8 @@ public interface Workflow extends WorkObject
      * 
      * @param p_hiFuzzyRepetitionWordCount
      */
-//    public void setMedHiFuzzyRepetitionWordCount(
-//            int p_medHiFuzzyRepetitionWordCount);
+    // public void setMedHiFuzzyRepetitionWordCount(
+    // int p_medHiFuzzyRepetitionWordCount);
 
     /**
      * Sets the workflow's total HI fuzzy word count (95-99%) as calculated by
@@ -361,7 +359,8 @@ public interface Workflow extends WorkObject
      * 
      * @param p_hiFuzzyRepetitionWordCount
      */
-//    public void setHiFuzzyRepetitionWordCount(int p_hiFuzzyRepetitionWordCount);
+    // public void setHiFuzzyRepetitionWordCount(int
+    // p_hiFuzzyRepetitionWordCount);
 
     /**
      * Set the value of the Sub-Leverage-Match word count to be the specified
@@ -374,7 +373,7 @@ public interface Workflow extends WorkObject
      * @param p_subLevMatchWordCount
      *            The number of words in the sub leverage match category.
      */
-//    void setSubLevMatchWordCount(int p_subLevMatchWordCount);
+    // void setSubLevMatchWordCount(int p_subLevMatchWordCount);
 
     /**
      * Set the value of the Sub-Leverage-Match-Repetition word count to be the
@@ -387,7 +386,7 @@ public interface Workflow extends WorkObject
      * @param p_subLevRepetitionWordCount
      *            The number of repetitions in the sub leverage match category.
      */
-//    void setSubLevRepetitionWordCount(int p_subLevRepetitionWordCount);
+    // void setSubLevRepetitionWordCount(int p_subLevRepetitionWordCount);
 
     /*
      * Sets the workflow's total noMatch word count as calculated by
@@ -460,7 +459,7 @@ public interface Workflow extends WorkObject
      * @return A list of workflow owners who can perform modification (i.e.
      *         structural edit and reassignment) of this workflow.
      */
-    List getWorkflowOwners();
+    List<WorkflowOwner> getWorkflowOwners();
 
     /**
      * Get a list of workflow owner ids
@@ -545,8 +544,7 @@ public interface Workflow extends WorkObject
      * @param p_isEstimatedCompletionDateOverrided
      *            - is overrided.
      */
-    void setEstimatedCompletionDateOverrided(
-            boolean p_isEstimatedCompletionDateOverrided);
+    void setEstimatedCompletionDateOverrided(boolean p_isEstimatedCompletionDateOverrided);
 
     /**
      * For sla report issue.
@@ -567,8 +565,7 @@ public interface Workflow extends WorkObject
      * @param p_estimatedTranslateCompletionDate
      *            - The date to be set.
      */
-    public void setEstimatedTranslateCompletionDate(
-            Date p_estimatedTranslateCompletionDate);
+    public void setEstimatedTranslateCompletionDate(Date p_estimatedTranslateCompletionDate);
 
     /**
      * For sla report issue. User can override the
@@ -643,19 +640,19 @@ public interface Workflow extends WorkObject
     public void setMtConfidenceScore(int p_mtConfidenceScore);
 
     public int getMtConfidenceScore();
-    
+
     public int getScorecardShowType();
-    
+
     public void setScorecardShowType(int p_scorecardShowType);
-    
+
     public String getScorecardComment();
-    
+
     public void setScorecardComment(String p_scorecardComment);
 
     public void setMtEngineWordCount(int p_mtEngineWordCount);
 
     public int getMtEngineWordCount();
-    
+
     public String getMtProfileName();
 
     public void setMtProfileName(String mtProfileName);

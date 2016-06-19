@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -130,15 +131,13 @@ public class DITAQAChecker
 
     public DITAQAChecker() throws Exception
     {
-        m_bundle = SystemResourceBundle.getInstance().getResourceBundle(
-                ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
+        m_bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
     }
 
-    public File runQAChecksAndGenerateReport(TaskInstance p_taskInstance)
-            throws Exception
+    public File runQAChecksAndGenerateReport(TaskInstance p_taskInstance) throws Exception
     {
-        return runQAChecksAndGenerateReport(p_taskInstance.getTask()
-                .getTaskNode().getId());
+        return runQAChecksAndGenerateReport(p_taskInstance.getTask().getTaskNode().getId());
     }
 
     public File runQAChecksAndGenerateReport(long p_taskId) throws Exception
@@ -179,8 +178,7 @@ public class DITAQAChecker
      */
     private static String getReportFileName(Task p_task)
     {
-		String dateSuffix = new SimpleDateFormat("yyyyMMdd HHmmss")
-				.format(new Date());
+        String dateSuffix = new SimpleDateFormat("yyyyMMdd HHmmss").format(new Date());
         try
         {
             String trgLang = p_task.getTargetLocale().toString();
@@ -196,8 +194,7 @@ public class DITAQAChecker
         }
         catch (Exception e)
         {
-            String msg = "Error when get report file name for task "
-                    + p_task.getId();
+            String msg = "Error when get report file name for task " + p_task.getId();
             logger.warn(msg, e);
         }
 
@@ -208,6 +205,7 @@ public class DITAQAChecker
 
     /**
      * Write report data info workbook in cache to output to file later.
+     * 
      * @param p_workbook
      * @param task
      * @throws Exception
@@ -258,8 +256,7 @@ public class DITAQAChecker
         titleCell.setCellStyle(cs);
     }
 
-    private void addLanguageHeader(Workbook p_workBook, Sheet p_sheet)
-            throws Exception
+    private void addLanguageHeader(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
         int col = 0;
         int row = LANGUAGE_HEADER_ROW;
@@ -275,8 +272,8 @@ public class DITAQAChecker
         trgLangCell.setCellStyle(getHeaderStyle(p_workBook));
     }
 
-    private void writeLanguageInfo(Workbook p_workbook, Sheet p_sheet,
-            String p_sourceLang, String p_targetLang) throws Exception
+    private void writeLanguageInfo(Workbook p_workbook, Sheet p_sheet, String p_sourceLang,
+            String p_targetLang) throws Exception
     {
         int col = 0;
         int row = LANGUAGE_INFO_ROW;
@@ -298,8 +295,8 @@ public class DITAQAChecker
      * Add hidden info "DITA_taskID" for offline uploading. When upload, system
      * can know the report type and current task ID report generated from.
      */
-    private void addHidenInfoForUpload(Workbook p_workbook, Sheet p_sheet,
-            long p_taskId) throws Exception
+    private void addHidenInfoForUpload(Workbook p_workbook, Sheet p_sheet, long p_taskId)
+            throws Exception
     {
         Row titleRow = getRow(p_sheet, 0);
         Cell cell_AA1 = getCell(titleRow, 26);
@@ -309,8 +306,7 @@ public class DITAQAChecker
         p_sheet.setColumnHidden(26, true);
     }
 
-    private void addSegmentHeader(Workbook p_workBook, Sheet p_sheet)
-            throws Exception
+    private void addSegmentHeader(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
         int col = 0;
         int row = SEGMENT_HEADER_ROW;
@@ -373,14 +369,13 @@ public class DITAQAChecker
     }
 
     @SuppressWarnings("rawtypes")
-    private int writeSegmentInfo(Workbook p_workBook, Sheet p_sheet, Task p_task)
-            throws Exception
+    private int writeSegmentInfo(Workbook p_workBook, Sheet p_sheet, Task p_task) throws Exception
     {
         int row = SEGMENT_START_ROW;
         Job job = ServerProxy.getJobHandler().getJobById(p_task.getJobId());
         GlobalSightLocale trgLocale = p_task.getTargetLocale();
-        
-        Vector<TargetPage> targetPages = new Vector<TargetPage>();
+
+        Collection<TargetPage> targetPages = new Vector<TargetPage>();
 
         TranslationMemoryProfile tmp = null;
         Vector<String> excludItems = null;
@@ -389,7 +384,7 @@ public class DITAQAChecker
         {
             if (Workflow.PENDING.equals(workflow.getState())
                     || Workflow.CANCELLED.equals(workflow.getState())
-//                    || Workflow.EXPORT_FAILED.equals(workflow.getState())
+                    // || Workflow.EXPORT_FAILED.equals(workflow.getState())
                     || Workflow.IMPORT_FAILED.equals(workflow.getState()))
             {
                 continue;
@@ -397,8 +392,7 @@ public class DITAQAChecker
             if (trgLocale.getId() == workflow.getTargetLocale().getId())
             {
                 targetPages = workflow.getTargetPages();
-                tmp = workflow.getJob().getL10nProfile()
-                        .getTranslationMemoryProfile();
+                tmp = workflow.getJob().getL10nProfile().getTranslationMemoryProfile();
                 if (tmp != null)
                 {
                     excludItems = tmp.getJobExcludeTuTypes();
@@ -419,12 +413,10 @@ public class DITAQAChecker
             String tuType = null;
             PseudoData pData = new PseudoData();
             pData.setMode(PseudoConstants.PSEUDO_VERBOSE);
-            for (int i = 0; i < targetPages.size(); i++)
+            for (TargetPage targetPage : targetPages)
             {
-                TargetPage targetPage = (TargetPage) targetPages.get(i);
                 SourcePage sourcePage = targetPage.getSourcePage();
-                String externalPageId = sourcePage.getExternalPageId()
-                        .replace("\\", "/");
+                String externalPageId = sourcePage.getExternalPageId().replace("\\", "/");
                 if (!externalPageId.toLowerCase().endsWith(".xml"))
                 {
                     nonDitaPages.add(sourcePage);
@@ -435,10 +427,8 @@ public class DITAQAChecker
                 List sourceTuvs = SegmentTuvUtil.getSourceTuvs(sourcePage);
                 List targetTuvs = SegmentTuvUtil.getTargetTuvs(targetPage);
 
-                boolean m_rtlSourceLocale = EditUtil
-                        .isRTLLocale(sourcePageLocale.toString());
-                boolean m_rtlTargetLocale = EditUtil
-                        .isRTLLocale(targetPageLocale.toString());
+                boolean m_rtlSourceLocale = EditUtil.isRTLLocale(sourcePageLocale.toString());
+                boolean m_rtlTargetLocale = EditUtil.isRTLLocale(targetPageLocale.toString());
 
                 for (int j = 0; j < targetTuvs.size(); j++)
                 {
@@ -452,10 +442,8 @@ public class DITAQAChecker
                         continue;
                     }
 
-                    String source = getSegment(pData, sourceTuv,
-                            m_rtlSourceLocale, job.getId());
-                    String target = getSegment(pData, targetTuv,
-                            m_rtlTargetLocale, job.getId());
+                    String source = getSegment(pData, sourceTuv, m_rtlSourceLocale, job.getId());
+                    String target = getSegment(pData, targetTuv, m_rtlTargetLocale, job.getId());
                     Object[] checkResults = doDitaCheck(source, target, trgLocale);
 
                     Row currentRow = getRow(p_sheet, row);
@@ -471,7 +459,7 @@ public class DITAQAChecker
                     }
                     col++;
 
-                    //Page Name
+                    // Page Name
                     Cell cell_B = getCell(currentRow, col);
                     cell_B.setCellValue(externalPageId);
                     cell_B.setCellStyle(getNoWrapContentStyle(p_workBook));
@@ -494,13 +482,12 @@ public class DITAQAChecker
                             : getContentStyle(p_workBook);
                     Cell cell_E = getCell(currentRow, col);
                     cell_E.setCellStyle(srcStyle);
-                    List<String> srcHighlightIndexes = getHighlightIndexes(
-                            checkResults, "source");
+                    List<String> srcHighlightIndexes = getHighlightIndexes(checkResults, "source");
                     // DITA check failed
                     if (srcHighlightIndexes != null)
                     {
-                        RichTextString ts = getRichTextString(p_workBook,
-                                source, srcHighlightIndexes);
+                        RichTextString ts = getRichTextString(p_workBook, source,
+                                srcHighlightIndexes);
                         cell_E.setCellType(XSSFCell.CELL_TYPE_STRING);
                         cell_E.setCellValue(ts);
                     }
@@ -515,13 +502,12 @@ public class DITAQAChecker
                             : getContentStyle(p_workBook);
                     Cell cell_F = getCell(currentRow, col);
                     cell_F.setCellStyle(trgStyle);
-                    List<String> trgHighlightIndexes = getHighlightIndexes(
-                            checkResults, "target");
+                    List<String> trgHighlightIndexes = getHighlightIndexes(checkResults, "target");
                     // DITA check failed
                     if (trgHighlightIndexes != null)
                     {
-                        RichTextString ts = getRichTextString(p_workBook,
-                                target, trgHighlightIndexes);
+                        RichTextString ts = getRichTextString(p_workBook, target,
+                                trgHighlightIndexes);
                         cell_F.setCellType(XSSFCell.CELL_TYPE_STRING);
                         cell_F.setCellValue(ts);
                     }
@@ -564,7 +550,8 @@ public class DITAQAChecker
                 Cell cell = getCell(currentRow, 0);
                 cell.setCellStyle(getNoWrapContentStyle(p_workBook));
                 String spName = sp.getExternalPageId().replace("\\", "/");
-                cell.setCellValue("\"" + spName + "\" need not do DITA QA checks as it is not XML file.");
+                cell.setCellValue(
+                        "\"" + spName + "\" need not do DITA QA checks as it is not XML file.");
                 row++;
             }
         }
@@ -572,8 +559,7 @@ public class DITAQAChecker
         return row;
     }
 
-    private void writeBlank(Sheet p_sheet, int p_row, int p_colLen)
-            throws Exception
+    private void writeBlank(Sheet p_sheet, int p_row, int p_colLen) throws Exception
     {
         for (int col = 0; col < p_colLen; col++)
         {
@@ -584,30 +570,27 @@ public class DITAQAChecker
         }
     }
 
-    private void addFalsePositiveValidation(Sheet p_sheet, int startRow,
-            int lastRow, int startColumn, int lastColumn)
+    private void addFalsePositiveValidation(Sheet p_sheet, int startRow, int lastRow,
+            int startColumn, int lastColumn)
     {
         // Add category failure drop down list here.
         DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
 
         String[] options =
         { "Yes", "No" };
-        DataValidationConstraint dvConstraint = dvHelper
-                .createExplicitListConstraint(options);
+        DataValidationConstraint dvConstraint = dvHelper.createExplicitListConstraint(options);
 
-        CellRangeAddressList addressList = new CellRangeAddressList(startRow,
-                lastRow, startColumn, lastColumn);
+        CellRangeAddressList addressList = new CellRangeAddressList(startRow, lastRow, startColumn,
+                lastColumn);
 
-        DataValidation validation = dvHelper.createValidation(dvConstraint,
-                addressList);
+        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
 
         validation.setSuppressDropDownArrow(true);
         validation.setShowErrorBox(true);
         p_sheet.addValidationData(validation);
     }
 
-    private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale,
-            long p_jobId)
+    private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale, long p_jobId)
     {
         StringBuffer content = new StringBuffer();
         String dataType = null;
@@ -627,8 +610,7 @@ public class DITAQAChecker
                 {
                     GxmlElement sub = (GxmlElement) subFlows.get(i);
                     String subId = sub.getAttribute(GxmlNames.SUB_ID);
-                    content.append("\r\n#").append(tuId).append(":")
-                            .append(subId).append("\n")
+                    content.append("\r\n#").append(tuId).append(":").append(subId).append("\n")
                             .append(getVerbosePtagString(sub, dataType));
                 }
             }
@@ -647,8 +629,7 @@ public class DITAQAChecker
         return result;
     }
 
-    private String getVerbosePtagString(GxmlElement p_gxmlElement,
-            String p_dataType)
+    private String getVerbosePtagString(GxmlElement p_gxmlElement, String p_dataType)
     {
         String verbosePtags = null;
         OnlineTagHelper applet = new OnlineTagHelper();
@@ -667,8 +648,7 @@ public class DITAQAChecker
         return verbosePtags;
     }
 
-    private Object[] doDitaCheck(String source, String target,
-            GlobalSightLocale trgLocale)
+    private Object[] doDitaCheck(String source, String target, GlobalSightLocale trgLocale)
     {
         Object[] results1 = checkExtraContent(source, target);
         Object[] results2 = checkEmptyTags(source, target);
@@ -682,13 +662,13 @@ public class DITAQAChecker
         String description = null;
         List<String> srcAllStr = new ArrayList<String>();
         List<String> trgAllStr = new ArrayList<String>();
-        for (Object[] checkResult: allCheckResults)
+        for (Object[] checkResult : allCheckResults)
         {
             if (checkResult != null)
             {
                 if (description == null)
                 {
-                    description = (String) checkResult[0];                    
+                    description = (String) checkResult[0];
                 }
                 else
                 {
@@ -746,7 +726,7 @@ public class DITAQAChecker
             currentNum = allInList.get(j);
             if (j == 0)
             {
-                startNum =currentNum;
+                startNum = currentNum;
                 preNum = currentNum;
                 continue;
             }
@@ -778,14 +758,14 @@ public class DITAQAChecker
      * indexes.
      * 
      * @param arr
-     * @param flag "source" or "target"
+     * @param flag
+     *            "source" or "target"
      * @return
      */
     @SuppressWarnings("unchecked")
     private List<String> getHighlightIndexes(Object[] arr, String flag)
     {
-        if (arr == null || arr.length != 3
-                || (!"source".equals(flag) && !"target".equals(flag)))
+        if (arr == null || arr.length != 3 || (!"source".equals(flag) && !"target".equals(flag)))
         {
             return null;
         }
@@ -808,19 +788,19 @@ public class DITAQAChecker
                 if (result.size() > 0)
                 {
                     return result;
-                }                
+                }
             }
             catch (Exception e)
             {
-                
+
             }
         }
 
         return null;
     }
 
-    private RichTextString getRichTextString(Workbook p_workBook,
-            String segment, List<String> highlightIndexes)
+    private RichTextString getRichTextString(Workbook p_workBook, String segment,
+            List<String> highlightIndexes)
     {
         RichTextString ts = new XSSFRichTextString(segment);
         ts.applyFont(getNormalFont(p_workBook));
@@ -829,8 +809,7 @@ public class DITAQAChecker
             String[] arr = red.split("-");
             int indexStart = Integer.parseInt(arr[0]);
             int indexEnd = Integer.parseInt(arr[1]);
-            ts.applyFont(indexStart, indexEnd,
-                    getRedFont(p_workBook));
+            ts.applyFont(indexStart, indexEnd, getRedFont(p_workBook));
         }
         return ts;
     }
@@ -840,7 +819,8 @@ public class DITAQAChecker
      * appear within a "menucascade". E.g The following sequence is invalid
      * because of the "xyz":
      * 
-     * <menucascade><uicontrol>abc</uicontrol>xyz<uicontrol>abc</uicontrol></menucascade>
+     * <menucascade><uicontrol>abc</uicontrol>xyz
+     * <uicontrol>abc</uicontrol></menucascade>
      * 
      * @param target
      *            -- like
@@ -864,8 +844,7 @@ public class DITAQAChecker
             char c = target.charAt(i);
             if (c == '[')
             {
-                if (isInMenuCascade && !isInUIControl
-                        && tmp.toString().trim().length() > 0)
+                if (isInMenuCascade && !isInUIControl && tmp.toString().trim().length() > 0)
                 {
                     trgRedIndexRegions.add(indexStart + "-" + i);
                 }
@@ -945,19 +924,17 @@ public class DITAQAChecker
                 {
                     if ((indexStart + startTag.length()) <= indexEnd)
                     {
-                        String innerContent = target.substring(indexStart
-                                + startTag.length(), indexEnd);
-                        if (innerContent == null
-                                || innerContent.trim().length() == 0)
+                        String innerContent = target.substring(indexStart + startTag.length(),
+                                indexEnd);
+                        if (innerContent == null || innerContent.trim().length() == 0)
                         {
-                            trgRedIndexRegions.add(indexStart + "-"
-                                    + (indexEnd + endTag.length()));
+                            trgRedIndexRegions.add(indexStart + "-" + (indexEnd + endTag.length()));
                             indexStart = source.indexOf(startTag);
                             indexEnd = source.indexOf(endTag);
                             if (indexStart > -1 && indexEnd > -1 && indexStart < indexEnd)
                             {
-                                srcRedIndexRegions.add(indexStart + "-"
-                                        + (indexEnd + endTag.length()));
+                                srcRedIndexRegions
+                                        .add(indexStart + "-" + (indexEnd + endTag.length()));
                             }
                         }
                     }
@@ -979,40 +956,33 @@ public class DITAQAChecker
     }
 
     /**
-     * Index sorting
-     * The localized index entries do not need to be sorted for all languages (except Japanese and Simplifies Chinese) - the index is sorted automatically by the template.
-     * For Zh-cn, and JA the indexes do not sort correctly. To get around this we require the translators for these languages to insert an extra element.
+     * Index sorting The localized index entries do not need to be sorted for
+     * all languages (except Japanese and Simplifies Chinese) - the index is
+     * sorted automatically by the template. For Zh-cn, and JA the indexes do
+     * not sort correctly. To get around this we require the translators for
+     * these languages to insert an extra element.
      * 
-     * Japanese
-     * Search for <indexterm>text</indexterm> where text is the kanji JA text
-     * They need to insert an element <index-sort-as> and convert the text in <indexterm> to katakana/hiragana
-     * Example:
-     * <indexterm>[data]</indexterm>
-     * becomes
-     * <indexterm>[data]<index-sort-as>data</index-sort-as></indexterm>
-     * where [data] is kanji and data is katakana
-     * Simplified Chinese
-     * Simplified Chinese must be sorted based on pinyin sounds
-     * Search for <indexterm>text</indexterm> where text is the zh-cn text
-     * Insert an element <index-sort-as> and add the text that is in <indexterm> as pinyin
-     * Example:
-     * <indexterm>[data]</indexterm>
-     * becomes
-     * <indexterm>[data]<index-sort-as>data</index-sort-as></indexterm>
+     * Japanese Search for <indexterm>text</indexterm> where text is the kanji
+     * JA text They need to insert an element <index-sort-as> and convert the
+     * text in <indexterm> to katakana/hiragana Example:
+     * <indexterm>[data]</indexterm> becomes <indexterm>[data]
+     * <index-sort-as>data</index-sort-as></indexterm> where [data] is kanji and
+     * data is katakana Simplified Chinese Simplified Chinese must be sorted
+     * based on pinyin sounds Search for <indexterm>text</indexterm> where text
+     * is the zh-cn text Insert an element <index-sort-as> and add the text that
+     * is in <indexterm> as pinyin Example: <indexterm>[data]</indexterm>
+     * becomes <indexterm>[data]<index-sort-as>data</index-sort-as></indexterm>
      * where data is pinyin
-     *  
+     * 
      */
-    private Object[] checkIndexSortAs(String source, String target,
-            GlobalSightLocale trgLocale)
+    private Object[] checkIndexSortAs(String source, String target, GlobalSightLocale trgLocale)
     {
-        if (target == null || target.indexOf("[indexterm") == -1
-                || trgLocale == null)
+        if (target == null || target.indexOf("[indexterm") == -1 || trgLocale == null)
             return null;
 
         // for "index-sort-as" check, only for "zh_CN", "zh_SG" and "ja_JP".
         String trgLang = trgLocale.toString();
-        if (!"zh_CN".equalsIgnoreCase(trgLang)
-                && !"zh_SG".equalsIgnoreCase(trgLang)
+        if (!"zh_CN".equalsIgnoreCase(trgLang) && !"zh_SG".equalsIgnoreCase(trgLang)
                 && !"ja_JP".equalsIgnoreCase(trgLang))
         {
             return null;
@@ -1034,8 +1004,7 @@ public class DITAQAChecker
         int safeloop = 0;
         while (indextermTags.size() > 0 && safeloop < 10)
         {
-            tmpStr = _ditaCheck3(tmpStr, indextermTags,
-                    failedIndextermTags);
+            tmpStr = _ditaCheck3(tmpStr, indextermTags, failedIndextermTags);
             safeloop++;
         }
 
@@ -1076,8 +1045,8 @@ public class DITAQAChecker
         return null;
     }
 
-    private static String _ditaCheck3(String verboseStr,
-            Set<String> unhandledTags, Set<String> failedIndextermTags)
+    private static String _ditaCheck3(String verboseStr, Set<String> unhandledTags,
+            Set<String> failedIndextermTags)
     {
         int indexStart = -1;
         int indexEnd = -1;
@@ -1093,9 +1062,8 @@ public class DITAQAChecker
             if (indexStart > -1 && indexEnd > -1 && indexStart < indexEnd)
             {
                 innerContent = verboseStr.substring(indexStart + startTag.length(), indexEnd);
-                // it has no nested "indexterm" tag. 
-                if (innerContent == null
-                        || innerContent.toLowerCase().indexOf("[indexterm") == -1)
+                // it has no nested "indexterm" tag.
+                if (innerContent == null || innerContent.toLowerCase().indexOf("[indexterm") == -1)
                 {
                     // Remove the handled content
                     verboseStr = verboseStr.replace(startTag + innerContent + endTag, "");
@@ -1128,7 +1096,7 @@ public class DITAQAChecker
             CellStyle cs = p_workbook.createCellStyle();
             cs.setFont(font);
             cs.setWrapText(true);
-            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
             cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
             cs.setBorderTop(CellStyle.BORDER_THIN);
             cs.setBorderRight(CellStyle.BORDER_THIN);
@@ -1161,8 +1129,7 @@ public class DITAQAChecker
         return contentStyle;
     }
 
-    private CellStyle getNoWrapContentStyle(Workbook p_workbook)
-            throws Exception
+    private CellStyle getNoWrapContentStyle(Workbook p_workbook) throws Exception
     {
         if (noWrapContentStyle == null)
         {

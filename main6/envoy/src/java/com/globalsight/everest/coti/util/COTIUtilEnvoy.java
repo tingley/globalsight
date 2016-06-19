@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +30,6 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.coti.COTIDocument;
@@ -107,8 +107,7 @@ public class COTIUtilEnvoy
      * @param cproject
      * @return
      */
-    public static String getProjectDir(long companyId, COTIPackage cpackage,
-            COTIProject cproject)
+    public static String getProjectDir(long companyId, COTIPackage cpackage, COTIProject cproject)
     {
         String path = getCOTIRootDir(companyId);
         path += File.separator + cpackage.getId() + ".unzip";
@@ -126,16 +125,15 @@ public class COTIUtilEnvoy
      * @param document
      * @return
      */
-    public static String getCotiDocumentPath(long companyId,
-            COTIPackage cpackage, COTIProject cproject, COTIDocument document)
+    public static String getCotiDocumentPath(long companyId, COTIPackage cpackage,
+            COTIProject cproject, COTIDocument document)
     {
         // copy coti xml to path
         String fileType = document.getIsTranslation() ? COTIConstants.fileType_translation
                 : COTIConstants.fileType_reference;
         String fileRef = document.getFileRef();
 
-        return getCotiDocumentPath(companyId, cpackage, cproject, fileType,
-                fileRef);
+        return getCotiDocumentPath(companyId, cpackage, cproject, fileType, fileRef);
     }
 
     /**
@@ -148,12 +146,10 @@ public class COTIUtilEnvoy
      * @param fileRef
      * @return
      */
-    public static String getCotiDocumentPath(long companyId,
-            COTIPackage cpackage, COTIProject cproject, String fileType,
-            String fileRef)
+    public static String getCotiDocumentPath(long companyId, COTIPackage cpackage,
+            COTIProject cproject, String fileType, String fileRef)
     {
-        boolean isTranslation = COTIConstants.fileType_translation
-                .equals(fileType);
+        boolean isTranslation = COTIConstants.fileType_translation.equals(fileType);
         String folderName = (isTranslation ? COTIConstants.Dir_TranslationFiles_Name
                 : COTIConstants.Dir_ReferenceFiles_Name);
         boolean addFolderName = true;
@@ -177,8 +173,7 @@ public class COTIUtilEnvoy
      * @param cproject
      * @return
      */
-    public static String getCotiXmlPath(long companyId, COTIPackage cpackage,
-            COTIProject cproject)
+    public static String getCotiXmlPath(long companyId, COTIPackage cpackage, COTIProject cproject)
     {
         // copy coti xml to path
         String projectDir = getProjectDir(companyId, cpackage, cproject);
@@ -194,13 +189,12 @@ public class COTIUtilEnvoy
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public static byte[] zipAndReadData(File file)
-            throws FileNotFoundException, IOException
+    public static byte[] zipAndReadData(File file) throws FileNotFoundException, IOException
     {
         File tempFile = File.createTempFile("GS_COTI_file", ".zip");
 
-        ZipIt.addEntriesToZipFile(tempFile, new File[] { file }, true,
-                "Download From GlobalSight");
+        ZipIt.addEntriesToZipFile(tempFile, new File[]
+        { file }, true, "Download From GlobalSight");
 
         return FileUtil.readFile(tempFile, (int) tempFile.length());
     }
@@ -224,8 +218,7 @@ public class COTIUtilEnvoy
             }
 
             // add project into package
-            List<COTIProject> theProjects = getCOTIProjectsByPackageId(
-                    cotiProjects, packageId);
+            List<COTIProject> theProjects = getCOTIProjectsByPackageId(cotiProjects, packageId);
 
             long companyId = thePackage.getCompanyId();
             File tempDir = new File(getCOTITempDir(companyId));
@@ -233,11 +226,9 @@ public class COTIUtilEnvoy
             {
                 tempDir.mkdirs();
             }
-            String packageFileName = thePackage.getId() + "_"
-                    + thePackage.getFileName();
+            String packageFileName = thePackage.getId() + "_" + thePackage.getFileName();
 
-            File tempCoti = File.createTempFile("ID_" + thePackage.getId()
-                    + "_", ".coti", tempDir);
+            File tempCoti = File.createTempFile("ID_" + thePackage.getId() + "_", ".coti", tempDir);
             tempCoti.delete();
             File parant = new File(tempCoti.getPath() + ".unzip");
             File tempFile = new File(parant, packageFileName);
@@ -250,10 +241,9 @@ public class COTIUtilEnvoy
             for (int j = 0; j < theProjects.size(); j++)
             {
                 COTIProject theProject = theProjects.get(j);
-                String projectDir = new File(getProjectDir(companyId,
-                        thePackage, theProject)).getPath();
-                String cotiXmlPath = getCotiXmlPath(companyId, thePackage,
-                        theProject);
+                String projectDir = new File(getProjectDir(companyId, thePackage, theProject))
+                        .getPath();
+                String cotiXmlPath = getCotiXmlPath(companyId, thePackage, theProject);
                 File cotiXmlFile = new File(cotiXmlPath);
                 Set<File> docs = new HashSet<File>();
                 if (cotiXmlFile.exists())
@@ -265,15 +255,14 @@ public class COTIUtilEnvoy
                         .getCOTIDocumentsByProjectId(theProject.getId());
                 for (COTIDocument cotiDocument : theDocs)
                 {
-                    File f = getExportedDocument(thePackage, theProject,
-                            cotiDocument);
+                    File f = getExportedDocument(thePackage, theProject, cotiDocument);
 
                     if (f.exists())
                     {
-                        String path = COTIUtilEnvoy.getCotiDocumentPath(
-                                thePackage.getCompanyId(), thePackage, theProject, cotiDocument);
+                        String path = COTIUtilEnvoy.getCotiDocumentPath(thePackage.getCompanyId(),
+                                thePackage, theProject, cotiDocument);
                         File oriFile = new File(path);
-                        
+
                         if (f.getPath().equals(oriFile.getPath()))
                         {
                             docs.add(f);
@@ -286,8 +275,8 @@ public class COTIUtilEnvoy
                     }
                 }
 
-                ZipIt.addEntriesToZipFile(tempFile, docs, theProject.getId()
-                        + "_" + theProject.getDirName(), projectDir, "");
+                ZipIt.addEntriesToZipFile(tempFile, docs,
+                        theProject.getId() + "_" + theProject.getDirName(), projectDir, "");
             }
 
             packages.add(thePackage);
@@ -299,8 +288,7 @@ public class COTIUtilEnvoy
             File result = File.createTempFile("GS_Downlaod_", ".coti");
             File[] fa = new File[packageFiles.size()];
             fa = packageFiles.toArray(fa);
-            ZipIt.addEntriesToZipFile(result, fa, true,
-                    "Generated by GlobalSight");
+            ZipIt.addEntriesToZipFile(result, fa, true, "Generated by GlobalSight");
 
             return result;
         }
@@ -308,8 +296,8 @@ public class COTIUtilEnvoy
         return null;
     }
 
-    public static List<COTIProject> getCOTIProjectsByPackageId(
-            List<COTIProject> cotiProjects, long packageId)
+    public static List<COTIProject> getCOTIProjectsByPackageId(List<COTIProject> cotiProjects,
+            long packageId)
     {
         List<COTIProject> result = new ArrayList<COTIProject>();
 
@@ -339,8 +327,7 @@ public class COTIUtilEnvoy
         File tempUnzip = new File(tempDir, tempFile.getName() + ".unzip");
 
         writeFile(tempFile, cotiFile);
-        List<String> files = ZipIt.unpackZipPackage(tempFile.getPath(),
-                tempUnzip.getPath());
+        List<String> files = ZipIt.unpackZipPackage(tempFile.getPath(), tempUnzip.getPath());
 
         File firstFile = null;
         if (files != null && files.size() > 0)
@@ -351,16 +338,14 @@ public class COTIUtilEnvoy
         return firstFile;
     }
 
-    public static List<File> unzipAndGetProjectDir(File cotiFile)
-            throws Exception
+    public static List<File> unzipAndGetProjectDir(File cotiFile) throws Exception
     {
         // read coti xml file
         File tempFile = File.createTempFile("GS_COTI_xml", ".zip");
         File tempDir = tempFile.getParentFile();
         File tempUnzip = new File(tempDir, tempFile.getName() + ".unzip");
 
-        List<String> files = ZipIt.unpackZipPackage(cotiFile.getPath(),
-                tempUnzip.getPath());
+        List<String> files = ZipIt.unpackZipPackage(cotiFile.getPath(), tempUnzip.getPath());
 
         List<File> resultfiles = new ArrayList<File>();
         if (files != null && files.size() > 0)
@@ -379,8 +364,7 @@ public class COTIUtilEnvoy
         return resultfiles;
     }
 
-    public static COTIProject createCOTIProject(Company c, String cotiXml)
-            throws Exception
+    public static COTIProject createCOTIProject(Company c, String cotiXml) throws Exception
     {
         COTIPackage cpackage = null;
         COTIProject cproject = null;
@@ -428,7 +412,7 @@ public class COTIUtilEnvoy
     public static boolean startCOTIProject(COTIProject cproject) throws Exception
     {
         boolean result = false;
-        
+
         // check project status
         String oriStatus = cproject.getStatus();
         if (COTIConstants.project_status_created.equals(oriStatus)
@@ -442,21 +426,19 @@ public class COTIUtilEnvoy
             }
             catch (Exception e)
             {
-                String msg = "Update status failed information by projectId "
-                        + cproject.getId();
+                String msg = "Update status failed information by projectId " + cproject.getId();
                 throw new Exception(msg, e);
             }
         }
-        
+
         return result;
     }
-    
+
     public static String saveDocumentFile(COTIPackage cpackage, COTIProject cproject,
-            File documentFile, String fileRef, String fileType)
-            throws IOException
+            File documentFile, String fileRef, String fileType) throws IOException
     {
-        String path = COTIUtilEnvoy.getCotiDocumentPath(
-                cpackage.getCompanyId(), cpackage, cproject, fileType, fileRef);
+        String path = COTIUtilEnvoy.getCotiDocumentPath(cpackage.getCompanyId(), cpackage, cproject,
+                fileType, fileRef);
         File dst = new File(path);
         if (dst.exists())
         {
@@ -464,8 +446,7 @@ public class COTIUtilEnvoy
         }
         FileUtil.copyFile(documentFile, dst);
 
-        String docid = COTIDbUtil.getDocumentId("" + cproject.getId(),
-                fileType, fileRef);
+        String docid = COTIDbUtil.getDocumentId("" + cproject.getId(), fileType, fileRef);
 
         return docid;
     }
@@ -493,8 +474,8 @@ public class COTIUtilEnvoy
      * @param cotiXml
      * @throws IOException
      */
-    public static void saveCotiXml(long companyId, COTIPackage cpackage,
-            COTIProject cproject, String cotiXml) throws IOException
+    public static void saveCotiXml(long companyId, COTIPackage cpackage, COTIProject cproject,
+            String cotiXml) throws IOException
     {
         // copy coti xml to path
         String cotiXmlPath = getCotiXmlPath(companyId, cpackage, cproject);
@@ -525,8 +506,7 @@ public class COTIUtilEnvoy
     {
         try
         {
-            COTIProject cp = COTIDbUtil
-                    .getCOTIProjectByGlobalSightJobId(globalsightJobId);
+            COTIProject cp = COTIDbUtil.getCOTIProjectByGlobalSightJobId(globalsightJobId);
             if (cp != null)
             {
                 cp.setStatus(COTIConstants.project_status_cancelled);
@@ -563,8 +543,7 @@ public class COTIUtilEnvoy
     {
         try
         {
-            COTIProject cp = COTIDbUtil
-                    .getCOTIProjectByGlobalSightJobId(globalsightJobId);
+            COTIProject cp = COTIDbUtil.getCOTIProjectByGlobalSightJobId(globalsightJobId);
             if (cp != null)
             {
                 cp.setStatus(COTIConstants.project_status_finished);
@@ -577,8 +556,8 @@ public class COTIUtilEnvoy
         }
     }
 
-    public static File getExportedDocument(COTIPackage cpackage,
-            COTIProject cproject, COTIDocument cdoc)
+    public static File getExportedDocument(COTIPackage cpackage, COTIProject cproject,
+            COTIDocument cdoc)
     {
         File result = null;
         boolean returnOriFile = true;
@@ -596,8 +575,7 @@ public class COTIUtilEnvoy
 
                 File companyFolder = new File(companyFolderPath);
                 File targetLocaleFolder = new File(companyFolder, targetLocale);
-                File jobIdFile = new File(targetLocaleFolder, ""
-                        + gsjob.getJobId());
+                File jobIdFile = new File(targetLocaleFolder, "" + gsjob.getJobId());
                 File exportedFile = new File(jobIdFile, cdoc.getFileRef());
 
                 if (exportedFile.exists() && exportedFile.isFile())
@@ -611,8 +589,8 @@ public class COTIUtilEnvoy
         // else return the source file
         if (returnOriFile)
         {
-            String path = COTIUtilEnvoy.getCotiDocumentPath(
-                    cpackage.getCompanyId(), cpackage, cproject, cdoc);
+            String path = COTIUtilEnvoy.getCotiDocumentPath(cpackage.getCompanyId(), cpackage,
+                    cproject, cdoc);
 
             result = new File(path);
         }
@@ -627,8 +605,7 @@ public class COTIUtilEnvoy
      * @param cdoc
      * @return
      */
-    public static TargetPage getTargetPageByCOTIDocument(COTIProject cproject,
-            COTIDocument cdoc)
+    public static TargetPage getTargetPageByCOTIDocument(COTIProject cproject, COTIDocument cdoc)
     {
         if (cproject == null || cdoc == null)
         {
@@ -646,12 +623,11 @@ public class COTIUtilEnvoy
             if (ite != null && ite.hasNext())
             {
                 Workflow wf = ite.next();
-                Vector<TargetPage> targetPages = wf.getTargetPages();
+                Collection<TargetPage> targetPages = wf.getTargetPages();
 
                 for (TargetPage targetPage : targetPages)
                 {
-                    String pagename = targetPage.getSourcePage()
-                            .getExternalPageId();
+                    String pagename = targetPage.getSourcePage().getExternalPageId();
                     if (pagename.endsWith(fileRef))
                     {
                         return targetPage;
@@ -670,8 +646,7 @@ public class COTIUtilEnvoy
      * @return
      * @throws NoSuchElementException
      */
-    public static Locale makeLocaleFromString(String p_localeName)
-            throws NoSuchElementException
+    public static Locale makeLocaleFromString(String p_localeName) throws NoSuchElementException
     {
         String sep = "_";
         if (!p_localeName.contains(sep) && p_localeName.contains("-"))

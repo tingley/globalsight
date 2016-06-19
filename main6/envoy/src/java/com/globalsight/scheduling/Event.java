@@ -16,10 +16,8 @@
  */
 package com.globalsight.scheduling;
 
-import java.util.HashMap;
-
 /**
- * Event is an abstract class that represents a generic event.  Concrete
+ * Event is an abstract class that represents a generic event. Concrete
  * subclasses include ScheduledEvent and UnscheduledEvent, which provide
  * behavior that coincides with the current state of the event.
  */
@@ -29,7 +27,7 @@ public abstract class Event
     // PRIVATE MEMBER VARIABLES
     //
     private EventInfo m_info;
-    
+
     //
     // PUBLIC CONSTRUCTORS
     //
@@ -38,7 +36,7 @@ public abstract class Event
      */
     public Event()
     {
-        m_info = new EventInfo();        
+        m_info = new EventInfo();
     }
 
     //
@@ -47,9 +45,10 @@ public abstract class Event
     /**
      * Set the event info for this event.
      *
-     * @param p_eventInfo the new value to use
+     * @param p_eventInfo
+     *            the new value to use
      */
-    void setEventInfo(EventInfo p_eventInfo)
+    public void setEventInfo(EventInfo p_eventInfo)
     {
         m_info = p_eventInfo;
     }
@@ -60,8 +59,10 @@ public abstract class Event
     /**
      * Add the given key-value pair to the event's info object.
      *
-     * @param p_key the key of the pair
-     * @param p_value the value of the pair
+     * @param p_key
+     *            the key of the pair
+     * @param p_value
+     *            the value of the pair
      */
     public void addInfoEntry(Object p_key, Object p_value)
     {
@@ -69,10 +70,11 @@ public abstract class Event
     }
 
     /**
-     * Find the info entry value that corresponds to the given key, or null
-     * if none exists.
+     * Find the info entry value that corresponds to the given key, or null if
+     * none exists.
      *
-     * @param p_key the key to search for in the info.
+     * @param p_key
+     *            the key to search for in the info.
      *
      * @return the string that corresponds to the given key, or null.
      */

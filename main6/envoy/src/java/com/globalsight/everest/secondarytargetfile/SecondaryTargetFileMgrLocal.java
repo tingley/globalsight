@@ -19,11 +19,10 @@ package com.globalsight.everest.secondarytargetfile;
 
 import java.io.File;
 import java.rmi.RemoteException;
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -51,8 +50,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  * SecondaryTargetFile object (i.e. creation, update, and removal).
  * 
  */
-public final class SecondaryTargetFileMgrLocal implements
-        SecondaryTargetFileMgr
+public final class SecondaryTargetFileMgrLocal implements SecondaryTargetFileMgr
 {
     // for logging purposes
     private static final Logger s_category = Logger
@@ -82,48 +80,45 @@ public final class SecondaryTargetFileMgrLocal implements
     /**
      * @see SecondaryTargetFileMgr.createSecondaryTargetFile
      */
-    public void createSecondaryTargetFile(String p_absolutePath,
-            String p_relativePath, int p_sourcePageBomType, String p_eventFlowXml, long p_exportBatchId)
+    public void createSecondaryTargetFile(String p_absolutePath, String p_relativePath,
+            int p_sourcePageBomType, String p_eventFlowXml, long p_exportBatchId)
             throws SecondaryTargetFileException, RemoteException
     {
         ExportBatchEvent ebe = null;
         try
         {
-            ebe = ServerProxy.getExportEventObserver().getExportBatchEventById(
-                    p_exportBatchId, false);
+            ebe = ServerProxy.getExportEventObserver().getExportBatchEventById(p_exportBatchId,
+                    false);
 
             // since STF is created per workflow, there would be one
             // workflow id for an export batch event.
             Long wfId = (Long) ebe.getWorkflowIds().get(0);
 
             // a light workflow object without iFlow related attributes
-            Workflow wf = (Workflow) HibernateUtil
-                    .get(WorkflowImpl.class, wfId);
+            Workflow wf = (Workflow) HibernateUtil.get(WorkflowImpl.class, wfId);
 
-            String storagePath = constructRelativePath(p_relativePath, wf
-                    .getJob().getId(), wfId);
+            String storagePath = constructRelativePath(p_relativePath, wf.getJob().getId(), wfId);
 
-            SecondaryTargetFile existingStf = getStfByWfIdAndPath(wfId,
-                    storagePath);
+            SecondaryTargetFile existingStf = getStfByWfIdAndPath(wfId, storagePath);
 
             boolean replace = existingStf != null
-                    && shouldReplaceExistingStf(wfId,ebe.getTaskId().longValue());
+                    && shouldReplaceExistingStf(wfId, ebe.getTaskId().longValue());
 
             SecondaryTargetFile stf = null;
             if (existingStf == null || replace)
             {
                 // instantiate the STF object and set its values (need to
                 // append jobId\wfId as a prefix of the relative path)
-                stf = replace ? existingStf : createSecondaryTargetFile(ebe,
-                        p_relativePath, p_eventFlowXml, wfId);
+                stf = replace ? existingStf
+                        : createSecondaryTargetFile(ebe, p_relativePath, p_eventFlowXml, wfId);
                 if (!replace)
                 {
                     stf.setWorkflow(wf);
                 }
 
                 // rename the temp file to the name given by relative path
-                stf = ServerProxy.getNativeFileManager().moveFileToStorage(
-                        p_absolutePath, stf, p_sourcePageBomType);
+                stf = ServerProxy.getNativeFileManager().moveFileToStorage(p_absolutePath, stf,
+                        p_sourcePageBomType);
             }
 
             // persist the STF (for new STF only)
@@ -137,14 +132,13 @@ public final class SecondaryTargetFileMgrLocal implements
             try
             {
                 // update task's stf_creation_state to 'failed'
-                ServerProxy.getTaskManager().updateStfCreationState(
-                        ebe.getTaskId().longValue(), Task.FAILED);
+                ServerProxy.getTaskManager().updateStfCreationState(ebe.getTaskId().longValue(),
+                        Task.FAILED);
             }
             catch (Exception ex)
             {
-                s_category.error(
-                        "createSTF :: failed to update stf_creation_state of"
-                                + " task for export event batch " + ebe, ex);
+                s_category.error("createSTF :: failed to update stf_creation_state of"
+                        + " task for export event batch " + ebe, ex);
             }
             throw new SecondaryTargetFileException(e);
         }
@@ -162,8 +156,8 @@ public final class SecondaryTargetFileMgrLocal implements
                     .getExportBatchEventById(p_exportBatchId, false);
 
             // update task's stf_creation_state to 'failed'
-            ServerProxy.getTaskManager().updateStfCreationState(
-                    ebe.getTaskId().longValue(), Task.FAILED);
+            ServerProxy.getTaskManager().updateStfCreationState(ebe.getTaskId().longValue(),
+                    Task.FAILED);
         }
         catch (Exception ex)
         {
@@ -219,7 +213,8 @@ public final class SecondaryTargetFileMgrLocal implements
     }
 
     /**
-     * @see SecondaryTargetFileMgr.removeSecondaryTargetFile(SecondaryTargetFile)
+     * @see SecondaryTargetFileMgr.removeSecondaryTargetFile(
+     *      SecondaryTargetFile)
      */
     public void removeSecondaryTargetFile(SecondaryTargetFile p_stf)
             throws SecondaryTargetFileException, RemoteException
@@ -232,15 +227,16 @@ public final class SecondaryTargetFileMgrLocal implements
         }
         catch (Exception e)
         {
-            String[] args = { String.valueOf(p_stf.getId()) };
+            String[] args =
+            { String.valueOf(p_stf.getId()) };
             throw new SecondaryTargetFileException(
-                    SecondaryTargetFileException.MSG_FAILED_TO_DELETE_STF,
-                    args, e);
+                    SecondaryTargetFileException.MSG_FAILED_TO_DELETE_STF, args, e);
         }
     }
 
     /**
-     * @see SecondaryTargetFileMgr.updateSecondaryTargetFile(SecondaryTargetFile)
+     * @see SecondaryTargetFileMgr.updateSecondaryTargetFile(
+     *      SecondaryTargetFile)
      */
     public void updateSecondaryTargetFile(SecondaryTargetFile p_stf)
             throws SecondaryTargetFileException, RemoteException
@@ -251,10 +247,10 @@ public final class SecondaryTargetFileMgrLocal implements
         }
         catch (Exception e)
         {
-            String[] args = { String.valueOf(p_stf.getId()) };
+            String[] args =
+            { String.valueOf(p_stf.getId()) };
             throw new SecondaryTargetFileException(
-                    SecondaryTargetFileException.MSG_FAILED_TO_UPDATE_STF,
-                    args, e);
+                    SecondaryTargetFileException.MSG_FAILED_TO_UPDATE_STF, args, e);
         }
     }
 
@@ -269,8 +265,8 @@ public final class SecondaryTargetFileMgrLocal implements
 
         try
         {
-            SecondaryTargetFile stf = (SecondaryTargetFile) session.get(
-                    SecondaryTargetFile.class, p_stfId);
+            SecondaryTargetFile stf = (SecondaryTargetFile) session.get(SecondaryTargetFile.class,
+                    p_stfId);
 
             stf.setState(p_state);
             session.update(stf);
@@ -281,14 +277,14 @@ public final class SecondaryTargetFileMgrLocal implements
         }
         catch (Exception e)
         {
-            String[] args = { String.valueOf(p_stfId) };
+            String[] args =
+            { String.valueOf(p_stfId) };
             throw new SecondaryTargetFileException(
-                    SecondaryTargetFileException.MSG_FAILED_TO_UPDATE_STF,
-                    args, e);
+                    SecondaryTargetFileException.MSG_FAILED_TO_UPDATE_STF, args, e);
         }
         finally
         {
-            //session.close();
+            // session.close();
         }
     }
 
@@ -301,25 +297,23 @@ public final class SecondaryTargetFileMgrLocal implements
     // ////////////////////////////////////////////////////////////////////
 
     // get a SecondaryTargetFile object by id
-    private SecondaryTargetFile getStfById(Long p_id)
-            throws SecondaryTargetFileException
+    private SecondaryTargetFile getStfById(Long p_id) throws SecondaryTargetFileException
     {
         try
         {
-            return (SecondaryTargetFile) HibernateUtil.get(
-                    SecondaryTargetFile.class, p_id);
+            return (SecondaryTargetFile) HibernateUtil.get(SecondaryTargetFile.class, p_id);
         }
         catch (Exception e)
         {
-            String args[] = { String.valueOf(p_id) };
+            String args[] =
+            { String.valueOf(p_id) };
             throw new SecondaryTargetFileException(
                     SecondaryTargetFileException.MSG_FAILED_TO_GET_STF, args, e);
         }
     }
 
     // get a SecondaryTargetFile object by wf id and storage path
-    private SecondaryTargetFile getStfByWfIdAndPath(Long p_id,
-            String p_storagePath)
+    private SecondaryTargetFile getStfByWfIdAndPath(Long p_id, String p_storagePath)
     {
         String hql = " from SecondaryTargetFile s"
                 + " where s.workflow.id = :WF_ID and s.storagePath = :STORAGE_PATH ";
@@ -328,9 +322,8 @@ public final class SecondaryTargetFileMgrLocal implements
 
         try
         {
-            return (SecondaryTargetFile) session.createQuery(hql).setLong(
-                    "WF_ID", p_id.longValue()).setString("STORAGE_PATH",
-                    p_storagePath).list().get(0);
+            return (SecondaryTargetFile) session.createQuery(hql).setLong("WF_ID", p_id.longValue())
+                    .setString("STORAGE_PATH", p_storagePath).list().get(0);
         }
         catch (Exception e)
         {
@@ -338,7 +331,7 @@ public final class SecondaryTargetFileMgrLocal implements
         }
         finally
         {
-            //session.close();
+            // session.close();
         }
     }
 
@@ -358,15 +351,13 @@ public final class SecondaryTargetFileMgrLocal implements
         catch (Exception e)
         {
             throw new SecondaryTargetFileException(
-                    SecondaryTargetFileException.MSG_FAILED_TO_CREATE_STF,
-                    null, e);
+                    SecondaryTargetFileException.MSG_FAILED_TO_CREATE_STF, null, e);
         }
     }
 
     // create a new STF object
-    private SecondaryTargetFile createSecondaryTargetFile(
-            ExportBatchEvent p_exportBatchEvent, String p_relativePath,
-            String p_eventFlowXml, Long p_wfId)
+    private SecondaryTargetFile createSecondaryTargetFile(ExportBatchEvent p_exportBatchEvent,
+            String p_relativePath, String p_eventFlowXml, Long p_wfId)
             throws SecondaryTargetFileException
     {
         try
@@ -375,14 +366,15 @@ public final class SecondaryTargetFileMgrLocal implements
                     p_exportBatchEvent.getJob().getId(), p_wfId);
             // new instance of STF without setting workflow back-pointer
             SecondaryTargetFile stf = new SecondaryTargetFile(p_eventFlowXml,
-                    p_exportBatchEvent.getResponsibleUserId(),
-                    SecondaryTargetFileState.ACTIVE_JOB, storagePath);
+                    p_exportBatchEvent.getResponsibleUserId(), SecondaryTargetFileState.ACTIVE_JOB,
+                    storagePath);
 
             return stf;
         }
         catch (Exception e)
         {
-            String args[] = { String.valueOf(p_wfId) };
+            String args[] =
+            { String.valueOf(p_wfId) };
             throw new SecondaryTargetFileException(
                     SecondaryTargetFileException.MSG_FAILED_TO_GET_WF, args, e);
         }
@@ -417,8 +409,7 @@ public final class SecondaryTargetFileMgrLocal implements
             // Only populate TM when ALL STFs are in exported state
             if (isExported(p_workflow.getSecondaryTargetFiles()))
             {
-                s_category.debug("All STFs of workflow with id "
-                        + p_workflow.getId()
+                s_category.debug("All STFs of workflow with id " + p_workflow.getId()
                         + "have been exported.  Now populate TM.");
 
                 populateTm(p_workflow);
@@ -427,11 +418,11 @@ public final class SecondaryTargetFileMgrLocal implements
         catch (Exception e)
         {
             long wfId = p_workflow == null ? -1 : p_workflow.getId();
-            String args[] = { String.valueOf(p_stfId), String.valueOf(wfId) };
+            String args[] =
+            { String.valueOf(p_stfId), String.valueOf(wfId) };
 
             throw new SecondaryTargetFileException(
-                    SecondaryTargetFileException.MSG_FAILED_TO_UPDATE_WF_STATE,
-                    args, e);
+                    SecondaryTargetFileException.MSG_FAILED_TO_UPDATE_WF_STATE, args, e);
         }
     }
 
@@ -439,22 +430,21 @@ public final class SecondaryTargetFileMgrLocal implements
      * Notifies the workflow event observer if an stf fails to export. This is
      * only called for a final export.
      */
-    private void notifyWorkflowExportFailedEvent(Long p_stfId,
-            Workflow p_workflow) throws SecondaryTargetFileException
+    private void notifyWorkflowExportFailedEvent(Long p_stfId, Workflow p_workflow)
+            throws SecondaryTargetFileException
     {
         try
         {
-            ServerProxy.getWorkflowEventObserver()
-                    .notifyWorkflowExportFailedEvent(p_workflow);
+            ServerProxy.getWorkflowEventObserver().notifyWorkflowExportFailedEvent(p_workflow);
         }
         catch (Exception e)
         {
             long wfId = p_workflow == null ? -1 : p_workflow.getId();
-            String args[] = { String.valueOf(p_stfId), String.valueOf(wfId) };
+            String args[] =
+            { String.valueOf(p_stfId), String.valueOf(wfId) };
 
             throw new SecondaryTargetFileException(
-                    SecondaryTargetFileException.MSG_FAILED_TO_UPDATE_WF_STATE,
-                    args, e);
+                    SecondaryTargetFileException.MSG_FAILED_TO_UPDATE_WF_STATE, args, e);
         }
     }
 
@@ -466,27 +456,20 @@ public final class SecondaryTargetFileMgrLocal implements
     {
         L10nProfile l10nProfile = p_workflow.getJob().getL10nProfile();
 
-        LeveragingLocales leveragingLocales = l10nProfile
-                .getLeveragingLocales();
+        LeveragingLocales leveragingLocales = l10nProfile.getLeveragingLocales();
 
-        TranslationMemoryProfile tmProfile = l10nProfile
-                .getTranslationMemoryProfile();
+        TranslationMemoryProfile tmProfile = l10nProfile.getTranslationMemoryProfile();
 
-        LeverageOptions leverageOptions = new LeverageOptions(tmProfile,
-                leveragingLocales);
+        LeverageOptions leverageOptions = new LeverageOptions(tmProfile, leveragingLocales);
 
         TmCoreManager tmCoreManager = LingServerProxy.getTmCoreManager();
 
-        List targetPages = p_workflow.getTargetPages();
+        Collection<TargetPage> targetPages = p_workflow.getTargetPages();
         long jobId = p_workflow.getJob().getId();
-        int size = targetPages.size();
-
-        for (int i = 0; i < size; i++)
+        for (TargetPage tp : targetPages)
         {
-            TargetPage tp = (TargetPage) targetPages.get(i);
-
-            tmCoreManager.populatePageByLocale(tp.getSourcePage(),
-                    leverageOptions, tp.getGlobalSightLocale(), jobId);
+            tmCoreManager.populatePageByLocale(tp.getSourcePage(), leverageOptions,
+                    tp.getGlobalSightLocale(), jobId);
 
             // also update page state along with its tuvs. Note that
             // workflow state will also be set to exported in this method.
@@ -498,14 +481,12 @@ public final class SecondaryTargetFileMgrLocal implements
      * Construct a relative path by appending the job id and workflow id to the
      * current path.
      */
-    private String constructRelativePath(String p_relativePath, long p_jobId,
-            Long p_wfId)
+    private String constructRelativePath(String p_relativePath, long p_jobId, Long p_wfId)
     {
         // make sure there are no slashed
         if (p_relativePath.startsWith("/") || p_relativePath.startsWith("\\"))
         {
-            p_relativePath = p_relativePath.substring(1, p_relativePath
-                    .length());
+            p_relativePath = p_relativePath.substring(1, p_relativePath.length());
         }
 
         // append job id and workflow id to the beginning of the relative path
@@ -523,7 +504,8 @@ public final class SecondaryTargetFileMgrLocal implements
      * Determines whether the existing STF (if any) should be replaced by a
      * newly created one.
      */
-    private boolean shouldReplaceExistingStf(long p_workflowInstanceId, long p_taskId) throws Exception
+    private boolean shouldReplaceExistingStf(long p_workflowInstanceId, long p_taskId)
+            throws Exception
     {
         WfTaskInfo wfti = ServerProxy.getWorkflowServer().getWorkflowTaskInfo(p_workflowInstanceId,
                 p_taskId);

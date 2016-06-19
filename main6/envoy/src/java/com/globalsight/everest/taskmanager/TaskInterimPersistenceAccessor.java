@@ -107,8 +107,7 @@ public class TaskInterimPersistenceAccessor
         }
         catch (Exception e)
         {
-            CATEGORY.error("Failed to update activity with TASK_ID " + taskId,
-                    e);
+            CATEGORY.error("Failed to update activity with TASK_ID " + taskId, e);
         }
         finally
         {
@@ -119,39 +118,28 @@ public class TaskInterimPersistenceAccessor
 
     /**
      * Cancels the active activities from the workflow(s) being canceled.
-     * 
-     * @param taskList
-     *            The list of active activities.
      */
-    public static void cancelInterimActivities(List<?> taskList)
+    public static void cancelInterimActivities(List<WorkflowTaskInstance> taskList)
     {
         Connection connection = null;
         try
         {
             connection = ConnectionPool.getConnection();
-            for (int i = 0; i < taskList.size(); i++)
+            for (WorkflowTaskInstance task : taskList)
             {
-                Object[] tasks = (Object[]) taskList.get(i);
-                for (Object task : tasks)
+                try
                 {
-                    try
-                    {
-                        skipInterimActivity(
-                                ((WorkflowTaskInstance) task).getTaskId(),
-                                connection);
-                    }
-                    catch (Exception e)
-                    {
-                        CATEGORY.error(
-                                "Error found in cancelInterimActivities.", e);
-                    }
+                    skipInterimActivity(task.getTaskId(), connection);
+                }
+                catch (Exception e)
+                {
+                    CATEGORY.error("Error found in cancelInterimActivities.", e);
                 }
             }
         }
         catch (ConnectionPoolException e)
         {
-            CATEGORY.error(
-                    "Fail to get connection in cancelInterimActivities.", e);
+            CATEGORY.error("Failed to get connection in cancelInterimActivities.", e);
         }
         finally
         {
@@ -189,8 +177,7 @@ public class TaskInterimPersistenceAccessor
      */
     public static void dispatchInterimActivity(TaskInstance taskInstance)
     {
-        String activityName = WorkflowJbpmUtil.getActivityName(taskInstance
-                .getName());
+        String activityName = WorkflowJbpmUtil.getActivityName(taskInstance.getName());
         Connection cnn = null;
         PreparedStatement ps = null;
         long taskId = taskInstance.getTask().getTaskNode().getId();
@@ -211,9 +198,8 @@ public class TaskInterimPersistenceAccessor
                 ps.executeUpdate();
                 if (CATEGORY.isDebugEnabled())
                 {
-                    CATEGORY.debug("Added activity " + activityName
-                            + " to user " + assignee + " with TASK_ID "
-                            + taskId + " to TASK_INTERIM table.");
+                    CATEGORY.debug("Added activity " + activityName + " to user " + assignee
+                            + " with TASK_ID " + taskId + " to TASK_INTERIM table.");
                 }
             }
             if (!actors.contains(pm))
@@ -223,17 +209,16 @@ public class TaskInterimPersistenceAccessor
                 ps.executeUpdate();
                 if (CATEGORY.isDebugEnabled())
                 {
-                    CATEGORY.debug("Added activity " + activityName + " to pm "
-                            + pm + " with TASK_ID " + taskId
-                            + " to TASK_INTERIM table.");
+                    CATEGORY.debug("Added activity " + activityName + " to pm " + pm
+                            + " with TASK_ID " + taskId + " to TASK_INTERIM table.");
                 }
             }
             cnn.commit();
         }
         catch (Exception e)
         {
-            CATEGORY.error("Failed to add activity " + activityName
-                    + " with TASK_ID " + taskId + " to TASK_INTERIM table.", e);
+            CATEGORY.error("Failed to add activity " + activityName + " with TASK_ID " + taskId
+                    + " to TASK_INTERIM table.", e);
         }
         finally
         {
@@ -269,8 +254,7 @@ public class TaskInterimPersistenceAccessor
         }
         catch (Exception e)
         {
-            CATEGORY.error("Failed to delete activity with TASK_ID " + taskId,
-                    e);
+            CATEGORY.error("Failed to delete activity with TASK_ID " + taskId, e);
         }
         finally
         {
@@ -420,8 +404,7 @@ public class TaskInterimPersistenceAccessor
         }
         catch (Exception e)
         {
-            CATEGORY.error("Failed to query 'TRIGGERED' state for user "
-                    + userId, e);
+            CATEGORY.error("Failed to query 'TRIGGERED' state for user " + userId, e);
         }
         finally
         {
@@ -459,8 +442,7 @@ public class TaskInterimPersistenceAccessor
         }
         catch (Exception e)
         {
-            CATEGORY.error("Failed to query the activity with TASK_ID "
-                    + taskId, e);
+            CATEGORY.error("Failed to query the activity with TASK_ID " + taskId, e);
         }
         finally
         {
@@ -543,8 +525,7 @@ public class TaskInterimPersistenceAccessor
         }
         catch (Exception e)
         {
-            CATEGORY.error("Failed to delete activity with TASK_ID " + taskId,
-                    e);
+            CATEGORY.error("Failed to delete activity with TASK_ID " + taskId, e);
         }
         finally
         {
@@ -570,8 +551,8 @@ public class TaskInterimPersistenceAccessor
      * @param pm
      *            The project manager.
      */
-    private static void deleteAvailableActivity(Connection cnn, long taskId,
-            String actor, String pm)
+    private static void deleteAvailableActivity(Connection cnn, long taskId, String actor,
+            String pm)
     {
         PreparedStatement ps = null;
         try
@@ -584,8 +565,7 @@ public class TaskInterimPersistenceAccessor
         }
         catch (Exception e)
         {
-            CATEGORY.error(
-                    "Failed to delete activities with TASK_ID " + taskId, e);
+            CATEGORY.error("Failed to delete activities with TASK_ID " + taskId, e);
         }
         finally
         {
@@ -602,8 +582,7 @@ public class TaskInterimPersistenceAccessor
      * @param userId
      *            The user who is logging in the first time.
      */
-    private static void deleteDirtyActivities(Connection cnn, String userId)
-            throws Exception
+    private static void deleteDirtyActivities(Connection cnn, String userId) throws Exception
     {
         Connection c = cnn;
         PreparedStatement ps = null;
@@ -619,8 +598,7 @@ public class TaskInterimPersistenceAccessor
         }
         catch (Exception e)
         {
-            CATEGORY.error("Failed to delete the dirty activities from user "
-                    + userId, e);
+            CATEGORY.error("Failed to delete the dirty activities from user " + userId, e);
             throw e;
         }
         finally
@@ -645,8 +623,7 @@ public class TaskInterimPersistenceAccessor
      * 
      * @throws Exception
      */
-    private static void setTriggeredMark(Connection cnn, String userId)
-            throws Exception
+    private static void setTriggeredMark(Connection cnn, String userId) throws Exception
     {
         PreparedStatement ps = null;
         try
@@ -657,8 +634,7 @@ public class TaskInterimPersistenceAccessor
         }
         catch (Exception e)
         {
-            CATEGORY.error("Failed to set the 'TRIGGERED' mark for user "
-                    + userId, e);
+            CATEGORY.error("Failed to set the 'TRIGGERED' mark for user " + userId, e);
             throw e;
         }
         finally
@@ -682,9 +658,8 @@ public class TaskInterimPersistenceAccessor
      * 
      * @throws Exception
      */
-    private static void transferActivities(Connection cnn,
-            List<TaskVo> availableTasks, List<TaskVo> inprogressTasks, String userId)
-            throws Exception
+    private static void transferActivities(Connection cnn, List<TaskVo> availableTasks,
+            List<TaskVo> inprogressTasks, String userId) throws Exception
     {
         PreparedStatement ps = null;
         try
@@ -692,21 +667,21 @@ public class TaskInterimPersistenceAccessor
             ps = cnn.prepareStatement(SQL_INSERT_ACTIVITY);
             for (int i = 0; i < availableTasks.size(); i++)
             {
-            	TaskVo task = availableTasks.get(i);
-            	TaskImpl t = HibernateUtil.get(TaskImpl.class, task.getTaskId());
-            	
+                TaskVo task = availableTasks.get(i);
+                TaskImpl t = HibernateUtil.get(TaskImpl.class, task.getTaskId());
+
                 ps.setLong(1, t.getId());
                 ps.setString(2, t.getTaskName());
                 ps.setString(3, Task.STATE_ACTIVE_STR);
                 ps.setString(4, userId);
                 ps.executeUpdate();
             }
-            
+
             for (int i = 0; i < inprogressTasks.size(); i++)
             {
-            	TaskVo task = inprogressTasks.get(i);
-            	TaskImpl t = HibernateUtil.get(TaskImpl.class, task.getTaskId());
-            	
+                TaskVo task = inprogressTasks.get(i);
+                TaskImpl t = HibernateUtil.get(TaskImpl.class, task.getTaskId());
+
                 ps.setLong(1, t.getId());
                 ps.setString(2, t.getTaskName());
                 ps.setString(3, Task.STATE_ACCEPTED_STR);
@@ -716,8 +691,9 @@ public class TaskInterimPersistenceAccessor
         }
         catch (Exception e)
         {
-            CATEGORY.error("Failed to transfer activities for user " + userId
-                    + " to TASK_INTERIM table.", e);
+            CATEGORY.error(
+                    "Failed to transfer activities for user " + userId + " to TASK_INTERIM table.",
+                    e);
             throw e;
         }
         finally

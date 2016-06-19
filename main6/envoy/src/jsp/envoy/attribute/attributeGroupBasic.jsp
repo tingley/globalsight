@@ -55,6 +55,10 @@
 	    attributeSetId = Long.toString(attributeSet.getId());;
 	    name = attributeSet.getName();
 	    desc = attributeSet.getDescription();
+	    if (desc == null) 
+	    {
+			desc = "";
+		}
 	    validateURL += "&id=" + attributeSetId;
 	}
 %>

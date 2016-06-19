@@ -1,3 +1,4 @@
+
 /**
  * Copyright 2009 Welocalize, Inc.
  * 
@@ -14,14 +15,9 @@
  * the License.
  * 
  */
-
-import installer.InputOption;
-import installer.InstallerFrame;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -29,7 +25,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
@@ -46,11 +41,12 @@ import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
+import installer.InputOption;
 import util.Action;
+import util.CodeUtil;
 import util.FileUtil;
 import util.InstallUtil;
 import util.JarSignUtil;
-import util.CodeUtil;
 import util.Page;
 
 public class Install extends installer.EventBroadcaster
@@ -84,16 +80,6 @@ public class Install extends installer.EventBroadcaster
 
     public static final String INSTALLATION_MYSQL_DIRECTORY = "data/mysql";
 
-    public static final String INSTALLATION_OPENLDAP_DIRECTORY = "data/openldap";
-
-    public static final String INSTALLATION_OPENLDAP_SUB_DIRECTORY = INSTALLATION_OPENLDAP_DIRECTORY
-            + "/globalsight";
-
-    public static final String INSTALLATION_OPENLDAP_DIRECTORY_LINUX = "data/openldap-linux";
-
-    public static final String INSTALLATION_OPENLDAP_SUB_DIRECTORY_LINUX = INSTALLATION_OPENLDAP_DIRECTORY_LINUX
-            + "/globalsight";
-
     public static String GS_HOME = determineGsHome();
 
     // new directory in jboss 7
@@ -108,11 +94,9 @@ public class Install extends installer.EventBroadcaster
 
     public static String JBOSS_UTIL_BIN = concatPath(GS_HOME, "jboss/util/bin");
 
-    public static String MYSQL_SQL_FILE = concatPath(GS_HOME,
-            "install/data/mysql");
+    public static String MYSQL_SQL_FILE = concatPath(GS_HOME, "install/data/mysql");
 
-    public static final String TEMP_DIRECTORY = System
-            .getProperty("java.io.tmpdir");
+    public static final String TEMP_DIRECTORY = System.getProperty("java.io.tmpdir");
 
     // For the properties inside the installation directory, use
     // forward slashes in the path, which will work if they are
@@ -134,8 +118,7 @@ public class Install extends installer.EventBroadcaster
 
     private static final String INSTALL_GROUPS_PROPERTIES_FILE = "data/installOrderUI.properties";
 
-    public static final String GS_KEY_DIR = concatPath(
-            INSTALLATION_DATA_DIRECTORY, "key");
+    public static final String GS_KEY_DIR = concatPath(INSTALLATION_DATA_DIRECTORY, "key");
 
     private int m_operatingSystem;
 
@@ -152,32 +135,24 @@ public class Install extends installer.EventBroadcaster
     private static final String SERVER_HOST = "server_host";
 
     private static final String[] creationSqlFiles =
-    { "create_cap_mysql.sql", "create_snippet_tables_mysql.sql",
-            "vendor_management_mysql.sql",
-            "create_cxe_mysql.sql", "insert_locales_mysql.sql",
-            "insert_currency_codes_mysql.sql",
-            "insert_template_formats_mysql.sql",
-            "insert_known_formats_mysql.sql",
-            "insert_system_parameters_mysql.sql",
-            "insert_UImodifiable_system_parameters_mysql.sql",
+    { "create_cap_mysql.sql", "create_snippet_tables_mysql.sql", "vendor_management_mysql.sql",
+            "create_cxe_mysql.sql", "insert_locales_mysql.sql", "insert_currency_codes_mysql.sql",
+            "insert_template_formats_mysql.sql", "insert_known_formats_mysql.sql",
+            "insert_system_parameters_mysql.sql", "insert_UImodifiable_system_parameters_mysql.sql",
             "insert_extensions_mysql.sql", "insert_exportlocation_mysql.sql",
-            "insert_default_calendar_mysql.sql",
-            "insert_leverage_group_mysql.sql", "create_tm_mysql.sql",
-            "create_in_progress_tm_mysql.sql", "create_corpus_map_mysql.sql",
-            "create_termbase_tables_mysql.sql",
-            "insert_termbase_data_mysql.sql", "create_jbpm_tables.sql",
-            "create_quartz_tables_mysql.sql" };
+            "insert_default_calendar_mysql.sql", "insert_leverage_group_mysql.sql",
+            "create_tm_mysql.sql", "create_in_progress_tm_mysql.sql", "create_corpus_map_mysql.sql",
+            "create_termbase_tables_mysql.sql", "insert_termbase_data_mysql.sql",
+            "create_jbpm_tables.sql", "create_quartz_tables_mysql.sql" };
 
     private static final String[] cleanSqlFiles =
-    { "drop_all_mysql.sql", "drop_jbpm_tables.sql",
-            "drop_quartz_tables_mysql.sql" };
+    { "drop_all_mysql.sql", "drop_jbpm_tables.sql", "drop_quartz_tables_mysql.sql" };
 
     // Files to copy, stored in tables so they can be counted. Note that
     // they only store the names of individual files, not directories.
     private Hashtable<String, String> m_configFileList = null;
 
-    private static ResourceBundle RESOURCE = ResourceBundle
-            .getBundle("data/installNoUI");
+    private static ResourceBundle RESOURCE = ResourceBundle.getBundle("data/installNoUI");
 
     private static ResourceBundle INSTALL_OPTION_RESOURCE = ResourceBundle
             .getBundle("data/installAmbassador");
@@ -191,13 +166,13 @@ public class Install extends installer.EventBroadcaster
     private static final String DIVIDE_CHAR = "=";
 
     private static final String Line_CHAR = "*";
-    
+
     private String JKS, keyPass, keyAlias;
-    
+
     private static final Set<String> keys = new HashSet<String>();
 
-    public final static Action QUIT_ACTION = new Action(
-            RESOURCE.getString("quit_key"), RESOURCE.getString("quit_name"), 0)
+    public final static Action QUIT_ACTION = new Action(RESOURCE.getString("quit_key"),
+            RESOURCE.getString("quit_name"), 0)
     {
         public void doAction()
         {
@@ -205,8 +180,8 @@ public class Install extends installer.EventBroadcaster
         }
     };
 
-    public final Action BACK_ACTION = new Action(
-            RESOURCE.getString("back_key"), RESOURCE.getString("back_name"), -1)
+    public final Action BACK_ACTION = new Action(RESOURCE.getString("back_key"),
+            RESOURCE.getString("back_name"), -1)
     {
         public void doAction()
         {
@@ -214,8 +189,8 @@ public class Install extends installer.EventBroadcaster
         }
     };
 
-    public final Action NEXT_ACTION = new Action(
-            RESOURCE.getString("next_key"), RESOURCE.getString("next_name"), -2)
+    public final Action NEXT_ACTION = new Action(RESOURCE.getString("next_key"),
+            RESOURCE.getString("next_name"), -2)
     {
         public void doAction()
         {
@@ -232,8 +207,8 @@ public class Install extends installer.EventBroadcaster
         }
     };
 
-    public final Action DOWN_ACTION = new Action(
-            RESOURCE.getString("down_key"), RESOURCE.getString("down_name"), -4)
+    public final Action DOWN_ACTION = new Action(RESOURCE.getString("down_key"),
+            RESOURCE.getString("down_name"), -4)
     {
         public void doAction()
         {
@@ -241,8 +216,7 @@ public class Install extends installer.EventBroadcaster
         }
     };
 
-    public final Action INSTALL_ACTION = new Action(
-            RESOURCE.getString("install_key"),
+    public final Action INSTALL_ACTION = new Action(RESOURCE.getString("install_key"),
             RESOURCE.getString("install_name"), -5)
     {
         public void doAction()
@@ -259,8 +233,7 @@ public class Install extends installer.EventBroadcaster
         }
     };
 
-    public final Action WELCOLM_PAGE_ACTION = new Action(
-            RESOURCE.getString("welcolm_page_key"),
+    public final Action WELCOLM_PAGE_ACTION = new Action(RESOURCE.getString("welcolm_page_key"),
             RESOURCE.getString("welcolm_page_name"), -6)
     {
         public void doAction()
@@ -269,8 +242,7 @@ public class Install extends installer.EventBroadcaster
         }
     };
 
-    public final Action INSTALL_PAGE_ACTION = new Action(
-            RESOURCE.getString("install_page_key"),
+    public final Action INSTALL_PAGE_ACTION = new Action(RESOURCE.getString("install_page_key"),
             RESOURCE.getString("install_page_name"), -7)
     {
         public String toString()
@@ -284,8 +256,7 @@ public class Install extends installer.EventBroadcaster
         }
     };
 
-    public final Action LOAD_SETTINGS_ACTION = new Action(
-            RESOURCE.getString("load_settings_key"),
+    public final Action LOAD_SETTINGS_ACTION = new Action(RESOURCE.getString("load_settings_key"),
             RESOURCE.getString("load_settings_name"), -8)
     {
         public void doAction()
@@ -300,9 +271,8 @@ public class Install extends installer.EventBroadcaster
                 }
                 catch (IOException e)
                 {
-                    logger.error(RESOURCE
-                            .getString("error_settings_path")
-                            + file.getAbsolutePath(), e);
+                    logger.error(RESOURCE.getString("error_settings_path") + file.getAbsolutePath(),
+                            e);
                 }
             }
 
@@ -414,8 +384,7 @@ public class Install extends installer.EventBroadcaster
         System.out.print("\n--");
         StringBuffer pageName = new StringBuffer();
         List<String> pages = InstallUtil.getPages();
-        pageName.append(" ").append((String) pages.get(pageIndex - 1))
-                .append(" ");
+        pageName.append(" ").append((String) pages.get(pageIndex - 1)).append(" ");
         if (properties.size() > Page.MAX_ROW)
         {
             int pageNum = properties.size() / Page.MAX_ROW;
@@ -449,8 +418,7 @@ public class Install extends installer.EventBroadcaster
                     storeProperty.put(option.getKey(), returnValue);
                 }
             }
-            logger.info(i + 1 + " : " + option.getDesplayValue() + " = "
-                    + value);
+            logger.info(i + 1 + " : " + option.getDesplayValue() + " = " + value);
         }
 
         logger.info("");
@@ -510,8 +478,7 @@ public class Install extends installer.EventBroadcaster
         actions.add(LOAD_SETTINGS_ACTION);
         actions.add(NEXT_ACTION);
 
-        logger.info(m_installAmbassador
-                .getProperty("pre_install_message_no_ui"));
+        logger.info(m_installAmbassador.getProperty("pre_install_message_no_ui"));
         for (int i = 0; i < actions.size(); i++)
         {
             Action action = (Action) actions.get(i);
@@ -545,7 +512,7 @@ public class Install extends installer.EventBroadcaster
                 execute(cmd);
             }
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             logger.error(e);
         }
@@ -656,31 +623,30 @@ public class Install extends installer.EventBroadcaster
 
         gotoPropertiesPage(pageIndex, (inputValue - 1) / Page.MAX_ROW);
     }
-    
+
     private boolean validateJarSign()
     {
-    	boolean enable = "true".equalsIgnoreCase(getInstallValue("jar_sign_enable"));
-    	if (enable)
-    	{
+        boolean enable = "true".equalsIgnoreCase(getInstallValue("jar_sign_enable"));
+        if (enable)
+        {
             String keyStore = getInstallValue("jar_sign_jks");
             keyStore = keyStore.trim();
             File r = new File(keyStore);
             if (!r.isFile())
             {
-            	logger.info(m_installAmbassador
-                        .getProperty("error.keystore_file"));
-                try 
+                logger.info(m_installAmbassador.getProperty("error.keystore_file"));
+                try
                 {
-					System.in.read();
-				} 
-                catch (IOException e) 
+                    System.in.read();
+                }
+                catch (IOException e)
                 {
                     logger.error(e);
-				}
-            	
-            	return false;
+                }
+
+                return false;
             }
-            
+
             keyStore = r.getAbsolutePath();
             String keyPass = getInstallValue("jar_sign_pwd");
             String keyAlias = getInstallValue("jar_sign_keyAlias");
@@ -694,40 +660,35 @@ public class Install extends installer.EventBroadcaster
             }
             else
             {
-            	String confirm = m_installAmbassador
-                        .getProperty("alert.keystore_password_no_ui");
-                InputOption confirmCreateTable = new InputOption(null, confirm,
-                        InputOption.YES_NO);
+                String confirm = m_installAmbassador.getProperty("alert.keystore_password_no_ui");
+                InputOption confirmCreateTable = new InputOption(null, confirm, InputOption.YES_NO);
                 String input = InstallUtil.getInput(confirmCreateTable, ":");
                 if ("n".equalsIgnoreCase(input))
                 {
-                	return false;
+                    return false;
                 }
             }
-    	}
-    	
-    	return true;
+        }
+
+        return true;
     }
 
     private void install() throws Exception
     {
         logger.info("Storing properties...");
         storeUserInput();
-        
+
         if (!validateJarSign())
         {
-        	gotoPropertiesPage(1);
+            gotoPropertiesPage(1);
         }
-        
 
-        String createDatabase = InstallUtil.getInstallOptions().getProperty(
-                InstallUtil.CREATE_DATABASE);
+        String createDatabase = InstallUtil.getInstallOptions()
+                .getProperty(InstallUtil.CREATE_DATABASE);
         if (createDatabase.equalsIgnoreCase("true"))
         {
-            String confirm = m_installAmbassador
-                    .getProperty("alert.confirm_create_db_no_ui");
-            InputOption confirmCreateTable = new InputOption(null, confirm,
-                    InputOption.YES_NO);
+            String confirm = m_installAmbassador.getProperty("alert.confirm_create_db_no_ui");
+            InputOption confirmCreateTable = new InputOption(null, confirm, InputOption.YES_NO);
             String input = InstallUtil.getInput(confirmCreateTable, ":");
             if ("n".equalsIgnoreCase(input))
             {
@@ -735,28 +696,25 @@ public class Install extends installer.EventBroadcaster
             }
         }
 
-        String generate = InstallUtil.getInstallOptions().getProperty(
-                InstallUtil.GENERATE_CONFGURATEION_FILE);
+        String generate = InstallUtil.getInstallOptions()
+                .getProperty(InstallUtil.GENERATE_CONFGURATEION_FILE);
         if (generate.equalsIgnoreCase("true"))
         {
-            logger.info(INSTALL_OPTION_RESOURCE
-                    .getString(InstallUtil.GENERATE_CONFGURATEION_FILE));
+            logger.info(INSTALL_OPTION_RESOURCE.getString(InstallUtil.GENERATE_CONFGURATEION_FILE));
             processFiles();
         }
 
-        String createService = InstallUtil.getInstallOptions().getProperty(
-                InstallUtil.CREATE_NT_SERVICE);
+        String createService = InstallUtil.getInstallOptions()
+                .getProperty(InstallUtil.CREATE_NT_SERVICE);
         if (createService.equalsIgnoreCase("true"))
         {
-            logger.info(INSTALL_OPTION_RESOURCE
-                    .getString(InstallUtil.CREATE_NT_SERVICE));
+            logger.info(INSTALL_OPTION_RESOURCE.getString(InstallUtil.CREATE_NT_SERVICE));
             installGlobalSightService();
         }
 
         if (createDatabase.equalsIgnoreCase("true"))
         {
-            logger.info(INSTALL_OPTION_RESOURCE
-                    .getString(InstallUtil.CREATE_DATABASE));
+            logger.info(INSTALL_OPTION_RESOURCE.getString(InstallUtil.CREATE_DATABASE));
             createDatabaseTables();
         }
         else
@@ -765,8 +723,7 @@ public class Install extends installer.EventBroadcaster
             updateDatabaseTables();
         }
 
-        String merge = InstallUtil.getInstallOptions().getProperty(
-                InstallUtil.MERGE_PROPERTIES);
+        String merge = InstallUtil.getInstallOptions().getProperty(InstallUtil.MERGE_PROPERTIES);
         if (merge.equalsIgnoreCase("true"))
         {
             String previousAmbassadorHome = readEntry(
@@ -775,20 +732,19 @@ public class Install extends installer.EventBroadcaster
         }
 
         signJar();
-        
+
         logger.info(RESOURCE.getString("install_finish"));
         System.in.read();
     }
-    
+
     private void signJar()
     {
-    	if (JKS != null)
-    	{
-    		File root = new File(
-        			Install.GS_HOME
-    						+ "/jboss/server/standalone/deployments/globalsight.ear/globalsight-web.war/applet/lib");
-    		JarSignUtil.updateJars(root, JKS, keyPass, keyAlias, null, null);
-    	}
+        if (JKS != null)
+        {
+            File root = new File(Install.GS_HOME
+                    + "/jboss/server/standalone/deployments/globalsight.ear/globalsight-web.war/applet/lib");
+            JarSignUtil.updateJars(root, JKS, keyPass, keyAlias, null, null);
+        }
     }
 
     /**
@@ -799,8 +755,7 @@ public class Install extends installer.EventBroadcaster
      * @param p_propertyFileLocation
      *            path to properties file
      */
-    public static void setLastInstallValuesLocation(
-            String p_propertyFileLocation)
+    public static void setLastInstallValuesLocation(String p_propertyFileLocation)
     {
         INSTALL_VALUES_PROPERTIES_FILE = p_propertyFileLocation;
     }
@@ -843,8 +798,7 @@ public class Install extends installer.EventBroadcaster
      * @throws FileNotFoundException
      * @throws IOException
      */
-    private InputStream getResource(String p_propertyFileName)
-            throws IOException
+    private InputStream getResource(String p_propertyFileName) throws IOException
     {
         InputStream inputstream;
 
@@ -879,16 +833,15 @@ public class Install extends installer.EventBroadcaster
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public void loadProperties(String p_propertyFileName,
-            Properties p_properties) throws IOException
+    public void loadProperties(String p_propertyFileName, Properties p_properties)
+            throws IOException
     {
         InputStream inputstream = getResource(p_propertyFileName);
         p_properties.load(inputstream);
         inputstream.close();
-        
+
         if (p_propertyFileName.equalsIgnoreCase(INSTALL_VALUES_PROPERTIES_FILE)
-                || p_propertyFileName
-                        .equalsIgnoreCase(SYSTEM4_LAST_INSTALL_VALUES_PROPERTIES_FILE))
+                || p_propertyFileName.equalsIgnoreCase(SYSTEM4_LAST_INSTALL_VALUES_PROPERTIES_FILE))
         {
             decode();
         }
@@ -906,8 +859,7 @@ public class Install extends installer.EventBroadcaster
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public Properties loadProperties(String p_propertyFileName)
-            throws IOException
+    public Properties loadProperties(String p_propertyFileName) throws IOException
     {
         Properties properties = new Properties();
         loadProperties(p_propertyFileName, properties);
@@ -945,13 +897,11 @@ public class Install extends installer.EventBroadcaster
             if (m_operatingSystem == OS_WINDOWS)
             {
                 // Load the default values
-                loadProperties(DEFAULT_INSTALL_VALUES_PROPERTIES_FILE,
-                        m_installValues);
+                loadProperties(DEFAULT_INSTALL_VALUES_PROPERTIES_FILE, m_installValues);
             }
             else if (m_operatingSystem == OS_LINUX)
             {
-                loadProperties(DEFAULT_INSTALL_VALUES_PROPERTIES_FILE_NO_UI,
-                        m_installValues);
+                loadProperties(DEFAULT_INSTALL_VALUES_PROPERTIES_FILE_NO_UI, m_installValues);
             }
             else
             {
@@ -970,8 +920,7 @@ public class Install extends installer.EventBroadcaster
             {
                 try
                 {
-                    loadProperties(SYSTEM4_LAST_INSTALL_VALUES_PROPERTIES_FILE,
-                            m_installValues);
+                    loadProperties(SYSTEM4_LAST_INSTALL_VALUES_PROPERTIES_FILE, m_installValues);
                 }
                 catch (IOException exception2)
                 {
@@ -985,8 +934,8 @@ public class Install extends installer.EventBroadcaster
         }
         catch (IOException e)
         {
-            logger.error("Error reading Install values "
-                    + DEFAULT_INSTALL_VALUES_PROPERTIES_FILE, e);
+            logger.error("Error reading Install values " + DEFAULT_INSTALL_VALUES_PROPERTIES_FILE,
+                    e);
             throw e;
         }
 
@@ -994,12 +943,11 @@ public class Install extends installer.EventBroadcaster
     }
 
     // Get the order
-    public void loadOrderedList(String p_propertiesFile,
-            ArrayList<String> p_list) throws IOException
+    public void loadOrderedList(String p_propertiesFile, ArrayList<String> p_list)
+            throws IOException
     {
         InputStream inputstream = getResource(p_propertiesFile);
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-                inputstream));
+        BufferedReader in = new BufferedReader(new InputStreamReader(inputstream));
 
         String str;
         while ((str = in.readLine()) != null)
@@ -1022,13 +970,11 @@ public class Install extends installer.EventBroadcaster
     {
         try
         {
-            loadOrderedList(INSTALL_ORDER_PROPERTIES_FILE,
-                    m_installOrderArrayList);
+            loadOrderedList(INSTALL_ORDER_PROPERTIES_FILE, m_installOrderArrayList);
         }
         catch (IOException e)
         {
-            logger.error("Error reading Install order "
-                    + INSTALL_ORDER_PROPERTIES_FILE, e);
+            logger.error("Error reading Install order " + INSTALL_ORDER_PROPERTIES_FILE, e);
             throw e;
         }
     }
@@ -1037,8 +983,7 @@ public class Install extends installer.EventBroadcaster
     private void loadInstallAmbassador() throws IOException
     {
         // Load the key-displayname hash from the properties file
-        String dir = INSTALLATION_DATA_DIRECTORY
-                + "/installAmbassador.properties";
+        String dir = INSTALLATION_DATA_DIRECTORY + "/installAmbassador.properties";
 
         try
         {
@@ -1064,8 +1009,7 @@ public class Install extends installer.EventBroadcaster
         }
         catch (IOException e)
         {
-            logger.error("Error reading Install display strings "
-                    + installDisplayProperties, e);
+            logger.error("Error reading Install display strings " + installDisplayProperties, e);
             throw e;
         }
     }
@@ -1086,8 +1030,7 @@ public class Install extends installer.EventBroadcaster
 
         try
         {
-            storeUserInput(concatPath(INSTALLATION_DATA_DIRECTORY,
-                    "installValues.properties"));
+            storeUserInput(concatPath(INSTALLATION_DATA_DIRECTORY, "installValues.properties"));
         }
         catch (IOException e3)
         {
@@ -1108,31 +1051,28 @@ public class Install extends installer.EventBroadcaster
         {
             logger.info("Saving your settings to " + p_fileName);
             addAdditionalInstallValues();
-            String p_fileName_forwardslash= replace(p_fileName.toString(), BACKSLASH, FORWARDSLASH);
-            if (p_fileName_forwardslash
-                    .equalsIgnoreCase(INSTALL_VALUES_PROPERTIES_FILE)
-                    || p_fileName
-                            .equalsIgnoreCase(SYSTEM4_LAST_INSTALL_VALUES_PROPERTIES_FILE))
+            String p_fileName_forwardslash = replace(p_fileName.toString(), BACKSLASH,
+                    FORWARDSLASH);
+            if (p_fileName_forwardslash.equalsIgnoreCase(INSTALL_VALUES_PROPERTIES_FILE)
+                    || p_fileName.equalsIgnoreCase(SYSTEM4_LAST_INSTALL_VALUES_PROPERTIES_FILE))
             {
                 encode();
             }
-            
+
             m_installValues.store(new FileOutputStream(p_fileName), null);
-            
-            if (p_fileName_forwardslash
-                    .equalsIgnoreCase(INSTALL_VALUES_PROPERTIES_FILE)
-                    || p_fileName
-                            .equalsIgnoreCase(SYSTEM4_LAST_INSTALL_VALUES_PROPERTIES_FILE))
+
+            if (p_fileName_forwardslash.equalsIgnoreCase(INSTALL_VALUES_PROPERTIES_FILE)
+                    || p_fileName.equalsIgnoreCase(SYSTEM4_LAST_INSTALL_VALUES_PROPERTIES_FILE))
             {
                 decode();
-            } 
+            }
         }
         catch (IOException e)
         {
             logger.error("Error saving your settings " + p_fileName, e);
             throw e;
         }
-        logger.info("Saving your settings to " + p_fileName+" is done.");
+        logger.info("Saving your settings to " + p_fileName + " is done.");
     }
 
     // initializes the list of configuration files
@@ -1145,207 +1085,96 @@ public class Install extends installer.EventBroadcaster
         if (SERVER_JBOSS.equals(choice))
         {
             // standalone.xml
-            m_configFileList
-                    .put(concatPath(GS_HOME,
-                            "jboss/util/standalone.xml.template"),
-                            concatPath(GS_HOME,
-                                    "jboss/server/standalone/configuration/standalone.xml"));
+            m_configFileList.put(concatPath(GS_HOME, "jboss/util/standalone.xml.template"),
+                    concatPath(GS_HOME, "jboss/server/standalone/configuration/standalone.xml"));
             if (m_operatingSystem == OS_LINUX)
             {
                 // service.sh
-                m_configFileList.put(
-                        concatPath(JBOSS_UTIL_BIN, "service.sh.template"),
+                m_configFileList.put(concatPath(JBOSS_UTIL_BIN, "service.sh.template"),
                         concatPath(JBOSS_UTIL_BIN, "service.sh"));
             }
         }
 
         // Process files in the deployment directory
-        m_configFileList.put(
-                concatPath(DIR_EAR,
-                        "lib/classes/hibernate-jbpm.cfg.xml.template"),
+        m_configFileList.put(concatPath(DIR_EAR, "lib/classes/hibernate-jbpm.cfg.xml.template"),
                 concatPath(DIR_EAR, "lib/classes/hibernate-jbpm.cfg.xml"));
 
-        m_configFileList.put(
-                concatPath(DIR_EAR, "lib/classes/quartz.properties.template"),
+        m_configFileList.put(concatPath(DIR_EAR, "lib/classes/quartz.properties.template"),
                 concatPath(DIR_EAR, "lib/classes/quartz.properties"));
 
-        m_configFileList.put(
-                concatPath(DIR_EAR,
-                        "globalsight-web.war/WEB-INF/web.xml.template"),
+        m_configFileList.put(concatPath(DIR_EAR, "globalsight-web.war/WEB-INF/web.xml.template"),
                 concatPath(DIR_EAR, "globalsight-web.war/WEB-INF/web.xml"));
 
-        m_configFileList
-                .put(concatPath(DIR_EAR,
-                        "lib/classes/properties/envoy_generated.properties.template"),
-                        concatPath(DIR_EAR,
-                                "lib/classes/properties/envoy_generated.properties"));
-
-        m_configFileList
-                .put(concatPath(DIR_EAR,
-                        "lib/classes/properties/db_connection.properties.template"),
-                        concatPath(DIR_EAR,
-                                "lib/classes/properties/db_connection.properties"));
-
-        m_configFileList
-                .put(concatPath(DIR_EAR,
-                        "lib/classes/hibernate.properties.template"),
-                        concatPath(DIR_EAR, "lib/classes/hibernate.properties"));
-
-        m_configFileList
-                .put(concatPath(DIR_EAR,
-                        "lib/classes/properties/Logger.properties.template"),
-                        concatPath(DIR_EAR,
-                                "lib/classes/properties/Logger.properties"));
+        m_configFileList.put(
+                concatPath(DIR_EAR, "lib/classes/properties/envoy_generated.properties.template"),
+                concatPath(DIR_EAR, "lib/classes/properties/envoy_generated.properties"));
 
         m_configFileList.put(
-                concatPath(DIR_EAR,
-                        "lib/classes/properties/SRX2.0.xsd.template"),
+                concatPath(DIR_EAR, "lib/classes/properties/db_connection.properties.template"),
+                concatPath(DIR_EAR, "lib/classes/properties/db_connection.properties"));
+
+        m_configFileList.put(concatPath(DIR_EAR, "lib/classes/hibernate.properties.template"),
+                concatPath(DIR_EAR, "lib/classes/hibernate.properties"));
+
+        m_configFileList.put(
+                concatPath(DIR_EAR, "lib/classes/properties/Logger.properties.template"),
+                concatPath(DIR_EAR, "lib/classes/properties/Logger.properties"));
+
+        m_configFileList.put(concatPath(DIR_EAR, "lib/classes/properties/SRX2.0.xsd.template"),
                 concatPath(DIR_EAR, "lib/classes/properties/SRX2.0.xsd"));
 
         // process command line scripts
-        m_configFileList.put(
-                concatPath(DIR_EAR, "bin/CreateDictionary.cmd.template"),
+        m_configFileList.put(concatPath(DIR_EAR, "bin/CreateDictionary.cmd.template"),
                 concatPath(DIR_EAR, "bin/CreateDictionary.cmd"));
 
         m_configFileList.put(
-                concatPath(DIR_EAR,
-                        "globalsight-web.war/reports/datasource.xml.template"),
-                concatPath(DIR_EAR,
-                        "globalsight-web.war/reports/datasource.xml"));
-
-        // files for LDAP (Windows Version) ldif file
-        m_configFileList
-                .put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
-                        "globalsight.ldif.template"),
-                        concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
-                                "globalsight.ldif"));
-
-        m_configFileList
-                .put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
-                        "addCustomer.ldif.template"),
-                        concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
-                                "addCustomer.ldif"));
+                concatPath(DIR_EAR, "globalsight-web.war/reports/datasource.xml.template"),
+                concatPath(DIR_EAR, "globalsight-web.war/reports/datasource.xml"));
 
         m_configFileList.put(
-                concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
-                        "vendor_management.ldif.template"),
-                concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
-                        "vendor_management.ldif"));
-
-        // acl file
-        m_configFileList.put(
-                concatPath(INSTALLATION_OPENLDAP_SUB_DIRECTORY,
-                        "globalsight.acl.template"),
-                concatPath(INSTALLATION_OPENLDAP_SUB_DIRECTORY,
-                        "globalsight.acl"));
-
-        // conf file
-        m_configFileList.put(
-                concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
-                        "ldap.conf.template"),
-                concatPath(INSTALLATION_OPENLDAP_DIRECTORY, "ldap.conf"));
+                concatPath(INSTALLATION_MYSQL_DIRECTORY, "create_cap_mysql.sql.template"),
+                concatPath(INSTALLATION_MYSQL_DIRECTORY, "create_cap_mysql.sql"));
 
         m_configFileList.put(
-                concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
-                        "slapd.conf.template"),
-                concatPath(INSTALLATION_OPENLDAP_DIRECTORY, "slapd.conf"));
+                concatPath(INSTALLATION_MYSQL_DIRECTORY, "delete_index_tables_mysql.sql.template"),
+                concatPath(INSTALLATION_MYSQL_DIRECTORY, "delete_index_tables_mysql.sql"));
 
-        // files for LDAP (Linux Version)
-        // ldif file
-        m_configFileList.put(
-                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
-                        "globalsight.ldif.template"),
-                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
-                        "globalsight.ldif"));
-
-        m_configFileList.put(
-                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
-                        "addCustomer.ldif.template"),
-                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
-                        "addCustomer.ldif"));
-
-        m_configFileList.put(
-                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
-                        "vendor_management.ldif.template"),
-                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
-                        "vendor_management.ldif"));
-
-        // acl file
-        m_configFileList.put(
-                concatPath(INSTALLATION_OPENLDAP_SUB_DIRECTORY_LINUX,
-                        "globalsight.acl.template"),
-                concatPath(INSTALLATION_OPENLDAP_SUB_DIRECTORY_LINUX,
-                        "globalsight.acl"));
-
-        // conf file
-        m_configFileList.put(
-                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
-                        "ldap.conf.template"),
-                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX, "ldap.conf"));
-
-        m_configFileList
-                .put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
-                        "slapd.conf.template"),
-                        concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
-                                "slapd.conf"));
-
-        m_configFileList
-                .put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                        "create_cap_mysql.sql.template"),
-                        concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                                "create_cap_mysql.sql"));
-
-        m_configFileList.put(
-                concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                        "delete_index_tables_mysql.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                        "delete_index_tables_mysql.sql"));
-
-        m_configFileList.put(
-                concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                        "gsdb_mysql.sql.template"),
+        m_configFileList.put(concatPath(INSTALLATION_MYSQL_DIRECTORY, "gsdb_mysql.sql.template"),
                 concatPath(INSTALLATION_MYSQL_DIRECTORY, "gsdb_mysql.sql"));
 
         m_configFileList.put(
                 concatPath(INSTALLATION_MYSQL_DIRECTORY,
                         "insert_default_calendar_mysql.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                        "insert_default_calendar_mysql.sql"));
+                concatPath(INSTALLATION_MYSQL_DIRECTORY, "insert_default_calendar_mysql.sql"));
 
         m_configFileList.put(
                 concatPath(INSTALLATION_MYSQL_DIRECTORY,
                         "insert_exportlocation_mysql.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                        "insert_exportlocation_mysql.sql"));
+                concatPath(INSTALLATION_MYSQL_DIRECTORY, "insert_exportlocation_mysql.sql"));
 
         m_configFileList.put(
                 concatPath(INSTALLATION_MYSQL_DIRECTORY,
                         "insert_system_parameters_mysql.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                        "insert_system_parameters_mysql.sql"));
+                concatPath(INSTALLATION_MYSQL_DIRECTORY, "insert_system_parameters_mysql.sql"));
 
-        m_configFileList
-                .put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
+        m_configFileList.put(
+                concatPath(INSTALLATION_MYSQL_DIRECTORY,
                         "insert_UImodifiable_system_parameters_mysql.sql.template"),
-                        concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                                "insert_UImodifiable_system_parameters_mysql.sql"));
+                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                        "insert_UImodifiable_system_parameters_mysql.sql"));
 
         m_configFileList.put(
                 concatPath(INSTALLATION_MYSQL_DIRECTORY,
                         "update_exportlocation_mysql.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                        "update_exportlocation_mysql.sql"));
+                concatPath(INSTALLATION_MYSQL_DIRECTORY, "update_exportlocation_mysql.sql"));
 
         m_configFileList.put(
-                concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                        "drop_all_mysql.sql.template"),
+                concatPath(INSTALLATION_MYSQL_DIRECTORY, "drop_all_mysql.sql.template"),
                 concatPath(INSTALLATION_MYSQL_DIRECTORY, "drop_all_mysql.sql"));
 
-        m_configFileList
-                .put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                        "drop_jbpm_tables.sql.template"),
-                        concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                                "drop_jbpm_tables.sql"));
+        m_configFileList.put(
+                concatPath(INSTALLATION_MYSQL_DIRECTORY, "drop_jbpm_tables.sql.template"),
+                concatPath(INSTALLATION_MYSQL_DIRECTORY, "drop_jbpm_tables.sql"));
     }
 
     // returns the number of configuration files in the list
@@ -1413,8 +1242,7 @@ public class Install extends installer.EventBroadcaster
 
         prehandleMailServer();
 
-        for (Enumeration<String> e = m_configFileList.keys(); e
-                .hasMoreElements();)
+        for (Enumeration<String> e = m_configFileList.keys(); e.hasMoreElements();)
         {
             String source = e.nextElement().toString();
             String destination = m_configFileList.get(source).toString();
@@ -1426,8 +1254,8 @@ public class Install extends installer.EventBroadcaster
 
     private boolean prehandleMailServer()
     {
-        boolean useSSLMail = "true".equalsIgnoreCase(m_installValues
-                .getProperty("mailserver_use_ssl", "false"));
+        boolean useSSLMail = "true"
+                .equalsIgnoreCase(m_installValues.getProperty("mailserver_use_ssl", "false"));
         if (useSSLMail)
             m_installValues.setProperty("mail_transport_protocol", "smtps");
         else
@@ -1436,41 +1264,55 @@ public class Install extends installer.EventBroadcaster
         String pop3Server = "";
         String mailAddress = m_installValues.getProperty("admin_email");
         if (mailAddress != null && mailAddress.contains("@"))
-            pop3Server = "pop3."
-                    + mailAddress.substring(mailAddress.indexOf("@") + 1);
+            pop3Server = "pop3." + mailAddress.substring(mailAddress.indexOf("@") + 1);
         else
             pop3Server = m_installValues.getProperty("mailserver");
         m_installValues.setProperty("mailserver_pop3", pop3Server);
 
-        boolean enableEmailServer = "true".equalsIgnoreCase(m_installValues
-                .getProperty("system_notification_enabled", "false"));
-        m_installValues.setProperty("mail_smtp_start", enableEmailServer ? ""
-                : "<!--");
-        m_installValues.setProperty("mail_smtp_end", enableEmailServer ? ""
-                : "-->");
+        boolean enableEmailServer = "true".equalsIgnoreCase(
+                m_installValues.getProperty("system_notification_enabled", "false"));
+        m_installValues.setProperty("mail_comments_end", enableEmailServer ? "-->" : "");
+        m_installValues.setProperty("mail_comments_start", enableEmailServer ? "<!--" : "");
 
-        boolean enableEmailAuthentication = "true"
-                .equalsIgnoreCase(m_installValues.getProperty(
-                        "email_authentication_enabled", "false"));
-        if (!enableEmailServer)
+        boolean enableEmailAuthentication = "true".equalsIgnoreCase(
+                m_installValues.getProperty("email_authentication_enabled", "false"));
+        if (enableEmailServer)
         {
-            enableEmailAuthentication = true;
+            if (enableEmailAuthentication)
+            {
+                m_installValues.setProperty("mail_authentication_start", "");
+                m_installValues.setProperty("mail_authentication_end", "");
+                m_installValues.setProperty("mail_start", "<!--");
+                m_installValues.setProperty("mail_end", "-->");
+            }
+            else
+            {
+                m_installValues.setProperty("mail_authentication_start", "<!--");
+                m_installValues.setProperty("mail_authentication_end", "-->");
+                m_installValues.setProperty("mail_start", "");
+                m_installValues.setProperty("mail_end", "");
+            }
         }
-        m_installValues.setProperty("mail_authentication_start",
-                enableEmailAuthentication ? "" : "<!--");
-        m_installValues.setProperty("mail_authentication_end",
-                enableEmailAuthentication ? "" : "-->");
+        else
+        {
+            m_installValues.setProperty("mail_authentication_start", "");
+            m_installValues.setProperty("mail_authentication_end", "");
+            m_installValues.setProperty("mail_start", "");
+            m_installValues.setProperty("mail_end", "");
+        }
 
         return useSSLMail;
     }
 
     private boolean prehandleServerSSL()
     {
-        boolean enableSSL = "true".equalsIgnoreCase(m_installValues
-                .getProperty("server_ssl_enable", "false"));
+        boolean enableSSL = "true"
+                .equalsIgnoreCase(m_installValues.getProperty("server_ssl_enable", "false"));
 
         if (enableSSL)
         {
+            m_installValues.setProperty("http_comments_end", "");
+            m_installValues.setProperty("http_comments_start", "");
             m_installValues.setProperty("ssl_comments_end", "-->");
             m_installValues.setProperty("ssl_comments_start", "<!--");
             String kspwd = m_installValues.getProperty("server_ssl_ks_pwd");
@@ -1479,6 +1321,8 @@ public class Install extends installer.EventBroadcaster
         }
         else
         {
+            m_installValues.setProperty("http_comments_end", "-->");
+            m_installValues.setProperty("http_comments_start", "<!--");
             m_installValues.setProperty("ssl_comments_end", "");
             m_installValues.setProperty("ssl_comments_start", "");
             m_installValues.setProperty("server_ssl_port", "443");
@@ -1492,35 +1336,30 @@ public class Install extends installer.EventBroadcaster
         String axis2config = "axis2.http.xml";
         if (enableSSL)
         {
-            String defaultKeyStore = concatPath(GS_HOME,
-                    "jboss/util/globalsight_ori.keystore");
+            String defaultKeyStore = concatPath(GS_HOME, "jboss/util/globalsight_ori.keystore");
 
             String keyStore = m_installValues.getProperty("server_ssl_ks_path");
-            if (keyStore == null || "".equals(keyStore.trim())
-                    || !new File(keyStore).isFile())
+            if (keyStore == null || "".equals(keyStore.trim()) || !new File(keyStore).isFile())
             {
                 keyStore = defaultKeyStore;
             }
 
             RecursiveCopy copier = new RecursiveCopy();
-            copier.copyFile(
-                    keyStore,
-                    concatPath(GS_HOME, "jboss/server/standalone/configuration"),
+            copier.copyFile(keyStore, concatPath(GS_HOME, "jboss/server/standalone/configuration"),
                     "globalsight.keystore");
 
             axis2config = "axis2.https.xml";
         }
 
-        File src = new File(concatPath(DIR_EAR,
-                "globalsightServices.war/WEB-INF/conf"), axis2config);
-        File dst = new File(concatPath(DIR_EAR,
-                "globalsightServices.war/WEB-INF/conf"), "axis2.xml");
+        File src = new File(concatPath(DIR_EAR, "globalsightServices.war/WEB-INF/conf"),
+                axis2config);
+        File dst = new File(concatPath(DIR_EAR, "globalsightServices.war/WEB-INF/conf"),
+                "axis2.xml");
 
         FileUtil.copyFile(src, dst);
     }
 
-    private void processFile(String sourceFileStr, String destFileStr)
-            throws IOException
+    private void processFile(String sourceFileStr, String destFileStr) throws IOException
     {
         processFile(sourceFileStr, destFileStr, m_installValues);
     }
@@ -1528,8 +1367,8 @@ public class Install extends installer.EventBroadcaster
     // replace instances of "%%key%%" with "value" in the source file,
     // and save it to the destination file. The keys and values are
     // from the specified properties object.
-    public void processFile(String sourceFileStr, String destFileStr,
-            Properties p_properties) throws IOException
+    public void processFile(String sourceFileStr, String destFileStr, Properties p_properties)
+            throws IOException
     {
         File sourceFile = new File(sourceFileStr);
         File destFile = new File(destFileStr);
@@ -1543,8 +1382,7 @@ public class Install extends installer.EventBroadcaster
         try
         {
             InputStream inputstream = getResource(sourceFileStr);
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                    inputstream));
+            BufferedReader in = new BufferedReader(new InputStreamReader(inputstream));
             BufferedWriter out = new BufferedWriter(new FileWriter(destFile));
 
             String str, newstr;
@@ -1569,22 +1407,19 @@ public class Install extends installer.EventBroadcaster
                     // match
                     {
                         newstr = replace(str, "%%ldap_user_password%%",
-                                encodeMD5(p_properties
-                                        .getProperty("ldap_password")));
+                                encodeMD5(p_properties.getProperty("ldap_password")));
                     }
                     else if (str.indexOf("%%super_admin_password%%") != -1) // has
                     // match
                     {
                         newstr = replace(str, "%%super_admin_password%%",
-                                encodeMD5(p_properties
-                                        .getProperty("system4_admin_password")));
+                                encodeMD5(p_properties.getProperty("system4_admin_password")));
                     }
                     else
                     {
                         // Iterate over the array to see if the string matches
                         // *any* of the install keys
-                        for (Enumeration<?> e = p_properties.propertyNames(); e
-                                .hasMoreElements();)
+                        for (Enumeration<?> e = p_properties.propertyNames(); e.hasMoreElements();)
                         {
                             String key = (String) e.nextElement();
                             String pattern = "%%" + key + "%%";
@@ -1596,8 +1431,7 @@ public class Install extends installer.EventBroadcaster
                                 continue;
                             }
 
-                            newstr = replace(str, pattern,
-                                    replacePathSlash(replace));
+                            newstr = replace(str, pattern, replacePathSlash(replace));
                             str = newstr;
                         }
                     }
@@ -1642,9 +1476,8 @@ public class Install extends installer.EventBroadcaster
     {
         if (str.startsWith(BACKSLASH))
         {
-            return (DOUBLEBACKSLASH + str.substring(2).replaceAll(
-                    DOUBLEBACKSLASH, FORWARDSLASH)).replaceAll(
-                    DOUBLEBACKSLASH_REG, DOUBLEBACKSLASH_REP);
+            return (DOUBLEBACKSLASH + str.substring(2).replaceAll(DOUBLEBACKSLASH, FORWARDSLASH))
+                    .replaceAll(DOUBLEBACKSLASH_REG, DOUBLEBACKSLASH_REP);
         }
         else
         {
@@ -1657,67 +1490,23 @@ public class Install extends installer.EventBroadcaster
         return 30;
     }
 
-    public void initOpenLDAP() throws IOException
-    {
-        if (m_operatingSystem == OS_LINUX)
-        {
-            // This operation does not support Linux yet.
-            return;
-        }
-
-        String ldapInstallDir = m_installValues.getProperty("ldap_install_dir");
-        if (ldapInstallDir.startsWith("\\\\"))
-        {
-            logger.info("OpenLDAP is not installed in the local machine.");
-            return;
-        }
-
-        String event = "Initializing OpenLDAP data.";
-        logger.info(event);
-
-        fireActionEvent(event);
-
-        // if (m_operatingSystem == OS_LINUX)
-        // {
-        // execute(new String[] { "sh",
-        // "./JavaServiceWrapper/bin/initOpenLDAP.sh", ldapInstallDir });
-        // }
-        // else
-        if (m_operatingSystem == OS_WINDOWS)
-        {
-            ldapInstallDir = '"' + ldapInstallDir.replace('/', '\\') + '"';
-            String[] cmds =
-            { concatPath(JBOSS_UTIL_BIN, "initOpenLDAP.bat"), ldapInstallDir };
-            executeNoOutputNoError(cmds);
-        }
-        else
-        {
-            logger.info("Your OS is not supported.");
-        }
-
-        logger.info("done.");
-    }
-
-    public void createDatabaseTables() throws IOException
+    public void createDatabaseTables() throws Exception
     {
         logger.info("Dropping GlobalSight tables.");
 
         for (int i = 0, length = cleanSqlFiles.length; i < length; i++)
         {
-            importSqlFile(concatPath(INSTALLATION_DATA_DIRECTORY, "/mysql/"
-                    + cleanSqlFiles[i]));
+            importSqlFile(concatPath(INSTALLATION_DATA_DIRECTORY, "/mysql/" + cleanSqlFiles[i]));
         }
 
         logger.info("Creating GlobalSight tables.");
 
         for (int i = 0, length = creationSqlFiles.length; i < length; i++)
         {
-            importSqlFile(concatPath(INSTALLATION_DATA_DIRECTORY, "/mysql/"
-                    + creationSqlFiles[i]));
+            importSqlFile(concatPath(INSTALLATION_DATA_DIRECTORY, "/mysql/" + creationSqlFiles[i]));
         }
         logger.info("Creating GlobalSight views.");
-        importSqlFile(concatPath(INSTALLATION_DATA_DIRECTORY,
-                "/mysql/create_views_mysql.sql"));
+        importSqlFile(concatPath(INSTALLATION_DATA_DIRECTORY, "/mysql/create_views_mysql.sql"));
 
         // initOpenLDAP();
     }
@@ -1727,15 +1516,15 @@ public class Install extends installer.EventBroadcaster
         return 450;
     }
 
-    public void updateDatabaseTables() throws IOException
+    public void updateDatabaseTables() throws Exception
     {
         logger.info("Updating SYSTEM_PARAMETER table.");
         importSqlFile(concatPath(INSTALLATION_DATA_DIRECTORY,
                 "/mysql/insert_system_parameters_mysql.sql"));
 
         logger.info("Updating EXPORT_LOCATION table.");
-        importSqlFile(concatPath(INSTALLATION_DATA_DIRECTORY,
-                "/mysql/update_exportlocation_mysql.sql"));
+        importSqlFile(
+                concatPath(INSTALLATION_DATA_DIRECTORY, "/mysql/update_exportlocation_mysql.sql"));
     }
 
     /**
@@ -1744,7 +1533,7 @@ public class Install extends installer.EventBroadcaster
      * @param sqlfile
      *            -- the script to run
      */
-    private void importSqlFile(String sqlfile) throws IOException
+    private void importSqlFile(String sqlfile) throws Exception
     {
         // Make a file just so we can append "quit;" to it
         File sqltemp = new File(sqlfile);
@@ -1755,12 +1544,9 @@ public class Install extends installer.EventBroadcaster
         if (m_operatingSystem == OS_LINUX)
         {
             String[] sqlStmt =
-            { "sh", "./data/linux/importSqlFile.sh",
-                    getInstallValue("database_server"),
-                    getInstallValue("database_port"),
-                    getInstallValue("database_username"),
-                    getInstallValue("database_password"),
-                    getInstallValue("database_instance_name"),
+            { "sh", "./data/linux/importSqlFile.sh", getInstallValue("database_server"),
+                    getInstallValue("database_port"), getInstallValue("database_username"),
+                    getInstallValue("database_password"), getInstallValue("database_instance_name"),
                     sqltemp.getAbsolutePath() };
 
             execute(sqlStmt);
@@ -1769,12 +1555,9 @@ public class Install extends installer.EventBroadcaster
         {
             String[] sqlStmt =
             { "cmd.exe", "/c", ".\\data\\windows\\importSqlFile.bat",
-                    getInstallValue("database_server"),
-                    getInstallValue("database_port"),
-                    getInstallValue("database_username"),
-                    getInstallValue("database_password"),
-                    getInstallValue("database_instance_name"),
-                    sqltemp.getAbsolutePath()};
+                    getInstallValue("database_server"), getInstallValue("database_port"),
+                    getInstallValue("database_username"), getInstallValue("database_password"),
+                    getInstallValue("database_instance_name"), sqltemp.getAbsolutePath() };
 
             execute(sqlStmt);
         }
@@ -1783,51 +1566,41 @@ public class Install extends installer.EventBroadcaster
     }
 
     // executes the command and spits output to stdout
-    private void execute(String[] command) throws IOException
+    private void execute(String[] command) throws Exception
     {
-        Process p = Runtime.getRuntime().exec(command);
-        printExecutionOutput(p, true, true, true);
+        List<String> commands = new ArrayList<String>();
+        for (String c : command)
+        {
+            commands.add(c);
+        }
+        execute(commands);
     }
 
-    private void executeNoUIOutput(String[] command) throws IOException
+    private void execute(List<String> commands) throws Exception
     {
-        Process p = Runtime.getRuntime().exec(command);
-        printExecutionOutput(p, true, true, false);
+        ProcessBuilder ps = new ProcessBuilder(commands);
+        ps.redirectErrorStream(true);
+        Process p = ps.start();
+        printExecutionOutput(p, true, true, true);
     }
 
     // executes the command and spits output to stdout
-    private void execute(String command) throws IOException
+    private void execute(String command) throws Exception
     {
-        Process p = Runtime.getRuntime().exec(command);
+        ProcessBuilder ps = new ProcessBuilder(command);
+        ps.redirectErrorStream(true);
+        Process p = ps.start();
         printExecutionOutput(p, true, true, true);
     }
 
-    // executes the command and hides output, but does display "." and ":"
-    private void executeNoOutputNoError(String command) throws IOException
-    {
-        Process p = Runtime.getRuntime().exec(command);
-        printExecutionOutput(p, false, false, false);
-    }
-
-    private void executeNoOutputNoError(String[] command) throws IOException
-    {
-        Process p = Runtime.getRuntime().exec(command);
-        printExecutionOutput(p, false, false, false);
-    }
-
-    private void printExecutionOutput(Process p, boolean showCmdOutput,
-            boolean showError, boolean showUIOutput) throws IOException
+    private void printExecutionOutput(Process p, boolean showCmdOutput, boolean showError,
+            boolean showUIOutput) throws Exception
     {
         try
         {
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                    p.getInputStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
-            BufferedReader sin = new BufferedReader(new InputStreamReader(
-                    p.getErrorStream()));
-
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-                    p.getOutputStream()));
+            BufferedReader sin = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
             String line;
 
@@ -1855,14 +1628,14 @@ public class Install extends installer.EventBroadcaster
                 }
             }
 
+            p.waitFor();
+
             in.close();
             sin.close();
-            out.close();
-
         }
         catch (IOException e)
         {
-            logger.error("Error executing system command.",e);
+            logger.error("Error executing system command.", e);
             throw e;
         }
     }
@@ -1870,13 +1643,10 @@ public class Install extends installer.EventBroadcaster
     // Utility function to read a line from standard input
     // if no output is provided, the default is returned
     // if 'q' is hit, it will exit
-    private String readEntry(String prompt, String p_default)
-            throws IOException
+    private String readEntry(String prompt, String p_default) throws IOException
     {
         logger.info(prompt + "[" + p_default + "]: ");
-//        System.out.flush();
-        BufferedReader input = new BufferedReader(new InputStreamReader(
-                System.in));
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         String userInput = input.readLine();
         String entry = null;
 
@@ -1917,30 +1687,23 @@ public class Install extends installer.EventBroadcaster
 
         m_installValues.put("system_log_directory", logDir.toString());
 
-        String logDirForwardSlash = replace(logDir.toString(), BACKSLASH,
-                FORWARDSLASH);
-        m_installValues.put("system_log_directory_forwardslash",
-                logDirForwardSlash);
+        String logDirForwardSlash = replace(logDir.toString(), BACKSLASH, FORWARDSLASH);
+        m_installValues.put("system_log_directory_forwardslash", logDirForwardSlash);
 
         // java_home - add forwardslash variable
         String java_home = getInstallValue("java_home");
-        String java_home_forwardslash = replace(java_home, BACKSLASH,
-                FORWARDSLASH);
+        String java_home_forwardslash = replace(java_home, BACKSLASH, FORWARDSLASH);
         m_installValues.put("java_home_forwardslash", java_home_forwardslash);
 
         // msoffice_dir_forwardslash
         String msoffice_dir = getInstallValue("msoffice_dir");
-        String msoffice_dir_forwardslash = replace(msoffice_dir, BACKSLASH,
-                FORWARDSLASH);
-        m_installValues.put("msoffice_dir_forwardslash",
-                msoffice_dir_forwardslash);
+        String msoffice_dir_forwardslash = replace(msoffice_dir, BACKSLASH, FORWARDSLASH);
+        m_installValues.put("msoffice_dir_forwardslash", msoffice_dir_forwardslash);
 
         // file_storage_dir_forwardslash (secondary target file
         String file_storage_dir = getInstallValue("file_storage_dir");
-        String file_storage_dir_forwardslash = replace(file_storage_dir,
-                BACKSLASH, FORWARDSLASH);
-        m_installValues.put("file_storage_dir_forwardslash",
-                file_storage_dir_forwardslash);
+        String file_storage_dir_forwardslash = replace(file_storage_dir, BACKSLASH, FORWARDSLASH);
+        m_installValues.put("file_storage_dir_forwardslash", file_storage_dir_forwardslash);
 
         // gs_home_forwardslash
         String gs_home_forwardslash = replace(GS_HOME, BACKSLASH, FORWARDSLASH);
@@ -1950,10 +1713,8 @@ public class Install extends installer.EventBroadcaster
         // gs_ear_root
         m_installValues.put("gs_ear_root", DIR_EAR);
 
-        String gs_ear_root_forwardslash = replace(DIR_EAR, BACKSLASH,
-                FORWARDSLASH);
-        m_installValues.put("gs_ear_root_forwardslash",
-                gs_ear_root_forwardslash);
+        String gs_ear_root_forwardslash = replace(DIR_EAR, BACKSLASH, FORWARDSLASH);
+        m_installValues.put("gs_ear_root_forwardslash", gs_ear_root_forwardslash);
 
         String classpath_separator = ";";
         if (m_operatingSystem == OS_WINDOWS)
@@ -1968,10 +1729,8 @@ public class Install extends installer.EventBroadcaster
 
         // add cxe_docsDir_forwardslash - for config.xml, web.xml
         String cxe_docsDir = getInstallValue("cxe_docsDir");
-        String cxe_docsDir_forwardslash = replace(cxe_docsDir, BACKSLASH,
-                FORWARDSLASH);
-        m_installValues.put("cxe_docsDir_forwardslash",
-                cxe_docsDir_forwardslash);
+        String cxe_docsDir_forwardslash = replace(cxe_docsDir, BACKSLASH, FORWARDSLASH);
+        m_installValues.put("cxe_docsDir_forwardslash", cxe_docsDir_forwardslash);
 
         // figure out what the CAP login Url should be for users
         StringBuffer baseUrl = new StringBuffer();
@@ -2024,8 +1783,7 @@ public class Install extends installer.EventBroadcaster
         cap_login_url = baseUrl.toString() + "/globalsight";
         m_installValues.put("cap_login_url", cap_login_url);
 
-        boolean enableSSL = "true"
-                .equalsIgnoreCase(getInstallValue("server_ssl_enable"));
+        boolean enableSSL = "true".equalsIgnoreCase(getInstallValue("server_ssl_enable"));
         String cap_login_url_ssl = "";
         if (enableSSL)
         {
@@ -2056,10 +1814,9 @@ public class Install extends installer.EventBroadcaster
         install_data_dir.append("install");
         install_data_dir.append(File.separator);
         install_data_dir.append(INSTALLATION_DATA_DIRECTORY);
-        String install_data_dir_forwardslash = replace(
-                install_data_dir.toString(), BACKSLASH, FORWARDSLASH);
-        m_installValues.put("install_data_dir_forwardslash",
-                install_data_dir_forwardslash);
+        String install_data_dir_forwardslash = replace(install_data_dir.toString(), BACKSLASH,
+                FORWARDSLASH);
+        m_installValues.put("install_data_dir_forwardslash", install_data_dir_forwardslash);
 
         m_installValues.put("canoncial_mysql_path", MYSQL_SQL_FILE);
         m_installValues.put("GS_HOME", GS_HOME);
@@ -2067,8 +1824,7 @@ public class Install extends installer.EventBroadcaster
         {
             // put values for linux jboss service command (service.sh.template)
             m_installValues.put("JBOSS_HOME", JBOSS_HOME);
-            m_installValues.put("SERVICE_NAME",
-                    RESOURCE.getString("service_name"));
+            m_installValues.put("SERVICE_NAME", RESOURCE.getString("service_name"));
         }
     }
 
@@ -2140,33 +1896,18 @@ public class Install extends installer.EventBroadcaster
         }
     }
 
-    public void installGlobalSightService() throws IOException
+    public void installGlobalSightService() throws Exception
     {
         if (m_operatingSystem == OS_WINDOWS)
         {
-            boolean is64Bit = is64Bit();
-            logger.info("Removing NT service " + SERVICE_NAME
-                    + " if it is installed...");
-            String uninstallCommand = concatPath(JBOSS_UTIL_BIN,
-                    "service-win32-uninstall.bat");
-            if (is64Bit)
-            {
-                uninstallCommand = concatPath(JBOSS_UTIL_BIN,
-                        "service-win64-uninstall.bat");
-            }
-
+            logger.info("\nRemoving NT service " + SERVICE_NAME + " if it is installed...");
+            String uninstallCommand = concatPath(JBOSS_UTIL_BIN, "service-uninstall.bat");
             logger.info("Executing " + uninstallCommand);
             execute(uninstallCommand);
             logger.info("done.");
 
-            logger.info("Adding NT service " + SERVICE_NAME + "...");
-            String installCommand = concatPath(JBOSS_UTIL_BIN,
-                    "service-win32-install.bat");
-            if (is64Bit)
-            {
-                installCommand = concatPath(JBOSS_UTIL_BIN,
-                        "service-win64-install.bat");
-            }
+            logger.info("\nAdding NT service " + SERVICE_NAME + "...");
+            String installCommand = concatPath(JBOSS_UTIL_BIN, "service-install.bat");
             logger.info("Executing " + installCommand);
             execute(installCommand);
             logger.info("done.");
@@ -2174,11 +1915,9 @@ public class Install extends installer.EventBroadcaster
         else if (m_operatingSystem == OS_LINUX)
         {
             String serviceSh = concatPath(JBOSS_UTIL_BIN, "service.sh");
-            String installServiceSh = concatPath(JBOSS_UTIL_BIN,
-                    "InstallApp-NT.sh");
+            String installServiceSh = concatPath(JBOSS_UTIL_BIN, "service-install.sh");
             String[] installService =
-            { "sh", installServiceSh, serviceSh,
-                    RESOURCE.getString("service_name") };
+            { "sh", installServiceSh, serviceSh, RESOURCE.getString("service_name") };
             execute(installService);
         }
     }
@@ -2194,8 +1933,7 @@ public class Install extends installer.EventBroadcaster
         catch (IOException e)
         {
             throw new IllegalStateException(
-                    "Cannot determine current working directory."
-                            + e.getMessage());
+                    "Cannot determine current working directory." + e.getMessage());
         }
     }
 
@@ -2203,8 +1941,7 @@ public class Install extends installer.EventBroadcaster
     {
         try
         {
-            byte[] md5Msg = MessageDigest.getInstance("MD5").digest(
-                    msg.getBytes());
+            byte[] md5Msg = MessageDigest.getInstance("MD5").digest(msg.getBytes());
             return "{MD5}" + new String(new Base64().encode(md5Msg));
         }
         catch (NoSuchAlgorithmException e)
@@ -2214,12 +1951,6 @@ public class Install extends installer.EventBroadcaster
         }
     }
 
-    private boolean is64Bit()
-    {
-        String os = System.getProperty("os.arch");
-        return os.endsWith("64");
-    }
-    
     private void decode()
     {
         for (String key : keys)
@@ -2238,7 +1969,7 @@ public class Install extends installer.EventBroadcaster
             }
         }
     }
-    
+
     private void encode()
     {
         for (String key : keys)
@@ -2257,13 +1988,14 @@ public class Install extends installer.EventBroadcaster
             }
         }
     }
-    
-    public Install(){
+
+    public Install()
+    {
         keys.add("server_ssl_ks_pwd");
         keys.add("jar_sign_pwd");
         keys.add("system4_admin_password");
         keys.add("database_password");
         keys.add("account_password");
     }
-  
+
 }

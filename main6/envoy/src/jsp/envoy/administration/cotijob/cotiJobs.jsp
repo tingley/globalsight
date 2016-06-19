@@ -3,6 +3,7 @@
 <%@page import="com.globalsight.everest.webapp.pagehandler.administration.cotijob.CotiJobsManagement"%>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page contentType="text/html; charset=UTF-8"
          errorPage="/envoy/common/error.jsp"
          import="java.util.*,com.globalsight.everest.webapp.javabean.NavigationBean,
@@ -441,7 +442,7 @@ creationDate
 	    if (navigator.userAgent.indexOf('Firefox') >= 0){
 		    document.write("<DIV>");
 		    }</SCRIPT>
-		<B><A  CLASS="${jobVo.textType.replace("Text","HREF")}"  HREF="/globalsight/ControlServlet?linkName=cotiJobDetail&pageName=cojs&jobId=${jobVo.jobId}&fromJobs=true">${jobVo.cotiProjectName}</A></B>
+		<B><A  CLASS="${fn:replace(jobVo.textType,"Text","HREF")}"  HREF="/globalsight/ControlServlet?linkName=cotiJobDetail&pageName=cojs&jobId=${jobVo.jobId}&fromJobs=true">${jobVo.cotiProjectName}</A></B>
 		<SCRIPT language="javascript">if (navigator.userAgent.indexOf('Firefox') >= 0){document.write("</DIV>")}</SCRIPT></TD>	 
 	<TD CLASS=${jobVo.textType} >
 	<SCRIPT language="javascript">
@@ -455,7 +456,7 @@ creationDate
 	    }
 	    else
 	    {
-	    	document.write("<B><A CLASS=\"${jobVo.textType.replace("Text","HREF")}\"  " 
+	    	document.write("<B><A CLASS=\"${fn:replace(jobVo.textType,"Text","HREF")}\"  " 
 	    			+ "HREF=\"ControlServlet?linkName=jobDetails&pageName=ALLS&jobId=" 
 	    					+ gsjobId + "&fromJobs=true\">" + gsjobId + " (${jobVo.globalsightJobStatus})</A></B>");
 	    }

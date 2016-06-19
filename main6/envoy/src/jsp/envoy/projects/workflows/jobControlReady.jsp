@@ -1,5 +1,6 @@
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
     import="java.util.*,com.globalsight.everest.webapp.javabean.NavigationBean,
@@ -1201,7 +1202,7 @@ is defined in header.jspIncl which must be included in the body.
 	<TD CLASS="standardText name${jobVo.id}" style="word-break:break-all" >	
 		    <c:choose>
 		    <c:when  test="${jobVo.hasDetail}">
-		<B><A  CLASS="${jobVo.textType.replace("Text","HREF")}"  HREF="/globalsight/ControlServlet?linkName=jobDetails&pageName=ALLS&jobId=${jobVo.id}&fromJobs=true" oncontextmenu="contextForTab('${jobVo.id}',event)">${jobVo.name}</A></B>
+		<B><A  CLASS="${fn:replace(jobVo.textType,"Text","HREF")}"  HREF="/globalsight/ControlServlet?linkName=jobDetails&pageName=ALLS&jobId=${jobVo.id}&fromJobs=true" oncontextmenu="contextForTab('${jobVo.id}',event)">${jobVo.name}</A></B>
 		    </c:when >
 		    <c:otherwise>${jobVo.name}</c:otherwise>
 		    </c:choose>

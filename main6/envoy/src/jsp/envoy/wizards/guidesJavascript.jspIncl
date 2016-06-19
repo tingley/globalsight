@@ -86,7 +86,7 @@ function showGuide(guide)
         (guideNode == "fileProfiles") || 
         (guideNode == "filterConfiguration") ||
         (guideNode == "import") ||
-        (guideNode == "createJob") ||
+        (guideNode == "createZipJob") ||
         (guideNode == "finish")))
    {
       guide = "fileSystem2";
@@ -101,7 +101,7 @@ function showGuide(guide)
              (guideNode != "filterConfiguration") ||
              (guideNode != "fileProfiles") || 
              (guideNode != "import") ||
-             (guideNode != "createJob") ||
+             (guideNode != "createZipJob") ||
              (guideNode != "finish")))
    {
       guide = "generic_fileSystem";
@@ -118,7 +118,7 @@ function showGuide(guide)
              (guideNode == "dbPreviewRules") || 
              (guideNode == "dbProfiles") || 
              (guideNode == "import") ||
-             (guideNode == "createJob") ||
+             (guideNode == "createZipJob") ||
              (guideNode == "finish")))
    {
       guide = "database2";
@@ -134,7 +134,7 @@ function showGuide(guide)
              (guideNode != "dbPreviewRules") || 
              (guideNode != "dbProfiles") || 
              (guideNode != "import") ||
-             (guideNode != "createJob") ||
+             (guideNode != "createZipJob") ||
              (guideNode != "finish")))
    {
       guide = "generic_database";
@@ -273,7 +273,7 @@ function activateNodes(obj, guide)
               obj_fileProfiles = getRef('fileProfiles');
               obj_filterConfiguration = getRef('filterConfiguration');
               obj_import = getRef('import');
-              obj_createJob = getRef('createJob');
+              obj_createZipJob = getRef('createZipJob');
               obj_finish = getRef('finish');
               objects = [obj_workflows,
                          obj_locProfiles,
@@ -284,8 +284,8 @@ function activateNodes(obj, guide)
                          obj_filterConfiguration,
                          obj_fileProfiles,
                          obj_import,
-    <% if (userPers.getPermissionFor(Permission.CREATE_JOB)) { %>
-                         obj_createJob,
+    <% if (userPers.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>
+                         obj_createZipJob,
     <%}%>
                          obj_finish];
     }

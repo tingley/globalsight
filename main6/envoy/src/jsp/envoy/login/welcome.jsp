@@ -445,9 +445,6 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.RSS_READER%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=rssReaderUrl%>"><%=bundle.getString("lb_rss_reader")%></A><BR>
         </amb:permission>
-        <amb:permission name="<%=Permission.CREATE_JOB%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=createJobUrl%>"><%=bundle.getString("lb_create_job")%> (deprecated)</A><BR>
-        </amb:permission>
         <amb:permission name="<%=Permission.CREATE_JOB_NO_APPLET%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=createZipJobUrl%>"><%=bundle.getString("lb_create_job_without_java")%></A><BR>
         </amb:permission>

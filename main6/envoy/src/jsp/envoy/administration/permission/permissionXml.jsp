@@ -320,7 +320,6 @@
   <permission id="<%=Permission.CUSTOMER_UPLOAD%>"/>
   <permission id="<%=Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE%>"/>
   <% } %>
-  <permission id="<%=Permission.CREATE_JOB%>"/>
   <permission id="<%=Permission.CREATE_JOB_NO_APPLET%>"/>
 </category>
 <category id="lb_connectors">

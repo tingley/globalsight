@@ -44,7 +44,7 @@
     String startUrlGuide = LinkHelper.getWebActivityURL(request, "start");
     String sys4reportsUrlGuide = LinkHelper.getWebActivityURL(request, "reports");
     String workflowsUrlGuide = LinkHelper.getWebActivityURL(request, "templates");
-    String createJobGuide = LinkHelper.getWebActivityURL(request, "createJobs");
+    String createZipJobGuide = LinkHelper.getWebActivityURL(request, "createZipJobs");
     String terminologyUrlGuide = LinkHelper.getWebActivityURL(request, "termbases");
     String tmUrlGuide = LinkHelper.getWebActivityURL(request, "tm");
     String tmProfileUrlGuide = LinkHelper.getWebActivityURL(request, "tmProfiles");
@@ -492,9 +492,9 @@
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
     NAME="importDotTop" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
-<% if (userPerms.getPermissionFor(Permission.CREATE_JOB)) { %>
+<% if (userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
-    NAME="createJobDotTop" HEIGHT=2 WIDTH=7></TD>
+    NAME="createZipJobDotTop" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
 <%}%>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
@@ -527,9 +527,9 @@
 <TD ID="fileProfilesBarSpacer" WIDTH=10 HEIGHT=2></TD>
 <TD ID="importBar" HEIGHT=3 ALIGN="CENTER"></TD>
 <TD ID="importBarSpacer" WIDTH=10 HEIGHT=2></TD>
-<% if (userPerms.getPermissionFor(Permission.CREATE_JOB)) { %>
-<TD ID="createJobBar" HEIGHT=3 ALIGN="CENTER"></TD>
-<TD ID="createJobBarSpacer" WIDTH=10 HEIGHT=2></TD>
+<% if (userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>
+<TD ID="createZipJobBar" HEIGHT=3 ALIGN="CENTER"></TD>
+<TD ID="createZipJobBarSpacer" WIDTH=10 HEIGHT=2></TD>
 <%}%>
 <TD ID="finishBar" HEIGHT=3 ALIGN="CENTER"></TD>
 <TD ID="finishBarSpacer" WIDTH=10 HEIGHT=2></TD>
@@ -567,9 +567,9 @@
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
     NAME="importDotBottom" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
-<% if (userPerms.getPermissionFor(Permission.CREATE_JOB)) { %>
+<% if (userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
-    NAME="createJobDotBottom" HEIGHT=2 WIDTH=7></TD>
+    NAME="createZipJobDotBottom" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
 <%}%>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
@@ -645,11 +645,11 @@
            HREF="javascript:loadUrl('<%=importUrlGuide%>')" ><%= menuBundle.getString("lb_import") %></A>
     </TD>
     <TD WIDTH=10></TD>
-    <% if (userPerms.getPermissionFor(Permission.CREATE_JOB)) { %>
-    <TD CLASS="wizardCell" ID="createJob">
-        <A ID="createJobLink"
+    <% if (userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>
+    <TD CLASS="wizardCell" ID="createZipJob">
+        <A ID="createZipJobLink"
            CLASS="wizardLinks" 
-           HREF="javascript:loadUrl('<%=createJobGuide%>')" ><%= menuBundle.getString("lb_create_job") %> (deprecated)</A>
+           HREF="javascript:loadUrl('<%=createZipJobGuide%>')" ><%= menuBundle.getString("lb_create_job_without_java") %></A>
     </TD>
     <TD WIDTH=10></TD>
     <%}%>

@@ -70,7 +70,6 @@
         userPerms.getPermissionFor(Permission.IMPORT) || 
         userPerms.getPermissionFor(Permission.EXPORT_LOC_VIEW) || 
         userPerms.getPermissionFor(Permission.CORPUS_ALIGNER_VIEW) ||
-        userPerms.getPermissionFor(Permission.CREATE_JOB) ||
         userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET) ||
         userPerms.getPermissionFor(Permission.RSS_READER) ||
         userPerms.getPermissionFor(Permission.ELOQUA) ||
@@ -172,7 +171,6 @@
    String gitconnectorUrl = LinkHelper.getWebActivityURL(request, "gitconnector");
    String blaiseConnectorUrl = LinkHelper.getWebActivityURL(request, "blaiseConnector");
    String rssReaderUrl = LinkHelper.getWebActivityURL(request, "rssReader");
-   String createJobUrl = LinkHelper.getWebActivityURL(request, "createJobs");
    String createZipJobUrl = LinkHelper.getWebActivityURL(request, "createZipJobs");
    String createCotiJobUrl = LinkHelper.getWebActivityURL(request, "cotiJobs");
    String eloquaUrl = LinkHelper.getWebActivityURL(request, "eloqua");
@@ -540,10 +538,6 @@ dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_rss_reade
 <% } %>
 <%}%>
 
-<% if (userPerms.getPermissionFor(Permission.CREATE_JOB)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_create_job")%> (deprecated)", "javascript:goToUrl('<%=createJobUrl%>');", ""));
-<% } %>
-
 <% if (userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_create_job_without_java")%>", "javascript:goToUrl('<%=createZipJobUrl%>');", ""));
 <% } %>
@@ -554,6 +548,10 @@ dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_coti_job"
 
 <% if (userPerms.getPermissionFor(Permission.ELOQUA)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_eloqua")%>", "javascript:goToUrl('<%=eloquaUrl%>');", ""));
+<% } %>
+
+<% if (userPerms.getPermissionFor(Permission.MIND_TOUCH)) { %>
+dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_mindtouch")%>", "javascript:goToUrl('<%=mindtouchUrl%>');", ""));
 <% } %>
 
 <% if (userPerms.getPermissionFor(Permission.GIT_CONNECTOR)) { %>

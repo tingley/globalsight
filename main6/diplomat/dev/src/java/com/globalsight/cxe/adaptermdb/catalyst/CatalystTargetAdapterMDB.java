@@ -16,32 +16,16 @@
  */
 package com.globalsight.cxe.adaptermdb.catalyst;
 
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
-import javax.jms.MessageListener;
-
 import com.globalsight.cxe.adapter.BaseAdapter;
 import com.globalsight.cxe.adapter.catalyst.CatalystAdapter;
 import com.globalsight.cxe.adaptermdb.BaseAdapterMDB;
-import com.globalsight.cxe.adaptermdb.EventTopicMap;
-import com.globalsight.everest.util.jms.JmsHelper;
 
 /**
  * CatalystTargetAdapterMDB uses the CatalystAdapter
  */
-@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
-{
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
-                + EventTopicMap.JMS_PREFIX
-                + EventTopicMap.FOR_CATALYST_TARGET_ADAPTER),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE) })
-@TransactionManagement(value = TransactionManagementType.BEAN)
 public class CatalystTargetAdapterMDB extends BaseAdapterMDB
 {
-    private static String ADAPTER_NAME = CatalystTargetAdapterMDB.class
-            .getName();
+    private static String ADAPTER_NAME = CatalystTargetAdapterMDB.class.getName();
 
     protected String getAdapterName()
     {

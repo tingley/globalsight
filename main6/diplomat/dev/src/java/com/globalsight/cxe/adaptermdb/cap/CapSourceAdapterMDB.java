@@ -16,32 +16,15 @@
  */
 package com.globalsight.cxe.adaptermdb.cap;
 
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
-import javax.jms.MessageListener;
-
 import com.globalsight.cxe.adapter.BaseAdapter;
 import com.globalsight.cxe.adapter.cap.CapAdapter;
 import com.globalsight.cxe.adaptermdb.BaseAdapterMDB;
-import com.globalsight.cxe.adaptermdb.EventTopicMap;
-import com.globalsight.everest.util.jms.JmsHelper;
 
 /**
  * CapSourceAdapterMDB
  */
-@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
-{
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
-                + EventTopicMap.JMS_PREFIX
-                + EventTopicMap.FOR_CAP_SOURCE_ADAPTER),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE) })
-@TransactionManagement(value = TransactionManagementType.BEAN)
 public class CapSourceAdapterMDB extends BaseAdapterMDB
 {
-    private static final long serialVersionUID = -622725591113310156L;
-
     private static String ADAPTER_NAME = CapSourceAdapterMDB.class.getName();
 
     protected String getAdapterName()

@@ -78,8 +78,6 @@ public class Install extends installer.EventBroadcaster
 
     public static final String INSTALLATION_DATA_DIRECTORY = "data";
 
-    public static final String INSTALLATION_MYSQL_DIRECTORY = "data/mysql";
-
     public static String GS_HOME = determineGsHome();
 
     // new directory in jboss 7
@@ -1132,49 +1130,49 @@ public class Install extends installer.EventBroadcaster
                 concatPath(DIR_EAR, "globalsight-web.war/reports/datasource.xml"));
 
         m_configFileList.put(
-                concatPath(INSTALLATION_MYSQL_DIRECTORY, "create_cap_mysql.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY, "create_cap_mysql.sql"));
+                concatPath(MYSQL_SQL_FILE, "create_cap_mysql.sql.template"),
+                concatPath(MYSQL_SQL_FILE, "create_cap_mysql.sql"));
 
         m_configFileList.put(
-                concatPath(INSTALLATION_MYSQL_DIRECTORY, "delete_index_tables_mysql.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY, "delete_index_tables_mysql.sql"));
+                concatPath(MYSQL_SQL_FILE, "delete_index_tables_mysql.sql.template"),
+                concatPath(MYSQL_SQL_FILE, "delete_index_tables_mysql.sql"));
 
-        m_configFileList.put(concatPath(INSTALLATION_MYSQL_DIRECTORY, "gsdb_mysql.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY, "gsdb_mysql.sql"));
+        m_configFileList.put(concatPath(MYSQL_SQL_FILE, "gsdb_mysql.sql.template"),
+                concatPath(MYSQL_SQL_FILE, "gsdb_mysql.sql"));
 
         m_configFileList.put(
-                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                concatPath(MYSQL_SQL_FILE,
                         "insert_default_calendar_mysql.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY, "insert_default_calendar_mysql.sql"));
+                concatPath(MYSQL_SQL_FILE, "insert_default_calendar_mysql.sql"));
 
         m_configFileList.put(
-                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                concatPath(MYSQL_SQL_FILE,
                         "insert_exportlocation_mysql.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY, "insert_exportlocation_mysql.sql"));
+                concatPath(MYSQL_SQL_FILE, "insert_exportlocation_mysql.sql"));
 
         m_configFileList.put(
-                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                concatPath(MYSQL_SQL_FILE,
                         "insert_system_parameters_mysql.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY, "insert_system_parameters_mysql.sql"));
+                concatPath(MYSQL_SQL_FILE, "insert_system_parameters_mysql.sql"));
 
         m_configFileList.put(
-                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                concatPath(MYSQL_SQL_FILE,
                         "insert_UImodifiable_system_parameters_mysql.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                concatPath(MYSQL_SQL_FILE,
                         "insert_UImodifiable_system_parameters_mysql.sql"));
 
         m_configFileList.put(
-                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                concatPath(MYSQL_SQL_FILE,
                         "update_exportlocation_mysql.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY, "update_exportlocation_mysql.sql"));
+                concatPath(MYSQL_SQL_FILE, "update_exportlocation_mysql.sql"));
 
         m_configFileList.put(
-                concatPath(INSTALLATION_MYSQL_DIRECTORY, "drop_all_mysql.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY, "drop_all_mysql.sql"));
+                concatPath(MYSQL_SQL_FILE, "drop_all_mysql.sql.template"),
+                concatPath(MYSQL_SQL_FILE, "drop_all_mysql.sql"));
 
         m_configFileList.put(
-                concatPath(INSTALLATION_MYSQL_DIRECTORY, "drop_jbpm_tables.sql.template"),
-                concatPath(INSTALLATION_MYSQL_DIRECTORY, "drop_jbpm_tables.sql"));
+                concatPath(MYSQL_SQL_FILE, "drop_jbpm_tables.sql.template"),
+                concatPath(MYSQL_SQL_FILE, "drop_jbpm_tables.sql"));
     }
 
     // returns the number of configuration files in the list

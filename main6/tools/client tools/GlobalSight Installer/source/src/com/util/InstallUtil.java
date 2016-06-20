@@ -19,7 +19,10 @@ package com.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
@@ -535,32 +538,35 @@ public abstract class InstallUtil
      */
     public void parseAllTemplates() throws IOException
     {
-    	InstallValues.addAdditionalInstallValues();
-    	
-        URL url = InstallUtil.class.getClassLoader().getResource("generateFiles.properties");
-        Properties properties = new Properties();
-        InputStream in = url.openStream();
-        properties.load(in);
-        Properties installValues = getProperties();
-        
-        for (Object ob : properties.keySet())
-        {
-        	String path = (String) ob;
-        	File f1 = new File(ServerUtil.getPath() + "/" + path);
-        	File f2 = new File(ServerUtil.getPath() + "/" + properties.getProperty(path));
-        	
-        	try 
-        	{
-        		processFile(f1, f2, installValues);
-			} 
-        	catch (Exception e) 
-        	{
-        		log.error("Failed to parse " + f1.getPath() + " to " + f2.getPath());
-				log.error(e);
-				continue;
-			}
-        }
-    }
+    	URLClassLoader loader = null;
+    	String dir = null;
+		try 
+		{
+			dir = System.setProperty("user.dir", ServerUtil.getPath() + "/install/");
+			URL url = new URL("file:" + ServerUtil.getPath() + "/install/installer.jar");
+			loader = new URLClassLoader( new URL[]{ url } );
+			Class<?> install = loader.loadClass("Install");
+			Object instance = install.newInstance();
+			Field f = install.getDeclaredField("m_installValues");
+			f.setAccessible(true);
+			f.set(instance, InstallValues.getProperties());
+			Method m2 = install.getDeclaredMethod("initializeConfigurationFileList");
+			m2.setAccessible(true);
+			m2.invoke(instance);
+		} 
+		catch (Exception e) 
+		{
+			log.error(e);
+		}
+		finally
+		{
+			if (dir != null)
+				System.setProperty("user.dir", dir);
+			
+			if (loader != null)
+				loader.close();
+		}
+    } 
     
     private String replacePathSlash(String str)
     {

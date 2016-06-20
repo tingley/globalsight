@@ -136,13 +136,13 @@ public class Plug_8_7_0 implements Plug
 			URL url = new URL("file:" + ServerUtil.getPath() + "/install/installer.jar");
 			URLClassLoader loader = new URLClassLoader( new URL[]{ url } );
 			Class<?> install = loader.loadClass("Install");
-			Object fileUtil = install.newInstance();
+			Object instance = install.newInstance();
 			Field f = install.getField("JBOSS_UTIL_BIN");
-			f.set(fileUtil, ServerUtil.getPath() + "/jboss/util/bin");
+			f.set(instance, ServerUtil.getPath() + "/jboss/util/bin");
 			Method m = install.getMethod("determineOperatingSystem");
-			m.invoke(fileUtil);
+			m.invoke(instance);
 			m = install.getMethod("installGlobalSightService");
-			m.invoke(fileUtil);
+			m.invoke(instance);
 			loader.close();
 		} 
 		catch (Exception e) 

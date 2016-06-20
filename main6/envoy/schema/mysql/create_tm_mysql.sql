@@ -229,7 +229,6 @@ DROP TABLE IF EXISTS `TM3_TM`;
 
 CREATE TABLE `TM3_TM` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `type` smallint(6) NOT NULL,
   `tu_table` varchar(128) DEFAULT NULL,
   `tuv_table` varchar(128) DEFAULT NULL,
   `tuv_ext_table` varchar(128) DEFAULT NULL,

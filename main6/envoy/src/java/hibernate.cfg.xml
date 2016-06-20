@@ -146,7 +146,7 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/AddingSourcePage.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/MSOfficePPTFilter.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/SSOUserMapping.hbm.xml" />
-		<mapping resource="com/globalsight/ling/tm3/core/persistence/xml/BaseTm.hbm.xml" />
+		<mapping resource="com/globalsight/ling/tm3/core/persistence/xml/MultilingualSharedTm.hbm.xml" />
 		<mapping resource="com/globalsight/ling/tm3/core/persistence/xml/TM3Attribute.hbm.xml" />
 		<mapping resource="com/globalsight/ling/tm3/core/persistence/xml/TM3Event.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/RemovedTag.hbm.xml" />

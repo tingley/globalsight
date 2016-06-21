@@ -550,7 +550,7 @@ public abstract class InstallUtil
 			Field f = install.getDeclaredField("m_installValues");
 			f.setAccessible(true);
 			f.set(instance, InstallValues.getProperties());
-			Method m2 = install.getDeclaredMethod("initializeConfigurationFileList");
+			Method m2 = install.getDeclaredMethod("processFiles");
 			m2.setAccessible(true);
 			m2.invoke(instance);
 		} 

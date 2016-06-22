@@ -22,9 +22,18 @@
 			<module name="org.jdom" export="true" />
 			<system export="true">
 				<paths>
-				    <path name="com/sun/jndi/toolkit/url" />
+				    <path name="com/sun/beans/editors" />
+					<path name="com/sun/jndi/toolkit/url" />
 					<path name="com/sun/org/apache/regexp/internal" />
+					<path name="com/sun/org/apache/xalan/internal/xsltc/trax" />
 					<path name="com/sun/org/apache/xerces/internal/dom" />
+
+					<!-- GBS-4154: Blaise Connector -->
+					<path name="javax/xml/bind" />
+					<path name="javax/xml/bind/annotation" />
+					<path name="com/sun/xml/internal/bind/api" />
+					<path name="com/sun/xml/internal/bind/v2" />
+					<path name="com/sun/xml/internal/bind/v2/model/annotation" />
 				</paths>
 			</system>
 		</dependencies>

@@ -85,7 +85,6 @@ function showGuide(guide)
         (guideNode == "fileExtensions") ||
         (guideNode == "fileProfiles") || 
         (guideNode == "filterConfiguration") ||
-        (guideNode == "import") ||
         (guideNode == "createZipJob") ||
         (guideNode == "finish")))
    {
@@ -100,7 +99,6 @@ function showGuide(guide)
              (guideNode != "fileExtensions") ||
              (guideNode != "filterConfiguration") ||
              (guideNode != "fileProfiles") || 
-             (guideNode != "import") ||
              (guideNode != "createZipJob") ||
              (guideNode != "finish")))
    {
@@ -117,7 +115,6 @@ function showGuide(guide)
              (guideNode == "dbImportSettings") || 
              (guideNode == "dbPreviewRules") || 
              (guideNode == "dbProfiles") || 
-             (guideNode == "import") ||
              (guideNode == "createZipJob") ||
              (guideNode == "finish")))
    {
@@ -133,7 +130,6 @@ function showGuide(guide)
              (guideNode != "dbImportSettings") || 
              (guideNode != "dbPreviewRules") || 
              (guideNode != "dbProfiles") || 
-             (guideNode != "import") ||
              (guideNode != "createZipJob") ||
              (guideNode != "finish")))
    {
@@ -211,7 +207,6 @@ function activateNodes(obj, guide)
       obj_attributes = getRef('attributes');
       obj_attributeGroups = getRef('attributeGroups');
       obj_localePairs = getRef('localePairs');
-      obj_gsEdition = getRef('gsEdition');
       obj_activityType = getRef('activityType');
       obj_permissionGroups = getRef('permissionGroups');
       obj_users = getRef('users');
@@ -239,9 +234,6 @@ function activateNodes(obj, guide)
                  obj_attributeGroups,
 <% } %>                 
                  obj_localePairs,
-<% if (userPers.getPermissionFor(Permission.GSEDITION_VIEW)) { %>
-                 obj_gsEdition,
-<% } %>
                  obj_activityType, 
 <%if (b_costingGuideJs) {%>
                  obj_currency,
@@ -272,7 +264,6 @@ function activateNodes(obj, guide)
               obj_fileExtensions = getRef('fileExtensions');
               obj_fileProfiles = getRef('fileProfiles');
               obj_filterConfiguration = getRef('filterConfiguration');
-              obj_import = getRef('import');
               obj_createZipJob = getRef('createZipJob');
               obj_finish = getRef('finish');
               objects = [obj_workflows,
@@ -283,7 +274,6 @@ function activateNodes(obj, guide)
                          obj_fileExtensions,
                          obj_filterConfiguration,
                          obj_fileProfiles,
-                         obj_import,
     <% if (userPers.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>
                          obj_createZipJob,
     <%}%>

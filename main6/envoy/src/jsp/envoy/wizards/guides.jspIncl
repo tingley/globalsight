@@ -20,7 +20,6 @@
     //URL of the menu items
     String companiesUrlGuide = LinkHelper.getWebActivityURL(request, "companies");
     String activityTypesUrlGuide = LinkHelper.getWebActivityURL(request, "activities");
-    String gsEditionUrlGuide = LinkHelper.getWebActivityURL(request, "gsEdition");
     String calendarsUrlGuide = LinkHelper.getWebActivityURL(request, "calendars");
     String currencyUrlGuide = LinkHelper.getWebActivityURL(request, "currency");
     String dbConnectionsUrlGuide = LinkHelper.getWebActivityURL(request, "dbconnections");
@@ -31,7 +30,6 @@
     String fileProfilesUrlGuide = LinkHelper.getWebActivityURL(request, "fileprofiles");
     String finishUrlGuide = LinkHelper.getWebActivityURL(request, "finish");
     String glossariesUrlGuide = LinkHelper.getWebActivityURL(request, "glossaries");
-    String importUrlGuide = LinkHelper.getWebActivityURL(request,"import");
     String locProfilesUrlGuide = LinkHelper.getWebActivityURL(request, "locprofiles");
     String localePairsUrlGuide = LinkHelper.getWebActivityURL(request, "locales");
     String attributeUrlGuide = LinkHelper.getWebActivityURL(request, "attributeDefine");
@@ -102,11 +100,6 @@
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
     NAME="localePairsDotTop" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
-<% if (userPerms.getPermissionFor(Permission.GSEDITION_VIEW)) { %>
-<TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
-    NAME="gsEditionDotTop" HEIGHT=2 WIDTH=7></TD>
-<TD WIDTH=10  HEIGHT=2></TD>
-<% } %>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
     NAME="activityTypeDotTop" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
@@ -172,10 +165,6 @@
 <% } %>
 <TD ID="localePairsBar" HEIGHT=3 ALIGN="CENTER"></TD>
 <TD ID="localePairsBarSpacer" WIDTH=10 HEIGHT=2></TD>
-<% if (userPerms.getPermissionFor(Permission.GSEDITION_VIEW)) { %>
-<TD ID="gsEditionBar" HEIGHT=3 ALIGN="CENTER"></TD>
-<TD ID="gsEditionBarSpacer" WIDTH=10 HEIGHT=2></TD>
-<% } %>
 <TD ID="activityTypeBar" HEIGHT=3 ALIGN="CENTER"></TD>
 <TD ID="activityTypeBarSpacer" WIDTH=10 HEIGHT=2></TD>
 <%if (b_costingGuide) {%>
@@ -239,12 +228,6 @@
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
     NAME="localePairsDotBottom" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
-
-<% if (userPerms.getPermissionFor(Permission.GSEDITION_VIEW)) { %>
-<TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
-    NAME="gsEditionDotBottom" HEIGHT=2 WIDTH=7></TD>
-<TD WIDTH=10  HEIGHT=2></TD>
-<% } %>
 
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
     NAME="activityTypeDotBottom" HEIGHT=2 WIDTH=7></TD>
@@ -335,14 +318,6 @@
            HREF="javascript:loadUrl('<%=localePairsUrlGuide%>')" ><%= menuBundle.getString("lb_locale_pairs") %></A>
     </TD>
         <TD WIDTH=10></TD>
-<% if (userPerms.getPermissionFor(Permission.GSEDITION_VIEW)) { %>
-    <TD CLASS="wizardCell" ID="gsEdition"> 
-        <A ID="gsEditionLink"
-           CLASS="wizardLinks" 
-           HREF="javascript:loadUrl('<%=gsEditionUrlGuide%>')" ><%= menuBundle.getString("lb_gseditions") %></A>
-    </TD>
-    <TD WIDTH=10></TD>
-<% } %>
     <TD CLASS="wizardCell" ID="activityType">
         <A ID="activityTypeLink"
            CLASS="wizardLinks" 
@@ -489,9 +464,6 @@
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
     NAME="fileProfilesDotTop" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
-<TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
-    NAME="importDotTop" HEIGHT=2 WIDTH=7></TD>
-<TD WIDTH=10  HEIGHT=2></TD>
 <% if (userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
     NAME="createZipJobDotTop" HEIGHT=2 WIDTH=7></TD>
@@ -525,8 +497,6 @@
 
 <TD ID="fileProfilesBar" HEIGHT=3 ALIGN="CENTER"></TD>
 <TD ID="fileProfilesBarSpacer" WIDTH=10 HEIGHT=2></TD>
-<TD ID="importBar" HEIGHT=3 ALIGN="CENTER"></TD>
-<TD ID="importBarSpacer" WIDTH=10 HEIGHT=2></TD>
 <% if (userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>
 <TD ID="createZipJobBar" HEIGHT=3 ALIGN="CENTER"></TD>
 <TD ID="createZipJobBarSpacer" WIDTH=10 HEIGHT=2></TD>
@@ -563,9 +533,6 @@
 <TD WIDTH=10  HEIGHT=2></TD>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
     NAME="fileProfilesDotBottom" HEIGHT=2 WIDTH=7></TD>
-<TD WIDTH=10  HEIGHT=2></TD>
-<TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
-    NAME="importDotBottom" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
 <% if (userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
@@ -637,12 +604,6 @@
         <A ID="fileProfilesLink" 
            CLASS="wizardLinks" 
            HREF="javascript:loadUrl('<%=fileProfilesUrlGuide%>')" ><%= menuBundle.getString("lb_file_profiles") %></A>
-    </TD>
-    <TD WIDTH=10></TD>
-    <TD CLASS="wizardCell" ID="import">
-        <A ID="importLink"
-           CLASS="wizardLinks" 
-           HREF="javascript:loadUrl('<%=importUrlGuide%>')" ><%= menuBundle.getString("lb_import") %></A>
     </TD>
     <TD WIDTH=10></TD>
     <% if (userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>

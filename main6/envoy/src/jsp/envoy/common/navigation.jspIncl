@@ -33,7 +33,6 @@
     if (userPerms.getPermissionFor(Permission.COMPANY_VIEW) ||
         userPerms.getPermissionFor(Permission.LOCALE_PAIRS_VIEW) ||
         userPerms.getPermissionFor(Permission.ACTIVITY_TYPES_VIEW) ||
-        userPerms.getPermissionFor(Permission.GSEDITION_VIEW) ||
         userPerms.getPermissionFor(Permission.CURRENCY_VIEW) || 
         userPerms.getPermissionFor(Permission.RATES_VIEW) || 
         userPerms.getPermissionFor(Permission.SYS_CAL_VIEW) || 
@@ -66,15 +65,10 @@
         userPerms.getPermissionFor(Permission.FILE_EXT_VIEW) || 
         userPerms.getPermissionFor(Permission.XMLRULE_VIEW) ||
         userPerms.getPermissionFor(Permission.SEGMENTATIONRULE_VIEW) || 
-        userPerms.getPermissionFor(Permission.SGMLRULE_VIEW) || 
-        userPerms.getPermissionFor(Permission.IMPORT) || 
         userPerms.getPermissionFor(Permission.EXPORT_LOC_VIEW) || 
-        userPerms.getPermissionFor(Permission.CORPUS_ALIGNER_VIEW) ||
         userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET) ||
-        userPerms.getPermissionFor(Permission.RSS_READER) ||
         userPerms.getPermissionFor(Permission.ELOQUA) ||
-        userPerms.getPermissionFor(Permission.GIT_CONNECTOR) ||
-	(b_customerAccessGroup && userPerms.getPermissionFor(Permission.CUSTOMER_UPLOAD)))
+        userPerms.getPermissionFor(Permission.GIT_CONNECTOR))
             hasDataSourceMenu = true;
 
     boolean hasGuidesMenu = false;
@@ -129,11 +123,8 @@
    String activityTypesUrl = LinkHelper.getWebActivityURL(request, "activities");
    String archivedJobsUrl = LinkHelper.getWebActivityURL(request, "archive");
    String calendarsUrl = LinkHelper.getWebActivityURL(request, "calendars");
-   String corpusAlignerUrl = LinkHelper.getWebActivityURL(request, "aligner");
    String currencyUrl = LinkHelper.getWebActivityURL(request, "currency");
-   String gsEditionUrl = LinkHelper.getWebActivityURL(request, "gsEdition");
    String customUrl = LinkHelper.getWebActivityURL(request, "customPage");
-   String customerUploadUrl = LinkHelper.getWebActivityURL(request, "customerView");
    String customerJobsUrl = LinkHelper.getWebActivityURL(request, "customerJobs");
    String dbConnectionsUrl = LinkHelper.getWebActivityURL(request, "dbconnections");
    String dbImportSettingsUrl = LinkHelper.getWebActivityURL(request, "dbimportsettings");
@@ -147,7 +138,6 @@
    String fileProfilesUrl = LinkHelper.getWebActivityURL(request, "fileprofiles");
    String glossariesUrl = LinkHelper.getWebActivityURL(request, "glossaries");
    String serviceWareUrl = LinkHelper.getWebActivityURL(request,"swimport");
-   String importUrl = LinkHelper.getWebActivityURL(request,"import");
    String locProfilesUrl = LinkHelper.getWebActivityURL(request, "locprofiles");
    String localePairsUrl = LinkHelper.getWebActivityURL(request, "locales");
    //String logoutUrl = LinkHelper.getWebActivityURL(request, "login");
@@ -162,7 +152,6 @@
    String reportsUrl = LinkHelper.getWebActivityURL(request, "reports");  
    String shutdownUrl = LinkHelper.getWebActivityURL(request, "shutdown");
    String systemActivitiesUrl = LinkHelper.getWebActivityURL(request, "jobCreationStatus");
-   String snippetImportUrl = LinkHelper.getWebActivityURL(request, "snippetimport");
    String cvsServerUrl = LinkHelper.getWebActivityURL(request, "cvsserver");
    String cvsModuleUrl = LinkHelper.getWebActivityURL(request, "cvsmodule");
    String cvsModuleMappingUrl = LinkHelper.getWebActivityURL(request, "moduleMapping");
@@ -170,7 +159,6 @@
    String cvsJobUrl = LinkHelper.getWebActivityURL(request, "cvsjob");
    String gitconnectorUrl = LinkHelper.getWebActivityURL(request, "gitconnector");
    String blaiseConnectorUrl = LinkHelper.getWebActivityURL(request, "blaiseConnector");
-   String rssReaderUrl = LinkHelper.getWebActivityURL(request, "rssReader");
    String createZipJobUrl = LinkHelper.getWebActivityURL(request, "createZipJobs");
    String createCotiJobUrl = LinkHelper.getWebActivityURL(request, "cotiJobs");
    String eloquaUrl = LinkHelper.getWebActivityURL(request, "eloqua");
@@ -189,7 +177,6 @@
    String xmlRulesUrl = LinkHelper.getWebActivityURL(request, "xmlrules");
    String xmlDtdsUrl = LinkHelper.getWebActivityURL(request, "xmldtds");
    String segmentationRulesUrl = LinkHelper.getWebActivityURL(request, "segmentationrules");
-   String sgmlRulesUrl = LinkHelper.getWebActivityURL(request, "sgmlrules");
    String jobsSearchUrl = LinkHelper.getWebActivityURL(request, "jobsAll");
    String jobGroupsUrl = LinkHelper.getWebActivityURL(request,"jobGroups");
    String tasksSearchUrl = LinkHelper.getWebActivityURL(request, "myactivities");
@@ -321,10 +308,6 @@ setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_attribute_group
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_locale_pairs")%>", "javascript:goToUrl('<%=localePairsUrl%>');", ""));
 <% } %>
 
-<% if (userPerms.getPermissionFor(Permission.GSEDITION_VIEW)) { %>
-setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_gseditions")%>", "javascript:goToUrl('<%=gsEditionUrl%>');", ""));
-<% } %>
-
 <% if (userPerms.getPermissionFor(Permission.ACTIVITY_TYPES_VIEW)) { %>
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_activity_types")%>", "javascript:goToUrl('<%=activityTypesUrl%>');", ""));
 <% } %>
@@ -390,12 +373,6 @@ setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_loc_profiles")%
 <% if (userPerms.getPermissionFor(Permission.SUPPORT_FILES_VIEW)) { %>
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_supportFiles")%>", "javascript:goToUrl('<%=glossariesUrl%>');", ""));
 <% } %>
-
-<% if(b_snippets) { %>
-<% if (userPerms.getPermissionFor(Permission.SNIPPET_IMPORT)) { %>
-setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_snippet_import")%>", "javascript:goToUrl('<%=snippetImportUrl%>');", ""));
-<%}%>
-<%}%>
 
 <% if (userPerms.getPermissionFor(Permission.CVS_Servers)) { %>
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_cvsservers")%>", "javascript:goToUrl('<%=cvsServerUrl%>');", ""));
@@ -475,20 +452,6 @@ tmp.mnemonic = 'd';
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_segmentation_rules")%>", "javascript:goToUrl('<%=segmentationRulesUrl%>');", ""));
 <% } %>
 
-<% if (userPerms.getPermissionFor(Permission.SGMLRULE_VIEW)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_sgml_rules") /*"SGML Rules"*/%>", "javascript:goToUrl('<%=sgmlRulesUrl%>');", ""));
-<% } %>
-
-<% if (userPerms.getPermissionFor(Permission.IMPORT)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_import")%>", "javascript:goToUrl('<%=importUrl%>');", ""));
-<% } %>
-
-<% if (b_customerAccessGroup) { %>
-<% if (userPerms.getPermissionFor(Permission.CUSTOMER_UPLOAD)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_upload")%>", "javascript:goToUrl('<%=customerUploadUrl%>');", ""));
-<% } %>
-<% } %>
-
 <% if (b_serviceware) {%>
 <% if (userPerms.getPermissionFor(Permission.SERVICEWARE_IMPORT)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_serviceware_import")%>", "javascript:goToUrl('<%=serviceWareUrl%>');", ""));
@@ -524,19 +487,9 @@ dataSourcesMenu.add(new WebFXMenuItem("Documentum Import", "javascript:window.op
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_export_locations")%>", "javascript:goToUrl('<%=exportLocationsUrl%>');", ""));
 <% } %>
 
-<%if (b_corpusAligner){%>
-<% if (userPerms.getPermissionFor(Permission.CORPUS_ALIGNER_VIEW)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_corpus_aligner")%>", "javascript:goToUrl('<%=corpusAlignerUrl%>');", ""));
-<% } %>
-
 <% if (userPerms.getPermissionFor(Permission.CVS_OPERATE)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_cvs_job")%>", "javascript:goToUrl('<%=cvsJobUrl%>');", ""));
 <% } %>
-
-<% if (userPerms.getPermissionFor(Permission.RSS_READER)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_rss_reader")%>", "javascript:goToUrl('<%=rssReaderUrl%>');", ""));
-<% } %>
-<%}%>
 
 <% if (userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_create_job_without_java")%>", "javascript:goToUrl('<%=createZipJobUrl%>');", ""));

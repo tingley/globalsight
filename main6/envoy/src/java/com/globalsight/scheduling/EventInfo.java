@@ -30,7 +30,7 @@ import java.util.Map;
  */
 public class EventInfo implements Serializable
 {
-    // This HashMap contains all the event related info.
+    private static final long serialVersionUID = -4877129654611552510L;
     public Map flux_event_info;
 
     //

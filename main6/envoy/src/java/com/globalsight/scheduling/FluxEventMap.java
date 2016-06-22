@@ -19,8 +19,8 @@ package com.globalsight.scheduling;
 import com.globalsight.everest.persistence.PersistentObject;
 
 /**
- * FluxEventMap contains event related info used for updating the status of
- * a job when necessary (i.e. when a user accepts an activity, the event for
+ * FluxEventMap contains event related info used for updating the status of a
+ * job when necessary (i.e. when a user accepts an activity, the event for
  * sending deadline email should be removed).
  */
 
@@ -127,7 +127,7 @@ public class FluxEventMap extends PersistentObject
      * @param p_eventId
      *            the id of the event.
      */
-    void setEventId(String p_eventId)
+    public void setEventId(String p_eventId)
     {
         m_eventId = p_eventId;
 
@@ -140,7 +140,7 @@ public class FluxEventMap extends PersistentObject
      * @param p_eventType
      *            the type of the event.
      */
-    void setEventType(int p_eventType)
+    public void setEventType(int p_eventType)
     {
         m_eventType = p_eventType;
     }
@@ -151,7 +151,7 @@ public class FluxEventMap extends PersistentObject
      * @param p_domainObjectId
      *            The id of the domain object.
      */
-    void setDomainObjectId(long p_domainObjectId)
+    public void setDomainObjectId(long p_domainObjectId)
     {
         m_domainObjectId = p_domainObjectId;
     }
@@ -165,7 +165,7 @@ public class FluxEventMap extends PersistentObject
      * @param p_domainObjectType
      *            the type of the domain object represented as an integer.
      */
-    void setDomainObjectType(int p_domainObjectType)
+    public void setDomainObjectType(int p_domainObjectType)
     {
         m_domainObjectType = p_domainObjectType;
     }

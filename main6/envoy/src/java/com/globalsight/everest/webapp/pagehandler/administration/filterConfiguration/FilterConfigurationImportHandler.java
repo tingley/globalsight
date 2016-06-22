@@ -1718,6 +1718,7 @@ public class FilterConfigurationImportHandler extends PageHandler
          * @param filterTableName
          * @param newFilterName
          * */
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         private String checkFilterNameExists(String filterName, String filterTableName)
         {
             String hql = null;
@@ -1734,36 +1735,42 @@ public class FilterConfigurationImportHandler extends PageHandler
             map.put("companyId", Long.parseLong(companyId));
             List itList = HibernateUtil.search(hql, map);
 
-            for (int i=0;i<itList.size();i++)
+            List<String> existedNames = new ArrayList<String>();
+            for (int i = 0; i < itList.size(); i++)
             {
-                String name = (String)itList.get(i);
-                if (filterName.equalsIgnoreCase(name))
+                String name = (String) itList.get(i);
+                existedNames.add(name.toLowerCase());
+            }
+
+            if (existedNames.contains(filterName.toLowerCase()))
+            {
+                for (int num = 1;; num++)
                 {
-                    for (int num = 1;; num++)
+                    String returnStr = null;
+                    if (filterName.contains("_import_"))
                     {
-                        String returnStr = null;
-                        if (filterName.contains("_import_"))
-                        {
-                            returnStr = filterName.substring(0, filterName.lastIndexOf('_')) + "_"
-                                    + num;
-                        }
-                        else
-                        {
-                            returnStr = filterName + "_import_" + num;
-                        }
-                        if (!itList.contains(returnStr))
-                        {
-                            return returnStr;
-                        }
+                        returnStr = filterName.substring(0, filterName.lastIndexOf('_')) + "_"
+                                + num;
+                    }
+                    else
+                    {
+                        returnStr = filterName + "_import_" + num;
+                    }
+
+                    if (!existedNames.contains(returnStr.toLowerCase()))
+                    {
+                        return returnStr;
                     }
                 }
             }
-            return filterName;
+            else
+            {
+                return filterName;
+            }
         }
 
         private FMFilter putDataIntoFMFilter(Map<String, String> valueMap)
         {
-
             FMFilter fmFilter = new FMFilter();
             String keyField = null;
             String valueField = null;

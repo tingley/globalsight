@@ -40,6 +40,7 @@ public class CreatePdfThread extends MultiCompanySupportedThread
     private boolean enableIndd = false;
     private boolean enableOffice = false;
     private boolean enableXML = false;
+    private boolean enableHTML = false;
 
     public CreatePdfThread(Job job, Logger logger)
     {
@@ -53,6 +54,7 @@ public class CreatePdfThread extends MultiCompanySupportedThread
             enableIndd = PreviewPDFHelper.isInDesignEnabled(companyId);
             enableOffice = PreviewPDFHelper.isOfficeEnabled(companyId);
             enableXML = PreviewPDFHelper.isXMLEnabled(companyId);
+            enableHTML = PreviewPDFHelper.isHTMLEnabled(companyId);
         }
         catch (Exception ex)
         {
@@ -82,7 +84,8 @@ public class CreatePdfThread extends MultiCompanySupportedThread
                         || pageName.endsWith(".docx")
                         || pageName.endsWith(".pptx")
                         || pageName.endsWith(".xlsx")
-                        || pageName.endsWith(".xml"))
+                        || pageName.endsWith(".xml")
+                        || pageName.endsWith(".html"))
                 {
                     if (pageName.endsWith(".xml"))
                     {
@@ -96,6 +99,14 @@ public class CreatePdfThread extends MultiCompanySupportedThread
                                 .readFileProfile(fpId);
                         
                         if (!FileProfileUtil.isXmlPreviewPDF(fp))
+                        {
+                            continue;
+                        }
+                    }
+                    
+                    if (pageName.endsWith(".html") || pageName.endsWith(".xhtml") || pageName.endsWith(".htm"))
+                    {
+                        if (!enableHTML)
                         {
                             continue;
                         }

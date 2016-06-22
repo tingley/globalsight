@@ -1,8 +1,25 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -43,31 +60,29 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 
-public class TaskDetailHelper 
+public class TaskDetailHelper
 {
-	
-	private static final Logger CATEGORY = Logger
-    	.getLogger(CommentMainHandler.class.getName());
-	
-	public static final String TASK_HOURS_STATE = "taskHours";
+
+    private static final Logger CATEGORY = Logger.getLogger(CommentMainHandler.class.getName());
+
+    public static final String TASK_HOURS_STATE = "taskHours";
     public static final String TASK_PAGES_STATE = "taskPages";
     public static final String TASK_STATE = WebAppConstants.TASK_STATE;
     public static final String WORK_OBJECT = WebAppConstants.WORK_OBJECT;
     public static final String UILOCALE = WebAppConstants.UILOCALE;
 
-	public void prepareTaskData(HttpServletRequest p_request, HttpServletResponse p_response,
-			HttpSession httpSession, String taskId)
-	{
-    	User user = TaskHelper.getUser(httpSession);
-		String taskStateParam = p_request.getParameter(TASK_STATE);
-		int taskState = TaskHelper.getInt(taskStateParam, -10);
-    	Task task = TaskHelper.getTask(user.getUserId(),Long.parseLong(taskId), taskState);
-    	TaskHelper.storeObject(httpSession, WORK_OBJECT, task);
-    	TaskHelper.updateMRUtask(p_request, httpSession, task, p_response,
-                task.getState());
-    	
-    	Locale uiLocale = (Locale) httpSession.getAttribute(UILOCALE);
-    	List targetPages = null;
+    public void prepareTaskData(HttpServletRequest p_request, HttpServletResponse p_response,
+            HttpSession httpSession, String taskId)
+    {
+        User user = TaskHelper.getUser(httpSession);
+        String taskStateParam = p_request.getParameter(TASK_STATE);
+        int taskState = TaskHelper.getInt(taskStateParam, -10);
+        Task task = TaskHelper.getTask(user.getUserId(), Long.parseLong(taskId), taskState);
+        TaskHelper.storeObject(httpSession, WORK_OBJECT, task);
+        TaskHelper.updateMRUtask(p_request, httpSession, task, p_response, task.getState());
+
+        Locale uiLocale = (Locale) httpSession.getAttribute(UILOCALE);
+        List targetPages = null;
         if (task.getTaskType().equals(Task.TYPE_TRANSLATION))
         {
             targetPages = task.getTargetPages();
@@ -76,18 +91,16 @@ public class TaskDetailHelper
         {
             try
             {
-                Job job = ServerProxy.getJobHandler().getJobById(
-                        task.getJobId());
+                Job job = ServerProxy.getJobHandler().getJobById(task.getJobId());
                 List workflows = new ArrayList();
                 workflows.addAll(job.getWorkflows());
                 for (int i = 0; i < workflows.size(); i++)
                 {
                     Workflow workflow = (Workflow) workflows.get(i);
-                    if (workflow.getTargetLocale().equals(
-                            task.getTargetLocale()))
+                    if (workflow.getTargetLocale().equals(task.getTargetLocale()))
                     {
-                        if (workflow.getWorkflowType().equals(
-                                WorkflowTypeConstants.TYPE_TRANSLATION))
+                        if (workflow.getWorkflowType()
+                                .equals(WorkflowTypeConstants.TYPE_TRANSLATION))
                         {
                             targetPages = new ArrayList();
                             targetPages.addAll(workflow.getTargetPages());
@@ -105,21 +118,18 @@ public class TaskDetailHelper
                 throw new EnvoyServletException(e);
             }
         }
-    	targetPages = filterPagesByName(p_request, httpSession, targetPages);
+        targetPages = filterPagesByName(p_request, httpSession, targetPages);
         sortPages(p_request, httpSession, uiLocale, targetPages);
-        TaskHelper.storeObject(httpSession, WebAppConstants.TARGET_PAGES,
-                targetPages);
-        
-        boolean isHourlyRate = ((task.getState() == Task.STATE_ACCEPTED) && isHourlyRate(
-                task, null)) ? true : false;
-        TaskHelper.storeObject(httpSession, TASK_HOURS_STATE, new Boolean(
-                isHourlyRate));
-        
-        boolean isPageBasedRate = ((task.getState() == Task.STATE_ACCEPTED) && isPageBasedRate(
-                task, null)) ? true : false;
-        TaskHelper.storeObject(httpSession, TASK_PAGES_STATE, new Boolean(
-                isPageBasedRate));
-        
+        TaskHelper.storeObject(httpSession, WebAppConstants.TARGET_PAGES, targetPages);
+
+        boolean isHourlyRate = ((task.getState() == Task.STATE_ACCEPTED)
+                && isHourlyRate(task, null)) ? true : false;
+        TaskHelper.storeObject(httpSession, TASK_HOURS_STATE, new Boolean(isHourlyRate));
+
+        boolean isPageBasedRate = ((task.getState() == Task.STATE_ACCEPTED)
+                && isPageBasedRate(task, null)) ? true : false;
+        TaskHelper.storeObject(httpSession, TASK_PAGES_STATE, new Boolean(isPageBasedRate));
+
         int openSegmentCount = 0;
         int closedSegmentCount = 0;
         // Get the number of open and closed issues.
@@ -135,29 +145,26 @@ public class TaskDetailHelper
         List<String> cStates = new ArrayList<String>();
         cStates.add(Issue.STATUS_CLOSED);
         closedSegmentCount = getIssueCount(task, httpSession, cStates);
-        httpSession.setAttribute(
-                JobManagementHandler.OPEN_AND_QUERY_SEGMENT_COMMENTS,
+        httpSession.setAttribute(JobManagementHandler.OPEN_AND_QUERY_SEGMENT_COMMENTS,
                 new Integer(openSegmentCount).toString());
-        httpSession.setAttribute(
-                JobManagementHandler.CLOSED_SEGMENT_COMMENTS, new Integer(
-                        closedSegmentCount).toString());
-        
+        httpSession.setAttribute(JobManagementHandler.CLOSED_SEGMENT_COMMENTS,
+                new Integer(closedSegmentCount).toString());
+
         String action = p_request.getParameter(WebAppConstants.TASK_ACTION);
         if (WebAppConstants.TASK_ACTION_RETRIEVE.equals(action))
         {
-        	// Set detail page id in session
+            // Set detail page id in session
             TaskHelper.storeObject(httpSession, WebAppConstants.TASK_DETAILPAGE_ID,
                     TaskHelper.DETAIL_PAGE_1);
         }
-	}
-	
-	
-	/**
+    }
+
+    /**
      * Filter the pages by the specified search filter. Return only the pages
      * that match the filter.
      */
-    protected List filterPagesByName(HttpServletRequest p_request,
-            HttpSession p_session, List p_pages)
+    protected List filterPagesByName(HttpServletRequest p_request, HttpSession p_session,
+            List p_pages)
     {
         String thisFileSearch = (String) p_request
                 .getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
@@ -185,14 +192,14 @@ public class TaskDetailHelper
             return p_pages;
         }
     }
-    
+
     /**
      * Sorts the target pages for the task specified by the sort column and
      * direction.
      */
     @SuppressWarnings("unchecked")
-    protected void sortPages(HttpServletRequest p_request,
-            HttpSession p_session, Locale p_uiLocale, List p_pages)
+    protected void sortPages(HttpServletRequest p_request, HttpSession p_session, Locale p_uiLocale,
+            List p_pages)
     {
         // first get comparator from session
         PageComparator comparator = (PageComparator) p_session
@@ -201,14 +208,11 @@ public class TaskDetailHelper
         {
             // Default: Sort by external page id (page name) ascending, so it'll
             // be alphabetized
-            comparator = new PageComparator(PageComparator.EXTERNAL_PAGE_ID,
-                    true, p_uiLocale);
-            p_session.setAttribute(JobManagementHandler.PAGE_COMPARATOR,
-                    comparator);
+            comparator = new PageComparator(PageComparator.EXTERNAL_PAGE_ID, true, p_uiLocale);
+            p_session.setAttribute(JobManagementHandler.PAGE_COMPARATOR, comparator);
         }
 
-        String criteria = p_request
-                .getParameter(JobManagementHandler.PAGE_SORT_PARAM);
+        String criteria = p_request.getParameter(JobManagementHandler.PAGE_SORT_PARAM);
         if (criteria != null)
         {
             int sortCriteria = Integer.parseInt(criteria);
@@ -230,20 +234,19 @@ public class TaskDetailHelper
         p_session.setAttribute(JobManagementHandler.PAGE_SORT_ASCENDING,
                 new Boolean(comparator.getSortAscending()));
     }
-    
-    private int getIssueCount(Task task, HttpSession session,
-            List<String> states) throws EnvoyServletException
+
+    private int getIssueCount(Task task, HttpSession session, List<String> states)
+            throws EnvoyServletException
     {
         int count = 0;
 
         Workflow wf = task.getWorkflow();
         if (!(wf.getState().equals(Workflow.CANCELLED)))
         {
-            List pages = wf.getTargetPages();
+            Collection<TargetPage> pages = wf.getTargetPages();
             List<Long> targetPageIds = new ArrayList<Long>();
-            for (int j = 0; j < pages.size(); j++)
+            for (TargetPage tPage : pages)
             {
-                TargetPage tPage = (TargetPage) pages.get(j);
                 String state = tPage.getPageState();
                 if (!PageState.IMPORT_FAIL.equals(state))
                 {
@@ -254,8 +257,7 @@ public class TaskDetailHelper
             try
             {
                 CommentManager manager = ServerProxy.getCommentManager();
-                count = manager.getIssueCount(Issue.TYPE_SEGMENT,
-                        targetPageIds, states);
+                count = manager.getIssueCount(Issue.TYPE_SEGMENT, targetPageIds, states);
             }
             catch (Exception ex)
             {
@@ -264,22 +266,19 @@ public class TaskDetailHelper
         }
         return count;
     }
-    
+
     private boolean isPageBasedRate(Task p_task, String p_user)
     {
         // If costing has been disabled,
         // we do not want to show the Page based rate field in the ui.
         boolean isPage = false;
         SystemConfiguration sc = SystemConfiguration.getInstance();
-        boolean s_isCostingEnabled = sc
-                .getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED);
+        boolean s_isCostingEnabled = sc.getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED);
         if (s_isCostingEnabled)
         {
             Rate actualRate = getActualRateToBeUsed(p_task, p_user);
-            if ((actualRate != null && actualRate.getRateType().equals(
-                    Rate.UnitOfWork.PAGE_COUNT))
-                    || ((p_task.getRevenueRate() != null) && p_task
-                            .getRevenueRate().getRateType()
+            if ((actualRate != null && actualRate.getRateType().equals(Rate.UnitOfWork.PAGE_COUNT))
+                    || ((p_task.getRevenueRate() != null) && p_task.getRevenueRate().getRateType()
                             .equals(Rate.UnitOfWork.PAGE_COUNT)))
             {
                 isPage = true;
@@ -287,22 +286,19 @@ public class TaskDetailHelper
         }
         return isPage;
     }
-    
+
     private boolean isHourlyRate(Task p_task, String p_user)
     {
         // If costing has been disabled,
         // we do not want to show the hour based rate field in the ui.
         boolean isHourly = false;
         SystemConfiguration sc = SystemConfiguration.getInstance();
-        boolean s_isCostingEnabled = sc
-                .getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED);
+        boolean s_isCostingEnabled = sc.getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED);
         if (s_isCostingEnabled)
         {
             Rate actualRate = getActualRateToBeUsed(p_task, p_user);
-            if ((actualRate != null && actualRate.getRateType().equals(
-                    Rate.UnitOfWork.HOURLY))
-                    || ((p_task.getRevenueRate() != null) && p_task
-                            .getRevenueRate().getRateType()
+            if ((actualRate != null && actualRate.getRateType().equals(Rate.UnitOfWork.HOURLY))
+                    || ((p_task.getRevenueRate() != null) && p_task.getRevenueRate().getRateType()
                             .equals(Rate.UnitOfWork.HOURLY)))
             {
                 isHourly = true;
@@ -310,7 +306,7 @@ public class TaskDetailHelper
         }
         return isHourly;
     }
-    
+
     /**
      * This is copied from CostingEngineLocal The logic is not exactly same but
      * quite similar.
@@ -341,9 +337,7 @@ public class TaskDetailHelper
             }
             catch (Exception e)
             {
-                CATEGORY.error(
-                        "TaskDetailHandler::Problem getting user information ",
-                        e);
+                CATEGORY.error("TaskDetailHandler::Problem getting user information ", e);
             }
             try
             {
@@ -351,8 +345,7 @@ public class TaskDetailHelper
                 if (user != null)
                 {
                     // find out user role
-                    Vector uRoles = new Vector(ServerProxy.getUserManager()
-                            .getUserRoles(user));
+                    Vector uRoles = new Vector(ServerProxy.getUserManager().getUserRoles(user));
                     String activity = t.getTaskName();
                     GlobalSightLocale source = t.getSourceLocale();
                     GlobalSightLocale target = t.getTargetLocale();
@@ -382,14 +375,12 @@ public class TaskDetailHelper
             }
             catch (Exception e)
             {
-                CATEGORY.error(
-                        "TaskDetailHandler::Problem getting user information ",
-                        e);
+                CATEGORY.error("TaskDetailHandler::Problem getting user information ", e);
             }
         }
         return useRate;
     }
-    
+
     /*
      * Copied from CostingEngine
      */
@@ -398,8 +389,7 @@ public class TaskDetailHelper
         CostingEngineLocal local = new CostingEngineLocal();
         return local.getRate(p_id);
     }
-    
-    
+
     /**
      * methods from taskdetail jsp
      */
@@ -445,8 +435,8 @@ public class TaskDetailHelper
     }
 
     // Prints file name with full path
-    public static String printPageLink(JspWriter out, String p_page,
-            String p_url, boolean hasEditPerm, int pageNum) throws IOException
+    public static String printPageLink(JspWriter out, String p_page, String p_url,
+            boolean hasEditPerm, int pageNum) throws IOException
     {
         // Preserve any MsOffice prefixes: (header) en_US/foo/bar.ppt but
         // show them last so the main file names are grouped together
@@ -469,19 +459,20 @@ public class TaskDetailHelper
             out.print(" oncontextmenu=\"contextForPage('");
             out.print(p_url);
             out.print("', event, '");
-            out.print( pageNum);
+            out.print(pageNum);
             out.print("')\"");
             out.print(" onfocus='this.blur();'");
             out.print(" page='");
             out.print(p_url);
             out.print("'");
             out.print(" CLASS='standardHREF'>");
-            out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:500px\'>\");}</SCRIPT>");
+            out.print(
+                    "<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:500px\'>\");}</SCRIPT>");
             out.print(pageName);
-            out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>");
+            out.print(
+                    "<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>");
             out.print("</a>");
-            treeParam.append("text=" + pageName)
-                    .append(p_url.replaceAll("&", "|"))
+            treeParam.append("text=" + pageName).append(p_url.replaceAll("&", "|"))
                     .append("|title=" + pageName);
         }
         else
@@ -493,8 +484,8 @@ public class TaskDetailHelper
     }
 
     // Prints short file name with full path in tooltip
-    public static String printPageLinkShort(JspWriter out, String p_page,
-            String p_url, boolean hasEditPerm, int pageNum) throws IOException
+    public static String printPageLinkShort(JspWriter out, String p_page, String p_url,
+            boolean hasEditPerm, int pageNum) throws IOException
     {
         // Preserve any MsOffice prefixes: (header) en_US/foo/bar.ppt but
         // show them last so the main file names are grouped together
@@ -541,8 +532,7 @@ public class TaskDetailHelper
             out.print(shortName);
             out.print("</a>");
             treeParam.append("text=" + shortName.replace("\'", "&apos;"))
-                    .append(p_url.replaceAll("&", "|"))
-                    .append("|title=" + pageName);
+                    .append(p_url.replaceAll("&", "|")).append("|title=" + pageName);
         }
         else
         {
@@ -551,7 +541,7 @@ public class TaskDetailHelper
 
         return treeParam.toString();
     }
-    
+
     public static StringBuffer getExportLink(Task theTask, String url, long workflowId)
     {
         StringBuffer exportLink = new StringBuffer(url);
@@ -562,7 +552,7 @@ public class TaskDetailHelper
         exportLink.append("&");
         exportLink.append(JobManagementHandler.EXPORT_SELECTED_WORKFLOWS_ONLY_PARAM);
         exportLink.append("=true");
-        //GBS-2913 Added to the url parameter taskId
+        // GBS-2913 Added to the url parameter taskId
         exportLink.append("&");
         exportLink.append(WebAppConstants.TASK_ID);
         exportLink.append("=");
@@ -571,17 +561,15 @@ public class TaskDetailHelper
         exportLink.append(WebAppConstants.TASK_STATE);
         exportLink.append("=");
         exportLink.append(theTask.getState());
-        
+
         return exportLink;
     }
 
-    public static StringBuffer getDownloadLink(Task theTask, String url,
-            long workflowId, String jobId)
+    public static StringBuffer getDownloadLink(Task theTask, String url, long workflowId,
+            String jobId)
     {
-        StringBuffer downloadLink = new StringBuffer(
-                "/globalsight/ControlServlet"
-                        + "?linkName=jobDownload&pageName=TK2"
-                        + "&firstEntry=true&fromTaskDetail=true");
+        StringBuffer downloadLink = new StringBuffer("/globalsight/ControlServlet"
+                + "?linkName=jobDownload&pageName=TK2" + "&firstEntry=true&fromTaskDetail=true");
         downloadLink.append("&");
         downloadLink.append(DownloadFileHandler.PARAM_JOB_ID);
         downloadLink.append("=");

@@ -57,6 +57,7 @@ public interface CompanyConstants
     public static final String ENABLE_INCTXRV_TOOL_INDD = "enableInCtxRvToolInddField";
     public static final String ENABLE_INCTXRV_TOOL_OFFICE = "enableInCtxRvToolOfficeField";
     public static final String ENABLE_INCTXRV_TOOL_XML = "enableInCtxRvToolXMLField";
+    public static final String ENABLE_INCTXRV_TOOL_HTML = "enableInCtxRvToolHTMLField";
 
     public static final String FILTER_NAME = "companyNameFilter";
     public static final String FILTER_DESCRIPTION = "companyDescriptionFilter";

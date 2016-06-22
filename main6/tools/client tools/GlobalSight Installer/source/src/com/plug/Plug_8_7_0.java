@@ -1,12 +1,21 @@
 package com.plug;
 
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.install.Upgrade;
+import com.util.FileUtil;
+import com.util.ServerUtil;
 import com.util.db.DbUtil;
 import com.util.db.DbUtilFactory;
 
@@ -15,11 +24,14 @@ public class Plug_8_7_0 implements Plug
     private static Logger log = Logger.getLogger(Plug_8_7_0.class);
 
     public DbUtil dbUtil = DbUtilFactory.getDbUtil();
+    private String propertiesPath = ServerUtil.getPath() + "/jboss/server/standalone/deployments/globalsight.ear/lib/classes/properties/";
 
 	@Override
 	public void run()
 	{
 		executeCreateIndexSql();
+		updateThreadProperties();
+		installGlobalSightService();
 	}
 
 	private void executeCreateIndexSql()
@@ -88,5 +100,54 @@ public class Plug_8_7_0 implements Plug
 		sqlList.add("CREATE INDEX IDX_COST_BY_WORD_COUNT_COST_ID ON COST_BY_WORD_COUNT(COST_ID);");
 
 		return sqlList;
+	}
+	
+	private void updateThreadProperties()
+	{
+		for(String p : Upgrade.COPY_UNCOVER)
+		{
+			updateThreadProperty(p);
+		}
+	}
+	
+	private void updateThreadProperty(String name)
+	{
+	    File f = new File(propertiesPath + name);
+	    String content = FileUtil.readFile(f);
+	    int index = content.indexOf("# Set thread number");
+	    if (index > 0)
+	    {
+	        content = content.substring(index);
+	        try 
+	        {
+				FileUtil.writeFile(f, content);
+			}
+	        catch (IOException e) 
+	        {
+				log.error("Failed to update file: " + name, e);
+			}
+	    }
+	}
+	
+	private void installGlobalSightService()
+	{
+		try 
+		{
+			URL url = new URL("file:" + ServerUtil.getPath() + "/install/installer.jar");
+			URLClassLoader loader = new URLClassLoader( new URL[]{ url } );
+			Class<?> install = loader.loadClass("Install");
+			Object instance = install.newInstance();
+			Field f = install.getField("JBOSS_UTIL_BIN");
+			f.set(instance, ServerUtil.getPath() + "/jboss/util/bin");
+			Method m = install.getMethod("determineOperatingSystem");
+			m.invoke(instance);
+			m = install.getMethod("installGlobalSightService");
+			m.invoke(instance);
+			loader.close();
+		} 
+		catch (Exception e) 
+		{
+			log.error(e);
+		}
 	}
 }

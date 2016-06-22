@@ -7,7 +7,7 @@
         </id>
 
         <many-to-one name="tm" column="tmId"
-            class="com.globalsight.ling.tm3.core.BaseTm" not-null="true"
+            class="com.globalsight.ling.tm3.core.MultilingualSharedTm" not-null="true"
             lazy="false" />
 
         <property name="name" length="128" column="name" 

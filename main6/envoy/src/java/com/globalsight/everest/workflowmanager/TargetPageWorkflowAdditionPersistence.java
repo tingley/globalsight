@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -52,17 +51,14 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageResult;
 import com.globalsight.util.GlobalSightLocale;
 
-public class TargetPageWorkflowAdditionPersistence extends
-        AbstractTargetPagePersistence implements TargetPagePersistence
+public class TargetPageWorkflowAdditionPersistence extends AbstractTargetPagePersistence
+        implements TargetPagePersistence
 {
-    private static Logger s_logger = Logger
-            .getLogger(TargetPageWorkflowAdditionPersistence.class);
+    private static Logger s_logger = Logger.getLogger(TargetPageWorkflowAdditionPersistence.class);
 
-
-    public Collection<TargetPage> persistObjectsWithExtractedFile(
-            SourcePage p_sourcePage, Collection p_targetLocales,
-            TermLeverageResult p_termMatches, boolean p_useLeveragedSegments,
-            boolean p_useLeveragedTerms,
+    public Collection<TargetPage> persistObjectsWithExtractedFile(SourcePage p_sourcePage,
+            Collection p_targetLocales, TermLeverageResult p_termMatches,
+            boolean p_useLeveragedSegments, boolean p_useLeveragedTerms,
             ExactMatchedSegments p_exactMatchedSegments) throws PageException
     {
         ArrayList<TargetPage> targetPages = new ArrayList<TargetPage>();
@@ -79,8 +75,7 @@ public class TargetPageWorkflowAdditionPersistence extends
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
 
-            List<LeverageGroup> levertages = p_sourcePage.getExtractedFile()
-                    .getLeverageGroupSet();
+            List<LeverageGroup> levertages = p_sourcePage.getExtractedFile().getLeverageGroupSet();
 
             // if it is a discard-add workflow, do not insert the tuvs.
             Job job = p_sourcePage.getRequest().getJob();
@@ -96,12 +91,11 @@ public class TargetPageWorkflowAdditionPersistence extends
                     boolean breakFlag = false;
                     if (wf.getTargetLocale().equals(targetLocale))
                     {
-                        Vector<TargetPage> tPages = wf.getTargetPages();
+                        Collection<TargetPage> tPages = wf.getTargetPages();
                         for (TargetPage page : tPages)
                         {
                             // Check if the page is existed.
-                            if (page.getExternalPageId().equals(
-                                    p_sourcePage.getExternalPageId()))
+                            if (page.getExternalPageId().equals(p_sourcePage.getExternalPageId()))
                             {
                                 it.remove();
                                 breakFlag = true;
@@ -114,12 +108,9 @@ public class TargetPageWorkflowAdditionPersistence extends
                     }
                 }
 
-                TargetPage targetPage = new TargetPage(targetLocale,
-                        p_sourcePage);
-                targetPage.getExtractedFile().getLeverageGroupSet()
-                        .addAll(levertages);
-                targetPage.setTimestamp(new Timestamp(System
-                        .currentTimeMillis()));
+                TargetPage targetPage = new TargetPage(targetLocale, p_sourcePage);
+                targetPage.getExtractedFile().getLeverageGroupSet().addAll(levertages);
+                targetPage.setTimestamp(new Timestamp(System.currentTimeMillis()));
 
                 session.save(targetPage);
                 targetPages.add(targetPage);
@@ -128,17 +119,15 @@ public class TargetPageWorkflowAdditionPersistence extends
             Collection sourceTuvs = SegmentTuvUtil.getSourceTuvs(p_sourcePage);
             for (Iterator<Tuv> it = sourceTuvs.iterator(); it.hasNext();)
             {
-            	it.next().setState(TuvState.NOT_LOCALIZED);
+                it.next().setState(TuvState.NOT_LOCALIZED);
             }
             SegmentTuUtil.getTusBySourcePageId(p_sourcePage.getId());
             HashMap<Tu, Tuv> sourceTuvMap = getSourceTuvMap(sourceTuvs, jobId);
-            Set<Tuv> targetTuvs = createPersistenceTuv(p_sourcePage,
-                    p_targetLocales, p_termMatches, p_useLeveragedSegments,
-                    p_useLeveragedTerms, p_exactMatchedSegments, sourceTuvs,
+            Set<Tuv> targetTuvs = createPersistenceTuv(p_sourcePage, p_targetLocales, p_termMatches,
+                    p_useLeveragedSegments, p_useLeveragedTerms, p_exactMatchedSegments, sourceTuvs,
                     sourceTuvMap);
 
-            targetTuvs = SegmentTuTuvPersistence.saveTargetTuvs(targetTuvs,
-                    jobId);
+            targetTuvs = SegmentTuTuvPersistence.saveTargetTuvs(targetTuvs, jobId);
 
             // add target tuv source comment
             Iterator sourceTuvsIt = sourceTuvs.iterator();
@@ -177,17 +166,15 @@ public class TargetPageWorkflowAdditionPersistence extends
                         for (int i = 0; i < targetPages.size(); i++)
                         {
                             tPage = (TargetPage) targetPages.get(i);
-                            if (tPage.getGlobalSightLocale().getId() == tgtTuv
-                                    .getLocaleId())
+                            if (tPage.getGlobalSightLocale().getId() == tgtTuv.getLocaleId())
                             {
                                 break;
                             }
                         }
 
-                        String jobUid = job == null ? null : job
-                                .getCreateUserId();
-                        IssueImpl issue = SourceComment.createSourceComment(
-                                tPage, tu, tgtTuv, jobUid);
+                        String jobUid = job == null ? null : job.getCreateUserId();
+                        IssueImpl issue = SourceComment.createSourceComment(tPage, tu, tgtTuv,
+                                jobUid);
                         session.save(issue);
                     }
                 }
@@ -212,11 +199,10 @@ public class TargetPageWorkflowAdditionPersistence extends
         return targetPages;
     }
 
-    private Set<Tuv> createPersistenceTuv(SourcePage p_sourcePage,
-            Collection p_targetLocales, TermLeverageResult p_termMatches,
-            boolean p_useLeveragedSegments, boolean p_useLeveragedTerms,
-            ExactMatchedSegments p_exactMatchedSegments, Collection sourceTuvs,
-            HashMap<Tu, Tuv> sourceTuvMap) throws PageException
+    private Set<Tuv> createPersistenceTuv(SourcePage p_sourcePage, Collection p_targetLocales,
+            TermLeverageResult p_termMatches, boolean p_useLeveragedSegments,
+            boolean p_useLeveragedTerms, ExactMatchedSegments p_exactMatchedSegments,
+            Collection sourceTuvs, HashMap<Tu, Tuv> sourceTuvMap) throws PageException
     {
         Set<Tuv> tuvs = new HashSet<Tuv>();
 
@@ -225,11 +211,9 @@ public class TargetPageWorkflowAdditionPersistence extends
             for (Iterator it = p_targetLocales.iterator(); it.hasNext();)
             {
                 GlobalSightLocale targetLocale = (GlobalSightLocale) it.next();
-                boolean useLeveragedTerms = ExtractedFileImporter
-                        .getLeveragematch();
-                ArrayList<Tuv> targetTuvs = getTargetTuvs(p_sourcePage,
-                        sourceTuvMap, targetLocale, p_termMatches,
-                        useLeveragedTerms, p_exactMatchedSegments);
+                boolean useLeveragedTerms = ExtractedFileImporter.getLeveragematch();
+                ArrayList<Tuv> targetTuvs = getTargetTuvs(p_sourcePage, sourceTuvMap, targetLocale,
+                        p_termMatches, useLeveragedTerms, p_exactMatchedSegments);
                 tuvs.addAll(targetTuvs);
             }
         }

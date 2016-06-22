@@ -17,36 +17,19 @@
 
 package com.globalsight.everest.costing;
 
-// java
-import java.io.Serializable;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.jms.JMSException;
-import javax.naming.NamingException;
-
-import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.util.jms.JmsHelper;
+import com.globalsight.cxe.util.costing.CostCalculatorUtil;
 
 public class CostCalculator
-    implements Serializable
 {
-    //////////////////////////////////////
-    // Constants                        //
-    //////////////////////////////////////
     private long m_jobId = 0;
     private Currency m_currency = null;
     private boolean m_reCalculate = false;
     private int m_costType = 0;
 
-
-    //////////////////////////////////////
-    // Constructors                     //
-    //////////////////////////////////////
-
-    public CostCalculator(long p_jobId,
-                          Currency p_currency, 
-                          boolean p_reCalculate, 
-                          int p_costType)
+    public CostCalculator(long p_jobId, Currency p_currency, boolean p_reCalculate, int p_costType)
     {
         m_jobId = p_jobId;
         m_currency = p_currency;
@@ -54,22 +37,14 @@ public class CostCalculator
         m_reCalculate = p_reCalculate;
     }
 
-    /**
-     * Sends a JMS message to the calculator to calculate the cost
-     * 
-     * @exception JMSException
-     * @exception NamingException
-     */
     public void sendToCalculateCost()
-    throws JMSException, NamingException
     {
-        Hashtable map = new Hashtable(3);   
-        CompanyWrapper.saveCurrentCompanyIdInMap(map, null);
-        map.put(new Integer(CostingEngine.JOB), new Long(m_jobId));
-        map.put(new Integer(CostingEngine.CURRENCY), m_currency);
-        map.put(new Integer(CostingEngine.RECALCULATE), new Boolean(m_reCalculate));
-        map.put(new Integer(CostingEngine.COST_TYPE), new Integer(m_costType));
-        JmsHelper.sendMessageToQueue(map,JmsHelper.JMS_CALCULATE_COST_QUEUE);
+        Map<Integer, Object> data = new HashMap<Integer, Object>();
+        data.put(CostingEngine.JOB, m_jobId);
+        data.put(CostingEngine.CURRENCY, m_currency);
+        data.put(CostingEngine.RECALCULATE, m_reCalculate);
+        data.put(CostingEngine.COST_TYPE, m_costType);
+        // GBS-4400
+        CostCalculatorUtil.calculateCostWithThread(data);
     }
 }
-

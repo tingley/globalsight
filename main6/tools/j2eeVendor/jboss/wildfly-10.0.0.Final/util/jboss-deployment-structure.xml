@@ -1,0 +1,41 @@
+<jboss-deployment-structure>
+	<ear-subdeployments-isolated>false</ear-subdeployments-isolated>
+	<deployment>
+		<dependencies>
+		    <module name="com.mysql" export="true" />
+		    <module name="javax.mail.api" export="true" />
+		    <module name="javax.wsdl4j.api" export="true" />
+		    <module name="org.apache.commons.beanutils" export="true" />
+		    <module name="org.apache.commons.collections" export="true" />
+		    <module name="org.apache.commons.io" export="true" />
+		    <module name="org.apache.commons.lang" export="true" />
+			<module name="org.apache.cxf" export="true" />
+			<module name="org.apache.cxf.impl" export="true" />
+			<module name="org.apache.httpcomponents" export="true" />
+			<module name="org.apache.xalan" export="true" />
+			<module name="org.apache.xerces" export="true" />
+			<module name="org.codehaus.jackson.jackson-mapper-asl" export="true" />
+			<module name="org.hibernate" export="true" />
+			<module name="org.hibernate.optional.c3p0" export="true" />
+			<module name="org.hibernate.optional.ehcache" export="true" />
+			<module name="org.javassist" export="true" />
+			<module name="org.jdom" export="true" />
+			<system export="true">
+				<paths>
+				    <path name="com/sun/beans/editors" />
+					<path name="com/sun/jndi/toolkit/url" />
+					<path name="com/sun/org/apache/regexp/internal" />
+					<path name="com/sun/org/apache/xalan/internal/xsltc/trax" />
+					<path name="com/sun/org/apache/xerces/internal/dom" />
+
+					<!-- GBS-4154: Blaise Connector -->
+					<path name="javax/xml/bind" />
+					<path name="javax/xml/bind/annotation" />
+					<path name="com/sun/xml/internal/bind/api" />
+					<path name="com/sun/xml/internal/bind/v2" />
+					<path name="com/sun/xml/internal/bind/v2/model/annotation" />
+				</paths>
+			</system>
+		</dependencies>
+	</deployment>
+</jboss-deployment-structure>

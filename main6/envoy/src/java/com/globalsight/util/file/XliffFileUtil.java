@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.naming.NamingException;
 
@@ -63,8 +62,7 @@ import com.globalsight.util.zip.ZipIt;
  */
 public class XliffFileUtil
 {
-    private static final Logger logger = Logger.getLogger(XliffFileUtil.class
-            .getName());
+    private static final Logger logger = Logger.getLogger(XliffFileUtil.class.getName());
     public static final int KNOWN_FILE_FORMAT_XLIFF = 39;
     public static final int KNOWN_FILE_FORMAT_XLZ = 48;
     public static final String XLIFF_EXTENSION = ".xlf";
@@ -145,8 +143,7 @@ public class XliffFileUtil
             return false;
 
         String tmp = p_filename.trim().toLowerCase();
-        return tmp.endsWith(XLIFF_EXTENSION)
-                || tmp.endsWith(XLIFF_LONG_EXTENSION);
+        return tmp.endsWith(XLIFF_EXTENSION) || tmp.endsWith(XLIFF_LONG_EXTENSION);
     }
 
     /**
@@ -167,15 +164,13 @@ public class XliffFileUtil
      * @version 1.0
      * @since 8.2.2
      */
-    public static void processMultipleFileTags(
-            Hashtable<String, FileProfile> p_files, String p_filename,
-            FileProfile p_fp)
+    public static void processMultipleFileTags(Hashtable<String, FileProfile> p_files,
+            String p_filename, FileProfile p_fp)
     {
         MultipleFileTagsXliff multipleFileTagsXliff = processMultipleFileTags(p_filename);
         if (multipleFileTagsXliff != null)
         {
-            ArrayList<String> separatedFile = multipleFileTagsXliff
-                    .getSeparatedFiles();
+            ArrayList<String> separatedFile = multipleFileTagsXliff.getSeparatedFiles();
             for (int j = 0; j < separatedFile.size(); j++)
             {
                 p_files.put(separatedFile.get(j), p_fp);
@@ -198,12 +193,10 @@ public class XliffFileUtil
      * @version 1.0
      * @since 8.2.2
      */
-    public static MultipleFileTagsXliff processMultipleFileTags(
-            String p_relativeFilename)
+    public static MultipleFileTagsXliff processMultipleFileTags(String p_relativeFilename)
     {
         String absoluteFilename = generateAbsolutePath(p_relativeFilename);
-        boolean hasMultipleFileTags = XliffFileUtil
-                .isMultipleFileTags(absoluteFilename);
+        boolean hasMultipleFileTags = XliffFileUtil.isMultipleFileTags(absoluteFilename);
         if (hasMultipleFileTags)
         {
             String fileContent = getFileContent(absoluteFilename);
@@ -254,9 +247,7 @@ public class XliffFileUtil
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Can not verify if current file contains multiple file tags.",
-                    e);
+            logger.error("Can not verify if current file contains multiple file tags.", e);
             return false;
         }
     }
@@ -299,9 +290,7 @@ public class XliffFileUtil
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Can not verify if current file contains multiple file tags.",
-                    e);
+            logger.error("Can not verify if current file contains multiple file tags.", e);
             return false;
         }
     }
@@ -328,13 +317,12 @@ public class XliffFileUtil
             String exportLocation = "";
             File file = null;
             ArrayList<String> subPaths = new ArrayList<String>();
-            Vector<TargetPage> targetPages = p_workflow.getAllTargetPages();
+            List<TargetPage> targetPages = p_workflow.getAllTargetPages();
 
             String baseDocDir = AmbFileStoragePathUtils.getCxeDocDirPath();
-            if (CompanyWrapper.SUPER_COMPANY_ID.equals(CompanyWrapper
-                    .getCurrentCompanyId())
-                    && !CompanyWrapper.SUPER_COMPANY_ID.equals(String
-                            .valueOf(p_workflow.getJob().getCompanyId())))
+            if (CompanyWrapper.SUPER_COMPANY_ID.equals(CompanyWrapper.getCurrentCompanyId())
+                    && !CompanyWrapper.SUPER_COMPANY_ID
+                            .equals(String.valueOf(p_workflow.getJob().getCompanyId())))
             {
                 baseDocDir += baseDocDir + File.separator;
             }
@@ -344,23 +332,18 @@ public class XliffFileUtil
             for (TargetPage targetPage : targetPages)
             {
                 exportLocation = targetPage.getExportSubDir();
-                if (exportLocation.startsWith("\\")
-                        || exportLocation.startsWith("/"))
+                if (exportLocation.startsWith("\\") || exportLocation.startsWith("/"))
                     exportLocation = exportLocation.substring(1);
                 sourceFilename = targetPage.getSourcePage().getExternalPageId();
                 sourceFilename = sourceFilename.replace("/", File.separator);
-                filename = sourceFilename.substring(
-                        sourceFilename.indexOf(File.separator) + 1,
+                filename = sourceFilename.substring(sourceFilename.indexOf(File.separator) + 1,
                         sourceFilename.lastIndexOf(File.separator));
-                index = sourceFilename.toLowerCase().lastIndexOf(
-                        SEPARATE_FLAG + File.separator);
+                index = sourceFilename.toLowerCase().lastIndexOf(SEPARATE_FLAG + File.separator);
                 if (index != -1)
                 {
-                    tmp = baseDocDir + File.separator
-                            + sourceFilename.substring(0, index);
+                    tmp = baseDocDir + File.separator + sourceFilename.substring(0, index);
                     file = new File(tmp);
-                    if (file.exists() && file.isFile()
-                            && !subPaths.contains(filename))
+                    if (file.exists() && file.isFile() && !subPaths.contains(filename))
                         subPaths.add(filename);
                 }
             }
@@ -368,12 +351,11 @@ public class XliffFileUtil
             String[] subFiles = null, sortedSubFiles = null;
             for (String subPath : subPaths)
             {
-                tmp = baseDocDir + File.separator + exportLocation
-                        + File.separator + subPath;
+                tmp = baseDocDir + File.separator + exportLocation + File.separator + subPath;
                 file = new File(tmp);
                 subFiles = file.list();
                 if (subFiles == null)
-                	continue;
+                    continue;
                 sortedSubFiles = sortSubFiles(subFiles);
                 combineSeparatedXliffFiles(tmp, sortedSubFiles);
             }
@@ -387,51 +369,46 @@ public class XliffFileUtil
 
     public static String getSourceFile(String externalPageId, String companyId)
     {
-    	if (!isXliffFile(externalPageId))
-    		return null;
-    	
-    	 String baseCxeDocDir = AmbFileStoragePathUtils.getCxeDocDirPath()
-                 .concat(File.separator);
-    	 String companyName = CompanyWrapper.getCompanyNameById(companyId);
+        if (!isXliffFile(externalPageId))
+            return null;
 
-         if (CompanyWrapper.SUPER_COMPANY_ID.equals(CompanyWrapper
-                 .getCurrentCompanyId())
-                 && !CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
-         {
-             baseCxeDocDir += companyName + File.separator;
-         }
-         
-         int index = externalPageId.lastIndexOf(SEPARATE_FLAG + File.separator);
-         String tmp = "";
-         String sourceFilename = "";
-         File sourceFile = null;
-         File sourcePath = null, targetPath = null;
-         
-         if (index != -1)
-         {
-             tmp = externalPageId.substring(0, index);
-             sourceFilename = baseCxeDocDir + tmp;
-             sourceFile = new File(sourceFilename);
-             if (sourceFile.exists() && sourceFile.isFile())
-             {
-                 return sourceFile.getAbsolutePath();
-             }
-         }
-         
-         tmp = externalPageId.substring(0,
-        		 externalPageId.lastIndexOf(File.separator));
-         sourceFilename = baseCxeDocDir + tmp
-                 + XliffFileUtil.XLZ_EXTENSION;
-         sourceFile = new File(sourceFilename);
-         if (sourceFile.exists() && sourceFile.isFile())
-         {
-        	 return sourceFile.getAbsolutePath();
-         }
-         
-         return null;
+        String baseCxeDocDir = AmbFileStoragePathUtils.getCxeDocDirPath().concat(File.separator);
+        String companyName = CompanyWrapper.getCompanyNameById(companyId);
+
+        if (CompanyWrapper.SUPER_COMPANY_ID.equals(CompanyWrapper.getCurrentCompanyId())
+                && !CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
+        {
+            baseCxeDocDir += companyName + File.separator;
+        }
+
+        int index = externalPageId.lastIndexOf(SEPARATE_FLAG + File.separator);
+        String tmp = "";
+        String sourceFilename = "";
+        File sourceFile = null;
+        File sourcePath = null, targetPath = null;
+
+        if (index != -1)
+        {
+            tmp = externalPageId.substring(0, index);
+            sourceFilename = baseCxeDocDir + tmp;
+            sourceFile = new File(sourceFilename);
+            if (sourceFile.exists() && sourceFile.isFile())
+            {
+                return sourceFile.getAbsolutePath();
+            }
+        }
+
+        tmp = externalPageId.substring(0, externalPageId.lastIndexOf(File.separator));
+        sourceFilename = baseCxeDocDir + tmp + XliffFileUtil.XLZ_EXTENSION;
+        sourceFile = new File(sourceFilename);
+        if (sourceFile.exists() && sourceFile.isFile())
+        {
+            return sourceFile.getAbsolutePath();
+        }
+
+        return null;
     }
-    
-    
+
     /**
      * Process the files if the source file is with XLZ file format
      * 
@@ -457,7 +434,7 @@ public class XliffFileUtil
 
         try
         {
-            Vector<TargetPage> targetPages = p_workflow.getAllTargetPages();
+            List<TargetPage> targetPages = p_workflow.getAllTargetPages();
             String baseCxeDocDir = AmbFileStoragePathUtils.getCxeDocDirPath()
                     .concat(File.separator);
 
@@ -465,8 +442,7 @@ public class XliffFileUtil
             String companyId = String.valueOf(job.getCompanyId());
             String companyName = CompanyWrapper.getCompanyNameById(companyId);
 
-            if (CompanyWrapper.SUPER_COMPANY_ID.equals(CompanyWrapper
-                    .getCurrentCompanyId())
+            if (CompanyWrapper.SUPER_COMPANY_ID.equals(CompanyWrapper.getCurrentCompanyId())
                     && !CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
             {
                 baseCxeDocDir += companyName + File.separator;
@@ -476,8 +452,7 @@ public class XliffFileUtil
             for (int i = 0; i < targetPages.size(); i++)
             {
                 tp = (TargetPage) targetPages.get(i);
-                externalId = FileUtil.commonSeparator(tp.getSourcePage()
-                        .getExternalPageId());
+                externalId = FileUtil.commonSeparator(tp.getSourcePage().getExternalPageId());
                 index = externalId.lastIndexOf(SEPARATE_FLAG + File.separator);
                 if (index != -1)
                 {
@@ -499,17 +474,14 @@ public class XliffFileUtil
 
                 if (isXliffFile(externalId))
                 {
-                    tmp = externalId.substring(0,
-                            externalId.lastIndexOf(File.separator));
-                    sourceFilename = baseCxeDocDir + tmp
-                            + XliffFileUtil.XLZ_EXTENSION;
+                    tmp = externalId.substring(0, externalId.lastIndexOf(File.separator));
+                    sourceFilename = baseCxeDocDir + tmp + XliffFileUtil.XLZ_EXTENSION;
                     sourceFile = new File(sourceFilename);
                     if (sourceFile.exists() && sourceFile.isFile())
                     {
                         // source file is with xlz file format
                         exportDir = tp.getExportSubDir();
-                        if (exportDir.startsWith("\\")
-                                || exportDir.startsWith("/"))
+                        if (exportDir.startsWith("\\") || exportDir.startsWith("/"))
                             exportDir = exportDir.substring(1);
                         targetDir = baseCxeDocDir + exportDir
                                 + tmp.substring(tmp.indexOf(File.separator));
@@ -535,8 +507,7 @@ public class XliffFileUtil
                                 continue;
                             if (isXliffFile(f.getAbsolutePath()))
                                 continue;
-                            org.apache.commons.io.FileUtils
-                                    .copyFileToDirectory(f, targetPath);
+                            org.apache.commons.io.FileUtils.copyFileToDirectory(f, targetPath);
                         }
                     }
                 }
@@ -552,8 +523,7 @@ public class XliffFileUtil
                 {
                     continue;
                 }
-                ZipIt.addEntriesToZipFile(xlzFile, targetPath.listFiles(),
-                        true, "");
+                ZipIt.addEntriesToZipFile(xlzFile, targetPath.listFiles(), true, "");
             }
         }
         catch (Exception e)
@@ -567,12 +537,12 @@ public class XliffFileUtil
      * Separate content in a Xliff file with multiple <File> tags into single
      * Xliff file level. For example, Original file named as
      * <i>Demo_Xliff.xlf</i> has 2 <File> tags in it, ...... <file ...
-     * original='Test01_File.xml' ... > ... <iws:asset-data>
-     * <iws:seg_asset_id>1522335</iws:seg_asset_id> ... </iws:asset-data> ....
-     * </file> <file ... original='Test02_File.xml' ... > ... <iws:asset-data>
-     * <iws:seg_asset_id>1522336</iws:seg_asset_id> ... </iws:asset-data> ....
-     * </file> and separated files will be named as below format,
-     * Demo_Xliff.xlf.sub\Test01_File.xml_1522335_1.xlf
+     * original='Test01_File.xml' ... > ...
+     * <iws:asset-data> <iws:seg_asset_id>1522335</iws:seg_asset_id>
+     * ... </iws:asset-data> .... </file> <file ... original='Test02_File.xml'
+     * ... > ... <iws:asset-data> <iws:seg_asset_id>1522336</iws:seg_asset_id>
+     * ... </iws:asset-data> .... </file> and separated files will be named as
+     * below format, Demo_Xliff.xlf.sub\Test01_File.xml_1522335_1.xlf
      * Demo_Xliff.xlf.sub\Test02_File.xml_1522336_2.xlf
      * 
      * @param absoluteFilename
@@ -583,14 +553,13 @@ public class XliffFileUtil
      * @version 1.0
      * @since 8.2.2
      */
-    private static MultipleFileTagsXliff separateMultipleFileTagsFile(
-            String absoluteFilename, String fileContent)
+    private static MultipleFileTagsXliff separateMultipleFileTagsFile(String absoluteFilename,
+            String fileContent)
     {
         MultipleFileTagsXliff multipleFileTagsXliff = new MultipleFileTagsXliff();
         try
         {
-            separateFileContent(multipleFileTagsXliff, absoluteFilename,
-                    fileContent);
+            separateFileContent(multipleFileTagsXliff, absoluteFilename, fileContent);
         }
         catch (Exception e)
         {
@@ -612,8 +581,7 @@ public class XliffFileUtil
      * @version 1.0
      * @since 8.2.2
      */
-    private static void separateFileContent(
-            MultipleFileTagsXliff multipleFileTagsXliff,
+    private static void separateFileContent(MultipleFileTagsXliff multipleFileTagsXliff,
             String absoluteFilename, String fileContent)
     {
         String header = "";
@@ -624,13 +592,10 @@ public class XliffFileUtil
 
         contentBeginIndex = fileContent.indexOf("<file ");
         // Get header of original Xliff file
-        header = contentBeginIndex != -1 ? fileContent.substring(0,
-                contentBeginIndex) : "";
-        contentEndIndex = fileContent.lastIndexOf("</file>")
-                + "</file>".length();
+        header = contentBeginIndex != -1 ? fileContent.substring(0, contentBeginIndex) : "";
+        contentEndIndex = fileContent.lastIndexOf("</file>") + "</file>".length();
         // Get footer of original Xliff file
-        footer = contentEndIndex != -1 ? fileContent.substring(contentEndIndex)
-                : "";
+        footer = contentEndIndex != -1 ? fileContent.substring(contentEndIndex) : "";
 
         // Get main content of original Xliff file
         content = fileContent.substring(contentBeginIndex, contentEndIndex);
@@ -638,8 +603,7 @@ public class XliffFileUtil
         multipleFileTagsXliff.setHeader(header);
         multipleFileTagsXliff.setContent(content);
         multipleFileTagsXliff.setFooter(footer);
-        generateSeparatedFiles(multipleFileTagsXliff, absoluteFilename, header,
-                content, footer);
+        generateSeparatedFiles(multipleFileTagsXliff, absoluteFilename, header, content, footer);
     }
 
     /**
@@ -660,18 +624,15 @@ public class XliffFileUtil
      * @version 1.0
      * @since 8.2.2
      */
-    private static void generateSeparatedFiles(
-            MultipleFileTagsXliff multipleFileTagsXliff,
-            String absoluteFilename, String header, String content,
-            String footer)
+    private static void generateSeparatedFiles(MultipleFileTagsXliff multipleFileTagsXliff,
+            String absoluteFilename, String header, String content, String footer)
     {
         try
         {
             String absolutePath = getBaseAbsoluatePath(absoluteFilename);
             String mainName = getMainFilename(absoluteFilename);
             String separatedDirPath = mainName + SEPARATE_FLAG;
-            String absouateSeparatedPath = absolutePath + File.separator
-                    + separatedDirPath;
+            String absouateSeparatedPath = absolutePath + File.separator + separatedDirPath;
             File file = new File(absouateSeparatedPath);
             file.mkdirs();
 
@@ -691,34 +652,30 @@ public class XliffFileUtil
             while ((beginIndex = content.indexOf("<file ")) > -1)
             {
                 endIndex = content.indexOf("</file>") + lengthOfFileEndTag;
-                subContent = header + content.substring(beginIndex, endIndex)
-                        + footer;
+                subContent = header + content.substring(beginIndex, endIndex) + footer;
 
                 // Use XML parser to get element value
                 document = saxReader.read(new StringReader(subContent));
                 rootElement = document.getRootElement();
                 fileTagElement = rootElement.element("file");
-                originalSubFilename = fileTagElement.attributeValue("original")
-                        .replace("/", File.separator);
+                originalSubFilename = fileTagElement.attributeValue("original").replace("/",
+                        File.separator);
                 originalSubFilename = originalSubFilename
-                        .substring(originalSubFilename
-                                .lastIndexOf(File.separator) + 1);
+                        .substring(originalSubFilename.lastIndexOf(File.separator) + 1);
                 fileHeaderElement = fileTagElement.element("header");
-                if (fileHeaderElement != null
-                        && fileHeaderElement.element("asset-data") != null)
+                if (fileHeaderElement != null && fileHeaderElement.element("asset-data") != null)
                 {
                     segAssetId = fileHeaderElement.element("asset-data")
                             .elementText("seg_asset_id");
                 }
 
                 // Generate file name of separated file
-                subFilename = originalSubFilename + "_" + segAssetId + "_"
-                        + count + ".xlf";
+                subFilename = originalSubFilename + "_" + segAssetId + "_" + count + ".xlf";
 
                 // Write separated file into disk
                 file = new File(absouateSeparatedPath, subFilename);
-                fout = new BufferedWriter(new OutputStreamWriter(
-                        new FileOutputStream(file), "UTF-8"));
+                fout = new BufferedWriter(
+                        new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
                 fout.write(subContent);
                 fout.close();
 
@@ -760,34 +717,31 @@ public class XliffFileUtil
      * @since 8.2.2
      */
     private static void separateXlzFile(Hashtable<String, FileProfile> p_files,
-            String p_relativeFilename, FileProfile p_fp) throws Exception,
-            RemoteException, NamingException
+            String p_relativeFilename, FileProfile p_fp)
+            throws Exception, RemoteException, NamingException
     {
         String xlzPath = "", extractedFile = "", baseXlzFilePath = "";
         String tmp = "";
         ArrayList<String> separatedFiles = null;
         long referenceFPId = 0l;
 
-        String absoluteFilename = AmbFileStoragePathUtils.getCxeDocDirPath()
-                + File.separator + p_relativeFilename;
-        xlzPath = absoluteFilename.substring(0,
-                absoluteFilename.lastIndexOf("."));
-        baseXlzFilePath = p_relativeFilename.substring(0,
-                p_relativeFilename.lastIndexOf("."));
+        String absoluteFilename = AmbFileStoragePathUtils.getCxeDocDirPath() + File.separator
+                + p_relativeFilename;
+        xlzPath = absoluteFilename.substring(0, absoluteFilename.lastIndexOf("."));
+        baseXlzFilePath = p_relativeFilename.substring(0, p_relativeFilename.lastIndexOf("."));
 
         separatedFiles = ZipIt.unpackZipPackage(absoluteFilename, xlzPath);
 
         referenceFPId = p_fp.getReferenceFP();
-        p_fp = ServerProxy.getFileProfilePersistenceManager()
-                .getFileProfileById(referenceFPId, false);
+        p_fp = ServerProxy.getFileProfilePersistenceManager().getFileProfileById(referenceFPId,
+                false);
 
         for (int i = 0; i < separatedFiles.size(); i++)
         {
             extractedFile = separatedFiles.get(i);
             if (XliffFileUtil.isXliffFile(extractedFile))
             {
-                tmp = baseXlzFilePath.concat(File.separator).concat(
-                        extractedFile);
+                tmp = baseXlzFilePath.concat(File.separator).concat(extractedFile);
                 // Need to handle separated Xliff files from XLZ to sure if the
                 // they have multiple <File> tags in each one
                 processMultipleFileTags(p_files, tmp, p_fp);
@@ -824,8 +778,7 @@ public class XliffFileUtil
      */
     private static String getBaseAbsoluatePath(String p_absoluteFilename)
     {
-        return p_absoluteFilename.substring(0,
-                p_absoluteFilename.lastIndexOf(File.separator));
+        return p_absoluteFilename.substring(0, p_absoluteFilename.lastIndexOf(File.separator));
     }
 
     /**
@@ -840,8 +793,7 @@ public class XliffFileUtil
      */
     private static String getMainFilename(String p_absoluteFilename)
     {
-        return p_absoluteFilename.substring(p_absoluteFilename
-                .lastIndexOf(File.separator) + 1);
+        return p_absoluteFilename.substring(p_absoluteFilename.lastIndexOf(File.separator) + 1);
     }
 
     /**
@@ -861,8 +813,8 @@ public class XliffFileUtil
 
         try
         {
-            fin = new BufferedReader(new InputStreamReader(new FileInputStream(
-                    new File(p_filename)), "UTF-8"));
+            fin = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(new File(p_filename)), "UTF-8"));
             String line = "";
             while ((line = fin.readLine()) != null)
             {
@@ -872,8 +824,7 @@ public class XliffFileUtil
         }
         catch (Exception e)
         {
-            logger.error("Can not get file content correctly. File -- "
-                    + p_filename, e);
+            logger.error("Can not get file content correctly. File -- " + p_filename, e);
             return "";
         }
         finally
@@ -903,8 +854,7 @@ public class XliffFileUtil
     private static String generateAbsolutePath(String p_relativePath)
     {
         String baseCxeDirPath = AmbFileStoragePathUtils.getCxeDocDirPath();
-        String path = baseCxeDirPath.concat(File.separator).concat(
-                p_relativePath);
+        String path = baseCxeDirPath.concat(File.separator).concat(p_relativePath);
         return path.replace("/", File.separator);
     }
 
@@ -920,8 +870,7 @@ public class XliffFileUtil
      * @version 1.0
      * @since 8.2.2
      */
-    private static void combineSeparatedXliffFiles(String p_subDir,
-            String[] sortedSubFiles)
+    private static void combineSeparatedXliffFiles(String p_subDir, String[] sortedSubFiles)
     {
         File file = null, xliffFile = null;
         String fileContent = "";
@@ -931,17 +880,15 @@ public class XliffFileUtil
         BufferedWriter fout = null;
         try
         {
-            xliffFilename = p_subDir.substring(0,
-                    p_subDir.lastIndexOf(SEPARATE_FLAG));
+            xliffFilename = p_subDir.substring(0, p_subDir.lastIndexOf(SEPARATE_FLAG));
             xliffFile = new File(xliffFilename);
-            fout = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(xliffFile), "UTF-8"));
+            fout = new BufferedWriter(
+                    new OutputStreamWriter(new FileOutputStream(xliffFile), "UTF-8"));
 
             for (String f : sortedSubFiles)
             {
                 file = new File(p_subDir, f);
-                fileContent = XliffFileUtil.getFileContent(file
-                        .getAbsolutePath());
+                fileContent = XliffFileUtil.getFileContent(file.getAbsolutePath());
                 if (StringUtil.isEmpty(header))
                 {
                     beginIndex = fileContent.indexOf("<file ");
@@ -1026,8 +973,7 @@ public class XliffFileUtil
         try
         {
             Element root = p_doc.getRootElement();
-            Element noteElement = root.element(XliffConstants.FILE)
-                    .element(XliffConstants.HEADER)
+            Element noteElement = root.element(XliffConstants.FILE).element(XliffConstants.HEADER)
                     .element(XliffConstants.NOTE);
             String notes = noteElement.getText();
             int index = notes.indexOf(item);
@@ -1080,8 +1026,7 @@ public class XliffFileUtil
         return result;
     }
 
-    private static HashMap<String, Object> getPossibleOriginalXlfSourceFile(
-            File xlfFile)
+    private static HashMap<String, Object> getPossibleOriginalXlfSourceFile(File xlfFile)
     {
         HashMap<String, Object> result = new HashMap<String, Object>();
         File wantedFile = xlfFile;
@@ -1092,11 +1037,9 @@ public class XliffFileUtil
             if (parentFolderName.endsWith(".sub"))
             {
                 File grandFile = xlfFile.getParentFile().getParentFile();
-                String fileName = parentFolderName.substring(0,
-                        parentFolderName.length() - 4);
+                String fileName = parentFolderName.substring(0, parentFolderName.length() - 4);
                 File file = new File(grandFile, fileName);
-                if (file.exists() && file.isFile()
-                        && isXliffFile(file.getName()))
+                if (file.exists() && file.isFile() && isXliffFile(file.getName()))
                 {
                     wantedFile = file;
                     isSubFile = true;
@@ -1113,8 +1056,7 @@ public class XliffFileUtil
         return result;
     }
 
-    private static HashMap<String, Object> getPossibleOriginalXlzSourceFile(
-            File file)
+    private static HashMap<String, Object> getPossibleOriginalXlzSourceFile(File file)
     {
         HashMap<String, Object> result = new HashMap<String, Object>();
         File wantedFile = file;

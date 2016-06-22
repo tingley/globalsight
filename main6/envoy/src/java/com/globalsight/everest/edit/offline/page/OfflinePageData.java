@@ -42,6 +42,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -244,6 +246,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
     // For XLF/OmegaT translation kit, store its tuID to target "state"
     // attribute value.
     private HashMap<String, String> tuId2XlfTrgStateMap = new HashMap<String, String>();
+
+    private static Pattern convertLfPattern = Pattern.compile("<ph[\\s].*?>[^<]*?</ph>");
 
     /**
      * Constructor.
@@ -2478,12 +2482,45 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
 
     private String convertLf(String s, int tmxLevel)
     {
-        String replace = "";
-        if (tmxLevel != TmxUtil.TMX_LEVEL_ONE)
+        if (tmxLevel == TmxUtil.TMX_LEVEL_ONE)
         {
-            replace = "<ph type=\"LF\">[LF]</ph>";
+            return StringUtil.replace(s, "\n", "");
         }
-        return s.replace("\n", replace);
+        else
+        {
+            if (s.indexOf("\n") == -1)
+                return s;
+            else
+            {
+                s = protectLfWithinPh(s);
+                s = StringUtil.replace(s, "\n", "<ph type=\"LF\">[LF]</ph>");
+                return StringUtil.replace(s, "[PHLF]", "\n");
+            }
+        }
+    }
+
+    /**
+     * "PH" tag does not allow nested tags, so replace "\n" within "ph" element
+     * to "[PHLF]" then replace them back finally to protect them (GBS-4426).
+     */
+    private String protectLfWithinPh(String src)
+    {
+        Matcher m = convertLfPattern.matcher(src);
+        StringBuilder output = new StringBuilder();
+        int start = 0;
+        String str = "";
+        while (m.find(start))
+        {
+            output.append(src.substring(start, m.start()));
+            str = src.substring(m.start(), m.end());
+            // "\n" within "<ph>" tag is replaced to "[PHLF]".
+            str = str.replace("\n", "[PHLF]");
+            output.append(str);
+            start = m.end();
+        }
+        output.append(src.substring(start));
+
+        return output.toString();
     }
 
     public void writeOfflineTmxFile(OutputStreamWriter p_outputStream, DownloadParams p_params,

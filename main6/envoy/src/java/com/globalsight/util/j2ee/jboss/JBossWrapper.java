@@ -30,8 +30,7 @@ import com.globalsight.util.j2ee.AppServerWrapperFactory;
 
 public class JBossWrapper extends AppServerWrapper
 {
-    private static final Logger s_logger = Logger
-            .getLogger(AppServerWrapper.class.getName());
+    private static final Logger s_logger = Logger.getLogger(AppServerWrapper.class.getName());
 
     public static final String USER_TRANSACTION = "UserTransaction";
 
@@ -68,7 +67,7 @@ public class JBossWrapper extends AppServerWrapper
             {
                 c.append("jboss-cli.sh");
             }
-            c.append(" --connect command=:shutdown");
+            c.append(" --connect --command=:shutdown");
 
             SystemConfiguration config = SystemConfiguration.getInstance();
             String gsHome = config
@@ -85,15 +84,13 @@ public class JBossWrapper extends AppServerWrapper
 
             String command = bin.toString() + c.toString();
             s_logger.info("Executing command:" + command);
-            ProcessRunner pr = new ProcessRunner(command, System.out,
-                    System.err);
+            ProcessRunner pr = new ProcessRunner(command, System.out, System.err);
             Thread t = new Thread(pr);
             t.start();
         }
         catch (Exception e)
         {
-            s_logger.error("Failed to execute script to shutdown jboss server",
-                    e);
+            s_logger.error("Failed to execute script to shutdown jboss server", e);
         }
     }
 

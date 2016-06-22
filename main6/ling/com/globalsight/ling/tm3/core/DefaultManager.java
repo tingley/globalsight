@@ -50,7 +50,7 @@ public class DefaultManager implements TM3Manager
         Session session = HibernateUtil.getSession();
         try
         {
-            List<? extends TM3Tm> tms = session.createCriteria(BaseTm.class)
+            List<? extends TM3Tm> tms = session.createCriteria(MultilingualSharedTm.class)
                     .list();
             for (TM3Tm t : tms)
             {
@@ -71,7 +71,7 @@ public class DefaultManager implements TM3Manager
     {
         try
         {
-            BaseTm<T> tm = (BaseTm<T>) HibernateUtil.get(BaseTm.class, id,
+            BaseTm<T> tm = (BaseTm<T>) HibernateUtil.get(MultilingualSharedTm.class, id,
                     false);
             if (tm != null)
             {

@@ -16,23 +16,23 @@
  */
 package com.globalsight.scheduling;
 
-import java.util.HashMap;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * EventInfo is a wrapper for the FluxEventInfo class.  This
- * class allows the general specification of user-defined attributes as
- * key-value pairs that are stored on a HashMap.  When an event is actually
- * persisted into the database, the HashMap is converted into a string
- * representation; this is converted back into a HashMap through the special
- * constructor that takes a FluxEventInfo as its argument.
+ * EventInfo is a wrapper for the FluxEventInfo class. This class allows the
+ * general specification of user-defined attributes as key-value pairs that are
+ * stored on a HashMap. When an event is actually persisted into the database,
+ * the HashMap is converted into a string representation; this is converted back
+ * into a HashMap through the special constructor that takes a FluxEventInfo as
+ * its argument.
  */
 public class EventInfo implements Serializable
 {
-    // This HashMap contains all the event related info.  
-    public HashMap flux_event_info;
-    
-    
+    private static final long serialVersionUID = -4877129654611552510L;
+    public Map flux_event_info;
+
     //
     // PACKAGE-SCOPE CONSTRUCTORS
     //
@@ -47,22 +47,23 @@ public class EventInfo implements Serializable
     /**
      * Create an instance of the event info from the given HashMap.
      */
-    public EventInfo(HashMap p_map)
+    public EventInfo(Map p_map)
     {
         super();
-        flux_event_info = p_map;        
+        flux_event_info = p_map;
     }
 
-    
     //
     // PUBLIC METHODS
     //
     /**
-     * Add the given key-value pair as an info entry on the EventInfo.
-     * Null keys and values are not inserted into the table.
+     * Add the given key-value pair as an info entry on the EventInfo. Null keys
+     * and values are not inserted into the table.
      *
-     * @param p_key the searchable string to be treated as the key
-     * @param p_value the string to be treated as the value
+     * @param p_key
+     *            the searchable string to be treated as the key
+     * @param p_value
+     *            the string to be treated as the value
      */
     public void addEntry(Object p_key, Object p_value)
     {
@@ -73,10 +74,11 @@ public class EventInfo implements Serializable
     }
 
     /**
-     * Find the entry value that corresponds to the given key, or null
-     * if none exists.
+     * Find the entry value that corresponds to the given key, or null if none
+     * exists.
      *
-     * @param p_key the key to search for in the info.
+     * @param p_key
+     *            the key to search for in the info.
      *
      * @return the string that corresponds to the given key, or null.
      */
@@ -90,11 +92,10 @@ public class EventInfo implements Serializable
      *
      * @return the hashmap.
      */
-    public HashMap getMap()
+    public Map getMap()
     {
         return flux_event_info;
     }
-
 
     public String toString()
     {

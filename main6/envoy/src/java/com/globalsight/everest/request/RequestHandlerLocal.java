@@ -23,7 +23,6 @@ import java.io.StringReader;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -73,8 +72,7 @@ import com.globalsight.util.mail.MailerConstants;
 public class RequestHandlerLocal implements RequestHandler
 {
     // for logging purposes
-    private static Logger c_logger = Logger
-            .getLogger(RequestHandlerLocal.class);
+    private static Logger c_logger = Logger.getLogger(RequestHandlerLocal.class);
 
     // used for email messages - keys into property file
     // subject and message keys for all import failures
@@ -105,8 +103,7 @@ public class RequestHandlerLocal implements RequestHandler
     /**
      * @see RequestHandler.findRequest(long)
      */
-    public Request findRequest(long p_id) throws RequestHandlerException,
-            RemoteException
+    public Request findRequest(long p_id) throws RequestHandlerException, RemoteException
     {
         return RequestPersistenceAccessor.findRequest(p_id);
     }
@@ -118,29 +115,25 @@ public class RequestHandlerLocal implements RequestHandler
     }
 
     /**
-     * Used by the service activator MDB. Prepares and submits a request for
-     * localization. (This used to be the onMessage() functionality)
+     * Prepares and submits a request for localization.
      */
-    public void prepareAndSubmitRequest(HashMap p_hashmap,
-            String p_contentFileName, int p_requestType, String p_eventFlowXml,
-            GeneralException p_exception, String p_l10nRequestXml)
+    public void prepareAndSubmitRequest(String p_contentFileName, int p_requestType,
+            String p_eventFlowXml, GeneralException p_exception, String p_l10nRequestXml)
             throws RemoteException, RequestHandlerException
     {
         RequestImpl req = null;
         try
         {
             // 1.Create the request object
-            req = prepareL10nRequest(p_requestType, p_contentFileName,
-                    p_l10nRequestXml, p_eventFlowXml, p_exception);
+            req = prepareL10nRequest(p_requestType, p_contentFileName, p_l10nRequestXml,
+                    p_eventFlowXml, p_exception);
 
             // 2.Submit request
             submitRequest(req);
         }
         catch (RequestHandlerException rhe)
         {
-            c_logger.error(
-                    "Failed to submit the request. "
-                            + p_l10nRequestXml.toString(), rhe);
+            c_logger.error("Failed to submit the request. " + p_l10nRequestXml.toString(), rhe);
 
             // send an email to admin: at this point nothing is persisted yet.
             String[] attachments = null;
@@ -174,9 +167,7 @@ public class RequestHandlerLocal implements RequestHandler
             catch (Exception e)
             {
                 // failed to get message args
-                c_logger.error(
-                        "Could not get message arguments for import failure.",
-                        e);
+                c_logger.error("Could not get message arguments for import failure.", e);
             }
 
             sendEmailToAdmin(IMPORT_FAILED_MESSAGE, messageArgs, attachments,
@@ -193,52 +184,43 @@ public class RequestHandlerLocal implements RequestHandler
      * @see RequestHandler.setExceptionInRequest(Request p_request,
      *      GeneralException p_exception)
      */
-    public void setExceptionInRequest(Request p_request,
-            GeneralException p_exception) throws RequestHandlerException,
-            RemoteException
+    public void setExceptionInRequest(Request p_request, GeneralException p_exception)
+            throws RequestHandlerException, RemoteException
     {
-        RequestPersistenceAccessor
-                .setExceptionInRequest(p_request, p_exception);
+        RequestPersistenceAccessor.setExceptionInRequest(p_request, p_exception);
     }
 
     /**
      * @see RequestHandler.setExceptionInRequest(long p_requestId,
      *      GeneralException p_exception)
      */
-    public void setExceptionInRequest(long p_requestId,
-            GeneralException p_exception) throws RequestHandlerException,
-            RemoteException
+    public void setExceptionInRequest(long p_requestId, GeneralException p_exception)
+            throws RequestHandlerException, RemoteException
     {
-        RequestPersistenceAccessor.setExceptionInRequest(p_requestId,
-                p_exception);
+        RequestPersistenceAccessor.setExceptionInRequest(p_requestId, p_exception);
     }
 
     public void setExceptionInWorkflowRequest(WorkflowRequest p_request,
-            GeneralException p_exception) throws RequestHandlerException,
-            RemoteException
+            GeneralException p_exception) throws RequestHandlerException, RemoteException
     {
-        RequestPersistenceAccessor.setExceptionInWorkflowRequest(p_request,
-                p_exception);
+        RequestPersistenceAccessor.setExceptionInWorkflowRequest(p_request, p_exception);
     }
 
     public long createWorkflowRequest(WorkflowRequest p_request, Job p_job,
-            Collection p_workflowTemplates) throws GeneralException,
-            RemoteException
+            Collection p_workflowTemplates) throws GeneralException, RemoteException
     {
-        return RequestPersistenceAccessor.insertWorkflowRequest(p_request,
-                p_job, p_workflowTemplates);
+        return RequestPersistenceAccessor.insertWorkflowRequest(p_request, p_job,
+                p_workflowTemplates);
     }
 
     /**
      * @see RequestHandler.importPage(Request) method
      */
-    public void importPage(Request p_request) throws RequestHandlerException,
-            RemoteException
+    public void importPage(Request p_request) throws RequestHandlerException, RemoteException
     {
         // just sends the request onto the job creator this imports all the page
         // content and adds it to a job.
-        CompanyThreadLocal.getInstance().setIdValue(
-                String.valueOf(p_request.getCompanyId()));
+        CompanyThreadLocal.getInstance().setIdValue(String.valueOf(p_request.getCompanyId()));
         JobCreator jc = getJobCreator();
         try
         {
@@ -251,8 +233,7 @@ public class RequestHandlerLocal implements RequestHandler
         }
         catch (Exception ex)
         {
-            c_logger.error(
-                    "JobCreator.addRequestToJob. " + p_request.toString(), ex);
+            c_logger.error("JobCreator.addRequestToJob. " + p_request.toString(), ex);
 
             try
             {
@@ -281,22 +262,20 @@ public class RequestHandlerLocal implements RequestHandler
                 if (c_logger.isDebugEnabled())
                 {
                     c_logger.debug("Looking for the data source name of a "
-                            + "database profile for request "
-                            + p_request.getId());
+                            + "database profile for request " + p_request.getId());
                 }
 
                 // get the database profile persistence manager
                 DatabaseProfilePersistenceManager dbProfMgr = null;
                 try
                 {
-                    dbProfMgr = ServerProxy
-                            .getDatabaseProfilePersistenceManager();
+                    dbProfMgr = ServerProxy.getDatabaseProfilePersistenceManager();
                 }
                 catch (GeneralException ge)
                 {
                     throw new RequestHandlerException(
-                            RequestHandlerException.MSG_FAILED_TO_FIND_DB_PROFILE_MANAGER,
-                            null, ge);
+                            RequestHandlerException.MSG_FAILED_TO_FIND_DB_PROFILE_MANAGER, null,
+                            ge);
                 }
                 try
                 {
@@ -310,8 +289,7 @@ public class RequestHandlerLocal implements RequestHandler
                     args[0] = Long.toString(p_request.getDataSourceId());
                     args[1] = Long.toString(p_request.getId());
                     throw new RequestHandlerException(
-                            RequestHandlerException.MSG_FAILED_TO_GET_DATA_SOURCE_NAME,
-                            args, dpee);
+                            RequestHandlerException.MSG_FAILED_TO_GET_DATA_SOURCE_NAME, args, dpee);
                 }
             }
             else
@@ -326,14 +304,13 @@ public class RequestHandlerLocal implements RequestHandler
                 FileProfilePersistenceManager fileProfMgr = null;
                 try
                 {
-                    fileProfMgr = ServerProxy
-                            .getFileProfilePersistenceManager();
+                    fileProfMgr = ServerProxy.getFileProfilePersistenceManager();
                 }
                 catch (Exception e)
                 {
                     throw new RequestHandlerException(
-                            RequestHandlerException.MSG_FAILED_TO_FIND_FILE_PROFILE_MANAGER,
-                            null, e);
+                            RequestHandlerException.MSG_FAILED_TO_FIND_FILE_PROFILE_MANAGER, null,
+                            e);
                 }
                 try
                 {
@@ -347,8 +324,7 @@ public class RequestHandlerLocal implements RequestHandler
                     args[0] = Long.toString(p_request.getDataSourceId());
                     args[1] = Long.toString(p_request.getId());
                     throw new RequestHandlerException(
-                            RequestHandlerException.MSG_FAILED_TO_GET_DATA_SOURCE_NAME,
-                            args, fpee);
+                            RequestHandlerException.MSG_FAILED_TO_GET_DATA_SOURCE_NAME, args, fpee);
                 }
             }
         }
@@ -358,8 +334,7 @@ public class RequestHandlerLocal implements RequestHandler
             args[0] = Long.toString(-1);
             args[1] = Long.toString(p_request.getId());
             throw new RequestHandlerException(
-                    RequestHandlerException.MSG_FAILED_TO_GET_DATA_SOURCE_NAME,
-                    args, null);
+                    RequestHandlerException.MSG_FAILED_TO_GET_DATA_SOURCE_NAME, args, null);
         }
 
         return dsName;
@@ -370,8 +345,7 @@ public class RequestHandlerLocal implements RequestHandler
      * 
      * @see RequestHandler.startDelayedImports
      */
-    public void startDelayedImports() throws RemoteException,
-            RequestHandlerException
+    public void startDelayedImports() throws RemoteException, RequestHandlerException
     {
         try
         {
@@ -381,8 +355,7 @@ public class RequestHandlerLocal implements RequestHandler
         {
             // messages are logged in call to reimporter
             throw new RequestHandlerException(
-                    RequestHandlerException.MSG_FAILED_TO_START_DELAYED_IMPORTS,
-                    null, re);
+                    RequestHandlerException.MSG_FAILED_TO_START_DELAYED_IMPORTS, null, re);
         }
     }
 
@@ -391,8 +364,7 @@ public class RequestHandlerLocal implements RequestHandler
      * 
      * @see RequestHandler.cleanupIncompleteRequests()
      */
-    public void cleanupIncompleteRequests() throws RemoteException,
-            RequestHandlerException
+    public void cleanupIncompleteRequests() throws RemoteException, RequestHandlerException
     {
         c_logger.info("Starting cleanup of incomplete imports....");
         // handleIncompletePages();
@@ -409,14 +381,12 @@ public class RequestHandlerLocal implements RequestHandler
         try
         {
             fileProfMgr = ServerProxy.getFileProfilePersistenceManager();
-            fileProfile = fileProfMgr.readFileProfile(p_request
-                    .getDataSourceId());
+            fileProfile = fileProfMgr.readFileProfile(p_request.getDataSourceId());
         }
         catch (Exception e)
         {
             throw new RequestHandlerException(
-                    RequestHandlerException.MSG_FAILED_TO_FIND_FILE_PROFILE_MANAGER,
-                    null, e);
+                    RequestHandlerException.MSG_FAILED_TO_FIND_FILE_PROFILE_MANAGER, null, e);
         }
         return fileProfile;
     }
@@ -427,12 +397,11 @@ public class RequestHandlerLocal implements RequestHandler
      * request that won't be part of the page.
      */
     private RequestImpl prepareL10nRequest(int p_requestType, String p_gxml,
-            String p_l10nRequestXml, String p_eventFlowXml,
-            GeneralException p_exception) throws RequestHandlerException
+            String p_l10nRequestXml, String p_eventFlowXml, GeneralException p_exception)
+            throws RequestHandlerException
     {
         // Parse through the L10nRequestXml
-        BufferedReader br = new BufferedReader(new StringReader(
-                p_l10nRequestXml));
+        BufferedReader br = new BufferedReader(new StringReader(p_l10nRequestXml));
 
         L10nRequestXmlParser parser = new L10nRequestXmlParser(br);
 
@@ -476,16 +445,14 @@ public class RequestHandlerLocal implements RequestHandler
             dataSourceId = Long.parseLong(dataSourceIdString);
         }
 
-        String priority = parser
-                .findElementInXml(CxeToCapRequest.L10nRequestXml.JOB_PRIORITY);
+        String priority = parser.findElementInXml(CxeToCapRequest.L10nRequestXml.JOB_PRIORITY);
 
-        String baseHref = parser
-                .findElementInXml(CxeToCapRequest.L10nRequestXml.BASE_HREF);
+        String baseHref = parser.findElementInXml(CxeToCapRequest.L10nRequestXml.BASE_HREF);
 
         if (c_logger.isDebugEnabled())
         {
-            String debugMessage = "Parameters found: " + externalPageId + " "
-                    + l10nProfileId + " " + originalSourceEncoding;
+            String debugMessage = "Parameters found: " + externalPageId + " " + l10nProfileId + " "
+                    + originalSourceEncoding;
             debugMessage += " " + dataSourceType + " " + dataSourceId + " ";
 
             c_logger.debug(debugMessage);
@@ -505,21 +472,19 @@ public class RequestHandlerLocal implements RequestHandler
             String args[] = new String[1];
             args[0] = Long.toString(l10nProfileId);
             throw new RequestHandlerException(
-                    RequestHandlerException.MSG_FAILED_TO_GET_L10N_PROFILE,
-                    args, phe);
+                    RequestHandlerException.MSG_FAILED_TO_GET_L10N_PROFILE, args, phe);
         }
         catch (RemoteException re)
         {
             String args[] = new String[1];
             args[0] = Long.toString(l10nProfileId);
             throw new RequestHandlerException(
-                    RequestHandlerException.MSG_FAILED_TO_GET_L10N_PROFILE,
-                    args, re);
+                    RequestHandlerException.MSG_FAILED_TO_GET_L10N_PROFILE, args, re);
         }
 
         // Create a request
-        RequestImpl r = RequestFactory.createRequest(p_requestType, profile,
-                p_gxml, p_eventFlowXml, p_exception);
+        RequestImpl r = RequestFactory.createRequest(p_requestType, profile, p_gxml, p_eventFlowXml,
+                p_exception);
 
         // set the values that were sent in and not part of the
         // constructor
@@ -554,12 +519,9 @@ public class RequestHandlerLocal implements RequestHandler
         // information
         if (profile.getDispatchCriteria().getCondition() == DispatchCriteria.BATCH_CONDITION)
         {
-            String batchId = parser
-                    .findElementInXml(CxeToCapRequest.L10nRequestXml.BATCH_ID);
-            String pageCount = parser
-                    .findElementInXml(CxeToCapRequest.L10nRequestXml.PAGE_COUNT);
-            String pageNumber = parser
-                    .findElementInXml(CxeToCapRequest.L10nRequestXml.PAGE_NUMBER);
+            String batchId = parser.findElementInXml(CxeToCapRequest.L10nRequestXml.BATCH_ID);
+            String pageCount = parser.findElementInXml(CxeToCapRequest.L10nRequestXml.PAGE_COUNT);
+            String pageNumber = parser.findElementInXml(CxeToCapRequest.L10nRequestXml.PAGE_NUMBER);
             String docPageCount = parser
                     .findElementInXml(CxeToCapRequest.L10nRequestXml.DOC_PAGE_COUNT);
             String docPageNumber = parser
@@ -570,25 +532,25 @@ public class RequestHandlerLocal implements RequestHandler
                     .findElementInXml(CxeToCapRequest.L10nRequestXml.IMPORT_INITIATOR);
 
             // truncate the jobPrefixName to the max byte size in the DB
-            jobPrefixName = EditUtil.truncateUTF8Len(jobPrefixName,
-                    MAX_JOBNAME_SIZE);
+            jobPrefixName = EditUtil.truncateUTF8Len(jobPrefixName, MAX_JOBNAME_SIZE);
 
             if (batchId != null)
             {
-                BatchInfo bi = new BatchInfo(batchId,
-                        Long.parseLong(pageCount), Long.parseLong(pageNumber),
-                        Long.parseLong(docPageCount),
+                BatchInfo bi = new BatchInfo(batchId, Long.parseLong(pageCount),
+                        Long.parseLong(pageNumber), Long.parseLong(docPageCount),
                         Long.parseLong(docPageNumber), jobPrefixName);
                 r.setBatchInfo(bi);
             }
 
             RequestPersistenceAccessor.insertRequest(r);
         }
-        else if (profile.getDispatchCriteria().getCondition() == DispatchCriteria.WORD_COUNT_OR_TIMER_CONDITION)
+        else if (profile.getDispatchCriteria()
+                .getCondition() == DispatchCriteria.WORD_COUNT_OR_TIMER_CONDITION)
         {
             RequestPersistenceAccessor.insertWordCountRequest(r);
         }
-        else if (profile.getDispatchCriteria().getCondition() == DispatchCriteria.WORD_COUNT_CONDITION)
+        else if (profile.getDispatchCriteria()
+                .getCondition() == DispatchCriteria.WORD_COUNT_CONDITION)
         {
             RequestPersistenceAccessor.insertWordCountRequest(r);
         }
@@ -608,8 +570,7 @@ public class RequestHandlerLocal implements RequestHandler
             StringReader sr = new StringReader(p_eventFlowXml);
             InputSource is = new InputSource(sr);
             DOMParser domParser = new DOMParser();
-            domParser.setFeature("http://xml.org/sax/features/validation",
-                    false);
+            domParser.setFeature("http://xml.org/sax/features/validation", false);
             domParser.parse(is);
             Document document = domParser.getDocument();
             Element root = document.getDocumentElement();
@@ -652,8 +613,7 @@ public class RequestHandlerLocal implements RequestHandler
     /**
      * Initiate the importing of the created, already persisted request.
      */
-    public long submitRequest(RequestImpl p_request)
-            throws RequestHandlerException, RemoteException
+    public long submitRequest(RequestImpl p_request) throws RequestHandlerException, RemoteException
     {
         // if this is an extracted request then check if the page
         // already exists in an active job (an active re-import)
@@ -696,8 +656,7 @@ public class RequestHandlerLocal implements RequestHandler
         try
         {
             addDeleteEnabled = SystemConfiguration.getInstance()
-                    .getBooleanParameter(
-                            SystemConfigParamNames.ADD_DELETE_ENABLED);
+                    .getBooleanParameter(SystemConfigParamNames.ADD_DELETE_ENABLED);
         }
         catch (Exception e)
         {
@@ -715,20 +674,17 @@ public class RequestHandlerLocal implements RequestHandler
             SourcePage p = findPreviousSourcePage(p_request);
 
             if (m_reimporter.isActivePage(p)
-                    && ((ExtractedSourceFile) p.getPrimaryFile())
-                            .containGsTags())
+                    && ((ExtractedSourceFile) p.getPrimaryFile()).containGsTags())
             {
-                c_logger.error("Can't import the page "
-                        + p.getExternalPageId()
+                c_logger.error("Can't import the page " + p.getExternalPageId()
                         + " to any target locales because it is part of an active job and contains snippets.");
                 // takes in one argument - external page id
                 String[] args =
                 { p.getExternalPageId() };
                 RequestHandlerException rhe = new RequestHandlerException(
-                        RequestHandlerException.MSG_PAGE_WITH_SNIPPETS_IN_OF_ACTIVE_JOB,
-                        args, null);
-                RequestPersistenceAccessor
-                        .setExceptionInRequest(p_request, rhe);
+                        RequestHandlerException.MSG_PAGE_WITH_SNIPPETS_IN_OF_ACTIVE_JOB, args,
+                        null);
+                RequestPersistenceAccessor.setExceptionInRequest(p_request, rhe);
             }
         }
 
@@ -743,10 +699,9 @@ public class RequestHandlerLocal implements RequestHandler
                 TargetPage tp = (TargetPage) tps.get(i);
                 if (m_reimporter.isActivePage(tp))
                 {
-                    p_request.addActiveTarget(tp.getGlobalSightLocale(), tp
-                            .getWorkflowInstance().getJob());
-                    c_logger.info("Importing - Found the page "
-                            + p_request.getExternalPageId()
+                    p_request.addActiveTarget(tp.getGlobalSightLocale(),
+                            tp.getWorkflowInstance().getJob());
+                    c_logger.info("Importing - Found the page " + p_request.getExternalPageId()
                             + " to still be active in the locale "
                             + tp.getGlobalSightLocale().toString());
                 }
@@ -777,9 +732,7 @@ public class RequestHandlerLocal implements RequestHandler
             }
             catch (ReimporterException re)
             {
-                c_logger.error(
-                        "An exception was thrown when attempting to delay import.",
-                        re);
+                c_logger.error("An exception was thrown when attempting to delay import.", re);
                 throw new RequestHandlerException(re);
             }
         }
@@ -808,8 +761,7 @@ public class RequestHandlerLocal implements RequestHandler
             String[] args =
             { p.getExternalPageId() };
             RequestHandlerException rhe = new RequestHandlerException(
-                    RequestHandlerException.MSG_PAGE_ALREADY_PART_OF_ACTIVE_JOB,
-                    args, null);
+                    RequestHandlerException.MSG_PAGE_ALREADY_PART_OF_ACTIVE_JOB, args, null);
             RequestPersistenceAccessor.setExceptionInRequest(p_request, rhe);
         }
 
@@ -828,12 +780,10 @@ public class RequestHandlerLocal implements RequestHandler
      * 
      * @return The previous version or NULL if one doesn't exist.
      */
-    private SourcePage findPreviousSourcePage(Request p_request)
-            throws RequestHandlerException
+    private SourcePage findPreviousSourcePage(Request p_request) throws RequestHandlerException
     {
         // get the source locale from the profile
-        GlobalSightLocale sourceLocale = p_request.getL10nProfile()
-                .getSourceLocale();
+        GlobalSightLocale sourceLocale = p_request.getL10nProfile().getSourceLocale();
         // find the page manager and verify if the page can be imported
         PageManager pm = getPageManager();
         SourcePage p = null;
@@ -844,8 +794,8 @@ public class RequestHandlerLocal implements RequestHandler
         }
         catch (Exception e)
         {
-            c_logger.error("Exception when calling "
-                    + "PageManager.getCurrentPageByNameAndLocale", e);
+            c_logger.error("Exception when calling " + "PageManager.getCurrentPageByNameAndLocale",
+                    e);
             // just passes null back doesn't throw an exception
         }
         return p;
@@ -862,8 +812,7 @@ public class RequestHandlerLocal implements RequestHandler
      * 
      * @return The previous version or NULL if one doesn't exist.
      */
-    private ArrayList findPreviousTargetPages(Request p_request)
-            throws RequestHandlerException
+    private ArrayList findPreviousTargetPages(Request p_request) throws RequestHandlerException
     {
         // find the page manager and verify if the page can be imported
         PageManager pm = getPageManager();
@@ -875,8 +824,9 @@ public class RequestHandlerLocal implements RequestHandler
         }
         catch (Exception e)
         {
-            c_logger.error("Exception when calling "
-                    + "PageManager.getCurrentTargetPagesByNameAndLocales", e);
+            c_logger.error(
+                    "Exception when calling " + "PageManager.getCurrentTargetPagesByNameAndLocales",
+                    e);
             // just passes null back doesn't throw an exception
         }
         return tps;
@@ -895,8 +845,7 @@ public class RequestHandlerLocal implements RequestHandler
             Collection pages = getPageManager().getSourcePagesStillImporting();
             if (pages != null && pages.size() > 0)
             {
-                c_logger.info("Cleaning up "
-                        + pages.size()
+                c_logger.info("Cleaning up " + pages.size()
                         + " page(s) that were importing when the system was shutdown.");
                 for (Iterator i = pages.iterator(); i.hasNext();)
                 {
@@ -912,8 +861,7 @@ public class RequestHandlerLocal implements RequestHandler
                     // done to it using JDBC will go directly to the DB and the
                     // cache and
                     // DB will be out-of-date.
-                    Request r = RequestPersistenceAccessor
-                            .findRequestByPageId(sp.getId());
+                    Request r = RequestPersistenceAccessor.findRequestByPageId(sp.getId());
 
                     // update the request type
                     String[] args =
@@ -926,8 +874,7 @@ public class RequestHandlerLocal implements RequestHandler
                     // update the request with an error exception of failing to
                     // import
                     // because of the system being shutdown
-                    setExceptionInRequest(
-                            r,
+                    setExceptionInRequest(r,
                             new RequestHandlerException(
                                     RequestHandlerException.MSG_FAILED_TO_COMPLETE_IMPORT_DURING_SHUTDOWN,
                                     args, null));
@@ -943,8 +890,7 @@ public class RequestHandlerLocal implements RequestHandler
         catch (Exception e)
         {
             throw new RequestHandlerException(
-                    RequestHandlerException.MSG_FAILED_TO_CLEANUP_INCOMPLETE_IMPORTS,
-                    null, e);
+                    RequestHandlerException.MSG_FAILED_TO_CLEANUP_INCOMPLETE_IMPORTS, null, e);
         }
     }
 
@@ -959,12 +905,10 @@ public class RequestHandlerLocal implements RequestHandler
         try
         {
             // find all the incomplete requests
-            Collection requests = RequestPersistenceAccessor
-                    .findRequestsStillImporting();
+            Collection requests = RequestPersistenceAccessor.findRequestsStillImporting();
             if (requests != null && requests.size() > 0)
             {
-                c_logger.info("Cleaning up " + requests.size()
-                        + " request(s) were importing "
+                c_logger.info("Cleaning up " + requests.size() + " request(s) were importing "
                         + "when they system was shutdown.");
                 for (Iterator i = requests.iterator(); i.hasNext();)
                 {
@@ -975,21 +919,17 @@ public class RequestHandlerLocal implements RequestHandler
                     StringReader sr = new StringReader(r.getEventFlowXml());
                     InputSource is = new InputSource(sr);
                     DOMParser parser = new DOMParser();
-                    parser.setFeature("http://xml.org/sax/features/validation",
-                            false);
+                    parser.setFeature("http://xml.org/sax/features/validation", false);
                     parser.parse(is);
                     Document document = parser.getDocument();
                     Element root = document.getDocumentElement();
                     NodeList nl = root.getElementsByTagName("displayName");
                     Element displayNameElt = (Element) nl.item(0);
 
-                    String pageName = displayNameElt.getFirstChild()
-                            .getNodeValue();
+                    String pageName = displayNameElt.getFirstChild().getNodeValue();
                     r.setExternalPageId(pageName);
-                    Element source = (Element) root.getElementsByTagName(
-                            "source").item(0);
-                    String dataSourceType = source
-                            .getAttribute("dataSourceType");
+                    Element source = (Element) root.getElementsByTagName("source").item(0);
+                    String dataSourceType = source.getAttribute("dataSourceType");
                     r.setDataSourceType(dataSourceType);
 
                     String[] args =
@@ -997,8 +937,7 @@ public class RequestHandlerLocal implements RequestHandler
                     // update the request with an error exception of failing to
                     // import
                     // because of the system being shutdown
-                    setExceptionInRequest(
-                            r,
+                    setExceptionInRequest(r,
                             new RequestHandlerException(
                                     RequestHandlerException.MSG_FAILED_TO_COMPLETE_IMPORT_DURING_SHUTDOWN,
                                     args, null));
@@ -1014,8 +953,7 @@ public class RequestHandlerLocal implements RequestHandler
         catch (Exception e)
         {
             throw new RequestHandlerException(
-                    RequestHandlerException.MSG_FAILED_TO_CLEANUP_INCOMPLETE_IMPORTS,
-                    null, e);
+                    RequestHandlerException.MSG_FAILED_TO_CLEANUP_INCOMPLETE_IMPORTS, null, e);
         }
     }
 
@@ -1035,8 +973,7 @@ public class RequestHandlerLocal implements RequestHandler
         boolean shouldNotifyPm = false;
         for (int i = 0; i < targetLocales.length; i++)
         {
-            WorkflowTemplateInfo wfti = l10nProfile
-                    .getWorkflowTemplateInfo(targetLocales[i]);
+            WorkflowTemplateInfo wfti = l10nProfile.getWorkflowTemplateInfo(targetLocales[i]);
             if (!shouldNotifyPm && wfti.notifyProjectManager())
             {
                 shouldNotifyPm = true;
@@ -1055,14 +992,13 @@ public class RequestHandlerLocal implements RequestHandler
         // if at least one of the wfInfos had the pm notify flag on, notify PM.
         if (shouldNotifyPm)
         {
-            sendEmail(l10nProfile.getProject().getProjectManagerId(),
-                    messageArgs, companyIdStr);
+            sendEmail(l10nProfile.getProject().getProjectManagerId(), messageArgs, companyIdStr);
         }
     }
 
     // send mail to Project manager / Workflow Manager
-    private void sendEmail(String p_userId, String[] p_messageArgs,
-            String p_companyIdStr) throws Exception
+    private void sendEmail(String p_userId, String[] p_messageArgs, String p_companyIdStr)
+            throws Exception
     {
         if (!m_systemNotificationEnabled)
         {
@@ -1072,16 +1008,15 @@ public class RequestHandlerLocal implements RequestHandler
         User user = getUserManager().getUser(p_userId);
 
         ServerProxy.getMailer().sendMailFromAdmin(user, p_messageArgs,
-                MailerConstants.INITIAL_IMPORT_FAILED_SUBJECT,
-                IMPORT_FAILED_MESSAGE, p_companyIdStr);
+                MailerConstants.INITIAL_IMPORT_FAILED_SUBJECT, IMPORT_FAILED_MESSAGE,
+                p_companyIdStr);
     }
 
     /*
      * Send email to the administrator. If fails - log the error.
      */
-    private void sendEmailToAdmin(String p_messageKey,
-            String[] p_messageArguments, String[] p_attachments,
-            String p_companyIdStr)
+    private void sendEmailToAdmin(String p_messageKey, String[] p_messageArguments,
+            String[] p_attachments, String p_companyIdStr)
     {
         if (!m_systemNotificationEnabled)
         {
@@ -1091,14 +1026,14 @@ public class RequestHandlerLocal implements RequestHandler
         try
         {
             ServerProxy.getMailer().sendMailToAdmin(p_messageArguments,
-                    MailerConstants.INITIAL_IMPORT_FAILED_SUBJECT,
-                    p_messageKey, p_attachments, p_companyIdStr);
+                    MailerConstants.INITIAL_IMPORT_FAILED_SUBJECT, p_messageKey, p_attachments,
+                    p_companyIdStr);
         }
         catch (Exception ge)
         {
             c_logger.error("Failed to send an email to the administrator for "
-                    + MailerConstants.INITIAL_IMPORT_FAILED_SUBJECT + " "
-                    + p_messageKey + " " + p_messageArguments, ge);
+                    + MailerConstants.INITIAL_IMPORT_FAILED_SUBJECT + " " + p_messageKey + " "
+                    + p_messageArguments, ge);
         }
     }
 
@@ -1113,8 +1048,7 @@ public class RequestHandlerLocal implements RequestHandler
         catch (Exception e)
         {
             throw new RequestHandlerException(
-                    RequestHandlerException.MSG_FAILED_TO_FIND_PROJECT_HANDLER,
-                    null, e);
+                    RequestHandlerException.MSG_FAILED_TO_FIND_PROJECT_HANDLER, null, e);
         }
 
         return ph;
@@ -1131,8 +1065,7 @@ public class RequestHandlerLocal implements RequestHandler
         catch (Exception ge)
         {
             throw new RequestHandlerException(
-                    RequestHandlerException.MSG_FAILED_TO_FIND_PAGE_MANAGER,
-                    null, ge);
+                    RequestHandlerException.MSG_FAILED_TO_FIND_PAGE_MANAGER, null, ge);
         }
 
         return pm;
@@ -1149,8 +1082,7 @@ public class RequestHandlerLocal implements RequestHandler
         }
         catch (GeneralException ge)
         {
-            throw new RequestHandlerException(
-                    RequestHandlerException.MSG_FAILED_TO_FIND_JOBCREATOR,
+            throw new RequestHandlerException(RequestHandlerException.MSG_FAILED_TO_FIND_JOBCREATOR,
                     null, ge);
         }
 
@@ -1168,8 +1100,7 @@ public class RequestHandlerLocal implements RequestHandler
         catch (Exception e)
         {
             throw new RequestHandlerException(
-                    RequestHandlerException.MSG_FAILED_TO_FIND_USER_MANAGER,
-                    null, e);
+                    RequestHandlerException.MSG_FAILED_TO_FIND_USER_MANAGER, null, e);
         }
 
         return um;
@@ -1178,12 +1109,10 @@ public class RequestHandlerLocal implements RequestHandler
     /**
      * Get the error message arguments.
      */
-    private String[] getMessageArgs(Request p_r, GeneralException p_exception)
-            throws Exception
+    private String[] getMessageArgs(Request p_r, GeneralException p_exception) throws Exception
     {
         SystemConfiguration config = SystemConfiguration.getInstance();
-        String capLoginUrl = config
-                .getStringParameter(SystemConfigParamNames.CAP_LOGIN_URL);
+        String capLoginUrl = config.getStringParameter(SystemConfigParamNames.CAP_LOGIN_URL);
 
         String messageArgs[] = new String[5];
         messageArgs[0] = p_r.getDataSourceType();

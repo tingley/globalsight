@@ -33,7 +33,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.comment.CommentManager;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.DisplayMatchTypeKeys;
 import com.globalsight.everest.edit.SynchronizationManager;
@@ -64,7 +63,6 @@ import com.globalsight.everest.tuv.TuvImplVo;
 import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.tuv.TuvManagerLocal;
 import com.globalsight.everest.tuv.TuvState;
-import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.edit.online.AutoPropagateThread;
@@ -86,8 +84,7 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public class UploadPageSaver implements AmbassadorDwUpConstants
 {
-    static private final Logger s_category = Logger
-            .getLogger(UploadPageSaver.class);
+    static private final Logger s_category = Logger.getLogger(UploadPageSaver.class);
 
     static private final SynchronizationManager s_synchManager = getSynchronizationManager();
 
@@ -104,7 +101,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
     static public final String UPLOAD_PAGE_SOURCE_LOCALE = "uploadPageSourceLocale";
     static public final String UPLOAD_PAGE_TARGET_LOCALE = "uploadPageTargetLocale";
     static public final String UPLOAD_PAGE_USER_LOCALE = "uploadPageUserLocale";
-    static public final String IS_UPLOADING_TASKS="isUploadingTasks";
+    static public final String IS_UPLOADING_TASKS = "isUploadingTasks";
 
     static private final String UPLOAD_SUCCESSFUL_SUBJECT = "uploadSuccessfulSubject";
     static private final String UPLOAD_SUCCESSFUL_MESSAGE = "uploadSuccessfulMessage";
@@ -133,8 +130,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             // parser, we will have to stick to English only VALUES for
             // those keys as well.
             ResourceBundle m_matchTypeLabels = ResourceBundle.getBundle(
-                    "com.globalsight.resources.messages.EditorMatchTypeLabels",
-                    Locale.US);
+                    "com.globalsight.resources.messages.EditorMatchTypeLabels", Locale.US);
 
             // LOAD match type string for comparison.
             // The hash set is used to validate uploaded match type strings.
@@ -146,30 +142,24 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             while (enumKeys.hasMoreElements())
             {
                 key = (String) enumKeys.nextElement();
-                m_allMatchTypesSet.add(m_matchTypeLabels.getString(key)
-                        .toLowerCase());
+                m_allMatchTypesSet.add(m_matchTypeLabels.getString(key).toLowerCase());
             }
 
             // Load only the protected match types.
             // This hash is used to determine protected segments.
             m_protectedMatchTypesSet = new HashSet();
 
-            m_protectedMatchTypesSet
-                    .add(m_matchTypeLabels.getString(
-                            DisplayMatchTypeKeys.MSG_OL_CUR_TRG_EXCLUDED)
-                            .toLowerCase());
+            m_protectedMatchTypesSet.add(m_matchTypeLabels
+                    .getString(DisplayMatchTypeKeys.MSG_OL_CUR_TRG_EXCLUDED).toLowerCase());
 
-            m_protectedMatchTypesSet.add(m_matchTypeLabels.getString(
-                    DisplayMatchTypeKeys.MSG_OL_CUR_TRG_SUB_EXCLUDED)
-                    .toLowerCase());
+            m_protectedMatchTypesSet.add(m_matchTypeLabels
+                    .getString(DisplayMatchTypeKeys.MSG_OL_CUR_TRG_SUB_EXCLUDED).toLowerCase());
 
-            m_protectedMatchTypesSet.add(m_matchTypeLabels.getString(
-                    DisplayMatchTypeKeys.MSG_OL_EXACT_LOCKED).toLowerCase());
+            m_protectedMatchTypesSet.add(m_matchTypeLabels
+                    .getString(DisplayMatchTypeKeys.MSG_OL_EXACT_LOCKED).toLowerCase());
 
-            m_protectedMatchTypesSet
-                    .add(m_matchTypeLabels.getString(
-                            DisplayMatchTypeKeys.MSG_OL_EXACT_SUB_LOCKED)
-                            .toLowerCase());
+            m_protectedMatchTypesSet.add(m_matchTypeLabels
+                    .getString(DisplayMatchTypeKeys.MSG_OL_EXACT_SUB_LOCKED).toLowerCase());
         }
         catch (Exception ex)
         {
@@ -189,8 +179,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         {
             // Check if Add Delete is enabled
             m_addDeleteEnabled = SystemConfiguration.getInstance()
-                    .getBooleanParameter(
-                            SystemConfigParamNames.ADD_DELETE_ENABLED);
+                    .getBooleanParameter(SystemConfigParamNames.ADD_DELETE_ENABLED);
         }
         catch (Exception ex)
         {
@@ -226,19 +215,16 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         if (pageId == null || pageId.length() == 0)
         {
             UploadPageSaverException ex = new UploadPageSaverException(
-                    UploadPageSaverException.MSG_FAILED_ARGS_GET_REFPAGE, null,
-                    null);
+                    UploadPageSaverException.MSG_FAILED_ARGS_GET_REFPAGE, null, null);
             s_category.error(ex.getMessage(), ex);
             throw ex;
         }
 
         m_pageIdAsString = pageId;
         m_placeholderFormatId = p_uploadPage.getPlaceholderFormatId();
-        setLocales(p_uploadPage.getSourceLocaleName(),
-                p_uploadPage.getTargetLocaleName());
+        setLocales(p_uploadPage.getSourceLocaleName(), p_uploadPage.getTargetLocaleName());
 
-        m_targetPage = getTargetPage(Long.parseLong(pageId),
-                m_targetLocale.getId());
+        m_targetPage = getTargetPage(Long.parseLong(pageId), m_targetLocale.getId());
 
         // GXML editor synchronization - if source page is
         // being updated, can't download target page.
@@ -262,30 +248,26 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             String args[] =
             { String.valueOf(m_targetPage.getId()) };
 
-            if (status.getStatus().equals(
-                    SynchronizationStatus.GXMLUPDATE_STARTED))
+            if (status.getStatus().equals(SynchronizationStatus.GXMLUPDATE_STARTED))
             {
                 UploadPageSaverException ex = new UploadPageSaverException(
-                        UploadPageSaverException.MSG_PAGE_IS_BEING_UPDATED,
-                        args, null);
+                        UploadPageSaverException.MSG_PAGE_IS_BEING_UPDATED, args, null);
                 s_category.info(ex);
                 throw ex;
             }
-            else if (status.getStatus().equals(
-                    SynchronizationStatus.UPLOAD_STARTED)
+            else if (status.getStatus().equals(SynchronizationStatus.UPLOAD_STARTED)
                     && s_synchManager.checkTempFileName(p_tempFileName))
             {
                 UploadPageSaverException ex = new UploadPageSaverException(
-                        UploadPageSaverException.MSG_PAGE_IS_BEING_UPDATED,
-                        args, null);
+                        UploadPageSaverException.MSG_PAGE_IS_BEING_UPDATED, args, null);
                 s_category.info(ex);
                 throw ex;
             }
         }
 
         // Init the actual page data from the database.
-        m_ref_PageData = getRefferencePageData(p_uploadPage,
-                p_excludedItemTypes, p_uploadFileFormat);
+        m_ref_PageData = getRefferencePageData(p_uploadPage, p_excludedItemTypes,
+                p_uploadFileFormat);
 
         return m_ref_PageData;
     }
@@ -304,9 +286,8 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
      * @return PageData that will be used as a reference for error checking
      * @exception UploadPageSaverException
      */
-    public ArrayList<PageData> initializeAndGetReferencePages(
-            OfflinePageData p_uploadPage, Collection p_excludedItemTypes,
-            int p_uploadFileFormat) throws UploadPageSaverException
+    public ArrayList<PageData> initializeAndGetReferencePages(OfflinePageData p_uploadPage,
+            Collection p_excludedItemTypes, int p_uploadFileFormat) throws UploadPageSaverException
     {
         ArrayList<PageData> pageDatas = new ArrayList<PageData>();
         PageData pageData = null;
@@ -314,8 +295,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         String pageId = p_uploadPage.getPageId();
         String[] pageIds = pageId.split(",");
 
-        setLocales(p_uploadPage.getSourceLocaleName(),
-                p_uploadPage.getTargetLocaleName());
+        setLocales(p_uploadPage.getSourceLocaleName(), p_uploadPage.getTargetLocaleName());
         m_placeholderFormatId = p_uploadPage.getPlaceholderFormatId();
 
         for (int i = 0; i < pageIds.length; i++)
@@ -326,15 +306,13 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             if (pageId == null || pageId.length() == 0)
             {
                 UploadPageSaverException ex = new UploadPageSaverException(
-                        UploadPageSaverException.MSG_FAILED_ARGS_GET_REFPAGE,
-                        null, null);
+                        UploadPageSaverException.MSG_FAILED_ARGS_GET_REFPAGE, null, null);
                 s_category.error(ex.getMessage(), ex);
                 throw ex;
             }
 
             m_pageIdAsString = pageId;
-            m_targetPage = getTargetPage(Long.parseLong(pageId),
-                    m_targetLocale.getId());
+            m_targetPage = getTargetPage(Long.parseLong(pageId), m_targetLocale.getId());
 
             // GXML editor synchronization - if source page is
             // being updated, can't download target page.
@@ -358,29 +336,25 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                 String args[] =
                 { String.valueOf(m_targetPage.getId()) };
 
-                if (status.getStatus().equals(
-                        SynchronizationStatus.GXMLUPDATE_STARTED))
+                if (status.getStatus().equals(SynchronizationStatus.GXMLUPDATE_STARTED))
                 {
                     UploadPageSaverException ex = new UploadPageSaverException(
-                            UploadPageSaverException.MSG_PAGE_IS_BEING_UPDATED,
-                            args, null);
+                            UploadPageSaverException.MSG_PAGE_IS_BEING_UPDATED, args, null);
                     s_category.info(ex);
                     throw ex;
                 }
-                else if (status.getStatus().equals(
-                        SynchronizationStatus.UPLOAD_STARTED))
+                else if (status.getStatus().equals(SynchronizationStatus.UPLOAD_STARTED))
                 {
                     UploadPageSaverException ex = new UploadPageSaverException(
-                            UploadPageSaverException.MSG_PAGE_IS_BEING_UPDATED,
-                            args, null);
+                            UploadPageSaverException.MSG_PAGE_IS_BEING_UPDATED, args, null);
                     s_category.info(ex);
                     throw ex;
                 }
             }
 
             // Init the actual page data from the database.
-            pageData = getRefferencePageData(pageId, p_uploadPage,
-                    p_excludedItemTypes, p_uploadFileFormat);
+            pageData = getRefferencePageData(pageId, p_uploadPage, p_excludedItemTypes,
+                    p_uploadFileFormat);
 
             if (pageData != null)
                 pageDatas.add(pageData);
@@ -407,11 +381,10 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
      *            the uploaded segment in question.
      * @return true if protected, false if not.
      */
-    static public boolean confirmUploadProtection(
-            OfflineSegmentData p_uploadSegment) throws UploadPageSaverException
+    static public boolean confirmUploadProtection(OfflineSegmentData p_uploadSegment)
+            throws UploadPageSaverException
     {
-        String uploadMatchType = p_uploadSegment.getDisplayMatchType()
-                .toLowerCase();
+        String uploadMatchType = p_uploadSegment.getDisplayMatchType().toLowerCase();
 
         // We do not show the match type at all when the segment is
         // not an exact or fuzzy match. So an empty string means NOT
@@ -425,8 +398,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         if (!m_allMatchTypesSet.contains(uploadMatchType))
         {
             UploadPageSaverException ex = new UploadPageSaverException(
-                    UploadPageSaverException.MSG_INVALID_UPLOAD_MATCH_TYPE,
-                    null, null);
+                    UploadPageSaverException.MSG_INVALID_UPLOAD_MATCH_TYPE, null, null);
             s_category.error(ex.getMessage(), ex);
             throw ex;
         }
@@ -459,21 +431,20 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
      *            - The file name used for email notification.
      * @exception GeneralException
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void savePageToDb(OfflinePageData p_uploadPage,
-            ArrayList<PageData> p_referencePages, String p_jmsDestinationQueue,
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
+    public void savePageToDb(OfflinePageData p_uploadPage, ArrayList<PageData> p_referencePages,
             User p_user, String p_fileName, List<Task> p_isUploadingTasks)
             throws GeneralException, DiplomatBasicParserException
     {
         m_uploadPage = p_uploadPage;
 
         boolean isRepeatedSegments = false;
-        if (p_fileName != null
-                && p_fileName.contains(DownLoadApi.REPEATED_SEGMENTS_KEY))
+        if (p_fileName != null && p_fileName.contains(DownLoadApi.REPEATED_SEGMENTS_KEY))
         {
             isRepeatedSegments = true;
         }
-        
+
         long jobId = -1;
         OfflineSegmentData refSegment = null;
         HashMap subsToBeSavedMap = new HashMap();
@@ -482,8 +453,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         {
             refPageData = p_referencePages.get(i);
             jobId = refPageData.getPageSegments().getSourcePage().getJobId();
-            HashMap ref_OPDSegmentMap = refPageData.getOfflinePageData()
-                    .getSegmentMap();
+            HashMap ref_OPDSegmentMap = refPageData.getOfflinePageData().getSegmentMap();
 
             // NOTE: all upload errors have been handled at this point,
             // and all changed/unchanged segments have been flagged in the
@@ -502,8 +472,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
 
                 // Only modified segments are saved in PageSegments.
                 // Modified segments have been marked in the ptag error checker.
-                if (uploadSegment.hasTargetBeenEdited()
-                        && uploadSegment.isTagCheckSuccesful())
+                if (uploadSegment.hasTargetBeenEdited() && uploadSegment.isTagCheckSuccesful())
                 {
                     // Add - tuvs to be saved:
 
@@ -519,10 +488,8 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                         if ((subs = (SubsOfParent) subsToBeSavedMap
                                 .get(uploadSegment.getTuIdAsLong())) == null)
                         {
-                            subs = new SubsOfParent(
-                                    uploadSegment.getTuIdAsLong());
-                            subsToBeSavedMap.put(uploadSegment.getTuIdAsLong(),
-                                    subs);
+                            subs = new SubsOfParent(uploadSegment.getTuIdAsLong());
+                            subsToBeSavedMap.put(uploadSegment.getTuIdAsLong(), subs);
                         }
 
                         // add the subflow to TuvParentSubs
@@ -534,39 +501,35 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                     {
                         // Note: MUST use setGxmlExcludeTopTagsIgnoreSubflows()
                         SegmentPair segmentPair = refPageData.getPageSegments()
-                                .getSegmentPairByTuId(
-                                        uploadSegment.getTuIdAsLong()
-                                                .longValue(), m_targetLocale);
+                                .getSegmentPairByTuId(uploadSegment.getTuIdAsLong().longValue(),
+                                        m_targetLocale);
                         // set the text
-                        segmentPair.getTargetTuv()
-                                .setGxmlExcludeTopTagsIgnoreSubflows(
-                                        uploadSegment.getDisplayTargetText(),
-                                        jobId);
-                        if (uploadSegment.isStateTranslated()) {
+                        segmentPair.getTargetTuv().setGxmlExcludeTopTagsIgnoreSubflows(
+                                uploadSegment.getDisplayTargetText(), jobId);
+                        if (uploadSegment.isStateTranslated())
+                        {
                             segmentPair.getTargetTuv().setState(TuvState.APPROVED);
-                        } else {
-                        	segmentPair.getTargetTuv().setState(TuvState.LOCALIZED);
+                        }
+                        else
+                        {
+                            segmentPair.getTargetTuv().setState(TuvState.LOCALIZED);
                         }
                         // set the modified flag
                         segmentPair.setModified();
                     }
                 }
-                else if (isRepeatedSegments
-                        && uploadSegment.isTagCheckSuccesful())
+                else if (isRepeatedSegments && uploadSegment.isTagCheckSuccesful())
                 {
                     if (!uploadSegment.isSubflowSegment()
                             && !confirmUploadProtection(uploadSegment))
                     {
                         // Note: MUST use setGxmlExcludeTopTagsIgnoreSubflows()
                         SegmentPair segmentPair = refPageData.getPageSegments()
-                                .getSegmentPairByTuId(
-                                        uploadSegment.getTuIdAsLong().longValue(),
+                                .getSegmentPairByTuId(uploadSegment.getTuIdAsLong().longValue(),
                                         m_targetLocale);
 
-                        String srcGxml = segmentPair.getSourceTuv()
-                                .getGxmlExcludeTopTags();
-                        String tgtGxml = segmentPair.getTargetTuv()
-                                .getGxmlExcludeTopTags();
+                        String srcGxml = segmentPair.getSourceTuv().getGxmlExcludeTopTags();
+                        String tgtGxml = segmentPair.getTargetTuv().getGxmlExcludeTopTags();
                         String newTgtGxml = uploadSegment.getDisplayTargetText();
                         PseudoData srcPD = new PseudoData();
                         srcPD.setIgnoreNativeId(true);
@@ -574,27 +537,22 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                         tgtPD.setIgnoreNativeId(true);
                         PseudoData newTgtPD = new PseudoData();
                         newTgtPD.setIgnoreNativeId(true);
-                        String srcPtag = TmxPseudo.tmx2Pseudo(srcGxml, srcPD)
+                        String srcPtag = TmxPseudo.tmx2Pseudo(srcGxml, srcPD).getPTagSourceString();
+                        String tgtPtag = TmxPseudo.tmx2Pseudo(tgtGxml, tgtPD).getPTagSourceString();
+                        String newTgtPtag = TmxPseudo.tmx2Pseudo(newTgtGxml, newTgtPD)
                                 .getPTagSourceString();
-                        String tgtPtag = TmxPseudo.tmx2Pseudo(tgtGxml, tgtPD)
-                                .getPTagSourceString();
-                        String newTgtPtag = TmxPseudo.tmx2Pseudo(newTgtGxml,
-                                newTgtPD).getPTagSourceString();
-                        
+
                         String matchType = uploadSegment.getDisplayMatchType();
-                        if (matchType != null
-                                && matchType.contains("Context Exact Match"))
+                        if (matchType != null && matchType.contains("Context Exact Match"))
                         {
                             newTgtPtag = newTgtPtag.trim();
                         }
 
-                        if (!newTgtPtag.equals(tgtPtag) &&
-                        		!newTgtPtag.equals(srcPtag))
+                        if (!newTgtPtag.equals(tgtPtag) && !newTgtPtag.equals(srcPtag))
                         {
                             // set the text same as target segment
                             segmentPair.getTargetTuv()
-                                    .setGxmlExcludeTopTagsIgnoreSubflows(
-                                            newTgtGxml, jobId);
+                                    .setGxmlExcludeTopTagsIgnoreSubflows(newTgtGxml, jobId);
 
                             // set the modified flag
                             segmentPair.setModified();
@@ -607,8 +565,8 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                         }
                         else if (uploadSegment.hasTargetBeenEdited())
                         {
-                        	segmentPair.getTargetTuv().setState(TuvState.LOCALIZED);
-                        	segmentPair.setModified();
+                            segmentPair.getTargetTuv().setState(TuvState.LOCALIZED);
+                            segmentPair.setModified();
                         }
                     }
                 }
@@ -622,20 +580,18 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             // save or index. This is so an upload confirmation e-mail
             // will still be sent - and in the same order that files
             // are upload.
-            List<TuvImplVo> modifiedTuvs = getModifiedTuvs(refPageData
-                    .getPageSegments());
+            List<TuvImplVo> modifiedTuvs = getModifiedTuvs(refPageData.getPageSegments());
             List newComments = p_uploadPage.getUploadedNewIssues();
             Map replyComments = p_uploadPage.getUploadedReplyIssuesMap();
 
             // filter comments here for consolidate RTF
             newComments = filterNewComment(newComments, ref_OPDSegmentMap);
-            replyComments = filterReplayComment(replyComments,
-                    ref_OPDSegmentMap);
+            replyComments = filterReplayComment(replyComments, ref_OPDSegmentMap);
             boolean isLastOne = (i == p_referencePages.size() - 1);
             long trgPageId = refPageData.getPageSegments().getSourcePage()
                     .getTargetPageByLocaleId(m_targetLocale.getId()).getId();
-            saveNoJms(modifiedTuvs, newComments, replyComments, p_user, p_fileName,
-                    p_jmsDestinationQueue, isLastOne, trgPageId, p_isUploadingTasks);
+            saveNoJms(modifiedTuvs, newComments, replyComments, p_user, p_fileName, isLastOne,
+                    trgPageId, p_isUploadingTasks);
         }
     }
 
@@ -712,8 +668,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
     // download parameters. We only have the ones recorded in the
     // upload file header.
     private PageData getRefferencePageData(OfflinePageData p_uploadPage,
-            Collection p_excludedTypeNames, int p_uploadFileFormat)
-            throws UploadPageSaverException
+            Collection p_excludedTypeNames, int p_uploadFileFormat) throws UploadPageSaverException
     {
         try
         {
@@ -725,8 +680,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             UploadParams uploadParams = new UploadParams();
             uploadParams.setSourceLocale(srcLoc);
             uploadParams.setTargetLocale(trgLoc);
-            uploadParams.setTagDisplayFormatID(p_uploadPage
-                    .getPlaceholderFormatId());
+            uploadParams.setTagDisplayFormatID(p_uploadPage.getPlaceholderFormatId());
             uploadParams.setPageId(p_uploadPage.getPageId());
             uploadParams.setTargetPageId(m_targetPage.getIdAsLong());
             // We do not record the page name in the header during
@@ -734,10 +688,8 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             // /*p_uploadPage.getPageName()*/
             uploadParams.setPageName("Unknown upload page name");
             uploadParams.setCanUseUrl(false);
-            uploadParams.setMergeOverrideDirectives(p_uploadPage
-                    .getSegmentMergeMap());
-            uploadParams.setMergeEnabled(p_uploadPage
-                    .isLoadedFromMergeEnabledClient());
+            uploadParams.setMergeOverrideDirectives(p_uploadPage.getSegmentMergeMap());
+            uploadParams.setMergeEnabled(p_uploadPage.isLoadedFromMergeEnabledClient());
             uploadParams.setExcludedTypeNames(p_excludedTypeNames);
             uploadParams.setFileFormatId(p_uploadFileFormat);
 
@@ -747,8 +699,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         catch (Exception ex)
         {
             UploadPageSaverException ex1 = new UploadPageSaverException(
-                    UploadPageSaverException.MSG_FAILED_ARGS_GET_REFPAGE, null,
-                    ex);
+                    UploadPageSaverException.MSG_FAILED_ARGS_GET_REFPAGE, null, ex);
             throw ex1;
         }
     }
@@ -759,9 +710,8 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
     // the previous coded worked. We do not have all original
     // download parameters. We only have the ones recorded in the
     // upload file header.
-    private PageData getRefferencePageData(String pageId,
-            OfflinePageData p_uploadPage, Collection p_excludedTypeNames,
-            int p_uploadFileFormat) throws UploadPageSaverException
+    private PageData getRefferencePageData(String pageId, OfflinePageData p_uploadPage,
+            Collection p_excludedTypeNames, int p_uploadFileFormat) throws UploadPageSaverException
     {
         try
         {
@@ -773,8 +723,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             UploadParams uploadParams = new UploadParams();
             uploadParams.setSourceLocale(srcLoc);
             uploadParams.setTargetLocale(trgLoc);
-            uploadParams.setTagDisplayFormatID(p_uploadPage
-                    .getPlaceholderFormatId());
+            uploadParams.setTagDisplayFormatID(p_uploadPage.getPlaceholderFormatId());
             uploadParams.setPageId(pageId);
             uploadParams.setTargetPageId(m_targetPage.getIdAsLong());
             // We do not record the page name in the header during
@@ -782,10 +731,8 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             // /*p_uploadPage.getPageName()*/
             uploadParams.setPageName("Unknown upload page name");
             uploadParams.setCanUseUrl(false);
-            uploadParams.setMergeOverrideDirectives(p_uploadPage
-                    .getSegmentMergeMap());
-            uploadParams.setMergeEnabled(p_uploadPage
-                    .isLoadedFromMergeEnabledClient());
+            uploadParams.setMergeOverrideDirectives(p_uploadPage.getSegmentMergeMap());
+            uploadParams.setMergeEnabled(p_uploadPage.isLoadedFromMergeEnabledClient());
             uploadParams.setExcludedTypeNames(p_excludedTypeNames);
             uploadParams.setFileFormatId(p_uploadFileFormat);
 
@@ -795,14 +742,13 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         catch (Exception ex)
         {
             UploadPageSaverException ex1 = new UploadPageSaverException(
-                    UploadPageSaverException.MSG_FAILED_ARGS_GET_REFPAGE, null,
-                    ex);
+                    UploadPageSaverException.MSG_FAILED_ARGS_GET_REFPAGE, null, ex);
             throw ex1;
         }
     }
 
-    private void setSubsOnTargets(Map p_subsToBeSavedMap,
-            ArrayList<PageData> p_referencePages) throws GeneralException
+    private void setSubsOnTargets(Map p_subsToBeSavedMap, ArrayList<PageData> p_referencePages)
+            throws GeneralException
     {
         Map subflowOffsetMap = m_uploadPage.buildSubflowOffsetMap();
         Collection allSubsOfParent = p_subsToBeSavedMap.values();
@@ -810,8 +756,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         for (Iterator it = allSubsOfParent.iterator(); it.hasNext();)
         {
             SubsOfParent subs = (SubsOfParent) it.next();
-            SubflowMergeInfo subInfo = (SubflowMergeInfo) subflowOffsetMap
-                    .get(subs.m_parentTuvId);
+            SubflowMergeInfo subInfo = (SubflowMergeInfo) subflowOffsetMap.get(subs.m_parentTuvId);
 
             if (subInfo != null)
             {
@@ -828,20 +773,16 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
 
                     if (pageData != null)
                     {
-                        segmentPair = m_ref_PageData.getPageSegments()
-                                .getSegmentPairByTuId(
-                                        subs.m_parentTuvId.longValue(),
-                                        m_targetLocale);
+                        segmentPair = m_ref_PageData.getPageSegments().getSegmentPairByTuId(
+                                subs.m_parentTuvId.longValue(), m_targetLocale);
                     }
                     if (pageData == null && p_referencePages != null)
                     {
                         for (int i = 0; i < p_referencePages.size(); i++)
                         {
                             pageData = p_referencePages.get(i);
-                            segmentPair = pageData.getPageSegments()
-                                    .getSegmentPairByTuId(
-                                            subs.m_parentTuvId.longValue(),
-                                            m_targetLocale);
+                            segmentPair = pageData.getPageSegments().getSegmentPairByTuId(
+                                    subs.m_parentTuvId.longValue(), m_targetLocale);
 
                             if (segmentPair != null)
                             {
@@ -857,27 +798,26 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                 {
                     // Not critical enough to abort and unfortunately,
                     // we currently do not have a warning mechanism
-                    s_category
-                            .error("Unable to set Subflow(s) on parent segment. "
+                    s_category.error(
+                            "Unable to set Subflow(s) on parent segment. "
                                     + "The parent segment will be saved without the updated subflow(s).",
-                                    ex);
+                            ex);
                 }
             }
         }
     }
-    
+
     private void saveTuvNoJms(List<TuvImplVo> p_modifiedTuvs, List p_newComments,
-            Map p_replyComments, User p_user, String p_fileName,
-            String p_jmsDestinationQueue, boolean p_isLastOne, long p_trgPageId,
-            List<Task> p_isUploadingTasks) throws GeneralException
+            Map p_replyComments, User p_user, String p_fileName, boolean p_isLastOne,
+            long p_trgPageId, List<Task> p_isUploadingTasks) throws GeneralException
     {
         if (p_modifiedTuvs == null || p_modifiedTuvs.size() == 0)
         {
             // If no modified TUVs, ensure the uploading status is set back to
             // "N" before return.
-            if (p_isLastOne) {
-                TaskHelper.updateTaskStatus(p_isUploadingTasks, UPLOAD_DONE,
-                        false);
+            if (p_isLastOne)
+            {
+                TaskHelper.updateTaskStatus(p_isUploadingTasks, UPLOAD_DONE, false);
             }
 
             return;
@@ -891,15 +831,13 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         catch (RemoteException e)
         {
         }
-        
-       
+
         try
         {
             PageManager pageMgr = ServerProxy.getPageManager();
-            SourcePage sp = pageMgr.getTargetPage(p_trgPageId)
-                    .getSourcePage();
+            SourcePage sp = pageMgr.getTargetPage(p_trgPageId).getSourcePage();
             long jobId = sp.getJobId();
-            
+
             TuvManagerLocal tml = new TuvManagerLocal();
             tml.saveTuvsFromOfflineNoJms(p_modifiedTuvs, jobId);
         }
@@ -917,55 +855,6 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             {
             }
 
-        }
-    }
-    
-
-    // "modifiedTuvs" are from same page/job.
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void save(List<TuvImplVo> p_modifiedTuvs, List p_newComments,
-            Map p_replyComments, User p_user, String p_fileName,
-            String p_jmsDestinationQueue, boolean p_isLastOne, long p_trgPageId,
-            List<Task> p_isUploadingTasks) throws GeneralException
-    {
-        if (p_modifiedTuvs == null || p_modifiedTuvs.size() == 0)
-        {
-            // If no modified TUVs, ensure the uploading status is set back to
-            // "N" before return.
-            if (p_isLastOne) {
-                TaskHelper.updateTaskStatus(p_isUploadingTasks, UPLOAD_DONE,
-                        false);
-            }
-
-            return;
-        }
-
-        try
-        {
-            HashMap map = new HashMap();
-
-            CompanyWrapper.saveCurrentCompanyIdInMap(map, s_category);
-            map.put(UPLOAD_PAGE_ID, p_trgPageId);
-            map.put(UPLOAD_PAGE_SOURCE_LOCALE, m_sourceLocale);
-            map.put(UPLOAD_PAGE_TARGET_LOCALE, m_targetLocale);
-            map.put(UPLOAD_PAGE_USER_LOCALE, setUserLocale(p_user));
-            map.put(MODIFIED_TUVS, p_modifiedTuvs);
-            map.put(NEW_COMMENTS, p_newComments);
-            map.put(MODIFIED_COMMENTS, p_replyComments);
-            map.put(USER, p_user);
-            map.put(FILE_NAME, p_fileName);
-            map.put(IS_LAST_PAGE, new Boolean(p_isLastOne));
-            map.put(IS_UPLOADING_TASKS, p_isUploadingTasks);
-
-            // Send all data through the JMS queue to PageSaverMDB.
-            JmsHelper.sendMessageToQueue(map, p_jmsDestinationQueue);
-        }
-        catch (Exception ex)
-        {
-            // s_category.error("UploadPageSaver" + ex.getMessage(), ex);
-            throw new UploadPageSaverException(
-                    UploadPageSaverException.MSG_FAILED_TO_POST_JMS_UPLOAD_SAVE,
-                    null, ex);
         }
     }
 
@@ -989,24 +878,21 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
 
             PageManager pageMgr = ServerProxy.getPageManager();
             TuvManager tuvMgr = ServerProxy.getTuvManager();
-            InProgressTmManager ipTmMgr = LingServerProxy
-                    .getInProgressTmManager();
+            InProgressTmManager ipTmMgr = LingServerProxy.getInProgressTmManager();
 
-            SourcePage sp = pageMgr.getTargetPage(p_targetPageId)
-                    .getSourcePage();
+            SourcePage sp = pageMgr.getTargetPage(p_targetPageId).getSourcePage();
             long sourcePageId = sp.getId();
             long jobId = sp.getJobId();
             for (Iterator it = p_modifiedTuvs.iterator(); it.hasNext();)
             {
                 targetTuv = (Tuv) it.next();
-                sourceTuv = tuvMgr.getTuvForSegmentEditor(targetTuv
-                        .getTu(jobId).getId(), p_sourceLocale.getId(), jobId);
+                sourceTuv = tuvMgr.getTuvForSegmentEditor(targetTuv.getTu(jobId).getId(),
+                        p_sourceLocale.getId(), jobId);
                 // only saveTuvsIntoInProgressTm if target segment != source
                 // segment
                 String srcGxml = sourceTuv.getGxmlExcludeTopTags();
                 String tgtGxml = targetTuv.getGxmlExcludeTopTags();
-                if (srcGxml != null && tgtGxml != null
-                        && !srcGxml.equals(tgtGxml))
+                if (srcGxml != null && tgtGxml != null && !srcGxml.equals(tgtGxml))
                 {
                     ipTmMgr.save(sourceTuv, targetTuv, "0", sourcePageId);
                 }
@@ -1019,8 +905,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         }
     }
 
-    private void saveNewComments(List p_comments, String p_user,
-            Long p_targetPageId)
+    private void saveNewComments(List p_comments, String p_user, Long p_targetPageId)
     {
         // p_comments is just a flat ArrayList of UploadIssue objects.
 
@@ -1037,8 +922,8 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                 continue;
             }
 
-            String logicalKey = CommentHelper.makeLogicalKey(
-                    p_targetPageId.longValue(), tuId, tuvId, subId);
+            String logicalKey = CommentHelper.makeLogicalKey(p_targetPageId.longValue(), tuId,
+                    tuvId, subId);
 
             if (s_category.isDebugEnabled())
             {
@@ -1049,16 +934,16 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             {
                 CommentManager mgr = ServerProxy.getCommentManager();
 
-                mgr.addIssue(issue.getLevelObjectType(), issue.getTuvId(),
-                        issue.getTitle(), issue.getPriority(),
-                        issue.getStatus(), issue.getCategory(), p_user,
+                mgr.addIssue(issue.getLevelObjectType(), issue.getTuvId(), issue.getTitle(),
+                        issue.getPriority(), issue.getStatus(), issue.getCategory(), p_user,
                         issue.getComment(), logicalKey);
             }
             catch (Exception ex)
             {
                 // Don't fail the upload because of comments.
-                s_category.error("Error creating new comment for " + logicalKey
-                        + " (continuing anyway)", ex);
+                s_category.error(
+                        "Error creating new comment for " + logicalKey + " (continuing anyway)",
+                        ex);
             }
         }
     }
@@ -1083,33 +968,32 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             try
             {
                 CommentManager mgr = ServerProxy.getCommentManager();
-                mgr.replyToIssue(oldIssueId.longValue(), issue.getTitle(),
-                        issue.getPriority(), issue.getStatus(),
-                        issue.getCategory(), p_user, issue.getComment());
+                mgr.replyToIssue(oldIssueId.longValue(), issue.getTitle(), issue.getPriority(),
+                        issue.getStatus(), issue.getCategory(), p_user, issue.getComment());
             }
             catch (Exception ex)
             {
                 // Don't fail the upload because of comments.
-                s_category.error("Error replying to comment " + oldIssueId
-                        + " (continuing anyway)", ex);
+                s_category.error("Error replying to comment " + oldIssueId + " (continuing anyway)",
+                        ex);
             }
         }
     }
-    
- // "modifiedTuvs" are from same page/job.
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void saveNoJms(List<TuvImplVo> p_modifiedTuvs, List p_newComments,
-            Map p_replyComments, User p_user, String p_fileName,
-            String p_jmsDestinationQueue, boolean p_isLastOne, long p_trgPageId,
+
+    // "modifiedTuvs" are from same page/job.
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
+    private void saveNoJms(List<TuvImplVo> p_modifiedTuvs, List p_newComments, Map p_replyComments,
+            User p_user, String p_fileName, boolean p_isLastOne, long p_trgPageId,
             List<Task> p_isUploadingTasks) throws GeneralException
     {
         if (p_modifiedTuvs == null || p_modifiedTuvs.size() == 0)
         {
             // If no modified TUVs, ensure the uploading status is set back to
             // "N" before return.
-            if (p_isLastOne) {
-                TaskHelper.updateTaskStatus(p_isUploadingTasks, UPLOAD_DONE,
-                        false);
+            if (p_isLastOne)
+            {
+                TaskHelper.updateTaskStatus(p_isUploadingTasks, UPLOAD_DONE, false);
             }
 
             return;
@@ -1118,10 +1002,8 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         String companyIdStr = null;
         try
         {
-            TargetPage tp = ServerProxy.getPageManager().getTargetPage(
-                    p_trgPageId);
-            companyIdStr = String.valueOf(tp.getWorkflowInstance()
-                    .getCompanyId());
+            TargetPage tp = ServerProxy.getPageManager().getTargetPage(p_trgPageId);
+            companyIdStr = String.valueOf(tp.getWorkflowInstance().getCompanyId());
         }
         catch (Exception e)
         {
@@ -1131,8 +1013,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         // check if auto propagate
         String specTus = "";
         boolean isRepeatedSegments = false;
-        if (p_fileName != null
-                && p_fileName.contains(DownLoadApi.REPEATED_SEGMENTS_KEY))
+        if (p_fileName != null && p_fileName.contains(DownLoadApi.REPEATED_SEGMENTS_KEY))
         {
             isRepeatedSegments = true;
         }
@@ -1149,10 +1030,9 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                 specTus = specTus + tuv.getTuId() + ",";
             }
         }
-        
-        saveTuvNoJms(p_modifiedTuvs, p_newComments, p_replyComments, p_user,
-                p_fileName, p_jmsDestinationQueue, p_isLastOne, p_trgPageId,
-                p_isUploadingTasks);
+
+        saveTuvNoJms(p_modifiedTuvs, p_newComments, p_replyComments, p_user, p_fileName,
+                p_isLastOne, p_trgPageId, p_isUploadingTasks);
 
         specTus = ""; // do not do Auto-Propagate from don's email
         if (specTus != null && specTus.length() > 0)
@@ -1177,13 +1057,12 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
 
         // Delete the old files for preview
         PreviewPDFHelper.deleteOldPdf(p_trgPageId, m_targetLocale.getId());
-        PreviewPageHandler.deleteOldPreviewFile(p_trgPageId,
-                m_targetLocale.getId());
+        PreviewPageHandler.deleteOldPreviewFile(p_trgPageId, m_targetLocale.getId());
         // After a successful save, notify user.
         // (Including when no modified Tuvs or comments are uploaded.)
         GlobalSightLocale userLocale = setUserLocale(p_user);
-        String localePair = OfflineEditHelper.localePair(m_sourceLocale,
-                m_targetLocale, userLocale);
+        String localePair = OfflineEditHelper.localePair(m_sourceLocale, m_targetLocale,
+                userLocale);
 
         if (isRepeatedSegments)
         {
@@ -1191,8 +1070,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             {
                 OfflineEditHelper.notifyUser(p_user, p_fileName, localePair,
                         OfflineEditHelper.UPLOAD_SUCCESSFUL_SUBJECT,
-                        OfflineEditHelper.UPLOAD_SUCCESSFUL_MESSAGE,
-                        companyIdStr);
+                        OfflineEditHelper.UPLOAD_SUCCESSFUL_MESSAGE, companyIdStr);
             }
         }
         else
@@ -1201,21 +1079,20 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                     OfflineEditHelper.UPLOAD_SUCCESSFUL_SUBJECT,
                     OfflineEditHelper.UPLOAD_SUCCESSFUL_MESSAGE, companyIdStr);
         }
-        
+
         if (p_isLastOne && p_isUploadingTasks != null && p_isUploadingTasks.size() > 0)
         {
             for (Task isUploadingTask : p_isUploadingTasks)
             {
                 // Update task status (Upload Done)
-                TaskHelper.updateTaskStatus(isUploadingTask, AmbassadorDwUpConstants.UPLOAD_DONE, false);
-                s_category
-                        .info("Offline file uploading is done for task(taskID:"
-                                + isUploadingTask.getId() + "):"
-                                + isUploadingTask.getTaskName());
+                TaskHelper.updateTaskStatus(isUploadingTask, AmbassadorDwUpConstants.UPLOAD_DONE,
+                        false);
+                s_category.info("Offline file uploading is done for task(taskID:"
+                        + isUploadingTask.getId() + "):" + isUploadingTask.getTaskName());
             }
         }
     }
-    
+
     /**
      * Gets all the required data to build an Offline page from the DB.
      * 
@@ -1239,20 +1116,18 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         }
     }
 
-    private List<TuvImplVo> getModifiedTuvs(PageSegments p_segments)
-            throws GeneralException
+    private List<TuvImplVo> getModifiedTuvs(PageSegments p_segments) throws GeneralException
     {
         return p_segments.getModifiedTuvs(m_targetLocale);
     }
 
-    private GlobalSightLocale setUserLocale(User p_user)
-            throws GeneralException
+    private GlobalSightLocale setUserLocale(User p_user) throws GeneralException
     {
         // get locale objects for e-mail notification
         try
         {
-            m_userLocale = ServerProxy.getLocaleManager().getLocaleByString(
-                    p_user.getDefaultUILocale());
+            m_userLocale = ServerProxy.getLocaleManager()
+                    .getLocaleByString(p_user.getDefaultUILocale());
 
             return m_userLocale;
         }
@@ -1272,8 +1147,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
      * @return the actual source page
      * @exception UploadPageSaverException
      */
-    private SourcePage getSourcePage(long p_sourcePageId)
-            throws UploadPageSaverException
+    private SourcePage getSourcePage(long p_sourcePageId) throws UploadPageSaverException
     {
         PageManager mgr = null;
 
@@ -1314,8 +1188,8 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         }
         catch (Exception ex)
         {
-            s_category.error("Internal error: "
-                    + "cannot receive offline/online synchronization messages",
+            s_category.error(
+                    "Internal error: " + "cannot receive offline/online synchronization messages",
                     ex);
         }
 

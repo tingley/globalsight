@@ -812,8 +812,6 @@ public interface WebAppConstants
     public static String DOWLOAD_DELAY_TIME_TABLE = "downloadDelayTimeTable";
     public static String TASK_COMPLETE_DELAY_TIME_TABLE = "taskCompleteDelayTimeTable";
 
-    public static String IS_USE_IN_CONTEXT = "isUseInContext";
-    public static String LEVERAGE_EXACT_ONLY = "exactMatchOnly";
     public static String IS_IN_CONTEXT_MATCH = "isInContextMatch";
 
     public static final String REQUEST_METHOD_GET = "get";

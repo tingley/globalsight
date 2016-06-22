@@ -215,9 +215,6 @@
      <permission id="<%=Permission.UILOCALE_NEW%>"/>     
   </permission>
 <%  }%>
-<% if(b_snippets) { %>
-  <permission id="<%=Permission.SNIPPET_IMPORT%>"/>
-<%  }%>
 <% if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId)) { %>
   <permission id="<%=Permission.SYSTEM_PARAMS%>"/>
   <permission id="<%=Permission.LOGS_VIEW%>"/>
@@ -284,19 +281,12 @@
     <permission id="<%=Permission.SEGMENTATIONRULE_REMOVE%>"/>
     <permission id="<%=Permission.SEGMENTATIONRULE_DUP%>"/>
   </permission>
-  <permission id="<%=Permission.SGMLRULE_VIEW%>">
-     <permission id="<%=Permission.SGMLRULE_UPLOAD%>"/>
-     <permission id="<%=Permission.SGMLRULE_CREATE%>"/>
-     <permission id="<%=Permission.SGMLRULE_REMOVE%>"/>
-     <permission id="<%=Permission.SGMLRULE_EDIT%>"/>
-  </permission>
   <permission id="<%=Permission.EXPORT_LOC_VIEW%>">
      <permission id="<%=Permission.EXPORT_LOC_REMOVE%>"/>
      <permission id="<%=Permission.EXPORT_LOC_DEFAULT%>"/>
      <permission id="<%=Permission.EXPORT_LOC_EDIT%>"/>
      <permission id="<%=Permission.EXPORT_LOC_NEW%>"/>
   </permission>
-  <permission id="<%=Permission.IMPORT%>"/>
 <% if (b_serviceware) { %>
   <permission id="<%=Permission.SERVICEWARE_IMPORT%>"/>
 <% } %>
@@ -309,18 +299,9 @@
 <% if (b_documentum) { %>
      <permission id="<%=Permission.DOCUMENTUM_IMPORT%>"/>
 <% } %>
-<% if (b_corpusAligner) { %>
-  <permission id="<%=Permission.CORPUS_ALIGNER_VIEW%>">
-     <permission id="<%=Permission.CORPUS_ALIGNER_CREATE%>"/>
-     <permission id="<%=Permission.CORPUS_ALIGNER_DOWNLOAD%>"/>
-     <permission id="<%=Permission.CORPUS_ALIGNER_UPLOAD%>"/>
-  </permission>
-<% } %>
 <% if (b_customerAccessGroup) { %>
-  <permission id="<%=Permission.CUSTOMER_UPLOAD%>"/>
   <permission id="<%=Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE%>"/>
   <% } %>
-  <permission id="<%=Permission.CREATE_JOB%>"/>
   <permission id="<%=Permission.CREATE_JOB_NO_APPLET%>"/>
 </category>
 <category id="lb_connectors">
@@ -328,7 +309,6 @@
   <permission id="<%=Permission.COTI_JOB%>"/>
   <permission id="<%=Permission.GIT_CONNECTOR%>"/>
   <permission id="<%=Permission.ELOQUA%>"/>
-  <permission id="<%=Permission.RSS_READER%>"/>
   <category id="lb_cvs">
       <permission id="<%=Permission.CVS_Servers%>">
           <permission id="<%=Permission.CVS_Servers_NEW%>"/>

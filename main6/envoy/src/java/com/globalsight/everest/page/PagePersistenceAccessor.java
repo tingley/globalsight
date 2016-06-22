@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -36,14 +35,13 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
- * PagePersistenceAccessor is responsible for accessing TopLink persistance
+ * PagePersistenceAccessor is responsible for accessing Hibernate persistance
  * service for all of the PageManager activities. These activities include all
  * types of database query, insert, and update.
  */
 public final class PagePersistenceAccessor
 {
-    static private final Logger CATEGORY = Logger
-            .getLogger(PagePersistenceAccessor.class);
+    static private final Logger CATEGORY = Logger.getLogger(PagePersistenceAccessor.class);
 
     // ////////////////////////////////////////////////////////////////////
     // Begin: Static package level methods
@@ -57,14 +55,12 @@ public final class PagePersistenceAccessor
      * @exception PageException
      *                thrown upon a query error.
      */
-    public static SourcePage getSourcePageById(long p_sourcePageId)
-            throws PageException
+    public static SourcePage getSourcePageById(long p_sourcePageId) throws PageException
     {
         SourcePage page = null;
         try
         {
-            page = (SourcePage) HibernateUtil.get(SourcePage.class,
-                    p_sourcePageId);
+            page = (SourcePage) HibernateUtil.get(SourcePage.class, p_sourcePageId);
         }
         catch (Exception e)
         {
@@ -83,14 +79,12 @@ public final class PagePersistenceAccessor
      * @exception PageException
      *                thrown upon a query error.
      */
-    public static TargetPage getTargetPageById(long p_targetPageId)
-            throws PageException
+    public static TargetPage getTargetPageById(long p_targetPageId) throws PageException
     {
         TargetPage page = null;
         try
         {
-            page = (TargetPage) HibernateUtil.get(TargetPage.class,
-                    p_targetPageId);
+            page = (TargetPage) HibernateUtil.get(TargetPage.class, p_targetPageId);
         }
         catch (Exception e)
         {
@@ -112,8 +106,8 @@ public final class PagePersistenceAccessor
      * @throws PageException
      *             when an error occurs.
      */
-    static public Collection<?> getTemplateParts(Long p_sourcePageId,
-            String p_pageTemplateType) throws PageException
+    static public Collection<?> getTemplateParts(Long p_sourcePageId, String p_pageTemplateType)
+            throws PageException
     {
         Collection<?> result = null;
 
@@ -123,14 +117,12 @@ public final class PagePersistenceAccessor
             String hql = null;
             if (flag)
             {
-                hql = "from TemplatePartArchived t "
-                        + "where t.pageTemplate.typeValue = :type "
+                hql = "from TemplatePartArchived t " + "where t.pageTemplate.typeValue = :type "
                         + "and t.pageTemplate.sourcePage.id = :pId order by t.order";
             }
             else
             {
-                hql = "from TemplatePart t "
-                        + "where t.pageTemplate.typeValue = :type "
+                hql = "from TemplatePart t " + "where t.pageTemplate.typeValue = :type "
                         + "and t.pageTemplate.sourcePage.id = :pId order by t.order";
             }
             HashMap<String, Object> map = new HashMap<String, Object>();
@@ -144,8 +136,7 @@ public final class PagePersistenceAccessor
             String[] args =
             { p_sourcePageId.toString(), p_pageTemplateType };
 
-            throw new PageException(
-                    PageException.MSG_FAILED_TO_GET_TEMPLATE_PARTS, args, ex);
+            throw new PageException(PageException.MSG_FAILED_TO_GET_TEMPLATE_PARTS, args, ex);
         }
 
         return result;
@@ -160,8 +151,7 @@ public final class PagePersistenceAccessor
      * @exception PageException
      *                - component exception thrown if the update fails.
      */
-    static public void resetPagesToPreviousState(Collection<?> p_pages)
-            throws PageException
+    static public void resetPagesToPreviousState(Collection<?> p_pages) throws PageException
     {
         Session session = null;
         Transaction transaction = null;
@@ -179,13 +169,12 @@ public final class PagePersistenceAccessor
                 if (CATEGORY.isDebugEnabled())
                 {
                     // this could be a target page or source page
-                    CATEGORY.debug("Resetting page " + page.getId()
-                            + " back to its previous state " + prevState);
+                    CATEGORY.debug("Resetting page " + page.getId() + " back to its previous state "
+                            + prevState);
                 }
 
                 // register the object and use the clone for updating
-                Page pageClone = (Page) session.get(page.getClass(),
-                        page.getIdAsLong());
+                Page pageClone = (Page) session.get(page.getClass(), page.getIdAsLong());
                 if (pageClone != null)
                 {
                     pageClone.setPageState(prevState);
@@ -202,11 +191,8 @@ public final class PagePersistenceAccessor
                 transaction.rollback();
             }
 
-            CATEGORY.error(
-                    "PagePersistenceAccessor :: resetPagesToPreviousState(List)",
-                    ex);
-            throw new PageException(
-                    PageException.MSG_FAILED_TO_UPDATE_PAGE_STATE, null, ex);
+            CATEGORY.error("PagePersistenceAccessor :: resetPagesToPreviousState(List)", ex);
+            throw new PageException(PageException.MSG_FAILED_TO_UPDATE_PAGE_STATE, null, ex);
         }
         finally
         {
@@ -228,8 +214,7 @@ public final class PagePersistenceAccessor
      *             when an error occurs.
      */
     @SuppressWarnings("unchecked")
-    public static Vector<?> getTargetPages(long p_sourcePageId)
-            throws PageException
+    public static Vector<?> getTargetPages(long p_sourcePageId) throws PageException
     {
         Vector<?> result = null;
 
@@ -245,9 +230,8 @@ public final class PagePersistenceAccessor
             String[] args =
             { Long.toString(p_sourcePageId) };
 
-            throw new PageException(
-                    PageException.MSG_FAILED_TO_GET_TARGET_PAGES_OF_SOURCE,
-                    args, pe);
+            throw new PageException(PageException.MSG_FAILED_TO_GET_TARGET_PAGES_OF_SOURCE, args,
+                    pe);
         }
 
         return result;
@@ -285,8 +269,7 @@ public final class PagePersistenceAccessor
      * @throws PageException
      *             when an error occurs.
      */
-    static TargetPage getTargetPage(long p_sourcePageId, long p_localeId)
-            throws PageException
+    static TargetPage getTargetPage(long p_sourcePageId, long p_localeId) throws PageException
     {
         try
         {
@@ -297,8 +280,7 @@ public final class PagePersistenceAccessor
             map.put("lId", new Long(p_localeId));
             List<?> queryResult = HibernateUtil.search(hql, map);
 
-            return queryResult.size() == 0 ? null : (TargetPage) queryResult
-                    .get(0);
+            return queryResult.size() == 0 ? null : (TargetPage) queryResult.get(0);
         }
         catch (Exception ex)
         {
@@ -306,8 +288,7 @@ public final class PagePersistenceAccessor
             { Long.toString(p_sourcePageId), Long.toString(p_localeId) };
 
             throw new PageException(
-                    PageException.MSG_FAILED_TO_GET_TARGET_PAGE_BY_SOURCE_AND_LOCALE,
-                    args, ex);
+                    PageException.MSG_FAILED_TO_GET_TARGET_PAGE_BY_SOURCE_AND_LOCALE, args, ex);
         }
     }
 
@@ -350,9 +331,8 @@ public final class PagePersistenceAccessor
             String[] args =
             { p_externalPageId, p_sourceLocale.getDisplayName() };
 
-            throw new PageException(
-                    PageException.MSG_FAILED_TO_GET_PAGE_BY_NAME_AND_LOCALE,
-                    args, pe);
+            throw new PageException(PageException.MSG_FAILED_TO_GET_PAGE_BY_NAME_AND_LOCALE, args,
+                    pe);
         }
     }
 
@@ -372,9 +352,8 @@ public final class PagePersistenceAccessor
      *                - Component exception thrown upon a query error.
      */
     @SuppressWarnings("unchecked")
-    static TargetPage getActiveTargetPageByNameAndLocales(
-            String p_externalPageId, GlobalSightLocale p_sourceLocale,
-            GlobalSightLocale p_targetLocale) throws PageException
+    static TargetPage getActiveTargetPageByNameAndLocales(String p_externalPageId,
+            GlobalSightLocale p_sourceLocale, GlobalSightLocale p_targetLocale) throws PageException
     {
         try
         {
@@ -385,25 +364,23 @@ public final class PagePersistenceAccessor
                     + "and r.l10nProfile.sourceLocale.id = :sourceLocaleId "
                     + "and t.workflowInstance.targetLocale.id =:targetLocaleId "
                     + "and t.pageState in ('" + PageState.IMPORTING + "', '"
-                    + PageState.IMPORT_SUCCESS + "', '" + PageState.ACTIVE_JOB
-                    + "', '" + PageState.LOCALIZED + "'))";
+                    + PageState.IMPORT_SUCCESS + "', '" + PageState.ACTIVE_JOB + "', '"
+                    + PageState.LOCALIZED + "'))";
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("externalPageId", p_externalPageId);
             map.put("sourceLocaleId", p_sourceLocale.getIdAsLong());
             map.put("targetLocaleId", p_targetLocale.getIdAsLong());
             List<?> queryResult = HibernateUtil.search(hql, map);
 
-            return queryResult.size() == 0 ? null : (TargetPage) queryResult
-                    .get(0);
+            return queryResult.size() == 0 ? null : (TargetPage) queryResult.get(0);
         }
         catch (Exception pe)
         {
             String[] args =
             { p_externalPageId, p_sourceLocale.getDisplayName() };
 
-            throw new PageException(
-                    PageException.MSG_FAILED_TO_GET_PAGE_BY_NAME_AND_LOCALE,
-                    args, pe);
+            throw new PageException(PageException.MSG_FAILED_TO_GET_PAGE_BY_NAME_AND_LOCALE, args,
+                    pe);
         }
     }
 
@@ -420,19 +397,14 @@ public final class PagePersistenceAccessor
 
         try
         {
-            result = HibernateUtil
-                    .searchWithSql(
-                            SourcePage.class,
-                            SourcePageDescriptorModifier.SOURCE_PAGES_STILL_IMPORTING_SQL);
+            result = HibernateUtil.searchWithSql(SourcePage.class,
+                    SourcePageDescriptorModifier.SOURCE_PAGES_STILL_IMPORTING_SQL);
         }
         catch (Exception pe)
         {
-            CATEGORY.error(
-                    "Failed to get the source pages that are stuck importing.",
-                    pe);
+            CATEGORY.error("Failed to get the source pages that are stuck importing.", pe);
 
-            throw new PageException(
-                    PageException.MSG_FAILED_TO_GET_SOURCE_PAGES_STILL_IMPORTING,
+            throw new PageException(PageException.MSG_FAILED_TO_GET_SOURCE_PAGES_STILL_IMPORTING,
                     null, pe);
         }
 
@@ -459,8 +431,7 @@ public final class PagePersistenceAccessor
         catch (Exception e)
         {
             CATEGORY.error("Failed to persist source page.", e);
-            throw new PageException(
-                    PageException.MSG_FAILED_TO_GET_SOURCE_PAGES_STILL_IMPORTING,
+            throw new PageException(PageException.MSG_FAILED_TO_GET_SOURCE_PAGES_STILL_IMPORTING,
                     null, e);
         }
     }
@@ -496,11 +467,10 @@ public final class PagePersistenceAccessor
      * @exception PageException
      *                - Component exception thrown upon an update.
      */
-    static void updateStateOfPages(Collection<?> p_pages1, String p_state1,
-            Collection<?> p_pages2, String p_state2) throws PageException
+    static void updateStateOfPages(Collection<?> p_pages1, String p_state1, Collection<?> p_pages2,
+            String p_state2) throws PageException
     {
-        updateStateOfPages(p_pages1.toArray(), p_state1, p_pages2.toArray(),
-                p_state2);
+        updateStateOfPages(p_pages1.toArray(), p_state1, p_pages2.toArray(), p_state2);
     }
 
     /**
@@ -515,8 +485,8 @@ public final class PagePersistenceAccessor
      * @exception PageException
      *                - Component exception thrown upon an update.
      */
-    static void updateStateOfPage(Page p_page, String p_state,
-            String p_exportError) throws PageException
+    static void updateStateOfPage(Page p_page, String p_state, String p_exportError)
+            throws PageException
     {
         if (p_page instanceof TargetPage)
         {
@@ -540,8 +510,7 @@ public final class PagePersistenceAccessor
      * @exception PageException
      *                - Component exception thrown upon an update.
      */
-    static void updateStateOfPage(Page p_page, String p_state)
-            throws PageException
+    static void updateStateOfPage(Page p_page, String p_state) throws PageException
     {
         Object[] pages =
         { p_page };
@@ -557,8 +526,8 @@ public final class PagePersistenceAccessor
      * @exception PageException
      *                - Component exception thrown upon delete error.
      */
-    static void deleteOnImportFailure(SourcePage p_page,
-            Collection<?> p_targetPages) throws PageException
+    static void deleteOnImportFailure(SourcePage p_page, Collection<?> p_targetPages)
+            throws PageException
     {
         Session session = null;
         Transaction transaction = null;
@@ -568,8 +537,7 @@ public final class PagePersistenceAccessor
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
 
-            SourcePage pageClone = (SourcePage) session.get(SourcePage.class,
-                    p_page.getIdAsLong());
+            SourcePage pageClone = (SourcePage) session.get(SourcePage.class, p_page.getIdAsLong());
 
             if (pageClone.getPrimaryFileType() == ExtractedFile.EXTRACTED_FILE)
             {
@@ -597,8 +565,7 @@ public final class PagePersistenceAccessor
                 transaction.rollback();
             }
 
-            throw new PageException(PageException.MSG_FAILED_TO_DELETE_PAGE,
-                    null, e);
+            throw new PageException(PageException.MSG_FAILED_TO_DELETE_PAGE, null, e);
         }
         finally
         {
@@ -614,8 +581,8 @@ public final class PagePersistenceAccessor
      * either base href is NULL it won't update the page (leaves it with the
      * existing one).
      */
-    static void updateBaseHrefs(Page p_page, String p_internalBaseHref,
-            String p_externalBaseHref) throws PageException
+    static void updateBaseHrefs(Page p_page, String p_internalBaseHref, String p_externalBaseHref)
+            throws PageException
     {
         Session session = null;
         Transaction transaction = null;
@@ -628,12 +595,10 @@ public final class PagePersistenceAccessor
                 session = HibernateUtil.getSession();
                 transaction = session.beginTransaction();
 
-                Page pageClone = (Page) session.get(p_page.getClass(),
-                        p_page.getIdAsLong());
+                Page pageClone = (Page) session.get(p_page.getClass(), p_page.getIdAsLong());
                 if (pageClone != null)
                 {
-                    ExtractedFile ef = (ExtractedFile) pageClone
-                            .getPrimaryFile();
+                    ExtractedFile ef = (ExtractedFile) pageClone.getPrimaryFile();
 
                     if (p_internalBaseHref != null)
                     {
@@ -676,8 +641,7 @@ public final class PagePersistenceAccessor
                 args[2] = p_externalBaseHref;
             }
 
-            throw new PageException(
-                    PageException.MSG_FAILED_TO_UPDATE_BASE_HREFS, args, e);
+            throw new PageException(PageException.MSG_FAILED_TO_UPDATE_BASE_HREFS, args, e);
         }
         finally
         {
@@ -699,8 +663,7 @@ public final class PagePersistenceAccessor
      *            the page id and the value is a Long that is the new word
      *            count.
      */
-    static void updateWordCount(HashMap<?, ?> p_pageWordCounts)
-            throws PageException
+    static void updateWordCount(HashMap<?, ?> p_pageWordCounts) throws PageException
     {
         Session session = null;
         Transaction transaction = null;
@@ -715,14 +678,12 @@ public final class PagePersistenceAccessor
             for (Iterator<?> it = sourcePages.iterator(); it.hasNext();)
             {
                 Long spId = (Long) it.next();
-                int wordCount = ((Integer) p_pageWordCounts.get(spId))
-                        .intValue();
+                int wordCount = ((Integer) p_pageWordCounts.get(spId)).intValue();
 
                 // clone the source page - but first get it from the server
                 // cache - just in case it changed by someone else while
                 // this update is being done.
-                SourcePage spClone = (SourcePage) session.get(SourcePage.class,
-                        spId);
+                SourcePage spClone = (SourcePage) session.get(SourcePage.class, spId);
 
                 if (spClone != null)
                 {
@@ -750,8 +711,7 @@ public final class PagePersistenceAccessor
                     // if the page is an unextracted file then set the target
                     // pages
                     // too
-                    if (changeMade
-                            && spClone.getPrimaryFileType() == PrimaryFile.UNEXTRACTED_FILE)
+                    if (changeMade && spClone.getPrimaryFileType() == PrimaryFile.UNEXTRACTED_FILE)
                     {
                         Vector<?> targetPages = getTargetPages(spId.longValue());
                         if (targetPages != null && targetPages.size() > 0)
@@ -767,10 +727,8 @@ public final class PagePersistenceAccessor
                                 pwc.setNoMatchWordCount(spClone.getWordCount());
                                 // update the total word count
                                 pwc.setTotalWordCount(pwc.getNoMatchWordCount()
-                                        + pwc.getLowFuzzyWordCount()
-                                        + pwc.getMedFuzzyWordCount()
-                                        + pwc.getMedHiFuzzyWordCount()
-                                        + pwc.getHiFuzzyWordCount()
+                                        + pwc.getLowFuzzyWordCount() + pwc.getMedFuzzyWordCount()
+                                        + pwc.getMedHiFuzzyWordCount() + pwc.getHiFuzzyWordCount()
                                         + pwc.getContextMatchWordCount()
                                         + pwc.getSegmentTmWordCount());
                                 tp.setWordCount(pwc);
@@ -790,8 +748,7 @@ public final class PagePersistenceAccessor
             {
                 transaction.rollback();
             }
-            throw new PageException(
-                    PageException.MSG_FAILED_TO_UPDATE_WORD_COUNT, null, e);
+            throw new PageException(PageException.MSG_FAILED_TO_UPDATE_WORD_COUNT, null, e);
         }
         finally
         {
@@ -832,17 +789,15 @@ public final class PagePersistenceAccessor
             else
             // a source page
             {
-                pageClone = (TargetPage) session.get(SourcePage.class,
+                pageClone = (SourcePage) session.get(SourcePage.class,
                         p_modifiedPage.getIdAsLong());
                 targetPage = false;
             }
 
             if (pageClone != null)
             {
-                UnextractedFile uf = (UnextractedFile) pageClone
-                        .getPrimaryFile();
-                UnextractedFile modifiedUf = (UnextractedFile) p_modifiedPage
-                        .getPrimaryFile();
+                UnextractedFile uf = (UnextractedFile) pageClone.getPrimaryFile();
+                UnextractedFile modifiedUf = (UnextractedFile) p_modifiedPage.getPrimaryFile();
                 // now copy all the changes
                 uf.setStoragePath(modifiedUf.getStoragePath());
                 uf.setLastModifiedDate(modifiedUf.getLastModifiedDate());
@@ -859,15 +814,11 @@ public final class PagePersistenceAccessor
             {
                 transaction.rollback();
             }
-            CATEGORY.error(
-                    "Failed to persist the un-extracted file updates in page "
-                            + p_modifiedPage.getId(), e);
+            CATEGORY.error("Failed to persist the un-extracted file updates in page "
+                    + p_modifiedPage.getId(), e);
             String args[] =
-            { targetPage ? "target" : "source",
-                    Long.toString(p_modifiedPage.getId()) };
-            throw new PageException(
-                    PageException.MSG_FAILED_TO_UPDATE_UNEXTRACTED_FILE, args,
-                    e);
+            { targetPage ? "target" : "source", Long.toString(p_modifiedPage.getId()) };
+            throw new PageException(PageException.MSG_FAILED_TO_UPDATE_UNEXTRACTED_FILE, args, e);
         }
         finally
         {
@@ -888,8 +839,8 @@ public final class PagePersistenceAccessor
 
     // update the state of two sets of page(s)
     // but does NOT update any page with the state of IMPORT_FAIL
-    private static void updateStateOfPages(Object[] p_pages1, String p_state1,
-            Object[] p_pages2, String p_state2) throws PageException
+    private static void updateStateOfPages(Object[] p_pages1, String p_state1, Object[] p_pages2,
+            String p_state2) throws PageException
     {
         Session session = null;
         Transaction transaction = null;
@@ -905,16 +856,14 @@ public final class PagePersistenceAccessor
 
                 if (CATEGORY.isDebugEnabled())
                 {
-                    CATEGORY.debug("Setting page " + page.getId()
-                            + " to state " + p_state1);
+                    CATEGORY.debug("Setting page " + page.getId() + " to state " + p_state1);
                 }
 
                 // change the state if it isn't in the IMPORT_FAIL state
                 if (!page.getPageState().equals(PageState.IMPORT_FAIL))
                 {
                     // register the object and use the clone for updating
-                    Page pageClone = (Page) session.get(page.getClass(),
-                            page.getIdAsLong());
+                    Page pageClone = (Page) session.get(page.getClass(), page.getIdAsLong());
                     if (pageClone != null)
                     {
                         pageClone.setPageState(p_state1);
@@ -929,16 +878,14 @@ public final class PagePersistenceAccessor
 
                 if (CATEGORY.isDebugEnabled())
                 {
-                    CATEGORY.debug("Setting page " + page.getId()
-                            + " to state " + p_state2);
+                    CATEGORY.debug("Setting page " + page.getId() + " to state " + p_state2);
                 }
 
                 // change the state if it isn't in the IMPORT_FAIL state
                 if (!page.getPageState().equals(PageState.IMPORT_FAIL))
                 {
                     // register the object and use the clone for updating
-                    Page pageClone = (Page) session.get(page.getClass(),
-                            page.getIdAsLong());
+                    Page pageClone = (Page) session.get(page.getClass(), page.getIdAsLong());
                     if (pageClone != null)
                     {
                         pageClone.setPageState(p_state2);
@@ -955,10 +902,8 @@ public final class PagePersistenceAccessor
             {
                 transaction.rollback();
             }
-            CATEGORY.error("PagePersistenceAccessor :: updateStateOfPage -- ",
-                    ex);
-            throw new PageException(
-                    PageException.MSG_FAILED_TO_UPDATE_PAGE_STATE, null, ex);
+            CATEGORY.error("PagePersistenceAccessor :: updateStateOfPage -- ", ex);
+            throw new PageException(PageException.MSG_FAILED_TO_UPDATE_PAGE_STATE, null, ex);
         }
         finally
         {
@@ -977,8 +922,7 @@ public final class PagePersistenceAccessor
      * @param p_state
      *            is the state
      */
-    private static void updateStateOfPages(Object[] p_pages, String p_state)
-            throws PageException
+    private static void updateStateOfPages(Object[] p_pages, String p_state) throws PageException
     {
         Session session = null;
         Transaction transaction = null;
@@ -994,16 +938,14 @@ public final class PagePersistenceAccessor
 
                 if (CATEGORY.isDebugEnabled())
                 {
-                    CATEGORY.debug("Setting page " + page.getId()
-                            + " to state " + p_state);
+                    CATEGORY.debug("Setting page " + page.getId() + " to state " + p_state);
                 }
 
                 // only change the state if not of IMPORT_FAIL state
                 if (!page.getPageState().equals(PageState.IMPORT_FAIL))
                 {
-                    Class<?> ob = page.getClass().getName()
-                            .startsWith(SourcePage.class.getName()) ? SourcePage.class
-                            : TargetPage.class;
+                    Class<?> ob = page.getClass().getName().startsWith(SourcePage.class.getName())
+                            ? SourcePage.class : TargetPage.class;
                     // register the object and use the clone for updating
                     Page pageClone = (Page) session.get(ob, page.getIdAsLong());
                     if (pageClone != null)
@@ -1022,10 +964,8 @@ public final class PagePersistenceAccessor
             {
                 transaction.rollback();
             }
-            CATEGORY.error("PagePersistenceAccessor :: updateStateOfPage -- ",
-                    ex);
-            throw new PageException(
-                    PageException.MSG_FAILED_TO_UPDATE_PAGE_STATE, null, ex);
+            CATEGORY.error("PagePersistenceAccessor :: updateStateOfPage -- ", ex);
+            throw new PageException(PageException.MSG_FAILED_TO_UPDATE_PAGE_STATE, null, ex);
         }
         finally
         {
@@ -1046,8 +986,8 @@ public final class PagePersistenceAccessor
      * @param p_exportError
      *            The error to be set (if any).
      */
-    private static void updateStateOfTargetPage(TargetPage p_targetPage,
-            String p_state, String p_exportError) throws PageException
+    private static void updateStateOfTargetPage(TargetPage p_targetPage, String p_state,
+            String p_exportError) throws PageException
     {
         Session session = HibernateUtil.getSession();
         Transaction transaction = session.beginTransaction();
@@ -1055,8 +995,8 @@ public final class PagePersistenceAccessor
         {
             if (CATEGORY.isDebugEnabled())
             {
-                CATEGORY.debug("Setting target page with id "
-                        + p_targetPage.getId() + " to state " + p_state);
+                CATEGORY.debug("Setting target page with id " + p_targetPage.getId() + " to state "
+                        + p_state);
             }
 
             // only change the state if not of IMPORT_FAIL state
@@ -1082,8 +1022,7 @@ public final class PagePersistenceAccessor
         catch (Exception ex) // PersistenceException and TOPLinkException
         {
             transaction.rollback();
-            throw new PageException(
-                    PageException.MSG_FAILED_TO_UPDATE_PAGE_STATE, null, ex);
+            throw new PageException(PageException.MSG_FAILED_TO_UPDATE_PAGE_STATE, null, ex);
         }
         finally
         {

@@ -159,7 +159,7 @@ function filterItems(e) {
                  filter="FileExtensionName" filterValue="<%=FileExtensionName%>"   width="22%">
                     <%= fe.getName() %>
                 </amb:column>
-                <amb:column label="" sortBy=""width="40%">
+                <amb:column label="" sortBy="" width="40%">
                     &nbsp;
                 </amb:column>
                 <% if (isSuperAdmin) { %>

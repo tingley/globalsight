@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.costing.AmountOfWork;
 import com.globalsight.everest.costing.Rate;
@@ -49,6 +51,8 @@ import com.globalsight.util.date.DateHelper;
  */
 public class TaskImpl extends PersistentObject implements Task, WorkObject
 {
+    private Logger logger = Logger.getLogger(TaskImpl.class);
+    
     private static final long serialVersionUID = 1L;
 
     public static final String EMPTY_DATE = "--";
@@ -117,7 +121,6 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     //for gbs-3574
     private int m_isReportUploaded = 0;//0:not upload; 1: uploaded.
     private int m_isReportUploadCheck = 0;//0:not check; 1: check.
-    private int m_isActivityCommentUploadCheck = 0;//0:not check; 1: check.
     
     private String m_qualityAssessment = null;
     private String m_marketSuitability = null;
@@ -149,14 +152,24 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
 	public int getIsReportUploadCheck() {
 		return this.m_isReportUploadCheck;
 	}
-
-	public void setIsActivityCommentUploadCheck(int p_isActivityCommentCheck){
-	    this.m_isActivityCommentUploadCheck = p_isActivityCommentCheck;
-	}
 	
-	public int getIsActivityCommentUploadCheck(){
-	    return this.m_isActivityCommentUploadCheck;
-	}
+    public int getIsActivityCommentUploadCheck()
+    {
+        if (this.m_wfTaskInstance == null)
+        {
+            try
+            {
+                m_wfTaskInstance = (WorkflowTaskInstance) ServerProxy.getWorkflowServer()
+                        .getWorkflowTaskInstance(this.getWorkflow().getId(), this.getId());
+            }
+            catch (Exception e)
+            {
+                logger.error(e);
+            }
+        }
+
+        return (m_wfTaskInstance != null ? m_wfTaskInstance.getActivityCommentUploadCheck() : 0);
+    }
 	
 	public void setIsReportUploaded(int p_isReportUploaded) {
 		this.m_isReportUploaded = p_isReportUploaded;
@@ -735,7 +748,6 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         }
     }
 
-    
     /**
      * To get the name of the task.
      * 

@@ -1,0 +1,56 @@
+This document describes how to sign your own SSL certificate requests using the OpenSSL toolkit and use these self-signed certificates to allow HTTPS connections to Microsoft's IIS SMTP server on Windows platform.
+
+(Note: Please use your own path to replace that in the commands in this document.)
+
+1. Walkthrough
+1.1 Download OpenSSL Windows version from "http://ncu.dl.sourceforge.net/project/gnuwin32/openssl/0.9.8h-1/openssl-0.9.8h-1-bin.zip" and unzip openssl-0.9.8h-1-bin.zip. These instructions assume OpenSSL is unzipped in "C:\OpenSSL".
+
+1.2 Create directory "demoCA" under "C:\OpenSSL\bin"; Create an empty text file named "index.txt" in "C:\OpenSSL\bin\demoCA"; Create a text file named "serial" in "C:\OpenSSL\bin\demoCA" and input "01" in this file; Create directories "newcerts" and 
+"private" under "C:\OpenSSL\bin\demoCA".
+
+2. Set up a Certificate Authority (CA)
+2.1 Open Windows command (cmd) and go to "C:\OpenSSL\bin"
+Command:
+C:\Windows\system32>cd /d C:\OpenSSL\bin
+
+2.2 Create a 1024-bit private key and use it to create a master certificate
+Command:
+C:\OpenSSL\bin>openssl req -x509 -newkey rsa:1024 -keyout cakey.pem -out cacert.pem -days 8000 -config c:\OpenSSL\share\openssl.cnf
+
+Input and verify a password for this private key when getting:
+"writing new private key to 'cakey.pem'
+Enter PEM pass phrase:"
+
+Next you are about to be asked to enter information that will be incorporated
+into your certificate request.
+
+Now you get two files "cakey.pem" and "cacert.pem" (under "C:\OpenSSL\bin") and one password for your private key. 
+
+2.3 (optional) We export our CA certificate in PKCS12 format - this will allow Windows users to import the PKCS12 certificate into their Trusted Root Store, so they don't get warning messages every time they use one of our certificates. 
+Command:
+C:\OpenSSL\bin>openssl x509 -in cacert.pem -outform DER -out cacert.der
+
+
+2.4 Copy file "cacert.pem" into "C:\OpenSSL\bin\demoCA" and "cakey.pem" into "C:\OpenSSL\bin\demoCA\private"
+
+3. Create an Certificate Request file using the Certificate Wizard in IIS and you should end up with a file called certreq.txt.
+
+4. Sign the Certificate Request
+4.1 Copy the certreq.txt file into C:\OpenSSL\bin
+
+4.2 Sign the request (need enter password for your private key)
+Command:
+C:\OpenSSL\bin>openssl ca -in certreq.txt -out myserver.pem -days 8000 -config c:\OpenSSL\share\openssl.cnf
+
+4.3 Convert the signed certificate into x509 format for use with IIS:
+Command:
+C:\OpenSSL\bin>openssl x509 -in myserver.pem -out myserver_x509.cer
+
+5. Install the new certificate following the Certificate Wizard under IIS.
+Remember that the myserver_x509.cer file is our certificate response file. 
+
+6. Finally you should import this self-signed certificate into GlobalSight %java_home%\jre keystore to make GlobalSight trust this certificate.
+Run cmd and rd to your <java_home>\jre\lib\security which GlobalSight used and then import certificate.
+Command example:
+C:\OpenSSL\bin>cd /d "C:\jdk1.6.0_07\jre\lib\security"
+C:\jdk1.6.0_07\jre\lib\security>"C:\jdk1.6.0_07\bin\keytool" -importcert -trustcacerts -alias gs_smtp -keystore cacerts -file <path-of-myserver_x509.cer> -storepass changeit -noprompt

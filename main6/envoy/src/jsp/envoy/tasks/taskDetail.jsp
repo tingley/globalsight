@@ -703,6 +703,7 @@
     boolean okForInContextReviewXml = PreviewPDFHelper.isXMLEnabled("" + theTask.getCompanyId());
     boolean okForInContextReviewIndd = PreviewPDFHelper.isInDesignEnabled("" + theTask.getCompanyId());
 	boolean okForInContextReviewOffice = PreviewPDFHelper.isOfficeEnabled("" + theTask.getCompanyId());
+	boolean okForInContextReviewHTML = PreviewPDFHelper.isHTMLEnabled("" + theTask.getCompanyId());
 %>
 <HTML>
 <HEAD>
@@ -1738,6 +1739,7 @@ if (targetPgsSize > 0)
         {
             String pageNameLow = pageName.toLowerCase();
             boolean isXml = pageNameLow.endsWith(".xml");
+            boolean isHTML = pageNameLow.endsWith(".html") || pageNameLow.endsWith(".xhtml") || pageNameLow.endsWith(".htm");
             boolean isInDesign = pageNameLow.endsWith(".indd") || pageNameLow.endsWith(".idml");
             boolean isOffice = pageNameLow.endsWith(".docx") || pageNameLow.endsWith(".pptx") || pageNameLow.endsWith(".xlsx");
             
@@ -1753,6 +1755,10 @@ if (targetPgsSize > 0)
             if (isOffice)
             {
                 enableInContextReivew = okForInContextReviewOffice;
+            }
+            if (isHTML)
+            {
+                enableInContextReivew = okForInContextReviewHTML;
             }
         %>
            	incontextReviewPDFs[<%=i%>] = <%=(enableInContextReivew ? 1 : 0 )%>;

@@ -23,7 +23,7 @@ case "$1" in
     ;;
     stop)
         echo "Stopping GlobalSight"
-        start-stop-daemon --start --quiet --background --user ${JBOSS_USER} --exec ${JBOSS_HOME}/bin/jboss-cli.sh -- --connect command=:shutdown
+        start-stop-daemon --start --quiet --background --user ${JBOSS_USER} --exec ${JBOSS_HOME}/bin/jboss-cli.sh -- --connect --command=:shutdown
     ;;
     restart)
       $0 stop

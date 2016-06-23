@@ -1078,20 +1078,11 @@ public class Install extends installer.EventBroadcaster
     {
         m_configFileList = new Hashtable<String, String>();
 
-        String choice = SERVER_JBOSS;
-
-        if (SERVER_JBOSS.equals(choice))
-        {
-            // standalone.xml
-            m_configFileList.put(concatPath(GS_HOME, "jboss/util/standalone.xml.template"),
-                    concatPath(GS_HOME, "jboss/server/standalone/configuration/standalone.xml"));
-            if (m_operatingSystem == OS_LINUX)
-            {
-                // service.sh
-                m_configFileList.put(concatPath(JBOSS_UTIL_BIN, "service.sh.template"),
-                        concatPath(JBOSS_UTIL_BIN, "service.sh"));
-            }
-        }
+        m_configFileList.put(concatPath(GS_HOME, "jboss/util/standalone.xml.template"),
+                concatPath(GS_HOME, "jboss/server/standalone/configuration/standalone.xml"));
+        
+        m_configFileList.put(concatPath(JBOSS_UTIL_BIN, "service.sh.template"),
+                concatPath(JBOSS_UTIL_BIN, "service.sh"));
 
         // Process files in the deployment directory
         m_configFileList.put(concatPath(DIR_EAR, "lib/classes/hibernate-jbpm.cfg.xml.template"),

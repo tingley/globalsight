@@ -53,6 +53,8 @@ public class PseudoData
     private int m_nBaseUniqueIndex = 1; // must start at 1
     // A array of objects that represent all tagss in te source
     private Vector m_SrcCompleteTagList = new Vector();
+    
+    private Vector unmapTags = null;
     // Locale (for now its just for error messages)
     private Locale m_locale = null;
     // Ptag resources
@@ -1085,6 +1087,40 @@ public class PseudoData
             if (SrcItem.getPTagName().equals(p_TrgPTag))
             {
                 return SrcItem;
+            }
+        }
+
+        return null;
+    }
+    
+    private Vector getUnmapTags()
+    {
+        if (unmapTags == null)
+        {
+            unmapTags = new Vector<>();
+            if (m_SrcCompleteTagList != null)
+                unmapTags.addAll(m_SrcCompleteTagList);
+        }
+        
+        return unmapTags;
+    }
+    
+    public TagNode findUnmapSrcItemByTrgName(String p_TrgPTag)
+    {
+        Vector tags = getUnmapTags();
+        if (tags == null || (p_TrgPTag.length() == 0))
+        {
+            return null;
+        }
+
+        Enumeration SrcEnumerator = tags.elements();
+        while (SrcEnumerator.hasMoreElements())
+        {
+            TagNode srcItem = (TagNode) SrcEnumerator.nextElement();
+            if (srcItem.getPTagName().equals(p_TrgPTag))
+            {
+                tags.remove(srcItem);
+                return srcItem;
             }
         }
 

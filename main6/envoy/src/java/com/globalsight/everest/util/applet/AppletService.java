@@ -80,8 +80,6 @@ public class AppletService extends HttpServlet
     private static final long serialVersionUID = 1L;
     private HttpServletRequest request;
     HttpServletResponse response;
-    // private PrintWriter writer;
-    // private ServletOutputStream out;
     private long companyId;
 
     public void service(HttpServletRequest request, HttpServletResponse response)
@@ -176,8 +174,6 @@ public class AppletService extends HttpServlet
     public void getRoles()
     {
         HttpSession session = request.getSession();
-        ResourceBundle bundle = PageHandler.getBundle(session);
-
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
 
@@ -192,8 +188,6 @@ public class AppletService extends HttpServlet
         if (wfti == null)
         {
             Workflow wf = (Workflow) sessionMgr.getAttribute(WorkflowTemplateConstants.WF_INSTANCE);
-            WorkflowInstance wfi = wf.getIflowInstance();
-
             targetLocale = wf.getTargetLocale();
             sourceLocale = wf.getJob().getSourceLocale();
             JobImpl job = HibernateUtil.get(JobImpl.class, wf.getJob().getId());
@@ -240,6 +234,7 @@ public class AppletService extends HttpServlet
         }
     }
 
+    @SuppressWarnings("rawtypes")
     public void getParticipantUserForTemplate()
     {
         String activity = request.getParameter("activity");
@@ -299,18 +294,16 @@ public class AppletService extends HttpServlet
         writeString(JsonUtil.toJson(userRoles));
     }
 
+    @SuppressWarnings("rawtypes")
     public void getParticipantUserForInstance()
     {
         String activity = request.getParameter("activity");
 
         HttpSession session = request.getSession();
-        ResourceBundle bundle = PageHandler.getBundle(session);
 
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-
         Workflow wf = (Workflow) sessionMgr.getAttribute(WorkflowTemplateConstants.WF_INSTANCE);
-        WorkflowInstance wfi = wf.getIflowInstance();
 
         GlobalSightLocale targetLocale = wf.getTargetLocale();
         GlobalSightLocale sourceLocale = wf.getJob().getSourceLocale();
@@ -360,6 +353,7 @@ public class AppletService extends HttpServlet
         writeString(JsonUtil.toJson(userRoles));
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void getWorkflowDetailData()
     {
         HttpSession session = request.getSession();
@@ -580,6 +574,7 @@ public class AppletService extends HttpServlet
         writeString(js);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private Map getTaskJson(WorkflowTaskInstance wt, Vector lines)
     {
         Map map = new HashMap();
@@ -610,6 +605,7 @@ public class AppletService extends HttpServlet
 
             assignment.put("activity", wt.getActivityName());
             assignment.put("report_upload_check", wt.getReportUploadCheck());
+            assignment.put("activity_comment_upload_check", wt.getActivityCommentUploadCheck());
             assignment.put("roles", wt.getRolesAsString());
             assignment.put("accepted_time", wt.getAcceptTime());
             assignment.put("completed_time", wt.getCompletedTime());
@@ -617,7 +613,6 @@ public class AppletService extends HttpServlet
             assignment.put("overdueToUser_time", wt.getOverdueToUser());
             assignment.put("role_type", Boolean.toString(wt.getRoleType()));
             assignment.put("sequence", wt.getSequence());
-
             assignment.put("structural_state", wt.getStructuralState());
             assignment.put("rate_selection_criteria", wt.getRateSelectionCriteria());
             assignment.put("expense_rate_id", wt.getExpenseRateId());
@@ -645,6 +640,7 @@ public class AppletService extends HttpServlet
         return map;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void getWorkflowDetailDataForEdit()
     {
         HttpSession session = request.getSession();
@@ -655,8 +651,6 @@ public class AppletService extends HttpServlet
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
 
         Workflow wf = (Workflow) sessionMgr.getAttribute(WorkflowTemplateConstants.WF_INSTANCE);
-        WorkflowInstance wfi = wf.getIflowInstance();
-
         GlobalSightLocale targetLocale = wf.getTargetLocale();
         GlobalSightLocale sourceLocale = wf.getJob().getSourceLocale();
 
@@ -664,15 +658,12 @@ public class AppletService extends HttpServlet
                 sourceLocale, targetLocale);
         sessionMgr.setAttribute("workflowDetailData", table);
         table.put("companyId", wf.getCompanyId());
-        // table.put("workflowName", wfi.getName());
         sessionMgr.setAttribute("workflowDetailData", table);
         writeString(JsonUtil.toJson(table));
     }
 
     public void saveWorkflowInstance()
     {
-        HttpSession session = request.getSession();
-
         String xml = request.getParameter("xml");
         String ids = request.getParameter("ids");
 

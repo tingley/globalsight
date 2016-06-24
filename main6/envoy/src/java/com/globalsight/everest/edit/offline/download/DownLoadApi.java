@@ -377,6 +377,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         // as this is apparently populated by the TM in OmegaT.
         m_downloadParams.setPopulate100(false);
         m_downloadParams.setPopulateFuzzy(false);
+        m_downloadParams.setPopulateMT(false);
         m_status = p_status;
         setUILocaleResources(m_downloadParams);
 
@@ -710,6 +711,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         List<OfflinePageData> datas = new ArrayList<OfflinePageData>();
         OfflinePageData pageData = new OfflinePageData();
         pageData.setPopulate100(m_downloadParams.isPopulate100());
+        pageData.setPopulateMT(m_downloadParams.isPopulateMT());
         OfflinePageData repPageData = new OfflinePageData();
         boolean isConsolidate = false;
         boolean isCombined = false;
@@ -1189,6 +1191,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         OfflinePageData consolidatedData = new OfflinePageData();
         consolidatedData.setPageName(m_downloadParams.getFullJobName());
         consolidatedData.setPopulate100(m_downloadParams.isPopulate100());
+        consolidatedData.setPopulateMT(m_downloadParams.isPopulateMT());
         HashSet<OfflineSegmentData> allDatas = new HashSet<OfflineSegmentData>();
         boolean inited = false;
 

@@ -220,6 +220,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
     private boolean m_isXliff = false;
     private boolean m_isXliff20 = false;
     private boolean populate100 = false;
+    private boolean populateMT = false;
     private boolean preserveSourceFolder = false;
 
     // **MUST** start false to properly load an upload file.
@@ -335,6 +336,16 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
         this.populate100 = populate100;
     }
 
+    public boolean isPopulateMT()
+    {
+        return populateMT;
+    }
+    
+    public void setPopulateMT(boolean populateMT)
+    {
+        this.populateMT = populateMT;
+    }
+    
     /**
      * Adds a OfflineSegmentData to the segment list.
      * 
@@ -2619,30 +2630,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                         targetLocale = osd.getTargetTuv().getGlobalSightLocale().getLocaleCode();
                     }
 
-                    String translateTuString = null;
                     boolean isCreatedFromMT = false;
-                    String[] translatedSrcTrgSegments = new String[2];
-                    // ## Compose the translated segment into tmx string first,
-                    // but write at last.
-                    if (!isPenaltyTmx && osd.getTargetTuv() != null
-                            && osd.getTargetTuv().isLocalized())
-                    {
-                        userId = osd.getTargetTuv().getLastModifiedUser();
-                        isCreatedFromMT = isCreatedFromMTEngine(userId);
-                        if (isAddLocalizedTargetAsTu(p_mode, isCreatedFromMT))
-                        {
-                            translateTuString = getTranslatedTuString(osd, sourceText, sourceLocale,
-                                    targetText, targetLocale, isOmegaT, isFromXliff, p_tmxLevel,
-                                    changeCreationIdToMT, translatedSrcTrgSegments);
-                        }
-                    }
-
-                    // avoid to output two same tu for Machine Translate
-                    boolean isAddTrasnlatedTU = true;
-                    if (StringUtil.isEmpty(translateTuString))
-                    {
-                        isAddTrasnlatedTU = false;
-                    }
 
                     // Write TM matches into tmx.
                     StringBuffer exactAndFuzzy = new StringBuffer();
@@ -2685,17 +2673,11 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                                 targetText = convertLf(targetText, p_tmxLevel);
                             }
 
-                            if (p_mode == TmxUtil.TMX_MODE_INC_ALL
+                           if (p_mode == TmxUtil.TMX_MODE_INC_ALL && !isCreatedFromMT                             
                                     || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
                                     || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT)
                                     || (p_mode == TmxUtil.TMX_MODE_NON_ICE && !isCreatedFromMT))
                             {
-                                if (isSameAsLocalizedSegments(translatedSrcTrgSegments, sourceText,
-                                        targetText))
-                                {
-                                    isAddTrasnlatedTU = false;
-                                }
-
                                 TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(sourceText,
                                         m_sourceLocaleName, null, null, null, null);
                                 TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(targetText,
@@ -2710,11 +2692,6 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                         }
 
                         p_outputStream.write(exactAndFuzzy.toString());
-                    }
-
-                    if (isAddTrasnlatedTU)
-                    {
-                        p_outputStream.write(translateTuString);
                     }
                 }
             }

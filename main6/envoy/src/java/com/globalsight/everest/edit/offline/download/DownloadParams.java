@@ -111,7 +111,8 @@ public class DownloadParams implements Serializable
 
     private boolean populate100 = true;
     private boolean populateFuzzy = true;
-
+    private boolean populateMT = true;
+    
     // need consolidate output file (for XLF format)
     private boolean needConsolidate = false;
     private String consolidateFileType = null;
@@ -1208,6 +1209,16 @@ public class DownloadParams implements Serializable
     public void setPopulate100(boolean populate100)
     {
         this.populate100 = populate100;
+    }
+    
+    public boolean isPopulateMT()
+    {
+        return populateMT;
+    }
+
+    public void setPopulateMT(boolean populateMT)
+    {
+        this.populateMT = populateMT;
     }
 
     public boolean isPopulateFuzzy()

@@ -591,13 +591,6 @@ function filterItems(e) {
          TITLE="<%=bundle.getString("helper_text_tm_maintenence")%>">
     </amb:permission>
 
-      <% if (isSuperAdmin) { %>
-	      <INPUT CLASS="standardText" TYPE="BUTTON" name="convertBtn" disabled
-	      VALUE="<%=bundle.getString("lb_tm_convert_tm3")%>"
-	      ID="convertBtn" onclick="convertToTm3()"
-	      TITLE="<%=bundle.getString("lb_tm_convert_tm3")%>">
-      <% } %>
-
     <amb:permission name="<%=Permission.TM_IMPORT%>" >
       <INPUT CLASS="standardText" TYPE="BUTTON" name="importBtn" disabled
          VALUE="<%=bundle.getString("lb_import1")%>"

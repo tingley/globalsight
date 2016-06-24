@@ -23,6 +23,7 @@ import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -71,22 +72,26 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobHandler;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
+import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.statistics.StatisticsService;
 import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.tasks.UpdateLeverageHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -102,22 +107,35 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowAdditionSender;
 import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
+import com.globalsight.everest.workflowmanager.WorkflowManager;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
+import com.globalsight.ling.tm2.BaseTmTuv;
+import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.Entry;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.FormUtil;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.modules.Modules;
 
 public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 {
     private static final Logger CATEGORY = Logger.getLogger(JobWorkflowsHandler.class);
+
     protected static boolean s_isGxmlEditorEnabled = false;
     private static boolean s_isSpecialCustomer = false; // Dell specific!
     private static String s_downloadDelayTimeAfterExporting; // Dell specific!
+
     private static Map<Long, Integer> updateWordCountsPercentageMap = Collections
             .synchronizedMap(new HashMap<Long, Integer>());
+    /**
+     * Map<Long, Long>: jobID:percentage
+     */
+    private static Map<Long, Integer> leverageMTPercentageMap = Collections
+            .synchronizedMap(new HashMap<Long, Integer>());
+
+    private WorkflowManager workflowManager = ServerProxy.getWorkflowManager();
 
     static
     {
@@ -206,6 +224,11 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         else if ("getUpdateWCPercentage".equals(p_request.getParameter("action")))
         {
             getUpdateWordCountsPercentage(p_response, job.getJobId());
+            return;
+        }
+        else if ("getLeverageMTPercentage".equals(p_request.getParameter("action")))
+        {
+            getLeverageMTPercentage(p_response, job.getJobId());
             return;
         }
         else if ("jobPageCount".equals(p_request.getParameter("action")))
@@ -529,10 +552,31 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         {
             p_response.setContentType("text/plain");
             out = p_response.getOutputStream();
-            StringBuffer sb = new StringBuffer();
-            sb.append("{\"updateWCPercentage\":");
-            sb.append(updateWordCountsPercentageMap.get(p_jobId)).append("}");
-            out.write(sb.toString().getBytes("UTF-8"));
+            JSONObject json = new JSONObject();
+            json.put("updateWCPercentage", updateWordCountsPercentageMap.get(p_jobId));
+            out.write(json.toString().getBytes("UTF-8"));
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error(e.getMessage(), e);
+        }
+        finally
+        {
+            out.close();
+        }
+    }
+
+    private void getLeverageMTPercentage(HttpServletResponse p_response, long p_jobId)
+            throws IOException
+    {
+        ServletOutputStream out = p_response.getOutputStream();
+        try
+        {
+            p_response.setContentType("text/plain");
+            out = p_response.getOutputStream();
+            JSONObject json = new JSONObject();
+            json.put("leverageMTPercentage", leverageMTPercentageMap.get(p_jobId));
+            out.write(json.toString().getBytes("UTF-8"));
         }
         catch (Exception e)
         {
@@ -580,8 +624,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             while (tokenizer.hasMoreTokens())
             {
                 wfId = tokenizer.nextToken();
-                WorkflowHandlerHelper
-                        .dispatchWF(WorkflowHandlerHelper.getWorkflowById(Long.parseLong(wfId)));
+                WorkflowHandlerHelper.dispatchWF(WorkflowHandlerHelper.getWorkflowById(Long
+                        .parseLong(wfId)));
             }
 
             sessionMgr.setAttribute(JobManagementHandler.WF_PREVIOUS_ACTION,
@@ -595,9 +639,18 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             {
                 for (String id : readyWorkflowIds.split(","))
                 {
-                    WorkflowHandlerHelper
-                            .dispatchWF(WorkflowHandlerHelper.getWorkflowById(Long.parseLong(id)));
+                    WorkflowHandlerHelper.dispatchWF(WorkflowHandlerHelper.getWorkflowById(Long
+                            .parseLong(id)));
                 }
+            }
+        }
+        else if (p_request.getParameter(JobManagementHandler.LEVERAGE_MT) != null)
+        {
+            if (wfIdParam != null)
+            {
+                leverageMT(wfIdParam);
+                p_request.setAttribute("isLeveragingMT", "true");
+                return;
             }
         }
         else if (p_request.getParameter(JobManagementHandler.UPDATE_WORD_COUNTS) != null)
@@ -626,8 +679,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         }
         else if (p_request.getParameter(JobManagementHandler.ASSIGN_PARAM) != null)
         {
-            if ("saveAssign"
-                    .equalsIgnoreCase(p_request.getParameter(JobManagementHandler.ASSIGN_PARAM)))
+            if ("saveAssign".equalsIgnoreCase(p_request
+                    .getParameter(JobManagementHandler.ASSIGN_PARAM)))
             {
                 doSaveAssign(p_request, sessionMgr);
             }
@@ -702,68 +755,6 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             // and not performing an action on a workflow
             return;
         }
-    }
-
-    private void updateWordCounts(final String p_workflowIds)
-    {
-        Runnable runnable = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                try
-                {
-                    List<Long> wfIds = new ArrayList<Long>();
-                    wfIds = UpdateLeverageHelper.getWfIds(p_workflowIds);
-
-                    long jobId = -1;
-                    int wfNumber = wfIds.size();
-                    if (wfNumber > 0)
-                    {
-                        Workflow wf = ServerProxy.getWorkflowManager()
-                                .getWorkflowById(wfIds.get(0));
-                        jobId = wf.getJob().getId();
-                        // Initialize this job's percentage to 0.
-                        updateWordCountsPercentageMap.put(jobId, 0);
-                    }
-
-                    int count = 0;
-                    for (Iterator it = wfIds.iterator(); it.hasNext();)
-                    {
-                        Workflow wf = ServerProxy.getWorkflowManager()
-                                .getWorkflowById((Long) it.next());
-
-                        TranslationMemoryProfile tmProfile = wf.getJob().getL10nProfile()
-                                .getTranslationMemoryProfile();
-                        Vector<String> jobExcludeTuTypes = tmProfile.getJobExcludeTuTypes();
-
-                        StatisticsService.calculateTargetPagesWordCount(wf, jobExcludeTuTypes);
-
-                        List<Workflow> wfList = new ArrayList<Workflow>();
-                        wfList.add(wf);
-                        StatisticsService.calculateWorkflowStatistics(wfList, jobExcludeTuTypes);
-
-                        count++;
-                        updateWordCountsPercentageMap.put(jobId,
-                                Math.round(count * 100 / wfNumber));
-                    }
-                    // Add this to ensure the progressBar will go to end 100.
-                    updateWordCountsPercentageMap.put(jobId, 100);
-                }
-                catch (Exception e)
-                {
-                    throw new EnvoyServletException(e);
-                }
-                finally
-                {
-                    SegmentTuTuvCacheManager.clearCache();
-                }
-            }
-        };
-
-        Thread t = new MultiCompanySupportedThread(runnable);
-        t.setName("Update WordCounts for workflows: " + p_workflowIds);
-        t.start();
     }
 
     private boolean isSameAction(SessionManager p_sessionMgr, HttpServletRequest p_request,
@@ -848,8 +839,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         p_request.setAttribute("isSuperAdmin", isSuperAdmin(p_request));
         p_request.setAttribute("isCustomerAccessGroupInstalled",
                 Modules.isCustomerAccessGroupInstalled());
-        p_request.setAttribute("isVendorManagementInstalled",
-                Modules.isVendorManagementInstalled());
+        p_request
+                .setAttribute("isVendorManagementInstalled", Modules.isVendorManagementInstalled());
         p_request.setAttribute("reimportOption", getReimportOption());
         // control Estimated Review Start column access permission
         p_request.setAttribute("customerAccessGroupIsDell", s_isSpecialCustomer);
@@ -865,6 +856,19 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         {
             e.printStackTrace();
         }
+
+        boolean hasMtProfile = false;
+        for (Workflow wf : job.getWorkflows())
+        {
+            MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileByL10nProfile(
+                    job.getL10nProfile(), wf.getTargetLocale());
+            if (mtProfile != null && mtProfile.isActive())
+            {
+                hasMtProfile = true;
+                break;
+            }
+        }
+        p_request.setAttribute("hasMtProfile", hasMtProfile + "");
     }
 
     private boolean isSuperAdmin(HttpServletRequest p_request)
@@ -889,8 +893,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         return reimportOption;
     }
 
-    private List<JobWorkflowDisplay> getJobWorkflowDisplayList(HttpServletRequest p_request,
-            Job job)
+    private List<JobWorkflowDisplay> getJobWorkflowDisplayList(HttpServletRequest p_request, Job job)
     {
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
@@ -925,8 +928,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                     break;
                 }
             }
-            jobWorkflowDisplay.setTargetLocaleDisplayName(
-                    workflow.getTargetLocale().getDisplayName(uiLocale));
+            jobWorkflowDisplay.setTargetLocaleDisplayName(workflow.getTargetLocale()
+                    .getDisplayName(uiLocale));
             jobWorkflowDisplay.setTotalWordCount(getTotalWordCount(workflow));
             jobWorkflowDisplay.setStateBundleString(bundle.getString(workflow.getState()));
             jobWorkflowDisplay.setIsWorkflowEditable(isWorkflowEditable(perms, workflow));
@@ -1089,8 +1092,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 String taskId = String.valueOf(task.getId());
                 Activity activity = ServerProxy.getJobHandler().getActivityByCompanyId(
                         task.getTaskName(), String.valueOf(task.getCompanyId()));
-                ContainerRole containerRole = ServerProxy.getUserManager()
-                        .getContainerRole(activity, srcLocale, targLocale);
+                ContainerRole containerRole = ServerProxy.getUserManager().getContainerRole(
+                        activity, srcLocale, targLocale);
                 String userParam = p_request.getParameter("users" + taskId);
                 /*
                  * userParam =
@@ -1103,7 +1106,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                  * userInfos[1]=user2Name userInfos[0] = "userId3" and
                  * userInfos[1]=user3Name
                  */
-                if (!StringUtil.isEmpty(userParam))
+                if (userParam != null && userParam != "")
                 {
                     String[] users = userParam.split(":");
                     String[] userInfos = null;
@@ -1130,8 +1133,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
             boolean shouldModifyWf = false;
             Long id = Long.valueOf(wfId);
-            WorkflowInstance wi = ServerProxy.getWorkflowServer()
-                    .getWorkflowInstanceById(id.longValue());
+            WorkflowInstance wi = ServerProxy.getWorkflowServer().getWorkflowInstanceById(
+                    id.longValue());
 
             Vector tasks = wi.getWorkflowInstanceTasks();
 
@@ -1459,8 +1462,10 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
                 copyFilesName = getAllCopiedFilesForWinPE(rootElement);
                 baseConv = sc.getStringParameter(SystemConfigParamNames.WINDOWS_PE_DIR,
-                        CompanyWrapper.SUPER_COMPANY_ID) + File.separator + "winpe" + File.separator
-                        + companyName;
+                        CompanyWrapper.SUPER_COMPANY_ID)
+                        + File.separator
+                        + "winpe"
+                        + File.separator + companyName;
             }
 
             // Copy files to target folder
@@ -1691,5 +1696,177 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             score.setIsActive(false);
             session.update(score);
         }
+    }
+
+    private void leverageMT(final String p_wfIds)
+    {
+        Runnable runnable = new Runnable()
+        {
+            @SuppressWarnings("unchecked")
+            public void run()
+            {
+                try
+                {
+                    List<Long> p_workflowIds = UpdateLeverageHelper.getWfIds(p_wfIds);
+                    Job job = workflowManager.getWorkflowById(p_workflowIds.get(0)).getJob();
+                    int sourcePageNumber = job.getSourcePages(PrimaryFile.EXTRACTED_FILE).size();
+                    long jobId = job.getId();
+                    // Initialize this job's percentage to 0.
+                    leverageMTPercentageMap.put(jobId, 0);
+
+                    List<Long> validWfIds = UpdateLeverageHelper.filterWorkflowsByState(
+                            p_workflowIds, Workflow.READY_TO_BE_DISPATCHED);
+                    if (validWfIds != null && validWfIds.size() > 0)
+                    {
+                        List<Workflow> validWfs = new ArrayList<Workflow>();
+                        for (Long wfId : validWfIds)
+                        {
+                            validWfs.add(workflowManager.getWorkflowById(wfId));
+                        }
+
+                        int count = 0;
+                        // all target page number + workflow number (for
+                        // calculating word counts)
+                        int total = validWfs.size() * sourcePageNumber + validWfs.size();
+                        for (Workflow wf : validWfs)
+                        {
+                            List<TargetPage> targetPages = wf
+                                    .getTargetPages(PrimaryFile.EXTRACTED_FILE);
+                            for (TargetPage tp : targetPages)
+                            {
+                                updateFromMT(wf, tp);// /
+                                count++;
+                                leverageMTPercentageMap.put(jobId, Math.round(count * 100 / total));
+                            }
+                        }
+
+                        // Auto update word counts
+                        TranslationMemoryProfile tmProfile = job.getL10nProfile()
+                                .getTranslationMemoryProfile();
+                        Vector<String> jobExcludeTuTypes = tmProfile.getJobExcludeTuTypes();
+                        List<Workflow> wfList = new ArrayList<Workflow>();
+                        for (Workflow wf : validWfs)
+                        {
+                            StatisticsService.calculateTargetPagesWordCount(wf, jobExcludeTuTypes);
+
+                            wfList.clear();
+                            wfList.add(wf);
+                            StatisticsService
+                                    .calculateWorkflowStatistics(wfList, jobExcludeTuTypes);
+
+                            count++;
+                            leverageMTPercentageMap.put(jobId, Math.round(count * 100 / total));
+                        }
+                    }
+
+                    // Anyway, set this to ensure the process bar will end.
+                    leverageMTPercentageMap.put(jobId, 100);
+                }
+                catch (Exception ex)
+                {
+                    CATEGORY.error(ex);
+                }
+                finally
+                {
+                    CATEGORY.info("Leveraging MT is done for workflows:" + p_wfIds);
+                    HibernateUtil.closeSession();
+                }
+            }
+        };
+
+        // Set the percentage to 0 to ensure previous operation won't impact
+        // this time.
+        Thread t = new MultiCompanySupportedThread(runnable);
+        t.setName("Leverage MT for workflows: " + p_wfIds);
+        t.start();
+    }
+
+    private void updateFromMT(Workflow p_wf, TargetPage p_targetPage) throws Exception
+    {
+        GlobalSightLocale sourceLocale = p_wf.getJob().getSourceLocale();
+        GlobalSightLocale targetLocale = p_wf.getTargetLocale();
+
+        SourcePage p_sourcePage = p_targetPage.getSourcePage();
+        long jobId = p_sourcePage.getJobId();
+
+        // 1. Untranslated source segments
+        Collection<Tuv> untranslatedSrcTuvs = UpdateLeverageHelper.getUntranslatedTuvsForMT(
+                p_targetPage, sourceLocale.getId());
+
+        // 2. Convert all untranslated source TUVs to "BaseTmTuv".
+        List<BaseTmTuv> sourceTuvs = new ArrayList<BaseTmTuv>();
+        for (Tuv srcTuv : untranslatedSrcTuvs)
+        {
+            BaseTmTuv btt = TmUtil.createTmSegment(srcTuv, "0", jobId);
+            sourceTuvs.add(btt);
+        }
+        // 3.Re-save target tuv
+        if (sourceTuvs.size() > 0)
+        {
+            UpdateLeverageHelper.applyMTMatches(p_sourcePage, sourceLocale, targetLocale,
+                    untranslatedSrcTuvs);
+        }
+    }
+
+    private void updateWordCounts(final String p_workflowIds)
+    {
+        Runnable runnable = new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    List<Long> wfIds = new ArrayList<Long>();
+                    wfIds = UpdateLeverageHelper.getWfIds(p_workflowIds);
+
+                    long jobId = -1;
+                    int wfNumber = wfIds.size();
+                    if (wfNumber > 0)
+                    {
+                        Workflow wf = ServerProxy.getWorkflowManager()
+                                .getWorkflowById(wfIds.get(0));
+                        jobId = wf.getJob().getId();
+                        // Initialize this job's percentage to 0.
+                        updateWordCountsPercentageMap.put(jobId, 0);
+                    }
+
+                    int count = 0;
+                    for (Iterator it = wfIds.iterator(); it.hasNext();)
+                    {
+                        Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
+                                (Long) it.next());
+
+                        TranslationMemoryProfile tmProfile = wf.getJob().getL10nProfile()
+                                .getTranslationMemoryProfile();
+                        Vector<String> jobExcludeTuTypes = tmProfile.getJobExcludeTuTypes();
+
+                        StatisticsService.calculateTargetPagesWordCount(wf, jobExcludeTuTypes);
+
+                        List<Workflow> wfList = new ArrayList<Workflow>();
+                        wfList.add(wf);
+                        StatisticsService.calculateWorkflowStatistics(wfList, jobExcludeTuTypes);
+
+                        count++;
+                        updateWordCountsPercentageMap
+                                .put(jobId, Math.round(count * 100 / wfNumber));
+                    }
+                    // Add this to ensure the progressBar will go to end 100.
+                    updateWordCountsPercentageMap.put(jobId, 100);
+                }
+                catch (Exception e)
+                {
+                    throw new EnvoyServletException(e);
+                }
+                finally
+                {
+                    HibernateUtil.closeSession();
+                }
+            }
+        };
+
+        Thread t = new MultiCompanySupportedThread(runnable);
+        t.setName("Update WordCounts for workflows: " + p_workflowIds);
+        t.start();
     }
 }

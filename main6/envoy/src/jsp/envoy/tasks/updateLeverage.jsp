@@ -177,9 +177,9 @@ $(document).ready(function()
     			reApplyChecked = "on";
     		}
 			var reTryChecked = null;
-			if($("#reTryMTID").attr("checked")=="checked"){
-				reTryChecked = "on";
-			}
+//			if($("#reTryMTID").attr("checked")=="checked"){
+//				reTryChecked = "on";
+//			}
     		var penalty = $("#inProgressTmPenaltyID").attr("value");
     		$.get('<%=updateUrl%>',
 				{
@@ -254,8 +254,8 @@ $(document).ready(function()
 	{
 	    var ufj = document.getElementById("updateFromJobCheckBoxID").checked;
 	    var rrt = document.getElementById("reApplyReferenceTmsID").checked;
-	    var rtm	= document.getElementById("reTryMTID").checked;
-	    if (ufj != true && rrt != true && rtm != true) {
+//	    var rtm	= document.getElementById("reTryMTID").checked;
+	    if (ufj != true && rrt != true) {
 	        alert("<%=noOptionSelected%>");
 	        return false;
 	    }
@@ -448,11 +448,13 @@ function helpSwitch()
       <TD style="padding-top: 15px; padding-bottom: 15px"><%=reApplyReferenceTMs%></TD>
       <TD style="padding-top: 15px; padding-bottom: 15px"><input type="checkbox" id="reApplyReferenceTmsID" name="reApplyReferenceTmsName" onclick="" class="standardText" />
     </TR>
-     <TR><TD colspan="2" style="border:solid #ccc;border-width:0 0 1px 0;">&nbsp;</TD></TR>
-       <TR>
+    <!-- 
+    <TR><TD colspan="2" style="border:solid #ccc;border-width:0 0 1px 0;">&nbsp;</TD></TR>
+    <TR>
       <TD style="padding-top: 15px; padding-bottom: 15px"><%=reTryMT%></TD>
       <TD style="padding-top: 15px; padding-bottom: 15px"><input type="checkbox" id="reTryMTID" name="reTryMTName" onclick="" class="standardText" />
     </TR>
+     -->
   </TABLE>
   
   <div id="updateLeverageProgressBar" style="display:none"></div><BR/>

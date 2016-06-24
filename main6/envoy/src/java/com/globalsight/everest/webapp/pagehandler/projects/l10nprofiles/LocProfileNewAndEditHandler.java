@@ -20,7 +20,6 @@
 package com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -389,6 +388,8 @@ public class LocProfileNewAndEditHandler extends PageHandler implements
 
         p_request.setAttribute("AutomaticDispatch",
                 editLocprofile.dispatchIsAutomatic() + "");
+
+        p_request.setAttribute("useMtOnJobCreation", editLocprofile.getUseMtOnJobCreation() + "");
 
         GlobalSightLocale[] targets = editLocprofile.getTargetLocales();
         long[] workflowTemplateId = new long[targets.length];

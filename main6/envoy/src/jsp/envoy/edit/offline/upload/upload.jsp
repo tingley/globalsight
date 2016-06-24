@@ -33,6 +33,8 @@
                 com.globalsight.everest.util.system.SystemConfigParamNames,
 	            com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
 	            com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
+                com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper,
+                com.globalsight.everest.projecthandler.MachineTranslationProfile,
 	            com.globalsight.everest.workflow.ConditionNodeTargetInfo,
 	            com.globalsight.everest.jobhandler.Job,
 	            com.globalsight.everest.company.CompanyWrapper,
@@ -607,6 +609,18 @@ $(document).ready(function(){
                isExportSTF = "true";
            }
         }
+    }
+
+    String labelLeverageMT = bundle.getString("lb_leverage_mt");
+    String leverageMTUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
+        "=leverageMT" + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
+    
+    boolean hasMtProfile = false;
+    MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileByL10nProfile(
+            theJob.getL10nProfile(), workflowImpl.getTargetLocale());
+    if (mtProfile != null && mtProfile.isActive())
+    {
+        hasMtProfile = true;
     }
 %>
 <SCRIPT LANGUAGE="JavaScript">

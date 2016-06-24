@@ -173,6 +173,11 @@ function doUpdateLeverage(urlUpdateLeverage)
 	});
 }
 
+function leverageMT(leverageMTUrl)
+{
+	location.replace(leverageMTUrl);
+}
+
 function doReject(urlSent)
 {
    var rmsg = '<%=bundle.getString("lb_reject_warning_after_accept")%>';
@@ -819,6 +824,11 @@ function doUploadingCheck(urlSent)
 	            <%
 	            if(perms.getPermissionFor(Permission.ACTIVITIES_UPDATE_LEVERAGE)) {%>
 	            	<INPUT TYPE=BUTTON VALUE="<%= labelUpdateLeverage %>" ONCLICK="doUpdateLeverage('<%= updateLeverageUrl %>'); return false;">
+	            <%}%>
+	            <!-- "Leverage MT" button-->
+	            <%
+	            if(hasMtProfile && perms.getPermissionFor(Permission.ACTIVITIES_UPDATE_LEVERAGE)) {%>
+	            	<INPUT TYPE=BUTTON VALUE="<%= labelLeverageMT %>" ONCLICK="leverageMT('<%= leverageMTUrl %>'); return false;">
 	            <%}
 	        }
 	    }

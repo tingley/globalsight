@@ -72,6 +72,7 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     protected int m_priority = -1;
     protected GlobalSightLocale m_sourceLocale = null;
     protected boolean m_autoDispatch = true;
+    protected boolean useMtOnJobCreation = true;
 
     // used to save translation workflow template information
     protected Hashtable<GlobalSightLocale, WorkflowTemplateInfo> workflowTemplateInfoMap = new Hashtable<GlobalSightLocale, WorkflowTemplateInfo>(
@@ -138,6 +139,7 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
         m_description = null;
         m_sourceLocale = null;
         m_autoDispatch = true;
+        useMtOnJobCreation = true;
         workflowTemplateInfoMap = new Hashtable<GlobalSightLocale, WorkflowTemplateInfo>();
         dtpWorkflowTemplateInfoMap = new Hashtable<GlobalSightLocale, WorkflowTemplateInfo>();
         workflowTemplatesSet = new HashSet<WorkflowTemplateInfo>();
@@ -754,6 +756,8 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
                         .toDebugString())
                 + " m_autoDispatch="
                 + new Boolean(m_autoDispatch).toString()
+                + " useMtOnJobCreation="
+                + new Boolean(useMtOnJobCreation).toString()
                 + "\nm_workflowTemplateInfoMap="
                 + (workflowTemplateInfoMap == null ? "null"
                         : workflowTemplateInfoMap.toString())
@@ -1065,6 +1069,16 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     public void setAutoDispatch(boolean dispatch)
     {
         m_autoDispatch = dispatch;
+    }
+
+    public boolean getUseMtOnJobCreation()
+    {
+        return this.useMtOnJobCreation;
+    }
+
+    public void setUseMtOnJobCreation(boolean useMtOnJobCreation)
+    {
+        this.useMtOnJobCreation = useMtOnJobCreation;
     }
 
     public AttributeSet getAttributeSet()

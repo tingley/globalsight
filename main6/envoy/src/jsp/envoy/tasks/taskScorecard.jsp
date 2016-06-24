@@ -47,6 +47,8 @@
       com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler,  
       com.globalsight.everest.webapp.pagehandler.administration.company.Select,    
       com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
+      com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper,
+      com.globalsight.everest.projecthandler.MachineTranslationProfile,
       com.globalsight.everest.qachecks.QACheckerHelper,
       com.globalsight.everest.qachecks.DITAQACheckerHelper,
       com.globalsight.everest.workflow.Activity,
@@ -848,6 +850,19 @@ private static String toggleBgColor(int p_rowNumber)
     List<Select> scorecardCategories = (List<Select>)sessionMgr.getAttribute("scorecardCategories");
     boolean isScored = (Boolean)sessionMgr.getAttribute("isScored");
     int categoryNum = scorecardMap.keySet().size();
+
+    String labelLeverageMT = bundle.getString("lb_leverage_mt");
+
+    String leverageMTUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
+        "=leverageMT" + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
+    
+	boolean hasMtProfile = false;
+    MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileByL10nProfile(
+            theJob.getL10nProfile(), workflowImpl.getTargetLocale());
+    if (mtProfile != null && mtProfile.isActive())
+    {
+        hasMtProfile = true;
+    }
 %>
 <HTML>
 <HEAD>

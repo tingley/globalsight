@@ -172,10 +172,12 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
 					.add(UserParamNames.DOWNLOAD_OPTION_PENALIZED_REFERENCE_TM_PER_DEFAULT);
 
 			// 24
-			DOWNLOAD_OPTIONS
-					.add(UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE);
-			DOWNLOAD_OPTIONS_DEFAULT
-					.add(UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE_DEFAULT);
+            DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE);
+            DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE_DEFAULT);
+            
+            // 25
+            DOWNLOAD_OPTIONS.add(OfflineConstants.POPULATE_MT);
+            DOWNLOAD_OPTIONS_DEFAULT.add("yes");
         }
         catch (Throwable ignore)
         {

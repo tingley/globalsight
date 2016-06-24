@@ -704,7 +704,8 @@ public class TaskListHandler extends PageHandler
                 .get(18);
         String penalizedReferenceTmPre = downloadOfflineFilesOptions.get(21);
         String penalizedReferenceTmPer = downloadOfflineFilesOptions.get(22);
-
+        String populateMT = downloadOfflineFilesOptions.get(24);
+        
         File tmpFile = File.createTempFile("GSDownloadAllOffline", null);
         JobPackageZipper zipper = new JobPackageZipper();
         zipper.createZipFile(tmpFile);
@@ -871,6 +872,7 @@ public class TaskListHandler extends PageHandler
         downloadParams.setAllSTF_tasks(allSTF_tasks);
         downloadParams.setDisplayExactMatch(displayExactMatch);
         downloadParams.setPopulate100("yes".equalsIgnoreCase(populate100));
+        downloadParams.setPopulateMT("yes".equalsIgnoreCase(populateMT));
         downloadParams.setPopulateFuzzy("yes".equalsIgnoreCase(populateFuzzy));
         downloadParams.setPreserveSourceFolder("yes"
                 .equalsIgnoreCase(preserveSourceFolder));

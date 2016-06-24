@@ -374,6 +374,8 @@ public class SendDownloadFileHelper implements WebAppConstants
                 .getParameter(OfflineConstants.CONSOLIDATE_TERM) != null);
         params.setPopulate100(p_request
                 .getParameter(OfflineConstants.POPULATE_100) != null);
+        params.setPopulateMT(p_request
+                .getParameter(OfflineConstants.POPULATE_MT) != null);
         params.setPopulateFuzzy(p_request
                 .getParameter(OfflineConstants.POPULATE_FUZZY) != null);
         params.setDisplayExactMatch(displayExactMatch);

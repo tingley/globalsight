@@ -51,6 +51,8 @@ public class RestApplicationConfig extends Application implements RestConstants
         // version 1.0 resources. 
         resources.add("com.globalsight.restful.version1_0.tm.TmResource");
         resources.add("com.globalsight.restful.version1_0.tmprofile.TmProfileResource");
+        resources.add("com.globalsight.restful.version1_0.job.JobResource");
+        resources.add("com.globalsight.restful.version1_0.fileProfile.FileProfileResource");
     }
 
     // Register your resource classes here

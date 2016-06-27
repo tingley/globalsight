@@ -17,23 +17,21 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import com.globalsight.restful.RestfulApiTestHelper;
+import com.globalsight.restful.login.LoginResourceTester;
 import com.globalsight.restful.util.FileUtil;
 
 public class JobResourceTester extends RestfulApiTestHelper
 {
-	private String userName = null;
-	private String password = null;
+    private String accessToken = null;
 
-	public JobResourceTester(String userName, String password)
-	{
-		this.userName = userName;
-		this.password = password;
-	}
+    public JobResourceTester(String accessToken)
+    {
+        this.accessToken = accessToken;
+    }
 
 	/**
-	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{
-	 * companyName}/jobs/getUniqueJobName?jobName="ABC"
-	 * */
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/jobs/getUniqueJobName?jobName="ABC"
+	 */
 	public String testGetUniqueJobName()
 	{
 		CloseableHttpClient httpClient = getHttpClient();
@@ -44,7 +42,8 @@ public class JobResourceTester extends RestfulApiTestHelper
 			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/getUniqueJobName");
 			// required params
 			url.append("?jobName=").append("ABC");
-			HttpGet httpGet = getHttpGet(url.toString(), userName, password);
+
+			HttpGet httpGet = getHttpGet(url.toString(), accessToken);
 
 			httpResponse = httpClient.execute(httpGet);
 
@@ -62,9 +61,8 @@ public class JobResourceTester extends RestfulApiTestHelper
 	}
 
 	/**
-	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{
-	 * companyName}/jobs/uploadSourceFile"
-	 * */
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/jobs/sourceFiles
+	 */
 	public void testUploadSourceFile()
 	{
 		CloseableHttpClient httpClient = getHttpClient();
@@ -77,7 +75,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 			String fileProfileId = "1065";
 
 			StringBuffer url = new StringBuffer();
-			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/uploadSourceFile");
+			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/sourceFiles");
 			// required params
 			url.append("?jobName=").append(jobName);
 			url.append("&fileProfileId=").append(fileProfileId);
@@ -120,8 +118,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 						.setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
 						.addPart("anyNameIsOkay", byteBody).build();
 
-				HttpPost httpPost = getHttpPost(url.toString(), userName,
-						password);
+				HttpPost httpPost = getHttpPost(url.toString(), accessToken);
 				httpPost.setEntity(multiPartEntity);
 
 				httpResponse = httpClient.execute(httpPost);
@@ -138,9 +135,8 @@ public class JobResourceTester extends RestfulApiTestHelper
 	}
 
 	/**
-	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{
-	 * companyName}/jobs/createJob"
-	 * */
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/jobs/createJob"
+	 */
 	public void testCreateJob()
 	{
 		CloseableHttpClient httpClient = getHttpClient();
@@ -163,7 +159,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 			url.append("&targetLocales=").append(p_targetLocales);
 			url.append("&attributes=").append(p_attributes);
 
-			HttpPost httpPost = getHttpPost(url.toString(), userName, password);
+			HttpPost httpPost = getHttpPost(url.toString(), accessToken);
 			httpResponse = httpClient.execute(httpPost);
 
 			printHttpResponse(httpResponse);
@@ -179,9 +175,8 @@ public class JobResourceTester extends RestfulApiTestHelper
 	}
 
 	/**
-	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{
-	 * companyName}/jobs/{jobId}/status
-	 * */
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/jobs/{jobId}/status
+	 */
 	public String testGetJobStatus()
 	{
 		CloseableHttpClient httpClient = getHttpClient();
@@ -190,7 +185,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 		{
 			StringBuffer url = new StringBuffer();
 			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/1460/status");
-			HttpGet httpGet = getHttpGet(url.toString(), userName, password);
+			HttpGet httpGet = getHttpGet(url.toString(), accessToken);
 
 			httpResponse = httpClient.execute(httpGet);
 
@@ -208,18 +203,17 @@ public class JobResourceTester extends RestfulApiTestHelper
 	}
 
 	/**
-	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{
-	 * companyName}/jobs/{jobId}/getExportedFilesInZip
-	 * */
-	public void testGetJobExportFilesInZip()
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/jobs/{jobIds}/targetFiles
+	 */
+	public void testGetJobExportFiles()
 	{
 		CloseableHttpClient httpClient = getHttpClient();
 		HttpResponse httpResponse = null;
 		try
 		{
 			StringBuffer url = new StringBuffer();
-			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/1460/getExportedFilesInZip");
-			HttpGet httpGet = getHttpGet(url.toString(), userName, password);
+			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/1460/targetFiles");
+			HttpGet httpGet = getHttpGet(url.toString(), accessToken);
 			httpResponse = httpClient.execute(httpGet);
 
 			int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -280,15 +274,19 @@ public class JobResourceTester extends RestfulApiTestHelper
 
 	public static void main(String[] args)
 	{
-		JobResourceTester tester = new JobResourceTester("allieadmin",
-				"password");
+		JobResourceTester tester = null;
 		try
 		{
+            LoginResourceTester loginTester = new LoginResourceTester();
+            String accessToken = loginTester.testLogin("york", "password");
+            System.out.println("access token: " + accessToken);
+
+            tester = new JobResourceTester(accessToken);
 			// tester.testGetUniqueJobName();
 			// tester.testUploadSourceFile();
 			// tester.testCreateJob();
 			// tester.testGetJobStatus();
-			tester.testGetJobExportFilesInZip();
+			tester.testGetJobExportFiles();
 		}
 		finally
 		{

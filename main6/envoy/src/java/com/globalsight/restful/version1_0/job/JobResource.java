@@ -1,8 +1,23 @@
+/**
+ * Copyright 2016 Welocalize, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.
+ *
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package com.globalsight.restful.version1_0.job;
 
-
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -37,7 +52,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.dom4j.Element;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartInput;
 
@@ -83,7 +97,6 @@ import com.globalsight.restful.RestWebServiceUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.Assert;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.IntHolder;
 import com.globalsight.util.RuntimeCache;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -91,7 +104,6 @@ import com.globalsight.util.file.XliffFileUtil;
 import com.globalsight.util.mail.MailerConstants;
 import com.globalsight.util.zip.ZipIt;
 import com.globalsight.webservices.AmbassadorUtil;
-import com.globalsight.webservices.WebServiceException;
 import com.globalsight.webservices.attribute.AddJobAttributeThread;
 import com.globalsight.webservices.attribute.AttributeUtil;
 import com.globalsight.webservices.attribute.Attributes;
@@ -101,21 +113,25 @@ import com.globalsight.webservices.vo.JobFiles;
 @Path("/1.0/companies/{companyName}/jobs")
 public class JobResource extends RestResource
 {
+    private static final Logger logger = Logger.getLogger(JobResource.class);
+
     public static final String GET_UNIQUE_JOB_NAME = "getUniqueJobName";
     public static final String UPLOAD_SOURCE_FILE = "uploadSourceFile";
     public static final String CREATE_JOB = "createJob";
     public static final String GET_JOB_STATUS = "getJobStatus";
-    public static final String GET_JOB_EXPORT_FILE_IN_ZIP = "getJobExportFilesInZip";
+    public static final String GET_JOB_EXPORT_FILES = "getJobExportFiles";
+
     public static String ERROR_JOB_NAME = "You cannot have \\, /, :, ;, *, ?, |, \", &lt;, &gt;, % or &amp; in the Job Name.";
+
     private static Set<Long> cachedJobIds = Collections.synchronizedSet(new HashSet<Long>());
-    private static final Logger logger = Logger.getLogger(JobResource.class);
 
     @GET
     @Path("/getUniqueJobName")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response getUniqueJobName(@HeaderParam("Authorization") List<String> authorization,
-            @PathParam("companyName") String p_companyName, @QueryParam("jobName") String p_jobName)
-            throws RestWebServiceException
+    public Response getUniqueJobName(
+            @HeaderParam("accessToken") List<String> accessToken,
+            @PathParam("companyName") String p_companyName,
+            @QueryParam("jobName") String p_jobName) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         Connection connection = null;
@@ -123,7 +139,7 @@ public class JobResource extends RestResource
         ResultSet results = null;
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
             restArgs.put("companyName", p_companyName);
@@ -149,7 +165,7 @@ public class JobResource extends RestResource
             results = query.executeQuery();
             if (results.next())
             {
-                return getUniqueJobName(authorization, p_companyName, p_jobName);
+                return getUniqueJobName(accessToken, p_companyName, p_jobName);
             }
             else
                 return Response.status(200).entity(p_jobName).build();
@@ -170,13 +186,14 @@ public class JobResource extends RestResource
     }
 
     @POST
-    @Path("/uploadSourceFile")
+    @Path("/sourceFiles")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response uploadSourceFile(@HeaderParam("Authorization") List<String> authorization,
+    public Response uploadSourceFile(
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName,
             @QueryParam("jobName") String p_jobName,
-            @QueryParam("fileProfileId") String p_fileProfileId, MultipartInput p_input)
-            throws RestWebServiceException
+            @QueryParam("fileProfileId") String p_fileProfileId,
+            MultipartInput p_input) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         boolean updateJobStateIfException = true;
@@ -185,7 +202,7 @@ public class JobResource extends RestResource
         User user;
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
@@ -272,16 +289,19 @@ public class JobResource extends RestResource
                 restStart.end();
             }
         }
-        return Response.status(200).entity("File is uploaded successfully. JobId : " + jobId)
+        return Response.status(200).entity("File is uploaded successfully for job: " + jobId)
                 .build();
     }
 
     @POST
     @Path("/createJob")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response createJob(@HeaderParam("Authorization") List<String> authorization,
-            @PathParam("companyName") String p_companyName, @QueryParam("jobId") String p_jobId,
-            @QueryParam("comment") String p_comment, @QueryParam("filePaths") String p_filePaths,
+    public Response createJob(
+            @HeaderParam("accessToken") List<String> accessToken,
+            @PathParam("companyName") String p_companyName,
+            @QueryParam("jobId") String p_jobId,
+            @QueryParam("comment") String p_comment,
+            @QueryParam("filePaths") String p_filePaths,
             @QueryParam("fileProfileIds") String p_fileProfileIds,
             @QueryParam("targetLocales") String p_targetLocales,
             @QueryParam("attributes") String p_attributes) throws RestWebServiceException
@@ -307,8 +327,9 @@ public class JobResource extends RestResource
             ArrayList<String> zipFiles = null;
             long referenceFPId = 0l;
             boolean isWSFlag = true;
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
             User user = ServerProxy.getUserManager().getUserByName(userName);
+
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
             restArgs.put("companyName", p_companyName);
@@ -319,6 +340,7 @@ public class JobResource extends RestResource
             restArgs.put("targetLocales", p_targetLocales);
             restArgs.put("attributes", p_attributes);
             restStart = RestWebServiceLog.start(JobResource.class, CREATE_JOB, restArgs);
+
             checkPermission(userName, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
             Assert.assertIsInteger(p_jobId);
             if (StringUtil.isNotEmpty(p_jobId))
@@ -477,15 +499,16 @@ public class JobResource extends RestResource
             }
         }
 
-        return Response.status(200).entity("Create job success !").build();
+        return Response.status(200).entity("Create job success!").build();
     }
 
     @GET
     @Path("/{jobId}/status")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getJobStatus(@HeaderParam("Authorization") List<String> authorization,
-            @PathParam("companyName") String p_companyName, @PathParam("jobId") String p_jobId)
-            throws RestWebServiceException
+    public Response getJobStatus(
+            @HeaderParam("accessToken") List<String> accessToken,
+            @PathParam("companyName") String p_companyName,
+            @PathParam("jobId") String p_jobId) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         Connection connection = null;
@@ -495,7 +518,7 @@ public class JobResource extends RestResource
         {
             String name = "";
             String status;
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
             restArgs.put("companyName", p_companyName);
@@ -541,23 +564,23 @@ public class JobResource extends RestResource
     }
 
     @GET
-    @Path("/{jobIds}/getExportedFilesInZip")
+    @Path("/{jobIds}/targetFiles")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getJobExportFilesInZip(
-            @HeaderParam("Authorization") List<String> authorization,
-            @PathParam("companyName") String p_companyName, @PathParam("jobIds") String p_jobIds)
-            throws RestWebServiceException
+    public Response getJobExportedFiles(
+            @HeaderParam("accessToken") List<String> accessToken,
+            @PathParam("companyName") String p_companyName,
+            @PathParam("jobIds") String p_jobIds) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
             User user = ServerProxy.getUserManager().getUserByName(userName);
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
             restArgs.put("companyName", p_companyName);
             restArgs.put("jobIds", p_jobIds);
-            restStart = RestWebServiceLog.start(JobResource.class, GET_JOB_EXPORT_FILE_IN_ZIP,
+            restStart = RestWebServiceLog.start(JobResource.class, GET_JOB_EXPORT_FILES,
                     restArgs);
             checkPermission(userName, Permission.JOBS_VIEW);
             checkPermission(userName, Permission.JOBS_EXPORT);
@@ -569,7 +592,7 @@ public class JobResource extends RestResource
             if (p_jobIds == null || p_jobIds.trim() == "")
             {
                 errorMsg = "Job ids can not be empty.";
-                throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILE_IN_ZIP,
+                throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES,
                         errorMsg));
             }
 
@@ -584,7 +607,7 @@ public class JobResource extends RestResource
                 if (job == null)
                 {
                     errorMsg = "Job " + jobId + " does not exist.";
-                    throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILE_IN_ZIP,
+                    throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES,
                             errorMsg));
                 }
 
@@ -594,7 +617,7 @@ public class JobResource extends RestResource
                         && !UserUtil.isSuperPM(user.getUserId()))
                 {
                     errorMsg = "Job " + jobId + " is not from the user's company.";
-                    throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILE_IN_ZIP,
+                    throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES,
                             errorMsg));
                 }
 
@@ -606,7 +629,7 @@ public class JobResource extends RestResource
             {
                 errorMsg = user.getUserId()
                         + " is super PM, but job ids are not from the same company.";
-                throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILE_IN_ZIP,
+                throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES,
                         errorMsg));
             }
 
@@ -661,7 +684,7 @@ public class JobResource extends RestResource
                 catch (Exception e)
                 {
                     logger.error("Error found in getJobExportFilesInZip.", e);
-                    throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILE_IN_ZIP,
+                    throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES,
                             e.getMessage()));
                 }
             }
@@ -690,7 +713,7 @@ public class JobResource extends RestResource
         }
         catch (Exception e)
         {
-            throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILE_IN_ZIP,
+            throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES,
                     e.getMessage()));
         }
         finally
@@ -888,7 +911,7 @@ public class JobResource extends RestResource
         }
         catch (Exception e)
         {
-            throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILE_IN_ZIP,
+            throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES,
                     e.getMessage()));
         }
     }
@@ -1341,41 +1364,6 @@ public class JobResource extends RestResource
         }
     }
 
-    private void writeFile(String path, byte[] bytes, long companyId)
-            throws RestWebServiceException
-    {
-        File newFile = new File(AmbFileStoragePathUtils.getCxeDocDir(companyId), path);
-        newFile.getParentFile().mkdirs();
-        FileOutputStream fos = null;
-
-        try
-        {
-            fos = new FileOutputStream(newFile, true);
-            fos.write(bytes);
-        }
-        catch (Exception e)
-        {
-            logger.error("Could not copy uploaded file to the docs directory.", e);
-            String message = "Could not copy uploaded file to the docs directory." + e.getMessage();
-            throw new RestWebServiceException(makeErrorJson(UPLOAD_SOURCE_FILE, message));
-        }
-        finally
-        {
-            try
-            {
-                if (fos != null)
-                    fos.close();
-            }
-            catch (Exception e)
-            {
-                logger.error("Could not copy uploaded file to the docs directory.", e);
-                String message = "Could not copy uploaded file to the docs directory."
-                        + e.getMessage();
-                throw new RestWebServiceException(makeErrorJson(UPLOAD_SOURCE_FILE, message));
-            }
-        }
-    }
-
     private String getRealPath(String jobId, String filePath, String srcLocale,
             boolean hasWebserviceInPath)
     {
@@ -1474,7 +1462,6 @@ public class JobResource extends RestResource
     }
 
     private String checkIfCreateJobCalled(String methodName, long jobId, String jobName)
-            throws WebServiceException
     {
         if (cachedJobIds.contains(jobId))
         {
@@ -1518,115 +1505,6 @@ public class JobResource extends RestResource
         }
 
         return "The file " + p_filePath + " has no extension.";
-    }
-
-    /**
-     * Validates the segment, and try to repair it if the format is wrong.
-     */
-    @SuppressWarnings("rawtypes")
-    private Element validateSegment(Element p_seg, IntHolder p_x_count) throws Exception
-    {
-        String attr;
-        List elems = p_seg.elements();
-        for (Iterator it = elems.iterator(); it.hasNext();)
-        {
-            Element elem = (Element) it.next();
-            String name = elem.getName();
-
-            if (name.equals("bpt"))
-            {
-                attr = elem.attributeValue("x"); // mandatory only in 1.4
-                if (attr == null || attr.length() == 0)
-                {
-                    elem.addAttribute("x", String.valueOf(p_x_count.inc()));
-                }
-
-                attr = elem.attributeValue("i"); // mandatory
-                if (attr == null || attr.length() == 0)
-                {
-                    throw new Exception("A <bpt> tag is lacking the mandatory i attribute.");
-                }
-
-                attr = elem.attributeValue("type");
-                if (attr == null || attr.length() == 0)
-                {
-                    elem.addAttribute("type", "text");
-                }
-            }
-            else if (name.equals("ept"))
-            {
-                attr = elem.attributeValue("i"); // mandatory
-                if (attr == null || attr.length() == 0)
-                {
-                    throw new Exception("A <ept> tag is lacking the mandatory i attribute.");
-                }
-            }
-            else if (name.equals("it"))
-            {
-                attr = elem.attributeValue("x"); // mandatory only in 1.4
-                if (attr == null || attr.length() == 0)
-                {
-                    elem.addAttribute("x", String.valueOf(p_x_count.inc()));
-                }
-
-                attr = elem.attributeValue("pos"); // mandatory
-                if (attr == null || attr.length() == 0)
-                {
-                    throw new Exception("A <it> tag is lacking the mandatory pos attribute.");
-                }
-
-                attr = elem.attributeValue("type");
-                if (attr == null || attr.length() == 0)
-                {
-                    elem.addAttribute("type", "text");
-                }
-            }
-            else if (name.equals("ph"))
-            {
-                attr = elem.attributeValue("x"); // mandatory only in 1.4
-                if (attr == null || attr.length() == 0)
-                {
-                    elem.addAttribute("x", String.valueOf(p_x_count.inc()));
-                }
-
-                attr = elem.attributeValue("type");
-                if (attr == null || attr.length() == 0)
-                {
-                    elem.addAttribute("type", "text");
-                }
-
-                // GXML doesn't care about assoc, just preserve it.
-                // attr = elem.attributeValue("assoc");
-            }
-            else if (name.equals("ut"))
-            {
-                // TMX level 2 does not allow UT. We can either remove
-                // it, or look inside and guess what it may be.
-                it.remove();
-                continue;
-            }
-
-            // Recurse into any subs.
-            validateSubs(elem, p_x_count);
-        }
-
-        return p_seg;
-    }
-
-    /**
-     * Validates the sub elements inside a TMX tag. This means adding a <sub
-     * locType="..."> attribute.
-     */
-    @SuppressWarnings("rawtypes")
-    private void validateSubs(Element p_elem, IntHolder p_x_count) throws Exception
-    {
-        List subs = p_elem.elements("sub");
-
-        for (int i = 0, max = subs.size(); i < max; i++)
-        {
-            Element sub = (Element) subs.get(i);
-            validateSegment(sub, p_x_count);
-        }
     }
 
     /**
@@ -1726,37 +1604,4 @@ public class JobResource extends RestResource
 
         logger.info(sb.toString());
     }
-
-    // Get file name from content-disposition header info. A sample info is
-    // like:
-    // "form-data; name="attachment"; filename="tm_100_InContext_Fuzzy_NoMatch.xml"
-    private String getFileNameFromHeaderInfo(String contentDisposition)
-    {
-        if (StringUtil.isEmpty(contentDisposition))
-            return null;
-
-        String fileName = null;
-        String[] strs = contentDisposition.split(";");
-        for (String str : strs)
-        {
-            if (str != null && str.trim().startsWith("filename="))
-            {
-                str = str.trim();
-                str = str.substring("filename=".length());
-                if (str.startsWith("\""))
-                {
-                    str = str.substring(1);
-                }
-                if (str.endsWith("\""))
-                {
-                    str = str.substring(0, str.length() - 1);
-                }
-                fileName = str;
-                break;
-            }
-        }
-
-        return fileName;
-    }
-
 }

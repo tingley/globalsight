@@ -1,5 +1,5 @@
 /**
- * Copyright 2009 Welocalize, Inc.
+ * Copyright 2016 Welocalize, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -77,14 +77,14 @@ public class TmProfileResource extends RestResource
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTmProfile(
-            @HeaderParam("Authorization") List<String> authorization,
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName,
             @PathParam("id") long p_tmProfileId) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
@@ -139,13 +139,13 @@ public class TmProfileResource extends RestResource
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllTmProfiles(
-            @HeaderParam("Authorization") List<String> authorization,
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);

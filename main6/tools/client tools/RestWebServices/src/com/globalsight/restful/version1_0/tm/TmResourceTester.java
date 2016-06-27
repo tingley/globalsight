@@ -37,18 +37,17 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import com.globalsight.restful.RestfulApiTestHelper;
+import com.globalsight.restful.login.LoginResourceTester;
 import com.globalsight.restful.util.FileUtil;
 import com.globalsight.restful.util.URLEncoder;
 
 public class TmResourceTester extends RestfulApiTestHelper
 {
-    private String userName = null;
-    private String password = null;
+    private String accessToken = null;
 
-    public TmResourceTester(String userName, String password)
+    public TmResourceTester(String accessToken)
     {
-        this.userName = userName;
-        this.password = password;
+        this.accessToken = accessToken;
     }
 
     /**
@@ -62,7 +61,7 @@ public class TmResourceTester extends RestfulApiTestHelper
         {
             String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms";
 
-            HttpGet httpGet = getHttpGet(url, userName, password);
+            HttpGet httpGet = getHttpGet(url, accessToken);
 
             httpResponse = httpClient.execute(httpGet);
 
@@ -105,7 +104,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             url.append("&sid=").append(sid);
             url.append("&escapeString=").append(escapeString);
 
-            HttpPost httpPost = getHttpPost(url.toString(), userName, password);
+            HttpPost httpPost = getHttpPost(url.toString(), accessToken);
 
             httpResponse = httpClient.execute(httpPost);
 
@@ -133,7 +132,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             long id = 912902;
             String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms/5/tus/" + id;
 
-            HttpGet httpGet = getHttpGet(url, userName, password);
+            HttpGet httpGet = getHttpGet(url, accessToken);
 
             httpResponse = httpClient.execute(httpGet);
 
@@ -173,7 +172,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             url.append("&offset=").append(offset);
             url.append("&targetLocale=").append(targetLocale);
 
-            HttpGet httpGet = getHttpGet(url.toString(), userName, password);
+            HttpGet httpGet = getHttpGet(url.toString(), accessToken);
 
             httpResponse = httpClient.execute(httpGet);
 
@@ -201,7 +200,7 @@ public class TmResourceTester extends RestfulApiTestHelper
         HttpResponse httpResponse = null;
         try
         {
-            HttpPut httpPut = getHttpPut(url, userName, password);
+            HttpPut httpPut = getHttpPut(url, accessToken);
 
             // The TUs that will be edited are from the "tuXml".
             StringEntity reqEntity = new StringEntity(tuXml, "UTF-8");
@@ -234,7 +233,7 @@ public class TmResourceTester extends RestfulApiTestHelper
         HttpResponse httpResponse = null;
         try
         {
-            HttpDelete httpDelete = getHttpDelete(url, userName, password);
+            HttpDelete httpDelete = getHttpDelete(url, accessToken);
 
             httpResponse = httpClient.execute(httpDelete);
 
@@ -309,7 +308,7 @@ public class TmResourceTester extends RestfulApiTestHelper
                         .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
                         .addPart("anyNameIsOkay", byteBody).build();
 
-                HttpPost httpPost = getHttpPost(strUrl, userName, password);
+                HttpPost httpPost = getHttpPost(strUrl, accessToken);
                 httpPost.setEntity(multiPartEntity);
 
                 HttpResponse httpResponse = httpClient.execute(httpPost);
@@ -338,7 +337,7 @@ public class TmResourceTester extends RestfulApiTestHelper
         HttpResponse httpResponse = null;
         try
         {
-            HttpPost httpPost = getHttpPost(url, userName, password);
+            HttpPost httpPost = getHttpPost(url, accessToken);
 
             httpResponse = httpClient.execute(httpPost);
 
@@ -382,7 +381,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             url.append("&projectNames=").append(projectNames);
             url.append("&exportedFileName=").append(exportedFileName);
 
-            HttpGet httpGet = getHttpGet(url.toString(), userName, password);
+            HttpGet httpGet = getHttpGet(url.toString(), accessToken);
 
             httpResponse = httpClient.execute(httpGet);
 
@@ -410,7 +409,7 @@ public class TmResourceTester extends RestfulApiTestHelper
         {
             String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms/4/export/" + identifyKey;
 
-            HttpGet httpGet = getHttpGet(url, userName, password);
+            HttpGet httpGet = getHttpGet(url, accessToken);
 
             httpResponse = httpClient.execute(httpGet);
 
@@ -519,7 +518,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             url.append("&modifyStartDate=").append(modifyStartDate);
             url.append("&modifyFinishDate=").append(modifyFinishDate);
 
-            HttpGet httpGet = getHttpGet(url.toString(), userName, password);
+            HttpGet httpGet = getHttpGet(url.toString(), accessToken);
 
             httpResponse = httpClient.execute(httpGet);
 
@@ -580,7 +579,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             url.append("&targetLocale=").append(targetLocale);
             url.append("&escapeString=").append(escapeString);
 
-            HttpGet httpGet = getHttpGet(url.toString(), userName, password);
+            HttpGet httpGet = getHttpGet(url.toString(), accessToken);
 
             httpResponse = httpClient.execute(httpGet);
 
@@ -598,34 +597,38 @@ public class TmResourceTester extends RestfulApiTestHelper
 
     public static void main(String[] args)
     {
-        TmResourceTester tester = new TmResourceTester("york", "password");
-
+        TmResourceTester tester = null;
         try
         {
+            LoginResourceTester loginTester = new LoginResourceTester();
+            String accessToken = loginTester.testLogin("york", "password");
+            System.out.println("access token: " + accessToken);
+
+            tester = new TmResourceTester(accessToken);
             tester.testGetTms();
 
-//            tester.testCreateTu();
+            tester.testCreateTu();
 
-//            tester.testGetTu();
+            tester.testGetTu();
 
-//            String tuXml = tester.testGetTus();
-//            tester.testEditTus(tuXml);
+            String tuXml = tester.testGetTus();
+            tester.testEditTus(tuXml);
 
-//            tester.testDeleteTus();
+            tester.testDeleteTus();
 
-//            tester.testUploadTmxFile();
-//            tester.testImportTmxFile();
+            tester.testUploadTmxFile();
+            tester.testImportTmxFile();
 
-//            String identifyKey = "199098841";
-//            identifyKey = tester.testExportTM();
-//            if (identifyKey != null)
-//            {
-//                tester.testGetTmExportFile(identifyKey);
-//            }
+            String identifyKey = "199098841";
+            identifyKey = tester.testExportTM();
+            if (identifyKey != null)
+            {
+                tester.testGetTmExportFile(identifyKey);
+            }
 
-//            tester.testFullTextSearch();
+            tester.testFullTextSearch();
 
-//            tester.testLeverageSegment();
+            tester.testLeverageSegment();
         }
         finally
         {

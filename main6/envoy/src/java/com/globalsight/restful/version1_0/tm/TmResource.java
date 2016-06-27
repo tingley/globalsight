@@ -1,5 +1,5 @@
 /**
- * Copyright 2009 Welocalize, Inc.
+ * Copyright 2016 Welocalize, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -216,13 +216,13 @@ public class TmResource extends RestResource
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTms(
-            @HeaderParam("Authorization") List<String> authorization,
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
@@ -393,7 +393,7 @@ public class TmResource extends RestResource
     @POST
     @Path("/{tmId}/tus")
     public Response createTu(
-            @HeaderParam("Authorization") List<String> authorization,
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName,
             @PathParam("tmId") String p_tmId,
             @QueryParam("sourceLocale") String p_sourceLocale,
@@ -406,7 +406,7 @@ public class TmResource extends RestResource
         RestWebServiceLog.Start restStart = null;
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
             String escapeString = checkEscapeString(p_escapeString);
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
@@ -798,7 +798,7 @@ public class TmResource extends RestResource
     @Path("/{tmId}/tus/{id}")
     @Produces(MediaType.APPLICATION_XML)
     public Response getTu(
-            @HeaderParam("Authorization") List<String> authorization,
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName,
             @PathParam("tmId") String p_tmId,
             @PathParam("id") String p_tuId) throws RestWebServiceException
@@ -807,7 +807,7 @@ public class TmResource extends RestResource
         String tuXml = "";
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
@@ -911,7 +911,7 @@ public class TmResource extends RestResource
     @Path("/{tmId}/tus")
     @Produces(MediaType.APPLICATION_XML)
     public Response getTus(
-            @HeaderParam("Authorization") List<String> authorization,
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName,
             @PathParam("tmId") String p_tmId,
             @QueryParam("startId") @DefaultValue("0") String p_startId,
@@ -923,7 +923,7 @@ public class TmResource extends RestResource
         String tuXml = "";
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
@@ -1164,7 +1164,7 @@ public class TmResource extends RestResource
     @Path("/{tmId}/tus")
     @Consumes(MediaType.APPLICATION_XML)
     public Response editTus(
-            @HeaderParam("Authorization") List<String> authorization,
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName,
             @PathParam("tmId") String p_tmId,
             InputStream inputStream) throws RestWebServiceException
@@ -1172,7 +1172,7 @@ public class TmResource extends RestResource
         RestWebServiceLog.Start restStart = null;
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
             String tuXml = IOUtils.toString(inputStream, "UTF-8");
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
@@ -1438,7 +1438,7 @@ public class TmResource extends RestResource
     @DELETE
     @Path("/{tmId}/tus/{ids}")
     public Response deleteTus(
-            @HeaderParam("Authorization") List<String> authorization,
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName,
             @PathParam("tmId") String p_tmId,
             @PathParam("ids") String p_tuIds) throws RestWebServiceException
@@ -1446,7 +1446,7 @@ public class TmResource extends RestResource
         RestWebServiceLog.Start restStart = null;
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
@@ -1580,7 +1580,7 @@ public class TmResource extends RestResource
     @Path("/{tmId}/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response uploadTmxFile(
-            @HeaderParam("Authorization") List<String> authorization,
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName,
             @PathParam("tmId") String p_tmId,
             MultipartInput p_input) throws RestWebServiceException
@@ -1588,7 +1588,7 @@ public class TmResource extends RestResource
         RestWebServiceLog.Start restStart = null;
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
@@ -1641,37 +1641,6 @@ public class TmResource extends RestResource
         return Response.status(200).entity("File is uploaded successfully.").build();
     }
 
-    // Get file name from content-disposition header info. A sample info is like:
-    // "form-data; name="attachment"; filename="tm_100_InContext_Fuzzy_NoMatch.xml"
-    private String getFileNameFromHeaderInfo(String contentDisposition)
-    {
-        if (StringUtil.isEmpty(contentDisposition))
-            return null;
-
-        String fileName = null;
-        String[] strs = contentDisposition.split(";");
-        for (String str : strs)
-        {
-            if (str != null && str.trim().startsWith("filename="))
-            {
-                str = str.trim();
-                str = str.substring("filename=".length());
-                if (str.startsWith("\""))
-                {
-                    str = str.substring(1);
-                }
-                if (str.endsWith("\""))
-                {
-                    str = str.substring(0, str.length() - 1);
-                }
-                fileName = str;
-                break;
-            }
-        }
-
-        return fileName;
-    }
-
     /**
      * Import TM data file into TM. The TM data file is uploaded via "upload" requests.
      * 
@@ -1697,7 +1666,7 @@ public class TmResource extends RestResource
     @POST
     @Path("/{tmId}/import")
     public Response importTmxFile(
-            @HeaderParam("Authorization") List<String> authorization,
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName,
             @PathParam("tmId") String p_tmId,
             @QueryParam("syncMode") String p_syncMode) throws RestWebServiceException
@@ -1705,7 +1674,7 @@ public class TmResource extends RestResource
         RestWebServiceLog.Start restStart = null;
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
@@ -1839,7 +1808,7 @@ public class TmResource extends RestResource
     @GET
     @Path("/{tmId}/export")
     public Response exportTM(
-            @HeaderParam("Authorization") List<String> authorization,
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName,
             @PathParam("tmId") String p_tmId,
             @QueryParam("languages") String p_languages,
@@ -1854,7 +1823,7 @@ public class TmResource extends RestResource
         String identifyKey = null;
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
@@ -2223,7 +2192,7 @@ public class TmResource extends RestResource
     @Path("/{tmId}/export/{identifyKey}")
     @Produces({"application/xml;charset=UTF-8"})
     public Response getTmExportFile(
-            @HeaderParam("Authorization") List<String> authorization,
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName,
             @PathParam("identifyKey") String p_identifyKey)
             throws RestWebServiceException
@@ -2232,7 +2201,7 @@ public class TmResource extends RestResource
 
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
@@ -2340,7 +2309,7 @@ public class TmResource extends RestResource
     @Path("/{tmIds}/fullTextSearch")
     @Produces(MediaType.APPLICATION_XML)
     public Response fullTextSearch(
-            @HeaderParam("Authorization") List<String> authorization,
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName,
             @PathParam("tmIds") String p_tmIds,
             @QueryParam("searchText") String p_searchText,
@@ -2355,7 +2324,7 @@ public class TmResource extends RestResource
         RestWebServiceLog.Start restStart = null;
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
@@ -2664,7 +2633,7 @@ public class TmResource extends RestResource
     @Path("/leverage")
     @Produces(MediaType.APPLICATION_XML)
     public Response leverageSegment(
-            @HeaderParam("Authorization") List<String> authorization,
+            @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName,
             @QueryParam("tmProfileName") String p_tmProfileName,
             @QueryParam("searchText") String p_searchText,
@@ -2675,7 +2644,7 @@ public class TmResource extends RestResource
         RestWebServiceLog.Start restStart = null;
         try
         {
-            String userName = getUserNameFromRequest(authorization);
+            String userName = getUserNameFromSession(accessToken.get(0));
             String escapeString = checkEscapeString(p_escapeString);
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();

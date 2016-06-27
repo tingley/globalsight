@@ -22,16 +22,15 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import com.globalsight.restful.RestfulApiTestHelper;
+import com.globalsight.restful.login.LoginResourceTester;
 
 public class TmProfileResourceTester extends RestfulApiTestHelper
 {
-    private String userName = null;
-    private String password = null;
+    private String accessToken = null;
 
-    public TmProfileResourceTester(String userName, String password)
+    public TmProfileResourceTester(String accessToken)
     {
-        this.userName = userName;
-        this.password = password;
+        this.accessToken = accessToken;
     }
 
     /**
@@ -45,7 +44,7 @@ public class TmProfileResourceTester extends RestfulApiTestHelper
         HttpResponse httpResponse = null;
         try
         {
-            HttpGet httpGet = getHttpGet(url, userName, password);
+            HttpGet httpGet = getHttpGet(url, accessToken);
 
             httpResponse = httpClient.execute(httpGet);
 
@@ -73,7 +72,7 @@ public class TmProfileResourceTester extends RestfulApiTestHelper
         HttpResponse httpResponse = null;
         try
         {
-            HttpGet httpGet = getHttpGet(url, userName, password);
+            HttpGet httpGet = getHttpGet(url, accessToken);
 
             httpResponse = httpClient.execute(httpGet);
 
@@ -91,10 +90,16 @@ public class TmProfileResourceTester extends RestfulApiTestHelper
 
     public static void main(String[] args)
     {
-        TmProfileResourceTester tester = new TmProfileResourceTester("york", "password");
+        TmProfileResourceTester tester = null;
 
         try
         {
+            LoginResourceTester loginTester = new LoginResourceTester();
+            String accessToken = loginTester.testLogin("york", "password");
+            System.out.println("access token: " + accessToken);
+
+            tester = new TmProfileResourceTester(accessToken);
+
             tester.testGetTMProfile();
 
             tester.testGetAllTmProfiles();

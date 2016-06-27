@@ -55,7 +55,7 @@ public class RestWebServiceUtil
         return randomStr;
     }
 
-    public static String getUserNameFromRequest(List<String> authorization)
+    public static String getUserNameFromBasicAuthorizationHeader(List<String> authorization)
             throws RestWebServiceException
     {
         return getUserNamePwdFromRequest(authorization).get(0);

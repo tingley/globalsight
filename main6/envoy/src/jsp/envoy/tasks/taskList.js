@@ -519,12 +519,12 @@ function initButtonActions() {
             	alert("Below activities of jobs need be scored, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isNeedScoreTaskId);
             }
             
-            var reportUploadCheckConfirmInfo = "One or more activities you selected require upload Translation Edit/ Reviewer Comments Report before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
-            var activityCommentUploadCheckConfirmInfo = "One or more activities you selected require upload an activity comment attachment before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
+            var reportUploadCheckConfirmInfo = "One or more activities you selected require uploading Translation Edit/ Reviewer Comments Report before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
+            var activityCommentUploadCheckConfirmInfo = "One or more activities you selected require uploading an activity comment attachment before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
             if(taskIds.indexOf(",") < 0)
             {
-            	reportUploadCheckConfirmInfo = "The activity requires upload Translation Edit/ Reviewer Comments Report before complete it. Are you sure to continue?";
-                activityCommentUploadCheckConfirmInfo = "The activity requires upload an activity comment attachment before complete it. Are you sure to continue?";            	
+            	reportUploadCheckConfirmInfo = "The activity requires uploading Translation Edit/ Reviewer Comments Report before complete it. Are you sure to continue?";
+                activityCommentUploadCheckConfirmInfo = "The activity requires uploading an activity comment attachment before complete it. Are you sure to continue?";            	
             }
             var isFinishUnUploadReportTask = true;
             var isFinishUnUploadActivityCommentTak = true;
@@ -669,12 +669,12 @@ function initButtonActions() {
             	alert("Below activities of jobs need be scored, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isNeedScoreTaskId);
             }
             
-            var reportUploadCheckConfirmInfo = "One or more activities you selected require upload Translation Edit/ Reviewer Comments Report before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
-            var activityCommentUploadCheckConfirmInfo = "One or more activities you selected require upload an activity comment attachment before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
+            var reportUploadCheckConfirmInfo = "One or more activities you selected require uploading Translation Edit/ Reviewer Comments Report before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
+            var activityCommentUploadCheckConfirmInfo = "One or more activities you selected require uploading an activity comment attachment before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
             if(taskIds.indexOf(",") < 0)
             {
-            	reportUploadCheckConfirmInfo = "The activity requires upload Translation Edit/ Reviewer Comments Report before complete it. Are you sure to continue?";
-                activityCommentUploadCheckConfirmInfo = "The activity requires upload an activity comment attachment before complete it. Are you sure to continue?";            	
+            	reportUploadCheckConfirmInfo = "The activity requires uploading Translation Edit/ Reviewer Comments Report before complete it. Are you sure to continue?";
+                activityCommentUploadCheckConfirmInfo = "The activity requires uploading an activity comment attachment before complete it. Are you sure to continue?";            	
             }
 
             var isFinishUnUploadReportTask = true;

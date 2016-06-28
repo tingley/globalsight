@@ -341,7 +341,7 @@ public class Upgrade
             @Override
             public boolean accept(File pathname)
             {
-            	if (!isUpdateJboss())
+            	if (isUpdateJboss())
             		return true;
             	
             	if (getIgnoreFiles().contains(pathname.getName()))

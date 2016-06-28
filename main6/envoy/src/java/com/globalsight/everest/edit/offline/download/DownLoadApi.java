@@ -1417,8 +1417,6 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             DownloadParams p_downloadParams) throws IOException, JobException,
             GeneralException
     {
-        // TODO Well if the fullPlainPath will lost all by customer,the code and
-        // it related should be removed
         String tmxPlainPath = null;
         String tmx14bPath = null;
         String fname = null;
@@ -1524,8 +1522,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             {
                 mode = TmxUtil.TMX_MODE_NON_ICE;
             }
-            
-			if (separateTmFile)
+            else if (separateTmFile)
 			{
 				mode = TmxUtil.TMX_MODE_TM_ONLY;
 			}
@@ -1556,12 +1553,12 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                         TmxUtil.TMX_LEVEL_TWO, convertLF, mode, true);
             }
 
+            // OmegaT
             if (seperateMT && full14bPath != null)
-		   {
+            {
                 // add ice files
                 mode = TmxUtil.TMX_MODE_ICE_ONLY;
-                String icePath = DownloadHelper
-                        .makeTmxAutoParentPath(m_downloadParams);
+                String icePath = DownloadHelper.makeTmxAutoParentPath(m_downloadParams);
                 icePath = icePath + fname;
                 sb = new StringBuffer();
                 sb.append(m_resource.getString("msg_dnld_adding_file"));
@@ -1609,8 +1606,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     {
                         if (j != null)
                         {
-                            j = ServerProxy.getJobHandler().getJobById(
-                                    j.getId());
+                            j = ServerProxy.getJobHandler().getJobById(j.getId());
                         }
                         else
                         {
@@ -1626,8 +1622,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     if (j != null)
                     {
                         Collection<Workflow> wfs = j.getWorkflows();
-                        Iterator<Workflow> wfsIt = (wfs != null) ? wfs
-                                .iterator() : null;
+                        Iterator<Workflow> wfsIt = (wfs != null) ? wfs.iterator() : null;
 
                         while (wfsIt.hasNext())
                         {
@@ -1637,8 +1632,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                             {
                                 if (wf.getUseMT())
                                 {
-                                    mtConfidenceScoreSet.add(wf
-                                            .getMtConfidenceScore());
+                                    mtConfidenceScoreSet.add(wf.getMtConfidenceScore());
                                     useMT = true;
                                 }
                             }
@@ -1646,18 +1640,15 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     }
                 }
 
-                Vector<OfflineSegmentData> allSegments = p_page
-                        .getSegmentList();
+                Vector<OfflineSegmentData> allSegments = p_page.getSegmentList();
                 sb = new StringBuffer();
                 if (useMT)
                 {
                     for (Integer score : mtConfidenceScoreSet)
                     {
-                        String tmxPenalty = DownloadHelper
-                                .makeTmxParentPath(m_downloadParams);
+                        String tmxPenalty = DownloadHelper.makeTmxParentPath(m_downloadParams);
                         mtConfidenceScore = 100 - score;
-                        String penaltyDir = "mt/penalty-" + mtConfidenceScore
-                                + "/";
+                        String penaltyDir = "mt/penalty-" + mtConfidenceScore + "/";
                         tmxPenalty = tmxPenalty + penaltyDir + fname;
 
                         sb.setLength(0);
@@ -1696,7 +1687,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     m_status.speak(m_pageCounter, sb.toString());
                 }
             }
-			if (!isOmegaT && separateTmFile && mtTmxNamePath != null)
+
+            if (!isOmegaT && separateTmFile && mtTmxNamePath != null)
 			{
 				mode = TmxUtil.TMX_MODE_MT_ONLY;
 				sb = new StringBuffer();

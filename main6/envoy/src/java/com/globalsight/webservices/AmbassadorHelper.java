@@ -2714,6 +2714,7 @@ public class AmbassadorHelper extends JsonTypeWebService
 		else if (fileType.equals(OfflineConstants.FORMAT_OMEGAT_VALUE))
 		{
 			downloadParams.setPopulate100(false);
+			downloadParams.setPopulateMT(false);
 			// Penalized Reference TM Options
 			downloadParams.setPenalizedReferenceTmPre(false);
 			downloadParams.setPenalizedReferenceTmPer(false);

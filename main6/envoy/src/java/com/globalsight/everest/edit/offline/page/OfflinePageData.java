@@ -2601,7 +2601,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                                 AmbassadorDwUpExceptionConstants.INVALID_FILE_FORMAT, msg);
                     }
 
-                    // Find the orignal non-ice segment.
+                    // Find the original non-ice segment.
                     if (p_mode == TmxUtil.TMX_MODE_NON_ICE && isContinue(osd))
                     {
                         continue;

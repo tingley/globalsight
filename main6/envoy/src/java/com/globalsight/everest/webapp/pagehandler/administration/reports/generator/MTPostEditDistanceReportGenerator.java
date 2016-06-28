@@ -962,7 +962,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         { "-r", ref, "-h", hyp, "-o", "sum", "-n", "outputFileName", "-N" };
         boolean writeToFile = true;
         double totalTer = new TERtest().calculateTER(args, hypsegs, refsegs, writeToFile);
-        return this.get3DigitFormater().format(totalTer * 100);
+        return this.get2DigitFormater().format(totalTer * 100);
     }
 
     private void setAllCellStyleNull()

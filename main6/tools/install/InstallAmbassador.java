@@ -244,7 +244,6 @@ public class InstallAmbassador extends InstallerFrame implements ActionListener,
 
     private static boolean checkInstallPath()
     {
-        logger.info("Check Install path is starting...");
         File f = new File(".");
         String path = f.getAbsolutePath();
         path = path.replace("\\", "/");
@@ -254,11 +253,9 @@ public class InstallAmbassador extends InstallerFrame implements ActionListener,
         {
             if (ALLOWD_PATH.indexOf(c) < 0)
             {
-                logger.warn("The Install path is wrong.");
                 return false;
             }
         }
-        logger.info("Check Install path is done.");
         return true;
     }
 
@@ -281,7 +278,6 @@ public class InstallAmbassador extends InstallerFrame implements ActionListener,
         }
         catch (IOException ex)
         {
-            logger.error(ex);
             // If the value type properties file is not found, do
             // nothing, and the default type will be used for the
             // parameters.
@@ -391,7 +387,6 @@ public class InstallAmbassador extends InstallerFrame implements ActionListener,
                     // The type of control for this parameter is
                     // not defined, so the default type will be
                     // used.
-                    logger.error(ex);
                     typesList = null;
                 }
             }
@@ -954,7 +949,6 @@ public class InstallAmbassador extends InstallerFrame implements ActionListener,
 
     public static void main(String[] args)
     {
-        logger.info("Installer is starting...");
         Utilities.requireJava14();
 
         boolean useUI = true;

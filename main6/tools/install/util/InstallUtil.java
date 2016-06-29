@@ -35,12 +35,10 @@ import org.apache.log4j.Logger;
 public class InstallUtil
 {
     static Logger logger = Logger.getLogger(InstallUtil.class.getName());
-    private static ResourceBundle RESOURCE_NO_UI = ResourceBundle
-            .getBundle("data/installNoUI");
-    private static ResourceBundle PAGE_PROPERTIES = ResourceBundle
-            .getBundle("data/installOrderUI");
-    private static ResourceBundle RESOURCE_UI = ResourceBundle
-            .getBundle("data/installAmbassador");
+
+    private static ResourceBundle RESOURCE_NO_UI = ResourceBundle.getBundle("data/installNoUI");
+    private static ResourceBundle PAGE_PROPERTIES = ResourceBundle.getBundle("data/installOrderUI");
+    private static ResourceBundle RESOURCE_UI = ResourceBundle.getBundle("data/installAmbassador");
 
     private final static String SETTINGS_FILE_NAME = "installValues.properties";
 
@@ -179,8 +177,7 @@ public class InstallUtil
 
     private static String getString()
     {
-        BufferedReader input = new BufferedReader(new InputStreamReader(
-                System.in));
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         String value = "";
         try
         {
@@ -230,8 +227,7 @@ public class InstallUtil
                 List<File> files = getSettingsFile(file);
                 if (files.size() == 0)
                 {
-                    logger.info(RESOURCE_NO_UI
-                            .getString(ERROR_SEARCH_FILE_PATH));
+                    logger.info(RESOURCE_NO_UI.getString(ERROR_SEARCH_FILE_PATH));
                 }
                 else
                 {
@@ -240,16 +236,14 @@ public class InstallUtil
                         for (int i = 0; i < files.size(); i++)
                         {
                             File f = (File) files.get(i);
-                            logger.info("    " + (i + 1) + ". "
-                                    + f.getAbsolutePath());
+                            logger.info("    " + (i + 1) + ". " + f.getAbsolutePath());
                         }
 
                         int n = -1;
 
                         while (true)
                         {
-                            logger.info(RESOURCE_NO_UI
-                                    .getString(SELECT_SETTING_FILE));
+                            logger.info(RESOURCE_NO_UI.getString(SELECT_SETTING_FILE));
                             String select = getString();
                             if (select.length() == 0)
                             {
@@ -270,12 +264,10 @@ public class InstallUtil
                                 return (File) files.get(n - 1);
                             }
 
-                            String message = RESOURCE_NO_UI
-                                    .getString(ERROR_SELECT);
+                            String message = RESOURCE_NO_UI.getString(ERROR_SELECT);
                             StringBuffer arguments = new StringBuffer("1");
                             arguments.append(" ~ " + files.size());
-                            message = MessageFormat.format(message, arguments
-                                    .toString());
+                            message = MessageFormat.format(message, arguments.toString());
                             logger.info(message);
                         }
 
@@ -298,8 +290,7 @@ public class InstallUtil
         public boolean accept(File pathname)
         {
             // TODO Auto-generated method stub
-            if (pathname.isFile()
-                    && pathname.getName().equals(SETTINGS_FILE_NAME)
+            if (pathname.isFile() && pathname.getName().equals(SETTINGS_FILE_NAME)
                     || !pathname.isFile())
             {
                 return true;

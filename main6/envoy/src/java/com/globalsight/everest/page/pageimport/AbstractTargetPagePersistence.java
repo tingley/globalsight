@@ -280,7 +280,9 @@ public abstract class AbstractTargetPagePersistence implements
             }
 
             /****** Priority 3 : Handle MT hitting ******/
-            if (mtProfile != null && mtProfile.isActive())
+            boolean useMtOnJobCreation = p_sourcePage.getRequest().getL10nProfile()
+                    .getUseMtOnJobCreation();
+            if (mtProfile != null && mtProfile.isActive() && useMtOnJobCreation)
             {
                 String mtEngine = mtProfile.getMtEngine();
                 machineTranslator = MTHelper.initMachineTranslator(mtEngine);

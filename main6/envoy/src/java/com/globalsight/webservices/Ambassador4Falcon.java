@@ -335,21 +335,21 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *            -- flag to decide if include MT'd word counts.
      * @return String in JSON. A sample is like:
      *         [{"total":236,"85-94%":0,"jobId":39,"filePath":
-     *         "en_US\\39\\global","MTConfidenceScore":100,"inContextMatches":0,
+     *         "en_US\\39\\global","MTThresholdLevel":100,"inContextMatches":0,
      *         "75-84%":0,"95-99%":0,"jobName":"mumt_22759766","lang":"fr_FR",
-     *         "MT":0,"repetitions":0, "noMatch":0,"projectDescription":"com1",
+     *         "machineTranslated":0,"repetitions":0, "noMatch":0,"projectDescription":"com1",
      *         "creationDate ":"2013-11-01 11:48:20"
      *         ,"fileName":"Welocalize_Company.html","100%Matches":236},
      *         {"total":236,"85-94%":0,"jobId":39,"filePath":"en_US\\39\\global"
-     *         ,"MTConfidenceScore":100,"inContextMatches":0,"75-84%":0,"95-99%"
-     *         :0,"jobName":"mumt_22759766","lang":"de_DE","MT":0,"repetitions":
+     *         ,"MTThresholdLevel":100,"inContextMatches":0,"75-84%":0,"95-99%"
+     *         :0,"jobName":"mumt_22759766","lang":"de_DE","machineTranslated":0,"repetitions":
      *         0, "noMatch":236,"projectDescription":"com1","creationDate ":
      *         "2013-11-01 11:48:20"
      *         ,"fileName":"Welocalize_Company.html","100%Matches":0},
      *         {"total":236,"85-94%":13,"jobId":38,"filePath":
-     *         "en_US\\38\\global","MTConfidenceScore":100,"inContextMatches":53
+     *         "en_US\\38\\global","MTThresholdLevel":100,"inContextMatches":53
      *         ,"75-84%":13,"95-99%":30,"jobName":"mty_826004265","lang":"fr_FR"
-     *         ,"MT":0,"repetitions":0,
+     *         ,"machineTranslated":0,"repetitions":0,
      *         "noMatch":52,"projectDescription":"Template","creationDate ":
      *         "2013-11-01 11:41:14"
      *         ,"fileName":"Welocalize_Company.html","100%Matches":75}]
@@ -404,7 +404,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
                     String createDate = dateFormat.format(job.getCreateDate());
                     for (Workflow p_workflow : job.getWorkflows())
                     {
-                        int mtConfidenceScore = p_workflow.getMtConfidenceScore();
+                        int mtThreshold = p_workflow.getMtConfidenceScore();
                         String lang = p_workflow.getTargetLocale().toString();
                         for (TargetPage tg : p_workflow.getTargetPages())
                         {
@@ -417,7 +417,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
                             jsonObj.put("lang", lang);
                             try
                             {
-                                addWordCountForJson(tg, jsonObj, threshold, mtConfidenceScore,
+                                addWordCountForJson(tg, jsonObj, threshold, mtThreshold,
                                         p_includeMTData);
                             }
                             catch (Exception e)
@@ -983,7 +983,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
     }
 
     private int addWordCountForJson(TargetPage tg, JSONObject jsonObj, int threshold,
-            int mtConfidenceScore, boolean includeMTData) throws Exception
+            int mtThreshold, boolean includeMTData) throws Exception
     {
         boolean isInContextMatch = PageHandler
                 .isInContextMatch(tg.getSourcePage().getRequest().getJob());
@@ -1025,34 +1025,42 @@ public class Ambassador4Falcon extends JsonTypeWebService
         // and MT confidence score.
         if (includeMTData)
         {
-            if (mtConfidenceScore == 100)
-            {
-                _100MatchWordCount = _100MatchWordCount - mtExactMatchWordCount;
-            }
-            else if (mtConfidenceScore < 100 && mtConfidenceScore >= threshold)
-            {
-                if (mtConfidenceScore >= 95)
-                {
-                    hiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 95 && mtConfidenceScore >= 85)
-                {
-                    medHiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 85 && mtConfidenceScore >= 75)
-                {
-                    medFuzzyWordCount -= mtFuzzyNoMatchWordCount;
-                }
-                else if (mtConfidenceScore < 75)
-                {
-                    noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
-                }
-                repetitionsWordCount -= mtRepetitionsWordCount;
-            }
-            else if (mtConfidenceScore < threshold)
+            if (tg.getWorkflowInstance().getIsSinceVersion87())
             {
                 noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
                 repetitionsWordCount -= mtRepetitionsWordCount;
+            }
+            else
+            {
+                if (mtThreshold == 100)
+                {
+                    _100MatchWordCount = _100MatchWordCount - mtExactMatchWordCount;
+                }
+                else if (mtThreshold < 100 && mtThreshold >= threshold)
+                {
+                    if (mtThreshold >= 95)
+                    {
+                        hiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
+                    }
+                    else if (mtThreshold < 95 && mtThreshold >= 85)
+                    {
+                        medHiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
+                    }
+                    else if (mtThreshold < 85 && mtThreshold >= 75)
+                    {
+                        medFuzzyWordCount -= mtFuzzyNoMatchWordCount;
+                    }
+                    else if (mtThreshold < 75)
+                    {
+                        noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+                    }
+                    repetitionsWordCount -= mtRepetitionsWordCount;
+                }
+                else if (mtThreshold < threshold)
+                {
+                    noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
+                    repetitionsWordCount -= mtRepetitionsWordCount;
+                }
             }
         }
 
@@ -1080,14 +1088,14 @@ public class Ambassador4Falcon extends JsonTypeWebService
 
         if (includeMTData)
         {
-            jsonObj.put("MT", mtTotalWordCount);
+            jsonObj.put("machineTranslated", mtTotalWordCount);
         }
 
         jsonObj.put("total", totalWords);
 
         if (includeMTData)
         {
-            jsonObj.put("MTConfidenceScore", mtConfidenceScore);
+            jsonObj.put("MTThresholdLevel", mtThreshold);
         }
 
         return totalWords;

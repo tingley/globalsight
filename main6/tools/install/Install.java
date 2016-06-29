@@ -397,11 +397,12 @@ public class Install extends installer.EventBroadcaster
             pageName.append(pageNum);
             pageName.append(")");
         }
-        logger.info(pageName);
+        System.out.print(pageName);
         for (int i = 0; i < WIDTH - pageName.length() - 2; i++)
         {
-            logger.info("-");
+            System.out.print("-");
         }
+        System.out.println("\n");
 
         for (int i = min; i < max; i++)
         {
@@ -419,18 +420,19 @@ public class Install extends installer.EventBroadcaster
             logger.info(i + 1 + " : " + option.getDesplayValue() + " = " + value);
         }
 
-        logger.info("");
+        System.out.println("");
         for (int i = 0; i < actions.size(); i++)
         {
             Action action = (Action) actions.get(i);
-
-            logger.info(action.toString());
+            System.out.print(action.toString());
         }
 
+        System.out.println("\n");
         for (int i = 0; i < WIDTH; i++)
         {
-            logger.info("-");
+            System.out.print("-");
         }
+        System.out.println();
     }
 
     private void loadProperties() throws Exception
@@ -446,6 +448,7 @@ public class Install extends installer.EventBroadcaster
     void installSystem4() throws Exception
     {
         // boolean modifySystemParameterTable = false;
+        System.out.println("\n");
 
         if (!determineOperatingSystem())
         {
@@ -464,11 +467,12 @@ public class Install extends installer.EventBroadcaster
     {
         clear();
 
-        logger.info("\n-- " + TITLE + " ");
+        System.out.print("\n-- " + TITLE + " ");
         for (int i = 0; i < WIDTH - TITLE.length() - 4; i++)
         {
-            logger.info("-");
+            System.out.print("-");
         }
+        System.out.println("\n");
 
         List<Action> actions = new ArrayList<Action>();
 
@@ -483,10 +487,12 @@ public class Install extends installer.EventBroadcaster
             logger.info(action.toString());
         }
 
+        System.out.println("\n");
         for (int i = 0; i < WIDTH; i++)
         {
-            logger.info("-");
+            System.out.print("-");
         }
+        System.out.println();
 
         int inputValue = InstallUtil.getSelection(0, actions);
         for (int i = 0; i < actions.size(); i++)
@@ -1078,20 +1084,11 @@ public class Install extends installer.EventBroadcaster
     {
         m_configFileList = new Hashtable<String, String>();
 
-        String choice = SERVER_JBOSS;
-
-        if (SERVER_JBOSS.equals(choice))
-        {
-            // standalone.xml
-            m_configFileList.put(concatPath(GS_HOME, "jboss/util/standalone.xml.template"),
-                    concatPath(GS_HOME, "jboss/server/standalone/configuration/standalone.xml"));
-            if (m_operatingSystem == OS_LINUX)
-            {
-                // service.sh
-                m_configFileList.put(concatPath(JBOSS_UTIL_BIN, "service.sh.template"),
-                        concatPath(JBOSS_UTIL_BIN, "service.sh"));
-            }
-        }
+        m_configFileList.put(concatPath(GS_HOME, "jboss/util/standalone.xml.template"),
+                concatPath(GS_HOME, "jboss/server/standalone/configuration/standalone.xml"));
+        
+        m_configFileList.put(concatPath(JBOSS_UTIL_BIN, "service.sh.template"),
+                concatPath(JBOSS_UTIL_BIN, "service.sh"));
 
         // Process files in the deployment directory
         m_configFileList.put(concatPath(DIR_EAR, "lib/classes/hibernate-jbpm.cfg.xml.template"),

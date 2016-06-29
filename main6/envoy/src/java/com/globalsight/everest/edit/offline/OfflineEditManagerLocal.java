@@ -2154,6 +2154,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             String wordCountForDownload = downloadOfflineFilesOptions.get(20);
             String penalizedReferenceTmPre = downloadOfflineFilesOptions.get(21);
             String penalizedReferenceTmPer = downloadOfflineFilesOptions.get(22);
+            String populateMT = downloadOfflineFilesOptions.get(24);
 
             List<Long> pageIdList = new ArrayList<Long>();
             List<String> pageNameList = new ArrayList<String>();
@@ -2201,6 +2202,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             downloadParams.setPopulate100("yes".equalsIgnoreCase(populate100));
             downloadParams.setPopulateFuzzy("yes".equalsIgnoreCase(populateFuzzy));
             downloadParams.setPreserveSourceFolder("yes".equalsIgnoreCase(preserveSourceFolder));
+            downloadParams.setPopulateMT("yes".equalsIgnoreCase(populateMT));
             downloadParams.setConsolidateFileType(consolidateFileType);
             downloadParams.setWordCountForDownload(Integer.parseInt(wordCountForDownload));
             downloadParams.setIncludeXmlNodeContextInformation(

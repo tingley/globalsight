@@ -39,7 +39,9 @@
             com.globalsight.everest.webapp.pagehandler.offline.download.DownloadPageHandler,
             com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,
             com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
-            com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler, 
+            com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler,
+            com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper,
+            com.globalsight.everest.projecthandler.MachineTranslationProfile,
             com.globalsight.everest.util.system.SystemConfigParamNames,
             com.globalsight.everest.workflowmanager.Workflow,
             com.globalsight.util.AmbFileStoragePathUtils,
@@ -710,6 +712,18 @@
            }
         }
     }
+
+    String labelLeverageMT = bundle.getString("lb_leverage_mt");
+    String leverageMTUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
+        "=leverageMT" + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
+    
+    boolean hasMtProfile = false;
+    MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileByL10nProfile(
+            theJob.getL10nProfile(), workflowImpl.getTargetLocale());
+    if (mtProfile != null && mtProfile.isActive())
+    {
+        hasMtProfile = true;
+    }
 %>
 <HTML>
 <!-- This JSP is: /envoy/edit/offline/download/download.jsp -->
@@ -1331,7 +1345,7 @@ $(document).ready(function(){
 			<!-- GBS-3831 -->
 			<TR>
               <TD></TD>
-			  <TD id="separateTMfileTD"><SPAN CLASS="standardText tmxTypeSelector"><input type="checkbox" id="separateTMfile" name="<%=UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE %>"/><%=bundle.getString("lb_mt_matches_into_separate_tm_file")%></SPAN></TD>
+			  <TD id="separateTMfileTD"><SPAN CLASS="standardText tmxTypeSelector"><input type="checkbox" id="separateTMfile" name="<%=UserParamNames.DOWNLOAD_OPTION_SEPARATE_TM_FILE %>"/><%=bundle.getString("lb_include_mt_matches_as_separate_file")%></SPAN></TD>
 			</TR>
 			
 			<TR id="penalizedReferenceTm">
@@ -1378,6 +1392,12 @@ $(document).ready(function(){
                 <TD><SPAN CLASS="standardText">
                 <input id="populate100CheckBox" type="checkbox" name="<%=OfflineConstants.POPULATE_100%>" checked="checked" value="true"/></SPAN>
                 </TD>
+            </TR>
+            <TR id="populatemt" class="formatAcces">
+                <TD><SPAN CLASS="standardText"><%=bundle.getString("lb_populate_mt_target_segment") %></SPAN></TD>
+                <TD><SPAN CLASS="standardText">
+                <input id="populatemtCheckBox" type="checkbox" name="<%=OfflineConstants.POPULATE_MT%>" checked="checked" value="true"/></SPAN>
+            	</TD>
             </TR>
              <TR id="populatefuzzy" class="formatAcces">
                 <TD><SPAN CLASS="standardText"><%=bundle.getString("lb_populate_fuzzy_target_segment") %></SPAN></TD>

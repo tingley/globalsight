@@ -26,6 +26,7 @@ import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +38,7 @@ import java.util.Vector;
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -56,6 +58,7 @@ import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
+import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.CostCalculator;
 import com.globalsight.everest.costing.CostingEngineLocal;
@@ -70,6 +73,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.Page;
 import com.globalsight.everest.page.PagePersistenceAccessor;
 import com.globalsight.everest.page.PageState;
+import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportHelper;
@@ -83,6 +87,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskImpl;
+import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -101,6 +106,8 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.ling.tm2.BaseTmTuv;
+import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
@@ -110,7 +117,6 @@ import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.zip.ZipIt;
 
-@SuppressWarnings("deprecation")
 public class TaskDetailHandler extends PageHandler
 {
     private static final Logger CATEGORY = Logger.getLogger(TaskDetailHandler.class);
@@ -126,6 +132,12 @@ public class TaskDetailHandler extends PageHandler
     protected static boolean s_isRevenueEnabled = false;
     protected static boolean s_isParagraphEditorEnabled = false;
 
+    /**
+     * Map<Long, Long>: taskID:percentage
+     */
+    private static Map<Long, Integer> leverageMTPercentageMap = Collections
+            .synchronizedMap(new HashMap<Long, Integer>());
+
     static
     {
         try
@@ -138,8 +150,7 @@ public class TaskDetailHandler extends PageHandler
         }
         catch (Throwable e)
         {
-            CATEGORY.error("TaskDetailHandler: Problem getting costing parameter from database ",
-                    e);
+            CATEGORY.error("TaskDetailHandler: Problem getting costing parameter from database ", e);
         }
     }
 
@@ -400,6 +411,20 @@ public class TaskDetailHandler extends PageHandler
             sessionMgr.setAttribute("scorecard", scorecardMap);
             sessionMgr.setAttribute("isScored", isScored);
             sessionMgr.setAttribute("scorecardComment", scorecardComment);
+        }
+        else if ("leverageMT".equals(action))
+        {
+            String taskIdParam = p_request.getParameter(TASK_ID);
+            long taskId = TaskHelper.getLong(taskIdParam);
+            leverageMT(taskId);
+            p_request.setAttribute("isLeveragingMT", "true");
+        }
+        else if ("getLeverageMTPercentage".equals(action))
+        {
+            String taskIdParam = p_request.getParameter(TASK_ID);
+            long taskId = TaskHelper.getLong(taskIdParam);
+            getLeverageMTPercentage(p_response, taskId);
+            return;
         }
 
         // saveComment
@@ -1472,4 +1497,108 @@ public class TaskDetailHandler extends PageHandler
         return isScored;
     }
 
+    private void leverageMT(final long taskId)
+    {
+        Runnable runnable = new Runnable()
+        {
+            @SuppressWarnings("unchecked")
+            public void run()
+            {
+                try
+                {
+                    Task task = (Task) HibernateUtil.get(TaskImpl.class, taskId);
+                    if (task == null)
+                        return;
+
+                    Workflow wf = task.getWorkflow();
+                    if (!Workflow.DISPATCHED.equals(wf.getState()))
+                        return;
+
+                    Job job = wf.getJob();
+                    int sourcePageNumber = job.getSourcePages(PrimaryFile.EXTRACTED_FILE).size();
+                    int total = sourcePageNumber;
+                    // Initialize this task's percentage to 0.
+                    leverageMTPercentageMap.put(task.getId(), 0);
+
+                    int count = 0;
+                    List<TargetPage> targetPages = wf.getTargetPages(PrimaryFile.EXTRACTED_FILE);
+                    for (TargetPage tp : targetPages)
+                    {
+                        updateFromMT(wf, tp);
+                        count++;
+                        leverageMTPercentageMap.put(task.getId(), Math.round(count * 100 / total));
+                    }
+
+                    // Anyway, set this to ensure the process bar will end.
+                    leverageMTPercentageMap.put(task.getId(), 100);
+                }
+                catch (Exception ex)
+                {
+                    CATEGORY.error(ex);
+                }
+                finally
+                {
+                    CATEGORY.info("Leveraging MT is done for task:" + taskId);
+                    HibernateUtil.closeSession();
+                }
+            }
+        };
+
+        // Set the percentage to 0 to ensure previous operation won't impact
+        // this time.
+        leverageMTPercentageMap.put(taskId, 0);
+        Thread t = new MultiCompanySupportedThread(runnable);
+        t.setName("Leverage MT for task: " + taskId);
+        t.start();
+    }
+
+    private void updateFromMT(Workflow p_wf, TargetPage p_targetPage) throws Exception
+    {
+        GlobalSightLocale sourceLocale = p_wf.getJob().getSourceLocale();
+        GlobalSightLocale targetLocale = p_wf.getTargetLocale();
+
+        SourcePage p_sourcePage = p_targetPage.getSourcePage();
+        long jobId = p_sourcePage.getJobId();
+
+        // 1. Untranslated source segments
+        Collection<Tuv> untranslatedSrcTuvs = UpdateLeverageHelper.getUntranslatedTuvsForMT(
+                p_targetPage, sourceLocale.getId());
+
+        // 2. Convert all untranslated source TUVs to "BaseTmTuv".
+        List<BaseTmTuv> sourceTuvs = new ArrayList<BaseTmTuv>();
+        for (Tuv srcTuv : untranslatedSrcTuvs)
+        {
+            BaseTmTuv btt = TmUtil.createTmSegment(srcTuv, "0", jobId);
+            sourceTuvs.add(btt);
+        }
+        // 3.Re-save target tuv
+        if (sourceTuvs.size() > 0)
+        {
+            UpdateLeverageHelper.applyMTMatches(p_sourcePage, sourceLocale, targetLocale,
+                    untranslatedSrcTuvs);
+        }
+    }
+
+    private void getLeverageMTPercentage(HttpServletResponse p_response, long p_taskId)
+            throws IOException
+    {
+        ServletOutputStream out = p_response.getOutputStream();
+        try
+        {
+            p_response.setContentType("text/plain");
+            out = p_response.getOutputStream();
+            StringBuffer sb = new StringBuffer();
+            sb.append("{\"leverageMTPercentage\":");
+            sb.append(leverageMTPercentageMap.get(p_taskId)).append("}");
+            out.write(sb.toString().getBytes("UTF-8"));
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error(e);
+        }
+        finally
+        {
+            out.close();
+        }
+    }
 }

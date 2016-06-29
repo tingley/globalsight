@@ -30,6 +30,8 @@
                 com.globalsight.everest.servlet.util.SessionManager,
                 com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
                 com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
+                com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper,
+                com.globalsight.everest.projecthandler.MachineTranslationProfile,
                 com.globalsight.everest.workflow.ConditionNodeTargetInfo,
                 com.globalsight.everest.page.TargetPage,
                 com.globalsight.everest.util.system.SystemConfigParamNames,
@@ -499,6 +501,18 @@
 
     String labelReportQAChecks = bundle.getString("lb_activity_qa_checks");
     String regenerateReportConfirm = bundle.getString("lb_run_dita_qa_checks_generate_report_confirm");
+
+    String labelLeverageMT = bundle.getString("lb_leverage_mt");
+    String leverageMTUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
+        "=leverageMT" + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
+    
+    boolean hasMtProfile = false;
+    MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileByL10nProfile(
+            theJob.getL10nProfile(), workflowImpl.getTargetLocale());
+    if (mtProfile != null && mtProfile.isActive())
+    {
+        hasMtProfile = true;
+    }
 %>
 <HTML>
 <HEAD>

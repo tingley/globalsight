@@ -19288,7 +19288,7 @@ public class Ambassador extends AbstractWebService
         boolean flag = false;
         for (Workflow wf : wfs)
         {
-            flag = (wf.getIsSinceVersion87() && wf.getMtTotalWordCount() > 0);
+            flag = wf.getIsSinceVersion87();
             if (flag)
             {
                 break;

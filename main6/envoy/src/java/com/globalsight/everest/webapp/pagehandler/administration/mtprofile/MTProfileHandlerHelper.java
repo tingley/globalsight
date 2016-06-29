@@ -79,6 +79,18 @@ public class MTProfileHandlerHelper
                 workflowTemplateInfo.getId());
     }
 
+    public static MachineTranslationProfile getMtProfileByL10nProfile(
+            L10nProfile l10nProfile, GlobalSightLocale p_targetLocale)
+    {
+        WorkflowTemplateInfo workflowTemplateInfo = l10nProfile
+                .getWorkflowTemplateInfo(p_targetLocale);
+        if (workflowTemplateInfo.getTargetLocale().getId() != p_targetLocale.getId())
+        {
+            return null;
+        }
+        return getMTProfileByRelation(l10nProfile.getId(), workflowTemplateInfo.getId());
+    }
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static Collection<MachineTranslationProfile> getAllMTProfiles(
             String condition) throws RemoteException, ProjectHandlerException

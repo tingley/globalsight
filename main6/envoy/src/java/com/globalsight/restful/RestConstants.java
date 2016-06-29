@@ -18,12 +18,11 @@ package com.globalsight.restful;
 
 public interface RestConstants
 {
-    // API version ID
-    public static final String VERSION_ID = "versionId";
-
     public static final String COMPANY_NAME = "companyName";
 
     public static final String TM_ID = "tmId";
 
     public static final String VERSION_1_0 = "1.0";
+
+    public static final String GLOBALSIGHT_ACCESS_TOKEN = "accessToken";
 }

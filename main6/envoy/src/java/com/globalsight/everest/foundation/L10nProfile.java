@@ -345,4 +345,7 @@ public interface L10nProfile
     
     public long getWfStatePostId();
     public void setWfStatePostId(long p_wfStatePostId);
+
+    public boolean getUseMtOnJobCreation();
+    public void setUseMtOnJobCreation(boolean useMtOnJobCreation);
 }

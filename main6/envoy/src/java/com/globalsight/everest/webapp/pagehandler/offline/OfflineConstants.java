@@ -134,6 +134,7 @@ public interface OfflineConstants
 
     String POPULATE_100 = "populate100";
     String POPULATE_FUZZY = "populatefuzzy";
+    String POPULATE_MT = "populatemt";
 
     String NEED_CONSOLIDATE = "needConsolidate";
     String CONSOLIDATE_FILE_TYPE = "consolidateFileType";

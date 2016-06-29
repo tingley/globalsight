@@ -6652,6 +6652,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 	private String getNewSegement(String segment, String searchText,
 			String locale)
 	{
+	    if(StringUtil.isEmptyAndNull(searchText))
+	        return segment;
+	    
 		String beginSpan = "<span class=\"editorSegmentInternal\">";
 		String endSpan = "</span>";
 		if (segment.contains(beginSpan) && segment.contains(endSpan))

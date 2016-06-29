@@ -45,12 +45,16 @@ public class RestApplicationConfig extends Application implements RestConstants
     // All implemented resources are registered here...
     static
     {
+        // Use resources in "RestResources.properties" prior
         loadResourceProperties();
 
         // If no "RestResources.properties", use this.
-        // version 1.0 resources. 
+        resources.add("com.globalsight.restful.login.LoginResource");
+        // version 1.0 resources.
         resources.add("com.globalsight.restful.version1_0.tm.TmResource");
         resources.add("com.globalsight.restful.version1_0.tmprofile.TmProfileResource");
+        resources.add("com.globalsight.restful.version1_0.job.JobResource");
+        resources.add("com.globalsight.restful.version1_0.fileProfile.FileProfileResource");
     }
 
     // Register your resource classes here
@@ -59,6 +63,7 @@ public class RestApplicationConfig extends Application implements RestConstants
         List<String> classNames = getResourceClasses(resourceProperties);
         if (classNames == null || classNames.size() == 0)
         {
+            logger.info("No restful resources are found from \"RestResources.properties\" file, use default.");
             classNames = resources;
         }
 
@@ -98,7 +103,7 @@ public class RestApplicationConfig extends Application implements RestConstants
                     {
                         if (StringUtil.isNotEmpty(className))
                         {
-                            classNames.add(className.trim());                            
+                            classNames.add(className.trim());
                         }
                     }
                 }

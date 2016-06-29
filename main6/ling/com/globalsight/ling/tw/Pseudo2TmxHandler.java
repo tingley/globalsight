@@ -129,6 +129,13 @@ public class Pseudo2TmxHandler implements PseudoBaseHandler
                 }
             }
         }
+        
+        tmxString = getExistAddablerTmx(tagName);
+        if (tmxString != null)
+        {
+            resultTmx.append(tmxString);
+            return;
+        }
 
         // If not found in unique source mappings, try looking in
         // the addables map. The I Attribute for addables
@@ -159,6 +166,23 @@ public class Pseudo2TmxHandler implements PseudoBaseHandler
     {
         resultTmx.append(strText);
         resultNative.append(strText);
+    }
+    
+    public String getExistAddablerTmx(String ptag)
+    {
+        String overrideMapKey = (String) m_PseudoData.isAddableTag(ptag);
+        if (overrideMapKey == null)
+            return null;
+        
+        TagNode tagNode = m_PseudoData.findUnmapSrcItemByTrgName(ptag);
+        if (tagNode != null)
+        {
+            tagNode.setMapped(true);
+            Hashtable tmxMissedMap = m_PseudoData.getMissedPseudo2TmxMap();
+            return (String) tmxMissedMap.get("" + tagNode.getSourceListIndex());
+        }
+        
+        return null;
     }
 
     /**

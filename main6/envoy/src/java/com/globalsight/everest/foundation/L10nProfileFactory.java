@@ -46,6 +46,7 @@ public class L10nProfileFactory
         BasicL10nProfile basicProfile = new BasicL10nProfile(
                 p_l10nProfile.getName());
         basicProfile.setPriority(p_l10nProfile.getPriority());
+        basicProfile.setUseMtOnJobCreation(p_l10nProfile.getUseMtOnJobCreation());
         basicProfile.setAutomaticDispatch(p_l10nProfile.dispatchIsAutomatic());
         basicProfile.setProjectId(p_l10nProfile.getProjectId());
         if (p_l10nProfile.getProject() != null)

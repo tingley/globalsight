@@ -54,6 +54,13 @@ public class FileProfileResource extends RestResource
 
     public static final String GET_FILE_PROFILES = "getFileProfiles";
 
+    /**
+     * Get all of the FileProfile information from GlobalSight side as JSON
+     * 
+     * @param p_companyName
+     *                  Company name.
+     * @return Return all file profiles information for JSON.
+     * */
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)

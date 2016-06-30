@@ -36,19 +36,19 @@ public class FileProfileResourceTester extends RestfulApiTestHelper
 	/**
 	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/fileProfiles
 	 */
-	public String testGetFileProfiles()
+	public void testGetFileProfiles()
 	{
 		CloseableHttpClient httpClient = getHttpClient();
 		HttpResponse httpResponse = null;
 		try
 		{
 			StringBuffer url = new StringBuffer();
-			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/York/fileProfiles");
+			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/fileProfiles");
 			HttpGet httpGet = getHttpGet(url.toString(), accessToken);
 
 			httpResponse = httpClient.execute(httpGet);
 
-			return printHttpResponse(httpResponse);
+			printHttpResponse(httpResponse);
 		}
 		catch (Exception e)
 		{
@@ -58,7 +58,6 @@ public class FileProfileResourceTester extends RestfulApiTestHelper
 		{
 			consumeQuietly(httpResponse);
 		}
-		return null;
 	}
 
 	public static void main(String[] args)
@@ -67,7 +66,7 @@ public class FileProfileResourceTester extends RestfulApiTestHelper
 		try
 		{
             LoginResourceTester loginTester = new LoginResourceTester();
-            String accessToken = loginTester.testLogin("york", "password");
+            String accessToken = loginTester.testLogin("allieadmin", "password");
             System.out.println("access token: " + accessToken);
 
             tester = new FileProfileResourceTester(accessToken);

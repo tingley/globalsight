@@ -3,14 +3,14 @@
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
-    import="java.util.*,com.globalsight.everest.webapp.webnavigation.LinkHelper,
+    import="java.util.*,
+        com.globalsight.everest.webapp.webnavigation.LinkHelper,
         java.util.ResourceBundle,
         com.globalsight.util.edit.EditUtil,
         com.globalsight.everest.permission.Permission,
         com.globalsight.everest.servlet.util.SessionManager,
         com.globalsight.everest.webapp.pagehandler.PageHandler,
         com.globalsight.everest.webapp.WebAppConstants,
-        com.globalsight.everest.gsedition.GSEdition,
         com.globalsight.everest.projecthandler.ProjectTM,
         com.globalsight.util.FormUtil"
     session="true"
@@ -29,24 +29,8 @@ String xmlDefinition =
   (String)sessionMgr.getAttribute(WebAppConstants.TM_DEFINITION);
 sessionMgr.removeElement(WebAppConstants.TM_DEFINITION);
 
-List allGSEditions = (List) sessionMgr.getAttribute("allGSEdition");
-
 ProjectTM modifyProjectTM = (ProjectTM) sessionMgr.getAttribute("modifyProjectTM");
 sessionMgr.removeElement("modifyProjectTM");
-
-Map remoteFpIdNames = (HashMap) sessionMgr.getAttribute("remoteFpIdNames");
-sessionMgr.removeElement("remoteFpIdNames");
-
-boolean modifiedFPStillExist = false;
-if (remoteFpIdNames != null && remoteFpIdNames.size() > 0 && modifyProjectTM != null)
-{
-	modifyProjectTM.getRemoteTmProfileId();
-	Set allFpIds = remoteFpIdNames.keySet();
-	if (allFpIds.contains(modifyProjectTM.getRemoteTmProfileId()))
-	{
-		modifiedFPStillExist = true;
-	}
-}
 
 String str_tmid =
   (String)sessionMgr.getAttribute(WebAppConstants.TM_TM_ID);
@@ -249,22 +233,6 @@ function doOK()
         alert("<%= bundle.getString("lb_tm_organization") %>" + "<%= bundle.getString("msg_invalid_entry") %>");
         return false;
     }
-    var isRemoteTm = document.getElementById('idRemoteTm');
-    if (isRemoteTm.checked==true)
-    {
-    	var selectedGSEditionId = getSelectedGsEdition();
-    	if (selectedGSEditionId == -1)
-    	{
-        	alert("<%= bundle.getString("lb_tm_gs_edition_not_selected") %>");
-        	return false;
-        }
-    	var selectedRemoteTmProfile = getSeletedRemoteTmProfile();
-        if (selectedRemoteTmProfile == "")
-        {
-        	alert("<%= bundle.getString("lb_tm_remote_tmprofile_not_selected") %>");
-        	return false;
-        }
-    }
 
     // attibutes
     var objtmAttributes = document.getElementById("tmAttributes");
@@ -366,20 +334,6 @@ function parseDefinition()
    	{
     	objIndexTarget.checked = false;
    	}
-    
-    var isRemoteTm = $xml.find("tm > isRemoteTm").text();
-    var objIsRemoteTm = document.getElementById('idRemoteTm');
-	var divRemoteTmSetting = document.getElementById('idRemoteTmSetting');
-    if (isRemoteTm == "true")
-    {
-    	objIsRemoteTm.checked = true;
-    	divRemoteTmSetting.style.display = 'block';
-    }
-    else
-    {
-    	objIsRemoteTm.checked = false;
-    	divRemoteTmSetting.style.display = 'none';
-    }
 }
 
 function doOnLoad()
@@ -414,94 +368,6 @@ function doOnLoad()
     initAttbutesUI();
 }
 
-function showOrHideEditions(object)
-{
-    var isChecked = object.checked;
-    var divRemoteTmSetting = document.getElementById('idRemoteTmSetting');
-    if (isChecked == true)
-    {
-    	divRemoteTmSetting.style.display = 'block';
-    }
-    else
-    {
-    	divRemoteTmSetting.style.display = 'none';
-    }
-}
-
-//get all tm profiles from specified gs edition server
-function getTmProfiles()
-{
-    var remoteTmProfile = document.getElementById("idRemoteTmProfile");
-    remoteTmProfile.options.length = 0;
-    remoteTmProfile.disabled = true;
-
-	var selectedGSEditionId = getSelectedGsEdition();
-    if (selectedGSEditionId != -1)
-    {
-        var obj = {id:selectedGSEditionId};
-        sendAjax(obj, "getAllRemoteTmProfiles", "getAllRemoteTmProfiles");
-    }
-}
-
-//return selected gsEdition Id
-function getSelectedGsEdition()
-{
-    var selectedGSEditionId = -1;
-	var GSEditions = document.getElementById("idGsEdition");
-    if(GSEditions.length > 1)
-    {
-        for (var i=0; i<GSEditions.options.length; i++)
-        {
-            if (GSEditions.options[i].selected == true)
-            {
-                selectedGSEditionId = GSEditions.options[i].value;
-            }
-        }
-    }
-
-    return selectedGSEditionId;
-}
-
-//return selected remote tm profile
-function getSeletedRemoteTmProfile()
-{
-    var selectedRemoteTmProfileIdName = "";
-    var remoteTmProfiles = document.getElementById("idRemoteTmProfile");
-	if (remoteTmProfiles.length > 0)
-	{
-        for (var i=0;i<remoteTmProfiles.options.length; i++)
-        {
-            if (remoteTmProfiles.options[i].selected == true)
-            {
-                selectedRemoteTmProfileIdName = remoteTmProfiles.options[i].value;
-            }
-        }
-	}
-
-	return selectedRemoteTmProfileIdName;
-}
-
-function getAllRemoteTmProfiles(data)
-{
-    allRemoteTmProfiles = eval(data);
-
-    var remoteTmProfile = document.getElementById("idRemoteTmProfile");
-    remoteTmProfile.options.length = 0;
-
-    if (allRemoteTmProfiles != null)
-    {
-        for(var i = 0; i < allRemoteTmProfiles.length; i++)
-        {
-            var oOption = document.createElement("OPTION");
-            //need save remote tm profile id and name both,so put them into 'value' together.
-            oOption.value = allRemoteTmProfiles[i].tmProfileId + "_" + allRemoteTmProfiles[i].tmProfileName;
-            oOption.text = allRemoteTmProfiles[i].tmProfileName;
-            remoteTmProfile.options.add(oOption);
-        }
-    }
-
-    remoteTmProfile.disabled = false;
-}
 </SCRIPT>
 </HEAD>
 <BODY onload="doOnLoad();" LEFTMARGIN="0" RIGHTMARGIN="0"
@@ -547,12 +413,6 @@ function getAllRemoteTmProfiles(data)
     <TD CLASS="standardText">Index Target:</TD>
     <TD CLASS="standardText"><input type="checkbox" ID="idIndexTarget" NAME="indexTarget"/></TD>
   </TR>
-  <TR>
-    <TD CLASS="standardText"><%=bundle.getString("lb_tm_remote_tm")%></TD>
-    <TD CLASS="standardText">
-        <input type="checkbox" id="idRemoteTm" NAME="<%=WebAppConstants.TM_TM_REMOTE_TM%>" onclick="showOrHideEditions(this)"/>
-    </TD>
-  </TR>
   <amb:permission name="<%=Permission.TM_ENABLE_TM_ATTRIBUTES%>" >
   <TR>
     <TD CLASS="standardText" valign="top">TU Attributes:</TD>
@@ -579,76 +439,6 @@ function getAllRemoteTmProfiles(data)
   </TR>
  </amb:permission>
 </TABLE>
-
-<div id="idRemoteTmSetting" style="display:none;">
-<p>
-    <TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="">
-        <tr><td colspan="2"><b><%=bundle.getString("lb_tm_set_tmprofile") %></b></td></tr>
-        <TR>
-            <TD CLASS="standardText"><%=bundle.getString("lb_tm_gs_editions")%></TD>
-            <TD CLASS="standardText" align="left">
-                <select id="idGsEdition" class="standardText" NAME="<%=WebAppConstants.TM_TM_GS_EDITON%>" onchange="getTmProfiles()">
-                <% if (allGSEditions != null && allGSEditions.size() > 0) { %>
-                      <option value="-1"> </option>
-                <%    for (int i=0; i<allGSEditions.size(); i++)
-                      {
-                	       String selected = "";
-                           GSEdition edition = (GSEdition) allGSEditions.get(i);
-                           long modifyGSEditionId = -1;
-                           if (modifyProjectTM != null) {
-                               modifyGSEditionId = modifyProjectTM.getGsEditionId();
-                           }
-                           if (modifyGSEditionId == edition.getId()) {
-                        		  selected = "selected";
-                           }
-                %>
-                           <option value="<%=edition.getId()%>" <%=selected%>> <%=edition.getName() %></option>
-                <%    }
-                   }%>
-
-                </select>
-            </TD>
-        </TR>
-        <TR>
-            <TD CLASS="standardText"><%=bundle.getString("lb_tm_remote_tm_profile")%></TD>
-            <TD CLASS="standardText" align="left">
-
-                <select id="idRemoteTmProfile" class="standardText" NAME="<%=WebAppConstants.TM_TM_REMOTE_TM_PROFILE%>" >
-                <%
-                    if (modifyProjectTM != null)
-                    {
-                        long modifyRemoteTmProfileId = -1;
-                        String modifyRemoteTmProfileName = "";
-                    	modifyRemoteTmProfileId = modifyProjectTM.getRemoteTmProfileId();
-                    	modifyRemoteTmProfileName = modifyProjectTM.getRemoteTmProfileName();
-                        if (modifyRemoteTmProfileId != -1 && modifiedFPStillExist == true)
-                        {
-                %>
-                   	<option value="<%=modifyRemoteTmProfileId + "_" + modifyRemoteTmProfileName%>" selected><%=modifyRemoteTmProfileName%></option>
-                <%      }
-                        if (remoteFpIdNames != null && remoteFpIdNames.size()>0)
-                        {
-                        	Iterator fpIdNameIter = remoteFpIdNames.entrySet().iterator();
-                        	while (fpIdNameIter.hasNext())
-                        	{
-                        		Map.Entry entry = (Map.Entry )fpIdNameIter.next();
-                        		long id = ((Long)entry.getKey()).longValue();
-                        		String name = (String) entry.getValue();
-                        		if (id != modifyRemoteTmProfileId)
-                        		{
-                %>
-                    <option value="<%=id + "_" + name%>"><%=name%></option>
-                <%
-                        		}
-                        	}
-                        }
-                    } %>
-                </select>
-
-            </TD>
-        </TR>
-	</TABLE>
-</p></div>
 
 <% String tokenName = FormUtil.getTokenName(FormUtil.Forms.NEW_TRANSLATION_MEMORY); %>
 <input type="hidden" name="<%=tokenName%>" value="<%=request.getAttribute(tokenName)%>" />

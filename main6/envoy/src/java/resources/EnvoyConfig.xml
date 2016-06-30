@@ -3403,20 +3403,6 @@
       </WebPage>
     </WebActivity>
   </WebModule>
-  <WebModule webModuleName="gsEdition"> 
-    <WebActivity webActivityName="gsEdition">
-      <WebPage pageName="gsEditionMain" isDefault="true" jspName="/envoy/administration/gsedition/gsEditionMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.gsedition.GSEditionMainHandler">
-        <PageLink linkName="new1" destinationPageName="gsEditionNewEdit"></PageLink>
-        <PageLink linkName="edit" destinationPageName="gsEditionNewEdit"></PageLink>
-        <PageLink linkName="remove" destinationPageName="gsEditionMain"></PageLink>
-        <PageLink linkName="self" destinationPageName="gsEditionMain"></PageLink>
-      </WebPage>
-      <WebPage pageName="gsEditionNewEdit" isDefault="false" jspName="/envoy/administration/gsedition/gsEditionBasic.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.gsedition.GSEditionBasicHandler">
-        <PageLink linkName="save" destinationPageName="gsEditionMain"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="gsEditionMain"></PageLink>
-      </WebPage>
-    </WebActivity>
-  </WebModule>
   <WebModule webModuleName="cvsFileProfile"> 
     <WebActivity webActivityName="cvsfileprofile">
       <WebPage pageName="CVSFP" isDefault="true" jspName="/envoy/administration/cvsfileprofile/cvsFileProfileMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.cvsconfig.fileprofile.CVSFileProfileMainHandler">

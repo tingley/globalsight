@@ -16,16 +16,13 @@
  */
 package com.globalsight.everest.util.ajax;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -35,8 +32,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.fileupload.DiskFileUpload;
 import org.apache.commons.fileupload.FileItem;
@@ -44,9 +39,6 @@ import org.apache.commons.fileupload.FileUpload;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
@@ -79,8 +71,6 @@ import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.gsedition.GSEdition;
-import com.globalsight.everest.gsedition.GSEditionManagerLocal;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -95,8 +85,6 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.StringUtil;
-import com.globalsight.webservices.client.Ambassador;
-import com.globalsight.webservices.client.WebServiceClientHelper;
 
 public class AjaxService extends HttpServlet
 {
@@ -1667,201 +1655,6 @@ public class AjaxService extends HttpServlet
         writer.write(message);
         writer.flush();
 
-    }
-
-    public void getRemoteFileProfile()
-    {
-        long GSEditionID = Long.parseLong(request.getParameter("id"));
-        GSEditionManagerLocal gsEditionManager = new GSEditionManagerLocal();
-        GSEdition edition = gsEditionManager.getGSEditionByID(GSEditionID);
-
-        try
-        {
-            Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
-                    edition.getHostName(), edition.getHostPort(), edition.getUserName(),
-                    edition.getPassword(), edition.getEnableHttps());
-            String fullAccessToken = ambassador.login(edition.getUserName(), edition.getPassword());
-            String realAccessToken = WebServiceClientHelper.getRealAccessToken(fullAccessToken);
-
-            HashMap xliffFP = ambassador.getXliffFileProfile(realAccessToken);
-            StringBuilder sb = new StringBuilder();
-            sb.append("[");
-
-            Iterator itera = (Iterator) xliffFP.keySet().iterator();
-            int i = 0;
-
-            if (itera.hasNext())
-            {
-                while (itera.hasNext())
-                {
-                    i++;
-                    Object key = itera.next();
-                    String val = (String) xliffFP.get(key);
-                    sb.append("{");
-                    sb.append("\"fileprofileID\":").append(key).append(",");
-                    sb.append("\"fileprofileName\":").append("\"").append(val).append("\"")
-                            .append("}");
-
-                    if (i < xliffFP.size())
-                    {
-                        sb.append(",");
-                    }
-                }
-            }
-            else
-            {
-                sb.append("{");
-                sb.append("\"noXliffFile\":").append("\"true").append("\"").append("}");
-            }
-
-            sb.append("]");
-
-            writer.write(sb.toString());
-            writer.close();
-        }
-        catch (Exception e)
-        {
-            String msg = e.getMessage();
-            String errorInfo = null;
-
-            if (msg != null && msg.indexOf("No such operation") > -1)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.append("[");
-                sb.append("{");
-                sb.append("\"lowVersion\":").append("\"true").append("\"").append("}");
-                sb.append("]");
-
-                writer.write(sb.toString());
-                writer.close();
-            }
-            else
-            {
-                if (msg != null
-                        && (msg.indexOf("Connection timed out") > -1
-                                || msg.indexOf("UnknownHostException") > -1 || msg
-                                .indexOf("java.net.ConnectException") > -1))
-                {
-                    errorInfo = "Can not connect to server. Please check GS Edition configuration.";
-                }
-                else if (msg != null
-                        && msg.indexOf("Illegal web service access attempt from IP address") > -1)
-                {
-                    errorInfo = "User name or password of GS Edition is wrong. Or the IP is not allowed to access server.";
-                }
-                else if (msg != null
-                        && msg.indexOf("The username or password may be incorrect") > -1)
-                {
-                    errorInfo = "Can not connect to server. Please check GS Edition configuration.";
-                }
-                else if (msg != null
-                        && msg.indexOf("com.globalsight.webservices.WebServiceException") > -1)
-                {
-                    errorInfo = "Can not connect to server.";
-                }
-                else
-                {
-                    errorInfo = msg;
-                }
-
-                StringBuilder sb = new StringBuilder();
-                sb.append("[");
-                sb.append("{");
-                sb.append("\"errorInfo\":").append("\"").append(errorInfo).append("\"").append("}");
-                sb.append("]");
-                writer.write(sb.toString());
-                writer.close();
-            }
-            // e.printStackTrace();
-        }
-    }
-
-    /**
-     * 
-     */
-    public void getAllRemoteTmProfiles()
-    {
-        long GSEditionID = Long.parseLong(request.getParameter("id"));
-        GSEditionManagerLocal gsEditionManager = new GSEditionManagerLocal();
-        GSEdition edition = gsEditionManager.getGSEditionByID(GSEditionID);
-
-        try
-        {
-            Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
-                    edition.getHostName(), edition.getHostPort(), edition.getUserName(),
-                    edition.getPassword(), edition.getEnableHttps());
-            String fullAccessToken = ambassador.login(edition.getUserName(), edition.getPassword());
-            String realAccessToken = WebServiceClientHelper.getRealAccessToken(fullAccessToken);
-
-            String strAllTmProfiles = ambassador.getAllTMProfiles(realAccessToken);
-            CATEGORY.debug("allTmProfiles :: " + strAllTmProfiles);
-
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            InputStream stream = new ByteArrayInputStream(strAllTmProfiles.getBytes("UTF-8"));
-            org.w3c.dom.Document doc = db.parse(stream);
-
-            StringBuilder sb = new StringBuilder();
-            sb.append("[");
-
-            Element root = doc.getDocumentElement();
-            NodeList TMProfileNL = root.getElementsByTagName("TMProfile");
-            for (int i = 0; i < TMProfileNL.getLength(); i++)
-            {
-                String id = null;
-                String name = null;
-
-                Node subNode = TMProfileNL.item(i);
-                if (subNode instanceof Element)
-                {
-                    NodeList childNodeList = subNode.getChildNodes();
-                    for (int j = 0; j < childNodeList.getLength(); j++)
-                    {
-                        if (childNodeList.item(j) instanceof Element)
-                        {
-                            String nodeName = childNodeList.item(j).getNodeName();
-                            NodeList subNodeList = childNodeList.item(j).getChildNodes();
-                            String nodeValue = null;
-                            if (subNodeList != null && subNodeList.getLength() > 0)
-                            {
-                                nodeValue = subNodeList.item(0).getNodeValue();
-                            }
-                            CATEGORY.debug("nodeName :: " + nodeName + "; nodeValue :: "
-                                    + nodeValue);
-
-                            if ("id".equals(nodeName.toLowerCase()))
-                            {
-                                id = nodeValue;
-                            }
-                            else if ("name".equals(nodeName.toLowerCase()))
-                            {
-                                name = nodeValue;
-                            }
-                        }
-                    }
-                }
-
-                if (id != null && name != null)
-                {
-                    sb.append("{");
-                    sb.append("\"tmProfileId\":").append(id).append(",");
-                    sb.append("\"tmProfileName\":").append("\"").append(name).append("\"")
-                            .append("}");
-                }
-                if ((i + 1) < TMProfileNL.getLength())
-                {
-                    sb.append(",");
-                }
-            }
-            sb.append("]");
-
-            writer.write(sb.toString());
-            writer.close();
-        }
-        catch (Exception e)
-        {
-
-        }
     }
 
     public void isProjectUseTerbase()

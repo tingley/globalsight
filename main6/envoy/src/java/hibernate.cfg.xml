@@ -135,7 +135,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TextCondition.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/DateCondition.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/AttributeClone.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/GSEdition.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/RssFeed.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/RssItem.hbm.xml" />	
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TuConceptRelation.hbm.xml" />

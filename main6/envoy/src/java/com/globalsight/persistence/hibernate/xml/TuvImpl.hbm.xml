@@ -61,14 +61,10 @@
         <property name="repeated" column="IS_REPEATED" type="yes_no"
         	not-null="false" />
 
-    <set name="xliffAlt" table="xliff_alt" inverse="true" cascade="save-update">
-       <key column="TUV_ID"/>
-       <one-to-many  class="com.globalsight.ling.docproc.extractor.xliff.XliffAlt"/>
-    </set>
-    
-    <set name="issueEditionRelation" table="ISSUE_EDITION_RELATION" inverse="true" cascade="save-update">
-       <key column="TUV_ID"/>
-       <one-to-many  class="com.globalsight.everest.comment.IssueEditionRelation"/>
-    </set>
+	    <set name="xliffAlt" table="xliff_alt" inverse="true" cascade="save-update">
+	       <key column="TUV_ID"/>
+	       <one-to-many  class="com.globalsight.ling.docproc.extractor.xliff.XliffAlt"/>
+	    </set>
+
 	</class>
 </hibernate-mapping>

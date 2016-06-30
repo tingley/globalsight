@@ -651,7 +651,6 @@ public interface WebAppConstants
     public static final String TM_TM_ORGANIZATION = "organization";
     public static final String TM_TM_DESCRIPTION = "description";
     public static final String TM_TM_REMOTE_TM = "remoteTm";
-    public static final String TM_TM_GS_EDITON = "gsEdition";
     public static final String TM_TM_REMOTE_TM_PROFILE = "remoteTmProfile";
     public static final String TM_TM_STATUS = "status";
     public static final String TM_UPLOAD_STATUS = "uploadStatus";
@@ -833,8 +832,6 @@ public interface WebAppConstants
     public static final String TM_STATUS_CONVERTED_FAIL = "Failed";
     public static final String TM_STATUS_CONVERTED_CANCELLED = "Cancelled";
     public static final String TM_STATUS_CONVERTED_STOPPED = "Conversion Stopped";
-
-    public static final String GS_EDITION_ALL = "allGSEdition";
 
     public static final String JOB_GROUP_NAME = "name";
     public static final String JOB_GROUP_PROJECT = "project";

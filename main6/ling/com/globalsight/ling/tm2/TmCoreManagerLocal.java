@@ -56,7 +56,6 @@ import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatchResults;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.Leverager;
-import com.globalsight.ling.tm2.leverage.RemoteLeverager;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.persistence.PageJobDataRetriever;
 import com.globalsight.ling.tm2.persistence.SegmentQueryResult;
@@ -83,8 +82,7 @@ public class TmCoreManagerLocal implements TmCoreManager
     // object to lock for synchronizing tm population process (due to deadlocks)
     private Boolean m_tmPopulationLock = new Boolean(true);
 
-    private static final Logger LOGGER = Logger
-            .getLogger(TmCoreManagerLocal.class);
+    private static final Logger LOGGER = Logger.getLogger(TmCoreManagerLocal.class);
 
     /**
      * Save source and target segments that belong to the page. Segments are
@@ -358,8 +356,7 @@ public class TmCoreManagerLocal implements TmCoreManager
         }
 
         // Split the tms up by implementation
-        SortedTms sortedTms = sortTmsByImplementation(leverageOptions
-                .getLeverageTms());
+        SortedTms sortedTms = sortTmsByImplementation(leverageOptions.getLeverageTms());
 
         Session session = HibernateUtil.getSession();
 
@@ -369,13 +366,6 @@ public class TmCoreManagerLocal implements TmCoreManager
             // Leverage the tm2 and tm3 tms
             leverager.leveragePage(p_sourcePage, p_leverageDataCenter,
                     sortedTms.tm2Tms, sortedTms.tm3Tms);
-
-            // Leverage the remote TMs
-            if (p_leverageRemoteTm && sortedTms.remoteTms.size() > 0)
-            {
-                new RemoteLeverager().remoteLeveragePage(p_sourcePage,
-                        sortedTms.remoteTms, p_leverageDataCenter);
-            }
         }
         catch (LingManagerException le)
         {

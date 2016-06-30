@@ -1111,10 +1111,6 @@ function doUnload()
     w_updateLeverage = null;
 }
 
-function recreateGSEdition(urlSent) {
-    location.replace(urlSent);
-}
-
 function submitDtpForm(form, buttonClicked, linkParam) {
     if(buttonClicked == "DtpDownload") {
         form.action = "<%=dtpDownloadURL%>&taskAction=<%=WebAppConstants.DTP_DOWNLOAD%>" + linkParam;

@@ -3636,7 +3636,6 @@ public class ProjectHandlerLocal implements ProjectHandler
             clone.setCompanyId(p_projectTM.getCompanyId());
             clone.setIndexTarget(p_projectTM.isIndexTarget());
             clone.setIsRemoteTm(p_projectTM.getIsRemoteTm());
-            clone.setGsEditionId(p_projectTM.getGsEditionId());
             clone.setRemoteTmProfileId(p_projectTM.getRemoteTmProfileId());
             clone.setRemoteTmProfileName(p_projectTM.getRemoteTmProfileName());
 

@@ -17,9 +17,7 @@
 
 package com.globalsight.everest.webapp.pagehandler.tm.management;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.rmi.RemoteException;
 import java.sql.Connection;
@@ -33,7 +31,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -41,21 +38,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.globalsight.cxe.entity.customAttribute.TMAttribute;
 import com.globalsight.cxe.entity.customAttribute.TMAttributeManager;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.gsedition.GSEdition;
-import com.globalsight.everest.gsedition.GSEditionManagerLocal;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.projecthandler.Project;
@@ -85,8 +75,6 @@ import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.util.progress.ProcessStatus;
 import com.globalsight.util.progress.TmProcessStatus;
-import com.globalsight.webservices.client.Ambassador;
-import com.globalsight.webservices.client.WebServiceClientHelper;
 
 /**
  * PageHandler is responsible for creating, deleting and modifying TMs.
@@ -132,6 +120,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
      * @param p_context
      *            context the Servlet context
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
             HttpServletRequest p_request, HttpServletResponse p_response,
             ServletContext p_context) throws ServletException, IOException,
@@ -224,18 +213,6 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                 // load existing definition and display for modification
                 String definition = getDefination(projectTm, false);
                 sessionMgr.setAttribute(TM_DEFINITION, definition);
-
-                GSEditionManagerLocal gsEditionManager = new GSEditionManagerLocal();
-                Collection allGSEdition = gsEditionManager.getAllGSEdition();
-                sessionMgr.setAttribute("allGSEdition", allGSEdition);
-
-                long gsEditionId = projectTm.getGsEditionId();
-                if (gsEditionId != -1)
-                {
-                    Map remoteFileProfileIdName = getRemoteFPIdName(gsEditionId);
-                    sessionMgr.setAttribute("remoteFpIdNames",
-                            remoteFileProfileIdName);
-                }
             }
             else if (action.equals(TM_ACTION_CLONE))
             {
@@ -253,10 +230,6 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                 sessionMgr.setAttribute(TM_EXIST_NAMES, getExistTMNames(tms));
                 FormUtil.addSubmitToken(p_request,
                         FormUtil.Forms.NEW_TRANSLATION_MEMORY);
-
-                GSEditionManagerLocal gsEditionManager = new GSEditionManagerLocal();
-                Collection allGSEdition = gsEditionManager.getAllGSEdition();
-                sessionMgr.setAttribute("allGSEdition", allGSEdition);
             }
             else if (action.equals(TM_ACTION_SAVE))
             {
@@ -294,16 +267,10 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                     if (isRemoteTm != null && "on".equals(isRemoteTm))
                     {
                         tm.setIsRemoteTm(true);
-                        // set gsEditionId
-                        String gsEditionId = EditUtil
-                                .utf8ToUnicode((String) p_request
-                                        .getParameter(TM_TM_GS_EDITON));
-                        tm.setGsEditionId(Long.parseLong(gsEditionId));
                         // set remoteTmProfileId and remoteTmProfileName
                         // (tmprofileId_tmprofileName)
-                        String remoteTmProfileIdName = EditUtil
-                                .utf8ToUnicode((String) p_request
-                                        .getParameter(TM_TM_REMOTE_TM_PROFILE));
+                        String remoteTmProfileIdName = EditUtil.utf8ToUnicode((String) p_request
+                                .getParameter(TM_TM_REMOTE_TM_PROFILE));
                         if (remoteTmProfileIdName != null
                                 && !"".equals(remoteTmProfileIdName))
                         {
@@ -575,10 +542,6 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
 
         FormUtil.addSubmitToken(p_request,
                 FormUtil.Forms.NEW_TRANSLATION_MEMORY);
-
-        GSEditionManagerLocal gsEditionManager = new GSEditionManagerLocal();
-        Collection allGSEdition = gsEditionManager.getAllGSEdition();
-        sessionMgr.setAttribute(GS_EDITION_ALL, allGSEdition);
     }
 
     private void cancelValidation(SessionManager sessionMgr)
@@ -682,7 +645,6 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                     .append("<description></description>")
                     .append("<indexTarget>false</indexTarget>")
                     .append("<isRemoteTm>false</isRemoteTm>")
-                    .append("<gsEditionId></gsEditionId>")
                     .append("<remoteTmProfileId></remoteTmProfileId>")
                     .append("<remoteTmProfileName></remoteTmProfileName>")
                     .append("</tm>");
@@ -727,11 +689,6 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                     .encodeXmlEntities(p_tm.getIsRemoteTm() == true ? "true"
                             : "false"));
             result.append("</isRemoteTm>");
-            result.append("<gsEditionId>");
-            result.append(EditUtil
-                    .encodeXmlEntities(p_tm.getGsEditionId() == -1 ? ""
-                            : String.valueOf(p_tm.getGsEditionId())));
-            result.append("</gsEditionId>");
             result.append("<remoteTmProfileId>");
             result.append(EditUtil.encodeXmlEntities(p_tm
                     .getRemoteTmProfileId() == -1 ? "" : String.valueOf(p_tm
@@ -756,6 +713,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
      * @throws ProjectHandlerException
      * @throws RemoteException
      */
+    @SuppressWarnings("rawtypes")
     private List<ProjectTM> getTMs(String userId, String cond)
             throws ProjectHandlerException, RemoteException
     {
@@ -896,91 +854,6 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
         }
 
         return existTMNames.toString();
-    }
-
-    /**
-     * Get file profile Id-Names map from remote server specified by
-     * gsEditionId.
-     * 
-     * @param p_gsEditionId
-     * @return
-     */
-    private Map getRemoteFPIdName(long p_gsEditionId)
-    {
-        Map results = new HashMap();
-        try
-        {
-            GSEditionManagerLocal gsEditionManager = new GSEditionManagerLocal();
-            GSEdition edition = gsEditionManager
-                    .getGSEditionByID(p_gsEditionId);
-            Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
-                    edition.getHostName(), edition.getHostPort(),
-                    edition.getUserName(), edition.getPassword(),
-                    edition.getEnableHttps());
-            String fullAccessToken = ambassador.login(edition.getUserName(),
-                    edition.getPassword());
-            String realAccessToken = WebServiceClientHelper
-                    .getRealAccessToken(fullAccessToken);
-
-            String strAllTmProfiles = ambassador
-                    .getAllTMProfiles(realAccessToken);
-            logger.debug("allTmProfiles :: " + strAllTmProfiles);
-
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            InputStream stream = new ByteArrayInputStream(
-                    strAllTmProfiles.getBytes("UTF-8"));
-            org.w3c.dom.Document doc = db.parse(stream);
-            Element root = doc.getDocumentElement();
-
-            NodeList TMProfileNL = root.getElementsByTagName("TMProfile");
-            for (int i = 0; i < TMProfileNL.getLength(); i++)
-            {
-                String id = null;
-                String name = null;
-
-                Node subNode = TMProfileNL.item(i);
-                if (subNode instanceof Element)
-                {
-                    NodeList childNodeList = subNode.getChildNodes();
-                    for (int j = 0; j < childNodeList.getLength(); j++)
-                    {
-                        if (childNodeList.item(j) instanceof Element)
-                        {
-                            String nodeName = childNodeList.item(j)
-                                    .getNodeName();
-                            NodeList subNodeList = childNodeList.item(j)
-                                    .getChildNodes();
-                            String nodeValue = null;
-                            if (subNodeList != null
-                                    && subNodeList.getLength() > 0)
-                            {
-                                nodeValue = subNodeList.item(0).getNodeValue();
-                            }
-                            logger.debug("nodeName :: " + nodeName
-                                    + "; nodeValue :: " + nodeValue);
-
-                            if ("id".equals(nodeName.toLowerCase()))
-                            {
-                                id = nodeValue;
-                            }
-                            else if ("name".equals(nodeName.toLowerCase()))
-                            {
-                                name = nodeValue;
-                            }
-                        }
-                    }
-                }
-                results.put(new Long(id), name);
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.error("Fail to get file profile Id-Names by gsEditionId : "
-                    + p_gsEditionId);
-        }
-
-        return results;
     }
 
     private void setNumberOfPerPage(HttpServletRequest req)

@@ -115,7 +115,6 @@ public class CompanyRemoval
     private static final String SQL_DELETE_FILE_VALUE_ITEM = "delete from FILE_VALUE_ITEM where JOB_ATTRIBUTE_ID in ";
     private static final String SQL_DELETE_FILTER_CONFIGURATION = "delete from FILTER_CONFIGURATION where COMPANY_ID=?";
     private static final String SQL_DELETE_FRAME_MAKER_FILTER = "delete from FRAME_MAKER_FILTER where COMPANY_ID=?";
-    private static final String SQL_DELETE_GS_EDITION = "delete from GS_EDITION where COMPANYID=?";
     private static final String SQL_DELETE_HOLIDAY = "delete from HOLIDAY where COMPANY_ID=?";
     private static final String SQL_DELETE_HTML_FILTER = "delete from HTML_FILTER where COMPANY_ID=?";
     private static final String SQL_DELETE_IMAGE_REPLACE_FILE_MAP = "delete from IMAGE_REPLACE_FILE_MAP where TARGET_PAGE_ID in ";
@@ -966,8 +965,6 @@ public class CompanyRemoval
             removeFilter(conn);
             // remove filter configurations
             removeFilterConfiguration(conn);
-            // remove gs editions
-            removeGsEdition(conn);
             // remove holidays
             removeHoliday(conn);
             // remove MT profiles
@@ -1855,14 +1852,6 @@ public class CompanyRemoval
         logStart("FRAME_MAKER_FILTER");
         execOnce(conn, SQL_DELETE_FRAME_MAKER_FILTER, company.getId());
         logEnd("FRAME_MAKER_FILTER");
-    }
-
-    private void removeGsEdition(Connection conn) throws SQLException
-    {
-        long companyId = company.getId();
-        logStart("GS_EDITION");
-        execOnce(conn, SQL_DELETE_GS_EDITION, companyId);
-        logEnd("GS_EDITION");
     }
 
     private void removeHoliday(Connection conn) throws SQLException

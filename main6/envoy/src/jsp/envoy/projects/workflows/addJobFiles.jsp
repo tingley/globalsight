@@ -178,7 +178,7 @@ $(document).ready(function(){
 
 function showDuplicate(pageArray)
 {
-	alert("Below files are already in the uploaded list, ignored: \n\n" + pageArray);
+	alert("<%=bundle.getString("msg_upload_dup_files")%>\n\n" + pageArray);
 }
 
 function addDivForNewFile(paramArray) 

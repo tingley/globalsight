@@ -63,11 +63,6 @@
      <permission id="<%=Permission.LOCALE_NEW%>"/>
 <% } %>
   </permission>
-  <permission id="<%=Permission.GSEDITION_VIEW%>">
-     <permission id="<%=Permission.GSEDITION_REMOVE%>"/>
-     <permission id="<%=Permission.GSEDITION_EDIT%>"/> 
-     <permission id="<%=Permission.GSEDITION_NEW%>"/>
-  </permission>
   <permission id="<%=Permission.ACTIVITY_TYPES_VIEW%>">
      <permission id="<%=Permission.ACTIVITY_TYPES_REMOVE%>"/>
      <permission id="<%=Permission.ACTIVITY_TYPES_EDIT%>"/>

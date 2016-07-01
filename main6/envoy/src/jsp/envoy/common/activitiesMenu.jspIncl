@@ -10,8 +10,6 @@
            "=" + Task.STATE_ACTIVE + "&listType=stateOnly&init=0";
    String tasksInProgressUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
            "=" + Task.STATE_ACCEPTED + "&listType=stateOnly&init=0";
-   String tasksInProgressGSEditionUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
-           "=" + WorkflowConstants.TASK_GSEDITION_IN_PROGESS + "&listType=stateOnly&init=0";
    String tasksFinishedUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
            "=" + Task.STATE_COMPLETED + "&listType=stateOnly&init=0";
    String tasksRejectedUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
@@ -102,8 +100,6 @@ myActivitiesMenu.add(new WebFXMenuSeparator());
 myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_available")%>", "javascript:goToUrl('<%=tasksAvailableUrl%>');", ""));
 
 myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_inprogress")%>", "javascript:goToUrl('<%=tasksInProgressUrl%>');", ""));
-
-//myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_inprogress")%>(<%=mainMenuBundle.getString("lb_gsedition")%>)", "javascript:goToUrl('<%=tasksInProgressGSEditionUrl%>');", ""));//modify for GBS-2875
 
 myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_finished")%>", "javascript:goToUrl('<%=tasksFinishedUrl%>');", ""));
 

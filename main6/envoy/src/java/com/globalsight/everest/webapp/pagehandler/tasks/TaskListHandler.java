@@ -701,6 +701,7 @@ public class TaskListHandler extends PageHandler
         String includeXmlNodeContextInformation = downloadOfflineFilesOptions.get(18);
         String penalizedReferenceTmPre = downloadOfflineFilesOptions.get(21);
         String penalizedReferenceTmPer = downloadOfflineFilesOptions.get(22);
+        String separateTMfile = downloadOfflineFilesOptions.get(23);
         String populateMT = downloadOfflineFilesOptions.get(24);
         
         File tmpFile = File.createTempFile("GSDownloadAllOffline", null);
@@ -881,6 +882,7 @@ public class TaskListHandler extends PageHandler
                 .equalsIgnoreCase(excludeFullyLeveragedFiles));
         downloadParams.setPenalizedReferenceTmPre("yes".equalsIgnoreCase(penalizedReferenceTmPre));
         downloadParams.setPenalizedReferenceTmPer("yes".equalsIgnoreCase(penalizedReferenceTmPer));
+        downloadParams.setChangeSeparateTMFile("yes".equalsIgnoreCase(separateTMfile));
         downloadParams.setZipper(zipper);
 
         try
@@ -939,6 +941,7 @@ public class TaskListHandler extends PageHandler
         String consolidateXLF = downloadOfflineFilesOptions.get(12);
         String changeCreationIdForMt = downloadOfflineFilesOptions.get(13);
         String includeRepetitions = downloadOfflineFilesOptions.get(14);
+        String TMEditType = downloadOfflineFilesOptions.get(15);
         String excludeFullyLeveragedFiles = downloadOfflineFilesOptions.get(16);
         String preserveSourceFolder = downloadOfflineFilesOptions.get(17);
         String includeXmlNodeContextInformation = downloadOfflineFilesOptions
@@ -947,6 +950,7 @@ public class TaskListHandler extends PageHandler
         String wordCountForDownload = downloadOfflineFilesOptions.get(20);
         String penalizedReferenceTmPre = downloadOfflineFilesOptions.get(21);
         String penalizedReferenceTmPer = downloadOfflineFilesOptions.get(22);
+        String separateTMfile = downloadOfflineFilesOptions.get(23);
         String populateMT = downloadOfflineFilesOptions.get(24);
 
         File tmpFile = File.createTempFile("GSDownloadAllOffline", null);
@@ -1047,12 +1051,14 @@ public class TaskListHandler extends PageHandler
             downloadParams.setConsolidateFileType(consolidateFileType);
             downloadParams.setWordCountForDownload(Integer.parseInt(wordCountForDownload));
             downloadParams.setIncludeRepetitions("yes".equalsIgnoreCase(includeRepetitions));
+            downloadParams.setTMEditType(Integer.parseInt(TMEditType));
             downloadParams.setChangeCreationIdForMTSegments("yes"
                     .equalsIgnoreCase(changeCreationIdForMt));
             downloadParams.setExcludeFullyLeveragedFiles("yes"
                     .equalsIgnoreCase(excludeFullyLeveragedFiles));
             downloadParams.setPenalizedReferenceTmPre("yes"
                     .equalsIgnoreCase(penalizedReferenceTmPre));
+            downloadParams.setChangeSeparateTMFile("yes".equalsIgnoreCase(separateTMfile));
             downloadParams.setPenalizedReferenceTmPer("yes"
                     .equalsIgnoreCase(penalizedReferenceTmPer));
 

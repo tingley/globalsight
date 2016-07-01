@@ -20,6 +20,9 @@ package com.globalsight.restful.version1_0.job;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
+import com.globalsight.ling.common.URLDecoder;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -59,6 +62,8 @@ import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
 import com.globalsight.config.UserParameterPersistenceManagerLocal;
 import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
+import com.globalsight.cxe.entity.customAttribute.Attribute;
+import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
@@ -125,6 +130,15 @@ public class JobResource extends RestResource
 
     private static Set<Long> cachedJobIds = Collections.synchronizedSet(new HashSet<Long>());
 
+    /**
+     * Get a unique job name.
+     * 
+     * @param p_companyName 
+     *                  Company name.
+     * @param p_jobName 
+     *                  Job name.
+     * @return Return a unique job name, it does not exist in the database.
+     * */
     @GET
     @Path("/getUniqueJobName")
     @Produces(MediaType.TEXT_PLAIN)
@@ -134,9 +148,6 @@ public class JobResource extends RestResource
             @QueryParam("jobName") String p_jobName) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
-        Connection connection = null;
-        PreparedStatement query = null;
-        ResultSet results = null;
         try
         {
             String userName = getUserNameFromSession(accessToken.get(0));
@@ -145,31 +156,14 @@ public class JobResource extends RestResource
             restArgs.put("companyName", p_companyName);
             restArgs.put("jobName", p_jobName);
             restStart = RestWebServiceLog.start(JobResource.class, GET_UNIQUE_JOB_NAME, restArgs);
-
             String jobNameValidation = validateJobName(p_jobName);
             if (jobNameValidation != null)
             {
-                throw new RestWebServiceException(makeErrorJson(GET_UNIQUE_JOB_NAME,
-                        jobNameValidation));
+                throw new RestWebServiceException(jobNameValidation);
             }
-            String randomStr = String.valueOf((new Random()).nextInt(999999999));
-            while (randomStr.length() < 9)
-            {
-                randomStr = "0" + randomStr;
-            }
-            p_jobName = p_jobName + "_" + randomStr;
-            String sql = "SELECT ID FROM JOB WHERE NAME=?";
-            connection = ConnectionPool.getConnection();
-            query = connection.prepareStatement(sql);
-            query.setString(1, p_jobName);
-            results = query.executeQuery();
-            if (results.next())
-            {
-                return getUniqueJobName(accessToken, p_companyName, p_jobName);
-            }
-            else
-                return Response.status(200).entity(p_jobName).build();
 
+            p_jobName = getJobName(p_jobName);
+            return Response.status(200).entity(p_jobName).build();
         }
         catch (Exception e)
         {
@@ -180,11 +174,10 @@ public class JobResource extends RestResource
             if (restStart != null)
             {
                 restStart.end();
-                releaseDBResource(results, query, connection);
             }
         }
     }
-
+    
     @POST
     @Path("/sourceFiles")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -215,8 +208,11 @@ public class JobResource extends RestResource
             String jobNameValidation = validateJobName(p_jobName);
             if (jobNameValidation != null)
             {
-                throw new RestWebServiceException(makeErrorJson(UPLOAD_SOURCE_FILE,
-                        jobNameValidation));
+                throw new RestWebServiceException(jobNameValidation);
+            }
+            if (StringUtil.isEmpty(p_fileProfileId))
+            {
+                throw new RestWebServiceException("Empty file profile id.");
             }
             FileProfile fp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(
                     Long.parseLong(p_fileProfileId));
@@ -239,14 +235,14 @@ public class JobResource extends RestResource
             if (msg != null)
             {
                 updateJobStateIfException = false;
-                throw new RestWebServiceException(makeErrorJson(UPLOAD_SOURCE_FILE, msg));
+                throw new RestWebServiceException(msg);
             }
 
             if (!isInSameCompany(userName, String.valueOf(fp.getCompanyId()))
                     && !UserUtil.isSuperPM(user.getUserId()))
             {
                 String message = "Current user cannot upload file with the file profile which is in other company.";
-                throw new RestWebServiceException(makeErrorJson(UPLOAD_SOURCE_FILE, message));
+                throw new RestWebServiceException(message);
             }
 
             String srcLocale = findSrcLocale(p_fileProfileId);
@@ -293,6 +289,25 @@ public class JobResource extends RestResource
                 .build();
     }
 
+    /**
+     * Create a job
+     * 
+     * @param p_companyName 
+     *                  Company name.
+     * @param p_jobId
+     *                  Job id.
+     * @param p_comment
+     *                  String Job comment.
+     * @param p_filePaths
+     *                  String Path of files which are contained in job, split by "|"
+     * @param p_fileProfileIds
+     *                  String ID of file profiles, split by "|"
+     * @param p_targetLocales
+     *                  String Target locales which like to be translated, split by "|"
+     * @param p_attributes
+     *                  String Attributes used to create job
+     * @return A "Create job success." message.
+     * */
     @POST
     @Path("/createJob")
     @Produces(MediaType.TEXT_PLAIN)
@@ -348,7 +363,7 @@ public class JobResource extends RestResource
             if (job == null)
             {
                 String msg = "current jobId : " + p_jobId + " does not exist.";
-                throw new RestWebServiceException(makeErrorJson(CREATE_JOB, msg));
+                throw new RestWebServiceException(msg);
             }
             cachedJobIds.add(job.getId());
             validationParameter(job, p_filePaths, p_fileProfileIds, p_targetLocales,
@@ -429,7 +444,21 @@ public class JobResource extends RestResource
                 {
                     jobatts.add(AttributeUtil.createJobAttribute(jobAttributeVo));
                 }
+                RuntimeCache.addJobAtttibutesCache(uuId, jobatts);
+            }
+            else
+            {
+                AttributeSet as = ((JobImpl) job).getAttributeSet();
+                List<Attribute> jas = as.getAttributeAsList();
+                List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
+                atts = new ArrayList<JobAttributeVo>();
 
+                for (Attribute ja : jas)
+                {
+                    JobAttributeVo vo = AttributeUtil.getAttributeVo(ja.getCloneAttribute());
+                    atts.add(vo);
+                    jobatts.add(AttributeUtil.createJobAttribute(vo));
+                }
                 RuntimeCache.addJobAtttibutesCache(uuId, jobatts);
             }
 
@@ -480,7 +509,7 @@ public class JobResource extends RestResource
                 String errXml = "You are using inactive profile ids " + invalidFpIds
                         + ", in a future release this create job may fail.";
                 logger.warn(errXml);
-                throw new RestWebServiceException(makeErrorJson(CREATE_JOB, errXml));
+                throw new RestWebServiceException(errXml);
             }
         }
         catch (Exception e)
@@ -499,9 +528,18 @@ public class JobResource extends RestResource
             }
         }
 
-        return Response.status(200).entity("Create job success!").build();
+        return Response.status(200).entity("Create job success.").build();
     }
 
+    /**
+     * Get job status by job id.
+     * 
+     * @param p_companyName
+     *                  Company name.
+     * @param p_jobId
+     *                  Job id. 
+     * @return Return job statu for JSON
+     * */
     @GET
     @Path("/{jobId}/status")
     @Produces(MediaType.APPLICATION_JSON)
@@ -563,6 +601,14 @@ public class JobResource extends RestResource
         }
     }
 
+    /**
+     * Gets exported files in one zip by job ids
+     * @param p_companyName
+     *                  Company name.
+     * @param p_jobIds
+     *                  Job ids.
+     * @return Return all export files compressed.
+     * */
     @GET
     @Path("/{jobIds}/targetFiles")
     @Produces(MediaType.APPLICATION_JSON)
@@ -592,8 +638,7 @@ public class JobResource extends RestResource
             if (p_jobIds == null || p_jobIds.trim() == "")
             {
                 errorMsg = "Job ids can not be empty.";
-                throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES,
-                        errorMsg));
+                throw new RestWebServiceException(errorMsg);
             }
 
             String[] jobIdlist = p_jobIds.split(",");
@@ -607,8 +652,7 @@ public class JobResource extends RestResource
                 if (job == null)
                 {
                     errorMsg = "Job " + jobId + " does not exist.";
-                    throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES,
-                            errorMsg));
+                    throw new RestWebServiceException(errorMsg);
                 }
 
                 String jobCompanyId = String.valueOf(job.getCompanyId());
@@ -617,8 +661,7 @@ public class JobResource extends RestResource
                         && !UserUtil.isSuperPM(user.getUserId()))
                 {
                     errorMsg = "Job " + jobId + " is not from the user's company.";
-                    throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES,
-                            errorMsg));
+                    throw new RestWebServiceException(errorMsg);
                 }
 
                 jobIds.add(jobId);
@@ -629,8 +672,7 @@ public class JobResource extends RestResource
             {
                 errorMsg = user.getUserId()
                         + " is super PM, but job ids are not from the same company.";
-                throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES,
-                        errorMsg));
+                throw new RestWebServiceException(errorMsg);
             }
 
             // Check if there are exporting workflows
@@ -684,8 +726,7 @@ public class JobResource extends RestResource
                 catch (Exception e)
                 {
                     logger.error("Error found in getJobExportFilesInZip.", e);
-                    throw new RestWebServiceException(makeErrorJson(GET_JOB_EXPORT_FILES,
-                            e.getMessage()));
+                    throw new RestWebServiceException(e.getMessage());
                 }
             }
             else
@@ -726,6 +767,43 @@ public class JobResource extends RestResource
         return null;
     }
 
+    private String getJobName(String p_jobName) throws RestWebServiceException
+    {
+        Connection connection = null;
+        PreparedStatement query = null;
+        ResultSet results = null;
+        try
+        {
+            String randomStr = String.valueOf((new Random()).nextInt(999999999));
+            while (randomStr.length() < 9)
+            {
+                randomStr = "0" + randomStr;
+            }
+            String uniqueJobName = p_jobName + "_" + randomStr;
+            String sql = "SELECT ID FROM JOB WHERE NAME=?";
+            connection = ConnectionPool.getConnection();
+            query = connection.prepareStatement(sql);
+            query.setString(1, p_jobName);
+            results = query.executeQuery();
+            if (results.next())
+            {
+                return getJobName(p_jobName);
+            }
+            else
+            {
+                return uniqueJobName;
+            }
+        }
+        catch (Exception e)
+        {
+            throw new RestWebServiceException(e.getMessage());
+        }
+        finally
+        {
+            releaseDBResource(results, query, connection);
+        }
+    }
+    
     private Map<File, String> getEntryFileToFileNameMap(Set<File> entryFiles, Set<Long> jobIdSet,
             Set<String> locales, String cxeDocsDirPath, String userId)
     {
@@ -972,34 +1050,36 @@ public class JobResource extends RestResource
             String p_targetLocales, Vector<String> fileProfileIds, Vector<String> filePaths,
             Vector<String> targetLocales) throws RestWebServiceException
     {
-        // filePaths
-        for (String path : (p_filePaths).split("\\|"))
-        {
-            filePaths.add(path);
-        }
-        // fileProfileIds
-        for (String fId : (p_fileProfileIds).split("\\|"))
-        {
-            fileProfileIds.add(fId);
-        }
-
-        ArrayList<String> list = new ArrayList<String>();
-        for (String s : fileProfileIds)
-        {
-            FileProfile fp = HibernateUtil.get(FileProfileImpl.class, Long.parseLong(s), false);
-            if (fp == null)
-            {
-                list.add(s);
-            }
-        }
-        if (list.size() > 0)
-        {
-            String invalidFpIds = AmbassadorUtil.listToString(list);
-            String errXml = "Below file profiles do not exist : " + invalidFpIds;
-            throw new RestWebServiceException(makeErrorJson(CREATE_JOB, errXml));
-        }
+       
         try
         {
+            // filePaths
+            for (String path : (p_filePaths).split("\\|"))
+            {
+                filePaths.add(path);
+            }
+            // fileProfileIds
+            for (String fId : (p_fileProfileIds).split("\\|"))
+            {
+                fileProfileIds.add(fId);
+            }
+
+            ArrayList<String> list = new ArrayList<String>();
+            for (String s : fileProfileIds)
+            {
+                FileProfile fp = HibernateUtil.get(FileProfileImpl.class, Long.parseLong(s), false);
+                if (fp == null)
+                {
+                    list.add(s);
+                }
+            }
+            if (list.size() > 0)
+            {
+                String invalidFpIds = AmbassadorUtil.listToString(list);
+                String errXml = "Below file profiles do not exist : " + invalidFpIds;
+                throw new RestWebServiceException(errXml);
+            }
+
             FileProfile fp;
             for (String fpids : fileProfileIds)
             {
@@ -1008,61 +1088,61 @@ public class JobResource extends RestResource
                 if (fp.getCompanyId() != job.getCompanyId())
                 {
                     String message = "Current user cannot create job with the file profile which is in other company.";
-                    throw new RestWebServiceException(makeErrorJson(CREATE_JOB, message));
+                    throw new RestWebServiceException(message);
+                }
+            }
+
+            // targetLocales
+            if (StringUtil.isNotEmpty(p_targetLocales))
+            {
+                handleTargetLocales(targetLocales, p_targetLocales, fileProfileIds.size());
+            }
+            else
+            {
+                handleTargetLocales(targetLocales, "", fileProfileIds.size());
+            }
+
+            GlobalSightLocale[] targetLocales_l10n = job.getL10nProfile().getTargetLocales();
+            Set<String> gls = new HashSet<String>();
+            for (GlobalSightLocale trgLoc_l10n : targetLocales_l10n)
+            {
+                gls.add(trgLoc_l10n.toString().toLowerCase());
+            }
+            StringBuilder sb = new StringBuilder();
+            for (String trgLocs : targetLocales)
+            {
+                for (String trgLoc : trgLocs.split(","))
+                {
+                    if (StringUtil.isNotEmpty(trgLocs) && !gls.contains(trgLoc.toLowerCase()))
+                    {
+                        sb.append(",");
+                        sb.append(trgLoc);
+                    }
+                }
+            }
+            if (sb.length() > 0)
+            {
+                String message = "Invalid or non-exsit tagetLocale: " + sb.toString().substring(1)
+                        + "  in current L10nProfile";
+                throw new RestWebServiceException(message);
+            }
+
+            if (filePaths != null && filePaths.size() > 0)
+            {
+                for (int i = 0; i < filePaths.size(); i++)
+                {
+                    String filePath = (String) filePaths.get(i);
+                    String extensionMsg = checkExtensionExisted(filePath);
+                    if (extensionMsg != null)
+                    {
+                        throw new RestWebServiceException(extensionMsg);
+                    }
                 }
             }
         }
         catch (Exception e)
         {
             throw new RestWebServiceException(makeErrorJson(CREATE_JOB, e.getMessage()));
-        }
-
-        // targetLocales
-        if (StringUtil.isNotEmpty(p_targetLocales))
-        {
-            handleTargetLocales(targetLocales, p_targetLocales, fileProfileIds.size());
-        }
-        else
-        {
-            handleTargetLocales(targetLocales, "", fileProfileIds.size());
-        }
-
-        GlobalSightLocale[] targetLocales_l10n = job.getL10nProfile().getTargetLocales();
-        Set<String> gls = new HashSet<String>();
-        for (GlobalSightLocale trgLoc_l10n : targetLocales_l10n)
-        {
-            gls.add(trgLoc_l10n.toString().toLowerCase());
-        }
-        StringBuilder sb = new StringBuilder();
-        for (String trgLocs : targetLocales)
-        {
-            for (String trgLoc : trgLocs.split(","))
-            {
-                if (StringUtil.isNotEmpty(trgLocs) && !gls.contains(trgLoc.toLowerCase()))
-                {
-                    sb.append(",");
-                    sb.append(trgLoc);
-                }
-            }
-        }
-        if (sb.length() > 0)
-        {
-            String message = "Invalid or non-exsit tagetLocale: " + sb.toString().substring(1)
-                    + "  in current L10nProfile";
-            throw new RestWebServiceException(makeErrorJson(CREATE_JOB, message));
-        }
-
-        if (filePaths != null && filePaths.size() > 0)
-        {
-            for (int i = 0; i < filePaths.size(); i++)
-            {
-                String filePath = (String) filePaths.get(i);
-                String extensionMsg = checkExtensionExisted(filePath);
-                if (extensionMsg != null)
-                {
-                    throw new RestWebServiceException(makeErrorJson(CREATE_JOB, extensionMsg));
-                }
-            }
         }
     }
 

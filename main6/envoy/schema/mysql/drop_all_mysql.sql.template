@@ -289,7 +289,6 @@ DROP TABLE IF EXISTS base_filter CASCADE;
 DROP TABLE IF EXISTS base_filter_mapping CASCADE;
 
 DROP TABLE IF EXISTS xliff_alt CASCADE;
-DROP TABLE IF EXISTS gs_edition CASCADE;
 DROP TABLE IF EXISTS tu_concept_relation CASCADE;
 DROP TABLE IF EXISTS remote_access_history CASCADE;
 

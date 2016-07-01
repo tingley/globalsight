@@ -357,9 +357,6 @@
            <amb:permission  name="<%=Permission.JOB_WORKFLOWS_SKIP%>" >
                <input id="skip" class="standardText" type="button" name="skip" value="<%=bundle.getString("lb_skip_activity")%>" onClick="submitForm('skip');"/>
            </amb:permission>
-           <c:if test="${sending_back_edition}">
-           	   <input class="standardText" type="button" name="ReSendingBack" value="<%=bundle.getString("lb_resendingback_edition_job")%>" onclick="submitForm('sendingbackEditionJob');"/>
-           </c:if>
             <%if(showButton && enableQAChecks && allowManualRunningQAChecks){ %>
   			<INPUT TYPE="BUTTON" NAME=downloadQAReport VALUE="<%=bundle.getString("lb_download_qa_reports")%>" onClick="submitForm('downloadQAReport')">
     		<% } %>
@@ -1054,12 +1051,6 @@ function realSubmitForm(specificButton){
            }
 	   }
 	   var url = "${skip.pageURL}&wfId=" + wfId + "&jobId=${jobId}";
-	   $("#workflowForm").attr("action", url);
-	   $("#workflowForm").submit();
-   }
-   else if (specificButton == "sendingbackEditionJob")
-   {
-	   var url = "${self.pageURL}&action=sendingbackEditionJob&wfId=" + wfId + "&jobId=${jobId}";
 	   $("#workflowForm").attr("action", url);
 	   $("#workflowForm").submit();
    }

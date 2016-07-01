@@ -491,10 +491,10 @@ public class Permission
     static public final String BASE_TEXT_FILTER_INTERNAL_TEXT = "base.text.filter.internal.text";
     static public final String BASE_TEXT_FILTER_ESCAPING = "base.text.filter.escaping";
 
-    static public final String GSEDITION_VIEW = "gsedition.view";
-    static public final String GSEDITION_REMOVE = "gsedition.remove";
-    static public final String GSEDITION_EDIT = "gsedition.edit";
-    static public final String GSEDITION_NEW = "gsedition.new";
+//    static public final String GSEDITION_VIEW = "gsedition.view";
+//    static public final String GSEDITION_REMOVE = "gsedition.remove";
+//    static public final String GSEDITION_EDIT = "gsedition.edit";
+//    static public final String GSEDITION_NEW = "gsedition.new";
 
     static public final String ADD_SOURCE_FILES = "sourceFiles.add";
     static public final String DELETE_SOURCE_FILES = "sourceFiles.delete";
@@ -930,10 +930,10 @@ public class Permission
         added = addPermission(330, JOB_ATTRIBUTE_REPORT) || added;
 
         // GSEdition
-        added = addPermission(331, GSEDITION_VIEW) || added;
-        added = addPermission(332, GSEDITION_REMOVE) || added;
-        added = addPermission(333, GSEDITION_EDIT) || added;
-        added = addPermission(334, GSEDITION_NEW) || added;
+//        added = addPermission(331, GSEDITION_VIEW) || added;
+//        added = addPermission(332, GSEDITION_REMOVE) || added;
+//        added = addPermission(333, GSEDITION_EDIT) || added;
+//        added = addPermission(334, GSEDITION_NEW) || added;
 
         added = addPermission(339, CVS_Servers) || added;
         added = addPermission(340, CVS_Servers_NEW) || added;

@@ -304,6 +304,9 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
 
         key = OfflineConstants.POPULATE_100;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
+        
+        key = OfflineConstants.POPULATE_MT;
+        optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
 
         key = OfflineConstants.POPULATE_FUZZY;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");

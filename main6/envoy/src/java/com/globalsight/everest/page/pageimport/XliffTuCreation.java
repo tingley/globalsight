@@ -139,6 +139,10 @@ public class XliffTuCreation implements IXliffTuCreation
         {
             String altLanguage = elem.getAttribute("altLanguage");
             String altQuality = elem.getAttribute("altQuality");
+            if(altQuality.endsWith("%"))
+            {
+                altQuality = altQuality.substring(0, altQuality.indexOf("%"));
+            }
             String altMid = elem.getAttribute("altMid");
             GxmlElement seg = (GxmlElement) elem.getChildElements().get(0);
             ArrayList<Tu> array = (ArrayList<Tu>) p_lg.getTus(false);

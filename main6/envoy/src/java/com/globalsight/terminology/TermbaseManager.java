@@ -481,6 +481,7 @@ public class TermbaseManager implements TermbaseExceptionMessages
         try
         {
             conn = DbUtil.getConnection();
+            conn.setAutoCommit(false);
             stmt = conn.createStatement();
             stmt.addBatch("delete from TB_TERMBASE where tbid=" + p_tb.getId());
             stmt.executeBatch();

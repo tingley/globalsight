@@ -20,9 +20,6 @@ package com.globalsight.restful.version1_0.job;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-
-import com.globalsight.ling.common.URLDecoder;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -131,14 +128,15 @@ public class JobResource extends RestResource
     private static Set<Long> cachedJobIds = Collections.synchronizedSet(new HashSet<Long>());
 
     /**
-     * Get a unique job name.
+     * Get an unique job name.
      * 
      * @param p_companyName 
-     *                  Company name.
+     *                  Company name. Required.
      * @param p_jobName 
-     *                  Job name.
-     * @return Return a unique job name, it does not exist in the database.
-     * */
+     *                  Job name. Required.
+     * @return Return an unique job name in current system.
+     * 
+     */
     @GET
     @Path("/getUniqueJobName")
     @Produces(MediaType.TEXT_PLAIN)
@@ -177,7 +175,24 @@ public class JobResource extends RestResource
             }
         }
     }
-    
+
+    /**
+     * Upload source file to server side.
+     * 
+     * @param p_companyName
+     *            Company name. Required.
+     * @param p_jobName
+     *            Job name. Required.
+     * @param p_fileProfileId
+     *            File profile ID for current file. Required.
+     * @param p_input
+     *            Uploading source file content. Required.
+     *
+     * @return A successful message
+     * 
+     * @throws RestWebServiceException
+     * 
+     */
     @POST
     @Path("/sourceFiles")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -293,21 +308,38 @@ public class JobResource extends RestResource
      * Create a job
      * 
      * @param p_companyName 
-     *                  Company name.
+     *                  Company name. Required.
      * @param p_jobId
-     *                  Job id.
-     * @param p_comment
-     *                  String Job comment.
+     *                  Job id. Required.
      * @param p_filePaths
-     *                  String Path of files which are contained in job, split by "|"
+     *                  String Path of files which are contained in job, split by "|". Required.
      * @param p_fileProfileIds
-     *                  String ID of file profiles, split by "|"
+     *                  String ID of file profiles, split by "|". Required.
      * @param p_targetLocales
-     *                  String Target locales which like to be translated, split by "|"
+     *                  String Target locales which like to be translated, split by "|". Optional.
+     * @param p_comment
+     *                  String Job comment. Optional.
      * @param p_attributes
-     *                  String Attributes used to create job
+     *                  String Attributes used to create job. Optional. Example: 
+     *            <attributes>
+     *                      <attributes xsi:type="fileJobAttributeVo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+     *                          <displayName>file_01</displayName>
+     *                          <fromSuperCompany>false</fromSuperCompany>
+     *                          <internalName>file_01</internalName>
+     *                          <required>false</required> 
+     *                          <type>file</type> 
+     *                      </attributes>
+     *                      <attributes xsi:type="textJobAttributeVo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+     *                          <displayName>file_02</displayName>
+     *                          <fromSuperCompany>false</fromSuperCompany>
+     *                          <internalName>file_02</internalName>
+     *                          <required>false</required> 
+     *                          <type>text</type> 
+     *                      </attributes>
+     *            </attributes>
      * @return A "Create job success." message.
-     * */
+     * 
+     */
     @POST
     @Path("/createJob")
     @Produces(MediaType.TEXT_PLAIN)
@@ -315,10 +347,10 @@ public class JobResource extends RestResource
             @HeaderParam("accessToken") List<String> accessToken,
             @PathParam("companyName") String p_companyName,
             @QueryParam("jobId") String p_jobId,
-            @QueryParam("comment") String p_comment,
             @QueryParam("filePaths") String p_filePaths,
             @QueryParam("fileProfileIds") String p_fileProfileIds,
             @QueryParam("targetLocales") String p_targetLocales,
+            @QueryParam("comment") String p_comment,
             @QueryParam("attributes") String p_attributes) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
@@ -366,7 +398,7 @@ public class JobResource extends RestResource
                 throw new RestWebServiceException(msg);
             }
             cachedJobIds.add(job.getId());
-            validationParameter(job, p_filePaths, p_fileProfileIds, p_targetLocales,
+            validateParameters(job, p_filePaths, p_fileProfileIds, p_targetLocales,
                     fileProfileIds, filePaths, targetLocales);
 
             fppm = ServerProxy.getFileProfilePersistenceManager();
@@ -506,10 +538,10 @@ public class JobResource extends RestResource
             if (inactive_list.size() > 0)
             {
                 String invalidFpIds = AmbassadorUtil.listToString(inactive_list);
-                String errXml = "You are using inactive profile ids " + invalidFpIds
+                String errMsg = "You are using inactive profile ids " + invalidFpIds
                         + ", in a future release this create job may fail.";
-                logger.warn(errXml);
-                throw new RestWebServiceException(errXml);
+                logger.warn(errMsg);
+                throw new RestWebServiceException(errMsg);
             }
         }
         catch (Exception e)
@@ -535,11 +567,13 @@ public class JobResource extends RestResource
      * Get job status by job id.
      * 
      * @param p_companyName
-     *                  Company name.
+     *                  Company name. Required.
      * @param p_jobId
-     *                  Job id. 
-     * @return Return job statu for JSON
-     * */
+     *                  Job id.  Required.
+     * 
+     * @return Return job status for JSON
+     * 
+     */
     @GET
     @Path("/{jobId}/status")
     @Produces(MediaType.APPLICATION_JSON)
@@ -603,12 +637,15 @@ public class JobResource extends RestResource
 
     /**
      * Gets exported files in one zip by job ids
+     * 
      * @param p_companyName
-     *                  Company name.
+     *                  Company name. Required.
      * @param p_jobIds
-     *                  Job ids.
+     *                  Job ids. Required.
+     * 
      * @return Return all export files compressed.
-     * */
+     * 
+     */
     @GET
     @Path("/{jobIds}/targetFiles")
     @Produces(MediaType.APPLICATION_JSON)
@@ -783,10 +820,11 @@ public class JobResource extends RestResource
             String sql = "SELECT ID FROM JOB WHERE NAME=?";
             connection = ConnectionPool.getConnection();
             query = connection.prepareStatement(sql);
-            query.setString(1, p_jobName);
+            query.setString(1, uniqueJobName);
             results = query.executeQuery();
             if (results.next())
             {
+                releaseDBResource(results, query, connection);
                 return getJobName(p_jobName);
             }
             else
@@ -1046,7 +1084,7 @@ public class JobResource extends RestResource
         return path;
     }
 
-    private void validationParameter(Job job, String p_filePaths, String p_fileProfileIds,
+    private void validateParameters(Job job, String p_filePaths, String p_fileProfileIds,
             String p_targetLocales, Vector<String> fileProfileIds, Vector<String> filePaths,
             Vector<String> targetLocales) throws RestWebServiceException
     {
@@ -1076,8 +1114,8 @@ public class JobResource extends RestResource
             if (list.size() > 0)
             {
                 String invalidFpIds = AmbassadorUtil.listToString(list);
-                String errXml = "Below file profiles do not exist : " + invalidFpIds;
-                throw new RestWebServiceException(errXml);
+                String errMsg = "Below file profiles do not exist : " + invalidFpIds;
+                throw new RestWebServiceException(errMsg);
             }
 
             FileProfile fp;
@@ -1142,7 +1180,7 @@ public class JobResource extends RestResource
         }
         catch (Exception e)
         {
-            throw new RestWebServiceException(makeErrorJson(CREATE_JOB, e.getMessage()));
+            throw new RestWebServiceException(e.getMessage());
         }
     }
 
@@ -1658,7 +1696,7 @@ public class JobResource extends RestResource
         }
         catch (ConnectionPoolException e)
         {
-            e.printStackTrace();
+            logger.error("Closing Connection", e);
         }
     }
 

@@ -132,21 +132,10 @@ public class Hits
             
             String str = doc.get(IndexDocument.TEXT).toLowerCase();
 
-            if (m_isTerm)
+            if (text.indexOf(str) > -1 || str.indexOf(text) > -1)
             {
-                if (str.indexOf(text) > -1)
-                {
-                    m_hits.add(new Hit(doc.get(IndexDocument.MAINID), doc.get(IndexDocument.SUBID),
-                            doc.get(IndexDocument.TEXT), score));
-                }
-            }
-            else
-            {
-                if (text.indexOf(str) > -1 || str.indexOf(text) > -1)
-                {
-                    m_hits.add(new Hit(doc.get(IndexDocument.MAINID), doc.get(IndexDocument.SUBID),
-                            doc.get(IndexDocument.TEXT), score));
-                }
+                m_hits.add(new Hit(doc.get(IndexDocument.MAINID), doc.get(IndexDocument.SUBID),
+                        doc.get(IndexDocument.TEXT), score));
             }
         }
     }

@@ -271,7 +271,7 @@ else
 {
 	lb_title = "Post Review Editor";
 }
-lb_title = lb_title + " - " + state.getSimpleSourcePageName();
+lb_title = "Post Review Editor - " + state.getSimpleSourcePageName();
 
 String url_self = self.getPageURL();
 String url_refresh     = refresh.getPageURL();

@@ -456,11 +456,11 @@ public class Ambassador extends AbstractWebService
      * minimal version to allow access webservice, 8.2 is the current version of
      * desktop. Abandoned since 8.2.1.
      */
-    private static String VERSION = "(3.1,8.5)";
+    private static String VERSION = "(3.1,8.7)";
 
     // new version used to check, since 8.2.1
     // need to be changed according to the release version each time
-    private static String VERSION_NEW = "(3.1,8.5)";
+    private static String VERSION_NEW = "(3.1,8.7)";
 
     /**
      * used by checkIfInstalled() to remember whether the web service is

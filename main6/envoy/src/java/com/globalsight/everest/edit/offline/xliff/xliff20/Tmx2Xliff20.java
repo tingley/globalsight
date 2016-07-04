@@ -496,6 +496,11 @@ public class Tmx2Xliff20
         for (Object o : us)
         {
             Unit u = (Unit) o;
+            if (u.getTranslate() != null && "no".equalsIgnoreCase(u.getTranslate().value()))
+            {
+                continue;
+            }
+
             Segment seg = (Segment) u.getSegmentOrIgnorable().get(0);
             Target t = seg.getTarget();
             Map<String, String> subType = getSourceSubTypes(seg);

@@ -2629,9 +2629,32 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                         sourceLocale = osd.getSourceTuv().getGlobalSightLocale().getLocaleCode();
                         targetLocale = osd.getTargetTuv().getGlobalSightLocale().getLocaleCode();
                     }
-
+                    
+                    String translateTuString = null;
                     boolean isCreatedFromMT = false;
+                    String[] translatedSrcTrgSegments = new String[2];
+                    // ## Compose the translated segment into tmx string first,
+                    // but write at last.
+                    if (!isPenaltyTmx && osd.getTargetTuv() != null
+                            && osd.getTargetTuv().isLocalized())
+                    {
+                        userId = osd.getTargetTuv().getLastModifiedUser();
+                        isCreatedFromMT = isCreatedFromMTEngine(userId);
+                        if (isAddLocalizedTargetAsTu(p_mode, isCreatedFromMT))
+                        {
+                            translateTuString = getTranslatedTuString(osd, sourceText, sourceLocale,
+                                    targetText, targetLocale, isOmegaT, isFromXliff, p_tmxLevel,
+                                    changeCreationIdToMT, translatedSrcTrgSegments);
+                        }
+                    }
 
+                    // avoid to output two same tu for Machine Translate
+                    boolean isAddTrasnlatedTU = true;
+                    if (StringUtil.isEmpty(translateTuString))
+                    {
+                        isAddTrasnlatedTU = false;
+                    }
+                    
                     // Write TM matches into tmx.
                     StringBuffer exactAndFuzzy = new StringBuffer();
                     List<LeverageMatch> allLMs = new ArrayList<LeverageMatch>();
@@ -2673,11 +2696,17 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                                 targetText = convertLf(targetText, p_tmxLevel);
                             }
 
-                           if (p_mode == TmxUtil.TMX_MODE_INC_ALL && !isCreatedFromMT                             
+                           if (p_mode == TmxUtil.TMX_MODE_INC_ALL
                                     || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
                                     || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT)
                                     || (p_mode == TmxUtil.TMX_MODE_NON_ICE && !isCreatedFromMT))
                             {
+                               if (isSameAsLocalizedSegments(translatedSrcTrgSegments, sourceText,
+                                       targetText))
+                               {
+                                   isAddTrasnlatedTU = false;
+                               }
+                               
                                 TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(sourceText,
                                         m_sourceLocaleName, null, null, null, null);
                                 TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(targetText,
@@ -2692,6 +2721,12 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                         }
 
                         p_outputStream.write(exactAndFuzzy.toString());
+                    }
+                    
+
+                    if (isAddTrasnlatedTU)
+                    {
+                        p_outputStream.write(translateTuString);
                     }
                 }
             }

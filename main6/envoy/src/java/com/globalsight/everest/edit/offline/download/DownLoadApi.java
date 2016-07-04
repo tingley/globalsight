@@ -1522,7 +1522,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             {
                 mode = TmxUtil.TMX_MODE_NON_ICE;
             }
-            else if (separateTmFile)
+            else
 			{
 				mode = TmxUtil.TMX_MODE_TM_ONLY;
 			}
@@ -1532,6 +1532,24 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 m_zipper.writePath(full14bPath);
                 m_zipper.writeTmxPage(p_page, p_downloadParams,
                         TmxUtil.TMX_LEVEL_TWO, convertLF, mode, false);
+            }
+            
+            if (separateTmFile && full14bPath != null)
+            {
+                // add mt files
+                mode = TmxUtil.TMX_MODE_MT_ONLY;
+                String mtPath = DownloadHelper.makeMt14bParentPath(m_downloadParams);
+                mtPath = mtPath + fname;
+                sb = new StringBuffer();
+                sb.append(m_resource.getString("msg_dnld_adding_file"));
+                sb.append("/mt/");
+                sb.append(fname);
+                m_pageCounter++;
+                m_status.speak(m_pageCounter, sb.toString());
+
+                m_zipper.writePath(mtPath);
+                m_zipper.writeTmxPage(p_page, p_downloadParams, TmxUtil.TMX_LEVEL_TWO, convertLF,
+                        mode, false);
             }
 
             if (fullPlainPath != null)

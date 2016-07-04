@@ -466,7 +466,6 @@ public abstract class AbstractTargetPagePersistence implements
                         jobId);
             }
 
-            XliffAlt maxScoreAlt = processor.getMaxScoreAlt();
             ExtractedSourceFile esf = (ExtractedSourceFile) p_sourcePage
                     .getExtractedFile();
             boolean isPO = IFormatNames.FORMAT_PO.equals(esf.getDataType());
@@ -502,9 +501,6 @@ public abstract class AbstractTargetPagePersistence implements
                     // Perhaps need re-factor below 2 methods in future.
                     float tmScore = getTMScore(tu, src, trg, isPassolo,
                             tu.getPassoloState());
-                    boolean needLeverageMatch = hasValidLeverageMatch(tu, src,
-                            trg, sourceTuv, tmScore);
-
                     if (isPassolo && "New".equals(tu.getPassoloState()))
                     {
                         boolean equals = isSrcEqualsTrg(src, trg);
@@ -514,63 +510,17 @@ public abstract class AbstractTargetPagePersistence implements
                             targetTuv.setGxml(targetGxml);
                             tu.addTuv(targetTuv);
                             p_appliedTuTuvMap.put(tu, targetTuv);
-
-                            needLeverageMatch = false;
                         }
                     }
-
-                    if (needLeverageMatch)
+                    //save xlf/po target into "leverage_match
+                    if (!isSrcEqualsTrg(src, trg) || (!"".equals(src) && !"".equals(src)
+                            && "no".equals(tu.getTranslate())) && !isPassolo)
                     {
-                        // save XLF/PO target into "leverage_match"
-                        LeverageMatch lm = new LeverageMatch();
-                        lm.setSourcePageId(p_sourcePage.getIdAsLong());
-                        lm.setOriginalSourceTuvId(sourceTuv.getIdAsLong());
-                        lm.setSubId("0");
-                        // Put xliff target or best alt-trans
-                        if (!trg.isEmpty())
-                        {
-                            lm.setMatchedText(tu.getXliffTarget());
-                            lm.setMatchedOriginalSource(sourceTuv.getGxml());
-                        }
-                        else if (sourceTuv.getXliffAlt(false) != null
-                                && sourceTuv.getXliffAlt(false).size() > 0)
-                        {
-                            lm.setMatchedText(maxScoreAlt.getSegment());
-                            lm.setMatchedOriginalSource(maxScoreAlt
-                                    .getSourceSegment());
-                        }
-                        lm.setMatchedClob(null);
-                        lm.setTargetLocale(targetTuv.getGlobalSightLocale());
-                        // XLF and PO target use "-1" as "order_num".
-                        lm.setOrderNum((short) TmCoreManager.LM_ORDER_NUM_START_XLF_PO_TARGET);
+                        LeverageMatch lm = saveToLev(p_sourcePage, sourceTuv, targetTuv,
+                                isPO, tmProfile, tmScore);
+                        lm.setMatchedText(tu.getXliffTarget());
+                        lm.setMatchedOriginalSource(sourceTuv.getGxml());
                         lm.setScoreNum(tmScore);
-
-                        if (tmScore < 100)
-                        {
-                            lm.setMatchType(MatchState.FUZZY_MATCH.getName());
-                        }
-                        else if (isPO)
-                        {
-                            lm.setMatchType(MatchState.PO_EXACT_MATCH.getName());
-                        }
-                        else
-                        {
-                            lm.setMatchType(MatchState.XLIFF_EXACT_MATCH
-                                    .getName());
-                        }
-
-                        lm.setMatchedTuvId(-1);
-                        lm.setProjectTmIndex(isPO ? Leverager.PO_TM_PRIORITY
-                                : Leverager.XLIFF_PRIORITY);
-                        lm.setTmId(0);
-                        lm.setTmProfileId(tmProfile.getIdAsLong());
-                        lm.setMtName(null);
-
-                        lm.setSid(sourceTuv.getSid());
-                        lm.setCreationUser(sourceTuv.getCreatedUser());
-                        lm.setCreationDate(sourceTuv.getLastModified());
-                        lm.setModifyDate(sourceTuv.getLastModified());
-
                         lmCollection.add(lm);
 
                         IXliffMatchesProcessor xlfProcess = new XliffMatchesProcess();
@@ -581,13 +531,40 @@ public abstract class AbstractTargetPagePersistence implements
                         }
                         if (!trg.isEmpty())
                         {
-                            boolean success = xlfProcess
-                                    .addTargetTuvToTu(tu, sourceTuv, targetTuv,
-                                            src, trg, p_appliedTuTuvMap,
-                                            tmScore, threshold, isPO);
-                            if (success)
+                            xlfProcess.addTargetTuvToTu(tu, sourceTuv, targetTuv, src, trg,
+                                    p_appliedTuTuvMap, tmScore, threshold, isPO);
+                        }
+                    }
+                    //save all alt-trans to "leverage_match"
+                    if (sourceTuv.getXliffAlt(false) != null
+                            && sourceTuv.getXliffAlt(false).size() > 0 && !isPassolo)
+                    {
+                        Set<XliffAlt> altSet = new HashSet<XliffAlt>();
+                        altSet.addAll(sourceTuv.getXliffAlt(false));
+                        if (altSet != null)
+                        {
+                            Iterator ite = altSet.iterator();
+                            while (ite.hasNext())
                             {
-                                continue;
+                                XliffAlt alt = (XliffAlt) ite.next();
+                                LeverageMatch lm = saveToLev(p_sourcePage, sourceTuv, targetTuv,
+                                        isPO, tmProfile, tmScore);
+                                lm.setMatchedText(alt.getSegment());
+                                lm.setMatchedOriginalSource(alt.getSourceSegment());
+                                lm.setScoreNum(Float.parseFloat(alt.getQuality()));
+                                lmCollection.add(lm);
+
+                                IXliffMatchesProcessor xlfProcess = new XliffMatchesProcess();
+
+                                if (tu.hasXliffTMScoreStr())
+                                {
+                                    xlfProcess = new WSMatchesProcess();
+                                }
+                                if (!trg.isEmpty())
+                                {
+                                    xlfProcess.addTargetTuvToTu(tu, sourceTuv, targetTuv, src, trg,
+                                            p_appliedTuTuvMap, tmScore, threshold, isPO);
+                                }
                             }
                         }
                     }
@@ -599,6 +576,43 @@ public abstract class AbstractTargetPagePersistence implements
                 lmCollection, jobId);
 
         return p_appliedTuTuvMap;
+    }
+
+    private LeverageMatch saveToLev(SourcePage p_sourcePage, Tuv sourceTuv, Tuv targetTuv,
+            boolean isPO, TranslationMemoryProfile tmProfile, float tmScore)
+    {
+        LeverageMatch lm = new LeverageMatch();
+        lm.setSourcePageId(p_sourcePage.getIdAsLong());
+        lm.setOriginalSourceTuvId(sourceTuv.getIdAsLong());
+        lm.setSubId("0");
+        lm.setMatchedClob(null);
+        lm.setTargetLocale(targetTuv.getGlobalSightLocale());
+        // XLF and PO target use "-1" as "order_num".
+        lm.setOrderNum((short) TmCoreManager.LM_ORDER_NUM_START_XLF_PO_TARGET);
+        if (tmScore < 100)
+        {
+            lm.setMatchType(MatchState.FUZZY_MATCH.getName());
+        }
+        else if (isPO)
+        {
+            lm.setMatchType(MatchState.PO_EXACT_MATCH.getName());
+        }
+        else
+        {
+            lm.setMatchType(MatchState.XLIFF_EXACT_MATCH.getName());
+        }
+
+        lm.setMatchedTuvId(-1);
+        lm.setProjectTmIndex(isPO ? Leverager.PO_TM_PRIORITY : Leverager.XLIFF_PRIORITY);
+        lm.setTmId(0);
+        lm.setTmProfileId(tmProfile.getIdAsLong());
+        lm.setMtName(null);
+
+        lm.setSid(sourceTuv.getSid());
+        lm.setCreationUser(sourceTuv.getCreatedUser());
+        lm.setCreationDate(sourceTuv.getLastModified());
+        lm.setModifyDate(sourceTuv.getLastModified());
+        return lm;
     }
 
     /**
@@ -676,23 +690,23 @@ public abstract class AbstractTargetPagePersistence implements
                         .getIdAsLong());
                 if (lss != null && lss.size() > 0)
                 {
-                	int hashMatchedNum = getHashMatchedNum(sourceTuv, lss);
+                    int hashMatchedNum = getHashMatchedNum(sourceTuv, lss);
                     LeverageSegment segment = SegmentUtil2
                             .getNextBestLeverageSegment(sourceTuv, lss);
                     while (segment != null)
                     {
                         hasOneHundredMatch = true;
-						boolean isTagMatched = SegmentUtil2.canBeModified(
-								targetTuv, segment.getSegment(), jobId);
-						// for most cases
+                        boolean isTagMatched = SegmentUtil2.canBeModified(
+                                targetTuv, segment.getSegment(), jobId);
+                        // for most cases
                         if (isTagMatched)
                         {
                             targetTuv = modifyTUV(targetTuv, segment);
                             tuvGotChanged = true;
-							// If there is only one hash matched match in
-							// multiple exact matches, target TUV state should
-							// be exact match instead of not_localized for
-							// multiple translation.     
+                            // If there is only one hash matched match in
+                            // multiple exact matches, target TUV state should
+                            // be exact match instead of not_localized for
+                            // multiple translation.     
                             //GBS-4360: Part of ICE matches can't be locked in offline file
                             if (hashMatchedNum == 1
                                     && isHashValueMatched(sourceTuv, segment)
@@ -706,16 +720,16 @@ public abstract class AbstractTargetPagePersistence implements
                         // for special cases, had better to have
                         else
                         {
-							String segment2 = SegmentUtil2.adjustSegmentAttributeValues(
-								targetTuv.getGxmlElement(), 
-									SegmentUtil2.getGxmlElement(segment.getSegment()),
-										tu.getDataType());
-							isTagMatched = SegmentUtil2.canBeModified(
-									targetTuv, segment2, jobId);
+                            String segment2 = SegmentUtil2.adjustSegmentAttributeValues(
+                                targetTuv.getGxmlElement(), 
+                                    SegmentUtil2.getGxmlElement(segment.getSegment()),
+                                        tu.getDataType());
+                            isTagMatched = SegmentUtil2.canBeModified(
+                                    targetTuv, segment2, jobId);
                             if (isTagMatched)
                             {
-								segment2 = getTargetGxmlFitForItsOwnSourceContent(
-										sourceTuv, segment2, jobId);
+                                segment2 = getTargetGxmlFitForItsOwnSourceContent(
+                                        sourceTuv, segment2, jobId);
                                 segment.setSegment(segment2);
                                 targetTuv = modifyTUV(targetTuv, segment);
                                 tuvGotChanged = true;
@@ -830,36 +844,36 @@ public abstract class AbstractTargetPagePersistence implements
     }
 
     /**
-	 * Return the number of leverage segments that have same previous hash and
-	 * next hash as source TUV's.
-	 */
-	private int getHashMatchedNum(Tuv srcTuv, List<LeverageSegment> lss)
-	{
-		long preHash = srcTuv.getPreviousHash();
-		long nextHash = srcTuv.getNextHash();
-		int num = 0;
-		for (LeverageSegment ls : lss)
-		{
-			if (preHash != -1 && nextHash != -1
-					&& preHash == ls.getPreviousHash()
-					&& nextHash == ls.getNextHash())
-			{
-				num++;
-			}
-		}
-		return num;
-	}
+     * Return the number of leverage segments that have same previous hash and
+     * next hash as source TUV's.
+     */
+    private int getHashMatchedNum(Tuv srcTuv, List<LeverageSegment> lss)
+    {
+        long preHash = srcTuv.getPreviousHash();
+        long nextHash = srcTuv.getNextHash();
+        int num = 0;
+        for (LeverageSegment ls : lss)
+        {
+            if (preHash != -1 && nextHash != -1
+                    && preHash == ls.getPreviousHash()
+                    && nextHash == ls.getNextHash())
+            {
+                num++;
+            }
+        }
+        return num;
+    }
 
-	private boolean isHashValueMatched(Tuv srcTuv, LeverageSegment ls)
-	{
-		if (srcTuv.getPreviousHash() != -1 && srcTuv.getNextHash() != -1
-				&& srcTuv.getPreviousHash() == ls.getPreviousHash()
-				&& srcTuv.getNextHash() == ls.getNextHash())
-		{
-			return true;
-		}
-		return false;
-	}
+    private boolean isHashValueMatched(Tuv srcTuv, LeverageSegment ls)
+    {
+        if (srcTuv.getPreviousHash() != -1 && srcTuv.getNextHash() != -1
+                && srcTuv.getPreviousHash() == ls.getPreviousHash()
+                && srcTuv.getNextHash() == ls.getNextHash())
+        {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Hit MT to get matches for un-applied segments. MT matches will be stored
@@ -1228,6 +1242,10 @@ public abstract class AbstractTargetPagePersistence implements
             return true;
         }
 
+        if (p_sourceTuv.getXliffAlt(false) != null && p_sourceTuv.getXliffAlt(false).size() > 0)
+        {
+            return true;
+        }
         boolean equals = isSrcEqualsTrg(p_srcSegment, p_trgSegment);
 
         if (!tu.hasXliffTMScoreStr())

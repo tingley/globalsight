@@ -21,8 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.globalsight.ling.common.URLDecoder;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -292,20 +290,37 @@ public class JobResource extends RestResource
     /**
      * Create a job
      * 
-     * @param p_companyName 
-     *                  Company name.
+     * @param p_companyName
+     *            Company name.
      * @param p_jobId
-     *                  Job id.
+     *            Job id.
      * @param p_comment
-     *                  String Job comment.
+     *            String Job comment.
      * @param p_filePaths
-     *                  String Path of files which are contained in job, split by "|"
+     *            String Path of files which are contained in job, split by "|"
      * @param p_fileProfileIds
-     *                  String ID of file profiles, split by "|"
+     *            String ID of file profiles, split by "|"
      * @param p_targetLocales
-     *                  String Target locales which like to be translated, split by "|"
+     *            String Target locales which like to be translated, split by
+     *            "|"
      * @param p_attributes
-     *                  String Attributes used to create job
+     *            String Attributes used to create job,example: 
+     *            <attributes>
+     *                      <attributes xsi:type="fileJobAttributeVo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+     *                          <displayName>file_01</displayName>
+     *                          <fromSuperCompany>false</fromSuperCompany>
+     *                          <internalName>file_01</internalName>
+     *                          <required>false</required> 
+     *                          <type>file</type> 
+     *                      </attributes>
+     *                      <attributes xsi:type="textJobAttributeVo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+     *                          <displayName>file_02</displayName>
+     *                          <fromSuperCompany>false</fromSuperCompany>
+     *                          <internalName>file_02</internalName>
+     *                          <required>false</required> 
+     *                          <type>text</type> 
+     *                      </attributes>
+     *            </attributes>
      * @return A "Create job success." message.
      * */
     @POST
@@ -783,10 +798,11 @@ public class JobResource extends RestResource
             String sql = "SELECT ID FROM JOB WHERE NAME=?";
             connection = ConnectionPool.getConnection();
             query = connection.prepareStatement(sql);
-            query.setString(1, p_jobName);
+            query.setString(1, uniqueJobName);
             results = query.executeQuery();
             if (results.next())
             {
+                releaseDBResource(results, query, connection);
                 return getJobName(p_jobName);
             }
             else
@@ -1658,7 +1674,7 @@ public class JobResource extends RestResource
         }
         catch (ConnectionPoolException e)
         {
-            e.printStackTrace();
+            logger.error("Closing Connection", e);
         }
     }
 

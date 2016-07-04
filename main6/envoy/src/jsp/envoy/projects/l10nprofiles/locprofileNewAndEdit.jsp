@@ -20,7 +20,6 @@
      com.globalsight.everest.util.system.SystemConfigParamNames,
      com.globalsight.everest.util.system.SystemConfiguration,
 	 java.lang.Integer, java.util.Locale,
-     com.globalsight.util.GeneralException,
 	 java.util.ResourceBundle,
      java.util.Collections,
      com.globalsight.util.collections.HashtableValueOrderWalker,
@@ -388,6 +387,13 @@ $(document).ready(function editPage(){
 					<option value="${NO_TM_USAGE}" <c:if test="${LocProfileTMUsageId==NO_TM_USAGE}">selected="selected"</c:if>><%=bundle.getString("lb_no")%></option>
 				</select>
 			</div>
+            <div>
+                <label for="useMtOnJobCreation"><%=bundle.getString("lb_use_machine_translation")%><span class="asterisk">*</span>:</label>
+				<select id="useMtOnJobCreation" name="useMtOnJobCreation">
+					<option value="true" <c:if test="${useMtOnJobCreation==true}">selected="selected"</c:if>><%=bundle.getString("lb_automatic")%></option>
+					<option value="false" <c:if test="${useMtOnJobCreation==false}">selected="selected"</c:if>><%=bundle.getString("lb_manual")%></option>
+				</select>
+            </div>
 			<div>
 				<label for="AutomaticDispatch"><%=bundle.getString("lb_workflow_dispatch")%><span class="asterisk">*</span>:</label>
 				<select id="AutomaticDispatch" name="AutomaticDispatch">

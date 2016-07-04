@@ -32,6 +32,8 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
  <jsp:useBean id="imageUploader" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
+ <jsp:useBean id="tb" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
@@ -198,7 +200,7 @@ catch (Exception e)
     // ignore this exceptiopn
 }
 
-
+String url_tb = tb.getPageURL();
 %>
 <!-- This JSP is: envoy/edit/online/ce_main.jsp -->
 <html>
@@ -212,7 +214,7 @@ catch (Exception e)
 
 @import url(/globalsight/dijit/themes/tundra/attribute.css);
 
-BODY, #idTable, #idTable2 { font-family: verdana; font-size: 10pt; }
+BODY, #idTable, #idTable2 { font-family: Arial; font-size: 9pt; }
 BODY { margin: 0; }
 #idToolbar { padding: 10px 10px 10px 10px; font-family: verdana; font-size: 9pt;  }
 #idHelp { float: right; font-size: 8pt; cursor: hand; cursor:pointer; text-decoration: underline; }
@@ -628,6 +630,21 @@ function doOnLoad()
     <%
    	}
     %>
+  </tr>
+  <tr >
+      <td colspan="4">
+         <div class = "lineStyle">
+            &nbsp;
+         </div>
+      </td>
+  </tr>
+  <tr align="left"><td colSpan=4><IFRAME ID=IFrame2 FRAMEBORDER=0 SCROLLING="auto" SRC="<%=url_tb%>" width="100%" height="100"></IFRAME></td></tr>
+    <tr >
+      <td colspan="4">
+         <div class = "lineStyle">
+            &nbsp;
+         </div>
+      </td>
   </tr>
     <tr>
     <td valign="top"><span class="label"><%=bundle.getString("lb_sid") %>:</span></td>

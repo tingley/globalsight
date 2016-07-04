@@ -24,8 +24,6 @@
             not-null="false" unique="false" />
 		<property name="isRemoteTm" column="IS_REMOTE_TM" type="yes_no"
 			not-null="false" unique="false" />
-		<property name="gsEditionId" column="GS_EDITION_ID" type="long"
-			not-null="false" unique="false" />
 		<property name="remoteTmProfileId" column="REMOTE_TM_PROFILE_ID"
 			type="long" not-null="false" unique="false" />
 		<property name="remoteTmProfileName" length="60"

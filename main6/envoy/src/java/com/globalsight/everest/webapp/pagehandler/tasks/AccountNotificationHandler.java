@@ -16,11 +16,20 @@
  */
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.rmi.RemoteException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -28,26 +37,45 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+import org.json.JSONObject;
+
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.util.FileUtil;
+import com.globalsight.util.GeneralException;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
+import com.globalsight.util.mail.MailerConstants;
+import com.globalsight.util.mail.MailerLocal;
+import com.globalsight.util.resourcebundle.SystemResourceBundle;
+import com.globalsight.webservices.AmbassadorUtil;
 
 /**
  * Page handler for adding/removing email notification settings to a user.
  */
+@SuppressWarnings("unchecked")
 public class AccountNotificationHandler extends PageHandler
 {
+    private static final Logger logger = Logger.getLogger(AccountNotificationHandler.class
+            .getName());
+
     private static List s_adminNotifications = new ArrayList();
     private static List s_pmAndWfmNotifications = new ArrayList();
     private static List s_generalNotifications = new ArrayList();
+    public static String RESOURCE_LOCATION = "/com/globalsight/resources/messages/";
 
     // populate the notification lists based on access group
     static
@@ -117,23 +145,357 @@ public class AccountNotificationHandler extends PageHandler
      *            the original response object
      * @param p_context
      *            context the Servlet context
+     * @throws IOException 
+     * @throws ServletException 
+     * @throws EnvoyServletException 
      */
-    public void invokePageHandler(WebPageDescriptor pageDescriptor,
-            HttpServletRequest request, HttpServletResponse response,
-            ServletContext context) throws ServletException, IOException,
-            EnvoyServletException
+    public void invokePageHandler(WebPageDescriptor pageDescriptor, HttpServletRequest request,
+            HttpServletResponse response, ServletContext context) throws EnvoyServletException,
+            ServletException, IOException
     {
         HttpSession session = request.getSession(false);
 
-        preparePageInfo(request, session);
+        String action = request.getParameter("action");
+        if ("notification".equals(action))
+        {
+            preparePageInfo(request, session);
+        }
+        else if ("save".equals(action))
+        {
+            saveEditEmailTemplate(request, session, response);
+            return;
+        }
+        else if ("edit".equals(action))
+        {
+            editEmailTemplate(request, session, response);
+            return;
+        }
+        else if ("reset".equals(action))
+        {
+            resetEmailTemplate(request, session, response);
+            return;
+        }
 
-        // Call parent invokePageHandler() to set link beans and invoke JSP
         super.invokePageHandler(pageDescriptor, request, response, context);
     }
 
     // ////////////////////////////////////////////////////////////////////
     // Begin: Local Methods
     // ////////////////////////////////////////////////////////////////////
+
+    /**
+     * Resets email content template to the most origin template.
+     */
+    private void resetEmailTemplate(HttpServletRequest p_request, HttpSession p_session,
+            HttpServletResponse response)
+    {
+        try
+        {
+            PrintWriter writer = response.getWriter();
+            String subjectKey = p_request.getParameter("subjectKey");
+            String messageKey = p_request.getParameter("messageKey");
+            Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
+            ResourceBundle resetBundle = SystemResourceBundle.getInstance().getResourceBundle(
+                    MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale);
+
+            String subjectReset = resetBundle.getString(subjectKey);
+            JSONObject json = new JSONObject();
+            json.put("subjectKey", subjectKey);
+            json.put("messageKey", messageKey);
+            json.put("subjectText", subjectReset);
+            json.put("messageText", resetBundle.getString(messageKey));
+
+            writer.write(json.toString());
+            writer.flush();
+            writer.close();
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+        }
+    }
+
+    /**
+     * Edits email content template.
+     */
+    private void editEmailTemplate(HttpServletRequest p_request, HttpSession p_session,
+            HttpServletResponse response)
+    {
+        try
+        {
+            String companyName = getCompanyName(p_session);
+            Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
+            ResourceBundle emailBundle = SystemResourceBundle.getInstance().getEmailResourceBundle(
+                    MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale, companyName);
+
+            String selectFromValue = p_request.getParameter("selectFromValue");
+            String selectToValue = p_request.getParameter("selectToValue");
+            String selectValue = (!"".equals(selectFromValue)) ? selectFromValue : selectToValue;
+            String subjectKey = MailerConstants.getEmailSubject(selectValue);
+            String messageKey = MailerConstants.getEmailMessage(selectValue);
+            String subjectText = emailBundle.getString(subjectKey);
+            String messageText = emailBundle.getString(messageKey);
+
+            JSONObject json = new JSONObject();
+            json.put("subjectKey", subjectKey);
+            json.put("messageKey", messageKey);
+            json.put("subjectText", subjectText);
+            json.put("messageText", messageText);
+
+            PrintWriter writer = response.getWriter();
+            writer.write(json.toString());
+            writer.flush();
+            writer.close();
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+        }
+    }
+
+    /**
+     * Checks apply pattern of subject or message.
+     * @param content
+     * @return
+     */
+    private boolean checkApplyPattern(String content)
+    {
+        try
+        {
+            new MessageFormat(content);
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Save content that user edit email template
+     * 
+     * @return
+     * @throws IOException
+     * @throws ServletException
+     */
+    private void saveEditEmailTemplate(HttpServletRequest p_request, HttpSession p_session,
+            HttpServletResponse response)
+    {
+        PrintWriter writer = null;
+        try
+        {
+            writer = response.getWriter();
+
+            String companyName = getCompanyName(p_session);
+            Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
+            String key = MailerLocal.DEFAULT_RESOURCE_NAME + "_" + companyName + "_" + uiLocale;
+            ResourceBundle resourceBundle = SystemResourceBundle.getInstance().getResourceBundle(
+                    MailerLocal.DEFAULT_RESOURCE_NAME, uiLocale);
+
+            String subjectKey = p_request.getParameter("subjectKey");
+            String messageKey = p_request.getParameter("messageKey");
+            String subjectEdited = p_request.getParameter("subjectText");
+            String messageEdited = p_request.getParameter("messageText");
+
+            // check subject and message pattern
+            if (!checkApplyPattern(subjectEdited))
+            {
+                writer.write("Subject fails to apply pattern: unmatched braces.");
+                return;
+            }
+            if (!checkApplyPattern(messageEdited))
+            {
+                writer.write("Message fails to apply pattern: unmatched braces.");
+                return;
+            }
+
+            subjectEdited = keepBsSubject(subjectEdited);
+            messageEdited = handleMessage(messageEdited);
+            String subjectOri = resourceBundle.getString(subjectKey);
+            String messageOri = resourceBundle.getString(messageKey);
+            // check place-holders
+            HashSet<String> list = checkPlaceHolders(subjectOri, messageOri, subjectEdited,
+                    messageEdited);
+            if (list.size() != 0)
+            {
+                StringBuffer result = new StringBuffer();
+                String addErrorPlaceHold = AmbassadorUtil.listToString(list);
+                result.append("The following placeholders cannot be added : " + addErrorPlaceHold
+                        + "\r\n");
+
+                writer.write(result.toString());
+                writer.flush();
+            }
+            else
+            {
+                String oriLocaleFilePath = getClass().getResource(
+                        RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties")
+                        .getFile();
+                oriLocaleFilePath = oriLocaleFilePath.substring(0,
+                        oriLocaleFilePath.lastIndexOf("/"));
+                String newEmailTemplateFileName = "EmailMessageResource_" + companyName + "_"
+                        + uiLocale + ".properties";
+                File newFile = new File(oriLocaleFilePath, newEmailTemplateFileName);
+
+                FileInputStream fis = null;
+                if (newFile.exists())
+                {
+                    fis = (FileInputStream) getClass().getResourceAsStream(
+                            RESOURCE_LOCATION + "EmailMessageResource_" + companyName + "_" + uiLocale
+                                    + ".properties");
+                }
+                else
+                {
+                    newFile.getParentFile().mkdirs();
+                    fis = (FileInputStream) getClass().getResourceAsStream(
+                            RESOURCE_LOCATION + "EmailMessageResource_" + uiLocale + ".properties");
+                }
+
+                String content = FileUtil.readFile(fis, "utf-8");
+                StringBuffer document = new StringBuffer();
+
+                String contentPartOne = content.substring(0, content.indexOf(subjectKey));
+                document.append(contentPartOne);
+                document.append(subjectKey).append("=").append(subjectEdited).append("\r\n");
+                document.append(messageKey).append("=").append(messageEdited);
+
+                String contentPartOpt = content.substring(content.indexOf(messageKey));
+                String contentPartTwo = contentPartOpt.substring(contentPartOpt.indexOf("##########"));
+                document.append("\r\n" + contentPartTwo);
+
+                FileUtil.writeFile(newFile, document.toString());
+
+                SystemResourceBundle.getInstance().removeResourceBundleKey(key);
+
+                writer.write("Save successfully.");
+                writer.flush();
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when save email template.", e);
+        }
+        finally
+        {
+            if (writer != null)
+            {
+                writer.close();                
+            }
+        }
+    }
+
+    private String handleMessage(String messageEdited)
+    {
+        messageEdited = keepBsMessage(messageEdited);
+
+        messageEdited = StringUtil.replace(messageEdited, "\n", "\\r\\n\\\r\n");
+
+        return ignoreLastBackSlash(messageEdited);
+    }
+
+    /**
+     * Keeps the backslash of the email template content.
+     */
+    private String keepBsSubject(String content)
+    {
+        StringBuffer keepBackslash = new StringBuffer();
+        for (int i = 0; i < content.length(); i++)
+        {
+            char c = content.charAt(i);
+            if (c == '\\')
+            {
+                keepBackslash.append("\\\\\\\\");
+            }
+            else
+            {
+                keepBackslash.append(c);
+            }
+        }
+        return keepBackslash.toString();
+    }
+
+    /**
+     * Keeps the backslash of the email template content.
+     */
+    private String keepBsMessage(String content)
+    {
+        StringBuffer keepBackslash = new StringBuffer();
+        for (int i = 0; i < content.length(); i++)
+        {
+            char c = content.charAt(i);
+            if (c == '\\')
+            {
+                keepBackslash.append("\\\\");
+            }
+            else
+            {
+                keepBackslash.append(c);
+            }
+        }
+        return keepBackslash.toString();
+    }
+
+    /**
+     * Remove the last "\" in message body to keep consistent with that in original properties.
+     */
+    private String ignoreLastBackSlash(String content)
+    {
+        if (content.indexOf("\\") != -1 && content.endsWith("\\\r\n"))
+        {
+            content = content.substring(0, content.lastIndexOf("\\"));
+        }
+        return content;
+    }
+
+    /**
+     * Checks if email template content that user edited is valid or not.
+     */
+    private HashSet<String> checkPlaceHolders(String subjectOri, String messageOri,
+            String subjectEdited, String messageEdited)
+    {
+        HashSet<String> addedErrorPlaceHolds = new HashSet<String>();
+        HashSet<String> placeHoldersOri = new HashSet<String>();
+        HashSet<String> subPlaceHoldersEdited = new HashSet<String>();
+        HashSet<String> mesPlaceHoldersEdited = new HashSet<String>();
+
+        getPlaceHolders(subjectOri, placeHoldersOri);
+        getPlaceHolders(messageOri, placeHoldersOri);
+        getPlaceHolders(subjectEdited, subPlaceHoldersEdited);
+        getPlaceHolders(messageEdited, mesPlaceHoldersEdited);
+
+        addErrorPlaceHoldes(placeHoldersOri, subPlaceHoldersEdited, addedErrorPlaceHolds);
+        addErrorPlaceHoldes(placeHoldersOri, mesPlaceHoldersEdited, addedErrorPlaceHolds);
+
+        return addedErrorPlaceHolds;
+    }
+
+    /**
+     * Adds invalid placeholders into arraylist.
+     */
+    private void addErrorPlaceHoldes(HashSet<String> placeHoldersOri,
+            HashSet<String> placeHoldersEdited, HashSet<String> addedErrorPlaceHolds)
+    {
+        for (String ph : placeHoldersEdited)
+        {
+            if (!placeHoldersOri.contains(ph))
+            {
+                addedErrorPlaceHolds.add(ph);
+            }
+        }
+    }
+
+    /**
+     * Gets place holders of email template content.
+     */
+    private void getPlaceHolders(String text, HashSet<String> placeholdersOri)
+    {
+        Pattern p = Pattern.compile("\\{\\d+\\}");
+        Matcher m = p.matcher(text);
+        while (m.find())
+        {
+            placeholdersOri.add(m.group());
+        }
+    }
 
     /**
      * Get the notification flag value. The value will be retrieved from the
@@ -255,6 +617,25 @@ public class AccountNotificationHandler extends PageHandler
 
         return availableOptions;
     }
+
+    private String getCompanyName(HttpSession p_session) throws UserManagerException,
+            RemoteException, GeneralException
+    {
+        String companyName = null;
+        String userId = (String) p_session.getAttribute(WebAppConstants.USER_NAME);
+        User user = ServerProxy.getUserManager().getUser(userId);
+        if (UserUtil.isSuperPM(userId))
+        {
+            companyName = (String) p_session
+                    .getAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM);
+        }
+        else
+        {
+            companyName = user.getCompanyName();
+        }
+        return companyName;
+    }
+
     // ////////////////////////////////////////////////////////////////////
     // End: Local Methods
     // ////////////////////////////////////////////////////////////////////

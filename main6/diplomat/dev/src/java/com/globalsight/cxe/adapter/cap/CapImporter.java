@@ -16,9 +16,9 @@
  */
 package com.globalsight.cxe.adapter.cap;
 
-import java.io.Serializable;
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Element;
@@ -30,12 +30,12 @@ import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.util.CxeProxy;
+import com.globalsight.cxe.util.aligner.AlignerUtil;
+import com.globalsight.cxe.util.request.RequestHandlerActivatorUtil;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.diplomat.util.XmlUtil;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.request.CxeToCapRequest;
 import com.globalsight.everest.request.Request;
-import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.edit.EditUtil;
 
@@ -56,8 +56,6 @@ public class CapImporter
 
     private String m_eventFlowXml = null;
     private String m_displayName = null;
-    private String m_messageId = null;
-    private String m_exportBatchId = null;
 
     // information needed for the L10nRequestXml
     private String m_dataSourceType = null;
@@ -74,9 +72,6 @@ public class CapImporter
     private String m_docPageNumber = null;
     private String m_jobPrefixName = null;
     private String m_importInitiatorId = null;
-    // the original CXE request type that CAP passes in for export or preview
-    private String m_origCxeRequestType;
-    private Long m_exportedTime = null;
     private CxeMessage m_cxeMessage = null;
 
     private String m_priority = null;
@@ -91,8 +86,7 @@ public class CapImporter
     // Constructors //
     // ////////////////////////////////////
 
-    public CapImporter(CxeMessage p_cxeMessage,
-            org.apache.log4j.Logger p_logger, int p_requestType)
+    public CapImporter(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger, int p_requestType)
             throws Exception
     {
         m_cxeMessage = p_cxeMessage;
@@ -134,8 +128,8 @@ public class CapImporter
         {
             parseEventFlowXml();
 
-            GeneralException exception = (GeneralException) m_cxeMessage
-                    .getParameters().get("Exception");
+            GeneralException exception = (GeneralException) m_cxeMessage.getParameters()
+                    .get("Exception");
 
             if (exception != null)
             {
@@ -143,43 +137,37 @@ public class CapImporter
             }
             else
             {
-                m_logger.info("Uploading import request to CAP for: "
-                        + m_displayName);
+                m_logger.info("Uploading import request to CAP for: " + m_displayName);
             }
 
             String l10nRequestXml = makeL10nRequestXml();
-            String contentFileName = readContentFileName(m_cxeMessage
-                    .getMessageData());
+            String contentFileName = readContentFileName(m_cxeMessage.getMessageData());
 
-            HashMap hm = new HashMap();
-            CompanyWrapper.saveCurrentCompanyIdInMap(hm, m_logger);
-            hm.put(CxeToCapRequest.REQUEST_TYPE, new Integer(m_requestType));
-            hm.put(CxeToCapRequest.CONTENT, contentFileName);
-            hm.put(CxeToCapRequest.EVENT_FLOW_XML, m_eventFlowXml);
-            hm.put(CxeToCapRequest.L10N_REQUEST_XML, l10nRequestXml);
-            hm.put(CxeToCapRequest.EXCEPTION, exception);
+            Map<String, Object> data = new HashMap<String, Object>();
+
+            data.put(CxeToCapRequest.REQUEST_TYPE, new Integer(m_requestType));
+            data.put(CxeToCapRequest.CONTENT, contentFileName);
+            data.put(CxeToCapRequest.EVENT_FLOW_XML, m_eventFlowXml);
+            data.put(CxeToCapRequest.L10N_REQUEST_XML, l10nRequestXml);
+            data.put(CxeToCapRequest.EXCEPTION, exception);
 
             // See whether the CXE import type was l10n or aligner.
             if (m_cxeImportRequestType.equals(CxeProxy.IMPORT_TYPE_ALIGNER))
             {
                 m_logger.info("Sending message to JMS_ALIGNER_QUEUE for aligner.");
 
-                hm.put("PageCount", m_pageCount);
-                hm.put("PageNumber", m_pageNumber);
-                hm.put("DocPageCount", m_docPageCount);
-                hm.put("DocPageNumber", m_docPageNumber);
-                hm.put("AlignerExtractor",
-                        m_cxeMessage.getParameters().get("AlignerExtractor"));
-
-                JmsHelper.sendMessageToQueue((Serializable) hm,
-                        JmsHelper.JMS_ALIGNER_QUEUE);
+                data.put("PageCount", m_pageCount);
+                data.put("PageNumber", m_pageNumber);
+                data.put("DocPageCount", m_docPageCount);
+                data.put("DocPageNumber", m_docPageNumber);
+                data.put("AlignerExtractor", m_cxeMessage.getParameters().get("AlignerExtractor"));
+                // GBS-4400
+                AlignerUtil.handleAlignerWithThread(data);
             }
             else
             {
-                // m_logger.info("Sending message to JMS_IMPORTING_QUEUE for import.");
-
-                JmsHelper.sendMessageToQueue((Serializable) hm,
-                        JmsHelper.JMS_IMPORTING_QUEUE);
+                // GBS-4400
+                RequestHandlerActivatorUtil.handleRequestWithThread(data);
             }
         }
         catch (Exception e)
@@ -191,15 +179,15 @@ public class CapImporter
             throw new CapAdapterException("HTTPIm", errorArgs, e);
         }
     }
-    
-    public HashMap getContent()
+
+    public Map<String, Object> getContent()
     {
-    	try
+        try
         {
             parseEventFlowXml();
 
-            GeneralException exception = (GeneralException) m_cxeMessage
-                    .getParameters().get("Exception");
+            GeneralException exception = (GeneralException) m_cxeMessage.getParameters()
+                    .get("Exception");
 
             if (exception != null)
             {
@@ -207,36 +195,29 @@ public class CapImporter
             }
             else
             {
-                m_logger.info("Uploading import request to CAP for: "
-                        + m_displayName);
+                m_logger.info("Uploading import request to CAP for: " + m_displayName);
             }
 
             String l10nRequestXml = makeL10nRequestXml();
-            String contentFileName = readContentFileName(m_cxeMessage
-                    .getMessageData());
+            String contentFileName = readContentFileName(m_cxeMessage.getMessageData());
 
-            HashMap hm = new HashMap();
-            CompanyWrapper.saveCurrentCompanyIdInMap(hm, m_logger);
-            hm.put(CxeToCapRequest.REQUEST_TYPE, new Integer(m_requestType));
-            hm.put(CxeToCapRequest.CONTENT, contentFileName);
-            hm.put(CxeToCapRequest.EVENT_FLOW_XML, m_eventFlowXml);
-            hm.put(CxeToCapRequest.L10N_REQUEST_XML, l10nRequestXml);
-            hm.put(CxeToCapRequest.EXCEPTION, exception);
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put(CxeToCapRequest.REQUEST_TYPE, new Integer(m_requestType));
+            data.put(CxeToCapRequest.CONTENT, contentFileName);
+            data.put(CxeToCapRequest.EVENT_FLOW_XML, m_eventFlowXml);
+            data.put(CxeToCapRequest.L10N_REQUEST_XML, l10nRequestXml);
+            data.put(CxeToCapRequest.EXCEPTION, exception);
 
-            // See whether the CXE import type was l10n or aligner.
             if (m_cxeImportRequestType.equals(CxeProxy.IMPORT_TYPE_ALIGNER))
             {
-                m_logger.info("Sending message to JMS_ALIGNER_QUEUE for aligner.");
-
-                hm.put("PageCount", m_pageCount);
-                hm.put("PageNumber", m_pageNumber);
-                hm.put("DocPageCount", m_docPageCount);
-                hm.put("DocPageNumber", m_docPageNumber);
-                hm.put("AlignerExtractor",
-                        m_cxeMessage.getParameters().get("AlignerExtractor"));
+                data.put("PageCount", m_pageCount);
+                data.put("PageNumber", m_pageNumber);
+                data.put("DocPageCount", m_docPageCount);
+                data.put("DocPageNumber", m_docPageNumber);
+                data.put("AlignerExtractor", m_cxeMessage.getParameters().get("AlignerExtractor"));
             }
 
-            return hm;
+            return data;
         }
         catch (Exception e)
         {
@@ -275,13 +256,10 @@ public class CapImporter
             Element sourceElement = (Element) nl.item(0);
             m_dataSourceType = sourceElement.getAttribute("dataSourceType");
             m_dataSourceId = sourceElement.getAttribute("dataSourceId");
-            m_pageIsCxePreviewable = sourceElement
-                    .getAttribute("pageIsCxePreviewable");
-            m_cxeImportRequestType = sourceElement
-                    .getAttribute("importRequestType");
+            m_pageIsCxePreviewable = sourceElement.getAttribute("pageIsCxePreviewable");
+            m_cxeImportRequestType = sourceElement.getAttribute("importRequestType");
 
-            m_importInitiatorId = sourceElement
-                    .getAttribute("importInitiatorId");
+            m_importInitiatorId = sourceElement.getAttribute("importInitiatorId");
 
             nl = rootElement.getElementsByTagName("displayName");
             e = (Element) nl.item(0);
@@ -349,44 +327,6 @@ public class CapImporter
             nl = rootElement.getElementsByTagName("docPageNumber");
             e = (Element) nl.item(0);
             m_docPageNumber = e.getFirstChild().getNodeValue();
-
-            // the messageId is optional in the EventFlowXml
-            nl = rootElement.getElementsByTagName("capMessageId");
-            if (nl.getLength() > 0)
-            {
-                e = (Element) nl.item(0);
-                m_messageId = e.getFirstChild().getNodeValue();
-            }
-            else
-            {
-                m_messageId = null;
-            }
-
-            // the original cxe request type is optional in the EventFlowXml
-            nl = rootElement.getElementsByTagName("cxeRequestType");
-            if (nl.getLength() > 0)
-            {
-                e = (Element) nl.item(0);
-                m_origCxeRequestType = e.getFirstChild().getNodeValue();
-            }
-            else
-            {
-                m_origCxeRequestType = null;
-            }
-
-            // get out the export batch ID
-            nl = rootElement.getElementsByTagName("exportBatchInfo");
-            if (nl.getLength() > 0)
-            {
-                e = (Element) nl.item(0);
-                NodeList nl2 = e.getElementsByTagName("exportBatchId");
-                e = (Element) nl2.item(0);
-                m_exportBatchId = e.getFirstChild().getNodeValue();
-            }
-            else
-            {
-                m_exportBatchId = "N/A";
-            }
         }
         finally
         {
@@ -424,8 +364,8 @@ public class CapImporter
         }
 
         b.append("<originalSourceFileContent>");
-        String originalSourceFileContent = (String) m_cxeMessage
-                .getParameters().get(BaseAdapter.PARAM_ORIGINAL_FILE_CONTENT);
+        String originalSourceFileContent = (String) m_cxeMessage.getParameters()
+                .get(BaseAdapter.PARAM_ORIGINAL_FILE_CONTENT);
         b.append(EditUtil.encodeXmlEntities(originalSourceFileContent));
         b.append("</originalSourceFileContent>");
 

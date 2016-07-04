@@ -49,8 +49,28 @@ public class XMLRuleFilter implements Filter
     {
     }
 
-    public XMLRuleFilter(String filterName, String filterDescription,
-            long xmlRuleId, long companyId, boolean convertHtmlEntity)
+    public XMLRuleFilter(String filterName, String filterDescription, long xmlRuleId,
+            long companyId)
+    {
+        this.filterName = filterName;
+        this.filterDescription = filterDescription;
+        this.xmlRuleId = xmlRuleId;
+        this.companyId = companyId;
+    }
+
+    public XMLRuleFilter(long id, String filterName, String filterDescription, long xmlRuleId,
+            long companyId)
+    {
+        this(filterName, filterDescription, xmlRuleId, companyId);
+        this.id = id;
+    }
+
+    /**
+     * @deprecated convertHtmlEntity disabled, leave it for upgrade to entity
+     *             handle mode
+     */
+    public XMLRuleFilter(String filterName, String filterDescription, long xmlRuleId,
+            long companyId, boolean convertHtmlEntity)
     {
         this.filterName = filterName;
         this.filterDescription = filterDescription;
@@ -59,11 +79,14 @@ public class XMLRuleFilter implements Filter
         this.convertHtmlEntity = convertHtmlEntity;
     }
 
-    public XMLRuleFilter(long id, String filterName, String filterDescription,
-            long xmlRuleId, long companyId, boolean convertHtmlEntity)
+    /**
+     * @deprecated convertHtmlEntity disabled, leave it for upgrade to entity
+     *             handle mode
+     */
+    public XMLRuleFilter(long id, String filterName, String filterDescription, long xmlRuleId,
+            long companyId, boolean convertHtmlEntity)
     {
-        this(filterName, filterDescription, xmlRuleId, companyId,
-                convertHtmlEntity);
+        this(filterName, filterDescription, xmlRuleId, companyId, convertHtmlEntity);
         this.id = id;
     }
 
@@ -76,8 +99,7 @@ public class XMLRuleFilter implements Filter
         return HibernateUtil.search(hql, map).size() > 0;
     }
 
-    public boolean checkExistsEdit(long filterId, String filterName,
-            long companyId)
+    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
     {
         String hql = "from XMLRuleFilter xr where xr.id<>:filterId and xr.filterName =:filterName and xr.companyId=:companyId";
         Map map = new HashMap();
@@ -105,9 +127,8 @@ public class XMLRuleFilter implements Filter
     public XMLRuleFilter getFilter(long companyId, String filterName)
     {
         StringBuffer sql = new StringBuffer();
-        sql.append("from XMLRuleFilter xr where xr.companyId =")
-                .append(companyId).append(" and xr.filterName like '%")
-                .append(filterName).append("%'");
+        sql.append("from XMLRuleFilter xr where xr.companyId =").append(companyId)
+                .append(" and xr.filterName like '%").append(filterName).append("%'");
         List filters = HibernateUtil.search(sql.toString());
         if (filters != null && filters.size() > 0)
         {
@@ -134,7 +155,7 @@ public class XMLRuleFilter implements Filter
 
     public String toJSON(long companyId)
     {
-        XmlFilterConfigParser parser = new XmlFilterConfigParser(configXml);
+        XmlFilterConfigParser parser = new XmlFilterConfigParser(this);
         boolean isParsed = false;
         try
         {
@@ -148,17 +169,14 @@ public class XMLRuleFilter implements Filter
         }
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"filterTableName\":")
-                .append("\"" + FilterConstants.XMLRULE_TABLENAME + "\"")
+        sb.append("\"filterTableName\":").append("\"" + FilterConstants.XMLRULE_TABLENAME + "\"")
                 .append(",");
         sb.append("\"id\":").append(id).append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
-        sb.append("\"filterName\":").append("\"")
-                .append(FilterHelper.escape(filterName)).append("\"")
-                .append(",");
+        sb.append("\"filterName\":").append("\"").append(FilterHelper.escape(filterName))
+                .append("\"").append(",");
         sb.append("\"filterDescription\":").append("\"")
-                .append(FilterHelper.escape(filterDescription)).append("\"")
-                .append(",");
+                .append(FilterHelper.escape(filterDescription)).append("\"").append(",");
         // sb.append("\"xmlRuleName\":").append("\"").append(
         // FilterHelper.escape(getXmlRuleNameById(xmlRuleId)))
         // .append("\"").append(",");
@@ -173,8 +191,7 @@ public class XMLRuleFilter implements Filter
             sb.append("{");
             sb.append("\"xmlRuleId\":").append(xmlRuleFile.getId()).append(",");
             sb.append("\"xmlRuleName\":").append("\"")
-                    .append(FilterHelper.escape(xmlRuleFile.getName()))
-                    .append("\"");
+                    .append(FilterHelper.escape(xmlRuleFile.getName())).append("\"");
             sb.append("}");
 
             sb.append(",");
@@ -187,95 +204,73 @@ public class XMLRuleFilter implements Filter
         // base filter list
         // sb.append(BaseFilterManager.getAllBaseFiltersJson()).append(",");
         sb.append("\"xmlRuleId\":").append(xmlRuleId).append(",");
-        sb.append("\"convertHtmlEntity\":").append(convertHtmlEntity)
-                .append(",");
         sb.append("\"useXmlRule\":").append(useXmlRule).append(",");
-        sb.append("\"extendedWhitespaceChars\":")
-                .append("\"")
-                .append(isParsed ? FilterHelper.escape(parser
-                        .getExtendedWhiteSpaceChars()) : "").append("\",");
-        sb.append("\"phConsolidationMode\":")
-                .append(isParsed ? parser.getPhConsolidationMode()
-                        : XmlFilterConstants.PH_CONSOLIDATE_DONOT).append(",");
+        sb.append("\"extendedWhitespaceChars\":").append("\"")
+                .append(isParsed ? FilterHelper.escape(parser.getExtendedWhiteSpaceChars()) : "")
+                .append("\",");
+        sb.append("\"phConsolidationMode\":").append(isParsed ? parser.getPhConsolidationMode()
+                : XmlFilterConstants.PH_CONSOLIDATE_DONOT).append(",");
         sb.append("\"phTrimMode\":")
-                .append(isParsed ? parser.getPhTrimMode()
-                        : XmlFilterConstants.PH_TRIM_DONOT).append(",");
-        sb.append("\"nonasciiAs\":")
-                .append(isParsed ? parser.getNonasciiAs()
-                        : XmlFilterConstants.NON_ASCII_AS_CHARACTER)
+                .append(isParsed ? parser.getPhTrimMode() : XmlFilterConstants.PH_TRIM_DONOT)
                 .append(",");
-        sb.append("\"wsHandleMode\":")
-                .append(isParsed ? parser.getWhiteSpaceHanldeMode()
-                        : XmlFilterConstants.WHITESPACE_HANDLE_PRESERVE)
+        sb.append("\"nonasciiAs\":").append(
+                isParsed ? parser.getNonasciiAs() : XmlFilterConstants.NON_ASCII_AS_CHARACTER)
                 .append(",");
-        sb.append("\"emptyTagFormat\":")
-                .append(isParsed ? parser.getEmptyTagFormat()
-                        : XmlFilterConstants.EMPTY_TAG_FORMAT_PRESERVE)
+        sb.append("\"wsHandleMode\":").append(isParsed ? parser.getWhiteSpaceHanldeMode()
+                : XmlFilterConstants.WHITESPACE_HANDLE_PRESERVE).append(",");
+        sb.append("\"emptyTagFormat\":").append(isParsed ? parser.getEmptyTagFormat()
+                : XmlFilterConstants.EMPTY_TAG_FORMAT_PRESERVE).append(",");
+        sb.append("\"entityHandleMode\":").append(
+                isParsed ? parser.getEntityHandleMode() : XmlFilterConstants.ENTITY_HANDLE_MODE_1)
                 .append(",");
         sb.append("\"elementPostFilter\":").append("\"")
-                .append(isParsed ? parser.getElementPostFilterTableName() : "")
-                .append("\",");
+                .append(isParsed ? parser.getElementPostFilterTableName() : "").append("\",");
         sb.append("\"elementPostFilterId\":").append("\"")
-                .append(isParsed ? parser.getElementPostFilterId() : "")
-                .append("\",");
+                .append(isParsed ? parser.getElementPostFilterId() : "").append("\",");
         sb.append("\"cdataPostFilter\":").append("\"")
-                .append(isParsed ? parser.getCdataPostFilterTableName() : "")
-                .append("\",");
+                .append(isParsed ? parser.getCdataPostFilterTableName() : "").append("\",");
         sb.append("\"cdataPostFilterId\":").append("\"")
-                .append(isParsed ? parser.getCdataPostFilterId() : "")
-                .append("\",");
+                .append(isParsed ? parser.getCdataPostFilterId() : "").append("\",");
         sb.append("\"sidSupportTagName\":").append("\"")
                 .append(isParsed ? parser.getSidTagName() : "").append("\",");
         sb.append("\"sidSupportAttName\":").append("\"")
                 .append(isParsed ? parser.getSidAttrName() : "").append("\",");
-        sb.append("\"isCheckWellFormed\":")
-                .append(isParsed ? parser.isCheckWellFormed() : "false")
+        sb.append("\"isCheckWellFormed\":").append(isParsed ? parser.isCheckWellFormed() : "false")
                 .append(",");
-        sb.append("\"isGerateLangInfo\":")
-                .append(isParsed ? parser.isGerateLangInfo() : "false")
+        sb.append("\"isGerateLangInfo\":").append(isParsed ? parser.isGerateLangInfo() : "false")
                 .append(",");
         sb.append("\"preserveWsTags\":")
-                .append("\"")
-                .append(isParsed ? FilterHelper.escape(parser
-                        .getWhiteSpacePreserveTagsJson()) : "[]").append("\",");
-        sb.append("\"embTags\":")
-                .append("\"")
-                .append(isParsed ? FilterHelper.escape(parser
-                        .getEmbeddedTagsJson()) : "[]").append("\",");
-        sb.append("\"transAttrTags\":")
-                .append("\"")
-                .append(isParsed ? FilterHelper.escape(parser
-                        .getTransAttrTagsJson()) : "[]").append("\",");
-        sb.append("\"contentInclTags\":")
-                .append("\"")
-                .append(isParsed ? FilterHelper.escape(parser
-                        .getContentInclTagsJson()) : "[]").append("\",");
-        sb.append("\"cdataPostfilterTags\":")
-                .append("\"")
-                .append(isParsed ? FilterHelper.escape(parser
-                        .getCDataPostFilterTagsJson()) : "[]").append("\",");
-        sb.append("\"entities\":")
-                .append("\"")
-                .append(isParsed ? FilterHelper.escape(parser.getEntitiesJson())
-                        : "[]").append("\",");
-        sb.append("\"processIns\":")
-                .append("\"")
-                .append(isParsed ? FilterHelper.escape(parser
-                        .getProcessInsJson()) : "[]").append("\",");
-        sb.append("\"internalTag\":")
-                .append("\"")
-                .append(isParsed ? FilterHelper.escape(parser
-                        .getInternalTagJson()) : "[]").append("\",");
-        sb.append("\"srcCmtXmlComment\":")
-                .append("\"")
-                .append(isParsed ? FilterHelper.escape(parser
-                        .getSrcCmtXmlCommentJson()) : "[]").append("\",");
-        sb.append("\"srcCmtXmlTag\":")
-                .append("\"")
-                .append(isParsed ? FilterHelper.escape(parser
-                        .getSrcCmtXmlTagJson()) : "[]").append("\",");
-        sb.append("\"baseFilterId\":").append("\"").append(getBaseFilterId())
-                .append("\"");
+                .append("\"").append(isParsed
+                        ? FilterHelper.escape(parser.getWhiteSpacePreserveTagsJson()) : "[]")
+                .append("\",");
+        sb.append("\"embTags\":").append("\"")
+                .append(isParsed ? FilterHelper.escape(parser.getEmbeddedTagsJson()) : "[]")
+                .append("\",");
+        sb.append("\"transAttrTags\":").append("\"")
+                .append(isParsed ? FilterHelper.escape(parser.getTransAttrTagsJson()) : "[]")
+                .append("\",");
+        sb.append("\"contentInclTags\":").append("\"")
+                .append(isParsed ? FilterHelper.escape(parser.getContentInclTagsJson()) : "[]")
+                .append("\",");
+        sb.append("\"cdataPostfilterTags\":").append("\"")
+                .append(isParsed ? FilterHelper.escape(parser.getCDataPostFilterTagsJson()) : "[]")
+                .append("\",");
+        sb.append("\"entities\":").append("\"")
+                .append(isParsed ? FilterHelper.escape(parser.getEntitiesJson()) : "[]")
+                .append("\",");
+        sb.append("\"processIns\":").append("\"")
+                .append(isParsed ? FilterHelper.escape(parser.getProcessInsJson()) : "[]")
+                .append("\",");
+        sb.append("\"internalTag\":").append("\"")
+                .append(isParsed ? FilterHelper.escape(parser.getInternalTagJson()) : "[]")
+                .append("\",");
+        sb.append("\"srcCmtXmlComment\":").append("\"")
+                .append(isParsed ? FilterHelper.escape(parser.getSrcCmtXmlCommentJson()) : "[]")
+                .append("\",");
+        sb.append("\"srcCmtXmlTag\":").append("\"")
+                .append(isParsed ? FilterHelper.escape(parser.getSrcCmtXmlTagJson()) : "[]")
+                .append("\",");
+        sb.append("\"baseFilterId\":").append("\"").append(getBaseFilterId()).append("\"");
         sb.append("}");
 
         return sb.toString();
@@ -285,8 +280,7 @@ public class XMLRuleFilter implements Filter
     {
         try
         {
-            return ServerProxy.getXmlRuleFilePersistenceManager()
-                    .getAllXmlRuleFiles();
+            return ServerProxy.getXmlRuleFilePersistenceManager().getAllXmlRuleFiles();
         }
         catch (Exception e)
         {
@@ -361,11 +355,19 @@ public class XMLRuleFilter implements Filter
         this.companyId = companyId;
     }
 
+    /**
+     * @deprecated convertHtmlEntity disabled, leave it for upgrade to entity
+     *             handle mode
+     */
     public boolean isConvertHtmlEntity()
     {
         return convertHtmlEntity;
     }
 
+    /**
+     * @deprecated convertHtmlEntity disabled, leave it for upgrade to entity
+     *             handle mode
+     */
     public void setConvertHtmlEntity(boolean convertHtmlEntity)
     {
         this.convertHtmlEntity = convertHtmlEntity;
@@ -403,7 +405,7 @@ public class XMLRuleFilter implements Filter
 
     public Map<String, String> parseConfigXml(String nodeName)
     {
-        XmlFilterConfigParser parser = new XmlFilterConfigParser(configXml);
+        XmlFilterConfigParser parser = new XmlFilterConfigParser(this);
         boolean isParsed = false;
         try
         {
@@ -421,21 +423,15 @@ public class XMLRuleFilter implements Filter
         {
             if (nodeName != null && nodeName.length() > 0)
             {
-                if (nodeName
-                        .equals(XmlFilterConstants.NODE_ELEMENT_POST_FILTER))
+                if (nodeName.equals(XmlFilterConstants.NODE_ELEMENT_POST_FILTER))
                 {
-                    result.put(FilterConstants.TABLENAME,
-                            parser.getElementPostFilterTableName());
-                    result.put(FilterConstants.TABLEID,
-                            parser.getElementPostFilterId());
+                    result.put(FilterConstants.TABLENAME, parser.getElementPostFilterTableName());
+                    result.put(FilterConstants.TABLEID, parser.getElementPostFilterId());
                 }
-                else if (nodeName
-                        .equals(XmlFilterConstants.NODE_CDATA_POST_FILTER))
+                else if (nodeName.equals(XmlFilterConstants.NODE_CDATA_POST_FILTER))
                 {
-                    result.put(FilterConstants.TABLENAME,
-                            parser.getCdataPostFilterTableName());
-                    result.put(FilterConstants.TABLEID,
-                            parser.getCdataPostFilterId());
+                    result.put(FilterConstants.TABLENAME, parser.getCdataPostFilterTableName());
+                    result.put(FilterConstants.TABLEID, parser.getCdataPostFilterId());
                 }
             }
         }

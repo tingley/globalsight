@@ -99,8 +99,6 @@ function getOption(field)
             <select name="<%=statusOptions%>">
                 <option value='<%=Task.STATE_ACTIVE%>'><%= bundle.getString("lb_available") %></option>
                 <option value='<%=Task.STATE_ACCEPTED%>'><%= bundle.getString("lb_inprogress") %></option>
-<!--            <option value='<%=WorkflowConstants.TASK_GSEDITION_IN_PROGESS%>'><%= bundle.getString("lb_inprogress") %>(<%= bundle.getString("lb_gsedition") %>)</option>
--->
                 <option value='<%=Task.STATE_COMPLETED%>'><%= bundle.getString("lb_finished") %></option>
                 <option value='<%=Task.STATE_REJECTED%>'><%= bundle.getString("lb_rejected") %></option>
                 <option value='<%=Task.STATE_ALL%>'><%= bundle.getString("lb_all_status") %></option>

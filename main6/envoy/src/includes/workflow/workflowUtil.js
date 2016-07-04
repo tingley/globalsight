@@ -161,7 +161,8 @@ function generateActivityNode(node) {
 	data["sequence"] = n;
 	data["workflow_pm"] = workflowDetailData["workflowPM"];
 	data["workflow_manager"] = workflowDetailData["workflowManager"];
-	data["report_upload_check"] = node.getAssignmentValue("report_upload_check"); 
+	data["report_upload_check"] = node.getAssignmentValue("report_upload_check");
+	data["activity_comment_upload_check"] = node.getAssignmentValue("activity_comment_upload_check");
 	
 	data["roles"] = node.getAssignmentValue("roles"); 
 	data["accepted_time"] = node.getAssignmentValue("accepted_time"); 

@@ -394,7 +394,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -822,7 +821,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload Base Text Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -860,7 +858,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload Html Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -899,7 +896,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload Java Script Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -937,7 +933,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload Xml Rule data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -982,9 +977,8 @@ public class FilterConfigurationImportHandler extends PageHandler
                                 .getXmlRuleId()));
                     }
 
-                    String configXmlStr = xmlRuleFilter.getConfigXml();
                     XmlFilterConfigParser xmlFilterConfigParser = new XmlFilterConfigParser(
-                            configXmlStr);
+                            xmlRuleFilter);
                     xmlFilterConfigParser.parserXml();
 
                     // elementPostFilterId
@@ -1050,7 +1044,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload Xml Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -1065,8 +1058,7 @@ public class FilterConfigurationImportHandler extends PageHandler
         private void storeJsonFilterData(Map<String, List> dataMap)
         {
             JsonFilter jsonFilter = null;
-            List<JsonFilter> jsonFilterList = (List<JsonFilter>) dataMap
-                    .get("json_filter");
+            List<JsonFilter> jsonFilterList = (List<JsonFilter>) dataMap.get("json_filter");
             try
             {
                 for (int i = 0; i < jsonFilterList.size(); i++)
@@ -1077,6 +1069,11 @@ public class FilterConfigurationImportHandler extends PageHandler
                     // get new filter name
                     String newFilterName = checkFilterNameExists(name, "JsonFilter");
                     jsonFilter.setFilterName(newFilterName);
+                    if (baseFilterIdMap.get(jsonFilter.getBaseFilterId()) != null)
+                    {
+                        jsonFilter
+                                .setBaseFilterId(baseFilterIdMap.get(jsonFilter.getBaseFilterId()));
+                    }
 
                     // Judgment "json_Filter" are references "html_filter"
                     if (jsonFilter.getElementPostFilterTableName().equalsIgnoreCase(
@@ -1099,8 +1096,7 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
-                String msg = "Upload Java Properties Filter data failed !";
+                String msg = "Upload Json Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
             }
@@ -1148,7 +1144,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload Java Properties Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -1197,7 +1192,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload MS Office 2010 Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -1247,7 +1241,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload MS Office Doc Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -1297,7 +1290,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload MS Office Excel Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -1347,7 +1339,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload MS Office PPT Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -1381,7 +1372,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload FrameMaker 9/Mif 9 Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -1415,7 +1405,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload Jsp Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -1450,7 +1439,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload OpenOffice Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -1484,7 +1472,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload InDesign/IDML Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -1537,7 +1524,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload Portable Object Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -1589,7 +1575,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload Plain Text Filter data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -1695,7 +1680,6 @@ public class FilterConfigurationImportHandler extends PageHandler
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 String msg = "Upload BaseFilterMapping data failed !";
                 logger.warn(msg);
                 addToError(msg);
@@ -1734,6 +1718,7 @@ public class FilterConfigurationImportHandler extends PageHandler
          * @param filterTableName
          * @param newFilterName
          * */
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         private String checkFilterNameExists(String filterName, String filterTableName)
         {
             String hql = null;
@@ -1750,7 +1735,14 @@ public class FilterConfigurationImportHandler extends PageHandler
             map.put("companyId", Long.parseLong(companyId));
             List itList = HibernateUtil.search(hql, map);
 
-            if (itList.contains(filterName))
+            List<String> existedNames = new ArrayList<String>();
+            for (int i = 0; i < itList.size(); i++)
+            {
+                String name = (String) itList.get(i);
+                existedNames.add(name.toLowerCase());
+            }
+
+            if (existedNames.contains(filterName.toLowerCase()))
             {
                 for (int num = 1;; num++)
                 {
@@ -1764,7 +1756,8 @@ public class FilterConfigurationImportHandler extends PageHandler
                     {
                         returnStr = filterName + "_import_" + num;
                     }
-                    if (!itList.contains(returnStr))
+
+                    if (!existedNames.contains(returnStr.toLowerCase()))
                     {
                         return returnStr;
                     }
@@ -1778,7 +1771,6 @@ public class FilterConfigurationImportHandler extends PageHandler
 
         private FMFilter putDataIntoFMFilter(Map<String, String> valueMap)
         {
-
             FMFilter fmFilter = new FMFilter();
             String keyField = null;
             String valueField = null;

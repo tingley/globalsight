@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1933" MadCap:lastWidth="577">
+    <head><title>PDA Library Search Tab</title>
+    </head>
+    <body>
+        <h1>PDA 
+ Library Search tab</h1>
+        <p class="para">Use this tab to specify parameter values used during Library 
+ Matching.</p>
+        <h2>Library match</h2>
+        <p class="para">These parameters specify how a library search is conducted.</p>
+        <h3>Derivative</h3>
+        <p class="para">Number of times the software applies the derivative algorithm 
+ to a spectrum before it performs Library Matching. </p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ None, First, Second, Third, or Fourth</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ None</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Set the Smoothing parameter if you intend to use <span style="font-style: italic;">both</span> 
+ smoothing and derivatives as part of the Library Matching criteria in 
+ the processing method. Derivatives require a smoothing number (set by 
+ the Smoothing parameter). If you select a Derivative value of First, Second, 
+ Third, or Fourth, the PDA software selects a default Smoothing value of 
+ 5.</p>
+        <h3>Smoothing</h3>
+        <p class="para">Length of the Savitsky-Golay filter applied to the spectra 
+ for both smoothing and derivatives. If you are using smoothing or derivatives, 
+ specify a smoothing number. Choices: If the Derivative is None, values 
+ are None and odd values from 5 to 31 with a default of None. If the Derivative 
+ is First, Second, Third, or Fourth, values are odd numbers from 5 to 31 
+ with a default of 5.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ For background information about Savitsky-Golay filtering, refer to Abraham 
+ A. Savitsky and M.J.E. Golay, "Smoothing and Differentiation of Data 
+ by Least-Squares Procedures," <span style="font-style: italic;">Analytical 
+ Chemistry</span>, Vol. 36: 1964, p. 1627.</p>
+        <h3>Search threshold (degrees)</h3>
+        <p class="para">Threshold for the reported Match Angle. Empower software 
+ does not report any matches with a Match Angle greater than the Search 
+ Threshold value you choose. </p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 0.00 to 90.00</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 10.0</p>
+        <h3>Search depth</h3>
+        <p class="para">Number of matches reported for a library search. For example, 
+ with a search depth of 3, the software performs all possible searches, 
+ then selects and reports the best 3 matches. Results are reported only 
+ when the calculated Match Angle is less than the Search Threshold. </p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 1 to 3</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 3</p>
+        <h3>Threshold criteria</h3>
+        <p class="para">Estimates the noise and/or solvent contribution to the Match 
+ Angle of a spectrum during Library Matching, and flags match results that 
+ exceed this threshold. For details about using the Threshold Criteria 
+ parameter during Library Matching, click. Choices: </p>
+        <ul>
+            <li class="listbull">Noise 
+ + Solvent – Adds the Solvent Angle to the Noise Angle. You must fill in 
+ the Solvent Angle field.</li>
+            <li class="listbull">Noise 
+ – Reports and uses only the Noise Angle, which is calculated based on 
+ total system performance, ignoring solvent contribution.</li>
+            <li class="listbull">Solvent – Reports and 
+ uses only the Solvent Angle. You must enter a value in the Solvent Angle 
+ field.</li>
+        </ul>
+        <h3>Solvent angle (degrees)</h3>
+        <p class="para">Compensates for solvent contribution to Spectral Contrast 
+ angles. If a solvent angle is in the Threshold Criteria, enter a value 
+ in the Solvent Angle field. Solvent Angle allows you to estimate the solvent-induced 
+ spectral changes. </p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 0.00 to 90.00</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 1.00</p>
+        <h3>Search libraries</h3>
+        <p class="para">Spectral libraries used for Library Matching. Use libraries 
+ acquired at the same wavelength range and resolution as the spectra you 
+ are trying to match.</p>
+        <h3>Retention time presearch</h3>
+        <p class="para">Limits the search to library spectra with retention times 
+ similar to the acquired spectrum, thus reducing search time.</p>
+        <h3>RT window (%)</h3>
+        <p class="para">Specifies a retention time window when you use Retention 
+ Time Presearch. </p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 0.0 to 100.0%&#160;of the actual retention time of the acquired spectrum. 
+ </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ ±10.0% of the retention time.</p>
+        <h3>Wavelength presearch</h3>
+        <p class="para">Limits the search to library spectra with wavelength maxima 
+ within the specified wavelength window.</p>
+        <h3>Window (nm)</h3>
+        <p class="para">Specifies a wavelength window when you use Wavelength Presearch. 
+ </p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 0.0 to 100.0&#160;nm</p>
+        <p class="para"><span class="emphasisbold">Default:</span>&#160;5.0&#160;nm</p>
+    </body>
+</html>

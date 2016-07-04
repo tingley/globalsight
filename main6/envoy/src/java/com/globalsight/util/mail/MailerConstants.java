@@ -17,15 +17,16 @@
 
 package com.globalsight.util.mail;
 
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import com.globalsight.config.UserParamNames;
-import com.globalsight.everest.edit.offline.OfflineEditHelper;
-import com.globalsight.everest.workflow.WorkflowMailerConstants;
-import com.globalsight.scheduling.SchedulerConstants;
 import com.globalsight.everest.aligner.EmailNotification;
+import com.globalsight.everest.edit.offline.OfflineEditHelper;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.workflow.WorkflowMailerConstants;
+import com.globalsight.scheduling.SchedulerConstants;
 
 /**
  * This class contains notification related constants.  It also
@@ -86,8 +87,9 @@ public class MailerConstants
     public static final String LOGIN_RESET_PASSWORD_SUBJECT 		= "subject_login_resetPassword";
     public static final String LOGIN_RETRIEVE_UESRNAME_SUBJECT 		= "subject_login_retrieveUsernames";
     public static final String JOB_IMPORT_SUCC_SUBJECT              = "subject_job_import_succ";
-
+    public static final String SUBJECT_UPLOADALIGNMENTCOMPLETED     =   "subject_uploadAlignmentCompleted";
     // Email message keys
+    public static final String MESSAGE_UPLOADALIGNMENTCOMPLETED    = "message_customerUploadCompleted";
     public static final String CUSTOMER_UPLOAD_COMPLETED_MESSAGE 	= "message_customerUploadCompleted";
     public static final String DESKTOPICON_UPLOAD_COMPLETED_MESSAGE = "message_desktopiconUploadCompleted";
     public static final String LOGIN_RESET_PASSWORD_MESSAGE 		= "message_login_resetPassword";
@@ -108,8 +110,230 @@ public class MailerConstants
     private static ArrayList s_systemNotifications = new ArrayList();
     private static ArrayList s_wfNotifications = new ArrayList();
     private static ArrayList s_generalNotifications = new ArrayList();
+    
+    //GBS-3736
+    private static HashMap s_userParaNamesSubject = new HashMap();
+    private static HashMap s_userParaNamesMessage = new HashMap();
     static
     {
+        // MailerConstants
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_SUCCESS,
+                SUBJECT_UPLOADALIGNMENTCOMPLETED);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_SUCCESS,
+                MESSAGE_UPLOADALIGNMENTCOMPLETED);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_INITIAL_IMPORT_FAILURE,
+                INITIAL_IMPORT_FAILED_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_INITIAL_IMPORT_FAILURE,"importFailedMessage");
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_JOB_DISCARD_FAILURE,
+                CANCEL_FAILURE_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_JOB_DISCARD_FAILURE,"jobCancelFailure");
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_READY_TO_DISPATCH, DISPATCH_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_READY_TO_DISPATCH,"manualJobDispatch");
+        
+        s_userParaNamesSubject
+                .put(UserParamNames.NOTIFY_DISPATCH_FAILURE, DISPATCH_FAILURE_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_DISPATCH_FAILURE, "jobDispatchFailure");
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_IMPORT_FAILURE, JOB_IMPORT_FAILED_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_IMPORT_FAILURE, "jobImportFailedMessage");
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_IMPORT_CORRECTION,
+                JOB_IMPORT_CORRECTION_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_IMPORT_CORRECTION, "jobImportCorrectionMessage");
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_DELAYED_REIMPORT_FAILURE,
+                PAGE_FAILED_TO_REIMPORT_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_DELAYED_REIMPORT_FAILURE,"pageFailedReimportToPmMessage");
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_PM_CHANGE_IN_PROJECT,
+                WF_PM_CHANGE_FAILED_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_PM_CHANGE_IN_PROJECT,"message_wfUpdateFailed");
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_PM_CHANGE_IN_PROJECT,
+                WF_PM_CHANGE_COMPLETED_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_PM_CHANGE_IN_PROJECT,"message_wfUpdateCompleted");
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_EXPORT_SOURCE_FAILURE,
+                EXPORT_FAILED_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_EXPORT_SOURCE_FAILURE,"exportFailedMessage");
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_ESTIMATED_EXCEEDS_PLANNED_DATE,
+                ESTIMATED_EXCEEDS_PLANNED_DATE);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_ESTIMATED_EXCEEDS_PLANNED_DATE,
+                "estimatedExceedsPlanned");
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_ADD_WORKFLOW_TO_JOB_FAILURE,
+                WF_IMPORT_FAILURE_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_ADD_WORKFLOW_TO_JOB_FAILURE,
+                "importFailure");
+        
+       s_userParaNamesSubject.put(UserParamNames.NOTIFY_STF_CREATION_FAILURE,
+                STF_CREATION_FAILED_SUBJECT);
+       s_userParaNamesMessage.put(UserParamNames.NOTIFY_STF_CREATION_FAILURE,
+               "message_stf_creation_failed");
+       
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_DELAYED_REIMPORT,
+                PAGE_REIMPORT_TO_PM_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_DELAYED_REIMPORT,
+                "pageReimportedToPmMessage");
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_EXPORT_FOR_UPDATE, PAGE_EFU_TO_PM_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_EXPORT_FOR_UPDATE, "pageExportForUpdateToPmMessage");
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_EXPORT_COMPLETION, EXPORT_FAILED_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_EXPORT_COMPLETION, "exportFailedMessage");
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_EXPORT_COMPLETION,
+                REPORT_EXPORT_COMPLETED_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_EXPORT_COMPLETION, "message_export_completed");
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_EXPORT_COMPLETION,
+                REPORT_EXPORT_FAILED_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_EXPORT_COMPLETION,
+                "message_export_completed");
+        
+        // WorkflowMailerConstants
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_TASK_ACCEPTANCE,
+                WorkflowMailerConstants.ACCEPT_TASK_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_TASK_ACCEPTANCE,
+                WorkflowMailerConstants.ACCEPT_TASK_MESSAGE);
+        
+        //s_userParaNamesSubject.put(WorkflowMailerConstants.ADVANCE_TASK_SUBJECT,UserParamNames.notify);
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_WORKFLOW_DISCARD,
+                WorkflowMailerConstants.CANCEL_TASK_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_WORKFLOW_DISCARD,
+                WorkflowMailerConstants.CANCEL_TASK_MESSAGE);
+        
+        // s_userParaNamesSubject.put(WorkflowMailerConstants.REASSIGN_TASK_SUBJECT,UserParamNames.notify_);
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_TASK_REJECTION,
+                WorkflowMailerConstants.REJECT_TASK_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_TASK_REJECTION,
+                WorkflowMailerConstants.REJECT_TASK_MESSAGE);
+        
+        // s_userParaNamesSubject.put(WorkflowMailerConstants.REROUTE_TASK_SUBJECT,UserParamNames.notify_);
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_NEWLY_ASSIGNED_TASK,
+                WorkflowMailerConstants.ACTIVATE_TASK_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_NEWLY_ASSIGNED_TASK,
+                WorkflowMailerConstants.ACTIVATE_TASK_MESSAGE);
+        
+        // s_userParaNamesSubject.put(WorkflowMailerConstants.ACTIVATE_REVIEW_TASK_SUBJECT,UserParamNames.notify_);
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_TASK_COMPLETION,
+                WorkflowMailerConstants.COMPLETED_TASK_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_TASK_COMPLETION,
+                WorkflowMailerConstants.COMPLETED_TASK_MESSAGE);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_WFL_COMPLETION,
+                WorkflowMailerConstants.COMPLETED_WFL_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_WFL_COMPLETION,
+                WorkflowMailerConstants.COMPLETED_WFL_MESSAGE);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_JOB_COMPLETION,
+                WorkflowMailerConstants.COMPLETED_JOB_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_JOB_COMPLETION,
+                WorkflowMailerConstants.COMPLETED_JOB_MESSAGE);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_DELAYED_REIMPORT,
+                WorkflowMailerConstants.PAGE_REIMPORTED_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_DELAYED_REIMPORT,
+                WorkflowMailerConstants.PAGE_REIMPORTED_MESSAGE);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_EXPORT_FOR_UPDATE,
+                WorkflowMailerConstants.PAGE_EXPORTED_FOR_UPDATE_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_EXPORT_FOR_UPDATE,
+                WorkflowMailerConstants.PAGE_EXPORTED_FOR_UPDATE_MESSAGE);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_NO_AVAILABLE_RESOURCE,
+                WorkflowMailerConstants.NO_AVAILABLE_RESOURCE_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_NO_AVAILABLE_RESOURCE,
+                WorkflowMailerConstants.NO_AVAILABLE_RESOURCE_MESSAGE);
+
+        // SchedulerConstants
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_SCHEDULING_FAILURE,
+                SchedulerConstants.SCHEDULING_FAILED_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_SCHEDULING_FAILURE,
+                SchedulerConstants.SCHEDULING_FAILED_BODY);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_ACTIVITY_DEADLINE,
+                SchedulerConstants.ACCEPTANCE + SchedulerConstants.DEADLINE_APPROACH_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_ACTIVITY_DEADLINE,
+                SchedulerConstants.ACCEPTANCE + SchedulerConstants.DEADLINE_APPROACH_BODY);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_ACTIVITY_DEADLINE,
+                SchedulerConstants.ACCEPTANCE + SchedulerConstants.DEADLINE_PASSED_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_ACTIVITY_DEADLINE,
+                SchedulerConstants.ACCEPTANCE + SchedulerConstants.DEADLINE_PASSED_BODY);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_ACTIVITY_DEADLINE,
+                SchedulerConstants.COMPLETION + SchedulerConstants.DEADLINE_APPROACH_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_ACTIVITY_DEADLINE,
+                SchedulerConstants.COMPLETION + SchedulerConstants.DEADLINE_APPROACH_BODY);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_ACTIVITY_DEADLINE,
+                SchedulerConstants.COMPLETION + SchedulerConstants.DEADLINE_PASSED_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_ACTIVITY_DEADLINE,
+                SchedulerConstants.COMPLETION + SchedulerConstants.DEADLINE_PASSED_BODY);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_OVERDUE_PM, SchedulerConstants.ACCEPTANCE
+                + SchedulerConstants.NOTIFY_PM_OVERDUE_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_OVERDUE_PM, SchedulerConstants.ACCEPTANCE
+                + SchedulerConstants.NOTIFY_USER_OVERDUE_BODY);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_OVERDUE_PM, SchedulerConstants.COMPLETION
+                + SchedulerConstants.NOTIFY_PM_OVERDUE_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_OVERDUE_PM, SchedulerConstants.COMPLETION
+                + SchedulerConstants.NOTIFY_PM_OVERDUE_BODY);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_OVERDUE_USER,
+                SchedulerConstants.ACCEPTANCE + SchedulerConstants.NOTIFY_USER_OVERDUE_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_OVERDUE_USER,
+                SchedulerConstants.ACCEPTANCE + SchedulerConstants.NOTIFY_USER_OVERDUE_BODY);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_OVERDUE_USER,
+                SchedulerConstants.COMPLETION + SchedulerConstants.NOTIFY_USER_OVERDUE_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_OVERDUE_USER,
+                SchedulerConstants.COMPLETION + SchedulerConstants.NOTIFY_USER_OVERDUE_BODY);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_QUOTE_PERSON,
+                SchedulerConstants.NOTIFY_QUOTE_PERSON_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_QUOTE_PERSON,
+                SchedulerConstants.NOTIFY_QUOTE_PERSON_BODY);
+
+        // OfflineEditHelper
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD,
+                OfflineEditHelper.UPLOAD_SUCCESSFUL_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD,
+                OfflineEditHelper.UPLOAD_SUCCESSFUL_MESSAGE);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_SAVING_SEGMENTS_FAILURE,
+                OfflineEditHelper.UPLOAD_FAIL_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_SAVING_SEGMENTS_FAILURE,
+                OfflineEditHelper.UPLOAD_FAIL_MESSAGE);
+
+        // EmailNotification
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_BATCH_ALIGNMENT_SUCCESS,
+                EmailNotification.BATCH_COMPLETE_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_BATCH_ALIGNMENT_SUCCESS,
+                EmailNotification.BATCH_COMPLETE_MESSAGE);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_BATCH_ALIGNMENT_FAILURE,
+                EmailNotification.BATCH_FAILED_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_BATCH_ALIGNMENT_FAILURE,
+                EmailNotification.BATCH_FAILED_MESSAGE);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_SUCCESS,
+                EmailNotification.UPLOAD_COMPLETE_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_BATCH_ALIGNMENT_FAILURE,
+                EmailNotification.UPLOAD_COMPLETE_MESSAGE);
+        
+        s_userParaNamesSubject.put(UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_FAILURE,
+                EmailNotification.UPLOAD_FAILED_SUBJECT);
+        s_userParaNamesMessage.put(UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_FAILURE,
+                EmailNotification.UPLOAD_FAILED_MESSAGE);
+        
+
         //////////////////////////////////////////////////////////////////////
         //  ADMIN
         //////////////////////////////////////////////////////////////////////
@@ -324,8 +548,26 @@ public class MailerConstants
         return p_emailSubject == null ? null :
             (String)s_notificationMap.get(p_emailSubject);
     }
-
-
+    
+    /**
+     * Get the email subject base on notification parameter name. The
+     * notification parameter name is the key used in the resource bundle
+     */
+    public static String getEmailSubject(String notificationParamName)
+    {
+        return notificationParamName == null ? null : (String) s_userParaNamesSubject
+                .get(notificationParamName);
+    }
+    
+    /**
+     * Get the email message base on notification parameter name. The
+     * notification parameter name is the key used in the resource bundle
+     */
+    public static String getEmailMessage(String notificationParamName)
+    {
+        return notificationParamName == null ? null : (String) s_userParaNamesMessage
+                .get(notificationParamName);
+    }
     /**
      * Checks the permissionset for the appropriate notification
      * permission based on the category of the email subject.

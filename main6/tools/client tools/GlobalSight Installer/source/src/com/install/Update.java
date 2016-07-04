@@ -50,7 +50,7 @@ public class Update
     private static Logger log = Logger.getLogger(Update.class);
     private static final String EAR_PATH = "/jboss/server/standalone/deployments/globalsight.ear";
     private static final String LIB_PATH = EAR_PATH + "/lib";
-    private static final String GLOBLASIGHT_JAR = EAR_PATH + "/globalsight.jar";
+    private static final String GLOBLASIGHT_JAR = LIB_PATH + "/globalsight.jar";
     private static final String CLASS_PATH = LIB_PATH + "/classes";
 //    private static final String PATCH_SQL_DIR = "/install/data/ERs";
     private static final String BACKUP_FILE = "backup";

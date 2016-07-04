@@ -2678,7 +2678,7 @@ public class AmbassadorHelper extends JsonTypeWebService
 
 		// Placeholder Format(Deafult--compact)
 		int ptagFormat = helper.getPtagFormat(OfflineConstants.PTAG_COMPACT);
-		// Allow Edit Locked Segments(Deafult--Allow Edit of ICE and 100% matches)
+		// Allow Edit Locked Segments(Default--Allow Edit of ICE and 100% matches)
 		int TMEditType = helper.getEditAllState("1", l10nProfile);
 		// TM Options(Deafult--TMX File - 1.4b)
 		int resInsMode = helper
@@ -2714,6 +2714,7 @@ public class AmbassadorHelper extends JsonTypeWebService
 		else if (fileType.equals(OfflineConstants.FORMAT_OMEGAT_VALUE))
 		{
 			downloadParams.setPopulate100(false);
+			downloadParams.setPopulateMT(false);
 			// Penalized Reference TM Options
 			downloadParams.setPenalizedReferenceTmPre(false);
 			downloadParams.setPenalizedReferenceTmPer(false);

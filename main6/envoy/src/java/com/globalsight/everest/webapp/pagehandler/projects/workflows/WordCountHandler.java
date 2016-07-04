@@ -53,10 +53,9 @@ public class WordCountHandler extends PageHandler
     public static String WF_KEY = "wf";
     public static String LMT = "LevMatchThreshold";
     public static String JOB_NAME = "JOB_NAME";
+    public static String MT_COLUMN_FLAG = "hasMtColumnFlag";
 
-    private static final Logger s_logger =
-        Logger.getLogger(
-            WordCountHandler.class);
+    private static final Logger s_logger = Logger.getLogger(WordCountHandler.class);
 
     /**
      * Invokes this PageHandler
@@ -108,17 +107,16 @@ public class WordCountHandler extends PageHandler
         try
         {
             String wfid = p_request.getParameter("wfId");
-            wf = ServerProxy.getWorkflowManager().
-                getWorkflowByIdRefresh(Long.parseLong(wfid));
+            wf = ServerProxy.getWorkflowManager().getWorkflowByIdRefresh(Long.parseLong(wfid));
             Job job = wf.getJob();
             List<Workflow> wfs = new ArrayList<Workflow>();
             wfs.add(wf);
-            boolean isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
-            boolean exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();
-            p_sessionMgr.setAttribute(WebAppConstants.IS_USE_IN_CONTEXT, isUseInContext);
-            p_sessionMgr.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, exactMatchOnly);
+
             p_sessionMgr.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, PageHandler.isInContextMatch(job));
             p_request.setAttribute(WebAppConstants.JOB_ID,job.getId()+"");
+
+            // Decide whether to show "MT" column on GUI
+            setMtColumnFlag(wfs, p_request);
 
             prepareWorkflowList(p_request, p_session, p_sessionMgr, wfs,
                                 job.getJobName(), String.valueOf(
@@ -142,40 +140,30 @@ public class WordCountHandler extends PageHandler
                              SessionManager p_sessionMgr)
     throws EnvoyServletException
     {
-        Long jobId = new Long((String) p_request.getParameter(
-            JobManagementHandler.JOB_ID));
+        Long jobId = new Long((String) p_request.getParameter(JobManagementHandler.JOB_ID));
         p_request.setAttribute(JobManagementHandler.JOB_ID, jobId+"");
         Job job = null;
-        boolean isUseInContext = false;
-        boolean exactMatchOnly = false;
         boolean isInContextMatch = false;
         try
         {
-            job = ServerProxy.getJobHandler().getJobById(
-                jobId.longValue());
-            isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
-            exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();
+            job = ServerProxy.getJobHandler().getJobById(jobId.longValue());
             isInContextMatch = isInContextMatch(job);
         }
         catch (Exception e)
         {
             throw new EnvoyServletException(e);
         }
-
-        p_sessionMgr.setAttribute(WebAppConstants.IS_USE_IN_CONTEXT, isUseInContext);
-        p_sessionMgr.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, exactMatchOnly);
         p_sessionMgr.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch);
-		String wfids = (String) p_request
-				.getParameter(JobManagementHandler.WF_ID);
 
+        String wfids = (String) p_request.getParameter(JobManagementHandler.WF_ID);
         Hashtable hash = new Hashtable();
         StringTokenizer st = new StringTokenizer(wfids, " ");
         while (st.hasMoreTokens())
         {
             hash.put(st.nextToken(), "1");
         }
-        
-        List sublist = new ArrayList();
+
+        List<Workflow> sublist = new ArrayList<Workflow>();
         // pull out ones the user is interested in
         for (Workflow wf : job.getWorkflows())
         {
@@ -184,7 +172,10 @@ public class WordCountHandler extends PageHandler
                 sublist.add(wf);
             }
         }
-        
+
+        // Decide whether to show "MT" column on GUI
+        setMtColumnFlag(sublist, p_request);
+
         prepareWorkflowList(p_request, p_session, p_sessionMgr, sublist, 
                             job.getJobName(), String.valueOf(
                                 job.getLeverageMatchThreshold()));
@@ -215,20 +206,14 @@ public class WordCountHandler extends PageHandler
     }
 
     // refresh the list when sorting by a column is invoked.
-    private void refresh(HttpServletRequest p_request,
-                         HttpSession p_session,
-                         SessionManager p_sessionMgr)
-    throws EnvoyServletException
+    private void refresh(HttpServletRequest p_request, HttpSession p_session,
+            SessionManager p_sessionMgr) throws EnvoyServletException
     {
-        Locale uiLocale = (Locale)p_session.getAttribute(
-                                    WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
 
         ArrayList sublist = (ArrayList) p_sessionMgr.getAttribute("sublist");
-        setTableNavigation(p_request, p_session, sublist,
-                          new WorkflowComparator(uiLocale),
-                          10,
-                          WF_LIST, WF_KEY);
-
+        setTableNavigation(p_request, p_session, sublist, new WorkflowComparator(uiLocale), 10,
+                WF_LIST, WF_KEY);
     }
 
     private void setCommonRequestAttributes(HttpServletRequest p_request)
@@ -246,6 +231,18 @@ public class WordCountHandler extends PageHandler
 
         p_request.setAttribute(SystemConfigParamNames.IS_DELL,
             new Boolean(isSpecialCustomer));
+    }
+
+    private void setMtColumnFlag(List<Workflow> wfList, HttpServletRequest p_request)
+    {
+        boolean hasMtColumnFlag = false;
+        for (Workflow wf : wfList)
+        {
+            hasMtColumnFlag = (wf.getIsSinceVersion87() && wf.getMtTotalWordCount() > 0);
+            if (hasMtColumnFlag)
+                break;
+        }
+        p_request.setAttribute(MT_COLUMN_FLAG, hasMtColumnFlag);
     }
 }
 

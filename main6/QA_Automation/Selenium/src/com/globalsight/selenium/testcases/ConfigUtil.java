@@ -12,7 +12,9 @@ public class ConfigUtil
     private static final ResourceBundle CONFIG_DATA_BUNDLE = ResourceBundle
             .getBundle(PropertyFileConfiguration.CONFIG_PROPERTIES);
     
+     
     private static String propertiesFile = PropertyFileConfiguration.SMOKE_TEST_PROPERTIES;
+  
 
     /**
      * Get the Configure variables from the ConfigAndCommonData.properties file.
@@ -111,6 +113,13 @@ public class ConfigUtil
             return null;
         else
             return getDataInCase(propertiesFile, propertyName);
+    }
+    public static String getProperty(String propertiesFiles, String propertyName) 
+    {
+        if (StringUtil.isEmpty(propertiesFiles) || StringUtil.isEmpty(propertyName))
+            return null;
+        else
+            return getDataInCase(propertiesFiles, propertyName);
     }
 
     public static void setPropertyFile(String propertiesFile)

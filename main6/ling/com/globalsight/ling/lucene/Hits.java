@@ -112,12 +112,12 @@ public class Hits
     private void dealHits(IndexSearcher searcher, ScoreDoc[] p_hits, int end,
             int begin, float p_minScore, String text) throws IOException
     {
-        m_hits = new ArrayList(end);
-        text = text.toLowerCase();
-        
         if(p_hits.length < end) {
             end = p_hits.length;
         }
+        
+        m_hits = new ArrayList(end);
+        text = text.toLowerCase();
 
         for (int i = begin, max = end; i < max; i++)
         {
@@ -134,7 +134,7 @@ public class Hits
 
             if (m_isTerm)
             {
-                if (text.indexOf(str) > -1)
+                if (str.indexOf(text) > -1)
                 {
                     m_hits.add(new Hit(doc.get(IndexDocument.MAINID), doc.get(IndexDocument.SUBID),
                             doc.get(IndexDocument.TEXT), score));

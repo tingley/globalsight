@@ -50,6 +50,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
+import com.globalsight.everest.comment.CommentFile;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -670,8 +671,7 @@ public class TaskListHandler extends PageHandler
             List<OEMProcessStatus> statusList) throws GeneralException,
             NamingException, IOException
     {
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
         sessionMgr.removeElement(DOWNLOAD_STATUS);
         Vector<String> downloadOfflineFilesOptions = getDownloadOption(session);
         SendDownloadFileHelper help = new SendDownloadFileHelper();
@@ -683,8 +683,7 @@ public class TaskListHandler extends PageHandler
         String encoding = downloadOfflineFilesOptions.get(2);
         int ptagFormat = help.getPtagFormat(downloadOfflineFilesOptions.get(3));
         int platformId = help.getPlatformId(request, editorId);
-        int resInsMode = help
-                .getResourceInsertionMode(downloadOfflineFilesOptions.get(4));
+        int resInsMode = help.getResourceInsertionMode(downloadOfflineFilesOptions.get(4));
         String displayExactMatch = downloadOfflineFilesOptions.get(6);
         // String consolidateTM = downloadOfflineFilesOptions.get(7);
         // String consolidateTerm = downloadOfflineFilesOptions.get(8);
@@ -699,11 +698,12 @@ public class TaskListHandler extends PageHandler
         String includeRepetitions = downloadOfflineFilesOptions.get(14);
         String excludeFullyLeveragedFiles = downloadOfflineFilesOptions.get(16);
         String preserveSourceFolder = downloadOfflineFilesOptions.get(17);
-        String includeXmlNodeContextInformation = downloadOfflineFilesOptions
-                .get(18);
+        String includeXmlNodeContextInformation = downloadOfflineFilesOptions.get(18);
         String penalizedReferenceTmPre = downloadOfflineFilesOptions.get(21);
         String penalizedReferenceTmPer = downloadOfflineFilesOptions.get(22);
-
+        String separateTMfile = downloadOfflineFilesOptions.get(23);
+        String populateMT = downloadOfflineFilesOptions.get(24);
+        
         File tmpFile = File.createTempFile("GSDownloadAllOffline", null);
         JobPackageZipper zipper = new JobPackageZipper();
         zipper.createZipFile(tmpFile);
@@ -737,7 +737,7 @@ public class TaskListHandler extends PageHandler
         HashMap<Long, Long> allPage_tasks = new HashMap<Long, Long>();
 
         Vector excludeTypes = null;
-        int downloadEditAll = 0;
+        int downloadEditAll = 4;
         GlobalSightLocale srcLocale = null;
         GlobalSightLocale targetLocale = null;
         String targetLocaleStr = null;
@@ -755,8 +755,7 @@ public class TaskListHandler extends PageHandler
 
             long jobId = task.getJobId();
             Job job = ServerProxy.getJobHandler().getJobById(jobId);
-            TranslationMemoryProfile tmp = job.getL10nProfile()
-                    .getTranslationMemoryProfile();
+            TranslationMemoryProfile tmp = job.getL10nProfile().getTranslationMemoryProfile();
             String refTms = tmp.getRefTMsToLeverageFrom();
             if (!StringUtil.isEmpty(refTms))
             {
@@ -807,8 +806,7 @@ public class TaskListHandler extends PageHandler
                     downloadEditAll = help.getEditAllState(
                             downloadOfflineFilesOptions.get(15), l10nProfile);
                 }
-                excludeTypes = l10nProfile.getTranslationMemoryProfile()
-                        .getJobExcludeTuTypes();
+                excludeTypes = l10nProfile.getTranslationMemoryProfile().getJobExcludeTuTypes();
                 targetLocaleStr = task.getTargetLocale().toString();
                 srcLocale = task.getSourceLocale();
                 targetLocale = task.getTargetLocale();
@@ -870,23 +868,21 @@ public class TaskListHandler extends PageHandler
         downloadParams.setAllSTF_tasks(allSTF_tasks);
         downloadParams.setDisplayExactMatch(displayExactMatch);
         downloadParams.setPopulate100("yes".equalsIgnoreCase(populate100));
+        downloadParams.setPopulateMT("yes".equalsIgnoreCase(populateMT));
         downloadParams.setPopulateFuzzy("yes".equalsIgnoreCase(populateFuzzy));
-        downloadParams.setPreserveSourceFolder("yes"
-                .equalsIgnoreCase(preserveSourceFolder));
+        downloadParams.setPreserveSourceFolder("yes".equalsIgnoreCase(preserveSourceFolder));
         downloadParams.setIncludeXmlNodeContextInformation("yes"
                 .equalsIgnoreCase(includeXmlNodeContextInformation));
         downloadParams.setConsolidateFileType("consolidate");
         downloadParams.setNeedCombined(true);
-        downloadParams.setIncludeRepetitions("yes"
-                .equalsIgnoreCase(includeRepetitions));
+        downloadParams.setIncludeRepetitions("yes".equalsIgnoreCase(includeRepetitions));
         downloadParams.setChangeCreationIdForMTSegments("yes"
                 .equalsIgnoreCase(changeCreationIdForMt));
         downloadParams.setExcludeFullyLeveragedFiles("yes"
                 .equalsIgnoreCase(excludeFullyLeveragedFiles));
-        downloadParams.setPenalizedReferenceTmPre("yes"
-                .equalsIgnoreCase(penalizedReferenceTmPre));
-        downloadParams.setPenalizedReferenceTmPer("yes"
-                .equalsIgnoreCase(penalizedReferenceTmPer));
+        downloadParams.setPenalizedReferenceTmPre("yes".equalsIgnoreCase(penalizedReferenceTmPre));
+        downloadParams.setPenalizedReferenceTmPer("yes".equalsIgnoreCase(penalizedReferenceTmPer));
+        downloadParams.setChangeSeparateTMFile("yes".equalsIgnoreCase(separateTMfile));
         downloadParams.setZipper(zipper);
 
         try
@@ -909,8 +905,7 @@ public class TaskListHandler extends PageHandler
 
         String zipFileName = jobName + "_" + targetLocaleStr + ".zip";
         CommentFilesDownLoad commentFilesDownload = new CommentFilesDownLoad();
-        commentFilesDownload.sendFileToClient(request, response, zipFileName,
-                tmpFile);
+        commentFilesDownload.sendFileToClient(request, response, zipFileName, tmpFile);
     }
 
     @SuppressWarnings(
@@ -933,8 +928,7 @@ public class TaskListHandler extends PageHandler
         String encoding = downloadOfflineFilesOptions.get(2);
         int ptagFormat = help.getPtagFormat(downloadOfflineFilesOptions.get(3));
         int platformId = help.getPlatformId(request, editorId);
-        int resInsMode = help
-                .getResourceInsertionMode(downloadOfflineFilesOptions.get(4));
+        int resInsMode = help.getResourceInsertionMode(downloadOfflineFilesOptions.get(4));
         String displayExactMatch = downloadOfflineFilesOptions.get(6);
         String consolidateTM = downloadOfflineFilesOptions.get(7);
         String consolidateTerm = downloadOfflineFilesOptions.get(8);
@@ -947,6 +941,7 @@ public class TaskListHandler extends PageHandler
         String consolidateXLF = downloadOfflineFilesOptions.get(12);
         String changeCreationIdForMt = downloadOfflineFilesOptions.get(13);
         String includeRepetitions = downloadOfflineFilesOptions.get(14);
+        String TMEditType = downloadOfflineFilesOptions.get(15);
         String excludeFullyLeveragedFiles = downloadOfflineFilesOptions.get(16);
         String preserveSourceFolder = downloadOfflineFilesOptions.get(17);
         String includeXmlNodeContextInformation = downloadOfflineFilesOptions
@@ -955,6 +950,8 @@ public class TaskListHandler extends PageHandler
         String wordCountForDownload = downloadOfflineFilesOptions.get(20);
         String penalizedReferenceTmPre = downloadOfflineFilesOptions.get(21);
         String penalizedReferenceTmPer = downloadOfflineFilesOptions.get(22);
+        String separateTMfile = downloadOfflineFilesOptions.get(23);
+        String populateMT = downloadOfflineFilesOptions.get(24);
 
         File tmpFile = File.createTempFile("GSDownloadAllOffline", null);
         String zipFileName = "DownloadAllOfflineFiles.zip";
@@ -1015,7 +1012,7 @@ public class TaskListHandler extends PageHandler
             long workflowId = task.getWorkflow().getId();
             L10nProfile l10nProfile = task.getWorkflow().getJob()
                     .getL10nProfile();
-            int downloadEditAll = 4;
+            int downloadEditAll = LocProfileStateConstants.TM_EDIT_TYPE_DENY;// 4
             if (l10nProfile.getTmChoice() == LocProfileStateConstants.ALLOW_EDIT_TM_USAGE)
             {
                 downloadEditAll = help.getEditAllState(
@@ -1040,32 +1037,28 @@ public class TaskListHandler extends PageHandler
                     task.getSourceLocale(), task.getTargetLocale(), true,
                     fileFormat, excludeTypes, downloadEditAll, supportFileList,
                     resInsMode, user);
-            downloadParams.setConsolidateTmxFiles("yes"
-                    .equalsIgnoreCase(consolidateTM));
-            downloadParams.setConsolidateTermFiles("yes"
-                    .equalsIgnoreCase(consolidateTerm));
+            downloadParams.setConsolidateTmxFiles("yes".equalsIgnoreCase(consolidateTM));
+            downloadParams.setConsolidateTermFiles("yes".equalsIgnoreCase(consolidateTerm));
             downloadParams.setTermFormat(terminology);
-            downloadParams.setJob(ServerProxy.getJobHandler().getJobById(
-                    task.getJobId()));
+            downloadParams.setJob(ServerProxy.getJobHandler().getJobById(task.getJobId()));
             downloadParams.setDisplayExactMatch(displayExactMatch);
             downloadParams.setPopulate100("yes".equalsIgnoreCase(populate100));
-            downloadParams.setPopulateFuzzy("yes"
-                    .equalsIgnoreCase(populateFuzzy));
-            downloadParams.setPreserveSourceFolder("yes"
-                    .equalsIgnoreCase(preserveSourceFolder));
+            downloadParams.setPopulateMT("yes".equalsIgnoreCase(populateMT));
+            downloadParams.setPopulateFuzzy("yes".equalsIgnoreCase(populateFuzzy));
+            downloadParams.setPreserveSourceFolder("yes".equalsIgnoreCase(preserveSourceFolder));
             downloadParams.setIncludeXmlNodeContextInformation("yes"
                     .equalsIgnoreCase(includeXmlNodeContextInformation));
             downloadParams.setConsolidateFileType(consolidateFileType);
-            downloadParams.setWordCountForDownload(Integer
-                    .parseInt(wordCountForDownload));
-            downloadParams.setIncludeRepetitions("yes"
-                    .equalsIgnoreCase(includeRepetitions));
+            downloadParams.setWordCountForDownload(Integer.parseInt(wordCountForDownload));
+            downloadParams.setIncludeRepetitions("yes".equalsIgnoreCase(includeRepetitions));
+            downloadParams.setTMEditType(Integer.parseInt(TMEditType));
             downloadParams.setChangeCreationIdForMTSegments("yes"
                     .equalsIgnoreCase(changeCreationIdForMt));
             downloadParams.setExcludeFullyLeveragedFiles("yes"
                     .equalsIgnoreCase(excludeFullyLeveragedFiles));
             downloadParams.setPenalizedReferenceTmPre("yes"
                     .equalsIgnoreCase(penalizedReferenceTmPre));
+            downloadParams.setChangeSeparateTMFile("yes".equalsIgnoreCase(separateTMfile));
             downloadParams.setPenalizedReferenceTmPer("yes"
                     .equalsIgnoreCase(penalizedReferenceTmPer));
 
@@ -1090,8 +1083,7 @@ public class TaskListHandler extends PageHandler
             }
             else
             {
-                int curSize = OEMProcessStatus
-                        .findNumberOfFiles(downloadParams);
+                int curSize = OEMProcessStatus.findNumberOfFiles(downloadParams);
                 status.setMultiTasks(false);
                 status.setCounter((taskTotalSize - 1) * curSize);
                 status.setTotalFiles(taskTotalSize * curSize);
@@ -1106,8 +1098,7 @@ public class TaskListHandler extends PageHandler
 
         zipper.closeZipFile();
         CommentFilesDownLoad commentFilesDownload = new CommentFilesDownLoad();
-        commentFilesDownload.sendFileToClient(request, response, zipFileName,
-                tmpFile);
+        commentFilesDownload.sendFileToClient(request, response, zipFileName, tmpFile);
     }
 
     private Vector<String> getDownloadOption(HttpSession session)
@@ -1396,7 +1387,9 @@ public class TaskListHandler extends PageHandler
         StringBuffer isFinishedTaskId = new StringBuffer();
         StringBuffer isUploadingJobName = new StringBuffer();
         StringBuffer isNeedScoreTaskId = new StringBuffer();
+        StringBuffer isNeedActivityCommentCheckTaskId = new StringBuffer();
         StringBuffer isNeedReportUploadCheckTaskId = new StringBuffer();
+        StringBuffer isFinishedActivityCommentUploadTaskId = new StringBuffer();
         StringBuffer isFinishedReportUploadTaskId = new StringBuffer();
         StringBuffer unTranslatedTaskId = new StringBuffer();
         int percentage = 0;
@@ -1411,6 +1404,15 @@ public class TaskListHandler extends PageHandler
 
                 if (task != null)
                 {
+                    //GBS-4309
+                    int isActivityCommentUploaded = 0;
+                    ArrayList<CommentFile> cf = ServerProxy.getCommentManager()
+                            .getActivityCommentAttachments(task);
+                    if (cf != null && cf.size() > 0)
+                    {
+                        isActivityCommentUploaded = 1;
+                    }
+                    
                     if (task.getIsUploading() == 'Y')
                     {
                         isUploadingJobName.append("[JobID:")
@@ -1465,6 +1467,20 @@ public class TaskListHandler extends PageHandler
                                             .append(task.getJobName())
                                             .append("],");
                                 }
+
+                                if (task.getIsActivityCommentUploadCheck() == 0
+                                        || (task.getIsActivityCommentUploadCheck() == 1 && isActivityCommentUploaded == 1))
+                                {
+                                    isFinishedActivityCommentUploadTaskId.append(taskId)
+                                            .append(" ");
+                                }
+                                if (task.getIsActivityCommentUploadCheck() == 1
+                                        && isActivityCommentUploaded == 0)
+                                {
+                                    isNeedActivityCommentCheckTaskId.append("[JobID:")
+                                            .append(task.getJobId()).append(",JobName:")
+                                            .append(task.getJobName()).append("],");
+                                }
                             }
                             else
                             {
@@ -1475,6 +1491,20 @@ public class TaskListHandler extends PageHandler
                         {
                             isFinishedTaskId.append(taskId).append(" ");
 
+                            if (task.getIsActivityCommentUploadCheck() == 0
+                                    || (task.getIsActivityCommentUploadCheck() == 1 && isActivityCommentUploaded == 1))
+                            {
+                                isFinishedActivityCommentUploadTaskId.append(taskId)
+                                        .append(" ");
+                            }
+                            if (task.getIsActivityCommentUploadCheck() == 1
+                                    && isActivityCommentUploaded == 0)
+                            {
+                                isNeedActivityCommentCheckTaskId.append("[JobID:")
+                                        .append(task.getJobId()).append(",JobName:")
+                                        .append(task.getJobName()).append("],");
+                            }
+                            
                             if (task.getIsReportUploadCheck() == 0
                                     || (task.getIsReportUploadCheck() == 1 && task
                                             .getIsReportUploaded() == 1))
@@ -1527,7 +1557,19 @@ public class TaskListHandler extends PageHandler
                 result = result + "\"isFinishedReportUploadTaskId\":\""
                         + isFinishedReportUploadTaskId.toString().trim()
                         + "\",";
+            }            
+            if (isNeedActivityCommentCheckTaskId.length() != 0)
+            {
+                result = result + "\"isNeedActivityCommentCheckTaskId\":\""
+                        + isNeedActivityCommentCheckTaskId.toString().trim()
+                        + "\",";
             }
+            if (isFinishedActivityCommentUploadTaskId.length() != 0)
+            {
+                result = result + "\"isFinishedActivityCommentUploadTaskId\":\""
+                        + isFinishedActivityCommentUploadTaskId.toString().trim()
+                        + "\",";
+            }          
             if (unTranslatedTaskId.length() != 0)
             {
                 result = result + "\"unTranslatedTaskId\":\""

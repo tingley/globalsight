@@ -413,8 +413,7 @@ public class Ambassador extends AbstractWebService
 
     public static String ERROR_EXPORT_PROJECT_NAMES = "You cannot have \\, /, :, ;, .,*, ?,!,$,#,@,[,],{,},(,),^,+,=,~, |, \',\", &lt;, &gt;, % or &amp; in the Project Name.";
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(
-            "yyyy-MM-dd");
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     private static final Logger logger = Logger.getLogger(Ambassador.class);
 
@@ -430,36 +429,28 @@ public class Ambassador extends AbstractWebService
     // Cached jobIds that jobs creation had been started, this is used to avoid
     // job with same ID to be created repeatedly.
     // For "uploadFile...()" and "CreateJob...()" APIs only.
-    private static Set<Long> cachedJobIds = Collections
-            .synchronizedSet(new HashSet<Long>());
+    private static Set<Long> cachedJobIds = Collections.synchronizedSet(new HashSet<Long>());
 
     private static String NOT_IN_DB = "This job is not ready for query: ";
 
     private final static String XML_HEAD = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n";
 
-    private final static String ENTRY_XML = "\r\n\t<entry>"
-            + "\r\n\t\t<tm id={0}>{1}</tm>"
-            + "\r\n\t\t<percentage>{2}%</percentage>"
-            + "\r\n\t\t<sid>{3}</sid>" + "\r\n\t\t<source>"
-            + "\r\n\t\t\t<locale>{4}</locale>"
-            + "\r\n\t\t\t<segment>{5}</segment>" + "\r\n\t\t</source>"
-            + "\r\n\t\t<target>" + "\r\n\t\t\t<locale>{6}</locale>"
-            + "\r\n\t\t\t<segment>{7}</segment>" + "\r\n\t\t</target>"
-            + "\r\n\t</entry>";
+    private final static String ENTRY_XML = "\r\n\t<entry>" + "\r\n\t\t<tm id={0}>{1}</tm>"
+            + "\r\n\t\t<percentage>{2}%</percentage>" + "\r\n\t\t<sid>{3}</sid>"
+            + "\r\n\t\t<source>" + "\r\n\t\t\t<locale>{4}</locale>"
+            + "\r\n\t\t\t<segment>{5}</segment>" + "\r\n\t\t</source>" + "\r\n\t\t<target>"
+            + "\r\n\t\t\t<locale>{6}</locale>" + "\r\n\t\t\t<segment>{7}</segment>"
+            + "\r\n\t\t</target>" + "\r\n\t</entry>";
 
-    private final static String ENTRY_XML_SAVE = "<entry>"
-            + "\r\n\t<sid>{0}</sid>"
-            + "\r\n\t<source>\r\n\t\t<locale>{1}</locale>\r\n\t\t"
-            + "{2}\r\n\t</source>\r\n\t"
-            + "<target>\r\n\t\t<locale>{3}</locale>\r\n\t\t"
-            + "{4}\r\n\t</target>\r\n</entry>";
+    private final static String ENTRY_XML_SAVE = "<entry>" + "\r\n\t<sid>{0}</sid>"
+            + "\r\n\t<source>\r\n\t\t<locale>{1}</locale>\r\n\t\t" + "{2}\r\n\t</source>\r\n\t"
+            + "<target>\r\n\t\t<locale>{3}</locale>\r\n\t\t" + "{4}\r\n\t</target>\r\n</entry>";
 
     private final static String NULL_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
             + "\r\n<entries>\r\n\t<entry>\r\n\t\t"
             + "<percentage>0%</percentage>\r\n\t</entry>\r\n</entries>";
 
-    private static final SimpleDateFormat format = new SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss");
+    private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     /*
      * The version of desktop icon e.g. VERSION = "(3.1,8.2)" -> 3.1 is the
      * minimal version to allow access webservice, 8.2 is the current version of
@@ -505,8 +496,7 @@ public class Ambassador extends AbstractWebService
             SystemConfiguration config = SystemConfiguration.getInstance();
             webServerDocRoot = config
                     .getStringParameter(SystemConfigParamNames.WEB_SERVER_DOC_ROOT);
-            if (!(webServerDocRoot.endsWith("/") || webServerDocRoot
-                    .endsWith("\\")))
+            if (!(webServerDocRoot.endsWith("/") || webServerDocRoot.endsWith("\\")))
             {
                 webServerDocRoot = webServerDocRoot + "/";
             }
@@ -541,8 +531,7 @@ public class Ambassador extends AbstractWebService
      * 
      * @exception WebServiceException
      */
-    public String login(String p_username, String p_password)
-            throws WebServiceException
+    public String login(String p_username, String p_password) throws WebServiceException
     {
         String accessToken = this.doLogin(p_username, p_password);
         String separator = "+_+";
@@ -584,8 +573,7 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String getFileProfileInformation(String p_accessToken)
-            throws WebServiceException
+    public String getFileProfileInformation(String p_accessToken) throws WebServiceException
     {
         try
         {
@@ -594,8 +582,8 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            return makeResponseXml("getFileProfileInformation", false,
-                    "Access token is Invalid").toString();
+            return makeResponseXml("getFileProfileInformation", false, "Access token is Invalid")
+                    .toString();
         }
 
         checkAccess(p_accessToken, "getFileProfileInformation");
@@ -604,21 +592,17 @@ public class Ambassador extends AbstractWebService
         ArrayList fileProfileIds = new ArrayList();
         ArrayList fileProfileDescriptions = new ArrayList();
         ArrayList fileProfileNames = new ArrayList();
-        queryDatabaseForFileProfileInformation(fileProfileIds,
-                fileProfileDescriptions, fileProfileNames);
+        queryDatabaseForFileProfileInformation(fileProfileIds, fileProfileDescriptions,
+                fileProfileNames);
 
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<fileProfileInformation>\r\n");
         for (int i = 0; i < fileProfileIds.size(); i++)
         {
             xml.append("<fileProfile>");
-            xml.append("\t<id>").append(fileProfileIds.get(i).toString())
-                    .append("</id>\r\n");
-            xml.append("\t<name>").append(fileProfileNames.get(i).toString())
-                    .append("</name>\r\n");
-            xml.append("\t<description>")
-                    .append(fileProfileDescriptions.get(i).toString())
+            xml.append("\t<id>").append(fileProfileIds.get(i).toString()).append("</id>\r\n");
+            xml.append("\t<name>").append(fileProfileNames.get(i).toString()).append("</name>\r\n");
+            xml.append("\t<description>").append(fileProfileDescriptions.get(i).toString())
                     .append("</description>\r\n");
             xml.append("</fileProfile>");
         }
@@ -636,8 +620,7 @@ public class Ambassador extends AbstractWebService
      * 
      * @exception WebServiceException
      */
-    public String getAllProjects(String p_accessToken)
-            throws WebServiceException
+    public String getAllProjects(String p_accessToken) throws WebServiceException
     {
         checkAccess(p_accessToken, "getAllProjects");
         checkPermission(p_accessToken, Permission.GET_ALL_PROJECTS);
@@ -654,8 +637,7 @@ public class Ambassador extends AbstractWebService
             message = makeErrorXml("getAllProjects", message);
             throw new WebServiceException(message);
         }
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<ProjectInformation>\r\n");
         Iterator it = c.iterator();
         while (it.hasNext())
@@ -663,21 +645,17 @@ public class Ambassador extends AbstractWebService
             Project project = (Project) it.next();
             xml.append("<Project>\r\n");
             xml.append("\t<id>").append(project.getId()).append("</id>\r\n");
-            xml.append("\t<name>").append(project.getName())
-                    .append("</name>\r\n");
-            if (project.getDescription() == null
-                    || project.getDescription().length() < 1)
+            xml.append("\t<name>").append(project.getName()).append("</name>\r\n");
+            if (project.getDescription() == null || project.getDescription().length() < 1)
             {
-                xml.append("\t<description>").append("N/A")
-                        .append("</description>\r\n");
+                xml.append("\t<description>").append("N/A").append("</description>\r\n");
             }
             else
             {
                 xml.append("\t<description>").append(project.getDescription())
                         .append("</description>\r\n");
             }
-            xml.append("\t<projectmanager>")
-                    .append(project.getProjectManagerId())
+            xml.append("\t<projectmanager>").append(project.getProjectManagerId())
                     .append("</projectmanager>\r\n");
             xml.append("</Project>\r\n");
         }
@@ -696,8 +674,7 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String getAllActivityTypes(String p_accessToken)
-            throws WebServiceException
+    public String getAllActivityTypes(String p_accessToken) throws WebServiceException
     {
         checkAccess(p_accessToken, "getAllActivityTypes");
         checkPermission(p_accessToken, Permission.ACTIVITY_TYPES_VIEW);
@@ -714,8 +691,7 @@ public class Ambassador extends AbstractWebService
             message = makeErrorXml("getAllActivities", message);
             throw new WebServiceException(message);
         }
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<ActivityInformation>\r\n");
         Iterator it = c.iterator();
         while (it.hasNext())
@@ -723,13 +699,10 @@ public class Ambassador extends AbstractWebService
             Activity activity = (Activity) it.next();
             xml.append("<Activity>\r\n");
             xml.append("\t<id>").append(activity.getId()).append("</id>\r\n");
-            xml.append("\t<name>").append(activity.getName())
-                    .append("</name>\r\n");
-            if (activity.getDescription() == null
-                    || activity.getDescription().length() < 1)
+            xml.append("\t<name>").append(activity.getName()).append("</name>\r\n");
+            if (activity.getDescription() == null || activity.getDescription().length() < 1)
             {
-                xml.append("\t<description>").append("N/A")
-                        .append("</description>\r\n");
+                xml.append("\t<description>").append("N/A").append("</description>\r\n");
             }
             else
             {
@@ -768,8 +741,7 @@ public class Ambassador extends AbstractWebService
             message = makeErrorXml("getAllUsers", message);
             throw new WebServiceException(message);
         }
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<userInformation>\r\n");
         Iterator it = v.iterator();
         while (it.hasNext())
@@ -777,14 +749,10 @@ public class Ambassador extends AbstractWebService
             User user = (User) it.next();
             xml.append("<user>\r\n");
             xml.append("\t<id>").append(user.getUserId()).append("</id>\r\n");
-            xml.append("\t<name>").append(user.getUserName())
-                    .append("</name>\r\n");
-            xml.append("\t<firstName>").append(user.getFirstName())
-                    .append("</firstName>\r\n");
-            xml.append("\t<lastName>").append(user.getLastName())
-                    .append("</lastName>\r\n");
-            xml.append("\t<status>")
-                    .append(LdapHelper.getStateAsString(user.getState()))
+            xml.append("\t<name>").append(user.getUserName()).append("</name>\r\n");
+            xml.append("\t<firstName>").append(user.getFirstName()).append("</firstName>\r\n");
+            xml.append("\t<lastName>").append(user.getLastName()).append("</lastName>\r\n");
+            xml.append("\t<status>").append(LdapHelper.getStateAsString(user.getState()))
                     .append("</status>\r\n");
             xml.append("</user>\r\n");
         }
@@ -810,8 +778,7 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String getUserInfo(String p_accessToken, String p_userId)
-            throws WebServiceException
+    public String getUserInfo(String p_accessToken, String p_userId) throws WebServiceException
     {
         checkAccess(p_accessToken, GET_USER_INFO);
         checkPermission(p_accessToken, Permission.USERS_VIEW);
@@ -831,8 +798,7 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            String message = "Failed to get user object by userId : "
-                    + p_userId;
+            String message = "Failed to get user object by userId : " + p_userId;
             logger.error(message, e);
             message = makeErrorXml("getUserInfo", message);
             throw new WebServiceException(message);
@@ -843,94 +809,75 @@ public class Ambassador extends AbstractWebService
         if (!UserUtil.isSuperAdmin(p_userId))
         {
             if (loggedCompanyName != null
-                    && !loggedCompanyName.equalsIgnoreCase(user
-                            .getCompanyName()))
+                    && !loggedCompanyName.equalsIgnoreCase(user.getCompanyName()))
             {
-                String msg = "Current logged user '" + loggedUserName
-                        + "' and the user '" + p_userId
-                        + "' are NOT in the same company.";
+                String msg = "Current logged user '" + loggedUserName + "' and the user '"
+                        + p_userId + "' are NOT in the same company.";
                 logger.error(msg);
                 msg = makeErrorXml("getUserInfo", msg);
                 throw new WebServiceException(msg);
             }
         }
 
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<userInformation>\r\n");
         //
-        xml.append("\t<userId>").append(user.getUserId())
-                .append("</userId>\r\n");
-        xml.append("\t<userName>").append(user.getUserName())
-                .append("</userName>\r\n");
-        xml.append("\t<firstName>").append(user.getFirstName())
-                .append("</firstName>\r\n");
-        xml.append("\t<lastName>").append(user.getLastName())
-                .append("</lastName>\r\n");
-        if (user.getTitle() != null
-                && user.getTitle().equalsIgnoreCase("null") == false
+        xml.append("\t<userId>").append(user.getUserId()).append("</userId>\r\n");
+        xml.append("\t<userName>").append(user.getUserName()).append("</userName>\r\n");
+        xml.append("\t<firstName>").append(user.getFirstName()).append("</firstName>\r\n");
+        xml.append("\t<lastName>").append(user.getLastName()).append("</lastName>\r\n");
+        if (user.getTitle() != null && user.getTitle().equalsIgnoreCase("null") == false
                 && user.getTitle().length() > 0)
         {
-            xml.append("\t<title>").append(user.getTitle())
-                    .append("</title>\r\n");
+            xml.append("\t<title>").append(user.getTitle()).append("</title>\r\n");
         }
-        xml.append("\t<status>")
-                .append(LdapHelper.getStateAsString(user.getState()))
+        xml.append("\t<status>").append(LdapHelper.getStateAsString(user.getState()))
                 .append("</status>\r\n");
-        xml.append("\t<companyName>").append(user.getCompanyName())
-                .append("</companyName>\r\n");
+        xml.append("\t<companyName>").append(user.getCompanyName()).append("</companyName>\r\n");
         // Contact Info
         xml.append("\t<contactInfo>\r\n");
         String address = user.getAddress();
         if (address != null && address.trim().length() > 0
                 && "null".equalsIgnoreCase(address) == false)
         {
-            xml.append("\t\t<address>").append(address)
-                    .append("</address>\r\n");
+            xml.append("\t\t<address>").append(address).append("</address>\r\n");
         }
         String homePhone = user.getHomePhoneNumber();
         if (homePhone != null && homePhone.trim().length() > 0
                 && "null".equalsIgnoreCase(homePhone) == false)
         {
-            xml.append("\t\t<homePhone>").append(homePhone)
-                    .append("</homePhone>\r\n");
+            xml.append("\t\t<homePhone>").append(homePhone).append("</homePhone>\r\n");
         }
         String workPhone = user.getOfficePhoneNumber();
         if (workPhone != null && workPhone.trim().length() > 0
                 && "null".equalsIgnoreCase(workPhone) == false)
         {
-            xml.append("\t\t<workPhone>").append(workPhone)
-                    .append("</workPhone>\r\n");
+            xml.append("\t\t<workPhone>").append(workPhone).append("</workPhone>\r\n");
         }
         String cellPhone = user.getCellPhoneNumber();
         if (cellPhone != null && cellPhone.trim().length() > 0
                 && "null".equalsIgnoreCase(cellPhone) == false)
         {
-            xml.append("\t\t<cellPhone>").append(cellPhone)
-                    .append("</cellPhone>\r\n");
+            xml.append("\t\t<cellPhone>").append(cellPhone).append("</cellPhone>\r\n");
         }
         String faxPhone = user.getFaxPhoneNumber();
         if (faxPhone != null && faxPhone.trim().length() > 0
                 && "null".equalsIgnoreCase(faxPhone) == false)
         {
-            xml.append("\t\t<faxPhone>").append(faxPhone)
-                    .append("</faxPhone>\r\n");
+            xml.append("\t\t<faxPhone>").append(faxPhone).append("</faxPhone>\r\n");
         }
-        xml.append("\t\t<email>").append(user.getEmail())
-                .append("</email>\r\n");
+        xml.append("\t\t<email>").append(user.getEmail()).append("</email>\r\n");
         String ccEmail = user.getCCEmail();
         if (ccEmail != null && ccEmail.trim().length() > 0
                 && "null".equalsIgnoreCase(ccEmail) == false)
         {
-            xml.append("\t\t<CCEmail>").append(ccEmail)
-                    .append("</CCEmail>\r\n");
+            xml.append("\t\t<CCEmail>").append(ccEmail).append("</CCEmail>\r\n");
         }
         String bccEmail = user.getBCCEmail();
         if (bccEmail != null && bccEmail.trim().length() > 0
                 && "null".equalsIgnoreCase(bccEmail) == false)
         {
-            xml.append("\t\t<BCCEmail>").append(bccEmail)
-                    .append("</BCCEmail>\r\n");
+            xml.append("\t\t<BCCEmail>").append(bccEmail).append("</BCCEmail>\r\n");
         }
         xml.append("\t\t<defaultUILocale>").append(user.getDefaultUILocale())
                 .append("</defaultUILocale>\r\n");
@@ -945,15 +892,14 @@ public class Ambassador extends AbstractWebService
             {
                 Project project = (Project) it.next();
                 xml.append("\t\t<project>\r\n");
-                xml.append("\t\t\t<projectId>").append(project.getId())
-                        .append("</projectId>\r\n");
+                xml.append("\t\t\t<projectId>").append(project.getId()).append("</projectId>\r\n");
                 xml.append("\t\t\t<projectName>").append(project.getName())
                         .append("</projectName>\r\n");
                 try
                 {
                     long companyId = project.getCompanyId();
-                    String companyName = ServerProxy.getJobHandler()
-                            .getCompanyById(companyId).getCompanyName();
+                    String companyName = ServerProxy.getJobHandler().getCompanyById(companyId)
+                            .getCompanyName();
                     xml.append("\t\t\t<projectCompanyId>").append(companyName)
                             .append("</projectCompanyId>\r\n");
                 }
@@ -974,8 +920,7 @@ public class Ambassador extends AbstractWebService
             while (rolesIter.hasNext())
             {
                 Role role = (Role) rolesIter.next();
-                String lp = role.getSourceLocale() + "-"
-                        + role.getTargetLocale();
+                String lp = role.getSourceLocale() + "-" + role.getTargetLocale();
                 if (!lpList.contains(lp))
                 {
                     lpList.add(lp);
@@ -983,8 +928,7 @@ public class Ambassador extends AbstractWebService
             }
             for (int i = 0; i < lpList.size(); i++)
             {
-                xml.append("\t\t<role>").append(lpList.get(i))
-                        .append("</role>\r\n");
+                xml.append("\t\t<role>").append(lpList.get(i)).append("</role>\r\n");
             }
             xml.append("\t</roles>\r\n");
         }
@@ -998,8 +942,7 @@ public class Ambassador extends AbstractWebService
             while (iter.hasNext())
             {
                 PermissionGroup pg = (PermissionGroup) iter.next();
-                xml.append("\t\t<group>").append(pg.getName())
-                        .append("</group>\r\n");
+                xml.append("\t\t<group>").append(pg.getName()).append("</group>\r\n");
             }
             xml.append("\t</permissionGroups>\r\n");
         }
@@ -1039,11 +982,12 @@ public class Ambassador extends AbstractWebService
      * @param p_roles
      *            Roles String information of user. It uses a string with XML
      *            format to mark all roles information of user. REQUIRED.
-     *            Example: <?xml version=\"1.0\"?> <roles> <role>
-     *            <sourceLocale>en_US</sourceLocale>
-     *            <targetLocale>de_DE</targetLocale> <activities> <activity>
-     *            <name>Dtp1</name> </activity> <activity> <name>Dtp2</name>
-     *            </activity> </activities> </role> </roles>
+     *            Example: <?xml version=\"1.0\"?>
+     *            <roles> <role> <sourceLocale>en_US</sourceLocale>
+     *            <targetLocale>de_DE</targetLocale>
+     *            <activities> <activity> <name>Dtp1</name> </activity>
+     *            <activity> <name>Dtp2</name> </activity> </activities> </role>
+     *            </roles>
      * @param p_isInAllProject
      *            boolean If the user need to be included in all project.
      *            REQUIRED.
@@ -1061,16 +1005,14 @@ public class Ambassador extends AbstractWebService
      *         permission -1 -- Unknown exception
      * @throws WebServiceException
      */
-    public int createUser(String p_accessToken, String p_userId,
-            String p_password, String p_firstName, String p_lastName,
-            String p_email, String[] p_permissionGrps, String p_status,
-            String p_roles, boolean p_isInAllProject, String[] p_projectIds)
+    public int createUser(String p_accessToken, String p_userId, String p_password,
+            String p_firstName, String p_lastName, String p_email, String[] p_permissionGrps,
+            String p_status, String p_roles, boolean p_isInAllProject, String[] p_projectIds)
             throws WebServiceException
     {
         AmbassadorHelper helper = new AmbassadorHelper();
-        return helper.createUser(p_accessToken, p_userId, p_password,
-                p_firstName, p_lastName, p_email, p_permissionGrps, p_status,
-                p_roles, p_isInAllProject, p_projectIds);
+        return helper.createUser(p_accessToken, p_userId, p_password, p_firstName, p_lastName,
+                p_email, p_permissionGrps, p_status, p_roles, p_isInAllProject, p_projectIds);
     }
 
     /**
@@ -1099,11 +1041,12 @@ public class Ambassador extends AbstractWebService
      * @param p_roles
      *            Roles String information of user. It uses a string with XML
      *            format to mark all roles information of user. Example: <?xml
-     *            version=\"1.0\"?> <roles> <role>
-     *            <sourceLocale>en_US</sourceLocale>
-     *            <targetLocale>de_DE</targetLocale> <activities> <activity>
-     *            <name>Dtp1</name> </activity> <activity> <name>Dtp2</name>
-     *            </activity> </activities> </role> </roles>
+     *            version=\"1.0\"?>
+     *            <roles> <role> <sourceLocale>en_US</sourceLocale>
+     *            <targetLocale>de_DE</targetLocale>
+     *            <activities> <activity> <name>Dtp1</name> </activity>
+     *            <activity> <name>Dtp2</name> </activity> </activities> </role>
+     *            </roles>
      * @param p_isInAllProject
      *            boolean If the user need to be included in all project.
      *            REQUIRED.
@@ -1121,16 +1064,14 @@ public class Ambassador extends AbstractWebService
      *         permission -1 -- Unknown exception
      * @throws WebServiceException
      */
-    public int modifyUser(String p_accessToken, String p_userId,
-            String p_password, String p_firstName, String p_lastName,
-            String p_email, String[] p_permissionGrps, String p_status,
-            String p_roles, boolean p_isInAllProject, String[] p_projectIds)
+    public int modifyUser(String p_accessToken, String p_userId, String p_password,
+            String p_firstName, String p_lastName, String p_email, String[] p_permissionGrps,
+            String p_status, String p_roles, boolean p_isInAllProject, String[] p_projectIds)
             throws WebServiceException
     {
         AmbassadorHelper helper = new AmbassadorHelper();
-        return helper.modifyUser(p_accessToken, p_userId, p_password,
-                p_firstName, p_lastName, p_email, p_permissionGrps, p_status,
-                p_roles, p_isInAllProject, p_projectIds);
+        return helper.modifyUser(p_accessToken, p_userId, p_password, p_firstName, p_lastName,
+                p_email, p_permissionGrps, p_status, p_roles, p_isInAllProject, p_projectIds);
     }
 
     /**
@@ -1143,8 +1084,7 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String getAllLocalePairs(String p_accessToken)
-            throws WebServiceException
+    public String getAllLocalePairs(String p_accessToken) throws WebServiceException
     {
         checkAccess(p_accessToken, "getAllLocalePairs");
         checkPermission(p_accessToken, Permission.LOCALE_PAIRS_VIEW);
@@ -1161,8 +1101,7 @@ public class Ambassador extends AbstractWebService
             message = makeErrorXml("getAllLocalePairs", message);
             throw new WebServiceException(message);
         }
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<LocalePairInformation>\r\n");
         Iterator it = v.iterator();
         while (it.hasNext())
@@ -1171,17 +1110,13 @@ public class Ambassador extends AbstractWebService
             xml.append("<localePair>\r\n");
             xml.append("\t<id>").append(lp.getId()).append("</id>\r\n");
             xml.append("\t<sourceLocale>\r\n");
-            xml.append("\t<code>").append(lp.getSource().toString())
-                    .append("</code>\r\n");
-            xml.append("\t<displayName>")
-                    .append(lp.getSource().getDisplayName())
+            xml.append("\t<code>").append(lp.getSource().toString()).append("</code>\r\n");
+            xml.append("\t<displayName>").append(lp.getSource().getDisplayName())
                     .append("</displayName>\r\n");
             xml.append("\t</sourceLocale>\r\n");
             xml.append("\t<targetLocale>\r\n");
-            xml.append("\t<code>").append(lp.getTarget().toString())
-                    .append("</code>\r\n");
-            xml.append("\t<displayName>")
-                    .append(lp.getTarget().getDisplayName())
+            xml.append("\t<code>").append(lp.getTarget().toString()).append("</code>\r\n");
+            xml.append("\t<displayName>").append(lp.getTarget().getDisplayName())
                     .append("</displayName>\r\n");
             xml.append("\t</targetLocale>\r\n");
             xml.append("</localePair>\r\n");
@@ -1205,8 +1140,7 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String getAllProjectsByUser(String p_accessToken)
-            throws WebServiceException
+    public String getAllProjectsByUser(String p_accessToken) throws WebServiceException
     {
         checkAccess(p_accessToken, GET_ALL_PROJECTS_BY_USER);
         // checkPermission(p_accessToken, Permission.GET_ALL_PROJECTS);
@@ -1216,9 +1150,8 @@ public class Ambassador extends AbstractWebService
         {
             String username = getUsernameFromSession(p_accessToken);
             User user = ServerProxy.getUserManager().getUserByName(username);
-            projects = ServerProxy.getProjectHandler()
-                    .getProjectInfosManagedByUser(user,
-                            Permission.GROUP_MODULE_GLOBALSIGHT);
+            projects = ServerProxy.getProjectHandler().getProjectInfosManagedByUser(user,
+                    Permission.GROUP_MODULE_GLOBALSIGHT);
         }
         catch (Exception e)
         {
@@ -1228,8 +1161,7 @@ public class Ambassador extends AbstractWebService
             throw new WebServiceException(message);
         }
         Iterator it = projects.iterator();
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<ProjectInformation>\r\n");
         while (it.hasNext())
         {
@@ -1239,8 +1171,7 @@ public class Ambassador extends AbstractWebService
             xml.append("\t<name>").append(pi.getName()).append("</name>\r\n");
             if (pi.getDescription() == null || pi.getDescription().length() < 1)
             {
-                xml.append("\t<description>").append("N/A")
-                        .append("</description>\r\n");
+                xml.append("\t<description>").append("N/A").append("</description>\r\n");
             }
             else
             {
@@ -1270,12 +1201,10 @@ public class Ambassador extends AbstractWebService
      *            "|"
      * @throws WebServiceException
      */
-    public void createJob(String accessToken, String jobName, String comment,
-            String filePaths, String fileProfileIds, String targetLocales)
-            throws WebServiceException
+    public void createJob(String accessToken, String jobName, String comment, String filePaths,
+            String fileProfileIds, String targetLocales) throws WebServiceException
     {
-        createJob(accessToken, jobName, comment, filePaths, fileProfileIds,
-                targetLocales, null);
+        createJob(accessToken, jobName, comment, filePaths, fileProfileIds, targetLocales, null);
     }
 
     /**
@@ -1299,9 +1228,9 @@ public class Ambassador extends AbstractWebService
      */
     @SuppressWarnings(
     { "unchecked", "rawtypes" })
-    public void createJob(String accessToken, String jobName, String comment,
-            String filePaths, String fileProfileIds, String targetLocales,
-            String attributeXml) throws WebServiceException
+    public void createJob(String accessToken, String jobName, String comment, String filePaths,
+            String fileProfileIds, String targetLocales, String attributeXml)
+            throws WebServiceException
     {
         HashMap args = new HashMap();
         args.put("accessToken", accessToken);
@@ -1327,7 +1256,8 @@ public class Ambassador extends AbstractWebService
      * <li>accessToken String</li>
      * <li>jobName String Job name</li>
      * <li>comment String Job comment</li>
-     * <li>filePaths Vector(String) Path of files which are contained in job</li>
+     * <li>filePaths Vector(String) Path of files which are contained in job
+     * </li>
      * <li>fileProfileIds Vector(String) ID of file profiles</li>
      * <li>targetLocales Vector(String) Target locales which like to be
      * translated</li>
@@ -1352,8 +1282,7 @@ public class Ambassador extends AbstractWebService
         String jobNameValidation = validateJobName(jobName);
         if (jobNameValidation != null)
         {
-            throw new WebServiceException(makeErrorXml("createJob",
-                    jobNameValidation));
+            throw new WebServiceException(makeErrorXml("createJob", jobNameValidation));
         }
         WebServicesLog.Start activityStart = null;
         Job job = null;
@@ -1363,8 +1292,7 @@ public class Ambassador extends AbstractWebService
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobName", jobName);
-            activityStart = WebServicesLog.start(Ambassador.class,
-                    "createJob(args)", activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class, "createJob(args)", activityArgs);
             job = ServerProxy.getJobHandler().getJobByJobName(jobName);
             if (job == null)
             {
@@ -1386,8 +1314,8 @@ public class Ambassador extends AbstractWebService
                 ArrayList<String> list = new ArrayList();
                 for (String s : fileProfileIds)
                 {
-                    FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
-                            Long.parseLong(s), false);
+                    FileProfile fp = HibernateUtil.get(FileProfileImpl.class, Long.parseLong(s),
+                            false);
                     if (fp == null)
                     {
                         list.add(s);
@@ -1404,24 +1332,23 @@ public class Ambassador extends AbstractWebService
                 {
                     String fpId = (String) fileProfileIds.get(0);
                     long iFpId = Long.parseLong(fpId);
-                    FileProfile fp = ServerProxy
-                            .getFileProfilePersistenceManager()
+                    FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
                             .readFileProfile(iFpId);
-                    if (priority == null) 
+                    if (priority == null)
                     {
                         long l10nProfileId = fp.getL10nProfileId();
-                        BasicL10nProfile blp = HibernateUtil.get(
-                                BasicL10nProfile.class, l10nProfileId);
+                        BasicL10nProfile blp = HibernateUtil.get(BasicL10nProfile.class,
+                                l10nProfileId);
                         priority = String.valueOf(blp.getPriority());
                     }
-                    job = JobCreationMonitor.initializeJob(jobName, userId,
-                            fp.getL10nProfileId(), priority, Job.PROCESSING);
-                    
+                    job = JobCreationMonitor.initializeJob(jobName, userId, fp.getL10nProfileId(),
+                            priority, Job.PROCESSING);
+
                     for (String fpIdcp : fileProfileIds)
                     {
                         long Fpid = Long.parseLong(fpIdcp);
-                        FileProfile fpcp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(
-                                Fpid);
+                        FileProfile fpcp = ServerProxy.getFileProfilePersistenceManager()
+                                .readFileProfile(Fpid);
                         if (fpcp.getCompanyId() != job.getCompanyId())
                         {
                             String message = makeErrorXml("createJobOnInitial",
@@ -1448,22 +1375,18 @@ public class Ambassador extends AbstractWebService
         }
     }
 
-    private void changeFileListByXliff(String p_filename,
-            String p_targetLocale, FileProfile p_fileProfile,
-            Vector p_fileProfileList, Vector p_fileList,
+    private void changeFileListByXliff(String p_filename, String p_targetLocale,
+            FileProfile p_fileProfile, Vector p_fileProfileList, Vector p_fileList,
             Vector p_afterTargetLocales)
     {
         Hashtable<String, FileProfile> splitFiles = new Hashtable<String, FileProfile>();
-        XliffFileUtil.processMultipleFileTags(splitFiles, p_filename,
-                p_fileProfile);
+        XliffFileUtil.processMultipleFileTags(splitFiles, p_filename, p_fileProfile);
         if (splitFiles != null && splitFiles.size() > 0)
         {
-            for (Iterator<String> iterator = splitFiles.keySet().iterator(); iterator
-                    .hasNext();)
+            for (Iterator<String> iterator = splitFiles.keySet().iterator(); iterator.hasNext();)
             {
                 String tmp = iterator.next();
-                p_fileList.add(new File(AmbFileStoragePathUtils.getCxeDocDir(),
-                        tmp));
+                p_fileList.add(new File(AmbFileStoragePathUtils.getCxeDocDir(), tmp));
                 p_fileProfileList.add(p_fileProfile);
                 p_afterTargetLocales.add(p_targetLocale);
             }
@@ -1481,9 +1404,8 @@ public class Ambassador extends AbstractWebService
      * @throws NumberFormatException
      */
     @SuppressWarnings("unchecked")
-    public void createJobOnInitial(HashMap args) throws WebServiceException,
-            NumberFormatException, RemoteException, GeneralException,
-            NamingException
+    public void createJobOnInitial(HashMap args) throws WebServiceException, NumberFormatException,
+            RemoteException, GeneralException, NamingException
     {
         Job job = null;
 
@@ -1503,16 +1425,14 @@ public class Ambassador extends AbstractWebService
             if (job == null)
             {
                 String msg = "current jobId : " + jobId + " does not exist.";
-                throw new WebServiceException(makeErrorXml(
-                         "createJobOnInitial", msg));
+                throw new WebServiceException(makeErrorXml("createJobOnInitial", msg));
             }
 
             String jobName = job.getJobName();
             String recreateFlag = (String) args.get("recreate");
             if (!"true".equalsIgnoreCase(recreateFlag))
             {
-                String msg = checkIfCreateJobCalled("createJobOnInitial",
-                        job.getId(), jobName);
+                String msg = checkIfCreateJobCalled("createJobOnInitial", job.getId(), jobName);
                 if (msg != null)
                 {
                     throw new WebServiceException(msg);
@@ -1553,8 +1473,7 @@ public class Ambassador extends AbstractWebService
             ArrayList<String> list = new ArrayList<String>();
             for (String s : fileProfileIds)
             {
-                FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
-                        Long.parseLong(s), false);
+                FileProfile fp = HibernateUtil.get(FileProfileImpl.class, Long.parseLong(s), false);
                 if (fp == null)
                 {
                     list.add(s);
@@ -1570,8 +1489,8 @@ public class Ambassador extends AbstractWebService
             for (String fpids : fileProfileIds)
             {
                 long iFpId = Long.parseLong(fpids);
-                FileProfile fp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(
-                        iFpId);
+                FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
+                        .readFileProfile(iFpId);
                 if (fp.getCompanyId() != job.getCompanyId())
                 {
                     String message = makeErrorXml("createJobOnInitial",
@@ -1620,7 +1539,7 @@ public class Ambassador extends AbstractWebService
                                 + "  in current L10nProfile");
                 throw new WebServiceException(message);
             }
-            
+
             String priority = (String) args.get("priority");
             String attributesXml = (String) args.get("attributes");
 
@@ -1635,8 +1554,8 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("attributes", attributesXml);
             activityArgs.put("isJobCreatedOriginallyViaWS",
                     (String) args.get("isJobCreatedOriginallyViaWS"));
-            activityStart = WebServicesLog.start(Ambassador.class,
-                    "createJobOnInitial(args)", activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class, "createJobOnInitial(args)",
+                    activityArgs);
             if (filePaths != null && filePaths.size() > 0)
             {
                 for (int i = 0; i < filePaths.size(); i++)
@@ -1645,8 +1564,8 @@ public class Ambassador extends AbstractWebService
                     String extensionMsg = checkExtensionExisted(filePath);
                     if (extensionMsg != null)
                     {
-                        throw new WebServiceException(makeErrorXml(
-                                "createJobOnInitial", extensionMsg));
+                        throw new WebServiceException(
+                                makeErrorXml("createJobOnInitial", extensionMsg));
                     }
                 }
             }
@@ -1666,8 +1585,7 @@ public class Ambassador extends AbstractWebService
             long referenceFPId = 0l;
 
             boolean isWSFlag = true;
-            if ("false"
-                    .equals((String) args.get("isJobCreatedOriginallyViaWS")))
+            if ("false".equals((String) args.get("isJobCreatedOriginallyViaWS")))
             {
                 isWSFlag = false;
             }
@@ -1690,8 +1608,8 @@ public class Ambassador extends AbstractWebService
                     filename = filename.replace('\\', File.separatorChar);
                     String srcLocale = findSrcLocale(fpId);
                     filename = getRealPath(jobId, filename, srcLocale, isWSFlag);
-                    realFilename = AmbFileStoragePathUtils.getCxeDocDir(job
-                            .getCompanyId()) + File.separator + filename;
+                    realFilename = AmbFileStoragePathUtils.getCxeDocDir(job.getCompanyId())
+                            + File.separator + filename;
                     file = new File(realFilename);
                     if (file.getAbsolutePath().endsWith(".xml"))
                     {
@@ -1718,11 +1636,9 @@ public class Ambassador extends AbstractWebService
                          * NOTE: We just process xliff files for now, ignore any
                          * other types of files.
                          */
-                        zipDir = realFilename.substring(0,
-                                realFilename.lastIndexOf("."));
+                        zipDir = realFilename.substring(0, realFilename.lastIndexOf("."));
                         zipFiles = ZipIt.unpackZipPackage(realFilename, zipDir);
-                        String relativePath = filename.substring(0,
-                                filename.lastIndexOf("."));
+                        String relativePath = filename.substring(0, filename.lastIndexOf("."));
                         String tmp = "";
                         for (String f : zipFiles)
                         {
@@ -1731,16 +1647,15 @@ public class Ambassador extends AbstractWebService
                             if (XliffFileUtil.isXliffFile(f))
                             {
                                 tmp = relativePath + File.separator + f;
-                                changeFileListByXliff(tmp, vTargetLocale,
-                                        referenceFP, fileProfiles, files,
-                                        afterTargetLocales);
+                                changeFileListByXliff(tmp, vTargetLocale, referenceFP, fileProfiles,
+                                        files, afterTargetLocales);
                             }
                         }
                     }
                     else if (39 == fp.getKnownFormatTypeId())
                     {
-                        changeFileListByXliff(filename, vTargetLocale, fp,
-                                fileProfiles, files, afterTargetLocales);
+                        changeFileListByXliff(filename, vTargetLocale, fp, fileProfiles, files,
+                                afterTargetLocales);
                     }
                     else
                     {
@@ -1763,8 +1678,8 @@ public class Ambassador extends AbstractWebService
             // Calls script if has.
             // Vector result = FileSystemUtil.execScript(files, fileProfiles,
             // targetLocales);
-            Vector result = FileSystemUtil.execScript(files, fileProfiles,
-                    afterTargetLocales, Long.parseLong(jobId), jobName);
+            Vector result = FileSystemUtil.execScript(files, fileProfiles, afterTargetLocales,
+                    Long.parseLong(jobId), jobName);
             Vector sFiles = (Vector) result.get(0);
             Vector sProFiles = (Vector) result.get(1);
             Vector stargetLocales = (Vector) result.get(2);
@@ -1785,8 +1700,7 @@ public class Ambassador extends AbstractWebService
                     List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
                     for (JobAttributeVo jobAttributeVo : atts)
                     {
-                        jobatts.add(AttributeUtil
-                                .createJobAttribute(jobAttributeVo));
+                        jobatts.add(AttributeUtil.createJobAttribute(jobAttributeVo));
                     }
 
                     RuntimeCache.addJobAtttibutesCache(uuId, jobatts);
@@ -1800,8 +1714,7 @@ public class Ambassador extends AbstractWebService
 
                     for (Attribute ja : jas)
                     {
-                        JobAttributeVo vo = AttributeUtil.getAttributeVo(ja
-                                .getCloneAttribute());
+                        JobAttributeVo vo = AttributeUtil.getAttributeVo(ja.getCloneAttribute());
                         atts.add(vo);
                         jobatts.add(AttributeUtil.createJobAttribute(vo));
                     }
@@ -1823,36 +1736,35 @@ public class Ambassador extends AbstractWebService
                 FileProfile realProfile = (FileProfile) sProFiles.get(i);
                 String targetLocale = (String) stargetLocales.get(i);
                 String path = realFile.getPath();
-                String relativeName = path.substring(AmbFileStoragePathUtils
-                        .getCxeDocDir().getPath().length() + 1);
+                String relativeName = path
+                        .substring(AmbFileStoragePathUtils.getCxeDocDir().getPath().length() + 1);
 
                 try
                 {
-                    publishEventToCxe(jobId, jobName, i + 1, pageCount, 1, 1,
-                            relativeName, Long.toString(realProfile.getId()),
-                            targetLocale, (Integer) exitValues.get(i), priority);
+                    publishEventToCxe(jobId, jobName, i + 1, pageCount, 1, 1, relativeName,
+                            Long.toString(realProfile.getId()), targetLocale,
+                            (Integer) exitValues.get(i), priority);
                 }
                 catch (Exception e)
                 {
-                    logger.error("Create job(" + jobName
-                            + ") failed with exception " + e.getMessage());
-                    throw new WebServiceException("Create job(" + jobName
-                            + ") failed with exception " + e.getMessage());
+                    logger.error(
+                            "Create job(" + jobName + ") failed with exception " + e.getMessage());
+                    throw new WebServiceException(
+                            "Create job(" + jobName + ") failed with exception " + e.getMessage());
                 }
             }
 
             // set job attribute
             if (atts != null && atts.size() > 0)
             {
-                AddJobAttributeThread thread = new AddJobAttributeThread(uuId,
-                        companyId);
+                AddJobAttributeThread thread = new AddJobAttributeThread(uuId, companyId);
                 thread.setJobAttributeVos(atts);
                 thread.createJobAttributes();
             }
 
             // Send email at the end.
-            sendUploadCompletedEmail(filePaths, fileProfileIds, accessToken,
-                    jobName, comment, new Date());
+            sendUploadCompletedEmail(filePaths, fileProfileIds, accessToken, jobName, comment,
+                    new Date());
 
             // It is allowed to create job with inactive file profile Ids, but
             // throw exception to warn user.
@@ -1888,8 +1800,7 @@ public class Ambassador extends AbstractWebService
         }
     }
 
-    private Vector<String> handleTargetLocales(String p_targetLocales,
-            int fileSize)
+    private Vector<String> handleTargetLocales(String p_targetLocales, int fileSize)
     {
         Vector<String> tLocales = new Vector<String>();
 
@@ -1915,8 +1826,7 @@ public class Ambassador extends AbstractWebService
                     }
                     if (locales != "" && locales.endsWith(","))
                     {
-                        tLocales.add(locales.substring(0,
-                                locales.lastIndexOf(",")));
+                        tLocales.add(locales.substring(0, locales.lastIndexOf(",")));
                     }
                 }
                 else
@@ -1936,15 +1846,14 @@ public class Ambassador extends AbstractWebService
         return tLocales;
     }
 
-    private String checkIfCreateJobCalled(String methodName, long jobId,
-            String jobName) throws WebServiceException
+    private String checkIfCreateJobCalled(String methodName, long jobId, String jobName)
+            throws WebServiceException
     {
         // Job with "jobId" is being created or has been created, can't start
         // job creation with same job ID.
         if (cachedJobIds.contains(jobId))
         {
-            String message = "Current job (jobId:" + jobId + ";jobName:"
-                    + jobName
+            String message = "Current job (jobId:" + jobId + ";jobName:" + jobName
                     + ") is being created or has been created already.";
             return makeErrorXml(methodName, message);
         }
@@ -1971,8 +1880,7 @@ public class Ambassador extends AbstractWebService
         if (originalEncode == null && file.isFile())
         {
             logger.warn("Can not get the encoding of file: " + file
-                    + ", please check whether the encoding of file: " + file
-                    + " is unicode.");
+                    + ", please check whether the encoding of file: " + file + " is unicode.");
         }
         else
         {
@@ -2084,8 +1992,7 @@ public class Ambassador extends AbstractWebService
         String jobNameValidation = validateJobName(jobName);
         if (jobNameValidation != null)
         {
-            throw new WebServiceException(makeErrorXml("getUniqueJobName",
-                    jobNameValidation));
+            throw new WebServiceException(makeErrorXml("getUniqueJobName", jobNameValidation));
         }
 
         String randomStr = String.valueOf((new Random()).nextInt(999999999));
@@ -2104,11 +2011,10 @@ public class Ambassador extends AbstractWebService
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName",
-                    getUsernameFromSession(accessToken));
+            activityArgs.put("loggedUserName", getUsernameFromSession(accessToken));
             activityArgs.put("jobName", jobName);
-            activityStart = WebServicesLog.start(Ambassador.class,
-                    "getUniqueJobName(args)", activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class, "getUniqueJobName(args)",
+                    activityArgs);
             String sql = "SELECT ID FROM JOB WHERE NAME=?";
             connection = ConnectionPool.getConnection();
             query = connection.prepareStatement(sql);
@@ -2182,8 +2088,7 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            throw new WebServiceException(makeErrorXml("uploadFile",
-                    e.getMessage()));
+            throw new WebServiceException(makeErrorXml("uploadFile", e.getMessage()));
         }
     }
 
@@ -2214,14 +2119,13 @@ public class Ambassador extends AbstractWebService
             String jobNameValidation = validateJobName(jobName);
             if (jobNameValidation != null)
             {
-                throw new WebServiceException(makeErrorXml(
-                        "uploadFileForInitial", jobNameValidation));
+                throw new WebServiceException(
+                        makeErrorXml("uploadFileForInitial", jobNameValidation));
             }
             String extensionMsg = checkExtensionExisted(filePath);
             if (extensionMsg != null)
             {
-                throw new WebServiceException(makeErrorXml(
-                        "uploadFileForInitial", extensionMsg));
+                throw new WebServiceException(makeErrorXml("uploadFileForInitial", extensionMsg));
             }
             String userName = getUsernameFromSession(accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
@@ -2229,20 +2133,18 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("jobName", jobName);
             activityArgs.put("filePath", filePath);
             activityArgs.put("fileProfileId", fileProfileId);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "uploadFile(accessToken, jobName,filePath,fileProfileId,content)",
-                            activityArgs);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "uploadFileForInitial(args)", activityArgs);
+                    "uploadFile(accessToken, jobName,filePath,fileProfileId,content)",
+                    activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class, "uploadFileForInitial(args)",
+                    activityArgs);
             String userId = UserUtil.getUserIdByName(userName);
             FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
                     .readFileProfile(Long.parseLong(fileProfileId));
             if (priority == null)
             {
                 long l10nProfileId = fp.getL10nProfileId();
-                BasicL10nProfile blp = HibernateUtil.get(
-                        BasicL10nProfile.class, l10nProfileId);
+                BasicL10nProfile blp = HibernateUtil.get(BasicL10nProfile.class, l10nProfileId);
                 priority = String.valueOf(blp.getPriority());
             }
 
@@ -2256,26 +2158,24 @@ public class Ambassador extends AbstractWebService
                 else
                 {
                     // for GBS-2137, initialize the job with "UPLOADING" state
-                    job = JobCreationMonitor.initializeJob(jobName, userId,
-                            fp.getL10nProfileId(), priority, Job.UPLOADING);
+                    job = JobCreationMonitor.initializeJob(jobName, userId, fp.getL10nProfileId(),
+                            priority, Job.UPLOADING);
                     jobId = String.valueOf(job.getId());
                 }
             }
 
             // GBS-3367 (special case checking)
-            String msg = checkIfCreateJobCalled("uploadFileForInitial",
-                    Long.parseLong(jobId), jobName);
+            String msg = checkIfCreateJobCalled("uploadFileForInitial", Long.parseLong(jobId),
+                    jobName);
             if (msg != null)
             {
                 updateJobStateIfException = false;
                 throw new WebServiceException(msg);
             }
 
-            if (!isInSameCompany(userName, fp.getCompanyId())
-                    && !UserUtil.isSuperPM(userId))
+            if (!isInSameCompany(userName, fp.getCompanyId()) && !UserUtil.isSuperPM(userId))
             {
-                String message = makeErrorXml(
-                        "uploadFile",
+                String message = makeErrorXml("uploadFile",
                         "Current user cannot upload file with the file profile which is in other company.");
                 throw new WebServiceException(message);
             }
@@ -2293,8 +2193,7 @@ public class Ambassador extends AbstractWebService
         {
             if (jobId != null && updateJobStateIfException)
             {
-                JobCreationMonitor.updateJobState(Long.parseLong(jobId),
-                        Job.IMPORTFAILED);
+                JobCreationMonitor.updateJobState(Long.parseLong(jobId), Job.IMPORTFAILED);
             }
             logger.error(e);
             throw new WebServiceException(e.getMessage());
@@ -2340,8 +2239,7 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            throw new WebServiceException(makeErrorXml("uploadFile",
-                    e.getMessage()));
+            throw new WebServiceException(makeErrorXml("uploadFile", e.getMessage()));
         }
 
         byte[] bytes;
@@ -2402,8 +2300,7 @@ public class Ambassador extends AbstractWebService
      *         information
      * @throws WebServiceException
      */
-    public String getStatus(String p_accessToken, String p_jobName)
-            throws WebServiceException
+    public String getStatus(String p_accessToken, String p_jobName) throws WebServiceException
     {
         checkAccess(p_accessToken, GET_STATUS);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
@@ -2418,8 +2315,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("jobName", p_jobName);
             activityStart = WebServicesLog.start(Ambassador.class,
                     "getStatus(p_accessToken, p_jobName)", activityArgs);
-            StringBuffer xml = new StringBuffer(
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+            StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             Job job = queryJob(jobName, p_accessToken);
             String status = job.getState();
             float estimatedCost = (float) 0.0;
@@ -2434,12 +2330,11 @@ public class Ambassador extends AbstractWebService
                 if (sc.getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED) == true)
                 {
                     costingEnabled = true;
-                    pivotCurrency = ServerProxy.getCostingEngine()
-                            .getPivotCurrency();
+                    pivotCurrency = ServerProxy.getCostingEngine().getPivotCurrency();
                     pivotCurrencyName = pivotCurrency.getDisplayName();
                     // calculate expenses
-                    Cost cost = ServerProxy.getCostingEngine().calculateCost(
-                            job, pivotCurrency, true, Cost.REVENUE);
+                    Cost cost = ServerProxy.getCostingEngine().calculateCost(job, pivotCurrency,
+                            true, Cost.REVENUE);
                     if (cost != null)
                     {
                         Money m = cost.getEstimatedCost();
@@ -2461,25 +2356,23 @@ public class Ambassador extends AbstractWebService
             {
                 logger.error(
                         "Failed to get costing information for getStatus() web service call for job "
-                                + jobName, e);
+                                + jobName,
+                        e);
             }
 
             xml.append("<jobStatus>\r\n");
-            xml.append("\t<jobName>")
-                    .append(EditUtil.encodeXmlEntities(jobName))
+            xml.append("\t<jobName>").append(EditUtil.encodeXmlEntities(jobName))
                     .append("</jobName>\r\n");
             xml.append("\t<jobId>").append(job.getId()).append("</jobId>\r\n");
             xml.append("\t<status>").append(status).append("</status>\r\n");
             if (costingEnabled)
             {
                 xml.append("\t<cost>\r\n");
-                xml.append("\t\t<currency>").append(pivotCurrencyName)
-                        .append("</currency>\r\n");
+                xml.append("\t\t<currency>").append(pivotCurrencyName).append("</currency>\r\n");
                 xml.append("\t\t\t<expense>\r\n");
                 xml.append("\t\t\t\t<estimatedCost>").append(estimatedCost)
                         .append("</estimatedCost>\r\n");
-                xml.append("\t\t\t\t<finalCost isOverrideCost=\"").append(
-                        isOverrideCost);
+                xml.append("\t\t\t\t<finalCost isOverrideCost=\"").append(isOverrideCost);
                 xml.append("\">").append(finalCost).append("</finalCost>\r\n");
                 xml.append("\t\t\t</expense>\r\n");
                 xml.append("\t</cost>\r\n");
@@ -2526,21 +2419,17 @@ public class Ambassador extends AbstractWebService
         WebServicesLog.Start activityStart = null;
         try
         {
-            StringBuffer xml = new StringBuffer(
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+            StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             String userName = getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobId", p_jobId);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "getJobAndWorkflowInfo(p_accessToken, p_jobId)",
-                    activityArgs);
+                    "getJobAndWorkflowInfo(p_accessToken, p_jobId)", activityArgs);
             String userId = UserUtil.getUserIdByName(userName);
             User user = ServerProxy.getUserManager().getUser(userId);
             Job job = ServerProxy.getJobHandler().getJobById(p_jobId);
-            Assert.assertFalse(
-                    !isInSameCompany(userName,
-                            String.valueOf(job.getCompanyId())),
+            Assert.assertFalse(!isInSameCompany(userName, String.valueOf(job.getCompanyId())),
                     "Cannot access the job which is not in the same company with current user");
 
             String status = job.getState();
@@ -2548,23 +2437,18 @@ public class Ambassador extends AbstractWebService
 
             xml.append("<jobInfo>\r\n");
             xml.append("\t<id>").append(p_jobId).append("</id>\r\n");
-            xml.append("\t<name>")
-                    .append(EditUtil.encodeXmlEntities(job.getJobName()))
+            xml.append("\t<name>").append(EditUtil.encodeXmlEntities(job.getJobName()))
                     .append("</name>\r\n");
             xml.append("\t<status>").append(status).append("</status>\r\n");
             xml.append("\t<creator>").append(job.getCreateUser().getUserName())
                     .append("</creator>\r\n");
             xml.append("\t<createDate>").append(job.getCreateDate().toString())
                     .append("</createDate>\r\n");
-            xml.append("\t<priority>").append(job.getPriority())
-                    .append("</priority>\r\n");
-            xml.append("\t<sourceLocale>")
-                    .append(job.getSourceLocale().getDisplayName())
+            xml.append("\t<priority>").append(job.getPriority()).append("</priority>\r\n");
+            xml.append("\t<sourceLocale>").append(job.getSourceLocale().getDisplayName())
                     .append("</sourceLocale>\r\n");
-            xml.append("\t<state>").append(job.getState())
-                    .append("</state>\r\n");
-            xml.append("\t<pageCount>").append(job.getPageCount())
-                    .append("</pageCount>\r\n");
+            xml.append("\t<state>").append(job.getState()).append("</state>\r\n");
+            xml.append("\t<pageCount>").append(job.getPageCount()).append("</pageCount>\r\n");
             // Source pages
             xml.append("\t<sourcePages>\r\n");
             List sps = new ArrayList(job.getSourcePages());
@@ -2590,41 +2474,34 @@ public class Ambassador extends AbstractWebService
 
             xml.append("\t<workflowInfo>\r\n");
 
-            long l10nprofile = 0l;
             Workflow w = null;
             TranslationMemoryProfile tmp = null;
             TaskInstance taskInstance = null;
             String currentTaskName = "";
-            TimeZone timeZone = ServerProxy.getCalendarManager()
-                    .findUserTimeZone(userId);
+            TimeZone timeZone = ServerProxy.getCalendarManager().findUserTimeZone(userId);
             Timestamp ts = new Timestamp(Timestamp.DATE, timeZone);
             Locale uiLocale = new Locale(user.getDefaultUILocale());
             ts.setLocale(uiLocale);
-
+            boolean hasMtElementFlag = this.canHaveMtElement(wfs);
             for (Iterator wfi = wfs.iterator(); wfi.hasNext();)
             {
                 currentTaskName = "";
                 w = (Workflow) wfi.next();
-                l10nprofile = w.getJob().getL10nProfileId();
 
                 xml.append("\t\t<workflow>\r\n");
                 xml.append("\t\t\t<id>").append(w.getId()).append("</id>\r\n");
-                xml.append("\t\t\t<targetLocale>")
-                        .append(w.getTargetLocale().getDisplayName())
+                xml.append("\t\t\t<targetLocale>").append(w.getTargetLocale().getDisplayName())
                         .append("</targetLocale>\r\n");
-                xml.append("\t\t\t<state>").append(w.getState())
-                        .append("</state>\r\n");
-                xml.append("\t\t\t<dispatchDate>")
-                        .append(w.getDispatchedDate() == null ? "" : w
-                                .getDispatchedDate().toString())
+                xml.append("\t\t\t<state>").append(w.getState()).append("</state>\r\n");
+                xml.append("\t\t\t<dispatchDate>").append(
+                        w.getDispatchedDate() == null ? "" : w.getDispatchedDate().toString())
                         .append("</dispatchDate>\r\n");
 
                 // currentActivity
                 taskInstance = WorkflowManagerLocal.getCurrentTask(w.getId());
                 if (taskInstance != null)
                 {
-                    currentTaskName = TaskJbpmUtil
-                            .getTaskDisplayName(taskInstance.getName());
+                    currentTaskName = TaskJbpmUtil.getTaskDisplayName(taskInstance.getName());
                 }
                 xml.append("\t\t\t<currentActivity>").append(currentTaskName)
                         .append("</currentActivity>\r\n");
@@ -2673,52 +2550,47 @@ public class Ambassador extends AbstractWebService
 
                 if (w.getCompletedDate() != null)
                 {
-                    xml.append("\t\t\t<completeDate>")
-                            .append(w.getCompletedDate().toString())
+                    xml.append("\t\t\t<completeDate>").append(w.getCompletedDate().toString())
                             .append("</completeDate>\r\n");
                 }
 
-                tmp = ServerProxy.getProjectHandler()
-                        .getL10nProfile(l10nprofile)
-                        .getTranslationMemoryProfile();
-
-                xml.append("\t\t\t<isInContextMatch>")
-                        .append(tmp.getIsContextMatchLeveraging())
+                xml.append("\t\t\t<isInContextMatch>").append(PageHandler.isInContextMatch(job))
                         .append("</isInContextMatch>\r\n");
-                xml.append("\t\t\t<percentageComplete>")
-                        .append(w.getPercentageCompletion())
+                xml.append("\t\t\t<percentageComplete>").append(w.getPercentageCompletion())
                         .append("</percentageComplete>\r\n");
-                xml.append("\t\t\t<targetWordCount total=\"")
-                        .append(w.getTotalWordCount()).append("\">\r\n");
-                xml.append("\t\t\t\t<contextMatch>")
-                        .append(w.getContextMatchWordCount())
+                xml.append("\t\t\t<targetWordCount total=\"").append(w.getTotalWordCount())
+                        .append("\">\r\n");
+                xml.append("\t\t\t\t<contextMatch>").append(w.getContextMatchWordCount())
                         .append("</contextMatch>\r\n");
-                xml.append("\t\t\t\t<segmentTmMatch>")
-                        .append(w.getSegmentTmWordCount())
+                xml.append("\t\t\t\t<segmentTmMatch>").append(w.getSegmentTmWordCount())
                         .append("</segmentTmMatch>\r\n");
                 xml.append("\t\t\t\t<lowFuzzyMatch>")
-                        .append(w.getLowFuzzyMatchWordCount())
+                        .append(hasMtElementFlag
+                                ? w.getLowFuzzyMatchWordCount() - w.getMtFuzzyNoMatchWordCount()
+                                : w.getLowFuzzyMatchWordCount())
                         .append("</lowFuzzyMatch>\r\n");
-                xml.append("\t\t\t\t<medFuzzyMatch>")
-                        .append(w.getMedFuzzyMatchWordCount())
+                xml.append("\t\t\t\t<medFuzzyMatch>").append(w.getMedFuzzyMatchWordCount())
                         .append("</medFuzzyMatch>\r\n");
-                xml.append("\t\t\t\t<medHiFuzzyMatch>")
-                        .append(w.getMedHiFuzzyMatchWordCount())
+                xml.append("\t\t\t\t<medHiFuzzyMatch>").append(w.getMedHiFuzzyMatchWordCount())
                         .append("</medHiFuzzyMatch>\r\n");
-                xml.append("\t\t\t\t<hiFuzzyMatch>")
-                        .append(w.getHiFuzzyMatchWordCount())
+                xml.append("\t\t\t\t<hiFuzzyMatch>").append(w.getHiFuzzyMatchWordCount())
                         .append("</hiFuzzyMatch>\r\n");
                 xml.append("\t\t\t\t<repetitionMatch>")
-                        .append(w.getRepetitionWordCount())
+                        .append(hasMtElementFlag
+                                ? w.getRepetitionWordCount() - w.getMtRepetitionsWordCount()
+                                : w.getRepetitionWordCount())
                         .append("</repetitionMatch>\r\n");
                 xml.append("\t\t\t\t<noMatch>").append(w.getNoMatchWordCount())
                         .append("</noMatch>\r\n");
-                xml.append("\t\t\t\t<noExactMatch>")
-                        .append(w.getTotalExactMatchWordCount())
+                xml.append("\t\t\t\t<noExactMatch>").append(w.getTotalExactMatchWordCount())
                         .append("</noExactMatch>\r\n");
-                xml.append("\t\t\t\t<inContextMatch>")
-                        .append(w.getInContextMatchWordCount())
+                xml.append("\t\t\t\t<inContextMatch>").append(w.getInContextMatchWordCount())
                         .append("</inContextMatch>\r\n");
+                if (hasMtElementFlag)
+                {
+                    xml.append("\t\t\t\t<machineTranslated>").append(w.getMtTotalWordCount())
+                            .append("</machineTranslated>\r\n");
+                }
                 xml.append("\t\t\t</targetWordCount>\r\n");
                 xml.append("\t\t</workflow>\r\n");
             }
@@ -2750,8 +2622,7 @@ public class Ambassador extends AbstractWebService
      * @return
      * @throws WebServiceException
      */
-    public String getJobStatus(String p_accessToken, String p_jobName)
-            throws WebServiceException
+    public String getJobStatus(String p_accessToken, String p_jobName) throws WebServiceException
     {
         checkAccess(p_accessToken, GET_JOB_STATUS);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
@@ -2770,13 +2641,10 @@ public class Ambassador extends AbstractWebService
             activityStart = WebServicesLog.start(Ambassador.class,
                     "getJobStatus(p_accessToken, p_jobName)", activityArgs);
             String condition = appendJobCondition(p_jobName);
-            String sql = "SELECT ID, STATE FROM JOB WHERE COMPANY_ID=? AND "
-                    + condition;
+            String sql = "SELECT ID, STATE FROM JOB WHERE COMPANY_ID=? AND " + condition;
             connection = ConnectionPool.getConnection();
             query = connection.prepareStatement(sql);
-            query.setLong(1,
-                    CompanyWrapper.getCompanyByName(user.getCompanyName())
-                            .getId());
+            query.setLong(1, CompanyWrapper.getCompanyByName(user.getCompanyName()).getId());
             query.setString(2, p_jobName);
 
             results = query.executeQuery();
@@ -2825,8 +2693,7 @@ public class Ambassador extends AbstractWebService
             releaseDBResource(results, query, connection);
         }
 
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<job>\r\n");
         xml.append("<id>");
         xml.append(id);
@@ -2865,8 +2732,7 @@ public class Ambassador extends AbstractWebService
         Job job = queryJob(jobName, p_accessToken);
         long jobId = job.getId();
         String jobCompanyId = String.valueOf(job.getCompanyId());
-        if (!isInSameCompany(getUsernameFromSession(p_accessToken),
-                jobCompanyId))
+        if (!isInSameCompany(getUsernameFromSession(p_accessToken), jobCompanyId))
             throw new WebServiceException(
                     "Cannot access the job which is not in the same company with current user");
 
@@ -2908,14 +2774,11 @@ public class Ambassador extends AbstractWebService
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobName", p_jobName);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "getJobExportFiles(p_accessToken, p_jobName)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "getJobExportFiles(p_accessToken, p_jobName)", activityArgs);
             for (Workflow w : job.getWorkflows())
             {
-                if (Workflow.CANCELLED.equals(w.getState())
-                        || Workflow.PENDING.equals(w.getState())
+                if (Workflow.CANCELLED.equals(w.getState()) || Workflow.PENDING.equals(w.getState())
                         || Workflow.EXPORT_FAILED.equals(w.getState())
                         || Workflow.IMPORT_FAILED.equals(w.getState()))
                     continue;
@@ -2966,8 +2829,7 @@ public class Ambassador extends AbstractWebService
                     {
                         if (s.length() > 0)
                         {
-                            allPath.append("/").append(
-                                    URLEncoder.encode(s, "utf-8"));
+                            allPath.append("/").append(URLEncoder.encode(s, "utf-8"));
                         }
                     }
                     jobFiles.addPath(allPath.toString());
@@ -2984,14 +2846,12 @@ public class Ambassador extends AbstractWebService
                 {
                     if (s.length() > 0)
                     {
-                        allPath.append("/").append(
-                                URLEncoder.encode(s, "utf-8"));
+                        allPath.append("/").append(URLEncoder.encode(s, "utf-8"));
                     }
                 }
                 jobFiles.addPath(allPath.toString());
             }
-            String returnStr = com.globalsight.cxe.util.XmlUtil
-                    .object2String(jobFiles);
+            String returnStr = com.globalsight.cxe.util.XmlUtil.object2String(jobFiles);
             if (returnStr != null && logger.isDebugEnabled())
             {
                 logger.info("getJobExportFiles API returning: " + returnStr);
@@ -3031,7 +2891,7 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, GET_JOB_EXPORT_FILES_IN_ZIP);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
-        checkPermission(p_accessToken,Permission.JOBS_DOWNLOAD);
+        checkPermission(p_accessToken, Permission.JOBS_DOWNLOAD);
 
         String userName = getUsernameFromSession(p_accessToken);
         String userId = UserUtil.getUserIdByName(userName);
@@ -3191,8 +3051,9 @@ public class Ambassador extends AbstractWebService
                     for (String path : jobFileInOneJob.getPaths())
                     {
                         String[] pathlist = path.split("/");
-                        String entryfilepath = (AmbFileStoragePathUtils.getCxeDocDirPath(job
-                                .getCompanyId()) + "\\" + path).replace("/", "\\");
+                        String entryfilepath = (AmbFileStoragePathUtils
+                                .getCxeDocDirPath(job.getCompanyId()) + "\\" + path).replace("/",
+                                        "\\");
                         File entryfile = new File(entryfilepath);
                         if (entryfile.exists() && entryfile.isFile())
                         {
@@ -3206,14 +3067,14 @@ public class Ambassador extends AbstractWebService
             }
 
             String tempS = jobIds.toString();
-            String jobNamesstr =  tempS.substring(1, tempS.length() - 1);
+            String jobNamesstr = tempS.substring(1, tempS.length() - 1);
             String zipName = "GlobalSight_Download_jobs(" + jobNamesstr + ").zip";
-            
+
             // Zip all files into zip file
             if (exportingwfs.size() == 0 && jobFileList.size() > 0)
             {
                 try
-                {            
+                {
                     String cxedocpath = AmbFileStoragePathUtils.getCxeDocDirPath(currentCompanyId);
                     if (UserUtil.isSuperAdmin(userId) || UserUtil.isSuperPM(userId))
                     {
@@ -3223,8 +3084,8 @@ public class Ambassador extends AbstractWebService
                     File zipfile = new File(zipFileDir, zipName);
                     zipfile.getParentFile().mkdirs();
 
-                    Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(
-                            entryFiles, jobIds, locales, cxedocpath, userId);
+                    Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(entryFiles,
+                            jobIds, locales, cxedocpath, userId);
                     ZipIt.addEntriesToZipFile(zipfile, entryFileToFileNameMap, "");
                 }
                 catch (Exception e)
@@ -3247,7 +3108,8 @@ public class Ambassador extends AbstractWebService
                 {
                     returnStr.append("\t<exportingJob>\r\n");
                     returnStr.append("\t\t<jobId>" + wfone.getJob().getId() + "</jobId>\r\n");
-                    returnStr.append("\t\t<language>" + wfone.getTargetLocale() + "</language>\r\n");
+                    returnStr
+                            .append("\t\t<language>" + wfone.getTargetLocale() + "</language>\r\n");
                     returnStr.append("\t</exportingJob>\r\n");
                 }
                 returnStr.append("\t</exportingJobs>\r\n");
@@ -3270,8 +3132,8 @@ public class Ambassador extends AbstractWebService
 
                 returnStr.append("</exportingJobs>\r\n");
                 returnStr.append("\t<message></message>\r\n");
-                returnStr.append("\t<path>" + root + webservice_zip + "/" + identifyKey
-                        + "/"+zipName+"</path>\r\n");
+                returnStr.append("\t<path>" + root + webservice_zip + "/" + identifyKey + "/"
+                        + zipName + "</path>\r\n");
             }
             returnStr.append("</JobFiles>");
             return returnStr.toString();
@@ -3303,7 +3165,7 @@ public class Ambassador extends AbstractWebService
      * @return Map includes entryFileName info
      */
     private Map<File, String> getEntryFileToFileNameMap(Set<File> entryFiles, Set<Long> jobIdSet,
-            Set<String> locales, String cxeDocsDirPath,String userId)
+            Set<String> locales, String cxeDocsDirPath, String userId)
     {
         Map<File, String> entryFileToFileNameMap = new HashMap<File, String>();
         File tempFile;
@@ -3327,8 +3189,8 @@ public class Ambassador extends AbstractWebService
                 for (String key : tempMap.keySet())
                 {
                     tempFile = new File(key);
-                    entryFileToFileNameMap.put(tempFile, jobId + File.separator + "passolo"
-                            + File.separator + tempMap.get(key));
+                    entryFileToFileNameMap.put(tempFile,
+                            jobId + File.separator + "passolo" + File.separator + tempMap.get(key));
                 }
             }
 
@@ -3376,8 +3238,7 @@ public class Ambassador extends AbstractWebService
         }
         return entryFileToFileNameMap;
     }
-    
-    
+
     /**
      * Gets exported files in a zip by workflowIds
      * 
@@ -3396,7 +3257,7 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, GET_WORKFLOW_EXPORT_FILES_IN_ZIP);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
-        checkPermission(p_accessToken,Permission.JOBS_DOWNLOAD);
+        checkPermission(p_accessToken, Permission.JOBS_DOWNLOAD);
 
         String errormsg = "";
         p_workflowIds = p_workflowIds.replace(" ", "");
@@ -3442,8 +3303,8 @@ public class Ambassador extends AbstractWebService
                 {
 
                     errormsg = "Workflow " + wfId + " is not from the user's company.";;
-                    throw new WebServiceException(makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP,
-                            errormsg));
+                    throw new WebServiceException(
+                            makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP, errormsg));
                 }
                 jobExist.add(jobId);
                 if (WorkflowExportingHelper.isExporting(wf.getId()))
@@ -3454,8 +3315,8 @@ public class Ambassador extends AbstractWebService
             if (jobExist.size() > 1)
             {
                 errormsg = "Workflow ids are not from the same job.";
-                throw new WebServiceException(makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP,
-                        errormsg));
+                throw new WebServiceException(
+                        makeErrorXml(GET_WORKFLOW_EXPORT_FILES_IN_ZIP, errormsg));
             }
 
             if (exportingwfs.size() == 0)
@@ -3536,13 +3397,14 @@ public class Ambassador extends AbstractWebService
                         }
                         jobFiles.addPath(allPath.toString());
                     }
-                    
+
                     ArrayList<String> paths = (ArrayList<String>) jobFiles.getPaths();
                     for (String path : paths)
                     {
                         String[] pathlist = path.split("/");
-                        String entryfilepath = (AmbFileStoragePathUtils.getCxeDocDirPath(job
-                                .getCompanyId()) + "\\" + path).replace("/", "\\");
+                        String entryfilepath = (AmbFileStoragePathUtils
+                                .getCxeDocDirPath(job.getCompanyId()) + "\\" + path).replace("/",
+                                        "\\");
                         File entryfile = new File(entryfilepath);
                         if (entryfile.exists() && entryfile.isFile())
                         {
@@ -3558,7 +3420,8 @@ public class Ambassador extends AbstractWebService
             StringBuffer returnStr = new StringBuffer();
             returnStr.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n");
             returnStr.append("<JobFiles>\r\n");
-            returnStr.append("\t<RequestedWorkflowIds>" + p_workflowIds + "</RequestedWorkflowIds>\r\n");
+            returnStr.append(
+                    "\t<RequestedWorkflowIds>" + p_workflowIds + "</RequestedWorkflowIds>\r\n");
             if (exportingwfs.size() > 0)
             {
                 returnStr.append("\t<exportingWorkflows>\r\n");
@@ -3576,20 +3439,20 @@ public class Ambassador extends AbstractWebService
             else if (jobFileList.size() > 0)
             {
                 StringBuilder prefix = new StringBuilder();
-                prefix.append(getUrl()).append("/cxedocs/");  
+                prefix.append(getUrl()).append("/cxedocs/");
                 String company = CompanyWrapper.getCompanyNameById(currentCompanyId);
                 prefix.append(URLEncoder.encode(company, "utf-8"));
                 String commonPath = prefix.toString();
-                
+
                 String zipName = "GlobalSight_Download_jobs(" + jobId + ").zip";
-                
+
                 String cxedocpath = AmbFileStoragePathUtils.getCxeDocDirPath(currentCompanyId);
                 if (UserUtil.isSuperAdmin(userId) || UserUtil.isSuperPM(userId))
                 {
                     cxedocpath = cxedocpath + "/Welocalize";
                 }
                 File zipFileDir = new File(cxedocpath + webservice_zip + "\\" + identifyKey);
-                File zipFile = new File(zipFileDir,zipName);
+                File zipFile = new File(zipFileDir, zipName);
                 zipFile.getParentFile().mkdirs();
 
                 Set<Long> jobIds = new HashSet<Long>();
@@ -3597,11 +3460,11 @@ public class Ambassador extends AbstractWebService
                 Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(entryFiles,
                         jobIds, locales, cxedocpath, userId);
                 ZipIt.addEntriesToZipFile(zipFile, entryFileToFileNameMap, "");
-                
+
                 returnStr.append("\t<exportingWorkflows></exportingWorkflows>\r\n");
                 returnStr.append("\t<message></message>\r\n");
-                returnStr.append("\t<path>" + commonPath + webservice_zip + "/" + identifyKey
-                        + "/" + zipName + "</path>\r\n");
+                returnStr.append("\t<path>" + commonPath + webservice_zip + "/" + identifyKey + "/"
+                        + zipName + "</path>\r\n");
             }
             else
             {
@@ -3659,10 +3522,9 @@ public class Ambassador extends AbstractWebService
         // for new scripts on import/export
         if (path.contains("/PreProcessed_" + job.getId() + "_"))
         {
-            finalPath = path.replace(
-                    path.substring(
-                            path.lastIndexOf("/PreProcessed_" + job.getId()
-                                    + "_"), path.lastIndexOf("/")), "");
+            finalPath = path
+                    .replace(path.substring(path.lastIndexOf("/PreProcessed_" + job.getId() + "_"),
+                            path.lastIndexOf("/")), "");
         }
         // compatible codes for old import/export
         else
@@ -3671,8 +3533,7 @@ public class Ambassador extends AbstractWebService
             if (index > -1)
             {
                 String fileName = path.substring(index + 1);
-                String extension = fileName
-                        .substring(fileName.lastIndexOf(".") + 1);
+                String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
                 fileName = fileName.substring(0, fileName.lastIndexOf("."));
                 String rest = path.substring(0, index);
                 if (rest.endsWith("/" + fileName))
@@ -3700,8 +3561,8 @@ public class Ambassador extends AbstractWebService
      *         job according with special workflow locale
      * @throws WebServiceException
      */
-    public String getJobExportWorkflowFiles(String p_accessToken,
-            String p_jobName, String workflowLocale) throws WebServiceException
+    public String getJobExportWorkflowFiles(String p_accessToken, String p_jobName,
+            String workflowLocale) throws WebServiceException
     {
         checkAccess(p_accessToken, GET_JOB_EXPORT_WORKFLOW_FILES);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
@@ -3711,8 +3572,7 @@ public class Ambassador extends AbstractWebService
         Job job = queryJob(jobName, p_accessToken);
         long jobId = job.getId();
         String jobCompanyId = String.valueOf(job.getCompanyId());
-        if (!isInSameCompany(getUsernameFromSession(p_accessToken),
-                jobCompanyId))
+        if (!isInSameCompany(getUsernameFromSession(p_accessToken), jobCompanyId))
             throw new WebServiceException(
                     "Cannot access the job which is not in the same company with current user");
 
@@ -3756,10 +3616,9 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobName", p_jobName);
             activityArgs.put("workflowLocale", workflowLocale);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "getJobExportWorkflowFiles(p_accessToken, p_jobName,workflowLocale)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "getJobExportWorkflowFiles(p_accessToken, p_jobName,workflowLocale)",
+                    activityArgs);
             for (Workflow w : job.getWorkflows())
             {
                 if (StringUtil.isEmpty(workflowLocale))
@@ -3822,8 +3681,7 @@ public class Ambassador extends AbstractWebService
                     {
                         if (s.length() > 0)
                         {
-                            allPath.append("/").append(
-                                    URLEncoder.encode(s, "utf-8"));
+                            allPath.append("/").append(URLEncoder.encode(s, "utf-8"));
                         }
                     }
                     jobFiles.addPath(allPath.toString());
@@ -3838,8 +3696,7 @@ public class Ambassador extends AbstractWebService
                 {
                     if (s.length() > 0)
                     {
-                        allPath.append("/").append(
-                                URLEncoder.encode(s, "utf-8"));
+                        allPath.append("/").append(URLEncoder.encode(s, "utf-8"));
                     }
                 }
                 jobFiles.addPath(allPath.toString());
@@ -3869,8 +3726,7 @@ public class Ambassador extends AbstractWebService
         if (!workflowState.equals(Workflow.EXPORTED))
             return false;
 
-        String lowerWorkflowLocale = workflow.getTargetLocale().toString()
-                .toLowerCase();
+        String lowerWorkflowLocale = workflow.getTargetLocale().toString().toLowerCase();
         String lowerLocale = locale.replace('-', '_').toLowerCase();
         if (lowerWorkflowLocale.equals(lowerLocale))
             return true;
@@ -3892,8 +3748,7 @@ public class Ambassador extends AbstractWebService
         if (StringUtil.isEmpty(jobCompanyId) || StringUtil.isEmpty(filename))
             return false;
 
-        String baseDocDir = AmbFileStoragePathUtils
-                .getCxeDocDirPath(jobCompanyId);
+        String baseDocDir = AmbFileStoragePathUtils.getCxeDocDirPath(jobCompanyId);
         filename = baseDocDir + File.separator + filename;
         String tmpFilename = filename + ".tmp";
         File exportedFile = null, tmpFile = null;
@@ -3936,8 +3791,7 @@ public class Ambassador extends AbstractWebService
             throw new WebServiceException("Job " + jobName + " does not exist.");
         }
 
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<localizedDocuments>\r\n");
         if ("EXPORTED".equalsIgnoreCase(status))
         {
@@ -3953,11 +3807,9 @@ public class Ambassador extends AbstractWebService
 
             StringBuilder urlPrefix = new StringBuilder();
             urlPrefix.append(getUrl()).append("/cxedocs/");
-            String company = CompanyWrapper.getCompanyNameById(job
-                    .getCompanyId());
+            String company = CompanyWrapper.getCompanyNameById(job.getCompanyId());
             urlPrefix.append(URLEncoder.encode(company, "utf-8"));
-            xml.append("<urlPrefix>").append(urlPrefix)
-                    .append("</urlPrefix>\r\n");
+            xml.append("<urlPrefix>").append(urlPrefix).append("</urlPrefix>\r\n");
 
             Iterator iterator = workflows.iterator();
 
@@ -3965,8 +3817,7 @@ public class Ambassador extends AbstractWebService
             {
                 Workflow workflow = (Workflow) iterator.next();
                 String targetLocale = workflow.getTargetLocale().toString();
-                xml.append("<targetLocale>")
-                        .append(EditUtil.encodeXmlEntities(targetLocale))
+                xml.append("<targetLocale>").append(EditUtil.encodeXmlEntities(targetLocale))
                         .append("</targetLocale>\r\n");
             }
         }
@@ -3988,8 +3839,8 @@ public class Ambassador extends AbstractWebService
      * @return String An XML description which contains URLs to a localized
      *         document for each workflow
      */
-    public String getLocalizedDocuments(String p_accessToken, String p_jobName,
-            String p_wfId) throws WebServiceException
+    public String getLocalizedDocuments(String p_accessToken, String p_jobName, String p_wfId)
+            throws WebServiceException
     {
         checkAccess(p_accessToken, GET_LOCALIZED_DOCUMENTS);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
@@ -4003,27 +3854,25 @@ public class Ambassador extends AbstractWebService
             throw new WebServiceException("Job " + jobName + " does not exist.");
         }
 
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
 
         xml.append("<localizedDocuments>\r\n");
         Workflow wf = null;
 
         try
         {
-            wf = ServerProxy.getWorkflowManager().getWorkflowById(
-                    Long.parseLong(p_wfId));
+            wf = ServerProxy.getWorkflowManager().getWorkflowById(Long.parseLong(p_wfId));
         }
         catch (Exception e)
         {
-            throw new WebServiceException("Failed to get workflow "
-                    + e.getMessage());
+            throw new WebServiceException("Failed to get workflow " + e.getMessage());
         }
 
         // if (wf == null || !wf.getState().equals("EXPORTED"))
         // {
         // throw new
-        // WebServiceException("workflows does not exist or its state is not EXPORTED.");
+        // WebServiceException("workflows does not exist or its state is not
+        // EXPORTED.");
         // }
 
         xml.append("<jobId>").append(jobId).append("</jobId>\r\n");
@@ -4037,8 +3886,7 @@ public class Ambassador extends AbstractWebService
         xml.append("<urlPrefix>").append(urlPrefix).append("</urlPrefix>\r\n");
 
         String targetLocale = wf.getTargetLocale().toString();
-        xml.append("<targetLocale>")
-                .append(EditUtil.encodeXmlEntities(targetLocale))
+        xml.append("<targetLocale>").append(EditUtil.encodeXmlEntities(targetLocale))
                 .append("</targetLocale>\r\n");
 
         xml.append("</localizedDocuments>\r\n");
@@ -4057,8 +3905,8 @@ public class Ambassador extends AbstractWebService
      *         document for each workflow if the job has been exported
      * @throws WebServiceException
      */
-    public String getLocalizedDocuments_old(String p_accessToken,
-            String p_jobName) throws WebServiceException
+    public String getLocalizedDocuments_old(String p_accessToken, String p_jobName)
+            throws WebServiceException
     {
         checkAccess(p_accessToken, GET_LOCALIZED_DOCUMENTS);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
@@ -4072,21 +3920,17 @@ public class Ambassador extends AbstractWebService
 
         // query all the target pages for the workflows for this job
         StringBuffer sql = new StringBuffer();
-        sql.append(
-                "select source_page.external_page_id, locale.iso_lang_code, ")
+        sql.append("select source_page.external_page_id, locale.iso_lang_code, ")
                 .append("locale.iso_country_code, target_page.export_sub_dir")
                 .append(" from job, workflow, request, source_page, locale, target_page")
-                .append(" where job.name=?")
-                .append(" and workflow.job_id=job.id")
-                .append(" and request.job_id=job.id")
-                .append(" and source_page.id=request.page_id")
+                .append(" where job.name=?").append(" and workflow.job_id=job.id")
+                .append(" and request.job_id=job.id").append(" and source_page.id=request.page_id")
                 .append(" and locale.id=workflow.target_locale_id")
                 .append(" and source_page.id=target_page.source_page_id")
                 .append(" and workflow.iflow_instance_id = target_page.workflow_iflow_instance_id")
                 .append(" and target_page.state =?");
 
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<localizedDocuments>\r\n");
         xml.append("<jobId>").append(jobId).append("</jobId>\r\n");
         xml.append("<jobName>").append(EditUtil.encodeXmlEntities(jobName))
@@ -4106,8 +3950,7 @@ public class Ambassador extends AbstractWebService
             boolean gotSomeResult = false;
             StringBuilder urlPrefix = new StringBuilder();
             urlPrefix.append(getUrl()).append("/cxedocs/");
-            String company = CompanyWrapper.getCompanyNameById(job
-                    .getCompanyId());
+            String company = CompanyWrapper.getCompanyNameById(job.getCompanyId());
             urlPrefix.append(URLEncoder.encode(company, "utf-8"));
 
             while (results.next())
@@ -4120,8 +3963,7 @@ public class Ambassador extends AbstractWebService
                 locale.append("_").append(countryCode);
 
                 String targetFileName = File.separator
-                        + replaceLocalInFileName(fileName, exportSubDir,
-                                locale.toString());
+                        + replaceLocalInFileName(fileName, exportSubDir, locale.toString());
                 targetFileName = targetFileName.replace('\\', '/');
                 String encodedTargetFileName = "";
                 // String[] names = targetFileName.split("/");
@@ -4130,28 +3972,22 @@ public class Ambassador extends AbstractWebService
                 // encodedTargetFileName = encodedTargetFileName + "/" +
                 // URLEncoder.encode(names[i]);
                 // }
-                encodedTargetFileName = URLEncoder
-                        .encodeUrlString(targetFileName);
-                xml.append("<targetPage locale=\"").append(locale.toString())
-                        .append("\"");
+                encodedTargetFileName = URLEncoder.encodeUrlString(targetFileName);
+                xml.append("<targetPage locale=\"").append(locale.toString()).append("\"");
                 Locale l = new Locale(langCode, countryCode);
-                xml.append(" localeDisplayName=\"").append(l.getDisplayName())
-                        .append("\">");
+                xml.append(" localeDisplayName=\"").append(l.getDisplayName()).append("\">");
                 xml.append(urlPrefix).append(targetFileName);
                 xml.append("</targetPage>\r\n");
                 gotSomeResult = true;
             }
 
             if (!gotSomeResult)
-                throw new WebServiceException("No documents for job name "
-                        + jobName);
+                throw new WebServiceException("No documents for job name " + jobName);
 
         }
         catch (ConnectionPoolException cpe)
         {
-            logger.error(
-                    "Unable to connect to database to get localized documents.",
-                    cpe);
+            logger.error("Unable to connect to database to get localized documents.", cpe);
         }
         catch (SQLException sqle)
         {
@@ -4178,8 +4014,8 @@ public class Ambassador extends AbstractWebService
      * @return String
      * @exception WebServiceException
      */
-    public String cancelWorkflow(String p_accessToken, String p_jobName,
-            String p_workflowLocale) throws WebServiceException
+    public String cancelWorkflow(String p_accessToken, String p_jobName, String p_workflowLocale)
+            throws WebServiceException
     {
         checkAccess(p_accessToken, CANCEL_WORKFLOW);
         checkPermission(p_accessToken, Permission.JOB_WORKFLOWS_DISCARD);
@@ -4193,12 +4029,9 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobName", p_jobName);
             activityArgs.put("workflowLocale", p_workflowLocale);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "cancelWorkflow(p_accessToken, p_jobName,p_workflowLocale)",
-                            activityArgs);
-            StringBuffer xml = new StringBuffer(
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "cancelWorkflow(p_accessToken, p_jobName,p_workflowLocale)", activityArgs);
+            StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             Job job = queryJob(jobName, p_accessToken);
             String status = job.getState();
             boolean didCancel = false;
@@ -4212,25 +4045,22 @@ public class Ambassador extends AbstractWebService
             }
             else
             {
-                if (!status.equals(Job.DISPATCHED)
-                        && !status.equals(Job.READY_TO_BE_DISPATCHED))
+                if (!status.equals(Job.DISPATCHED) && !status.equals(Job.READY_TO_BE_DISPATCHED))
                     throw new WebServiceException(
                             "You can only discard workflows that are in the following states:DISPATCHED or READY_TO_BE_DISPATCHED");
 
                 // cancel just one workflow
-                Locale locale = GlobalSightLocale
-                        .makeLocaleFromString(workflowLocale);
+                Locale locale = GlobalSightLocale.makeLocaleFromString(workflowLocale);
                 Object[] workflows = job.getWorkflows().toArray();
-                logger.info("Job " + jobName + " has " + workflows.length
-                        + " workflow.");
+                logger.info("Job " + jobName + " has " + workflows.length + " workflow.");
                 for (int i = 0; i < workflows.length; i++)
                 {
                     Workflow w = (Workflow) workflows[i];
                     Locale wLocale = w.getTargetLocale().getLocale();
                     if (locale.equals(wLocale))
                     {
-                        logger.info("Cancelling workflow " + workflowLocale
-                                + " for job " + jobName);
+                        logger.info(
+                                "Cancelling workflow " + workflowLocale + " for job " + jobName);
                         ServerProxy.getWorkflowManager().cancel(userId, w);
                         didCancel = true;
                         break;
@@ -4242,8 +4072,7 @@ public class Ambassador extends AbstractWebService
                 throw new Exception("No workflow for locale " + workflowLocale);
 
             xml.append("<cancelStatus>\r\n");
-            xml.append("\t<jobName>")
-                    .append(EditUtil.encodeXmlEntities(jobName))
+            xml.append("\t<jobName>").append(EditUtil.encodeXmlEntities(jobName))
                     .append("</jobName>\r\n");
             if (workflowLocale == null)
                 xml.append("\t<workflowLocale>All Locales</workflowLocale>\r\n");
@@ -4279,8 +4108,7 @@ public class Ambassador extends AbstractWebService
      * @return An XML description which contains canceling information
      * @throws WebServiceException
      */
-    public String cancelJob(String p_accessToken, String p_jobName)
-            throws WebServiceException
+    public String cancelJob(String p_accessToken, String p_jobName) throws WebServiceException
     {
         checkAccess(p_accessToken, CANCEL_JOB);
         checkPermission(p_accessToken, Permission.JOBS_DISCARD);
@@ -4296,18 +4124,14 @@ public class Ambassador extends AbstractWebService
             String userId = UserUtil.getUserIdByName(userName);
 
             Job job = queryJob(p_jobName, p_accessToken);
-            if (!UserUtil.isInProject(userId,
-                    String.valueOf(job.getProjectId())))
-                throw new WebServiceException(
-                        "Current user cannot cancel the job.");
+            if (!UserUtil.isInProject(userId, String.valueOf(job.getProjectId())))
+                throw new WebServiceException("Current user cannot cancel the job.");
 
-            StringBuffer xml = new StringBuffer(
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+            StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             logger.info("Cancelling all workflows for job " + p_jobName);
             ServerProxy.getJobHandler().cancelJob(userId, job, null);
             xml.append("<cancelStatus>\r\n");
-            xml.append("\t<jobName>")
-                    .append(EditUtil.encodeXmlEntities(p_jobName))
+            xml.append("\t<jobName>").append(EditUtil.encodeXmlEntities(p_jobName))
                     .append("</jobName>\r\n");
             xml.append("\t<workflowLocale>All Locales</workflowLocale>\r\n");
             xml.append("\t<status>canceled</status>\r\n");
@@ -4339,8 +4163,7 @@ public class Ambassador extends AbstractWebService
      * @return An XML description which contains canceling information
      * @throws WebServiceException
      */
-    public String cancelJobById(String p_accessToken, long p_jobId)
-            throws WebServiceException
+    public String cancelJobById(String p_accessToken, long p_jobId) throws WebServiceException
     {
         checkAccess(p_accessToken, CANCEL_JOB_BY_ID);
         checkPermission(p_accessToken, Permission.JOBS_DISCARD);
@@ -4355,13 +4178,10 @@ public class Ambassador extends AbstractWebService
                     "cancelJobById(p_accessToken, p_jobId)", activityArgs);
             String userId = UserUtil.getUserIdByName(userName);
             Job job = ServerProxy.getJobHandler().getJobById(p_jobId);
-            if (!UserUtil.isInProject(userId,
-                    String.valueOf(job.getProjectId())))
-                throw new WebServiceException(
-                        "Current user cannot cancel the job.");
+            if (!UserUtil.isInProject(userId, String.valueOf(job.getProjectId())))
+                throw new WebServiceException("Current user cannot cancel the job.");
 
-            StringBuffer xml = new StringBuffer(
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+            StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             logger.info("Cancelling all workflows for job " + p_jobId);
             ServerProxy.getJobHandler().cancelJob(userId, job, null);
             xml.append("<cancelStatus>\r\n");
@@ -4373,13 +4193,11 @@ public class Ambassador extends AbstractWebService
         }
         catch (JobException je)
         {
-            StringBuffer messageBuf = new StringBuffer(
-                    "Unable to cancel the job ");
+            StringBuffer messageBuf = new StringBuffer("Unable to cancel the job ");
             messageBuf.append(p_jobId);
 
             // couldn't find the user specified
-            if (je.getMessageKey().equals(
-                    JobException.MSG_FAILED_TO_GET_JOB_BY_ID))
+            if (je.getMessageKey().equals(JobException.MSG_FAILED_TO_GET_JOB_BY_ID))
             {
                 messageBuf.append(" The job couldn't be found.");
             }
@@ -4414,8 +4232,7 @@ public class Ambassador extends AbstractWebService
      * @throws WebServiceException
      * @author Vincent Yan, 2011/01/17
      */
-    public String cancelJobs(String p_accessToken, String p_jobIds)
-            throws WebServiceException
+    public String cancelJobs(String p_accessToken, String p_jobIds) throws WebServiceException
     {
         try
         {
@@ -4446,8 +4263,7 @@ public class Ambassador extends AbstractWebService
             String sJobId = "";
             long jobId = 0L;
             Job job = null;
-            StringBuffer xml = new StringBuffer(
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+            StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             xml.append("<cancelStatus>\r\n");
 
             for (int i = 0; i < jobIds.length; i++)
@@ -4456,10 +4272,8 @@ public class Ambassador extends AbstractWebService
                 jobId = Long.parseLong(sJobId);
                 job = jobHandler.getJobById(jobId);
 
-                if (!UserUtil.isInProject(userId,
-                        String.valueOf(job.getProjectId())))
-                    throw new WebServiceException(
-                            "Current user cannot cancel the job.");
+                if (!UserUtil.isInProject(userId, String.valueOf(job.getProjectId())))
+                    throw new WebServiceException("Current user cannot cancel the job.");
 
                 logger.info("Cancelling all workflows for job " + jobId);
 
@@ -4475,13 +4289,11 @@ public class Ambassador extends AbstractWebService
         }
         catch (JobException je)
         {
-            StringBuffer messageBuf = new StringBuffer(
-                    "Unable to cancel the job ");
+            StringBuffer messageBuf = new StringBuffer("Unable to cancel the job ");
             messageBuf.append(p_jobIds);
 
             // couldn't find the user specified
-            if (je.getMessageKey().equals(
-                    JobException.MSG_FAILED_TO_GET_JOB_BY_ID))
+            if (je.getMessageKey().equals(JobException.MSG_FAILED_TO_GET_JOB_BY_ID))
             {
                 messageBuf.append(" The job couldn't be found.");
             }
@@ -4526,10 +4338,9 @@ public class Ambassador extends AbstractWebService
      * @param p_priority
      *            Priority can be empty.If not empty,priority must be 1,2,3,4 or
      *            5;
-     * */
-    public String editJobDetailInfo(String p_accessToken, String p_jobId,
-            String p_jobName, String p_estimatedDateXml, String p_priority)
-            throws WebServiceException
+     */
+    public String editJobDetailInfo(String p_accessToken, String p_jobId, String p_jobName,
+            String p_estimatedDateXml, String p_priority) throws WebServiceException
     {
         checkAccess(p_accessToken, EDIT_JOB_DETAIL_INFO);
         checkPermission(p_accessToken, Permission.JOBS_DETAILS);
@@ -4540,18 +4351,16 @@ public class Ambassador extends AbstractWebService
         activityArgs.put("jobName", p_jobName);
         activityArgs.put("estimatedDateXml", p_estimatedDateXml);
         activityArgs.put("priority", p_priority);
-        WebServicesLog.Start activityStart = WebServicesLog
-                .start(Ambassador.class,
-                        "editJobDetailInfo(p_accessToken,p_jobId,p_jobName,p_estimatedDateXml,p_priority)",
-                        activityArgs);
+        WebServicesLog.Start activityStart = WebServicesLog.start(Ambassador.class,
+                "editJobDetailInfo(p_accessToken,p_jobId,p_jobName,p_estimatedDateXml,p_priority)",
+                activityArgs);
 
         Map<String, Object> paramter = new HashMap<String, Object>();
         try
         {
             if (!Assert.assertNotEmpty(p_jobId))
             {
-                return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-                        "Job id can not be empty");
+                return makeErrorXml(EDIT_JOB_DETAIL_INFO, "Job id can not be empty");
             }
             Assert.assertIsInteger(p_jobId);
             if (StringUtil.isNotEmpty(p_priority))
@@ -4559,14 +4368,11 @@ public class Ambassador extends AbstractWebService
                 Assert.assertIsInteger(p_priority);
 
                 int priority = Integer.parseInt(p_priority);
-                if (priority != 1 && priority != 2 && priority != 3
-                        && priority != 4 && priority != 5)
+                if (priority != 1 && priority != 2 && priority != 3 && priority != 4
+                        && priority != 5)
                 {
-                    return makeErrorXml(
-                            EDIT_JOB_DETAIL_INFO,
-                            "Invalid priority: "
-                                    + p_priority
-                                    + ", it should be limited in 1, 2, 3, 4, 5 or empty.");
+                    return makeErrorXml(EDIT_JOB_DETAIL_INFO, "Invalid priority: " + p_priority
+                            + ", it should be limited in 1, 2, 3, 4, 5 or empty.");
                 }
                 paramter.put("priority", p_priority);
             }
@@ -4580,21 +4386,16 @@ public class Ambassador extends AbstractWebService
         Job job = null;
         try
         {
-            job = ServerProxy.getJobHandler().getJobById(
-                    Long.parseLong(p_jobId));
+            job = ServerProxy.getJobHandler().getJobById(Long.parseLong(p_jobId));
             if (job == null)
             {
-                return makeErrorXml(EDIT_JOB_DETAIL_INFO, "Invalid job id: "
-                        + p_jobId);
+                return makeErrorXml(EDIT_JOB_DETAIL_INFO, "Invalid job id: " + p_jobId);
             }
 
             if (!isInSameCompany(userName, String.valueOf(job.getCompanyId())))
             {
-                return makeErrorXml(
-                        EDIT_JOB_DETAIL_INFO,
-                        "Invalid job id: "
-                                + p_jobId
-                                + ", current user is not in the same company with the job.");
+                return makeErrorXml(EDIT_JOB_DETAIL_INFO, "Invalid job id: " + p_jobId
+                        + ", current user is not in the same company with the job.");
             }
 
             if (!job.getDisplayState().equalsIgnoreCase("ready")
@@ -4620,14 +4421,10 @@ public class Ambassador extends AbstractWebService
                 p_jobName = EditUtil.removeCRLF(p_jobName);
                 if (p_jobName.length() > 120)
                 {
-                    return makeErrorXml(
-                            EDIT_JOB_DETAIL_INFO,
-                            "Invalid job name: "
-                                    + p_jobName
-                                    + ",  the max lenght for job name limits to 120 characters.");
+                    return makeErrorXml(EDIT_JOB_DETAIL_INFO, "Invalid job name: " + p_jobName
+                            + ",  the max lenght for job name limits to 120 characters.");
                 }
-                Job checkJob = ServerProxy.getJobHandler().getJobByJobName(
-                        p_jobName);
+                Job checkJob = ServerProxy.getJobHandler().getJobByJobName(p_jobName);
                 if (checkJob == null)
                 {
                     paramter.put("jobName", p_jobName);
@@ -4636,17 +4433,13 @@ public class Ambassador extends AbstractWebService
                 {
                     if (checkJob.getId() == Long.parseLong(p_jobId))
                     {
-                        return makeErrorXml(
-                                EDIT_JOB_DETAIL_INFO,
-                                "Invalid job name: "
-                                        + p_jobName
-                                        + ", the modify name is identical to current one.");
+                        return makeErrorXml(EDIT_JOB_DETAIL_INFO, "Invalid job name: " + p_jobName
+                                + ", the modify name is identical to current one.");
                     }
                     else
                     {
                         return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-                                "Invalid job name: " + p_jobName
-                                        + ", job name already exists.");
+                                "Invalid job name: " + p_jobName + ", job name already exists.");
                     }
                 }
             }
@@ -4664,8 +4457,7 @@ public class Ambassador extends AbstractWebService
             try
             {
                 User user = ServerProxy.getUserManager().getUser(userId);
-                TimeZone timeZone = ServerProxy.getCalendarManager()
-                        .findUserTimeZone(userId);
+                TimeZone timeZone = ServerProxy.getCalendarManager().findUserTimeZone(userId);
                 Timestamp ts = new Timestamp(Timestamp.DATE, timeZone);
                 Locale uiLocale = new Locale(user.getDefaultUILocale());
                 ts.setLocale(uiLocale);
@@ -4684,10 +4476,8 @@ public class Ambassador extends AbstractWebService
                     try
                     {
                         targetLocale = et.element("targetLocale").getText();
-                        tranComDateStr = et.element(
-                                "estimatedTranslateCompletionDate").getText();
-                        workComDateStr = et.element(
-                                "estimatedWorkflowCompletionDate").getText();
+                        tranComDateStr = et.element("estimatedTranslateCompletionDate").getText();
+                        workComDateStr = et.element("estimatedWorkflowCompletionDate").getText();
                     }
                     catch (Exception e)
                     {
@@ -4713,19 +4503,16 @@ public class Ambassador extends AbstractWebService
                         long sameId = -1;
                         for (Workflow wf : job.getWorkflows())
                         {
-                            if (targetGSLocale.getId() == wf.getTargetLocale()
-                                    .getId())
+                            if (targetGSLocale.getId() == wf.getTargetLocale().getId())
                             {
                                 sameId = wf.getTargetLocale().getId();
                             }
                         }
                         if (sameId == -1)
                         {
-                            return makeErrorXml(
-                                    EDIT_JOB_DETAIL_INFO,
-                                    "Invalid target locale: "
-                                            + targetLocale
-                                            + ", current job has no workflow with this target locale.");
+                            return makeErrorXml(EDIT_JOB_DETAIL_INFO, "Invalid target locale: "
+                                    + targetLocale
+                                    + ", current job has no workflow with this target locale.");
                         }
                     }
                     catch (Exception e)
@@ -4740,14 +4527,12 @@ public class Ambassador extends AbstractWebService
                         {
                             Date tranComDate = sfm.parse(tranComDateStr);
                             ts.setDate(tranComDate);
-                            dateMap.put("estimatedTranslateCompletionDate",
-                                    ts.getDate());
+                            dateMap.put("estimatedTranslateCompletionDate", ts.getDate());
                         }
                         catch (ParseException e)
                         {
                             return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-                                    "Invalid estimatedTranslateCompletionDate: "
-                                            + tranComDateStr);
+                                    "Invalid estimatedTranslateCompletionDate: " + tranComDateStr);
                         }
                     }
 
@@ -4757,19 +4542,16 @@ public class Ambassador extends AbstractWebService
                         {
                             Date workComDate = sfm.parse(workComDateStr);
                             ts.setDate(workComDate);
-                            dateMap.put("estimatedWorkflowCompletionDate",
-                                    ts.getDate());
+                            dateMap.put("estimatedWorkflowCompletionDate", ts.getDate());
                         }
                         catch (ParseException e)
                         {
                             return makeErrorXml(EDIT_JOB_DETAIL_INFO,
-                                    "Invalid estimatedWorkflowCompletionDate: "
-                                            + workComDateStr);
+                                    "Invalid estimatedWorkflowCompletionDate: " + workComDateStr);
                         }
                     }
 
-                    if (!dateMap.isEmpty()
-                            && !workMap.containsKey(targetGSLocale.getId()))
+                    if (!dateMap.isEmpty() && !workMap.containsKey(targetGSLocale.getId()))
                     {
                         workMap.put(targetGSLocale.getId(), dateMap);
                     }
@@ -4813,8 +4595,7 @@ public class Ambassador extends AbstractWebService
             HibernateUtil.merge(job);
         }
 
-        String hql = "from WorkflowImpl w where w.job.id = :jId "
-                + "and w.targetLocale.id = :tId";
+        String hql = "from WorkflowImpl w where w.job.id = :jId " + "and w.targetLocale.id = :tId";
         Map map = new HashMap();
         map.put("jId", Long.parseLong(jobId));
         if (workMap != null)
@@ -4823,13 +4604,11 @@ public class Ambassador extends AbstractWebService
             for (Long targetLocaleId : tgLocaleKeySet)
             {
                 map.put("tId", targetLocaleId);
-                WorkflowImpl wf = (WorkflowImpl) HibernateUtil.search(hql, map)
-                        .get(0);
+                WorkflowImpl wf = (WorkflowImpl) HibernateUtil.search(hql, map).get(0);
                 if (!wf.getState().equals("DISPATCHED")
                         && !wf.getState().equals("READY_TO_BE_DISPATCHED"))
                 {
-                    return makeErrorXml(
-                            EDIT_JOB_DETAIL_INFO,
+                    return makeErrorXml(EDIT_JOB_DETAIL_INFO,
                             "Only when workflow is in ready or in progress state, estimated completion dates are allowed to modify.");
                 }
                 Map<String, Date> dateMap = workMap.get(targetLocaleId);
@@ -4844,8 +4623,7 @@ public class Ambassador extends AbstractWebService
                         wf.setEstimatedTranslateCompletionDate(date);
                         wf.setEstimatedTranslateCompletionDateOverrided(true);
                     }
-                    else if (key
-                            .equalsIgnoreCase("estimatedWorkflowCompletionDate"))
+                    else if (key.equalsIgnoreCase("estimatedWorkflowCompletionDate"))
                     {
                         wf.setEstimatedCompletionDate(date);
                         wf.setEstimatedCompletionDateOverrided(true);
@@ -4856,8 +4634,7 @@ public class Ambassador extends AbstractWebService
             }
         }
 
-        if (StringUtil.isNotEmpty(jobName) || StringUtil.isNotEmpty(priority)
-                || workMap != null)
+        if (StringUtil.isNotEmpty(jobName) || StringUtil.isNotEmpty(priority) || workMap != null)
         {
             return "Success.";
         }
@@ -4872,21 +4649,21 @@ public class Ambassador extends AbstractWebService
      * @param p_targetLocales
      *            Target locale can be empty, can be one or more.
      * @return Return xml, for example: <?xml version="1.0" encoding="UTF-8" ?>
-     *         <job> <id>280</id> <name>job_4012_861430940</name> <workflows>
-     *         <workflow> <targetLocal>French (France) [fr_FR]</targetLocal>
+     *         <job> <id>280</id> <name>job_4012_861430940</name>
+     *         <workflows> <workflow> <targetLocal>French (France)
+     *         [fr_FR]</targetLocal>
      *         <workflowTranslationPercentage>3%</workflowTranslationPercentage>
-     *         <targetPages> <targetPage>
-     *         <pageName>en_US\280\Welocalize_Company_IncludingRepeat_Codesensitive
-     *         .html</pageName>
+     *         <targetPages> <targetPage> <pageName>en_US\280\
+     *         Welocalize_Company_IncludingRepeat_Codesensitive .html</pageName>
      *         <pageTranslationPercentage>100%</pageTranslationPercentage>
-     *         </targetPage> <targetPage>
-     *         <pageName>en_US\280\Welocalize_Company_IncludingRepeat_Leverage
-     *         Match Threshold.html</pageName>
+     *         </targetPage> <targetPage> <pageName>en_US\280\
+     *         Welocalize_Company_IncludingRepeat_Leverage Match
+     *         Threshold.html</pageName>
      *         <pageTranslationPercentage>1%</pageTranslationPercentage>
      *         </targetPage> </targetPages> </workflow> </workflows> </job>
-     * */
-    public String getTranslationPercentage(String p_accessToken,
-            String p_jobId, String p_targetLocales) throws WebServiceException
+     */
+    public String getTranslationPercentage(String p_accessToken, String p_jobId,
+            String p_targetLocales) throws WebServiceException
     {
         checkAccess(p_accessToken, GET_TRANSLATION_PERCENTAGE);
         String userName = getUsernameFromSession(p_accessToken);
@@ -4894,10 +4671,8 @@ public class Ambassador extends AbstractWebService
         activityArgs.put("loggedUserName", userName);
         activityArgs.put("jobId", p_jobId);
         activityArgs.put("targetLocales", p_targetLocales);
-        WebServicesLog.Start activityStart = WebServicesLog
-                .start(Ambassador.class,
-                        "getTranslationPercentage(p_accessToken,p_jobId,p_targetLocales)",
-                        activityArgs);
+        WebServicesLog.Start activityStart = WebServicesLog.start(Ambassador.class,
+                "getTranslationPercentage(p_accessToken,p_jobId,p_targetLocales)", activityArgs);
         try
         {
             Assert.assertNotEmpty(p_jobId);
@@ -4912,21 +4687,16 @@ public class Ambassador extends AbstractWebService
         Job job = null;
         try
         {
-            job = ServerProxy.getJobHandler().getJobById(
-                    Long.parseLong(p_jobId));
+            job = ServerProxy.getJobHandler().getJobById(Long.parseLong(p_jobId));
             if (job == null)
             {
-                return makeErrorXml(GET_TRANSLATION_PERCENTAGE,
-                        "Invalid job id:" + p_jobId);
+                return makeErrorXml(GET_TRANSLATION_PERCENTAGE, "Invalid job id:" + p_jobId);
             }
 
             if (!isInSameCompany(userName, String.valueOf(job.getCompanyId())))
             {
-                return makeErrorXml(
-                        GET_TRANSLATION_PERCENTAGE,
-                        "Invalid job id:"
-                                + p_jobId
-                                + ", current user is not in the same company with the job.");
+                return makeErrorXml(GET_TRANSLATION_PERCENTAGE, "Invalid job id:" + p_jobId
+                        + ", current user is not in the same company with the job.");
             }
         }
         catch (Exception e)
@@ -4947,17 +4717,14 @@ public class Ambassador extends AbstractWebService
                     targetGSLocale = getLocaleByName(trgLocalArr[i].trim());
                     if (targetGSLocale == null)
                     {
-                        return makeErrorXml(
-                                GET_TRANSLATION_PERCENTAGE,
-                                "Invalid target locale: "
-                                        + trgLocalArr[i].trim());
+                        return makeErrorXml(GET_TRANSLATION_PERCENTAGE,
+                                "Invalid target locale: " + trgLocalArr[i].trim());
                     }
 
                     long sameId = -1;
                     for (Workflow wf : job.getWorkflows())
                     {
-                        if (targetGSLocale.getId() == wf.getTargetLocale()
-                                .getId())
+                        if (targetGSLocale.getId() == wf.getTargetLocale().getId())
                         {
                             sameId = wf.getTargetLocale().getId();
                             trgLocalIdSet.add(targetGSLocale.getId());
@@ -4965,10 +4732,8 @@ public class Ambassador extends AbstractWebService
                     }
                     if (sameId == -1)
                     {
-                        return makeErrorXml(
-                                GET_TRANSLATION_PERCENTAGE,
-                                "Invalid target locale: "
-                                        + trgLocalArr[i]
+                        return makeErrorXml(GET_TRANSLATION_PERCENTAGE,
+                                "Invalid target locale: " + trgLocalArr[i]
                                         + ", the current job is not included the target locale.");
                     }
                 }
@@ -4980,8 +4745,7 @@ public class Ambassador extends AbstractWebService
             }
         }
 
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<job>\r\n");
         xml.append("\t<id>").append(job.getId()).append("</id>\r\n");
         xml.append("\t<name>").append(job.getJobName()).append("</name>\r\n");
@@ -4999,28 +4763,22 @@ public class Ambassador extends AbstractWebService
             }
 
             xml.append("\t\t<workflow>\r\n");
-            xml.append("\t\t\t<targetLocal>")
-                    .append(wf.getTargetLocale().getDisplayName())
+            xml.append("\t\t\t<targetLocal>").append(wf.getTargetLocale().getDisplayName())
                     .append("</targetLocal>\r\n");
-            int taskPrecentage = SegmentTuvUtil
-                    .getTranslatedPercentageForTargetPages(wf.getTargetPages());
-            xml.append("\t\t\t<workflowTranslationPercentage>")
-                    .append(taskPrecentage)
+            Collection<TargetPage> trgPages = wf.getTargetPages();
+            List<TargetPage> trgPageList = new ArrayList<TargetPage>(trgPages);
+            int taskPrecentage = SegmentTuvUtil.getTranslatedPercentageForTargetPages(trgPageList);
+            xml.append("\t\t\t<workflowTranslationPercentage>").append(taskPrecentage)
                     .append("%</workflowTranslationPercentage>\r\n");
             xml.append("\t\t\t<targetPages>\r\n");
-            Vector<TargetPage> trgPages = wf.getTargetPages();
-            Iterator<TargetPage> itPages = trgPages.iterator();
-            while (itPages.hasNext())
+            for (TargetPage page : trgPages)
             {
-                TargetPage page = (TargetPage) itPages.next();
                 xml.append("\t\t\t\t<targetPage>\r\n");
-                xml.append("\t\t\t\t\t<pageName>")
-                        .append(page.getExternalPageId())
+                xml.append("\t\t\t\t\t<pageName>").append(page.getExternalPageId())
                         .append("</pageName>\r\n");
                 int pagePercentage = SegmentTuvUtil
                         .getTranslatedPercentageForTargetPage(page.getId());
-                xml.append("\t\t\t\t\t<pageTranslationPercentage>")
-                        .append(pagePercentage)
+                xml.append("\t\t\t\t\t<pageTranslationPercentage>").append(pagePercentage)
                         .append("%</pageTranslationPercentage>\r\n");
                 xml.append("\t\t\t\t</targetPage>\r\n");
             }
@@ -5047,8 +4805,8 @@ public class Ambassador extends AbstractWebService
      * @return String
      * @exception WebServiceException
      */
-    public String exportWorkflow(String p_accessToken, String p_jobName,
-            String p_workflowLocale) throws WebServiceException
+    public String exportWorkflow(String p_accessToken, String p_jobName, String p_workflowLocale)
+            throws WebServiceException
     {
 
         checkAccess(p_accessToken, EXPORT_WORKFLOW);
@@ -5065,24 +4823,20 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("jobName", p_jobName);
             activityArgs.put("workflowLocale", p_workflowLocale);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "exportWorkflow(p_accessToken, p_jobName,p_workflowLocale)",
-                            activityArgs);
-            StringBuffer xml = new StringBuffer(
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "exportWorkflow(p_accessToken, p_jobName,p_workflowLocale)", activityArgs);
+            StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             Job job = queryJob(jobName, p_accessToken);
             Object[] workflows = job.getWorkflows().toArray();
             long projectId = job.getL10nProfile().getProject().getId();
-            User projectMgr = ServerProxy.getProjectHandler()
-                    .getProjectById(projectId).getProjectManager();
+            User projectMgr = ServerProxy.getProjectHandler().getProjectById(projectId)
+                    .getProjectManager();
             boolean didExport = false;
 
             if (workflowLocale == null)
             {
                 // export all workflow
-                logger.info("Exporting all " + workflows.length
-                        + " workflows for job " + jobName);
+                logger.info("Exporting all " + workflows.length + " workflows for job " + jobName);
                 for (int i = 0; i < workflows.length; i++)
                 {
                     Workflow w = (Workflow) workflows[i];
@@ -5097,10 +4851,8 @@ public class Ambassador extends AbstractWebService
             else
             {
                 // export just one workflow
-                Locale locale = GlobalSightLocale
-                        .makeLocaleFromString(workflowLocale);
-                logger.info("Job " + jobName + " has " + workflows.length
-                        + " workflow.");
+                Locale locale = GlobalSightLocale.makeLocaleFromString(workflowLocale);
+                logger.info("Job " + jobName + " has " + workflows.length + " workflow.");
                 for (int i = 0; i < workflows.length; i++)
                 {
                     Workflow w = (Workflow) workflows[i];
@@ -5118,8 +4870,7 @@ public class Ambassador extends AbstractWebService
                 throw new Exception("No workflow for locale " + workflowLocale);
 
             xml.append("<exportStatus>\r\n");
-            xml.append("\t<jobName>")
-                    .append(EditUtil.encodeXmlEntities(jobName))
+            xml.append("\t<jobName>").append(EditUtil.encodeXmlEntities(jobName))
                     .append("</jobName>\r\n");
             if (workflowLocale == null)
                 xml.append("\t<workflowLocale>All Locales</workflowLocale>\r\n");
@@ -5157,8 +4908,7 @@ public class Ambassador extends AbstractWebService
      *         export job
      * @throws WebServiceException
      */
-    public String exportJob(String p_accessToken, String p_jobName)
-            throws WebServiceException
+    public String exportJob(String p_accessToken, String p_jobName) throws WebServiceException
     {
         checkAccess(p_accessToken, EXPORT_JOB);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
@@ -5173,17 +4923,15 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("jobName", p_jobName);
             activityStart = WebServicesLog.start(Ambassador.class,
                     "exportJob(p_accessToken, p_jobName)", activityArgs);
-            StringBuffer xml = new StringBuffer(
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+            StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             Job job = queryJob(jobName, p_accessToken);
             Object[] workflows = job.getWorkflows().toArray();
             long projectId = job.getL10nProfile().getProject().getId();
-            User projectMgr = ServerProxy.getProjectHandler()
-                    .getProjectById(projectId).getProjectManager();
+            User projectMgr = ServerProxy.getProjectHandler().getProjectById(projectId)
+                    .getProjectManager();
 
             // export all workflow
-            logger.info("Exporting all " + workflows.length
-                    + " workflows for job " + jobName);
+            logger.info("Exporting all " + workflows.length + " workflows for job " + jobName);
             for (int i = 0; i < workflows.length; i++)
             {
                 Workflow w = (Workflow) workflows[i];
@@ -5194,8 +4942,7 @@ public class Ambassador extends AbstractWebService
                 }
             }
             xml.append("<exportStatus>\r\n");
-            xml.append("\t<jobName>")
-                    .append(EditUtil.encodeXmlEntities(jobName))
+            xml.append("\t<jobName>").append(EditUtil.encodeXmlEntities(jobName))
                     .append("</jobName>\r\n");
             xml.append("\t<workflowLocale>All Locales</workflowLocale>\r\n");
             xml.append("\t<status>Export Request Sent</status>\r\n");
@@ -5229,8 +4976,7 @@ public class Ambassador extends AbstractWebService
      *         message.
      * @throws WebServiceException
      */
-    public String archiveJob(String p_accessToken, String p_jobIds)
-            throws WebServiceException
+    public String archiveJob(String p_accessToken, String p_jobIds) throws WebServiceException
     {
         checkAccess(p_accessToken, ARCHIVE_JOB);
         checkPermission(p_accessToken, Permission.JOBS_ARCHIVE);
@@ -5239,8 +4985,7 @@ public class Ambassador extends AbstractWebService
         Company company = getCompanyByName(curUser.getCompanyName());
 
         String[] jobIds = p_jobIds.split(",");
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         WorkflowManager wfManager = null;
         HashMap<String, String> errorJobs = new HashMap<String, String>();
         boolean isArchived;
@@ -5249,8 +4994,7 @@ public class Ambassador extends AbstractWebService
             try
             {
                 isArchived = false;
-                Job job = ServerProxy.getJobHandler().getJobById(
-                        Long.parseLong(jobId));
+                Job job = ServerProxy.getJobHandler().getJobById(Long.parseLong(jobId));
                 if (job == null)
                 {
                     errorJobs.put(jobId, "the job may not exist.");
@@ -5258,12 +5002,9 @@ public class Ambassador extends AbstractWebService
                 }
 
                 // If job is not from current user's company, ignore.
-                if (company.getId() != 1
-                        && company.getId() != job.getCompanyId())
+                if (company.getId() != 1 && company.getId() != job.getCompanyId())
                 {
-                    errorJobs
-                            .put(jobId,
-                                    "this job belongs to another company, can not archive.");
+                    errorJobs.put(jobId, "this job belongs to another company, can not archive.");
                     continue;
                 }
 
@@ -5274,9 +5015,8 @@ public class Ambassador extends AbstractWebService
                 isArchived = wfManager.archive(job);
                 if (!isArchived)
                 {
-                    errorJobs
-                            .put(jobId,
-                                    "the job is not in \"Exported\" state and can't be archived.");
+                    errorJobs.put(jobId,
+                            "the job is not in \"Exported\" state and can't be archived.");
                 }
             }
             catch (Exception e)
@@ -5313,27 +5053,23 @@ public class Ambassador extends AbstractWebService
      *         and number of workflows exporting
      * @throws WebServiceException
      */
-    public String getImportExportStatus(String p_accessToken)
-            throws WebServiceException
+    public String getImportExportStatus(String p_accessToken) throws WebServiceException
     {
         checkAccess(p_accessToken, GET_IMPORT_EXPORT_STATUS);
 
         User curUser = getUser(getUsernameFromSession(p_accessToken));
         Company company = getCompanyByName(curUser.getCompanyName());
-        String jobsCreatingNumSql = "select count(ID) from JobImpl "
-                + " where STATE in ('" + Job.UPLOADING + "', '" + Job.IN_QUEUE
-                + "', '" + Job.EXTRACTING + "', '" + Job.LEVERAGING + "', '"
-                + Job.CALCULATING_WORD_COUNTS + "', '" + Job.PROCESSING + "')"
-                + " and COMPANY_ID = " + company.getId();
+        String jobsCreatingNumSql = "select count(ID) from JobImpl " + " where STATE in ('"
+                + Job.UPLOADING + "', '" + Job.IN_QUEUE + "', '" + Job.EXTRACTING + "', '"
+                + Job.LEVERAGING + "', '" + Job.CALCULATING_WORD_COUNTS + "', '" + Job.PROCESSING
+                + "')" + " and COMPANY_ID = " + company.getId();
         int jobsCreatingNum = HibernateUtil.count(jobsCreatingNumSql);
-        int localesExportingNum = WorkflowExportingHelper
-                .getExportingWorkflowNumber(false, company.getId());
+        int localesExportingNum = WorkflowExportingHelper.getExportingWorkflowNumber(false,
+                company.getId());
 
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<ImportExportStatus>\r\n");
-        xml.append("\t<jobsCreating>").append(jobsCreatingNum)
-                .append("</jobsCreating>\r\n");
+        xml.append("\t<jobsCreating>").append(jobsCreatingNum).append("</jobsCreating>\r\n");
         xml.append("\t<localesExporting>").append(localesExportingNum)
                 .append("</localesExporting>\r\n");
         xml.append("</ImportExportStatus>\r\n");
@@ -5352,8 +5088,8 @@ public class Ambassador extends AbstractWebService
      *         all the accepted tasks in the specified workflow
      * @throws WebServiceException
      */
-    public String getAcceptedTasksInWorkflow(String p_accessToken,
-            long p_workflowId) throws WebServiceException
+    public String getAcceptedTasksInWorkflow(String p_accessToken, long p_workflowId)
+            throws WebServiceException
     {
         checkAccess(p_accessToken, GET_ACCEPTED_TASKS);
         checkPermission(p_accessToken, Permission.ACTIVITIES_ACCEPT);
@@ -5367,55 +5103,41 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("workflowId", p_workflowId);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "getAcceptedTasksInWorkflow(p_accessToken, p_workflowId)",
-                    activityArgs);
-            StringBuffer xml = new StringBuffer(
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+                    "getAcceptedTasksInWorkflow(p_accessToken, p_workflowId)", activityArgs);
+            StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             xml.append("<acceptedTasks>\r\n");
-            xml.append("<workflowId>").append(p_workflowId)
-                    .append("</workflowId>\r\n");
-            taskInfos = ServerProxy.getTaskManager()
-                    .getAcceptedTaskInfosInWorkflow(p_workflowId);
+            xml.append("<workflowId>").append(p_workflowId).append("</workflowId>\r\n");
+            taskInfos = ServerProxy.getTaskManager().getAcceptedTaskInfosInWorkflow(p_workflowId);
             for (Iterator i = taskInfos.iterator(); i.hasNext();)
             {
                 TaskInfo ti = (TaskInfo) i.next();
                 xml.append("\t<task>\r\n");
                 xml.append("\t\t<id>").append(ti.getId()).append("</id>\r\n");
-                xml.append("\t\t<name>").append(ti.getName())
-                        .append("</name>\r\n");
-                xml.append("\t\t<state>").append(ti.getStateAsString())
-                        .append("</state>\r\n");
-                xml.append("\t\t<acceptByDate>")
-                        .append(ti.getAcceptByAsString())
+                xml.append("\t\t<name>").append(ti.getName()).append("</name>\r\n");
+                xml.append("\t\t<state>").append(ti.getStateAsString()).append("</state>\r\n");
+                xml.append("\t\t<acceptByDate>").append(ti.getAcceptByAsString())
                         .append("</acceptByDate>\r\n");
                 // these are accepted tasks so the date and user id should be
                 // set
-                xml.append("\t\t<acceptedDate>")
-                        .append(ti.getAcceptedDateAsString())
+                xml.append("\t\t<acceptedDate>").append(ti.getAcceptedDateAsString())
                         .append("</acceptedDate>\r\n");
 
                 xml.append("\t\t<accepter>\r\n");
                 // get user information about the user who accepted the task
                 UserInfo ui = getUserInfo(ti.getAcceptor());
-                xml.append("\t\t\t<userid>").append(ui.getUserName())
-                        .append("</userid>\r\n");
+                xml.append("\t\t\t<userid>").append(ui.getUserName()).append("</userid>\r\n");
                 xml.append("\t\t\t<firstName>").append(ui.getFirstName())
                         .append("</firstName>\r\n");
-                xml.append("\t\t\t<lastName>").append(ui.getLastName())
-                        .append("</lastName>\r\n");
-                xml.append("\t\t\t<title>").append(ui.getTitle())
-                        .append("</title>\r\n");
-                xml.append("\t\t\t<email>").append(ui.getEmailAddress())
-                        .append("</email>\r\n");
+                xml.append("\t\t\t<lastName>").append(ui.getLastName()).append("</lastName>\r\n");
+                xml.append("\t\t\t<title>").append(ui.getTitle()).append("</title>\r\n");
+                xml.append("\t\t\t<email>").append(ui.getEmailAddress()).append("</email>\r\n");
                 xml.append("\t\t</accepter>\r\n");
 
-                xml.append("\t\t<completeByDate>")
-                        .append(ti.getCompleteByAsString())
+                xml.append("\t\t<completeByDate>").append(ti.getCompleteByAsString())
                         .append("</completeByDate>\r\n");
                 if (ti.getCompletedDateAsString() != null)
                 {
-                    xml.append("\t\t<completedDate>")
-                            .append(ti.getCompletedDateAsString())
+                    xml.append("\t\t<completedDate>").append(ti.getCompletedDateAsString())
                             .append("</completedDate>\r\n");
                 }
                 xml.append("\t</task>\r\n");
@@ -5427,8 +5149,7 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(GET_ACCEPTED_TASKS, e);
-            String message = "Could not get the accepted tasks in workflow "
-                    + p_workflowId;
+            String message = "Could not get the accepted tasks in workflow " + p_workflowId;
             message = makeErrorXml(GET_ACCEPTED_TASKS, message);
             throw new WebServiceException(message);
         }
@@ -5454,8 +5175,8 @@ public class Ambassador extends AbstractWebService
      * 
      * @return The basic info about the tasks in XML format.
      */
-    public String getCurrentTasksInWorkflow(String p_accessToken,
-            long p_workflowId) throws WebServiceException
+    public String getCurrentTasksInWorkflow(String p_accessToken, long p_workflowId)
+            throws WebServiceException
     {
         checkAccess(p_accessToken, GET_CURRENT_TASKS);
         checkPermission(p_accessToken, Permission.ACTIVITIES_VIEW);
@@ -5469,13 +5190,10 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("workflowId", p_workflowId);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "getCurrentTasksInWorkflow(p_accessToken, p_workflowId)",
-                    activityArgs);
-            StringBuffer xml = new StringBuffer(
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+                    "getCurrentTasksInWorkflow(p_accessToken, p_workflowId)", activityArgs);
+            StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             xml.append("  <tasksInWorkflow>\r\n");
-            xml.append("    <workflowId>").append(p_workflowId)
-                    .append("</workflowId>\r\n");
+            xml.append("    <workflowId>").append(p_workflowId).append("</workflowId>\r\n");
             tasks = ServerProxy.getTaskManager().getCurrentTasks(p_workflowId);
             Object[] taskArray = tasks == null ? null : tasks.toArray();
             int size = taskArray == null ? -1 : taskArray.length;
@@ -5484,10 +5202,8 @@ public class Ambassador extends AbstractWebService
                 Task ti = (Task) taskArray[i];
                 xml.append("\t<task>\r\n");
                 xml.append("\t\t<id>").append(ti.getId()).append("</id>\r\n");
-                xml.append("\t\t<name>").append(ti.getTaskName())
-                        .append("</name>\r\n");
-                xml.append("\t\t<state>").append(ti.getStateAsString())
-                        .append("</state>\r\n");
+                xml.append("\t\t<name>").append(ti.getTaskName()).append("</name>\r\n");
+                xml.append("\t\t<state>").append(ti.getStateAsString()).append("</state>\r\n");
                 xml.append("\t</task>\r\n");
             }
 
@@ -5497,8 +5213,7 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(GET_CURRENT_TASKS, e);
-            String message = "Could not get the tasks for workflow with id "
-                    + p_workflowId;
+            String message = "Could not get the tasks for workflow with id " + p_workflowId;
             message = makeErrorXml(GET_CURRENT_TASKS, message);
             throw new WebServiceException(message);
         }
@@ -5527,8 +5242,8 @@ public class Ambassador extends AbstractWebService
      * 
      * @return The basic info about the tasks in XML format.
      */
-    public String getTasksInJob(String p_accessToken, long p_jobId,
-            String p_taskName) throws WebServiceException
+    public String getTasksInJob(String p_accessToken, long p_jobId, String p_taskName)
+            throws WebServiceException
     {
         checkAccess(p_accessToken, GET_TASKS);
         checkPermission(p_accessToken, Permission.ACTIVITIES_VIEW);
@@ -5547,11 +5262,9 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("jobId", p_jobId);
             activityArgs.put("taskName", p_taskName);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "getTasksInJob(p_accessToken, p_jobId, p_taskName)",
-                    activityArgs);
+                    "getTasksInJob(p_accessToken, p_jobId, p_taskName)", activityArgs);
 
-            if (!UserUtil.isInProject(userId,
-                    String.valueOf(job.getProjectId())))
+            if (!UserUtil.isInProject(userId, String.valueOf(job.getProjectId())))
                 throw new WebServiceException(
                         "Current user does not have permission to get task information");
 
@@ -5559,12 +5272,9 @@ public class Ambassador extends AbstractWebService
                     "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             xml.append("<tasksInJob>\r\n");
             xml.append("\t<jobId>").append(p_jobId).append("</jobId>\r\n");
-            taskInfos = ServerProxy.getTaskManager().getTasks(p_taskName,
-                    p_jobId);
-            Map<Long, String> taskAssignees = AmbassadorHelper
-                    .getTaskAssigneesByJob(p_jobId);
-            List<Long> processdefintionList = AmbassadorHelper
-                    .getProcessdefintion(p_jobId);
+            taskInfos = ServerProxy.getTaskManager().getTasks(p_taskName, p_jobId);
+            Map<Long, String> taskAssignees = AmbassadorHelper.getTaskAssigneesByJob(p_jobId);
+            List<Long> processdefintionList = AmbassadorHelper.getProcessdefintion(p_jobId);
             Map<Long, TaskJbpmNode> jbpmNodeMap = AmbassadorHelper
                     .getTaskJbpmNode(processdefintionList);
             Map<Long, List<TaskJbpmTransition>> jbpmTranMap = AmbassadorHelper
@@ -5580,8 +5290,8 @@ public class Ambassador extends AbstractWebService
                 Task ti = (Task) tasks[i];
                 String assignees = taskAssignees.get(ti.getId());
 
-                conList = AmbassadorHelper.getConditionNodeTargetInfo(
-                        ti.getId(), jbpmNodeMap, jbpmTranMap, conList);
+                conList = AmbassadorHelper.getConditionNodeTargetInfo(ti.getId(), jbpmNodeMap,
+                        jbpmTranMap, conList);
                 buildXmlForTask(xml, ti, "\t", connection, assignees, conList);
             }
             xml.append("</tasksInJob>\r\n");
@@ -5590,8 +5300,8 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(GET_TASKS, e);
-            String message = "Could not get the tasks with the name "
-                    + p_taskName + " for job with id " + p_jobId;
+            String message = "Could not get the tasks with the name " + p_taskName
+                    + " for job with id " + p_jobId;
             message = makeErrorXml(GET_TASKS, message);
             throw new WebServiceException(message);
         }
@@ -5607,8 +5317,7 @@ public class Ambassador extends AbstractWebService
             }
             catch (Exception e2)
             {
-                logger.error("Cannot release database connection correctly.",
-                        e2);
+                logger.error("Cannot release database connection correctly.", e2);
             }
         }
     }
@@ -5629,12 +5338,11 @@ public class Ambassador extends AbstractWebService
      * @author Vincent Yan, 2012/08/08
      * @since 8.2.3
      */
-    public String getTasksInJobs(String p_accessToken, String jobIds,
-            String p_taskName) throws WebServiceException
+    public String getTasksInJobs(String p_accessToken, String jobIds, String p_taskName)
+            throws WebServiceException
     {
         if (StringUtil.isEmpty(p_accessToken) || StringUtil.isEmpty(jobIds))
-            return makeErrorXml("getTasksInJobs(String, String, String)",
-                    "Invalid parameter.");
+            return makeErrorXml("getTasksInJobs(String, String, String)", "Invalid parameter.");
 
         try
         {
@@ -5658,13 +5366,11 @@ public class Ambassador extends AbstractWebService
 
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
-            activityArgs.put("jobNum", jobIdArray == null ? 0
-                    : jobIdArray.length);
+            activityArgs.put("jobNum", jobIdArray == null ? 0 : jobIdArray.length);
             activityArgs.put("jobIds", jobIds);
             activityArgs.put("taskName", p_taskName);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "getTasksInJobs(p_accessToken, jobIds, p_taskName)",
-                    activityArgs);
+                    "getTasksInJobs(p_accessToken, jobIds, p_taskName)", activityArgs);
             JobHandlerWLRemote jobHandlerLocal = ServerProxy.getJobHandler();
             Job job = null;
 
@@ -5686,8 +5392,7 @@ public class Ambassador extends AbstractWebService
                     if (job == null)
                         continue;
 
-                    if (!UserUtil.isInProject(userId,
-                            String.valueOf(job.getProjectId())))
+                    if (!UserUtil.isInProject(userId, String.valueOf(job.getProjectId())))
                     {
                         continue;
                     }
@@ -5696,16 +5401,14 @@ public class Ambassador extends AbstractWebService
                     {
                         subXml.append("\t<job>\r\n");
 
-                        subXml.append("\t\t<job_id>").append(jobId)
-                                .append("</job_id>\r\n");
+                        subXml.append("\t\t<job_id>").append(jobId).append("</job_id>\r\n");
                         subXml.append("\t\t<job_name>")
-                                .append(EditUtil.encodeXmlEntities(job
-                                        .getJobName()))
+                                .append(EditUtil.encodeXmlEntities(job.getJobName()))
                                 .append("</job_name>\r\n");
 
                         boolean isReturnAssignees = false;
-                        taskInfos = ServerProxy.getTaskManager().getTasks(
-                                p_taskName, jobId, isReturnAssignees);
+                        taskInfos = ServerProxy.getTaskManager().getTasks(p_taskName, jobId,
+                                isReturnAssignees);
                         Map<Long, String> taskAssignees = AmbassadorHelper
                                 .getTaskAssigneesByJob(jobId);
                         List<Long> processdefintionList = AmbassadorHelper
@@ -5714,8 +5417,7 @@ public class Ambassador extends AbstractWebService
                                 .getTaskJbpmNode(processdefintionList);
                         Map<Long, List<TaskJbpmTransition>> jbpmTranMap = AmbassadorHelper
                                 .getTaskJbpmTransition(processdefintionList);
-                        Object[] tasks = taskInfos == null ? null : taskInfos
-                                .toArray();
+                        Object[] tasks = taskInfos == null ? null : taskInfos.toArray();
                         int size = tasks == null ? -1 : tasks.length;
 
                         for (int i = 0; i < size; i++)
@@ -5725,12 +5427,10 @@ public class Ambassador extends AbstractWebService
                             String wfState = ti.getWorkflow().getState();
                             if (Workflow.CANCELLED.equals(wfState))
                                 continue;
-                            conList = AmbassadorHelper
-                                    .getConditionNodeTargetInfo(ti.getId(),
-                                            jbpmNodeMap, jbpmTranMap, conList);
+                            conList = AmbassadorHelper.getConditionNodeTargetInfo(ti.getId(),
+                                    jbpmNodeMap, jbpmTranMap, conList);
                             String assignees = taskAssignees.get(ti.getId());
-                            buildXmlForTask(subXml, ti, "\t\t", connection,
-                                    assignees, conList);
+                            buildXmlForTask(subXml, ti, "\t\t", connection, assignees, conList);
                         }
 
                         subXml.append("\t</job>\r\n");
@@ -5750,8 +5450,8 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error("getTasksInJobs", e);
-            String message = "Could not get the tasks with the name "
-                    + p_taskName + " for job with ids (" + jobIds + ")";
+            String message = "Could not get the tasks with the name " + p_taskName
+                    + " for job with ids (" + jobIds + ")";
             return makeErrorXml("getTasksInJobs", message);
         }
         finally
@@ -5774,8 +5474,7 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String acceptTask(String p_accessToken, String p_taskId)
-            throws WebServiceException
+    public String acceptTask(String p_accessToken, String p_taskId) throws WebServiceException
     {
         String rtnString = "success";
         checkAccess(p_accessToken, ACCEPT_TASK);
@@ -5803,8 +5502,7 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            String message = "Failed to get task object by taskId : "
-                    + p_taskId;
+            String message = "Failed to get task object by taskId : " + p_taskId;
             return makeErrorXml(ACCEPT_TASK, message);
         }
         WebServicesLog.Start activityStart = null;
@@ -5833,10 +5531,8 @@ public class Ambassador extends AbstractWebService
                 {
                     if (!allAssignees.contains(acceptor))
                     {
-                        String message = "'"
-                                + acceptor
-                                + "' is not an available assignee for current task "
-                                + p_taskId;
+                        String message = "'" + acceptor
+                                + "' is not an available assignee for current task " + p_taskId;
                         logger.warn(message);
                         return makeErrorXml(ACCEPT_TASK, message);
                     }
@@ -5852,9 +5548,8 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            String message = "Failed to accept task for taskId : " + p_taskId
-                    + ",maybe '" + acceptor
-                    + "' do not have the authority to operate the task";
+            String message = "Failed to accept task for taskId : " + p_taskId + ",maybe '"
+                    + acceptor + "' do not have the authority to operate the task";
             return makeErrorXml(ACCEPT_TASK, message);
         }
         finally
@@ -5880,8 +5575,8 @@ public class Ambassador extends AbstractWebService
      *            condition node.
      * @throws WebServiceException
      */
-    public String completeTask(String p_accessToken, String p_taskId,
-            String p_destinationArrow) throws WebServiceException
+    public String completeTask(String p_accessToken, String p_taskId, String p_destinationArrow)
+            throws WebServiceException
     {
         String rtnStr = "success";
         checkAccess(p_accessToken, "completeTask");
@@ -5929,22 +5624,18 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("taskId", p_taskId);
             activityArgs.put("destinationArrow", p_destinationArrow);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "completeTask(p_accessToken,p_taskId,p_destinationArrow)",
-                    activityArgs);
+                    "completeTask(p_accessToken,p_taskId,p_destinationArrow)", activityArgs);
             // Find the user to complete task.
-            WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
-                    .getWorkflowTaskInstance(userId, task.getId(),
-                            WorkflowConstants.TASK_ALL_STATES);
+            WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer().getWorkflowTaskInstance(
+                    userId, task.getId(), WorkflowConstants.TASK_ALL_STATES);
             task.setWorkflowTask(wfTask);
             List allAssignees = task.getAllAssignees();
             if (allAssignees != null && allAssignees.size() > 0)
             {
                 if (!allAssignees.contains(userId))
                 {
-                    String message = "'"
-                            + userName
-                            + "' is not an available assignee for current task "
-                            + p_taskId;
+                    String message = "'" + userName
+                            + "' is not an available assignee for current task " + p_taskId;
                     logger.warn(message);
                     message = makeErrorXml("completeTask", message);
                     throw new WebServiceException(message);
@@ -5957,8 +5648,7 @@ public class Ambassador extends AbstractWebService
                 HashSet<String> arrowNames = new HashSet<String>();
                 for (int i = 0; i < conditionNodes.size(); i++)
                 {
-                    ConditionNodeTargetInfo info = (ConditionNodeTargetInfo) conditionNodes
-                            .get(i);
+                    ConditionNodeTargetInfo info = (ConditionNodeTargetInfo) conditionNodes.get(i);
                     arrowNames.add(info.getArrowName());
                 }
 
@@ -5973,18 +5663,14 @@ public class Ambassador extends AbstractWebService
             }
 
             TaskImpl dbTask = HibernateUtil.get(TaskImpl.class, task.getId());
-            ProjectImpl project = (ProjectImpl) dbTask.getWorkflow().getJob()
-                    .getProject();
+            ProjectImpl project = (ProjectImpl) dbTask.getWorkflow().getJob().getProject();
             WorkflowImpl workflowImpl = (WorkflowImpl) dbTask.getWorkflow();
-            boolean isCheckUnTranslatedSegments = project
-                    .isCheckUnTranslatedSegments();
-            boolean isRequriedScore = workflowImpl.getScorecardShowType() == 1 ? true
-                    : false;
+            boolean isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
+            boolean isRequriedScore = workflowImpl.getScorecardShowType() == 1 ? true : false;
             boolean isReviewOnly = dbTask.isReviewOnly();
             if (isCheckUnTranslatedSegments && !isReviewOnly)
             {
-                int percentage = SegmentTuvUtil
-                        .getTranslatedPercentageForTask(task);
+                int percentage = SegmentTuvUtil.getTranslatedPercentageForTask(task);
                 if (100 != percentage)
                 {
                     rtnStr = "The task is not 100% translated and can not be completed.";
@@ -6002,8 +5688,7 @@ public class Ambassador extends AbstractWebService
 
             if (task.getState() == Task.STATE_ACCEPTED)
             {
-                ServerProxy.getTaskManager().completeTask(userId, task,
-                        p_destinationArrow, null);
+                ServerProxy.getTaskManager().completeTask(userId, task, p_destinationArrow, null);
             }
             else
             {
@@ -6012,8 +5697,7 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception ex)
         {
-            String msg = "Fail to complete task : " + p_taskId + " ; "
-                    + ex.getMessage();
+            String msg = "Fail to complete task : " + p_taskId + " ; " + ex.getMessage();
             logger.error(msg, ex);
             return makeErrorXml(COMPLETE_TASK, msg);
         }
@@ -6042,13 +5726,12 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String rejectTask(String p_accessToken, String p_taskId,
-            String p_rejectComment) throws WebServiceException
+    public String rejectTask(String p_accessToken, String p_taskId, String p_rejectComment)
+            throws WebServiceException
     {
         String rtnStr = "success";
         checkAccess(p_accessToken, REJECT_TASK);
-        checkPermission(p_accessToken,
-                Permission.ACTIVITIES_REJECT_AFTER_ACCEPTING);
+        checkPermission(p_accessToken, Permission.ACTIVITIES_REJECT_AFTER_ACCEPTING);
 
         try
         {
@@ -6073,19 +5756,14 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("p_taskId", p_taskId);
             activityArgs.put("p_rejectComment", p_rejectComment);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "rejectTask(p_accessToken,p_taskId,p_rejectComment)",
-                    activityArgs);
-            WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
-                    .getWorkflowTaskInstance(rejectUserId,
-                            Long.parseLong(p_taskId),
-                            WorkflowConstants.TASK_ALL_STATES);
-            task = (Task) HibernateUtil.get(TaskImpl.class,
-                    Long.parseLong(p_taskId));
+                    "rejectTask(p_accessToken,p_taskId,p_rejectComment)", activityArgs);
+            WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer().getWorkflowTaskInstance(
+                    rejectUserId, Long.parseLong(p_taskId), WorkflowConstants.TASK_ALL_STATES);
+            task = (Task) HibernateUtil.get(TaskImpl.class, Long.parseLong(p_taskId));
             task.setWorkflowTask(wfTask);
 
             String rejectComment = EditUtil.utf8ToUnicode(p_rejectComment);
-            if (task.getState() == Task.STATE_ACTIVE
-                    || task.getState() == Task.STATE_ACCEPTED)
+            if (task.getState() == Task.STATE_ACTIVE || task.getState() == Task.STATE_ACCEPTED)
             {
                 TaskHelper.rejectTask(rejectUserId, task, rejectComment);
             }
@@ -6132,14 +5810,13 @@ public class Ambassador extends AbstractWebService
      *            the Project Manager can view this file. General = All
      *            Participants of the Task can view this file.
      */
-    public String addComment(String p_accessToken, long p_objectId,
-            int p_objectType, String p_userId, String p_comment, byte[] p_file,
-            String p_fileName, String p_access) throws WebServiceException
+    public String addComment(String p_accessToken, long p_objectId, int p_objectType,
+            String p_userId, String p_comment, byte[] p_file, String p_fileName, String p_access)
+            throws WebServiceException
     {
         checkAccess(p_accessToken, ADD_COMMENT);
 
-        StringBuffer errMessage = new StringBuffer(
-                "Could not add the comment to the object.  ");
+        StringBuffer errMessage = new StringBuffer("Could not add the comment to the object.  ");
         WebServicesLog.Start activityStart = null;
         try
         {
@@ -6153,10 +5830,9 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("fileName", p_fileName);
             activityArgs.put("access", p_access);
 
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "addComment(p_accessToken,p_objectId,p_objectType,p_userId,p_comment,p_file,p_fileName,p_access)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "addComment(p_accessToken,p_objectId,p_objectType,p_userId,p_comment,p_file,p_fileName,p_access)",
+                    activityArgs);
             String userId = UserUtil.getUserIdByName(userName);
             long projectId = 0l;
 
@@ -6168,8 +5844,7 @@ public class Ambassador extends AbstractWebService
                 // checkPermission(p_accessToken, Permission.JOB_COMMENTS_NEW);
                 projectId = ((Job) object).getProjectId();
                 if (!UserUtil.isInProject(userId, String.valueOf(projectId)))
-                    throw new WebServiceException(
-                            "Current user cannot access the job");
+                    throw new WebServiceException("Current user cannot access the job");
             }
             else if (p_objectType == Comment.TASK)
             {
@@ -6177,38 +5852,31 @@ public class Ambassador extends AbstractWebService
             }
             else if (p_objectType == Comment.WORKFLOW)
             {
-                object = WorkflowPersistenceAccessor
-                        .getWorkflowById(p_objectId);
+                object = WorkflowPersistenceAccessor.getWorkflowById(p_objectId);
 
                 // checkPermission(p_accessToken,
                 // Permission.ACTIVITIES_COMMENTS_NEW);
                 projectId = ((Workflow) object).getJob().getProjectId();
                 if (!UserUtil.isInProject(userId, String.valueOf(projectId)))
-                    throw new WebServiceException(
-                            "Current user cannot access the job");
+                    throw new WebServiceException("Current user cannot access the job");
             }
 
             // save out the main part of the comment
-            Comment comment = ServerProxy.getCommentManager().saveComment(
-                    object,
-                    p_objectId,
-                    ServerProxy.getUserManager().getUser(p_userId)
-                            .getUserName(), p_comment);
+            Comment comment = ServerProxy.getCommentManager().saveComment(object, p_objectId,
+                    ServerProxy.getUserManager().getUser(p_userId).getUserName(), p_comment);
             // if there are attachments
             if (p_file != null && p_file.length > 0)
             {
                 String access = CommentUpload.GENERAL;
-                if (p_access != null
-                        && p_access.equals(CommentUpload.RESTRICTED))
+                if (p_access != null && p_access.equals(CommentUpload.RESTRICTED))
                 {
                     access = p_access;
                 }
 
                 StringBuffer finalPath = new StringBuffer(
-                        AmbFileStoragePathUtils.getCommentReferenceDir()
-                                .getAbsolutePath());
-                finalPath.append(File.separator).append(comment.getId())
-                        .append(File.separator).append(access);
+                        AmbFileStoragePathUtils.getCommentReferenceDir().getAbsolutePath());
+                finalPath.append(File.separator).append(comment.getId()).append(File.separator)
+                        .append(access);
 
                 File tempFile = new File(finalPath.toString(), p_fileName);
                 tempFile.getParentFile().mkdirs();
@@ -6221,10 +5889,8 @@ public class Ambassador extends AbstractWebService
 
             StringBuffer xml = new StringBuffer();
             xml.append("<addCommentStatus>\r\n");
-            xml.append("\t<objectId>").append(p_objectId)
-                    .append("</objectId>\r\n");
-            xml.append("\t<objectType>").append(p_objectType)
-                    .append("</objectType>\r\n");
+            xml.append("\t<objectId>").append(p_objectId).append("</objectId>\r\n");
+            xml.append("\t<objectType>").append(p_objectType).append("</objectType>\r\n");
             xml.append("\t<status>successful</status>\r\n");
             xml.append("</addCommentStatus>\r\n");
             return xml.toString();
@@ -6232,18 +5898,15 @@ public class Ambassador extends AbstractWebService
         catch (GeneralException ge)
         {
             // couldn't find the job specified
-            if (ge.getMessageKey().equals(
-                    JobException.MSG_FAILED_TO_GET_JOB_BY_ID))
+            if (ge.getMessageKey().equals(JobException.MSG_FAILED_TO_GET_JOB_BY_ID))
             {
                 errMessage.append("Failed to find job " + p_objectId);
             }
-            else if (ge.getMessageKey().equals(
-                    WorkflowException.MSG_FAILED_TO_GET_WORK_ITEM))
+            else if (ge.getMessageKey().equals(WorkflowException.MSG_FAILED_TO_GET_WORK_ITEM))
             {
                 errMessage.append("Failed to find workflow " + p_objectId);
             }
-            else if (ge.getMessageKey().equals(
-                    TaskException.MSG_FAILED_TO_GET_TASK))
+            else if (ge.getMessageKey().equals(TaskException.MSG_FAILED_TO_GET_TASK))
             {
                 errMessage.append("Failed to find task " + p_objectId);
             }
@@ -6294,20 +5957,18 @@ public class Ambassador extends AbstractWebService
      *            the Project Manager can view this file. General = All
      *            Participants of the Task can view this file.
      */
-    public String addJobComment(String p_accessToken, String p_jobName,
-            String p_userId, String p_comment, byte[] p_file,
-            String p_fileName, String p_access) throws WebServiceException
+    public String addJobComment(String p_accessToken, String p_jobName, String p_userId,
+            String p_comment, byte[] p_file, String p_fileName, String p_access)
+            throws WebServiceException
     {
         checkAccess(p_accessToken, ADD_COMMENT);
         String jobNameValidation = validateJobName(p_jobName);
         if (jobNameValidation != null)
         {
-            throw new WebServiceException(makeErrorXml("addJobComment",
-                    jobNameValidation));
+            throw new WebServiceException(makeErrorXml("addJobComment", jobNameValidation));
         }
 
-        StringBuffer errMessage = new StringBuffer(
-                "Could not add the comment to the object.  ");
+        StringBuffer errMessage = new StringBuffer("Could not add the comment to the object.  ");
         WebServicesLog.Start activityStart = null;
         try
         {
@@ -6319,27 +5980,24 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("comment", p_comment);
             activityArgs.put("fileName", p_fileName);
             activityArgs.put("access", p_access);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "addJobComment(p_accessToken,p_jobName,p_userId,p_comment,p_file,p_fileName,p_access)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "addJobComment(p_accessToken,p_jobName,p_userId,p_comment,p_file,p_fileName,p_access)",
+                    activityArgs);
 
             String userId = UserUtil.getUserIdByName(userName);
             User user = ServerProxy.getUserManager().getUser(userId);
 
             String fileName = null;
             File file = null;
-            String baseDocDir = AmbFileStoragePathUtils.getCxeDocDir()
-                    .getAbsolutePath();
-            String commentDir = baseDocDir.concat(File.separator).concat(
-                    p_jobName);
+            String baseDocDir = AmbFileStoragePathUtils.getCxeDocDir().getAbsolutePath();
+            String commentDir = baseDocDir.concat(File.separator).concat(p_jobName);
 
             fileName = commentDir.concat(".txt");
             file = new File(fileName);
             FileWriter fout = new FileWriter(file);
             StringBuilder comment = new StringBuilder();
-            comment.append(user.getUserName()).append(",")
-                    .append(System.currentTimeMillis()).append(",");
+            comment.append(user.getUserName()).append(",").append(System.currentTimeMillis())
+                    .append(",");
             comment.append(p_comment);
             fout.write(comment.toString());
             fout.close();
@@ -6348,8 +6006,7 @@ public class Ambassador extends AbstractWebService
             if (p_file != null && p_file.length > 0)
             {
                 String access = CommentUpload.GENERAL;
-                if (p_access != null
-                        && p_access.equals(CommentUpload.RESTRICTED))
+                if (p_access != null && p_access.equals(CommentUpload.RESTRICTED))
                 {
                     access = p_access;
                 }
@@ -6374,8 +6031,7 @@ public class Ambassador extends AbstractWebService
             // couldn't find the job specified
 
             logger.error("addJobComment", ge);
-            String message = makeErrorXml("addJobComment",
-                    errMessage.toString());
+            String message = makeErrorXml("addJobComment", errMessage.toString());
             throw new WebServiceException(message);
         }
         catch (Exception e)
@@ -6421,9 +6077,8 @@ public class Ambassador extends AbstractWebService
      * @return An XML report of user unavailibity for a particular container
      *         role.
      */
-    public String getUserUnavailabilityReport(String p_accessToken,
-            String p_activityName, String p_sourceLocale,
-            String p_targetLocale, int p_month, int p_year)
+    public String getUserUnavailabilityReport(String p_accessToken, String p_activityName,
+            String p_sourceLocale, String p_targetLocale, int p_month, int p_year)
             throws WebServiceException
     {
         checkAccess(p_accessToken, GET_USER_UNAVAILABILITY_REPORT);
@@ -6439,20 +6094,18 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("targetLocale", p_targetLocale);
             activityArgs.put("month", p_month);
             activityArgs.put("year", p_year);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "getUserUnavailabilityReport(p_accessToken,p_activityName,p_sourceLocale,p_targetLocale,p_month,p_year)",
-                            activityArgs);
-            StringBuffer xml = new StringBuffer(
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "getUserUnavailabilityReport(p_accessToken,p_activityName,p_sourceLocale,p_targetLocale,p_month,p_year)",
+                    activityArgs);
+            StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             xml.append("<userAvailabilityReport>\r\n");
             xml.append("<users>\r\n");
 
-            List userInfos = ServerProxy.getUserManager().getUserInfos(
-                    p_activityName, p_sourceLocale, p_targetLocale);
+            List userInfos = ServerProxy.getUserManager().getUserInfos(p_activityName,
+                    p_sourceLocale, p_targetLocale);
 
-            java.util.Map map = ServerProxy.getCalendarManager()
-                    .userUnavailabilityReport(userInfos, p_month, p_year);
+            java.util.Map map = ServerProxy.getCalendarManager().userUnavailabilityReport(userInfos,
+                    p_month, p_year);
 
             int size = userInfos == null ? -1 : userInfos.size();
 
@@ -6469,9 +6122,8 @@ public class Ambassador extends AbstractWebService
         {
             logger.error(GET_USER_UNAVAILABILITY_REPORT, e);
             String message = "Could not get the user availability report "
-                    + " for activity, source locale, and target locale "
-                    + p_activityName + ",  " + p_sourceLocale + ",  "
-                    + p_targetLocale;
+                    + " for activity, source locale, and target locale " + p_activityName + ",  "
+                    + p_sourceLocale + ",  " + p_targetLocale;
             message = makeErrorXml(GET_USER_UNAVAILABILITY_REPORT, message);
             throw new WebServiceException(message);
         }
@@ -6496,17 +6148,16 @@ public class Ambassador extends AbstractWebService
      * @return
      * @throws WebServiceException
      */
-    public String passDCTMAccount(String p_accessToken, String docBase,
-            String dctmUserName, String dctmPassword)
-            throws WebServiceException
+    public String passDCTMAccount(String p_accessToken, String docBase, String dctmUserName,
+            String dctmPassword) throws WebServiceException
     {
 
         checkAccess(p_accessToken, PASS_DCTMACCOUNT);
         try
         {
             logger.info("Starting to save dctm account");
-            String userId = DocumentumOperator.getInstance().saveDCTMAccount(
-                    docBase, dctmUserName, dctmPassword);
+            String userId = DocumentumOperator.getInstance().saveDCTMAccount(docBase, dctmUserName,
+                    dctmPassword);
             logger.info("Finish to save dctm account");
             return userId;
         }
@@ -6514,8 +6165,8 @@ public class Ambassador extends AbstractWebService
         {
             logger.error(PASS_DCTMACCOUNT, e);
             String message = "Could not save Documentum account "
-                    + " for docBase, dctmUserName, dctmPassword" + docBase
-                    + ", " + dctmUserName + ", " + dctmPassword;
+                    + " for docBase, dctmUserName, dctmPassword" + docBase + ", " + dctmUserName
+                    + ", " + dctmPassword;
             message = makeErrorXml(PASS_DCTMACCOUNT, message);
             throw new WebServiceException(message.toString());
         }
@@ -6529,8 +6180,7 @@ public class Ambassador extends AbstractWebService
      * @return String An XML description which contains all file profiles
      * @throws WebServiceException
      */
-    public String getFileProfileInfoEx(String p_accessToken)
-            throws WebServiceException
+    public String getFileProfileInfoEx(String p_accessToken) throws WebServiceException
     {
 
         String username = "";
@@ -6565,11 +6215,9 @@ public class Ambassador extends AbstractWebService
                     List uProjects = null;
                     // *********************** For GBS-390************
                     // get all projects current user belongs to.
-                    uProjects = ServerProxy.getProjectHandler()
-                            .getProjectsByUser(user.getUserId());
+                    uProjects = ServerProxy.getProjectHandler().getProjectsByUser(user.getUserId());
 
-                    for (Iterator ifp = fileProfiles_all.iterator(); ifp
-                            .hasNext();)
+                    for (Iterator ifp = fileProfiles_all.iterator(); ifp.hasNext();)
                     {
                         FileProfile fp = (FileProfile) ifp.next();
                         Project fpProj = getProject(fp);
@@ -6593,33 +6241,27 @@ public class Ambassador extends AbstractWebService
                 while (iter.hasNext())
                 {
                     FileProfile fileProfile = (FileProfile) iter.next();
-                    generateFileProfileInfoXml(fileProfile, xmlStr,
-                            fileProfileManager);
+                    generateFileProfileInfoXml(fileProfile, xmlStr, fileProfileManager);
                 }
             }
             catch (Exception ex)
             {
-                errorMessage
-                        .append("Failed to get all of FileProfile info as a xml String");
-                logger.error(
-                        "Failed to get all of FileProfile info as a xml String",
-                        ex);
+                errorMessage.append("Failed to get all of FileProfile info as a xml String");
+                logger.error("Failed to get all of FileProfile info as a xml String", ex);
             }
 
             xmlStr.append("</fileProfileInfo>\r\n");
 
             if (logger.isDebugEnabled())
             {
-                logger.debug("The xml string for file profile info :"
-                        + xmlStr.toString());
+                logger.debug("The xml string for file profile info :" + xmlStr.toString());
             }
 
             return xmlStr.toString();
         }
         catch (Exception e)
         {
-            String message = makeErrorXml(GET_FILE_PROFILEINFOEX,
-                    errorMessage.toString());
+            String message = makeErrorXml(GET_FILE_PROFILEINFOEX, errorMessage.toString());
             throw new WebServiceException(message);
         }
     }
@@ -6677,23 +6319,23 @@ public class Ambassador extends AbstractWebService
                 company = ServerProxy.getJobHandler().getCompany(p_companyName);
                 if (company == null)
                 {
-                    return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invalid company name: "
-                            + p_companyName);
+                    return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE,
+                            "Invalid company name: " + p_companyName);
                 }
             }
             else
             {
                 if (!logUserCompany.getName().equalsIgnoreCase(p_companyName.trim()))
                 {
-                    return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invalid company name: "
-                            + p_companyName);
+                    return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE,
+                            "Invalid company name: " + p_companyName);
                 }
                 else
                 {
                     company = logUserCompany;
                 }
             }
-            
+
             L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfileByName(
                     p_l10nProfileName.trim(), String.valueOf(company.getId()));
 
@@ -6761,8 +6403,8 @@ public class Ambassador extends AbstractWebService
             }
             else
             {
-                return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE, "Invalid l10Profile name: "
-                        + p_l10nProfileName);
+                return makeErrorXml(GET_FILEPROFILES_FOR_L10PROFILE,
+                        "Invalid l10Profile name: " + p_l10nProfileName);
             }
 
         }
@@ -6799,17 +6441,15 @@ public class Ambassador extends AbstractWebService
      *            account.
      * @throws WebServiceException
      */
-    public void createDocumentumJob(String p_accessToken, String jobName,
-            String fileProfileId, String objectId, String userId)
-            throws WebServiceException
+    public void createDocumentumJob(String p_accessToken, String jobName, String fileProfileId,
+            String objectId, String userId) throws WebServiceException
     {
 
         checkAccess(p_accessToken, CREATE_DTCMJOB);
         String jobNameValidation = validateJobName(jobName);
         if (jobNameValidation != null)
         {
-            throw new WebServiceException(makeErrorXml("createDocumentumJob",
-                    jobNameValidation));
+            throw new WebServiceException(makeErrorXml("createDocumentumJob", jobNameValidation));
         }
 
         StringBuffer errorMessage = new StringBuffer();
@@ -6818,9 +6458,8 @@ public class Ambassador extends AbstractWebService
         {
             if (logger.isDebugEnabled())
             {
-                logger.debug("Creating a documentum job (fileProfileId ="
-                        + fileProfileId + ",objectId =" + userId + ", userId ="
-                        + objectId + ")");
+                logger.debug("Creating a documentum job (fileProfileId =" + fileProfileId
+                        + ",objectId =" + userId + ", userId =" + objectId + ")");
             }
 
             String dcmtFileName = null;
@@ -6832,13 +6471,11 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("fileProfileId", fileProfileId);
             activityArgs.put("objectId", objectId);
             activityArgs.put("userId", userId);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "createDocumentumJob(p_accessToken,jobName,fileProfileId,objectId,userId)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "createDocumentumJob(p_accessToken,jobName,fileProfileId,objectId,userId)",
+                    activityArgs);
             // Get file name from Documentum via objectId.
-            dcmtFileName = DocumentumOperator.getInstance().getObjectName(
-                    userId, objectId);
+            dcmtFileName = DocumentumOperator.getInstance().getObjectName(userId, objectId);
             attrFileName = dcmtFileName + ".attribute";
             if (dcmtFileName == null)
             {
@@ -6850,26 +6487,24 @@ public class Ambassador extends AbstractWebService
 
             // Get the dctm file attribute to be translatable content as a xml
             // string.
-            String dctmFileAttrXml = DocumentumOperator.getInstance()
-                    .generateAttributesXml(userId, objectId);
+            String dctmFileAttrXml = DocumentumOperator.getInstance().generateAttributesXml(userId,
+                    objectId);
             if (dctmFileAttrXml == null || dctmFileAttrXml.length() == 0)
             {
                 // throw new WebServiceException("Can't get the dctm file
                 // attribute as a xml String");
                 // create a unique batch ID
-                String batchId = jobName
-                        + Long.toString(System.currentTimeMillis());
-                CxeProxy.importFromDocumentum(objectId, dcmtFileName, jobName,
-                        batchId, fileProfileId, new Integer(1), new Integer(1),
-                        new Integer(1), new Integer(1), false, null, userId);
+                String batchId = jobName + Long.toString(System.currentTimeMillis());
+                CxeProxy.importFromDocumentum(objectId, dcmtFileName, jobName, batchId,
+                        fileProfileId, new Integer(1), new Integer(1), new Integer(1),
+                        new Integer(1), false, null, userId);
                 logger.info("Trying to import a documentum file");
             }
             else
             {
                 if (logger.isDebugEnabled())
                 {
-                    logger.debug("The dctm file attribute xml String :"
-                            + dctmFileAttrXml);
+                    logger.debug("The dctm file attribute xml String :" + dctmFileAttrXml);
                 }
 
                 // One job includes two files(documentum file, xml attribute
@@ -6877,8 +6512,7 @@ public class Ambassador extends AbstractWebService
                 // so hard code here.
                 Integer pageCount = new Integer(2);
                 // create a unique batch ID
-                String batchId = jobName
-                        + Long.toString(System.currentTimeMillis());
+                String batchId = jobName + Long.toString(System.currentTimeMillis());
                 // Get the fileprofile id used to translate xml attribute file.
                 String xmlFPId = getXmlFileProfile(fileProfileId);
                 if (xmlFPId == null)
@@ -6887,15 +6521,13 @@ public class Ambassador extends AbstractWebService
                     throw new WebServiceException("Can't get a xml Fileprofile");
                 }
 
-                CxeProxy.importFromDocumentum(objectId, dcmtFileName, jobName,
-                        batchId, fileProfileId, pageCount, Integer.valueOf(1),
-                        Integer.valueOf(1), Integer.valueOf(1), false, null,
-                        userId);
+                CxeProxy.importFromDocumentum(objectId, dcmtFileName, jobName, batchId,
+                        fileProfileId, pageCount, Integer.valueOf(1), Integer.valueOf(1),
+                        Integer.valueOf(1), false, null, userId);
                 logger.info("Trying to import a documentum file");
 
-                CxeProxy.importFromDocumentum(objectId, attrFileName, jobName,
-                        batchId, xmlFPId, pageCount, Integer.valueOf(2),
-                        Integer.valueOf(1), Integer.valueOf(1), true,
+                CxeProxy.importFromDocumentum(objectId, attrFileName, jobName, batchId, xmlFPId,
+                        pageCount, Integer.valueOf(2), Integer.valueOf(1), Integer.valueOf(1), true,
                         dctmFileAttrXml, userId);
                 logger.info("Trying to import a documentum attribute file");
 
@@ -6905,8 +6537,7 @@ public class Ambassador extends AbstractWebService
         {
             logger.error("Failed to create a documentum job", ex);
             errorMessage.append(" Failed to create a documentum job");
-            String message = makeErrorXml(CREATE_DTCMJOB,
-                    errorMessage.toString());
+            String message = makeErrorXml(CREATE_DTCMJOB, errorMessage.toString());
             throw new WebServiceException(message);
         }
         finally
@@ -6933,8 +6564,8 @@ public class Ambassador extends AbstractWebService
      *            account.
      * @throws WebServiceException
      */
-    public void cancelDocumentumJob(String p_accessToken, String objectId,
-            String jobId, String userId) throws WebServiceException
+    public void cancelDocumentumJob(String p_accessToken, String objectId, String jobId,
+            String userId) throws WebServiceException
     {
 
         checkAccess(p_accessToken, CANCEL_DCTMJOB);
@@ -6948,11 +6579,9 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("jobId", jobId);
             activityArgs.put("userId", userId);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "cancelDocumentumJob(p_accessToken,objectId,jobId,userId)",
-                    activityArgs);
+                    "cancelDocumentumJob(p_accessToken,objectId,jobId,userId)", activityArgs);
             String uid = UserUtil.getUserIdByName(userName);
-            Job job = ServerProxy.getJobHandler().getJobById(
-                    Long.valueOf(jobId).longValue());
+            Job job = ServerProxy.getJobHandler().getJobById(Long.valueOf(jobId).longValue());
 
             logger.info("Cancelling all workflows for job " + jobId);
             ServerProxy.getJobHandler().cancelJob(uid, job, null);
@@ -6961,13 +6590,11 @@ public class Ambassador extends AbstractWebService
         }
         catch (JobException je)
         {
-            StringBuffer messageBuf = new StringBuffer(
-                    "Unable to cancel the job ");
+            StringBuffer messageBuf = new StringBuffer("Unable to cancel the job ");
             messageBuf.append(jobId);
 
             // couldn't find the user specified
-            if (je.getMessageKey().equals(
-                    JobException.MSG_FAILED_TO_GET_JOB_BY_ID))
+            if (je.getMessageKey().equals(JobException.MSG_FAILED_TO_GET_JOB_BY_ID))
             {
                 messageBuf.append(" The job couldn't be found.");
             }
@@ -6999,12 +6626,11 @@ public class Ambassador extends AbstractWebService
      * @param p_accessToken
      * @param p_message
      * @return xml String result <jobs> <job> <name>job name</name>
-     *         <status>downloadable | create_error | unknown</status> </job>
-     *         </jobs>
+     *         <status>downloadable | create_error |
+     *         unknown</status> </job> </jobs>
      * @throws WebServiceException
      */
-    public String getDownloadableJobs(String p_accessToken, String p_msg)
-            throws WebServiceException
+    public String getDownloadableJobs(String p_accessToken, String p_msg) throws WebServiceException
     {
         checkAccess(p_accessToken, GET_DOWNLOADABLE_JOBS);
 
@@ -7017,11 +6643,8 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            throw new WebServiceException(
-                    makeErrorXml(
-                            "getDownloadableJobs",
-                            "Invalid xml content in parameter p_msg. "
-                                    + e.getMessage()));
+            throw new WebServiceException(makeErrorXml("getDownloadableJobs",
+                    "Invalid xml content in parameter p_msg. " + e.getMessage()));
         }
         try
         {
@@ -7070,8 +6693,7 @@ public class Ambassador extends AbstractWebService
                             }
                             else
                             {
-                                String jobIdStr = String
-                                        .valueOf(job.getJobId());
+                                String jobIdStr = String.valueOf(job.getJobId());
                                 if (jobDirs2.contains(jobIdStr))
                                 {
                                     status = "downloadable";
@@ -7141,8 +6763,7 @@ public class Ambassador extends AbstractWebService
      * @return
      * @throws WebServiceException
      */
-    public String getServerVersion(String p_accessToken)
-            throws WebServiceException
+    public String getServerVersion(String p_accessToken) throws WebServiceException
     {
         checkAccess(p_accessToken, "getServerVersion");
 
@@ -7165,22 +6786,17 @@ public class Ambassador extends AbstractWebService
      * @param fileProfileManager
      *            Manage class for file profile
      */
-    private void generateFileProfileInfoXml(FileProfile fileProfile,
-            StringBuffer xmlStr,
+    private void generateFileProfileInfoXml(FileProfile fileProfile, StringBuffer xmlStr,
             FileProfilePersistenceManager fileProfileManager)
     {
 
         // Add basic information for a specified file profile.
         xmlStr.append("\t<fileProfile>\r\n");
-        xmlStr.append("\t\t<id>").append(fileProfile.getId())
-                .append("</id>\r\n");
-        xmlStr.append("\t\t<name>").append(fileProfile.getName())
-                .append("</name>\r\n");
-        xmlStr.append("\t\t<l10nprofile>")
-                .append(fileProfile.getL10nProfileId())
+        xmlStr.append("\t\t<id>").append(fileProfile.getId()).append("</id>\r\n");
+        xmlStr.append("\t\t<name>").append(fileProfile.getName()).append("</name>\r\n");
+        xmlStr.append("\t\t<l10nprofile>").append(fileProfile.getL10nProfileId())
                 .append("</l10nprofile>\r\n");
-        xmlStr.append("\t\t<sourceFileFormat>")
-                .append(fileProfile.getKnownFormatTypeId())
+        xmlStr.append("\t\t<sourceFileFormat>").append(fileProfile.getKnownFormatTypeId())
                 .append("</sourceFileFormat>\r\n");
         xmlStr.append("\t\t<description>");
         if (fileProfile.getDescription() == null)
@@ -7189,8 +6805,7 @@ public class Ambassador extends AbstractWebService
         }
         else
         {
-            xmlStr.append(fileProfile.getDescription()).append(
-                    "</description>\r\n");
+            xmlStr.append(fileProfile.getDescription()).append("</description>\r\n");
         }
 
         // Add file extensions information for a specified file profile.
@@ -7203,8 +6818,7 @@ public class Ambassador extends AbstractWebService
                 Long fileExtensionId = (Long) fileExtensionIds.get(i);
                 FileExtension fileExtension = fileProfileManager
                         .readFileExtension(fileExtensionId.longValue());
-                xmlStr.append("\t\t\t<fileExtension>")
-                        .append(fileExtension.getName())
+                xmlStr.append("\t\t\t<fileExtension>").append(fileExtension.getName())
                         .append("</fileExtension>\r\n");
             }
             xmlStr.append("\t\t</fileExtensionInfo>\r\n");
@@ -7212,19 +6826,16 @@ public class Ambassador extends AbstractWebService
             // Add locales information for a specified file profile.
             long l10nProfileId = fileProfile.getL10nProfileId();
             ProjectHandler projectHandler = ServerProxy.getProjectHandler();
-            L10nProfile l10nProfile = projectHandler
-                    .getL10nProfile(l10nProfileId);
+            L10nProfile l10nProfile = projectHandler.getL10nProfile(l10nProfileId);
             GlobalSightLocale sourceLocale = l10nProfile.getSourceLocale();
             GlobalSightLocale[] targetLocales = l10nProfile.getTargetLocales();
             xmlStr.append("\t\t<localeInfo>\r\n");
-            xmlStr.append("\t\t\t<sourceLocale>")
-                    .append(sourceLocale.toString())
+            xmlStr.append("\t\t\t<sourceLocale>").append(sourceLocale.toString())
                     .append("</sourceLocale>\r\n");
             for (int i = 0; i < targetLocales.length; i++)
             {
                 GlobalSightLocale targetLocale = targetLocales[i];
-                xmlStr.append("\t\t\t<targetLocale>")
-                        .append(targetLocale.toString())
+                xmlStr.append("\t\t\t<targetLocale>").append(targetLocale.toString())
                         .append("</targetLocale>\r\n");
             }
             xmlStr.append("\t\t</localeInfo>\r\n");
@@ -7256,8 +6867,8 @@ public class Ambassador extends AbstractWebService
         {
             FileProfilePersistenceManager fpManager = ServerProxy
                     .getFileProfilePersistenceManager();
-            FileProfile oriFileProfile = fpManager.getFileProfileById(Long
-                    .valueOf(fpId).longValue(), false);
+            FileProfile oriFileProfile = fpManager
+                    .getFileProfileById(Long.valueOf(fpId).longValue(), false);
             long l10nProfileId = oriFileProfile.getL10nProfileId();
 
             // Try to find a xml file profile with the same l10nProfile Id, and
@@ -7267,8 +6878,7 @@ public class Ambassador extends AbstractWebService
             while (iter.hasNext())
             {
                 FileProfile fp = (FileProfile) iter.next();
-                if (fp.getL10nProfileId() == l10nProfileId
-                        && fp.getKnownFormatTypeId() == 7)
+                if (fp.getL10nProfileId() == l10nProfileId && fp.getKnownFormatTypeId() == 7)
                 {
                     xmlFileProfile = fp;
                     break;
@@ -7279,8 +6889,7 @@ public class Ambassador extends AbstractWebService
             // request.
             if (xmlFileProfile == null)
             {
-                String fpName = "DCMT_XML_FP_"
-                        + String.valueOf(System.currentTimeMillis());
+                String fpName = "DCMT_XML_FP_" + String.valueOf(System.currentTimeMillis());
                 xmlFileProfile = new FileProfileImpl(oriFileProfile);
                 Vector fileExts = new Vector();
                 // Add *.xml file extension.
@@ -7293,8 +6902,7 @@ public class Ambassador extends AbstractWebService
 
             if (logger.isDebugEnabled())
             {
-                logger.debug("Using a xml fileprofile, id="
-                        + xmlFileProfile.getId());
+                logger.debug("Using a xml fileprofile, id=" + xmlFileProfile.getId());
             }
 
             return String.valueOf(xmlFileProfile.getId());
@@ -7319,8 +6927,7 @@ public class Ambassador extends AbstractWebService
      * @param p_reservedTime
      *            - The event object.
      */
-    private void appendEventDate(StringBuffer p_xmlStringBuffer,
-            ReservedTime p_reservedTime)
+    private void appendEventDate(StringBuffer p_xmlStringBuffer, ReservedTime p_reservedTime)
     {
         // reset the locale and time zone to server's default one.
         Timestamp start = p_reservedTime.getStartTimestamp();
@@ -7340,24 +6947,21 @@ public class Ambassador extends AbstractWebService
             p_xmlStringBuffer.append(start);
         }
         // for events such as a daily meeting from 10 to 12.
-        else if (!sameDay && start.getHour() != end.getHour()
-                && p_reservedTime.getTaskId() == null)
+        else if (!sameDay && start.getHour() != end.getHour() && p_reservedTime.getTaskId() == null)
         {
             String startDateAsString = start.toString();
             String endDateAsString = end.toString();
 
-            p_xmlStringBuffer.append(startDateAsString.substring(0,
-                    startDateAsString.indexOf(" ")));
+            p_xmlStringBuffer
+                    .append(startDateAsString.substring(0, startDateAsString.indexOf(" ")));
             p_xmlStringBuffer.append(" - ");
-            p_xmlStringBuffer.append(endDateAsString.substring(0,
-                    endDateAsString.indexOf(" ")));
+            p_xmlStringBuffer.append(endDateAsString.substring(0, endDateAsString.indexOf(" ")));
             p_xmlStringBuffer.append(" (");
-            p_xmlStringBuffer.append(startDateAsString.substring(
-                    startDateAsString.indexOf(" ") + 1,
+            p_xmlStringBuffer.append(startDateAsString.substring(startDateAsString.indexOf(" ") + 1,
                     startDateAsString.length()));
             p_xmlStringBuffer.append(" -");
-            p_xmlStringBuffer.append(endDateAsString.substring(
-                    endDateAsString.indexOf(" "), endDateAsString.length()));
+            p_xmlStringBuffer.append(endDateAsString.substring(endDateAsString.indexOf(" "),
+                    endDateAsString.length()));
             p_xmlStringBuffer.append(")");
         }
         else
@@ -7387,13 +6991,11 @@ public class Ambassador extends AbstractWebService
         }
         catch (UserManagerException ume)
         {
-            StringBuffer messageBuf = new StringBuffer(
-                    "Unable to get information for user ");
+            StringBuffer messageBuf = new StringBuffer("Unable to get information for user ");
             messageBuf.append(p_userId);
 
             // couldn't find the user specified
-            if (ume.getMessageKey().equals(
-                    UserManagerException.MSG_GET_USER_ERROR))
+            if (ume.getMessageKey().equals(UserManagerException.MSG_GET_USER_ERROR))
             {
                 messageBuf.append(".  The user couldn't be found.");
             }
@@ -7423,14 +7025,12 @@ public class Ambassador extends AbstractWebService
      *            Specified user information
      * @throws Exception
      */
-    private void exportSingleWorkflow(Job p_job, Workflow p_workflow,
-            User p_user) throws Exception
+    private void exportSingleWorkflow(Job p_job, Workflow p_workflow, User p_user) throws Exception
     {
-        List targetPages = p_workflow.getTargetPages();
+        Collection<TargetPage> targetPages = p_workflow.getTargetPages();
         ArrayList pageIds = new ArrayList();
-        for (int j = 0; j < targetPages.size(); j++)
+        for (TargetPage tp : targetPages)
         {
-            TargetPage tp = (TargetPage) targetPages.get(j);
             pageIds.add(tp.getIdAsLong());
         }
         ExportParameters ep = new ExportParameters(p_workflow);
@@ -7439,14 +7039,11 @@ public class Ambassador extends AbstractWebService
         wfIds.add(p_workflow.getIdAsLong());
         Long taskId = null;
 
-        logger.info("Exporting workflow  "
-                + p_workflow.getTargetLocale().toString() + " for job "
+        logger.info("Exporting workflow  " + p_workflow.getTargetLocale().toString() + " for job "
                 + p_job.getJobName());
-        long exportBatchId = ServerProxy.getExportEventObserver()
-                .notifyBeginExportTargetBatch(p_job, p_user, pageIds, wfIds,
-                        taskId, ExportBatchEvent.INTERIM_PRIMARY);
-        ServerProxy.getPageManager().exportPage(ep, pageIds, isTargetPage,
-                exportBatchId);
+        long exportBatchId = ServerProxy.getExportEventObserver().notifyBeginExportTargetBatch(
+                p_job, p_user, pageIds, wfIds, taskId, ExportBatchEvent.INTERIM_PRIMARY);
+        ServerProxy.getPageManager().exportPage(ep, pageIds, isTargetPage, exportBatchId);
     }
 
     /**
@@ -7461,9 +7058,9 @@ public class Ambassador extends AbstractWebService
      *            Array of names for file profile
      * @throws WebServiceException
      */
-    private void queryDatabaseForFileProfileInformation(
-            ArrayList p_fileProfileIds, ArrayList p_fileProfileDescriptions,
-            ArrayList p_fileProfileNames) throws WebServiceException
+    private void queryDatabaseForFileProfileInformation(ArrayList p_fileProfileIds,
+            ArrayList p_fileProfileDescriptions, ArrayList p_fileProfileNames)
+            throws WebServiceException
     {
         Iterator fileProfileIter = null;
         try
@@ -7476,8 +7073,7 @@ public class Ambassador extends AbstractWebService
         {
             String message = "Unable to get file profiles from db.";
             logger.error(message, e);
-            message = makeErrorXml("queryDatabaseForFileProfileInformation",
-                    message);
+            message = makeErrorXml("queryDatabaseForFileProfileInformation", message);
             throw new WebServiceException(message);
         }
         FileProfile fileProfile = null;
@@ -7538,11 +7134,9 @@ public class Ambassador extends AbstractWebService
      * @param bytes
      * @throws WebServiceException
      */
-    private void writeFile(String path, byte[] bytes, long companyId)
-            throws WebServiceException
+    private void writeFile(String path, byte[] bytes, long companyId) throws WebServiceException
     {
-        File newFile = new File(
-                AmbFileStoragePathUtils.getCxeDocDir(companyId), path);
+        File newFile = new File(AmbFileStoragePathUtils.getCxeDocDir(companyId), path);
         newFile.getParentFile().mkdirs();
         FileOutputStream fos = null;
 
@@ -7553,10 +7147,8 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            logger.error("Could not copy uploaded file to the docs directory.",
-                    e);
-            String message = "Could not copy uploaded file to the docs directory."
-                    + e.getMessage();
+            logger.error("Could not copy uploaded file to the docs directory.", e);
+            String message = "Could not copy uploaded file to the docs directory." + e.getMessage();
             message = makeErrorXml("copyFileToDocsDirectory", message);
             throw new WebServiceException(message);
         }
@@ -7569,9 +7161,7 @@ public class Ambassador extends AbstractWebService
             }
             catch (IOException e)
             {
-                logger.error(
-                        "Could not copy uploaded file to the docs directory.",
-                        e);
+                logger.error("Could not copy uploaded file to the docs directory.", e);
                 String message = "Could not copy uploaded file to the docs directory."
                         + e.getMessage();
                 message = makeErrorXml("copyFileToDocsDirectory", message);
@@ -7590,8 +7180,7 @@ public class Ambassador extends AbstractWebService
      * @return Job Return job object if there exist.
      * @exception WebServiceException
      */
-    private Job queryJob(String p_jobName, String p_accessToken)
-            throws WebServiceException
+    private Job queryJob(String p_jobName, String p_accessToken) throws WebServiceException
     {
         Connection connection = null;
         PreparedStatement query = null;
@@ -7603,8 +7192,7 @@ public class Ambassador extends AbstractWebService
             String condition = appendJobCondition(p_jobName);
 
             User user = getUser(getUsernameFromSession(p_accessToken));
-            long companyId = CompanyWrapper.getCompanyByName(
-                    user.getCompanyName()).getId();
+            long companyId = CompanyWrapper.getCompanyByName(user.getCompanyName()).getId();
 
             String sql = null;
             if (companyId != 1)
@@ -7684,8 +7272,7 @@ public class Ambassador extends AbstractWebService
             if (index > -1)
             {
                 String random = p_jobName.substring(index + 1);
-                if (random != null && random.length() > 6
-                        && StringUtils.isNumeric(random))
+                if (random != null && random.length() > 6 && StringUtils.isNumeric(random))
                 {
                     condition = "(NAME=? OR NAME LIKE '%" + random + "')";
                 }
@@ -7702,20 +7289,17 @@ public class Ambassador extends AbstractWebService
     /**
      * /** Publishes to CXE to create a job.
      */
-    private void publishEventToCxe(String p_jobId, String p_batchId,
-            int p_pageNum, int p_pageCount, int p_docPageNum,
-            int p_docPageCount, String p_fileName, String p_fileProfileId,
-            String p_targetLocales, Integer p_exitValueByScript,
-            String p_priority) throws Exception
+    private void publishEventToCxe(String p_jobId, String p_batchId, int p_pageNum, int p_pageCount,
+            int p_docPageNum, int p_docPageCount, String p_fileName, String p_fileProfileId,
+            String p_targetLocales, Integer p_exitValueByScript, String p_priority) throws Exception
     {
         String key = p_batchId + p_fileName + p_pageNum;
         CxeProxy.setTargetLocales(key, p_targetLocales);
         logger.info("Publishing import request to CXE for file " + p_fileName);
-        CxeProxy.importFromFileSystem(p_fileName, p_jobId, p_batchId,
-                p_fileProfileId, Integer.valueOf(p_pageCount),
-                Integer.valueOf(p_pageNum), Integer.valueOf(p_docPageCount),
-                Integer.valueOf(p_docPageNum), Boolean.TRUE, Boolean.FALSE,
-                CxeProxy.IMPORT_TYPE_L10N, p_exitValueByScript, p_priority);
+        CxeProxy.importFromFileSystem(p_fileName, p_jobId, p_batchId, p_fileProfileId,
+                Integer.valueOf(p_pageCount), Integer.valueOf(p_pageNum),
+                Integer.valueOf(p_docPageCount), Integer.valueOf(p_docPageNum), Boolean.TRUE,
+                Boolean.FALSE, CxeProxy.IMPORT_TYPE_L10N, p_exitValueByScript, p_priority);
     }
 
     /**
@@ -7728,8 +7312,7 @@ public class Ambassador extends AbstractWebService
      * @param p_locale
      * @return
      */
-    private String replaceLocalInFileName(String p_fileName,
-            String p_exportSubDir, String p_locale)
+    private String replaceLocalInFileName(String p_fileName, String p_exportSubDir, String p_locale)
     {
         int index = p_fileName.indexOf('/');
         if (index == -1)
@@ -7749,28 +7332,23 @@ public class Ambassador extends AbstractWebService
      *            Task object
      * @throws WebServiceException
      */
-    private void buildXmlForTask(StringBuilder xml, Task t, String tab,
-            Connection connection, String assignees,
-            List<ConditionNodeTargetInfo> conList) throws WebServiceException
+    private void buildXmlForTask(StringBuilder xml, Task t, String tab, Connection connection,
+            String assignees, List<ConditionNodeTargetInfo> conList) throws WebServiceException
     {
         xml.append(tab).append("<task>\r\n");
         xml.append(tab).append("\t<id>").append(t.getId()).append("</id>\r\n");
-        xml.append(tab).append("\t<workflowId>")
-                .append(t.getWorkflow().getId()).append("</workflowId>\r\n");
-        xml.append(tab).append("\t<name>").append(t.getTaskName())
-                .append("</name>\r\n");
-        xml.append(tab).append("\t<state>").append(t.getStateAsString())
-                .append("</state>\r\n");
-        xml.append(tab).append("\t<type>").append(t.getTaskType())
-                .append("</type>\r\n");
+        xml.append(tab).append("\t<workflowId>").append(t.getWorkflow().getId())
+                .append("</workflowId>\r\n");
+        xml.append(tab).append("\t<name>").append(t.getTaskName()).append("</name>\r\n");
+        xml.append(tab).append("\t<state>").append(t.getStateAsString()).append("</state>\r\n");
+        xml.append(tab).append("\t<type>").append(t.getTaskType()).append("</type>\r\n");
 
         if (t.getAcceptor() != null && t.getAcceptor().length() > 0)
         {
             xml.append(tab).append("\t<accepter>\r\n");
             // get user information about the user who accepted the task
             UserInfo ui = getUserInfo(t.getAcceptor());
-            xml.append(tab).append("\t\t<userid>").append(ui.getUserName())
-                    .append("</userid>\r\n");
+            xml.append(tab).append("\t\t<userid>").append(ui.getUserName()).append("</userid>\r\n");
             xml.append(tab).append("\t\t<firstName>").append(ui.getFirstName())
                     .append("</firstName>\r\n");
             xml.append(tab).append("\t\t<lastName>").append(ui.getLastName())
@@ -7778,8 +7356,7 @@ public class Ambassador extends AbstractWebService
             if (ui.getTitle() != null && ui.getTitle().length() > 0
                     && !"null".equalsIgnoreCase(ui.getTitle()))
             {
-                xml.append(tab).append("\t\t<title>").append(ui.getTitle())
-                        .append("</title>\r\n");
+                xml.append(tab).append("\t\t<title>").append(ui.getTitle()).append("</title>\r\n");
             }
             xml.append(tab).append("\t\t<email>").append(ui.getEmailAddress())
                     .append("</email>\r\n");
@@ -7799,8 +7376,7 @@ public class Ambassador extends AbstractWebService
                 .append(convertDateToString(t.getEstimatedAcceptanceDate()))
                 .append("</estimatedAcceptanceDate>\r\n");
 
-        xml.append(tab).append("\t<acceptedDate>")
-                .append(convertDateToString(t.getAcceptedDate()))
+        xml.append(tab).append("\t<acceptedDate>").append(convertDateToString(t.getAcceptedDate()))
                 .append("</acceptedDate>\r\n");
 
         xml.append(tab).append("\t<estimatedCompletionDate>")
@@ -7808,31 +7384,26 @@ public class Ambassador extends AbstractWebService
                 .append("</estimatedCompletionDate>\r\n");
 
         xml.append(tab).append("\t<completedDate>")
-                .append(convertDateToString(t.getCompletedDate()))
-                .append("</completedDate>\r\n");
+                .append(convertDateToString(t.getCompletedDate())).append("</completedDate>\r\n");
 
         String availableDate = getTaskAvailableDate(t, connection);
         xml.append(tab).append("\t<availableDate>").append(availableDate)
                 .append("</availableDate>\r\n");
 
-        xml.append(tab).append("\t<isSkipped>")
-                .append(AmbassadorHelper.isSkippedTask(t.getId()))
+        xml.append(tab).append("\t<isSkipped>").append(AmbassadorHelper.isSkippedTask(t.getId()))
                 .append("</isSkipped>\r\n");
 
         if (conList != null && conList.size() > 0)
         {
             for (int i = 0; i < conList.size(); i++)
             {
-                ConditionNodeTargetInfo cti = (ConditionNodeTargetInfo) conList
-                        .get(i);
-                String arrowName = xmlEncoder.encodeStringBasic(cti
-                        .getArrowName());
+                ConditionNodeTargetInfo cti = (ConditionNodeTargetInfo) conList.get(i);
+                String arrowName = xmlEncoder.encodeStringBasic(cti.getArrowName());
                 String pointTo = cti.getTargetNodeName();
                 xml.append(tab).append("\t<outgoing>\r\n");
                 xml.append(tab).append("\t\t<arrowName>").append(arrowName)
                         .append("</arrowName>\r\n");
-                xml.append(tab).append("\t\t<pointTo>").append(pointTo)
-                        .append("</pointTo>\r\n");
+                xml.append(tab).append("\t\t<pointTo>").append(pointTo).append("</pointTo>\r\n");
                 xml.append(tab).append("\t</outgoing>\r\n");
             }
         }
@@ -7869,8 +7440,7 @@ public class Ambassador extends AbstractWebService
             pstmt.setLong(1, workflowId);
             pstmt.setString(2, Task.COMPLETED);
             if (acceptedDate != null)
-                pstmt.setTimestamp(3,
-                        new java.sql.Timestamp(acceptedDate.getTime()));
+                pstmt.setTimestamp(3, new java.sql.Timestamp(acceptedDate.getTime()));
 
             rs = pstmt.executeQuery();
 
@@ -7880,8 +7450,7 @@ public class Ambassador extends AbstractWebService
                 if (tmp != null)
                     availableDate = convertDateToString(new Date(tmp.getTime()));
                 else
-                    availableDate = convertDateToString(t.getWorkflow()
-                            .getDispatchedDate());
+                    availableDate = convertDateToString(t.getWorkflow().getDispatchedDate());
             }
         }
         catch (Exception e)
@@ -7908,15 +7477,12 @@ public class Ambassador extends AbstractWebService
      *            List of events
      * @throws WebServiceException
      */
-    private void buildXmlForUserUnavailability(StringBuffer xml,
-            UserInfo p_userInfo, List p_reservedTimes)
-            throws WebServiceException
+    private void buildXmlForUserUnavailability(StringBuffer xml, UserInfo p_userInfo,
+            List p_reservedTimes) throws WebServiceException
     {
         xml.append("\t<user>\r\n");
-        xml.append("\t\t<fullName>").append(p_userInfo.getFullName())
-                .append("</fullName>\r\n");
-        xml.append("\t\t<username>").append(p_userInfo.getUserName())
-                .append("</username>\r\n");
+        xml.append("\t\t<fullName>").append(p_userInfo.getFullName()).append("</fullName>\r\n");
+        xml.append("\t\t<username>").append(p_userInfo.getUserName()).append("</username>\r\n");
         xml.append("\t\t<events>\r\n");
 
         int size = p_reservedTimes == null ? -1 : p_reservedTimes.size();
@@ -7925,10 +7491,8 @@ public class Ambassador extends AbstractWebService
             ReservedTime rt = (ReservedTime) p_reservedTimes.get(i);
             xml.append("\t\t\t<event>\r\n");
 
-            xml.append("\t\t\t<name>").append(rt.getSubject())
-                    .append("</name>\r\n");
-            xml.append("\t\t\t<type>").append(rt.getType())
-                    .append("</type>\r\n");
+            xml.append("\t\t\t<name>").append(rt.getSubject()).append("</name>\r\n");
+            xml.append("\t\t\t<type>").append(rt.getType()).append("</type>\r\n");
 
             appendEventDate(xml, rt);
 
@@ -8010,8 +7574,7 @@ public class Ambassador extends AbstractWebService
      * @return String -- the source locale abbreviation
      * @exception WebServiceException
      */
-    private String findSrcLocale(String p_fileProfileId)
-            throws WebServiceException
+    private String findSrcLocale(String p_fileProfileId) throws WebServiceException
     {
         String errorMsg = null;
         String sourceLocale = null;
@@ -8025,8 +7588,7 @@ public class Ambassador extends AbstractWebService
             }
             catch (Exception e)
             {
-                errorMsg = "The parameter fileProfileId is not numeric: "
-                        + p_fileProfileId;
+                errorMsg = "The parameter fileProfileId is not numeric: " + p_fileProfileId;
                 throw new Exception(errorMsg, e);
             }
 
@@ -8063,8 +7625,7 @@ public class Ambassador extends AbstractWebService
             }
             catch (Exception e)
             {
-                errorMsg = "Fail to get source locale by l10nProfile Id: "
-                        + lpid;
+                errorMsg = "Fail to get source locale by l10nProfile Id: " + lpid;
                 throw new Exception(errorMsg, e);
             }
 
@@ -8105,15 +7666,13 @@ public class Ambassador extends AbstractWebService
         try
         {
             long l10nProfileId = p_fp.getL10nProfileId();
-            L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfile(
-                    l10nProfileId);
+            L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfile(l10nProfileId);
             p = lp.getProject();
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Failed to get the project that file profile "
-                            + p_fp.toString() + " is associated with.", e);
+            logger.error("Failed to get the project that file profile " + p_fp.toString()
+                    + " is associated with.", e);
             // just leave and return NULL
         }
         return p;
@@ -8136,9 +7695,8 @@ public class Ambassador extends AbstractWebService
      * @param relativeFileName
      *            File name
      */
-    private void sendUploadCompletedEmail(String p_accessToken,
-            String p_comment, Date date, String jobName, int[] pageParas,
-            String fileProfileId, String relativeFileName)
+    private void sendUploadCompletedEmail(String p_accessToken, String p_comment, Date date,
+            String jobName, int[] pageParas, String fileProfileId, String relativeFileName)
     {
         String key_files = jobName + "_files";
         String key_fileprofiles = jobName + "_fps";
@@ -8151,21 +7709,19 @@ public class Ambassador extends AbstractWebService
         }
         files.add(relativeFileName);
 
-        List fileprofileIds = (List) dataStoreForFilesInSendingEmail
-                .get(key_fileprofiles);
+        List fileprofileIds = (List) dataStoreForFilesInSendingEmail.get(key_fileprofiles);
         if (fileprofileIds == null)
         {
             fileprofileIds = new ArrayList();
-            dataStoreForFilesInSendingEmail.put(key_fileprofiles,
-                    fileprofileIds);
+            dataStoreForFilesInSendingEmail.put(key_fileprofiles, fileprofileIds);
         }
         fileprofileIds.add(fileProfileId);
 
         // if all the files has been upload successfully, then send mail
         if (pageParas[0] == pageParas[1])
         {
-            sendUploadCompletedEmail(files, fileprofileIds, p_accessToken,
-                    jobName, p_comment, date);
+            sendUploadCompletedEmail(files, fileprofileIds, p_accessToken, jobName, p_comment,
+                    date);
         }
     }
 
@@ -8192,17 +7748,15 @@ public class Ambassador extends AbstractWebService
      * @param p_uploadDate
      *            Date for uploading
      */
-    private void sendUploadCompletedEmail(List p_fileNames, List p_fpIds,
-            String p_accessToken, String p_jobName, String p_jobComment,
-            Date p_uploadDate)
+    private void sendUploadCompletedEmail(List p_fileNames, List p_fpIds, String p_accessToken,
+            String p_jobName, String p_jobComment, Date p_uploadDate)
     {
         try
         {
             User user = getUser(getUsernameFromSession(p_accessToken));
             Object[] projects = getProjectsFromFPIds(p_fpIds);
             int projectsLength = projects.length;
-            String companyIdStr = String.valueOf(((Project) projects[0])
-                    .getCompanyId());
+            String companyIdStr = String.valueOf(((Project) projects[0]).getCompanyId());
 
             String[] messageArguments = new String[7];
             messageArguments[1] = p_jobName;
@@ -8234,13 +7788,10 @@ public class Ambassador extends AbstractWebService
             for (int i = 0; i < filesLength; i++)
             {
                 // en_us\webservice\test\test.txt (fileprofile_1)
-                sb.append(p_fileNames.get(i))
-                        .append("  (")
-                        .append(ServerProxy
-                                .getFileProfilePersistenceManager()
-                                .readFileProfile(
-                                        Long.parseLong(p_fpIds.get(i)
-                                                .toString())).getName())
+                sb.append(p_fileNames.get(i)).append("  (")
+                        .append(ServerProxy.getFileProfilePersistenceManager()
+                                .readFileProfile(Long.parseLong(p_fpIds.get(i).toString()))
+                                .getName())
                         .append(")");
                 if (i != filesLength - 1)
                     sb.append("\r\n");
@@ -8265,24 +7816,23 @@ public class Ambassador extends AbstractWebService
             UserParameterPersistenceManagerLocal uppml = new UserParameterPersistenceManagerLocal();
             UserParameter up = uppml.getUserParameter(user.getUserId(),
                     UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
-            if (up != null && up.getIntValue() == 1) {
-                ServerProxy.getMailer().sendMailFromAdmin(user,
-                        messageArguments,
+            if (up != null && up.getIntValue() == 1)
+            {
+                ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
                         MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
-                        MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
-                        companyIdStr);
+                        MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE, companyIdStr);
             }
             // get the PMs address (could be a group alias)
             List pms = new ArrayList();
             boolean add = true;
             for (int i = 0; i < projectsLength; i++)
             {
-                User u = UserHandlerHelper.getUser(((Project) projects[i])
-                        .getProjectManagerId());
+                User u = UserHandlerHelper.getUser(((Project) projects[i]).getProjectManagerId());
                 if (u == null)
                 {
-                    logger.error("Can not get project manager for DesktopIcon upload notification by project "
-                            + (Project) projects[i]);
+                    logger.error(
+                            "Can not get project manager for DesktopIcon upload notification by project "
+                                    + (Project) projects[i]);
                     return;
                 }
                 if (u.getUserId().equals(user.getUserId()))
@@ -8305,7 +7855,8 @@ public class Ambassador extends AbstractWebService
             {
                 if (add)
                 {
-                    logger.error("There was no GlobalSight project manager email address for DesktopIcon upload notification.");
+                    logger.error(
+                            "There was no GlobalSight project manager email address for DesktopIcon upload notification.");
                 }
 
                 return;
@@ -8320,14 +7871,13 @@ public class Ambassador extends AbstractWebService
                 time.setDate(p_uploadDate);
                 messageArguments[0] = time.toString();
                 messageArguments[6] = u.getSpecialNameForEmail();
-                
-                up = uppml.getUserParameter(u.getUserId(),
-                        UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
-                if (up != null && up.getIntValue() == 1) {
-                ServerProxy.getMailer().sendMailFromAdmin(u, messageArguments,
-                        MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
-                        MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
-                        companyIdStr);
+
+                up = uppml.getUserParameter(u.getUserId(), UserParamNames.NOTIFY_SUCCESSFUL_UPLOAD);
+                if (up != null && up.getIntValue() == 1)
+                {
+                    ServerProxy.getMailer().sendMailFromAdmin(u, messageArguments,
+                            MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
+                            MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE, companyIdStr);
                 }
             }
         }
@@ -8382,8 +7932,7 @@ public class Ambassador extends AbstractWebService
         {
             String fileProfileId = (String) p_fps.get(i);
             long fpid = Long.parseLong(fileProfileId);
-            FileProfilePersistenceManager fppm = ServerProxy
-                    .getFileProfilePersistenceManager();
+            FileProfilePersistenceManager fppm = ServerProxy.getFileProfilePersistenceManager();
             FileProfile fp = fppm.readFileProfile(fpid);
             Project p = getProject(fp);
             boolean add = true;
@@ -8483,13 +8032,12 @@ public class Ambassador extends AbstractWebService
      * 
      * @deprecated
      */
-    public void saveEntry(String p_accessToken, String p_tmProfileName,
-            String p_sourceLocale, String p_sourceSegment,
-            String p_targetLocale, String p_targetSegment)
+    public void saveEntry(String p_accessToken, String p_tmProfileName, String p_sourceLocale,
+            String p_sourceSegment, String p_targetLocale, String p_targetSegment)
             throws WebServiceException
     {
-        saveEntry(p_accessToken, p_tmProfileName, null, p_sourceLocale,
-                p_sourceSegment, p_targetLocale, p_targetSegment, "false");
+        saveEntry(p_accessToken, p_tmProfileName, null, p_sourceLocale, p_sourceSegment,
+                p_targetLocale, p_targetSegment, "false");
     }
 
     /**
@@ -8507,10 +8055,9 @@ public class Ambassador extends AbstractWebService
      * @return String
      * @throws WebServiceException
      */
-    public String saveEntry(String p_accessToken, String p_tmProfileName,
-            String sid, String p_sourceLocale, String p_sourceSegment,
-            String p_targetLocale, String p_targetSegment, boolean isEscape)
-            throws WebServiceException
+    public String saveEntry(String p_accessToken, String p_tmProfileName, String sid,
+            String p_sourceLocale, String p_sourceSegment, String p_targetLocale,
+            String p_targetSegment, boolean isEscape) throws WebServiceException
     {
         String escapeString = "false";
         if (isEscape)
@@ -8518,9 +8065,8 @@ public class Ambassador extends AbstractWebService
             escapeString = "true";
         }
 
-        String rtn = saveEntry(p_accessToken, p_tmProfileName, sid,
-                p_sourceLocale, p_sourceSegment, p_targetLocale,
-                p_targetSegment, escapeString);
+        String rtn = saveEntry(p_accessToken, p_tmProfileName, sid, p_sourceLocale, p_sourceSegment,
+                p_targetLocale, p_targetSegment, escapeString);
 
         return rtn;
     }
@@ -8542,8 +8088,7 @@ public class Ambassador extends AbstractWebService
      * locales.add(&quot;fr_FR&quot;);
      * segments.add(&quot;target segment&quot;);
      * 
-     * String entry = ambassador.saveEntry(accessToken, tmProfileName, locales,
-     *         segments);
+     * String entry = ambassador.saveEntry(accessToken, tmProfileName, locales, segments);
      * </pre>
      * 
      * An example XML response is:
@@ -8586,10 +8131,9 @@ public class Ambassador extends AbstractWebService
      * 
      * @see #login(username, password)
      */
-    public String saveEntry(String p_accessToken, String p_tmProfileName,
-            String sid, String p_sourceLocale, String p_sourceSegment,
-            String p_targetLocale, String p_targetSegment, String escapeString)
-            throws WebServiceException
+    public String saveEntry(String p_accessToken, String p_tmProfileName, String sid,
+            String p_sourceLocale, String p_sourceSegment, String p_targetLocale,
+            String p_targetSegment, String escapeString) throws WebServiceException
     {
         try
         {
@@ -8598,10 +8142,9 @@ public class Ambassador extends AbstractWebService
             Assert.assertNotEmpty(p_sourceLocale, "source locale");
             Assert.assertNotEmpty(p_sourceSegment, "source string");
             Assert.assertNotNull(p_targetLocale, "target locale");
-            if (escapeString == null
-                    || escapeString.trim().length() == 0
-                    || (!"true".equals(escapeString.trim()) && !"false"
-                            .equals(escapeString.trim())))
+            if (escapeString == null || escapeString.trim().length() == 0
+                    || (!"true".equals(escapeString.trim())
+                            && !"false".equals(escapeString.trim())))
             {
                 escapeString = "false";
             }
@@ -8629,10 +8172,9 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("p_targetLocale", p_targetLocale);
             activityArgs.put("p_targetSegment", p_targetSegment);
             activityArgs.put("escapeString", escapeString);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "saveEntry(p_accessToken,p_tmProfileName,sid,p_sourceLocale,p_sourceSegment,p_targetLocale,p_targetSegment,escapeString)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "saveEntry(p_accessToken,p_tmProfileName,sid,p_sourceLocale,p_sourceSegment,p_targetLocale,p_targetSegment,escapeString)",
+                    activityArgs);
             sid = clearSid(sid);
 
             boolean escape = Boolean.parseBoolean(escapeString);
@@ -8663,14 +8205,12 @@ public class Ambassador extends AbstractWebService
             targetTuv.setLocale(targetLocale);
 
             sourceTuv.setCreationUser(Tmx.DEFAULT_USER);
-            sourceTuv.setCreationDate(new java.sql.Timestamp(new Date()
-                    .getTime()));
+            sourceTuv.setCreationDate(new java.sql.Timestamp(new Date().getTime()));
             sourceTuv.setSegment(p_sourceSegment);
             sourceTuv.setSid(sid);
 
             targetTuv.setCreationUser(Tmx.DEFAULT_USER);
-            targetTuv.setCreationDate(new java.sql.Timestamp(new Date()
-                    .getTime()));
+            targetTuv.setCreationDate(new java.sql.Timestamp(new Date().getTime()));
             targetTuv.setSegment(p_targetSegment);
             targetTuv.setSid(sid);
 
@@ -8681,13 +8221,12 @@ public class Ambassador extends AbstractWebService
             tus.add(tu);
 
             Tm tm = getProjectTm(p_tmProfileName);
-            LingServerProxy.getTmCoreManager().saveToSegmentTm(tm, tus,
-                    TmCoreManager.SYNC_MERGE, null);
+            LingServerProxy.getTmCoreManager().saveToSegmentTm(tm, tus, TmCoreManager.SYNC_MERGE,
+                    null);
 
             StringBuilder returnString = new StringBuilder(XML_HEAD);
-            String entryXml = MessageFormat.format(ENTRY_XML_SAVE, sid,
-                    sourceLocale.toString(), p_sourceSegment,
-                    targetLocale.toString(), p_targetSegment);
+            String entryXml = MessageFormat.format(ENTRY_XML_SAVE, sid, sourceLocale.toString(),
+                    p_sourceSegment, targetLocale.toString(), p_targetSegment);
             if (sid == null)
             {
                 entryXml = entryXml.replaceAll("\r\n\t<sid>.*?</sid>", "");
@@ -8784,8 +8323,7 @@ public class Ambassador extends AbstractWebService
             try
             {
                 validateSegment(element, new IntHolder(1));
-                this.segment = "<segment>" + ImportUtil.getInnerXml(element)
-                        + "</segment>";
+                this.segment = "<segment>" + ImportUtil.getInnerXml(element) + "</segment>";
             }
             catch (Exception e)
             {
@@ -8814,8 +8352,7 @@ public class Ambassador extends AbstractWebService
      * @return Repaired segment
      * @throws Exception
      */
-    private Element validateSegment(Element p_seg, IntHolder p_x_count)
-            throws Exception
+    private Element validateSegment(Element p_seg, IntHolder p_x_count) throws Exception
     {
         String attr;
 
@@ -8837,8 +8374,7 @@ public class Ambassador extends AbstractWebService
                 attr = elem.attributeValue("i"); // mandatory
                 if (attr == null || attr.length() == 0)
                 {
-                    throw new Exception(
-                            "A <bpt> tag is lacking the mandatory i attribute.");
+                    throw new Exception("A <bpt> tag is lacking the mandatory i attribute.");
                 }
 
                 attr = elem.attributeValue("type");
@@ -8852,8 +8388,7 @@ public class Ambassador extends AbstractWebService
                 attr = elem.attributeValue("i"); // mandatory
                 if (attr == null || attr.length() == 0)
                 {
-                    throw new Exception(
-                            "A <ept> tag is lacking the mandatory i attribute.");
+                    throw new Exception("A <ept> tag is lacking the mandatory i attribute.");
                 }
             }
             else if (name.equals("it"))
@@ -8867,8 +8402,7 @@ public class Ambassador extends AbstractWebService
                 attr = elem.attributeValue("pos"); // mandatory
                 if (attr == null || attr.length() == 0)
                 {
-                    throw new Exception(
-                            "A <it> tag is lacking the mandatory pos attribute.");
+                    throw new Exception("A <it> tag is lacking the mandatory pos attribute.");
                 }
 
                 attr = elem.attributeValue("type");
@@ -8910,15 +8444,14 @@ public class Ambassador extends AbstractWebService
     }
 
     /**
-     * Validates the sub elements inside a TMX tag. This means adding a <sub
-     * locType="..."> attribute.
+     * Validates the sub elements inside a TMX tag. This means adding a
+     * <sub locType="..."> attribute.
      * 
      * @param p_elem
      * @param p_x_count
      * @throws Exception
      */
-    private void validateSubs(Element p_elem, IntHolder p_x_count)
-            throws Exception
+    private void validateSubs(Element p_elem, IntHolder p_x_count) throws Exception
     {
         List subs = p_elem.elements("sub");
 
@@ -8940,11 +8473,11 @@ public class Ambassador extends AbstractWebService
      * @return
      * @throws WebServiceException
      */
-    public String searchEntries(String p_accessToken, String p_tmProfileName,
-            String p_string, String p_sourceLocale) throws WebServiceException
+    public String searchEntries(String p_accessToken, String p_tmProfileName, String p_string,
+            String p_sourceLocale) throws WebServiceException
     {
-        String rtn = searchEntries(p_accessToken, p_tmProfileName, p_string,
-                p_sourceLocale, "false");
+        String rtn = searchEntries(p_accessToken, p_tmProfileName, p_string, p_sourceLocale,
+                "false");
 
         return rtn;
     }
@@ -8960,17 +8493,16 @@ public class Ambassador extends AbstractWebService
      * @return
      * @throws WebServiceException
      */
-    public String searchEntries(String p_accessToken, String p_tmProfileName,
-            String p_string, String p_sourceLocale, boolean isEscape)
-            throws WebServiceException
+    public String searchEntries(String p_accessToken, String p_tmProfileName, String p_string,
+            String p_sourceLocale, boolean isEscape) throws WebServiceException
     {
         String escapeString = "false";
         if (isEscape)
         {
             escapeString = "true";
         }
-        String rtn = searchEntries(p_accessToken, p_tmProfileName, p_string,
-                p_sourceLocale, escapeString);
+        String rtn = searchEntries(p_accessToken, p_tmProfileName, p_string, p_sourceLocale,
+                escapeString);
 
         return rtn;
     }
@@ -9023,9 +8555,8 @@ public class Ambassador extends AbstractWebService
      * 
      * @see #login(username, password)
      */
-    public String searchEntries(String p_accessToken, String p_tmProfileName,
-            String p_string, String p_sourceLocale, String escapeString)
-            throws WebServiceException
+    public String searchEntries(String p_accessToken, String p_tmProfileName, String p_string,
+            String p_sourceLocale, String escapeString) throws WebServiceException
     {
         try
         {
@@ -9033,10 +8564,9 @@ public class Ambassador extends AbstractWebService
             Assert.assertNotEmpty(p_tmProfileName, "tm profile name");
             Assert.assertNotEmpty(p_sourceLocale, "source locale");
             Assert.assertNotEmpty(p_string, "source string");
-            if (escapeString == null
-                    || escapeString.trim().length() == 0
-                    || (!"true".equals(escapeString.trim()) && !"false"
-                            .equals(escapeString.trim())))
+            if (escapeString == null || escapeString.trim().length() == 0
+                    || (!"true".equals(escapeString.trim())
+                            && !"false".equals(escapeString.trim())))
             {
                 escapeString = "false";
             }
@@ -9058,8 +8588,7 @@ public class Ambassador extends AbstractWebService
         Vector localePairs = null;
         try
         {
-            localePairs = ServerProxy.getLocaleManager()
-                    .getSourceTargetLocalePairs();
+            localePairs = ServerProxy.getLocaleManager().getSourceTargetLocalePairs();
         }
         catch (Exception e)
         {
@@ -9080,10 +8609,9 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("string", p_string);
             activityArgs.put("sourceLocale", p_sourceLocale);
             activityArgs.put("escapeString", escapeString);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "searchEntries(p_accessToken,p_tmProfileName,p_string,p_sourceLocale,escapeString)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "searchEntries(p_accessToken,p_tmProfileName,p_string,p_sourceLocale,escapeString)",
+                    activityArgs);
 
             session = HibernateUtil.getSession();
             Leverager leverager = new Leverager(session);
@@ -9107,13 +8635,12 @@ public class Ambassador extends AbstractWebService
                     .getTMProfileByName(p_tmProfileName);
             if (tmp == null)
             {
-                String message = "Unable to get translation memory profile:"
-                        + p_tmProfileName;
+                String message = "Unable to get translation memory profile:" + p_tmProfileName;
                 logger.error(message);
                 throw new WebServiceException(message);
             }
-            ProjectTM ptm = ServerProxy.getProjectHandler().getProjectTMById(
-                    tmp.getProjectTmIdForSave(), false);
+            ProjectTM ptm = ServerProxy.getProjectHandler()
+                    .getProjectTMById(tmp.getProjectTmIdForSave(), false);
             String companyId = String.valueOf(ptm.getCompanyId());
 
             Set tmIdsOverride = new HashSet();
@@ -9123,40 +8650,35 @@ public class Ambassador extends AbstractWebService
                 tmIdsOverride.add(tm.getProjectTmId());
             }
 
-            OverridableLeverageOptions levOptions = new OverridableLeverageOptions(
-                    tmp, levLocales);
+            OverridableLeverageOptions levOptions = new OverridableLeverageOptions(tmp, levLocales);
 
             int threshold = (int) tmp.getFuzzyMatchThreshold();
             levOptions.setMatchThreshold(threshold);
             levOptions.setTmsToLeverageFrom(tmIdsOverride);
             boolean isTmProcedence = tmp.isTmProcendence();
-            String segment = wrapSegment(p_string,
-                    Boolean.valueOf(escapeString));
+            String segment = wrapSegment(p_string, Boolean.valueOf(escapeString));
             PageTmTu tu = new PageTmTu(-1, -1, "plaintext", "text", true);
             PageTmTuv tuv = new PageTmTuv(-1, segment, sourceLocale);
             tuv.setTu(tu);
             tuv.setExactMatchKey();
             tu.addTuv(tuv);
 
-            Iterator<LeverageMatches> itLeverageMatches = LingServerProxy
-                    .getTmCoreManager()
-                    .leverageSegments(Collections.singletonList(tuv),
-                            sourceLocale, trgLocales, levOptions)
+            Iterator<LeverageMatches> itLeverageMatches = LingServerProxy.getTmCoreManager()
+                    .leverageSegments(Collections.singletonList(tuv), sourceLocale, trgLocales,
+                            levOptions)
                     .leverageResultIterator();
 
             long jobId = -1;// -1 is fine here.
             // In fact only ONE levMatches in this iterator.
             while (itLeverageMatches.hasNext())
             {
-                LeverageMatches levMatches = (LeverageMatches) itLeverageMatches
-                        .next();
+                LeverageMatches levMatches = (LeverageMatches) itLeverageMatches.next();
 
                 // walk through all target locales in the LeverageMatches
                 Iterator itLocales = levMatches.targetLocaleIterator(jobId);
                 while (itLocales.hasNext())
                 {
-                    GlobalSightLocale tLocale = (GlobalSightLocale) itLocales
-                            .next();
+                    GlobalSightLocale tLocale = (GlobalSightLocale) itLocales.next();
                     // walk through all matches in the locale
                     Iterator itMatch = levMatches.matchIterator(tLocale, jobId);
                     while (itMatch.hasNext())
@@ -9168,8 +8690,7 @@ public class Ambassador extends AbstractWebService
                             continue;
                         }
 
-                        List<LeveragedTuv> tuvs = storedTuvs.get(tLocale
-                                .toString());
+                        List<LeveragedTuv> tuvs = storedTuvs.get(tLocale.toString());
                         if (tuvs == null)
                         {
                             tuvs = new ArrayList<LeveragedTuv>();
@@ -9193,10 +8714,8 @@ public class Ambassador extends AbstractWebService
                     for (String name : localeNames)
                     {
                         List<LeveragedTuv> matchedTuvs = storedTuvs.get(name);
-                        Collections.sort(
-                                matchedTuvs,
-                                getMatchedTuvComparator(levOptions,
-                                        isTmProcedence));
+                        Collections.sort(matchedTuvs,
+                                getMatchedTuvComparator(levOptions, isTmProcedence));
                         int size = Math.min(matchedTuvs.size(),
                                 (int) tmp.getNumberOfMatchesReturned());
                         for (int i = 0; i < size; i++)
@@ -9217,18 +8736,14 @@ public class Ambassador extends AbstractWebService
                             logger.info("tmName : " + tmName);
                             String strTmId = "'" + tmId + "'";
 
-                            String entryXml = MessageFormat.format(ENTRY_XML,
-                                    strTmId, tmName, matchedTuv.getScore(),
-                                    sourceTuv.getSid(), sourceTuv.getLocale(),
-                                    sourceTuv.getSegmentNoTopTag(),
-                                    matchedTuv.getLocale(),
-                                    matchedTuv.getSegmentNoTopTag());
+                            String entryXml = MessageFormat.format(ENTRY_XML, strTmId, tmName,
+                                    matchedTuv.getScore(), sourceTuv.getSid(),
+                                    sourceTuv.getLocale(), sourceTuv.getSegmentNoTopTag(),
+                                    matchedTuv.getLocale(), matchedTuv.getSegmentNoTopTag());
 
-                            if (sourceTuv.getSid() == null
-                                    || sourceTuv.getSid().length() == 0)
+                            if (sourceTuv.getSid() == null || sourceTuv.getSid().length() == 0)
                             {
-                                entryXml = entryXml.replaceAll(
-                                        "\r\n\t\t<sid>.*?</sid>", "");
+                                entryXml = entryXml.replaceAll("\r\n\t\t<sid>.*?</sid>", "");
                             }
 
                             returnString.append(entryXml);
@@ -9237,8 +8752,7 @@ public class Ambassador extends AbstractWebService
                         // threshold
                         for (int i = 0; i < trgLocales.size(); i++)
                         {
-                            GlobalSightLocale trgLocale = (GlobalSightLocale) trgLocales
-                                    .get(i);
+                            GlobalSightLocale trgLocale = (GlobalSightLocale) trgLocales.get(i);
                             if (trgLocale.toString().equals(name))
                             {
                                 trgLocales.remove(trgLocale);
@@ -9314,10 +8828,9 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public HashMap searchEntriesInBatch(String p_accessToken,
-            Long p_remoteTmProfileId, Map p_segmentMap, Long p_sourceLocaleId,
-            Map p_btrgLocal2LevLocalesMap, Boolean p_translatable,
-            Boolean p_escapeString) throws WebServiceException
+    public HashMap searchEntriesInBatch(String p_accessToken, Long p_remoteTmProfileId,
+            Map p_segmentMap, Long p_sourceLocaleId, Map p_btrgLocal2LevLocalesMap,
+            Boolean p_translatable, Boolean p_escapeString) throws WebServiceException
     {
         checkAccess(p_accessToken, "searchEntriesInBatch");
         // checkPermission(p_accessToken, Permission.SERVICE_TM_SEARCH_ENTRY);
@@ -9339,37 +8852,31 @@ public class Ambassador extends AbstractWebService
             // target locales and leverage locales
             ArrayList trgLocales = new ArrayList();
             LeveragingLocales levLocales = new LeveragingLocales();
-            if (p_btrgLocal2LevLocalesMap != null
-                    && p_btrgLocal2LevLocalesMap.size() > 0)
+            if (p_btrgLocal2LevLocalesMap != null && p_btrgLocal2LevLocalesMap.size() > 0)
             {
                 Iterator iter = p_btrgLocal2LevLocalesMap.entrySet().iterator();
                 while (iter.hasNext())
                 {
                     Map.Entry entry = (Map.Entry) iter.next();
                     long trgLocaleId = ((Long) entry.getKey()).longValue();
-                    GlobalSightLocale trgLocale = localeManager
-                            .getLocaleById(trgLocaleId);
+                    GlobalSightLocale trgLocale = localeManager.getLocaleById(trgLocaleId);
                     trgLocales.add(trgLocale);
 
                     String levLocaleIds = (String) entry.getValue();
                     StringTokenizer st = new StringTokenizer(levLocaleIds, ",");
                     while (st.hasMoreElements())
                     {
-                        long levLocaleId = Long.parseLong((String) st
-                                .nextElement());
-                        GlobalSightLocale levLocale = localeManager
-                                .getLocaleById(levLocaleId);
+                        long levLocaleId = Long.parseLong((String) st.nextElement());
+                        GlobalSightLocale levLocale = localeManager.getLocaleById(levLocaleId);
                         Set leveragingLocales = null;
                         try
                         {
-                            leveragingLocales = levLocales
-                                    .getLeveragingLocales(levLocale);
+                            leveragingLocales = levLocales.getLeveragingLocales(levLocale);
                         }
                         catch (Exception e)
                         {
                         }
-                        levLocales.setLeveragingLocale(levLocale,
-                                leveragingLocales);
+                        levLocales.setLeveragingLocale(levLocale, leveragingLocales);
                     }
                 }
             }
@@ -9385,8 +8892,8 @@ public class Ambassador extends AbstractWebService
                 throw new WebServiceException(message);
             }
 
-            ProjectTM ptm = ServerProxy.getProjectHandler().getProjectTMById(
-                    tmp.getProjectTmIdForSave(), false);
+            ProjectTM ptm = ServerProxy.getProjectHandler()
+                    .getProjectTMById(tmp.getProjectTmIdForSave(), false);
             // tmIdsOverride
             Set tmIdsOverride = new HashSet();
             Vector<LeverageProjectTM> tms = tmp.getProjectTMsToLeverageFrom();
@@ -9401,8 +8908,7 @@ public class Ambassador extends AbstractWebService
             }
 
             // levOptions & leverageDataCenter
-            OverridableLeverageOptions levOptions = new OverridableLeverageOptions(
-                    tmp, levLocales);
+            OverridableLeverageOptions levOptions = new OverridableLeverageOptions(tmp, levLocales);
             int threshold = (int) tmp.getFuzzyMatchThreshold();
             levOptions.setMatchThreshold(threshold);
             levOptions.setTmsToLeverageFrom(tmIdsOverride);
@@ -9417,8 +8923,7 @@ public class Ambassador extends AbstractWebService
                 long srcTuvId = ((Long) entry.getKey()).longValue();
                 String segment = (String) entry.getValue();
                 segment = wrapSegment(segment, p_escapeString.booleanValue());
-                PageTmTu tu = new PageTmTu(-1, -1, "plaintext", "text",
-                        p_translatable);
+                PageTmTu tu = new PageTmTu(-1, -1, "plaintext", "text", p_translatable);
                 PageTmTuv tuv = new PageTmTuv(srcTuvId, segment, sourceLocale);
                 tuv.setTu(tu);
                 tuv.setExactMatchKey();
@@ -9430,22 +8935,19 @@ public class Ambassador extends AbstractWebService
             LeverageDataCenter leverageDataCenter = null;
             try
             {
-                leverageDataCenter = LingServerProxy.getTmCoreManager()
-                        .leverageSegments(sourceTuvs, sourceLocale, trgLocales,
-                                levOptions);
+                leverageDataCenter = LingServerProxy.getTmCoreManager().leverageSegments(sourceTuvs,
+                        sourceLocale, trgLocales, levOptions);
             }
             catch (Exception e)
             {
                 logger.error("Failed to leverage segments.", e);
             }
 
-            Iterator itLeverageMatches = leverageDataCenter
-                    .leverageResultIterator();
+            Iterator itLeverageMatches = leverageDataCenter.leverageResultIterator();
             while (itLeverageMatches.hasNext())
             {
                 // one "LeverageMatches" represents one segment matches
-                LeverageMatches levMatches = (LeverageMatches) itLeverageMatches
-                        .next();
+                LeverageMatches levMatches = (LeverageMatches) itLeverageMatches.next();
                 long originalTuvId = levMatches.getOriginalTuv().getId();
                 HashMap trgLocaleMatchesMap = new HashMap();
 
@@ -9453,20 +8955,18 @@ public class Ambassador extends AbstractWebService
                 Iterator itLocales = levMatches.targetLocaleIterator(jobId);
                 while (itLocales.hasNext())
                 {
-                    GlobalSightLocale targetLocale = (GlobalSightLocale) itLocales
-                            .next();
+                    GlobalSightLocale targetLocale = (GlobalSightLocale) itLocales.next();
                     Vector matchedTuvMapForSpecifiedTrgLocale = new Vector();
 
                     HashMap innerMap = new HashMap();
-                    Iterator itMatch = levMatches.matchIterator(targetLocale,
-                            jobId);
+                    Iterator itMatch = levMatches.matchIterator(targetLocale, jobId);
                     while (itMatch.hasNext())
                     {
                         LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();
 
                         HashMap matchInfoMap = new HashMap();
-                        String subId = ((SegmentTmTu) levMatches
-                                .getOriginalTuv().getTu()).getSubId();
+                        String subId = ((SegmentTmTu) levMatches.getOriginalTuv().getTu())
+                                .getSubId();
                         matchInfoMap.put("subId", subId);
                         String matchedSegment = matchedTuv.getSegmentNoTopTag();
                         matchedSegment = matchedTuv.getSegment();
@@ -9478,15 +8978,14 @@ public class Ambassador extends AbstractWebService
                         float score = matchedTuv.getScore();
                         matchInfoMap.put("score", score);
                         // source string from TM
-                        ProjectTmTuvT tmTuv = HibernateUtil.get(
-                                ProjectTmTuvT.class, matchedTuv.getId());
+                        ProjectTmTuvT tmTuv = HibernateUtil.get(ProjectTmTuvT.class,
+                                matchedTuv.getId());
                         String tmSource = "";
                         if (tmTuv != null)
                         {
                             try
                             {
-                                tmSource = tmTuv.getTu().getSourceTuv()
-                                        .getSegmentString();
+                                tmSource = tmTuv.getTu().getSourceTuv().getSegmentString();
                             }
                             catch (Exception ex)
                             {
@@ -9499,14 +8998,12 @@ public class Ambassador extends AbstractWebService
 
                         matchedTuvMapForSpecifiedTrgLocale.add(matchInfoMap);
                     }
-                    innerMap.put(targetLocale.getId(),
-                            matchedTuvMapForSpecifiedTrgLocale);
+                    innerMap.put(targetLocale.getId(), matchedTuvMapForSpecifiedTrgLocale);
 
                     trgLocaleMatchesMap.putAll(innerMap);
                 }
 
-                originalTuvId2MatchesMap
-                        .put(originalTuvId, trgLocaleMatchesMap);
+                originalTuvId2MatchesMap.put(originalTuvId, trgLocaleMatchesMap);
             }
         }
         catch (Exception e)
@@ -9556,10 +9053,8 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            logger.error("Failed to find if locale pair ("
-                    + p_sourceLocale.getLocale() + "->"
-                    + p_targetLocale.getLocale() + " is supported by MT "
-                    + p_mt.getEngineName());
+            logger.error("Failed to find if locale pair (" + p_sourceLocale.getLocale() + "->"
+                    + p_targetLocale.getLocale() + " is supported by MT " + p_mt.getEngineName());
         }
 
         return isSupported;
@@ -9573,8 +9068,7 @@ public class Ambassador extends AbstractWebService
      * @return
      */
     private Comparator<LeveragedTuv> getMatchedTuvComparator(
-            final OverridableLeverageOptions leverageOptions,
-            final boolean isTmProcedence)
+            final OverridableLeverageOptions leverageOptions, final boolean isTmProcedence)
     {
         return new Comparator<LeveragedTuv>()
         {
@@ -9624,13 +9118,12 @@ public class Ambassador extends AbstractWebService
      * @param p_targetSegment
      * @throws WebServiceException
      */
-    public void editEntry(String p_accessToken, String p_tmProfileName,
-            String p_sourceLocale, String p_sourceSegment,
-            String p_targetLocale, String p_targetSegment)
+    public void editEntry(String p_accessToken, String p_tmProfileName, String p_sourceLocale,
+            String p_sourceSegment, String p_targetLocale, String p_targetSegment)
             throws WebServiceException
     {
-        editEntry(p_accessToken, p_tmProfileName, null, null, p_sourceLocale,
-                p_sourceSegment, p_targetLocale, p_targetSegment, "false");
+        editEntry(p_accessToken, p_tmProfileName, null, null, p_sourceLocale, p_sourceSegment,
+                p_targetLocale, p_targetSegment, "false");
     }
 
     /**
@@ -9649,11 +9142,9 @@ public class Ambassador extends AbstractWebService
      * @param isEscape
      * @throws WebServiceException
      */
-    public void editEntry(String p_accessToken, String p_tmProfileName,
-            String p_orgSid, String p_newSid, String p_sourceLocale,
-            String p_sourceSegment, String p_targetLocale,
-            String p_targetSegment, boolean isEscape)
-            throws WebServiceException
+    public void editEntry(String p_accessToken, String p_tmProfileName, String p_orgSid,
+            String p_newSid, String p_sourceLocale, String p_sourceSegment, String p_targetLocale,
+            String p_targetSegment, boolean isEscape) throws WebServiceException
     {
         String escapeString = "false";
         if (isEscape)
@@ -9661,9 +9152,8 @@ public class Ambassador extends AbstractWebService
             escapeString = "true";
         }
 
-        editEntry(p_accessToken, p_tmProfileName, p_orgSid, p_newSid,
-                p_sourceLocale, p_sourceSegment, p_targetLocale,
-                p_targetSegment, escapeString);
+        editEntry(p_accessToken, p_tmProfileName, p_orgSid, p_newSid, p_sourceLocale,
+                p_sourceSegment, p_targetLocale, p_targetSegment, escapeString);
     }
 
     /**
@@ -9697,11 +9187,9 @@ public class Ambassador extends AbstractWebService
      * 
      * @see #login(username, password)
      */
-    public void editEntry(String p_accessToken, String p_tmProfileName,
-            String p_orgSid, String p_newSid, String p_sourceLocale,
-            String p_sourceSegment, String p_targetLocale,
-            String p_targetSegment, String escapeString)
-            throws WebServiceException
+    public void editEntry(String p_accessToken, String p_tmProfileName, String p_orgSid,
+            String p_newSid, String p_sourceLocale, String p_sourceSegment, String p_targetLocale,
+            String p_targetSegment, String escapeString) throws WebServiceException
     {
         try
         {
@@ -9710,10 +9198,9 @@ public class Ambassador extends AbstractWebService
             Assert.assertNotEmpty(p_sourceLocale, "source locale");
             Assert.assertNotEmpty(p_sourceSegment, "source string");
             Assert.assertNotEmpty(p_targetLocale, "target locale");
-            if (escapeString == null
-                    || escapeString.trim().length() == 0
-                    || (!"true".equals(escapeString.trim()) && !"false"
-                            .equals(escapeString.trim())))
+            if (escapeString == null || escapeString.trim().length() == 0
+                    || (!"true".equals(escapeString.trim())
+                            && !"false".equals(escapeString.trim())))
             {
                 escapeString = "false";
             }
@@ -9741,10 +9228,9 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("targetLocale", p_targetLocale);
             activityArgs.put("targetSegment", p_targetSegment);
             activityArgs.put("escapeString", escapeString);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "editEntry(p_accessToken,p_tmProfileName,p_orgSid,p_newSid,p_sourceLocale,p_sourceSegment,p_targetLocale,p_targetSegment,escapeString)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "editEntry(p_accessToken,p_tmProfileName,p_orgSid,p_newSid,p_sourceLocale,p_sourceSegment,p_targetLocale,p_targetSegment,escapeString)",
+                    activityArgs);
             long targetLocaleId = getLocaleByName(p_targetLocale).getId();
             p_orgSid = clearSid(p_orgSid);
             p_newSid = clearSid(p_newSid);
@@ -9757,8 +9243,7 @@ public class Ambassador extends AbstractWebService
                 p_targetSegment = repairSegment(p_targetSegment);
             }
 
-            ProjectTmTuT tu = getTu(p_tmProfileName, p_sourceSegment,
-                    p_sourceLocale, p_orgSid);
+            ProjectTmTuT tu = getTu(p_tmProfileName, p_sourceSegment, p_sourceLocale, p_orgSid);
             Set<ProjectTmTuvT> tuvs = tu.getTuvs();
 
             ProjectTmTuvT editTuv = null;
@@ -9781,8 +9266,7 @@ public class Ambassador extends AbstractWebService
             if (editTuv == null)
             {
                 throw new WebServiceException(
-                        "The specified entry do not have the target locale:"
-                                + p_targetLocale);
+                        "The specified entry do not have the target locale:" + p_targetLocale);
             }
 
             editTuv.setSegmentString(p_targetSegment);
@@ -9820,12 +9304,11 @@ public class Ambassador extends AbstractWebService
      *            Locale which need to be removed
      * @throws WebServiceException
      */
-    public void deleteSegment(String p_accessToken, String p_tmProfileName,
-            String p_string, String p_sourceLocale, String p_deleteLocale)
-            throws WebServiceException
+    public void deleteSegment(String p_accessToken, String p_tmProfileName, String p_string,
+            String p_sourceLocale, String p_deleteLocale) throws WebServiceException
     {
-        deleteSegment(p_accessToken, p_tmProfileName, p_string, p_sourceLocale,
-                p_deleteLocale, "false");
+        deleteSegment(p_accessToken, p_tmProfileName, p_string, p_sourceLocale, p_deleteLocale,
+                "false");
     }
 
     /**
@@ -9844,9 +9327,9 @@ public class Ambassador extends AbstractWebService
      *            (escaped) equivalents or not
      * @throws WebServiceException
      */
-    public void deleteSegment(String p_accessToken, String p_tmProfileName,
-            String p_string, String p_sourceLocale, String p_deleteLocale,
-            boolean isEscape) throws WebServiceException
+    public void deleteSegment(String p_accessToken, String p_tmProfileName, String p_string,
+            String p_sourceLocale, String p_deleteLocale, boolean isEscape)
+            throws WebServiceException
     {
         String escapeString = "false";
         if (isEscape)
@@ -9854,8 +9337,8 @@ public class Ambassador extends AbstractWebService
             escapeString = "true";
         }
 
-        deleteSegment(p_accessToken, p_tmProfileName, p_string, p_sourceLocale,
-                p_deleteLocale, escapeString);
+        deleteSegment(p_accessToken, p_tmProfileName, p_string, p_sourceLocale, p_deleteLocale,
+                escapeString);
     }
 
     /**
@@ -9887,9 +9370,9 @@ public class Ambassador extends AbstractWebService
      *            'false'.
      * @throws WebServiceException
      */
-    public void deleteSegment(String p_accessToken, String p_tmProfileName,
-            String p_string, String p_sourceLocale, String p_deleteLocale,
-            String escapeString) throws WebServiceException
+    public void deleteSegment(String p_accessToken, String p_tmProfileName, String p_string,
+            String p_sourceLocale, String p_deleteLocale, String escapeString)
+            throws WebServiceException
     {
         try
         {
@@ -9897,10 +9380,9 @@ public class Ambassador extends AbstractWebService
             Assert.assertNotEmpty(p_tmProfileName, "tm profile name");
             Assert.assertNotEmpty(p_sourceLocale, "source locale");
             Assert.assertNotEmpty(p_string, "source string");
-            if (escapeString == null
-                    || escapeString.trim().length() == 0
-                    || (!"true".equals(escapeString.trim()) && !"false"
-                            .equals(escapeString.trim())))
+            if (escapeString == null || escapeString.trim().length() == 0
+                    || (!"true".equals(escapeString.trim())
+                            && !"false".equals(escapeString.trim())))
             {
                 escapeString = "false";
             }
@@ -9928,16 +9410,14 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("sourceLocale", p_sourceLocale);
             activityArgs.put("deleteLocale", p_deleteLocale);
             activityArgs.put("escapeString", escapeString);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "deleteSegment(p_accessToken,p_tmProfileName,p_string,p_sourceLocale,p_deleteLocale,escapeString)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "deleteSegment(p_accessToken,p_tmProfileName,p_string,p_sourceLocale,p_deleteLocale,escapeString)",
+                    activityArgs);
 
             ProjectTM ptm = (ProjectTM) getProjectTm(p_tmProfileName);
             if (ptm.getTm3Id() == null)
             {
-                deleteTm2Segment(p_tmProfileName, p_string, p_sourceLocale,
-                        p_deleteLocale);
+                deleteTm2Segment(p_tmProfileName, p_string, p_sourceLocale, p_deleteLocale);
             }
             else
             {
@@ -9954,13 +9434,11 @@ public class Ambassador extends AbstractWebService
         }
     }
 
-    private void deleteTm2Segment(String p_tmProfileName, String p_string,
-            String p_sourceLocale, String p_deleteLocale)
-            throws WebServiceException
+    private void deleteTm2Segment(String p_tmProfileName, String p_string, String p_sourceLocale,
+            String p_deleteLocale) throws WebServiceException
     {
         ProjectTmTuT tu = getTu(p_tmProfileName, p_string, p_sourceLocale);
-        if (p_deleteLocale == null
-                || p_sourceLocale.equalsIgnoreCase(p_deleteLocale))
+        if (p_deleteLocale == null || p_sourceLocale.equalsIgnoreCase(p_deleteLocale))
         {
             try
             {
@@ -10007,9 +9485,8 @@ public class Ambassador extends AbstractWebService
         }
     }
 
-    private void deleteTm3Segment(ProjectTM ptm, String p_string,
-            String p_sourceLocale, String p_deleteLocale)
-            throws WebServiceException
+    private void deleteTm3Segment(ProjectTM ptm, String p_string, String p_sourceLocale,
+            String p_deleteLocale) throws WebServiceException
     {
         Connection conn = null;
         try
@@ -10020,8 +9497,7 @@ public class Ambassador extends AbstractWebService
             StatementBuilder sb = new StatementBuilder();
             sb.append("SELECT tuId FROM ").append(tuvTable);
             sb.append(" WHERE content = '").append(p_string).append("' ");
-            sb.append(" AND localeid = ? ").addValue(
-                    getLocaleByName(p_sourceLocale).getId());
+            sb.append(" AND localeid = ? ").addValue(getLocaleByName(p_sourceLocale).getId());
             sb.append(" AND tmid = ? ").addValue(ptm.getTm3Id());
             // Only return the first matched tu for now.
             // sb.append(" LIMIT 0,1;");
@@ -10029,7 +9505,8 @@ public class Ambassador extends AbstractWebService
             List<Long> tuIds = SQLUtil.execIdsQuery(conn, sb);
             if (tuIds == null || tuIds.size() == 0)
             {
-                logger.warn("deleteTm3Segment() :: do not find data to delete by current parameters.");
+                logger.warn(
+                        "deleteTm3Segment() :: do not find data to delete by current parameters.");
                 return;
             }
 
@@ -10045,13 +9522,11 @@ public class Ambassador extends AbstractWebService
             List<SegmentTmTu> segTmTus = new ArrayList<SegmentTmTu>();
             for (TM3Tu tm3Tu : tm3Tus)
             {
-                segTmTus.add(TM3Util.toSegmentTmTu(tm3Tu, ptm.getId(),
-                        formatAttr, typeAttr, sidAttr, fromWsAttr,
-                        translatableAttr, projectAttr));
+                segTmTus.add(TM3Util.toSegmentTmTu(tm3Tu, ptm.getId(), formatAttr, typeAttr,
+                        sidAttr, fromWsAttr, translatableAttr, projectAttr));
             }
 
-            if (p_deleteLocale == null
-                    || p_sourceLocale.equalsIgnoreCase(p_deleteLocale))
+            if (p_deleteLocale == null || p_sourceLocale.equalsIgnoreCase(p_deleteLocale))
             {
                 try
                 {
@@ -10114,22 +9589,24 @@ public class Ambassador extends AbstractWebService
      */
     private String wrapSegment(String segment, boolean escapeString)
     {
-        if (segment == null) {
+        if (segment == null)
+        {
             segment = "";
         }
 
-        if (segment.startsWith("<segment") && segment.endsWith("</segment>")) {
+        if (segment.startsWith("<segment") && segment.endsWith("</segment>"))
+        {
             segment = GxmlUtil.stripRootTag(segment);
         }
-        if (escapeString) {
+        if (escapeString)
+        {
             segment = XmlUtil.escapeString(segment);
         }
 
         return "<segment>" + segment + "</segment>";
     }
 
-    private Company getCompanyByName(String companyName)
-            throws WebServiceException
+    private Company getCompanyByName(String companyName) throws WebServiceException
     {
         String hql = "from Company where name = :name";
         HashMap map = new HashMap();
@@ -10178,8 +9655,7 @@ public class Ambassador extends AbstractWebService
                 .getTMProfileByName(p_tmProfileName);
         if (tmProfile == null)
         {
-            throw new WebServiceException("Unable to get tm profile by name: "
-                    + p_tmProfileName);
+            throw new WebServiceException("Unable to get tm profile by name: " + p_tmProfileName);
         }
 
         return getProjectTm(tmProfile.getProjectTmIdForSave());
@@ -10193,8 +9669,7 @@ public class Ambassador extends AbstractWebService
      * @return GlobalSightLocale Locale information with the specified name
      * @throws WebServiceException
      */
-    private GlobalSightLocale getLocaleByName(String name)
-            throws WebServiceException
+    private GlobalSightLocale getLocaleByName(String name) throws WebServiceException
     {
         name = ImportUtil.normalizeLocale(name.trim());
         try
@@ -10203,8 +9678,8 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            logger.warn("getLocaleByName() : Fail to get GlobalSightLocale by locale name: '"
-                    + name + "'");
+            logger.warn("getLocaleByName() : Fail to get GlobalSightLocale by locale name: '" + name
+                    + "'");
             throw new WebServiceException("Unable to get locale: " + name);
         }
     }
@@ -10224,8 +9699,8 @@ public class Ambassador extends AbstractWebService
      * @return ProjectTmTuT Tu information
      * @throws WebServiceException
      */
-    private ProjectTmTuT getTu(String tmProfileName, String sourceString,
-            String sourceLocale, String sid) throws WebServiceException
+    private ProjectTmTuT getTu(String tmProfileName, String sourceString, String sourceLocale,
+            String sid) throws WebServiceException
     {
         Assert.assertNotNull(tmProfileName, "tm profile name");
         Assert.assertNotNull(sourceString, "source string");
@@ -10233,8 +9708,7 @@ public class Ambassador extends AbstractWebService
 
         String hql = "select p.tu from ProjectTmTuvT p "
                 + "where p.locale.id = :lId and p.tu.projectTm.id=:tmId "
-                + "and p.tu.sourceLocale.id = :lId "
-                + "and p.segmentString = :sourceString ";
+                + "and p.tu.sourceLocale.id = :lId " + "and p.segmentString = :sourceString ";
         if (sid == null)
         {
             hql += "and p.sid is null";
@@ -10257,9 +9731,8 @@ public class Ambassador extends AbstractWebService
 
         if (tus.size() == 0)
         {
-            throw new WebServiceException("No any entry was found with locale("
-                    + sourceLocale + "), source string(" + sourceString
-                    + ") and sid(" + sid + ")");
+            throw new WebServiceException("No any entry was found with locale(" + sourceLocale
+                    + "), source string(" + sourceString + ") and sid(" + sid + ")");
         }
 
         return (ProjectTmTuT) tus.get(0);
@@ -10278,8 +9751,8 @@ public class Ambassador extends AbstractWebService
      * @return ProjectTmTuT Tu information
      * @throws WebServiceException
      */
-    private ProjectTmTuT getTu(String tmProfileName, String sourceString,
-            String sourceLocale) throws WebServiceException
+    private ProjectTmTuT getTu(String tmProfileName, String sourceString, String sourceLocale)
+            throws WebServiceException
     {
         Assert.assertNotNull(tmProfileName, "tm profile name");
         Assert.assertNotNull(sourceString, "source string");
@@ -10287,8 +9760,7 @@ public class Ambassador extends AbstractWebService
 
         String hql = "select p.tu from ProjectTmTuvT p "
                 + "where p.locale.id = :lId and p.tu.projectTm.id=:tmId "
-                + "and p.tu.sourceLocale.id = :lId "
-                + "and p.segmentString = :sourceString ";
+                + "and p.tu.sourceLocale.id = :lId " + "and p.segmentString = :sourceString ";
 
         Map map = new HashMap();
         map.put("lId", getLocaleByName(sourceLocale).getId());
@@ -10299,8 +9771,8 @@ public class Ambassador extends AbstractWebService
 
         if (tus.size() == 0)
         {
-            throw new WebServiceException("No any entry was found with locale("
-                    + sourceLocale + "), source string(" + sourceString + ")");
+            throw new WebServiceException("No any entry was found with locale(" + sourceLocale
+                    + "), source string(" + sourceString + ")");
         }
         // Only return the first matched tu.
         return (ProjectTmTuT) tus.get(0);
@@ -10314,8 +9786,7 @@ public class Ambassador extends AbstractWebService
      * @return String Name of project TM
      * @throws WebServiceException
      */
-    private String getProjectTmName(long tmId, Connection connection)
-            throws WebServiceException
+    private String getProjectTmName(long tmId, Connection connection) throws WebServiceException
     {
         PreparedStatement query = null;
         ResultSet results = null;
@@ -10374,8 +9845,7 @@ public class Ambassador extends AbstractWebService
      * @return String all tm profiles
      * @throws WebServiceException
      */
-    public String getAllTMProfiles(String p_accessToken)
-            throws WebServiceException
+    public String getAllTMProfiles(String p_accessToken) throws WebServiceException
     {
         try
         {
@@ -10407,8 +9877,7 @@ public class Ambassador extends AbstractWebService
         sbXML.append("<TMProfileInformation>\r\n");
         for (int i = 0; i < allTMProfiles.size(); i++)
         {
-            TranslationMemoryProfile profile = (TranslationMemoryProfile) allTMProfiles
-                    .get(i);
+            TranslationMemoryProfile profile = (TranslationMemoryProfile) allTMProfiles.get(i);
             if (profile != null)
             {
                 long id = profile.getId();
@@ -10418,8 +9887,8 @@ public class Ambassador extends AbstractWebService
                 String TMName = "";
                 try
                 {
-                    ProjectTM tm = ServerProxy.getProjectHandler()
-                            .getProjectTMById(storageTMId, false);
+                    ProjectTM tm = ServerProxy.getProjectHandler().getProjectTMById(storageTMId,
+                            false);
                     TMName = tm.getName();
                 }
                 catch (Exception ex)
@@ -10431,29 +9900,26 @@ public class Ambassador extends AbstractWebService
                 sbXML.append("\t<TMProfile>\r\n");
                 sbXML.append("\t\t<id>" + id + "</id>\r\n");
                 sbXML.append("\t\t<name>" + name + "</name>\r\n");
-                sbXML.append("\t\t<description>" + description
-                        + "</description>\r\n");
-                sbXML.append("\t\t<storageTMName>" + TMName
-                        + "</storageTMName>\r\n");
+                sbXML.append("\t\t<description>" + description + "</description>\r\n");
+                sbXML.append("\t\t<storageTMName>" + TMName + "</storageTMName>\r\n");
                 sbXML.append("\t\t<referenceTMGrp>\r\n");
-                Vector<LeverageProjectTM> tms = profile
-                        .getProjectTMsToLeverageFrom();
+                Vector<LeverageProjectTM> tms = profile.getProjectTMsToLeverageFrom();
                 for (LeverageProjectTM lp_tm : tms)
                 {
                     long projectTmId = lp_tm.getProjectTmId();
                     String refTmName = "";
                     try
                     {
-                        ProjectTM tm = ServerProxy.getProjectHandler()
-                                .getProjectTMById(projectTmId, false);
+                        ProjectTM tm = ServerProxy.getProjectHandler().getProjectTMById(projectTmId,
+                                false);
                         refTmName = tm.getName();
                     }
                     catch (Exception e)
                     {
                         // do nothing
                     }
-                    sbXML.append("\t\t\t<referenceTM id=\"" + projectTmId
-                            + "\">" + refTmName + "</referenceTM>\r\n");
+                    sbXML.append("\t\t\t<referenceTM id=\"" + projectTmId + "\">" + refTmName
+                            + "</referenceTM>\r\n");
                 }
                 sbXML.append("\t\t</referenceTMGrp>\r\n");
                 sbXML.append("\t</TMProfile>\r\n");
@@ -10472,8 +9938,7 @@ public class Ambassador extends AbstractWebService
      *         termbases that are associated with current user
      * @throws WebServiceException
      */
-    public String getAllTermbases(String p_accessToken)
-            throws WebServiceException
+    public String getAllTermbases(String p_accessToken) throws WebServiceException
     {
         try
         {
@@ -10498,16 +9963,14 @@ public class Ambassador extends AbstractWebService
         {
             StringBuffer sbSql = new StringBuffer(
                     "select TBID, TB_NAME, TB_DESCRIPTION, TB_DEFINITION, COMPANYID from TB_TERMBASE ");
-            String currentCompanyId = CompanyThreadLocal.getInstance()
-                    .getValue();
+            String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
             if (CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
             {
                 sbSql.append(" order by tbid asc ");
             }
             else
             {
-                sbSql.append(" where COMPANYID = " + currentCompanyId
-                        + " order by tbid asc ");
+                sbSql.append(" where COMPANYID = " + currentCompanyId + " order by tbid asc ");
             }
 
             connection = ConnectionPool.getConnection();
@@ -10529,8 +9992,7 @@ public class Ambassador extends AbstractWebService
                 sbXML.append("\t\t<id>" + tbid + "</id>\r\n");
                 sbXML.append("\t\t<name>" + tbName + "</name>\r\n");
                 sbXML.append("\t\t<description>" + des + "</description>\r\n");
-                sbXML.append("\t\t<companyName>" + companyName
-                        + "</companyName>\r\n");
+                sbXML.append("\t\t<companyName>" + companyName + "</companyName>\r\n");
                 sbXML.append("\t</Termbase>\r\n");
             }
         }
@@ -10586,9 +10048,9 @@ public class Ambassador extends AbstractWebService
      * 
      * @see #login(username, password)
      */
-    public void saveTBEntry(String p_accessToken, String p_termbaseName,
-            String p_sourceLocale, String p_sourceTerm, String p_targetLocale,
-            String p_targetTerm) throws WebServiceException
+    public void saveTBEntry(String p_accessToken, String p_termbaseName, String p_sourceLocale,
+            String p_sourceTerm, String p_targetLocale, String p_targetTerm)
+            throws WebServiceException
     {
         try
         {
@@ -10614,8 +10076,7 @@ public class Ambassador extends AbstractWebService
         SessionInfo si = null;
         try
         {
-            User user = ServerProxy.getUserManager().getUser(
-                    getUsernameFromSession(p_accessToken));
+            User user = ServerProxy.getUserManager().getUser(getUsernameFromSession(p_accessToken));
             si = new SessionInfo(user.getUserId(), "");
         }
         catch (Exception e)
@@ -10635,21 +10096,18 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("sourceTerm", p_sourceTerm);
             activityArgs.put("targetLocale", p_targetLocale);
             activityArgs.put("targetTerm", p_targetTerm);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "saveTBEntry(p_accessToken,p_termbaseName,p_sourceLocale,p_sourceTerm,p_targetLocale,p_targetTerm)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "saveTBEntry(p_accessToken,p_termbaseName,p_sourceLocale,p_sourceTerm,p_targetLocale,p_targetTerm)",
+                    activityArgs);
             connection = ConnectionPool.getConnection();
 
             // get source lang name
             p_sourceLocale = ImportUtil.normalizeLocale(p_sourceLocale);
             String source_lang = p_sourceLocale.substring(0, 2);
-            List sourceLangNameList = getLangNameByLocale(source_lang, tb,
-                    connection);
+            List sourceLangNameList = getLangNameByLocale(source_lang, tb, connection);
             if (sourceLangNameList.size() == 0)
             {
-                sourceLangNameList = getLangNameByLocale(source_lang, null,
-                        connection);
+                sourceLangNameList = getLangNameByLocale(source_lang, null, connection);
             }
             String source_langName = source_lang;
             if (sourceLangNameList.size() > 0)
@@ -10659,12 +10117,10 @@ public class Ambassador extends AbstractWebService
             // get target lang name
             p_targetLocale = ImportUtil.normalizeLocale(p_targetLocale);
             String target_lang = p_targetLocale.substring(0, 2);
-            List targetLangNameList = getLangNameByLocale(p_targetLocale, tb,
-                    connection);
+            List targetLangNameList = getLangNameByLocale(p_targetLocale, tb, connection);
             if (targetLangNameList.size() == 0)
             {
-                targetLangNameList = getLangNameByLocale(p_targetLocale, null,
-                        connection);
+                targetLangNameList = getLangNameByLocale(p_targetLocale, null, connection);
             }
             String target_langName = target_lang;
             if (targetLangNameList.size() > 0)
@@ -10672,26 +10128,24 @@ public class Ambassador extends AbstractWebService
                 target_langName = (String) targetLangNameList.get(0);
             }
 
-            boolean isExist = isExistInTermbase(tb, source_langName,
-                    p_sourceTerm, target_langName, p_targetTerm, connection);
+            boolean isExist = isExistInTermbase(tb, source_langName, p_sourceTerm, target_langName,
+                    p_targetTerm, connection);
             if (isExist == false)
             {
                 StringBuffer sbEntry = new StringBuffer(XML_HEAD);
                 sbEntry.append("<conceptGrp>\r\n");
 
                 sbEntry.append("\t<languageGrp>\r\n");
-                sbEntry.append("\t\t<language name='" + source_langName
-                        + "' locale='" + p_sourceLocale.substring(3, 5)
-                        + "'/>\r\n");
+                sbEntry.append("\t\t<language name='" + source_langName + "' locale='"
+                        + p_sourceLocale.substring(3, 5) + "'/>\r\n");
                 sbEntry.append("\t\t<termGrp>\r\n");
                 sbEntry.append("\t\t\t<term>" + p_sourceTerm + "</term>\r\n");
                 sbEntry.append("\t\t</termGrp>\r\n");
                 sbEntry.append("\t</languageGrp>\r\n");
 
                 sbEntry.append("\t<languageGrp>\r\n");
-                sbEntry.append("\t\t<language name='" + target_langName
-                        + "' locale='" + p_targetLocale.substring(3, 5)
-                        + "'/>\r\n");
+                sbEntry.append("\t\t<language name='" + target_langName + "' locale='"
+                        + p_targetLocale.substring(3, 5) + "'/>\r\n");
                 sbEntry.append("\t\t<termGrp>\r\n");
                 sbEntry.append("\t\t\t<term>" + p_targetTerm + "</term>\r\n");
                 sbEntry.append("\t\t</termGrp>\r\n");
@@ -10705,8 +10159,8 @@ public class Ambassador extends AbstractWebService
             }
             else
             {
-                editTBEntry(p_accessToken, p_termbaseName, p_sourceLocale,
-                        p_sourceTerm, p_targetLocale, p_targetTerm, connection);
+                editTBEntry(p_accessToken, p_termbaseName, p_sourceLocale, p_sourceTerm,
+                        p_targetLocale, p_targetTerm, connection);
             }
         }
         catch (Exception e)
@@ -10753,8 +10207,7 @@ public class Ambassador extends AbstractWebService
      * @throws WebServiceException
      */
     public String searchTBEntries(String p_accessToken, String p_termbaseName,
-            String p_searchString, String p_sourceLocale,
-            String p_targetLocale, double p_matchType)
+            String p_searchString, String p_sourceLocale, String p_targetLocale, double p_matchType)
             throws WebServiceException
     {
         // 1.Parameters check
@@ -10800,14 +10253,14 @@ public class Ambassador extends AbstractWebService
         try
         {
             connection = ConnectionPool.getConnection();
-            validSrcLangNameList = getValidLangNameList(p_sourceLocale,
-                    searchTB, searchType, connection);
+            validSrcLangNameList = getValidLangNameList(p_sourceLocale, searchTB, searchType,
+                    connection);
 
             // 4.Valid target language name list (can be empty)
             if (p_targetLocale != null && !"".equals(p_targetLocale.trim()))
             {
-                validTrgLangNameList = getValidLangNameList(p_targetLocale,
-                        searchTB, searchType, connection);
+                validTrgLangNameList = getValidLangNameList(p_targetLocale, searchTB, searchType,
+                        connection);
             }
         }
         catch (Exception e)
@@ -10822,8 +10275,7 @@ public class Ambassador extends AbstractWebService
             }
             catch (Exception e2)
             {
-                logger.error("Cannot release database connection correctly.",
-                        e2);
+                logger.error("Cannot release database connection correctly.", e2);
             }
         }
 
@@ -10842,25 +10294,22 @@ public class Ambassador extends AbstractWebService
                 // "p_targetLocale" is null or empty
                 if (p_targetLocale == null || "".equals(p_targetLocale.trim()))
                 {
-                    String emptyTrgSearch = searchHitlist(source_locale, null,
-                            p_searchString, searchType, searchTB);
+                    String emptyTrgSearch = searchHitlist(source_locale, null, p_searchString,
+                            searchType, searchTB);
                     sbXML.append(emptyTrgSearch == null ? "" : emptyTrgSearch);
                 }
                 else
                 {
                     // "p_targetLocale" is not null
-                    if (validTrgLangNameList != null
-                            && validTrgLangNameList.size() > 0)
+                    if (validTrgLangNameList != null && validTrgLangNameList.size() > 0)
                     {
                         Iterator trgLangIter = validTrgLangNameList.iterator();
                         while (trgLangIter.hasNext())
                         {
                             target_locale = (String) trgLangIter.next();
-                            String searchResult = searchHitlist(source_locale,
-                                    target_locale, p_searchString, searchType,
-                                    searchTB);
-                            sbXML.append(searchResult == null ? ""
-                                    : searchResult);
+                            String searchResult = searchHitlist(source_locale, target_locale,
+                                    p_searchString, searchType, searchTB);
+                            sbXML.append(searchResult == null ? "" : searchResult);
                         }
                     }
                 }
@@ -10875,8 +10324,8 @@ public class Ambassador extends AbstractWebService
     /**
      * For fuzzy search, the language name must be defined in TB languages.
      */
-    private List getValidLangNameList(String p_langName, Termbase p_searchTB,
-            String p_searchType, Connection connection)
+    private List getValidLangNameList(String p_langName, Termbase p_searchTB, String p_searchType,
+            Connection connection)
     {
         if (p_langName == null || p_searchTB == null || p_searchType == null)
         {
@@ -10885,8 +10334,7 @@ public class Ambassador extends AbstractWebService
 
         List<String> result = new ArrayList();
 
-        List candidateLangNameList = getLangNameByLocale(p_langName,
-                p_searchTB, connection);
+        List candidateLangNameList = getLangNameByLocale(p_langName, p_searchTB, connection);
         if (candidateLangNameList != null && candidateLangNameList.size() > 0)
         {
             // If exact search, don't check if "p_locale" is in the definition
@@ -10927,8 +10375,7 @@ public class Ambassador extends AbstractWebService
      */
     private List filterLangNameList(String p_locale, List p_langNameList)
     {
-        if (p_locale == null || p_langNameList == null
-                || p_langNameList.size() == 0)
+        if (p_locale == null || p_langNameList == null || p_langNameList.size() == 0)
         {
             return p_langNameList;
         }
@@ -10956,15 +10403,13 @@ public class Ambassador extends AbstractWebService
 
             boolean flag = true;
             // "zh_CN" && "zh_TW"
-            if ("zh".equals(lang) && "CN".equalsIgnoreCase(country)
-                    && langName.length() >= 5
+            if ("zh".equals(lang) && "CN".equalsIgnoreCase(country) && langName.length() >= 5
                     && "zh".equalsIgnoreCase(langName.substring(0, 2))
                     && "TW".equalsIgnoreCase(langName.substring(3, 5)))
             {
                 flag = false;
             }
-            if ("zh".equals(lang) && "TW".equalsIgnoreCase(country)
-                    && langName.length() >= 5
+            if ("zh".equals(lang) && "TW".equalsIgnoreCase(country) && langName.length() >= 5
                     && "zh".equalsIgnoreCase(langName.substring(0, 2))
                     && "CN".equalsIgnoreCase(langName.substring(3, 5)))
             {
@@ -10985,8 +10430,8 @@ public class Ambassador extends AbstractWebService
     /**
      * For "searchTBEntries(...)" API only.
      */
-    private String searchHitlist(String p_srcLang, String p_trgLang,
-            String p_searchString, String p_searchType, Termbase p_searchTB)
+    private String searchHitlist(String p_srcLang, String p_trgLang, String p_searchString,
+            String p_searchType, Termbase p_searchTB)
     {
         if (p_srcLang == null || p_searchType == null || p_searchTB == null)
         {
@@ -10994,17 +10439,15 @@ public class Ambassador extends AbstractWebService
         }
 
         StringBuffer sbXML = new StringBuffer();
-        Hitlist hitList = p_searchTB.searchHitlist(p_srcLang, p_trgLang,
-                p_searchString, p_searchType, 300, 0);
+        Hitlist hitList = p_searchTB.searchHitlist(p_srcLang, p_trgLang, p_searchString,
+                p_searchType, 300, 0);
         Iterator hitIter = hitList.getHits().iterator();
         while (hitIter.hasNext())
         {
             Hit hit = (Hit) hitIter.next();
             sbXML.append("\t<tbEntry>\r\n");
-            sbXML.append("\t\t<tbName>" + p_searchTB.getName()
-                    + "</tbName>\r\n");
-            TbConcept concept = HibernateUtil.get(TbConcept.class,
-                    hit.getConceptId());
+            sbXML.append("\t\t<tbName>" + p_searchTB.getName() + "</tbName>\r\n");
+            TbConcept concept = HibernateUtil.get(TbConcept.class, hit.getConceptId());
             Iterator langIter = concept.getLanguages().iterator();
             while (langIter.hasNext())
             {
@@ -11027,10 +10470,8 @@ public class Ambassador extends AbstractWebService
                             || language.equalsIgnoreCase(p_srcLang))
                     {
                         sbXML.append("\t\t<term isSrc=\"" + isSrc + "\">\r\n");
-                        sbXML.append("\t\t\t<lang_name>" + language
-                                + "</lang_name>\r\n");
-                        sbXML.append("\t\t\t<termContent>" + termContent
-                                + "</termContent>\r\n");
+                        sbXML.append("\t\t\t<lang_name>" + language + "</lang_name>\r\n");
+                        sbXML.append("\t\t\t<termContent>" + termContent + "</termContent>\r\n");
                         sbXML.append("\t\t</term>\r\n");
                     }
                 }
@@ -11061,9 +10502,8 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public void editTBEntry(String p_accessToken, String p_termbaseName,
-            String p_sourceLocale, String p_sourceTerm, String p_targetLocale,
-            String p_targetTerm, Connection connection)
+    public void editTBEntry(String p_accessToken, String p_termbaseName, String p_sourceLocale,
+            String p_sourceTerm, String p_targetLocale, String p_targetTerm, Connection connection)
             throws WebServiceException
     {
         try
@@ -11107,10 +10547,9 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("sourceTerm", p_sourceTerm);
             activityArgs.put("targetLocale", p_targetLocale);
             activityArgs.put("targetTerm", p_targetTerm);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "editTBEntry(p_accessToken,p_termbaseName,p_sourceLocale,p_sourceTerm,p_targetLocale,p_targetTerm,connection)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "editTBEntry(p_accessToken,p_termbaseName,p_sourceLocale,p_sourceTerm,p_targetLocale,p_targetTerm,connection)",
+                    activityArgs);
             if (connection == null)
             {
                 connection = ConnectionPool.getConnection();
@@ -11122,8 +10561,8 @@ public class Ambassador extends AbstractWebService
             String targetLangName = "";
             if (getLangNameByLocale(p_sourceLocale, tb, connection).size() > 0)
             {
-                sourceLangName = (String) getLangNameByLocale(p_sourceLocale,
-                        tb, connection).get(0);
+                sourceLangName = (String) getLangNameByLocale(p_sourceLocale, tb, connection)
+                        .get(0);
             }
             else
             {
@@ -11134,8 +10573,8 @@ public class Ambassador extends AbstractWebService
 
             if (getLangNameByLocale(p_targetLocale, tb, connection).size() > 0)
             {
-                targetLangName = (String) getLangNameByLocale(p_targetLocale,
-                        tb, connection).get(0);
+                targetLangName = (String) getLangNameByLocale(p_targetLocale, tb, connection)
+                        .get(0);
             }
             else
             {
@@ -11145,11 +10584,10 @@ public class Ambassador extends AbstractWebService
             }
 
             StringBuffer sbSQL = new StringBuffer();
-            sbSQL.append("select cid from tb_term " + " where lang_name = '"
-                    + targetLangName + "' and cid in ("
-                    + " SELECT CID FROM TB_TERM WHERE TBID = " + tbid
-                    + " AND LANG_NAME = '" + sourceLangName + "' "
-                    + " AND TERM = '" + p_sourceTerm + "')");
+            sbSQL.append("select cid from tb_term " + " where lang_name = '" + targetLangName
+                    + "' and cid in (" + " SELECT CID FROM TB_TERM WHERE TBID = " + tbid
+                    + " AND LANG_NAME = '" + sourceLangName + "' " + " AND TERM = '" + p_sourceTerm
+                    + "')");
 
             logger.info("SQL for 'cid' :" + sbSQL.toString() + "\r\n");
             query = connection.prepareStatement(sbSQL.toString());
@@ -11162,9 +10600,8 @@ public class Ambassador extends AbstractWebService
 
             if (cid != -1)
             {
-                String strSQL = "UPDATE TB_TERM SET TERM = '" + p_targetTerm
-                        + "'" + " WHERE LANG_NAME = '" + targetLangName + "'"
-                        + " AND CID = " + cid;
+                String strSQL = "UPDATE TB_TERM SET TERM = '" + p_targetTerm + "'"
+                        + " WHERE LANG_NAME = '" + targetLangName + "'" + " AND CID = " + cid;
 
                 logger.info("SQL for updating TB_TERM = " + strSQL + "\r\n");
 
@@ -11224,9 +10661,8 @@ public class Ambassador extends AbstractWebService
      * @param p_targetLocale
      * @throws WebServiceException
      */
-    public void deleteTBEntry(String p_accessToken, String p_termbaseName,
-            String p_searchString, String p_sourceLocale, String p_targetLocale)
-            throws WebServiceException
+    public void deleteTBEntry(String p_accessToken, String p_termbaseName, String p_searchString,
+            String p_sourceLocale, String p_targetLocale) throws WebServiceException
     {
         try
         {
@@ -11257,10 +10693,9 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("searchString", p_searchString);
             activityArgs.put("sourceLocale", p_sourceLocale);
             activityArgs.put("targetLocale", p_targetLocale);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "deleteTBEntry(p_accessToken,p_termbaseName,p_searchString,p_sourceLocale,p_targetLocale)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "deleteTBEntry(p_accessToken,p_termbaseName,p_searchString,p_sourceLocale,p_targetLocale)",
+                    activityArgs);
             connection = ConnectionPool.getConnection();
             connection.setAutoCommit(false);
 
@@ -11275,8 +10710,8 @@ public class Ambassador extends AbstractWebService
             String source_lang_name = "";
             if (getLangNameByLocale(p_sourceLocale, tb, connection).size() > 0)
             {
-                source_lang_name = (String) getLangNameByLocale(p_sourceLocale,
-                        tb, connection).get(0);
+                source_lang_name = (String) getLangNameByLocale(p_sourceLocale, tb, connection)
+                        .get(0);
             }
             else
             {
@@ -11290,27 +10725,20 @@ public class Ambassador extends AbstractWebService
             {
                 if (getLangNameByLocale(p_targetLocale, tb, connection).size() > 0)
                 {
-                    target_lang_name = (String) getLangNameByLocale(
-                            p_targetLocale, tb, connection).get(0);
+                    target_lang_name = (String) getLangNameByLocale(p_targetLocale, tb, connection)
+                            .get(0);
                 }
                 else
                 {
-                    String msg = "can't find language name for "
-                            + p_targetLocale;
+                    String msg = "can't find language name for " + p_targetLocale;
                     msg = makeErrorXml("deleteTBEntry", msg);
                     throw new WebServiceException(msg);
                 }
             }
 
             String sql1 = "SELECT TBID, TID, LID, CID, LANG_NAME, TERM FROM TB_TERM "
-                    + " WHERE TBID = "
-                    + tbid
-                    + " AND LANG_NAME = '"
-                    + source_lang_name
-                    + "'"
-                    + " AND TERM = '"
-                    + p_searchString
-                    + "'";
+                    + " WHERE TBID = " + tbid + " AND LANG_NAME = '" + source_lang_name + "'"
+                    + " AND TERM = '" + p_searchString + "'";
             long cid = -1;
 
             query = connection.prepareStatement(sql1);
@@ -11325,8 +10753,8 @@ public class Ambassador extends AbstractWebService
                 throw new WebServiceException(msg);
             }
 
-            String sql2 = "SELECT LANG_NAME FROM TB_TERM WHERE CID = " + cid
-                    + " AND TBID = " + tbid;
+            String sql2 = "SELECT LANG_NAME FROM TB_TERM WHERE CID = " + cid + " AND TBID = "
+                    + tbid;
             query = connection.prepareStatement(sql2);
             results = query.executeQuery();
             int langNum = 0;
@@ -11335,8 +10763,7 @@ public class Ambassador extends AbstractWebService
             {
                 langNum++;
                 if (!"".equals(target_lang_name.trim())
-                        && results.getString("LANG_NAME").equals(
-                                target_lang_name))
+                        && results.getString("LANG_NAME").equals(target_lang_name))
                 {
                     isTargetLang = true;
                 }
@@ -11346,35 +10773,26 @@ public class Ambassador extends AbstractWebService
             String sql4 = "";
             String sql5 = "";
             // delete all terms
-            if (target_lang_name == null
-                    || target_lang_name.equals(source_lang_name)
-                    || (target_lang_name != null
-                            && !target_lang_name.equals(source_lang_name)
+            if (target_lang_name == null || target_lang_name.equals(source_lang_name)
+                    || (target_lang_name != null && !target_lang_name.equals(source_lang_name)
                             && isTargetLang == true && langNum <= 2))
             {
-                sql3 = "DELETE FROM TB_TERM WHERE TBID = " + tbid
-                        + " AND CID = " + cid;
-                sql4 = "DELETE FROM TB_LANGUAGE WHERE TBID = " + tbid
-                        + " AND CID = " + cid;
-                sql5 = "DELETE FROM TB_CONCEPT WHERE TBID = " + tbid
-                        + " AND CID = " + cid;
+                sql3 = "DELETE FROM TB_TERM WHERE TBID = " + tbid + " AND CID = " + cid;
+                sql4 = "DELETE FROM TB_LANGUAGE WHERE TBID = " + tbid + " AND CID = " + cid;
+                sql5 = "DELETE FROM TB_CONCEPT WHERE TBID = " + tbid + " AND CID = " + cid;
             }
             // delete target term related data only
-            if (target_lang_name != null
-                    && !target_lang_name.equals(source_lang_name)
+            if (target_lang_name != null && !target_lang_name.equals(source_lang_name)
                     && isTargetLang == true && langNum > 2)
             {
-                sql3 = "DELETE FROM TB_TERM WHERE TBID = " + tbid
-                        + " AND CID = " + cid + " AND LANG_NAME = '"
-                        + target_lang_name + ";";
-                sql4 = "DELETE FROM TB_LANGUAGE WHERE TBID = " + tbid
-                        + " AND CID = " + cid + " AND NAME = '"
-                        + target_lang_name + "'";
+                sql3 = "DELETE FROM TB_TERM WHERE TBID = " + tbid + " AND CID = " + cid
+                        + " AND LANG_NAME = '" + target_lang_name + ";";
+                sql4 = "DELETE FROM TB_LANGUAGE WHERE TBID = " + tbid + " AND CID = " + cid
+                        + " AND NAME = '" + target_lang_name + "'";
                 sql5 = "";
             }
             // there is no data to be deleted
-            if (target_lang_name != null
-                    && !target_lang_name.equals(source_lang_name)
+            if (target_lang_name != null && !target_lang_name.equals(source_lang_name)
                     && isTargetLang == false)
             {
                 String msg = "no target term is found!";
@@ -11418,8 +10836,7 @@ public class Ambassador extends AbstractWebService
      * @return Termbase object
      * @throws WebServiceException
      */
-    private Termbase getTermbase(String p_termbaseName)
-            throws WebServiceException
+    private Termbase getTermbase(String p_termbaseName) throws WebServiceException
     {
         // get termbase object
         Termbase tb = null;
@@ -11429,8 +10846,7 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            String message = "Fail to get a termbase for termbase :"
-                    + p_termbaseName;
+            String message = "Fail to get a termbase for termbase :" + p_termbaseName;
             logger.error(message, e);
             throw new WebServiceException(message);
         }
@@ -11445,8 +10861,7 @@ public class Ambassador extends AbstractWebService
      *            to be input by user
      * @return lang name
      */
-    private List getLangNameByLocale(String queryLocale, Termbase tb,
-            Connection connection)
+    private List getLangNameByLocale(String queryLocale, Termbase tb, Connection connection)
     {
         List langList = new ArrayList();
 
@@ -11478,8 +10893,8 @@ public class Ambassador extends AbstractWebService
                 connection = ConnectionPool.getConnection();
 
             StringBuffer sbSQL = new StringBuffer();
-            sbSQL.append("SELECT DISTINCT NAME FROM TB_LANGUAGE "
-                    + " WHERE LOCALE LIKE '%" + lang + "%' ");
+            sbSQL.append("SELECT DISTINCT NAME FROM TB_LANGUAGE " + " WHERE LOCALE LIKE '%" + lang
+                    + "%' ");
             if (tb != null)
             {
                 sbSQL.append(" AND TBID = " + tb.getId());
@@ -11522,11 +10937,10 @@ public class Ambassador extends AbstractWebService
      * 
      * @return
      */
-    private String getMostPossibleLocale(List<String> p_langNameList,
-            String p_locale, Termbase p_tb, String p_searchType)
+    private String getMostPossibleLocale(List<String> p_langNameList, String p_locale,
+            Termbase p_tb, String p_searchType)
     {
-        if (p_langNameList == null || p_langNameList.size() == 0
-                || p_locale == null)
+        if (p_langNameList == null || p_langNameList.size() == 0 || p_locale == null)
         {
             return null;
         }
@@ -11638,20 +11052,19 @@ public class Ambassador extends AbstractWebService
      * @return
      * @throws WebServiceException
      */
-    private boolean isExistInTermbase(Termbase tb, String p_sourceLangName,
-            String p_sourceTerm, String p_targetLangName, String p_targetTerm,
-            Connection connection) throws WebServiceException
+    private boolean isExistInTermbase(Termbase tb, String p_sourceLangName, String p_sourceTerm,
+            String p_targetLangName, String p_targetTerm, Connection connection)
+            throws WebServiceException
     {
         boolean isExist = false;
 
         PreparedStatement query = null;
         ResultSet results = null;
 
-        String sql = " select cid from tb_term where lang_name = '"
-                + p_targetLangName + "' " + " and cid in ("
-                + " select cid from tb_term where tbid = " + tb.getId()
-                + " and lang_name = '" + p_sourceLangName + "' "
-                + " and term = '" + p_sourceTerm + "')";
+        String sql = " select cid from tb_term where lang_name = '" + p_targetLangName + "' "
+                + " and cid in (" + " select cid from tb_term where tbid = " + tb.getId()
+                + " and lang_name = '" + p_sourceLangName + "' " + " and term = '" + p_sourceTerm
+                + "')";
 
         logger.info("isExistInTermbase():sql: " + sql);
         try
@@ -11715,9 +11128,8 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String getFirstTu(String accessToken, String tmName,
-            String companyName, String sourceLocale, String targetLocale)
-            throws WebServiceException
+    public String getFirstTu(String accessToken, String tmName, String companyName,
+            String sourceLocale, String targetLocale) throws WebServiceException
     {
         try
         {
@@ -11745,24 +11157,21 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("companyName", companyName);
             activityArgs.put("sourceLocale", sourceLocale);
             activityArgs.put("targetLocale", targetLocale);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "getFirstTu(p_accessToken,tmName,companyName,sourceLocale,targetLocale)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "getFirstTu(p_accessToken,tmName,companyName,sourceLocale,targetLocale)",
+                    activityArgs);
 
             Company company = getCompanyByName(companyName);
             if (company == null)
             {
                 throw new WebServiceException(
-                        "Can not find the company with name (" + companyName
-                                + ")");
+                        "Can not find the company with name (" + companyName + ")");
             }
             ProjectTM tm = getProjectTm(tmName, company.getIdAsLong());
             if (tm == null)
             {
-                throw new WebServiceException(
-                        "Can not find the tm with tm name (" + tmName
-                                + ") and company name (" + companyName + ")");
+                throw new WebServiceException("Can not find the tm with tm name (" + tmName
+                        + ") and company name (" + companyName + ")");
             }
 
             GlobalSightLocale srcGSLocale = getLocaleByName(sourceLocale);
@@ -11803,10 +11212,8 @@ public class Ambassador extends AbstractWebService
         String hql = null;
         if (trgGSLocale != null)
         {
-            hql = "select tuv.tu from ProjectTmTuvT tuv "
-                    + "where tuv.locale.id = :tId "
-                    + "and tuv.tu.projectTm.id = :tmId "
-                    + "and tuv.tu.sourceLocale.id = :sId "
+            hql = "select tuv.tu from ProjectTmTuvT tuv " + "where tuv.locale.id = :tId "
+                    + "and tuv.tu.projectTm.id = :tmId " + "and tuv.tu.sourceLocale.id = :sId "
                     + "order by tuv.tu.id asc";
             paramsMap.put("tId", trgGSLocale.getId());
         }
@@ -11817,8 +11224,7 @@ public class Ambassador extends AbstractWebService
         }
         paramsMap.put("tmId", ptm.getId());
         paramsMap.put("sId", srcGSLocale.getId());
-        List<ProjectTmTuT> tus = (List<ProjectTmTuT>) HibernateUtil.search(hql,
-                paramsMap, 0, 1);
+        List<ProjectTmTuT> tus = (List<ProjectTmTuT>) HibernateUtil.search(hql, paramsMap, 0, 1);
         if (tus == null || tus.size() == 0)
         {
             return null;
@@ -11835,9 +11241,8 @@ public class Ambassador extends AbstractWebService
         return tu.convertToTmx(targetLocales);
     }
 
-    private <T> String getFirstTm3Tu(ProjectTM ptm,
-            GlobalSightLocale srcGSLocale, GlobalSightLocale trgGSLocale)
-            throws WebServiceException
+    private <T> String getFirstTm3Tu(ProjectTM ptm, GlobalSightLocale srcGSLocale,
+            GlobalSightLocale trgGSLocale) throws WebServiceException
     {
         Connection conn = null;
         try
@@ -11851,25 +11256,18 @@ public class Ambassador extends AbstractWebService
             StatementBuilder sb = new StatementBuilder();
             if (trgGSLocale != null)
             {
-                sb.append("SELECT tuv.tuId FROM ").append(tuvTable)
-                        .append(" tuv, (SELECT id FROM ").append(tuTable)
-                        .append(" tu WHERE tu.tmid = ? ")
-                        .addValue(ptm.getTm3Id())
-                        .append(" AND tu.srcLocaleId = ? ")
-                        .addValue(srcGSLocale.getId())
+                sb.append("SELECT tuv.tuId FROM ").append(tuvTable).append(" tuv, (SELECT id FROM ")
+                        .append(tuTable).append(" tu WHERE tu.tmid = ? ").addValue(ptm.getTm3Id())
+                        .append(" AND tu.srcLocaleId = ? ").addValue(srcGSLocale.getId())
                         .append(" ORDER BY tu.id LIMIT 0,1000) tuids ")
-                        .append("WHERE tuv.tuId = tuids.id ")
-                        .append("AND tuv.localeId = ? ")
-                        .addValue(trgGSLocale.getId())
-                        .append(" ORDER BY tuv.tuId LIMIT 0,1;");
+                        .append("WHERE tuv.tuId = tuids.id ").append("AND tuv.localeId = ? ")
+                        .addValue(trgGSLocale.getId()).append(" ORDER BY tuv.tuId LIMIT 0,1;");
             }
             else
             {
-                sb.append("SELECT id FROM ").append(tuTable)
-                        .append(" WHERE tmid = ? ").addValue(ptm.getTm3Id())
-                        .append(" AND srcLocaleId = ? ")
-                        .addValue(srcGSLocale.getId())
-                        .append(" ORDER BY id LIMIT 0,1;");
+                sb.append("SELECT id FROM ").append(tuTable).append(" WHERE tmid = ? ")
+                        .addValue(ptm.getTm3Id()).append(" AND srcLocaleId = ? ")
+                        .addValue(srcGSLocale.getId()).append(" ORDER BY id LIMIT 0,1;");
             }
             List<Long> tuIds = SQLUtil.execIdsQuery(conn, sb);
             if (tuIds != null && tuIds.size() > 0)
@@ -11886,9 +11284,8 @@ public class Ambassador extends AbstractWebService
             TM3Attribute translatableAttr = TM3Util.getAttr(tm, TRANSLATABLE);
             TM3Attribute fromWsAttr = TM3Util.getAttr(tm, FROM_WORLDSERVER);
             TM3Attribute projectAttr = TM3Util.getAttr(tm, UPDATED_BY_PROJECT);
-            SegmentTmTu segTmTu = TM3Util.toSegmentTmTu(tm3Tu, ptm.getId(),
-                    formatAttr, typeAttr, sidAttr, fromWsAttr,
-                    translatableAttr, projectAttr);
+            SegmentTmTu segTmTu = TM3Util.toSegmentTmTu(tm3Tu, ptm.getId(), formatAttr, typeAttr,
+                    sidAttr, fromWsAttr, translatableAttr, projectAttr);
 
             List<GlobalSightLocale> targetLocales = null;
             if (trgGSLocale != null)
@@ -11932,25 +11329,20 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String nextTus(String accessToken, String sourceLocale,
-            String targetLocale, String maxSize, String tuIdToStart)
-            throws WebServiceException
+    public String nextTus(String accessToken, String sourceLocale, String targetLocale,
+            String maxSize, String tuIdToStart) throws WebServiceException
     {
         try
         {
-            ProjectTmTuT tu = HibernateUtil.get(ProjectTmTuT.class,
-                    Long.parseLong(tuIdToStart));
+            ProjectTmTuT tu = HibernateUtil.get(ProjectTmTuT.class, Long.parseLong(tuIdToStart));
             if (tu == null)
             {
-                throw new WebServiceException("Can not find tu with id :"
-                        + tuIdToStart);
+                throw new WebServiceException("Can not find tu with id :" + tuIdToStart);
             }
             ProjectTM ptm = tu.getProjectTm();
-            Company company = ServerProxy.getJobHandler().getCompanyById(
-                    ptm.getCompanyId());
-            return nextTus(accessToken, ptm.getName(),
-                    company.getCompanyName(), sourceLocale, targetLocale,
-                    maxSize, tuIdToStart);
+            Company company = ServerProxy.getJobHandler().getCompanyById(ptm.getCompanyId());
+            return nextTus(accessToken, ptm.getName(), company.getCompanyName(), sourceLocale,
+                    targetLocale, maxSize, tuIdToStart);
         }
         catch (Exception e)
         {
@@ -11974,8 +11366,8 @@ public class Ambassador extends AbstractWebService
      * @return String
      * @throws WebServiceException
      */
-    public String deleteTuByTuIds(String accessToken, String tmName,
-            String companyName, String tuIds) throws WebServiceException
+    public String deleteTuByTuIds(String accessToken, String tmName, String companyName,
+            String tuIds) throws WebServiceException
     {
         try
         {
@@ -12000,21 +11392,19 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("tmName", tmName);
             activityArgs.put("companyName", companyName);
             activityArgs.put("tuIds", tuIds);
-            activityStart = WebServicesLog.start(Ambassador.class,
-                    DELETE_TU_BY_TUID, activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class, DELETE_TU_BY_TUID, activityArgs);
 
             Company company = getCompanyByName(companyName);
             if (company == null)
             {
-                return makeErrorXml(DELETE_TU_BY_TUID, "Can not find the company with name ("
-                        + companyName + ")");
+                return makeErrorXml(DELETE_TU_BY_TUID,
+                        "Can not find the company with name (" + companyName + ")");
             }
             ProjectTM ptm = getProjectTm(tmName, company.getIdAsLong());
             if (ptm == null)
             {
-                return makeErrorXml(DELETE_TU_BY_TUID,
-                        "Can not find the tm with tm name (" + tmName
-                                + ") and company name (" + companyName + ")");
+                return makeErrorXml(DELETE_TU_BY_TUID, "Can not find the tm with tm name (" + tmName
+                        + ") and company name (" + companyName + ")");
             }
 
             if (ptm.getTm3Id() == null)
@@ -12025,8 +11415,7 @@ public class Ambassador extends AbstractWebService
 
             if (StringUtil.isEmpty(tuIds))
             {
-                return makeErrorXml(DELETE_TU_BY_TUID,
-                        "Tu ids can not be empty.");
+                return makeErrorXml(DELETE_TU_BY_TUID, "Tu ids can not be empty.");
             }
 
             String[] tuIdArr = tuIds.split(",");
@@ -12035,8 +11424,7 @@ public class Ambassador extends AbstractWebService
             {
                 if (StringUtil.isEmpty(tuId))
                 {
-                    return makeErrorXml(DELETE_TU_BY_TUID,
-                            "Invalid tu id(s): " + tuIds);
+                    return makeErrorXml(DELETE_TU_BY_TUID, "Invalid tu id(s): " + tuIds);
                 }
                 try
                 {
@@ -12045,15 +11433,12 @@ public class Ambassador extends AbstractWebService
                 }
                 catch (Exception e)
                 {
-                    return makeErrorXml(DELETE_TU_BY_TUID,
-                            "Invalid tu id(s): " + tuIds);
+                    return makeErrorXml(DELETE_TU_BY_TUID, "Invalid tu id(s): " + tuIds);
                 }
             }
 
-            Tm tm = ServerProxy.getProjectHandler().getProjectTMById(
-                    ptm.getId(), true);
-            TM3Tm<GSTuvData> tm3tm = (new Tm3SegmentTmInfo()).getTM3Tm(tm
-                    .getTm3Id());
+            Tm tm = ServerProxy.getProjectHandler().getProjectTMById(ptm.getId(), true);
+            TM3Tm<GSTuvData> tm3tm = (new Tm3SegmentTmInfo()).getTM3Tm(tm.getTm3Id());
             List<TM3Tu<GSTuvData>> tus = tm3tm.getTu(tuIdList);
             List<SegmentTmTu> resultList = new ArrayList<SegmentTmTu>();
             TM3Attribute typeAttr = TM3Util.getAttr(tm3tm, TYPE);
@@ -12066,16 +11451,14 @@ public class Ambassador extends AbstractWebService
             {
                 if (tm3tu.getTm().getId().equals(tm.getTm3Id()))
                 {
-                    SegmentTmTu segmentTmTu = TM3Util.toSegmentTmTu(tm3tu,
-                            tm.getId(), formatAttr, typeAttr, sidAttr,
-                            fromWsAttr, translatableAttr, projectAttr);
+                    SegmentTmTu segmentTmTu = TM3Util.toSegmentTmTu(tm3tu, tm.getId(), formatAttr,
+                            typeAttr, sidAttr, fromWsAttr, translatableAttr, projectAttr);
                     resultList.add(segmentTmTu);
                 }
                 else
                 {
-                    return makeErrorXml(DELETE_TU_BY_TUID, "Tu id ("
-                            + tm3tu.getId()
-                            + ") does not belong to current tm.");
+                    return makeErrorXml(DELETE_TU_BY_TUID,
+                            "Tu id (" + tm3tu.getId() + ") does not belong to current tm.");
                 }
             }
             if (resultList.size() > 0)
@@ -12090,7 +11473,7 @@ public class Ambassador extends AbstractWebService
             return makeErrorXml(DELETE_TU_BY_TUID, e.getMessage());
         }
     }
-    
+
     /**
      * Search tus according to the specified tu.
      * 
@@ -12115,9 +11498,9 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String nextTus(String accessToken, String tmName,
-            String companyName, String sourceLocale, String targetLocale,
-            String maxSize, String tuIdToStart) throws WebServiceException
+    public String nextTus(String accessToken, String tmName, String companyName,
+            String sourceLocale, String targetLocale, String maxSize, String tuIdToStart)
+            throws WebServiceException
     {
         try
         {
@@ -12158,22 +11541,19 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("targetLocale", targetLocale);
             activityArgs.put("maxSize", maxSize);
             activityArgs.put("tuId", tuIdToStart);
-            activityStart = WebServicesLog.start(Ambassador.class, "nextTus",
-                    activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class, "nextTus", activityArgs);
 
             Company company = getCompanyByName(companyName);
             if (company == null)
             {
                 throw new WebServiceException(
-                        "Can not find the company with name (" + companyName
-                                + ")");
+                        "Can not find the company with name (" + companyName + ")");
             }
             ProjectTM ptm = getProjectTm(tmName, company.getIdAsLong());
             if (ptm == null)
             {
-                throw new WebServiceException(
-                        "Can not find the tm with tm name (" + tmName
-                                + ") and company name (" + companyName + ")");
+                throw new WebServiceException("Can not find the tm with tm name (" + tmName
+                        + ") and company name (" + companyName + ")");
             }
 
             GlobalSightLocale srcGSLocale = getLocaleByName(sourceLocale);
@@ -12185,13 +11565,11 @@ public class Ambassador extends AbstractWebService
 
             if (ptm.getTm3Id() == null)
             {
-                return nextTm2Tus(ptm, srcGSLocale, trgGSLocale,
-                        Long.parseLong(tuIdToStart), size);
+                return nextTm2Tus(ptm, srcGSLocale, trgGSLocale, Long.parseLong(tuIdToStart), size);
             }
             else
             {
-                return nextTm3Tus(ptm, srcGSLocale, trgGSLocale,
-                        Long.parseLong(tuIdToStart), size);
+                return nextTm3Tus(ptm, srcGSLocale, trgGSLocale, Long.parseLong(tuIdToStart), size);
             }
         }
         catch (Exception e)
@@ -12210,14 +11588,13 @@ public class Ambassador extends AbstractWebService
     }
 
     private String nextTm2Tus(ProjectTM ptm, GlobalSightLocale srcGSLocale,
-            GlobalSightLocale trgGSLocale, long tuIdToStart, int size)
-            throws WebServiceException
+            GlobalSightLocale trgGSLocale, long tuIdToStart, int size) throws WebServiceException
     {
         ProjectTmTuT tu = HibernateUtil.get(ProjectTmTuT.class, tuIdToStart);
         if (tu == null)
         {
-            throw new WebServiceException("Can not find tu with id "
-                    + tuIdToStart + " in current TM '" + ptm.getName() + "'.");
+            throw new WebServiceException("Can not find tu with id " + tuIdToStart
+                    + " in current TM '" + ptm.getName() + "'.");
         }
 
         String hql = null;
@@ -12228,19 +11605,16 @@ public class Ambassador extends AbstractWebService
         if (trgGSLocale != null)
         {
             hql = "select distinct tuv.tu from ProjectTmTuvT tuv where tuv.locale.id = :tId "
-                    + "and tuv.tu.projectTm.id = :tmId "
-                    + "and tuv.tu.sourceLocale.id = :sId "
+                    + "and tuv.tu.projectTm.id = :tmId " + "and tuv.tu.sourceLocale.id = :sId "
                     + "and tuv.tu.id > :fId order by tuv.tu.id asc";
             map.put("tId", trgGSLocale.getId());
         }
         else
         {
             hql = "from ProjectTmTuT tu where tu.projectTm.id = :tmId "
-                    + "and tu.sourceLocale.id = :sId "
-                    + "and tu.id > :fId order by tu.id asc";
+                    + "and tu.sourceLocale.id = :sId " + "and tu.id > :fId order by tu.id asc";
         }
-        List<ProjectTmTuT> tus = (List<ProjectTmTuT>) HibernateUtil.search(hql,
-                map, 0, size);
+        List<ProjectTmTuT> tus = (List<ProjectTmTuT>) HibernateUtil.search(hql, map, 0, size);
         if (tus == null || tus.size() == 0)
         {
             return "-1";
@@ -12262,8 +11636,7 @@ public class Ambassador extends AbstractWebService
     }
 
     private String nextTm3Tus(ProjectTM ptm, GlobalSightLocale srcGSLocale,
-            GlobalSightLocale trgGSLocale, long tuIdToStart, int size)
-            throws WebServiceException
+            GlobalSightLocale trgGSLocale, long tuIdToStart, int size) throws WebServiceException
     {
         Connection conn = null;
         try
@@ -12276,31 +11649,25 @@ public class Ambassador extends AbstractWebService
             StatementBuilder sb = new StatementBuilder();
             if (trgGSLocale != null)
             {
-                sb.append("SELECT tuv.tuId FROM ").append(tuvTable)
-                        .append(" tuv,");
+                sb.append("SELECT tuv.tuId FROM ").append(tuvTable).append(" tuv,");
                 sb.append(" (SELECT id FROM ").append(tuTable).append(" tu ")
                         .append("WHERE tu.tmid = ? ").addValue(ptm.getTm3Id())
-                        .append(" AND tu.srcLocaleId = ? ")
-                        .addValue(srcGSLocale.getId())
+                        .append(" AND tu.srcLocaleId = ? ").addValue(srcGSLocale.getId())
                         .append(" AND tu.id > ? ").addValue(tuIdToStart)
-                        .append(" ORDER BY tu.id LIMIT 0, ")
-                        .append(String.valueOf(10 * size)).append(") tuids ");
+                        .append(" ORDER BY tu.id LIMIT 0, ").append(String.valueOf(10 * size))
+                        .append(") tuids ");
                 sb.append(" WHERE tuv.tuId = tuids.id");
-                sb.append(" AND tuv.localeId = ? ").addValue(
-                        trgGSLocale.getId());
+                sb.append(" AND tuv.localeId = ? ").addValue(trgGSLocale.getId());
                 sb.append(" AND tuv.tmId = ? ").addValue(ptm.getTm3Id());
                 sb.append(" ORDER BY tuv.tuId ");
-                sb.append(" LIMIT 0, ").append(String.valueOf(size))
-                        .append(";");
+                sb.append(" LIMIT 0, ").append(String.valueOf(size)).append(";");
             }
             else
             {
-                sb.append("SELECT id FROM ").append(tuTable)
-                        .append(" WHERE tmid = ? ").addValue(ptm.getTm3Id())
-                        .append(" AND srcLocaleId = ? ")
-                        .addValue(srcGSLocale.getId()).append(" AND id > ? ")
-                        .addValue(tuIdToStart).append(" ORDER BY id ")
-                        .append("LIMIT 0,").append(size + ";");
+                sb.append("SELECT id FROM ").append(tuTable).append(" WHERE tmid = ? ")
+                        .addValue(ptm.getTm3Id()).append(" AND srcLocaleId = ? ")
+                        .addValue(srcGSLocale.getId()).append(" AND id > ? ").addValue(tuIdToStart)
+                        .append(" ORDER BY id ").append("LIMIT 0,").append(size + ";");
             }
             List<Long> tuIds = SQLUtil.execIdsQuery(conn, sb);
             if (tuIds == null || tuIds.size() == 0)
@@ -12320,9 +11687,8 @@ public class Ambassador extends AbstractWebService
             List<SegmentTmTu> segTmTus = new ArrayList<SegmentTmTu>();
             for (TM3Tu tm3Tu : tm3Tus)
             {
-                segTmTus.add(TM3Util.toSegmentTmTu(tm3Tu, ptm.getId(),
-                        formatAttr, typeAttr, sidAttr, fromWsAttr,
-                        translatableAttr, projectAttr));
+                segTmTus.add(TM3Util.toSegmentTmTu(tm3Tu, ptm.getId(), formatAttr, typeAttr,
+                        sidAttr, fromWsAttr, translatableAttr, projectAttr));
             }
 
             List<GlobalSightLocale> targetLocales = null;
@@ -12346,7 +11712,7 @@ public class Ambassador extends AbstractWebService
                 Element fileTypeElem = fileEle.element("fileType");
                 fileTypeElem.setText("xml");
             }
-            
+
             Iterator filterIter = rootElt.elementIterator("filterOptions");
             while (filterIter.hasNext())
             {
@@ -12354,21 +11720,18 @@ public class Ambassador extends AbstractWebService
                 Element language = filterEle.element("language");
                 if (trgGSLocale != null)
                 {
-                    language.setText(trgGSLocale.getLanguage() + "_"
-                            + trgGSLocale.getCountry());
+                    language.setText(trgGSLocale.getLanguage() + "_" + trgGSLocale.getCountry());
                 }
             }
 
-            options = doc.asXML().substring(
-                    doc.asXML().indexOf("<exportOptions>"));
+            options = doc.asXML().substring(doc.asXML().indexOf("<exportOptions>"));
             exporter.setExportOptions(options);
 
             Tmx tmx = new Tmx();
             tmx.setSourceLang(Tmx.DEFAULT_SOURCELANG);
             tmx.setDatatype(Tmx.DATATYPE_HTML);
 
-            TmxWriter tmxWriter = new TmxWriter(
-                    exporter.getExportOptionsObject(), ptm, tmx);
+            TmxWriter tmxWriter = new TmxWriter(exporter.getExportOptionsObject(), ptm, tmx);
             for (SegmentTmTu segTmTu : segTmTus)
             {
                 result.append(tmxWriter.getSegmentTmForXml(segTmTu));
@@ -12400,15 +11763,13 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String editTu(String accessToken, String tmx)
-            throws WebServiceException
+    public String editTu(String accessToken, String tmx) throws WebServiceException
     {
         long tuId = -1;
         SAXReader reader = new SAXReader();
         try
         {
-            Document doc = reader.read(new StringReader("<root>" + tmx
-                    + "</root>"));
+            Document doc = reader.read(new StringReader("<root>" + tmx + "</root>"));
             List tuNodes = doc.getRootElement().selectNodes("//tu");
             if (tuNodes != null && tuNodes.size() > 0)
             {
@@ -12424,12 +11785,10 @@ public class Ambassador extends AbstractWebService
             ProjectTmTuT tu = HibernateUtil.get(ProjectTmTuT.class, tuId);
             if (tu == null)
             {
-                throw new WebServiceException("Can not find tu with id :"
-                        + tuId);
+                throw new WebServiceException("Can not find tu with id :" + tuId);
             }
             ProjectTM ptm = tu.getProjectTm();
-            Company company = ServerProxy.getJobHandler().getCompanyById(
-                    ptm.getCompanyId());
+            Company company = ServerProxy.getJobHandler().getCompanyById(ptm.getCompanyId());
 
             return editTu(accessToken, ptm.getName(), company.getName(), tmx);
         }
@@ -12454,8 +11813,8 @@ public class Ambassador extends AbstractWebService
      * @return "true" if succeed
      * @throws WebServiceException
      */
-    public String editTu(String accessToken, String tmName, String companyName,
-            String tmx) throws WebServiceException
+    public String editTu(String accessToken, String tmName, String companyName, String tmx)
+            throws WebServiceException
     {
         try
         {
@@ -12480,8 +11839,8 @@ public class Ambassador extends AbstractWebService
         final ProjectTM ptm = getProjectTm(tmName, company.getIdAsLong());
         if (ptm == null)
         {
-            throw new WebServiceException("Can not find the tm with tm name ("
-                    + tmName + ") and company name (" + companyName + ")");
+            throw new WebServiceException("Can not find the tm with tm name (" + tmName
+                    + ") and company name (" + companyName + ")");
         }
 
         SAXReader reader = new SAXReader();
@@ -12524,8 +11883,8 @@ public class Ambassador extends AbstractWebService
             String loggedUserName = this.getUsernameFromSession(accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggedUserName);
-            activityStart = WebServicesLog.start(Ambassador.class,
-                    "editTu(accessToken,tmx)", activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class, "editTu(accessToken,tmx)",
+                    activityArgs);
             reader.read(new StringReader(tmx));
         }
         catch (DocumentException e)
@@ -12599,8 +11958,7 @@ public class Ambassador extends AbstractWebService
 
         if (nodes.size() < 2)
         {
-            throw new Exception(
-                    "TU contains less than 2 TUVs (after filtering), ignoring");
+            throw new Exception("TU contains less than 2 TUVs (after filtering), ignoring");
         }
 
         for (int i = 0; i < nodes.size(); i++)
@@ -12616,8 +11974,7 @@ public class Ambassador extends AbstractWebService
 
         if (!b_found)
         {
-            throw new Exception("TU is missing TUV in source language "
-                    + srcLang);
+            throw new Exception("TU is missing TUV in source language " + srcLang);
         }
     }
 
@@ -12668,16 +12025,14 @@ public class Ambassador extends AbstractWebService
             tu.setSourceLocale(manager.getLocaleByString(locale));
             // Segment type (text, css-color, etc)
             String segmentType = "text";
-            Node node = p_root.selectSingleNode(".//prop[@type = '"
-                    + Tmx.PROP_SEGMENTTYPE + "']");
+            Node node = p_root.selectSingleNode(".//prop[@type = '" + Tmx.PROP_SEGMENTTYPE + "']");
             if (node != null)
             {
                 segmentType = node.getText();
             }
             tu.setType(segmentType);
             // Sid
-            node = p_root.selectSingleNode(".//prop[@type= '"
-                    + Tmx.PROP_TM_UDA_SID + "']");
+            node = p_root.selectSingleNode(".//prop[@type= '" + Tmx.PROP_TM_UDA_SID + "']");
             if (node != null)
             {
                 tu.setSid(node.getText());
@@ -12702,9 +12057,8 @@ public class Ambassador extends AbstractWebService
 
                 if (savedTuvs.size() == 0)
                 {
-                    throw new WebServiceException(
-                            "Can not find tuv with tu id: " + tu.getId()
-                                    + ", locale: " + tuv.getLocale());
+                    throw new WebServiceException("Can not find tuv with tu id: " + tu.getId()
+                            + ", locale: " + tuv.getLocale());
                 }
 
                 // More than one tuv have the locale, than go to check the
@@ -12715,8 +12069,7 @@ public class Ambassador extends AbstractWebService
                     boolean find = false;
                     for (ProjectTmTuvT savedTuv : savedTuvs)
                     {
-                        if (savedTuv.getCreationDate().getTime() == tuv
-                                .getCreationDate().getTime())
+                        if (savedTuv.getCreationDate().getTime() == tuv.getCreationDate().getTime())
                         {
                             find = true;
                             savedTuv.merge(tuv);
@@ -12725,11 +12078,9 @@ public class Ambassador extends AbstractWebService
                     }
                     if (!find)
                     {
-                        throw new WebServiceException(
-                                "Can not find tuv with tu id: " + tu.getId()
-                                        + ", locale: " + tuv.getLocale()
-                                        + ", creation date:"
-                                        + tuv.getCreationDate());
+                        throw new WebServiceException("Can not find tuv with tu id: " + tu.getId()
+                                + ", locale: " + tuv.getLocale() + ", creation date:"
+                                + tuv.getCreationDate());
                     }
                 }
                 else
@@ -12759,8 +12110,8 @@ public class Ambassador extends AbstractWebService
         TM3Attribute translatableAttr = TM3Util.getAttr(tm, TRANSLATABLE);
         TM3Attribute fromWsAttr = TM3Util.getAttr(tm, FROM_WORLDSERVER);
         TM3Attribute projectAttr = TM3Util.getAttr(tm, UPDATED_BY_PROJECT);
-        SegmentTmTu tu = TM3Util.toSegmentTmTu(tm3Tu, ptm.getId(), formatAttr,
-                typeAttr, sidAttr, fromWsAttr, translatableAttr, projectAttr);
+        SegmentTmTu tu = TM3Util.toSegmentTmTu(tm3Tu, ptm.getId(), formatAttr, typeAttr, sidAttr,
+                fromWsAttr, translatableAttr, projectAttr);
 
         // Datatype of the TU (html, javascript etc)
         String format = p_root.attributeValue(Tmx.DATATYPE);
@@ -12780,8 +12131,7 @@ public class Ambassador extends AbstractWebService
         tu.setSourceLocale(manager.getLocaleByString(locale));
         // Segment type (text, css-color, etc)
         String segmentType = "text";
-        Node node = p_root.selectSingleNode(".//prop[@type = '"
-                + Tmx.PROP_SEGMENTTYPE + "']");
+        Node node = p_root.selectSingleNode(".//prop[@type = '" + Tmx.PROP_SEGMENTTYPE + "']");
         if (node != null)
         {
             segmentType = node.getText();
@@ -12789,8 +12139,7 @@ public class Ambassador extends AbstractWebService
         tu.setType(segmentType);
         // Sid
         String sid = null;
-        node = p_root.selectSingleNode(".//prop[@type= '" + Tmx.PROP_TM_UDA_SID
-                + "']");
+        node = p_root.selectSingleNode(".//prop[@type= '" + Tmx.PROP_TM_UDA_SID + "']");
         if (node != null)
         {
             sid = node.getText();
@@ -12803,8 +12152,7 @@ public class Ambassador extends AbstractWebService
         {
             Element elem = (Element) nodes.get(i);
             SegmentTmTuv tuv = new SegmentTmTuv();
-            PageTmTu pageTmTu = new PageTmTu(-1, -1, "plaintext", "text",
-                    true);
+            PageTmTu pageTmTu = new PageTmTu(-1, -1, "plaintext", "text", true);
             tuv.setTu(pageTmTu);
             tuv.setSid(sid);
             TmxUtil.convertFromTmx(elem, tuv);
@@ -12834,8 +12182,7 @@ public class Ambassador extends AbstractWebService
                 boolean find = false;
                 for (SegmentTmTuv savedTuv : savedTuvs)
                 {
-                    if (savedTuv.getCreationDate().getTime() == tuv
-                            .getCreationDate().getTime())
+                    if (savedTuv.getCreationDate().getTime() == tuv.getCreationDate().getTime())
                     {
                         find = true;
                         savedTuv.merge(tuv);
@@ -12845,10 +12192,8 @@ public class Ambassador extends AbstractWebService
                 if (!find)
                 {
                     throw new WebServiceException(
-                            "Can not find tuv with tu id: " + tu.getId()
-                                    + ", locale: " + tuv.getLocale()
-                                    + ", creation date:"
-                                    + tuv.getCreationDate());
+                            "Can not find tuv with tu id: " + tu.getId() + ", locale: "
+                                    + tuv.getLocale() + ", creation date:" + tuv.getCreationDate());
                 }
             }
             else
@@ -12870,8 +12215,7 @@ public class Ambassador extends AbstractWebService
      *         information for current user
      * @throws WebServiceException
      */
-    public String getAllPermissionsByUser(String p_accessToken)
-            throws WebServiceException
+    public String getAllPermissionsByUser(String p_accessToken) throws WebServiceException
     {
         String strReturn = "";
         try
@@ -12889,11 +12233,10 @@ public class Ambassador extends AbstractWebService
         try
         {
             // get permission set for current user
-            User user = ServerProxy.getUserManager().getUserByName(
-                    getUsernameFromSession(p_accessToken));
+            User user = ServerProxy.getUserManager()
+                    .getUserByName(getUsernameFromSession(p_accessToken));
             String userId = user.getUserId();
-            PermissionSet ps = Permission.getPermissionManager()
-                    .getPermissionSetForUser(userId);
+            PermissionSet ps = Permission.getPermissionManager().getPermissionSetForUser(userId);
             // convert permissions into Map (permissionName:bitValue)
             HashMap allPermsInMap = getAllPermissionsInMap(ps);
             // get returned XML
@@ -12985,8 +12328,7 @@ public class Ambassador extends AbstractWebService
      *         information that were defined by current user
      * @throws WebServiceException
      */
-    public String getSourceLocales(String p_accessToken)
-            throws WebServiceException
+    public String getSourceLocales(String p_accessToken) throws WebServiceException
     {
         StringBuffer strReturn = new StringBuffer(XML_HEAD);
         try
@@ -13004,19 +12346,17 @@ public class Ambassador extends AbstractWebService
         try
         {
             // get permission set for current user
-            User user = ServerProxy.getUserManager().getUserByName(
-                    getUsernameFromSession(p_accessToken));
+            User user = ServerProxy.getUserManager()
+                    .getUserByName(getUsernameFromSession(p_accessToken));
             LocaleManagerLocal lml = new LocaleManagerLocal();
-            ArrayList locales = new ArrayList(
-                    lml.getAllSourceLocalesByCompanyId(CompanyWrapper
-                            .getCompanyIdByName(user.getCompanyName())));
+            ArrayList locales = new ArrayList(lml.getAllSourceLocalesByCompanyId(
+                    CompanyWrapper.getCompanyIdByName(user.getCompanyName())));
             GlobalSightLocale locale = null;
             strReturn.append("<root>\r\n");
             for (int i = 0; i < locales.size(); i++)
             {
                 locale = (GlobalSightLocale) locales.get(i);
-                strReturn.append("<locale>\r\n<id>").append(locale.getId())
-                        .append("</id>\r\n");
+                strReturn.append("<locale>\r\n<id>").append(locale.getId()).append("</id>\r\n");
                 strReturn.append("<name>").append(locale.getDisplayName())
                         .append("</name>\r\n</locale>\r\n");
             }
@@ -13060,27 +12400,23 @@ public class Ambassador extends AbstractWebService
         try
         {
             // get permission set for current user
-            User user = ServerProxy.getUserManager().getUserByName(
-                    getUsernameFromSession(p_accessToken));
+            User user = ServerProxy.getUserManager()
+                    .getUserByName(getUsernameFromSession(p_accessToken));
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", user.getUserName());
             activityArgs.put("sourceLocale", p_sourceLocale);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "getTargetLocales(p_accessToken,p_sourceLocale)",
-                    activityArgs);
+                    "getTargetLocales(p_accessToken,p_sourceLocale)", activityArgs);
             LocaleManagerLocal lml = new LocaleManagerLocal();
-            GlobalSightLocale sourceLocale = lml
-                    .getLocaleByString(p_sourceLocale);
-            ArrayList locales = new ArrayList(lml.getTargetLocalesByCompanyId(
-                    sourceLocale,
+            GlobalSightLocale sourceLocale = lml.getLocaleByString(p_sourceLocale);
+            ArrayList locales = new ArrayList(lml.getTargetLocalesByCompanyId(sourceLocale,
                     CompanyWrapper.getCompanyIdByName(user.getCompanyName())));
             GlobalSightLocale locale = null;
             strReturn.append("<root>\r\n");
             for (int i = 0; i < locales.size(); i++)
             {
                 locale = (GlobalSightLocale) locales.get(i);
-                strReturn.append("<locale>\r\n<id>").append(locale.getId())
-                        .append("</id>\r\n");
+                strReturn.append("<locale>\r\n<id>").append(locale.getId()).append("</id>\r\n");
                 strReturn.append("<name>").append(locale.getDisplayName())
                         .append("</name>\r\n</locale>\r\n");
             }
@@ -13109,8 +12445,7 @@ public class Ambassador extends AbstractWebService
      * @return String URI for database connection
      * @throws WebServiceException
      */
-    public String getConnection(String p_accessToken)
-            throws WebServiceException
+    public String getConnection(String p_accessToken) throws WebServiceException
     {
         StringBuffer strReturn = new StringBuffer();
         try
@@ -13135,9 +12470,8 @@ public class Ambassador extends AbstractWebService
             String url = pr.getProperty("connect_string");
             String username = pr.getProperty("user_name");
             String password = pr.getProperty("password");
-            strReturn.append(url)
-                    .append("?useUnicode=true&characterEncoding=UTF-8")
-                    .append(",").append(username).append(",").append(password);
+            strReturn.append(url).append("?useUnicode=true&characterEncoding=UTF-8").append(",")
+                    .append(username).append(",").append(password);
         }
         catch (Exception e)
         {
@@ -13157,8 +12491,7 @@ public class Ambassador extends AbstractWebService
      * @return String priority associated with speicified L10N
      * @throws WebServiceException
      */
-    public String getPriorityByID(String p_accessToken, String p_l10nID)
-            throws WebServiceException
+    public String getPriorityByID(String p_accessToken, String p_l10nID) throws WebServiceException
     {
         StringBuffer strReturn = new StringBuffer();
         try
@@ -13243,14 +12576,11 @@ public class Ambassador extends AbstractWebService
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggedUserName);
             activityArgs.put("jobId", p_jobId);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "getAttributesByJobId(p_accessToken,p_jobId)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "getAttributesByJobId(p_accessToken,p_jobId)", activityArgs);
 
             JobImpl job = HibernateUtil.get(JobImpl.class, p_jobId);
-            Assert.assertFalse(job == null, "Can not find job by id: "
-                    + p_jobId);
+            Assert.assertFalse(job == null, "Can not find job by id: " + p_jobId);
             Assert.assertFalse(
                     !isInSameCompany(getUsernameFromSession(p_accessToken),
                             String.valueOf(job.getCompanyId())),
@@ -13263,16 +12593,14 @@ public class Ambassador extends AbstractWebService
             {
                 for (JobAttribute attribute : jobAttributes)
                 {
-                    JobAttributeVo vo = AttributeUtil
-                            .getJobAttributeVo(attribute);
+                    JobAttributeVo vo = AttributeUtil.getJobAttributeVo(attribute);
                     allAttributes.addAttribute(vo);
                 }
             }
 
             allAttributes.sort();
 
-            return com.globalsight.cxe.util.XmlUtil.object2String(
-                    allAttributes, true);
+            return com.globalsight.cxe.util.XmlUtil.object2String(allAttributes, true);
         }
         catch (Exception e)
         {
@@ -13307,8 +12635,8 @@ public class Ambassador extends AbstractWebService
      *            </ul>
      * @throws WebServiceException
      */
-    public void setJobAttribute(String accessToken, long jobId,
-            String attInternalName, Object value) throws WebServiceException
+    public void setJobAttribute(String accessToken, long jobId, String attInternalName,
+            Object value) throws WebServiceException
     {
         WebServicesLog.Start activityStart = null;
         try
@@ -13329,14 +12657,12 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("jobId", jobId);
             activityArgs.put("attInternalName", attInternalName);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "setJobAttribute(accessToken,jobId,attInternalName,value)",
-                    activityArgs);
+                    "setJobAttribute(accessToken,jobId,attInternalName,value)", activityArgs);
 
             if (!isInSameCompany(userName, String.valueOf(job.getCompanyId())))
             {
                 String message = "Current user is not in the same company with the job.";
-                throw new WebServiceException(makeErrorXml("setJobAttribute",
-                        message));
+                throw new WebServiceException(makeErrorXml("setJobAttribute", message));
             }
 
             List<JobAttribute> jobAtts = job.getAllJobAttributes();
@@ -13344,8 +12670,7 @@ public class Ambassador extends AbstractWebService
             boolean find = false;
             for (JobAttribute jobAtt : jobAtts)
             {
-                if (attInternalName.equals(jobAtt.getAttribute().getName())
-                        && value != null)
+                if (attInternalName.equals(jobAtt.getAttribute().getName()) && value != null)
                 {
                     jobAtt.setValue(value, false);
                     jobAttribute = jobAtt;
@@ -13357,8 +12682,7 @@ public class Ambassador extends AbstractWebService
             if (jobAttribute == null)
             {
                 throw new IllegalArgumentException(
-                        "Can not find job attribte by internal name: "
-                                + attInternalName);
+                        "Can not find job attribte by internal name: " + attInternalName);
             }
         }
         catch (Exception e)
@@ -13387,8 +12711,8 @@ public class Ambassador extends AbstractWebService
      *         specified job and attribute name
      * @throws WebServiceException
      */
-    public String getJobAttribute(String accessToken, long jobId,
-            String attInternalName) throws WebServiceException
+    public String getJobAttribute(String accessToken, long jobId, String attInternalName)
+            throws WebServiceException
     {
         WebServicesLog.Start activityStart = null;
         try
@@ -13407,24 +12731,19 @@ public class Ambassador extends AbstractWebService
 
             if (jobAttributes != null)
             {
-                String loggedUserName = this
-                        .getUsernameFromSession(accessToken);
+                String loggedUserName = this.getUsernameFromSession(accessToken);
                 Map<Object, Object> activityArgs = new HashMap<Object, Object>();
                 activityArgs.put("loggedUserName", loggedUserName);
                 activityArgs.put("jobId", jobId);
                 activityArgs.put("attInternalName", attInternalName);
                 activityStart = WebServicesLog.start(Ambassador.class,
-                        "getJobAttribute(accessToken,jobId,attInternalName)",
-                        activityArgs);
+                        "getJobAttribute(accessToken,jobId,attInternalName)", activityArgs);
                 for (JobAttribute attribute : jobAttributes)
                 {
-                    if (attInternalName.equals(attribute.getAttribute()
-                            .getName()))
+                    if (attInternalName.equals(attribute.getAttribute().getName()))
                     {
-                        JobAttributeVo vo = AttributeUtil
-                                .getJobAttributeVo(attribute);
-                        return com.globalsight.cxe.util.XmlUtil.object2String(
-                                vo, true);
+                        JobAttributeVo vo = AttributeUtil.getJobAttributeVo(attribute);
+                        return com.globalsight.cxe.util.XmlUtil.object2String(vo, true);
                     }
                 }
             }
@@ -13455,8 +12774,8 @@ public class Ambassador extends AbstractWebService
      *         with specified project
      * @throws WebServiceException
      */
-    public String getAttributesByProjectId(String p_accessToken,
-            long p_projectId) throws WebServiceException
+    public String getAttributesByProjectId(String p_accessToken, long p_projectId)
+            throws WebServiceException
     {
         WebServicesLog.Start activityStart = null;
         try
@@ -13465,22 +12784,17 @@ public class Ambassador extends AbstractWebService
             checkAccess(p_accessToken, "getTargetLocales");
             // checkPermission(p_accessToken, Permission.PROJECTS_VIEW);
 
-            ProjectImpl project = HibernateUtil.get(ProjectImpl.class,
-                    p_projectId);
+            ProjectImpl project = HibernateUtil.get(ProjectImpl.class, p_projectId);
 
-            Assert.assertFalse(project == null, "Can not find project by id: "
-                    + p_projectId);
+            Assert.assertFalse(project == null, "Can not find project by id: " + p_projectId);
 
             String userName = getUsernameFromSession(p_accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("projectId", p_projectId);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "getAttributesByProjectId(p_accessToken,p_projectId)",
-                    activityArgs);
-            Assert.assertFalse(
-                    !isInSameCompany(userName,
-                            String.valueOf(project.getCompanyId())),
+                    "getAttributesByProjectId(p_accessToken,p_projectId)", activityArgs);
+            Assert.assertFalse(!isInSameCompany(userName, String.valueOf(project.getCompanyId())),
                     "Cannot access the project which is not in the same company with current user");
 
             AttributeSet attributeSet = project.getAttributeSet();
@@ -13490,16 +12804,14 @@ public class Ambassador extends AbstractWebService
                 Set<Attribute> attributes = attributeSet.getAttributes();
                 for (Attribute attribute : attributes)
                 {
-                    JobAttributeVo vo = AttributeUtil.getAttributeVo(attribute
-                            .getCloneAttribute());
+                    JobAttributeVo vo = AttributeUtil.getAttributeVo(attribute.getCloneAttribute());
                     allAttributes.addAttribute(vo);
                 }
             }
 
             allAttributes.sort();
 
-            return com.globalsight.cxe.util.XmlUtil.object2String(
-                    allAttributes, true);
+            return com.globalsight.cxe.util.XmlUtil.object2String(allAttributes, true);
         }
         catch (Exception e)
         {
@@ -13524,23 +12836,20 @@ public class Ambassador extends AbstractWebService
      * @return long ID of project which is associated by the file profile
      * @throws WebServiceException
      */
-    public long getProjectIdByFileProfileId(String p_accessToken,
-            Long p_fileProfileId) throws WebServiceException
+    public long getProjectIdByFileProfileId(String p_accessToken, Long p_fileProfileId)
+            throws WebServiceException
     {
         try
         {
             Assert.assertNotEmpty(p_accessToken, "access token");
             Assert.assertNotNull(p_fileProfileId, "file profile id");
             // checkPermission(p_accessToken, Permission.PROJECTS_VIEW);
-            FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
-                    p_fileProfileId, false);
-            Assert.assertFalse(fp == null, "Can not get fileprofile by id: "
-                    + p_fileProfileId);
+            FileProfile fp = HibernateUtil.get(FileProfileImpl.class, p_fileProfileId, false);
+            Assert.assertFalse(fp == null, "Can not get fileprofile by id: " + p_fileProfileId);
 
             Project project = getProject(fp);
             Assert.assertFalse(project == null,
-                    "Can not get project by file profile id: "
-                            + p_fileProfileId);
+                    "Can not get project by file profile id: " + p_fileProfileId);
             return project.getId();
         }
         catch (Exception e)
@@ -13559,23 +12868,21 @@ public class Ambassador extends AbstractWebService
      * @return long ID of project which is associated by the file profile
      * @throws WebServiceException
      */
-    public long getProjectIdByFileProfileId(String p_accessToken,
-            long p_fileProfileId) throws WebServiceException
+    public long getProjectIdByFileProfileId(String p_accessToken, long p_fileProfileId)
+            throws WebServiceException
     {
         try
         {
             Assert.assertNotEmpty(p_accessToken, "access token");
             // checkPermission(p_accessToken, Permission.PROJECTS_VIEW);
 
-            FileProfile fp = HibernateUtil.get(FileProfileImpl.class,
-                    Long.valueOf(p_fileProfileId), false);
-            Assert.assertFalse(fp == null, "Can not get fileprofile by id: "
-                    + p_fileProfileId);
+            FileProfile fp = HibernateUtil.get(FileProfileImpl.class, Long.valueOf(p_fileProfileId),
+                    false);
+            Assert.assertFalse(fp == null, "Can not get fileprofile by id: " + p_fileProfileId);
 
             Project project = getProject(fp);
             Assert.assertFalse(project == null,
-                    "Can not get project by file profile id: "
-                            + p_fileProfileId);
+                    "Can not get project by file profile id: " + p_fileProfileId);
             return project.getId();
         }
         catch (Exception e)
@@ -13595,9 +12902,8 @@ public class Ambassador extends AbstractWebService
      * @param bytes
      * @throws WebServiceException
      */
-    public void uploadAttributeFiles(String p_accessToken, String jobName,
-            String attInternalName, String fileName, byte[] bytes)
-            throws WebServiceException
+    public void uploadAttributeFiles(String p_accessToken, String jobName, String attInternalName,
+            String fileName, byte[] bytes) throws WebServiceException
     {
         try
         {
@@ -13605,8 +12911,8 @@ public class Ambassador extends AbstractWebService
             String jobNameValidation = validateJobName(jobName);
             if (jobNameValidation != null)
             {
-                throw new WebServiceException(makeErrorXml(
-                        "uploadAttributeFiles", jobNameValidation));
+                throw new WebServiceException(
+                        makeErrorXml("uploadAttributeFiles", jobNameValidation));
             }
 
             String path = jobName + "/" + attInternalName + "/" + fileName;
@@ -13628,11 +12934,9 @@ public class Ambassador extends AbstractWebService
      *            Content of attributes
      * @throws WebServiceException
      */
-    private void writeAttributeFile(String path, byte[] bytes)
-            throws WebServiceException
+    private void writeAttributeFile(String path, byte[] bytes) throws WebServiceException
     {
-        File newFile = new File(AmbFileStoragePathUtils.getJobAttributeDir(),
-                path);
+        File newFile = new File(AmbFileStoragePathUtils.getJobAttributeDir(), path);
         newFile.getParentFile().mkdirs();
         FileOutputStream fos = null;
 
@@ -13643,9 +12947,7 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Could not copy uploaded file to the attribute directory.",
-                    e);
+            logger.error("Could not copy uploaded file to the attribute directory.", e);
             String message = "Could not copy uploaded file to the attribute directory."
                     + e.getMessage();
             message = makeErrorXml("copyFileToAttributeDirectory", message);
@@ -13659,9 +12961,7 @@ public class Ambassador extends AbstractWebService
             }
             catch (IOException e)
             {
-                logger.error(
-                        "Could not copy uploaded file to the attribute directory.",
-                        e);
+                logger.error("Could not copy uploaded file to the attribute directory.", e);
                 String message = "Could not copy uploaded file to the attribute directory."
                         + e.getMessage();
                 message = makeErrorXml("copyFileToAttributeDirectory", message);
@@ -13677,8 +12977,7 @@ public class Ambassador extends AbstractWebService
      * @return HashMap (Long:String)
      * @throws WebServiceException
      */
-    public HashMap getXliffFileProfile(String p_accessToken)
-            throws WebServiceException
+    public HashMap getXliffFileProfile(String p_accessToken) throws WebServiceException
     {
         HashMap xliffFPMap = new HashMap();
         checkAccess(p_accessToken, "getXliffFileProfile");
@@ -13724,9 +13023,7 @@ public class Ambassador extends AbstractWebService
                                 .getFileProfilePersistenceManager()
                                 .getFileExtension(fileExtensionId);
                         String extName = fileExtension.getName();
-                        if (extName != null
-                                && ("xlf".equals(extName) || "xliff"
-                                        .equals(extName)))
+                        if (extName != null && ("xlf".equals(extName) || "xliff".equals(extName)))
                         {
                             hasXlfAsExtension = true;
                         }
@@ -13759,9 +13056,8 @@ public class Ambassador extends AbstractWebService
      * @return "yes" or "no"
      * @throws WebServiceException
      */
-    public String isSupportCurrentLocalePair(String p_accessToken,
-            String p_fileProfileId, String p_srcLangCountry,
-            String p_trgLangCountry) throws WebServiceException
+    public String isSupportCurrentLocalePair(String p_accessToken, String p_fileProfileId,
+            String p_srcLangCountry, String p_trgLangCountry) throws WebServiceException
     {
         String yesOrNo = "no";
         checkAccess(p_accessToken, "isSupportCurrentLocalePair");
@@ -13775,37 +13071,29 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("fileProfileId", p_fileProfileId);
             activityArgs.put("srcLangCountry", p_srcLangCountry);
             activityArgs.put("trgLangCountry", p_trgLangCountry);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "isSupportCurrentLocalePair(p_accessToken,p_fileProfileId,p_srcLangCountry,p_trgLangCountry)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "isSupportCurrentLocalePair(p_accessToken,p_fileProfileId,p_srcLangCountry,p_trgLangCountry)",
+                    activityArgs);
             long fpID = Long.parseLong(p_fileProfileId);
-            FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
-                    .getFileProfileById(fpID, false);
-            if (!isInSameCompany(userName, fp.getCompanyId())
-                    && !UserUtil.isSuperAdmin(userId)
+            FileProfile fp = ServerProxy.getFileProfilePersistenceManager().getFileProfileById(fpID,
+                    false);
+            if (!isInSameCompany(userName, fp.getCompanyId()) && !UserUtil.isSuperAdmin(userId)
                     && !UserUtil.isSuperPM(userId))
             {
-                throw new WebServiceException(
-                        makeErrorXml(
-                                "isSupportCurrentLocalePair",
-                                "Current user has not permissions or in the same company with the file profile."));
+                throw new WebServiceException(makeErrorXml("isSupportCurrentLocalePair",
+                        "Current user has not permissions or in the same company with the file profile."));
             }
             long l10nProfileId = fp.getL10nProfileId();
-            L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfile(
-                    l10nProfileId);
+            L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfile(l10nProfileId);
             Collection wfInfos = lp.getWorkflowTemplateInfos();
             Iterator wfInfosIter = wfInfos.iterator();
             while (wfInfosIter.hasNext())
             {
-                WorkflowTemplateInfo wfInfo = (WorkflowTemplateInfo) wfInfosIter
-                        .next();
+                WorkflowTemplateInfo wfInfo = (WorkflowTemplateInfo) wfInfosIter.next();
                 GlobalSightLocale srcLocale = wfInfo.getSourceLocale();
-                String srcLangCountry = srcLocale.getLanguage() + "_"
-                        + srcLocale.getCountry();
+                String srcLangCountry = srcLocale.getLanguage() + "_" + srcLocale.getCountry();
                 GlobalSightLocale trgLocale = wfInfo.getTargetLocale();
-                String trgLangCountry = trgLocale.getLanguage() + "_"
-                        + trgLocale.getCountry();
+                String trgLangCountry = trgLocale.getLanguage() + "_" + trgLocale.getCountry();
 
                 if (srcLangCountry.equals(p_srcLangCountry)
                         && trgLangCountry.equals(p_trgLangCountry))
@@ -13818,9 +13106,8 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception ex)
         {
-            String message = "Fail to judge if file profile(ID:"
-                    + p_fileProfileId + ") has workflow for "
-                    + p_srcLangCountry + "-" + p_trgLangCountry;
+            String message = "Fail to judge if file profile(ID:" + p_fileProfileId
+                    + ") has workflow for " + p_srcLangCountry + "-" + p_trgLangCountry;
             logger.error(message, ex);
             message = makeErrorXml("getWorkFlowInfo", message);
             throw new WebServiceException(message);
@@ -13853,24 +13140,22 @@ public class Ambassador extends AbstractWebService
      * @param args
      * @throws WebServiceException
      */
-    public String uploadOriginalSourceFile(HashMap args)
-            throws WebServiceException
+    public String uploadOriginalSourceFile(HashMap args) throws WebServiceException
     {
         try
         {
             // Checks authority.
             String accessToken = (String) args.get("accessToken");
             checkAccess(accessToken, "uploadOriginalSourceFile");
-            checkPermission(accessToken,
-                    Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
+            checkPermission(accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
 
             // Reads parameters.
             String jobName = (String) args.get("jobName");
             String jobNameValidation = validateJobName(jobName);
             if (jobNameValidation != null)
             {
-                throw new WebServiceException(makeErrorXml(
-                        "uploadOriginalSourceFile", jobNameValidation));
+                throw new WebServiceException(
+                        makeErrorXml("uploadOriginalSourceFile", jobNameValidation));
             }
 
             String targetLocale = (String) args.get("targetLocale");// like
@@ -13880,18 +13165,15 @@ public class Ambassador extends AbstractWebService
             byte[] bytes = (byte[]) args.get("bytes");
 
             // Save file.
-            StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
-                    .getInstance().getStringParameter(
-                            SystemConfigParamNames.FILE_STORAGE_DIR));
+            StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration.getInstance()
+                    .getStringParameter(SystemConfigParamNames.FILE_STORAGE_DIR));
 
             // The full path is like this:
             // Welocalize\FileStorage\qa\GlobalSight\OriginalSourceFile\<target_locale>\<file_name_with_extension>
             fileStorageRoot = fileStorageRoot.append(File.separator)
-                    .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
-                    .append(File.separator)
-                    .append(WebAppConstants.ORIGINAL_SORUCE_FILE)
-                    .append(File.separator).append(jobName)
-                    .append(File.separator).append(targetLocale)
+                    .append(WebAppConstants.VIRTUALDIR_TOPLEVEL).append(File.separator)
+                    .append(WebAppConstants.ORIGINAL_SORUCE_FILE).append(File.separator)
+                    .append(jobName).append(File.separator).append(targetLocale)
                     .append(File.separator).append(filePath);
 
             writeFileToLocale(fileStorageRoot.toString(), bytes);
@@ -13900,8 +13182,7 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            String message = makeErrorXml("uploadOriginalSourceFile",
-                    e.getMessage());
+            String message = makeErrorXml("uploadOriginalSourceFile", e.getMessage());
             return message;
         }
     }
@@ -13915,8 +13196,7 @@ public class Ambassador extends AbstractWebService
      *            Content which need to be saved
      * @throws WebServiceException
      */
-    private void writeFileToLocale(String p_filePath, byte[] p_bytes)
-            throws WebServiceException
+    private void writeFileToLocale(String p_filePath, byte[] p_bytes) throws WebServiceException
     {
         File newFile = new File(p_filePath);
         newFile.getParentFile().mkdirs();
@@ -13929,9 +13209,7 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Could not copy uploaded file to the specified directory.",
-                    e);
+            logger.error("Could not copy uploaded file to the specified directory.", e);
             String message = "Could not copy uploaded file to the specified directory."
                     + e.getMessage();
             throw new WebServiceException(message);
@@ -13945,8 +13223,7 @@ public class Ambassador extends AbstractWebService
             catch (IOException e)
             {
                 logger.error("Fail to close FileOutPutSteam.", e);
-                String message = "Fail to close FileOutPutSteam."
-                        + e.getMessage();
+                String message = "Fail to close FileOutPutSteam." + e.getMessage();
                 throw new WebServiceException(message);
             }
         }
@@ -13970,8 +13247,8 @@ public class Ambassador extends AbstractWebService
      *      such as recalculating estimated completed time etc.
      * 
      */
-    public void updateTaskState(String p_accessToken, String p_taskId,
-            String p_state) throws WebServiceException
+    public void updateTaskState(String p_accessToken, String p_taskId, String p_state)
+            throws WebServiceException
     {
         checkAccess(p_accessToken, "updateTaskState");
         checkPermission(p_accessToken, Permission.JOB_WORKFLOWS_EDIT);
@@ -13987,8 +13264,7 @@ public class Ambassador extends AbstractWebService
         catch (NumberFormatException e)
         {
             logger.error("Invalid taskId or state.", e);
-            String message = makeErrorXml("updateActivityState",
-                    "Invalid taskId or state.");
+            String message = makeErrorXml("updateActivityState", "Invalid taskId or state.");
             throw new WebServiceException(message);
         }
 
@@ -14000,16 +13276,15 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("taskId", p_taskId);
             activityArgs.put("state", p_state);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "updateTaskState(p_accessToken,p_taskId,p_state)",
-                    activityArgs);
+                    "updateTaskState(p_accessToken,p_taskId,p_state)", activityArgs);
             Task task = TaskPersistenceAccessor.getTask(taskId, true);
             task.setState(state);
             TaskPersistenceAccessor.updateTask(task);
         }
         catch (TaskException te)
         {
-            String msg = "Failed to update task status for task Id : "
-                    + p_taskId + " and state : " + p_state;
+            String msg = "Failed to update task status for task Id : " + p_taskId + " and state : "
+                    + p_state;
             logger.error(msg, te);
             msg = makeErrorXml("updateActivityState", msg);
             throw new WebServiceException(msg);
@@ -14036,27 +13311,23 @@ public class Ambassador extends AbstractWebService
      *            The contents in bytes to be uploaded.
      * @throws WebServiceException
      */
-    public String uploadEditionFileBack(String p_accessToken,
-            String p_originalTaskId, String p_fileName, byte[] p_bytes)
-            throws WebServiceException
+    public String uploadEditionFileBack(String p_accessToken, String p_originalTaskId,
+            String p_fileName, byte[] p_bytes) throws WebServiceException
     {
         try
         {
             checkAccess(p_accessToken, "uploadEditionFileBack");
-            checkPermission(p_accessToken,
-                    Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
+            checkPermission(p_accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
 
             // Save file to comment reference path
-            StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
-                    .getInstance().getStringParameter(
-                            SystemConfigParamNames.FILE_STORAGE_DIR));
+            StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration.getInstance()
+                    .getStringParameter(SystemConfigParamNames.FILE_STORAGE_DIR));
 
             // The full path is like this:
             // Welocalize\FileStorage\qa\GlobalSight\tmp\<original_task_id>\<file_name_with_extension>
             fileStorageRoot = fileStorageRoot.append(File.separator)
-                    .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
-                    .append(File.separator).append("tmp")
-                    .append(File.separator).append(p_originalTaskId)
+                    .append(WebAppConstants.VIRTUALDIR_TOPLEVEL).append(File.separator)
+                    .append("tmp").append(File.separator).append(p_originalTaskId)
                     .append(File.separator).append(p_fileName);
 
             File newFile = new File(fileStorageRoot.toString());
@@ -14090,8 +13361,8 @@ public class Ambassador extends AbstractWebService
      *         Otherwise it will return error message.
      * @throws WebServiceException
      */
-    public String importOfflineTargetFiles(String p_accessToken,
-            String p_originalTaskId) throws WebServiceException
+    public String importOfflineTargetFiles(String p_accessToken, String p_originalTaskId)
+            throws WebServiceException
     {
         String userName = null;
         User userObj = null;
@@ -14134,15 +13405,13 @@ public class Ambassador extends AbstractWebService
         StringBuilder errorMessage = new StringBuilder(XML_HEAD);
 
         // uploaded files path
-        StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
-                .getInstance().getStringParameter(
-                        SystemConfigParamNames.FILE_STORAGE_DIR));
+        StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration.getInstance()
+                .getStringParameter(SystemConfigParamNames.FILE_STORAGE_DIR));
         // The full path is like this:
         // Welocalize\FileStorage\qa\GlobalSight\tmp\<original_task_id>
         fileStorageRoot = fileStorageRoot.append(File.separator)
-                .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
-                .append(File.separator).append("tmp").append(File.separator)
-                .append(p_originalTaskId);
+                .append(WebAppConstants.VIRTUALDIR_TOPLEVEL).append(File.separator).append("tmp")
+                .append(File.separator).append(p_originalTaskId);
 
         File parentFilePath = new File(fileStorageRoot.toString());
         File[] files = parentFilePath.listFiles();
@@ -14161,15 +13430,12 @@ public class Ambassador extends AbstractWebService
                 catch (Exception e)
                 {
                     logger.error("Cannot handle file " + fileName, e);
-                    status.addFileState(Long.valueOf(p_originalTaskId),
-                            fileName, "Failed");
+                    status.addFileState(Long.valueOf(p_originalTaskId), fileName, "Failed");
                     errorMessage.append("<file>\r\n");
                     errorMessage.append("\t<name>\r\n");
-                    errorMessage.append("\t\t").append(fileName)
-                            .append("</name>\r\n");
+                    errorMessage.append("\t\t").append(fileName).append("</name>\r\n");
                     errorMessage.append("\t<error>\r\n");
-                    errorMessage.append("\t\t").append(e.getMessage())
-                            .append("</error>\r\n");
+                    errorMessage.append("\t\t").append(e.getMessage()).append("</error>\r\n");
                 }
             }
 
@@ -14188,11 +13454,9 @@ public class Ambassador extends AbstractWebService
             try
             {
                 // Find the user to complete task.
-                WorkflowTaskInstance wfTask = ServerProxy
-                        .getWorkflowServer()
-                        .getWorkflowTaskInstance(
-                                UserUtil.getUserIdByName(userName),
-                                task.getId(), WorkflowConstants.TASK_ALL_STATES);
+                WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
+                        .getWorkflowTaskInstance(UserUtil.getUserIdByName(userName), task.getId(),
+                                WorkflowConstants.TASK_ALL_STATES);
                 task.setWorkflowTask(wfTask);
                 List allAssignees = task.getAllAssignees();
                 if (allAssignees != null && allAssignees.size() > 0)
@@ -14205,11 +13469,10 @@ public class Ambassador extends AbstractWebService
                 }
 
                 List condNodeInfo = task.getConditionNodeTargetInfos();
-                if (condNodeInfo == null
-                        || (condNodeInfo != null && condNodeInfo.size() < 1))
+                if (condNodeInfo == null || (condNodeInfo != null && condNodeInfo.size() < 1))
                 {
-                    ServerProxy.getTaskManager().completeTask(availableUserId,
-                            task, destinationArrow, null);
+                    ServerProxy.getTaskManager().completeTask(availableUserId, task,
+                            destinationArrow, null);
                 }
             }
             catch (Exception ex)
@@ -14240,8 +13503,8 @@ public class Ambassador extends AbstractWebService
      *         Otherwise it will return error message.
      * @throws WebServiceException
      */
-    public String importOfflineKitFiles(String p_accessToken,
-            String p_originalTaskId) throws WebServiceException
+    public String importOfflineKitFiles(String p_accessToken, String p_originalTaskId)
+            throws WebServiceException
     {
         String userName = null;
         User userObj = null;
@@ -14284,15 +13547,13 @@ public class Ambassador extends AbstractWebService
         StringBuilder errorMessage = new StringBuilder(XML_HEAD);
 
         // uploaded files path
-        StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
-                .getInstance().getStringParameter(
-                        SystemConfigParamNames.FILE_STORAGE_DIR));
+        StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration.getInstance()
+                .getStringParameter(SystemConfigParamNames.FILE_STORAGE_DIR));
         // The full path is like this:
         // Welocalize\FileStorage\qa\GlobalSight\tmp\<original_task_id>
         fileStorageRoot = fileStorageRoot.append(File.separator)
-                .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
-                .append(File.separator).append("tmp").append(File.separator)
-                .append(p_originalTaskId);
+                .append(WebAppConstants.VIRTUALDIR_TOPLEVEL).append(File.separator).append("tmp")
+                .append(File.separator).append(p_originalTaskId);
 
         File parentFilePath = new File(fileStorageRoot.toString());
         File[] files = parentFilePath.listFiles();
@@ -14322,22 +13583,18 @@ public class Ambassador extends AbstractWebService
                     file.delete();
                     if (file.exists())
                     {
-                        logger.error("File " + file.getAbsolutePath()
-                                + " cannot be deleted.");
+                        logger.error("File " + file.getAbsolutePath() + " cannot be deleted.");
                     }
                 }
                 catch (Exception e)
                 {
                     logger.error("Cannot handle file " + fileName, e);
-                    status.addFileState(Long.valueOf(p_originalTaskId),
-                            fileName, "Failed");
+                    status.addFileState(Long.valueOf(p_originalTaskId), fileName, "Failed");
                     errorMessage.append("<file>\r\n");
                     errorMessage.append("\t<name>\r\n");
-                    errorMessage.append("\t\t").append(fileName)
-                            .append("</name>\r\n");
+                    errorMessage.append("\t\t").append(fileName).append("</name>\r\n");
                     errorMessage.append("\t<error>\r\n");
-                    errorMessage.append("\t\t").append(e.getMessage())
-                            .append("</error>\r\n");
+                    errorMessage.append("\t\t").append(e.getMessage()).append("</error>\r\n");
                 }
             }
         }
@@ -14349,8 +13606,7 @@ public class Ambassador extends AbstractWebService
         }
 
         if (!errorMessage.toString().equals(XML_HEAD))
-            return makeErrorXml("importOfflineKitFiles",
-                    errorMessage.toString());
+            return makeErrorXml("importOfflineKitFiles", errorMessage.toString());
         else
             return null;
     }
@@ -14367,8 +13623,8 @@ public class Ambassador extends AbstractWebService
      * @return String File handling status with XML format
      * @throws WebServiceException
      */
-    public String getOfflineFileUploadStatus(String accessToken, String taskId,
-            String filename) throws WebServiceException
+    public String getOfflineFileUploadStatus(String accessToken, String taskId, String filename)
+            throws WebServiceException
     {
         checkAccess(accessToken, "getOfflineFileUploadStatus");
 
@@ -14386,16 +13642,13 @@ public class Ambassador extends AbstractWebService
         {
             if (!StringUtil.isEmpty(filename))
             {
-                String loggedUserName = this
-                        .getUsernameFromSession(accessToken);
+                String loggedUserName = this.getUsernameFromSession(accessToken);
                 Map<Object, Object> activityArgs = new HashMap<Object, Object>();
                 activityArgs.put("loggedUserName", loggedUserName);
                 activityArgs.put("taskId", taskId);
                 activityArgs.put("filename", filename);
-                activityStart = WebServicesLog
-                        .start(Ambassador.class,
-                                "getOfflineFileUploadStatus(accessToken,taskId,filename)",
-                                activityArgs);
+                activityStart = WebServicesLog.start(Ambassador.class,
+                        "getOfflineFileUploadStatus(accessToken,taskId,filename)", activityArgs);
                 String[] fileArray = filename.split(",");
                 for (String file : fileArray)
                 {
@@ -14408,11 +13661,10 @@ public class Ambassador extends AbstractWebService
                     xml.append("<fileStatus>\r\n");
                     for (String file : files)
                     {
-                        xml.append("\t<file>").append(file)
-                                .append("</file>\r\n");
+                        xml.append("\t<file>").append(file).append("</file>\r\n");
                         xml.append("\t<status>")
-                                .append(EditUtil.encodeHtmlEntities(fileStates
-                                        .get(file))).append("</status>\r\n");
+                                .append(EditUtil.encodeHtmlEntities(fileStates.get(file)))
+                                .append("</status>\r\n");
                     }
                     xml.append("</fileStatus>");
                 }
@@ -14439,8 +13691,8 @@ public class Ambassador extends AbstractWebService
         TimeZone timeZone = null;
         try
         {
-            timeZone = ServerProxy.getCalendarManager().findUserTimeZone(
-                    UserUtil.getUserIdByName(p_userName));
+            timeZone = ServerProxy.getCalendarManager()
+                    .findUserTimeZone(UserUtil.getUserIdByName(p_userName));
         }
         catch (Exception e)
         {
@@ -14461,8 +13713,8 @@ public class Ambassador extends AbstractWebService
      * @return
      * @throws WebServiceException
      */
-    public String isExistedPermission(String p_accessToken,
-            String p_permissionName) throws WebServiceException
+    public String isExistedPermission(String p_accessToken, String p_permissionName)
+            throws WebServiceException
     {
         checkAccess(p_accessToken, "isExistedPermission");
         checkPermission(p_accessToken, Permission.PERMGROUPS_VIEW);
@@ -14486,8 +13738,7 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String fetchCompanyInfo(String p_accessToken)
-            throws WebServiceException
+    public String fetchCompanyInfo(String p_accessToken) throws WebServiceException
     {
         String message = "";
         checkAccess(p_accessToken, "fetchCompanyInfo");
@@ -14512,8 +13763,7 @@ public class Ambassador extends AbstractWebService
 
             // Validate if current user is in administrator group
             ArrayList pers = new ArrayList(Permission.getPermissionManager()
-                    .getAllPermissionGroupNamesForUser(
-                            UserUtil.getUserIdByName(userName)));
+                    .getAllPermissionGroupNamesForUser(UserUtil.getUserIdByName(userName)));
             if (!pers.contains(Permission.GROUP_ADMINISTRATOR))
             {
                 message = makeErrorXml("fetchCompanyInfo",
@@ -14533,15 +13783,13 @@ public class Ambassador extends AbstractWebService
             throw new WebServiceException(message);
         }
 
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<Company>\r\n");
         xml.append("\t<id>").append(company.getId()).append("</id>\r\n");
-        xml.append("\t<name>").append(company.getCompanyName())
-                .append("</name>\r\n");
+        xml.append("\t<name>").append(company.getCompanyName()).append("</name>\r\n");
         xml.append("\t<description>")
-                .append(company.getDescription() == null ? "N/A" : company
-                        .getDescription()).append("</description>\r\n");
+                .append(company.getDescription() == null ? "N/A" : company.getDescription())
+                .append("</description>\r\n");
         xml.append("\t<enableIPFilter>").append(company.getEnableIPFilter())
                 .append("</enableIPFilter>\r\n");
         xml.append("</Company>\r\n");
@@ -14558,8 +13806,7 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String fetchJobIdsPerCompany(String p_accessToken)
-            throws WebServiceException
+    public String fetchJobIdsPerCompany(String p_accessToken) throws WebServiceException
     {
         checkAccess(p_accessToken, "fetchJobIdsPerCompany");
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
@@ -14571,8 +13818,7 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            String message = makeErrorXml("fetchJobIdsPerCompany",
-                    e.getMessage());
+            String message = makeErrorXml("fetchJobIdsPerCompany", e.getMessage());
             throw new WebServiceException(message);
         }
 
@@ -14645,8 +13891,8 @@ public class Ambassador extends AbstractWebService
      * @throws WebServiceException
      * @author Vincent Yan, 2011/01/12
      */
-    public String fetchJobsByRange(String p_accessToken, int p_offset,
-            int p_count, boolean p_isDescOrder) throws WebServiceException
+    public String fetchJobsByRange(String p_accessToken, int p_offset, int p_count,
+            boolean p_isDescOrder) throws WebServiceException
     {
         try
         {
@@ -14673,23 +13919,20 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("offset", p_offset);
             activityArgs.put("p_count", p_count);
             activityArgs.put("isDescOrder", p_isDescOrder);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "fetchJobsByRange(p_accessToken, p_offset,p_count,p_isDescOrder)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "fetchJobsByRange(p_accessToken, p_offset,p_count,p_isDescOrder)",
+                    activityArgs);
 
             JobHandlerWLRemote jobHandler = ServerProxy.getJobHandler();
 
             Company company = getCompanyInfo(userName);
             if (company != null)
             {
-                String[] ids = jobHandler.getJobIdsByCompany(
-                        String.valueOf(company.getId()), p_offset, p_count,
-                        p_isDescOrder, user.getUserId());
+                String[] ids = jobHandler.getJobIdsByCompany(String.valueOf(company.getId()),
+                        p_offset, p_count, p_isDescOrder, user.getUserId());
                 if (ids != null && ids.length > 0)
                 {
-                    result = fetchJobsPerCompany(p_accessToken, ids, true,
-                            true, false);
+                    result = fetchJobsPerCompany(p_accessToken, ids, true, true, false);
                 }
             }
             return result;
@@ -14726,9 +13969,8 @@ public class Ambassador extends AbstractWebService
      * @throws WebServiceException
      * @author Vincent Yan, 2011/01/12
      */
-    public String fetchJobsByState(String p_accessToken, String p_state,
-            int p_offset, int p_count, boolean p_isDescOrder)
-            throws WebServiceException
+    public String fetchJobsByState(String p_accessToken, String p_state, int p_offset, int p_count,
+            boolean p_isDescOrder) throws WebServiceException
     {
         try
         {
@@ -14758,22 +14000,19 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("offset", p_count);
             activityArgs.put("count", p_count);
             activityArgs.put("isDescOrder", p_isDescOrder);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "fetchJobsByState(p_accessToken, p_state,p_offset,p_count,p_isDescOrder)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "fetchJobsByState(p_accessToken, p_state,p_offset,p_count,p_isDescOrder)",
+                    activityArgs);
             JobHandlerWLRemote jobHandler = ServerProxy.getJobHandler();
 
             Company company = getCompanyInfo(userName);
             if (company != null)
             {
-                String[] ids = jobHandler.getJobIdsByState(
-                        String.valueOf(company.getId()), p_state, p_offset,
-                        p_count, p_isDescOrder, user.getUserId());
+                String[] ids = jobHandler.getJobIdsByState(String.valueOf(company.getId()), p_state,
+                        p_offset, p_count, p_isDescOrder, user.getUserId());
                 if (ids != null && ids.length > 0)
                 {
-                    result = fetchJobsPerCompany(p_accessToken, ids, true,
-                            true, false);
+                    result = fetchJobsPerCompany(p_accessToken, ids, true, true, false);
                 }
             }
 
@@ -14810,9 +14049,8 @@ public class Ambassador extends AbstractWebService
      * @return xml string
      * @throws WebServiceException
      */
-    public String fetchJobsByCreator(String p_accessToken,
-            String p_creatorUserName, int p_offset, int p_count,
-            boolean p_isDescOrder) throws WebServiceException
+    public String fetchJobsByCreator(String p_accessToken, String p_creatorUserName, int p_offset,
+            int p_count, boolean p_isDescOrder) throws WebServiceException
     {
         try
         {
@@ -14841,28 +14079,26 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("offset", p_count);
             activityArgs.put("count", p_count);
             activityArgs.put("isDescOrder", p_isDescOrder);
-            activityStart = WebServicesLog.start(Ambassador.class,
-                    "fetchJobsByCreator(p_accessToken,"
-                            + " p_creatorUserName, p_offset, "
-                            + "p_count, p_isDescOrder)", activityArgs);
+            activityStart = WebServicesLog.start(
+                    Ambassador.class, "fetchJobsByCreator(p_accessToken,"
+                            + " p_creatorUserName, p_offset, " + "p_count, p_isDescOrder)",
+                    activityArgs);
             JobHandlerWLRemote jobHandler = ServerProxy.getJobHandler();
             String creatorUserId = UserUtil.getUserIdByName(p_creatorUserName);
             if (creatorUserId == null)
             {
-                return makeErrorXml("fetchJobsByCreator", "Creator username "
-                        + p_creatorUserName + " does not exist.");
+                return makeErrorXml("fetchJobsByCreator",
+                        "Creator username " + p_creatorUserName + " does not exist.");
             }
 
             Company company = getCompanyInfo(userName);
             Long companyId = company.getIdAsLong();
-            if (company != null
-                    && !CompanyWrapper.isSuperCompany(companyId.toString()))
+            if (company != null && !CompanyWrapper.isSuperCompany(companyId.toString()))
             {
                 Company tempCompany = getCompanyInfo(p_creatorUserName);
                 Long tempCompanyId = tempCompany.getIdAsLong();
                 if (companyId != tempCompanyId
-                        && !CompanyWrapper.isSuperCompany(tempCompanyId
-                                .toString()))
+                        && !CompanyWrapper.isSuperCompany(tempCompanyId.toString()))
                 {
                     return makeErrorXml("fetchJobsByCreator",
                             "Can't fetch jobs by creator in other company.");
@@ -14870,13 +14106,11 @@ public class Ambassador extends AbstractWebService
             }
             if (company != null)
             {
-                String[] ids = jobHandler.getJobIdsByCreator(company.getId(),
-                        creatorUserId, p_offset, p_count, p_isDescOrder,
-                        user.getUserId());
+                String[] ids = jobHandler.getJobIdsByCreator(company.getId(), creatorUserId,
+                        p_offset, p_count, p_isDescOrder, user.getUserId());
                 if (ids != null && ids.length > 0)
                 {
-                    result = fetchJobsPerCompany(p_accessToken, ids, true,
-                            true, false);
+                    result = fetchJobsPerCompany(p_accessToken, ids, true, true, false);
                 }
             }
 
@@ -14906,8 +14140,7 @@ public class Ambassador extends AbstractWebService
      * @throws WebServiceException
      * @author Vincent Yan, 2011/01/17
      */
-    public String getCountsByJobState(String p_accessToken)
-            throws WebServiceException
+    public String getCountsByJobState(String p_accessToken) throws WebServiceException
     {
         try
         {
@@ -14920,8 +14153,7 @@ public class Ambassador extends AbstractWebService
             throw new WebServiceException(message);
         }
 
-        StringBuilder sb = new StringBuilder(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuilder sb = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         HashMap<String, Integer> counts = null;
 
         try
@@ -14932,8 +14164,7 @@ public class Ambassador extends AbstractWebService
             Company company = getCompanyInfo(userName);
             if (company != null)
             {
-                counts = jobHandler.getCountsByJobState(String.valueOf(company
-                        .getId()));
+                counts = jobHandler.getCountsByJobState(String.valueOf(company.getId()));
                 if (counts != null)
                 {
                     sb.append("\t<counts>\r\n");
@@ -14941,10 +14172,8 @@ public class Ambassador extends AbstractWebService
                     for (String state : keys)
                     {
                         sb.append("\t\t<countByState>\r\n");
-                        sb.append("\t\t\t<state>").append(state)
-                                .append("</state>\r\n");
-                        sb.append("\t\t\t<count>").append(counts.get(state))
-                                .append("</count>\r\n");
+                        sb.append("\t\t\t<state>").append(state).append("</state>\r\n");
+                        sb.append("\t\t\t<count>").append(counts.get(state)).append("</count>\r\n");
                         sb.append("\t\t</countByState>\r\n");
                     }
                     sb.append("\t</counts>\r\n");
@@ -14975,8 +14204,7 @@ public class Ambassador extends AbstractWebService
         {
             User user = getUser(p_userName);
             if (user != null)
-                return ServerProxy.getJobHandler().getCompany(
-                        user.getCompanyName());
+                return ServerProxy.getJobHandler().getCompany(user.getCompanyName());
         }
         catch (Exception e)
         {
@@ -14992,8 +14220,7 @@ public class Ambassador extends AbstractWebService
      * @return Jobs' information as XML format
      * @throws WebServiceException
      */
-    public String fetchJobsPerCompany(String p_accessToken)
-            throws WebServiceException
+    public String fetchJobsPerCompany(String p_accessToken) throws WebServiceException
     {
         try
         {
@@ -15019,8 +14246,7 @@ public class Ambassador extends AbstractWebService
             }
 
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName",
-                    getUsernameFromSession(p_accessToken));
+            activityArgs.put("loggedUserName", getUsernameFromSession(p_accessToken));
             activityArgs.put("jobNum", ids == null ? 0 : ids.length);
             activityArgs.put("jobIds", jobIds);
             activityStart = WebServicesLog.start(Ambassador.class,
@@ -15028,8 +14254,7 @@ public class Ambassador extends AbstractWebService
 
             if (ids != null && ids.length > 0)
             {
-                return fetchJobsPerCompany(p_accessToken, ids, true, true,
-                        false);
+                return fetchJobsPerCompany(p_accessToken, ids, true, true, false);
             }
             else
             {
@@ -15118,8 +14343,7 @@ public class Ambassador extends AbstractWebService
             TimeZone tz = null;
             try
             {
-                tz = ServerProxy.getCalendarManager().findUserTimeZone(
-                        loggedUserObj.getUserId());
+                tz = ServerProxy.getCalendarManager().findUserTimeZone(loggedUserObj.getUserId());
             }
             catch (Exception e)
             {
@@ -15132,12 +14356,10 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("jobIds", jobList);
             activityArgs.put("returnSourcePageInfo", p_returnSourcePageInfo);
             activityArgs.put("returnWorkflowInfo", p_returnWorkflowInfo);
-            activityArgs
-                    .put("returnJobAttributeInfo", p_returnJobAttributeInfo);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "fetchJobsPerCompany(p_accessToken, p_jobIds, p_returnSourcePageInfo, p_returnWorkflowInfo, p_returnJobAttributeInfo",
-                            activityArgs);
+            activityArgs.put("returnJobAttributeInfo", p_returnJobAttributeInfo);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "fetchJobsPerCompany(p_accessToken, p_jobIds, p_returnSourcePageInfo, p_returnWorkflowInfo, p_returnJobAttributeInfo",
+                    activityArgs);
 
             String jobIds = fetchJobIdsPerCompany(p_accessToken);
             String[] ids = null;
@@ -15161,8 +14383,7 @@ public class Ambassador extends AbstractWebService
                         if (job == null)
                             continue;
 
-                        if (!isInSameCompany(loggedUserName,
-                                String.valueOf(job.getCompanyId())))
+                        if (!isInSameCompany(loggedUserName, String.valueOf(job.getCompanyId())))
                         {
                             if (!UserUtil.isSuperAdmin(loggedUserName)
                                     && !UserUtil.isSuperPM(loggedUserName))
@@ -15171,9 +14392,8 @@ public class Ambassador extends AbstractWebService
                             }
                         }
 
-                        String singleJobXml = handleSingleJob(job, tz,
-                                p_returnSourcePageInfo, p_returnWorkflowInfo,
-                                p_returnJobAttributeInfo);
+                        String singleJobXml = handleSingleJob(job, tz, p_returnSourcePageInfo,
+                                p_returnWorkflowInfo, p_returnJobAttributeInfo);
                         xml.append(singleJobXml);
                     }
                 }
@@ -15218,9 +14438,8 @@ public class Ambassador extends AbstractWebService
      * 
      * @return string in XML.
      */
-    private String handleSingleJob(Job p_job, TimeZone p_tz,
-            boolean p_returnSourcePageInfo, boolean p_returnWorkflowInfo,
-            boolean p_returnJobAttributeInfo)
+    private String handleSingleJob(Job p_job, TimeZone p_tz, boolean p_returnSourcePageInfo,
+            boolean p_returnWorkflowInfo, boolean p_returnJobAttributeInfo)
     {
         StringBuffer subXML = new StringBuffer();
         StringBuilder tmpXml = new StringBuilder();
@@ -15234,20 +14453,17 @@ public class Ambassador extends AbstractWebService
 
         try
         {
-            subXML.append("\t\t<id>").append(p_job.getJobId())
-                    .append("</id>\r\n");
-            subXML.append("\t\t<name>")
-                    .append(EditUtil.encodeXmlEntities(p_job.getJobName()))
+            subXML.append("\t\t<id>").append(p_job.getJobId()).append("</id>\r\n");
+            subXML.append("\t\t<name>").append(EditUtil.encodeXmlEntities(p_job.getJobName()))
                     .append("</name>\r\n");
-            subXML.append("\t\t<state>").append(p_job.getState())
-                    .append("</state>\r\n");
+            subXML.append("\t\t<state>").append(p_job.getState()).append("</state>\r\n");
 
             // Display state
             try
             {
                 subXML.append("\t\t<displayState>")
-                        .append(p_job.getDisplayStateByLocale(new Locale("en",
-                                "US"))).append("</displayState>\r\n");
+                        .append(p_job.getDisplayStateByLocale(new Locale("en", "US")))
+                        .append("</displayState>\r\n");
             }
             catch (Exception e)
             {
@@ -15255,12 +14471,10 @@ public class Ambassador extends AbstractWebService
             }
 
             // Priority
-            subXML.append("\t\t<priority>").append(p_job.getPriority())
-                    .append("</priority>\r\n");
+            subXML.append("\t\t<priority>").append(p_job.getPriority()).append("</priority>\r\n");
 
             // Creator
-            subXML.append("\t\t<creator>")
-                    .append(p_job.getCreateUser().getUserName())
+            subXML.append("\t\t<creator>").append(p_job.getCreateUser().getUserName())
                     .append("</creator>\r\n");
 
             // Create date
@@ -15269,8 +14483,7 @@ public class Ambassador extends AbstractWebService
                     .append("</createDate>\r\n");
 
             // Start date
-            subXML.append("\t\t<startDate>")
-                    .append(convertDateToString(p_job.getStartDate(), p_tz))
+            subXML.append("\t\t<startDate>").append(convertDateToString(p_job.getStartDate(), p_tz))
                     .append("</startDate>\r\n");
 
             // Completed date
@@ -15282,17 +14495,14 @@ public class Ambassador extends AbstractWebService
             L10nProfile lp = p_job.getL10nProfile();
             if (lp == null)
             {
-                ServerProxy.getJobHandler()
-                        .getL10nProfileByJobId(p_job.getId());
+                ServerProxy.getJobHandler().getL10nProfileByJobId(p_job.getId());
             }
             subXML.append("\t\t<localizationProfile>\r\n");
             if (lp != null && lp.getId() > 0)
             {
-                subXML.append("\t\t\t<localizationProfileId>")
-                        .append(lp.getId())
+                subXML.append("\t\t\t<localizationProfileId>").append(lp.getId())
                         .append("</localizationProfileId>\r\n");
-                subXML.append("\t\t\t<localizationProfileName>")
-                        .append(lp.getName())
+                subXML.append("\t\t\t<localizationProfileName>").append(lp.getName())
                         .append("</localizationProfileName>\r\n");
             }
             subXML.append("\t\t</localizationProfile>\r\n");
@@ -15327,8 +14537,7 @@ public class Ambassador extends AbstractWebService
                     Project project = p_job.getProject();
                     tmpXml.append("\t\t\t<groupId>").append(jobGroup.getId())
                             .append("</groupId>\r\n");
-                    tmpXml.append("\t\t\t<groupName>")
-                            .append(jobGroup.getName())
+                    tmpXml.append("\t\t\t<groupName>").append(jobGroup.getName())
                             .append("</groupName>\r\n");
 
                     subXML.append(tmpXml.toString());
@@ -15350,8 +14559,7 @@ public class Ambassador extends AbstractWebService
                 subXML.append("\t\t<wordcount></wordcount>\r\n");
             }
             // numOfLanguages
-            subXML.append("\t\t<numOfLanguages>")
-                    .append(p_job.getWorkflows().size())
+            subXML.append("\t\t<numOfLanguages>").append(p_job.getWorkflows().size())
                     .append("</numOfLanguages>\r\n");
             String soureLocale = p_job.getSourceLocale().toString();
             Set<String> handledSafeBaseFiles = new HashSet<String>();
@@ -15359,8 +14567,7 @@ public class Ambassador extends AbstractWebService
             String eventFlowXml = null;
             int numPagesDocx = 0;
             int numPagesPptx = 0;
-            List<SourcePage> sourcePages = (List<SourcePage>) p_job
-                    .getSourcePages();
+            List<SourcePage> sourcePages = (List<SourcePage>) p_job.getSourcePages();
             for (SourcePage sourcePage : sourcePages)
             {
                 // m_externalPageId
@@ -15369,20 +14576,19 @@ public class Ambassador extends AbstractWebService
                         || externalPageId.toLowerCase().endsWith("pptx"))
                 {
                     eventFlowXml = sourcePage.getRequest().getEventFlowXml();
-                    String safeBaseFilename = jobHelper
-                            .getOffice2010SafeBaseFileName(eventFlowXml);
+                    String safeBaseFilename = jobHelper.getOffice2010SafeBaseFileName(eventFlowXml);
                     if (StringUtil.isNotEmpty(safeBaseFilename)
                             && !handledSafeBaseFiles.contains(safeBaseFilename))
                     {
                         if (externalPageId.toLowerCase().endsWith("docx"))
                         {
-                            numPagesDocx += jobHelper.getPageCount(
-                                    safeBaseFilename, soureLocale, "docx");
+                            numPagesDocx += jobHelper.getPageCount(safeBaseFilename, soureLocale,
+                                    "docx");
                         }
                         else if (externalPageId.toLowerCase().endsWith("pptx"))
                         {
-                            numPagesPptx += jobHelper.getPageCount(
-                                    safeBaseFilename, soureLocale, "pptx");
+                            numPagesPptx += jobHelper.getPageCount(safeBaseFilename, soureLocale,
+                                    "pptx");
                         }
                     }
 
@@ -15409,8 +14615,7 @@ public class Ambassador extends AbstractWebService
             {
                 String srcLang = p_job.getSourceLocale().getLanguage() + "_"
                         + p_job.getSourceLocale().getCountry();
-                subXML.append("\t\t<sourceLang>").append(srcLang)
-                        .append("</sourceLang>\r\n");
+                subXML.append("\t\t<sourceLang>").append(srcLang).append("</sourceLang>\r\n");
             }
             catch (Exception e)
             {
@@ -15420,10 +14625,8 @@ public class Ambassador extends AbstractWebService
             // Due date
             try
             {
-                String dueDateStr = convertDateToString(p_job.getDueDate(),
-                        p_tz);
-                subXML.append("\t\t<dueDate>").append(dueDateStr)
-                        .append("</dueDate>\r\n");
+                String dueDateStr = convertDateToString(p_job.getDueDate(), p_tz);
+                subXML.append("\t\t<dueDate>").append(dueDateStr).append("</dueDate>\r\n");
             }
             catch (Exception e)
             {
@@ -15442,8 +14645,7 @@ public class Ambassador extends AbstractWebService
                     {
                         SourcePage sp = (SourcePage) sfIt.next();
                         tmpXml.append("\t\t\t<sourcePage>\r\n");
-                        tmpXml.append("\t\t\t\t<sourcePageId>")
-                                .append(sp.getId())
+                        tmpXml.append("\t\t\t\t<sourcePageId>").append(sp.getId())
                                 .append("</sourcePageId>\r\n");
                         tmpXml.append("\t\t\t\t<externalPageId>")
                                 .append(replaceAndString(sp.getExternalPageId()))
@@ -15481,17 +14683,12 @@ public class Ambassador extends AbstractWebService
                             Workflow wf = (Workflow) it.next();
                             tmpXml.append("\t\t\t\t<wfId>").append(wf.getId())
                                     .append("</wfId>\r\n");
-                            String workflowName = workflowNameMap.get(wf
-                                    .getId());
-                            tmpXml.append("\t\t\t\t<workflowName>")
-                                    .append(workflowName)
+                            String workflowName = workflowNameMap.get(wf.getId());
+                            tmpXml.append("\t\t\t\t<workflowName>").append(workflowName)
                                     .append("</workflowName>\r\n");
-                            String targetLang = wf.getTargetLocale()
-                                    .getLanguage()
-                                    + "_"
+                            String targetLang = wf.getTargetLocale().getLanguage() + "_"
                                     + wf.getTargetLocale().getCountry();
-                            tmpXml.append("\t\t\t\t<targetLang>")
-                                    .append(targetLang)
+                            tmpXml.append("\t\t\t\t<targetLang>").append(targetLang)
                                     .append("</targetLang>\r\n");
                             tmpXml.append("\t\t\t</workflow>\n");
                         }
@@ -15511,16 +14708,14 @@ public class Ambassador extends AbstractWebService
             {
                 try
                 {
-                    List<JobAttribute> jobAttributes = p_job
-                            .getAllJobAttributes();
+                    List<JobAttribute> jobAttributes = p_job.getAllJobAttributes();
                     Attributes allAttributes = new Attributes();
                     List<DateJobAttributeVo> dataVos = new ArrayList<DateJobAttributeVo>();
                     if (jobAttributes != null)
                     {
                         for (JobAttribute attribute : jobAttributes)
                         {
-                            JobAttributeVo vo = AttributeUtil
-                                    .getJobAttributeVo(attribute);
+                            JobAttributeVo vo = AttributeUtil.getJobAttributeVo(attribute);
                             if ("date".equals(vo.getType()))
                             {
                                 dataVos.add((DateJobAttributeVo) vo);
@@ -15536,16 +14731,13 @@ public class Ambassador extends AbstractWebService
                     if (allAttributes.getAttributes().size() > 0)
                     {
                         allAttributes.sort();
-                        attrs = com.globalsight.cxe.util.XmlUtil.object2String(
-                                allAttributes, true);
+                        attrs = com.globalsight.cxe.util.XmlUtil.object2String(allAttributes, true);
                     }
 
                     if (attrs != null && !"".equals(attrs.trim()))
                     {
-                        String att = attrs.substring(attrs.indexOf(">") + 1)
-                                .trim();
-                        att = att
-                                .substring(0, att.lastIndexOf("</attributes>"));
+                        String att = attrs.substring(attrs.indexOf(">") + 1).trim();
+                        att = att.substring(0, att.lastIndexOf("</attributes>"));
                         subXML.append(att);
                         appendDateVos(subXML, dataVos, p_tz);
                         subXML.append("</attributes>\r\n");
@@ -15573,27 +14765,22 @@ public class Ambassador extends AbstractWebService
         return subXML.toString();
     }
 
-    private void appendDateVos(StringBuffer subXML,
-            List<DateJobAttributeVo> dataVos, TimeZone p_tz)
+    private void appendDateVos(StringBuffer subXML, List<DateJobAttributeVo> dataVos, TimeZone p_tz)
     {
         for (DateJobAttributeVo dateVo : dataVos)
         {
-            subXML.append("    <attributes xsi:type=\"dateJobAttributeVo\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n");
-            subXML.append("        <displayName>")
-                    .append(dateVo.getDisplayName())
+            subXML.append(
+                    "    <attributes xsi:type=\"dateJobAttributeVo\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n");
+            subXML.append("        <displayName>").append(dateVo.getDisplayName())
                     .append("</displayName>\r\n");
-            subXML.append("        <fromSuperCompany>")
-                    .append(dateVo.isFromSuperCompany())
+            subXML.append("        <fromSuperCompany>").append(dateVo.isFromSuperCompany())
                     .append("</fromSuperCompany>\r\n");
-            subXML.append("        <internalName>")
-                    .append(dateVo.getInternalName())
+            subXML.append("        <internalName>").append(dateVo.getInternalName())
                     .append("</internalName>\r\n");
             subXML.append("        <required>").append(dateVo.isRequired())
                     .append("</required>\r\n");
-            subXML.append("        <type>").append(dateVo.getType())
-                    .append("</type>\r\n");
-            subXML.append("        <value>")
-                    .append(convertDateToString(dateVo.getValue(), p_tz))
+            subXML.append("        <type>").append(dateVo.getType()).append("</type>\r\n");
+            subXML.append("        <value>").append(convertDateToString(dateVo.getValue(), p_tz))
                     .append("</value>\r\n");
             subXML.append("    </attributes>\r\n");
         }
@@ -15613,15 +14800,14 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String fetchWorkflowRelevantInfo(String p_accessToken,
-            String p_workflowId) throws WebServiceException
+    public String fetchWorkflowRelevantInfo(String p_accessToken, String p_workflowId)
+            throws WebServiceException
     {
         checkAccess(p_accessToken, "fetchWorkflowRelevantInfo");
         checkPermission(p_accessToken, Permission.JOB_WORKFLOWS_VIEW);
 
         WebServicesLog.Start activityStart = null;
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<WorkflowInfo>\r\n");
         try
         {
@@ -15629,64 +14815,49 @@ public class Ambassador extends AbstractWebService
             Assert.assertNotEmpty(p_workflowId, "workflowId");
 
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName",
-                    getUsernameFromSession(p_accessToken));
+            activityArgs.put("loggedUserName", getUsernameFromSession(p_accessToken));
             activityArgs.put("workflowId", p_workflowId);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "fetchWorkflowRelevantInfo(p_accessToken, p_workflowId)",
-                    activityArgs);
+                    "fetchWorkflowRelevantInfo(p_accessToken, p_workflowId)", activityArgs);
 
             JobHandlerWLRemote jobHandler = ServerProxy.getJobHandler();
-            WorkflowManagerWLRemote wfManager = ServerProxy
-                    .getWorkflowManager();
+            WorkflowManagerWLRemote wfManager = ServerProxy.getWorkflowManager();
 
-            Workflow wf = wfManager.getWorkflowById((new Long(p_workflowId))
-                    .longValue());
+            Workflow wf = wfManager.getWorkflowById((new Long(p_workflowId)).longValue());
             if (wf == null)
             {
-                String msg = "Can't find workflow for workflowId : "
-                        + p_workflowId;
+                String msg = "Can't find workflow for workflowId : " + p_workflowId;
                 throw new Exception(msg);
             }
 
             Job job = wf.getJob();
-            long l10nProfileId = wf.getJob().getFileProfile()
-                    .getL10nProfileId();
+            boolean hasMtElementFlag = canHaveMtElement(wf);
 
             /** Info of current workflow */
-            xml.append("\t<workflowId>").append(p_workflowId)
-                    .append("</workflowId>\r\n");
+            xml.append("\t<workflowId>").append(p_workflowId).append("</workflowId>\r\n");
             String trgLocale = wf.getTargetLocale().getLanguage() + "_"
                     + wf.getTargetLocale().getCountry();
-            xml.append("\t<targetLocale>").append(trgLocale)
-                    .append("</targetLocale>\r\n");
-            xml.append("\t<state>").append(wf.getState())
-                    .append("</state>\r\n");
-            xml.append("\t<percentageCompletion>")
-                    .append(wf.getPercentageCompletion())
+            xml.append("\t<targetLocale>").append(trgLocale).append("</targetLocale>\r\n");
+            xml.append("\t<state>").append(wf.getState()).append("</state>\r\n");
+            xml.append("\t<percentageCompletion>").append(wf.getPercentageCompletion())
                     .append("</percentageCompletion>\r\n");
             // currentActivity
-            TaskInstance taskInstance = WorkflowManagerLocal.getCurrentTask(wf
-                    .getId());
+            TaskInstance taskInstance = WorkflowManagerLocal.getCurrentTask(wf.getId());
             String currentTaskName = "";
             if (taskInstance != null)
             {
-                currentTaskName = TaskJbpmUtil.getTaskDisplayName(taskInstance
-                        .getName());
+                currentTaskName = TaskJbpmUtil.getTaskDisplayName(taskInstance.getName());
             }
             xml.append("\t<currentActivity>").append(currentTaskName)
                     .append("</currentActivity>\r\n");
             // estimatedTranslateCompletionDate
-            Date estimatedTransCompDate = wf
-                    .getEstimatedTranslateCompletionDate();
-            String temp = DateHelper.getFormattedDateAndTime(
-                    estimatedTransCompDate, null);
+            Date estimatedTransCompDate = wf.getEstimatedTranslateCompletionDate();
+            String temp = DateHelper.getFormattedDateAndTime(estimatedTransCompDate, null);
             xml.append("\t<estimatedTranslateCompletionDate>").append(temp)
                     .append("</estimatedTranslateCompletionDate>\r\n");
             // estimatedCompletionDate
             Date estimatedCompDate = wf.getEstimatedCompletionDate();
-            String temp2 = DateHelper.getFormattedDateAndTime(
-                    estimatedCompDate, null);
+            String temp2 = DateHelper.getFormattedDateAndTime(estimatedCompDate, null);
             xml.append("\t<estimatedCompletionDate>").append(temp2)
                     .append("</estimatedCompletionDate>\r\n");
             xml.append("\t<workflowPriority>").append(wf.getPriority())
@@ -15694,32 +14865,11 @@ public class Ambassador extends AbstractWebService
 
             /** Wordcount Summary */
             xml.append("\t<wordCountSummary>\r\n");
+
             // leverageOption
-            String leverageOption = "unknown";
-            boolean isInContextMatch = false;
-            try
-            {
-                TranslationMemoryProfile tmp = ServerProxy.getProjectHandler()
-                        .getL10nProfile(l10nProfileId)
-                        .getTranslationMemoryProfile();
-                if (tmp != null)
-                {
-                    isInContextMatch = tmp.getIsContextMatchLeveraging();
-                }
-
-                if (isInContextMatch)
-                {
-                    leverageOption = "Leverage in context matches";
-                }
-                else
-                {
-                    leverageOption = "100% match only";
-                }
-            }
-            catch (Exception e)
-            {
-
-            }
+            boolean isInContextMatch = PageHandler.isInContextMatch(job);
+            String leverageOption = isInContextMatch ? "Leverage in context matches"
+                    : "100% match only";
             xml.append("\t\t<leverageOption>").append(leverageOption)
                     .append("</leverageOption>\r\n");
             // 100%
@@ -15734,35 +14884,46 @@ public class Ambassador extends AbstractWebService
             }
             xml.append("\t\t<100%>").append(wc).append("</100%>\r\n");
             // 95%-99%
-            xml.append("\t\t<95%-99%>")
-                    .append(wf.getThresholdHiFuzzyWordCount())
+            xml.append("\t\t<95%-99%>").append(wf.getThresholdHiFuzzyWordCount())
                     .append("</95%-99%>\r\n");
             // 85%-94%
-            xml.append("\t\t<85%-94%>")
-                    .append(wf.getThresholdMedHiFuzzyWordCount())
+            xml.append("\t\t<85%-94%>").append(wf.getThresholdMedHiFuzzyWordCount())
                     .append("</85%-94%>\r\n");
             // 75%-84%
-            xml.append("\t\t<75%-84%>")
-                    .append(wf.getThresholdMedFuzzyWordCount())
+            xml.append("\t\t<75%-84%>").append(wf.getThresholdMedFuzzyWordCount())
                     .append("</75%-84%>\r\n");
-            // noMatch (50%-74%)
-            xml.append("\t\t<noMatch>")
-                    .append(wf.getThresholdNoMatchWordCount()
-                            + wf.getThresholdLowFuzzyWordCount())
-                    .append("</noMatch>\r\n");
+
+            // noMatch (50%-74% & < 50)
+            int noMatch = wf.getThresholdLowFuzzyWordCount() + wf.getThresholdNoMatchWordCount();
+            if (hasMtElementFlag)
+            {
+                noMatch -= wf.getMtFuzzyNoMatchWordCount();
+            }
+            xml.append("\t\t<noMatch>").append(noMatch).append("</noMatch>\r\n");
+
             // Repetitions
-            xml.append("\t\t<repetitions>").append(wf.getRepetitionWordCount())
-                    .append("</repetitions>\r\n");
+            int repetions = wf.getRepetitionWordCount();
+            if (hasMtElementFlag)
+            {
+                repetions -= wf.getMtRepetitionsWordCount();
+            }
+            xml.append("\t\t<repetitions>").append(repetions).append("</repetitions>\r\n");
+
             // In Context Matches
             if (isInContextMatch)
             {
-                xml.append("\t\t<InContextMatches>")
-                        .append(wf.getInContextMatchWordCount())
+                xml.append("\t\t<InContextMatches>").append(wf.getInContextMatchWordCount())
                         .append("</InContextMatches>\r\n");
             }
+
+            if (hasMtElementFlag)
+            {
+                xml.append("\t\t<machineTranslated>").append(wf.getMtTotalWordCount())
+                        .append("</machineTranslated>\r\n");
+            }
+
             // total
-            xml.append("\t\t<total>").append(wf.getTotalWordCount())
-                    .append("</total>\r\n");
+            xml.append("\t\t<total>").append(wf.getTotalWordCount()).append("</total>\r\n");
             xml.append("\t</wordCountSummary>\r\n");
 
             /** Job comments */
@@ -15779,26 +14940,23 @@ public class Ambassador extends AbstractWebService
                             .append("</jobCommentId>\r\n");
 
                     temp = comment.getComment();
-                    temp = StringUtil.isEmpty(temp) ? "" : XmlUtil
-                            .escapeString(temp);
+                    temp = StringUtil.isEmpty(temp) ? "" : XmlUtil.escapeString(temp);
 
                     xml.append("\t\t\t<jobCommentContent>").append(temp)
                             .append("</jobCommentContent>\r\n");
                     // comment files
                     xml.append("\t\t\t<jobCommentFiles>\r\n");
-                    String generalPath = getCommentPath(comment.getId(),
+                    String generalPath = getCommentPath(comment.getId(), CommentUpload.GENERAL);
+                    String generalCommentFileXML = getJobCommentsXML(generalPath,
                             CommentUpload.GENERAL);
-                    String generalCommentFileXML = getJobCommentsXML(
-                            generalPath, CommentUpload.GENERAL);
-                    if (generalCommentFileXML != null
-                            && generalCommentFileXML.trim().length() > 0)
+                    if (generalCommentFileXML != null && generalCommentFileXML.trim().length() > 0)
                     {
                         xml.append(generalCommentFileXML);
                     }
                     String restrictedPath = getCommentPath(comment.getId(),
                             CommentUpload.RESTRICTED);
-                    String restrictedCommentFileXML = getJobCommentsXML(
-                            restrictedPath, CommentUpload.RESTRICTED);
+                    String restrictedCommentFileXML = getJobCommentsXML(restrictedPath,
+                            CommentUpload.RESTRICTED);
                     if (restrictedCommentFileXML != null
                             && restrictedCommentFileXML.trim().length() > 0)
                     {
@@ -15834,31 +14992,28 @@ public class Ambassador extends AbstractWebService
                         {
                             Comment comment = (Comment) taskCommentIt.next();
                             xml.append("\t\t<taskComment>\r\n");
-                            xml.append("\t\t\t<taskCommentId>")
-                                    .append(comment.getId())
+                            xml.append("\t\t\t<taskCommentId>").append(comment.getId())
                                     .append("</taskCommentId>\r\n");
 
                             temp = comment.getComment();
-                            temp = StringUtil.isEmpty(temp) ? "" : XmlUtil
-                                    .escapeString(temp);
+                            temp = StringUtil.isEmpty(temp) ? "" : XmlUtil.escapeString(temp);
 
-                            xml.append("\t\t\t<taskCommentContent>")
-                                    .append(temp)
+                            xml.append("\t\t\t<taskCommentContent>").append(temp)
                                     .append("</taskCommentContent>\r\n");
                             xml.append("\t\t\t<taskCommentFiles>\r\n");
-                            String generalPath = getCommentPath(
-                                    comment.getId(), CommentUpload.GENERAL);
-                            String generalCommentFileXML = getTaskCommentsXML(
-                                    generalPath, CommentUpload.GENERAL);
+                            String generalPath = getCommentPath(comment.getId(),
+                                    CommentUpload.GENERAL);
+                            String generalCommentFileXML = getTaskCommentsXML(generalPath,
+                                    CommentUpload.GENERAL);
                             if (generalCommentFileXML != null
                                     && generalCommentFileXML.trim().length() > 0)
                             {
                                 xml.append(generalCommentFileXML);
                             }
-                            String restrictedPath = getCommentPath(
-                                    comment.getId(), CommentUpload.RESTRICTED);
-                            String restrictedCommentFileXML = getTaskCommentsXML(
-                                    restrictedPath, CommentUpload.RESTRICTED);
+                            String restrictedPath = getCommentPath(comment.getId(),
+                                    CommentUpload.RESTRICTED);
+                            String restrictedCommentFileXML = getTaskCommentsXML(restrictedPath,
+                                    CommentUpload.RESTRICTED);
                             if (restrictedCommentFileXML != null
                                     && restrictedCommentFileXML.trim().length() > 0)
                             {
@@ -15875,8 +15030,7 @@ public class Ambassador extends AbstractWebService
         catch (Exception ex)
         {
             logger.error(ex.getMessage(), ex);
-            String msg = makeErrorXml("fetchWorkflowRelevantInfo",
-                    ex.getMessage());
+            String msg = makeErrorXml("fetchWorkflowRelevantInfo", ex.getMessage());
             throw new WebServiceException(msg);
         }
         finally
@@ -15905,12 +15059,11 @@ public class Ambassador extends AbstractWebService
      * @throws WebServiceException
      * 
      */
-    public String fetchWorkflowRelevantInfoByJobs(String p_accessToken,
-            String jobIds) throws WebServiceException
+    public String fetchWorkflowRelevantInfoByJobs(String p_accessToken, String jobIds)
+            throws WebServiceException
     {
         if (StringUtil.isEmpty(p_accessToken) || StringUtil.isEmpty(jobIds))
-            return makeErrorXml("fetchWorkflowRelevantInfoByJobs",
-                    "Invalid parameter");
+            return makeErrorXml("fetchWorkflowRelevantInfoByJobs", "Invalid parameter");
 
         checkAccess(p_accessToken, "fetchWorkflowRelevantInfoByJobs");
         try
@@ -15919,8 +15072,7 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            return makeErrorXml("fetchWorkflowRelevantInfoByJobs",
-                    e.getMessage());
+            return makeErrorXml("fetchWorkflowRelevantInfoByJobs", e.getMessage());
         }
 
         WebServicesLog.Start activityStart = null;
@@ -15929,16 +15081,13 @@ public class Ambassador extends AbstractWebService
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName",
-                    getUsernameFromSession(p_accessToken));
+            activityArgs.put("loggedUserName", getUsernameFromSession(p_accessToken));
             activityArgs.put("jobIds", jobIds);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "fetchWorkflowRelevantInfoByJobs(p_accessToken, jobIds)",
-                    activityArgs);
+                    "fetchWorkflowRelevantInfoByJobs(p_accessToken, jobIds)", activityArgs);
 
             JobHandlerWLRemote jobHandler = ServerProxy.getJobHandler();
-            WorkflowManagerWLRemote wfManager = ServerProxy
-                    .getWorkflowManager();
+            WorkflowManagerWLRemote wfManager = ServerProxy.getWorkflowManager();
             Job job = null;
             ArrayList<Workflow> workflows = null;
 
@@ -15964,11 +15113,9 @@ public class Ambassador extends AbstractWebService
                 if (job == null)
                     continue;
 
-                if (!isInSameCompany(userName,
-                        String.valueOf(job.getCompanyId())))
+                if (!isInSameCompany(userName, String.valueOf(job.getCompanyId())))
                 {
-                    if (!UserUtil.isSuperAdmin(userId)
-                            && !UserUtil.isSuperPM(userId))
+                    if (!UserUtil.isSuperAdmin(userId) && !UserUtil.isSuperPM(userId))
                     {
                         continue;
                     }
@@ -15977,8 +15124,7 @@ public class Ambassador extends AbstractWebService
                 if (job != null)
                 {
                     xml.append("\t<job>\r\n");
-                    xml.append("\t\t<job_id>").append(jobIdString)
-                            .append("</job_id>\r\n");
+                    xml.append("\t\t<job_id>").append(jobIdString).append("</job_id>\r\n");
                     xml.append("\t\t<job_name>")
                             .append(EditUtil.encodeXmlEntities(job.getJobName()))
                             .append("</job_name>\r\n");
@@ -15986,12 +15132,13 @@ public class Ambassador extends AbstractWebService
                     workflows = new ArrayList<Workflow>(job.getWorkflows());
                     if (workflows != null && workflows.size() > 0)
                     {
+                        boolean hasMtElementFlag = this.canHaveMtElement(workflows);
                         xml.append("\t\t\t<workflows>\r\n");
                         for (Workflow workflow : workflows)
                         {
                             xml.append("\t\t\t\t<workflow>\r\n");
-                            xml.append(generateWorkflowInfo(workflow,
-                                    "\t\t\t\t\t"));
+                            xml.append(
+                                    generateWorkflowInfo(workflow, hasMtElementFlag, "\t\t\t\t\t"));
                             xml.append("\t\t\t\t</workflow>\r\n");
                         }
                         xml.append("\t\t\t</workflows>\r\n");
@@ -16024,7 +15171,7 @@ public class Ambassador extends AbstractWebService
         return xml.toString();
     }
 
-    private String generateWorkflowInfo(Workflow workflow, String tab)
+    private String generateWorkflowInfo(Workflow workflow, boolean hasMtElementFlag, String tab)
     {
         StringBuilder xml = new StringBuilder();
 
@@ -16033,25 +15180,21 @@ public class Ambassador extends AbstractWebService
         xml.append(tab).append("<workflow_id>").append(workflow.getId())
                 .append("</workflow_id>\r\n");
         // target locale
-        xml.append(tab).append("<target_locale>")
-                .append(workflow.getTargetLocale())
+        xml.append(tab).append("<target_locale>").append(workflow.getTargetLocale())
                 .append("</target_locale>\r\n");
         // workflow state
         xml.append(tab).append("<workflow_state>").append(workflow.getState())
                 .append("</workflow_state>\r\n");
         // percentage of completion
-        xml.append(tab).append("<percentage_completion>")
-                .append(workflow.getPercentageCompletion())
+        xml.append(tab).append("<percentage_completion>").append(workflow.getPercentageCompletion())
                 .append("</percentage_completion>\r\n");
 
         // current activity
-        TaskInstance taskInstance = WorkflowManagerLocal
-                .getCurrentTask(workflow.getId());
+        TaskInstance taskInstance = WorkflowManagerLocal.getCurrentTask(workflow.getId());
         String currentTaskName = "";
         if (taskInstance != null)
         {
-            currentTaskName = TaskJbpmUtil.getTaskDisplayName(taskInstance
-                    .getName());
+            currentTaskName = TaskJbpmUtil.getTaskDisplayName(taskInstance.getName());
         }
         xml.append(tab).append("<current_activity>").append(currentTaskName)
                 .append("</current_activity>\r\n");
@@ -16059,8 +15202,7 @@ public class Ambassador extends AbstractWebService
         // estimatedTranslateCompletionDate
         Date tmpDate = workflow.getEstimatedTranslateCompletionDate();
         String temp = DateHelper.getFormattedDateAndTime(tmpDate, null);
-        xml.append(tab).append("<estimated_translate_completion_date>")
-                .append(temp)
+        xml.append(tab).append("<estimated_translate_completion_date>").append(temp)
                 .append("</estimated_translate_completion_date>\r\n");
 
         // estimatedCompletionDate
@@ -16070,37 +15212,16 @@ public class Ambassador extends AbstractWebService
                 .append("</estimated_completion_date>\r\n");
 
         // workflow priority
-        xml.append(tab).append("<workflow_priority>")
-                .append(workflow.getPriority())
+        xml.append(tab).append("<workflow_priority>").append(workflow.getPriority())
                 .append("</workflow_priority>\r\n");
 
         /** Wordcount Summary */
         xml.append(tab).append("<word_counts>\r\n");
 
         // leverageOption
-        String leverageOption = "unknown";
-        boolean isInContextMatch = false;
-        try
-        {
-            Job job = workflow.getJob();
-            if (PageHandler.isInContextMatch(job))
-            {
-                isInContextMatch = true;
-            }
-
-            if (isInContextMatch)
-            {
-                leverageOption = "Leverage in context matches";
-            }
-            else
-            {
-                leverageOption = "Match 100 Percent";
-            }
-        }
-        catch (Exception e)
-        {
-
-        }
+        boolean isInContextMatch = PageHandler.isInContextMatch(workflow.getJob());
+        String leverageOption = isInContextMatch ? "Leverage in context matches"
+                : "100% match only";
         xml.append(tab).append("\t<leverage_option>").append(leverageOption)
                 .append("</leverage_option>\r\n");
 
@@ -16128,16 +15249,25 @@ public class Ambassador extends AbstractWebService
         xml.append(tab).append("\t<match_75_percent-84_percent>")
                 .append(workflow.getThresholdMedFuzzyWordCount())
                 .append("</match_75_percent-84_percent>\r\n");
-        // noMatch (50%-74%)
-        xml.append(tab)
-                .append("\t<no_match>")
-                .append(workflow.getThresholdNoMatchWordCount()
-                        + workflow.getThresholdLowFuzzyWordCount())
-                .append("</no_match>\r\n");
+
+        // noMatch (50%-74% & < 50)
+        int noMatch = workflow.getThresholdNoMatchWordCount()
+                + workflow.getThresholdLowFuzzyWordCount();
+        if (hasMtElementFlag)
+        {
+            noMatch -= workflow.getMtFuzzyNoMatchWordCount();
+        }
+        xml.append(tab).append("\t<no_match>").append(noMatch).append("</no_match>\r\n");
+
         // Repetitions
-        xml.append(tab).append("\t<repetitions>")
-                .append(workflow.getRepetitionWordCount())
+        int repetions = workflow.getRepetitionWordCount();
+        if (hasMtElementFlag)
+        {
+            repetions -= workflow.getMtRepetitionsWordCount();
+        }
+        xml.append(tab).append("\t<repetitions>").append(hasMtElementFlag)
                 .append("</repetitions>\r\n");
+
         // In Context Matches
         if (isInContextMatch)
         {
@@ -16145,9 +15275,16 @@ public class Ambassador extends AbstractWebService
                     .append(workflow.getInContextMatchWordCount())
                     .append("</in_context_match>\r\n");
         }
+
+        if (hasMtElementFlag)
+        {
+            xml.append(tab).append("\t<machine_translated>").append(workflow.getMtTotalWordCount())
+                    .append("</machine_translated>\r\n");
+        }
+
         // total
-        xml.append(tab).append("\t<total>")
-                .append(workflow.getTotalWordCount()).append("</total>\r\n");
+        xml.append(tab).append("\t<total>").append(workflow.getTotalWordCount())
+                .append("</total>\r\n");
         xml.append(tab).append("</word_counts>\r\n");
 
         /** Job comments */
@@ -16160,31 +15297,26 @@ public class Ambassador extends AbstractWebService
             {
                 Comment comment = (Comment) commentsIt.next();
                 xml.append(tab).append("\t<job_comment>\r\n");
-                xml.append(tab).append("\t\t<job_comment_id>")
-                        .append(comment.getId())
+                xml.append(tab).append("\t\t<job_comment_id>").append(comment.getId())
                         .append("</job_comment_id>\r\n");
 
                 temp = comment.getComment();
-                temp = StringUtil.isEmpty(temp) ? "" : XmlUtil
-                        .escapeString(temp);
+                temp = StringUtil.isEmpty(temp) ? "" : XmlUtil.escapeString(temp);
 
-                xml.append(tab).append("\t\t<job_comment_content>")
-                        .append(temp).append("</job_comment_content>\r\n");
+                xml.append(tab).append("\t\t<job_comment_content>").append(temp)
+                        .append("</job_comment_content>\r\n");
                 // comment files
                 xml.append(tab).append("\t\t<job_comment_files>\r\n");
-                String generalPath = getCommentPath(comment.getId(),
-                        CommentUpload.GENERAL);
+                String generalPath = getCommentPath(comment.getId(), CommentUpload.GENERAL);
                 String generalCommentFileXML = getJobCommentsXML(generalPath,
                         CommentUpload.GENERAL);
-                if (generalCommentFileXML != null
-                        && generalCommentFileXML.trim().length() > 0)
+                if (generalCommentFileXML != null && generalCommentFileXML.trim().length() > 0)
                 {
                     xml.append(tab).append(generalCommentFileXML);
                 }
-                String restrictedPath = getCommentPath(comment.getId(),
+                String restrictedPath = getCommentPath(comment.getId(), CommentUpload.RESTRICTED);
+                String restrictedCommentFileXML = getJobCommentsXML(restrictedPath,
                         CommentUpload.RESTRICTED);
-                String restrictedCommentFileXML = getJobCommentsXML(
-                        restrictedPath, CommentUpload.RESTRICTED);
                 if (restrictedCommentFileXML != null
                         && restrictedCommentFileXML.trim().length() > 0)
                 {
@@ -16220,22 +15352,18 @@ public class Ambassador extends AbstractWebService
                     {
                         Comment comment = (Comment) taskCommentIt.next();
                         xml.append(tab).append("\t<task_comment>\r\n");
-                        xml.append(tab).append("\t\t<task_comment_id>")
-                                .append(comment.getId())
+                        xml.append(tab).append("\t\t<task_comment_id>").append(comment.getId())
                                 .append("</task_comment_id>\r\n");
 
                         temp = comment.getComment();
-                        temp = StringUtil.isEmpty(temp) ? "" : XmlUtil
-                                .escapeString(temp);
+                        temp = StringUtil.isEmpty(temp) ? "" : XmlUtil.escapeString(temp);
 
-                        xml.append(tab).append("\t\t<task_comment_content>")
-                                .append(temp)
+                        xml.append(tab).append("\t\t<task_comment_content>").append(temp)
                                 .append("</task_comment_content>\r\n");
                         xml.append(tab).append("\t\t<task_comment_files>\r\n");
-                        String generalPath = getCommentPath(comment.getId(),
+                        String generalPath = getCommentPath(comment.getId(), CommentUpload.GENERAL);
+                        String generalCommentFileXML = getTaskCommentsXML(generalPath,
                                 CommentUpload.GENERAL);
-                        String generalCommentFileXML = getTaskCommentsXML(
-                                generalPath, CommentUpload.GENERAL);
                         if (generalCommentFileXML != null
                                 && generalCommentFileXML.trim().length() > 0)
                         {
@@ -16243,8 +15371,8 @@ public class Ambassador extends AbstractWebService
                         }
                         String restrictedPath = getCommentPath(comment.getId(),
                                 CommentUpload.RESTRICTED);
-                        String restrictedCommentFileXML = getTaskCommentsXML(
-                                restrictedPath, CommentUpload.RESTRICTED);
+                        String restrictedCommentFileXML = getTaskCommentsXML(restrictedPath,
+                                CommentUpload.RESTRICTED);
                         if (restrictedCommentFileXML != null
                                 && restrictedCommentFileXML.trim().length() > 0)
                         {
@@ -16263,15 +15391,12 @@ public class Ambassador extends AbstractWebService
 
     private String getCommentPath(long p_commentId, String p_access)
     {
-        StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
-                .getInstance().getStringParameter(
-                        SystemConfigParamNames.FILE_STORAGE_DIR));
+        StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration.getInstance()
+                .getStringParameter(SystemConfigParamNames.FILE_STORAGE_DIR));
 
-        fileStorageRoot.append(File.separator)
-                .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
-                .append(File.separator).append("CommentReference")
-                .append(File.separator).append(p_commentId)
-                .append(File.separator).append(p_access);
+        fileStorageRoot.append(File.separator).append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
+                .append(File.separator).append("CommentReference").append(File.separator)
+                .append(p_commentId).append(File.separator).append(p_access);
 
         return fileStorageRoot.toString();
     }
@@ -16300,8 +15425,8 @@ public class Ambassador extends AbstractWebService
                     subXML.append("\t\t\t\t\t<jobCommentFileName>")
                             .append(XmlUtil.escapeString(file.getName()))
                             .append("</jobCommentFileName>\r\n");
-                    subXML.append("\t\t\t\t\t<jobCommentAccess>")
-                            .append(p_access).append("</jobCommentAccess>\r\n");
+                    subXML.append("\t\t\t\t\t<jobCommentAccess>").append(p_access)
+                            .append("</jobCommentAccess>\r\n");
                     subXML.append("\t\t\t\t</jobCommentFile>\r\n");
                 }
             }
@@ -16334,8 +15459,7 @@ public class Ambassador extends AbstractWebService
                     subXML.append("\t\t\t\t\t<taskCommentFileName>")
                             .append(XmlUtil.escapeString(file.getName()))
                             .append("</taskCommentFileName>\r\n");
-                    subXML.append("\t\t\t\t\t<taskCommentAccess>")
-                            .append(p_access)
+                    subXML.append("\t\t\t\t\t<taskCommentAccess>").append(p_access)
                             .append("</taskCommentAccess>\r\n");
                     subXML.append("\t\t\t\t</taskCommentFile>\r\n");
                 }
@@ -16363,15 +15487,13 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String fetchFileForPreview(String p_accessToken, String p_jobId,
-            String p_targetLocaleId, String p_sourcePageId)
-            throws WebServiceException
+    public String fetchFileForPreview(String p_accessToken, String p_jobId, String p_targetLocaleId,
+            String p_sourcePageId) throws WebServiceException
     {
         checkAccess(p_accessToken, "fetchFileForPreview");
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
 
-        StringBuffer xml = new StringBuffer(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<exportedFileInfo>\r\n");
         WebServicesLog.Start activityStart = null;
 
@@ -16383,27 +15505,24 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("jobId", p_jobId);
             activityArgs.put("targetLocaleId", p_targetLocaleId);
             activityArgs.put("sourcePageId", p_sourcePageId);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "fetchFileForPreview(p_accessToken, p_jobId,p_targetLocaleId,p_sourcePageId)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "fetchFileForPreview(p_accessToken, p_jobId,p_targetLocaleId,p_sourcePageId)",
+                    activityArgs);
             JobHandlerWLRemote jobHandler = ServerProxy.getJobHandler();
-            WorkflowManagerWLRemote wfManager = ServerProxy
-                    .getWorkflowManager();
+            WorkflowManagerWLRemote wfManager = ServerProxy.getWorkflowManager();
 
             Job job = jobHandler.getJobById((new Long(p_jobId)).longValue());
             // this is like this:
             // http://<host>:<port>/globalsight/cxedocs/<companyName>
-            String urlPrefix = determineUrlPrefix(CompanyWrapper
-                    .getCompanyNameById(job.getCompanyId()));
+            String urlPrefix = determineUrlPrefix(
+                    CompanyWrapper.getCompanyNameById(job.getCompanyId()));
             Iterator wfIt = job.getWorkflows().iterator();
             while (wfIt.hasNext())
             {
                 Workflow wf = (Workflow) wfIt.next();
                 GlobalSightLocale targetLocale = wf.getTargetLocale();
                 // this is the wf wanted
-                if (targetLocale.getId() == (new Long(p_targetLocaleId)
-                        .longValue()))
+                if (targetLocale.getId() == (new Long(p_targetLocaleId).longValue()))
                 {
                     Iterator targetPagesIt = wf.getAllTargetPages().iterator();
                     while (targetPagesIt.hasNext())
@@ -16416,27 +15535,23 @@ public class Ambassador extends AbstractWebService
                             xml.append("\t<exportedFile>\r\n");
                             // fileUrl
                             String extPageId = sp.getExternalPageId();
-                            int separatorIndex = extPageId
-                                    .indexOf(File.separator);
+                            int separatorIndex = extPageId.indexOf(File.separator);
                             extPageId = extPageId.substring(separatorIndex + 1);
                             String trgLocale = targetLocale.getLanguage() + "_"
                                     + targetLocale.getCountry();
                             StringBuffer subXml = new StringBuffer(urlPrefix);
-                            subXml.append(File.separator).append(trgLocale)
-                                    .append(File.separator).append(extPageId);
+                            subXml.append(File.separator).append(trgLocale).append(File.separator)
+                                    .append(extPageId);
                             xml.append("\t\t<fileUrl>")
-                                    .append(EditUtil.encodeXmlEntities(subXml
-                                            .toString()))
+                                    .append(EditUtil.encodeXmlEntities(subXml.toString()))
                                     .append("</fileUrl>\r\n");
                             // downloadable
-                            String cxeDocPath = AmbFileStoragePathUtils
-                                    .getCxeDocDirPath();
+                            String cxeDocPath = AmbFileStoragePathUtils.getCxeDocDirPath();
                             StringBuffer path = new StringBuffer(cxeDocPath);
-                            path.append(File.separator).append(trgLocale)
-                                    .append(File.separator).append(extPageId);
+                            path.append(File.separator).append(trgLocale).append(File.separator)
+                                    .append(extPageId);
                             File file = new File(path.toString());
-                            xml.append("\t\t<downloadable>")
-                                    .append(file.exists())
+                            xml.append("\t\t<downloadable>").append(file.exists())
                                     .append("</downloadable>\r\n");
                             xml.append("\t</exportedFile>\r\n");
                         }
@@ -16475,9 +15590,8 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String getCommentFiles(String p_accessToken,
-            String p_commentObjectType, String p_jobOrTaskId)
-            throws WebServiceException
+    public String getCommentFiles(String p_accessToken, String p_commentObjectType,
+            String p_jobOrTaskId) throws WebServiceException
     {
         checkAccess(p_accessToken, DOWNLOAD_COMMENT_FILES);
         checkPermission(p_accessToken, Permission.ACTIVITIES_COMMENTS_DOWNLOAD);
@@ -16492,8 +15606,7 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            String message = makeErrorXml(DOWNLOAD_COMMENT_FILES,
-                    e.getMessage());
+            String message = makeErrorXml(DOWNLOAD_COMMENT_FILES, e.getMessage());
             throw new WebServiceException(message);
         }
 
@@ -16504,8 +15617,7 @@ public class Ambassador extends AbstractWebService
             long jobOrTaskId = Long.parseLong(p_jobOrTaskId);
             if ("J".equalsIgnoreCase(p_commentObjectType.trim()))
             {
-                workObject = ServerProxy.getJobHandler()
-                        .getJobById(jobOrTaskId);
+                workObject = ServerProxy.getJobHandler().getJobById(jobOrTaskId);
             }
             else if ("T".equalsIgnoreCase(p_commentObjectType.trim()))
             {
@@ -16532,14 +15644,12 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("commentObjectType", p_commentObjectType);
             activityArgs.put("jobOrTaskId", p_jobOrTaskId);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "getCommentFiles(p_accessToken, p_commentObjectType,p_jobOrTaskId)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "getCommentFiles(p_accessToken, p_commentObjectType,p_jobOrTaskId)",
+                    activityArgs);
             User user = ServerProxy.getUserManager().getUserByName(userName);
             companyName = user.getCompanyName();
-            companyId = ServerProxy.getJobHandler().getCompany(companyName)
-                    .getId();
+            companyId = ServerProxy.getJobHandler().getCompany(companyName).getId();
 
             // comment id_comment map
             Map commentMap = new HashMap();
@@ -16553,8 +15663,7 @@ public class Ambassador extends AbstractWebService
                     while (jobCommentIter.hasNext())
                     {
                         Comment jobComment = (Comment) jobCommentIter.next();
-                        commentMap.put(jobComment.getId(),
-                                jobComment.getComment());
+                        commentMap.put(jobComment.getId(), jobComment.getComment());
                     }
                 }
             }
@@ -16568,8 +15677,7 @@ public class Ambassador extends AbstractWebService
                     while (taskCommentIter.hasNext())
                     {
                         Comment taskComment = (Comment) taskCommentIter.next();
-                        commentMap.put(taskComment.getId(),
-                                taskComment.getComment());
+                        commentMap.put(taskComment.getId(), taskComment.getComment());
                     }
                 }
             }
@@ -16578,11 +15686,10 @@ public class Ambassador extends AbstractWebService
             //
             StringBuffer result = new StringBuffer(XML_HEAD);
             result.append("<CommentFilesInformation>\r\n");
-            result.append("\t<WorkObjectId>").append(p_jobOrTaskId)
-                    .append("</WorkObjectId>\r\n");
+            result.append("\t<WorkObjectId>").append(p_jobOrTaskId).append("</WorkObjectId>\r\n");
             result.append("\t<ObjectType>")
-                    .append(p_commentObjectType.equalsIgnoreCase("J") ? "job"
-                            : "task").append("</ObjectType>\r\n");
+                    .append(p_commentObjectType.equalsIgnoreCase("J") ? "job" : "task")
+                    .append("</ObjectType>\r\n");
             result.append("\t<Comments>\r\n");
             if (commentMap != null && commentMap.size() > 0)
             {
@@ -16594,11 +15701,9 @@ public class Ambassador extends AbstractWebService
                     long commentId = (Long) entry.getKey();
                     String comment = (String) entry.getValue();
 
-                    comment = StringUtil.isEmpty(comment) ? "" : XmlUtil
-                            .escapeString(comment);
+                    comment = StringUtil.isEmpty(comment) ? "" : XmlUtil.escapeString(comment);
 
-                    result.append("\t\t\t<CommentId>").append(commentId)
-                            .append("</CommentId>\r\n");
+                    result.append("\t\t\t<CommentId>").append(commentId).append("</CommentId>\r\n");
                     result.append("\t\t\t<CommentContent>").append(comment)
                             .append("</CommentContent>\r\n");
 
@@ -16607,16 +15712,13 @@ public class Ambassador extends AbstractWebService
                     {
                         if (companyId != -1)
                         {
-                            commentFileList = ServerProxy.getCommentManager()
-                                    .getCommentReferences(
-                                            String.valueOf(commentId), access,
-                                            String.valueOf(companyId));
+                            commentFileList = ServerProxy.getCommentManager().getCommentReferences(
+                                    String.valueOf(commentId), access, String.valueOf(companyId));
                         }
                         else
                         {
                             commentFileList = ServerProxy.getCommentManager()
-                                    .getCommentReferences(
-                                            String.valueOf(commentId), access);
+                                    .getCommentReferences(String.valueOf(commentId), access);
                         }
 
                     }
@@ -16637,22 +15739,18 @@ public class Ambassador extends AbstractWebService
                             String subFilePath = "";
                             if (index > -1)
                             {
-                                subFilePath = cfPath.substring(index
-                                        + "CommentReference".length() + 1);
+                                subFilePath = cfPath
+                                        .substring(index + "CommentReference".length() + 1);
                             }
                             StringBuffer cfUrl = new StringBuffer(
                                     AmbassadorUtil.getCapLoginOrPublicUrl());
-                            cfUrl.append("/GlobalSight/CommentReference2/")
-                                    .append(subFilePath);
-                            if (companyName != null
-                                    && companyName.trim().length() > 0)
+                            cfUrl.append("/GlobalSight/CommentReference2/").append(subFilePath);
+                            if (companyName != null && companyName.trim().length() > 0)
                             {
-                                cfUrl.append("?companyName=").append(
-                                        companyName);
+                                cfUrl.append("?companyName=").append(companyName);
                             }
                             result.append("\t\t\t\t<CommentFileUrl>")
-                                    .append(cfUrl.toString().replaceAll("\\\\",
-                                            "/"))
+                                    .append(cfUrl.toString().replaceAll("\\\\", "/"))
                                     .append("</CommentFileUrl>\r\n");
                         }
                         result.append("\t\t\t</CommentFiles>\r\n");
@@ -16690,8 +15788,7 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String getAllProjectTMs(String p_accessToken)
-            throws WebServiceException
+    public String getAllProjectTMs(String p_accessToken) throws WebServiceException
     {
         try
         {
@@ -16732,17 +15829,12 @@ public class Ambassador extends AbstractWebService
                 if (tm.getIsRemoteTm() == false)
                 {
                     sbXML.append("\t<ProjectTM>\r\n");
-                    sbXML.append("\t\t<id>").append(tm.getId())
-                            .append("</id>\r\n");
-                    sbXML.append("\t\t<name>").append(tm.getName())
-                            .append("</name>\r\n");
-                    sbXML.append("\t\t<domain>").append(tm.getDomain())
-                            .append("</domain>\r\n");
-                    sbXML.append("\t\t<organization>")
-                            .append(tm.getOrganization())
+                    sbXML.append("\t\t<id>").append(tm.getId()).append("</id>\r\n");
+                    sbXML.append("\t\t<name>").append(tm.getName()).append("</name>\r\n");
+                    sbXML.append("\t\t<domain>").append(tm.getDomain()).append("</domain>\r\n");
+                    sbXML.append("\t\t<organization>").append(tm.getOrganization())
                             .append("</organization>\r\n");
-                    sbXML.append("\t\t<description>")
-                            .append(tm.getDescription())
+                    sbXML.append("\t\t<description>").append(tm.getDescription())
                             .append("</description>\r\n");
                     sbXML.append("\t</ProjectTM>\r\n");
                 }
@@ -16768,9 +15860,8 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String uploadTmxFile(String p_accessToken, String p_fileName,
-            String p_tmName, byte[] p_contentsInBytes)
-            throws WebServiceException
+    public String uploadTmxFile(String p_accessToken, String p_fileName, String p_tmName,
+            byte[] p_contentsInBytes) throws WebServiceException
     {
         ProjectTM tm = null;
         try
@@ -16780,15 +15871,12 @@ public class Ambassador extends AbstractWebService
             Assert.assertNotEmpty(p_tmName, "tm name");
 
             checkAccess(p_accessToken, "uploadTmxFile");
-            checkPermission(p_accessToken,
-                    Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
+            checkPermission(p_accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
 
-            tm = ServerProxy.getProjectHandler().getProjectTMByName(p_tmName,
-                    false);
+            tm = ServerProxy.getProjectHandler().getProjectTMByName(p_tmName, false);
             if (tm == null)
             {
-                return makeErrorXml("uploadTmxFile",
-                        "Project TM does not exist : " + p_tmName);
+                return makeErrorXml("uploadTmxFile", "Project TM does not exist : " + p_tmName);
             }
         }
         catch (Exception e)
@@ -16805,19 +15893,14 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("fileName", p_fileName);
             activityArgs.put("tmName", p_tmName);
-            activityStart = WebServicesLog
-                    .start(Ambassador.class,
-                            "uploadTmxFile(accessToken, fileName, tmName, contentsInBytes)",
-                            activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class,
+                    "uploadTmxFile(accessToken, fileName, tmName, contentsInBytes)", activityArgs);
 
             StringBuffer fsRoot = new StringBuffer(
-                    AmbFileStoragePathUtils.getFileStorageDirPath(tm
-                            .getCompanyId()));
-            fsRoot = fsRoot.append(File.separator)
-                    .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
-                    .append(File.separator).append("TmImport")
-                    .append(File.separator).append(p_tmName.trim())
-                    .append(File.separator).append("tmp")
+                    AmbFileStoragePathUtils.getFileStorageDirPath(tm.getCompanyId()));
+            fsRoot = fsRoot.append(File.separator).append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
+                    .append(File.separator).append("TmImport").append(File.separator)
+                    .append(p_tmName.trim()).append(File.separator).append("tmp")
                     .append(File.separator).append(p_fileName);
 
             writeFileToLocale(fsRoot.toString(), p_contentsInBytes);
@@ -16851,8 +15934,8 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public void importTmxFile(String p_accessToken, String p_tmName,
-            String p_syncMode) throws WebServiceException
+    public void importTmxFile(String p_accessToken, String p_tmName, String p_syncMode)
+            throws WebServiceException
     {
         ProjectTM tm = null;
         try
@@ -16861,15 +15944,12 @@ public class Ambassador extends AbstractWebService
             Assert.assertNotEmpty(p_tmName, "tm name");
 
             checkAccess(p_accessToken, "importTmxFile");
-            checkPermission(p_accessToken,
-                    Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
+            checkPermission(p_accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
 
-            tm = ServerProxy.getProjectHandler().getProjectTMByName(p_tmName,
-                    false);
+            tm = ServerProxy.getProjectHandler().getProjectTMByName(p_tmName, false);
             if (tm == null)
             {
-                throw new WebServiceException("Project TM does not exist : "
-                        + p_tmName);
+                throw new WebServiceException("Project TM does not exist : " + p_tmName);
             }
         }
         catch (Exception e)
@@ -16888,15 +15968,13 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("tmName", p_tmName);
             activityArgs.put("syncMode", p_syncMode);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "importTmxFile(p_accessToken, p_tmName,p_syncMode)",
-                    activityArgs);
+                    "importTmxFile(p_accessToken, p_tmName,p_syncMode)", activityArgs);
 
             com.globalsight.everest.tm.importer.ImportOptions tmImportOptions = new com.globalsight.everest.tm.importer.ImportOptions();
             // syncMode : default "merge"
             tmImportOptions.setSyncMode(ImportOptions.SYNC_MERGE);
             if (ImportOptions.SYNC_MERGE.equalsIgnoreCase(p_syncMode)
-                    || ImportOptions.SYNC_OVERWRITE
-                            .equalsIgnoreCase(p_syncMode)
+                    || ImportOptions.SYNC_OVERWRITE.equalsIgnoreCase(p_syncMode)
                     || ImportOptions.SYNC_DISCARD.equalsIgnoreCase(p_syncMode))
             {
                 tmImportOptions.setSyncMode(p_syncMode.toLowerCase());
@@ -16907,21 +15985,17 @@ public class Ambassador extends AbstractWebService
             selectedTargets.add("all");
             tmImportOptions.setSelectedTargets(selectedTargets);
             /** importer */
-            IImportManager importer = TmManagerLocal
-                    .getProjectTmImporter(p_tmName);
+            IImportManager importer = TmManagerLocal.getProjectTmImporter(p_tmName);
             /** import tmx files one by one */
             StringBuffer fsRoot = new StringBuffer(
-                    AmbFileStoragePathUtils.getFileStorageDirPath(tm
-                            .getCompanyId()));
-            fsRoot = fsRoot.append(File.separator)
-                    .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
-                    .append(File.separator).append("TmImport")
-                    .append(File.separator).append(p_tmName.trim());
+                    AmbFileStoragePathUtils.getFileStorageDirPath(tm.getCompanyId()));
+            fsRoot = fsRoot.append(File.separator).append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
+                    .append(File.separator).append("TmImport").append(File.separator)
+                    .append(p_tmName.trim());
             // saved tmx file directory
             String savedTmxFilePath = fsRoot.toString();
             // tmp tmx file directory
-            String tmpTmxFilePath = fsRoot.append(File.separator).append("tmp")
-                    .toString();
+            String tmpTmxFilePath = fsRoot.append(File.separator).append("tmp").toString();
             File tmxFileDir = new File(tmpTmxFilePath);
             if (tmxFileDir.exists() && tmxFileDir.isDirectory())
             {
@@ -16931,15 +16005,12 @@ public class Ambassador extends AbstractWebService
                     for (int i = 0; i < tmxFiles.length; i++)
                     {
                         File tmxFile = tmxFiles[i];
-                        File savedFile = new File(savedTmxFilePath,
-                                tmxFile.getName());
+                        File savedFile = new File(savedTmxFilePath, tmxFile.getName());
 
-                        ImportUtil.createInstance().saveTmFileWithValidation(
-                                tmxFile, savedFile);
+                        ImportUtil.createInstance().saveTmFileWithValidation(tmxFile, savedFile);
 
                         importer.setImportOptions(tmImportOptions.getXml());
-                        importer.setImportFile(savedFile.getAbsolutePath(),
-                                false);
+                        importer.setImportFile(savedFile.getAbsolutePath(), false);
                         String options = importer.analyzeFile();
 
                         importer.setImportOptions(options);
@@ -16966,8 +16037,8 @@ public class Ambassador extends AbstractWebService
         }
     }
 
-    public String jobsSkipActivity(String p_accessToken, String p_workflowId,
-            String p_activity) throws WebServiceException
+    public String jobsSkipActivity(String p_accessToken, String p_workflowId, String p_activity)
+            throws WebServiceException
     {
         String userName = "";
         String returnMsg = null;
@@ -16994,8 +16065,7 @@ public class Ambassador extends AbstractWebService
         checkPermission(p_accessToken, Permission.JOB_WORKFLOWS_SKIP);
 
         ArrayList list = new ArrayList();
-        Entry<String, String> entry = new Entry<String, String>(p_workflowId,
-                p_activity);
+        Entry<String, String> entry = new Entry<String, String>(p_workflowId, p_activity);
         list.add(entry);
 
         WebServicesLog.Start activityStart = null;
@@ -17006,14 +16076,11 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("workflowId", p_workflowId);
             activityArgs.put("activity", p_activity);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "jobsSkipActivity(p_accessToken, p_workflowId,p_activity)",
-                    activityArgs);
-            Workflow wf = ServerProxy.getWorkflowManager()
-                    .getWorkflowById(wfId);
+                    "jobsSkipActivity(p_accessToken, p_workflowId,p_activity)", activityArgs);
+            Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(wfId);
             if (wf == null
-                    || (!UserUtil.isInProject(userId,
-                            String.valueOf(wf.getJob().getProjectId())) && !isInSameCompany(
-                            userName, String.valueOf(wf.getCompanyId()))))
+                    || (!UserUtil.isInProject(userId, String.valueOf(wf.getJob().getProjectId()))
+                            && !isInSameCompany(userName, String.valueOf(wf.getCompanyId()))))
             {
                 returnMsg = makeErrorXml("jobsSkipActivity",
                         "Current user are not in the same company or in project with the job.");
@@ -17052,8 +16119,8 @@ public class Ambassador extends AbstractWebService
      * @return Return null if the reassignment executes successfully.
      * @throws WebServiceException
      */
-    public String taskReassign(String p_accessToken, String p_taskId,
-            String[] p_users) throws WebServiceException
+    public String taskReassign(String p_accessToken, String p_taskId, String[] p_users)
+            throws WebServiceException
     {
         AmbassadorHelper helper = new AmbassadorHelper();
         return helper.taskReassign(p_accessToken, p_taskId, p_users);
@@ -17070,8 +16137,8 @@ public class Ambassador extends AbstractWebService
      * @return
      * @throws WebServiceException
      */
-    public String jobsAddLanguages(String p_accessToken, long p_jobId,
-            String p_wfInfos) throws WebServiceException
+    public String jobsAddLanguages(String p_accessToken, long p_jobId, String p_wfInfos)
+            throws WebServiceException
     {
         try
         {
@@ -17095,24 +16162,21 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("jobId", p_jobId);
             activityArgs.put("wfInfos", p_wfInfos);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "jobsAddLanguages(p_accessToken, p_jobId,p_wfInfos)",
-                    activityArgs);
+                    "jobsAddLanguages(p_accessToken, p_jobId,p_wfInfos)", activityArgs);
             String[] wfInfoArray = p_wfInfos.split(",");
             WorkflowHandlerHelper.validateStateOfPagesByJobId(p_jobId);
-            ArrayList wfInfos = new ArrayList();
+            List<Long> wfInfos = new ArrayList<Long>();
             for (int i = 0; i < wfInfoArray.length; i++)
             {
                 wfInfos.add(Long.decode(wfInfoArray[i]));
             }
-            WorkflowAdditionSender sender = new WorkflowAdditionSender(wfInfos,
-                    p_jobId);
+            WorkflowAdditionSender sender = new WorkflowAdditionSender(wfInfos, p_jobId);
             sender.sendToAddWorkflows();
         }
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            throw new WebServiceException(makeErrorXml("jobsAddLanguages",
-                    e.getMessage()));
+            throw new WebServiceException(makeErrorXml("jobsAddLanguages", e.getMessage()));
         }
         finally
         {
@@ -17157,8 +16221,7 @@ public class Ambassador extends AbstractWebService
         // first validate the state of the existing pages of the job
         WorkflowHandlerHelper.validateStateOfPagesInJob(job);
 
-        List wfInfos = (List) WorkflowHandlerHelper
-                .getWorkflowTemplateInfos(job);
+        List wfInfos = (List) WorkflowHandlerHelper.getWorkflowTemplateInfos(job);
         /**
          * here remove DTP workflow Templated, since currently Adding DTP
          * worklfow in a in progress job is not supported.
@@ -17166,8 +16229,7 @@ public class Ambassador extends AbstractWebService
         for (Iterator it = wfInfos.iterator(); it.hasNext();)
         {
             WorkflowTemplateInfo wfTemplate = (WorkflowTemplateInfo) it.next();
-            if (!WorkflowTypeConstants.TYPE_DTP.equals(wfTemplate
-                    .getWorkflowType()))
+            if (!WorkflowTypeConstants.TYPE_DTP.equals(wfTemplate.getWorkflowType()))
             {
                 returnMsg.append(wfTemplate.getId()).append(",");
             }
@@ -17193,8 +16255,8 @@ public class Ambassador extends AbstractWebService
      *            external page id
      * @throws EnvoyServletException
      */
-    private void getPageIdList(Task task, String[] idList, List p_pageIdList,
-            List p_pageNameList) throws EnvoyServletException
+    private void getPageIdList(Task task, String[] idList, List p_pageIdList, List p_pageNameList)
+            throws EnvoyServletException
     {
 
         if (idList != null)
@@ -17212,8 +16274,7 @@ public class Ambassador extends AbstractWebService
                 // Note: download is driven by the source page ids and the
                 // target locale
                 pageId = new Long(idList[i]);
-                page = (SourcePage) ServerProxy.getPageManager().getSourcePage(
-                        pageId.longValue());
+                page = (SourcePage) ServerProxy.getPageManager().getSourcePage(pageId.longValue());
             }
             catch (Exception e)
             {
@@ -17233,8 +16294,8 @@ public class Ambassador extends AbstractWebService
      */
     private String getTargetLocaleCode(DownloadParams p_downloadParams)
     {
-        String targetLocale = p_downloadParams.getTargetLocale().getLanguage()
-                + "_" + p_downloadParams.getTargetLocale().getCountryCode();
+        String targetLocale = p_downloadParams.getTargetLocale().getLanguage() + "_"
+                + p_downloadParams.getTargetLocale().getCountryCode();
 
         return targetLocale;
     }
@@ -17251,8 +16312,8 @@ public class Ambassador extends AbstractWebService
         try
         {
             User user = ServerProxy.getUserManager().getUserByName(p_userName);
-            String userCompanyId = ServerProxy.getJobHandler()
-                    .getCompany(user.getCompanyName()).getIdAsLong().toString();
+            String userCompanyId = ServerProxy.getJobHandler().getCompany(user.getCompanyName())
+                    .getIdAsLong().toString();
             return userCompanyId.equals(p_companyId) ? true : false;
         }
         catch (Exception e)
@@ -17278,24 +16339,22 @@ public class Ambassador extends AbstractWebService
      * @return If success, then return null. If fail, return error message
      * @throws WebServiceException
      */
-    public String dispatchWorkflow(String p_accessToken, String p_wfIds)
-            throws WebServiceException
+    public String dispatchWorkflow(String p_accessToken, String p_wfIds) throws WebServiceException
     {
         String message = "";
         // Validate inputting parameters
         User user = null;
         try
         {
-            user = ServerProxy.getUserManager().getUserByName(
-                    getUsernameFromSession(p_accessToken));
+            user = ServerProxy.getUserManager()
+                    .getUserByName(getUsernameFromSession(p_accessToken));
             PermissionSet ps = Permission.getPermissionManager()
                     .getPermissionSetForUser(user.getUserId());
 
             if (!ps.getPermissionFor(Permission.JOB_WORKFLOWS_DISPATCH)
                     && !ps.getPermissionFor(Permission.JOBS_DISPATCH))
             {
-                String msg = "User " + user.getUserName()
-                        + " does not have enough permission";
+                String msg = "User " + user.getUserName() + " does not have enough permission";
                 return makeErrorXml("dispatchWorkflow", msg);
             }
             Assert.assertNotEmpty(p_accessToken, "Access token");
@@ -17326,8 +16385,8 @@ public class Ambassador extends AbstractWebService
             }
             catch (NumberFormatException nfe)
             {
-                return makeErrorXml("dispatchWorkflow", "Invalid workflow id: "
-                        + wfIdString + ",non-numeric chars.");
+                return makeErrorXml("dispatchWorkflow",
+                        "Invalid workflow id: " + wfIdString + ",non-numeric chars.");
             }
         }
         WebServicesLog.Start activityStart = null;
@@ -17353,29 +16412,23 @@ public class Ambassador extends AbstractWebService
 
                         if (!wf.getJob().hasSetCostCenter())
                         {
-                            return makeErrorXml(
-                                    "dispatchWorkflow",
-                                    "Invalid workflow id: "
-                                            + wfId
-                                            + ", cost center attribute or required attributes are not set.");
+                            return makeErrorXml("dispatchWorkflow", "Invalid workflow id: " + wfId
+                                    + ", cost center attribute or required attributes are not set.");
                         }
-                        else if (UserUtil.isInProject(user.getUserId(),
-                                projectId))
+                        else if (UserUtil.isInProject(user.getUserId(), projectId))
                         {
                             wfm.dispatch(wf);
                         }
                         else
                         {
                             return makeErrorXml("dispatchWorkflow",
-                                    "Invalid workflow id: " + wfId
-                                            + " for current user.");
+                                    "Invalid workflow id: " + wfId + " for current user.");
                         }
                     }
                     else
                     {
                         return makeErrorXml("dispatchWorkflow",
-                                "Invalid workflow id: " + wfId
-                                        + ",does not exist.");
+                                "Invalid workflow id: " + wfId + ",does not exist.");
                     }
                 }
                 catch (WorkflowManagerException wfe)
@@ -17451,8 +16504,8 @@ public class Ambassador extends AbstractWebService
      * @author Vincent Yan
      * @since 8.2.3
      */
-    public String getJobsByTimeRange(String accessToken, String startTime,
-            long projectId) throws WebServiceException
+    public String getJobsByTimeRange(String accessToken, String startTime, long projectId)
+            throws WebServiceException
     {
         StringBuilder xml = new StringBuilder(XML_HEAD);
         xml.append("<jobs>\r\n");
@@ -17466,14 +16519,11 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("startTime", startTime);
             activityArgs.put("projectId", projectId);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "getJobsByTimeRange(p_accessToken,startTime, projectId)",
-                    activityArgs);
-            if (StringUtil.isEmpty(accessToken)
-                    || StringUtil.isEmpty(startTime)
+                    "getJobsByTimeRange(p_accessToken,startTime, projectId)", activityArgs);
+            if (StringUtil.isEmpty(accessToken) || StringUtil.isEmpty(startTime)
                     || !validateTimeRange(startTime) || projectId < 0)
             {
-                return makeErrorXml("getJobsByTimeRange",
-                        "Invalid time range parameter.");
+                return makeErrorXml("getJobsByTimeRange", "Invalid time range parameter.");
             }
             int hours = getHours(startTime);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -17489,12 +16539,11 @@ public class Ambassador extends AbstractWebService
 
             searchParameters.setCreationStart(calendar.getTime());
 
-            String hql = "from JobImpl j where j.createDate>='"
-                    + sdf.format(calendar.getTime()) + "'";
+            String hql = "from JobImpl j where j.createDate>='" + sdf.format(calendar.getTime())
+                    + "'";
             if (!CompanyWrapper.isSuperCompanyName(user.getCompanyName()))
             {
-                long companyId = CompanyWrapper.getCompanyByName(
-                        user.getCompanyName()).getId();
+                long companyId = CompanyWrapper.getCompanyByName(user.getCompanyName()).getId();
                 hql += " and j.companyId=" + companyId;
             }
             Collection collection = HibernateUtil.search(hql);
@@ -17514,8 +16563,7 @@ public class Ambassador extends AbstractWebService
                     if (projectId > 0 && projectId != job.getProjectId())
                         continue;
 
-                    if (!isInSameCompany(user.getUserName(),
-                            String.valueOf(job.getCompanyId()))
+                    if (!isInSameCompany(user.getUserName(), String.valueOf(job.getCompanyId()))
                             && !UserUtil.isSuperAdmin(user.getUserId())
                             && !UserUtil.isSuperPM(user.getUserId()))
                         continue;
@@ -17554,8 +16602,7 @@ public class Ambassador extends AbstractWebService
                 hours = days * 24;
                 if (lowerString.indexOf("h", index) > 0)
                 {
-                    tmp = lowerString.substring(index + 1,
-                            lowerString.length() - 1);
+                    tmp = lowerString.substring(index + 1, lowerString.length() - 1);
                     hours += Integer.parseInt(tmp);
                 }
             }
@@ -17610,49 +16657,40 @@ public class Ambassador extends AbstractWebService
             // job id
             xml.append("\t\t<id>").append(job.getId()).append("</id>\r\n");
             // job name
-            xml.append("\t\t<name>")
-                    .append(EditUtil.encodeXmlEntities(job.getJobName()))
+            xml.append("\t\t<name>").append(EditUtil.encodeXmlEntities(job.getJobName()))
                     .append("</name>\r\n");
             // job state
-            xml.append("\t\t<state>").append(job.getState())
-                    .append("</state>\r\n");
+            xml.append("\t\t<state>").append(job.getState()).append("</state>\r\n");
             // job creator
-            xml.append("\t\t<creator>")
-                    .append(job.getCreateUser().getUserName())
+            xml.append("\t\t<creator>").append(job.getCreateUser().getUserName())
                     .append("</creator>\r\n");
             // job create date
             xml.append("\t\t<create_date>")
-                    .append(DateHelper.getFormattedDateAndTime(
-                            job.getCreateDate(), null))
+                    .append(DateHelper.getFormattedDateAndTime(job.getCreateDate(), null))
                     .append("</create_date>\r\n");
             // company id
-            xml.append("\t\t<company_id>").append(job.getCompanyId())
-                    .append("</company_id>\r\n");
+            xml.append("\t\t<company_id>").append(job.getCompanyId()).append("</company_id>\r\n");
             // company name
             xml.append("\t\t<company_name>")
-                    .append(CompanyWrapper.getCompanyNameById(job
-                            .getCompanyId())).append("</company_name>\r\n");
+                    .append(CompanyWrapper.getCompanyNameById(job.getCompanyId()))
+                    .append("</company_name>\r\n");
             // project id
-            xml.append("\t\t<project_id>").append(job.getProjectId())
-                    .append("</project_id>\r\n");
+            xml.append("\t\t<project_id>").append(job.getProjectId()).append("</project_id>\r\n");
             // project name
             xml.append("\t\t<project_name>").append(job.getProject().getName())
                     .append("</project_name>\r\n");
             // job priority
-            xml.append("\t\t<priority>").append(job.getPriority())
-                    .append("</priority>\r\n");
+            xml.append("\t\t<priority>").append(job.getPriority()).append("</priority>\r\n");
             // source locale
             xml.append("\t\t<source_locale>").append(job.getSourceLocale())
                     .append("</source_locale>\r\n");
             // page count
-            xml.append("\t\t<page_count>").append(job.getPageCount())
-                    .append("</page_count>\r\n");
+            xml.append("\t\t<page_count>").append(job.getPageCount()).append("</page_count>\r\n");
             // word count
-            xml.append("\t\t<word_count>").append(job.getWordCount())
-                    .append("</word_count>\r\n");
+            xml.append("\t\t<word_count>").append(job.getWordCount()).append("</word_count>\r\n");
 
             Collection wfs = job.getWorkflows();
-
+            boolean hasMtElementFlag = this.canHaveMtElement(wfs);
             xml.append("\t\t<workflows>\r\n");
 
             Workflow workflow = null;
@@ -17664,7 +16702,7 @@ public class Ambassador extends AbstractWebService
                 currentTaskName = "";
                 workflow = (Workflow) wfi.next();
 
-                tmp = getWorkflowInfo(workflow, "\t\t\t");
+                tmp = getWorkflowInfo(workflow, hasMtElementFlag, "\t\t\t");
                 xml.append(tmp);
             }
             xml.append("\t\t</workflows>\r\n");
@@ -17690,7 +16728,7 @@ public class Ambassador extends AbstractWebService
      *            Tab string as prefix, such as '\t\t'
      * @return String workflow info in xml format
      */
-    private String getWorkflowInfo(Workflow workflow, String tab)
+    private String getWorkflowInfo(Workflow workflow, boolean hasMtElementFlag, String tab)
     {
         StringBuilder xml = new StringBuilder();
         TaskInstance taskInstance = null;
@@ -17701,25 +16739,21 @@ public class Ambassador extends AbstractWebService
         xml.append(tab).append("\t<workflow_id>").append(workflow.getId())
                 .append("</workflow_id>\r\n");
         // workflow state
-        xml.append(tab).append("\t<workflow_state>")
-                .append(workflow.getState()).append("</workflow_state>\r\n");
+        xml.append(tab).append("\t<workflow_state>").append(workflow.getState())
+                .append("</workflow_state>\r\n");
 
-        xml.append(tab).append("\t<target_locale>")
-                .append(workflow.getTargetLocale())
+        xml.append(tab).append("\t<target_locale>").append(workflow.getTargetLocale())
                 .append("</target_locale>\r\n");
-        xml.append(tab)
-                .append("\t<dispatch_date>")
-                .append(workflow.getDispatchedDate() == null ? "" : DateHelper
-                        .getFormattedDateAndTime(workflow.getDispatchedDate(),
-                                null)).append("</dispatch_date>\r\n");
+        xml.append(tab).append("\t<dispatch_date>")
+                .append(workflow.getDispatchedDate() == null ? ""
+                        : DateHelper.getFormattedDateAndTime(workflow.getDispatchedDate(), null))
+                .append("</dispatch_date>\r\n");
         // tasks
-        Hashtable<Long, Task> tasks = (Hashtable<Long, Task>) workflow
-                .getTasks();
+        Hashtable<Long, Task> tasks = (Hashtable<Long, Task>) workflow.getTasks();
         Rate rate = null;
         if (tasks == null || tasks.size() == 0)
         {
-            xml.append(tab).append("\t<tasks>\r\n").append(tab)
-                    .append("\t</tasks>\r\n");
+            xml.append(tab).append("\t<tasks>\r\n").append(tab).append("\t</tasks>\r\n");
         }
         else
         {
@@ -17753,38 +16787,19 @@ public class Ambassador extends AbstractWebService
         String currentTaskName = "";
         if (taskInstance != null)
         {
-            currentTaskName = TaskJbpmUtil.getTaskDisplayName(taskInstance
-                    .getName());
-            xml.append(tab).append("\t<current_activity>")
-                    .append(currentTaskName).append("</current_activity>\r\n");
+            currentTaskName = TaskJbpmUtil.getTaskDisplayName(taskInstance.getName());
+            xml.append(tab).append("\t<current_activity>").append(currentTaskName)
+                    .append("</current_activity>\r\n");
         }
 
         /** Wordcount Summary */
         xml.append(tab).append("\t<word_counts>\r\n");
+
         // leverageOption
-        String leverageOption = "unknown";
-        boolean isInContextMatch = false;
-        try
-        {
-            Job job = workflow.getJob();
-            if (PageHandler.isInContextMatch(job))
-            {
-                isInContextMatch = true;
-            }
-
-            if (isInContextMatch)
-            {
-                leverageOption = "Leverage in context matches";
-            }
-            else
-            {
-                leverageOption = "100% match only";
-            }
-        }
-        catch (Exception e)
-        {
-
-        }
+        Job job = workflow.getJob();
+        boolean isInContextMatch = PageHandler.isInContextMatch(job);
+        String leverageOption = isInContextMatch ? "Leverage in context matches"
+                : "100% match only";
         xml.append(tab).append("\t\t<leverage_option>").append(leverageOption)
                 .append("</leverage_option>\r\n");
         // 100%
@@ -17811,16 +16826,24 @@ public class Ambassador extends AbstractWebService
         xml.append(tab).append("\t\t<match_75_percent-84_percent>")
                 .append(workflow.getThresholdMedFuzzyWordCount())
                 .append("</match_75_percent-84_percent>\r\n");
-        // noMatch (50%-74%)
-        xml.append(tab)
-                .append("\t\t<no_match>")
-                .append(workflow.getThresholdNoMatchWordCount()
-                        + workflow.getThresholdLowFuzzyWordCount())
-                .append("</no_match>\r\n");
+
+        // noMatch (50%-74% & < 50)
+        int noMatch = workflow.getThresholdNoMatchWordCount()
+                + workflow.getThresholdLowFuzzyWordCount();
+        if (hasMtElementFlag)
+        {
+            noMatch -= workflow.getMtFuzzyNoMatchWordCount();
+        }
+        xml.append(tab).append("\t\t<no_match>").append(noMatch).append("</no_match>\r\n");
+
         // Repetitions
-        xml.append(tab).append("\t\t<repetitions>")
-                .append(workflow.getRepetitionWordCount())
-                .append("</repetitions>\r\n");
+        int repetions = workflow.getRepetitionWordCount();
+        if (hasMtElementFlag)
+        {
+            repetions -= workflow.getMtRepetitionsWordCount();
+        }
+        xml.append(tab).append("\t\t<repetitions>").append(repetions).append("</repetitions>\r\n");
+
         // In Context Matches
         if (isInContextMatch)
         {
@@ -17828,17 +16851,22 @@ public class Ambassador extends AbstractWebService
                     .append(workflow.getInContextMatchWordCount())
                     .append("</in_context_matches>\r\n");
         }
+
+        if (hasMtElementFlag)
+        {
+            xml.append(tab).append("\t\t<machine_translated>")
+                    .append(workflow.getMtTotalWordCount()).append("</machine_translated>\r\n");
+        }
+
         // total
-        xml.append(tab).append("\t\t<total>")
-                .append(workflow.getTotalWordCount()).append("</total>\r\n");
+        xml.append(tab).append("\t\t<total>").append(workflow.getTotalWordCount())
+                .append("</total>\r\n");
         xml.append(tab).append("\t</word_counts>\r\n");
 
         if (workflow.getCompletedDate() != null)
         {
-            xml.append(tab)
-                    .append("\t<complete_date>")
-                    .append(DateHelper.getFormattedDateAndTime(
-                            workflow.getCompletedDate(), null))
+            xml.append(tab).append("\t<complete_date>")
+                    .append(DateHelper.getFormattedDateAndTime(workflow.getCompletedDate(), null))
                     .append("</complete_date>\r\n");
         }
 
@@ -17865,8 +16893,8 @@ public class Ambassador extends AbstractWebService
         WorkflowTaskInstance wfTask;
         try
         {
-            wfTask = ServerProxy.getWorkflowServer().getWorkflowTaskInstance(
-                    task.getWorkflow().getId(), task.getId());
+            wfTask = ServerProxy.getWorkflowServer()
+                    .getWorkflowTaskInstance(task.getWorkflow().getId(), task.getId());
             task.setWorkflowTask(wfTask);
         }
         catch (Exception e)
@@ -17876,37 +16904,30 @@ public class Ambassador extends AbstractWebService
         xml.append(tab).append("<task>\r\n");
 
         // task id
-        xml.append(tab).append("\t<task_id>").append(task.getId())
-                .append("</task_id>\r\n");
+        xml.append(tab).append("\t<task_id>").append(task.getId()).append("</task_id>\r\n");
         // task name
         xml.append(tab).append("\t<task_name>").append(task.getTaskName())
                 .append("</task_name>\r\n");
         // task duration hours
-        xml.append(tab).append("\t<task_duration_hours>")
-                .append(task.getDurationString())
+        xml.append(tab).append("\t<task_duration_hours>").append(task.getDurationString())
                 .append("</task_duration_hours>\r\n");
         // task state
         tmp = task.getStateAsString() == null ? "" : task.getStateAsString();
-        xml.append(tab).append("\t<task_state>").append(tmp)
-                .append("</task_state>\r\n");
+        xml.append(tab).append("\t<task_state>").append(tmp).append("</task_state>\r\n");
         // task accept date
-        tmp = task.getAcceptedDate() == null ? "" : DateHelper
-                .getFormattedDateAndTime(task.getAcceptedDate(), null);
+        tmp = task.getAcceptedDate() == null ? ""
+                : DateHelper.getFormattedDateAndTime(task.getAcceptedDate(), null);
         xml.append(tab).append("\t<task_accept_date>").append(tmp)
                 .append("</task_accept_date>\r\n");
         // task assignees
-        if (task.getAllAssignees() == null
-                || task.getAllAssignees().size() == 0)
+        if (task.getAllAssignees() == null || task.getAllAssignees().size() == 0)
             tmp = task.getPossibleAssignee();
         else
             tmp = task.getAllAssigneesAsString();
-        xml.append(tab).append("\t<task_assignees>").append(tmp)
-                .append("</task_assignees>\r\n");
+        xml.append(tab).append("\t<task_assignees>").append(tmp).append("</task_assignees>\r\n");
         // task acceptor
-        tmp = task.getAcceptor() == null ? "" : UserUtil.getUserNameById(task
-                .getAcceptor());
-        xml.append(tab).append("\t<task_acceptor>").append(tmp)
-                .append("</task_acceptor>\r\n");
+        tmp = task.getAcceptor() == null ? "" : UserUtil.getUserNameById(task.getAcceptor());
+        xml.append(tab).append("\t<task_acceptor>").append(tmp).append("</task_acceptor>\r\n");
         // task expense rate
         rate = task.getExpenseRate();
         tmp = rate == null ? "" : String.valueOf(rate.getId());
@@ -17934,8 +16955,7 @@ public class Ambassador extends AbstractWebService
      * @author Vincent Yan
      * @since 8.2.3
      */
-    public String getAllL10NProfiles(String accessToken)
-            throws WebServiceException
+    public String getAllL10NProfiles(String accessToken) throws WebServiceException
     {
         if (StringUtil.isEmpty(accessToken))
             return makeErrorXml("getAllL10NProfiles", "Invalid access token");
@@ -17955,10 +16975,8 @@ public class Ambassador extends AbstractWebService
                 for (BasicL10nProfileInfo lp : profiles)
                 {
                     xml.append("\t<l10n_profile>\r\n");
-                    xml.append("\t\t<id>").append(lp.getProfileId())
-                            .append("</id>\r\n");
-                    xml.append("\t\t<name>").append(lp.getName())
-                            .append("</name>\r\n");
+                    xml.append("\t\t<id>").append(lp.getProfileId()).append("</id>\r\n");
+                    xml.append("\t\t<name>").append(lp.getName()).append("</name>\r\n");
                     xml.append("\t</l10n_profile>\r\n");
                 }
             }
@@ -17994,13 +17012,11 @@ public class Ambassador extends AbstractWebService
 
         String userName = getUsernameFromSession(p_accessToken);
         String userId = UserUtil.getUserIdByName(userName);
-        Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
-                workflowId);
+        Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(workflowId);
 
         if (wf == null)
         {
-            return makeErrorXml("getWorkflowPath",
-                    "Invalid workflow which is not exist.");
+            return makeErrorXml("getWorkflowPath", "Invalid workflow which is not exist.");
         }
 
         if (!isInSameCompany(userName, String.valueOf(wf.getCompanyId())))
@@ -18028,28 +17044,22 @@ public class Ambassador extends AbstractWebService
             activityStart = WebServicesLog.start(Ambassador.class,
                     "getWorkflowPath(p_accessToken, workflowId)", activityArgs);
             ctx = WorkflowConfiguration.getInstance().getJbpmContext();
-            ProcessInstance processInstance = ctx
-                    .getProcessInstance(workflowId);
-            workflowInstance = WorkflowProcessAdapter
-                    .getProcessInstance(processInstance);
+            ProcessInstance processInstance = ctx.getProcessInstance(workflowId);
+            workflowInstance = WorkflowProcessAdapter.getProcessInstance(processInstance);
 
             Vector tasks = workflowInstance.getWorkflowInstanceTasks();
-            WorkflowTaskInstance[] tasksArray = WorkflowJbpmUtil
-                    .convertToArray(tasks);
+            WorkflowTaskInstance[] tasksArray = WorkflowJbpmUtil.convertToArray(tasks);
             ArrorInfo arror = null;
-            ArrayList<WfTaskInfo> tmp = new ArrayList<WfTaskInfo>(ServerProxy
-                    .getWorkflowServer().timeDurationsInDefaultPath("Exit",
-                            workflowId, -1));
+            ArrayList<WfTaskInfo> tmp = new ArrayList<WfTaskInfo>(ServerProxy.getWorkflowServer()
+                    .timeDurationsInDefaultPath("Exit", workflowId, -1));
             Task task = null;
             for (WfTaskInfo taskInfo : tmp)
             {
                 task = ServerProxy.getTaskManager().getTask(taskInfo.getId());
                 xml.append("\t<task>\r\n");
                 xml.append("\t\t<id>").append(task.getId()).append("</id>\r\n");
-                xml.append("\t\t<name>").append(task.getTaskDisplayName())
-                        .append("</name>\r\n");
-                xml.append("\t\t<state>").append(task.getStateAsString())
-                        .append("</state>\r\n");
+                xml.append("\t\t<name>").append(task.getTaskDisplayName()).append("</name>\r\n");
+                xml.append("\t\t<state>").append(task.getStateAsString()).append("</state>\r\n");
                 xml.append("\t</task>\r\n");
             }
         }
@@ -18125,15 +17135,13 @@ public class Ambassador extends AbstractWebService
         availableValues.add("2");
         availableValues.add("3");
         availableValues.add("4");
-        if (lockedSegEditType == null
-                || !availableValues.contains(lockedSegEditType.trim()))
+        if (lockedSegEditType == null || !availableValues.contains(lockedSegEditType.trim()))
         {
             lockedSegEditType = "1";
         }
 
         if (StringUtil.isEmpty(accessToken))
-            return makeErrorXml(DOWNLOAD_XLIFF_OFFLINE_FILE,
-                    "Invalid access token.");
+            return makeErrorXml(DOWNLOAD_XLIFF_OFFLINE_FILE, "Invalid access token.");
         if (StringUtil.isEmpty(taskId) || Long.parseLong(taskId) < 1)
             return makeErrorXml(DOWNLOAD_XLIFF_OFFLINE_FILE, "Invalid task id.");
 
@@ -18161,42 +17169,37 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("taskId", taskId);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "downloadXliffOfflineFile(p_accessToken, taskId)",
-                    activityArgs);
+                    "downloadXliffOfflineFile(p_accessToken, taskId)", activityArgs);
 
             // Generate offline page data to file
-            File zipFile = workflowManager
-                    .downloadOfflineFiles(task, job, null, lockedSegEditType,
-                            isIncludeXmlNodeContextInformation);
+            File zipFile = workflowManager.downloadOfflineFiles(task, job, null, lockedSegEditType,
+                    isIncludeXmlNodeContextInformation);
 
             // Copy "zipFile" from
             // "FStorage\[companyName]\GlobalSight\CustomerDownload" folder to
             // "DOCS\[companyName]\workOfflineDownload" folder. This is
             // unnecessary, but we will not change it for now.
-            String filename = job.getJobName() + "_" + task.getSourceLocale()
-                    + "_" + task.getTargetLocale() + ".zip";
-            File targetFile = new File(
-                    AmbFileStoragePathUtils.getCxeDocDirPath() + File.separator
-                            + AmbFileStoragePathUtils.OFFLINE_FILE_DOWNLOAD_DIR
-                            + File.separator + filename);
+            String filename = job.getJobName() + "_" + task.getSourceLocale() + "_"
+                    + task.getTargetLocale() + ".zip";
+            File targetFile = new File(AmbFileStoragePathUtils.getCxeDocDirPath() + File.separator
+                    + AmbFileStoragePathUtils.OFFLINE_FILE_DOWNLOAD_DIR + File.separator
+                    + filename);
             FileUtil.copyFile(zipFile, targetFile);
 
             // Generate response xml content
             returnXml.append("<offlineFiles>\r\n");
-            String urlPrefix = determineUrlPrefix(CompanyWrapper
-                    .getCompanyNameById(job.getCompanyId()));
+            String urlPrefix = determineUrlPrefix(
+                    CompanyWrapper.getCompanyNameById(job.getCompanyId()));
 
             returnXml.append("\t").append(urlPrefix).append("/")
-                    .append(AmbFileStoragePathUtils.OFFLINE_FILE_DOWNLOAD_DIR)
-                    .append("/").append(EditUtil.encodeXmlEntities(filename))
-                    .append("\r\n");
+                    .append(AmbFileStoragePathUtils.OFFLINE_FILE_DOWNLOAD_DIR).append("/")
+                    .append(EditUtil.encodeXmlEntities(filename)).append("\r\n");
             returnXml.append("</offlineFiles>\r\n");
         }
         catch (Exception e)
         {
             logger.error("Error found in downloadXliffOfflineFile.", e);
-            return makeErrorXml(DOWNLOAD_XLIFF_OFFLINE_FILE,
-                    "Error info: " + e.toString());
+            return makeErrorXml(DOWNLOAD_XLIFF_OFFLINE_FILE, "Error info: " + e.toString());
         }
         finally
         {
@@ -18216,8 +17219,7 @@ public class Ambassador extends AbstractWebService
             for (Long jobId : p_jobIdList)
             {
                 Job job = ServerProxy.getJobHandler().getJobById(jobId);
-                if (job == null
-                        || !job.getProject().getUserIds().contains(p_userId))
+                if (job == null || !job.getProject().getUserIds().contains(p_userId))
                 {
                     illegalJobIds = illegalJobIds + "," + jobId;
                 }
@@ -18269,42 +17271,34 @@ public class Ambassador extends AbstractWebService
         return notMatchJobIds;
     }
 
-    private String getReportsUrl(File[] files) throws FileNotFoundException,
-            IOException
+    private String getReportsUrl(File[] files) throws FileNotFoundException, IOException
     {
         String returnString = "";
         if (files.length == 1)
         {
             File file = files[0];
-            String superFSDir = AmbFileStoragePathUtils
-                    .getFileStorageDirPath(1).replace("\\", "/");
+            String superFSDir = AmbFileStoragePathUtils.getFileStorageDirPath(1).replace("\\", "/");
             String fullPathName = file.getAbsolutePath().replace("\\", "/");
-            String path = fullPathName.substring(fullPathName
-                    .indexOf(superFSDir) + superFSDir.length());
-            path = path.substring(path.indexOf("/Reports/")
-                    + "/Reports/".length());
-            String root = AmbassadorUtil.getCapLoginOrPublicUrl()
-                    + "/DownloadReports";
+            String path = fullPathName
+                    .substring(fullPathName.indexOf(superFSDir) + superFSDir.length());
+            path = path.substring(path.indexOf("/Reports/") + "/Reports/".length());
+            String root = AmbassadorUtil.getCapLoginOrPublicUrl() + "/DownloadReports";
             returnString = root + "/" + path;
         }
         else if (files.length > 1)
         {
             Date date = new Date();
             String fullPathName = files[0].getAbsolutePath().replace("\\", "/");
-            String zipFileName = fullPathName.substring(0,
-                    fullPathName.lastIndexOf("/") + 1)
+            String zipFileName = fullPathName.substring(0, fullPathName.lastIndexOf("/") + 1)
                     + ReportConstants.REPORTS_NAME + date.getTime() + ".zip";
             File zipFile = new File(zipFileName);
             ZipIt.addEntriesToZipFile(zipFile, files, true, "");
 
-            String superFSDir = AmbFileStoragePathUtils
-                    .getFileStorageDirPath(1).replace("\\", "/");
-            String path = zipFileName.substring(zipFileName.indexOf(superFSDir)
-                    + superFSDir.length());
-            path = path.substring(path.indexOf("/Reports/")
-                    + "/Reports/".length());
-            String root = AmbassadorUtil.getCapLoginOrPublicUrl()
-                    + "/DownloadReports";
+            String superFSDir = AmbFileStoragePathUtils.getFileStorageDirPath(1).replace("\\", "/");
+            String path = zipFileName
+                    .substring(zipFileName.indexOf(superFSDir) + superFSDir.length());
+            path = path.substring(path.indexOf("/Reports/") + "/Reports/".length());
+            String root = AmbassadorUtil.getCapLoginOrPublicUrl() + "/DownloadReports";
             returnString = root + "/" + path;
         }
         return returnString;
@@ -18324,8 +17318,8 @@ public class Ambassador extends AbstractWebService
      *         ;
      * @throws WebServiceException
      */
-    public String generateTranslationEditReport(String p_accessToken,
-            String p_jobId, String p_targetLocale) throws WebServiceException
+    public String generateTranslationEditReport(String p_accessToken, String p_jobId,
+            String p_targetLocale) throws WebServiceException
     {
         checkAccess(p_accessToken, GENERATE_TRANSLATION_EDIT_REPORT);
         String returnString = "";
@@ -18335,14 +17329,12 @@ public class Ambassador extends AbstractWebService
             Long jobId = Long.valueOf(p_jobId);
             List<Long> jobIdList = new ArrayList<Long>();
             jobIdList.add(jobId);
-            String userId = UserUtil
-                    .getUserIdByName(getUsernameFromSession(p_accessToken));
+            String userId = UserUtil.getUserIdByName(getUsernameFromSession(p_accessToken));
             String illegalJobIds = checkIllegalJobIds(jobIdList, userId);
             if (illegalJobIds.length() > 0)
             {
                 return makeErrorXml(GENERATE_TRANSLATION_EDIT_REPORT,
-                        "Error info: illegal job id " + illegalJobIds
-                                + " for the login user");
+                        "Error info: illegal job id " + illegalJobIds + " for the login user");
             }
             // get target locales
             List<GlobalSightLocale> targetLocalList = new ArrayList<GlobalSightLocale>();
@@ -18350,17 +17342,14 @@ public class Ambassador extends AbstractWebService
             // get report
             Job job = ServerProxy.getJobHandler().getJobById(jobId);
             TranslationsEditReportGenerator generator = new TranslationsEditReportGenerator(
-                    CompanyWrapper.getCompanyNameById(job.getCompanyId()),
-                    userId);
-            File[] files = generator
-                    .generateReports(jobIdList, targetLocalList);
+                    CompanyWrapper.getCompanyNameById(job.getCompanyId()), userId);
+            File[] files = generator.generateReports(jobIdList, targetLocalList);
             returnString = getReportsUrl(files);
         }
         catch (Exception e)
         {
             logger.error("Error found in generateTranslationEditReport.", e);
-            return makeErrorXml(GENERATE_TRANSLATION_EDIT_REPORT,
-                    "Error info: " + e.toString());
+            return makeErrorXml(GENERATE_TRANSLATION_EDIT_REPORT, "Error info: " + e.toString());
         }
 
         return returnString;
@@ -18380,8 +17369,8 @@ public class Ambassador extends AbstractWebService
      *         ;
      * @throws WebServiceException
      */
-    public String generateTranslationVerificationReport(String p_accessToken,
-            String p_jobId, String p_targetLocale) throws WebServiceException
+    public String generateTranslationVerificationReport(String p_accessToken, String p_jobId,
+            String p_targetLocale) throws WebServiceException
     {
         checkAccess(p_accessToken, GENERATE_TRANSLATION_VERIFICATION_REPORT);
         String returnString = "";
@@ -18391,14 +17380,12 @@ public class Ambassador extends AbstractWebService
             Long jobId = Long.valueOf(p_jobId);
             List<Long> jobIdList = new ArrayList<Long>();
             jobIdList.add(jobId);
-            String userId = UserUtil
-                    .getUserIdByName(getUsernameFromSession(p_accessToken));
+            String userId = UserUtil.getUserIdByName(getUsernameFromSession(p_accessToken));
             String illegalJobIds = checkIllegalJobIds(jobIdList, userId);
             if (illegalJobIds.length() > 0)
             {
                 return makeErrorXml(GENERATE_TRANSLATION_VERIFICATION_REPORT,
-                        "Error info: illegal job id " + illegalJobIds
-                                + " for the login user");
+                        "Error info: illegal job id " + illegalJobIds + " for the login user");
             }
             // get target locales
             List<GlobalSightLocale> targetLocalList = new ArrayList<GlobalSightLocale>();
@@ -18406,16 +17393,13 @@ public class Ambassador extends AbstractWebService
             // get report
             Job job = ServerProxy.getJobHandler().getJobById(jobId);
             TranslationVerificationReportGenerator generator = new TranslationVerificationReportGenerator(
-                    CompanyWrapper.getCompanyNameById(job.getCompanyId()),
-                    userId);
-            File[] files = generator
-                    .generateReports(jobIdList, targetLocalList);
+                    CompanyWrapper.getCompanyNameById(job.getCompanyId()), userId);
+            File[] files = generator.generateReports(jobIdList, targetLocalList);
             returnString = getReportsUrl(files);
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Error found in generateTranslationVerificationReport.", e);
+            logger.error("Error found in generateTranslationVerificationReport.", e);
             return makeErrorXml(GENERATE_TRANSLATION_VERIFICATION_REPORT,
                     "Error info: " + e.toString());
         }
@@ -18437,8 +17421,8 @@ public class Ambassador extends AbstractWebService
      *         ;
      * @throws WebServiceException
      */
-    public String generatePostReviewQAReport(String p_accessToken,
-            String p_jobId, String p_targetLocale) throws WebServiceException
+    public String generatePostReviewQAReport(String p_accessToken, String p_jobId,
+            String p_targetLocale) throws WebServiceException
     {
         checkAccess(p_accessToken, GENERATE_POST_REVIEW_QA_REPORT);
         String returnString = "";
@@ -18448,14 +17432,12 @@ public class Ambassador extends AbstractWebService
             Long jobId = Long.valueOf(p_jobId);
             List<Long> jobIdList = new ArrayList<Long>();
             jobIdList.add(jobId);
-            String userId = UserUtil
-                    .getUserIdByName(getUsernameFromSession(p_accessToken));
+            String userId = UserUtil.getUserIdByName(getUsernameFromSession(p_accessToken));
             String illegalJobIds = checkIllegalJobIds(jobIdList, userId);
             if (illegalJobIds.length() > 0)
             {
                 return makeErrorXml(GENERATE_POST_REVIEW_QA_REPORT,
-                        "Error info: illegal job id " + illegalJobIds
-                                + " for the login user");
+                        "Error info: illegal job id " + illegalJobIds + " for the login user");
             }
             // get target locales
             List<GlobalSightLocale> targetLocalList = new ArrayList<GlobalSightLocale>();
@@ -18463,17 +17445,14 @@ public class Ambassador extends AbstractWebService
             // get report
             Job job = ServerProxy.getJobHandler().getJobById(jobId);
             PostReviewQAReportGenerator generator = new PostReviewQAReportGenerator(
-                    CompanyWrapper.getCompanyNameById(job.getCompanyId()),
-                    userId);
-            File[] files = generator
-                    .generateReports(jobIdList, targetLocalList);
+                    CompanyWrapper.getCompanyNameById(job.getCompanyId()), userId);
+            File[] files = generator.generateReports(jobIdList, targetLocalList);
             returnString = getReportsUrl(files);
         }
         catch (Exception e)
         {
             logger.error("Error found in generatePostReviewQAReport.", e);
-            return makeErrorXml(GENERATE_POST_REVIEW_QA_REPORT, "Error info: "
-                    + e.toString());
+            return makeErrorXml(GENERATE_POST_REVIEW_QA_REPORT, "Error info: " + e.toString());
         }
 
         return returnString;
@@ -18495,8 +17474,8 @@ public class Ambassador extends AbstractWebService
      *         .
      * @throws WebServiceException
      */
-    public String generateCharacterCountReport(String p_accessToken,
-            String p_jobIds, String p_targetLocales) throws WebServiceException
+    public String generateCharacterCountReport(String p_accessToken, String p_jobIds,
+            String p_targetLocales) throws WebServiceException
     {
         checkAccess(p_accessToken, GENERATE_CHARACTER_COUNT_REPORT);
         String returnString = "";
@@ -18508,14 +17487,12 @@ public class Ambassador extends AbstractWebService
             {
                 jobIdList.add(Long.valueOf(jobId));
             }
-            String userId = UserUtil
-                    .getUserIdByName(getUsernameFromSession(p_accessToken));
+            String userId = UserUtil.getUserIdByName(getUsernameFromSession(p_accessToken));
             String illegalJobIds = checkIllegalJobIds(jobIdList, userId);
             if (illegalJobIds.length() > 0)
             {
                 return makeErrorXml(GENERATE_CHARACTER_COUNT_REPORT,
-                        "Error info: illegal job id " + illegalJobIds
-                                + " for the login user");
+                        "Error info: illegal job id " + illegalJobIds + " for the login user");
             }
             // get target locales
             List<GlobalSightLocale> targetLocalList = new ArrayList<GlobalSightLocale>();
@@ -18526,27 +17503,21 @@ public class Ambassador extends AbstractWebService
             // get report
             Job job = ServerProxy.getJobHandler().getJobById(jobIdList.get(0));
             CharacterCountReportGenerator generator = new CharacterCountReportGenerator(
-                    CompanyWrapper.getCompanyNameById(job.getCompanyId()),
-                    userId);
-            String notMatchJobIds = checkJobLocaleMatch(jobIdList,
-                    targetLocalList);
+                    CompanyWrapper.getCompanyNameById(job.getCompanyId()), userId);
+            String notMatchJobIds = checkJobLocaleMatch(jobIdList, targetLocalList);
             if (notMatchJobIds.length() > 0)
             {
-                return makeErrorXml(
-                        GENERATE_CHARACTER_COUNT_REPORT,
-                        "Error info: the given job id: "
-                                + notMatchJobIds
+                return makeErrorXml(GENERATE_CHARACTER_COUNT_REPORT,
+                        "Error info: the given job id: " + notMatchJobIds
                                 + " have no workflow match the given target locales.");
             }
-            File[] files = generator
-                    .generateReports(jobIdList, targetLocalList);
+            File[] files = generator.generateReports(jobIdList, targetLocalList);
             returnString = getReportsUrl(files);
         }
         catch (Exception e)
         {
             logger.error("Error found in generateCharacterCountReport.", e);
-            return makeErrorXml(GENERATE_CHARACTER_COUNT_REPORT, "Error info: "
-                    + e.toString());
+            return makeErrorXml(GENERATE_CHARACTER_COUNT_REPORT, "Error info: " + e.toString());
         }
 
         return returnString;
@@ -18570,9 +17541,8 @@ public class Ambassador extends AbstractWebService
      *         ;
      * @throws WebServiceException
      */
-    public String generateReviewersCommentReport(String p_accessToken,
-            String p_jobIds, String p_targetLocales,
-            boolean p_includeCompactTags) throws WebServiceException
+    public String generateReviewersCommentReport(String p_accessToken, String p_jobIds,
+            String p_targetLocales, boolean p_includeCompactTags) throws WebServiceException
     {
         checkAccess(p_accessToken, GENERATE_REVIEWERS_COMMENT_REPORT);
         String returnString = "";
@@ -18584,14 +17554,12 @@ public class Ambassador extends AbstractWebService
             {
                 jobIdList.add(Long.valueOf(jobId));
             }
-            String userId = UserUtil
-                    .getUserIdByName(getUsernameFromSession(p_accessToken));
+            String userId = UserUtil.getUserIdByName(getUsernameFromSession(p_accessToken));
             String illegalJobIds = checkIllegalJobIds(jobIdList, userId);
             if (illegalJobIds.length() > 0)
             {
                 return makeErrorXml(GENERATE_REVIEWERS_COMMENT_REPORT,
-                        "Error info: illegal job id " + illegalJobIds
-                                + " for the login user");
+                        "Error info: illegal job id " + illegalJobIds + " for the login user");
             }
             // get target locales
             List<GlobalSightLocale> targetLocalList = new ArrayList<GlobalSightLocale>();
@@ -18602,27 +17570,22 @@ public class Ambassador extends AbstractWebService
             // get report
             Job job = ServerProxy.getJobHandler().getJobById(jobIdList.get(0));
             ReviewersCommentsReportGenerator generator = new ReviewersCommentsReportGenerator(
-                    CompanyWrapper.getCompanyNameById(job.getCompanyId()),
-                    p_includeCompactTags, userId);
-            String notMatchJobIds = checkJobLocaleMatch(jobIdList,
-                    targetLocalList);
+                    CompanyWrapper.getCompanyNameById(job.getCompanyId()), p_includeCompactTags,
+                    userId);
+            String notMatchJobIds = checkJobLocaleMatch(jobIdList, targetLocalList);
             if (notMatchJobIds.length() > 0)
             {
-                return makeErrorXml(
-                        GENERATE_REVIEWERS_COMMENT_REPORT,
-                        "Error info: the given job id: "
-                                + notMatchJobIds
+                return makeErrorXml(GENERATE_REVIEWERS_COMMENT_REPORT,
+                        "Error info: the given job id: " + notMatchJobIds
                                 + " have no workflow for the given target locales.");
             }
-            File[] files = generator
-                    .generateReports(jobIdList, targetLocalList);
+            File[] files = generator.generateReports(jobIdList, targetLocalList);
             returnString = getReportsUrl(files);
         }
         catch (Exception e)
         {
             logger.error("Error found in generateReviewersCommentReport.", e);
-            return makeErrorXml(GENERATE_REVIEWERS_COMMENT_REPORT,
-                    "Error info: " + e.toString());
+            return makeErrorXml(GENERATE_REVIEWERS_COMMENT_REPORT, "Error info: " + e.toString());
         }
 
         return returnString;
@@ -18646,9 +17609,8 @@ public class Ambassador extends AbstractWebService
      *         ;
      * @throws WebServiceException
      */
-    public String generateReviewersCommentSimplifiedReport(
-            String p_accessToken, String p_jobIds, String p_targetLocales,
-            boolean p_includeCompactTags) throws WebServiceException
+    public String generateReviewersCommentSimplifiedReport(String p_accessToken, String p_jobIds,
+            String p_targetLocales, boolean p_includeCompactTags) throws WebServiceException
     {
         checkAccess(p_accessToken, GENERATE_REVIEWERS_COMMENT_SIMPLIFIED_REPORT);
         String returnString = "";
@@ -18660,15 +17622,12 @@ public class Ambassador extends AbstractWebService
             {
                 jobIdList.add(Long.valueOf(jobId));
             }
-            String userId = UserUtil
-                    .getUserIdByName(getUsernameFromSession(p_accessToken));
+            String userId = UserUtil.getUserIdByName(getUsernameFromSession(p_accessToken));
             String illegalJobIds = checkIllegalJobIds(jobIdList, userId);
             if (illegalJobIds.length() > 0)
             {
-                return makeErrorXml(
-                        GENERATE_REVIEWERS_COMMENT_SIMPLIFIED_REPORT,
-                        "Error info: illegal job id " + illegalJobIds
-                                + " for the login user");
+                return makeErrorXml(GENERATE_REVIEWERS_COMMENT_SIMPLIFIED_REPORT,
+                        "Error info: illegal job id " + illegalJobIds + " for the login user");
             }
             // get target locales
             List<GlobalSightLocale> targetLocalList = new ArrayList<GlobalSightLocale>();
@@ -18679,27 +17638,21 @@ public class Ambassador extends AbstractWebService
             // get report
             Job job = ServerProxy.getJobHandler().getJobById(jobIdList.get(0));
             ReviewersCommentsSimpleReportGenerator generator = new ReviewersCommentsSimpleReportGenerator(
-                    CompanyWrapper.getCompanyNameById(job.getCompanyId()),
-                    p_includeCompactTags, userId);
-            String notMatchJobIds = checkJobLocaleMatch(jobIdList,
-                    targetLocalList);
+                    CompanyWrapper.getCompanyNameById(job.getCompanyId()), p_includeCompactTags,
+                    userId);
+            String notMatchJobIds = checkJobLocaleMatch(jobIdList, targetLocalList);
             if (notMatchJobIds.length() > 0)
             {
-                return makeErrorXml(
-                        GENERATE_REVIEWERS_COMMENT_SIMPLIFIED_REPORT,
-                        "Error info: the given job id: "
-                                + notMatchJobIds
+                return makeErrorXml(GENERATE_REVIEWERS_COMMENT_SIMPLIFIED_REPORT,
+                        "Error info: the given job id: " + notMatchJobIds
                                 + " have no workflow for the given target locales.");
             }
-            File[] files = generator
-                    .generateReports(jobIdList, targetLocalList);
+            File[] files = generator.generateReports(jobIdList, targetLocalList);
             returnString = getReportsUrl(files);
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Error found in generateReviewersCommentSimplifiedReport.",
-                    e);
+            logger.error("Error found in generateReviewersCommentSimplifiedReport.", e);
             return makeErrorXml(GENERATE_REVIEWERS_COMMENT_SIMPLIFIED_REPORT,
                     "Error info: " + e.toString());
         }
@@ -18726,8 +17679,7 @@ public class Ambassador extends AbstractWebService
         Task task = null;
         try
         {
-            task = ServerProxy.getTaskManager().getTask(
-                    Long.parseLong(p_taskId));
+            task = ServerProxy.getTaskManager().getTask(Long.parseLong(p_taskId));
         }
         catch (Exception e)
         {
@@ -18735,13 +17687,11 @@ public class Ambassador extends AbstractWebService
         }
         if (task == null)
         {
-            return makeErrorXml(GENERATE_DITA_QA_REPORT,
-                    "Can not find task by taskId " + p_taskId);
+            return makeErrorXml(GENERATE_DITA_QA_REPORT, "Can not find task by taskId " + p_taskId);
         }
 
         Company logUserCompany = getCompanyInfo(getUsernameFromSession(p_accessToken));
-        if (logUserCompany.getId() != 1
-                && logUserCompany.getId() != task.getCompanyId())
+        if (logUserCompany.getId() != 1 && logUserCompany.getId() != task.getCompanyId())
         {
             return makeErrorXml(GENERATE_DITA_QA_REPORT,
                     "Current user not super user or does not belong to company of this task: "
@@ -18750,11 +17700,9 @@ public class Ambassador extends AbstractWebService
 
         try
         {
-            File reportFile = DITAQACheckerHelper
-                    .getDitaReportFile((TaskImpl) task);
+            File reportFile = DITAQACheckerHelper.getDitaReportFile((TaskImpl) task);
             String superFs = AmbFileStoragePathUtils.getFileStorageDirPath(1);
-            String reportFilePath = reportFile.getAbsolutePath().replace("\\",
-                    "/");
+            String reportFilePath = reportFile.getAbsolutePath().replace("\\", "/");
             reportFilePath = reportFilePath.substring(superFs.length() + 1);
 
             StringBuffer root = new StringBuffer();
@@ -18765,10 +17713,8 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            return makeErrorXml(
-                    GENERATE_DITA_QA_REPORT,
-                    "Fail to generate report for taskId: " + p_taskId + " "
-                            + e.getMessage());
+            return makeErrorXml(GENERATE_DITA_QA_REPORT,
+                    "Fail to generate report for taskId: " + p_taskId + " " + e.getMessage());
         }
     }
 
@@ -18794,8 +17740,7 @@ public class Ambassador extends AbstractWebService
         Task task = null;
         try
         {
-            task = ServerProxy.getTaskManager().getTask(
-                    Long.parseLong(p_taskId));
+            task = ServerProxy.getTaskManager().getTask(Long.parseLong(p_taskId));
         }
         catch (Exception e)
         {
@@ -18810,11 +17755,9 @@ public class Ambassador extends AbstractWebService
 
         String userName = getUsernameFromSession(p_accessToken);
         Company logUserCompany = getCompanyInfo(userName);
-        if (logUserCompany.getId() != 1
-                && logUserCompany.getId() != task.getCompanyId())
+        if (logUserCompany.getId() != 1 && logUserCompany.getId() != task.getCompanyId())
         {
-            return makeErrorXml(
-                    GENERATE_QA_CHECKS_REPORT,
+            return makeErrorXml(GENERATE_QA_CHECKS_REPORT,
                     "Current user is not super user or does not belong to the company of this task: "
                             + p_taskId);
         }
@@ -18827,8 +17770,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", userName);
             activityArgs.put("taskId", p_taskId);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "generateQAChecksReport(p_accessToken, p_taskId)",
-                    activityArgs);
+                    "generateQAChecksReport(p_accessToken, p_taskId)", activityArgs);
 
             String fileUrl = null;
 
@@ -18837,21 +17779,16 @@ public class Ambassador extends AbstractWebService
                 if (QACheckerHelper.isShowQAChecksTab(task))
                 {
                     QAChecker checker = new QAChecker();
-                    checker.runQAChecksAndGenerateReport(Long
-                            .parseLong(p_taskId));
+                    checker.runQAChecksAndGenerateReport(Long.parseLong(p_taskId));
                     File qaReport = QACheckerHelper.getQAReportFile(task);
 
                     String filestore = AmbFileStoragePathUtils
-                            .getFileStorageDirPath(task.getCompanyId())
-                            .replace("\\", "/");
-                    String fullPathName = qaReport.getAbsolutePath().replace(
-                            "\\", "/");
-                    String path = fullPathName.substring(fullPathName
-                            .indexOf(filestore) + filestore.length());
-                    path = path.substring(path.indexOf("/Reports/")
-                            + "/Reports/".length());
-                    String root = AmbassadorUtil.getCapLoginOrPublicUrl()
-                            + "/DownloadReports";
+                            .getFileStorageDirPath(task.getCompanyId()).replace("\\", "/");
+                    String fullPathName = qaReport.getAbsolutePath().replace("\\", "/");
+                    String path = fullPathName
+                            .substring(fullPathName.indexOf(filestore) + filestore.length());
+                    path = path.substring(path.indexOf("/Reports/") + "/Reports/".length());
+                    String root = AmbassadorUtil.getCapLoginOrPublicUrl() + "/DownloadReports";
                     fileUrl = root + "/" + path;
 
                     returning = fileUrl;
@@ -18888,8 +17825,8 @@ public class Ambassador extends AbstractWebService
      *         report returning is like
      *         "http://10.10.213.117:8080/globalsight/DownloadReports/Reports/apiQACheckDownload/QAChecksReport_(206).zip"
      */
-    public String generateQAChecksReports(String p_accessToken, String jobIds,
-            String workflowIds) throws WebServiceException
+    public String generateQAChecksReports(String p_accessToken, String jobIds, String workflowIds)
+            throws WebServiceException
     {
         String returnFilePath = null;
         try
@@ -18923,8 +17860,8 @@ public class Ambassador extends AbstractWebService
             }
             catch (Exception e)
             {
-                return makeErrorXml(GENERATE_QA_CHECKS_REPORTS, tempId
-                        + " can not be converted into an integer.");
+                return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
+                        tempId + " can not be converted into an integer.");
             }
 
             Company logUserCompany = getCompanyInfo(getUsernameFromSession(p_accessToken));
@@ -18932,8 +17869,7 @@ public class Ambassador extends AbstractWebService
             {
                 for (String id : jobIdArr)
                 {
-                    Job job = ServerProxy.getJobHandler().getJobById(
-                            Long.parseLong(id));
+                    Job job = ServerProxy.getJobHandler().getJobById(Long.parseLong(id));
                     if (job != null)
                     {
                         if (job.getCompanyId() != logUserCompany.getId())
@@ -18954,8 +17890,7 @@ public class Ambassador extends AbstractWebService
             {
                 for (String id : jobIdArr)
                 {
-                    Job job = ServerProxy.getJobHandler().getJobById(
-                            Long.parseLong(id));
+                    Job job = ServerProxy.getJobHandler().getJobById(Long.parseLong(id));
                     if (job == null)
                     {
                         return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
@@ -18978,8 +17913,7 @@ public class Ambassador extends AbstractWebService
             Set<Long> companyIdSet = new HashSet<Long>();
             for (String jobId : jobIdArr)
             {
-                Job job = ServerProxy.getJobHandler().getJobById(
-                        Long.parseLong(jobId));
+                Job job = ServerProxy.getJobHandler().getJobById(Long.parseLong(jobId));
                 companyIdSet.add(job.getCompanyId());
                 workflowSet.addAll(job.getWorkflows());
                 jobIdSet.add(Long.parseLong(jobId));
@@ -18991,8 +17925,7 @@ public class Ambassador extends AbstractWebService
             {
                 Set<File> exportFilesList = new HashSet<File>();
                 Company company = CompanyWrapper.getCompanyById(companyId);
-                CompanyThreadLocal.getInstance().setValue(
-                        company.getCompanyName());
+                CompanyThreadLocal.getInstance().setValue(company.getCompanyName());
                 if (company.getEnableQAChecks())
                 {
                     for (Workflow workflow : workflowSet)
@@ -19000,15 +17933,12 @@ public class Ambassador extends AbstractWebService
                         if (workflow.getCompanyId() == companyId)
                         {
                             String filePath = null;
-                            if (workflowIdSet != null
-                                    && workflowIdSet.size() > 0)
+                            if (workflowIdSet != null && workflowIdSet.size() > 0)
                             {
                                 if (workflowIdSet.contains(workflow.getId()))
                                 {
-                                    locales.add(workflow.getTargetLocale()
-                                            .getLocaleCode());
-                                    filePath = WorkflowHandlerHelper
-                                            .getExportFilePath(workflow);
+                                    locales.add(workflow.getTargetLocale().getLocaleCode());
+                                    filePath = WorkflowHandlerHelper.getExportFilePath(workflow);
                                     if (filePath != null)
                                     {
                                         exportFilesList.add(new File(filePath));
@@ -19018,10 +17948,8 @@ public class Ambassador extends AbstractWebService
                             }
                             else
                             {
-                                locales.add(workflow.getTargetLocale()
-                                        .getLocaleCode());
-                                filePath = WorkflowHandlerHelper
-                                        .getExportFilePath(workflow);
+                                locales.add(workflow.getTargetLocale().getLocaleCode());
+                                filePath = WorkflowHandlerHelper.getExportFilePath(workflow);
                                 if (filePath != null)
                                 {
                                     exportFilesList.add(new File(filePath));
@@ -19033,8 +17961,7 @@ public class Ambassador extends AbstractWebService
 
                     if (workflowIdSet != null && workflowIdSet.size() > 0)
                     {
-                        if (exportFilesList != null
-                                && exportFilesList.size() == 0)
+                        if (exportFilesList != null && exportFilesList.size() == 0)
                         {
                             return makeErrorXml(GENERATE_QA_CHECKS_REPORTS,
                                     "Invalid workflow id(s): " + workflowIds);
@@ -19061,31 +17988,27 @@ public class Ambassador extends AbstractWebService
         return returnFilePath;
     }
 
-    private String zippedFolder(Set<Long> jobIdSet,
-            Map<Long, Set<File>> exportFilesMap, Set<String> locales)
+    private String zippedFolder(Set<Long> jobIdSet, Map<Long, Set<File>> exportFilesMap,
+            Set<String> locales)
     {
         String fileUrl = null;
-        String directory = AmbFileStoragePathUtils.getFileStorageDirPath(1)
-                .replace("\\", "/")
-                + File.separator
-                + "Reports"
-                + File.separator + "apiQACheckDownload";
+        String directory = AmbFileStoragePathUtils.getFileStorageDirPath(1).replace("\\", "/")
+                + File.separator + "Reports" + File.separator + "apiQACheckDownload";
         new File(directory).mkdirs();
 
         String downloadFileName = null;
         if (jobIdSet != null && jobIdSet.size() == 1)
         {
             Long jobId = jobIdSet.iterator().next();
-            downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT + "_("
-                    + jobId + ").zip";
+            downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT + "_(" + jobId + ").zip";
         }
         else if (jobIdSet != null && jobIdSet.size() > 1)
         {
             String tempS = jobIdSet.toString();
             tempS = tempS.replace(" ", "");
             String jobNamesstr = tempS.substring(1, tempS.length() - 1);
-            downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT + "_("
-                    + jobNamesstr + ").zip";
+            downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT + "_(" + jobNamesstr
+                    + ").zip";
         }
         String zipFileName = directory + File.separator + downloadFileName;
         File zipFile = new File(zipFileName);
@@ -19096,12 +18019,9 @@ public class Ambassador extends AbstractWebService
         {
             Set<File> exportListFiles = exportFilesMap.get(companyId);
             Map<File, String> entryFileToFileNameMap = WorkflowHandlerHelper
-                    .getEntryFileToFileNameMap(exportListFiles, jobIdSet,
-                            locales,
-                            AmbFileStoragePathUtils.getReportsDir(companyId)
-                                    .getPath()
-                                    + File.separator
-                                    + ReportConstants.REPORT_QA_CHECKS_REPORT);
+                    .getEntryFileToFileNameMap(exportListFiles, jobIdSet, locales,
+                            AmbFileStoragePathUtils.getReportsDir(companyId).getPath()
+                                    + File.separator + ReportConstants.REPORT_QA_CHECKS_REPORT);
             allEntryFileToFileNameMap.putAll(entryFileToFileNameMap);
         }
 
@@ -19110,16 +18030,13 @@ public class Ambassador extends AbstractWebService
             if (allEntryFileToFileNameMap.entrySet().size() > 0)
             {
 
-                ZipIt.addEntriesToZipFile(zipFile, allEntryFileToFileNameMap,
-                        "");
-                String filestore = AmbFileStoragePathUtils
-                        .getFileStorageDirPath(1).replace("\\", "/");
-                String fullPathName = zipFile.getAbsolutePath().replace("\\",
+                ZipIt.addEntriesToZipFile(zipFile, allEntryFileToFileNameMap, "");
+                String filestore = AmbFileStoragePathUtils.getFileStorageDirPath(1).replace("\\",
                         "/");
-                String path = fullPathName.substring(fullPathName
-                        .indexOf(filestore) + filestore.length());
-                String root = AmbassadorUtil.getCapLoginOrPublicUrl()
-                        + "/DownloadReports";
+                String fullPathName = zipFile.getAbsolutePath().replace("\\", "/");
+                String path = fullPathName
+                        .substring(fullPathName.indexOf(filestore) + filestore.length());
+                String root = AmbassadorUtil.getCapLoginOrPublicUrl() + "/DownloadReports";
                 fileUrl = root + path;
             }
             else
@@ -19164,8 +18081,7 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, GET_WORK_OFFLINE_FILES);
 
         AmbassadorHelper helper = new AmbassadorHelper();
-        return helper.getWorkOfflineFiles(p_accessToken, p_taskId,
-                p_workOfflineFileType, false);
+        return helper.getWorkOfflineFiles(p_accessToken, p_taskId, p_workOfflineFileType, false);
     }
 
     /**
@@ -19188,21 +18104,20 @@ public class Ambassador extends AbstractWebService
      * @return -- If succeed, return a "identifyKey" which is used to identify
      *         this uploading, a sample is "532689969". -- If fail, no key,
      *         return a standard error xml: <?xml version=\"1.0\"
-     *         encoding=\"UTF-8\" ?> <errorXml>
-     *         <method>uploadWorkOfflineFiles</method> <error>error
+     *         encoding=\"UTF-8\" ?>
+     *         <errorXml> <method>uploadWorkOfflineFiles</method> <error>error
      *         message</error> </errorXml>
      * 
      * @throws WebServiceException
      */
     public String uploadWorkOfflineFiles(String p_accessToken, Long p_taskId,
-            int p_workOfflineFileType, String p_fileName, byte[] bytes)
-            throws WebServiceException
+            int p_workOfflineFileType, String p_fileName, byte[] bytes) throws WebServiceException
     {
         checkAccess(p_accessToken, UPLOAD_WORK_OFFLINE_FILES);
 
         AmbassadorHelper helper = new AmbassadorHelper();
-        return helper.uploadWorkOfflineFiles(p_accessToken, p_taskId,
-                p_workOfflineFileType, p_fileName, bytes, false);
+        return helper.uploadWorkOfflineFiles(p_accessToken, p_taskId, p_workOfflineFileType,
+                p_fileName, bytes, false);
     }
 
     /**
@@ -19224,15 +18139,14 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String importWorkOfflineFiles(String p_accessToken, Long p_taskId,
-            String p_identifyKey, int p_workOfflineFileType)
-            throws WebServiceException
+    public String importWorkOfflineFiles(String p_accessToken, Long p_taskId, String p_identifyKey,
+            int p_workOfflineFileType) throws WebServiceException
     {
         checkAccess(p_accessToken, IMPORT_WORK_OFFLINE_FILES);
 
         AmbassadorHelper helper = new AmbassadorHelper();
-        return helper.importWorkOfflineFiles(p_accessToken, p_taskId,
-                p_identifyKey, p_workOfflineFileType, false);
+        return helper.importWorkOfflineFiles(p_accessToken, p_taskId, p_identifyKey,
+                p_workOfflineFileType, false);
     }
 
     /**
@@ -19251,8 +18165,8 @@ public class Ambassador extends AbstractWebService
      * @throws WebServiceException
      */
 
-    public String createJobGroup(String p_accessToken, String groupName,
-            String projectName, String sourceLocale) throws WebServiceException
+    public String createJobGroup(String p_accessToken, String groupName, String projectName,
+            String sourceLocale) throws WebServiceException
     {
         if (StringUtil.isEmpty(p_accessToken))
             return makeErrorXml(CREATE_JOB_GROUP, "Invalid access token.");
@@ -19286,8 +18200,7 @@ public class Ambassador extends AbstractWebService
             return makeErrorXml(CREATE_JOB_GROUP, "Invalid source locale.");
 
         User user = getUser(getUsernameFromSession(p_accessToken));
-        long companyId = CompanyWrapper.getCompanyByName(user.getCompanyName())
-                .getId();
+        long companyId = CompanyWrapper.getCompanyByName(user.getCompanyName()).getId();
 
         Map<String, String> map = checkGroupName(companyId, groupName);
         if (map != null && map.size() > 0)
@@ -19296,28 +18209,25 @@ public class Ambassador extends AbstractWebService
         Project project = null;
         try
         {
-            project = ServerProxy.getProjectHandler()
-                    .getProjectByNameAndCompanyId(projectName, companyId);
+            project = ServerProxy.getProjectHandler().getProjectByNameAndCompanyId(projectName,
+                    companyId);
             if (project == null)
-                return makeErrorXml(CREATE_JOB_GROUP, "Invalid project name: "
-                        + projectName);
+                return makeErrorXml(CREATE_JOB_GROUP, "Invalid project name: " + projectName);
         }
         catch (Exception e)
         {
         }
 
-        GlobalSightLocale locale = GSDataFactory.localeFromCode(sourceLocale
-                .trim());
+        GlobalSightLocale locale = GSDataFactory.localeFromCode(sourceLocale.trim());
         if (locale == null)
             return makeErrorXml(CREATE_JOB_GROUP, "Invalid source locale.");
 
-        String xml = saveJobGroup(groupName, project, locale, companyId,
-                user.getUserId());
+        String xml = saveJobGroup(groupName, project, locale, companyId, user.getUserId());
         return xml;
     }
 
-    private String saveJobGroup(String groupName, Project project,
-            GlobalSightLocale locale, long companyId, String userId)
+    private String saveJobGroup(String groupName, Project project, GlobalSightLocale locale,
+            long companyId, String userId)
     {
         JobGroup group = new JobGroup();
         group.setName(groupName);
@@ -19350,8 +18260,7 @@ public class Ambassador extends AbstractWebService
         String sql = "SELECT JG.ID,JG.NAME FROM JOB_GROUP JG WHERE JG.COMPANY_ID = :companyId AND JG.NAME= :groupName";
         paramMap.put("companyId", companyId + "");
         paramMap.put("groupName", groupName);
-        List result = (List) HibernateUtil.searchWithSql(sql.toString(),
-                paramMap);
+        List result = (List) HibernateUtil.searchWithSql(sql.toString(), paramMap);
         Map<String, String> map = new HashMap<String, String>();
         for (int i = 0; i < result.size(); i++)
         {
@@ -19375,8 +18284,8 @@ public class Ambassador extends AbstractWebService
      * 
      * @throws WebServiceException
      */
-    public String addJobToGroup(String p_accessToken, String groupId,
-            String jobId) throws WebServiceException
+    public String addJobToGroup(String p_accessToken, String groupId, String jobId)
+            throws WebServiceException
     {
         if (StringUtil.isEmpty(p_accessToken))
             return makeErrorXml(ADD_JOB_TO_GROUP, "Invalid access token.");
@@ -19390,8 +18299,7 @@ public class Ambassador extends AbstractWebService
             return makeErrorXml(ADD_JOB_TO_GROUP, "Invalid job id.");
 
         long projectId;
-        JobGroup jobGroup = HibernateUtil.get(JobGroup.class,
-                Long.parseLong(groupId));
+        JobGroup jobGroup = HibernateUtil.get(JobGroup.class, Long.parseLong(groupId));
 
         if (jobGroup == null)
             return makeErrorXml(ADD_JOB_TO_GROUP, "Invalid group id.");
@@ -19422,14 +18330,13 @@ public class Ambassador extends AbstractWebService
 
         if (existInGroup.trim().length() > 0)
         {
-            return makeErrorXml(ADD_JOB_TO_GROUP, "Job id (" + existInGroup
-                    + ") already in the group.");
+            return makeErrorXml(ADD_JOB_TO_GROUP,
+                    "Job id (" + existInGroup + ") already in the group.");
         }
 
         if (errorJobId.trim().length() > 0)
         {
-            return makeErrorXml(ADD_JOB_TO_GROUP, "Invalid job id :"
-                    + errorJobId);
+            return makeErrorXml(ADD_JOB_TO_GROUP, "Invalid job id :" + errorJobId);
         }
 
         String message = saveJobToGroup(groupId, jobId);
@@ -19440,8 +18347,8 @@ public class Ambassador extends AbstractWebService
     {
         boolean success = false;
         StringBuffer sql = new StringBuffer();
-        sql.append("UPDATE JOB SET ").append("GROUP_ID = ").append(groupId)
-                .append(" WHERE ID IN (").append(jobId).append(")");
+        sql.append("UPDATE JOB SET ").append("GROUP_ID = ").append(groupId).append(" WHERE ID IN (")
+                .append(jobId).append(")");
         try
         {
             HibernateUtil.executeSql(sql.toString());
@@ -19488,37 +18395,32 @@ public class Ambassador extends AbstractWebService
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggedUser.getUserName());
             activityArgs.put("p_identifyKey", p_identifyKey);
-            activityStart = WebServicesLog.start(Ambassador.class,
-                    "getTmExportStatus", activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class, "getTmExportStatus",
+                    activityArgs);
 
             if (StringUtil.isEmpty(p_identifyKey))
                 return makeErrorXml(TM_EXPORT_STATUS, "Invalid identifyKey.");
 
             returnXml = new StringBuilder(XML_HEAD);
             String root = AmbassadorUtil.getCapLoginOrPublicUrl();
-            String superFSDir = AmbFileStoragePathUtils
-                    .getFileStorageDirPath(1).replace("\\", "/");
+            String superFSDir = AmbFileStoragePathUtils.getFileStorageDirPath(1).replace("\\", "/");
             String directory = ExportUtil.getExportDirectory();
             directory = directory.replace("\\", "/");
-            String path = directory.substring(directory.indexOf(superFSDir)
-                    + superFSDir.length());
+            String path = directory.substring(directory.indexOf(superFSDir) + superFSDir.length());
             path = root + "/DownloadTM" + path + "/" + p_identifyKey + "/";
             String failed = directory + "/" + p_identifyKey + "/" + "failed";
-            String inprogress = directory + "/" + p_identifyKey + "/"
-                    + "inprogress";
+            String inprogress = directory + "/" + p_identifyKey + "/" + "inprogress";
             File failedFile = new File(failed);
             File inporgressFile = new File(inprogress);
             returnXml.append("<exportStatus>\r\n");
             if (failedFile.exists())
             {
-                returnXml.append("\t<status>").append("failed")
-                        .append("</status>\r\n");
+                returnXml.append("\t<status>").append("failed").append("</status>\r\n");
                 returnXml.append("\t<url></url>\r\n");
             }
             else if (inporgressFile.exists() && !failedFile.exists())
             {
-                returnXml.append("\t<status>").append("exporting")
-                        .append("</status>\r\n");
+                returnXml.append("\t<status>").append("exporting").append("</status>\r\n");
                 returnXml.append("\t<url></url>\r\n");
             }
             else
@@ -19534,22 +18436,17 @@ public class Ambassador extends AbstractWebService
                         String zipName = null;
                         if (fileName.endsWith(".xml"))
                         {
-                            zipName = fileName.substring(0,
-                                    fileName.lastIndexOf(".xml"))
-                                    + ".zip";
+                            zipName = fileName.substring(0, fileName.lastIndexOf(".xml")) + ".zip";
                             zipPath += zipName;
                             path += zipName;
                         }
                         else if (fileName.endsWith(".tmx"))
                         {
-                            zipName = fileName.substring(0,
-                                    fileName.lastIndexOf(".tmx"))
-                                    + ".zip";
+                            zipName = fileName.substring(0, fileName.lastIndexOf(".tmx")) + ".zip";
                             zipPath += zipName;
                             path += zipName;
                         }
-                        String xmlPath = directory + "/" + p_identifyKey + "/"
-                                + fileName;
+                        String xmlPath = directory + "/" + p_identifyKey + "/" + fileName;
                         compressionXml(zipPath, new File(xmlPath));
                     }
                     else
@@ -19559,12 +18456,10 @@ public class Ambassador extends AbstractWebService
                 }
                 catch (Exception e)
                 {
-                    return makeErrorXml(TM_EXPORT_STATUS,
-                            "Compression is incorrect.");
+                    return makeErrorXml(TM_EXPORT_STATUS, "Compression is incorrect.");
                 }
 
-                returnXml.append("\t<status>").append("finished")
-                        .append("</status>\r\n");
+                returnXml.append("\t<status>").append("finished").append("</status>\r\n");
                 returnXml.append("\t<url>").append(path).append("</url>\r\n");
             }
             returnXml.append("</exportStatus>\r\n");
@@ -19580,14 +18475,12 @@ public class Ambassador extends AbstractWebService
         return returnXml.toString();
     }
 
-    public String exportTM(String p_accessToken, String p_tmName,
-            String p_languages, String p_startDate, String p_finishDate,
-            String p_exportFormat, String p_exportedFileName)
-            throws WebServiceException
+    public String exportTM(String p_accessToken, String p_tmName, String p_languages,
+            String p_startDate, String p_finishDate, String p_exportFormat,
+            String p_exportedFileName) throws WebServiceException
     {
-        String returnXml = exportTM(p_accessToken, p_tmName, p_languages,
-                p_startDate, p_finishDate, p_exportFormat, p_exportedFileName,
-                null);
+        String returnXml = exportTM(p_accessToken, p_tmName, p_languages, p_startDate, p_finishDate,
+                p_exportFormat, p_exportedFileName, null);
         return returnXml;
     }
 
@@ -19621,10 +18514,9 @@ public class Ambassador extends AbstractWebService
      * @throws WebServiceException
      * 
      */
-    public String exportTM(String p_accessToken, String p_tmName,
-            String p_languages, String p_startDate, String p_finishDate,
-            String p_exportFormat, String p_exportedFileName,
-            String p_projectNames) throws WebServiceException
+    public String exportTM(String p_accessToken, String p_tmName, String p_languages,
+            String p_startDate, String p_finishDate, String p_exportFormat,
+            String p_exportedFileName, String p_projectNames) throws WebServiceException
     {
         if (StringUtil.isEmpty(p_accessToken))
             return makeErrorXml(EXPORT_TM, "Invalid access token.");
@@ -19644,8 +18536,7 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("p_exportFormat", p_exportFormat);
             activityArgs.put("p_exportedFileName", p_exportedFileName);
             activityArgs.put("p_projectNames", p_projectNames);
-            activityStart = WebServicesLog.start(Ambassador.class, "exportTM",
-                    activityArgs);
+            activityStart = WebServicesLog.start(Ambassador.class, "exportTM", activityArgs);
 
             if (StringUtil.isEmpty(p_tmName))
                 return makeErrorXml(EXPORT_TM, "Invalid tm name.");
@@ -19710,8 +18601,7 @@ public class Ambassador extends AbstractWebService
                     Date staDate = sdf.parse(startDate);
                     if (fshDate.before(staDate))
                     {
-                        return makeErrorXml(EXPORT_TM,
-                                "Invalid start date and finish date.");
+                        return makeErrorXml(EXPORT_TM, "Invalid start date and finish date.");
                     }
                 }
                 catch (ParseException e)
@@ -19726,12 +18616,10 @@ public class Ambassador extends AbstractWebService
                 for (String lang : languageArr)
                 {
                     lang = lang.replace("-", "_");
-                    GlobalSightLocale locale = GSDataFactory
-                            .localeFromCode(lang.trim());
+                    GlobalSightLocale locale = GSDataFactory.localeFromCode(lang.trim());
                     if (locale == null)
                     {
-                        return makeErrorXml(EXPORT_TM, "Invalid language : "
-                                + lang);
+                        return makeErrorXml(EXPORT_TM, "Invalid language : " + lang);
                     }
                 }
                 p_languages = p_languages.replace("-", "_");
@@ -19745,14 +18633,12 @@ public class Ambassador extends AbstractWebService
                     char c = p_projectNames.trim().charAt(i);
                     if (specialChars.indexOf(c) > -1)
                     {
-                        return makeErrorXml(EXPORT_TM,
-                                ERROR_EXPORT_PROJECT_NAMES);
+                        return makeErrorXml(EXPORT_TM, ERROR_EXPORT_PROJECT_NAMES);
                     }
                 }
             }
 
-            if (StringUtil.isEmpty(p_exportFormat)
-                    || !p_exportFormat.trim().equalsIgnoreCase("GMX")
+            if (StringUtil.isEmpty(p_exportFormat) || !p_exportFormat.trim().equalsIgnoreCase("GMX")
                     && !p_exportFormat.trim().equalsIgnoreCase("TMX1.4b"))
                 return makeErrorXml(EXPORT_TM, "Invalid export format.");
 
@@ -19770,8 +18656,8 @@ public class Ambassador extends AbstractWebService
                 identifyKey = AmbassadorUtil.getRandomFeed();
                 directory = directory + "/" + identifyKey + "/" + "inprogress";
                 new File(directory).mkdirs();
-                options = joinXml(options, startDate, finishDate, fileType,
-                        p_languages, p_exportedFileName, p_projectNames);
+                options = joinXml(options, startDate, finishDate, fileType, p_languages,
+                        p_exportedFileName, p_projectNames);
                 try
                 {
                     exporter.setExportOptions(options);
@@ -19782,14 +18668,12 @@ public class Ambassador extends AbstractWebService
                     // pass down new options from client
                     exporter.setExportOptions(options);
                     ((com.globalsight.everest.tm.exporter.ExportOptions) exporter
-                            .getExportOptionsObject())
-                            .setIdentifyKey(identifyKey);
+                            .getExportOptionsObject()).setIdentifyKey(identifyKey);
                     exporter.doExport();
                 }
                 catch (Exception e)
                 {
-                    ExportUtil.handleTmExportFlagFile(identifyKey, "failed",
-                            true);
+                    ExportUtil.handleTmExportFlagFile(identifyKey, "failed", true);
                 }
             }
         }
@@ -19830,19 +18714,17 @@ public class Ambassador extends AbstractWebService
      *            company.
      * 
      */
-    public String tmFullTextSearch(String p_accessToken, String p_string,
-            String p_tmNames, String p_sourceLocale, String p_targetLocale,
-            String p_dateType, String p_startDate, String p_finishDate,
-            String p_companyName) throws WebServiceException
+    public String tmFullTextSearch(String p_accessToken, String p_string, String p_tmNames,
+            String p_sourceLocale, String p_targetLocale, String p_dateType, String p_startDate,
+            String p_finishDate, String p_companyName) throws WebServiceException
     {
         if (StringUtil.isEmpty(p_accessToken))
             return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid access token.");
         // Check access token
         checkAccess(p_accessToken, TM_FULL_TEXT_SEARCH);
 
-        String errorXml = checkParamters(p_accessToken, p_string, p_tmNames,
-                p_sourceLocale, p_targetLocale, p_dateType, p_startDate,
-                p_finishDate, p_companyName);
+        String errorXml = checkParamters(p_accessToken, p_string, p_tmNames, p_sourceLocale,
+                p_targetLocale, p_dateType, p_startDate, p_finishDate, p_companyName);
         if (StringUtil.isNotEmpty(errorXml))
             return errorXml;
 
@@ -19856,8 +18738,7 @@ public class Ambassador extends AbstractWebService
             Date startDate = parseStartDate(p_startDate);
             Date endDate = parseEndDate(p_finishDate);
             boolean searchInSource = true;
-            Company company = ServerProxy.getJobHandler().getCompany(
-                    p_companyName);
+            Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
             GlobalSightLocale sourceGSL = lm.getLocaleByString(p_sourceLocale);
             GlobalSightLocale targetGSL = lm.getLocaleByString(p_targetLocale);
             // get all selected TMS
@@ -19869,9 +18750,9 @@ public class Ambassador extends AbstractWebService
             }
             // do search
             TmCoreManager mgr = LingServerProxy.getTmCoreManager();
-            List<TMidTUid> queryResult = mgr.tmConcordanceQuery(tmList,
-                    p_string, searchInSource ? sourceGSL : targetGSL,
-                    searchInSource ? targetGSL : sourceGSL, null);
+            List<TMidTUid> queryResult = mgr.tmConcordanceQuery(tmList, p_string,
+                    searchInSource ? sourceGSL : targetGSL, searchInSource ? targetGSL : sourceGSL,
+                    null);
 
             xml.append("<segments>\r\n");
             xml.append("\t<sourceLocale>").append(sourceGSL.getDisplayName())
@@ -19880,8 +18761,7 @@ public class Ambassador extends AbstractWebService
                     .append("</targetLocale>\r\n");
 
             // Get all TUS by queryResult, then get all needed properties
-            List<SegmentTmTu> tus = LingServerProxy.getTmCoreManager()
-                    .getSegmentsById(queryResult);
+            List<SegmentTmTu> tus = LingServerProxy.getTmCoreManager().getSegmentsById(queryResult);
             for (int i = 0, max = tus.size(); i < max; i++)
             {
                 SegmentTmTu tu = tus.get(i);
@@ -19895,28 +18775,23 @@ public class Ambassador extends AbstractWebService
                 {
                     if (p_dateType.equalsIgnoreCase("create"))
                     {
-                        Date creationDate = format.parse(format.format(srcTuv
-                                .getCreationDate()));
-                        boolean checkSrcDate = checkCreatetionDate(
-                                creationDate, startDate, endDate);
+                        Date creationDate = format.parse(format.format(srcTuv.getCreationDate()));
+                        boolean checkSrcDate = checkCreatetionDate(creationDate, startDate,
+                                endDate);
                         if (!checkSrcDate)
                             continue;
                     }
                     else if (p_dateType.equalsIgnoreCase("modify"))
                     {
-                        Date modifyDate = format.parse(format.format(srcTuv
-                                .getModifyDate()));
-                        boolean checkSrcDate = checkCreatetionDate(modifyDate,
-                                startDate, endDate);
+                        Date modifyDate = format.parse(format.format(srcTuv.getModifyDate()));
+                        boolean checkSrcDate = checkCreatetionDate(modifyDate, startDate, endDate);
                         if (!checkSrcDate)
                             continue;
                     }
                 }
-                TmxWriter.convertTuvToTmxLevel(tu, (SegmentTmTuv) srcTuv,
-                        TmxWriter.TMX_LEVEL_2);
+                TmxWriter.convertTuvToTmxLevel(tu, (SegmentTmTuv) srcTuv, TmxWriter.TMX_LEVEL_2);
                 xml.append("\t<segment>\r\n");
-                xml.append("\t\t<sourceSegment>")
-                        .append(GxmlUtil.stripRootTag(srcTuv.getSegment()))
+                xml.append("\t\t<sourceSegment>").append(GxmlUtil.stripRootTag(srcTuv.getSegment()))
                         .append("</sourceSegment>\r\n");
                 BaseTmTuv trgTuv;
                 Collection targetTuvs = tu.getTuvList(targetGSL);
@@ -19935,12 +18810,10 @@ public class Ambassador extends AbstractWebService
                         sid = "N/A";
                     }
                     long tmId = trgTuv.getTu().getTmId();
-                    xml.append("\t\t<sid>")
-                            .append(EditUtil.encodeXmlEntities(sid))
+                    xml.append("\t\t<sid>").append(EditUtil.encodeXmlEntities(sid))
                             .append("</sid>\r\n");
-                    xml.append("\t\t<tmName>")
-                            .append(ServerProxy.getProjectHandler()
-                                    .getProjectTMById(tmId, false).getName())
+                    xml.append("\t\t<tmName>").append(
+                            ServerProxy.getProjectHandler().getProjectTMById(tmId, false).getName())
                             .append("</tmName>\r\n");
                 }
                 xml.append("\t</segment>\r\n");
@@ -19958,13 +18831,11 @@ public class Ambassador extends AbstractWebService
         return "No matching content !";
     }
 
-    private boolean checkCreatetionDate(Date creationDate, Date startDate,
-            Date endDate)
+    private boolean checkCreatetionDate(Date creationDate, Date startDate, Date endDate)
     {
         if (startDate != null && endDate == null)
         {
-            if (!creationDate.after(startDate)
-                    && !creationDate.equals(startDate))
+            if (!creationDate.after(startDate) && !creationDate.equals(startDate))
             {
                 return false;
             }
@@ -19978,10 +18849,8 @@ public class Ambassador extends AbstractWebService
         }
         else if (startDate != null && endDate != null)
         {
-            if ((!creationDate.after(startDate) && !creationDate
-                    .equals(startDate))
-                    || (!creationDate.before(endDate) && !creationDate
-                            .equals(endDate)))
+            if ((!creationDate.after(startDate) && !creationDate.equals(startDate))
+                    || (!creationDate.before(endDate) && !creationDate.equals(endDate)))
             {
                 return false;
             }
@@ -20025,10 +18894,9 @@ public class Ambassador extends AbstractWebService
         return null;
     }
 
-    private String checkParamters(String p_accessToken, String p_string,
-            String p_tmNames, String p_sourceLocale, String p_targetLocale,
-            String p_dateType, String p_startDate, String p_finishDate,
-            String p_companyName)
+    private String checkParamters(String p_accessToken, String p_string, String p_tmNames,
+            String p_sourceLocale, String p_targetLocale, String p_dateType, String p_startDate,
+            String p_finishDate, String p_companyName)
     {
         if (StringUtil.isEmpty(p_string))
             return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid search string.");
@@ -20039,23 +18907,20 @@ public class Ambassador extends AbstractWebService
         if (StringUtil.isEmpty(p_sourceLocale))
             return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid source locale.");
 
-        GlobalSightLocale sourceLocale = GSDataFactory
-                .localeFromCode(p_sourceLocale);
+        GlobalSightLocale sourceLocale = GSDataFactory.localeFromCode(p_sourceLocale);
         if (sourceLocale == null)
             return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid source locale.");
 
         if (StringUtil.isEmpty(p_targetLocale))
             return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid target locale.");
 
-        GlobalSightLocale targetLocale = GSDataFactory
-                .localeFromCode(p_targetLocale);
+        GlobalSightLocale targetLocale = GSDataFactory.localeFromCode(p_targetLocale);
         if (targetLocale == null)
             return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid target locale.");
 
         if (StringUtil.isNotEmpty(p_dateType))
         {
-            if (!p_dateType.equalsIgnoreCase("create")
-                    && !p_dateType.equalsIgnoreCase("modify"))
+            if (!p_dateType.equalsIgnoreCase("create") && !p_dateType.equalsIgnoreCase("modify"))
                 return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid date type.");
         }
 
@@ -20064,25 +18929,21 @@ public class Ambassador extends AbstractWebService
 
         String userName = getUsernameFromSession(p_accessToken);
         Company logUserCompany = getCompanyInfo(userName);
-        if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String
-                .valueOf(logUserCompany.getId())))
+        if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String.valueOf(logUserCompany.getId())))
         {
             if (!logUserCompany.getName().equalsIgnoreCase(p_companyName))
             {
-                return makeErrorXml(TM_FULL_TEXT_SEARCH,
-                        "Invalid company name.");
+                return makeErrorXml(TM_FULL_TEXT_SEARCH, "Invalid company name.");
             }
             else
             {
                 String[] tmNameArr = p_tmNames.split(",");
                 for (String tmName : tmNameArr)
                 {
-                    ProjectTM projectTm = getProjectTm(tmName,
-                            logUserCompany.getId());
+                    ProjectTM projectTm = getProjectTm(tmName, logUserCompany.getId());
                     if (projectTm == null)
                     {
-                        return makeErrorXml(TM_FULL_TEXT_SEARCH, tmName
-                                + " is Invalid tm name.");
+                        return makeErrorXml(TM_FULL_TEXT_SEARCH, tmName + " is Invalid tm name.");
                     }
                 }
             }
@@ -20091,16 +18952,14 @@ public class Ambassador extends AbstractWebService
         {
             try
             {
-                Company company = ServerProxy.getJobHandler().getCompany(
-                        p_companyName);
+                Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
                 String[] tmNameArr = p_tmNames.split(",");
                 for (String tmName : tmNameArr)
                 {
                     ProjectTM projectTm = getProjectTm(tmName, company.getId());
                     if (projectTm == null)
                     {
-                        return makeErrorXml(TM_FULL_TEXT_SEARCH, tmName
-                                + "is Invalid tm name.");
+                        return makeErrorXml(TM_FULL_TEXT_SEARCH, tmName + "is Invalid tm name.");
                     }
                 }
             }
@@ -20168,8 +19027,7 @@ public class Ambassador extends AbstractWebService
             String[] args = new String[1];
             args[0] = String.valueOf(tmName);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID,
-                    args, e);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID, args, e);
         }
 
         return projectTM;
@@ -20191,9 +19049,9 @@ public class Ambassador extends AbstractWebService
         return formatDate;
     }
 
-    private String joinXml(String xml, String startDate, String finishDate,
-            String fileType, String languages, String exportedFileName,
-            String projectNames) throws WebServiceException
+    private String joinXml(String xml, String startDate, String finishDate, String fileType,
+            String languages, String exportedFileName, String projectNames)
+            throws WebServiceException
     {
         Document doc = null;
         try
@@ -20253,8 +19111,7 @@ public class Ambassador extends AbstractWebService
                 if (finishDate == null)
                 {
                     Date nowDate = new Date();
-                    SimpleDateFormat sdf = new SimpleDateFormat(
-                            "MM/dd/yyyy HH:mm:ss");
+                    SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
                     String nowDateStr = sdf.format(nowDate);
                     createdbeforeElem.setText(nowDateStr);
                 }
@@ -20295,8 +19152,7 @@ public class Ambassador extends AbstractWebService
     {
         try
         {
-            ZipOutputStream out = new ZipOutputStream(new FileOutputStream(
-                    zipFileName));
+            ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFileName));
             out.putNextEntry(new ZipEntry(inputFile.getName()));
             FileInputStream inputStream = new FileInputStream(inputFile);
             int b;
@@ -20354,15 +19210,13 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            String message = "Failed to get task object by taskId : "
-                    + p_taskId;
+            String message = "Failed to get task object by taskId : " + p_taskId;
             return makeErrorXml(GET_IN_CONTEXT_REVIEW_LINK, message);
         }
 
         if (task == null)
         {
-            return makeErrorXml(GET_IN_CONTEXT_REVIEW_LINK,
-                    "Can not get task by taskID.");
+            return makeErrorXml(GET_IN_CONTEXT_REVIEW_LINK, "Can not get task by taskID.");
         }
 
         if (task.getState() == Task.STATE_COMPLETED)
@@ -20378,23 +19232,18 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("loggedUserName", loggingUserName);
             activityArgs.put("taskId", p_taskId);
             activityStart = WebServicesLog.start(Ambassador.class,
-                    "getInContextReviewLink(p_accessToken, p_taskId)",
-                    activityArgs);
+                    "getInContextReviewLink(p_accessToken, p_taskId)", activityArgs);
 
-            User pm = task.getWorkflow().getJob().getProject()
-                    .getProjectManager();
-            WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
-                    .getWorkflowTaskInstance(userId, task.getId(),
-                            WorkflowConstants.TASK_ALL_STATES);
+            User pm = task.getWorkflow().getJob().getProject().getProjectManager();
+            WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer().getWorkflowTaskInstance(
+                    userId, task.getId(), WorkflowConstants.TASK_ALL_STATES);
             task.setWorkflowTask(wfTask);
             List allAssignees = task.getAllAssignees();
             if (allAssignees != null && allAssignees.size() > 0)
             {
-                if (!allAssignees.contains(userId)
-                        && !userId.equalsIgnoreCase(pm.getUserId()))
+                if (!allAssignees.contains(userId) && !userId.equalsIgnoreCase(pm.getUserId()))
                 {
-                    String message = "'"
-                            + userId
+                    String message = "'" + userId
                             + "' is neither acceptor/available assignee of current task nor project manager.";
                     logger.warn(message);
                     return makeErrorXml(GET_IN_CONTEXT_REVIEW_LINK, message);
@@ -20405,16 +19254,15 @@ public class Ambassador extends AbstractWebService
             link.append(AmbassadorUtil.getCapLoginOrPublicUrl());
             link.append("/ControlServlet?linkName=self&pageName=inctxrvED1&secret=");
             StringBuffer secret = new StringBuffer();
-            secret.append("taskId=").append(p_taskId.trim())
-                    .append("&nameField=").append(loggingUserName);
+            secret.append("taskId=").append(p_taskId.trim()).append("&nameField=")
+                    .append(loggingUserName);
             link.append(AmbassadorUtil.encryptionString(secret.toString()));
             return link.toString();
         }
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            String message = "Failed to get In Context Review Link for taskId : "
-                    + p_taskId;
+            String message = "Failed to get In Context Review Link for taskId : " + p_taskId;
             return makeErrorXml(GET_IN_CONTEXT_REVIEW_LINK, message);
         }
         finally
@@ -20424,5 +19272,28 @@ public class Ambassador extends AbstractWebService
                 activityStart.end();
             }
         }
+    }
+
+    private boolean canHaveMtElement(Workflow wf)
+    {
+        List<Workflow> wfs = new ArrayList<Workflow>();
+        return canHaveMtElement(wfs);
+    }
+
+    /**
+     * If any workflow has MTed segments, return true.
+     */
+    private boolean canHaveMtElement(Collection<Workflow> wfs)
+    {
+        boolean flag = false;
+        for (Workflow wf : wfs)
+        {
+            flag = wf.getIsSinceVersion87();
+            if (flag)
+            {
+                break;
+            }
+        }
+        return flag;
     }
 }

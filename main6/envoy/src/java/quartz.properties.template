@@ -17,7 +17,7 @@
 
 #-------- DataSource for MySql
 org.quartz.dataSource.amb_mysql.driver=com.mysql.jdbc.Driver
-org.quartz.dataSource.amb_mysql.URL=jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%
+org.quartz.dataSource.amb_mysql.URL=jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%?useUnicode=true&characterEncoding=UTF-8&useSSL=false
 org.quartz.dataSource.amb_mysql.user=%%database_username%%
 org.quartz.dataSource.amb_mysql.password=%%database_password%%
 

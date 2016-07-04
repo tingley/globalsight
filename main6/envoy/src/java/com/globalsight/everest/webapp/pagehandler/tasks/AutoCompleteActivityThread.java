@@ -118,7 +118,8 @@ public class AutoCompleteActivityThread implements Runnable
                         
                         if (act.getCompleteType() == Activity.COMPLETE_TYPE_SCHEDULE)
                         {
-                            if (ActivityScheduleUtil.autoCompleteActivity(act))
+                            if (act.getCompleteSchedule() != null
+                                    && ActivityScheduleUtil.autoCompleteActivity(act))
                             {
                                 ServerProxy.getTaskManager().completeTask(
                                         acceptor, t, null, null);

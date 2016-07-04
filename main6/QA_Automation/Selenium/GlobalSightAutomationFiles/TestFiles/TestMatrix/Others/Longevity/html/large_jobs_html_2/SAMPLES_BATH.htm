@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1430" MadCap:lastWidth="515">
+    <head><title>Bath A or B Samples Page</title>
+    </head>
+    <body>
+        <h1>Bath A or B 
+ Samples page</h1>
+        <p class="para">Use this page to enter sample parameters for Bath A and/or 
+ Bath B. This page appears only when you select a dissolution type in the 
+ Select Sample Set Method Type page of the Sample Set Method wizard. </p>
+        <h2>First vial position</h2>
+        <p class="para">The starting vial position for a range of vials to be filled. 
+ For example, for 8 syringes and 5 sample transfers, you need 40 vial positions. 
+ If you specify 9 as the first vial position, vials 9 to 48 are filled. 
+ </p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ with the 2690D/2695D, 1–120; without the 2690D/2695D, 1–999</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 1</p>
+        <h3>2690D/2695D Considerations</h3>
+        <p class="para">The position of the first sample vial must be divisible by 
+ 6 or 8 (depending on the number of syringes in the Waters Transfer Module) 
+ plus 1. For example, in a 6-syringe system, you can specify #13 as the 
+ first sample vial position (12 + 1), but not #11.</p>
+        <p class="para">Sample transfers cannot occur between carousels. The 2690D/2695D 
+ allows up to three for an 8-syringe system and four transfers per carousel 
+ for a 6-syringe system. However, it does not allow the transfer of four 
+ samples to one carousel and four samples to another carousel from the 
+ same sample transfer.</p>
+        <h2>Transfer times</h2>
+        <p class="para">Click a row in the Transfer Times table to specify the time 
+ (in minutes) to transfer each sample. </p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ The maximum number of vial positions in the carousels is 120. </p>
+        <p class="para">If you have a 2690D/2695D and run at least one dissolution 
+ test, you cannot edit the transfer times. If you do not have a 2690D/2695D 
+ and run at least one dissolution test, you can edit the transfers times 
+ from the Alter Samples menu.</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 1.00 to 59999.99 with no more than 20 entries in ascending order and no 
+ duplicate times.</p>
+        <p class="para"><span class="emphasisbold">Minimum 
+ entry:</span> 1 at 1:00</p>
+        <h2>Dissolution test duration</h2>
+        <p class="para">Specifies the total length of time (in minutes) to run the 
+ dissolution test. </p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 1.00 to 59999.00 min</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 60.00</p>
+        <h2>Perform infinity test</h2>
+        <p class="para">Runs an infinity test after the timed transfers in a dissolution 
+ test finishes. An infinity test<span style="font-style: italic;"> <![CDATA[ ]]></span>spins 
+ the apparatus (if applicable, paddles or basket) at 200 rpm (for a Hanson 
+ bath v. 2.1 or lower) or 250 rpm (for a Hanson bath that is v. 2.1 or 
+ higher) for Bath A or B. Enter the length of time (in minutes) you want 
+ to perform the infinity test. The high rate of speed allows the dosage 
+ form to completely dissolve in the media before another aliquot of sample 
+ is transferred to vials.</p>
+        <p class="para"><span class="emphasisbold">Entries 
+ in the time field:</span> 2.00 to 599.00 min</p>
+        <p class="para"><span class="emphasisbold">Typical 
+ entries:</span> 2.00 to 20.00</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <h2>Collect all samples before any LC (2690D/2695D only)</h2>
+        <p class="para">Transfers all aliquots in the sample set to vials <span style="font-style: italic;">before</span> 
+ any samples or standards are injected.</p>
+        <h2>Offsets bath A or B (2690D/2695D only)</h2>
+        <p class="para">If you selected Dissolution (Baths A and B) in the Select 
+ Sample Set Method Type page, Bath A and B Offset appear on the Bath B 
+ Samples page. </p>
+    </body>
+</html>

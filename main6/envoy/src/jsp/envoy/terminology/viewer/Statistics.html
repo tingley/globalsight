@@ -21,7 +21,8 @@
   //-->  
 </SCRIPT>
 <SCRIPT language="Javascript">
-var g_args;
+var o=window.opener;
+var g_args=o.statisticsData;
 
 function parseStatistics(dom)
 {
@@ -37,21 +38,20 @@ function parseStatistics(dom)
   var nodes, node;
   var termbase, entries, language, number;
 
-  termbase = dom.selectSingleNode('/statistics/termbase').text;
-  entries  = dom.selectSingleNode('/statistics/terms').text;
+  termbase = dom.termbase;
+  entries  = dom.terms;
 
   idTermbaseName.innerText = termbase;
   idTermbaseEntries.innerText = entries;
 
-  nodes = dom.selectNodes('//indexes/index');
+  nodes = dom.indexes;
   for (var i = 0; i < nodes.length; ++i)
   {
     node = nodes[i];
-
     row = tbody.insertRow(-1);
 
-    language = node.selectSingleNode('language').text;
-    number = node.selectSingleNode('terms').text;
+    language = node.language;
+    number = node.terms;
 
     cell = row.insertCell(-1);
     cell.innerHTML = language;
@@ -91,12 +91,8 @@ function doKeypress()
 
 function doLoad()
 {
-  g_args = window.dialogArguments;
-
   window.focus();
-
   init();  
-  
   document.getElementById("idTable").style.width =  document.body.clientWidth - 20;
 }
 

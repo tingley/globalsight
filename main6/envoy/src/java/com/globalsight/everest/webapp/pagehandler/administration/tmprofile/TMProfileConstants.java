@@ -122,10 +122,7 @@ public interface TMProfileConstants
      * Constant used for a remove action.
      */
     public static final String REMOVE_ACTION = "remove";
-    /**
-     * Constant used for machine translation edit action.
-     */
-    public static final String MT_EDIT_ACTION = "mt_edit";
+
     /**
      * Constant used for a save action.
      */
@@ -134,11 +131,6 @@ public interface TMProfileConstants
      * Constant used for a save all workflows action.
      */
     public static final String SAVE_ALL_TRANSLATION_MEMORY_PROFILES_ACTION = "saveTranslationMemoryProfiles";
-    /**
-     * Constants used for save or cancel a MT options editing results.
-     */
-    public static final String SAVE_MT_OPTIONS_ACTION = "saveMTOptions";
-    public static final String CANCEL_MT_OPTIONS_ACTION = "cancelMTOptions";
     
     public static final String SEARCH_ACTION = "search";
 
@@ -160,60 +152,7 @@ public interface TMProfileConstants
     public static final String MATCH_PERCENTAGE = "matchPercentage";
     
     public static final String TM_PROCENDENCE = "tmProcendence";
-    
-    /**
-     * Constants for Machine Translation configurations in TM profile Moved from
-     * SystemConfigParamNames line 505-509 The four parameters were in
-     * envoy.properties and system_parameter table, now are integrated with TM
-     * profile.
-     * 
-     * Note that below MT related constants have been moved to
-     * "MTProfileConstants.java" since 8.5.
-     */
-    public static final String MT_USE_MT="machineTranslation.useMT";
-    public static final String MT_ENGINE = "machineTranslation.engine";
-//    public static final String MT_AUTOCOMMIT_TO_TM = "machineTranslation.autoCommitToTM";
-   
-    public static final String MT_PTSURL = "ptsurl";
-    public static final String MT_LocalPairs_Map = "directionsMap";
-    public static final String MT_LocalPairs_List = "directionsList";
-    public static final String MT_DIRECTION_TOPICTEMPLATE_MAP = "dirToTplMap";
-    public static final String MT_PTS_USERNAME = "username";
-    public static final String MT_PTS_PASSWORD = "password";
-    public static final String MT_PTS_URL_FLAG = "pts_url_flag";
-    public static final String MT_PTS_URL_FLAG_V8 = "0";
-    public static final String MT_PTS_URL_FLAG_V9 = "1";
-    
-    public static final String MT_MS_URL = "ms_mt_url";
-    public static final String MT_MS_APPID = "ms_mt_appid";
-    public static final String MT_MS_CLIENT_ID = "ms_mt_client_id";
-    public static final String MT_MS_CLIENT_SECRET = "ms_mt_client_secret";
-    public static final String MT_MS_ACCESS_TOKEN = "ms_mt_access_token";
-    public static final String MT_MS_GRANT_TYPE = "client_credentials";
-    public static final String MT_MS_SCOPE = "http://api.microsofttranslator.com";
-    public static final String MT_MS_GET_ACCESS_TOKEN_URL = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13";
-    public static final String MT_MS_CATEGORY = "ms_mt_category";
-    public static final String MT_MS_URL_FLAG = "ms_mt_url_flag";
-    
-    public static final String MT_AO_URL = "ao_mt_url";
-    public static final String MT_AO_PORT = "ao_mt_port";
-    public static final String MT_AO_USERNAME = "ao_mt_username";
-    public static final String MT_AO_PASSWORD = "ao_mt_password";
-    public static final String MT_AO_ACCOUNT_NUMBER = "ao_mt_account_number";
-    
-    public static final String MT_SAFA_HOST = "safa_mt_host";
-    public static final String MT_SAFA_PORT = "safa_mt_port";
-    public static final String MT_SAFA_COMPANY_NAME = "safa_mt_company_name";
-    public static final String MT_SAFA_PASSWORD = "safa_mt_password";
-    public static final String MT_SAFA_CLIENT = "safaba_client";
-    
-    /**
-     * Currently 'Google' and "Promt" engines can be used.
-     */
-    public static final String MT_ENGINE_GOOGLE = "Google";
-    public static final String MT_ENGINE_PROMT = "Promt";
-    public static final String MT_ENGINE_MSTRANSLATOR = "MS_Translator";
-    
+
     /**
      * For TM accessing control
      */

@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Attribute;
@@ -52,8 +51,7 @@ import com.globalsight.util.XmlParser;
  */
 public class CorpusManagerLocal implements CorpusManager
 {
-    static private final Logger c_logger = Logger
-            .getLogger(CorpusManagerLocal.class);
+    static private final Logger c_logger = Logger.getLogger(CorpusManagerLocal.class);
 
     /**
      * Constant identifying UTF8 codeset.
@@ -147,16 +145,14 @@ public class CorpusManagerLocal implements CorpusManager
      *            cuv_id
      * @return CorpusDoc
      */
-    public CorpusDoc getCorpusDoc(Long p_id) throws RemoteException,
-            CorpusException
+    public CorpusDoc getCorpusDoc(Long p_id) throws RemoteException, CorpusException
     {
         checkIfInstalled();
 
         try
         {
             c_logger.debug("Querying for corpus doc " + p_id);
-            CorpusDoc doc = (CorpusDoc) HibernateUtil
-                    .get(CorpusDoc.class, p_id);
+            CorpusDoc doc = (CorpusDoc) HibernateUtil.get(CorpusDoc.class, p_id);
             c_logger.debug("Got corpus doc " + doc.getId());
 
             return doc;
@@ -176,8 +172,7 @@ public class CorpusManagerLocal implements CorpusManager
      *            cuv_id
      * @return CorpusDoc
      */
-    public Collection getCorpusDoc(String p_name) throws RemoteException,
-            CorpusException
+    public Collection getCorpusDoc(String p_name) throws RemoteException, CorpusException
     {
         checkIfInstalled();
 
@@ -185,11 +180,10 @@ public class CorpusManagerLocal implements CorpusManager
         {
             String searchString = "%" + p_name + "%";
 
-            c_logger.debug("Querying for corpus doc with name like '"
-                    + searchString + "'");
+            c_logger.debug("Querying for corpus doc with name like '" + searchString + "'");
 
-            String hql = "from CorpusDoc c where c.corpusDocGroup.corpusName like '"
-                    + searchString + "' order by c.globalSightLocale.id";
+            String hql = "from CorpusDoc c where c.corpusDocGroup.corpusName like '" + searchString
+                    + "' order by c.globalSightLocale.id";
             Collection result = HibernateUtil.search(hql, null);
 
             c_logger.debug("Got " + result.size() + "corpus docs.");
@@ -200,8 +194,7 @@ public class CorpusManagerLocal implements CorpusManager
         {
             e.printStackTrace();
             throw new CorpusException(
-                    "Could not query corpus docs with name like '" + p_name
-                            + "'");
+                    "Could not query corpus docs with name like '" + p_name + "'");
         }
     }
 
@@ -222,9 +215,8 @@ public class CorpusManagerLocal implements CorpusManager
      * @exception RemoteException
      * @exception CorpusException
      */
-    public CorpusDoc addNewSourceLanguageCorpusDoc(SourcePage p_sourcePage,
-            String p_gxmlContent, File p_binaryContent, boolean p_deleteBinary)
-            throws RemoteException, CorpusException
+    public CorpusDoc addNewSourceLanguageCorpusDoc(SourcePage p_sourcePage, String p_gxmlContent,
+            File p_binaryContent, boolean p_deleteBinary) throws RemoteException, CorpusException
     {
         checkIfInstalled();
 
@@ -250,12 +242,10 @@ public class CorpusManagerLocal implements CorpusManager
                 }
             }
 
-            long docPageCount = p_sourcePage.getRequest().getBatchInfo()
-                    .getDocPageCount();
+            long docPageCount = p_sourcePage.getRequest().getBatchInfo().getDocPageCount();
 
-            return addNewSourceLanguageCorpusDoc(locale, pagename,
-                    docPageCount, p_gxmlContent, p_binaryContent,
-                    p_deleteBinary, canStoreNativeFormatDosc);
+            return addNewSourceLanguageCorpusDoc(locale, pagename, docPageCount, p_gxmlContent,
+                    p_binaryContent, p_deleteBinary, canStoreNativeFormatDosc);
         }
         catch (CorpusException ce)
         {
@@ -281,34 +271,31 @@ public class CorpusManagerLocal implements CorpusManager
      * @param p_binaryContent
      * @param p_deleteBinary
      *            -- true if the binary file should be deleted after save
-     * @param boolean p_canStoreNativeFormatDosc for xls,xlsx,ppt,pptx
-     *        files,only one copy of source files should be stored.
+     * @param boolean
+     *            p_canStoreNativeFormatDosc for xls,xlsx,ppt,pptx files,only
+     *            one copy of source files should be stored.
      * @return A src corpus doc that has been added to the corpus
      * @exception RemoteException
      * @exception CorpusException
      */
-    public CorpusDoc addNewSourceLanguageCorpusDoc(GlobalSightLocale p_locale,
-            String p_pageName, String p_gxmlContent, File p_binaryContent,
-            boolean p_canStoreNativeFormatDosc) throws RemoteException,
-            CorpusException
+    public CorpusDoc addNewSourceLanguageCorpusDoc(GlobalSightLocale p_locale, String p_pageName,
+            String p_gxmlContent, File p_binaryContent, boolean p_canStoreNativeFormatDosc)
+            throws RemoteException, CorpusException
     {
         long docPageCount = -1; // doesn't matter
         boolean deleteBinary = false; // don't delete binaries when used by
                                       // aligner
 
-        return addNewSourceLanguageCorpusDoc(p_locale, p_pageName,
-                docPageCount, p_gxmlContent, p_binaryContent, deleteBinary,
-                p_canStoreNativeFormatDosc);
+        return addNewSourceLanguageCorpusDoc(p_locale, p_pageName, docPageCount, p_gxmlContent,
+                p_binaryContent, deleteBinary, p_canStoreNativeFormatDosc);
     }
 
     /**
      * Private implementation
      */
-    private CorpusDoc addNewSourceLanguageCorpusDoc(GlobalSightLocale p_locale,
-            String p_pageName, long p_docPageCount, String p_gxmlContent,
-            File p_binaryContent, boolean p_deleteBinary,
-            boolean p_canStoreNativeFormatDosc) throws RemoteException,
-            CorpusException
+    private CorpusDoc addNewSourceLanguageCorpusDoc(GlobalSightLocale p_locale, String p_pageName,
+            long p_docPageCount, String p_gxmlContent, File p_binaryContent, boolean p_deleteBinary,
+            boolean p_canStoreNativeFormatDosc) throws RemoteException, CorpusException
     {
         String name = p_pageName;
         GlobalSightLocale locale = p_locale;
@@ -332,19 +319,15 @@ public class CorpusManagerLocal implements CorpusManager
             // docs
             c_logger.debug("Saving source GXML to " + doc.getGxmlPath());
 
-            ServerProxy.getNativeFileManager().save(p_gxmlContent, UTF8,
-                    doc.getGxmlPath());
+            ServerProxy.getNativeFileManager().save(p_gxmlContent, UTF8, doc.getGxmlPath());
 
-            if (CorpusTm.isStoringNativeFormatDocs()
-                    && p_canStoreNativeFormatDosc)
+            if (CorpusTm.isStoringNativeFormatDocs() && p_canStoreNativeFormatDosc)
             {
-                c_logger.debug("Saving native format to "
-                        + doc.getNativeFormatPath());
+                c_logger.debug("Saving native format to " + doc.getNativeFormatPath());
 
                 // Don't delete
                 ServerProxy.getNativeFileManager().copyFileToStorage(
-                        p_binaryContent.getAbsolutePath(),
-                        doc.getNativeFormatPath(), false);
+                        p_binaryContent.getAbsolutePath(), doc.getNativeFormatPath(), false);
             }
             else
             {
@@ -383,8 +366,7 @@ public class CorpusManagerLocal implements CorpusManager
      */
     public CorpusDoc addNewTargetLanguageCorpusDoc(CorpusDoc p_src,
             GlobalSightLocale p_targetLocale, String p_gxml, File p_binaryData,
-            boolean p_canStoreNativeFormatDosc) throws RemoteException,
-            CorpusException
+            boolean p_canStoreNativeFormatDosc) throws RemoteException, CorpusException
     {
         checkIfInstalled();
 
@@ -403,19 +385,16 @@ public class CorpusManagerLocal implements CorpusManager
 
             // make a relative path for writing out the GXML
             c_logger.debug("Saving target GXML to " + doc.getGxmlPath());
-            ServerProxy.getNativeFileManager().save(p_gxml, UTF8,
-                    doc.getGxmlPath());
+            ServerProxy.getNativeFileManager().save(p_gxml, UTF8, doc.getGxmlPath());
 
             // save original document
             if (CorpusTm.isStoringNativeFormatDocs() && p_binaryData != null
                     && p_canStoreNativeFormatDosc)
             {
-                c_logger.debug("Saving native format to "
-                        + doc.getNativeFormatPath());
+                c_logger.debug("Saving native format to " + doc.getNativeFormatPath());
 
                 // Don't delete
-                ServerProxy.getNativeFileManager().copyFileToStorage(
-                        p_binaryData.getAbsolutePath(),
+                ServerProxy.getNativeFileManager().copyFileToStorage(p_binaryData.getAbsolutePath(),
                         doc.getNativeFormatPath(), false);
             }
             else
@@ -443,8 +422,8 @@ public class CorpusManagerLocal implements CorpusManager
      * @exception RemoteException
      * @exception CorpusException
      */
-    public void mapSegmentsToCorpusDoc(List<TuvMapping> p_segments,
-            CorpusDoc p_doc) throws RemoteException, CorpusException
+    public void mapSegmentsToCorpusDoc(List<TuvMapping> p_segments, CorpusDoc p_doc)
+            throws RemoteException, CorpusException
     {
         checkIfInstalled();
 
@@ -460,8 +439,8 @@ public class CorpusManagerLocal implements CorpusManager
                 transaction = session.beginTransaction();
 
                 XmlParser xmlParser = XmlParser.hire();
-                String gxml = ServerProxy.getNativeFileManager().getString(
-                        p_doc.getGxmlPath(), UTF8);
+                String gxml = ServerProxy.getNativeFileManager().getString(p_doc.getGxmlPath(),
+                        UTF8);
                 GxmlParser gxmlParser = new GxmlParser(xmlParser, gxml);
                 for (TuvMapping tuvmapping : p_segments)
                 {
@@ -471,8 +450,8 @@ public class CorpusManagerLocal implements CorpusManager
                     context.setTuId(new Long(tuvmapping.getProjectTmTuId()));
                     context.setTmId(tuvmapping.getTmId());
 
-                    c_logger.debug("Adding mapping: " + context.getTuvId()
-                            + " --> " + context.getCuvId());
+                    c_logger.debug(
+                            "Adding mapping: " + context.getTuvId() + " --> " + context.getCuvId());
 
                     String partialContext = gxmlParser.getLinesOfContext(1,
                             tuvmapping.getProjectTmTuId());
@@ -527,8 +506,8 @@ public class CorpusManagerLocal implements CorpusManager
      * @exception RemoteException
      * @exception CorpusException
      */
-    public ArrayList getCorpusContextsForSegment(long p_projectTuvId,
-            long p_sourceLocale) throws RemoteException, CorpusException
+    public ArrayList getCorpusContextsForSegment(long p_projectTuvId, long p_sourceLocale)
+            throws RemoteException, CorpusException
     {
         checkIfInstalled();
         ArrayList context = new ArrayList();
@@ -554,13 +533,11 @@ public class CorpusManagerLocal implements CorpusManager
                 // for each corpus context, look up the corresponding source
                 // context
                 CorpusContext targetContext = (CorpusContext) iter.next();
-                CorpusDoc targetCorpusDoc = getCorpusDoc(targetContext
-                        .getCuvId());
+                CorpusDoc targetCorpusDoc = getCorpusDoc(targetContext.getCuvId());
                 CorpusDocGroup docGroup = targetCorpusDoc.getCorpusDocGroup();
 
-                c_logger.debug("Executing named query with args: "
-                        + targetContext.getTuId() + "," + p_sourceLocale + ","
-                        + docGroup.getIdAsLong());
+                c_logger.debug("Executing named query with args: " + targetContext.getTuId() + ","
+                        + p_sourceLocale + "," + docGroup.getIdAsLong());
 
                 hql = "from CorpusContext c where c.tuId = :tuId "
                         + "and c.corpusDoc.globalSightLocale.id = :localId "
@@ -573,16 +550,16 @@ public class CorpusManagerLocal implements CorpusManager
 
                 if (result == null || result2.size() == 0)
                 {
-                    c_logger.warn("Could not find source context for ("
-                            + targetContext.getTuvId() + "," + p_sourceLocale
-                            + "," + docGroup.getId() + ")");
+                    c_logger.warn("Could not find source context for (" + targetContext.getTuvId()
+                            + "," + p_sourceLocale + "," + docGroup.getId() + ")");
                 }
                 else if (result2.size() > 1)
                 {
                     // this is a strange situation that shouldn't
                     // happen, so just output some debugging here
-                    c_logger.debug("CORPUS_CONTEXT_BY_TU_LOCALE_CU returned more than one match for tuv id: "
-                            + p_projectTuvId + " and locale " + p_sourceLocale);
+                    c_logger.debug(
+                            "CORPUS_CONTEXT_BY_TU_LOCALE_CU returned more than one match for tuv id: "
+                                    + p_projectTuvId + " and locale " + p_sourceLocale);
 
                     // walk through the results and print out this information
                     Object[] contexts = result2.toArray();
@@ -590,10 +567,9 @@ public class CorpusManagerLocal implements CorpusManager
                     {
                         CorpusContext ctx = (CorpusContext) contexts[i];
 
-                        c_logger.debug("Got context id=" + ctx.getIdAsLong()
-                                + ",cuvId=" + ctx.getCuvId() + ",tuvId="
-                                + ctx.getTuvId() + ",tuId=" + ctx.getTuId()
-                                + ",name=" + ctx.getName());
+                        c_logger.debug("Got context id=" + ctx.getIdAsLong() + ",cuvId="
+                                + ctx.getCuvId() + ",tuvId=" + ctx.getTuvId() + ",tuId="
+                                + ctx.getTuId() + ",name=" + ctx.getName());
                     }
 
                     // just add the first one or the idx one
@@ -605,22 +581,18 @@ public class CorpusManagerLocal implements CorpusManager
 
                     CorpusContext sourceContext = (CorpusContext) contexts[choice];
 
-                    c_logger.debug("Using src context[" + choice + "] "
-                            + sourceContext.getIdAsLong());
+                    c_logger.debug(
+                            "Using src context[" + choice + "] " + sourceContext.getIdAsLong());
 
-                    context.add(new CorpusContextHolder(sourceContext,
-                            targetContext));
+                    context.add(new CorpusContextHolder(sourceContext, targetContext));
                 }
                 else
                 {
-                    CorpusContext sourceContext = (CorpusContext) result2
-                            .toArray()[0];
+                    CorpusContext sourceContext = (CorpusContext) result2.toArray()[0];
 
-                    c_logger.debug("Got src context "
-                            + sourceContext.getIdAsLong());
+                    c_logger.debug("Got src context " + sourceContext.getIdAsLong());
 
-                    context.add(new CorpusContextHolder(sourceContext,
-                            targetContext));
+                    context.add(new CorpusContextHolder(sourceContext, targetContext));
                 }
             }
 
@@ -631,8 +603,7 @@ public class CorpusManagerLocal implements CorpusManager
         catch (Exception e)
         {
             e.printStackTrace();
-            throw new CorpusException(
-                    "Failed to get mapped segments from database.");
+            throw new CorpusException("Failed to get mapped segments from database.");
         }
     }
 
@@ -660,30 +631,27 @@ public class CorpusManagerLocal implements CorpusManager
         Transaction transaction = null;
         try
         {
-            c_logger.info("Removing corpus doc " + cuvId + " for "
-                    + p_sourcePage.getExternalPageId());
+            c_logger.info(
+                    "Removing corpus doc " + cuvId + " for " + p_sourcePage.getExternalPageId());
 
             CorpusDoc srcCorpusDoc = getCorpusDoc(cuvId);
 
             // get the native format doc and the gxml and remove them
-            File gxmlFile = ServerProxy.getNativeFileManager().getFile(
-                    srcCorpusDoc.getGxmlPath());
+            File gxmlFile = ServerProxy.getNativeFileManager().getFile(srcCorpusDoc.getGxmlPath());
 
             if (gxmlFile.exists())
             {
-                c_logger.info("Deleting gxml file "
-                        + srcCorpusDoc.getGxmlPath());
+                c_logger.info("Deleting gxml file " + srcCorpusDoc.getGxmlPath());
 
                 doDelete(gxmlFile);
             }
 
-            File nativeFormatFile = ServerProxy.getNativeFileManager().getFile(
-                    srcCorpusDoc.getNativeFormatPath());
+            File nativeFormatFile = ServerProxy.getNativeFileManager()
+                    .getFile(srcCorpusDoc.getNativeFormatPath());
 
             if (nativeFormatFile.exists())
             {
-                c_logger.info("Deleting native format file "
-                        + srcCorpusDoc.getNativeFormatPath());
+                c_logger.info("Deleting native format file " + srcCorpusDoc.getNativeFormatPath());
 
                 doDelete(nativeFormatFile);
             }
@@ -713,8 +681,7 @@ public class CorpusManagerLocal implements CorpusManager
      * then both docs and the group are removed as well. This also unlinks the
      * pages and removes all corpus context mappings.
      */
-    public void removeCorpusDoc(Long p_corpusDocId) throws RemoteException,
-            CorpusException
+    public void removeCorpusDoc(Long p_corpusDocId) throws RemoteException, CorpusException
     {
         checkIfInstalled();
 
@@ -810,14 +777,13 @@ public class CorpusManagerLocal implements CorpusManager
      *            if true then the associated src/target pages are unlinked
      * @exception Exception
      */
-    private void deleteCorpusDoc(CorpusDocGroup p_groupClone,
-            CorpusDoc p_corpusDoc, Session session, boolean p_unlinkPages)
-            throws Exception
+    private void deleteCorpusDoc(CorpusDocGroup p_groupClone, CorpusDoc p_corpusDoc,
+            Session session, boolean p_unlinkPages) throws Exception
     {
         Long cuvId = p_corpusDoc.getIdAsLong();
 
-        c_logger.info("Removing corpus doc " + p_corpusDoc.getLocale()
-                + " for " + p_groupClone.getCorpusName());
+        c_logger.info("Removing corpus doc " + p_corpusDoc.getLocale() + " for "
+                + p_groupClone.getCorpusName());
 
         // find the source or target page that used this cuv and set it to null
         if (p_unlinkPages)
@@ -850,8 +816,7 @@ public class CorpusManagerLocal implements CorpusManager
         String gxmlPath = p_corpusDoc.getGxmlPath();
         String nativeFormatPath = p_corpusDoc.getNativeFormatPath();
         File gxmlFile = ServerProxy.getNativeFileManager().getFile(gxmlPath);
-        File nativeFormatFile = ServerProxy.getNativeFileManager().getFile(
-                nativeFormatPath);
+        File nativeFormatFile = ServerProxy.getNativeFileManager().getFile(nativeFormatPath);
         // now delete the corpus doc
         session.delete(p_corpusDoc);
 
@@ -876,8 +841,7 @@ public class CorpusManagerLocal implements CorpusManager
      *            cuv id
      * @exception Exception
      */
-    private void deleteCorpusMappings(Long p_cuvId, Session session)
-            throws Exception
+    private void deleteCorpusMappings(Long p_cuvId, Session session) throws Exception
     {
         // Now delete any mappings...unfortunately we have to first
         // query them out first
@@ -899,8 +863,7 @@ public class CorpusManagerLocal implements CorpusManager
      * @param p_jobId
      *            job id
      */
-    public void cleanUpMsOfficeJobSourcePages(long p_jobId)
-            throws RemoteException, CorpusException
+    public void cleanUpMsOfficeJobSourcePages(long p_jobId) throws RemoteException, CorpusException
     {
         checkIfInstalled();
 
@@ -937,28 +900,28 @@ public class CorpusManagerLocal implements CorpusManager
                     continue;
                 }
 
-                String originalSourceFileContentName = firstSourcePage
-                        .getRequest().getOriginalSourceFileContent();
+                String originalSourceFileContentName = firstSourcePage.getRequest()
+                        .getOriginalSourceFileContent();
 
                 if (originalSourceFileContentName != null)
                 {
                     File f = new File(originalSourceFileContentName);
                     if (f.exists())
                     {
-                        c_logger.debug("Deleting original shared ms office file: "
-                                + f.getAbsolutePath());
+                        c_logger.debug(
+                                "Deleting original shared ms office file: " + f.getAbsolutePath());
 
                         doDelete(f);
                     }
                 }
                 else
                 {
-                    c_logger.warn("Request did not store the name of the original shared ms office file for sourcepage "
-                            + firstSourcePage.getId());
+                    c_logger.warn(
+                            "Request did not store the name of the original shared ms office file for sourcepage "
+                                    + firstSourcePage.getId());
                 }
 
-                CorpusDoc firstCorpusDoc = getCorpusDoc(firstSourcePage
-                        .getCuvId());
+                CorpusDoc firstCorpusDoc = getCorpusDoc(firstSourcePage.getCuvId());
                 // the main document to use for all other generated documents
                 String officialNFP = firstCorpusDoc.getNativeFormatPath();
 
@@ -973,8 +936,7 @@ public class CorpusManagerLocal implements CorpusManager
                     cd.setNativeFormatPath(officialNFP);
                     session.update(cd);
 
-                    File oldFile = ServerProxy.getNativeFileManager().getFile(
-                            oldPath);
+                    File oldFile = ServerProxy.getNativeFileManager().getFile(oldPath);
                     if (oldFile.exists())
                     {
                         doDelete(oldFile);
@@ -982,8 +944,7 @@ public class CorpusManagerLocal implements CorpusManager
                         c_logger.debug("Deleted old file " + oldPath);
                     }
 
-                    c_logger.debug("changed from " + oldPath + " to "
-                            + officialNFP);
+                    c_logger.debug("changed from " + oldPath + " to " + officialNFP);
                 }
 
                 transaction.commit();
@@ -1031,8 +992,7 @@ public class CorpusManagerLocal implements CorpusManager
         Transaction transaction = null;
         try
         {
-            TargetPage tp = ServerProxy.getPageManager().getTargetPage(
-                    p_targetPageId);
+            TargetPage tp = ServerProxy.getPageManager().getTargetPage(p_targetPageId);
 
             if (!SourcePage.isMicrosoftOffice(tp.getSourcePage()))
             {
@@ -1041,16 +1001,14 @@ public class CorpusManagerLocal implements CorpusManager
 
             Job job = tp.getWorkflowInstance().getJob();
 
-            c_logger.debug("cleaning up target pages for job "
-                    + job.getJobName());
+            c_logger.debug("cleaning up target pages for job " + job.getJobName());
 
             Iterator workflowsIter = job.getWorkflows().iterator();
             while (workflowsIter.hasNext())
             {
                 Workflow w = (Workflow) workflowsIter.next();
 
-                c_logger.debug("workflow " + w.getTargetLocale()
-                        + " is in state " + w.getState());
+                c_logger.debug("workflow " + w.getTargetLocale() + " is in state " + w.getState());
 
                 if (!w.getState().equals(Workflow.EXPORTED))
                 {
@@ -1058,22 +1016,20 @@ public class CorpusManagerLocal implements CorpusManager
                 }
 
                 // make all pages in this workflow use the same
-                Vector targetPages = tp.getWorkflowInstance().getTargetPages();
+                Collection<TargetPage> targetPages = tp.getWorkflowInstance().getTargetPages();
                 // first run through and find the one page that
                 // actually has a native format file associated with it
                 String officialNFP = null;
-                int officialIndex = -1;
-                for (int i = 0; i < targetPages.size(); i++)
+                int officialIndex = 0;
+                for (TargetPage targetPage : targetPages)
                 {
-                    tp = (TargetPage) targetPages.get(i);
-                    CorpusDoc cd = getCorpusDoc(tp.getCuvId());
-                    File nf = ServerProxy.getNativeFileManager().getFile(
-                            cd.getNativeFormatPath());
+                    CorpusDoc cd = getCorpusDoc(targetPage.getCuvId());
+                    File nf = ServerProxy.getNativeFileManager().getFile(cd.getNativeFormatPath());
 
                     if (nf.exists())
                     {
                         officialNFP = cd.getNativeFormatPath();
-                        officialIndex = i;
+                        officialIndex++;
                         break;
                     }
                 }
@@ -1081,21 +1037,17 @@ public class CorpusManagerLocal implements CorpusManager
                 session = HibernateUtil.getSession();
                 transaction = session.beginTransaction();
 
-                for (int i = 0; i < targetPages.size(); i++)
+                int i = 0;
+                for (TargetPage targetPage : targetPages)
                 {
                     if (i == officialIndex)
                     {
                         continue;
                     }
-
-                    tp = (TargetPage) targetPages.get(i);
-                    CorpusDoc cd = getCorpusDoc(tp.getCuvId());
-                    String oldPath = cd.getNativeFormatPath();
+                    CorpusDoc cd = getCorpusDoc(targetPage.getCuvId());
                     cd.setNativeFormatPath(officialNFP);
                     session.update(cd);
-
-                    c_logger.debug("changed from " + oldPath + " to "
-                            + officialNFP);
+                    i++;
                 }
 
                 transaction.commit();
@@ -1109,9 +1061,8 @@ public class CorpusManagerLocal implements CorpusManager
             }
 
             e.printStackTrace();
-            throw new CorpusException(
-                    "Failed to set all MS office target pages"
-                            + " in job to use same native format file.");
+            throw new CorpusException("Failed to set all MS office target pages"
+                    + " in job to use same native format file.");
         }
         finally
         {
@@ -1147,8 +1098,7 @@ public class CorpusManagerLocal implements CorpusManager
         if (count == null)
         {
             // not in table, so add it
-            m_table.put(p_file.getAbsolutePath(), new Integer(
-                    p_docPageCount - 1));
+            m_table.put(p_file.getAbsolutePath(), new Integer(p_docPageCount - 1));
         }
         else
         {

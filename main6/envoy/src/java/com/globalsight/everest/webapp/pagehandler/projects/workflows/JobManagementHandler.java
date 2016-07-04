@@ -414,6 +414,8 @@ public abstract class JobManagementHandler extends PageHandler
 
     public static final String UPDATE_WORD_COUNTS = "updateWordCounts";
 
+    public static final String LEVERAGE_MT = "leverageMT";
+
     public static final String ARCHIVE_WF_PARAM = "archiveWF";
 
     public static final String DISPATCH_WF_PARAM = "dispatchWF";

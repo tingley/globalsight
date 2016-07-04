@@ -107,6 +107,18 @@ public class PreviewPDFPageHandler extends PageHandler implements
         
         File pdfFile = getPreviewPdf(p_request, userid, action);
         
+        try
+        {
+            if (pdfFile.exists() && pdfFile.length() == 0)
+            {
+                pdfFile.delete();
+            }
+        }
+        catch (Exception ex)
+        {
+            // ignore
+        }
+        
         if (!pdfFile.exists())
         {
             EditorState state = (EditorState) sessionMgr

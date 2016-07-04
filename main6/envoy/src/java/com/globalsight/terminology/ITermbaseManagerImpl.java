@@ -167,6 +167,9 @@ public class ITermbaseManagerImpl extends RemoteServer implements
     public String getTermbaseName(long p_id) throws RemoteException
     {
         Termbase tb = TermbaseList.get(p_id);
+        String id = CompanyThreadLocal.getInstance().getValue();
+        if (id == null)
+            CompanyThreadLocal.getInstance().setIdValue(tb.getCompanyId());
 
         if (tb != null)
         {

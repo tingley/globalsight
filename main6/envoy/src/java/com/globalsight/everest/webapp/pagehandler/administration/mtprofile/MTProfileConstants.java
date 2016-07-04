@@ -109,10 +109,6 @@ public interface MTProfileConstants
      */
     public static final String REMOVE_ACTION = "remove";
     /**
-     * Constant used for machine translation edit action.
-     */
-    public static final String MT_ACTIVE_ACTION = "mt_active";
-    /**
      * Constant used for a save action.
      */
     public static final String SAVE_ACTION = "save";
@@ -133,8 +129,8 @@ public interface MTProfileConstants
      * Constants used for save or cancel a MT options editing results.
      */
     public static final String SAVE_MT_OPTIONS_ACTION = "saveMTOptions";
-    public static final String TEST_MT_OPTIONS_ACTION = "testHost";
     public static final String CANCEL_MT_OPTIONS_ACTION = "cancelMTOptions";
+    public static final String TEST_MT_OPTIONS_ACTION = "testHost";
 
     public static final String SEARCH_ACTION = "search";
 
@@ -160,13 +156,12 @@ public interface MTProfileConstants
     /**
      * Constants for Machine Translation configurations in TM profile Moved from
      * SystemConfigParamNames line 505-509 The four parameters were in
-     * envoy.properties and system_parameter table, now are integrated with TM
+     * envoy.properties and system_parameter table, now are integrated with MT
      * profile.
      */
     public static final String MT_USE_MT = "machineTranslation.useMT";
     public static final String MT_ENGINE = "machineTranslation.engine";
-    // public static final String MT_AUTOCOMMIT_TO_TM =
-    // "machineTranslation.autoCommitToTM";
+
     public static final String MT_INCLUDE_MT_IDENTIFIERS = "machineTranslation.includeMTIdentifiers";
     public static final String MT_MT_IDENTIFIER_LEADING = "machineTranslation.mtIdentifierLeading";
     public static final String MT_MT_IDENTIFIER_TRAILING = "machineTranslation.mtIdentifierTrailing";

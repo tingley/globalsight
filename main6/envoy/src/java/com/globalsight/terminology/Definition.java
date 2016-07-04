@@ -34,6 +34,9 @@ import com.globalsight.terminology.util.XmlParser;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 /**
  * <p>
  * A definition defines languages and entries stored in a termbase. It includes
@@ -96,6 +99,16 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
             return false;
         }
 
+        public JSONObject asJson()
+        {
+            JSONObject ob = new JSONObject();
+            ob.put("name", m_name);
+            ob.put("locale", m_locale);
+            ob.put("hasterms", m_hasTerms);
+
+            return ob;
+        }
+        
         public String asXML()
         {
             StringBuffer result = new StringBuffer(128);
@@ -163,6 +176,17 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
             return m_values;
         }
 
+        public JSONObject asJson()
+        {
+            JSONObject ob = new JSONObject();
+            ob.put("name", m_name);
+            ob.put("type", m_type);
+            ob.put("system", m_system);
+            ob.put("indexed", m_indexed);
+            ob.put("values", m_values);
+            return ob;
+        }
+        
         public String asXML()
         {
             StringBuffer result = new StringBuffer(128);
@@ -248,6 +272,15 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
             result.append("</index>");
 
             return result.toString();
+        }
+        
+        public JSONObject asJson()
+        {
+            JSONObject ob = new JSONObject();
+            ob.put("languagename", m_languageName);
+            ob.put("locale", m_locale);
+            ob.put("type", m_type);
+            return ob;
         }
     }
 
@@ -445,6 +478,41 @@ public class Definition implements FieldTypes, TermbaseExceptionMessages
         }
 
         return false;
+    }
+    
+    public JSONObject getJson()
+    {
+        JSONObject ob = new JSONObject();
+        ob.put("name", m_name);
+        ob.put("description", m_description);
+        
+        JSONArray languages = new JSONArray();
+        SortUtil.sort(m_languages, new LanguageComparator(Locale.getDefault()));
+        for (int i = 0, max = m_languages.size(); i < max; i++)
+        {
+            Language lang = (Language) m_languages.get(i);
+            languages.add(lang.asJson());
+        }
+        ob.put("languages", languages);
+        
+        JSONArray fields = new JSONArray();
+        SortUtil.sort(m_fields, new FieldComparator(Locale.getDefault()));
+        for (int i = 0, max = m_fields.size(); i < max; i++)
+        {
+            Field field = (Field) m_fields.get(i);
+            fields.add(field.asJson());
+        }
+        ob.put("fields", fields);
+        
+        JSONArray indexes = new JSONArray();
+        for (int i = 0, max = m_indexes.size(); i < max; i++)
+        {
+            Index index = (Index) m_indexes.get(i);
+            indexes.add(index.asJson());
+        }
+        ob.put("indexes", indexes);
+
+        return ob;
     }
 
     /**

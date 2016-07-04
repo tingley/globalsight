@@ -16,6 +16,7 @@
 			<workflow_manager>{{workflow_manager}}</workflow_manager>
 			<activity>{{activity}}</activity>
 			<report_upload_check>{{report_upload_check}}</report_upload_check>
+			<activity_comment_upload_check>{{activity_comment_upload_check}}</activity_comment_upload_check>
 			<roles>{{roles}}</roles>
 			<accepted_time>{{accepted_time}}</accepted_time>
 			<completed_time>{{completed_time}}</completed_time>

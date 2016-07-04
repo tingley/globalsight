@@ -27,4 +27,19 @@ public class PermissionGroups {
 	public static final String Done_BUTTON="done";
 	public static final String Cancel_BUTTON_Administrator="cancel";
 	
+	public static final String LOCALIZATION_PARTICIPANT_LINK = "link=LocalizationParticipant";
+	public static final String ADMINISTRATOR_LINK = "link=Administrator";
+	
+	public static final String MY_ACTIVITIES_EXPAND = "//div[@id='My Activities293']/a/img";
+	public static final String MY_ACTIVITIES_VIEW_EXPAND = "//div[@id='Activities (View)295']/a/img";
+	
+//	public static final String DATA_SOURCE_EXPAND = "//div[@id='Data Sources162']/a/img";
+	public static final String DATA_SOURCE_EXPAND = "//div[@id='Data Sources138']/a/img";
+//	public static final String DATA_SOURCE_FILTER_CONFIGURATION_EXPAND =  "//div[@id='Filter Configuration(View)168']/a/img";
+	public static final String DATA_SOURCE_FILTER_CONFIGURATION_EXPAND =  "//div[@id='Filter Configuration(View)144']/a/img";
+
+	
+	public static final String EXPORT_DOWNLOAD_CHECKBOX = "id=perm.activities.export.download";
+	public static final String EXPORT_FILTERS_CHECKBOX = "id=perm.filter.configuration.export.filters";
+	public static final String IMPORT_FILTERS_CHECKBOX = "id=perm.filter.configuration.import.filters";
 }

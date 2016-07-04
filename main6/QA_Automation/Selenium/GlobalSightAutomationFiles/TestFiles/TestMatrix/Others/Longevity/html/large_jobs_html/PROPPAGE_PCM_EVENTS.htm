@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1418" MadCap:lastWidth="571">
+    <head><title>Events Tab (PCM/15XX)</title>
+    </head>
+    <body>
+        <h1>Events 
+ tab (PCM/15XX)</h1>
+        <p class="para">Use this tab to program up to 11 timed external event outputs 
+ on the PCM.</p>
+        <h2>Events overview</h2>
+        <p class="para">A PCM event generates a relay output on the PCM that initiates 
+ a process on another device at a specified time. This output could turn 
+ on a column heater, control operation of a fraction collector or chart 
+ recorder, or activate a column switching valve. </p>
+        <p class="para">You can program up to 11 ev-0\]ent outputs in the Events table. 
+ Define the time that each event is to occur, the event types (Relay or 
+ Event), the event function (On, Off, Pulse, Repeat Pulse), and the interval 
+ of pulsed events.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Event outputs do not provide power to run the external device. Use an 
+ appropriate power supply to run the device.</p>
+        <h2>Enable events</h2>
+        <p class="para">Enables or disables events in the Events table.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <h2>Events table columns</h2>
+        <p class="para">Program operating parameters in these columns to define output 
+ events for an instrument connected to the Event or Relay terminals on 
+ the rear of the PCM.</p>
+        <h3>Time</h3>
+        <p class="para">Specifies the time that the event function occurs. Event 
+ rows are sorted by time. </p>
+        <h3>Event</h3>
+        <p class="para">Event output terminal. Choose from the two Relay outputs 
+ and four Event outputs to program up to 11 total event outputs. You can 
+ program the same output more than once. Choices:</p>
+        <ul>
+            <li style="font-size: 9pt;" class="listbull">Relay 1 and Relay 2</li>
+            <li style="font-size: 9pt;" class="listbull">Event 1, Event 2, Event 
+ 3, and Event 4</li>
+        </ul>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ To maintain similarity with the SIM, the output connections on the PCM 
+ are divided into two sets of terminal connections. Connections are labeled 
+ Event 1 through 4 and Relay 1 and 2. All six connections are relay connections 
+ that provide contact closures (not TTL outputs).</p>
+        <h3>Function</h3>
+        <p class="para">Type of function:</p>
+        <ul>
+            <li class="listbull">On – Turns on a contact 
+ closure (Relay or Event type). With this function, the switch provides 
+ a Low position (low resistance) output that remains on until an Off function 
+ is sent.</li>
+            <li class="listbull">Off – Turns off the contact 
+ closure (Relay or Event type). With this function, the switch moves to 
+ the High position (high resistance), and the contact closure is broken.</li>
+            <li class="listbull">Pulse – Transmits one 
+ On/Off pulse. With this function, the switch moves to the Low position 
+ then to the High position. The contact closure (low resistance) is maintained 
+ for the pulse width specified by the Interval parameter. The default pulse 
+ width is 0.02 min.</li>
+            <li class="listbull">Rep Pulse – Transmits 
+ multiple On/Off pulses. The switch alternates between the On and Off positions 
+ for the pulse width specified by the Interval parameter. Pulses continue 
+ until an Off function is sent.</li>
+        </ul>
+        <h3>Interval</h3>
+        <p class="para">Duration (in minutes) of a pulse event. You can access this 
+ parameter only if you selected Pulse or Rep Pulse as the function. The 
+ minimum pulse width is 0.02 minutes On and 0.02 minutes Off.</p>
+        <h3>Comments</h3>
+        <p class="para">Description of the programmed event. The description can 
+ be up to 256 characters in length.</p>
+    </body>
+</html>

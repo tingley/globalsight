@@ -120,8 +120,6 @@ public class TmxTagGenerator
     public static final int OFFICE_SUB = 52;
     public static final int OFFICE_SUP = 53;
     public static final int OFFICE_HIGHLIGHT = 54;
-    // GBS-4336
-    public static final int LF = 55;
 
     // specific for html
     private static final String[] m_InlineTypes =
@@ -135,8 +133,7 @@ public class TmxTagGenerator
             "c-x-bold", "c-strong", "c-x-strong", "c-italic", "c-x-italic", "c-ulined",
             "c-x-ulined", "c-link", "c-strike", "c-sub", "c-super", "c-font", "c-em", "c-x-em",
             "c-lb", "c-tab", "c-formfeed", "c-br", "superscript", "hyperlink", "office-bold",
-            "color", "office-italic", "office-underline", "office-sub", "office-sup", "highlight",
-            "x-lf" };
+            "color", "office-italic", "office-underline", "office-sub", "office-sup", "highlight" };
 
     public TmxTagGenerator()
     {

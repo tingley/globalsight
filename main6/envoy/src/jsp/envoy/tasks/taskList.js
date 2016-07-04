@@ -519,10 +519,15 @@ function initButtonActions() {
             	alert("Below activities of jobs need be scored, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isNeedScoreTaskId);
             }
             
-            var reportUploadCheckConfirmInfo = "One or more activities you selected require upload Translation Edit/ Reviewer Comments Report before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
+            var reportUploadCheckConfirmInfo = "One or more activities you selected require uploading Translation Edit/ Reviewer Comments Report before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
+            var activityCommentUploadCheckConfirmInfo = "One or more activities you selected require uploading an activity comment attachment before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
             if(taskIds.indexOf(",") < 0)
-            	reportUploadCheckConfirmInfo = "The activity requires upload Translation Edit/ Reviewer Comments Report before complete it. Are you sure to continue?";
+            {
+            	reportUploadCheckConfirmInfo = "The activity requires uploading Translation Edit/ Reviewer Comments Report before complete it. Are you sure to continue?";
+                activityCommentUploadCheckConfirmInfo = "The activity requires uploading an activity comment attachment before complete it. Are you sure to continue?";            	
+            }
             var isFinishUnUploadReportTask = true;
+            var isFinishUnUploadActivityCommentTak = true;
             if(data.isNeedReportUploadCheckTaskId)
             {
             	if(!confirm(reportUploadCheckConfirmInfo))
@@ -531,37 +536,6 @@ function initButtonActions() {
             	}
             }
             
-            if(isFinishUnUploadReportTask)
-            {
-            	if (data.isFinishedTaskId) {
-                	var confirmInfo = "The activities you selected will be completed and go to the exit of the workflow directly. Are you sure to continue?"; 
-                    for(var i=0;i<rowsPerPage;i++)
-                    {
-                    	taskIds = taskIds.replace(","," ");
-                    }
-                    if (data.unTranslatedTaskId) {
-                    	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
-                    }
-
-                    
-                	if (confirm(confirmInfo)) {
-                		$.post(selfUrl, {
-                			state:currentTaskState,
-                			taskAction:"completeActivity",
-                			taskParam:data.isFinishedTaskId
-                		}, function(data) {
-                			submitSearch();
-                		});
-                	}
-                }
-                else
-    			{
-                	if (data.unTranslatedTaskId) 
-                	{
-                		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
-                	}
-    			}
-            }
             if(!isFinishUnUploadReportTask)
             {
             	if (data.isFinishedReportUploadTaskId) {
@@ -595,7 +569,82 @@ function initButtonActions() {
                 		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
                 	}
     			}
+            	return;
             }
+            
+            if(data.isNeedActivityCommentCheckTaskId)
+            {
+            	if(!confirm(activityCommentUploadCheckConfirmInfo))
+            	{
+            		isFinishUnUploadActivityCommentTak = false;
+            	}
+            }
+            if(isFinishUnUploadActivityCommentTak)
+            {
+            	if (data.isFinishedTaskId) {
+                	var confirmInfo = "The activities you selected will be completed and go to the next one. Are you sure to continue?"; 
+                    for(var i=0;i<rowsPerPage;i++)
+                    {
+                    	taskIds = taskIds.replace(","," ");
+                    }
+                    if (data.unTranslatedTaskId) {
+                    	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+                    }
+
+                    
+                	if (confirm(confirmInfo)) {
+                		$.post(selfUrl, {
+                			state:currentTaskState,
+                			taskAction:"completeActivity",
+                			taskParam:data.isFinishedTaskId
+                		}, function(data) {
+                			submitSearch();
+                		});
+                	}
+                }
+                else
+    			{
+                	if (data.unTranslatedTaskId) 
+                	{
+                		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
+                	}
+    			}
+            }
+            if(!isFinishUnUploadActivityCommentTak)
+            {
+            	if (data.isFinishedActivityCommentUploadTaskId) {
+                	var confirmInfo = "The activities you selected will be completed and go to the next one. Are you sure to continue?";
+                    for(var i=0;i<rowsPerPage;i++)
+                    {
+                    	taskIds = taskIds.replace(","," ");
+                    }
+                    if (data.unTranslatedTaskId) {
+                    	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+                    }
+	            	if (confirm(confirmInfo) && data.isFinishedReportUploadTaskId) 
+	            	{
+	            		$.post(selfUrl, {
+	            			state:currentTaskState,
+	            			taskAction:"completeActivity",
+	            			taskParam:data.isFinishedActivityCommentUploadTaskId
+	            		}, function(data) {
+	            			submitSearch();
+	            		});
+	            	}
+	            	else
+	            	{
+	            		submitSearch();
+	            	}   
+                }
+                else
+    			{
+    				if (data.unTranslatedTaskId) 
+                	{
+                		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
+                	}
+    			}
+            }            
+            
         });
     });
 
@@ -620,10 +669,16 @@ function initButtonActions() {
             	alert("Below activities of jobs need be scored, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isNeedScoreTaskId);
             }
             
-            var reportUploadCheckConfirmInfo = "One or more activities you selected require upload Translation Edit/ Reviewer Comments Report before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
+            var reportUploadCheckConfirmInfo = "One or more activities you selected require uploading Translation Edit/ Reviewer Comments Report before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
+            var activityCommentUploadCheckConfirmInfo = "One or more activities you selected require uploading an activity comment attachment before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
             if(taskIds.indexOf(",") < 0)
-            	reportUploadCheckConfirmInfo = "The activity requires upload Translation Edit/ Reviewer Comments Report before complete it. Are you sure to continue?";
+            {
+            	reportUploadCheckConfirmInfo = "The activity requires uploading Translation Edit/ Reviewer Comments Report before complete it. Are you sure to continue?";
+                activityCommentUploadCheckConfirmInfo = "The activity requires uploading an activity comment attachment before complete it. Are you sure to continue?";            	
+            }
+
             var isFinishUnUploadReportTask = true;
+            var isFinishUnUploadActivityCommentTak = true;
             if(data.isNeedReportUploadCheckTaskId)
             {
             	if(!confirm(reportUploadCheckConfirmInfo))
@@ -632,7 +687,50 @@ function initButtonActions() {
             	}
             }
             
-            if(isFinishUnUploadReportTask)
+            if(!isFinishUnUploadReportTask)
+            {
+            	if (data.isFinishedReportUploadTaskId) {
+                	var confirmInfo = "The activities you selected will be completed and go to the exit of the workflow directly. Are you sure to continue?";
+                    for(var i=0;i<rowsPerPage;i++)
+                    {
+                    	taskIds = taskIds.replace(","," ");
+                    }
+                    if (data.unTranslatedTaskId) {
+                    	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+                    }
+	            	if (confirm(confirmInfo) && data.isFinishedReportUploadTaskId) 
+	            	{
+	            		$.post(selfUrl, {
+	            			state:currentTaskState,
+	            			taskAction:"completeWorkflow",
+	            			taskParam:data.isFinishedReportUploadTaskId
+	            		}, function(data) {
+	            			submitSearch();
+	            		});
+	            	}
+	            	else
+	            	{
+	            		submitSearch();
+	            	}   
+                }
+                else
+    			{
+    				if (data.unTranslatedTaskId) 
+                	{
+                		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
+                	}
+    			}
+            	return;
+            }
+            
+            if(data.isNeedActivityCommentCheckTaskId)
+            {
+            	if(!confirm(activityCommentUploadCheckConfirmInfo))
+            	{
+            		isFinishUnUploadActivityCommentTak = false;
+            	}
+            }
+            if(isFinishUnUploadActivityCommentTak)
             {
             	if (data.isFinishedTaskId) {
                 	var confirmInfo = "The activities you selected will be completed and go to the exit of the workflow directly. Are you sure to continue?"; 
@@ -663,9 +761,9 @@ function initButtonActions() {
                 	}
     			}
             }
-            if(!isFinishUnUploadReportTask)
+            if(!isFinishUnUploadActivityCommentTak)
             {
-            	if (data.isFinishedReportUploadTaskId) {
+            	if (data.isFinishedActivityCommentUploadTaskId) {
                 	var confirmInfo = "The activities you selected will be completed and go to the exit of the workflow directly. Are you sure to continue?"; 
                     for(var i=0;i<rowsPerPage;i++)
                     {
@@ -679,7 +777,7 @@ function initButtonActions() {
 	            		$.post(selfUrl, {
 	            			state:currentTaskState,
 	            			taskAction:"completeWorkflow",
-	            			taskParam:data.isFinishedReportUploadTaskId
+	            			taskParam:data.isFinishedActivityCommentUploadTaskId
 	            		}, function(data) {
 	            			submitSearch();
 	            		});
@@ -696,7 +794,8 @@ function initButtonActions() {
                 		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
                 	}
     			}
-            }
+            }            
+            
         });
     });
 

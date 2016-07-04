@@ -33,21 +33,29 @@ import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adapter.idml.IdmlHelper;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
+import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
+import com.globalsight.everest.integration.ling.tm2.Types;
+import com.globalsight.everest.page.ExtractedFile;
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvException;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.tuv.TuvState;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.inprogresstm.InProgressTmManager;
 import com.globalsight.ling.inprogresstm.leverage.Leverager;
@@ -58,6 +66,7 @@ import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
+import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
@@ -65,8 +74,13 @@ import com.globalsight.ling.tm2.leverage.LeveragedTu;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.persistence.DbUtil;
+import com.globalsight.machineTranslation.MTHelper;
+import com.globalsight.machineTranslation.MTHelper2;
+import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
+import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.edit.SegmentUtil2;
 
 /**
@@ -90,8 +104,7 @@ public class UpdateLeverageHelper
      * "NOT_LOCALIZED" state,2)source and target segment contents are the same,
      * 3)and best leverage match's score should be less than 100.
      */
-    public static Collection<Tuv> getUntranslatedTuvs(TargetPage p_tp,
-            long p_sourceLocaleId)
+    public static Collection<Tuv> getUntranslatedTuvs(TargetPage p_tp, long p_sourceLocaleId)
     {
         if (logger.isDebugEnabled())
         {
@@ -115,8 +128,7 @@ public class UpdateLeverageHelper
             // Touch to load all TUs and source TUVs for performance.
             tuvManager.getTus(p_tp.getSourcePage().getIdAsLong());
             tuvManager.getSourceTuvsForStatistics(p_tp.getSourcePage());
-            Collection<Tuv> targetTuvs = tuvManager
-                    .getTargetTuvsForStatistics(p_tp);
+            Collection<Tuv> targetTuvs = tuvManager.getTargetTuvsForStatistics(p_tp);
 
             long jobId = p_tp.getSourcePage().getJobId();
             for (Tuv trgTuv : targetTuvs)
@@ -129,8 +141,7 @@ public class UpdateLeverageHelper
                 {
                     for (LeverageMatch myLM : myLMs)
                     {
-                        if ("0".equals(myLM.getSubId())
-                                && myLM.getScoreNum() == 100.0)
+                        if ("0".equals(myLM.getSubId()) && myLM.getScoreNum() == 100.0)
                         {
                             hasExactMatch = true;
                             break;
@@ -151,13 +162,80 @@ public class UpdateLeverageHelper
             {
                 logger.debug("End getUntranslatedTuvs() for target page "
                         + p_tp.getId() + ", source locale Id "
-                        + p_sourceLocaleId);                
+                        + p_sourceLocaleId);
             }
         }
         catch (Exception e)
         {
             logger.error("Error when get untranslated Tuvs for target page : "
                     + p_tp.getId(), e);
+            throw new EnvoyServletException(e);
+        }
+
+        return untranslatedSrcTuvs;
+    }
+
+    /**
+     * Get untranslated source segments. The untranslated segments should follow
+     * the same logic as that during job creation process.
+     */
+    public static Collection<Tuv> getUntranslatedTuvsForMT(TargetPage p_tp, long p_sourceLocaleId)
+    {
+        if (p_tp == null || p_sourceLocaleId < 1)
+        {
+            return new ArrayList<Tuv>();
+        }
+
+        MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileBySourcePage(
+                p_tp.getSourcePage(), p_tp.getGlobalSightLocale());
+        if (mtProfile == null || !(mtProfile.isActive()))
+        {
+            return new ArrayList<Tuv>();
+        }
+
+        long mtThreshold = mtProfile.getMtConfidenceScore();
+        Collection<Tuv> untranslatedSrcTuvs = new ArrayList<Tuv>();
+        try
+        {
+            GlobalSightLocale targetLocale = p_tp.getGlobalSightLocale();
+            MatchTypeStatistics tuvMatchTypes = leverageMatchLingManager
+                    .getMatchTypesForStatistics(p_tp.getSourcePage().getIdAsLong(),
+                            targetLocale.getIdAsLong(), 0);
+            
+            // Touch to load all TUs and source TUVs for performance.
+            tuvManager.getTus(p_tp.getSourcePage().getIdAsLong());
+            tuvManager.getSourceTuvsForStatistics(p_tp.getSourcePage());
+            Collection<Tuv> targetTuvs = tuvManager.getTargetTuvsForStatistics(p_tp);
+
+            long jobId = p_tp.getSourcePage().getJobId();
+            for (Tuv trgTuv : targetTuvs)
+            {
+                // Target TUV must be in "NOT_LOCALIZED" state.
+                if (trgTuv.getState().getValue() != TuvState.NOT_LOCALIZED.getValue())
+                    continue;
+
+                // Source and target must have same content.
+                Tuv srcTuv = trgTuv.getTu(jobId).getTuv(p_sourceLocaleId, jobId);
+                if (!srcTuv.getGxml().equals(trgTuv.getGxml()))
+                    continue;
+
+                // Best TM match score must less than MT threshold.
+                Types type = tuvMatchTypes.getTypes(srcTuv.getId(), "0");
+                if (type != null)
+                {
+                    LeverageMatch bestLM = type.getLeverageMatch();
+                    if (bestLM != null && bestLM.getScoreNum() >= mtThreshold)
+                    {
+                        continue;
+                    }
+                }
+
+                untranslatedSrcTuvs.add(srcTuv);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when get untranslated Tuvs for target page: " + p_tp.getId(), e);
             throw new EnvoyServletException(e);
         }
 
@@ -658,4 +736,277 @@ public class UpdateLeverageHelper
         return wfIds;
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static void applyMTMatches(SourcePage p_sourcePage, GlobalSightLocale p_sourceLocale,
+            GlobalSightLocale p_targetLocale, Collection<Tuv> untranslatedSrcTuvs) throws Exception
+    {
+        MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileBySourcePage(
+                p_sourcePage, p_targetLocale);
+        if (mtProfile == null || !(mtProfile.isActive()))
+        {
+            return;
+        }
+
+        HashMap<Tu, Tuv> sourceTuvMap = getSourceTuvMap(p_sourcePage);
+        String mtEngine = mtProfile.getMtEngine();
+        MachineTranslator machineTranslator = MTHelper.initMachineTranslator(mtEngine);
+        HashMap paramMap = mtProfile.getParamHM();
+        paramMap.put(MachineTranslator.SOURCE_PAGE_ID, p_sourcePage.getId());
+        paramMap.put(MachineTranslator.TARGET_LOCALE_ID, p_targetLocale.getIdAsLong());
+        boolean isXlf = MTHelper2.isXlf(p_sourcePage.getId());
+        paramMap.put(MachineTranslator.NEED_SPECAIL_PROCESSING_XLF_SEGS, isXlf ? "true" : "false");
+        paramMap.put(MachineTranslator.DATA_TYPE, MTHelper2.getDataType(p_sourcePage.getId()));
+        paramMap.put(MachineTranslator.MT_PROFILE, mtProfile);
+        if (MachineTranslator.ENGINE_MSTRANSLATOR.equalsIgnoreCase(machineTranslator
+                .getEngineName()) && p_targetLocale.getLanguage().equalsIgnoreCase("sr"))
+        {
+            String srLang = mtProfile.getPreferedLangForSr(p_targetLocale.toString());
+            paramMap.put(MachineTranslator.SR_LANGUAGE, srLang);
+        }
+        machineTranslator.setMtParameterMap(paramMap);
+
+        List<TuvImpl> tuvsToBeUpdated = new ArrayList<TuvImpl>();
+        long jobId = p_sourcePage.getJobId();
+        TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
+
+        HashMap<Tu, Tuv> needHitMTTuTuvMap = new HashMap<Tu, Tuv>();
+        needHitMTTuTuvMap = formTuTuvMap(untranslatedSrcTuvs, sourceTuvMap, p_targetLocale, jobId);
+
+//        XmlEntities xe = new XmlEntities();
+        // put all TUs into array.
+        Object[] key_tus = needHitMTTuTuvMap.keySet().toArray();
+        Tu[] tusInArray = new Tu[key_tus.length];
+        for (int key = 0; key < key_tus.length; key++)
+        {
+            tusInArray[key] = (Tu) key_tus[key];
+        }
+        // put all target TUVs into array
+        Object[] value_tuvs = needHitMTTuTuvMap.values().toArray();
+        Tuv[] targetTuvsInArray = new Tuv[value_tuvs.length];
+        for (int value = 0; value < value_tuvs.length; value++)
+        {
+            targetTuvsInArray[value] = (Tuv) value_tuvs[value];
+        }
+        // put all GXML into array
+        String[] p_segments = new String[targetTuvsInArray.length];
+        for (int index = 0; index < targetTuvsInArray.length; index++)
+        {
+            String segment = targetTuvsInArray[index].getGxml();
+            TuvImpl tuv = new TuvImpl();
+            if (p_sourcePage.getExternalPageId().endsWith(".idml"))
+            {
+                segment = IdmlHelper.formatForOfflineDownload(segment);
+            }
+
+            tuv.setSegmentString(segment);
+            p_segments[index] = segment;
+        }
+
+        // Send all segments to MT engine for translation.
+        logger.info("Begin to hit " + machineTranslator.getEngineName() + "(Segment number:"
+                + p_segments.length + "; SourcePageID:" + p_sourcePage.getIdAsLong()
+                + "; TargetLocale:" + p_targetLocale.getLocale().getLanguage() + ").");
+        String[] translatedSegments = machineTranslator.translateBatchSegments(
+                p_sourceLocale.getLocale(), p_targetLocale.getLocale(), p_segments,
+                LeverageMatchType.CONTAINTAGS, true);
+        logger.info("End hit " + machineTranslator.getEngineName() + "(SourcePageID:"
+                + p_sourcePage.getIdAsLong() + "; TargetLocale:"
+                + p_targetLocale.getLocale().getLanguage() + ").");
+        // handle translate result one by one.
+        Collection<LeverageMatch> lmCollection = new ArrayList<LeverageMatch>();
+        for (int tuvIndex = 0; tuvIndex < targetTuvsInArray.length; tuvIndex++)
+        {
+            Tu currentTu = tusInArray[tuvIndex];
+            Tuv sourceTuv = (Tuv) sourceTuvMap.get(currentTu);
+            Tuv currentNewTuv = targetTuvsInArray[tuvIndex];
+
+            String machineTranslatedGxml = null;
+            if (translatedSegments != null && translatedSegments.length == targetTuvsInArray.length)
+            {
+                machineTranslatedGxml = translatedSegments[tuvIndex];
+            }
+            boolean isGetMTResult = isValidMachineTranslation(machineTranslatedGxml);
+
+            boolean tagMatched = true;
+            if (isGetMTResult
+                    && MTHelper.needCheckMTTranslationTag(machineTranslator.getEngineName()))
+            {
+                tagMatched = SegmentUtil2
+                        .canBeModified(currentNewTuv, machineTranslatedGxml, jobId);
+            }
+            // replace the content in target tuv with mt result
+            if (isGetMTResult && tagMatched)
+            {
+                // GBS-3722
+                if (mtProfile.isIncludeMTIdentifiers())
+                {
+                    String leading = mtProfile.getMtIdentifierLeading();
+                    String trailing = mtProfile.getMtIdentifierTrailing();
+                    if (!StringUtil.isEmpty(leading) || !StringUtil.isEmpty(trailing))
+                    {
+                        machineTranslatedGxml = MTHelper.tagMachineTranslatedContent(
+                                machineTranslatedGxml, leading, trailing);
+                    }
+                }
+                currentNewTuv.setGxml(MTHelper.fixMtTranslatedGxml(machineTranslatedGxml));
+                currentNewTuv.setMatchType(LeverageMatchType.UNKNOWN_NAME);
+                currentNewTuv.setLastModifiedUser(machineTranslator.getEngineName() + "_MT");
+                // mark TUVs as localized so they get committed to the TM
+                TuvImpl t = (TuvImpl) currentNewTuv;
+                t.setState(com.globalsight.everest.tuv.TuvState.LOCALIZED);
+                long trgTuvId = currentTu.getTuv(p_targetLocale.getId(), jobId).getId();
+                t.setId(trgTuvId);
+                tuvsToBeUpdated.add(t);
+            }
+
+            // save MT match into "leverage_match"
+            if (isGetMTResult == true)
+            {
+                LeverageMatch lm = new LeverageMatch();
+                lm.setSourcePageId(p_sourcePage.getIdAsLong());
+
+                lm.setOriginalSourceTuvId(sourceTuv.getIdAsLong());
+                lm.setSubId("0");
+                lm.setMatchedText(machineTranslatedGxml);
+                lm.setMatchedClob(null);
+                lm.setTargetLocale(currentNewTuv.getGlobalSightLocale());
+                // This is the first MT matches,its order number is 301.
+                lm.setOrderNum((short) TmCoreManager.LM_ORDER_NUM_START_MT);
+                lm.setScoreNum(MachineTranslator.MT_SCORE);
+                lm.setMatchType(MatchState.MACHINE_TRANSLATION.getName());
+                lm.setMatchedTuvId(-1);
+                lm.setProjectTmIndex(com.globalsight.ling.tm2.leverage.Leverager.MT_PRIORITY);
+                lm.setTmId(0);
+                lm.setTmProfileId(tmProfile.getIdAsLong());
+                lm.setMtName(machineTranslator.getEngineName() + "_MT");
+                lm.setMatchedOriginalSource(sourceTuv.getGxml());
+
+                lm.setCreationUser(machineTranslator.getEngineName() + "_MT");
+                lm.setCreationDate(sourceTuv.getLastModified());
+                lm.setModifyDate(sourceTuv.getLastModified());
+
+                lmCollection.add(lm);
+            }
+        }
+        List<Long> originalSourceTuvIds = new ArrayList<Long>();
+        for (Tuv untranslatedSrcTuv : untranslatedSrcTuvs)
+        {
+            originalSourceTuvIds.add(untranslatedSrcTuv.getIdAsLong());
+        }
+        LingServerProxy.getLeverageMatchLingManager().deleteLeverageMatches(originalSourceTuvIds,
+                p_targetLocale, LeverageMatchLingManager.DEL_LEV_MATCHES_MT_ONLY, jobId);
+        // Save the LMs into DB
+        LingServerProxy.getLeverageMatchLingManager().saveLeveragedMatches(lmCollection, jobId);
+
+        /****** END :: Hit MT to get matches if configured ******/
+
+        // Populate into target TUVs
+        SegmentTuvUtil.updateTuvs(tuvsToBeUpdated, jobId);
+    }
+
+    private static HashMap<Tu, Tuv> formTuTuvMap(Collection<Tuv> untranslatedSrcTuvs,
+            HashMap<Tu, Tuv> sourceTuvMap, GlobalSightLocale p_targetLocale, long p_jobId) throws Exception, RemoteException, GeneralException
+    {
+        HashMap<Tu, Tuv> result = new HashMap<Tu, Tuv>();
+        for (Tuv srcTuv : untranslatedSrcTuvs)
+        {
+            Tu tu = srcTuv.getTu(p_jobId);
+            Tuv targetTuv = ServerProxy.getTuvManager().cloneToTarget(srcTuv,
+                    p_targetLocale);
+            result.put(tu, targetTuv);
+        }
+        return result;
+    }
+
+    /**
+     * A machine translated gxml can't be null, empty, only tags, and should be
+     * valid gxml.
+     * 
+     * @param machineTranslatedGxml
+     * @return
+     */
+    private static boolean isValidMachineTranslation(String machineTranslatedGxml)
+    {
+        boolean result = false;
+
+        if (machineTranslatedGxml != null
+                && !"".equals(machineTranslatedGxml)
+                && !"".equals(GxmlUtil.stripRootTag(machineTranslatedGxml)
+                        .trim()))
+        {
+            // As the MT returned translation may be invalid XML string,it
+            // should not fail the job creation process.
+            try
+            {
+                // Perhaps the MT results include nothing except for tags
+                String textValue = SegmentUtil2.getGxmlElement(
+                        machineTranslatedGxml).getTextValue();
+                if (!"".equals(textValue.trim()))
+                {
+                    result = true;
+                }
+            }
+            catch (Exception ignore)
+            {
+                logger.warn("The machine translation is not valid, will be ignored.");
+            }
+        }
+
+        return result;
+    }
+
+    private static TranslationMemoryProfile getTmProfile(SourcePage p_sourcePage)
+    {
+        L10nProfile l10nProfile = p_sourcePage.getRequest().getL10nProfile();
+        TranslationMemoryProfile tmProfile = l10nProfile
+                .getTranslationMemoryProfile();
+
+        return tmProfile;
+    }
+
+    private static HashMap<Tu, Tuv> getSourceTuvMap(SourcePage p_sourcePage)
+    {
+        long jobId = p_sourcePage.getJobId();
+
+        HashMap<Tu, Tuv> result = new HashMap<Tu, Tuv>();
+
+        // Assume this page contains an extracted file, otherwise
+        // wouldn't have reached this place in the code.
+        Iterator<LeverageGroup> it1 = getExtractedFile(p_sourcePage)
+                .getLeverageGroups().iterator();
+        List<Tuv> srcTuvList = new ArrayList<Tuv>();
+        while (it1.hasNext())
+        {
+            LeverageGroup leverageGroup = it1.next();
+            Collection<Tu> tus = leverageGroup.getTus();
+
+            for (Iterator<Tu> it2 = tus.iterator(); it2.hasNext();)
+            {
+                Tu tu = it2.next();
+                Tuv tuv = tu.getTuv(p_sourcePage.getLocaleId(), jobId);
+                srcTuvList.add(tuv);
+                result.put(tu, tuv);
+            }
+        }
+
+        SegmentTuvUtil.setHashValues(srcTuvList);
+
+        return result;
+    }
+    
+    /**
+     * Returns the page's Extracted Primary File or NULL if it doesn't contain
+     * an Extracted file.
+     */
+    private static ExtractedFile getExtractedFile(SourcePage p_page)
+    {
+        ExtractedFile result = null;
+
+        if (p_page.getPrimaryFileType() == ExtractedFile.EXTRACTED_FILE)
+        {
+            result = (ExtractedFile) p_page.getPrimaryFile();
+        }
+
+        return result;
+    }
 }

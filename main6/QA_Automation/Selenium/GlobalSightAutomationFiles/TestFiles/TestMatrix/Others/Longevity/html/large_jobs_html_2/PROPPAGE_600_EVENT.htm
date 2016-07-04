@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1664" MadCap:lastWidth="515">
+    <head><title>Events Tab (600)</title>
+    </head>
+    <body>
+        <h1>Events 
+ tab (600)</h1>
+        <p class="para">Use this tab to program multiple events (both external and 
+ internal) in the Events table. The external events are triggered by four 
+ TTL output terminals (S1 through S4) on the rear panel of the 600 Series 
+ Controller. The internal events are used to control the alarm, to change 
+ reservoir sparge rates, and to change column heater temperature. Events 
+ can be triggered more than once, and multiple events can be triggered 
+ simultaneously.</p>
+        <h2>Initial event states: switch1–switch4</h2>
+        <p class="para">At the initial run conditions, enables or disables output 
+ switches S1 through S4 for use as output events that control external 
+ devices. See the <span style="font-style: italic;">600 Controller Installation 
+ and Maintenance Guide</span> for instructions on connecting external devices 
+ to the terminal strip.</p>
+        <h2>Enable events</h2>
+        <p class="para">Enables or disables the events in the Events table.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ This option does not affect initial event states.</p>
+        <h2>Events table columns</h2>
+        <p class="para">Program operating parameters in these columns.</p>
+        <h3>Time</h3>
+        <p class="para">Time when the event starts. Event rows are sorted by time. 
+ You can program different events to occur at once. </p>
+        <h3>Event</h3>
+        <p class="para">Type of event signal: one of the four TTL-level output switches 
+ (S1 through S4), or one of the three internal events (alarm, sparge, temperature). 
+ Choose from these event types to program up to 15 total events. You can 
+ program the same event more than once. Choices:</p>
+        <ul>
+            <li class="listbull">Switch 
+ 1 through Switch 4 – Correspond to terminal strip positions S1–S4 on the 
+ rear of the 600 Controller. Activating a Switch event triggers a TTL-level 
+ contact closure for controlling an external device (a vacuum degasser, 
+ for example). Select On, Off, or Pulse in the Function cell when you program 
+ a Switch event.</li>
+            <li class="listbull">Alarm 
+ – Controls the internal alarm for the 600 Controller. When turned On, 
+ the audible alarm sounds until it receives an Off signal. Select On, Off, 
+ or Pulse in the Function cell when you program an Alarm event.</li>
+            <li class="listbull">Sparge 
+ – Specifies the sparge rate for each enabled reservoir in the 600 Controller. 
+ You cannot change sparge rates for individual reservoirs. Enter a sparge 
+ rate of 0 to 100 mL/min in the Value cell when you program a Sparge event. 
+ Enable reservoirs and set the initial sparge rate in the Degas tab.</li>
+            <li class="listbull">Temperature 
+ – Specifies the temperature of the column heater in the slide-out drawer 
+ of the Waters 600E, 616, 626, 625 LC, or ActION Analyzer. Enter a temperature 
+ in <span style="font-family: Symbol;">°</span>C in the Value cell when you program a 
+ Temperature event. See the Column Temp parameters in the Temperature tab 
+ for entries.</li>
+        </ul>
+        <h3>Function</h3>
+        <p class="para">Function of the event. Function selections apply to the four 
+ external switch events (S1–S4) and the internal Alarm event. Choices:</p>
+        <ul>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">On – Turns 
+ on an alarm or contact closure that triggers an external or internal event. 
+ With this function, the contact closure remains closed until an Off function 
+ is sent.</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Off – 
+ Turns off an alarm, or event contact closure for the event. With this 
+ function, the contact closure is broken.</li>
+            <li style="font-size: 9pt; font-weight: normal;" class="listbull">Pulse 
+ – Transmits one On/Off pulse. The contact closure is maintained for 600 
+ milliseconds.</li>
+        </ul>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ There are no Function selections for the Sparge and Temperature events.</p>
+        <h3>Value</h3>
+        <p class="para">Value for the Sparge and Temperature event selections. The 
+ sparge rate range is 0 to 100 mL/min. The temperature range depends on 
+ the type of column heater and the ambient temperature. See the Column 
+ Temp Set parameter in the Temperature tab for details.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ There are no Value selections for the S1–S4 and Alarm events.</p>
+        <h3>Comments</h3>
+        <p class="para">Description of the programmed event. The description can 
+ be up to 256 characters in length.</p>
+    </body>
+</html>

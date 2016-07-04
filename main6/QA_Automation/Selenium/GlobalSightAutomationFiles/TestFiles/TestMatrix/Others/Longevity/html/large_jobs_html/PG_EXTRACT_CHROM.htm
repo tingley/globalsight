@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1207" MadCap:lastWidth="571">
+    <head><title>Chromatograms Tab (Extraction Plot)</title>
+    </head>
+    <body>
+        <h1>Chromatograms 
+ tab (Extraction plot)</h1>
+        <p class="para">Use this tab to specify the type of chromatogram extractions 
+ to include in your report.</p>
+        <h2>Extraction type</h2>
+        <p class="para">Lists types of chromatogram extractions. Choices:</p>
+        <ul>
+            <li class="listbull" style="font-weight: normal;">Extract 
+ – Chromatogram to be extracted at a single wavelength (PDA) or mass (MS).</li>
+            <li class="listbull" style="font-weight: normal;">MaxPlot 
+ – Extracted chromatogram in which each data point is plotted at its maximum 
+ absorbance wavelength (PDA) or maximum intensity mass (MS).</li>
+            <li class="listbull" style="font-weight: normal;">Total 
+ – For PDA, an extracted chromatogram that averages absorbance values of 
+ all wavelengths in a specified range. For MS, specifies an extracted chromatogram 
+ that sums intensity values of all masses in a specified range.</li>
+            <li class="listbull" style="font-weight: normal;">Ratio 
+ – Extracted chromatogram that represents a ratio of the absorbance at 
+ two wavelengths (PDA) or masses (MS).</li>
+            <li class="listbull">TIC – Extracted chromatogram 
+ that represents the sum of all ion intensities for each data point in 
+ the mass range specified in the instrument method (MS).</li>
+        </ul>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ MaxPlot and Total plot labels that appear for the chromatogram extraction 
+ use actual raw data limits instead of the channel description (from the 
+ associated method set) to display the extraction. For example, if the 
+ channel description is 190 to 800 nm in the method set, you might see 
+ that the extraction plot label is 190 to 798 nm, which is the actual raw 
+ PDA data. </p>
+        <h2>Beginning WvlnMass, Ending WvlnMass</h2>
+        <p class="para">Specific wavelengths (PDA data) or masses (MS data) of the 
+ extracted chromatograms you want reported. </p>
+        <h2>Threshold</h2>
+        <p class="para">When the Ratio extraction type is selected, Threshold specifies 
+ an absorbance threshold value for beginning and ending wavelengths. A 
+ ratio is plotted only when the absorbance at both wavelengths exceeds 
+ this threshold. Otherwise the ratio is not plotted. </p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 0.00001 to 9.99999&#160;AU</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.00100</p>
+        <h2>Peak separation 1 (MS centroid data only)</h2>
+        <p class="para">Enter a value to control the extraction tolerance when extracting 
+ a specific mass in MS. This field is enabled only when the Extraction 
+ Type is set to Ratio or Extract.</p>
+        <h2>Peak separation 2 (MS centroid data only)</h2>
+        <p class="para">Enter a value to control the extraction tolerance when extracting 
+ a second specific mass in the ratio. This field is enabled only when the 
+ Extraction Type is set to Ratio. </p>
+        <h2>Apply to PDA channel</h2>
+        <p class="para">Enables or disables the reporting of extracted chromatograms 
+ for the associated PDA channel. </p>
+        <h2>Apply to MS channel</h2>
+        <p class="para">Enables or disables the reporting of extracted chromatograms 
+ for the associated MS channel. </p>
+    </body>
+</html>

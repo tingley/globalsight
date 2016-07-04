@@ -20,13 +20,14 @@
 <%
     // Lables
     ResourceBundle bundle = PageHandler.getBundle(session);
-    String createJobTitle = bundle.getString("title_add_source_file");
-    String title = bundle.getString("title_add_source_file");
+    String createJobTitle = bundle.getString("title_add_source_files");
+    String title = bundle.getString("title_add_source_files");
     Job jobImpl = (Job) request.getAttribute("Job");
     SessionManager sessionMgr = (SessionManager) session
             .getAttribute(WebAppConstants.SESSION_MANAGER);
     User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
     String companyIdWorkingFor = CompanyThreadLocal.getInstance().getValue();
+    String selfURL = self.getPageURL();
     String userName = "";
     if (user != null) {
         userName = user.getUserName();
@@ -116,15 +117,6 @@ $(document).ready(function(){
     }).mouseout(function(){
         $(this).removeClass("standardBtn_mouseover").addClass("standardBtn_mouseout");
     }).css("width","90px");
-    <%
-    Collection<SourcePage> collection = jobImpl.getSourcePages();
-    List<String> nameList = new ArrayList<String>();
-    for (SourcePage sourcePage : collection)
-    {
-        String pageName = sourcePage.getFile().getName();%>
-        uploadedFiles.push("<%=pageName%>");
-    <%}
-    %>
     // action of cleanmap button
     $("#cleanMap").click(function()
     {
@@ -134,7 +126,7 @@ $(document).ready(function(){
         $("[name='fileProfile']").attr("value", "");
         $("[name='fileProfile'] option").attr("disabled", false);
         mapped = false;
-        l10Nid = 0;
+        l10Nid = <%=jobImpl.getL10nProfileId()%>;
     });
     
     // *************************************action of create button*************************************
@@ -172,21 +164,34 @@ $(document).ready(function(){
         $("#createJobForm").attr("target", "_self");
         $("#createJobForm").attr("enctype","application/x-www-form-urlencoded");
         $("#createJobForm").attr("encoding","application/x-www-form-urlencoded");
-        document.createJobForm.action += "&uploadAction=addFile&userName=<%=userName%>";
+        document.createJobForm.action = "<%=selfURL%>&uploadAction=addFile&userName=<%=userName%>";
         document.createJobForm.submit();
     });
-    // *************************************cancel button*************************************
-    $("#cancel").click(function()
+    // *************************************close button*************************************
+    $("#close").click(function()
     {
-       window.close();
+    	window.opener.location.reload();
+    	window.close();
     });
     
 });
+
+function showDuplicate(pageArray)
+{
+	alert("<%=bundle.getString("msg_upload_dup_files")%>\n\n" + pageArray);
+}
 
 function addDivForNewFile(paramArray) 
 {
 	var objs = eval(paramArray);
     var tempId = "";
+    if(objs=="")
+    {
+    	emptyFileValue();
+    	isUploading = false;
+    	$("#tmpFolderName").val(tempFolder);
+		return false;
+    }
     for (var i = 0; i < objs.length; i++) {
         var id = objs[i].id;
         var zipName = objs[i].zipName;
@@ -238,58 +243,12 @@ function checkAndUpload(){
 		emptyFileValue();
 		return false;
 	}
-	var tempFiles = document.getElementById( "selectedSourceFile" );
-	var tempFileName;
-	var dupFiles = new Array();
-	var temp;
-	for (var j = 0; j < tempFiles.files.length; j++)
-	{
-		temp = tempFiles.files[j];
-		tempFileName = temp.name;
-		var flag = true;
-		if (uploadedFiles.length > 0)
-		{
-			for (i = 0; i < uploadedFiles.length; i++)
-			{
-				if (uploadedFiles[i] == tempFileName)
-				{
-					dupFiles.push(tempFileName);
-					flag = false;
-				}
-			}
-		}
-		if (flag)
-		{
-			addTempDivElement(tempFileName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
-			uploadedFiles.push(tempFileName);
-		}
-	}
-	if (dupFiles.length > 0)
-	{
-		var result = dupFiles.join("\n");
-		if (dupFiles.length > 1)
-		{
-			alert("Below files are already in the uploaded list, ignored: \n\n" + result);
-		}
-		else
-		{
-			alert("Below file is already in the uploaded list, ignored: \n\n" + result);
-		}
-		if (dupFiles.length == tempFiles.files.length)
-		{
-			emptyFileValue();
-			return false;
-		}
-	}
-	  var action = $("#createJobForm").attr("action");
-	    $("#createJobForm").attr("action", action+"&uploadAction=uploadSelectedFile&tempFolder="+tempFolder);
-		$("#createJobForm").submit();
-		$("#createJobForm").attr("action", action);
-		
-		
-		isUploading = true;
-		emptyFileValue();
-		$("#selectedSourceFile").prop('disabled', false);
+    $("#createJobForm").attr("action", "<%=selfURL%>&uploadAction=uploadSelectedFile&tempFolder="+tempFolder);
+	$("#createJobForm").submit();
+	
+	isUploading = true;
+	emptyFileValue();
+	$("#selectedSourceFile").prop('disabled', false);
 }
 
 function emptyFileValue()
@@ -306,30 +265,6 @@ function isIE() { //ie?
         return true;  
     else  
         return false;  
-}
-
-function addTempDivElement(fileName) {
-	var id = $.md5(fileName);
-	$("#fileQueue").append('<div id="bp' + id + '" class="uploadifyQueueItem">' 
-            // div of progress bar container
-            + '<div id="ProgressDiv' + id + '" class="uploadifyProgress">'
-            // div of file name
-            + '<div class="fileInfo" id="FileInfo' + id + '" onclick="mapTargetLocales(ProgressDiv' + id + ')">' 
-            + fileName + '<input type="hidden" id="Hidden' + id + '" name="jobWholeName" value="' + id + '">'
-            + '<input type="hidden" name="jobFilePath" value="">' 
-            + '<input type="hidden" name="isSwitched" value=""></div>'
-            // div of file profile select
-            + '<div class="profile" onclick="mapTargetLocales(ProgressDiv' + id + ')"><span class="profileArea"></span></div>'
-            // div of cancel button
-            + '<div class="cancel"><img style="padding-top:3px" src="/globalsight/images/createjob/delete.png" border="0"/></div>'
-            // div of progress bar
-            + '<div class="uploadifyProgressBar" id="ProgressBar' + id + '"></div>'
-            + '</div></div>'
-            + '<div id="bptip' + id + '" class="tip_cj" style="display:none">' + fileName + '</div>');
-	runProgress(id, 15, "normal",false);
-	runProgress(id, 30, "normal",false);
-	runProgress(id, 45, "normal",false);
-    runProgress(id, 60, "normal",false);
 }
 
 function runProgress(id, percentage, speed, isSwitched) {
@@ -361,20 +296,19 @@ function queryFileProfile(id)
 {
     $("#ProgressBar" + id).css("background-color", "grey");
     var profile = $("#bp" + id).find(".profileArea");
+    profile.html("<select id='fp" + id
+            + "' name='fileProfile' style='width:143;z-index:50;padding-top:2px;padding-bottom:2px;' " 
+            + "onchange='disableUnavailableFileProfiles(this)'><option value=''></option>"
+            + "</select>");
     var theFileName = $("#Hidden" + id).attr("value");
-    $.get("/globalsight/ControlServlet?pageName=AJF&linkName=self", 
-            {"uploadAction":"queryFileProfile","fileName":theFileName,"l10Nid":l10Nid,"no":Math.random(), "userName":"<%=userName%>"}, 
+    $.get("<%=selfURL%>", 
+            {"uploadAction":"queryFileProfile","fileName":theFileName,"l10Nid":"<%=jobImpl.getL10nProfileId()%>","no":Math.random(), "userName":"<%=userName%>"}, 
             function(data){
                 profile.html("<select id='fp" + id
                         + "' name='fileProfile' style='width:143;z-index:50;padding-top:2px;padding-bottom:2px;' " 
                         + "onchange='disableUnavailableFileProfiles(this)'><option value=''></option>"
                         + data
                         + "</select>");
-                if (l10Nid == 0)
-                {
-                    l10Nid = getL10NFromSelectValue($("#fp"+id).children('option:selected').val());
-                }
-                disableUnavailableFileProfiles(document.getElementById("fp" + id));
                 if (!mapped && $("#fp" + id).val() != "") {
                     mapTargetLocales(document.getElementById("ProgressDiv" + id));
                 }
@@ -546,20 +480,17 @@ function removeFile(id, zipName, fileSize, filePath) {
         $("#fileNo").html(totalFileNo);
         $("#totalFileSize").html(parseNo(totalSize));
         // remove the file from system
-        $.post("/globalsight/ControlServlet?pageName=AJF&linkName=self", 
+        $.post("<%=selfURL%>", 
                 {"uploadAction":"deleteFile","filePath":filePath,
                 "folder":tempFolder,"no":Math.random()});
         var fileCount = $(".uploadifyQueueItem").length;
         if (fileCount == 0)
         {
-            $.post("/globalsight/ControlServlet?pageName=AJF&linkName=self", 
+            $.post("<%=selfURL%>", 
                     {"uploadAction":"deleteFile",
                     "folder":tempFolder,"no":Math.random()});
-            $("#targetLocaleArea").show();
-            $("#targetLocaleArea").html("");
             mapped = false;
-            $("#tlControl").attr("checked", false);
-            l10Nid = 0;
+            l10Nid = <%=jobImpl.getL10nProfileId()%>;
         }
     });
 }
@@ -598,7 +529,7 @@ function mapTargetLocales(o)
     </div>
 
     <div id="createJobDiv" style="margin-left:0px; margin-top:0px; class="standardText">
-        <form name="createJobForm" id="createJobForm" method="post" action="/globalsight/ControlServlet?pageName=AJF&linkName=self" enctype="multipart/form-data" target="none_iframe">
+        <form name="createJobForm" id="createJobForm" method="post" action="" enctype="multipart/form-data" target="none_iframe">
            <input type="hidden" id="tmpFolderName" name="tmpFolderName" value="">
             <input type="hidden" id="fileMapFileProfile" name="fileMapFileProfile" value="" />
             <input type="hidden" id="userName" name="userName" value="<%=userName%>" />
@@ -651,7 +582,7 @@ function mapTargetLocales(o)
 	                                    <td width="25%" align="right">
                                				<input id="create" type="button" class="standardBtn_mouseout" style="width:90px;" value="<%=bundle.getString("lb_add")%>" title="<%=bundle.getString("lb_add")%>">
                                				&nbsp;&nbsp;&nbsp;
-                           					<input id="cancel" type="button" class="standardBtn_mouseout" style="width:90px;" value="<%=bundle.getString("lb_cancel")%>" title="<%=bundle.getString("lb_cancel")%>">
+                           					<input id="close" type="button" class="standardBtn_mouseout" style="width:90px;" value="<%=bundle.getString("lb_close")%>" title="<%=bundle.getString("lb_close")%>">
 	                                    </td>
 	                                </tr>
 	                            </table>

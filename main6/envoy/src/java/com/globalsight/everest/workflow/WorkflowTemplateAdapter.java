@@ -629,6 +629,9 @@ public class WorkflowTemplateAdapter extends WorkflowHelper
         // report_upload_check field
         assignment.addElement(WorkflowConstants.FIELD_REPORT_UPLOAD_CHECK).addText(
                String.valueOf(p_wfTask.getReportUploadCheck()));
+        // activity_comment_upload_check field
+        assignment.addElement(WorkflowConstants.FIELD_ACTIVITY_COMMENT_UPLOAD_CHECK).addText(
+               String.valueOf(p_wfTask.getActivityCommentUploadCheck()));
         // roles field
         assignment.addElement(WorkflowConstants.FIELD_ROLES).addText(
                 p_wfTask.getRolesAsString());
@@ -1020,6 +1023,10 @@ public class WorkflowTemplateAdapter extends WorkflowHelper
         int reportUploadCheck = nodeParameter.getIntAttribute(
                 WorkflowConstants.FIELD_REPORT_UPLOAD_CHECK,
                 WorkflowConstants.REPORT_UPLOAD_CHECK);
+        
+        int activityCommentUploadCheck = nodeParameter.getIntAttribute(
+                WorkflowConstants.FIELD_ACTIVITY_COMMENT_UPLOAD_CHECK,
+                WorkflowConstants.ACTIVITY_COMMENT_UPLOAD_CHECK);
 
         String rolePreference = nodeParameter
                 .getAttribute(WorkflowConstants.FIELD_ROLE_PREFERENCE);
@@ -1038,6 +1045,7 @@ public class WorkflowTemplateAdapter extends WorkflowHelper
         p_task.setCompletedTime(timeToComplete);
         p_task.setOverdueToPM(overduePM);
         p_task.setOverdueToUser(overdueUser);
+        p_task.setActivityCommentUploadCheck(activityCommentUploadCheck);
         p_task.setReportUploadCheck(reportUploadCheck);
         p_task.setDisplayRoleName(UserUtil.getUserNamesByIds(displayRoleName));
     }

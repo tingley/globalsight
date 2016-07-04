@@ -14,11 +14,10 @@
  *  limitations under the License.
  *  
  */
-
 package com.globalsight.terminology.scheduler;
 
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -33,22 +32,17 @@ import com.globalsight.terminology.audit.TermAuditEvent;
 import com.globalsight.terminology.audit.TermAuditLog;
 import com.globalsight.terminology.indexer.IIndexManager;
 
-
-
 /**
- * TermbaseDispatcher acts on "termbase reindex" events sent by schedule engine (Quartz),
- * and executes them.
+ * TermbaseDispatcher acts on "termbase reindex" events sent by schedule engine
+ * (Quartz), and executes them.
  */
-public class TermbaseDispatcher
-    extends EventHandler
+public class TermbaseDispatcher extends EventHandler
 {
-    private static final Logger s_logger =
-        Logger.getLogger(
-            TermbaseDispatcher.class);
+    private static final Logger s_logger = Logger.getLogger(TermbaseDispatcher.class);
 
     static private ITermbaseManager s_manager;
 
-	//
+    //
     // Constructor
     //
 
@@ -74,19 +68,19 @@ public class TermbaseDispatcher
     //
 
     /**
-     * This method is called when a scheduled event is fired.  Subclasses must
+     * This method is called when a scheduled event is fired. Subclasses must
      * implement this method in order to obtain the desired behavior at fire
      * time.
      *
-     * @param 
-     * @throws EventHandlerException if any error occurs.
+     * @param
+     * @throws EventHandlerException
+     *             if any error occurs.
      */
-    public void eventFired(KeyFlowContext p_flowContext)
-        throws EventHandlerException
+    public void eventFired(KeyFlowContext p_flowContext) throws EventHandlerException
     {
         try
         {
-            EventInfo info = (EventInfo)p_flowContext.getKey();
+            EventInfo info = (EventInfo) p_flowContext.getKey();
 
             performReindexing(info.getMap());
         }
@@ -100,51 +94,48 @@ public class TermbaseDispatcher
     // Private Methods
     //
 
-    private void performReindexing(HashMap p_args)
-        throws Exception
+    private void performReindexing(Map p_args) throws Exception
     {
-        Long termbaseId = (Long)p_args.get(TermbaseScheduler.TERMBASE_ID);
-		IIndexManager indexer = null;
+        Long termbaseId = (Long) p_args.get(TermbaseScheduler.TERMBASE_ID);
+        IIndexManager indexer = null;
 
-		try
-		{
-			String name = s_manager.getTermbaseName(termbaseId.longValue());
+        try
+        {
+            String name = s_manager.getTermbaseName(termbaseId.longValue());
 
-			if (name == null)
-			{
-				s_logger.info("Scheduled re-indexing of termbase " + termbaseId + 
-					" cannot be started because the termbase has been deleted.");
+            if (name == null)
+            {
+                s_logger.info("Scheduled re-indexing of termbase " + termbaseId
+                        + " cannot be started because the termbase has been deleted.");
 
-				return;
-			}
+                return;
+            }
 
-			ITermbase tb = s_manager.connect(name, ITermbase.SYSTEM_USER, "");
+            ITermbase tb = s_manager.connect(name, ITermbase.SYSTEM_USER, "");
 
-			try
-			{
-				indexer = tb.getIndexer();
-			}
-			catch (Throwable ex)
-			{
-				TermAuditEvent auditEvent = new TermAuditEvent(
-					new Date(), ITermbase.SYSTEM_USER, name, name, "ALL",
-					"re-index", "scheduled re-indexing cannot be performed" + 
-					" (termbase is being re-indexed already)");
-				TermAuditLog.log(auditEvent);
+            try
+            {
+                indexer = tb.getIndexer();
+            }
+            catch (Throwable ex)
+            {
+                TermAuditEvent auditEvent = new TermAuditEvent(new Date(), ITermbase.SYSTEM_USER,
+                        name, name, "ALL", "re-index", "scheduled re-indexing cannot be performed"
+                                + " (termbase is being re-indexed already)");
+                TermAuditLog.log(auditEvent);
 
-				return;
-			}
+                return;
+            }
 
-			TermAuditEvent auditEvent = new TermAuditEvent(
-				new Date(), ITermbase.SYSTEM_USER, name, name, "ALL",
-				"re-index", "scheduled re-indexing started");
-			TermAuditLog.log(auditEvent);
+            TermAuditEvent auditEvent = new TermAuditEvent(new Date(), ITermbase.SYSTEM_USER, name,
+                    name, "ALL", "re-index", "scheduled re-indexing started");
+            TermAuditLog.log(auditEvent);
 
-			indexer.doIndex();
-		}
-		catch (Throwable ex)
-		{
-			s_logger.error("scheduled re-indexing error", ex);
-		}
-	}
+            indexer.doIndex();
+        }
+        catch (Throwable ex)
+        {
+            s_logger.error("scheduled re-indexing error", ex);
+        }
+    }
 }

@@ -422,9 +422,8 @@ public class ExportFilterHelper
                         {
                             try
                             {
-                                String configXmlStr = xmlRuleFilter.getConfigXml();
                                 XmlFilterConfigParser xmlFilterConfigParser = new XmlFilterConfigParser(
-                                        configXmlStr);
+                                        xmlRuleFilter);
                                 xmlFilterConfigParser.parserXml();
                                 String postFilterTableName = xmlFilterConfigParser
                                         .getElementPostFilterTableName();
@@ -535,9 +534,8 @@ public class ExportFilterHelper
                 {
                     try
                     {
-                        String configXmlStr = xmlRuleFilter.getConfigXml();
                         XmlFilterConfigParser xmlFilterConfigParser = new XmlFilterConfigParser(
-                                configXmlStr);
+                                xmlRuleFilter);
                         xmlFilterConfigParser.parserXml();
                         String postFilterTableName = xmlFilterConfigParser
                                 .getElementPostFilterTableName();
@@ -1580,9 +1578,9 @@ public class ExportFilterHelper
             buffer.append("xml_rule_filter.").append(xmlRuleFilter.getId())
                     .append(".XML_RULE_ID = ").append(xmlRuleFilter.getXmlRuleId())
                     .append(NEW_LINE);
-            buffer.append("xml_rule_filter.").append(xmlRuleFilter.getId())
-                    .append(".ENABLE_CONVERT_HTML_ENTITY = ")
-                    .append(xmlRuleFilter.isConvertHtmlEntity()).append(NEW_LINE);
+            // buffer.append("xml_rule_filter.").append(xmlRuleFilter.getId())
+            // .append(".ENABLE_CONVERT_HTML_ENTITY = ")
+            // .append(xmlRuleFilter.isConvertHtmlEntity()).append(NEW_LINE);
             // buffer.append("xml_rule_filter.").append(xmlRuleFilter.getId())
             // .append(".SECOND_FILTER_ID = ")
             // .append(xmlRuleFilter.getSecondFilterId()).append(NEW_LINE);

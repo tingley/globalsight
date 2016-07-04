@@ -76,6 +76,7 @@ var populateShow=function(){
 	$("#includeXmlNodeContextInformationBox").hide();
 	$(".formatAcces").hide();
 	$('#populate100').show();
+	$('#populatemt').show();
 }
 var populateHide=function(){
 	$(".formatAcces").show();
@@ -136,6 +137,7 @@ var optionKey={"rtfTradosOptimized":populate,"rtf":populateShow,
 					$("#includeXmlNodeContextInformationBox").show();
 					populateHide();
 					$('#populate100').hide();
+					$('#populatemt').hide();
 					$("#separateTMfileTD").hide();
 					disPtag();	
 					var unOmegaT=$(".unOmegaT");
@@ -256,7 +258,13 @@ function setClientDwnldOptions(formSent)
 			document.getElementById("populate100CheckBox").checked = false;
 		}
 	}
-
+	if (dwnldOpt.populatemt)
+	{
+		if(dwnldOpt.populatemt == 'false' || dwnldOpt.populatemt == 'no')
+		{
+			document.getElementById("populatemtCheckBox").checked = false;
+		}
+	}
 	if (dwnldOpt.populatefuzzy)
 	{
 		if(dwnldOpt.populatefuzzy == 'false' || dwnldOpt.populatefuzzy == 'no')
@@ -380,11 +388,14 @@ function saveUserOptions(formSent)
     var cookieValResInsMode = resInsModeSelect.options[resInsModeSelect.selectedIndex].value;
     var cookieValTerm = terminologySelect.options[terminologySelect.selectedIndex].value;
     
-    
     var editExactSelect = formSent.TMEditType;
     var cookieValEditExact = 0;
 	if (editExactSelect) {
 		cookieValEditExact = editExactSelect.options[editExactSelect.selectedIndex].value;
+	}else{
+		if(tmEditTypeParamter == 1){
+			cookieValEditExact = 4;
+		}
 	}
 
 	downloadForm.action += buildParams(cookieValFileFormat,  cookieValPtagFormat, cookieValResInsMode,cookieValEditExact, cookieValTerm);

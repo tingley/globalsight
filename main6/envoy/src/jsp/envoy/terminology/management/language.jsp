@@ -67,6 +67,17 @@ Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
 <SCRIPT LANGUAGE="Javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT language="Javascript" src="/globalsight/envoy/terminology/management/objects_js.jsp"></SCRIPT>
 <SCRIPT language="Javascript">
+function   centerWindow()   
+{
+    var xMax = screen.width;
+    var yMax = screen.height;
+    
+    window.moveTo(xMax/2 - 240, yMax/2 - 100 - 80);
+}
+  
+centerWindow();  
+
+var o=window.opener;
 var isModify = false;
 var bLanguageExists = false;
 var islocalCountry = false;
@@ -290,12 +301,16 @@ function doClose(ok)
       return;
     }
 
-    window.returnValue = new Language(name, locale, hasterms, exists);
-  }
-  else
-  {
-    window.returnValue = null;
-  }
+    var lang = new Language(name, locale, hasterms, exists);
+    if (o.isNew)
+    {
+    	o.addLanguageDialog(lang);
+    }
+    else
+    {
+    	o.modifyLanguageDialog(lang);
+    }	
+  }  
 
   window.close();
 }
@@ -304,7 +319,7 @@ function doLoad()
 {
   initLocales();
 
-  var arg = window.dialogArguments;
+  var arg = o.languageParams;
 
   if (arg != null)
   {

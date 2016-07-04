@@ -37,7 +37,8 @@ LABEL,
 }
 </style>
 <SCRIPT language="Javascript">
-var g_args;
+var o= window.opener;
+var g_args = o.addFieldParams;
 
 var g_currentFields;
 var g_currentAttributes;
@@ -229,11 +230,14 @@ function doClose(ok)
     g_args.setType(type);
     g_args.setValue(value);
 
-    window.returnValue = g_args;
-  }
-  else
-  {
-    window.returnValue = null;
+    if (o.isToCurrent)
+    {
+    	o.AddFieldToCurrentDialog(g_args);
+    }
+    else
+    {
+    	o.AddFieldAfterCurrentDialog(g_args);
+    }
   }
 
   window.close();
@@ -255,8 +259,6 @@ function doKeypress()
 
 function doLoad()
 {
-  g_args = window.dialogArguments;
-
   var level = g_args.getLevel();
   idLevel.innerText = Trim(level);
 

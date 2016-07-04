@@ -43,6 +43,7 @@ import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.XliffConstants;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
+import com.globalsight.everest.edit.offline.page.OfflinePageDataGenerator;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.Data;
 import com.globalsight.everest.edit.offline.xliff.xliff20.document.File;
@@ -63,7 +64,6 @@ import com.globalsight.everest.page.TemplatePart;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.tda.TdaHelper;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
@@ -80,6 +80,7 @@ import com.globalsight.ling.tw.internal.XliffInternalTag;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.NumberUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -862,8 +863,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
                     lm.setOriginalSourceTuvId(sourceTuv.getId());
                 }
                 String str = EditUtil.decodeXmlEntities(alt.getSourceSegment());
-                float score = (float) TdaHelper
-                        .PecentToDouble(alt.getQuality());
+                float score = (float) NumberUtil.PecentToDouble(alt.getQuality());
 
                 lm.setMatchedOriginalSource(str);
                 lm.setMatchedText(EditUtil.decodeXmlEntities(alt.getSegment()));
@@ -939,11 +939,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             String sourceStr = leverageMatch.getMatchedOriginalSource();
             String targetStr = leverageMatch.getLeveragedTargetString();
 
-            if (leverageMatch.getProjectTmIndex() == Leverager.TDA_TM_PRIORITY)
-            {
-                // not do anything
-            }
-            else if (leverageMatch.getProjectTmIndex() == Leverager.REMOTE_TM_PRIORITY)
+            if (leverageMatch.getProjectTmIndex() == Leverager.REMOTE_TM_PRIORITY)
             {
                 sourceStr = GxmlUtil.stripRootTag(sourceStr);
             }
@@ -1026,8 +1022,12 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
 
             Source s = new Source();
             m.setSource(s);
-            String score = StringUtil.formatPercent(
-                    leverageMatch.getScoreNum(), 2);
+            float scoreNum = leverageMatch.getScoreNum();
+            if (leverageMatch.isMtLeverageMatch())
+            {
+                scoreNum = OfflinePageDataGenerator.MT_SCORE_FOR_OFFLINE_KIT;
+            }
+            String score = StringUtil.formatPercent(scoreNum, 2);
             m.setMatchQuality(score);
             Tmx2Xliff20Handler handler = new Tmx2Xliff20Handler();
             handler.setSource(true);
@@ -1117,10 +1117,6 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             else if (projectTmIndex == Leverager.REMOTE_TM_PRIORITY)
             {
                 tmOrigin = "REMOTE_TM";
-            }
-            else if (projectTmIndex == Leverager.TDA_TM_PRIORITY)
-            {
-                tmOrigin = "TDA";
             }
             else if (projectTmIndex == Leverager.PO_TM_PRIORITY)
             {

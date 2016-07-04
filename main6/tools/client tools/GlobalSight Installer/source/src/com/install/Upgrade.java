@@ -70,8 +70,6 @@ public class Upgrade
     private static final String COPY = "copy";
     public static final String SIGN = "sign";
     
-    private Boolean isUpgradeJboss = null;
-
     private List<String> ignoreFiles;
     private List<String> ignoreEndPaths;
     private static List<JBossUpdater> updaters = new ArrayList<JBossUpdater>();
@@ -80,6 +78,7 @@ public class Upgrade
         updaters.add(new JBossUpdater4());
         updaters.add(new JBossUpdater71());
         updaters.add(new JBossUpdater72());
+        updaters.add(new JBossUpdaterWildfly());
     }
 
     public static Map<String, Integer> RATES = new HashMap<String, Integer>();
@@ -180,7 +179,7 @@ public class Upgrade
             path = path.replace(serverPath, upgradePath);
             if (!path.contains("globe_header.gif"))
             {//Add condition to skip globe_header.gif
-            FileUtil.copyFile(f, new File(path));
+                FileUtil.copyFile(f, new File(path));
             }
     	}
     }
@@ -283,79 +282,6 @@ public class Upgrade
         log.info("Backing up files finished");
     }
 
-//    private FileFilter getClassFilter()
-//    {
-//        return new FileFilter()
-//        {
-//            @Override
-//            public boolean accept(File pathname)
-//            {
-//                String name = pathname.getName();
-//                return name.endsWith(".class");
-//            }
-//        };
-//    }
-//    
-//    private FileFilter getJarFilter()
-//    {
-//        return new FileFilter()
-//        {
-//            @Override
-//            public boolean accept(File pathname)
-//            {
-//                String name = pathname.getName();
-//                return name.endsWith(".class");
-//            }
-//        };
-//    }
-    
-//    private void removeClassFiles()
-//    {
-//        log.info("Removing class files");
-//        List<File> files = FileUtil.getAllFiles(new File(ServerUtil.getPath()
-//                + EAR_PATH), getClassFilter());
-//        
-//        List<File> jares = FileUtil.getAllFiles(new File(UPGRADE_UTIL.getPath()
-//                + EAR_PATH), getJarFilter());        
-//        if (jares.size() > 10)
-//        {
-//            log.info("Removing jar files");
-//            files.addAll(FileUtil.getAllFiles(new File(ServerUtil.getPath()
-//                + EAR_PATH), getJarFilter()));
-//        }
-//
-//        int size = files.size();
-//        log.info("Size: " + size);
-//        int processTotle = RATES.get(DELETE);
-//        if (size == 0)
-//        {
-//            ui.addProgress(processTotle, "");
-//            return;
-//        }
-//        int rate = processTotle / size;
-//        int lose = processTotle - rate * size;
-//
-//        int i = 0;
-//        for (File f : files)
-//        {
-//            ui.addProgress(0, MessageFormat.format(Resource
-//                    .get("process.delete"), f.getName(), i + 1, size));
-//            
-//            String path = f.getPath().replace("\\", "/");
-//            while(f.exists() && !f.delete())
-//            {
-//                ui.tryAgain(MessageFormat.format(Resource
-//                        .get("msg.deleteFile"), path));
-//            }
-//            ui.addProgress(rate, MessageFormat.format(Resource
-//                    .get("process.delete"), f.getName(), i + 1, size));
-//            i++;
-//        }
-//
-//        ui.addProgress(lose, "");
-//        log.info("Removing class files finished");
-//    }
-
     private void validateJDK()
     {
     	 ui.addProgress(0, Resource.get("process.validateJDK"));
@@ -393,7 +319,7 @@ public class Upgrade
             DbUtil util = DbUtilFactory.getDbUtil();
             util.closeExistConn();
             
-//            ui.finish();
+            ui.finish();
         }
         catch (Exception e)
         {
@@ -415,6 +341,9 @@ public class Upgrade
             @Override
             public boolean accept(File pathname)
             {
+            	if (isUpdateJboss())
+            		return true;
+            	
             	if (getIgnoreFiles().contains(pathname.getName()))
             		return false;
             	
@@ -502,12 +431,6 @@ public class Upgrade
     	if (ignoreEndPaths == null)
     	{
     		ignoreEndPaths = new ArrayList<String>();
-    		
-    		ignoreEndPaths.add("/jmx-console.war/WEB-INF/jboss-web.xml");
-    		ignoreEndPaths.add("/jmx-console.war/WEB-INF/web.xml");
-    		
-    		ignoreEndPaths.add("/web-console.war/WEB-INF/jboss-web.xml");
-    		ignoreEndPaths.add("/web-console.war/WEB-INF/web.xml");
     	}
     	
     	return ignoreEndPaths;
@@ -518,47 +441,14 @@ public class Upgrade
         if (ignoreFiles == null)
         {
             ignoreFiles = new ArrayList<String>();
-
-//            // Ignore propertie files.
-//            String sourcePath = ServerUtil.getPath() + PROPERTIES_PATH;
-//            List<File> files = FileUtil.getAllFiles(new File(sourcePath),
-//                    new FileFilter()
-//                    {
-//                        @Override
-//                        public boolean accept(File pathname)
-//                        {
-//                            String path = pathname.getName();
-//                            return path.endsWith(".properties")
-//                                    && !Constants.COPY_PROPERTITES
-//                                            .contains(path);
-//                        }
-//                    });
-//            
-//            for (File f : files)
-//            {
-//                ignoreFiles.add(f.getName());
-//            }
-            ignoreFiles.add("jmx-console-users.properties");
-            ignoreFiles.add("jmx-console-roles.properties");
-            ignoreFiles.add("web-console-users.properties");
-            ignoreFiles.add("web-console-roles.properties");
-//            ignoreFiles.add("mt.config.properties");
-            
             ignoreFiles.add("system.xml");
-            ignoreFiles.add("jboss-service.xml");
-            ignoreFiles.add("GlobalSight-JMS-service.xml");
-            ignoreFiles.add("ear-deployer.xml");
-            ignoreFiles.add("server.xml");
-            
-            ignoreFiles.add("run.sh");
-            ignoreFiles.add("run.bat");
-            ignoreFiles.add("run.conf");
             
             if (!isUpdateJboss())
             {
             	ignoreFiles.add("standalone.xml");
+            	ignoreFiles.add("standalone.conf.bat");
+                ignoreFiles.add("standalone.bat");
                 ignoreFiles.add("standalone.conf");
-                ignoreFiles.add("standalone.conf.bat");
             }
         }
 

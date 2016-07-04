@@ -21,8 +21,7 @@ public class CurrencyFuncs extends BasicFuncs
     public void create(Selenium selenium, String currency, String factor)
             throws Exception
     {
-        if (isPresentInTable(selenium, Currency.CURRENCY_TABLE,
-                currency.replace("label=", "")))
+        if (selectRadioButtonFromTable(selenium,true, Currency.currencyNameFilter, currency))
         {
             Reporter.log("The currency " + currency + " has already exists!");
         }
@@ -37,23 +36,21 @@ public class CurrencyFuncs extends BasicFuncs
             selenium.click(Currency.SAVE_BUTTON);
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
-            Assert.assertEquals(
-                    isPresentInTable(selenium, Currency.CURRENCY_TABLE,
-                            currency.replace("label=", "")), true);
+            Assert.assertEquals(selectRadioButtonFromTable(selenium,true, Currency.currencyNameFilter, currency), true);
+                    
         }
     }
 
     public void modify(Selenium selenium, String currency, String factor)
             throws Exception
     {
-        boolean selected = selectRadioButtonFromTable(selenium,
-                Currency.CURRENCY_TABLE, currency);
+        boolean selected = selectRadioButtonFromTable(selenium,true, Currency.currencyNameFilter, currency);
         if (!selected)
         {
             Reporter.log("Cannot find a proper currency to edit.");
             return;
         }
-        clickAndWait(selenium, Currency.EDIT_BUTTON);
+        clickAndWait(selenium, "link="+currency);
         selenium.type(Currency.FACTOR_TEXT, factor);
         clickAndWait(selenium, Currency.SAVE_BUTTON);
     }

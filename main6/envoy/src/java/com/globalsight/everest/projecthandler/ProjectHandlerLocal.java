@@ -16,7 +16,6 @@
  */
 package com.globalsight.everest.projecthandler;
 
-import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -49,6 +48,7 @@ import com.globalsight.cxe.entity.customAttribute.TMAttribute;
 import com.globalsight.cxe.entity.databaseprofile.DatabaseProfileImpl;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
+import com.globalsight.cxe.util.project.ProjectUpdateUtil;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.company.Company;
@@ -83,7 +83,6 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserInfo;
 import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.usermgr.UserManagerException;
-import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.SetDefaultRoleUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.vendors.ProjectComparator;
@@ -125,12 +124,10 @@ import com.globalsight.util.system.LogType;
  */
 public class ProjectHandlerLocal implements ProjectHandler
 {
-    private static final Logger c_category = Logger
-            .getLogger(ProjectHandlerLocal.class);
+    private static final Logger c_category = Logger.getLogger(ProjectHandlerLocal.class);
 
     public static final String ALL_TM_PROFILES_SQL = " select * from tm_profile "
-            + " where company_id >= :"
-            + CompanyWrapper.COPMANY_ID_START_ARG
+            + " where company_id >= :" + CompanyWrapper.COPMANY_ID_START_ARG
             + " and company_id <= :" + CompanyWrapper.COPMANY_ID_END_ARG;
 
     private ResourceBundle p_resourceBundle = null;
@@ -166,8 +163,7 @@ public class ProjectHandlerLocal implements ProjectHandler
 
         if (!(p_l10nProfile instanceof BasicL10nProfile))
         {
-            basicProfile = L10nProfileFactory
-                    .makeBasicL10nProfile(p_l10nProfile);
+            basicProfile = L10nProfileFactory.makeBasicL10nProfile(p_l10nProfile);
         }
         else
         {
@@ -178,12 +174,10 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
-            basicProfile
-                    .setTimestamp(new Timestamp(System.currentTimeMillis()));
+            basicProfile.setTimestamp(new Timestamp(System.currentTimeMillis()));
             session.save(basicProfile);
 
-            Set<WorkflowTemplateInfo> workflowTemplateInfos = basicProfile
-                    .getWorkflowTemplates();
+            Set<WorkflowTemplateInfo> workflowTemplateInfos = basicProfile.getWorkflowTemplates();
             for (Iterator it = workflowTemplateInfos.iterator(); it.hasNext();)
             {
                 WorkflowTemplateInfo wfInfo = (WorkflowTemplateInfo) it.next();
@@ -198,17 +192,16 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
 
             transaction.commit();
-            
+
             return basicProfile.getId();
         }
         catch (Exception pe)
         {
-            c_category.error(p_l10nProfile.toString() + " " + pe.getMessage(),
-                    pe);
+            c_category.error(p_l10nProfile.toString() + " " + pe.getMessage(), pe);
             String[] args = new String[1];
             args[0] = p_l10nProfile.getName();
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_ADD_PROFILE, args, pe);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_ADD_PROFILE,
+                    args, pe);
         }
     }
 
@@ -225,9 +218,8 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                Miscellaneous exception, most likely occuring in the
      *                persistence component.
      */
-    public void duplicateL10nProfile(long p_profileId, String p_newName,
-            Collection p_localePairs, String p_displayRoleName)
-            throws RemoteException, ProjectHandlerException
+    public void duplicateL10nProfile(long p_profileId, String p_newName, Collection p_localePairs,
+            String p_displayRoleName) throws RemoteException, ProjectHandlerException
     {
         org.hibernate.Session session = null;
         Transaction transaction = null;
@@ -237,8 +229,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
             BasicL10nProfile profileToBeDuplicated = (BasicL10nProfile) getL10nProfile(p_profileId);
-            Collection workflowTemplateInfos = profileToBeDuplicated
-                    .getWorkflowTemplateInfos();
+            Collection workflowTemplateInfos = profileToBeDuplicated.getWorkflowTemplateInfos();
 
             if (workflowTemplateInfos.size() > 1)
             {
@@ -255,24 +246,21 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
 
             WorkflowTemplate iflowTemplate = ServerProxy.getWorkflowServer()
-                    .getWorkflowTemplateById(
-                            workflowTemplateInfo.getWorkflowTemplateId());
+                    .getWorkflowTemplateById(workflowTemplateInfo.getWorkflowTemplateId());
             Iterator it = p_localePairs.iterator();
 
             while (it.hasNext())
             {
                 LocalePair localePair = (LocalePair) it.next();
                 BasicL10nProfile duplicatedProfile = L10nProfileFactory
-                        .makeDuplicateL10nProfile(profileToBeDuplicated,
-                                localePair.getSource());
+                        .makeDuplicateL10nProfile(profileToBeDuplicated, localePair.getSource());
 
                 String autoName = generateAutoName(p_newName, localePair);
                 c_category.info("The value of name is " + autoName);
                 duplicatedProfile.setName(autoName);
                 duplicatedProfile.setSourceLocale(localePair.getSource());
-                WorkflowTemplateInfo wftInfo = duplicateWorkflowTemplate(
-                        autoName, workflowTemplateInfo.getId(), localePair,
-                        iflowTemplate, p_displayRoleName);
+                WorkflowTemplateInfo wftInfo = duplicateWorkflowTemplate(autoName,
+                        workflowTemplateInfo.getId(), localePair, iflowTemplate, p_displayRoleName);
 
                 Vector v = new Vector();
                 v.add(wftInfo);
@@ -305,11 +293,9 @@ public class ProjectHandlerLocal implements ProjectHandler
 
             String[] args = new String[1];
             args[0] = Long.toString(p_profileId);
-            c_category.error(e.getMessage() + " " + Long.toString(p_profileId),
-                    e);
+            c_category.error(e.getMessage() + " " + Long.toString(p_profileId), e);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_DUPLICATE_PROFILE,
-                    args, e);
+                    ProjectHandlerException.MSG_FAILED_TO_DUPLICATE_PROFILE, args, e);
         }
         finally
         {
@@ -341,9 +327,8 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                Failed to modify the profile; the cause is indicated by
      *                the exception code.
      */
-    public void modifyL10nProfile(L10nProfile p_l10nProfile,
-            Vector<WorkflowInfos> workflowInfos, long originalLocId)
-            throws RemoteException, ProjectHandlerException
+    public void modifyL10nProfile(L10nProfile p_l10nProfile, Vector<WorkflowInfos> workflowInfos,
+            long originalLocId) throws RemoteException, ProjectHandlerException
     {
         // Clone the modified profile so that it can be inserted to
         // system. The modified profile is created with a new profile id.
@@ -365,10 +350,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             {
                 c_category.debug("The value of tm choice in p_l10nProfile is "
                         + p_l10nProfile.getTmChoice());
-                c_category.debug("The modified l10n profile is "
-                        + modifiedProfile.toDebugString());
-                c_category.debug("The value of tm choice is "
-                        + modifiedProfile.getTmChoice());
+                c_category.debug("The modified l10n profile is " + modifiedProfile.toDebugString());
+                c_category.debug("The value of tm choice is " + modifiedProfile.getTmChoice());
             }
 
             modifiedProfile.setId(-1L);
@@ -377,18 +360,18 @@ public class ProjectHandlerLocal implements ProjectHandler
             // Now create a version node in profile version table
             if (c_category.isDebugEnabled())
             {
-                c_category.debug("ProfileID Before = " + originalLocId
-                        + " Modified == " + modifiedProfile.getId());
+                c_category.debug("ProfileID Before = " + originalLocId + " Modified == "
+                        + modifiedProfile.getId());
             }
 
-            L10nProfileVersion versionInfo = new L10nProfileVersion(
-                    originalLocId, modifiedProfile.getId());
+            L10nProfileVersion versionInfo = new L10nProfileVersion(originalLocId,
+                    modifiedProfile.getId());
             session.save(versionInfo);
 
             // delete the old version of it (logically deleted)
             // this is a modification so get the original profile.
-            originalProfile = (BasicL10nProfile) session.get(
-                    BasicL10nProfile.class, new Long(originalLocId));
+            originalProfile = (BasicL10nProfile) session.get(BasicL10nProfile.class,
+                    new Long(originalLocId));
 
             if (originalProfile != null)
             {
@@ -412,8 +395,8 @@ public class ProjectHandlerLocal implements ProjectHandler
                 if (fProfile.getReferenceFP() > 0)
                 {
                     long refFPId = fProfile.getReferenceFP();
-                    FileProfileImpl refXlzFP = HibernateUtil.get(
-                            FileProfileImpl.class, refFPId, false);
+                    FileProfileImpl refXlzFP = HibernateUtil.get(FileProfileImpl.class, refFPId,
+                            false);
                     refXlzFP.setL10nProfileId(modifiedProfile.getId());
                 }
             }
@@ -430,8 +413,7 @@ public class ProjectHandlerLocal implements ProjectHandler
 
             for (int i = 0; i < dProfiles.size(); i++)
             {
-                DatabaseProfileImpl dProfile = (DatabaseProfileImpl) dProfiles
-                        .get(i);
+                DatabaseProfileImpl dProfile = (DatabaseProfileImpl) dProfiles.get(i);
                 dProfile.setL10nProfileId(modifiedProfile.getId());
             }
 
@@ -448,26 +430,19 @@ public class ProjectHandlerLocal implements ProjectHandler
             {
                 L10nProfileWFTemplateInfo l10nProfileWFTemplateInfo = new L10nProfileWFTemplateInfo();
                 L10nProfileWFTemplateInfoKey l10nProfileWFTemplateInfoKey = new L10nProfileWFTemplateInfoKey();
-                l10nProfileWFTemplateInfoKey.setL10nProfileId(modifiedProfile
-                        .getId());
-                l10nProfileWFTemplateInfoKey.setWfTemplateId(workflowInfos.get(
-                        i).getWfId());
-                l10nProfileWFTemplateInfoKey.setMtProfileId(workflowInfos
-                        .get(i).getMtProfileId());
+                l10nProfileWFTemplateInfoKey.setL10nProfileId(modifiedProfile.getId());
+                l10nProfileWFTemplateInfoKey.setWfTemplateId(workflowInfos.get(i).getWfId());
+                l10nProfileWFTemplateInfoKey.setMtProfileId(workflowInfos.get(i).getMtProfileId());
                 l10nProfileWFTemplateInfo.setKey(l10nProfileWFTemplateInfoKey);
-                l10nProfileWFTemplateInfo.setIsActive(workflowInfos.get(i)
-                        .isActive());
+                l10nProfileWFTemplateInfo.setIsActive(workflowInfos.get(i).isActive());
 
-                if (ph.isPrimaryKeyExist(modifiedProfile.getId(), workflowInfos
-                        .get(i).getWfId()))
+                if (ph.isPrimaryKeyExist(modifiedProfile.getId(), workflowInfos.get(i).getWfId()))
                 {
-                    updateL10nProfileWfTemplateInfo(session,
-                            l10nProfileWFTemplateInfo);
+                    updateL10nProfileWfTemplateInfo(session, l10nProfileWFTemplateInfo);
                 }
                 else
                 {
-                    saveL10nProfileWfTemplateInfo(session,
-                            l10nProfileWFTemplateInfo);
+                    saveL10nProfileWfTemplateInfo(session, l10nProfileWFTemplateInfo);
                 }
             }
 
@@ -480,13 +455,11 @@ public class ProjectHandlerLocal implements ProjectHandler
                 transaction.rollback();
             }
 
-            c_category.error(p_l10nProfile.toString() + " " + pe.getMessage(),
-                    pe);
+            c_category.error(p_l10nProfile.toString() + " " + pe.getMessage(), pe);
             String[] args = new String[1];
             args[0] = Long.toString(originalLocId);
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_MODIFY_PROFILE, args,
-                    pe);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_MODIFY_PROFILE,
+                    args, pe);
         }
     }
 
@@ -516,9 +489,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             c_category.error("Couldn't remove the L10nProfile", pe);
             String args[] =
             { Long.toString(p_l10nProfile.getId()) };
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_REMOVE_PROFILE, args,
-                    pe);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_REMOVE_PROFILE,
+                    args, pe);
         }
     }
 
@@ -533,65 +505,57 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                Miscellaneous exception, most likely occuring in the
      *                persistence component.
      */
-    public Collection getAllL10nProfiles() throws RemoteException,
-            ProjectHandlerException
+    public Collection getAllL10nProfiles() throws RemoteException, ProjectHandlerException
     {
         try
         {
-            HashMap map = CompanyWrapper.addCompanyIdBoundArgs(
-                    CompanyWrapper.COPMANY_ID_START_ARG,
+            HashMap map = CompanyWrapper.addCompanyIdBoundArgs(CompanyWrapper.COPMANY_ID_START_ARG,
                     CompanyWrapper.COPMANY_ID_END_ARG);
 
-            return HibernateUtil.searchWithSql(
-                    L10nProfileDescriptorModifier.CURRENT_PROFILES_SQL, map,
-                    BasicL10nProfile.class);
+            return HibernateUtil.searchWithSql(L10nProfileDescriptorModifier.CURRENT_PROFILES_SQL,
+                    map, BasicL10nProfile.class);
         }
         catch (Exception pe)
         {
             c_category.error(pe.getMessage(), pe);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILES,
-                    null, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILES, null, pe);
         }
     }
-    
-	@Override
-	public Collection getL10ProfilesByProjectId(long projectId)
-			throws RemoteException, ProjectHandlerException
-	{
-		try
-		{
-			String hql = "FROM BasicL10nProfile L1 where L1.isActive = 'Y' and L1.project.id="
-					+ projectId + " order by L1.name";
-			return HibernateUtil.search(hql);
-		}
-		catch (Exception pe)
-		{
-			throw new ProjectHandlerException(
-					ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILES,
-					null, pe);
-		}
-	}
+
+    @Override
+    public Collection getL10ProfilesByProjectId(long projectId)
+            throws RemoteException, ProjectHandlerException
+    {
+        try
+        {
+            String hql = "FROM BasicL10nProfile L1 where L1.isActive = 'Y' and L1.project.id="
+                    + projectId + " order by L1.name";
+            return HibernateUtil.search(hql);
+        }
+        catch (Exception pe)
+        {
+            throw new ProjectHandlerException(
+                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILES, null, pe);
+        }
+    }
 
     /**
      * Get both active and inactive L10nProfiles for current company.
      */
-    public Collection getAllL10nProfilesData() throws RemoteException,
-            ProjectHandlerException
+    public Collection getAllL10nProfilesData() throws RemoteException, ProjectHandlerException
     {
         try
         {
             String hql = "FROM BasicL10nProfile L1 where L1.companyId="
-                    + CompanyWrapper.getCurrentCompanyId()
-                    + " order by L1.name";
+                    + CompanyWrapper.getCurrentCompanyId() + " order by L1.name";
             return HibernateUtil.search(hql);
         }
         catch (Exception pe)
         {
             c_category.error(pe.getMessage(), pe);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILES,
-                    null, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILES, null, pe);
         }
     }
 
@@ -606,8 +570,7 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                Miscellaneous exception, most likely occuring in the
      *                persistence component.
      */
-    public Vector getAllL10nProfilesForGUI() throws RemoteException,
-            ProjectHandlerException
+    public Vector getAllL10nProfilesForGUI() throws RemoteException, ProjectHandlerException
     {
         try
         {
@@ -616,22 +579,20 @@ public class ProjectHandlerLocal implements ProjectHandler
             map.put(CompanyWrapper.COPMANY_ID_START_ARG, args.get(0));
             map.put(CompanyWrapper.COPMANY_ID_END_ARG, args.get(1));
 
-            ArrayList result = (ArrayList) HibernateUtil.searchWithSql(
-                    L10nProfileDescriptorModifier.CURRENT_PROFILEINFOS_GUI_SQL,
-                    map);
+            ArrayList result = (ArrayList) HibernateUtil
+                    .searchWithSql(L10nProfileDescriptorModifier.CURRENT_PROFILEINFOS_GUI_SQL, map);
             return L10nProfileForGUIQueryResultHandler.handleResult(result);
         }
         catch (Exception pe)
         {
             c_category.error(pe.getMessage(), pe);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILES_FOR_GUI,
-                    null, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILES_FOR_GUI, null, pe);
         }
     }
 
-    public Vector getAllL10nProfilesForGUI(String[] filterParams,
-            Locale uiLocale) throws RemoteException, ProjectHandlerException
+    public Vector getAllL10nProfilesForGUI(String[] filterParams, Locale uiLocale)
+            throws RemoteException, ProjectHandlerException
     {
         Connection conn = null;
         Statement st = null;
@@ -652,17 +613,16 @@ public class ProjectHandlerLocal implements ProjectHandler
                 String tmpName = rs.getString("tmpname");
                 String projectName = rs.getString("project_name");
                 String projectId = rs.getString("project_id");
-                char isAutoDispatch = rs.getString("is_auto_dispatch")
-                        .toCharArray()[0];
+                char isAutoDispatch = rs.getString("is_auto_dispatch").toCharArray()[0];
                 String srcLocaleId = rs.getString("source_locale_id");
                 int wftCount = Integer.valueOf(rs.getString("countwft"));
-                BasicL10nProfileInfo basicL10nProfileInfo = new BasicL10nProfileInfo(
-                        id, name, description, companyId);
+                BasicL10nProfileInfo basicL10nProfileInfo = new BasicL10nProfileInfo(id, name,
+                        description, companyId);
                 basicL10nProfileInfo.setTmProfileName(tmpName);
                 basicL10nProfileInfo.setProjectName(projectName);
                 basicL10nProfileInfo.setIsAutoDispatch(isAutoDispatch);
-                basicL10nProfileInfo.setSrcLocaleName(CacheData
-                        .getLocaleDisplayNameById(srcLocaleId, uiLocale));
+                basicL10nProfileInfo.setSrcLocaleName(
+                        CacheData.getLocaleDisplayNameById(srcLocaleId, uiLocale));
                 basicL10nProfileInfo.setWFTCount(wftCount);
                 basicL10nProfileInfo.setTMProfileId(tmpId);
                 basicL10nProfileInfo.setProjectId(projectId);
@@ -674,8 +634,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             c_category.error(pe.getMessage(), pe);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILES_FOR_GUI,
-                    null, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILES_FOR_GUI, null, pe);
         }
         finally
         {
@@ -690,12 +649,14 @@ public class ProjectHandlerLocal implements ProjectHandler
         Vector args = CompanyWrapper.addCompanyIdBoundArgs(new Vector());
         StringBuffer sql = new StringBuffer(
                 "select l10n.ID, l10n.NAME, l10n.DESCRIPTION,l10n.COMPANYID,tmp.NAME TMPNAME,tmp.ID TMPID, p.PROJECT_NAME, p.PROJECT_SEQ project_id, l10n.IS_AUTO_DISPATCH, l10n.SOURCE_LOCALE_ID,count(lpwi.WF_TEMPLATE_ID) countwft");
-        sql.append(" from l10n_profile l10n, l10n_profile_tm_profile lptp, tm_profile tmp, project p, company c,l10n_profile_wftemplate_info lpwi");
+        sql.append(
+                " from l10n_profile l10n, l10n_profile_tm_profile lptp, tm_profile tmp, project p, company c,l10n_profile_wftemplate_info lpwi");
         sql.append(" where 1 = 1");
         sql.append(" and l10n.IS_ACTIVE = 'Y'");
         sql.append(" and lpwi.IS_ACTIVE = 'Y'");
         sql.append(" and l10n.ID = lpwi.L10N_PROFILE_ID");
-        sql.append(" and l10n.ID =  (select max(l10n2.ID) from l10n_profile l10n2 where l10n2.NAME = l10n.NAME and l10n2.COMPANYID = l10n.COMPANYID)");
+        sql.append(
+                " and l10n.ID =  (select max(l10n2.ID) from l10n_profile l10n2 where l10n2.NAME = l10n.NAME and l10n2.COMPANYID = l10n.COMPANYID)");
         sql.append(" and l10n.COMPANYID >= " + args.get(0));
         sql.append(" and l10n.COMPANYID <= " + args.get(1));
         if (filterParams[0] != null && filterParams[0].trim().length() > 0)
@@ -719,8 +680,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             sql.append(" and p.PROJECT_NAME LIKE '%" + filterParams[3] + "%'");
         }
         sql.append(" group by l10n.ID, l10n.NAME, l10n.DESCRIPTION, "
-                    + "l10n.COMPANYID, tmp.NAME, tmp.ID, p.PROJECT_NAME, p.PROJECT_SEQ,"
-                    + "l10n.IS_AUTO_DISPATCH,l10n.SOURCE_LOCALE_ID");
+                + "l10n.COMPANYID, tmp.NAME, tmp.ID, p.PROJECT_NAME, p.PROJECT_SEQ,"
+                + "l10n.IS_AUTO_DISPATCH,l10n.SOURCE_LOCALE_ID");
         sql.append(" order by l10n.NAME ");
         return sql.toString();
     }
@@ -737,26 +698,22 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                Miscellaneous exception, most likely occuring in the
      *                persistence component.
      */
-    public Hashtable getAllL10nProfileNames() throws RemoteException,
-            ProjectHandlerException
+    public Hashtable getAllL10nProfileNames() throws RemoteException, ProjectHandlerException
     {
         try
         {
-            HashMap map = CompanyWrapper.addCompanyIdBoundArgs(
-                    CompanyWrapper.COPMANY_ID_START_ARG,
+            HashMap map = CompanyWrapper.addCompanyIdBoundArgs(CompanyWrapper.COPMANY_ID_START_ARG,
                     CompanyWrapper.COPMANY_ID_END_ARG);
 
             String sql = L10nProfileDescriptorModifier.CURRENT_PROFILEINFOS_SQL;
-            ArrayList result = (ArrayList) HibernateUtil
-                    .searchWithSql(sql, map);
+            ArrayList result = (ArrayList) HibernateUtil.searchWithSql(sql, map);
             return L10nProfileQueryResultHandler.handleResult(result);
         }
         catch (PersistenceException pe)
         {
             c_category.error(pe.getMessage(), pe);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILE_NAMES,
-                    null, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROFILE_NAMES, null, pe);
         }
     }
 
@@ -773,8 +730,8 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                Miscellaneous exception, most likely occuring in the
      *                persistence component.
      */
-    public L10nProfile getL10nProfile(long p_profileId) throws RemoteException,
-            ProjectHandlerException
+    public L10nProfile getL10nProfile(long p_profileId)
+            throws RemoteException, ProjectHandlerException
     {
         // There should be one localization profile returned from the querey
         try
@@ -793,22 +750,19 @@ public class ProjectHandlerLocal implements ProjectHandler
             String[] args = new String[1];
             args[0] = Long.toString(p_profileId);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_LOCALIZATION_PROFILE,
-                    args, null);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_LOCALIZATION_PROFILE, args, null);
 
         }
         catch (Exception pe)
         {
-            c_category.error(
-                    Long.toString(p_profileId) + " " + pe.getMessage(), pe);
+            c_category.error(Long.toString(p_profileId) + " " + pe.getMessage(), pe);
             String[] args = new String[1];
             args[0] = Long.toString(p_profileId);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_LOCALIZATION_PROFILE,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_LOCALIZATION_PROFILE, args, pe);
         }
     }
-    
+
     public L10nProfile getL10nProfileByName(String p_profileName, String p_companyId)
     {
         try
@@ -858,8 +812,7 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                Failed to add the project; the cause is indicated by the
      *                exception code.
      */
-    public void addProject(Project p_project) throws RemoteException,
-            ProjectHandlerException
+    public void addProject(Project p_project) throws RemoteException, ProjectHandlerException
     {
         try
         {
@@ -876,12 +829,11 @@ public class ProjectHandlerLocal implements ProjectHandler
             if (pe.getOriginalException().getClass() == java.sql.SQLException.class)
             {
                 throw new ProjectHandlerException(
-                        ProjectHandlerException.MSG_FAILED_TO_ADD_PROJECT_ALREADY_EXISTS,
-                        args, pe);
+                        ProjectHandlerException.MSG_FAILED_TO_ADD_PROJECT_ALREADY_EXISTS, args, pe);
             }
 
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_ADD_PROJECT, args, pe);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_ADD_PROJECT,
+                    args, pe);
 
         }
         catch (Exception te)
@@ -890,8 +842,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             String[] args = new String[1];
             args[0] = p_project.getName();
 
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_ADD_PROJECT, args, te);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_ADD_PROJECT,
+                    args, te);
 
         }
         try
@@ -905,8 +857,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             String args[] =
             { p_project.getName() };
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_ADD_VENDORS_TO_PROJECT,
-                    args, e);
+                    ProjectHandlerException.MSG_FAILED_TO_ADD_VENDORS_TO_PROJECT, args, e);
         }
     }
 
@@ -921,8 +872,7 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                Failed to create the project; the cause is indicated by
      *                the exception code.
      */
-    public Project createProject() throws RemoteException,
-            ProjectHandlerException
+    public Project createProject() throws RemoteException, ProjectHandlerException
     {
         return new ProjectImpl();
     }
@@ -952,37 +902,27 @@ public class ProjectHandlerLocal implements ProjectHandler
             clone.setQuotePerson(null);
             clone.setTermbaseName(originalProject.getTermbaseName());
             clone.setUserIds(originalProject.getUserIds());
-            clone.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance()
-                    .getValue()));
+            clone.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance().getValue()));
             clone.setAttributeSet(originalProject.getAttributeSet());
             clone.setPMCost(originalProject.getPMCost());
             clone.setPoRequired(originalProject.getPoRequired());
-            clone.setAutoAcceptTrans(originalProject
-            		.getAutoAcceptTrans());
+            clone.setAutoAcceptTrans(originalProject.getAutoAcceptTrans());
             clone.setAutoSendTrans(originalProject.getAutoSendTrans());
-            clone.setReviewOnlyAutoAccept(originalProject
-                    .getReviewOnlyAutoAccept());
+            clone.setReviewOnlyAutoAccept(originalProject.getReviewOnlyAutoAccept());
             clone.setReviewOnlyAutoSend(originalProject.getReviewOnlyAutoSend());
-            clone.setReviewReportIncludeCompactTags(originalProject
-                    .isReviewReportIncludeCompactTags());
+            clone.setReviewReportIncludeCompactTags(
+                    originalProject.isReviewReportIncludeCompactTags());
             clone.setAutoAcceptPMTask(originalProject.getAutoAcceptPMTask());
-            clone.setCheckUnTranslatedSegments(originalProject
-                    .isCheckUnTranslatedSegments());
-            clone.setSaveTranslationsEditReport(originalProject
-                    .getSaveTranslationsEditReport());
-            clone.setSaveReviewersCommentsReport(originalProject
-                    .getSaveReviewersCommentsReport());
+            clone.setCheckUnTranslatedSegments(originalProject.isCheckUnTranslatedSegments());
+            clone.setSaveTranslationsEditReport(originalProject.getSaveTranslationsEditReport());
+            clone.setSaveReviewersCommentsReport(originalProject.getSaveReviewersCommentsReport());
             clone.setSaveOfflineFiles(originalProject.getSaveOfflineFiles());
-            clone.setAllowManualQAChecks(originalProject
-                    .getAllowManualQAChecks());
+            clone.setAllowManualQAChecks(originalProject.getAllowManualQAChecks());
             clone.setAutoAcceptQATask(originalProject.getAutoAcceptQATask());
             clone.setAutoSendQAReport(originalProject.getAutoSendQAReport());
-            clone.setManualRunDitaChecks(originalProject
-                    .getManualRunDitaChecks());
-            clone.setAutoAcceptDitaQaTask(originalProject
-                    .getAutoAcceptDitaQaTask());
-            clone.setAutoSendDitaQaReport(originalProject
-                    .getAutoSendDitaQaReport());
+            clone.setManualRunDitaChecks(originalProject.getManualRunDitaChecks());
+            clone.setAutoAcceptDitaQaTask(originalProject.getAutoAcceptDitaQaTask());
+            clone.setAutoSendDitaQaReport(originalProject.getAutoSendDitaQaReport());
 
             String quotePersonId = originalProject.getQuotePersonId();
             if (quotePersonId != null && !"".equals(quotePersonId))
@@ -996,8 +936,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                     User quotePerson = null;
                     try
                     {
-                        quotePerson = lookupUserManager()
-                                .getUser(quotePersonId);
+                        quotePerson = lookupUserManager().getUser(quotePersonId);
                     }
                     catch (UserManagerException ume)
                     {
@@ -1020,20 +959,14 @@ public class ProjectHandlerLocal implements ProjectHandler
 
             if (!originalProject.getProjectManagerId().equals(originalPm))
             {
-                Serializable msg = new ProjectUpdateMessage(p_modifierId,
-                        originalPm, originalProject.getProjectManagerId(),
-                        originalProject.getIdAsLong());
-                try
-                {
-                    JmsHelper.sendMessageToQueue(msg,
-                            JmsHelper.JMS_PROJECT_UPDATE_QUEUE);
-                }
-                catch (Exception e)
-                {
-                    c_category
-                            .error("Failed to send JMS message for project update.",
-                                    e);
-                }
+                Map<String, Object> data = new HashMap<String, Object>();
+                data.put("modifierId", p_modifierId);
+                data.put("originalPm", originalPm);
+                data.put("newPm", originalProject.getProjectManagerId());
+                data.put("projectId", originalProject.getId());
+                data.put("companyId", originalProject.getCompanyId());
+                // GBS-4400
+                ProjectUpdateUtil.performUpdateProcessWithThread(data);
             }
         }
         catch (PersistenceException pe)
@@ -1045,9 +978,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             c_category.error(p_project.toString() + " " + pe.getMessage(), pe);
             String[] args = new String[1];
             args[0] = Long.toString(p_project.getId());
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_MODIFY_PROJECT, args,
-                    pe);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_MODIFY_PROJECT,
+                    args, pe);
         }
     }
 
@@ -1063,13 +995,11 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                Failed to delete the project; the cause is indicated by
      *                the exception code.
      */
-    public void deleteProject(Project p_project) throws RemoteException,
-            ProjectHandlerException
+    public void deleteProject(Project p_project) throws RemoteException, ProjectHandlerException
     {
         if (c_category.isDebugEnabled())
         {
-            c_category.debug("deleteProject "
-                    + ((ProjectImpl) p_project).toDebugString());
+            c_category.debug("deleteProject " + ((ProjectImpl) p_project).toDebugString());
         }
 
         List projects = new ArrayList();
@@ -1077,13 +1007,9 @@ public class ProjectHandlerLocal implements ProjectHandler
         Collection l10nProfiles = getL10nProfiles(projects);
         if (!l10nProfiles.isEmpty())
         {
-            throw new ProjectHandlerDeleteConstrainedProjectException(
-                    p_project.getName()
-                            + " with id "
-                            + ((ProjectImpl) p_project).getIdAsLong()
-                                    .toString()
-                            + " is associated with L10nProfile "
-                            + l10nProfiles.toString());
+            throw new ProjectHandlerDeleteConstrainedProjectException(p_project.getName()
+                    + " with id " + ((ProjectImpl) p_project).getIdAsLong().toString()
+                    + " is associated with L10nProfile " + l10nProfiles.toString());
         }
 
         try
@@ -1097,9 +1023,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             c_category.error(p_project.toString() + " " + pe.getMessage(), pe);
             String[] args = new String[1];
             args[0] = Long.toString(p_project.getId());
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_REMOVE_PROJECT, args,
-                    pe);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_REMOVE_PROJECT,
+                    args, pe);
         }
     }
 
@@ -1114,8 +1039,7 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                Miscellaneous exception, most likely occuring in the
      *                persistence component.
      */
-    public Collection<Project> getAllProjects() throws RemoteException,
-            ProjectHandlerException
+    public Collection<Project> getAllProjects() throws RemoteException, ProjectHandlerException
     {
         try
         {
@@ -1124,8 +1048,7 @@ public class ProjectHandlerLocal implements ProjectHandler
 
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
-                hql = hql + " and project.companyId ="
-                        + Long.parseLong(currentId);
+                hql = hql + " and project.companyId =" + Long.parseLong(currentId);
             }
 
             List queryResult = HibernateUtil.search(hql);
@@ -1135,8 +1058,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 User pm = null;
                 try
                 {
-                    pm = lookupUserManager().getUser(
-                            project.getProjectManagerId());
+                    pm = lookupUserManager().getUser(project.getProjectManagerId());
                 }
                 catch (UserManagerException ume)
                 {
@@ -1158,8 +1080,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                         User quotePerson = null;
                         try
                         {
-                            quotePerson = lookupUserManager().getUser(
-                                    quotePersonId);
+                            quotePerson = lookupUserManager().getUser(quotePersonId);
                         }
                         catch (UserManagerException ume)
                         {
@@ -1182,27 +1103,25 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             c_category.error(pe.getMessage(), pe);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROJECTS,
-                    null, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROJECTS, null, pe);
         }
     }
 
     /**
      * @see ProjectHandler.getAllProjectInfosForGUI.
      */
-    public List<ProjectInfo> getAllProjectInfosForGUI() throws RemoteException,
-            ProjectHandlerException
+    public List<ProjectInfo> getAllProjectInfosForGUI()
+            throws RemoteException, ProjectHandlerException
     {
         return getAllProjectInfosForGUIbyCondition("");
     }
 
-    public List<ProjectInfo> getAllProjectInfosForGUIbyCondition(
-            String condition) throws RemoteException, ProjectHandlerException
+    public List<ProjectInfo> getAllProjectInfosForGUIbyCondition(String condition)
+            throws RemoteException, ProjectHandlerException
     {
         try
         {
-            String hql = "select new com.globalsight.everest.projecthandler.ProjectInfo"
-                    + "( p )"
+            String hql = "select new com.globalsight.everest.projecthandler.ProjectInfo" + "( p )"
                     + " from ProjectImpl p ,Company c where p.isActive = 'Y' and c.id=p.companyId";
             Session session = HibernateUtil.getSession();
             String currentId = CompanyThreadLocal.getInstance().getValue();
@@ -1248,8 +1167,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             c_category.error(pe.getMessage(), pe);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROJECTS_FOR_GUI,
-                    null, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROJECTS_FOR_GUI, null, pe);
         }
     }
 
@@ -1265,19 +1183,15 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                Miscellaneous exception, most likely occuring in the
      *                persistence component.
      */
-    public Hashtable getAllProjectNames() throws RemoteException,
-            ProjectHandlerException
+    public Hashtable getAllProjectNames() throws RemoteException, ProjectHandlerException
     {
         Hashtable projectNames = new Hashtable();
 
         try
         {
-            String hql = "select p.name,p.id from ProjectImpl p "
-                    + " where p.isActive = 'Y' "
-                    + " p.companyId >=:companyIdStart "
-                    + " and p.companyId <=:companyIdEnd";
-            HashMap map = CompanyWrapper.addCompanyIdBoundArgs(
-                    "companyIdStart", "companyIdEnd");
+            String hql = "select p.name,p.id from ProjectImpl p " + " where p.isActive = 'Y' "
+                    + " p.companyId >=:companyIdStart " + " and p.companyId <=:companyIdEnd";
+            HashMap map = CompanyWrapper.addCompanyIdBoundArgs("companyIdStart", "companyIdEnd");
             ArrayList setOfProjectNames = (ArrayList) ProjectQueryResultHandler
                     .handleResult(HibernateUtil.search(hql, map));
 
@@ -1286,8 +1200,7 @@ public class ProjectHandlerLocal implements ProjectHandler
 
             if (c_category.isDebugEnabled())
             {
-                c_category.debug("getAllProjectNames returns "
-                        + projectNames.toString());
+                c_category.debug("getAllProjectNames returns " + projectNames.toString());
             }
             return projectNames;
         }
@@ -1295,8 +1208,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             c_category.error(pe.getMessage(), pe);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROJECTS,
-                    null, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_PROJECTS, null, pe);
         }
     }
 
@@ -1311,8 +1223,7 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                System or network related exception.
      * @exception ProjectHandlerException
      */
-    public Project getProjectById(long p_id) throws RemoteException,
-            ProjectHandlerException
+    public Project getProjectById(long p_id) throws RemoteException, ProjectHandlerException
     {
         Project project = null;
 
@@ -1349,8 +1260,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                     User quotePerson = null;
                     try
                     {
-                        quotePerson = lookupUserManager()
-                                .getUser(quotePersonId);
+                        quotePerson = lookupUserManager().getUser(quotePersonId);
                     }
                     catch (UserManagerException ume)
                     {
@@ -1368,8 +1278,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
             if (c_category.isDebugEnabled())
             {
-                c_category.debug("getProjectById " + Long.toString(p_id)
-                        + " returned "
+                c_category.debug("getProjectById " + Long.toString(p_id) + " returned "
                         + ((ProjectImpl) project).toDebugString());
             }
 
@@ -1381,8 +1290,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             String[] args = new String[1];
             args[0] = Long.toString(p_id);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_BY_ID,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_BY_ID, args, pe);
         }
     }
 
@@ -1434,8 +1342,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                     User quotePerson = null;
                     try
                     {
-                        quotePerson = lookupUserManager()
-                                .getUser(quotePersonId);
+                        quotePerson = lookupUserManager().getUser(quotePersonId);
                     }
                     catch (UserManagerException ume)
                     {
@@ -1453,8 +1360,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
             if (c_category.isDebugEnabled())
             {
-                c_category.debug("getProjectByNameAndCompanyId " + p_name
-                        + " returned "
+                c_category.debug("getProjectByNameAndCompanyId " + p_name + " returned "
                         + ((ProjectImpl) project).toDebugString());
             }
 
@@ -1466,8 +1372,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             String[] args = new String[1];
             args[0] = p_name;
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_BY_NAME,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_BY_NAME, args, pe);
         }
     }
 
@@ -1485,8 +1390,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         try
         {
             String hsql = "from ProjectImpl p where p.isActive = 'Y'";
-            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String
-                    .valueOf(companyId)))
+            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String.valueOf(companyId)))
             {
                 hsql += " and p.companyId =" + companyId;
             }
@@ -1515,8 +1419,7 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @exception ProjectHandlerException
      * 
      */
-    public Project getProjectByName(String p_name) throws RemoteException,
-            ProjectHandlerException
+    public Project getProjectByName(String p_name) throws RemoteException, ProjectHandlerException
     {
         Project project = null;
 
@@ -1565,8 +1468,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                     User quotePerson = null;
                     try
                     {
-                        quotePerson = lookupUserManager()
-                                .getUser(quotePersonId);
+                        quotePerson = lookupUserManager().getUser(quotePersonId);
                     }
                     catch (UserManagerException ume)
                     {
@@ -1596,8 +1498,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             String[] args = new String[1];
             args[0] = p_name;
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_BY_NAME,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_BY_NAME, args, pe);
         }
     }
 
@@ -1609,8 +1510,7 @@ public class ProjectHandlerLocal implements ProjectHandler
     {
         // use a set nad comparator off of the project name
         // so no duplicate projects are returned
-        ProjectComparator pc = new ProjectComparator(new Locale(
-                p_user.getDefaultUILocale()));
+        ProjectComparator pc = new ProjectComparator(new Locale(p_user.getDefaultUILocale()));
         Set<Project> projects = new TreeSet<Project>(pc);
 
         try
@@ -1638,15 +1538,13 @@ public class ProjectHandlerLocal implements ProjectHandler
                 // if the user manages projects and can get all projects they
                 // manage
                 if (userPerms.getPermissionFor(Permission.PROJECTS_MANAGE)
-                        && userPerms
-                                .getPermissionFor(Permission.GET_PROJECTS_I_MANAGE))
+                        && userPerms.getPermissionFor(Permission.GET_PROJECTS_I_MANAGE))
                 {
-                    projects.addAll(getProjectsManagedByUser(p_user,
-                            Permission.GROUP_MODULE_GLOBALSIGHT));
+                    projects.addAll(
+                            getProjectsManagedByUser(p_user, Permission.GROUP_MODULE_GLOBALSIGHT));
                 }
                 // if the user can get the projects they belong to also
-                if (userPerms
-                        .getPermissionFor(Permission.GET_PROJECTS_I_BELONG))
+                if (userPerms.getPermissionFor(Permission.GET_PROJECTS_I_BELONG))
                 {
                     projects.addAll(getProjectsByUser(p_user.getUserId()));
                 }
@@ -1654,14 +1552,12 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception e)
         {
-            c_category
-                    .error("Couldn't get the projects by permission for user "
-                            + p_user.getUserName());
+            c_category.error(
+                    "Couldn't get the projects by permission for user " + p_user.getUserName());
             String args[] =
             { p_user.getUserName() };
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECTS_BY_PERMISSION,
-                    args, e);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECTS_BY_PERMISSION, args, e);
         }
 
         return new ArrayList<Project>(projects);
@@ -1685,8 +1581,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 // projects
                 projectInfos = getAllProjectInfosForGUI();
             }
-            else if (userPerms
-                    .getPermissionFor(Permission.GET_PROJECTS_I_MANAGE))
+            else if (userPerms.getPermissionFor(Permission.GET_PROJECTS_I_MANAGE))
             {
                 projectInfos = getProjectInfosByProjectManager(p_user);
             }
@@ -1740,27 +1635,24 @@ public class ProjectHandlerLocal implements ProjectHandler
     /**
      * @see ProjectHandler.getProjectInfosByUser(String)
      */
-    public List getProjectInfosByUser(String p_userId) throws RemoteException,
-            ProjectHandlerException
+    public List getProjectInfosByUser(String p_userId)
+            throws RemoteException, ProjectHandlerException
 
     {
         try
         {
             List projectInfos = null;
 
-            HashMap map = CompanyWrapper.addCompanyIdBoundArgs(
-                    CompanyWrapper.COPMANY_ID_START_ARG,
+            HashMap map = CompanyWrapper.addCompanyIdBoundArgs(CompanyWrapper.COPMANY_ID_START_ARG,
                     CompanyWrapper.COPMANY_ID_END_ARG);
             map.put("userId", p_userId);
             List list = HibernateUtil.searchWithSql(
-                    ProjectDescriptorModifier.PROJECT_INFO_BY_USER_ID_SQL, map,
-                    ProjectImpl.class);
-            Collection queryResult = ProjectQueryResultHandler
-                    .handleResultForGUI(list);
+                    ProjectDescriptorModifier.PROJECT_INFO_BY_USER_ID_SQL, map, ProjectImpl.class);
+            Collection queryResult = ProjectQueryResultHandler.handleResultForGUI(list);
             if (c_category.isDebugEnabled())
             {
-                c_category.debug("getProjectInfosByUser " + p_userId
-                        + " returns " + queryResult.toString());
+                c_category.debug(
+                        "getProjectInfosByUser " + p_userId + " returns " + queryResult.toString());
             }
             if (!queryResult.isEmpty())
             {
@@ -1774,13 +1666,12 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (PersistenceException pe)
         {
-            c_category.error("Failed to get all the project infos for a "
-                    + " user " + p_userId, pe);
+            c_category.error("Failed to get all the project infos for a " + " user " + p_userId,
+                    pe);
             String[] args = new String[1];
             args[0] = p_userId;
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_INFOS_BY_USER,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_INFOS_BY_USER, args, pe);
         }
     }
 
@@ -1793,14 +1684,12 @@ public class ProjectHandlerLocal implements ProjectHandler
         try
         {
             List projects = null;
-            HashMap map = CompanyWrapper.addCompanyIdBoundArgs(
-                    CompanyWrapper.COPMANY_ID_START_ARG,
+            HashMap map = CompanyWrapper.addCompanyIdBoundArgs(CompanyWrapper.COPMANY_ID_START_ARG,
                     CompanyWrapper.COPMANY_ID_END_ARG);
             map.put(ProjectDescriptorModifier.USER_ID_ARG, p_userId);
 
             Collection queryResult = HibernateUtil.searchWithSql(
-                    ProjectDescriptorModifier.PROJECTS_BY_USER_ID_SQL, map,
-                    ProjectImpl.class);
+                    ProjectDescriptorModifier.PROJECTS_BY_USER_ID_SQL, map, ProjectImpl.class);
 
             // setting the user object to the project through the user
             // manager id
@@ -1810,8 +1699,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 User pm = null;
                 try
                 {
-                    pm = lookupUserManager().getUser(
-                            project.getProjectManagerId());
+                    pm = lookupUserManager().getUser(project.getProjectManagerId());
                 }
                 catch (UserManagerException ume)
                 {
@@ -1833,8 +1721,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                         User quotePerson = null;
                         try
                         {
-                            quotePerson = lookupUserManager().getUser(
-                                    quotePersonId);
+                            quotePerson = lookupUserManager().getUser(quotePersonId);
                         }
                         catch (UserManagerException ume)
                         {
@@ -1853,8 +1740,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
             if (c_category.isDebugEnabled())
             {
-                c_category.debug("getProjectsByUser " + p_userId + " returns "
-                        + queryResult.toString());
+                c_category.debug(
+                        "getProjectsByUser " + p_userId + " returns " + queryResult.toString());
             }
             if (!queryResult.isEmpty())
             {
@@ -1868,34 +1755,28 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (PersistenceException pe)
         {
-            c_category.error("Failed to get all the projects for a " + " user "
-                    + p_userId, pe);
+            c_category.error("Failed to get all the projects for a " + " user " + p_userId, pe);
             String[] args = new String[1];
             args[0] = p_userId;
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECTS_BY_USER_ID,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECTS_BY_USER_ID, args, pe);
         }
     }
 
     /**
      * @see ProjectHandler.getProjectsByVendor(long)
      */
-    public List getProjectsByVendor(long p_vendorId) throws RemoteException,
-            ProjectHandlerException
+    public List getProjectsByVendor(long p_vendorId) throws RemoteException, ProjectHandlerException
     {
         try
         {
             List projects = null;
-            HashMap map = CompanyWrapper.addCompanyIdBoundArgs(
-                    CompanyWrapper.COPMANY_ID_START_ARG,
+            HashMap map = CompanyWrapper.addCompanyIdBoundArgs(CompanyWrapper.COPMANY_ID_START_ARG,
                     CompanyWrapper.COPMANY_ID_END_ARG);
-            map.put(ProjectDescriptorModifier.VENDOR_ID_ARG, new Long(
-                    p_vendorId));
+            map.put(ProjectDescriptorModifier.VENDOR_ID_ARG, new Long(p_vendorId));
 
             Collection queryResult = HibernateUtil.searchWithSql(
-                    ProjectDescriptorModifier.PROJECTS_BY_VENDOR_ID_SQL, map,
-                    ProjectImpl.class);
+                    ProjectDescriptorModifier.PROJECTS_BY_VENDOR_ID_SQL, map, ProjectImpl.class);
             // setting the user object to the project through the user
             // manager id
             for (Iterator i = queryResult.iterator(); i.hasNext();)
@@ -1904,8 +1785,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 User pm = null;
                 try
                 {
-                    pm = lookupUserManager().getUser(
-                            project.getProjectManagerId());
+                    pm = lookupUserManager().getUser(project.getProjectManagerId());
                 }
                 catch (UserManagerException ume)
                 {
@@ -1927,8 +1807,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                         User quotePerson = null;
                         try
                         {
-                            quotePerson = lookupUserManager().getUser(
-                                    quotePersonId);
+                            quotePerson = lookupUserManager().getUser(quotePersonId);
                         }
                         catch (UserManagerException ume)
                         {
@@ -1947,8 +1826,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
             if (c_category.isDebugEnabled())
             {
-                c_category.debug("getProjectsByVendor " + p_vendorId
-                        + " returns " + queryResult.toString());
+                c_category.debug(
+                        "getProjectsByVendor " + p_vendorId + " returns " + queryResult.toString());
             }
             if (!queryResult.isEmpty())
             {
@@ -1963,13 +1842,11 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (PersistenceException pe)
         {
-            c_category.error("Failed to get all the projects for " + " vendor "
-                    + p_vendorId, pe);
+            c_category.error("Failed to get all the projects for " + " vendor " + p_vendorId, pe);
             String[] args = new String[1];
             args[0] = Long.toString(p_vendorId);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECTS_BY_VENDOR_ID,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECTS_BY_VENDOR_ID, args, pe);
         }
     }
 
@@ -1984,19 +1861,16 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                System or network related exception.
      * @exception ProjectHandlerException
      */
-    public Collection<Project> getProjectsByWorkflowInstanceId(
-            long[] p_workflowInstanceIds) throws RemoteException,
-            ProjectHandlerException
+    public Collection<Project> getProjectsByWorkflowInstanceId(long[] p_workflowInstanceIds)
+            throws RemoteException, ProjectHandlerException
     {
         Project project = null;
         int size = p_workflowInstanceIds.length;
-        StringBuffer querySBuffer = new StringBuffer(
-                p_workflowInstanceIds.length * 5);
+        StringBuffer querySBuffer = new StringBuffer(p_workflowInstanceIds.length * 5);
         querySBuffer.append("{");
         for (int i = 0; i < size; i++)
         {
-            querySBuffer.append(p_workflowInstanceIds
-                    + (i != size - 1 ? ", " : ""));
+            querySBuffer.append(p_workflowInstanceIds + (i != size - 1 ? ", " : ""));
         }
         querySBuffer.append("}");
 
@@ -2008,8 +1882,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                     + "(SELECT * FROM workflow WHERE workflow_id = :workflowIds";
             HashMap map = new HashMap();
             map.put("workflowIds", querySBuffer.toString());
-            List resultSetObjects = HibernateUtil.searchWithSql(sql, map,
-                    ProjectImpl.class);
+            List resultSetObjects = HibernateUtil.searchWithSql(sql, map, ProjectImpl.class);
 
             for (int i = 0; i < resultSetObjects.size(); i++)
             {
@@ -2017,8 +1890,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 User pm = null;
                 try
                 {
-                    pm = lookupUserManager().getUser(
-                            project.getProjectManagerId());
+                    pm = lookupUserManager().getUser(project.getProjectManagerId());
                 }
                 catch (UserManagerException ume)
                 {
@@ -2040,8 +1912,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                         User quotePerson = null;
                         try
                         {
-                            quotePerson = lookupUserManager().getUser(
-                                    quotePersonId);
+                            quotePerson = lookupUserManager().getUser(quotePersonId);
                         }
                         catch (UserManagerException ume)
                         {
@@ -2061,8 +1932,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             if (c_category.isDebugEnabled())
             {
                 c_category.debug("getProjectsByWorkflowInstanceId "
-                        + ArrayConverter.asList(p_workflowInstanceIds)
-                                .toString() + " returns "
+                        + ArrayConverter.asList(p_workflowInstanceIds).toString() + " returns "
                         + resultSetObjects.toString());
             }
 
@@ -2070,13 +1940,11 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (PersistenceException pe)
         {
-            c_category.error(querySBuffer.toString() + " " + pe.getMessage(),
-                    pe);
+            c_category.error(querySBuffer.toString() + " " + pe.getMessage(), pe);
             String[] args = new String[1];
             args[0] = querySBuffer.substring(1, querySBuffer.length() - 2);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECTS_BY_WFI_ID,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECTS_BY_WFI_ID, args, pe);
         }
     }
 
@@ -2111,14 +1979,14 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (PersistenceException pe)
         {
-            c_category.error("Failed to add user " + p_userId + " to projects "
-                    + projectIdList.toString(), pe);
+            c_category.error(
+                    "Failed to add user " + p_userId + " to projects " + projectIdList.toString(),
+                    pe);
             String[] args = new String[2];
             args[0] = p_userId;
             args[1] = projectIdList.toString();
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_ADD_USER_TO_PROJECTS,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_ADD_USER_TO_PROJECTS, args, pe);
         }
         catch (Exception e)
         {
@@ -2161,14 +2029,13 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (PersistenceException pe)
         {
-            c_category.error("Failed to remove user " + p_userId
-                    + " from projects " + projectIdList.toString(), pe);
+            c_category.error("Failed to remove user " + p_userId + " from projects "
+                    + projectIdList.toString(), pe);
             String[] args = new String[2];
             args[0] = p_userId;
             args[1] = projectIdList.toString();
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_REMOVE_USER_FROM_PROJECTS,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_REMOVE_USER_FROM_PROJECTS, args, pe);
         }
         catch (Exception e)
         {
@@ -2220,14 +2087,14 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (PersistenceException pe)
         {
-            c_category.error("Failed to associate " + p_userId
-                    + " with projects " + p_projectIds.toString(), pe);
+            c_category.error(
+                    "Failed to associate " + p_userId + " with projects " + p_projectIds.toString(),
+                    pe);
             String[] args = new String[2];
             args[0] = p_userId;
             args[1] = p_projectIds.toString();
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_ASSOCIATE_USER_WITH_PROJECTS,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_ASSOCIATE_USER_WITH_PROJECTS, args, pe);
         }
         catch (Exception e)
         {
@@ -2256,17 +2123,13 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (UserManagerException ume)
         {
-            c_category
-                    .error("Failed to get all the users project manager "
-                            + p_manager.getUserName()
-                            + " can manage."
-                            + "  Could not retrieve one or more users from UserManager.",
-                            ume);
+            c_category.error("Failed to get all the users project manager "
+                    + p_manager.getUserName() + " can manage."
+                    + "  Could not retrieve one or more users from UserManager.", ume);
             String[] args =
             { p_manager.getUserName() };
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_USERS_PM_MANAGES,
-                    args, ume);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_ALL_USERS_PM_MANAGES, args, ume);
         }
 
         return userInfos;
@@ -2275,8 +2138,8 @@ public class ProjectHandlerLocal implements ProjectHandler
     /**
      * @see ProjectHandler.getUserIdsInSameProjects(User)
      */
-    public List getUserIdsInSameProjects(User p_user) throws RemoteException,
-            ProjectHandlerException
+    public List getUserIdsInSameProjects(User p_user)
+            throws RemoteException, ProjectHandlerException
     {
         // Get all projects that the project manager manages
         List projects = getProjectsByUser(p_user.getUserId());
@@ -2300,8 +2163,8 @@ public class ProjectHandlerLocal implements ProjectHandler
     /**
      * @see ProjectHandler.getProjectsWithUsers(List)
      */
-    public HashMap getProjectsWithUsers(List p_users) throws RemoteException,
-            ProjectHandlerException
+    public HashMap getProjectsWithUsers(List p_users)
+            throws RemoteException, ProjectHandlerException
     {
         HashMap hm = new HashMap();
         if (p_users != null && p_users.size() > 0)
@@ -2322,14 +2185,12 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
             catch (PersistenceException pe)
             {
-                c_category
-                        .error("Failed to query for all projects associated with a set of user ids.",
-                                pe);
+                c_category.error(
+                        "Failed to query for all projects associated with a set of user ids.", pe);
                 String[] args =
                 { userIds.toString() };
                 throw new ProjectHandlerException(
-                        ProjectHandlerException.MSG_FAILED_TO_GET_PROJECTS_BY_USER_IDS,
-                        args, pe);
+                        ProjectHandlerException.MSG_FAILED_TO_GET_PROJECTS_BY_USER_IDS, args, pe);
             }
 
             // now loop through them and create the hashmap
@@ -2359,9 +2220,8 @@ public class ProjectHandlerLocal implements ProjectHandler
      *            Collection of Projects.
      * @returns List of L10nProfiles associated with the Projects.
      */
-    public Collection<L10nProfile> getL10nProfiles(
-            Collection<Project> p_projects) throws RemoteException,
-            ProjectHandlerException
+    public Collection<L10nProfile> getL10nProfiles(Collection<Project> p_projects)
+            throws RemoteException, ProjectHandlerException
     {
         // This should be implemented with a query, not this way.
         Collection l10nProfiles = getAllL10nProfiles();
@@ -2390,9 +2250,8 @@ public class ProjectHandlerLocal implements ProjectHandler
      * Allocates a helper object to import project-related data into the
      * database.
      */
-    public IImportManager getProjectDataImportManager(User p_user,
-            long p_projectId) throws RemoteException, ProjectHandlerException,
-            ImporterException
+    public IImportManager getProjectDataImportManager(User p_user, long p_projectId)
+            throws RemoteException, ProjectHandlerException, ImporterException
     {
         if (p_user == null)
         {
@@ -2403,17 +2262,15 @@ public class ProjectHandlerLocal implements ProjectHandler
 
         Project project = getProjectById(p_projectId);
 
-        return new ImportManager(project, new SessionInfo(p_user.getUserId(),
-                ""));
+        return new ImportManager(project, new SessionInfo(p_user.getUserId(), ""));
     }
 
     /**
      * Allocates a helper object to export project-related data from the
      * database to files (CSV or XML).
      */
-    public IExportManager getProjectDataExportManager(User p_user,
-            long p_projectId) throws RemoteException, ProjectHandlerException,
-            ExporterException
+    public IExportManager getProjectDataExportManager(User p_user, long p_projectId)
+            throws RemoteException, ProjectHandlerException, ExporterException
     {
         if (p_user == null)
         {
@@ -2424,8 +2281,7 @@ public class ProjectHandlerLocal implements ProjectHandler
 
         Project project = getProjectById(p_projectId);
 
-        return new ExportManager(project, new SessionInfo(p_user.getUserId(),
-                ""));
+        return new ExportManager(project, new SessionInfo(p_user.getUserId(), ""));
     }
 
     /**
@@ -2448,8 +2304,7 @@ public class ProjectHandlerLocal implements ProjectHandler
 
             HashMap map = new HashMap();
             map.put("user_id", p_user.getUserId());
-            String currentCompanyId = CompanyThreadLocal.getInstance()
-                    .getValue();
+            String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
             {
                 hql = hql + " and p.companyId=:company_id";
@@ -2463,8 +2318,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 User pm = null;
                 try
                 {
-                    pm = lookupUserManager().getUser(
-                            project.getProjectManagerId());
+                    pm = lookupUserManager().getUser(project.getProjectManagerId());
                 }
                 catch (UserManagerException ume)
                 {
@@ -2486,8 +2340,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                         User quotePerson = null;
                         try
                         {
-                            quotePerson = lookupUserManager().getUser(
-                                    quotePersonId);
+                            quotePerson = lookupUserManager().getUser(quotePersonId);
                         }
                         catch (UserManagerException ume)
                         {
@@ -2506,8 +2359,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
             if (c_category.isDebugEnabled())
             {
-                c_category.debug("getProjectsByProjectManager "
-                        + p_user.toString() + " returns "
+                c_category.debug("getProjectsByProjectManager " + p_user.toString() + " returns "
                         + queryResult.toString());
             }
             return queryResult;
@@ -2518,8 +2370,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             String[] args = new String[1];
             args[0] = p_user.getUserName();
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECTS_BY_PM,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECTS_BY_PM, args, pe);
         }
     }
 
@@ -2544,17 +2395,14 @@ public class ProjectHandlerLocal implements ProjectHandler
 
             HashMap map = new HashMap();
             map.put("user_id", p_pm.getUserId());
-            String currentCompanyId = CompanyThreadLocal.getInstance()
-                    .getValue();
+            String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
             {
                 hql = hql + " and p.companyid=:company_id";
                 map.put("company_id", currentCompanyId);
             }
-            List list = HibernateUtil
-                    .searchWithSql(hql, map, ProjectImpl.class);
-            Collection queryResult = ProjectQueryResultHandler
-                    .handleResultForGUI(list);
+            List list = HibernateUtil.searchWithSql(hql, map, ProjectImpl.class);
+            Collection queryResult = ProjectQueryResultHandler.handleResultForGUI(list);
 
             if (!queryResult.isEmpty())
             {
@@ -2567,9 +2415,8 @@ public class ProjectHandlerLocal implements ProjectHandler
 
             if (c_category.isDebugEnabled())
             {
-                c_category.debug("getProjectsByProjectManager "
-                        + p_pm.getUserName() + " (" + p_pm.toString() + ") "
-                        + "returns " + queryResult.toString());
+                c_category.debug("getProjectsByProjectManager " + p_pm.getUserName() + " ("
+                        + p_pm.toString() + ") " + "returns " + queryResult.toString());
             }
 
             return projectInfos;
@@ -2581,8 +2428,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             args[0] = p_pm.getUserName();
 
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECTS_BY_PM,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECTS_BY_PM, args, pe);
         }
     }
 
@@ -2596,8 +2442,7 @@ public class ProjectHandlerLocal implements ProjectHandler
     /**
      * @see ProjectHandler.findWorkflowTemplates(WfTemplateSearchParameters)
      */
-    public Collection findWorkflowTemplates(
-            WfTemplateSearchParameters p_searchParameters)
+    public Collection findWorkflowTemplates(WfTemplateSearchParameters p_searchParameters)
             throws RemoteException, ProjectHandlerException
     {
         try
@@ -2607,10 +2452,9 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception e)
         {
-            c_category
-                    .error("Failed to get workflow templates by criteria.", e);
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null, e);
+            c_category.error("Failed to get workflow templates by criteria.", e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null,
+                    e);
         }
     }
 
@@ -2626,8 +2470,7 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @exception ProjectHandlerException
      *                Component specific exception
      */
-    public void createWorkflowTemplateInfo(
-            WorkflowTemplateInfo p_workflowTemplateInfo)
+    public void createWorkflowTemplateInfo(WorkflowTemplateInfo p_workflowTemplateInfo)
             throws RemoteException, ProjectHandlerException
     {
         try
@@ -2638,8 +2481,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             String[] args = new String[1];
             args[0] = p_workflowTemplateInfo.getName();
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_CREATE_WFI, args, e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_CREATE_WFI,
+                    args, e);
         }
     }
 
@@ -2657,11 +2500,9 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @exception ProjectHandlerException
      *                Component specific exception
      */
-    public void duplicateWorkflowTemplates(long p_wfTemplateInfoId,
-            String p_newName, Project project,
-            WorkflowTemplate p_iflowTemplate, Collection p_localePairs,
-            String p_displayRoleName) throws RemoteException,
-            ProjectHandlerException
+    public void duplicateWorkflowTemplates(long p_wfTemplateInfoId, String p_newName,
+            Project project, WorkflowTemplate p_iflowTemplate, Collection p_localePairs,
+            String p_displayRoleName) throws RemoteException, ProjectHandlerException
     {
         WorkflowTemplateInfo origWorkflowTemplateInfo = null;
         Session session = HibernateUtil.getSession();
@@ -2689,13 +2530,10 @@ public class ProjectHandlerLocal implements ProjectHandler
                 }
                 c_category.info("The value of name is " + name);
                 WorkflowTemplateInfo dupWorkflowTemplateInfo = createDuplicateWorkflowTemplateInfo(
-                        name, project, localePair, origWorkflowTemplateInfo,
-                        false);
-                WorkflowTemplate iflowTempDup = createIFlowDuplicate(name,
-                        workflowTemplate, localePair,
-                        origWorkflowTemplateInfo.getProjectManagerId(),
-                        origWorkflowTemplateInfo.getWorkflowManagerIds(),
-                        p_displayRoleName, false);
+                        name, project, localePair, origWorkflowTemplateInfo, false);
+                WorkflowTemplate iflowTempDup = createIFlowDuplicate(name, workflowTemplate,
+                        localePair, origWorkflowTemplateInfo.getProjectManagerId(),
+                        origWorkflowTemplateInfo.getWorkflowManagerIds(), p_displayRoleName, false);
                 dupWorkflowTemplateInfo.setWorkflowTemplate(iflowTempDup);
                 session.save(dupWorkflowTemplateInfo);
             }
@@ -2706,9 +2544,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             String[] args = new String[1];
             args[0] = origWorkflowTemplateInfo.getName();
             tx.rollback();
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_DUPLICATE_WFI, args,
-                    e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_DUPLICATE_WFI,
+                    args, e);
         }
     }
 
@@ -2723,8 +2560,8 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @exception ProjectHandlerException
      *                Component specific exception
      */
-    public void importWorkflowTemplates(Document doc, String p_newName,
-            Collection p_localePairs, String p_displayRoleName, String projectId)
+    public void importWorkflowTemplates(Document doc, String p_newName, Collection p_localePairs,
+            String p_displayRoleName, String projectId)
             throws RemoteException, ProjectHandlerException
     {
         Session session = HibernateUtil.getSession();
@@ -2750,8 +2587,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                     Element rolesElement = (Element) iter.next();
                     String content = rolesElement.getText();
                     content = content.substring(0,
-                            content.indexOf(source.toString())
-                                    + source.toString().length());
+                            content.indexOf(source.toString()) + source.toString().length());
                     rolesElement.setText(content + " " + target.toString());
                 }
 
@@ -2778,12 +2614,11 @@ public class ProjectHandlerLocal implements ProjectHandler
 
                 String name = generateAutoName(p_newName, localePair);
                 c_category.info("The value of name is " + name);
-                Attribute attribute = (Attribute) doc
-                        .selectSingleNode("/process-definition/@name");
+                Attribute attribute = (Attribute) doc.selectSingleNode("/process-definition/@name");
                 attribute.setValue(name);
                 workflowTemplate.setName(name);
-                WorkflowTemplateInfo workflowTemplateInfo = createNewWorkflowTemplateInfo(
-                        name, localePair, projectId);
+                WorkflowTemplateInfo workflowTemplateInfo = createNewWorkflowTemplateInfo(name,
+                        localePair, projectId);
 
                 WorkflowTemplate jbpmTemp = ServerProxy.getWorkflowServer()
                         .importWorkflowTemplate(workflowTemplate, doc);
@@ -2800,9 +2635,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             String[] args = new String[1];
             args[0] = workflowTemplate.getName();
             tx.rollback();
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_DUPLICATE_WFI, args,
-                    e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_DUPLICATE_WFI,
+                    args, e);
 
         }
     }
@@ -2811,18 +2645,16 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @see ProjectHandler.replaceWorkflowTemplateInL10nProfile(long, long)
      */
     public L10nProfile replaceWorkflowTemplateInL10nProfile(long p_profileId,
-            long p_workflowTemplateInfoId) throws RemoteException,
-            ProjectHandlerException
+            long p_workflowTemplateInfoId) throws RemoteException, ProjectHandlerException
     {
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
         try
         {
-            L10nProfile profile = (L10nProfile) session.get(
-                    BasicL10nProfile.class, new Long(p_profileId));
-            WorkflowTemplateInfo template = (WorkflowTemplateInfo) session.get(
-                    WorkflowTemplateInfo.class, new Long(
-                            p_workflowTemplateInfoId));
+            L10nProfile profile = (L10nProfile) session.get(BasicL10nProfile.class,
+                    new Long(p_profileId));
+            WorkflowTemplateInfo template = (WorkflowTemplateInfo) session
+                    .get(WorkflowTemplateInfo.class, new Long(p_workflowTemplateInfoId));
             GlobalSightLocale sourceLocale = profile.getSourceLocale();
             profile.setSourceLocale(sourceLocale);
             GlobalSightLocale targetLocale = template.getTargetLocale();
@@ -2838,15 +2670,12 @@ public class ProjectHandlerLocal implements ProjectHandler
         catch (Exception e)
         {
             tx.rollback();
-            c_category.error("Failed to replace workflow "
-                    + p_workflowTemplateInfoId + " in L10nProfile "
-                    + p_profileId, e);
+            c_category.error("Failed to replace workflow " + p_workflowTemplateInfoId
+                    + " in L10nProfile " + p_profileId, e);
             String args[] =
-            { Long.toString(p_profileId),
-                    Long.toString(p_workflowTemplateInfoId) };
+            { Long.toString(p_profileId), Long.toString(p_workflowTemplateInfoId) };
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_REPLACE_WFI_IN_PROFILE,
-                    args, e);
+                    ProjectHandlerException.MSG_FAILED_TO_REPLACE_WFI_IN_PROFILE, args, e);
         }
 
         return getL10nProfile(p_profileId);
@@ -2866,9 +2695,8 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @exception ProjectHandlerException
      *                Component specific exception
      */
-    public WorkflowTemplateInfo duplicateWorkflowTemplate(String p_newName,
-            long p_wfTemplateInfoId, LocalePair p_localePair,
-            WorkflowTemplate p_iflowTemplate, String p_displayRoleName)
+    public WorkflowTemplateInfo duplicateWorkflowTemplate(String p_newName, long p_wfTemplateInfoId,
+            LocalePair p_localePair, WorkflowTemplate p_iflowTemplate, String p_displayRoleName)
             throws RemoteException, ProjectHandlerException
     {
         WorkflowTemplateInfo origWorkflowTemplateInfo = null;
@@ -2877,26 +2705,21 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             origWorkflowTemplateInfo = getWorkflowTemplateInfoById(p_wfTemplateInfoId);
             WorkflowTemplate workflowTemplate = p_iflowTemplate;
-            dupWorkflowTemplateInfo = createDuplicateWorkflowTemplateInfo(
-                    p_newName, null, p_localePair, origWorkflowTemplateInfo,
-                    false);
-            WorkflowTemplate iflowDuplicate = createIFlowDuplicate(p_newName,
-                    workflowTemplate, p_localePair,
-                    origWorkflowTemplateInfo.getProjectManagerId(),
-                    origWorkflowTemplateInfo.getWorkflowManagerIds(),
-                    p_displayRoleName, false);
+            dupWorkflowTemplateInfo = createDuplicateWorkflowTemplateInfo(p_newName, null,
+                    p_localePair, origWorkflowTemplateInfo, false);
+            WorkflowTemplate iflowDuplicate = createIFlowDuplicate(p_newName, workflowTemplate,
+                    p_localePair, origWorkflowTemplateInfo.getProjectManagerId(),
+                    origWorkflowTemplateInfo.getWorkflowManagerIds(), p_displayRoleName, false);
             dupWorkflowTemplateInfo.setWorkflowTemplate(iflowDuplicate);
             HibernateUtil.save(dupWorkflowTemplateInfo);
         }
         catch (Exception e)
         {
-            c_category.error("The exception while duplicating a template is "
-                    + e);
+            c_category.error("The exception while duplicating a template is " + e);
             String[] args = new String[1];
             args[0] = origWorkflowTemplateInfo.getName();
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_DUPLICATE_WFI, args,
-                    e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_DUPLICATE_WFI,
+                    args, e);
 
         }
         return dupWorkflowTemplateInfo;
@@ -2906,9 +2729,8 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @see ProjectHandler.duplicateWorkflowTemplate(String, long,
      *      WorkflowTemplate)
      */
-    public WorkflowTemplateInfo duplicateWorkflowTemplate(String p_newName,
-            long p_wfTemplateInfoId, WorkflowTemplate p_iflowTemplate)
-            throws RemoteException, ProjectHandlerException
+    public WorkflowTemplateInfo duplicateWorkflowTemplate(String p_newName, long p_wfTemplateInfoId,
+            WorkflowTemplate p_iflowTemplate) throws RemoteException, ProjectHandlerException
     {
 
         WorkflowTemplateInfo origWorkflowTemplateInfo = null;
@@ -2916,14 +2738,12 @@ public class ProjectHandlerLocal implements ProjectHandler
         try
         {
             origWorkflowTemplateInfo = getWorkflowTemplateInfoById(p_wfTemplateInfoId);
-            LocalePair lp = ServerProxy.getLocaleManager()
-                    .getLocalePairBySourceTargetIds(
-                            origWorkflowTemplateInfo.getSourceLocale().getId(),
-                            origWorkflowTemplateInfo.getTargetLocale().getId());
-            dupWorkflowTemplateInfo = createDuplicateWorkflowTemplateInfo(
-                    p_newName, null, lp, origWorkflowTemplateInfo, true);
-            WorkflowTemplate iflowDuplicate = createIFlowDuplicate(p_newName,
-                    p_iflowTemplate, lp,
+            LocalePair lp = ServerProxy.getLocaleManager().getLocalePairBySourceTargetIds(
+                    origWorkflowTemplateInfo.getSourceLocale().getId(),
+                    origWorkflowTemplateInfo.getTargetLocale().getId());
+            dupWorkflowTemplateInfo = createDuplicateWorkflowTemplateInfo(p_newName, null, lp,
+                    origWorkflowTemplateInfo, true);
+            WorkflowTemplate iflowDuplicate = createIFlowDuplicate(p_newName, p_iflowTemplate, lp,
                     origWorkflowTemplateInfo.getProjectManagerId(),
                     origWorkflowTemplateInfo.getWorkflowManagerIds(), "", true);
             dupWorkflowTemplateInfo.setWorkflowTemplate(iflowDuplicate);
@@ -2931,13 +2751,11 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception e)
         {
-            c_category.error("The exception while duplicating a template is "
-                    + e);
+            c_category.error("The exception while duplicating a template is " + e);
             String[] args = new String[1];
             args[0] = origWorkflowTemplateInfo.getName();
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_DUPLICATE_WFI, args,
-                    e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_DUPLICATE_WFI,
+                    args, e);
 
         }
         return dupWorkflowTemplateInfo;
@@ -2954,9 +2772,8 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @exception ProjectHandlerException
      *                Component specific exception
      */
-    public WorkflowTemplateInfo getWorkflowTemplateInfoById(
-            long p_wfTemplateInfoId) throws RemoteException,
-            ProjectHandlerException
+    public WorkflowTemplateInfo getWorkflowTemplateInfoById(long p_wfTemplateInfoId)
+            throws RemoteException, ProjectHandlerException
     {
         try
         {
@@ -2966,8 +2783,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             String[] args = new String[1];
             args[0] = Long.toString(p_wfTemplateInfoId);
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_WFI, args, e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_GET_WFI, args,
+                    e);
         }
     }
 
@@ -2988,8 +2805,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             String hql = "from WorkflowTemplateInfo w where w.isActive = 'Y'";
             HashMap map = new HashMap();
-            String currentCompanyId = CompanyThreadLocal.getInstance()
-                    .getValue();
+            String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
             {
                 hql = hql + " and w.companyId=:companyId";
@@ -3000,8 +2816,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception e)
         {
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null, e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null,
+                    e);
         }
     }
 
@@ -3017,8 +2833,7 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @exception ProjectHandlerException
      *                Component specific exception
      */
-    public void modifyWorkflowTemplate(
-            WorkflowTemplateInfo p_workflowTemplateInfo)
+    public void modifyWorkflowTemplate(WorkflowTemplateInfo p_workflowTemplateInfo)
             throws RemoteException, ProjectHandlerException
     {
         // For GBS-1652: Deletes unselected leverage locale
@@ -3040,8 +2855,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 locale = locale.trim().substring(0, locale.length() - 1);
                 locale = " AND LOCALE_ID NOT IN (" + locale + ")";
 
-                String sql = "DELETE FROM LEVERAGE_LOCALES WHERE WORKFLOW_INFO_ID = "
-                        + wftiID;
+                String sql = "DELETE FROM LEVERAGE_LOCALES WHERE WORKFLOW_INFO_ID = " + wftiID;
                 sql = sql + locale;
                 HibernateUtil.executeSql(sql);
             }
@@ -3049,12 +2863,11 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception e)
         {
-            c_category
-                    .error("Exception: There is error when modifyWorkflowTemplate");
-        }// GBS-1652
+            c_category.error("Exception: There is error when modifyWorkflowTemplate");
+        } // GBS-1652
 
-        for (Iterator it2 = p_workflowTemplateInfo.getLeveragingLocalesSet()
-                .iterator(); it2.hasNext();)
+        for (Iterator it2 = p_workflowTemplateInfo.getLeveragingLocalesSet().iterator(); it2
+                .hasNext();)
         {
             LeverageLocales leverageLocales = (LeverageLocales) it2.next();
             leverageLocales.setBackPointer(p_workflowTemplateInfo);
@@ -3087,8 +2900,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception pe)
         {
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_REMOVE_WFI);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_REMOVE_WFI);
         }
     }
 
@@ -3109,9 +2921,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             String[] args = new String[1];
             args[0] = Long.toString(1);
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_REMOVE_PROFILE, args,
-                    e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_REMOVE_PROFILE,
+                    args, e);
         }
     }
 
@@ -3134,19 +2945,16 @@ public class ProjectHandlerLocal implements ProjectHandler
      * This duplicates the CAP Workflow Template Info Object in memory. No
      * interaction with database
      */
-    private WorkflowTemplateInfo createDuplicateWorkflowTemplateInfo(
-            String p_newName, Project project, LocalePair p_localePair,
-            WorkflowTemplateInfo p_origWorkflowTemplateInfo,
-            boolean p_exactDuplicate)
+    private WorkflowTemplateInfo createDuplicateWorkflowTemplateInfo(String p_newName,
+            Project project, LocalePair p_localePair,
+            WorkflowTemplateInfo p_origWorkflowTemplateInfo, boolean p_exactDuplicate)
     {
         WorkflowTemplateInfo workflowTemplateInfo = new WorkflowTemplateInfo();
         workflowTemplateInfo.setName(p_newName);
+        workflowTemplateInfo.setCodeSet(p_origWorkflowTemplateInfo.getCodeSet());
+        workflowTemplateInfo.setDescription(p_origWorkflowTemplateInfo.getDescription());
         workflowTemplateInfo
-                .setCodeSet(p_origWorkflowTemplateInfo.getCodeSet());
-        workflowTemplateInfo.setDescription(p_origWorkflowTemplateInfo
-                .getDescription());
-        workflowTemplateInfo.setCompanyId(Long.parseLong(CompanyThreadLocal
-                .getInstance().getValue()));
+                .setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance().getValue()));
         LeverageLocales leverageLocales = null;
 
         Set<LeverageLocales> lls = new HashSet<LeverageLocales>();
@@ -3159,12 +2967,10 @@ public class ProjectHandlerLocal implements ProjectHandler
         else
         // copy all of them
         {
-            Set<LeverageLocales> origLls = p_origWorkflowTemplateInfo
-                    .getLeveragingLocalesSet();
+            Set<LeverageLocales> origLls = p_origWorkflowTemplateInfo.getLeveragingLocalesSet();
             for (Iterator it = origLls.iterator(); it.hasNext();)
             {
-                LeverageLocales l = ((LeverageLocales) it.next())
-                        .cloneForInsert();
+                LeverageLocales l = ((LeverageLocales) it.next()).cloneForInsert();
                 l.setBackPointer(workflowTemplateInfo);
                 lls.add(l);
             }
@@ -3174,47 +2980,41 @@ public class ProjectHandlerLocal implements ProjectHandler
         workflowTemplateInfo.setTargetLocale(p_localePair.getTarget());
         if (project == null)
         {
-            workflowTemplateInfo.setProject(p_origWorkflowTemplateInfo
-                    .getProject());
+            workflowTemplateInfo.setProject(p_origWorkflowTemplateInfo.getProject());
             List<String> wfManagerIds = new ArrayList<String>();
-            wfManagerIds.addAll(p_origWorkflowTemplateInfo
-                    .getWorkflowManagerIds());
+            wfManagerIds.addAll(p_origWorkflowTemplateInfo.getWorkflowManagerIds());
             workflowTemplateInfo.setWorkflowManagerIds(wfManagerIds);
         }
         else
         {
             workflowTemplateInfo.setProject(project);
         }
-        workflowTemplateInfo.notifyProjectManager(p_origWorkflowTemplateInfo
-                .notifyProjectManager());
-        workflowTemplateInfo.setWorkflowType(p_origWorkflowTemplateInfo
-                .getWorkflowType());
-        workflowTemplateInfo.setScorecardShowType(p_origWorkflowTemplateInfo
-                .getScorecardShowType());
+        workflowTemplateInfo
+                .notifyProjectManager(p_origWorkflowTemplateInfo.notifyProjectManager());
+        workflowTemplateInfo.setWorkflowType(p_origWorkflowTemplateInfo.getWorkflowType());
+        workflowTemplateInfo
+                .setScorecardShowType(p_origWorkflowTemplateInfo.getScorecardShowType());
         return workflowTemplateInfo;
     }
 
-    private WorkflowTemplateInfo createNewWorkflowTemplateInfo(String name,
-            LocalePair localePair, String projectId)
+    private WorkflowTemplateInfo createNewWorkflowTemplateInfo(String name, LocalePair localePair,
+            String projectId)
     {
         // Sets leverage locale.
         Set<LeverageLocales> leveragingLocales = new HashSet<LeverageLocales>();
-        LeverageLocales leverageLocale = new LeverageLocales(
-                localePair.getTarget());
+        LeverageLocales leverageLocale = new LeverageLocales(localePair.getTarget());
         leveragingLocales.add(leverageLocale);
 
         // Sets workflowtemplateInfo.
         Project project;
         project = ProjectHandlerHelper.getProjectById(Long.valueOf(projectId));
-        WorkflowTemplateInfo wfti = new WorkflowTemplateInfo(name, "", project,
-                true, null, localePair.getSource(), localePair.getTarget(),
-                "UTF-8", leveragingLocales);
+        WorkflowTemplateInfo wfti = new WorkflowTemplateInfo(name, "", project, true, null,
+                localePair.getSource(), localePair.getTarget(), "UTF-8", leveragingLocales);
 
         wfti.setWorkflowType(WorkflowTypeConstants.TYPE_TRANSLATION);
 
         // Sets company.
-        wfti.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance()
-                .getValue()));
+        wfti.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance().getValue()));
 
         leverageLocale.setBackPointer(wfti);
 
@@ -3222,9 +3022,8 @@ public class ProjectHandlerLocal implements ProjectHandler
     }
 
     private WorkflowTemplate createIFlowDuplicate(String p_newName,
-            WorkflowTemplate p_workflowTemplate, LocalePair p_localePair,
-            String p_projectManagerId, List p_workflowManagerIds,
-            String p_displayRoleName, boolean p_exactDuplicate)
+            WorkflowTemplate p_workflowTemplate, LocalePair p_localePair, String p_projectManagerId,
+            List p_workflowManagerIds, String p_displayRoleName, boolean p_exactDuplicate)
             throws ProjectHandlerException
     {
         WorkflowTemplate workflowTemplate = new WorkflowTemplate();
@@ -3244,15 +3043,11 @@ public class ProjectHandlerLocal implements ProjectHandler
                     if (!p_exactDuplicate)
                     {
                         String activityName = workflowTask.getActivityName();
-                        Activity activity = ServerProxy.getJobHandler()
-                                .getActivityByCompanyId(
-                                        activityName,
-                                        String.valueOf(p_localePair
-                                                .getCompanyId()));
+                        Activity activity = ServerProxy.getJobHandler().getActivityByCompanyId(
+                                activityName, String.valueOf(p_localePair.getCompanyId()));
                         String[] containerRole =
-                        { getContainerRole(activity, p_localePair.getSource()
-                                .toString(), p_localePair.getTarget()
-                                .toString()) };
+                        { getContainerRole(activity, p_localePair.getSource().toString(),
+                                p_localePair.getTarget().toString()) };
                         workflowTask.setRoles(containerRole);
                         workflowTask.setRoleType(false);
                         workflowTask.setRevenueRateId(NO_RATE);
@@ -3271,24 +3066,20 @@ public class ProjectHandlerLocal implements ProjectHandler
             String desc = "";
             workflowTemplate.setDescription(desc);
             String[] wfManagerIds = new String[p_workflowManagerIds.size()];
-            wfManagerIds = (String[]) p_workflowManagerIds
-                    .toArray(wfManagerIds);
-            WorkflowOwners workflowOwners = new WorkflowOwners(
-                    p_projectManagerId, wfManagerIds);
-            iflowTemplate = ServerProxy.getWorkflowServer()
-                    .createWorkflowTemplate(workflowTemplate, workflowOwners);
+            wfManagerIds = (String[]) p_workflowManagerIds.toArray(wfManagerIds);
+            WorkflowOwners workflowOwners = new WorkflowOwners(p_projectManagerId, wfManagerIds);
+            iflowTemplate = ServerProxy.getWorkflowServer().createWorkflowTemplate(workflowTemplate,
+                    workflowOwners);
         }
         catch (Exception e)
         {
-            c_category
-                    .error("Unable to duplicate i flow plan for original plan name "
-                            + p_workflowTemplate.getName());
+            c_category.error("Unable to duplicate i flow plan for original plan name "
+                    + p_workflowTemplate.getName());
             c_category.error("The exception is " + e);
             String[] args = new String[1];
             args[0] = p_workflowTemplate.getName();
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_DUPLICATE_IFLOW_PLAN,
-                    args, e);
+                    ProjectHandlerException.MSG_FAILED_TO_DUPLICATE_IFLOW_PLAN, args, e);
 
         }
         return iflowTemplate;
@@ -3301,8 +3092,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         try
         {
 
-            ContainerRole cr = ServerProxy.getUserManager().getContainerRole(
-                    p_activity, p_sourceLocale, p_targetLocale);
+            ContainerRole cr = ServerProxy.getUserManager().getContainerRole(p_activity,
+                    p_sourceLocale, p_targetLocale);
             if (cr == null)
             {
                 roleName = "";
@@ -3314,14 +3105,11 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception e)
         {
-            c_category
-                    .error("Unable to retrieve container role from User Manager"
-                            + e);
+            c_category.error("Unable to retrieve container role from User Manager" + e);
             String[] args = new String[1];
             args[0] = p_activity.getName();
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_ACCESS_USERMANAGER,
-                    args, e);
+                    ProjectHandlerException.MSG_FAILED_TO_ACCESS_USERMANAGER, args, e);
 
         }
         return roleName;
@@ -3334,20 +3122,19 @@ public class ProjectHandlerLocal implements ProjectHandler
     // get a workflow template info object based on the given id. If
     // the p_editable parameter is true, the returned object is
     // editable. Otherwise it's just a read-only object.
-    private WorkflowTemplateInfo getWfTemplateById(Long p_wfTemplateInfoId,
-            boolean p_editable) throws Exception
+    private WorkflowTemplateInfo getWfTemplateById(Long p_wfTemplateInfoId, boolean p_editable)
+            throws Exception
     {
-        return (WorkflowTemplateInfo) HibernateUtil.get(
-                WorkflowTemplateInfo.class, p_wfTemplateInfoId);
+        return (WorkflowTemplateInfo) HibernateUtil.get(WorkflowTemplateInfo.class,
+                p_wfTemplateInfoId);
     }
 
     /**
      * @see ProjectHandler.getAllWorkflowTemplateInfosbyParameters(long, long,
      *      long)
      */
-    public Collection getAllWorkflowTemplateInfosByParameters(
-            long p_sourceLocaleId, long p_targetLocaleId, long p_projectId)
-            throws RemoteException, ProjectHandlerException
+    public Collection getAllWorkflowTemplateInfosByParameters(long p_sourceLocaleId,
+            long p_targetLocaleId, long p_projectId) throws RemoteException, ProjectHandlerException
     {
         Collection workflowTemplateInfos = null;
         try
@@ -3357,16 +3144,15 @@ public class ProjectHandlerLocal implements ProjectHandler
                     new Long(p_sourceLocaleId));
             map.put(WorkflowTemplateInfoDescriptorModifier.TARGET_LOCALE_ID,
                     new Long(p_targetLocaleId));
-            map.put(WorkflowTemplateInfoDescriptorModifier.PROJECT_ID,
-                    new Long(p_projectId));
+            map.put(WorkflowTemplateInfoDescriptorModifier.PROJECT_ID, new Long(p_projectId));
             String sql = WorkflowTemplateInfoDescriptorModifier.TEMPLATE_BY_PARAMETERS_SQL;
             workflowTemplateInfos = HibernateUtil.searchWithSql(sql, map,
                     WorkflowTemplateInfo.class);
         }
         catch (Exception e)
         {
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null, e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null,
+                    e);
         }
 
         return workflowTemplateInfos;
@@ -3382,21 +3168,18 @@ public class ProjectHandlerLocal implements ProjectHandler
             HashMap map = new HashMap();
             map.put(WorkflowTemplateInfoDescriptorModifier.L10N_PROFILE_ID,
                     new Long(l10nProfileId));
-            result = HibernateUtil
-                    .searchWithSql(
-                            WorkflowTemplateInfoDescriptorModifier.TEMPLATE_BY_L10PROFILE_ID_SQL,
-                            map, WorkflowTemplateInfo.class);
+            result = HibernateUtil.searchWithSql(
+                    WorkflowTemplateInfoDescriptorModifier.TEMPLATE_BY_L10PROFILE_ID_SQL, map,
+                    WorkflowTemplateInfo.class);
             // Remove the templates that are contained in the current workflow.
             HashMap existingWorkflows = getWorkflows(p_job);
             Iterator it2 = result.iterator();
             boolean isWorkflowDisplay = false;
             while (it2.hasNext())
             {
-                WorkflowTemplateInfo template = (WorkflowTemplateInfo) it2
-                        .next();
+                WorkflowTemplateInfo template = (WorkflowTemplateInfo) it2.next();
                 isWorkflowDisplay = false;
-                isWorkflowDisplay = hasExistingLocale(template,
-                        existingWorkflows);
+                isWorkflowDisplay = hasExistingLocale(template, existingWorkflows);
                 if (isWorkflowDisplay == true)
                 {
                     it2.remove();
@@ -3411,8 +3194,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 Iterator it4 = wr.getWorkflowTemplateList().iterator();
                 while (it4.hasNext())
                 {
-                    WorkflowTemplateInfo template = (WorkflowTemplateInfo) it4
-                            .next();
+                    WorkflowTemplateInfo template = (WorkflowTemplateInfo) it4.next();
                     removeWorkflowTemplates(result, template, existingWorkflows);
                 }
             }
@@ -3422,29 +3204,25 @@ public class ProjectHandlerLocal implements ProjectHandler
             c_category
                     .error("Unable to retrieve workflow templates for given source locale and project manager id "
                             + e);
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null, e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null,
+                    e);
         }
         return result;
     }
 
-    private void removeWorkflowTemplates(Collection p_templates,
-            WorkflowTemplateInfo p_addedWFT, HashMap p_existingWorkflows)
+    private void removeWorkflowTemplates(Collection p_templates, WorkflowTemplateInfo p_addedWFT,
+            HashMap p_existingWorkflows)
     {
         Iterator it = p_templates.iterator();
         while (it.hasNext())
         {
-            WorkflowTemplateInfo availableWFT = (WorkflowTemplateInfo) it
-                    .next();
+            WorkflowTemplateInfo availableWFT = (WorkflowTemplateInfo) it.next();
             String addedTargetLocale = p_addedWFT.getTargetLocale().toString();
-            Workflow existingWorkflow = (Workflow) p_existingWorkflows
-                    .get(addedTargetLocale);
+            Workflow existingWorkflow = (Workflow) p_existingWorkflows.get(addedTargetLocale);
             if (existingWorkflow != null)
             {
-                if (availableWFT.getTargetLocale().toString()
-                        .equals(addedTargetLocale)
-                        && !existingWorkflow.getState().equals(
-                                Workflow.CANCELLED))
+                if (availableWFT.getTargetLocale().toString().equals(addedTargetLocale)
+                        && !existingWorkflow.getState().equals(Workflow.CANCELLED))
                 {
                     it.remove();
                 }
@@ -3452,17 +3230,14 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
     }
 
-    private boolean hasExistingLocale(WorkflowTemplateInfo p_template,
-            HashMap p_currentWorkflows)
+    private boolean hasExistingLocale(WorkflowTemplateInfo p_template, HashMap p_currentWorkflows)
     {
 
         String templateTargetLocale = p_template.getTargetLocale().toString();
-        Workflow workflow = (Workflow) p_currentWorkflows
-                .get(templateTargetLocale);
+        Workflow workflow = (Workflow) p_currentWorkflows.get(templateTargetLocale);
         if (workflow != null)
         {
-            if (templateTargetLocale.equals(workflow.getTargetLocale()
-                    .toString())
+            if (templateTargetLocale.equals(workflow.getTargetLocale().toString())
                     && !workflow.getState().equals(Workflow.CANCELLED))
             {
                 return true;
@@ -3492,9 +3267,8 @@ public class ProjectHandlerLocal implements ProjectHandler
      * Return all workflow template infos with a particular source and target
      * locale.
      */
-    public Collection getAllWorkflowTemplateInfosByLocalePair(
-            LocalePair p_localPair) throws RemoteException,
-            ProjectHandlerException
+    public Collection getAllWorkflowTemplateInfosByLocalePair(LocalePair p_localPair)
+            throws RemoteException, ProjectHandlerException
     {
         Collection workflowTemplateInfos = null;
         try
@@ -3506,15 +3280,14 @@ public class ProjectHandlerLocal implements ProjectHandler
                     p_localPair.getTarget().getIdAsLong());
             map.put(WorkflowTemplateInfoDescriptorModifier.COMPANY_ID,
                     new Long(p_localPair.getCompanyId()));
-            workflowTemplateInfos = HibernateUtil
-                    .searchWithSql(
-                            WorkflowTemplateInfoDescriptorModifier.TEMPLATES_BY_LOCALE_PAIR_SQL,
-                            map, WorkflowTemplateInfo.class);
+            workflowTemplateInfos = HibernateUtil.searchWithSql(
+                    WorkflowTemplateInfoDescriptorModifier.TEMPLATES_BY_LOCALE_PAIR_SQL, map,
+                    WorkflowTemplateInfo.class);
         }
         catch (Exception e)
         {
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null, e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null,
+                    e);
         }
         return workflowTemplateInfos;
     }
@@ -3535,22 +3308,20 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @exception ProjectHandlerException
      *                Component specific exception
      */
-    public void createTranslationMemoryProfile(
-            TranslationMemoryProfile p_tmProfile) throws RemoteException,
-            ProjectHandlerException
+    public void createTranslationMemoryProfile(TranslationMemoryProfile p_tmProfile)
+            throws RemoteException, ProjectHandlerException
     {
         try
         {
-            p_tmProfile
-                    .setAllLeverageProjectTMs(p_tmProfile.getNewProjectTMs());
+            p_tmProfile.setAllLeverageProjectTMs(p_tmProfile.getNewProjectTMs());
             HibernateUtil.save(p_tmProfile);
         }
         catch (Exception e)
         {
             String[] args = new String[1];
             args[0] = p_tmProfile.getName();
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_CREATE_TMP, args, e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_CREATE_TMP,
+                    args, e);
         }
     }
 
@@ -3559,23 +3330,22 @@ public class ProjectHandlerLocal implements ProjectHandler
      * parameter is true, the returned object is editable. Otherwise it's just a
      * read-only object.
      */
-    public TranslationMemoryProfile getTMProfileById(long p_tmProfileId,
-            boolean p_editable) throws RemoteException, ProjectHandlerException
+    public TranslationMemoryProfile getTMProfileById(long p_tmProfileId, boolean p_editable)
+            throws RemoteException, ProjectHandlerException
     {
         TranslationMemoryProfile tmProfile = null;
 
         try
         {
-            tmProfile = (TranslationMemoryProfile) HibernateUtil.get(
-                    TranslationMemoryProfile.class, new Long(p_tmProfileId));
+            tmProfile = (TranslationMemoryProfile) HibernateUtil.get(TranslationMemoryProfile.class,
+                    new Long(p_tmProfileId));
         }
         catch (Exception e)
         {
             String[] args = new String[1];
             args[0] = new Long(p_tmProfileId).toString();
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_TM_PROFILE_BY_ID,
-                    args, e);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_TM_PROFILE_BY_ID, args, e);
         }
 
         return tmProfile;
@@ -3593,9 +3363,8 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @exception ProjectHandlerException
      *                Component specific exception
      */
-    public void modifyTranslationMemoryProfile(
-            TranslationMemoryProfile p_tmProfile) throws RemoteException,
-            ProjectHandlerException
+    public void modifyTranslationMemoryProfile(TranslationMemoryProfile p_tmProfile)
+            throws RemoteException, ProjectHandlerException
     {
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
@@ -3608,10 +3377,8 @@ public class ProjectHandlerLocal implements ProjectHandler
                 Iterator it2 = newProjectTMs.iterator();
 
                 TranslationMemoryProfile tmProfile = (TranslationMemoryProfile) session
-                        .get(TranslationMemoryProfile.class, new Long(
-                                p_tmProfile.getId()));
-                Iterator it = tmProfile.getProjectTMsToLeverageFrom()
-                        .iterator();
+                        .get(TranslationMemoryProfile.class, new Long(p_tmProfile.getId()));
+                Iterator it = tmProfile.getProjectTMsToLeverageFrom().iterator();
                 while (it.hasNext())
                 {
                     LeverageProjectTM levProjTM = (LeverageProjectTM) it.next();
@@ -3621,8 +3388,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 Vector v = new Vector();
                 while (it2.hasNext())
                 {
-                    LeverageProjectTM levProjTM = (LeverageProjectTM) it2
-                            .next();
+                    LeverageProjectTM levProjTM = (LeverageProjectTM) it2.next();
                     levProjTM.setTMProfile(tmProfile);
                     v.add(levProjTM);
                 }
@@ -3638,28 +3404,25 @@ public class ProjectHandlerLocal implements ProjectHandler
             tx.rollback();
             String[] args = new String[1];
             args[0] = p_tmProfile.getName();
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_MODIFY_TMP, args, e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_MODIFY_TMP,
+                    args, e);
         }
     }
 
-    public Collection getAllTMProfiles() throws RemoteException,
-            ProjectHandlerException
+    public Collection getAllTMProfiles() throws RemoteException, ProjectHandlerException
     {
         Collection tmProfiles = null;
 
         try
         {
-            HashMap map = CompanyWrapper.addCompanyIdBoundArgs(
-                    CompanyWrapper.COPMANY_ID_START_ARG,
+            HashMap map = CompanyWrapper.addCompanyIdBoundArgs(CompanyWrapper.COPMANY_ID_START_ARG,
                     CompanyWrapper.COPMANY_ID_END_ARG);
             tmProfiles = HibernateUtil.searchWithSql(ALL_TM_PROFILES_SQL, map,
                     TranslationMemoryProfile.class);
         }
         catch (Exception e)
         {
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_TM_PROFILES,
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_GET_TM_PROFILES,
                     null, e);
         }
 
@@ -3669,8 +3432,7 @@ public class ProjectHandlerLocal implements ProjectHandler
     // ////////////////////////////////////////////////////////////////////
     // Begin: Project TMs
     // ////////////////////////////////////////////////////////////////////
-    public Collection<ProjectTM> getAllProjectTMs() throws RemoteException,
-            ProjectHandlerException
+    public Collection<ProjectTM> getAllProjectTMs() throws RemoteException, ProjectHandlerException
     {
         return getAllProjectTMs(null);
     }
@@ -3684,8 +3446,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             String hql = "from ProjectTM pt where 1=1";
 
             HashMap map = new HashMap();
-            String currentCompanyId = CompanyThreadLocal.getInstance()
-                    .getValue();
+            String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
             {
                 hql += " and pt.companyId=:company_id and pt.status=:status";
@@ -3698,8 +3459,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception e)
         {
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TMS,
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TMS,
                     null, e);
         }
 
@@ -3712,8 +3472,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         return getAllProjectTMs(isSuperAdmin, null);
     }
 
-    public Collection<ProjectTM> getAllProjectTMs(boolean isSuperAdmin,
-            String cond) throws RemoteException, ProjectHandlerException
+    public Collection<ProjectTM> getAllProjectTMs(boolean isSuperAdmin, String cond)
+            throws RemoteException, ProjectHandlerException
     {
         if (!isSuperAdmin)
             return getAllProjectTMs();
@@ -3728,28 +3488,26 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception e)
         {
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TMS,
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TMS,
                     null, e);
         }
 
         return projectTMs;
     }
 
-    public void createProjectTM(ProjectTM p_projectTM) throws RemoteException,
-            ProjectHandlerException
+    public void createProjectTM(ProjectTM p_projectTM)
+            throws RemoteException, ProjectHandlerException
     {
         try
         {
-            Company company = ServerProxy.getJobHandler().getCompanyById(
-                    CompanyWrapper.getCurrentCompanyIdAsLong());
+            Company company = ServerProxy.getJobHandler()
+                    .getCompanyById(CompanyWrapper.getCurrentCompanyIdAsLong());
             if (company.getTmVersion().equals(TmVersion.TM3))
             {
                 // We need to create the tm3 storage. Use the shared TM pool for
                 // this company.
                 TM3Manager mgr = DefaultManager.create();
-                TM3Tm<GSTuvData> tm3tm = mgr.createMultilingualSharedTm(
-                        new GSDataFactory(),
+                TM3Tm<GSTuvData> tm3tm = mgr.createMultilingualSharedTm(new GSDataFactory(),
                         SegmentTmAttribute.inlineAttributes(), company.getId());
                 p_projectTM.setTm3Id(tm3tm.getId());
             }
@@ -3759,8 +3517,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         catch (Exception e)
         {
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_CREATE_PROJECT_TM,
-                    null, e);
+                    ProjectHandlerException.MSG_FAILED_TO_CREATE_PROJECT_TM, null, e);
         }
     }
 
@@ -3771,16 +3528,14 @@ public class ProjectHandlerLocal implements ProjectHandler
 
         try
         {
-            projectTM = (ProjectTM) HibernateUtil.get(ProjectTM.class,
-                    new Long(p_projectTMId));
+            projectTM = (ProjectTM) HibernateUtil.get(ProjectTM.class, new Long(p_projectTMId));
         }
         catch (Exception e)
         {
             String[] args = new String[1];
             args[0] = String.valueOf(p_projectTMId);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID,
-                    args, e);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID, args, e);
         }
 
         return projectTM;
@@ -3795,8 +3550,8 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @exception RemoteException
      * @exception ProjectHandlerException
      */
-    public ProjectTM getProjectTMByName(String p_projectTmName,
-            boolean p_editable) throws RemoteException, ProjectHandlerException
+    public ProjectTM getProjectTMByName(String p_projectTmName, boolean p_editable)
+            throws RemoteException, ProjectHandlerException
     {
         ProjectTM projectTM = null;
 
@@ -3807,8 +3562,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             HashMap map = new HashMap();
             map.put("name", p_projectTmName);
 
-            String currentCompanyId = CompanyThreadLocal.getInstance()
-                    .getValue();
+            String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
             {
                 hql += " and p.companyId = :companyId";
@@ -3822,8 +3576,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             String[] args = new String[1];
             args[0] = String.valueOf(p_projectTmName);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID,
-                    args, e);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID, args, e);
         }
 
         return projectTM;
@@ -3838,16 +3591,15 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public ProjectTM getProjectTMByTm3id(long p_tm3id) throws RemoteException,
-            ProjectHandlerException
+    public ProjectTM getProjectTMByTm3id(long p_tm3id)
+            throws RemoteException, ProjectHandlerException
     {
         ProjectTM tm = null;
         try
         {
             String sql = " select * from project_tm " + " where TM3_ID = ? ";
 
-            tm = (ProjectTM) HibernateUtil.getFirstWithSql(ProjectTM.class,
-                    sql, new Long(p_tm3id));
+            tm = (ProjectTM) HibernateUtil.getFirstWithSql(ProjectTM.class, sql, new Long(p_tm3id));
         }
         catch (Exception pe)
         {
@@ -3855,8 +3607,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             { String.valueOf(p_tm3id) };
             c_category.error(pe.getMessage(), pe);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID, args, pe);
         }
 
         if (tm == null)
@@ -3865,15 +3616,14 @@ public class ProjectHandlerLocal implements ProjectHandler
             String[] args =
             { String.valueOf(p_tm3id) };
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID,
-                    args, null);
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID, args, null);
         }
 
         return tm;
     }
 
-    public void modifyProjectTM(ProjectTM p_projectTM) throws RemoteException,
-            ProjectHandlerException
+    public void modifyProjectTM(ProjectTM p_projectTM)
+            throws RemoteException, ProjectHandlerException
     {
         try
         {
@@ -3886,7 +3636,6 @@ public class ProjectHandlerLocal implements ProjectHandler
             clone.setCompanyId(p_projectTM.getCompanyId());
             clone.setIndexTarget(p_projectTM.isIndexTarget());
             clone.setIsRemoteTm(p_projectTM.getIsRemoteTm());
-            clone.setGsEditionId(p_projectTM.getGsEditionId());
             clone.setRemoteTmProfileId(p_projectTM.getRemoteTmProfileId());
             clone.setRemoteTmProfileName(p_projectTM.getRemoteTmProfileName());
 
@@ -3909,29 +3658,26 @@ public class ProjectHandlerLocal implements ProjectHandler
             args[0] = Long.toString(p_projectTM.getId());
 
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_MODIFY_PROJECT_TM,
-                    args, e);
+                    ProjectHandlerException.MSG_FAILED_TO_MODIFY_PROJECT_TM, args, e);
         }
     }
 
-    public void removeProjectTm(long p_tmId) throws RemoteException,
-            ProjectHandlerException
+    public void removeProjectTm(long p_tmId) throws RemoteException, ProjectHandlerException
     {
         ProjectTM tm = getProjectTMById(p_tmId, true);
 
         try
         {
-        	Set<TMAttribute> attrs = tm.getAttributes();
+            Set<TMAttribute> attrs = tm.getAttributes();
             HibernateUtil.delete(tm);
-        	HibernateUtil.delete(tm.getAttributes());
+            HibernateUtil.delete(tm.getAttributes());
         }
         catch (Exception e)
         {
             String[] args = new String[1];
             args[0] = String.valueOf(p_tmId);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_REMOVE_PROJECT_TM,
-                    args, e);
+                    ProjectHandlerException.MSG_FAILED_TO_REMOVE_PROJECT_TM, args, e);
         }
     }
 
@@ -3946,16 +3692,14 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             c_category.error(e.getMessage(), e);
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_ACCESS_USERMANAGER,
-                    null, e);
+                    ProjectHandlerException.MSG_FAILED_TO_ACCESS_USERMANAGER, null, e);
         }
     }
 
     // ////////////////////////////////////////////////////////////////////
     // Begin: FileProfiles Template Info
 
-    public Collection findFileProfileTemplates(
-            FileProfileSearchParameters p_searchParameters)
+    public Collection findFileProfileTemplates(FileProfileSearchParameters p_searchParameters)
             throws RemoteException, ProjectHandlerException
     {
         try
@@ -3965,10 +3709,9 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception e)
         {
-            c_category.error(
-                    "Failed to get fileprofile templates by criteria.", e);
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_FPIS, null, e);
+            c_category.error("Failed to get fileprofile templates by criteria.", e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_GET_FPIS, null,
+                    e);
         }
 
     }
@@ -3977,8 +3720,7 @@ public class ProjectHandlerLocal implements ProjectHandler
     // End: FileProfiles Template Info
 
     @Override
-    public L10nProfileWFTemplateInfo getL10nProfileWfTemplateInfo(
-            long profileId, long workflowId)
+    public L10nProfileWFTemplateInfo getL10nProfileWfTemplateInfo(long profileId, long workflowId)
     {
         String hql = "from L10nProfileWFTemplateInfo l where l.key.l10nProfileId = :ProfileId and l.key.wfTemplateId = :TemplateId";
         HashMap map = new HashMap();
@@ -4053,8 +3795,8 @@ public class ProjectHandlerLocal implements ProjectHandler
     @Override
     public boolean isPrimaryKeyExist(long lnprofileId, long workflowId)
     {
-        String hql = "from L10nProfileWFTemplateInfo l where l.key.l10nProfileId="
-                + lnprofileId + " and l.key.wfTemplateId=" + workflowId;
+        String hql = "from L10nProfileWFTemplateInfo l where l.key.l10nProfileId=" + lnprofileId
+                + " and l.key.wfTemplateId=" + workflowId;
         List<L10nProfileWFTemplateInfo> list = (List<L10nProfileWFTemplateInfo>) HibernateUtil
                 .search(hql);
         return list.size() != 0;
@@ -4074,17 +3816,15 @@ public class ProjectHandlerLocal implements ProjectHandler
             query = connection.prepareStatement(sql);
             query.execute();
 
-            sql = "delete from l10n_profile_tm_profile where tm_profile_id = "
-                    + tmprofile.getId();
+            sql = "delete from l10n_profile_tm_profile where tm_profile_id = " + tmprofile.getId();
             query = connection.prepareStatement(sql);
             query.execute();
             connection.commit();
 
             HibernateUtil.delete(tmprofile);
-            
-            LogManager.log(LogType.TMProfile, LogManager.EVENT_TYPE_REMOVE,
-                    tmprofile.getId(), "Delete Translation Memory Profile ["
-                            + tmprofile.getName() + "]",
+
+            LogManager.log(LogType.TMProfile, LogManager.EVENT_TYPE_REMOVE, tmprofile.getId(),
+                    "Delete Translation Memory Profile [" + tmprofile.getName() + "]",
                     tmprofile.getCompanyId());
 
         }
@@ -4101,8 +3841,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             String[] args = new String[1];
             args[0] = String.valueOf(tmprofile.getId());
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_REMOVE_TM_PROFILE,
-                    args, e);
+                    ProjectHandlerException.MSG_FAILED_TO_REMOVE_TM_PROFILE, args, e);
         }
         finally
         {
@@ -4188,18 +3927,16 @@ public class ProjectHandlerLocal implements ProjectHandler
         return al;
     }
 
-    public List<ProjectImpl> getProjectsByTermbaseDepended(String termbaseName,
-            long companyId)
+    public List<ProjectImpl> getProjectsByTermbaseDepended(String termbaseName, long companyId)
     {
-        String hql = "from ProjectImpl p where p.termbase='" + termbaseName
-                + "' and p.companyId=" + companyId;
+        String hql = "from ProjectImpl p where p.termbase='" + termbaseName + "' and p.companyId="
+                + companyId;
         List<ProjectImpl> list = (List<ProjectImpl>) HibernateUtil.search(hql);
 
         return list;
     }
-    
-    public List<WorkflowStatePosts> getAllWorkflowStatePostProfie(
-            String[] filterParams)
+
+    public List<WorkflowStatePosts> getAllWorkflowStatePostProfie(String[] filterParams)
     {
         try
         {
@@ -4210,9 +3947,8 @@ public class ProjectHandlerLocal implements ProjectHandler
                 if (wfStatePost.getName().toLowerCase().indexOf(filterParams[0].toLowerCase()) != -1
                         && wfStatePost.getListenerURL().toLowerCase()
                                 .indexOf(filterParams[1].toLowerCase()) != -1
-                       && CompanyWrapper.getCompanyNameById(
-                                wfStatePost.getCompanyId()).toLowerCase().indexOf(
-                                filterParams[2].toLowerCase()) != -1)
+                        && CompanyWrapper.getCompanyNameById(wfStatePost.getCompanyId())
+                                .toLowerCase().indexOf(filterParams[2].toLowerCase()) != -1)
                 {
                     queryResult.add(wfStatePost);
                 }
@@ -4222,8 +3958,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception e)
         {
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null, e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null,
+                    e);
         }
     }
 
@@ -4234,8 +3970,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             String hql = "from WorkflowStatePosts wfs where 1 = 1";
             HashMap map = new HashMap();
-            String currentCompanyId = CompanyThreadLocal.getInstance()
-                    .getValue();
+            String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
             {
                 hql = hql + " and wfs.companyId=:companyId";
@@ -4246,8 +3981,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception e)
         {
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null, e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_GET_WFIS, null,
+                    e);
         }
     }
 
@@ -4262,8 +3997,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             String[] args = new String[1];
             args[0] = wfStatePost.getName();
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_CREATE_WFI, args, e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_CREATE_WFI,
+                    args, e);
         }
     }
 
@@ -4278,16 +4013,14 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             String[] args = new String[1];
             args[0] = Long.toString(wfStatePostId);
-            throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_GET_WFI, args, e);
+            throw new ProjectHandlerException(ProjectHandlerException.MSG_FAILED_TO_GET_WFI, args,
+                    e);
         }
     }
 
-    private WorkflowStatePosts getWfStatePostProfile(Long wfStatePostId,
-            boolean editable)
+    private WorkflowStatePosts getWfStatePostProfile(Long wfStatePostId, boolean editable)
     {
-        return (WorkflowStatePosts) HibernateUtil.get(WorkflowStatePosts.class,
-                wfStatePostId);
+        return (WorkflowStatePosts) HibernateUtil.get(WorkflowStatePosts.class, wfStatePostId);
     }
 
     @Override
@@ -4309,9 +4042,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             String args[] =
             { Long.toString(wfstaPosts.getId()) };
             throw new ProjectHandlerException(
-                    ProjectHandlerException.MSG_FAILED_TO_REMOVE_WF_STATE_POST_PROFILE,
-                    args, pe);
+                    ProjectHandlerException.MSG_FAILED_TO_REMOVE_WF_STATE_POST_PROFILE, args, pe);
         }
     }
-    
+
 }

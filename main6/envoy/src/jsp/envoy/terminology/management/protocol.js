@@ -118,18 +118,12 @@ function sendUserdataRequest(action, type, user, name, value)
 
 function showError(error)
 {
-    window.showModalDialog("/globalsight/envoy/terminology/management/error.jsp",
-        error,
-        "center:yes; help:no; resizable:yes; status:no; " +
-        "dialogWidth: 450px; dialogHeight: 300px; ");
+	alert(error);
 }
 
 // This should be turned into a MsgBox-style window with different
 // icons for warnings, informational messages, errors etc.
 function showWarning(message)
 {
-    window.showModalDialog("/globalsight/envoy/terminology/management/warning.jsp",
-        message,
-        "center:yes; help:no; resizable:yes; status:no; " +
-        "dialogWidth: 450px; dialogHeight: 300px; ");
+	alert(message);
 }

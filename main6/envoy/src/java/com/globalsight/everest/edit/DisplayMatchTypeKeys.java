@@ -27,6 +27,7 @@ public interface DisplayMatchTypeKeys
     public static final String MSG_OL_FUZZY_ANDSCORE_ANDNOTE = "OfflineFuzzyMatchWithScoreAndNote";
     public static final String MSG_NOMATCH = "NoMatch";
     public static final String MSG_MATCHTYPE_UNKNOWN = "MatchTypeUnknown";
+    public static final String MSG_MACHINE_TRANSLATION = "OfflineMachineTranslation";
 
     // Protected ==========================================================================
     // Segment which are provided only for context. Changes to the segment will be ignored.

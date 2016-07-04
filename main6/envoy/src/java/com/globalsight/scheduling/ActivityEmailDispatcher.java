@@ -17,8 +17,7 @@
 
 package com.globalsight.scheduling;
 
-//GlobalSight
-import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -68,13 +67,11 @@ public class ActivityEmailDispatcher extends EventHandler
      * @throws EventHandlerException
      *             if any error occurs.
      */
-    public void eventFired(KeyFlowContext p_flowContext)
-            throws EventHandlerException
+    public void eventFired(KeyFlowContext p_flowContext) throws EventHandlerException
     {
         try
         {
-            int eventKey = ((Integer) p_flowContext
-                    .get(SchedulerConstants.EVENT_KEY)).intValue();
+            int eventKey = ((Integer) p_flowContext.get(SchedulerConstants.EVENT_KEY)).intValue();
 
             EventInfo myKey = (EventInfo) p_flowContext.getKey();
             // modify the integer value (toggle during warning/deadline events)
@@ -85,18 +82,14 @@ public class ActivityEmailDispatcher extends EventHandler
 
                 if (myKey.getMap().get(SchedulerConstants.OVERDUE) == null)
                 {
-                    notifyProjectManager(
-                            SchedulerConstants.DEADLINE_APPROACH_SUBJECT,
-                            SchedulerConstants.DEADLINE_APPROACH_BODY,
-                            myKey.getMap());
+                    notifyProjectManager(SchedulerConstants.DEADLINE_APPROACH_SUBJECT,
+                            SchedulerConstants.DEADLINE_APPROACH_BODY, myKey.getMap());
                 }
                 else
                 {
                     // Sends "notify user overdue" email.
-                    notifyProjectUser(
-                            SchedulerConstants.NOTIFY_USER_OVERDUE_SUBJECT,
-                            SchedulerConstants.NOTIFY_USER_OVERDUE_BODY,
-                            myKey.getMap());
+                    notifyProjectUser(SchedulerConstants.NOTIFY_USER_OVERDUE_SUBJECT,
+                            SchedulerConstants.NOTIFY_USER_OVERDUE_BODY, myKey.getMap());
                 }
             }
             else
@@ -104,26 +97,21 @@ public class ActivityEmailDispatcher extends EventHandler
 
                 if (myKey.getMap().get(SchedulerConstants.OVERDUE) == null)
                 {
-                    notifyProjectManager(
-                            SchedulerConstants.DEADLINE_PASSED_SUBJECT,
-                            SchedulerConstants.DEADLINE_PASSED_BODY,
-                            myKey.getMap());
+                    notifyProjectManager(SchedulerConstants.DEADLINE_PASSED_SUBJECT,
+                            SchedulerConstants.DEADLINE_PASSED_BODY, myKey.getMap());
                 }
                 else
                 {
                     // Sends the "notify pm overdue" email.
-                    notifyProjectManagerOverdue(
-                            SchedulerConstants.NOTIFY_PM_OVERDUE_SUBJECT,
-                            SchedulerConstants.NOTIFY_PM_OVERDUE_BODY,
-                            myKey.getMap());
+                    notifyProjectManagerOverdue(SchedulerConstants.NOTIFY_PM_OVERDUE_SUBJECT,
+                            SchedulerConstants.NOTIFY_PM_OVERDUE_BODY, myKey.getMap());
                 }
             }
         }
         catch (Exception e)
         {
-            s_category
-                    .error("Failed to notify Project Manager about a warning/deadline notification.",
-                            e);
+            s_category.error(
+                    "Failed to notify Project Manager about a warning/deadline notification.", e);
         }
     }
 
@@ -136,26 +124,25 @@ public class ActivityEmailDispatcher extends EventHandler
     // ////////////////////////////////////////////////////////////////////
     // This method notifies the PM that the acceptance/completion time of a task
     // is either approaching or passed.
-    private void notifyProjectManager(String p_subjectSuffix,
-            String p_messageSuffix, HashMap p_emailInfo) throws Exception
+    private void notifyProjectManager(String p_subjectSuffix, String p_messageSuffix, Map map)
+            throws Exception
     {
-        String prefix = (String) p_emailInfo.get(SchedulerConstants.EVENT_TYPE);
-        EventSchedulerHelper.notifyProjectManager(p_emailInfo, prefix
-                + p_subjectSuffix, prefix + p_messageSuffix);
+        String prefix = (String) map.get(SchedulerConstants.EVENT_TYPE);
+        EventSchedulerHelper.notifyProjectManager(map, prefix + p_subjectSuffix,
+                prefix + p_messageSuffix);
     }
 
     // This method notifies the PM that when the acceptance/completion time of
     // a task over the deadline for days.
-    private void notifyProjectManagerOverdue(String p_subjectSuffix,
-            String p_messageSuffix, HashMap p_emailInfo) throws Exception
+    private void notifyProjectManagerOverdue(String p_subjectSuffix, String p_messageSuffix,
+            Map map) throws Exception
     {
-        String prefix = (String) p_emailInfo.get(SchedulerConstants.EVENT_TYPE);
-        long projId = (Long) p_emailInfo.get(SchedulerConstants.PROJECT_ID);
+        String prefix = (String) map.get(SchedulerConstants.EVENT_TYPE);
+        long projId = (Long) map.get(SchedulerConstants.PROJECT_ID);
         Project proj = ServerProxy.getProjectHandler().getProjectById(projId);
         if (proj == null)
         {
-            s_category
-                    .info("Not found the project in the system. Ignoring this request.");
+            s_category.info("Not found the project in the system. Ignoring this request.");
             return;
         }
         String companyId = String.valueOf(proj.getCompanyId());
@@ -164,27 +151,25 @@ public class ActivityEmailDispatcher extends EventHandler
         {
             // the company does not exist in database any more, ignore this
             // request. Should be because the company has been deleted.
-            s_category
-                    .info("Not found the company in the system. Ignoring this request.");
+            s_category.info("Not found the company in the system. Ignoring this request.");
             return;
         }
-        EventSchedulerHelper.notifyProjectManagerOverdue(p_emailInfo, prefix
-                + p_subjectSuffix, prefix + p_messageSuffix, companyId);
+        EventSchedulerHelper.notifyProjectManagerOverdue(map, prefix + p_subjectSuffix,
+                prefix + p_messageSuffix, companyId);
     }
 
     // This method notifies the task user that when the acceptance/completion
     // time of
     // a task over the deadline for days.
-    private void notifyProjectUser(String p_subjectSuffix,
-            String p_messageSuffix, HashMap p_emailInfo) throws Exception
+    private void notifyProjectUser(String p_subjectSuffix, String p_messageSuffix, Map map)
+            throws Exception
     {
-        String prefix = (String) p_emailInfo.get(SchedulerConstants.EVENT_TYPE);
-        long projId = (Long) p_emailInfo.get(SchedulerConstants.PROJECT_ID);
+        String prefix = (String) map.get(SchedulerConstants.EVENT_TYPE);
+        long projId = (Long) map.get(SchedulerConstants.PROJECT_ID);
         Project proj = ServerProxy.getProjectHandler().getProjectById(projId);
         if (proj == null)
         {
-            s_category
-                    .info("Not found the project in the system. Ignoring this request.");
+            s_category.info("Not found the project in the system. Ignoring this request.");
             return;
         }
         String companyId = String.valueOf(proj.getCompanyId());
@@ -193,12 +178,11 @@ public class ActivityEmailDispatcher extends EventHandler
         {
             // the company does not exist in database any more, ignore this
             // request. Should be because the company has been deleted.
-            s_category
-                    .info("Not found the company in the system. Ignoring this request.");
+            s_category.info("Not found the company in the system. Ignoring this request.");
             return;
         }
-        EventSchedulerHelper.notifyProjectUser(p_emailInfo, prefix
-                + p_subjectSuffix, prefix + p_messageSuffix, companyId);
+        EventSchedulerHelper.notifyProjectUser(map, prefix + p_subjectSuffix,
+                prefix + p_messageSuffix, companyId);
     }
     // ////////////////////////////////////////////////////////////////////
     // End: Local Private Methods

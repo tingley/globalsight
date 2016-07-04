@@ -35,7 +35,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.catalina.connector.ClientAbortException;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -69,8 +68,7 @@ public class ControlServlet extends HttpServlet
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger CATEGORY = Logger
-            .getLogger(ControlServlet.class);
+    private static final Logger CATEGORY = Logger.getLogger(ControlServlet.class);
 
     private static AppServerWrapper s_appServerWrapper = AppServerWrapperFactory
             .getAppServerWrapper();
@@ -99,15 +97,11 @@ public class ControlServlet extends HttpServlet
     {
         try
         {
-            if (s_appServerWrapper.getJ2EEServerName().equals(
-                    AppServerWrapperFactory.JBOSS))
+            if (s_appServerWrapper.getJ2EEServerName().equals(AppServerWrapperFactory.JBOSS))
             {
-                System.out
-                        .println("-----------JBOSS -- GlobalSight starting up------------");
-                AmbassadorServer.getAmbassadorServer().startup("GlobalSight",
-                        null);
-                System.out
-                        .println("-----------JBOSS -- GlobalSight started ------------");
+                System.out.println("-----------JBOSS -- GlobalSight starting up------------");
+                AmbassadorServer.getAmbassadorServer().startup("GlobalSight", null);
+                System.out.println("-----------JBOSS -- GlobalSight started ------------");
             }
         }
         catch (Exception e)
@@ -135,8 +129,7 @@ public class ControlServlet extends HttpServlet
         // for all the Servlet instances).
         if (!WebSiteDescription.isInitialized())
         {
-            if (!WebSiteDescription
-                    .createSiteDescription(WebAppConstants.ENVOY_CONFIG_FILE))
+            if (!WebSiteDescription.createSiteDescription(WebAppConstants.ENVOY_CONFIG_FILE))
             {
                 CATEGORY.error("Error reading XML site description file."
                         + WebAppConstants.ENVOY_CONFIG_FILE);
@@ -152,15 +145,11 @@ public class ControlServlet extends HttpServlet
         System.out.println("ControlServlet.destroy() called.");
         try
         {
-            if (s_appServerWrapper.getJ2EEServerName().equals(
-                    AppServerWrapperFactory.JBOSS))
+            if (s_appServerWrapper.getJ2EEServerName().equals(AppServerWrapperFactory.JBOSS))
             {
-                System.out
-                        .println("-----------JBOSS -- GlobalSight shutting down------------");
-                AmbassadorServer.getAmbassadorServer().shutdown("GlobalSight",
-                        null);
-                System.out
-                        .println("-----------JBOSS -- GlobalSight stopped ------------");
+                System.out.println("-----------JBOSS -- GlobalSight shutting down------------");
+                AmbassadorServer.getAmbassadorServer().shutdown("GlobalSight", null);
+                System.out.println("-----------JBOSS -- GlobalSight stopped ------------");
             }
         }
         catch (Exception e)
@@ -172,9 +161,8 @@ public class ControlServlet extends HttpServlet
     /**
      * Serve a GET request
      */
-    public void doGet(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws ServletException,
-            IOException
+    public void doGet(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws ServletException, IOException
     {
         try
         {
@@ -184,10 +172,6 @@ public class ControlServlet extends HttpServlet
         // aborts the request. Previously, we caught SocketException (maybe
         // thrown by other servers or earlier version of Tomcat?); but this
         // would be prone to false-positives anyway.
-        catch (ClientAbortException e)
-        {
-            CATEGORY.info("Client aborted request: " + e.getMessage());
-        }
         catch (Exception e)
         {
             CATEGORY.error("Exception servicing request", e);
@@ -208,11 +192,7 @@ public class ControlServlet extends HttpServlet
      */
     public static void handleJSPException(Throwable t)
     {
-        if (t instanceof ClientAbortException)
-        {
-            CATEGORY.info("Client aborted request in JSP: " + t.getMessage());
-        }
-        else if (t != null)
+        if (t != null)
         {
             CATEGORY.error("Exception servicing request in JSP", t);
         }
@@ -233,8 +213,7 @@ public class ControlServlet extends HttpServlet
             System.out.println("-------------------------------");
             System.out.println("HTTP request=" + p_request.toString());
             System.out.println("HTTP request URI=" + p_request.getRequestURI());
-            System.out.println("HTTP content type="
-                    + p_request.getContentType());
+            System.out.println("HTTP content type=" + p_request.getContentType());
 
             Enumeration enumeration = p_request.getAttributeNames();
             while (enumeration.hasMoreElements())
@@ -256,9 +235,8 @@ public class ControlServlet extends HttpServlet
     /**
      * Serve a GET request
      */
-    private void _doGet(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws ServletException,
-            IOException
+    private void _doGet(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws ServletException, IOException
     {
         if (AmbassadorServer.isSystem4Accessible() == false)
         {
@@ -302,16 +280,14 @@ public class ControlServlet extends HttpServlet
         {
             // If there is no user session, only three pages can be
             // invoked: entry and welcome, and the terminology viewer.
-            String activityName = p_request
-                    .getParameter(LinkHelper.ACTIVITY_NAME);
+            String activityName = p_request.getParameter(LinkHelper.ACTIVITY_NAME);
             String pageName = p_request.getParameter(WebAppConstants.PAGE_NAME);
 
             if (activityName != null && activityName.equals("termviewer"))
             {
-                WebActivityDescriptor activityDescriptor = WebSiteDescription
-                        .instance().getActivityDescriptor(activityName);
-                targetPageDescriptor = activityDescriptor
-                        .getDefaultPageDescriptor();
+                WebActivityDescriptor activityDescriptor = WebSiteDescription.instance()
+                        .getActivityDescriptor(activityName);
+                targetPageDescriptor = activityDescriptor.getDefaultPageDescriptor();
             }
             else if (pageName != null && pageName.equals(RETRIEVE_PAGE)
                     && LoginUtil.isFromLoginPage(p_request))
@@ -333,14 +309,12 @@ public class ControlServlet extends HttpServlet
                 // the entry page does not receive login parameters
                 // retrieve the page descriptor for entry page (this is
                 // a default)
-                targetPageDescriptor = WebSiteDescription.instance()
-                        .getPageDescriptor(ENTRY_PAGE);
+                targetPageDescriptor = WebSiteDescription.instance().getPageDescriptor(ENTRY_PAGE);
             }
             else if (LoginUtil.isFromLoginPage(p_request))
             {
                 // if so, proceed to login the user
-                sourcePageDescriptor = WebSiteDescription.instance()
-                        .getPageDescriptor(ENTRY_PAGE);
+                sourcePageDescriptor = WebSiteDescription.instance().getPageDescriptor(ENTRY_PAGE);
 
                 // verify that there is no extra flow of control test
                 PageHandler sourcePageHandler = null;
@@ -350,11 +324,10 @@ public class ControlServlet extends HttpServlet
                 }
                 catch (EnvoyServletException e)
                 {
-                    CATEGORY.error("Problem getting sourcePageHandler "
-                            + "(no user session exists): ", e);
-                    reportErrorPage(isApplet != null, null, e, p_request,
-                            p_response, m_servletContext, userSession,
-                            sourcePageHandler);
+                    CATEGORY.error(
+                            "Problem getting sourcePageHandler " + "(no user session exists): ", e);
+                    reportErrorPage(isApplet != null, null, e, p_request, p_response,
+                            m_servletContext, userSession, sourcePageHandler);
                 }
 
                 ControlFlowHelper controlFlowHelper = sourcePageHandler
@@ -373,23 +346,18 @@ public class ControlServlet extends HttpServlet
                         CATEGORY.error("Problem determining link to follow "
                                 + "(no user session exists): ", e);
 
-                        reportErrorPage(isApplet != null, null, e, p_request,
-                                p_response, m_servletContext, userSession,
-                                sourcePageHandler);
+                        reportErrorPage(isApplet != null, null, e, p_request, p_response,
+                                m_servletContext, userSession, sourcePageHandler);
                     }
                     catch (Throwable t)
                     {
-                        CATEGORY.error("Throwable thrown when determining "
-                                + "link to follow", t);
+                        CATEGORY.error("Throwable thrown when determining " + "link to follow", t);
 
-                        reportErrorPage(
-                                isApplet != null,
-                                null,
-                                new EnvoyServletException(
-                                        EnvoyServletException.EX_GENERAL,
+                        reportErrorPage(isApplet != null, null,
+                                new EnvoyServletException(EnvoyServletException.EX_GENERAL,
                                         GeneralException.getStackTraceString(t)),
-                                p_request, p_response, m_servletContext,
-                                userSession, sourcePageHandler);
+                                p_request, p_response, m_servletContext, userSession,
+                                sourcePageHandler);
                     }
                 }
 
@@ -397,9 +365,7 @@ public class ControlServlet extends HttpServlet
 
                 // determine the target page
                 targetPageDescriptor = WebSiteDescription.instance()
-                        .getPageDescriptor(
-                                sourcePageDescriptor
-                                        .getDestinationPageName(linkName));
+                        .getPageDescriptor(sourcePageDescriptor.getDestinationPageName(linkName));
             }
             else
             {
@@ -407,8 +373,7 @@ public class ControlServlet extends HttpServlet
                 // the entry page does not receive login parameters
                 // retrieve the page descriptor for entry page (this is
                 // a default)
-                targetPageDescriptor = WebSiteDescription.instance()
-                        .getPageDescriptor(ENTRY_PAGE);
+                targetPageDescriptor = WebSiteDescription.instance().getPageDescriptor(ENTRY_PAGE);
             }
         }
         else
@@ -424,8 +389,7 @@ public class ControlServlet extends HttpServlet
 
             // retrieve the name of the sourcePage and link.
             String linkName = null;
-            String sourcePageName = p_request
-                    .getParameter(LinkHelper.PAGE_NAME);
+            String sourcePageName = p_request.getParameter(LinkHelper.PAGE_NAME);
 
             // Multi-Company: get current user's company from the session
             // String companyName =
@@ -461,12 +425,11 @@ public class ControlServlet extends HttpServlet
                 }
                 catch (EnvoyServletException e)
                 {
-                    CATEGORY.error("Problem getting sourcePageHandler "
-                            + "(user session exists): ", e);
+                    CATEGORY.error("Problem getting sourcePageHandler " + "(user session exists): ",
+                            e);
 
-                    reportErrorPage(isApplet != null, null, e, p_request,
-                            p_response, m_servletContext, userSession,
-                            sourcePageHandler);
+                    reportErrorPage(isApplet != null, null, e, p_request, p_response,
+                            m_servletContext, userSession, sourcePageHandler);
                 }
 
                 ControlFlowHelper controlFlowHelper = sourcePageHandler
@@ -485,26 +448,22 @@ public class ControlServlet extends HttpServlet
                     }
                     catch (EnvoyServletException e)
                     {
-                        CATEGORY.error("Problem determining link to follow "
-                                + "(user session exists): ", e);
+                        CATEGORY.error(
+                                "Problem determining link to follow " + "(user session exists): ",
+                                e);
 
-                        reportErrorPage(isApplet != null, null, e, p_request,
-                                p_response, m_servletContext, userSession,
-                                sourcePageHandler);
+                        reportErrorPage(isApplet != null, null, e, p_request, p_response,
+                                m_servletContext, userSession, sourcePageHandler);
                     }
                     catch (Throwable t)
                     {
-                        CATEGORY.error("Throwable thrown when determining "
-                                + "link to follow", t);
+                        CATEGORY.error("Throwable thrown when determining " + "link to follow", t);
 
-                        reportErrorPage(
-                                isApplet != null,
-                                null,
-                                new EnvoyServletException(
-                                        EnvoyServletException.EX_GENERAL,
+                        reportErrorPage(isApplet != null, null,
+                                new EnvoyServletException(EnvoyServletException.EX_GENERAL,
                                         GeneralException.getStackTraceString(t)),
-                                p_request, p_response, m_servletContext,
-                                userSession, sourcePageHandler);
+                                p_request, p_response, m_servletContext, userSession,
+                                sourcePageHandler);
                     }
                 }
                 else
@@ -514,9 +473,7 @@ public class ControlServlet extends HttpServlet
 
                 // determine the target page
                 targetPageDescriptor = WebSiteDescription.instance()
-                        .getPageDescriptor(
-                                sourcePageDescriptor
-                                        .getDestinationPageName(linkName));
+                        .getPageDescriptor(sourcePageDescriptor.getDestinationPageName(linkName));
 
                 if (CATEGORY.isDebugEnabled())
                 {
@@ -528,8 +485,7 @@ public class ControlServlet extends HttpServlet
                 // if the page name does not exist, look for an
                 // activity name -- that is how the menus items are
                 // defined
-                String activityName = p_request
-                        .getParameter(LinkHelper.ACTIVITY_NAME);
+                String activityName = p_request.getParameter(LinkHelper.ACTIVITY_NAME);
 
                 if ("login".equals(activityName))
                 {
@@ -545,10 +501,9 @@ public class ControlServlet extends HttpServlet
                 // page within the activity
                 if (activityName != null)
                 {
-                    WebActivityDescriptor activityDescriptor = WebSiteDescription
-                            .instance().getActivityDescriptor(activityName);
-                    targetPageDescriptor = activityDescriptor
-                            .getDefaultPageDescriptor();
+                    WebActivityDescriptor activityDescriptor = WebSiteDescription.instance()
+                            .getActivityDescriptor(activityName);
+                    targetPageDescriptor = activityDescriptor.getDefaultPageDescriptor();
 
                     // now clean up session manager, but only if we
                     // change to an activity that is a "normal" one.
@@ -557,8 +512,7 @@ public class ControlServlet extends HttpServlet
                     // that is opened *during* an activity but does
                     // not end it, then don't clear out the state of
                     // the current activity.
-                    if (isApplet == null
-                            && activityDescriptor.shouldClearSession())
+                    if (isApplet == null && activityDescriptor.shouldClearSession())
                     {
                         SessionManager sessionMgr = (SessionManager) userSession
                                 .getAttribute(WebAppConstants.SESSION_MANAGER);
@@ -588,61 +542,53 @@ public class ControlServlet extends HttpServlet
 
         if (CATEGORY.isDebugEnabled())
         {
-            CATEGORY.debug("targetPageDescriptor="
-                    + targetPageDescriptor.toString());
+            CATEGORY.debug("targetPageDescriptor=" + targetPageDescriptor.toString());
         }
 
         // no target page is found
         if (targetPageDescriptor == null)
         {
-            CATEGORY.error("Target page not found "
-                    + getRequestParameters(p_request));
+            CATEGORY.error("Target page not found " + getRequestParameters(p_request));
 
             // report page not found error
-            reportErrorPage(isApplet != null, "Target page not found", null,
-                    p_request, p_response, m_servletContext, userSession, null);
+            reportErrorPage(isApplet != null, "Target page not found", null, p_request, p_response,
+                    m_servletContext, userSession, null);
             return;
         }
 
         String targetJSP = targetPageDescriptor.getJspURL();
-        String targetPageHandlerName = targetPageDescriptor
-                .getPageHandlerClassName();
+        String targetPageHandlerName = targetPageDescriptor.getPageHandlerClassName();
         PageHandler targetPageHandler = null;
         Map<Object, Object> activityArgs = new HashMap<Object, Object>();
         activityArgs.put("pageHandler", targetPageHandlerName);
         activityArgs.put("jsp", targetJSP);
-        activityArgs.put(
-                "user",
-                userSession == null ? null : userSession
-                        .getAttribute(WebAppConstants.USER_NAME));
+        activityArgs.put("user",
+                userSession == null ? null : userSession.getAttribute(WebAppConstants.USER_NAME));
 
-        ActivityLog.Start activityStart = ActivityLog.start(
-                ControlServlet.class, "_doGet", activityArgs);
+        ActivityLog.Start activityStart = ActivityLog.start(ControlServlet.class, "_doGet",
+                activityArgs);
         try
         {
             // process the page using the correct page handler
             targetPageHandler = getPageHandlerInstance(targetPageDescriptor);
-            String initial = p_request
-                    .getParameter(WebAppConstants.INITIAL_SCREEN);
+            String initial = p_request.getParameter(WebAppConstants.INITIAL_SCREEN);
 
             if (isApplet == null || initial != null)
             {
 
-                if (!TaskFilter.doFilter(targetPageHandler, p_request,
-                        p_response, m_servletContext))
+                if (!TaskFilter.doFilter(targetPageHandler, p_request, p_response,
+                        m_servletContext))
                 {
                     return;
                 }
 
-                if (userSession != null
-                        && !(targetPageHandler instanceof TaskListHandler))
+                if (userSession != null && !(targetPageHandler instanceof TaskListHandler))
                 {
-                    userSession
-                            .removeAttribute(TaskListHandler.TASK_SEARCH_RESULT);
+                    userSession.removeAttribute(TaskListHandler.TASK_SEARCH_RESULT);
                 }
 
-                targetPageHandler.invokePageHandler(targetPageDescriptor,
-                        p_request, p_response, m_servletContext);
+                targetPageHandler.invokePageHandler(targetPageDescriptor, p_request, p_response,
+                        m_servletContext);
             }
             else
             {
@@ -656,23 +602,17 @@ public class ControlServlet extends HttpServlet
                 // p_request.getInputStream().available() == 0;
                 boolean isDoGet = p_request.getParameter("doPost") == null;
 
-                Vector objs = targetPageHandler.invokePageHandlerForApplet(
-                        isDoGet, targetPageDescriptor, p_request, p_response,
-                        m_servletContext, userSession);
+                Vector objs = targetPageHandler.invokePageHandlerForApplet(isDoGet,
+                        targetPageDescriptor, p_request, p_response, m_servletContext, userSession);
 
                 Locale uiLocale = null;
                 if (userSession != null)
                 {
-                    uiLocale = (Locale) userSession
-                            .getAttribute(WebAppConstants.UILOCALE);
+                    uiLocale = (Locale) userSession.getAttribute(WebAppConstants.UILOCALE);
                 }
 
                 outputToApplet(objs, uiLocale, p_response);
             }
-        }
-        catch (ClientAbortException e)
-        {
-            throw e; // handled higher
         }
         catch (NumberFormatException e2)
         {
@@ -680,25 +620,21 @@ public class ControlServlet extends HttpServlet
             String pageName = null;
             if (targetPageDescriptor != null)
             {
-                pageHandlerClassName = targetPageDescriptor
-                        .getPageHandlerClassName();
+                pageHandlerClassName = targetPageDescriptor.getPageHandlerClassName();
                 pageName = targetPageDescriptor.getPageName();
             }
-            CATEGORY.error("Exception in targetPageHandler["
-                    + pageHandlerClassName + "," + pageName + "](isApplet="
-                    + isApplet + ")(" + getRequestParameters(p_request) + ")",
-                    e2);
+            CATEGORY.error("Exception in targetPageHandler[" + pageHandlerClassName + "," + pageName
+                    + "](isApplet=" + isApplet + ")(" + getRequestParameters(p_request) + ")", e2);
 
-            EnvoyServletException e = new EnvoyServletException(
-                            EnvoyServletException.EX_GENERAL, "Invalid number");
+            EnvoyServletException e = new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    "Invalid number");
 
             // If the response has already been started, there's nothing we can
             // do about it.
             if (!p_response.isCommitted())
             {
-                reportErrorPage(isApplet != null, null, e, p_request,
-                        p_response, m_servletContext, userSession,
-                        targetPageHandler);
+                reportErrorPage(isApplet != null, null, e, p_request, p_response, m_servletContext,
+                        userSession, targetPageHandler);
             }
         }
         catch (Exception t)
@@ -707,26 +643,21 @@ public class ControlServlet extends HttpServlet
             String pageName = null;
             if (targetPageDescriptor != null)
             {
-                pageHandlerClassName = targetPageDescriptor
-                        .getPageHandlerClassName();
+                pageHandlerClassName = targetPageDescriptor.getPageHandlerClassName();
                 pageName = targetPageDescriptor.getPageName();
             }
-            CATEGORY.error("Exception in targetPageHandler["
-                    + pageHandlerClassName + "," + pageName + "](isApplet="
-                    + isApplet + ")(" + getRequestParameters(p_request) + ")",
-                    t);
+            CATEGORY.error("Exception in targetPageHandler[" + pageHandlerClassName + "," + pageName
+                    + "](isApplet=" + isApplet + ")(" + getRequestParameters(p_request) + ")", t);
 
             EnvoyServletException e = t instanceof EnvoyServletException ? (EnvoyServletException) t
-                    : new EnvoyServletException(
-                            EnvoyServletException.EX_GENERAL, t);
+                    : new EnvoyServletException(EnvoyServletException.EX_GENERAL, t);
 
             // If the response has already been started, there's nothing we can
             // do about it.
             if (!p_response.isCommitted())
             {
-                reportErrorPage(isApplet != null, null, e, p_request,
-                        p_response, m_servletContext, userSession,
-                        targetPageHandler);
+                reportErrorPage(isApplet != null, null, e, p_request, p_response, m_servletContext,
+                        userSession, targetPageHandler);
             }
         }
         finally
@@ -739,9 +670,8 @@ public class ControlServlet extends HttpServlet
     /**
      * Serve a POST request
      */
-    public void doPost(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws ServletException,
-            IOException
+    public void doPost(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws ServletException, IOException
     {
         doGet(p_request, p_response);
     }
@@ -757,16 +687,14 @@ public class ControlServlet extends HttpServlet
     private PageHandler getPageHandlerInstance(WebPageDescriptor pageDescriptor)
             throws EnvoyServletException
     {
-        return PageHandlerFactory.getPageHandlerInstance(pageDescriptor
-                .getPageHandlerClassName());
+        return PageHandlerFactory.getPageHandlerInstance(pageDescriptor.getPageHandlerClassName());
     }
 
     // write back to applet
-    private void outputToApplet(Vector p_objects, Locale p_uiLocale,
-            HttpServletResponse p_response) throws IOException
+    private void outputToApplet(Vector p_objects, Locale p_uiLocale, HttpServletResponse p_response)
+            throws IOException
     {
-        ObjectOutputStream outputToApplet = new ObjectOutputStream(
-                p_response.getOutputStream());
+        ObjectOutputStream outputToApplet = new ObjectOutputStream(p_response.getOutputStream());
 
         outputToApplet.writeObject(p_objects);
         outputToApplet.writeObject(p_uiLocale);
@@ -780,9 +708,8 @@ public class ControlServlet extends HttpServlet
      */
     private void reportErrorPage(boolean p_isApplet, String p_message,
             EnvoyServletException p_exception, HttpServletRequest p_request,
-            HttpServletResponse p_response, ServletContext p_context,
-            HttpSession p_session, PageHandler p_pageHandler)
-            throws ServletException, IOException
+            HttpServletResponse p_response, ServletContext p_context, HttpSession p_session,
+            PageHandler p_pageHandler) throws ServletException, IOException
     {
         if (p_isApplet)
         {
@@ -801,22 +728,21 @@ public class ControlServlet extends HttpServlet
 
             if (p_pageHandler == null)
             {
-                p_context.getRequestDispatcher(WebAppConstants.ERROR_PAGE)
-                        .forward(p_request, p_response);
+                p_context.getRequestDispatcher(WebAppConstants.ERROR_PAGE).forward(p_request,
+                        p_response);
             }
             else
             {
-                p_context.getRequestDispatcher(p_pageHandler.getErrorPage())
-                        .forward(p_request, p_response);
+                p_context.getRequestDispatcher(p_pageHandler.getErrorPage()).forward(p_request,
+                        p_response);
             }
         }
     }
 
     // send a serializable ExceptionMessage object to the applet.
     @SuppressWarnings("unchecked")
-    private void sendErrorToApplet(HttpSession p_session,
-            EnvoyServletException p_exception, HttpServletResponse p_response)
-            throws IOException
+    private void sendErrorToApplet(HttpSession p_session, EnvoyServletException p_exception,
+            HttpServletResponse p_response) throws IOException
     {
         String message = p_exception.getTopLevelMessage();
         if (p_session != null)
@@ -831,21 +757,20 @@ public class ControlServlet extends HttpServlet
             if (manager != null)
             {
                 User user = (User) manager.getAttribute(WebAppConstants.USER);
-                message = p_exception.getTopLevelMessage(LocaleWrapper
-                        .getLocale(user.getDefaultUILocale()));
+                message = p_exception
+                        .getTopLevelMessage(LocaleWrapper.getLocale(user.getDefaultUILocale()));
             }
         }
 
         Vector objs = new Vector();
-        ExceptionMessage em = new ExceptionMessage(message,
-                p_exception.getStackTraceString(), CATEGORY.isDebugEnabled());
+        ExceptionMessage em = new ExceptionMessage(message, p_exception.getStackTraceString(),
+                CATEGORY.isDebugEnabled());
         objs.addElement(em);
 
         Locale uiLocale = null;
         if (p_session != null)
         {
-            uiLocale = (Locale) p_session
-                    .getAttribute(WebAppConstants.UILOCALE);
+            uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
         }
 
         outputToApplet(objs, uiLocale, p_response);
@@ -866,15 +791,13 @@ public class ControlServlet extends HttpServlet
         while (enumeration.hasMoreElements())
         {
             String name = (String) enumeration.nextElement();
-            parameters = parameters + " " + name + "="
-                    + p_request.getParameter(name);
+            parameters = parameters + " " + name + "=" + p_request.getParameter(name);
         }
 
         return parameters;
     }
 
-    private boolean isLoginSession(HttpSession p_userSession,
-            HttpServletRequest p_request)
+    private boolean isLoginSession(HttpSession p_userSession, HttpServletRequest p_request)
     {
         boolean isLogin = true;
         if (p_userSession == null)
@@ -883,20 +806,16 @@ public class ControlServlet extends HttpServlet
         }
         else
         {
-            String sessionUserName = (String) p_userSession
-                    .getAttribute(WebAppConstants.USER_NAME);
+            String sessionUserName = (String) p_userSession.getAttribute(WebAppConstants.USER_NAME);
             sessionUserName = UserUtil.getUserNameById(sessionUserName);
-            String loginFrom = p_request
-                    .getParameter(WebAppConstants.LOGIN_FROM);
+            String loginFrom = p_request.getParameter(WebAppConstants.LOGIN_FROM);
             if (sessionUserName == null || sessionUserName.length() == 0)
             {
                 isLogin = false;
             }
-            else if (loginFrom != null
-                    && WebAppConstants.LOGIN_FROM_EMAIL.equals(loginFrom))
+            else if (loginFrom != null && WebAppConstants.LOGIN_FROM_EMAIL.equals(loginFrom))
             {
-                String loginName = p_request
-                        .getParameter(WebAppConstants.LOGIN_NAME_FIELD);
+                String loginName = p_request.getParameter(WebAppConstants.LOGIN_NAME_FIELD);
                 if (loginName != null && loginName.length() > 0
                         && !sessionUserName.equals(loginName))
                 {
@@ -919,8 +838,8 @@ public class ControlServlet extends HttpServlet
      * 
      */
     private boolean returnImmediate(final HttpSession p_userSession,
-            final HttpServletRequest p_request,
-            final HttpServletResponse p_response) throws IOException
+            final HttpServletRequest p_request, final HttpServletResponse p_response)
+            throws IOException
     {
         String activityName = p_request.getParameter(LinkHelper.ACTIVITY_NAME);
         if ("checkSessionStatus".equals(activityName))
@@ -936,8 +855,7 @@ public class ControlServlet extends HttpServlet
             {
                 p_response.setContentType("text/plain");
                 out = p_response.getOutputStream();
-                String returns = "{\"sessionStatus\":\"" + sessionStatus
-                        + "\"}";
+                String returns = "{\"sessionStatus\":\"" + sessionStatus + "\"}";
                 out.write(returns.getBytes("UTF-8"));
 
                 return true;

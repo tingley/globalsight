@@ -40,9 +40,9 @@ function Properties(id)
     this.id = id;
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      	//this.importOptions = oImportOptions.XMLDocument;
-    	//this.definition = oDefinition.XMLDocument;
-    	var domOption=new ActiveXObject("Microsoft.XMLDOM");
+        //this.importOptions = oImportOptions.XMLDocument;
+        //this.definition = oDefinition.XMLDocument;
+        var domOption=new ActiveXObject("Microsoft.XMLDOM");
         domOption.async="false";
         domOption.loadXML(xmlImportOptions);
         this.importOptions = domOption;
@@ -54,18 +54,19 @@ function Properties(id)
     }
     else if(window.DOMParser)
     { 
-      	var parser = new DOMParser();
-      	this.importOptions = parser.parseFromString(xmlImportOptions,"text/xml");
-    	this.definition = parser.parseFromString(xmlDefinition,"text/xml");
+        var parser = new DOMParser();
+        this.importOptions = parser.parseFromString(xmlImportOptions,"text/xml");
+        this.definition = parser.parseFromString(xmlDefinition,"text/xml");
     }
     
-    this.name				= null;
-    this.type 			  	= null;
-    this.associatedColumn 	= null;
-    this.termLanguage		= null;
+    this.name               = null;
+    this.type               = null;
+    this.associatedColumn   = null;
+    this.termLanguage       = null;
 }
 
-
+var associateParams = null;
+var id = null;
 function Associate(event)
 {
     //var elem = window.event.srcElement;//
@@ -74,49 +75,51 @@ function Associate(event)
     {
         elem = elem.parentElement||elem.parentNode;
     }
-    var id = elem.getAttribute("id");
-    var oProperties = new Properties(id);
+    id = elem.getAttribute("id");
+    associateParams = new Properties(id);
 
-    oProperties = window.showModalDialog(
-      "/globalsight/envoy/terminology/management/associate.jsp", oProperties,
-      "dialogHeight:325px; dialogWidth:400px; center:yes; " +
-      "resizable:no; status:no;");
+    window.open(
+      "/globalsight/envoy/terminology/management/associate.jsp", 
+      "Associate", "height=325, width=400, toolbar =no, menubar=no, location=no, status=no");       
+}
 
+function associateDialog(oProperties)
+{
     if (oProperties != null)
     {
         idBody.cursor = "wait";
         
         var dom,nodes;
         if(window.navigator.userAgent.indexOf("MSIE")>0)
-    	{
-      		//dom = oImportOptions.XMLDocument;
-      		dom=new ActiveXObject("Microsoft.XMLDOM");
-        	dom.async="false";
-        	dom.loadXML(xmlImportOptions);
-    	}
-    	else if(window.DOMParser)
-    	{ 
-      		var parser = new DOMParser();
-      		dom = parser.parseFromString(xmlImportOptions,"text/xml");
-    	}
+        {
+            //dom = oImportOptions.XMLDocument;
+            dom=new ActiveXObject("Microsoft.XMLDOM");
+            dom.async="false";
+            dom.loadXML(xmlImportOptions);
+        }
+        else if(window.DOMParser)
+        { 
+            var parser = new DOMParser();
+            dom = parser.parseFromString(xmlImportOptions,"text/xml");
+        }
 
         //node = dom.selectSingleNode("/importOptions/columnOptions/column[@id='" + id + "']");
         nodes = $(dom).find("importOptions columnOptions column");
         for(i=0;i < nodes.length;i++)
         {
-        	var attrVlue = $(nodes[i]).attr("id");
-        	if(attrVlue == id)
-        	{
-        		node = nodes[i]
-        	}
+            var attrVlue = $(nodes[i]).attr("id");
+            if(attrVlue == id)
+            {
+                node = nodes[i]
+            }
         }
 
         var example = $(node).find("example").text();
         var encoding = $(node).find("encoding").text();
-        var name 				= oProperties.name;
-    	var type 				= oProperties.type;
-    	var associatedColumn 	= oProperties.associatedColumn;
-    	var termLanguage 		= oProperties.termLanguage;
+        var name                = oProperties.name;
+        var type                = oProperties.type;
+        var associatedColumn    = oProperties.associatedColumn;
+        var termLanguage        = oProperties.termLanguage;
 
         aColumns[id] = new Column(id, name, example, type,
             encoding, associatedColumn, termLanguage);
@@ -138,7 +141,7 @@ function showColumns()
    for (var i = 0; i < aColumns.length; ++i)
    {
       var oColumn = aColumns[i];
-	  var j=0;
+      var j=0;
       var row, cell;
 
       row = tbody.insertRow(i);//row = tbody.insertRow();
@@ -162,7 +165,7 @@ function showColumns()
 
       // Associated Column
       cell = row.insertCell(j++);
-      if (oColumn.associatedColumn != -1)
+      if (oColumn.associatedColumn != -1 && oColumn.associatedColumn != null)
       {
         cell.innerText = aColumns[oColumn.associatedColumn].name;
       }

@@ -377,6 +377,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         // as this is apparently populated by the TM in OmegaT.
         m_downloadParams.setPopulate100(false);
         m_downloadParams.setPopulateFuzzy(false);
+        m_downloadParams.setPopulateMT(false);
         m_status = p_status;
         setUILocaleResources(m_downloadParams);
 
@@ -710,6 +711,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         List<OfflinePageData> datas = new ArrayList<OfflinePageData>();
         OfflinePageData pageData = new OfflinePageData();
         pageData.setPopulate100(m_downloadParams.isPopulate100());
+        pageData.setPopulateMT(m_downloadParams.isPopulateMT());
         OfflinePageData repPageData = new OfflinePageData();
         boolean isConsolidate = false;
         boolean isCombined = false;
@@ -1189,6 +1191,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         OfflinePageData consolidatedData = new OfflinePageData();
         consolidatedData.setPageName(m_downloadParams.getFullJobName());
         consolidatedData.setPopulate100(m_downloadParams.isPopulate100());
+        consolidatedData.setPopulateMT(m_downloadParams.isPopulateMT());
         HashSet<OfflineSegmentData> allDatas = new HashSet<OfflineSegmentData>();
         boolean inited = false;
 
@@ -1245,10 +1248,18 @@ public class DownLoadApi implements AmbassadorDwUpConstants
     {
         long jobId = opd.getJobId();
         Vector vector = opd.getSegmentList();
+        List<Tuv> targetTuvs = new ArrayList<Tuv>();
+        for (int i = 0; i < vector.size(); i++)
+        {
+            OfflineSegmentData segment = (OfflineSegmentData) vector.get(i);
+            targetTuvs.add(segment.getTargetTuv());
+        }
+        
         Vector excludedTypes = m_downloadParams.getExcludedTypeNames();
         for (int i = 0; i < vector.size(); i++)
         {
             OfflineSegmentData segment = (OfflineSegmentData) vector.get(i);
+
             String subId = "0";
             if (!"".equals(segment.getSubflowId()))
             {
@@ -1258,7 +1269,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             if (segment.isProtectedChangeable())
             {
 				int iceType = LeverageUtil.getIsIncontextMatchType(i,
-						splittedTuvs, null, matchs, new Vector(), subId, jobId);
+						splittedTuvs, targetTuvs, matchs, new Vector(), subId, jobId);
 				if (iceType > 0)
 				{
 	                segment = (OfflineSegmentData) vector.get(i);
@@ -1300,7 +1311,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         {
         	String subId = getSubId(i, splittedTuvs);
 			int iceType = LeverageUtil.getIsIncontextMatchType(i, splittedTuvs,
-					null, matchs, excludedTypes, subId, jobId);
+			        targetTuvs, matchs, excludedTypes, subId, jobId);
             if (iceType > 0)
             {
                 long id = ((SegmentTmTuv) splittedTuvs.get(i)).getId();
@@ -1406,8 +1417,6 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             DownloadParams p_downloadParams) throws IOException, JobException,
             GeneralException
     {
-        // TODO Well if the fullPlainPath will lost all by customer,the code and
-        // it related should be removed
         String tmxPlainPath = null;
         String tmx14bPath = null;
         String fname = null;
@@ -1513,8 +1522,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             {
                 mode = TmxUtil.TMX_MODE_NON_ICE;
             }
-            
-			if (separateTmFile)
+            else
 			{
 				mode = TmxUtil.TMX_MODE_TM_ONLY;
 			}
@@ -1524,6 +1532,24 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 m_zipper.writePath(full14bPath);
                 m_zipper.writeTmxPage(p_page, p_downloadParams,
                         TmxUtil.TMX_LEVEL_TWO, convertLF, mode, false);
+            }
+            
+            if (separateTmFile && full14bPath != null)
+            {
+                // add mt files
+                mode = TmxUtil.TMX_MODE_MT_ONLY;
+                String mtPath = DownloadHelper.makeMt14bParentPath(m_downloadParams);
+                mtPath = mtPath + fname;
+                sb = new StringBuffer();
+                sb.append(m_resource.getString("msg_dnld_adding_file"));
+                sb.append("/mt/");
+                sb.append(fname);
+                m_pageCounter++;
+                m_status.speak(m_pageCounter, sb.toString());
+
+                m_zipper.writePath(mtPath);
+                m_zipper.writeTmxPage(p_page, p_downloadParams, TmxUtil.TMX_LEVEL_TWO, convertLF,
+                        mode, false);
             }
 
             if (fullPlainPath != null)
@@ -1545,12 +1571,12 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                         TmxUtil.TMX_LEVEL_TWO, convertLF, mode, true);
             }
 
+            // OmegaT
             if (seperateMT && full14bPath != null)
-		   {
+            {
                 // add ice files
                 mode = TmxUtil.TMX_MODE_ICE_ONLY;
-                String icePath = DownloadHelper
-                        .makeTmxAutoParentPath(m_downloadParams);
+                String icePath = DownloadHelper.makeTmxAutoParentPath(m_downloadParams);
                 icePath = icePath + fname;
                 sb = new StringBuffer();
                 sb.append(m_resource.getString("msg_dnld_adding_file"));
@@ -1598,8 +1624,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     {
                         if (j != null)
                         {
-                            j = ServerProxy.getJobHandler().getJobById(
-                                    j.getId());
+                            j = ServerProxy.getJobHandler().getJobById(j.getId());
                         }
                         else
                         {
@@ -1615,8 +1640,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     if (j != null)
                     {
                         Collection<Workflow> wfs = j.getWorkflows();
-                        Iterator<Workflow> wfsIt = (wfs != null) ? wfs
-                                .iterator() : null;
+                        Iterator<Workflow> wfsIt = (wfs != null) ? wfs.iterator() : null;
 
                         while (wfsIt.hasNext())
                         {
@@ -1626,8 +1650,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                             {
                                 if (wf.getUseMT())
                                 {
-                                    mtConfidenceScoreSet.add(wf
-                                            .getMtConfidenceScore());
+                                    mtConfidenceScoreSet.add(wf.getMtConfidenceScore());
                                     useMT = true;
                                 }
                             }
@@ -1635,18 +1658,15 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     }
                 }
 
-                Vector<OfflineSegmentData> allSegments = p_page
-                        .getSegmentList();
+                Vector<OfflineSegmentData> allSegments = p_page.getSegmentList();
                 sb = new StringBuffer();
                 if (useMT)
                 {
                     for (Integer score : mtConfidenceScoreSet)
                     {
-                        String tmxPenalty = DownloadHelper
-                                .makeTmxParentPath(m_downloadParams);
+                        String tmxPenalty = DownloadHelper.makeTmxParentPath(m_downloadParams);
                         mtConfidenceScore = 100 - score;
-                        String penaltyDir = "mt/penalty-" + mtConfidenceScore
-                                + "/";
+                        String penaltyDir = "mt/penalty-" + mtConfidenceScore + "/";
                         tmxPenalty = tmxPenalty + penaltyDir + fname;
 
                         sb.setLength(0);
@@ -1685,7 +1705,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     m_status.speak(m_pageCounter, sb.toString());
                 }
             }
-			if (!isOmegaT && separateTmFile && mtTmxNamePath != null)
+
+            if (!isOmegaT && separateTmFile && mtTmxNamePath != null)
 			{
 				mode = TmxUtil.TMX_MODE_MT_ONLY;
 				sb = new StringBuffer();

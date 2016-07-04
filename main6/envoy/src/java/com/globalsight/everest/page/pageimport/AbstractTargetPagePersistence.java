@@ -16,11 +16,7 @@
  */
 package com.globalsight.everest.page.pageimport;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -33,8 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.apache.log4j.Logger;
 
@@ -54,8 +48,6 @@ import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.tda.LeverageTDAResult;
-import com.globalsight.everest.tda.TdaHelper;
 import com.globalsight.everest.tuv.IXliffProcessor;
 import com.globalsight.everest.tuv.PoProcessor;
 import com.globalsight.everest.tuv.Tu;
@@ -88,8 +80,6 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageResult;
 import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecordList;
 import com.globalsight.terminology.termleverager.replacer.TermReplacer;
-import com.globalsight.util.AmbFileStoragePathUtils;
-import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
@@ -289,24 +279,10 @@ public abstract class AbstractTargetPagePersistence implements
                         unAppliedTus, appliedTuTuvMap);
             }
 
-            /****** Priority 3 : Handle TDA hitting ******/
-            boolean isSupportByTDA = false;
-            TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
-            if ((tmProfile.getTdatm() != null)
-                    && (tmProfile.getTdatm().getEnable() == 1))
-            {
-                isSupportByTDA = true;
-            }
-            if (isSupportByTDA)
-            {
-                unAppliedTus.removeAll(appliedTuTuvMap.keySet());
-                appliedTuTuvMap = applyTDAMatches(p_sourcePage, p_sourceTuvMap,
-                        sourceLocale, p_targetLocale, unAppliedTus,
-                        appliedTuTuvMap);
-            }
-
-            /****** Priority 4 : Handle MT hitting ******/
-            if (mtProfile != null && mtProfile.isActive())
+            /****** Priority 3 : Handle MT hitting ******/
+            boolean useMtOnJobCreation = p_sourcePage.getRequest().getL10nProfile()
+                    .getUseMtOnJobCreation();
+            if (mtProfile != null && mtProfile.isActive() && useMtOnJobCreation)
             {
                 String mtEngine = mtProfile.getMtEngine();
                 machineTranslator = MTHelper.initMachineTranslator(mtEngine);
@@ -346,7 +322,7 @@ public abstract class AbstractTargetPagePersistence implements
                 machineTranslator = null;
             }
 
-            /****** Priority 5 : remove all internal text segments match ******/
+            /****** Priority 4 : remove all internal text segments match ******/
             Set<Tu> internalTextTus = new HashSet<Tu>();
             if (appliedTuTuvMap != null && appliedTuTuvMap.size() > 0)
             {
@@ -373,7 +349,7 @@ public abstract class AbstractTargetPagePersistence implements
                 }
             }
 
-            /****** Priority 6 : Handle Rest TUs ******/
+            /****** Priority 5 : Handle Rest TUs ******/
             if (p_sourceTuvMap.size() > appliedTuTuvMap.size())
             {
                 unAppliedTus.removeAll(appliedTuTuvMap.keySet());
@@ -399,7 +375,7 @@ public abstract class AbstractTargetPagePersistence implements
                 }
             }
 
-            /****** Priority 7 : add source comment ******/
+            /****** Priority 6 : add source comment ******/
             Iterator iter = p_sourceTuvMap.entrySet().iterator();
             iter = p_sourceTuvMap.entrySet().iterator();
             while (iter.hasNext())
@@ -471,7 +447,7 @@ public abstract class AbstractTargetPagePersistence implements
                 .getMtProfileBySourcePage(p_sourcePage, p_targetLocale);
         long threshold = getThresholdForMatchDataSources(mtProfile, tmProfile);
 
-        // 2. Loop to add target TUVs that don't need go through local TM/TDA/MT
+        // 2. Loop to add target TUVs that don't need go through local TM/MT
         // matches into "p_appliedTuTuvMap".
         Collection<LeverageMatch> lmCollection = new ArrayList<LeverageMatch>();
         for (Iterator it = p_unAppliedTus.iterator(); it.hasNext();)
@@ -490,7 +466,6 @@ public abstract class AbstractTargetPagePersistence implements
                         jobId);
             }
 
-            XliffAlt maxScoreAlt = processor.getMaxScoreAlt();
             ExtractedSourceFile esf = (ExtractedSourceFile) p_sourcePage
                     .getExtractedFile();
             boolean isPO = IFormatNames.FORMAT_PO.equals(esf.getDataType());
@@ -526,9 +501,6 @@ public abstract class AbstractTargetPagePersistence implements
                     // Perhaps need re-factor below 2 methods in future.
                     float tmScore = getTMScore(tu, src, trg, isPassolo,
                             tu.getPassoloState());
-                    boolean needLeverageMatch = hasValidLeverageMatch(tu, src,
-                            trg, sourceTuv, tmScore);
-
                     if (isPassolo && "New".equals(tu.getPassoloState()))
                     {
                         boolean equals = isSrcEqualsTrg(src, trg);
@@ -538,63 +510,17 @@ public abstract class AbstractTargetPagePersistence implements
                             targetTuv.setGxml(targetGxml);
                             tu.addTuv(targetTuv);
                             p_appliedTuTuvMap.put(tu, targetTuv);
-
-                            needLeverageMatch = false;
                         }
                     }
-
-                    if (needLeverageMatch)
+                    //save xlf/po target into "leverage_match
+                    if (!isSrcEqualsTrg(src, trg) || (!"".equals(src) && !"".equals(src)
+                            && "no".equals(tu.getTranslate())) && !isPassolo)
                     {
-                        // save XLF/PO target into "leverage_match"
-                        LeverageMatch lm = new LeverageMatch();
-                        lm.setSourcePageId(p_sourcePage.getIdAsLong());
-                        lm.setOriginalSourceTuvId(sourceTuv.getIdAsLong());
-                        lm.setSubId("0");
-                        // Put xliff target or best alt-trans
-                        if (!trg.isEmpty())
-                        {
-                            lm.setMatchedText(tu.getXliffTarget());
-                            lm.setMatchedOriginalSource(sourceTuv.getGxml());
-                        }
-                        else if (sourceTuv.getXliffAlt(false) != null
-                                && sourceTuv.getXliffAlt(false).size() > 0)
-                        {
-                            lm.setMatchedText(maxScoreAlt.getSegment());
-                            lm.setMatchedOriginalSource(maxScoreAlt
-                                    .getSourceSegment());
-                        }
-                        lm.setMatchedClob(null);
-                        lm.setTargetLocale(targetTuv.getGlobalSightLocale());
-                        // XLF and PO target use "-1" as "order_num".
-                        lm.setOrderNum((short) TmCoreManager.LM_ORDER_NUM_START_XLF_PO_TARGET);
+                        LeverageMatch lm = saveToLev(p_sourcePage, sourceTuv, targetTuv,
+                                isPO, tmProfile, tmScore);
+                        lm.setMatchedText(tu.getXliffTarget());
+                        lm.setMatchedOriginalSource(sourceTuv.getGxml());
                         lm.setScoreNum(tmScore);
-
-                        if (tmScore < 100)
-                        {
-                            lm.setMatchType(MatchState.FUZZY_MATCH.getName());
-                        }
-                        else if (isPO)
-                        {
-                            lm.setMatchType(MatchState.PO_EXACT_MATCH.getName());
-                        }
-                        else
-                        {
-                            lm.setMatchType(MatchState.XLIFF_EXACT_MATCH
-                                    .getName());
-                        }
-
-                        lm.setMatchedTuvId(-1);
-                        lm.setProjectTmIndex(isPO ? Leverager.PO_TM_PRIORITY
-                                : Leverager.XLIFF_PRIORITY);
-                        lm.setTmId(0);
-                        lm.setTmProfileId(tmProfile.getIdAsLong());
-                        lm.setMtName(null);
-
-                        lm.setSid(sourceTuv.getSid());
-                        lm.setCreationUser(sourceTuv.getCreatedUser());
-                        lm.setCreationDate(sourceTuv.getLastModified());
-                        lm.setModifyDate(sourceTuv.getLastModified());
-
                         lmCollection.add(lm);
 
                         IXliffMatchesProcessor xlfProcess = new XliffMatchesProcess();
@@ -605,13 +531,40 @@ public abstract class AbstractTargetPagePersistence implements
                         }
                         if (!trg.isEmpty())
                         {
-                            boolean success = xlfProcess
-                                    .addTargetTuvToTu(tu, sourceTuv, targetTuv,
-                                            src, trg, p_appliedTuTuvMap,
-                                            tmScore, threshold, isPO);
-                            if (success)
+                            xlfProcess.addTargetTuvToTu(tu, sourceTuv, targetTuv, src, trg,
+                                    p_appliedTuTuvMap, tmScore, threshold, isPO);
+                        }
+                    }
+                    //save all alt-trans to "leverage_match"
+                    if (sourceTuv.getXliffAlt(false) != null
+                            && sourceTuv.getXliffAlt(false).size() > 0 && !isPassolo)
+                    {
+                        Set<XliffAlt> altSet = new HashSet<XliffAlt>();
+                        altSet.addAll(sourceTuv.getXliffAlt(false));
+                        if (altSet != null)
+                        {
+                            Iterator ite = altSet.iterator();
+                            while (ite.hasNext())
                             {
-                                continue;
+                                XliffAlt alt = (XliffAlt) ite.next();
+                                LeverageMatch lm = saveToLev(p_sourcePage, sourceTuv, targetTuv,
+                                        isPO, tmProfile, tmScore);
+                                lm.setMatchedText(alt.getSegment());
+                                lm.setMatchedOriginalSource(alt.getSourceSegment());
+                                lm.setScoreNum(Float.parseFloat(alt.getQuality()));
+                                lmCollection.add(lm);
+
+                                IXliffMatchesProcessor xlfProcess = new XliffMatchesProcess();
+
+                                if (tu.hasXliffTMScoreStr())
+                                {
+                                    xlfProcess = new WSMatchesProcess();
+                                }
+                                if (!trg.isEmpty())
+                                {
+                                    xlfProcess.addTargetTuvToTu(tu, sourceTuv, targetTuv, src, trg,
+                                            p_appliedTuTuvMap, tmScore, threshold, isPO);
+                                }
                             }
                         }
                     }
@@ -623,6 +576,43 @@ public abstract class AbstractTargetPagePersistence implements
                 lmCollection, jobId);
 
         return p_appliedTuTuvMap;
+    }
+
+    private LeverageMatch saveToLev(SourcePage p_sourcePage, Tuv sourceTuv, Tuv targetTuv,
+            boolean isPO, TranslationMemoryProfile tmProfile, float tmScore)
+    {
+        LeverageMatch lm = new LeverageMatch();
+        lm.setSourcePageId(p_sourcePage.getIdAsLong());
+        lm.setOriginalSourceTuvId(sourceTuv.getIdAsLong());
+        lm.setSubId("0");
+        lm.setMatchedClob(null);
+        lm.setTargetLocale(targetTuv.getGlobalSightLocale());
+        // XLF and PO target use "-1" as "order_num".
+        lm.setOrderNum((short) TmCoreManager.LM_ORDER_NUM_START_XLF_PO_TARGET);
+        if (tmScore < 100)
+        {
+            lm.setMatchType(MatchState.FUZZY_MATCH.getName());
+        }
+        else if (isPO)
+        {
+            lm.setMatchType(MatchState.PO_EXACT_MATCH.getName());
+        }
+        else
+        {
+            lm.setMatchType(MatchState.XLIFF_EXACT_MATCH.getName());
+        }
+
+        lm.setMatchedTuvId(-1);
+        lm.setProjectTmIndex(isPO ? Leverager.PO_TM_PRIORITY : Leverager.XLIFF_PRIORITY);
+        lm.setTmId(0);
+        lm.setTmProfileId(tmProfile.getIdAsLong());
+        lm.setMtName(null);
+
+        lm.setSid(sourceTuv.getSid());
+        lm.setCreationUser(sourceTuv.getCreatedUser());
+        lm.setCreationDate(sourceTuv.getLastModified());
+        lm.setModifyDate(sourceTuv.getLastModified());
+        return lm;
     }
 
     /**
@@ -700,50 +690,56 @@ public abstract class AbstractTargetPagePersistence implements
                         .getIdAsLong());
                 if (lss != null && lss.size() > 0)
                 {
-                	int hashMatchedNum = getHashMatchedNum(sourceTuv, lss);
+                    int hashMatchedNum = getHashMatchedNum(sourceTuv, lss);
                     LeverageSegment segment = SegmentUtil2
                             .getNextBestLeverageSegment(sourceTuv, lss);
                     while (segment != null)
                     {
                         hasOneHundredMatch = true;
-						boolean isTagMatched = SegmentUtil2.canBeModified(
-								targetTuv, segment.getSegment(), jobId);
-						// for most cases
+                        boolean isTagMatched = SegmentUtil2.canBeModified(
+                                targetTuv, segment.getSegment(), jobId);
+                        // for most cases
                         if (isTagMatched)
                         {
                             targetTuv = modifyTUV(targetTuv, segment);
                             tuvGotChanged = true;
-							// If there is only one hash matched match in
-							// multiple exact matches, target TUV state should
-							// be exact match instead of not_localized for
-							// multiple translation.
+                            // If there is only one hash matched match in
+                            // multiple exact matches, target TUV state should
+                            // be exact match instead of not_localized for
+                            // multiple translation.     
+                            //GBS-4360: Part of ICE matches can't be locked in offline file
                             if (hashMatchedNum == 1
-                            		&& isHashValueMatched(sourceTuv, segment))
+                                    && isHashValueMatched(sourceTuv, segment)
+                                    && !segment.getMatchType().equals(
+                                            MatchState.MULTIPLE_TRANSLATION.getName()))
                             {
-                            	targetTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
+                                targetTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
                             }
                             break;
                         }
                         // for special cases, had better to have
                         else
                         {
-							String segment2 = SegmentUtil2.adjustSegmentAttributeValues(
-								targetTuv.getGxmlElement(), 
-									SegmentUtil2.getGxmlElement(segment.getSegment()),
-										tu.getDataType());
-							isTagMatched = SegmentUtil2.canBeModified(
-									targetTuv, segment2, jobId);
+                            String segment2 = SegmentUtil2.adjustSegmentAttributeValues(
+                                targetTuv.getGxmlElement(), 
+                                    SegmentUtil2.getGxmlElement(segment.getSegment()),
+                                        tu.getDataType());
+                            isTagMatched = SegmentUtil2.canBeModified(
+                                    targetTuv, segment2, jobId);
                             if (isTagMatched)
                             {
-								segment2 = getTargetGxmlFitForItsOwnSourceContent(
-										sourceTuv, segment2, jobId);
+                                segment2 = getTargetGxmlFitForItsOwnSourceContent(
+                                        sourceTuv, segment2, jobId);
                                 segment.setSegment(segment2);
                                 targetTuv = modifyTUV(targetTuv, segment);
                                 tuvGotChanged = true;
-								if (hashMatchedNum == 1
-										&& isHashValueMatched(sourceTuv, segment))
+                              //GBS-4360: Part of ICE matches can't be locked in offline file
+                                if (hashMatchedNum == 1
+                                        && isHashValueMatched(sourceTuv, segment)
+                                        && !segment.getMatchType().equals(
+                                                MatchState.MULTIPLE_TRANSLATION.getName()))
                                 {
-                                	targetTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
+                                    targetTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
                                 }
                                 break;
                             }
@@ -848,194 +844,35 @@ public abstract class AbstractTargetPagePersistence implements
     }
 
     /**
-	 * Return the number of leverage segments that have same previous hash and
-	 * next hash as source TUV's.
-	 */
-	private int getHashMatchedNum(Tuv srcTuv, List<LeverageSegment> lss)
-	{
-		long preHash = srcTuv.getPreviousHash();
-		long nextHash = srcTuv.getNextHash();
-		int num = 0;
-		for (LeverageSegment ls : lss)
-		{
-			if (preHash != -1 && nextHash != -1
-					&& preHash == ls.getPreviousHash()
-					&& nextHash == ls.getNextHash())
-			{
-				num++;
-			}
-		}
-		return num;
-	}
-
-	private boolean isHashValueMatched(Tuv srcTuv, LeverageSegment ls)
-	{
-		if (srcTuv.getPreviousHash() != -1 && srcTuv.getNextHash() != -1
-				&& srcTuv.getPreviousHash() == ls.getPreviousHash()
-				&& srcTuv.getNextHash() == ls.getNextHash())
-		{
-			return true;
-		}
-		return false;
-	}
-
-	/**
-     * Hit TDA to get matches for un-applied segments. TDA matches will be
-     * stored in DB (As TDA won't return 100% match, so no matches will be
-     * populated into target TUVs.)
+     * Return the number of leverage segments that have same previous hash and
+     * next hash as source TUV's.
      */
-    private HashMap<Tu, Tuv> applyTDAMatches(SourcePage p_sourcePage,
-            HashMap<Tu, Tuv> p_sourceTuvMap, GlobalSightLocale p_sourceLocale,
-            GlobalSightLocale p_targetLocale, Set<Tu> p_unAppliedTus,
-            HashMap<Tu, Tuv> p_appliedTuTuvMap) throws Exception
+    private int getHashMatchedNum(Tuv srcTuv, List<LeverageSegment> lss)
     {
-        if (p_unAppliedTus == null || p_unAppliedTus.size() == 0)
+        long preHash = srcTuv.getPreviousHash();
+        long nextHash = srcTuv.getNextHash();
+        int num = 0;
+        for (LeverageSegment ls : lss)
         {
-            return p_appliedTuTuvMap;
-        }
-
-        long jobId = p_sourcePage.getJobId();
-
-        TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
-        long tmProfileThreshold = tmProfile.getFuzzyMatchThreshold();
-
-        HashMap<Tu, Tuv> needHitTDAMap = new HashMap<Tu, Tuv>();
-        needHitTDAMap = formTuTuvMap(p_unAppliedTus, p_sourceTuvMap,
-                p_targetLocale, jobId);
-
-        if (needHitTDAMap != null && needHitTDAMap.size() > 0)
-        {
-            TdaHelper tdaHelper = new TdaHelper();
-            String directory = AmbFileStoragePathUtils
-                    .getFileStorageDirPath(p_sourcePage.getCompanyId());
-
-            String filepath = directory + File.separator + "TDA"
-                    + File.separator + p_targetLocale;
-            File originalPath = new File(filepath + File.separator + "original");
-
-            if (!originalPath.exists())
+            if (preHash != -1 && nextHash != -1
+                    && preHash == ls.getPreviousHash()
+                    && nextHash == ls.getNextHash())
             {
-                originalPath.mkdirs();
-            }
-
-            File resultPath = new File(filepath + File.separator + "TDAResult");
-
-            if (!resultPath.exists())
-            {
-                resultPath.mkdirs();
-            }
-
-            // Generate the xliff file that send to TDA server
-            File temp = new File(originalPath, p_sourcePage.getId() + ".xlf");
-
-            FileOutputStream fos = new FileOutputStream(temp);
-            BufferedOutputStream bos = new BufferedOutputStream(fos, 4096);
-            OutputStreamWriter osw = new OutputStreamWriter(bos, FileUtil.UTF8);
-            tdaHelper.WriteTDAXliffFile(osw, p_sourceLocale.toString(),
-                    p_targetLocale.toString(), needHitTDAMap);
-            osw.flush();
-            osw.close();
-            bos.close();
-            fos.close();
-
-            // package the xliff file into zip file
-            String strZipName = filepath + File.separator + "original"
-                    + File.separator + p_sourcePage.getId() + ".zip";
-            ZipOutputStream zipout = new ZipOutputStream(new FileOutputStream(
-                    strZipName));
-
-            FileInputStream xliffStream = new FileInputStream(temp);
-            zipout.putNextEntry(new ZipEntry(p_sourcePage.getId() + ".xlf"));
-            byte[] buffer = new byte[1024];
-            int len;
-
-            while ((len = xliffStream.read(buffer)) > 0)
-            {
-                zipout.write(buffer, 0, len);
-            }
-
-            zipout.closeEntry();
-            zipout.flush();
-            zipout.close();
-            xliffStream.close();
-
-            File zipFile = new File(strZipName);
-
-            tdaHelper.leverageTDA(tmProfile.getTdatm(), zipFile, filepath
-                    + File.separator + "TDAResult", p_sourcePage.getId()
-                    + ".xlf", p_sourceLocale.toString().replace("_", "-"),
-                    p_targetLocale.toString().replace("_", "-"));
-
-            File leverageFile = new File(filepath + File.separator
-                    + "TDAResult" + File.separator + p_sourcePage.getId()
-                    + ".xlf");
-
-            if (leverageFile.exists())
-            {
-                FileInputStream file = new FileInputStream(leverageFile);
-                ArrayList matchList = tdaHelper.extract(file,
-                        tmProfileThreshold);
-
-                if (matchList != null && matchList.size() > 0)
-                {
-                    TuvManager tuvMgr = ServerProxy.getTuvManager();
-                    Collection<LeverageMatch> lmCollection = new ArrayList<LeverageMatch>();
-                    for (int i = 0; i < matchList.size(); i++)
-                    {
-                        LeverageTDAResult tdaResult = (LeverageTDAResult) matchList
-                                .get(i);
-                        Tu currentTu = tuvMgr.getTuForSegmentEditor(
-                                tdaResult.getTuid(), jobId);
-                        Tuv newTuv = (Tuv) needHitTDAMap.get(currentTu);
-
-                        // save TDA matches into "leverage_match"
-                        Tuv sourceTuv = (Tuv) p_sourceTuvMap.get(currentTu);
-
-                        LeverageMatch lm = new LeverageMatch();
-                        lm.setSourcePageId(p_sourcePage.getIdAsLong());
-                        lm.setOriginalSourceTuvId(sourceTuv.getIdAsLong());
-                        lm.setSubId("0");
-
-                        String startTag = newTuv.getGxmlElement().getStartTag();
-                        String endTag = newTuv.getGxmlElement().getEndTag();
-
-                        String tmpSegment = startTag
-                                + tdaResult.getResultText() + endTag;
-                        lm.setMatchedText(tmpSegment);
-                        lm.setMatchedClob(null);
-                        lm.setTargetLocale(newTuv.getGlobalSightLocale());
-                        lm.setOrderNum((short) tdaResult.getOrderNum());
-                        lm.setScoreNum((float) TdaHelper
-                                .PecentToDouble(tdaResult.getMatchPercent()));
-                        lm.setMatchType(MatchState.TDA_MATCH.getName());
-                        lm.setMatchedTuvId(-1);
-                        lm.setProjectTmIndex(Leverager.TDA_TM_PRIORITY);
-                        lm.setTmId(0);
-                        lm.setTmProfileId(tmProfile.getIdAsLong());
-                        lm.setMtName(null);
-                        lm.setMatchedOriginalSource(tdaResult.getSourceText());
-
-                        lm.setSid(sourceTuv.getSid());
-                        lm.setCreationUser(sourceTuv.getCreatedUser());
-                        lm.setCreationDate(sourceTuv.getLastModified());
-                        lm.setModifyDate(sourceTuv.getLastModified());
-
-                        lmCollection.add(lm);
-
-                        newTuv.setMatchType(MatchState.TDA_MATCH.getName());
-                        newTuv.setLastModifiedUser(IFormatNames.FORMAT_TDA);
-                        newTuv.setState(TuvState.NOT_LOCALIZED);
-                        currentTu.addTuv(newTuv);
-                        p_appliedTuTuvMap.put((TuImpl) currentTu, newTuv);
-                    }
-
-                    LingServerProxy.getLeverageMatchLingManager()
-                            .saveLeveragedMatches(lmCollection, jobId);
-                }
+                num++;
             }
         }
+        return num;
+    }
 
-        return p_appliedTuTuvMap;
+    private boolean isHashValueMatched(Tuv srcTuv, LeverageSegment ls)
+    {
+        if (srcTuv.getPreviousHash() != -1 && srcTuv.getNextHash() != -1
+                && srcTuv.getPreviousHash() == ls.getPreviousHash()
+                && srcTuv.getNextHash() == ls.getNextHash())
+        {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -1056,7 +893,6 @@ public abstract class AbstractTargetPagePersistence implements
         MachineTranslationProfile mtProfile = MTProfileHandlerHelper
                 .getMtProfileBySourcePage(p_sourcePage, p_targetLocale);
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
-        long mtConfidenceScore = mtProfile.getMtConfidenceScore();
 
         HashMap<Tu, Tuv> needHitMTTuTuvMap = new HashMap<Tu, Tuv>();
         needHitMTTuTuvMap = formTuTuvMap(p_unAppliedTus, p_sourceTuvMap,
@@ -1188,15 +1024,8 @@ public abstract class AbstractTargetPagePersistence implements
                 lm.setTargetLocale(currentNewTuv.getGlobalSightLocale());
                 // This is the first MT matches,its order number is 301.
                 lm.setOrderNum((short) TmCoreManager.LM_ORDER_NUM_START_MT);
-                lm.setScoreNum(mtConfidenceScore);
-                if (mtConfidenceScore == 100)
-                {
-                    lm.setMatchType(MatchState.MT_EXACT_MATCH.getName());
-                }
-                else
-                {
-                    lm.setMatchType(MatchState.FUZZY_MATCH.getName());
-                }
+                lm.setScoreNum(MachineTranslator.MT_SCORE);
+                lm.setMatchType(MatchState.MACHINE_TRANSLATION.getName());
                 lm.setMatchedTuvId(-1);
                 lm.setProjectTmIndex(Leverager.MT_PRIORITY);
                 lm.setTmId(0);
@@ -1258,17 +1087,8 @@ public abstract class AbstractTargetPagePersistence implements
                     lm.setTargetLocale(currentNewTuv.getGlobalSightLocale());
                     // This is the second MT matches,its order number is 302.
                     lm.setOrderNum((short) (TmCoreManager.LM_ORDER_NUM_START_MT + 1));
-                    lm.setScoreNum(mtConfidenceScore);
-                    if (mtConfidenceScore == 100)
-                    {
-                        // Add "MT_EXACT_MATCH" as one new MatchState --
-                        // SEGMENT_TM_EXACT_MATCH
-                        lm.setMatchType(MatchState.MT_EXACT_MATCH.getName());
-                    }
-                    else
-                    {
-                        lm.setMatchType(MatchState.FUZZY_MATCH.getName());
-                    }
+                    lm.setScoreNum(MachineTranslator.MT_SCORE);
+                    lm.setMatchType(MatchState.MACHINE_TRANSLATION.getName());
                     lm.setMatchedTuvId(-1);
                     lm.setProjectTmIndex(Leverager.MT_PRIORITY);
                     lm.setTmId(0);
@@ -1422,6 +1242,10 @@ public abstract class AbstractTargetPagePersistence implements
             return true;
         }
 
+        if (p_sourceTuv.getXliffAlt(false) != null && p_sourceTuv.getXliffAlt(false).size() > 0)
+        {
+            return true;
+        }
         boolean equals = isSrcEqualsTrg(p_srcSegment, p_trgSegment);
 
         if (!tu.hasXliffTMScoreStr())

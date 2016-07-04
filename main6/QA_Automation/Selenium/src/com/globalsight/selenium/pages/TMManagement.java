@@ -2,13 +2,14 @@ package com.globalsight.selenium.pages;
 
 public class TMManagement
 {
+	public static final String TM_SEARCH_CONTENT_TEXT = "id=tmNameFilter";
     public static final String New_BUTTON = "//input[@value='New...']";
     public static final String EDIT_BUTTON = "idModify";
     public static final String Demo = "TMId";
 
     public static final String TM_MANAGEMENT_TABLE = "//div[@id='contentLayer']//form//table//tbody//tr[2]//td//table//tbody";
 
-    
+    public static final String Import_BUTTON="id=importBtn";
     public static final String CorpusBrowser_BUTTON="//input[@id='corpusBtn']";
     public static final String Statistics_BUTTON="//input[@value='Statistics']";
     public static final String MAINTENANCE_BUTTON="//input[@id='mainBtn']";
@@ -23,12 +24,19 @@ public class TMManagement
     public static final String ORGANIZATION_TEXT = "organization";
     public static final String DESCRIPTION_TEXT = "description";
     public static final String RemoteTM_CHECKBOX = "idRemoteTm";
-    public static final String import_path = "//input[@id='idFilename']"; 
+    public static final String TM_INDEX_TARGET_CHECKBOX = "id=idIndexTarget";
+    public static final String Browse_BUTTON="id=idXml";
+    public static final String import_path_TEXT = "id=idFilename"; 
     public static final String import_name = "sourceTmName";
     public static final String import_format = "idTtmxRtf";
+    public static final String Next_BUTTON = "//input[@value='Next']";
 
     public static final String Cancel_BUTTON = "Cancel";
     public static final String SAVE_BUTTON = "OK";
+    
+    
+    
+    
     
     
     //TM Statistics
@@ -88,5 +96,6 @@ public class TMManagement
     
     public static final String EXPORT_MESSAGE="idMessages";
     public static final String EXPORT_PROGRESS_MSG="idProgress";
+	
     
 }

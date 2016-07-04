@@ -16,36 +16,35 @@
  */
 package com.globalsight.util;
 
-import java.io.PrintStream;
-import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.log.ActivityLog;
 
 /**
- * A ProcessRunner executes a given command and handles the standard
- * output and standard error.
+ * A ProcessRunner executes a given command and handles the standard output and
+ * standard error.
  */
-public class ProcessRunner
-    implements Runnable
+public class ProcessRunner implements Runnable
 {
-    private static final Logger s_logger =
-        Logger.getLogger(
-            ProcessRunner.class);
+    private static final Logger s_logger = Logger.getLogger(ProcessRunner.class);
 
     private String m_command;
     private PrintStream m_out;
     private PrintStream m_err;
 
     /**
-     * Constructs a Process Runner with the given command standard out
-     * and standard error are not written out.
+     * Constructs a Process Runner with the given command standard out and
+     * standard error are not written out.
      */
-    public ProcessRunner (String p_command)
+    public ProcessRunner(String p_command)
     {
         m_command = p_command;
         m_out = null;
@@ -53,11 +52,10 @@ public class ProcessRunner
     }
 
     /**
-     * Constructs a Process Runner with the given command standard out
-     * and standard error are written out to the output streams.
+     * Constructs a Process Runner with the given command standard out and
+     * standard error are written out to the output streams.
      */
-    public ProcessRunner (String p_command, PrintStream p_out,
-        PrintStream p_err)
+    public ProcessRunner(String p_command, PrintStream p_out, PrintStream p_err)
     {
         m_command = p_command;
         m_out = p_out;
@@ -65,19 +63,17 @@ public class ProcessRunner
     }
 
     /**
-     * Constructs a Process Runner with the given command standard out
-     * and standard error are written out to the files.
+     * Constructs a Process Runner with the given command standard out and
+     * standard error are written out to the files.
      */
-    public ProcessRunner (String p_command, String p_outFileName,
-        String p_errFileName, boolean p_append)
-        throws FileNotFoundException
+    public ProcessRunner(String p_command, String p_outFileName, String p_errFileName,
+            boolean p_append) throws FileNotFoundException
     {
         m_command = p_command;
 
         if (p_outFileName != null)
         {
-            m_out = new PrintStream (
-                new FileOutputStream(p_outFileName, p_append), true);
+            m_out = new PrintStream(new FileOutputStream(p_outFileName, p_append), true);
         }
         else
         {
@@ -86,8 +82,7 @@ public class ProcessRunner
 
         if (p_errFileName != null)
         {
-            m_err = new PrintStream (
-                new FileOutputStream(p_errFileName,p_append), true);
+            m_err = new PrintStream(new FileOutputStream(p_errFileName, p_append), true);
         }
         else
         {
@@ -95,64 +90,65 @@ public class ProcessRunner
         }
     }
 
-
     public void run()
     {
-        Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+        Map<Object, Object> activityArgs = new HashMap<Object, Object>();
         activityArgs.put("command", m_command);
-        ActivityLog.Start activityStart = ActivityLog.start(
-            ProcessRunner.class, "run", activityArgs);
+        ActivityLog.Start activityStart = ActivityLog.start(ProcessRunner.class, "run",
+                activityArgs);
         try
         {
             String threadName = Thread.currentThread().getName();
 
-            Process p = Runtime.getRuntime().exec(m_command);
+            ProcessBuilder ps = new ProcessBuilder(m_command);
+            ps.redirectErrorStream(true);
+            Process p = ps.start();
 
-            ProcessInputStreamHandler outputHandler =
-                new ProcessInputStreamHandler (p.getInputStream(), m_out);
-            ProcessInputStreamHandler errorHandler =
-                new ProcessInputStreamHandler (p.getErrorStream(), m_err);
+            ProcessInputStreamHandler outputHandler = new ProcessInputStreamHandler(
+                    p.getInputStream(), m_out);
+            ProcessInputStreamHandler errorHandler = new ProcessInputStreamHandler(
+                    p.getErrorStream(), m_err);
 
-            Thread outputThread = new Thread (outputHandler, threadName + "_out");
-            Thread errorThread = new Thread (errorHandler, threadName + "_err");
+            Thread outputThread = new Thread(outputHandler, threadName + "_out");
+            Thread errorThread = new Thread(errorHandler, threadName + "_err");
 
-            //start separate threads to handle output and error
+            // start separate threads to handle output and error
             outputThread.start();
             errorThread.start();
 
-            //wait for the process to die
+            // wait for the process to die
             try
             {
                 p.waitFor();
             }
             catch (InterruptedException ie)
-            {}
-
-            if (true == SystemConfiguration.getInstance().getBooleanParameter(
-                SystemConfigParamNames.PROCESS_RUNNER_WAIT_FOR_OUTPUT))
             {
-            
-                //wait for the output thread to die
+            }
+
+            if (true == SystemConfiguration.getInstance()
+                    .getBooleanParameter(SystemConfigParamNames.PROCESS_RUNNER_WAIT_FOR_OUTPUT))
+            {
+                // wait for the output thread to die
                 try
                 {
                     outputThread.join();
                 }
                 catch (InterruptedException ie)
-                {}
-
-                //wait for the error thread to die
+                {
+                }
+                // wait for the error thread to die
                 try
                 {
                     errorThread.join();
                 }
                 catch (InterruptedException ie)
-                {}
+                {
+                }
             }
         }
         catch (Throwable t)
         {
-            s_logger.error("Problem running command '" +
-                           m_command + "'",t);
+            s_logger.error("Problem running command '" + m_command + "'", t);
         }
         finally
         {
@@ -160,4 +156,3 @@ public class ProcessRunner
         }
     }
 }
-

@@ -17,5 +17,8 @@ public class Currency
     public static final String Cacel_BUTTON = "Cancel";
     public static final String CURRENCY_SELECT = "displayCurr";
     public static final String FACTOR_TEXT = "conversion";
+    
+    public static final String currencyNameFilter = "currencyNameFilter";
+    
 
 }

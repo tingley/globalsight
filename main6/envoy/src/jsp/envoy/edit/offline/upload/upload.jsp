@@ -11,6 +11,8 @@
                 com.globalsight.util.edit.EditUtil,
                 com.globalsight.everest.permission.Permission,
                 com.globalsight.everest.permission.PermissionSet,
+                com.globalsight.everest.comment.CommentFile,
+                com.globalsight.everest.comment.CommentManagerLocal,
                 com.globalsight.everest.edit.offline.OfflineEditManager,
                 com.globalsight.everest.util.system.SystemConfigParamNames,
                 com.globalsight.everest.secondarytargetfile.SecondaryTargetFile,
@@ -31,6 +33,8 @@
                 com.globalsight.everest.util.system.SystemConfigParamNames,
 	            com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
 	            com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
+                com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper,
+                com.globalsight.everest.projecthandler.MachineTranslationProfile,
 	            com.globalsight.everest.workflow.ConditionNodeTargetInfo,
 	            com.globalsight.everest.jobhandler.Job,
 	            com.globalsight.everest.company.CompanyWrapper,
@@ -291,6 +295,14 @@ $(document).ready(function(){
 	TaskImpl taskImpl = (TaskImpl)theTask;
     isReportUploadCheck = taskImpl.getIsReportUploadCheck();
     isUploaded = taskImpl.getIsReportUploaded();
+    String labelActivitiesCommentUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_comment_upload_check");
+    int isActivityCommentUploadCheck = taskImpl.getIsActivityCommentUploadCheck();
+    int isActivityCommentUploaded = 0;
+    ArrayList<CommentFile> cf =  ServerProxy.getCommentManager().getActivityCommentAttachments(theTask);
+    if(cf != null && cf.size()>0)
+    {
+        isActivityCommentUploaded =1;
+    }
 	WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;
@@ -597,6 +609,18 @@ $(document).ready(function(){
                isExportSTF = "true";
            }
         }
+    }
+
+    String labelLeverageMT = bundle.getString("lb_leverage_mt");
+    String leverageMTUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
+        "=leverageMT" + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
+    
+    boolean hasMtProfile = false;
+    MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileByL10nProfile(
+            theJob.getL10nProfile(), workflowImpl.getTargetLocale());
+    if (mtProfile != null && mtProfile.isActive())
+    {
+        hasMtProfile = true;
     }
 %>
 <SCRIPT LANGUAGE="JavaScript">

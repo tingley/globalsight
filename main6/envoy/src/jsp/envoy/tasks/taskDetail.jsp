@@ -1,4 +1,5 @@
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/activityError.jsp"
@@ -7,7 +8,8 @@
       com.globalsight.config.UserParameter,
       com.globalsight.cxe.entity.fileprofile.FileProfile,
       com.globalsight.cxe.entity.fileprofile.FileProfileUtil,
-      com.globalsight.everest.comment.CommentFile,      
+      com.globalsight.everest.comment.CommentFile,
+      com.globalsight.everest.comment.CommentManagerLocal,      
       com.globalsight.everest.comment.CommentManager,
       com.globalsight.everest.company.CompanyThreadLocal,
       com.globalsight.everest.company.CompanyWrapper,
@@ -44,6 +46,7 @@
       com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
       com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator,
       com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper,
+      com.globalsight.everest.webapp.pagehandler.administration.comment.CommentUploadHandler,
       com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler,
       com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHelper,
       com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
@@ -58,6 +61,8 @@
       com.globalsight.util.date.DateHelper,
       com.globalsight.util.edit.EditUtil,
       com.globalsight.util.StringUtil,
+      com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper,
+      com.globalsight.everest.projecthandler.MachineTranslationProfile,
       com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.PreviewPDFHelper,
       java.util.*,
       java.lang.StringBuffer,
@@ -229,6 +234,14 @@
     TaskImpl taskImpl = (TaskImpl)theTask;
     int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
     int isUploaded = taskImpl.getIsReportUploaded();
+    String labelActivitiesCommentUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_comment_upload_check");
+    int isActivityCommentUploadCheck = taskImpl.getIsActivityCommentUploadCheck();
+    int isActivityCommentUploaded = 0;
+    ArrayList<CommentFile> cf =  ServerProxy.getCommentManager().getActivityCommentAttachments(theTask);
+    if(cf != null && cf.size()>0)
+    {
+        isActivityCommentUploaded =1;
+    }
     WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;
@@ -693,6 +706,22 @@
     boolean okForInContextReviewXml = PreviewPDFHelper.isXMLEnabled("" + theTask.getCompanyId());
     boolean okForInContextReviewIndd = PreviewPDFHelper.isInDesignEnabled("" + theTask.getCompanyId());
 	boolean okForInContextReviewOffice = PreviewPDFHelper.isOfficeEnabled("" + theTask.getCompanyId());
+	boolean okForInContextReviewHTML = PreviewPDFHelper.isHTMLEnabled("" + theTask.getCompanyId());
+
+    String labelLeverageMT = bundle.getString("lb_leverage_mt");
+    String leverageMTUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
+        "=leverageMT" + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
+
+    String getLeverageMTPercentageUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
+            "=getLeverageMTPercentage" + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
+
+    boolean hasMtProfile = false;
+    MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileByL10nProfile(
+            theJob.getL10nProfile(), workflowImpl.getTargetLocale());
+    if (mtProfile != null && mtProfile.isActive())
+    {
+        hasMtProfile = true;
+    }
 %>
 <HTML>
 <HEAD>
@@ -738,6 +767,26 @@ span.taskComplDialog {
 	line-height: 20px;
     font-weight: bold;
 	}
+
+#fullbg {
+    background-color: Gray;
+    display:none;
+    z-index:1;
+    position:absolute;
+    left:0px;
+    top:0px;
+    filter:Alpha(Opacity=30);
+    /* IE */
+    -moz-opacity:0.4;
+    /* Moz + FF */
+    opacity: 0.4;
+}
+
+#container {
+    position:absolute;
+    display: none;
+    z-index: 2;
+}
 </style>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -750,6 +799,7 @@ span.taskComplDialog {
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
 <script language="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></script>
+<script src="/globalsight/jquery/jquery.progressbar.js"></script>
 <script type="text/javascript">
 var objectName = "";
 var guideNode = "myActivities";
@@ -1101,7 +1151,11 @@ function doUnload()
     {
         w_editor.close();
     }
-    try { w_updateLeverage.close(); } catch (e) {};
+    try {
+    	if (w_updateLeverage) {
+        	w_updateLeverage.close();
+    	}
+    } catch (e) {};
 
     w_editor = null;
     w_updateLeverage = null;
@@ -1203,6 +1257,14 @@ function searchPages(){
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
+
+<c:if test="${isLeveragingMT}">
+  <div id="fullbg" style='height:100px'></div>
+  <div id="container" style='height:100px'>
+    <div id="leverageMTProgressBar" style='height:10px'></div>
+  </div>
+</c:if>
+
 <% if (b_catalyst) {%>
 <TABLE ALIGN="RIGHT"><TR><TD><IMG SRC="/globalsight/images/logo_alchemy.gif"/></TD></TR></TABLE>
 <% } %>
@@ -1728,6 +1790,7 @@ if (targetPgsSize > 0)
         {
             String pageNameLow = pageName.toLowerCase();
             boolean isXml = pageNameLow.endsWith(".xml");
+            boolean isHTML = pageNameLow.endsWith(".html") || pageNameLow.endsWith(".xhtml") || pageNameLow.endsWith(".htm");
             boolean isInDesign = pageNameLow.endsWith(".indd") || pageNameLow.endsWith(".idml");
             boolean isOffice = pageNameLow.endsWith(".docx") || pageNameLow.endsWith(".pptx") || pageNameLow.endsWith(".xlsx");
             
@@ -1744,6 +1807,10 @@ if (targetPgsSize > 0)
             {
                 enableInContextReivew = okForInContextReviewOffice;
             }
+            if (isHTML)
+            {
+                enableInContextReivew = okForInContextReviewHTML;
+            }
         %>
            	incontextReviewPDFs[<%=i%>] = <%=(enableInContextReivew ? 1 : 0 )%>;
       <%}%>
@@ -1751,4 +1818,35 @@ if (targetPgsSize > 0)
         <% }
 }%>
 
+$(document).ready(function(){
+	<c:if test="${isLeveragingMT}">
+		var scrollHeight = document.body.scrollHeight-120;
+	    var scrollWidth = document.body.scrollWidth-40;
+	    $("#fullbg").css({width:scrollWidth, height:scrollHeight, display:"block"});
+	    $("#container").css({top:"400px",left:"600px", display: "block"});
+		$("#leverageMTProgressBar").progressBar();
+		setTimeout(leverageMTProgress, 500);
+	</c:if>
+})
+
+<c:if test="${isLeveragingMT}">
+function leverageMTProgress()
+{
+	var getPercentageURL = "<%=getLeverageMTPercentageUrl%>&t=" + new Date().getTime();
+	$.getJSON(getPercentageURL, function(data) {
+		var per = data.leverageMTPercentage;
+		$("#leverageMTProgressBar").progressBar(per);
+		if (per < 100) {
+			setTimeout(leverageMTProgress, 1000);
+		} else {
+			setTimeout(closeBg, 1000);
+		}
+	});
+}
+
+function closeBg() {
+	$("#fullbg").css("display","none");
+	$("#container").css("display","none");
+}
+</c:if>
 </SCRIPT>

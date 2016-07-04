@@ -6,7 +6,7 @@ package com.globalsight.selenium.pages;
 
 public class XMLRules
 {
-    // XML Rules
+	// XML Rules
     public static final String New_BUTTON = "//input[@value='New...']";
     public static final String Remove_BUTTON = "//input[@value='Remove']";
     public static final String Duplicate_BUTTON = "//input[@value='Duplicate']";

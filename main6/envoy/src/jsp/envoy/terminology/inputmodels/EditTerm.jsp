@@ -20,7 +20,8 @@ String title = bundle.getString("lb_term_input_model_edit_term_constraints");
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT language="Javascript">
-var g_args;
+var o=window.opener;
+var g_args=o.editTermParams;
 
 function doClose(ok)
 {
@@ -43,12 +44,7 @@ function doClose(ok)
     }
 
     g_args.setTerm(value);
-
-    window.returnValue = g_args;
-  }
-  else
-  {
-    window.returnValue = null;
+    o.editTermDialog(g_args);
   }
 
   window.close();
@@ -70,8 +66,6 @@ function doKeypress()
 
 function doWindowLoad()
 {
-  g_args = window.dialogArguments;
-
   idTerm.innerText = g_args.isMainTerm() ? "<%=bundle.getString("lb_term_input_model_main_term") %>" : "<%=bundle.getString("lb_term_input_model_synonyms") %>";
   idTermVerb.innerText = g_args.isMainTerm() ? "<%=bundle.getString("lb_term_input_model_is") %>:" : "<%=bundle.getString("lb_term_input_model_are") %>:";
   idLanguage.innerText = g_args.getLanguage();

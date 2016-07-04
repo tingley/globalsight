@@ -319,6 +319,33 @@ public class FileUtil
         }
     }
 
+    public static void writeFile(File file, byte[] p_bytes, boolean append)
+    {
+        file.getParentFile().mkdirs();
+
+        FileOutputStream fos = null;
+        try
+        {
+            fos = new FileOutputStream(file, append);
+            fos.write(p_bytes);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            try
+            {
+                fos.close();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * Reads some bytes from the file.
      * 

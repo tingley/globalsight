@@ -699,9 +699,9 @@ public class GraphicalWorkflowInstanceHandler extends PageHandler implements
 
                         }
                     }
-                    TaskInfoBean tib = new TaskInfoBean(t.getId(),
-                            estimatedHourAmount, actualHourAmount, expenseRate,
-                            revenueRate, rateSelectionCriteria, t.getIsReportUploadCheck());
+                    TaskInfoBean tib = new TaskInfoBean(t.getId(), estimatedHourAmount,
+                            actualHourAmount, expenseRate, revenueRate, rateSelectionCriteria,
+                            t.getIsReportUploadCheck(), t.getIsActivityCommentUploadCheck());
                     ht.put(new Long(t.getId()), tib);
                 }
             }

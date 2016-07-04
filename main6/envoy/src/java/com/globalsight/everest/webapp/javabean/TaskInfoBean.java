@@ -32,6 +32,7 @@ public class TaskInfoBean implements java.io.Serializable
     private Rate m_revenueRate = null;
     private int m_rateSelectionCriteria = 1;
     private int m_isReportUploadCheck = 0;
+    private int m_isActivityCommentUploadCheck = 0;
 
     /**
      * Constructor that leaves the actual amount of hours set to null.
@@ -79,9 +80,9 @@ public class TaskInfoBean implements java.io.Serializable
      *            The revenue rate the task is associated with or NULL if no
      *            rate is associated with it.
      */
-    public TaskInfoBean(long p_taskId, String p_estimatedHours,
-            String p_actualHours, Rate p_expenseRate, Rate p_revenueRate,
-            int p_rateSelectionCriteria, int p_isReportUploadCheck)
+    public TaskInfoBean(long p_taskId, String p_estimatedHours, String p_actualHours,
+            Rate p_expenseRate, Rate p_revenueRate, int p_rateSelectionCriteria,
+            int p_isReportUploadCheck, int p_isActivityCommentUploadCheck)
     {
         m_taskId = p_taskId;
         m_estimatedHours = p_estimatedHours;
@@ -90,12 +91,12 @@ public class TaskInfoBean implements java.io.Serializable
         m_revenueRate = p_revenueRate;
         m_rateSelectionCriteria = p_rateSelectionCriteria;
         m_isReportUploadCheck = p_isReportUploadCheck;
+        m_isActivityCommentUploadCheck = p_isActivityCommentUploadCheck;
     }
 
-    public TaskInfoBean(long p_taskId, String p_estimatedHours,
-            String p_actualHours, Rate p_expenseRate, Rate p_revenueRate,
-            int p_rateSelectionCriteria, String p_activityName,
-            int p_isReportUploadCheck)
+    public TaskInfoBean(long p_taskId, String p_estimatedHours, String p_actualHours,
+            Rate p_expenseRate, Rate p_revenueRate, int p_rateSelectionCriteria,
+            String p_activityName, int p_isReportUploadCheck, int p_isActivityCommentUploadCheck)
     {
         m_taskId = p_taskId;
         m_estimatedHours = p_estimatedHours;
@@ -105,6 +106,7 @@ public class TaskInfoBean implements java.io.Serializable
         m_rateSelectionCriteria = p_rateSelectionCriteria;
         m_activityName = p_activityName;
         m_isReportUploadCheck = p_isReportUploadCheck;
+        m_isActivityCommentUploadCheck = p_isActivityCommentUploadCheck;
     }
 
     // ////////////////////////////////////////////////////////////////////
@@ -213,4 +215,14 @@ public class TaskInfoBean implements java.io.Serializable
 	public int getIsReportUploadCheck() {
 		return m_isReportUploadCheck;
 	}
+	
+    public void setIsActivityCommentUploadCheck(int m_isActivityCommentUploadCheck)
+    {
+        this.m_isActivityCommentUploadCheck = m_isActivityCommentUploadCheck;
+    }
+
+    public int getIsActivityCommentUploadCheck()
+    {
+        return m_isActivityCommentUploadCheck;
+    }
 }

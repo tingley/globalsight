@@ -52,7 +52,7 @@
 	<target name="build-tests" depends="compile-tests, copy-test-files" />
 	<target name="compile-tests" depends="compile">
 		<mkdir dir="${testclasses}" />
-		<javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="utf-8" debug="on" destdir="${testclasses}" classpath="${classpath}" source="1.6" target="1.6">
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="utf-8" debug="on" destdir="${testclasses}" classpath="${classpath}" source="${javacsource}" target="${javactarget}">
 			<src path="${testSrc}" />
 		</javac>
 	</target>
@@ -67,7 +67,7 @@
 	<target name="build-ling-tests" depends="compile-ling-tests, copy-ling-test-files" />
 	<target name="compile-ling-tests" depends="compile">
 		<mkdir dir="${testclasses}" />
-		<javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="ISO-8859-1" debug="on" destdir="${testclasses}" classpath="${classpath}" source="1.6" target="1.6">
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="ISO-8859-1" debug="on" destdir="${testclasses}" classpath="${classpath}" source="${javacsource}" target="${javactarget}">
 			<src path="../../${lingSrcJava}" />
 			<include name="test/globalsight/**/*.java" />
 		</javac>
@@ -84,7 +84,7 @@
 	<target name="build-hibernate-tests" depends="compile-hibernate-tests" />
 	<target name="compile-hibernate-tests" depends="compile">
 		<mkdir dir="${testclasses}" />
-		<javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="ISO-8859-1" debug="on" destdir="${testclasses}" classpath="${classpath}" source="1.6" target="1.6">
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="ISO-8859-1" debug="on" destdir="${testclasses}" classpath="${classpath}" source="${javacsource}" target="${javactarget}">
 			<src path="../../envoy/hibernatetest/domain" />
 			<src path="../../envoy/hibernatetest/service" />
 		</javac>
@@ -122,17 +122,24 @@
 		</copy>
 	</target>
 
-	<target name="all" depends="compile, ling, cap, cxe, copy, AddSourceAppletJar" />
+	<target name="all" depends="compile, ling, cap, cxe, copy" />
 
 	<!-- Jar up all GlobalSight classes into globalsight.jar -->
 	<target name="globalsight.jar" depends="compile">
 		<echo message="**** Creating globalsight.jar ****" />
-		<jar update="true" duplicate="preserve" filesonly="true" destfile="${globalsight_home}/globalsight.jar">
-			<fileset dir="${serverclassesDest}" includes="**/*.class" />
+		<jar update="true" duplicate="preserve" filesonly="true" destfile="${globalsight_home}/lib/globalsight.jar">
+			<fileset dir="${serverclassesDest}" includes="**/*.class" excludes="com/globalsight/restful/version1_0/**/*.class" />
 		</jar>
 	</target>
 
-	<target name="zip" depends="all, globalsight.jar, globalsightServices, installer, distdir">
+	<target name="restResources_1_0" depends="compile">
+		<echo message="**** Creating restResources_1_0.jar ****" />
+		<jar update="true" duplicate="preserve" filesonly="true" destfile="${globalsight_home}/lib/restResources_1_0.jar">
+			<fileset dir="${serverclassesDest}" includes="com/globalsight/restful/version1_0/**/*.class" />
+		</jar>
+	</target>
+
+	<target name="zip" depends="all, globalsight.jar, restResources_1_0, globalsightServices, installer, distdir">
 		<ant antfile="zip.xml" target="zip" />
 	</target>
 
@@ -179,10 +186,6 @@
 	<!-- Target to package Desktop Icon -->
 	<target name="DesktopIcon">
 		<ant dir="${desktopicon.dir}/tools" antfile="build.xml" target="make.package" />
-	</target>
-
-	<target name="AddSourceAppletJar">
-		<ant dir="../../envoy/src/applet/AddSourceApplet" antfile="build.xml" target="all" />
 	</target>
 
 	<!-- Target to package all converters -->
@@ -337,7 +340,6 @@
 		<ant dir="${lingtools}/galign" antfile="build.xml" target="clean" />
 		<ant dir="../../${diplomatDevSrcJava}/../webtop-plugin" antfile="build.xml" target="clean" inheritAll="false" />
 		<ant antfile="../../envoy/src/webserviceClients/java/build.xml" target="clean" inheritAll="false" />
-		<ant dir="../../envoy/src/applet/AddSourceApplet" antfile="build.xml" target="clean" />
 		<ant dir="${globalsightServices}" antfile="build.xml" target="clean" inheritAll="false" />
 		<delete dir="${capclasses}" />
 		<delete dir="${testclasses}" />
@@ -420,11 +422,6 @@
 			<report todir="${testreports}" />
 		</junitreport>
 		<fail if="junit.failure" message="Unit test(s) failed.  See reports!" />
-	</target>
-
-	<!-- Sign the customer.jar for the applets -->
-	<target name="signCustomerJar">
-		<ant antfile="../../envoy/src/build.xml" target="sign_jars" />
 	</target>
 </project>
 

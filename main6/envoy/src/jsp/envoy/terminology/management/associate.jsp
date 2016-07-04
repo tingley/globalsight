@@ -43,6 +43,8 @@ String lb_ok = bundle.getString("lb_ok");
 <SCRIPT src="/globalsight/envoy/terminology/management/importObjects_js.jsp"></SCRIPT>
 <SCRIPT src="/globalsight/envoy/terminology/management/objects_js.jsp"></SCRIPT>
 <SCRIPT>
+var o=window.opener;
+var args = o.associateParams;
 var args;
 
 function doKeypress()
@@ -112,12 +114,8 @@ function doClose(ok)
             	idColumn.options[idColumn.selectedIndex].value;
         }
     }
-    window.returnValue = args;
-  }
-  else
-  {
-    window.returnValue = null;
-  }
+    o.associateDialog(args);
+  } 
 
   window.close();
 }
@@ -255,8 +253,6 @@ function initColumns(dom)
 
 function doLoad()
 {
-  args = window.dialogArguments;
-  
   addCustomFields(args.definition);
 
   initTypes();

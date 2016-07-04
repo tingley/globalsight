@@ -57,13 +57,11 @@ import com.globalsight.util.SortUtil;
  * Need to include "WorkObject" here also - as well as in Workflow.java TL can't
  * seem to find it from the interface Workflow.
  */
-public class WorkflowImpl extends PersistentObject implements Workflow,
-        WorkObject
+public class WorkflowImpl extends PersistentObject implements Workflow, WorkObject
 {
     private static final long serialVersionUID = -9074840785216382158L;
 
-    private static Logger c_logger = Logger.getLogger(WorkflowImpl.class
-            .getName());
+    private static Logger c_logger = Logger.getLogger(WorkflowImpl.class.getName());
 
     public static final String STATE = "m_state";
 
@@ -111,7 +109,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     private boolean m_taskMapNeedsBuilding = true;
 
     private Set<TargetPage> m_targetPages = new HashSet<TargetPage>();
-    private Vector<TargetPage> m_sortedTargetPages = new Vector<TargetPage>();
+    private List<TargetPage> m_sortedTargetPages = new ArrayList<TargetPage>();
     // Do the target pages need sorting?
     private boolean m_needsSorting = true;
 
@@ -197,7 +195,8 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     private int mtConfidenceScore = 0;
     private String mtProfileName = null;
     private String scorecardComment;
-    private int scorecardShowType = -1;//-1:Not Showing,0:Optional,1:Required  
+    private int scorecardShowType = -1;// -1:Not Showing,0:Optional,1:Required
+    private boolean isSinceVersion87 = true;
 
     /**
      * Get name of the company this activity belong to.
@@ -262,17 +261,16 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     /**
      * @see Workflow.getTargetPgaes(int)
      */
-    public ArrayList getTargetPages(int p_primaryFileType)
+    public List<TargetPage> getTargetPages(int p_primaryFileType)
     {
         sortTargetPages();
-        ArrayList targetPages = new ArrayList();
+        List<TargetPage> targetPages = new ArrayList<TargetPage>();
         // loop through the current target page collection
         // and gather ones of the particular type
         for (TargetPage targetPage : m_sortedTargetPages)
         {
             if ((targetPage.getPrimaryFileType() == p_primaryFileType)
-                    && (!targetPage.getPageState()
-                            .equals(PageState.IMPORT_FAIL)))
+                    && (!targetPage.getPageState().equals(PageState.IMPORT_FAIL)))
             {
                 targetPages.add(targetPage);
             }
@@ -283,10 +281,10 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     /**
      * @see Workflow.getTargetPages()
      */
-    public Vector<TargetPage> getTargetPages()
+    public List<TargetPage> getTargetPages()
     {
         sortTargetPages();
-        Vector<TargetPage> tps = new Vector<TargetPage>();
+        List<TargetPage> tps = new ArrayList<TargetPage>();
         for (TargetPage tp : m_sortedTargetPages)
         {
             // if the target page is not of an IMPORT_FAIL add to list
@@ -301,7 +299,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     /**
      * @see Workflow.getAllTargetPages
      */
-    public Vector<TargetPage> getAllTargetPages()
+    public List<TargetPage> getAllTargetPages()
     {
         sortTargetPages();
         return m_sortedTargetPages;
@@ -340,7 +338,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      * 
      * @return A map of tasks.
      */
-    public Hashtable getTasks()
+    public Hashtable<Long, Task> getTasks()
     {
         buildTaskMap();
         return m_taskMap;
@@ -452,12 +450,10 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     public int getContextMatchWordCount()
     {
-        return contextMatchWordCount == null ? 0 : contextMatchWordCount
-                .intValue();
+        return contextMatchWordCount == null ? 0 : contextMatchWordCount.intValue();
     }
 
-    public void setContextMatchWordCountAsInteger(
-            Integer p_contextMatchWordCount)
+    public void setContextMatchWordCountAsInteger(Integer p_contextMatchWordCount)
     {
         contextMatchWordCount = p_contextMatchWordCount;
     }
@@ -506,12 +502,10 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     public int getLowFuzzyMatchWordCount()
     {
-        return m_lowFuzzyMatchWordCount == null ? 0 : m_lowFuzzyMatchWordCount
-                .intValue();
+        return m_lowFuzzyMatchWordCount == null ? 0 : m_lowFuzzyMatchWordCount.intValue();
     }
 
-    public void setLowFuzzyMatchWordCountAsInteger(
-            Integer p_lowFuzzyMatchWordCount)
+    public void setLowFuzzyMatchWordCountAsInteger(Integer p_lowFuzzyMatchWordCount)
     {
         m_lowFuzzyMatchWordCount = p_lowFuzzyMatchWordCount;
     }
@@ -534,12 +528,10 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     public int getMedFuzzyMatchWordCount()
     {
-        return m_medFuzzyMatchWordCount == null ? 0 : m_medFuzzyMatchWordCount
-                .intValue();
+        return m_medFuzzyMatchWordCount == null ? 0 : m_medFuzzyMatchWordCount.intValue();
     }
 
-    public void setMedFuzzyMatchWordCountAsInteger(
-            Integer p_medFuzzyMatchWordCount)
+    public void setMedFuzzyMatchWordCountAsInteger(Integer p_medFuzzyMatchWordCount)
     {
         m_medFuzzyMatchWordCount = p_medFuzzyMatchWordCount;
     }
@@ -562,12 +554,10 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     public int getMedHiFuzzyMatchWordCount()
     {
-        return m_medHiFuzzyMatchWordCount == null ? 0
-                : m_medHiFuzzyMatchWordCount.intValue();
+        return m_medHiFuzzyMatchWordCount == null ? 0 : m_medHiFuzzyMatchWordCount.intValue();
     }
 
-    public void setMedHiFuzzyMatchWordCountAsInteger(
-            Integer p_medHiFuzzyMatchWordCount)
+    public void setMedHiFuzzyMatchWordCountAsInteger(Integer p_medHiFuzzyMatchWordCount)
     {
         m_medHiFuzzyMatchWordCount = p_medHiFuzzyMatchWordCount;
     }
@@ -590,8 +580,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     public int getHiFuzzyMatchWordCount()
     {
-        return m_hiFuzzyMatchWordCount == null ? 0 : m_hiFuzzyMatchWordCount
-                .intValue();
+        return m_hiFuzzyMatchWordCount == null ? 0 : m_hiFuzzyMatchWordCount.intValue();
     }
 
     public void setInContextMatchWordCount(int inContextMatchWord)
@@ -601,8 +590,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
 
     public int getInContextMatchWordCount()
     {
-        return this.incontextMatchWordCount == null ? 0
-                : incontextMatchWordCount.intValue();
+        return this.incontextMatchWordCount == null ? 0 : incontextMatchWordCount.intValue();
     }
 
     public void setMtExactMatchWordCount(int mtExactMatchWord)
@@ -612,26 +600,22 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
 
     public int getMtExactMatchWordCount()
     {
-        return this.mtExactMatchWordCount == null ? 0 : mtExactMatchWordCount
-                .intValue();
+        return this.mtExactMatchWordCount == null ? 0 : mtExactMatchWordCount.intValue();
     }
 
-    public void setNoUseInContextMatchWordCountAsInteger(
-            Integer noUseInContextMatchWordCount)
+    public void setNoUseInContextMatchWordCountAsInteger(Integer noUseInContextMatchWordCount)
     {
         this.noUseInContextMatchWordCount = noUseInContextMatchWordCount;
     }
 
     public void setNoUseInContextMatchWordCount(int noUseInContextMatchWordCount)
     {
-        this.noUseInContextMatchWordCount = new Integer(
-                noUseInContextMatchWordCount);
+        this.noUseInContextMatchWordCount = new Integer(noUseInContextMatchWordCount);
     }
 
     public Integer getNoUseInContextMatchWordCountAsInteger()
     {
-        return this.noUseInContextMatchWordCount == null ? 0
-                : noUseInContextMatchWordCount;
+        return this.noUseInContextMatchWordCount == null ? 0 : noUseInContextMatchWordCount;
     }
 
     public int getNoUseInContextMatchWordCount()
@@ -640,8 +624,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
                 : noUseInContextMatchWordCount.intValue();
     }
 
-    public void setTotalExactMatchWordCountAsInteger(
-            Integer totalExactMatchWordCount)
+    public void setTotalExactMatchWordCountAsInteger(Integer totalExactMatchWordCount)
     {
         this.totalExactMatchWordCount = totalExactMatchWordCount;
     }
@@ -653,14 +636,12 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
 
     public Integer getTotalExactMatchWordCountAsInteger()
     {
-        return this.totalExactMatchWordCount == null ? 0
-                : totalExactMatchWordCount;
+        return this.totalExactMatchWordCount == null ? 0 : totalExactMatchWordCount;
     }
 
     public int getTotalExactMatchWordCount()
     {
-        return this.totalExactMatchWordCount == null ? 0
-                : totalExactMatchWordCount.intValue();
+        return this.totalExactMatchWordCount == null ? 0 : totalExactMatchWordCount.intValue();
     }
 
     public void setInContextMatchWordCountAsInteger(Integer inContextMatchWord)
@@ -683,8 +664,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         return this.mtExactMatchWordCount;
     }
 
-    public void setHiFuzzyMatchWordCountAsInteger(
-            Integer p_hiFuzzyMatchWordCount)
+    public void setHiFuzzyMatchWordCountAsInteger(Integer p_hiFuzzyMatchWordCount)
     {
         m_hiFuzzyMatchWordCount = p_hiFuzzyMatchWordCount;
     }
@@ -746,8 +726,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         return 0;
     }
 
-    public void setRepetitionWordCountAsInteger(
-            Integer p_totalRepetitionWordCount)
+    public void setRepetitionWordCountAsInteger(Integer p_totalRepetitionWordCount)
     {
         m_totalRepetitionWordCount = p_totalRepetitionWordCount;
     }
@@ -861,7 +840,8 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     }
 
     /**
-     * @param long p_wfInstanceId
+     * @param long
+     *            p_wfInstanceId
      */
     public void setId(long p_wfInstanceId)
     {
@@ -892,8 +872,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     public int getPercentageCompletion()
     {
         double num = (double) (getCompletionNumerator());
-        double den = (double) ((getCompletionDenominator() != 0 ? getCompletionDenominator()
-                : 1));
+        double den = (double) ((getCompletionDenominator() != 0 ? getCompletionDenominator() : 1));
         return (int) ((num / den) * 100.0);
     }
 
@@ -984,7 +963,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     /**
      * @see Workflow.getWorkflowOwners()
      */
-    public List getWorkflowOwners()
+    public List<WorkflowOwner> getWorkflowOwners()
     {
         return new ArrayList<WorkflowOwner>(m_workflowOwners);
     }
@@ -1029,8 +1008,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         {
             for (WorkflowOwner wfo : m_workflowOwners)
             {
-                if (p_ownerType != null
-                        && p_ownerType.equals(wfo.getOwnerType()))
+                if (p_ownerType != null && p_ownerType.equals(wfo.getOwnerType()))
                 {
                     owners.add(wfo.getOwnerId());
                 }
@@ -1107,18 +1085,14 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
             if ("desc"
-                    .equals((String) sc
-                            .getStringParameter(SystemConfigParamNames.COMMENTS_SORTING))
-                    || "default"
-                            .equals((String) sc
-                                    .getStringParameter(SystemConfigParamNames.COMMENTS_SORTING)))
-            {
-                SortUtil.sort(m_sortedWorkflowComments,
-                        Collections.reverseOrder());
-            }
-            else if ("asc"
-                    .equals((String) sc
+                    .equals((String) sc.getStringParameter(SystemConfigParamNames.COMMENTS_SORTING))
+                    || "default".equals((String) sc
                             .getStringParameter(SystemConfigParamNames.COMMENTS_SORTING)))
+            {
+                SortUtil.sort(m_sortedWorkflowComments, Collections.reverseOrder());
+            }
+            else if ("asc".equals(
+                    (String) sc.getStringParameter(SystemConfigParamNames.COMMENTS_SORTING)))
             {
                 SortUtil.sort(m_sortedWorkflowComments);
             }
@@ -1184,14 +1158,12 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     /**
      * @see Workflow.setEstimatedCompletionDateOverrided(boolean)
      */
-    public void setEstimatedCompletionDateOverrided(
-            boolean p_isEstimatedCompletionDateOverrided)
+    public void setEstimatedCompletionDateOverrided(boolean p_isEstimatedCompletionDateOverrided)
     {
         m_isEstimatedCompletionDateOverrided = p_isEstimatedCompletionDateOverrided;
     }
 
-    public void setIsEstimatedCompletionDateOverrided(
-            Boolean p_isEstimatedCompletionDateOverrided)
+    public void setIsEstimatedCompletionDateOverrided(Boolean p_isEstimatedCompletionDateOverrided)
     {
         if (p_isEstimatedCompletionDateOverrided != null)
         {
@@ -1207,8 +1179,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     /**
      * @see Workflow.setEstimatedTranslateCompletionDate(Date)
      */
-    public void setEstimatedTranslateCompletionDate(
-            Date p_estimatedTranslateCompletionDate)
+    public void setEstimatedTranslateCompletionDate(Date p_estimatedTranslateCompletionDate)
     {
         if (p_estimatedTranslateCompletionDate != null)
         {
@@ -1305,8 +1276,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
             }
             else if (m_TranslateActivity.getState() == Task.STATE_COMPLETED)
             {
-                this.setTranslationCompletedDate(m_TranslateActivity
-                        .getCompletedDate());
+                this.setTranslationCompletedDate(m_TranslateActivity.getCompletedDate());
             }
 
             // Update Estimated Translate Completion Date
@@ -1318,8 +1288,8 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
                 }
                 else
                 {
-                    this.setEstimatedTranslateCompletionDate(m_TranslateActivity
-                            .getEstimatedCompletionDate());
+                    this.setEstimatedTranslateCompletionDate(
+                            m_TranslateActivity.getEstimatedCompletionDate());
                 }
             }
         }
@@ -1333,28 +1303,18 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     public String toStringNoTargetPages()
     {
         m_tasks.size();
-        return super.toString()
-                + " m_wfInstanceId="
-                + Long.toString(m_wfInstanceId)
-                + " m_job="
-                + (m_job != null ? m_job.getJobName() + " jobID="
-                        + ((JobImpl) m_job).getIdAsLong() : "null")
-                + " m_state="
-                + (m_state != null ? m_state : "null")
-                + " m_targetLocale="
-                + (m_targetLocale != null ? m_targetLocale.toString() : "null")
-                + "\n"
-                + " m_wfInstance="
-                + (m_wfInstance != null ? m_wfInstance.toString() : "null")
-                + " m_dispatchedDate="
-                + (m_dispatchedDate != null ? m_dispatchedDate.toString()
+        return super.toString() + " m_wfInstanceId=" + Long.toString(m_wfInstanceId) + " m_job="
+                + (m_job != null ? m_job.getJobName() + " jobID=" + ((JobImpl) m_job).getIdAsLong()
                         : "null")
+                + " m_state=" + (m_state != null ? m_state : "null") + " m_targetLocale="
+                + (m_targetLocale != null ? m_targetLocale.toString() : "null") + "\n"
+                + " m_wfInstance=" + (m_wfInstance != null ? m_wfInstance.toString() : "null")
+                + " m_dispatchedDate="
+                + (m_dispatchedDate != null ? m_dispatchedDate.toString() : "null")
                 + " m_completedDate="
-                + (m_completedDate != null ? m_completedDate.toString()
-                        : "null") + "\n" + " m_dispatchType="
-                + (m_dispatchType != null ? m_dispatchType : "null")
-                + " m_duration="
-                + (m_duration != null ? m_duration.toString() : "null")
+                + (m_completedDate != null ? m_completedDate.toString() : "null") + "\n"
+                + " m_dispatchType=" + (m_dispatchType != null ? m_dispatchType : "null")
+                + " m_duration=" + (m_duration != null ? m_duration.toString() : "null")
                 + "\nm_tasks=" + m_tasks.toString() + "\n";
     }
 
@@ -1366,9 +1326,8 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     public String toString()
     {
         m_targetPages.size();
-        return toStringNoTargetPages() + "\nm_targetPages="
-                + m_targetPages.toString() + "\nWorkflow "
-                + getIdAsLong().toString() + " toString end\n";
+        return toStringNoTargetPages() + "\nm_targetPages=" + m_targetPages.toString()
+                + "\nWorkflow " + getIdAsLong().toString() + " toString end\n";
     }
 
     /**
@@ -1423,9 +1382,8 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         }
         try
         {
-            Comparator comparator = new PageComparator(
-                    PageComparator.EXTERNAL_PAGE_ID, Locale.US);
-            m_sortedTargetPages = new Vector<TargetPage>(m_targetPages);
+            Comparator comparator = new PageComparator(PageComparator.EXTERNAL_PAGE_ID, Locale.US);
+            m_sortedTargetPages = new ArrayList<TargetPage>(m_targetPages);
             SortUtil.sort(m_sortedTargetPages, comparator);
             m_needsSorting = false;
         }
@@ -1451,18 +1409,15 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         buildTaskMap();
         try
         {
-            List taskInfos = ServerProxy.getWorkflowManager()
-                    .getTaskInfosInDefaultPath(this);
+            List taskInfos = ServerProxy.getWorkflowManager().getTaskInfosInDefaultPath(this);
             Iterator taskInfosIterator = taskInfos.iterator();
             if (taskInfos != null)
             {
                 for (int i = taskInfos.size() - 1; i >= 0; i--)
                 {
                     TaskInfo taskInfo = (TaskInfo) taskInfos.get(i);
-                    Task task = (Task) m_taskMap
-                            .get(new Long(taskInfo.getId()));
-                    Activity act = ServerProxy.getJobHandler().getActivity(
-                            task.getTaskName());
+                    Task task = (Task) m_taskMap.get(new Long(taskInfo.getId()));
+                    Activity act = ServerProxy.getJobHandler().getActivity(task.getTaskName());
                     if (Activity.isTranslateActivity(act.getType()))
                     {
                         m_TranslateActivity = task;
@@ -1522,8 +1477,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         return m_thresholdHiFuzzyWordCount;
     }
 
-    public void setThresholdHiFuzzyWordCountAsInteger(
-            Integer thresholdHiFuzzyWordCountAsInteger)
+    public void setThresholdHiFuzzyWordCountAsInteger(Integer thresholdHiFuzzyWordCountAsInteger)
     {
         this.m_thresholdHiFuzzyWordCount = thresholdHiFuzzyWordCountAsInteger;
     }
@@ -1544,8 +1498,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         return m_thresholdMedFuzzyWordCount;
     }
 
-    public void setThresholdMedFuzzyWordCountAsInteger(
-            Integer thresholdMedFuzzyWordCountAsInteger)
+    public void setThresholdMedFuzzyWordCountAsInteger(Integer thresholdMedFuzzyWordCountAsInteger)
     {
         this.m_thresholdMedFuzzyWordCount = thresholdMedFuzzyWordCountAsInteger;
     }
@@ -1555,8 +1508,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         return m_thresholdLowFuzzyWordCount;
     }
 
-    public void setThresholdLowFuzzyWordCountAsInteger(
-            Integer thresholdLowFuzzyWordCountAsInteger)
+    public void setThresholdLowFuzzyWordCountAsInteger(Integer thresholdLowFuzzyWordCountAsInteger)
     {
         this.m_thresholdLowFuzzyWordCount = thresholdLowFuzzyWordCountAsInteger;
     }
@@ -1566,22 +1518,19 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         return m_thresholdNoMatchWordCount;
     }
 
-    public void setThresholdNoMatchWordCountAsInteger(
-            Integer thresholdNoMatchWordCountAsInteger)
+    public void setThresholdNoMatchWordCountAsInteger(Integer thresholdNoMatchWordCountAsInteger)
     {
         this.m_thresholdNoMatchWordCount = thresholdNoMatchWordCountAsInteger;
     }
 
     public int getThresholdHiFuzzyWordCount()
     {
-        return m_thresholdHiFuzzyWordCount == null ? 0
-                : m_thresholdHiFuzzyWordCount.intValue();
+        return m_thresholdHiFuzzyWordCount == null ? 0 : m_thresholdHiFuzzyWordCount.intValue();
     }
 
     public void setThresholdHiFuzzyWordCount(int thresholdHiFuzzyWordCount)
     {
-        this.m_thresholdHiFuzzyWordCount = new Integer(
-                thresholdHiFuzzyWordCount);
+        this.m_thresholdHiFuzzyWordCount = new Integer(thresholdHiFuzzyWordCount);
     }
 
     public int getThresholdMedHiFuzzyWordCount()
@@ -1592,44 +1541,37 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
 
     public void setThresholdMedHiFuzzyWordCount(int thresholdMedHiFuzzyWordCount)
     {
-        this.m_thresholdMedHiFuzzyWordCount = new Integer(
-                thresholdMedHiFuzzyWordCount);
+        this.m_thresholdMedHiFuzzyWordCount = new Integer(thresholdMedHiFuzzyWordCount);
     }
 
     public int getThresholdMedFuzzyWordCount()
     {
-        return m_thresholdMedFuzzyWordCount == null ? 0
-                : m_thresholdMedFuzzyWordCount.intValue();
+        return m_thresholdMedFuzzyWordCount == null ? 0 : m_thresholdMedFuzzyWordCount.intValue();
     }
 
     public void setThresholdMedFuzzyWordCount(int thresholdMedFuzzyWordCount)
     {
-        this.m_thresholdMedFuzzyWordCount = new Integer(
-                thresholdMedFuzzyWordCount);
+        this.m_thresholdMedFuzzyWordCount = new Integer(thresholdMedFuzzyWordCount);
     }
 
     public int getThresholdLowFuzzyWordCount()
     {
-        return m_thresholdLowFuzzyWordCount == null ? 0
-                : m_thresholdLowFuzzyWordCount.intValue();
+        return m_thresholdLowFuzzyWordCount == null ? 0 : m_thresholdLowFuzzyWordCount.intValue();
     }
 
     public void setThresholdLowFuzzyWordCount(int thresholdLowFuzzyWordCount)
     {
-        this.m_thresholdLowFuzzyWordCount = new Integer(
-                thresholdLowFuzzyWordCount);
+        this.m_thresholdLowFuzzyWordCount = new Integer(thresholdLowFuzzyWordCount);
     }
 
     public int getThresholdNoMatchWordCount()
     {
-        return m_thresholdNoMatchWordCount == null ? 0
-                : m_thresholdNoMatchWordCount.intValue();
+        return m_thresholdNoMatchWordCount == null ? 0 : m_thresholdNoMatchWordCount.intValue();
     }
 
     public void setThresholdNoMatchWordCount(int thresholdNoMatchWordCount)
     {
-        this.m_thresholdNoMatchWordCount = new Integer(
-                thresholdNoMatchWordCount);
+        this.m_thresholdNoMatchWordCount = new Integer(thresholdNoMatchWordCount);
     }
 
     public void setMtTotalWordCount(int p_mtTotalWordCount)
@@ -1649,8 +1591,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
 
     public int getMtFuzzyNoMatchWordCount()
     {
-        return this.mtFuzzyNoMatchWordCount == null ? 0
-                : mtFuzzyNoMatchWordCount.intValue();
+        return this.mtFuzzyNoMatchWordCount == null ? 0 : mtFuzzyNoMatchWordCount.intValue();
     }
 
     public void setMtRepetitionsWordCount(int p_mtRepetitionsWordCount)
@@ -1660,8 +1601,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
 
     public int getMtRepetitionsWordCount()
     {
-        return this.mtRepetitionsWordCount == null ? 0 : mtRepetitionsWordCount
-                .intValue();
+        return this.mtRepetitionsWordCount == null ? 0 : mtRepetitionsWordCount.intValue();
     }
 
     public void setMtEngineWordCount(int p_mtEngineWordCount)
@@ -1694,21 +1634,25 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         return this.mtConfidenceScore;
     }
 
-	public void setScorecardComment(String p_scorecardComment) {
-		this.scorecardComment = p_scorecardComment;
-	}
+    public void setScorecardComment(String p_scorecardComment)
+    {
+        this.scorecardComment = p_scorecardComment;
+    }
 
-	public String getScorecardComment() {
-		return this.scorecardComment;
-	}
+    public String getScorecardComment()
+    {
+        return this.scorecardComment;
+    }
 
-	public void setScorecardShowType(int scorecardShowType) {
-		this.scorecardShowType = scorecardShowType;
-	}
+    public void setScorecardShowType(int scorecardShowType)
+    {
+        this.scorecardShowType = scorecardShowType;
+    }
 
-	public int getScorecardShowType() {
-		return scorecardShowType;
-	}
+    public int getScorecardShowType()
+    {
+        return scorecardShowType;
+    }
 
     public String getMtProfileName()
     {
@@ -1718,5 +1662,15 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     public void setMtProfileName(String mtProfileName)
     {
         this.mtProfileName = mtProfileName;
+    }
+
+    public boolean getIsSinceVersion87()
+    {
+        return isSinceVersion87;
+    }
+
+    public void setIsSinceVersion87(boolean isSinceVersion87)
+    {
+        this.isSinceVersion87 = isSinceVersion87;
     }
 }

@@ -19,7 +19,6 @@ package com.globalsight.everest.request;
 //globalsight
 import java.rmi.RemoteException;
 import java.util.Collection;
-import java.util.HashMap;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.jobhandler.Job;
@@ -30,8 +29,7 @@ import com.globalsight.util.GeneralException;
 /*
  * Remote implementation of RequestHandler.
  */
-public class RequestHandlerWLRMIImpl extends RemoteServer implements
-        RequestHandlerWLRemote
+public class RequestHandlerWLRMIImpl extends RemoteServer implements RequestHandlerWLRemote
 {
     private RequestHandler m_localReference;
 
@@ -81,8 +79,7 @@ public class RequestHandlerWLRMIImpl extends RemoteServer implements
      * 
      * @see RequestHandler.findRequest(long p_requestId)
      */
-    public Request findRequest(long param1) throws RequestHandlerException,
-            RemoteException
+    public Request findRequest(long param1) throws RequestHandlerException, RemoteException
     {
         return m_localReference.findRequest(param1);
     }
@@ -104,9 +101,8 @@ public class RequestHandlerWLRMIImpl extends RemoteServer implements
      * @see RequestHandler.setExceptionInRequest(Request p_request,
      *      GeneralException p_exception)
      */
-    public void setExceptionInRequest(Request p_request,
-            GeneralException p_exception) throws RequestHandlerException,
-            RemoteException
+    public void setExceptionInRequest(Request p_request, GeneralException p_exception)
+            throws RequestHandlerException, RemoteException
     {
         m_localReference.setExceptionInRequest(p_request, p_exception);
     }
@@ -115,26 +111,22 @@ public class RequestHandlerWLRMIImpl extends RemoteServer implements
      * @see RequestHandler.setExceptionInRequest(long p_requestId,
      *      GeneralException p_exception)
      */
-    public void setExceptionInRequest(long p_requestId,
-            GeneralException p_exception) throws RequestHandlerException,
-            RemoteException
+    public void setExceptionInRequest(long p_requestId, GeneralException p_exception)
+            throws RequestHandlerException, RemoteException
     {
         m_localReference.setExceptionInRequest(p_requestId, p_exception);
     }
 
     public void setExceptionInWorkflowRequest(WorkflowRequest p_request,
-            GeneralException p_exception) throws RequestHandlerException,
-            RemoteException
+            GeneralException p_exception) throws RequestHandlerException, RemoteException
     {
         m_localReference.setExceptionInWorkflowRequest(p_request, p_exception);
     }
 
     public long createWorkflowRequest(WorkflowRequest p_request, Job p_job,
-            Collection p_workflowTemplates) throws GeneralException,
-            RemoteException
+            Collection p_workflowTemplates) throws GeneralException, RemoteException
     {
-        return m_localReference.createWorkflowRequest(p_request, p_job,
-                p_workflowTemplates);
+        return m_localReference.createWorkflowRequest(p_request, p_job, p_workflowTemplates);
     }
 
     /*
@@ -142,8 +134,7 @@ public class RequestHandlerWLRMIImpl extends RemoteServer implements
      * 
      * @see RequestHandler.importPage(...)
      */
-    public void importPage(Request p_request) throws RequestHandlerException,
-            RemoteException
+    public void importPage(Request p_request) throws RequestHandlerException, RemoteException
     {
         m_localReference.importPage(p_request);
     }
@@ -164,8 +155,7 @@ public class RequestHandlerWLRMIImpl extends RemoteServer implements
      * 
      * @see RequestHandler.startDelayedImports()
      */
-    public void startDelayedImports() throws RemoteException,
-            RequestHandlerException
+    public void startDelayedImports() throws RemoteException, RequestHandlerException
     {
         m_localReference.startDelayedImports();
     }
@@ -175,23 +165,20 @@ public class RequestHandlerWLRMIImpl extends RemoteServer implements
      * 
      * @see RequestHandler.cleanupIncompleteRequests()
      */
-    public void cleanupIncompleteRequests() throws RemoteException,
-            RequestHandlerException
+    public void cleanupIncompleteRequests() throws RemoteException, RequestHandlerException
     {
         m_localReference.cleanupIncompleteRequests();
     }
 
     /**
-     * Used by the service activator MDB. Prepares and submits a request for
-     * localization. (This used to be the onMessage() functionality)
+     * Prepares and submits a request for localization.
      */
-    public void prepareAndSubmitRequest(HashMap p_hashmap,
-            String p_contentFileName, int p_requestType, String p_eventFlowXml,
-            GeneralException p_exception, String p_l10nRequestXml)
+    public void prepareAndSubmitRequest(String p_contentFileName, int p_requestType,
+            String p_eventFlowXml, GeneralException p_exception, String p_l10nRequestXml)
             throws RemoteException, RequestHandlerException
     {
-        m_localReference.prepareAndSubmitRequest(p_hashmap, p_contentFileName,
-                p_requestType, p_eventFlowXml, p_exception, p_l10nRequestXml);
+        m_localReference.prepareAndSubmitRequest(p_contentFileName, p_requestType, p_eventFlowXml,
+                p_exception, p_l10nRequestXml);
     }
 
     public FileProfile getFileProfile(Request p_request)

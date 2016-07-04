@@ -22,7 +22,6 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.everest.edit.online.OnlineEditorManagerLocal;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
@@ -43,7 +42,7 @@ import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
-import com.globalsight.ling.tm2.leverage.DateComparable;
+import com.globalsight.machineTranslation.MTHelper;
 
 public class LeverageUtil
 {
@@ -267,6 +266,11 @@ public class LeverageUtil
         if (isPassoloIncontextMatch(p_sourceTuvs.get(index), p_matchTypes, p_jobId))
         {
             return ICE_TYPE_PASSOLO_MATCHING;
+        }
+
+        if (isInvalidPoXlfTarget(index, p_sourceTuvs, p_targetTuvs, p_matchTypes, p_jobId))
+        {
+            return ICE_TYPE_NOT_ICE;
         }
 
         // For PO segment,if its target is valid, count it as "ICE" directly.
@@ -614,11 +618,60 @@ public class LeverageUtil
             return true;
         }
 
-        if (("xlf".equalsIgnoreCase(dataType) || "xliff"
-                .equalsIgnoreCase(dataType))
+        if (("xlf".equalsIgnoreCase(dataType) || "xliff".equalsIgnoreCase(dataType))
                 && statisMatchType == MatchTypeStatistics.SEGMENT_XLIFF_EXACT)
         {
             return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * For XLF/PO file, if its target is different from source but tag
+     * un-matched, can not be ICE as it can not be populated into target TUV.
+     */
+    private static boolean isInvalidPoXlfTarget(int index, List p_sourceTuvs, List p_targetTuvs,
+            MatchTypeStatistics p_matchTypes, long p_jobId)
+    {
+        if (p_sourceTuvs == null || p_sourceTuvs.size() == 0 || index < 0
+                || index >= p_sourceTuvs.size() || p_targetTuvs == null
+                || p_sourceTuvs.size() != p_targetTuvs.size())
+        {
+            return false;
+        }
+
+        try
+        {
+            String src = null;
+            String dataType = null;
+            Tuv targetTuv = (Tuv) p_targetTuvs.get(index);
+            String trg = targetTuv.getGxmlElement().getTextValue();
+
+            Object o = p_sourceTuvs.get(index);
+            if (o instanceof Tuv)
+            {
+                Tuv sourceTuv = (Tuv) o;
+                dataType = sourceTuv.getTu(p_jobId).getDataType();
+                src = sourceTuv.getGxmlElement().getTextValue();
+            }
+            else
+            {
+                SegmentTmTuv srcTuv = (SegmentTmTuv) o;
+                dataType = srcTuv.getTu().getFormat();
+                src = MTHelper.getGxmlElement(srcTuv.getSegment()).getTextValue();
+            }
+
+            boolean isPoXlf = "po".equalsIgnoreCase(dataType) || "xlf".equalsIgnoreCase(dataType)
+                    || "xliff".equalsIgnoreCase(dataType);
+            if (isPoXlf && src != null && src.equals(trg))
+            {
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
         }
 
         return false;
@@ -633,25 +686,26 @@ public class LeverageUtil
 				p_matchTypes, p_subId);
 		if (lm == null)
 			return false;
-
+		//(GBS-4360) Online and offline, determine the status of the target tuv
+	     if (lm.getMatchState().equals(MatchState.MULTIPLE_TRANSLATION))
+         {
+             Tuv targetTuv = (Tuv) p_targetTuvs.get(index);
+             if (targetTuv.getState().equals(TuvState.NOT_LOCALIZED))
+             {
+                 return false;
+             }
+         }
+	     
         long preHash = -1;
         long nextHash = -1;
         Object o = p_sourceTuvs.get(index);
     	if (isExactMatch(o, p_matchTypes))
-    	{
+        {
             if (o instanceof Tuv)
             {
-            	Tuv sourceTuv = (Tuv) o;
+                Tuv sourceTuv = (Tuv) o;
                 preHash = sourceTuv.getPreviousHash();
                 nextHash = sourceTuv.getNextHash();
-                if (lm.getMatchState().equals(MatchState.MULTIPLE_TRANSLATION))
-                {
-                    Tuv targetTuv = (Tuv) p_targetTuvs.get(index);
-                    if (targetTuv.getState().equals(TuvState.NOT_LOCALIZED))
-                    {
-                    	return false;
-                    }
-                }
             }
             else
             {
@@ -661,13 +715,12 @@ public class LeverageUtil
             }
 
             if (preHash != -1 && nextHash != -1 && preHash != BaseTmTuv.FIRST_HASH
-    				&& nextHash != BaseTmTuv.LAST_HASH
-    				&& preHash == lm.getPreviousHash()
-    				&& nextHash == lm.getNextHash())
-    		{
-    			return true;
-    		}
-    	}
+                    && nextHash != BaseTmTuv.LAST_HASH && preHash == lm.getPreviousHash()
+                    && nextHash == lm.getNextHash())
+            {
+                return true;
+            }
+        }
 
         return false;
     }

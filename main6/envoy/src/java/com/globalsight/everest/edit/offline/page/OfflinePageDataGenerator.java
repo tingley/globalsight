@@ -63,16 +63,19 @@ import com.globalsight.everest.tuv.PageSegmentsException;
 import com.globalsight.everest.tuv.SegmentPair;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvState;
+import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileStateConstants;
 import com.globalsight.ling.common.CodesetMapper;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
+import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.machineTranslation.MTHelper;
+import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResultSet;
 import com.globalsight.util.GeneralException;
@@ -99,8 +102,7 @@ import com.globalsight.util.gxml.GxmlNames;
  */
 public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 {
-    static protected final Logger CATEGORY = Logger
-            .getLogger(OfflinePageDataGenerator.class);
+    static protected final Logger CATEGORY = Logger.getLogger(OfflinePageDataGenerator.class);
 
     static public final int DEFAULT_MAX_FUZZY = 3;
 
@@ -117,8 +119,12 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     static public final int INDICATE_FUZZY_NORMAL = 10;
     static public final int INDICATE_FUZZY_TRADOS = 11;
     static public final int INDICATE_NO_MATCH = 12;
+    static public final int INDICATE_MT_MATCH = 13;
 
     static public final float SCORE_UNKNOWN = -1;
+
+    // MT translation applies fixed score "60".
+    static public final float MT_SCORE_FOR_OFFLINE_KIT = MachineTranslator.MT_SCORE;
 
     static private ResourceBundle m_resources;
     static
@@ -130,8 +136,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             // the parser, we will stick to English only VALUES
             // for those keys as well.
             m_resources = ResourceBundle.getBundle(
-                    "com/globalsight/resources/messages/EditorMatchTypeLabels",
-                    Locale.US);
+                    "com/globalsight/resources/messages/EditorMatchTypeLabels", Locale.US);
         }
         catch (MissingResourceException ex)
         {
@@ -190,6 +195,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     private boolean m_hasMergeOverrideDirectives = false;
     private boolean populateFuzzy = true;
     private boolean populate100 = true;
+    private boolean populateMT = true;
 
     private class SubflowData
     {
@@ -198,8 +204,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         String m_downloadTuId = null;
         GxmlElement m_sub = null;
 
-        public SubflowData(String p_downloadSubId, String p_downloadTuId,
-                GxmlElement p_sub, String p_parentOfSubTagName)
+        public SubflowData(String p_downloadSubId, String p_downloadTuId, GxmlElement p_sub,
+                String p_parentOfSubTagName)
         {
             m_downloadSubId = p_downloadSubId;
             m_downloadTuId = p_downloadTuId;
@@ -240,20 +246,17 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                     AmbassadorDwUpConstants.OFFLINE_CONFIG_PROPERTY, Locale.US);
 
             // Override default max number of fuzzy to display.
-            String tmp = bundle
-                    .getString(AmbassadorDwUpConstants.OFFLINE_CONFIG_KEY_MAX_FUZZY);
+            String tmp = bundle.getString(AmbassadorDwUpConstants.OFFLINE_CONFIG_KEY_MAX_FUZZY);
 
             m_maxFuzzyNum = Integer.parseInt(tmp);
 
             // Override default max number of segments allowed with annotations.
-            tmp = bundle
-                    .getString(AmbassadorDwUpConstants.OFFLINE_CONFIG_KEY_ATN_THRESHOLD);
+            tmp = bundle.getString(AmbassadorDwUpConstants.OFFLINE_CONFIG_KEY_ATN_THRESHOLD);
             m_annotationThreshold = Integer.parseInt(tmp);
 
             // Check if Add/Delete is enabled.
-            m_addDeleteEnabled = SystemConfiguration.getInstance()
-                    .getBooleanParameter(
-                            SystemConfigParamNames.ADD_DELETE_ENABLED);
+            m_addDeleteEnabled = SystemConfiguration.getInstance().getBooleanParameter(
+                    SystemConfigParamNames.ADD_DELETE_ENABLED);
         }
         catch (Exception ex)
         {
@@ -325,6 +328,21 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 || m_fileFormatId == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED;
     }
 
+    private boolean isDownloadForListRTF()
+    {
+        return AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_RTF == m_fileFormatId;
+    }
+
+    private boolean isDownloadForXliff12()
+    {
+        return AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF == m_fileFormatId;
+    }
+
+    private boolean isDownloadForXliff20()
+    {
+        return AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20 == m_fileFormatId;
+    }
+
     /**
      * Gets a PageData holding the raw data for download.
      * 
@@ -338,9 +356,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      *            all download parameters.
      * @return PageData all data relating to one offline file.
      */
-    public PageData getDownloadPageData(String p_pageIdAsString,
-            String p_pageName, boolean p_canUseUrl,
-            DownloadParams p_downloadParams, TargetPage p_trgPage)
+    public PageData getDownloadPageData(String p_pageIdAsString, String p_pageName,
+            boolean p_canUseUrl, DownloadParams p_downloadParams, TargetPage p_trgPage)
             throws GeneralException
     {
         CATEGORY.debug("getDownloadPageData()");
@@ -360,6 +377,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         m_excludeTypeNames = (Vector) p_downloadParams.getExcludedTypeNames();
         populateFuzzy = p_downloadParams.isPopulateFuzzy();
         populate100 = p_downloadParams.isPopulate100();
+        populateMT = p_downloadParams.isPopulateMT();
         PageData result = getPageData();
         setHeaderValues(result.getOfflinePageData(), p_downloadParams);
 
@@ -371,8 +389,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     /**
      * @return PageData all data relating to one offline file.
      */
-    public PageData getUploadReferencePageData(UploadParams p_uploadParams)
-            throws GeneralException
+    public PageData getUploadReferencePageData(UploadParams p_uploadParams) throws GeneralException
     {
         CATEGORY.debug("getUploadReferencePageData()");
         m_isDownloadRequest = false;
@@ -404,6 +421,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         // TuvManager and CommentManager.
         m_offlinePage = new OfflinePageData();
         m_offlinePage.setPopulate100(populate100);
+        m_offlinePage.setPopulateMT(populateMT);
         m_segmentCounter = 0;
 
         if (isUploadRequest())
@@ -419,12 +437,10 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         }
 
         // check parameters
-        if (m_pageName == null || m_pageName.length() == 0
-                || m_sourcePageIdAsLong == -1)
+        if (m_pageName == null || m_pageName.length() == 0 || m_sourcePageIdAsLong == -1)
         {
             OfflinePageDataGeneratorException ex = new OfflinePageDataGeneratorException(
-                    OfflinePageDataGeneratorException.MSG_FAILED_ARGS_GETDOWNLOADPAGE,
-                    null, null);
+                    OfflinePageDataGeneratorException.MSG_FAILED_ARGS_GETDOWNLOADPAGE, null, null);
             CATEGORY.error(ex.getMessage(), ex);
             throw ex;
         }
@@ -485,12 +501,10 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     /**
      * Adds all parent and subflows as separate unmerged segments.
      */
-    private void addUnMergedSegments()
-            throws OfflinePageDataGeneratorException,
+    private void addUnMergedSegments() throws OfflinePageDataGeneratorException,
             OfflineEditorManagerException, PageSegmentsException
     {
-        Iterator pairsIt = m_ref_pageSegs
-                .getUnmergedSegmentPairIterator(m_targetLocale);
+        Iterator pairsIt = m_ref_pageSegs.getUnmergedSegmentPairIterator(m_targetLocale);
         while (pairsIt.hasNext())
         {
             // Get the next set of source/target Tuvs
@@ -515,9 +529,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         OfflineSegmentData OSDParent = null;
         ArrayList OSDsubs = null;
 
-        Iterator pairsIt = m_ref_pageSegs
-                .getSegmentPairIterator(m_targetLocale);
-
+        Iterator pairsIt = m_ref_pageSegs.getSegmentPairIterator(m_targetLocale);
         while (pairsIt.hasNext())
         {
             // Get the next set of source/target Tuvs
@@ -540,8 +552,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             // Maps the parent-target to either a merged or unmerged
             // reference resource. Unmerged resources should already
             // have been added. See getOfflineDownloadPage().
-            if (m_offlinePage.mapSegmentToResource(OSDParent
-                    .getDisplaySegmentID()) == false)
+            if (m_offlinePage.mapSegmentToResource(OSDParent.getDisplaySegmentID()) == false)
             {
                 String args[] =
                 { OSDParent.getDisplaySegmentID() };
@@ -557,8 +568,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             {
                 OfflineSegmentData sub = (OfflineSegmentData) subsIt.next();
 
-                if (m_offlinePage.mapSegmentToResource(sub
-                        .getDisplaySegmentID()) == false)
+                if (m_offlinePage.mapSegmentToResource(sub.getDisplaySegmentID()) == false)
                 {
                     String args[] =
                     { sub.getDisplaySegmentID() };
@@ -614,13 +624,11 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         {
             fmList = getTMDataForSegment(p_pair, "0");
             fmRefTmsList = getTMDataRefTmsForSegment(p_pair, "0");
-            state = m_matchTypeStats.getLingManagerMatchType(srcTuv.getId(),
-                    "0");
+            state = m_matchTypeStats.getLingManagerMatchType(srcTuv.getId(), "0");
         }
-        boolean isTopLeverageMatchFromMT = isTopLeverageMatchFromMT(fmList);
 
         List isProtectedChangeable = new ArrayList();
-
+        // long tuId = srcTuv.getTuId();
         // First, determine which gxml to use as the target and the
         // score indicator.
         if (state == LeverageMatchLingManager.EXACT)
@@ -633,16 +641,14 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 
             if (isDownloadRequest())
             {
-                parentProtection = determineTuvDownloadLockStatus(trgTuv,
-                        isProtectedChangeable);
+                parentProtection = determineTuvDownloadLockStatus(trgTuv, isProtectedChangeable);
             }
 
-            if (parentProtection
-                    && TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_100)
+            if (parentProtection && TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_100)
                 parentProtection = false;
 
-            matchTypeDisplay = getDisplayMatchType(INDICATE_EXACT,
-                    parentProtection, String.valueOf(trgScore));
+            matchTypeDisplay = getDisplayMatchType(INDICATE_EXACT, parentProtection,
+                    String.valueOf(trgScore));
             matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_EXACT;
         }
         else if (state == LeverageMatchLingManager.UNVERIFIED)
@@ -659,12 +665,11 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             // parentProtection = determineTuvDownloadLockStatus(trgTuv);
             // }
 
-            matchTypeDisplay = getDisplayMatchType(INDICATE_UNVERIFIED_EXACT,
-                    parentProtection, String.valueOf(trgScore));
+            matchTypeDisplay = getDisplayMatchType(INDICATE_UNVERIFIED_EXACT, parentProtection,
+                    String.valueOf(trgScore));
             matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_UNVERIFIED_EXACT;
         }
-        else if (trgTuv.isNotLocalized() && isDownloadRequest()
-                && isDownloadForTrados())
+        else if (trgTuv.isNotLocalized() && isDownloadRequest() && isDownloadForTrados())
         {
             // This segment has not been touched by a human and we are
             // downloading for Trados. Insert the first fuzzy and its
@@ -677,8 +682,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 fuzzyMatchInserted = true;
                 trgScore = getTopLeveragedMatchScore(fmList);
                 // parentProtection == default
-                matchTypeDisplay = getDisplayMatchType(INDICATE_FUZZY_TRADOS,
-                        parentProtection, String.valueOf(trgScore));
+                matchTypeDisplay = getDisplayMatchType(INDICATE_FUZZY_TRADOS, parentProtection,
+                        String.valueOf(trgScore));
                 matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_FUZZY;
             }
             else
@@ -688,8 +693,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 trgGxml = trgTuv.getGxmlExcludeTopTags();
                 trgScore = 0; // no fuzzy
                 // parentProtection == default
-                matchTypeDisplay = getDisplayMatchType(INDICATE_NO_MATCH,
-                        parentProtection, String.valueOf(trgScore));
+                matchTypeDisplay = getDisplayMatchType(INDICATE_NO_MATCH, parentProtection,
+                        String.valueOf(trgScore));
                 matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_NOMATCH;
             }
         }
@@ -708,8 +713,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 trgGxml = trgTuv.getGxmlExcludeTopTags();
                 trgScore = getTopLeveragedMatchScore(fmList);
                 // parentProtection == default
-                matchTypeDisplay = getDisplayMatchType(INDICATE_FUZZY_NORMAL,
-                        parentProtection, String.valueOf(trgScore));
+                matchTypeDisplay = getDisplayMatchType(INDICATE_FUZZY_NORMAL, parentProtection,
+                        String.valueOf(trgScore));
                 matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_FUZZY;
             }
             else
@@ -720,8 +725,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 trgGxml = trgTuv.getGxmlExcludeTopTags();
                 trgScore = 0; // no fuzzy
                 // parentProtection == default
-                matchTypeDisplay = getDisplayMatchType(INDICATE_NO_MATCH,
-                        parentProtection, String.valueOf(trgScore));
+                matchTypeDisplay = getDisplayMatchType(INDICATE_NO_MATCH, parentProtection,
+                        String.valueOf(trgScore));
                 matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_NOMATCH;
             }
         }
@@ -731,22 +736,24 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             // we **always** use the current target.
             trgGxml = trgTuv.getGxmlExcludeTopTags();
             trgScore = 100; // must be set for Trados output
+            // to be safe, limit to below formats
+            if ((isDownloadForTrados() || isDownloadForListRTF() || isDownloadForTTX()
+                    || isDownloadForXliff12() || isDownloadForXliff20())
+                    && isMtTranslated(trgTuv))
+            {
+                trgScore = 60;
+            }
 
             // This segment has been touched by a human but we want to
             // indicate to the user that it originally had a TM match.
             String topGxml = getTopLeveragedMatchGxml(fmList, srcTuv, trgTuv, 0);
             float topScore = getTopLeveragedMatchScore(fmList);
-            if (isTopLeverageMatchFromMT && isDownloadForTTX())
-            {
-                topScore = 60;// Trados standard practice (I think it is weird, right?)
-            }
 
             // if this tuv is not exact, and it has sub segment with exact
             // match,
             // set it score to really fuzzy score
             TuvState tuvState = trgTuv.getState();
-            if (topScore < 100
-                    && tuvState.equals(TuvState.EXACT_MATCH_LOCALIZED)
+            if (topScore < 100 && tuvState.equals(TuvState.EXACT_MATCH_LOCALIZED)
                     && srcTuv.getSubflowsAsGxmlElements() != null
                     && srcTuv.getSubflowsAsGxmlElements().size() > 0)
             {
@@ -756,8 +763,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             if (topGxml == null)
             {
                 // there was no previous or current match
-                matchTypeDisplay = getDisplayMatchType(INDICATE_CURRENT_TARGET,
-                        parentProtection, String.valueOf(trgScore));
+                matchTypeDisplay = getDisplayMatchType(INDICATE_CURRENT_TARGET, parentProtection,
+                        String.valueOf(trgScore));
                 matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_NOMATCH;
             }
             else
@@ -765,18 +772,29 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 if (topScore >= 100)
                 {
                     // there was a previous or current exact match
-                    parentProtection = determineTuvDownloadLockStatus(trgTuv,
-                            isProtectedChangeable);
-                    matchTypeDisplay = getDisplayMatchType(INDICATE_EXACT,
-                            parentProtection, String.valueOf(topScore));
+                    parentProtection = determineTuvDownloadLockStatus(trgTuv, isProtectedChangeable);
+                    matchTypeDisplay = getDisplayMatchType(INDICATE_EXACT, parentProtection,
+                            String.valueOf(topScore));
                     matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_EXACT;
                 }
                 else
                 {
                     // there was a previous or current fuzzy match
-                    matchTypeDisplay = getDisplayMatchType(
-                            INDICATE_FUZZY_NORMAL, parentProtection,
-                            String.valueOf(topScore));
+                    if (isDownloadForTrados())
+                    {
+                        matchTypeDisplay = getDisplayMatchType(INDICATE_FUZZY_TRADOS,
+                                parentProtection, String.valueOf(topScore));
+                    }
+                    else
+                    {
+                        matchTypeDisplay = getDisplayMatchType(INDICATE_FUZZY_NORMAL,
+                                parentProtection, String.valueOf(topScore));
+                    }
+                    if (topScore == 60)
+                    {
+                        matchTypeDisplay = getDisplayMatchType(INDICATE_MT_MATCH, parentProtection,
+                                String.valueOf(topScore));
+                    }
                     matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_FUZZY;
                     // If populate 100, the "trgGxml" should be translated
                     // content and "trgScore" should be 100 always.
@@ -784,7 +802,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                     {
                         // do nothing.
                     }
-                    else if (populateFuzzy)
+                    else if (populateMT ||populateFuzzy)
                     {
                         trgGxml = topGxml;
                         trgScore = topScore;
@@ -806,7 +824,14 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 // GBS-3722, just use MT tagged target segment, do not use
                 // source
             }
-            else if (populate100 && TuvState.APPROVED.equals(trgTuv.getState()))
+            else if (populateMT && isMtTranslated(trgTuv))
+            {
+
+            }
+            else if (populate100 && trgScore == 100)
+            {
+            }
+            else if (populateFuzzy && !isMtTranslated(trgTuv) && trgScore !=100)
             {
 
             }
@@ -822,22 +847,11 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             trgGxml = IdmlHelper.formatForOfflineDownload(trgGxml);
         }
 
-        // GBS-4383: Set any MT segments that are populated into TTX as 60%
-        // leverage (Trados practice)
-        String modifyUser = trgTuv.getLastModifiedUser();
-        boolean isTrgMted = (modifyUser != null && modifyUser.toLowerCase().endsWith("_mt"));
-        if (isDownloadForTTX()
-                && ((populate100 && isTrgMted) || (!populate100 && isTopLeverageMatchFromMT)))
-        {
-            trgScore = 60;
-        }
-
         // Then create/append offline parent seg
-        OfflineSegmentData result = new OfflineSegmentData(
-                String.valueOf(trgTuv.getTu(jobId).getTuId()),
-                srcTuv.getDataType(jobId), itemType, srgGxml, trgGxml,
-                trgScore, matchTypeDisplay, matchTypeId, fmList, fmRefTmsList,
-                parentProtection, getTermDataForSegment(p_pair));
+        OfflineSegmentData result = new OfflineSegmentData(String.valueOf(trgTuv.getTu(jobId)
+                .getTuId()), srcTuv.getDataType(jobId), itemType, srgGxml, trgGxml, trgScore,
+                matchTypeDisplay, matchTypeId, fmList, fmRefTmsList, parentProtection,
+                getTermDataForSegment(p_pair));
 
         result.setTargetTuv(trgTuv);
         result.setSourceTuv(srcTuv);
@@ -847,8 +861,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 
         result.setCopyOfSource(trgTuv.isNotLocalized()
                 && (state != LeverageMatchLingManager.UNVERIFIED)
-                && (state != LeverageMatchLingManager.EXACT)
-                && !fuzzyMatchInserted);
+                && (state != LeverageMatchLingManager.EXACT) && !fuzzyMatchInserted);
         result.setIsStartOfNewPara(isStartOfNewPara(trgTuv, jobId));
         result.setMergedIds((ArrayList) p_pair.getMergedTuIds());
         result.setTouched(trgTuv);
@@ -923,8 +936,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         {
             // get a single source parent-of-subs
             GxmlElement aSrcParentOfSubs = (GxmlElement) it1.next();
-            List srcSubs = aSrcParentOfSubs
-                    .getDescendantElements(GxmlElement.SUB_TYPE);
+            List srcSubs = aSrcParentOfSubs.getDescendantElements(GxmlElement.SUB_TYPE);
 
             ListIterator it2 = srcSubs.listIterator();
             while (it2.hasNext())
@@ -933,8 +945,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 String srcSubId = srcSub.getAttribute(GxmlNames.SUB_ID);
                 ArrayList fmList = null;
                 ArrayList fmRefTmsList = null;
-                SubflowData trgSubData = (SubflowData) trgSubflowMap
-                        .get(srcSubId);
+                SubflowData trgSubData = (SubflowData) trgSubflowMap.get(srcSubId);
 
                 if (isDownloadRequest())
                 {
@@ -948,8 +959,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                     String[] args =
                     { srcSubId, "" };
                     OfflinePageDataGeneratorException ex = new OfflinePageDataGeneratorException(
-                            OfflinePageDataGeneratorException.MSG_FAILED_TO_GET_SUBFLOW_ID,
-                            args, null);
+                            OfflinePageDataGeneratorException.MSG_FAILED_TO_GET_SUBFLOW_ID, args,
+                            null);
                     CATEGORY.error(ex.getMessage(), ex);
                     throw ex;
                 }
@@ -986,8 +997,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 // that has been leveraged on import (copied into target).
                 if (isDownloadRequest())
                 {
-                    state = m_matchTypeStats.getLingManagerMatchType(
-                            srcTuv.getId(), srcSubId);
+                    state = m_matchTypeStats.getLingManagerMatchType(srcTuv.getId(), srcSubId);
                 }
 
                 if (state == LeverageMatchLingManager.EXACT)
@@ -996,8 +1006,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 
                     if (isDownloadRequest())
                     {
-                        subProtection = determineSubDownloadLockStatus(srcTuv,
-                                srcSubId);
+                        subProtection = determineSubDownloadLockStatus(srcTuv, srcSubId);
                     }
 
                     // Subflows are included in the comparison when we
@@ -1005,8 +1014,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                     // 100 also.
                     trgScore = 100;
 
-                    matchTypeDisplay = getDisplayMatchType(INDICATE_EXACT_SUB,
-                            subProtection, String.valueOf(trgScore));
+                    matchTypeDisplay = getDisplayMatchType(INDICATE_EXACT_SUB, subProtection,
+                            String.valueOf(trgScore));
                     matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_EXACT;
                 }
                 else if (state == LeverageMatchLingManager.UNVERIFIED)
@@ -1025,9 +1034,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                     // 100 also.
                     trgScore = 100;
 
-                    matchTypeDisplay = getDisplayMatchType(
-                            INDICATE_UNVERIFIED_EXACT_SUB, subProtection,
-                            String.valueOf(trgScore));
+                    matchTypeDisplay = getDisplayMatchType(INDICATE_UNVERIFIED_EXACT_SUB,
+                            subProtection, String.valueOf(trgScore));
                     matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_UNVERIFIED_EXACT;
                 }
                 else if (state == LeverageMatchLingManager.FUZZY
@@ -1039,26 +1047,24 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                         // by a human (NOT_LOCALIZED) and we are
                         // downloading for Trados. Use the first
                         // fuzzy and its score - if available.
-                        String topGxml = getTopLeveragedMatchGxml(fmList,
-                                srcTuv, trgTuv, Integer.parseInt(srcSubId));
+                        String topGxml = getTopLeveragedMatchGxml(fmList, srcTuv, trgTuv,
+                                Integer.parseInt(srcSubId));
 
                         if (topGxml != null)
                         {
                             trgSubGxml = topGxml;
                             fuzzyMatchInserted = true;
                             trgScore = getTopLeveragedMatchScore(fmList);
-                            matchTypeDisplay = getDisplayMatchType(
-                                    INDICATE_FUZZY_TRADOS, subProtection,
-                                    String.valueOf(trgScore));
+                            matchTypeDisplay = getDisplayMatchType(INDICATE_FUZZY_TRADOS,
+                                    subProtection, String.valueOf(trgScore));
                             matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_FUZZY;
                         }
                         else
                         {
                             trgSubGxml = trgSub.toGxmlExcludeTopTags();
                             trgScore = SCORE_UNKNOWN;
-                            matchTypeDisplay = getDisplayMatchType(
-                                    INDICATE_NO_MATCH, subProtection,
-                                    String.valueOf(trgScore));
+                            matchTypeDisplay = getDisplayMatchType(INDICATE_NO_MATCH,
+                                    subProtection, String.valueOf(trgScore));
                             matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_NOMATCH;
                         }
                     }
@@ -1072,25 +1078,23 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                         // match type label will tell the user to look
                         // in the resource pages to see the fuzzy
                         // matches.
-                        String topGxml = getTopLeveragedMatchGxml(fmList,
-                                srcTuv, trgTuv, Integer.parseInt(srcSubId));
+                        String topGxml = getTopLeveragedMatchGxml(fmList, srcTuv, trgTuv,
+                                Integer.parseInt(srcSubId));
 
                         if (topGxml != null)
                         {
                             trgSubGxml = trgSub.toGxmlExcludeTopTags();
                             trgScore = getTopLeveragedMatchScore(fmList);
-                            matchTypeDisplay = getDisplayMatchType(
-                                    INDICATE_FUZZY_NORMAL, subProtection,
-                                    String.valueOf(trgScore));
+                            matchTypeDisplay = getDisplayMatchType(INDICATE_FUZZY_NORMAL,
+                                    subProtection, String.valueOf(trgScore));
                             matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_FUZZY;
                         }
                         else
                         {
                             trgSubGxml = trgSub.toGxmlExcludeTopTags();
                             trgScore = 0;
-                            matchTypeDisplay = getDisplayMatchType(
-                                    INDICATE_NO_MATCH, subProtection,
-                                    String.valueOf(trgScore));
+                            matchTypeDisplay = getDisplayMatchType(INDICATE_NO_MATCH,
+                                    subProtection, String.valueOf(trgScore));
                             matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_NOMATCH;
                         }
                     }
@@ -1101,16 +1105,14 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                     // We **always** use the current target.
                     trgSubGxml = trgSub.toGxmlExcludeTopTags();
                     trgScore = 0; // this affects Trados output
-                    matchTypeDisplay = getDisplayMatchType(
-                            INDICATE_CURRENT_TARGET_SUB, subProtection,
-                            String.valueOf(trgScore));
+                    matchTypeDisplay = getDisplayMatchType(INDICATE_CURRENT_TARGET_SUB,
+                            subProtection, String.valueOf(trgScore));
                     matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_NOMATCH;
                 }
 
                 // *Always* use the SUB's source datatype if sub
                 // datatype is not present - we get it from the parent
-                String srcDataType = srcSub
-                        .getAttribute(GxmlNames.SUB_DATATYPE);
+                String srcDataType = srcSub.getAttribute(GxmlNames.SUB_DATATYPE);
                 if (srcDataType == null || srcDataType.length() == 0)
                 {
                     srcDataType = srcTuv.getDataType(jobId);
@@ -1131,17 +1133,14 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 OfflineSegmentData result = new OfflineSegmentData(
                         trgSubflowRootId + subId,
                         // always refer to source datatype
-                        srcDataType, srcItemType,
-                        srcSub.toGxmlExcludeTopTags(), trgSubGxml, trgScore,
-                        matchTypeDisplay, matchTypeId, fmList, fmRefTmsList,
+                        srcDataType, srcItemType, srcSub.toGxmlExcludeTopTags(), trgSubGxml,
+                        trgScore, matchTypeDisplay, matchTypeId, fmList, fmRefTmsList,
                         subProtection, null);
 
                 result.setCopyOfSource((state != LeverageMatchLingManager.UNVERIFIED)
-                        && (state != LeverageMatchLingManager.EXACT)
-                        && !fuzzyMatchInserted);
+                        && (state != LeverageMatchLingManager.EXACT) && !fuzzyMatchInserted);
                 result.setSourceTuv(srcTuv);
-                result.setDisplayParentOfSubTagName(trgSubData
-                        .getParentOfSubTagName());
+                result.setDisplayParentOfSubTagName(trgSubData.getParentOfSubTagName());
                 result.setTouched(trgTuv);
                 result.setTrgTuvId(trgTuv.getIdAsLong());
                 result.setBackReference(m_offlinePage);
@@ -1178,16 +1177,14 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             String[] args =
             { String.valueOf(m_sourcePageIdAsLong) };
             OfflinePageDataGeneratorException ex = new OfflinePageDataGeneratorException(
-                    OfflinePageDataGeneratorException.MSG_SOURCE_PAGE_NOT_FOUND,
-                    args, null);
+                    OfflinePageDataGeneratorException.MSG_SOURCE_PAGE_NOT_FOUND, args, null);
             CATEGORY.error(ex.getMessage(), ex);
             throw ex;
         }
 
         // Get raw tuv data:
-        m_ref_pageSegs = OfflineEditHelper.getPageSegments(m_srcPage,
-                m_targetLocale, m_mergeOverrideDirectives, isUploadRequest(),
-                m_mergeEnabled);
+        m_ref_pageSegs = OfflineEditHelper.getPageSegments(m_srcPage, m_targetLocale,
+                m_mergeOverrideDirectives, isUploadRequest(), m_mergeEnabled);
 
         if (isDownloadRequest())
         {
@@ -1198,8 +1195,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             if (m_fuzzyMatchMap == null)
             {
                 OfflinePageDataGeneratorException ex = new OfflinePageDataGeneratorException(
-                        OfflinePageDataGeneratorException.MSG_FAILED_TO_GET_LEVERAGE_MAP,
-                        null, null);
+                        OfflinePageDataGeneratorException.MSG_FAILED_TO_GET_LEVERAGE_MAP, null,
+                        null);
                 CATEGORY.error(ex.getMessage(), ex);
                 throw ex;
             }
@@ -1231,18 +1228,17 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         {
             // Assumes this source page has an extracted file.
             // Shouldn't have reached this method if it doesn't.
-            PageTemplate srcPageTemplate = getExtractedSourceFile(m_srcPage)
-                    .getPageTemplate(PageTemplate.TYPE_OFFLINE);
+            PageTemplate srcPageTemplate = getExtractedSourceFile(m_srcPage).getPageTemplate(
+                    PageTemplate.TYPE_OFFLINE);
 
-            Collection tp = ServerProxy.getPageManager()
-                    .getTemplatePartsForSourcePage(m_srcPage.getIdAsLong(),
-                            srcPageTemplate.getTypeAsString());
+            Collection tp = ServerProxy.getPageManager().getTemplatePartsForSourcePage(
+                    m_srcPage.getIdAsLong(), srcPageTemplate.getTypeAsString());
 
             // ALWAYS set the template parts before getting the page data.
             srcPageTemplate.setTemplateParts(new ArrayList(tp));
 
-            SnippetPageTemplate template = new SnippetPageTemplate(
-                    srcPageTemplate, m_targetLocale.toString());
+            SnippetPageTemplate template = new SnippetPageTemplate(srcPageTemplate,
+                    m_targetLocale.toString());
 
             m_interpretedTuIds = template.getInterpretedTuIds();
         }
@@ -1251,8 +1247,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             String[] args =
             { String.valueOf(m_srcPage.getId()), m_targetLocale.toString() };
             OfflinePageDataGeneratorException ex1 = new OfflinePageDataGeneratorException(
-                    OfflinePageDataGeneratorException.MSG_FAILED_TO_GET_INTERPRETED_TUIDS,
-                    args, ex);
+                    OfflinePageDataGeneratorException.MSG_FAILED_TO_GET_INTERPRETED_TUIDS, args, ex);
             CATEGORY.error(ex1.getMessage(), ex1);
             throw ex1;
         }
@@ -1261,8 +1256,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     /**
      * Sets the header information for the current page.
      */
-    private void setHeaderValues(OfflinePageData p_opd,
-            DownloadParams p_downloadParams)
+    private void setHeaderValues(OfflinePageData p_opd, DownloadParams p_downloadParams)
             throws OfflinePageDataGeneratorException
     {
         p_opd.setDocumentFormat(getExtractedSourceFile(m_srcPage).getDataType());
@@ -1283,16 +1277,14 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         p_opd.setTargetLocaleName(p_downloadParams.getTargetLocale().toString());
 
         // Get the IANA encoding name (for display in the file header).
-        String ianaEncoding = CodesetMapper.getIanaCharset(p_downloadParams
-                .getEncoding());
+        String ianaEncoding = CodesetMapper.getIanaCharset(p_downloadParams.getEncoding());
 
         if (ianaEncoding == null)
         {
             String[] args =
             { p_downloadParams.getEncoding() };
             OfflinePageDataGeneratorException ex = new OfflinePageDataGeneratorException(
-                    OfflinePageDataGeneratorException.MSG_UNKNOWN_ENCODING,
-                    args, null);
+                    OfflinePageDataGeneratorException.MSG_UNKNOWN_ENCODING, args, null);
             CATEGORY.error(ex.getMessage(), ex);
             throw ex;
         }
@@ -1300,20 +1292,17 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         p_opd.setEncoding(ianaEncoding);
 
         // get/set word counts
-        PageWordCounts wrdCnts = getTargetPageWordCounts(m_sourcePageIdAsLong,
-                p_downloadParams.getTargetLocale().getId());
+        PageWordCounts wrdCnts = getTargetPageWordCounts(m_sourcePageIdAsLong, p_downloadParams
+                .getTargetLocale().getId());
 
-        p_opd.setExactMatchWordCount((wrdCnts == null) ? -1 : wrdCnts
-                .getInContextWordCount() + wrdCnts.getSegmentTmWordCount());
+        p_opd.setExactMatchWordCount((wrdCnts == null) ? -1 : wrdCnts.getInContextWordCount()
+                + wrdCnts.getSegmentTmWordCount());
 
-        p_opd.setFuzzyMatchWordCount((wrdCnts == null) ? -1 : wrdCnts
-                .getLowFuzzyWordCount()
-                + wrdCnts.getMedFuzzyWordCount()
-                + wrdCnts.getMedHiFuzzyWordCount()
+        p_opd.setFuzzyMatchWordCount((wrdCnts == null) ? -1 : wrdCnts.getLowFuzzyWordCount()
+                + wrdCnts.getMedFuzzyWordCount() + wrdCnts.getMedHiFuzzyWordCount()
                 + wrdCnts.getHiFuzzyWordCount());
 
-        p_opd.setNoMatchWordCount((wrdCnts == null) ? -1 : wrdCnts
-                .getNoMatchWordCount());
+        p_opd.setNoMatchWordCount((wrdCnts == null) ? -1 : wrdCnts.getNoMatchWordCount());
 
         p_opd.setTMEditType(p_downloadParams.getTMEditType());
     }
@@ -1326,8 +1315,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      *            the id of the source page you are requesting
      * @return the actual source page
      */
-    private SourcePage getSourcePage(long p_sourcePageId)
-            throws OfflinePageDataGeneratorException
+    private SourcePage getSourcePage(long p_sourcePageId) throws OfflinePageDataGeneratorException
     {
         PageManager mgr = null;
 
@@ -1358,14 +1346,13 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      *            the locale of the target page
      * @return the target page word counts object
      */
-    private PageWordCounts getTargetPageWordCounts(long p_sourcePageId,
-            long p_targetLocaleId) throws OfflinePageDataGeneratorException
+    private PageWordCounts getTargetPageWordCounts(long p_sourcePageId, long p_targetLocaleId)
+            throws OfflinePageDataGeneratorException
     {
         try
         {
             PageManager mgr = ServerProxy.getPageManager();
-            TargetPage trgPage = mgr.getTargetPage(p_sourcePageId,
-                    p_targetLocaleId);
+            TargetPage trgPage = mgr.getTargetPage(p_sourcePageId, p_targetLocaleId);
 
             return trgPage != null ? trgPage.getWordCount() : null;
         }
@@ -1385,16 +1372,13 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      * @param p_targetLocale
      *            the locale you want the matches for
      */
-    private void getTMDataForPage(Long p_sourcePageId,
-            GlobalSightLocale p_targetLocale)
+    private void getTMDataForPage(Long p_sourcePageId, GlobalSightLocale p_targetLocale)
             throws OfflinePageDataGeneratorException
     {
         try
         {
-            SourcePage sp = ServerProxy.getPageManager().getSourcePage(
-                    p_sourcePageId);
-            List leverageMatches = LingServerProxy
-                    .getLeverageMatchLingManager()
+            SourcePage sp = ServerProxy.getPageManager().getSourcePage(p_sourcePageId);
+            List leverageMatches = LingServerProxy.getLeverageMatchLingManager()
                     .getLeverageMatchesForOfflineDownLoad(p_sourcePageId,
                             p_targetLocale.getIdAsLong());
             if (leverageMatches != null)
@@ -1405,7 +1389,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 int threshold = 0;
                 if (job != null)
                 {
-                	threshold = job.getLeverageMatchThreshold();
+                    threshold = job.getLeverageMatchThreshold();
                     TranslationMemoryProfile tmp = job.getL10nProfile()
                             .getTranslationMemoryProfile();
                     String refTms = tmp.getRefTMsToLeverageFrom();
@@ -1423,12 +1407,12 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                             {
                             }
                         }
-                        m_fuzzyMatchRefTmsMap = getLeverageMatchMap(
-                                leverageMatches, refTmIdsForPenalty);
+                        m_fuzzyMatchRefTmsMap = getLeverageMatchMap(leverageMatches,
+                                refTmIdsForPenalty);
                     }
                 }
-                m_matchTypeStats = getMatchTypesForStatistics(leverageMatches,
-                		threshold, sp.getJobId());
+                m_matchTypeStats = getMatchTypesForStatistics(leverageMatches, threshold,
+                        sp.getJobId());
             }
         }
         catch (Exception ex)
@@ -1438,10 +1422,11 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         }
     }
 
-    private MatchTypeStatistics getMatchTypesForStatistics(
-            List p_leverageMatches, int p_levMatchThreshold, long p_jobId)
+    private MatchTypeStatistics getMatchTypesForStatistics(List p_leverageMatches,
+            int p_levMatchThreshold, long p_jobId)
     {
-    	// TODO: should this keep same as "LeverageMatchLingManagerLocal.getMatchTypesForStatistics(..)"?
+        // TODO: should this keep same as
+        // "LeverageMatchLingManagerLocal.getMatchTypesForStatistics(..)"?
         Map<String, LeverageMatch> leverageMatchesMap = new HashMap<String, LeverageMatch>();
         // remove lower score_num record
         for (Iterator it = p_leverageMatches.iterator(); it.hasNext();)
@@ -1452,16 +1437,14 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 
             float scoreNum = cloneMatch.getScoreNum();
             String subId = cloneMatch.getSubId();
-            String idKey = MatchTypeStatistics.makeKey(originalSourceTuvId,
-                    subId);
+            String idKey = MatchTypeStatistics.makeKey(originalSourceTuvId, subId);
             LeverageMatch lm = (LeverageMatch) leverageMatchesMap.get(idKey);
             if (lm != null)
             {
                 if (scoreNum == 100)
                 {
                     if ((LeverageUtil.compareSid(lm, cloneMatch, p_jobId) > 0 && cloneMatch
-                            .getOrderNum() != -1)
-                            || lm.getScoreNum() < scoreNum)
+                            .getOrderNum() != -1) || lm.getScoreNum() < scoreNum)
                     {
                         leverageMatchesMap.remove(idKey);
                         leverageMatchesMap.put(idKey, cloneMatch);
@@ -1486,8 +1469,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         for (Iterator it = leverageMatches2.iterator(); it.hasNext();)
         {
             LeverageMatch match = (LeverageMatch) it.next();
-            String key = MatchTypeStatistics.makeKey(
-                    match.getOriginalSourceTuvId(), match.getSubId());
+            String key = MatchTypeStatistics.makeKey(match.getOriginalSourceTuvId(),
+                    match.getSubId());
             if (!list.contains(key))
             {
                 result.addMatchType(match);
@@ -1498,8 +1481,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         return result;
     }
 
-    private Map<Long, ArrayList<LeverageMatch>> getLeverageMatchMap(
-            List p_leverageMatches, List<Long> refTmIdsForPenalty)
+    private Map<Long, ArrayList<LeverageMatch>> getLeverageMatchMap(List p_leverageMatches,
+            List<Long> refTmIdsForPenalty)
     {
         // Put all the LeverageMatch in HashMap grouping by original Tuv id
         Map<Long, ArrayList<LeverageMatch>> result = new HashMap<Long, ArrayList<LeverageMatch>>();
@@ -1513,8 +1496,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             }
 
             Long key = new Long(match.getOriginalSourceTuvId());
-            ArrayList<LeverageMatch> set = (ArrayList<LeverageMatch>) result
-                    .get(key);
+            ArrayList<LeverageMatch> set = (ArrayList<LeverageMatch>) result.get(key);
 
             if (set == null)
             {
@@ -1528,8 +1510,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         return result;
     }
 
-    private Map<Long, ArrayList<LeverageMatch>> getLeverageMatchMap(
-            List p_leverageMatches)
+    private Map<Long, ArrayList<LeverageMatch>> getLeverageMatchMap(List p_leverageMatches)
     {
         // Put all the LeverageMatch in HashMap grouping by original Tuv id
         Map<Long, ArrayList<LeverageMatch>> result = new HashMap<Long, ArrayList<LeverageMatch>>();
@@ -1539,8 +1520,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             LeverageMatch match = (LeverageMatch) it.next();
 
             Long key = new Long(match.getOriginalSourceTuvId());
-            ArrayList<LeverageMatch> set = (ArrayList<LeverageMatch>) result
-                    .get(key);
+            ArrayList<LeverageMatch> set = (ArrayList<LeverageMatch>) result.get(key);
 
             if (set == null)
             {
@@ -1563,8 +1543,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      *            the locale you want the matches in
      * @return Map of best matches keyed by source TuvIds
      */
-    private TermLeverageMatchResultSet getTermDataForPage(
-            GlobalSightLocale p_targetLocale)
+    private TermLeverageMatchResultSet getTermDataForPage(GlobalSightLocale p_targetLocale)
             throws OfflinePageDataGeneratorException
     {
         TermLeverageManager mgr;
@@ -1613,10 +1592,10 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      * 
      * @return the gxml for this match
      */
-    private String getTopLeveragedMatchGxml(ArrayList p_fuzzyList,
-            Tuv p_srcTuv, Tuv p_trgTuv, int p_subId)
-            throws OfflinePageDataGeneratorException
+    private String getTopLeveragedMatchGxml(ArrayList p_fuzzyList, Tuv p_srcTuv, Tuv p_trgTuv,
+            int p_subId) throws OfflinePageDataGeneratorException
     {
+        LeverageMatch p_levMatch = null;
         if (p_fuzzyList == null || p_fuzzyList.size() == 0)
         {
             return null;
@@ -1627,7 +1606,22 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         //
         // TODO: need to find top match at least one that is 100%
         // before TM changed, this was guaranteed (by jimH's code)
-        LeverageMatch p_levMatch = (LeverageMatch) p_fuzzyList.get(0);
+        if (p_fuzzyList.size() > 1 && populateFuzzy && !populateMT)
+        {
+            for (int i = 0; i < p_fuzzyList.size(); i++)
+            {
+                LeverageMatch levMatch = (LeverageMatch) p_fuzzyList.get(i);
+                if (levMatch.getOrderNum() == TmCoreManager.LM_ORDER_NUM_START_LOCAL_TM)
+                {
+                    p_levMatch = (LeverageMatch) p_fuzzyList.get(i);
+                }
+            }
+
+        }
+        else
+        {
+            p_levMatch = (LeverageMatch) p_fuzzyList.get(0);
+        }
 
         try
         {
@@ -1648,41 +1642,44 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     private float getTopLeveragedMatchScore(ArrayList p_fuzzyList)
             throws OfflinePageDataGeneratorException
     {
+        LeverageMatch p_levMatch = null;
         if (p_fuzzyList == null || p_fuzzyList.size() == 0)
         {
             return SCORE_UNKNOWN;
         }
 
-        LeverageMatch p_levMatch = (LeverageMatch) p_fuzzyList.get(0);
+        if (p_fuzzyList.size() > 1 && populateFuzzy && !populateMT)
+        {
+            for (int i = 0; i < p_fuzzyList.size(); i++)
+            {
+                LeverageMatch levMatch = (LeverageMatch) p_fuzzyList.get(i);
+                if (levMatch.getOrderNum() == TmCoreManager.LM_ORDER_NUM_START_LOCAL_TM)
+                {
+                    p_levMatch = (LeverageMatch) p_fuzzyList.get(i);
+                }
+            }
+
+        }
+        else
+        {
+            p_levMatch = (LeverageMatch) p_fuzzyList.get(0);
+        }
 
         if (p_levMatch == null)
         {
             return SCORE_UNKNOWN;
         }
 
-        return p_levMatch.getScoreNum();
-    }
-
-    private boolean isTopLeverageMatchFromMT(ArrayList p_fuzzyList)
-    {
-        if (p_fuzzyList == null || p_fuzzyList.size() == 0)
+        // When offline download, MT match applies fixed score "60".
+        if (p_levMatch.getOrderNum() == TmCoreManager.LM_ORDER_NUM_START_MT
+                || p_levMatch.getOrderNum() == TmCoreManager.LM_ORDER_NUM_START_MT + 1)
         {
-            return false;
+            return MT_SCORE_FOR_OFFLINE_KIT;
         }
-
-        LeverageMatch levMatch = (LeverageMatch) p_fuzzyList.get(0);
-        if (levMatch == null)
+        else
         {
-            return false;
+            return p_levMatch.getScoreNum();
         }
-
-        if (levMatch.getCreationUser() != null
-                && levMatch.getCreationUser().toLowerCase().endsWith("_mt"))
-        {
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -1708,17 +1705,15 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         if (!result && p_tuv.getSubflowsAsGxmlElements() != null
                 && p_tuv.getSubflowsAsGxmlElements().size() > 0)
         {
-            Tuv srcTuv = p_tuv.getTu(jobId).getTuv(m_srcPage.getLocaleId(),
+            Tuv srcTuv = p_tuv.getTu(jobId).getTuv(m_srcPage.getLocaleId(), jobId);
+            result = EditorHelper.isRealExactMatchLocalied(srcTuv, p_tuv, m_matchTypeStats, "0",
                     jobId);
-            result = EditorHelper.isRealExactMatchLocalied(srcTuv, p_tuv,
-                    m_matchTypeStats, "0", jobId);
 
             if (result)
             {
                 // do not lock segment if it is MULTIPLE_TRANSLATION
                 Types types = m_matchTypeStats.getTypes(srcTuv.getId(), "0");
-                if (MatchState.MULTIPLE_TRANSLATION.equals(types
-                        .getMatchState()))
+                if (MatchState.MULTIPLE_TRANSLATION.equals(types.getMatchState()))
                 {
                     result = false;
 
@@ -1764,8 +1759,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             Types tps = m_matchTypeStats.getTypes(p_srcTuv.getId(), p_subId);
 
             // do not lock if have multiple translations
-            if (MatchState.MULTIPLE_TRANSLATION.getCompareKey() == tps
-                    .getMatchState().getCompareKey())
+            if (MatchState.MULTIPLE_TRANSLATION.getCompareKey() == tps.getMatchState()
+                    .getCompareKey())
             {
                 return false;
             }
@@ -1790,8 +1785,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     private boolean isExcluded(GxmlElement p_element, String p_itemType)
             throws OfflinePageDataGeneratorException
     {
-        return EditHelper.isTuvExcluded(p_element, p_itemType,
-                m_excludeTypeNames);
+        return EditHelper.isTuvExcluded(p_element, p_itemType, m_excludeTypeNames);
     }
 
     /**
@@ -1806,8 +1800,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      *            the score used for a fuzzy match
      * @return the indicator display string
      */
-    private String getDisplayMatchType(int p_msgId, boolean p_isProtected,
-            String p_score)
+    private String getDisplayMatchType(int p_msgId, boolean p_isProtected, String p_score)
     {
         String msg = "";
         boolean forTrados = false;
@@ -1815,8 +1808,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         switch (p_msgId)
         {
             case INDICATE_MATCH_TYPE_UNKNOWN:
-                msg = m_resources
-                        .getString(DisplayMatchTypeKeys.MSG_MATCHTYPE_UNKNOWN);
+                msg = m_resources.getString(DisplayMatchTypeKeys.MSG_MATCHTYPE_UNKNOWN);
                 break;
             case INDICATE_CURRENT_TARGET:
                 // show nothing for current target
@@ -1837,12 +1829,10 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                  */
                 break;
             case INDICATE_CURRENT_TARGET_EXCLUDED:
-                msg = m_resources
-                        .getString(DisplayMatchTypeKeys.MSG_OL_CUR_TRG_EXCLUDED);
+                msg = m_resources.getString(DisplayMatchTypeKeys.MSG_OL_CUR_TRG_EXCLUDED);
                 break;
             case INDICATE_CURRENT_TARGET_SUB_EXCLUDED:
-                msg = m_resources
-                        .getString(DisplayMatchTypeKeys.MSG_OL_CUR_TRG_SUB_EXCLUDED);
+                msg = m_resources.getString(DisplayMatchTypeKeys.MSG_OL_CUR_TRG_SUB_EXCLUDED);
                 break;
             case INDICATE_EXACT:
                 msg = m_resources
@@ -1878,6 +1868,9 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             case INDICATE_NO_MATCH:
                 msg = m_resources.getString(DisplayMatchTypeKeys.MSG_NOMATCH);
                 break;
+            case INDICATE_MT_MATCH:
+                msg = m_resources.getString(DisplayMatchTypeKeys.MSG_MACHINE_TRANSLATION);
+                break;
             default:
                 break;
         }
@@ -1909,16 +1902,14 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      * 
      * @since GBS-3776
      */
-    private ArrayList getTMDataRefTmsForSegment(SegmentPair p_pair,
-            String p_subId)
+    private ArrayList getTMDataRefTmsForSegment(SegmentPair p_pair, String p_subId)
     {
         if (m_fuzzyMatchRefTmsMap == null)
         {
             return null;
         }
 
-        ArrayList ts = (ArrayList) m_fuzzyMatchRefTmsMap.get(p_pair
-                .getSourceTuv().getIdAsLong());
+        ArrayList ts = (ArrayList) m_fuzzyMatchRefTmsMap.get(p_pair.getSourceTuv().getIdAsLong());
 
         if (ts == null)
         {
@@ -1983,8 +1974,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             return null;
         }
 
-        ArrayList ts = (ArrayList) m_fuzzyMatchMap.get(p_pair.getSourceTuv()
-                .getIdAsLong());
+        ArrayList ts = (ArrayList) m_fuzzyMatchMap.get(p_pair.getSourceTuv().getIdAsLong());
 
         if (ts == null)
         {
@@ -2015,24 +2005,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         if (result != null)
         {
             // make the order according to the score number
-            SortUtil.sort(result, new Comparator<LeverageMatch>()
-            {
-                public int compare(LeverageMatch l1, LeverageMatch l2)
-                {
-                    if (l1 != null && l2 != null)
-                    {
-                        if (l1.getScoreNum() > l2.getScoreNum())
-                        {
-                            return -1;
-                        }
-                        else
-                        {
-                            return 1;
-                        }
-                    }
-                    return 0;
-                }
-            });
+            SortUtil.sort(result, new LeverageMatchComparator());
         }
 
         return result;
@@ -2048,8 +2021,12 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 
         if (m_termResultSet != null)
         {
-            result = m_termResultSet.getLeverageMatches(p_pair.getSourceTuv()
-                    .getId(), 0L /* never subs in 4.2 */);
+            result = m_termResultSet.getLeverageMatches(p_pair.getSourceTuv().getId(), 0L /*
+                                                                                           * never
+                                                                                           * subs
+                                                                                           * in
+                                                                                           * 4.2
+                                                                                           */);
         }
 
         return result;
@@ -2061,8 +2038,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      */
     private HashMap makeSrcSubflowDataMap(SegmentPair p_pair, long jobId)
     {
-        return makeSubflowDataMap(p_pair.getSourceTuv(),
-                p_pair.getMergedTuIds(), jobId);
+        return makeSubflowDataMap(p_pair.getSourceTuv(), p_pair.getMergedTuIds(), jobId);
     }
 
     /**
@@ -2071,8 +2047,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      */
     private HashMap makeTrgSubflowDataMap(SegmentPair p_pair, long p_jobId)
     {
-        return makeSubflowDataMap(p_pair.getTargetTuv(),
-                p_pair.getMergedTuIds(), p_jobId);
+        return makeSubflowDataMap(p_pair.getTargetTuv(), p_pair.getMergedTuIds(), p_jobId);
     }
 
     /**
@@ -2080,8 +2055,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      * the sub data. The map is keyed by the subId. The value is a SubflowData
      * object.
      */
-    private HashMap makeSubflowDataMap(Tuv p_tuv, List p_mergedTuIds,
-            long p_jobId)
+    private HashMap makeSubflowDataMap(Tuv p_tuv, List p_mergedTuIds, long p_jobId)
     {
         HashMap subflowDataMap = new HashMap();
         List parentsOfSubs = p_tuv.getSubflowParentsAsGxmlElements();
@@ -2092,8 +2066,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             // get a single parent-of-subs
             GxmlElement parentOfSubs = (GxmlElement) it1.next();
             // get subs under this parent tag
-            List subs = parentOfSubs
-                    .getDescendantElements(GxmlElement.SUB_TYPE);
+            List subs = parentOfSubs.getDescendantElements(GxmlElement.SUB_TYPE);
             // build map
             ListIterator it2 = subs.listIterator();
 
@@ -2105,17 +2078,15 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 int downloadSubIdAsInt = 0;
 
                 // get ptag reference
-                String parentOfSubTagName = OfflineEditHelper
-                        .getParentOfSubTagName(parentOfSubs,
-                                m_tagDisplayFormatID);
+                String parentOfSubTagName = OfflineEditHelper.getParentOfSubTagName(parentOfSubs,
+                        m_tagDisplayFormatID);
                 GxmlElement sub = (GxmlElement) it2.next();
 
                 // get download Tu and subflow ids
                 // check if merged, if so revert to original ids for download
                 String subId = sub.getAttribute(GxmlNames.SUB_ID);
                 int subIdAsInt = Integer.parseInt(subId);
-                if (m_mergeEnabled
-                        && p_mergedTuIds != null
+                if (m_mergeEnabled && p_mergedTuIds != null
                         && subIdAsInt > AmbassadorDwUpConstants.SPLIT_MERGE_OFFSET_BASE)
                 {
                     // download subid
@@ -2131,13 +2102,12 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 else
                 {
                     downloadSubId = Integer.toString(subIdAsInt);
-                    downloadTuId = p_tuv.getTuId() > 0 ? String.valueOf(p_tuv
-                            .getTuId()) : p_tuv.getTu(p_jobId).getIdAsLong()
-                            .toString();
+                    downloadTuId = p_tuv.getTuId() > 0 ? String.valueOf(p_tuv.getTuId()) : p_tuv
+                            .getTu(p_jobId).getIdAsLong().toString();
                 }
 
-                subflowDataMap.put(subId, new SubflowData(downloadSubId,
-                        downloadTuId, sub, parentOfSubTagName));
+                subflowDataMap.put(subId, new SubflowData(downloadSubId, downloadTuId, sub,
+                        parentOfSubTagName));
             }
         }
 
@@ -2152,7 +2122,51 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     private boolean isPopulateSrcAsTrg(float p_targetScore)
     {
         return (p_targetScore == 100 && !populate100)
-                || (p_targetScore > 0 && p_targetScore != 100 && !populateFuzzy);
+                || (p_targetScore > 0 && p_targetScore != 100 && (!populateFuzzy || !populateMT));
     }
 
+    private boolean isMtTranslated(Tuv tuv)
+    {
+        String modifyUser = tuv.getLastModifiedUser();
+        return (modifyUser != null && modifyUser.toLowerCase().endsWith("_mt"));
+    }
+
+    private class LeverageMatchComparator extends StringComparator
+    {
+        private static final long serialVersionUID = -729929686418029804L;
+
+        public LeverageMatchComparator()
+        {
+            super(Locale.ENGLISH);
+        }
+
+        public int compare(Object p_A, Object p_B)
+        {
+            LeverageMatch a = (LeverageMatch) p_A;
+            LeverageMatch b = (LeverageMatch) p_B;
+
+            int result = 0;
+            // "MACHINE_TRANSLATION" matches have top priority.
+            String mtMatch1 = a.getMatchType();
+            String mtMatch2 = b.getMatchType();
+            if (mtMatch1 == null || !MatchState.MACHINE_TRANSLATION.getName().equals(mtMatch1))
+            {
+                mtMatch1 = "";
+            }
+            if (mtMatch2 == null || !MatchState.MACHINE_TRANSLATION.getName().equals(mtMatch2))
+            {
+                mtMatch2 = "";
+            }
+            result = super.compareStrings(mtMatch1, mtMatch2);
+            if (result != 0)
+            {
+                return -result;
+            }
+
+            // compare score
+            result = (int) (b.getScoreNum() - a.getScoreNum());
+            return result;
+
+        }
+    }
 }

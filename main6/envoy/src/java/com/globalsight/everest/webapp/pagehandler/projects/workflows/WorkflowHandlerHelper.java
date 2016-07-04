@@ -55,7 +55,9 @@ import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.page.PageStateValidator;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportParameters;
+import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.projecthandler.Project;
+import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.qachecks.QAChecker;
 import com.globalsight.everest.qachecks.QACheckerHelper;
 import com.globalsight.everest.request.Request;
@@ -67,11 +69,13 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.workflow.TaskEmailInfo;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.workflow.JbpmVariable;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -87,8 +91,7 @@ import com.globalsight.webservices.client2.WebService2ClientHelper;
  */
 public class WorkflowHandlerHelper
 {
-    private static final Logger logger = Logger
-            .getLogger(WorkflowHandlerHelper.class.getName());
+    private static final Logger logger = Logger.getLogger(WorkflowHandlerHelper.class.getName());
 
     /**
      * Archives the specified job.
@@ -112,8 +115,7 @@ public class WorkflowHandlerHelper
      *            Session Id, Workflow object
      * @throws EnvoyServletException
      */
-    static void archiveWorkflow(Workflow p_workflow)
-            throws EnvoyServletException
+    static void archiveWorkflow(Workflow p_workflow) throws EnvoyServletException
     {
         try
         {
@@ -133,8 +135,7 @@ public class WorkflowHandlerHelper
      * @param p_job
      *            The specified job.
      */
-    static void cancelJob(String p_userId, Job p_job)
-            throws EnvoyServletException
+    static void cancelJob(String p_userId, Job p_job) throws EnvoyServletException
     {
         cancelJob(p_userId, p_job, Job.PENDING);
     }
@@ -173,8 +174,7 @@ public class WorkflowHandlerHelper
      * @param p_job
      *            The specified job.
      */
-    static void cancelImportErrorPages(String p_userId, Job p_job)
-            throws EnvoyServletException
+    static void cancelImportErrorPages(String p_userId, Job p_job) throws EnvoyServletException
     {
         try
         {
@@ -209,10 +209,10 @@ public class WorkflowHandlerHelper
      * 
      * @param Workflow
      *            workflow object
-     * @exception throws EnvoyServletException
+     * @exception throws
+     *                EnvoyServletException
      */
-    static void cancelWF(String p_userId, Workflow p_workflow)
-            throws EnvoyServletException
+    static void cancelWF(String p_userId, Workflow p_workflow) throws EnvoyServletException
     {
         try
         {
@@ -252,13 +252,12 @@ public class WorkflowHandlerHelper
      *            - A collection of pages to be exported.
      */
     public static void exportPage(ExportParameters p_exportParameters, List p_pageIds,
-            boolean p_isTargetPage, long p_exportBatchId)
-            throws EnvoyServletException
+            boolean p_isTargetPage, long p_exportBatchId) throws EnvoyServletException
     {
         try
         {
-            ServerProxy.getPageManager().exportPage(p_exportParameters,
-                    p_pageIds, p_isTargetPage, p_exportBatchId);
+            ServerProxy.getPageManager().exportPage(p_exportParameters, p_pageIds, p_isTargetPage,
+                    p_exportBatchId);
         }
         catch (Exception e)
         {
@@ -278,13 +277,11 @@ public class WorkflowHandlerHelper
      *                - Wraps server side exceptions.
      */
     @Deprecated
-    static Map getActiveTasksForWorkflow(long p_workflowInstanceId)
-            throws EnvoyServletException
+    static Map getActiveTasksForWorkflow(long p_workflowInstanceId) throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getWorkflowServer().getActiveTasksForWorkflow(
-                    p_workflowInstanceId);
+            return ServerProxy.getWorkflowServer().getActiveTasksForWorkflow(p_workflowInstanceId);
         }
         catch (Exception e)
         {
@@ -295,8 +292,7 @@ public class WorkflowHandlerHelper
     /**
      * Gets activities for a workflow history.
      */
-    static Map<TaskInstance, Boolean> getWorkflowHistory(
-            long p_workflowInstanceId)
+    static Map<TaskInstance, Boolean> getWorkflowHistory(long p_workflowInstanceId)
     {
         JbpmContext ctx = WorkflowConfiguration.getInstance().getJbpmContext();
         Map<TaskInstance, Boolean> taskMap = new HashMap<TaskInstance, Boolean>();
@@ -345,8 +341,7 @@ public class WorkflowHandlerHelper
      * @return a Task object
      * @throws EnvoyServletException
      */
-    static Task getTask(String p_userId, long p_taskId)
-            throws EnvoyServletException
+    static Task getTask(String p_userId, long p_taskId) throws EnvoyServletException
     {
         try
         {
@@ -405,15 +400,13 @@ public class WorkflowHandlerHelper
      * @exception EnvoyServletException
      *                Component related exception.
      */
-    static public Collection getJobsByStateList(Vector p_stateList)
-            throws EnvoyServletException
+    static public Collection getJobsByStateList(Vector p_stateList) throws EnvoyServletException
     {
         try
         {
             // get the most recent jobs (within the number of days
             // specified in envoy.properties)
-            return ServerProxy.getJobHandler().getJobsByStateList(p_stateList,
-                    true);
+            return ServerProxy.getJobHandler().getJobsByStateList(p_stateList, true);
         }
         catch (Exception e)
         {
@@ -437,8 +430,7 @@ public class WorkflowHandlerHelper
     {
         try
         {
-            return ServerProxy.getJobHandler().getJobsByManagerIdAndState(
-                    p_userId, p_state);
+            return ServerProxy.getJobHandler().getJobsByManagerIdAndState(p_userId, p_state);
         }
         catch (Exception e)
         {
@@ -457,13 +449,13 @@ public class WorkflowHandlerHelper
      * @exception EnvoyServletException
      *                Component related exception.
      */
-    static public Collection getJobsByManagerIdAndStateList(String p_userId,
-            Vector p_stateList) throws EnvoyServletException
+    static public Collection getJobsByManagerIdAndStateList(String p_userId, Vector p_stateList)
+            throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getJobHandler().getJobsByManagerIdAndStateList(
-                    p_userId, p_stateList);
+            return ServerProxy.getJobHandler().getJobsByManagerIdAndStateList(p_userId,
+                    p_stateList);
         }
         catch (Exception e)
         {
@@ -482,13 +474,13 @@ public class WorkflowHandlerHelper
      * @exception EnvoyServletException
      *                Component related exception.
      */
-    static public Collection getJobsByWfManagerIdAndStateList(String p_userId,
-            Vector p_stateList) throws EnvoyServletException
+    static public Collection getJobsByWfManagerIdAndStateList(String p_userId, Vector p_stateList)
+            throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getJobHandler()
-                    .getJobsByWfManagerIdAndStateList(p_userId, p_stateList);
+            return ServerProxy.getJobHandler().getJobsByWfManagerIdAndStateList(p_userId,
+                    p_stateList);
         }
         catch (Exception e)
         {
@@ -505,8 +497,7 @@ public class WorkflowHandlerHelper
      * @exception EnvoyServletException
      *                Component related exception.
      */
-    static public Collection getJobsByRate(String p_rateId)
-            throws EnvoyServletException
+    static public Collection getJobsByRate(String p_rateId) throws EnvoyServletException
     {
         try
         {
@@ -527,8 +518,7 @@ public class WorkflowHandlerHelper
      * @exception EnvoyServletException
      *                Component related exception.
      */
-    public static Project getProjectById(long p_id)
-            throws EnvoyServletException
+    public static Project getProjectById(long p_id) throws EnvoyServletException
     {
         try
         {
@@ -546,8 +536,7 @@ public class WorkflowHandlerHelper
      * @param p_job
      *            the job of the job that is having workflows added to
      */
-    public static Collection getWorkflowTemplateInfos(Job p_job)
-            throws EnvoyServletException
+    public static Collection getWorkflowTemplateInfos(Job p_job) throws EnvoyServletException
     {
         try
         {
@@ -567,8 +556,7 @@ public class WorkflowHandlerHelper
      * @param p_targetPageId
      *            target page identifier
      */
-    static TargetPage getTargetPage(long p_targetPageId)
-            throws EnvoyServletException
+    static TargetPage getTargetPage(long p_targetPageId) throws EnvoyServletException
     {
         try
         {
@@ -590,13 +578,11 @@ public class WorkflowHandlerHelper
      * @exception EnvoyServletException
      *                Component related exception.
      */
-    public static Workflow getWorkflowById(long p_workflowId)
-            throws EnvoyServletException
+    public static Workflow getWorkflowById(long p_workflowId) throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getWorkflowManager().getWorkflowByIdRefresh(
-                    p_workflowId);
+            return ServerProxy.getWorkflowManager().getWorkflowByIdRefresh(p_workflowId);
         }
         catch (Exception e)
         {
@@ -617,8 +603,7 @@ public class WorkflowHandlerHelper
         {
             String wfid = stok.nextToken();
             String year = (String) p_request.getParameter("yearField_" + wfid);
-            String month = (String) p_request
-                    .getParameter("monthField_" + wfid);
+            String month = (String) p_request.getParameter("monthField_" + wfid);
             String day = (String) p_request.getParameter("dayField_" + wfid);
             updatePlannedCompletionDate(Long.parseLong(wfid), year, month, day);
         }
@@ -627,9 +612,8 @@ public class WorkflowHandlerHelper
     /**
      * Updates the estimated completion dates for the workflows in a job.
      */
-    public static void updateEstimatedCompletionDates(
-            HttpServletRequest p_request, TimeZone timezone)
-            throws EnvoyServletException
+    public static void updateEstimatedCompletionDates(HttpServletRequest p_request,
+            TimeZone timezone) throws EnvoyServletException
     {
         String wfIds = (String) p_request.getParameter("editableWFS");
 
@@ -641,18 +625,13 @@ public class WorkflowHandlerHelper
             // Update the date only when checkbox is checked.
             if (p_request.getParameter("checkField_" + wfid) != null)
             {
-                String year = (String) p_request.getParameter("yearField_"
-                        + wfid);
-                String month = (String) p_request.getParameter("monthField_"
-                        + wfid);
-                String day = (String) p_request
-                        .getParameter("dayField_" + wfid);
-                String hour = (String) p_request.getParameter("hourField_"
-                        + wfid);
-                String minute = (String) p_request.getParameter("minuteField_"
-                        + wfid);
-                updateEstimatedCompletionDate(Long.parseLong(wfid), year,
-                        month, day, hour, minute, timezone);
+                String year = (String) p_request.getParameter("yearField_" + wfid);
+                String month = (String) p_request.getParameter("monthField_" + wfid);
+                String day = (String) p_request.getParameter("dayField_" + wfid);
+                String hour = (String) p_request.getParameter("hourField_" + wfid);
+                String minute = (String) p_request.getParameter("minuteField_" + wfid);
+                updateEstimatedCompletionDate(Long.parseLong(wfid), year, month, day, hour, minute,
+                        timezone);
             }
         }
     }
@@ -661,9 +640,8 @@ public class WorkflowHandlerHelper
      * Updates the estimated translate completion dates for the workflows in a
      * job.
      */
-    public static void updateEstimatedTranslateCompletionDates(
-            HttpServletRequest p_request, TimeZone timezone)
-            throws EnvoyServletException
+    public static void updateEstimatedTranslateCompletionDates(HttpServletRequest p_request,
+            TimeZone timezone) throws EnvoyServletException
     {
         String wfIds = (String) p_request.getParameter("editableWFS");
 
@@ -675,18 +653,13 @@ public class WorkflowHandlerHelper
             // Update the date only when checkbox is checked.
             if (p_request.getParameter("checkField_" + wfid) != null)
             {
-                String year = (String) p_request.getParameter("yearField_"
-                        + wfid);
-                String month = (String) p_request.getParameter("monthField_"
-                        + wfid);
-                String day = (String) p_request
-                        .getParameter("dayField_" + wfid);
-                String hour = (String) p_request.getParameter("hourField_"
-                        + wfid);
-                String minute = (String) p_request.getParameter("minuteField_"
-                        + wfid);
-                updateEstimatedTranslateCompletionDate(Long.parseLong(wfid),
-                        year, month, day, hour, minute, timezone);
+                String year = (String) p_request.getParameter("yearField_" + wfid);
+                String month = (String) p_request.getParameter("monthField_" + wfid);
+                String day = (String) p_request.getParameter("dayField_" + wfid);
+                String hour = (String) p_request.getParameter("hourField_" + wfid);
+                String minute = (String) p_request.getParameter("minuteField_" + wfid);
+                updateEstimatedTranslateCompletionDate(Long.parseLong(wfid), year, month, day, hour,
+                        minute, timezone);
             }
         }
     }
@@ -701,13 +674,11 @@ public class WorkflowHandlerHelper
      * @exception EnvoyServletException
      *                - Component related exception.
      */
-    static Collection getWorkflowsByJobId(long p_jobId)
-            throws EnvoyServletException
+    static Collection getWorkflowsByJobId(long p_jobId) throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getJobReportingManager().getWorkflowsByJobId(
-                    p_jobId);
+            return ServerProxy.getJobReportingManager().getWorkflowsByJobId(p_jobId);
         }
         catch (Exception e)
         {
@@ -729,8 +700,7 @@ public class WorkflowHandlerHelper
     {
         try
         {
-            return ServerProxy.getWorkflowServer().getWorkflowInstanceById(
-                    p_workflowInstanceId);
+            return ServerProxy.getWorkflowServer().getWorkflowInstanceById(p_workflowInstanceId);
         }
         catch (Exception e)
         {
@@ -745,8 +715,7 @@ public class WorkflowHandlerHelper
     {
         try
         {
-            return ServerProxy.getWorkflowManager().getTaskInfosInDefaultPath(
-                    wf);
+            return ServerProxy.getWorkflowManager().getTaskInfosInDefaultPath(wf);
         }
         catch (Exception e)
         {
@@ -781,14 +750,13 @@ public class WorkflowHandlerHelper
      *            Session Id, WorkflowInstance iFlow instance
      * @throws EnvoyServletException
      */
-    static void modifyWorkflow(String p_sessionId,
-            WorkflowInstance p_wfInstance, String p_projectManagerID,
-            Hashtable p_modifiedTasks) throws EnvoyServletException
+    static void modifyWorkflow(String p_sessionId, WorkflowInstance p_wfInstance,
+            String p_projectManagerID, Hashtable p_modifiedTasks) throws EnvoyServletException
     {
         try
         {
-            ServerProxy.getWorkflowManager().modifyWorkflow(p_sessionId,
-                    p_wfInstance, p_projectManagerID, p_modifiedTasks);
+            ServerProxy.getWorkflowManager().modifyWorkflow(p_sessionId, p_wfInstance,
+                    p_projectManagerID, p_modifiedTasks);
         }
         catch (Exception e)
         {
@@ -803,8 +771,8 @@ public class WorkflowHandlerHelper
     static boolean isWorkflowModifiable(String p_workflowState)
     {
         return (p_workflowState.equals(Workflow.DISPATCHED)
-                || p_workflowState.equals(Workflow.READY_TO_BE_DISPATCHED) || p_workflowState
-                    .equals(Workflow.EXPORT_FAILED));
+                || p_workflowState.equals(Workflow.READY_TO_BE_DISPATCHED)
+                || p_workflowState.equals(Workflow.EXPORT_FAILED));
     }
 
     static long getDueDateInDays(WorkflowTaskInstance p_wfTask)
@@ -815,19 +783,18 @@ public class WorkflowHandlerHelper
     /**
      * @see WorkflowManager.updatePlannedCompletionDate(long, Date)
      */
-    static void updatePlannedCompletionDate(long p_workflowId, String p_year,
-            String p_month, String p_day) throws EnvoyServletException
+    static void updatePlannedCompletionDate(long p_workflowId, String p_year, String p_month,
+            String p_day) throws EnvoyServletException
     {
         try
         {
             // Note that the Calendar object wrapped in Timestamp uses
             // a "zero-based" month numbering system (so August is month
             // 7 and NOT month 8).
-            Timestamp ts = new Timestamp(Integer.parseInt(p_year),
-                    Integer.parseInt(p_month) - 1, Integer.parseInt(p_day),
-                    Timestamp.DATE);
-            ServerProxy.getWorkflowManager().updatePlannedCompletionDate(
-                    p_workflowId, ts.getDate());
+            Timestamp ts = new Timestamp(Integer.parseInt(p_year), Integer.parseInt(p_month) - 1,
+                    Integer.parseInt(p_day), Timestamp.DATE);
+            ServerProxy.getWorkflowManager().updatePlannedCompletionDate(p_workflowId,
+                    ts.getDate());
         }
         catch (Exception e)
         {
@@ -838,22 +805,21 @@ public class WorkflowHandlerHelper
     /**
      * @see WorkflowManager.updateEstimatedCompletionDate(long, Date)
      */
-    static void updateEstimatedCompletionDate(long p_workflowId, String p_year,
-            String p_month, String p_day, String p_hour, String p_minute,
-            TimeZone timezone) throws EnvoyServletException
+    static void updateEstimatedCompletionDate(long p_workflowId, String p_year, String p_month,
+            String p_day, String p_hour, String p_minute, TimeZone timezone)
+            throws EnvoyServletException
     {
         try
         {
             // Note that the Calendar object wrapped in Timestamp uses
             // a "zero-based" month numbering system (so August is month
             // 7 and NOT month 8).
-            Timestamp ts = new Timestamp(Integer.parseInt(p_year),
-                    Integer.parseInt(p_month) - 1, Integer.parseInt(p_day),
-                    Timestamp.DATE, timezone);
+            Timestamp ts = new Timestamp(Integer.parseInt(p_year), Integer.parseInt(p_month) - 1,
+                    Integer.parseInt(p_day), Timestamp.DATE, timezone);
             ts.setHour(Integer.parseInt(p_hour));
             ts.setMinute(Integer.parseInt(p_minute));
-            ServerProxy.getWorkflowManager().updateEstimatedCompletionDate(
-                    p_workflowId, ts.getDate());
+            ServerProxy.getWorkflowManager().updateEstimatedCompletionDate(p_workflowId,
+                    ts.getDate());
 
         }
         catch (Exception e)
@@ -865,23 +831,21 @@ public class WorkflowHandlerHelper
     /**
      * @see WorkflowManager.updateEstimatedTranslateCompletionDate(long, Date)
      */
-    static void updateEstimatedTranslateCompletionDate(long p_workflowId,
-            String p_year, String p_month, String p_day, String p_hour,
-            String p_minute, TimeZone timezone) throws EnvoyServletException
+    static void updateEstimatedTranslateCompletionDate(long p_workflowId, String p_year,
+            String p_month, String p_day, String p_hour, String p_minute, TimeZone timezone)
+            throws EnvoyServletException
     {
         try
         {
             // Note that the Calendar object wrapped in Timestamp uses
             // a "zero-based" month numbering system (so August is month
             // 7 and NOT month 8).
-            Timestamp ts = new Timestamp(Integer.parseInt(p_year),
-                    Integer.parseInt(p_month) - 1, Integer.parseInt(p_day),
-                    Timestamp.DATE, timezone);
+            Timestamp ts = new Timestamp(Integer.parseInt(p_year), Integer.parseInt(p_month) - 1,
+                    Integer.parseInt(p_day), Timestamp.DATE, timezone);
             ts.setHour(Integer.parseInt(p_hour));
             ts.setMinute(Integer.parseInt(p_minute));
-            ServerProxy.getWorkflowManager()
-                    .updateEstimatedTranslateCompletionDate(p_workflowId,
-                            ts.getDate());
+            ServerProxy.getWorkflowManager().updateEstimatedTranslateCompletionDate(p_workflowId,
+                    ts.getDate());
         }
         catch (Exception e)
         {
@@ -892,8 +856,7 @@ public class WorkflowHandlerHelper
     /**
      * Make sure no page is in UPDATING state for the given job.
      */
-    public static void validateStateOfPagesByJobId(long p_jobId)
-            throws EnvoyServletException
+    public static void validateStateOfPagesByJobId(long p_jobId) throws EnvoyServletException
     {
         Job job = getJobById(p_jobId);
         validateStateOfPagesInJob(job);
@@ -902,8 +865,7 @@ public class WorkflowHandlerHelper
     /**
      * Make sure no page is in UPDATING state for the given job.
      */
-    public static void validateStateOfPagesInJob(Job p_job)
-            throws EnvoyServletException
+    public static void validateStateOfPagesInJob(Job p_job) throws EnvoyServletException
     {
         try
         {
@@ -930,8 +892,7 @@ public class WorkflowHandlerHelper
      */
     public static WorkflowTaskInstance[] convertToArray(Vector p_wfInstanceTasks)
     {
-        WorkflowTaskInstance[] taskInstances = new WorkflowTaskInstance[p_wfInstanceTasks
-                .size()];
+        WorkflowTaskInstance[] taskInstances = new WorkflowTaskInstance[p_wfInstanceTasks.size()];
 
         Enumeration e = p_wfInstanceTasks.elements();
         int i = 0;
@@ -997,7 +958,7 @@ public class WorkflowHandlerHelper
                     trgLocales = parser.getTargetLocale();
                 }
                 String srcFilePathName = parser.getDataValue("source", "Filename");
-                
+
                 File srcFile = new File(docDir, srcFilePathName);
                 if (XliffFileUtil.isXliffFile(srcFile.getName()))
                 {
@@ -1011,28 +972,28 @@ public class WorkflowHandlerHelper
                 }
 
                 // Get the real source file if it has script on import.
-				FileProfile fp = fpManager.getFileProfileById(fpId, true);
-				if (StringUtils.isNotEmpty(fp.getScriptOnImport()))
-				{
+                FileProfile fp = fpManager.getFileProfileById(fpId, true);
+                if (StringUtils.isNotEmpty(fp.getScriptOnImport()))
+                {
                     String scriptedFolderNamePrefix = FileSystemUtil
                             .getScriptedFolderNamePrefixByJob(jobId);
-					String srcFileName = srcFile.getName();
-					int index = srcFileName.lastIndexOf(".");
-					String name = srcFileName.substring(0, index);
-					String extension = srcFileName.substring(index + 1);
+                    String srcFileName = srcFile.getName();
+                    int index = srcFileName.lastIndexOf(".");
+                    String name = srcFileName.substring(0, index);
+                    String extension = srcFileName.substring(index + 1);
                     String folderName = scriptedFolderNamePrefix + "_" + name + "_" + extension;
                     if (srcFile.getParentFile().getName().equalsIgnoreCase(folderName))
-					{
+                    {
                         File parentFile = srcFile.getParentFile().getParentFile();
                         String path = parentFile.getAbsolutePath() + File.separator + srcFileName;
-						File file = new File(path);
-						if (file.exists())
-						{
+                        File file = new File(path);
+                        if (file.exists())
+                        {
                             srcFilePathName = file.getAbsolutePath().substring(docDir.length() + 1);
-						}
-						srcFile = new File(docDir, srcFilePathName);
-					}
-				}
+                        }
+                        srcFile = new File(docDir, srcFilePathName);
+                    }
+                }
 
                 // For office 2010 formats, multiple requests may be from the
                 // same real file
@@ -1058,16 +1019,16 @@ public class WorkflowHandlerHelper
                             + srcFile.getAbsolutePath());
                     continue;
                 }
-                
+
                 // For eloqua file
                 if (srcFilePathName.toLowerCase().endsWith(".email.html")
                         || srcFilePathName.toLowerCase().endsWith(".landingpage.html"))
                 {
                     String name = srcFilePathName.substring(0, srcFilePathName.lastIndexOf("."));
-                    name = name.substring(0, name.lastIndexOf("."))+".obj";
+                    name = name.substring(0, name.lastIndexOf(".")) + ".obj";
                     File objSrcFile = new File(docDir, name);
-                    File objBackupFile = new File(docDir + File.separator + "recreateJob_tmp"
-                            + File.separator + name);
+                    File objBackupFile = new File(
+                            docDir + File.separator + "recreateJob_tmp" + File.separator + name);
                     if (objSrcFile.exists() && objSrcFile.isFile())
                     {
                         FileUtil.copyFile(objSrcFile, objBackupFile);
@@ -1096,7 +1057,8 @@ public class WorkflowHandlerHelper
                 targetLocales.add(trgLocales);
             }
 
-            // try to re-create job only when it has at least one valid source file.
+            // try to re-create job only when it has at least one valid source
+            // file.
             if (sourceFiles.size() > 0)
             {
                 // Remove job, but do not remove data in "job" table.
@@ -1128,7 +1090,7 @@ public class WorkflowHandlerHelper
                 args.put("targetLocales", targetLocales);
                 // args.put("attributes", attributeXml);
 
-                //   use job's original creator
+                // use job's original creator
                 User user = UserUtil.getUserById(createUserId);
                 SystemConfiguration config = SystemConfiguration.getInstance();
                 String hostName = config.getStringParameter("server.host");
@@ -1139,19 +1101,20 @@ public class WorkflowHandlerHelper
                 String userName = user.getUserName();
                 String password = user.getPassword();
                 Ambassador2 amb2 = WebService2ClientHelper.getClientAmbassador2(hostName,
-                        (httsEnabled ? sslPort : port), userName, password, (httsEnabled ? true
-                                : false));
+                        (httsEnabled ? sslPort : port), userName, password,
+                        (httsEnabled ? true : false));
                 String accessToken = amb2.dummyLogin(userName, password);
                 args.put("accessToken", accessToken);
                 args.put("recreate", "true");
                 boolean isViaWS = isJobCreatedOriginallyViaWS(realFiles.iterator().next(),
-                        job.getId()); 
+                        job.getId());
                 args.put("isJobCreatedOriginallyViaWS", isViaWS ? "true" : "false");
                 amb2.createJobOnInitial(args);
             }
             else
             {
-                logger.warn("Do not find any source files on hard disk, so can not re-create this job");
+                logger.warn(
+                        "Do not find any source files on hard disk, so can not re-create this job");
             }
         }
         catch (Exception e)
@@ -1171,229 +1134,219 @@ public class WorkflowHandlerHelper
         }
     }
 
-	public static String getExportFilePath(Workflow workflow)
-	{
-		String filePath = null;
-		try
-		{
-			Map activeTasks = ServerProxy.getWorkflowServer()
-					.getActiveTasksForWorkflow(workflow.getId());
+    public static String getExportFilePath(Workflow workflow)
+    {
+        String filePath = null;
+        try
+        {
+            Map activeTasks = ServerProxy.getWorkflowServer()
+                    .getActiveTasksForWorkflow(workflow.getId());
 
-			WorkflowTaskInstance activeTask = null;
-			Object[] tasks = (activeTasks == null) ? null : activeTasks
-					.values().toArray();
-			if (tasks != null && tasks.length > 0)
-			{
-				activeTask = (WorkflowTaskInstance) tasks[0];
-			}
+            WorkflowTaskInstance activeTask = null;
+            Object[] tasks = (activeTasks == null) ? null : activeTasks.values().toArray();
+            if (tasks != null && tasks.length > 0)
+            {
+                activeTask = (WorkflowTaskInstance) tasks[0];
+            }
 
-			if (activeTask != null)
-			{
-				Task task = ServerProxy.getTaskManager().getTask(
-						activeTask.getTaskId());
-				if (QACheckerHelper.isShowQAChecksTab(task))
-				{
-					if (QACheckerHelper.isQAActivity(task))
-					{
-						QAChecker qaChecker = new QAChecker();
-						filePath = qaChecker.runQAChecksAndGenerateReport(task
-								.getId());
-					}
-					else
-					{
-						filePath = getPreviousQAReportFilePath(workflow);
-					}
-				}
-			}
-			else
-			{
-				if (workflow.getJob().getProject().getAllowManualQAChecks())
-				{
-					if (workflow.getState().equalsIgnoreCase("EXPORTED")
-							|| workflow.getState()
-									.equalsIgnoreCase("LOCALIZED"))
-					{
-						filePath = getPreviousQAReportFilePath(workflow);
-					}
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			logger.error(e);
-		}
-		return filePath;
-	}
-    
-	private static String getPreviousQAReportFilePath(Workflow workflow)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(AmbFileStoragePathUtils.getReportsDir(workflow.getCompanyId()));
-		sb.append(File.separator);
-		sb.append(ReportConstants.REPORT_QA_CHECKS_REPORT);
-		sb.append(File.separator);
-		sb.append(workflow.getJob().getId());
-		sb.append(File.separator);
-		sb.append(workflow.getTargetLocale().toString());
-		File file = new File(sb.toString());
-		long maxTime = 0;
-		File emptyFile = null;
-		String filePath = null;
-		if (file.exists())
-		{
-			File[] files = file.listFiles();
-			for (File fe : files)
-			{
-				long time = fe.lastModified();
-				if (time > maxTime)
-				{
-					maxTime = time;
-					emptyFile = fe;
-				}
-			}
+            if (activeTask != null)
+            {
+                Task task = ServerProxy.getTaskManager().getTask(activeTask.getTaskId());
+                if (QACheckerHelper.isShowQAChecksTab(task))
+                {
+                    if (QACheckerHelper.isQAActivity(task))
+                    {
+                        QAChecker qaChecker = new QAChecker();
+                        filePath = qaChecker.runQAChecksAndGenerateReport(task.getId());
+                    }
+                    else
+                    {
+                        filePath = getPreviousQAReportFilePath(workflow);
+                    }
+                }
+            }
+            else
+            {
+                if (workflow.getJob().getProject().getAllowManualQAChecks())
+                {
+                    if (workflow.getState().equalsIgnoreCase("EXPORTED")
+                            || workflow.getState().equalsIgnoreCase("LOCALIZED"))
+                    {
+                        filePath = getPreviousQAReportFilePath(workflow);
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+        }
+        return filePath;
+    }
 
-			long maxDate = 0;
-			File emptyDownFile = null;
-			if (emptyFile != null)
-			{
-				File[] downFiles = emptyFile.listFiles();
-				for (File f : downFiles)
-				{
-					long time = f.lastModified();
-					if (time > maxDate)
-					{
-						maxDate = time;
-						emptyDownFile = f;
-					}
-				}
-				if (emptyDownFile != null)
-				{
-					filePath = emptyDownFile.getPath();
-				}
-			}
-		}
-		return filePath;
-	}
-	
-	public static void zippedFolder(HttpServletRequest p_request,
-			HttpServletResponse p_response, long companyId, Set<Long> jobIdSet,
-			Set<File> exportListFiles, Set<String> locales)
-	{
-		String zipFileName = AmbFileStoragePathUtils.getReportsDir(companyId)
-				+ File.separator + ReportConstants.REPORT_QA_CHECKS_REPORT
-				+ ".zip";
-		File zipFile = new File(zipFileName);
-		Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(
-				exportListFiles, jobIdSet, locales, AmbFileStoragePathUtils
-						.getReportsDir(companyId).getPath()
-						+ File.separator
-						+ ReportConstants.REPORT_QA_CHECKS_REPORT);
-		try
-		{
-			ZipIt.addEntriesToZipFile(zipFile, entryFileToFileNameMap, "");
-			String downloadFileName = zipFile.getName();
-			if (entryFileToFileNameMap.entrySet().size() > 0)
-			{
-				if (jobIdSet != null && jobIdSet.size() == 1)
-				{
-					Long jobId = jobIdSet.iterator().next();
-					downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT
-							+ "_(" + jobId + ").zip";
-				}
-				else if (jobIdSet != null && jobIdSet.size() > 1)
-				{
-					String tempS = jobIdSet.toString();
-					String jobNamesstr = tempS.substring(1, tempS.length() - 1);
-					downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT
-							+ "_(" + jobNamesstr + ").zip";
-				}
-			}
-			else
-			{
-				downloadFileName = "No Report Download.zip";
-			}
+    private static String getPreviousQAReportFilePath(Workflow workflow)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append(AmbFileStoragePathUtils.getReportsDir(workflow.getCompanyId()));
+        sb.append(File.separator);
+        sb.append(ReportConstants.REPORT_QA_CHECKS_REPORT);
+        sb.append(File.separator);
+        sb.append(workflow.getJob().getId());
+        sb.append(File.separator);
+        sb.append(workflow.getTargetLocale().toString());
+        File file = new File(sb.toString());
+        long maxTime = 0;
+        File emptyFile = null;
+        String filePath = null;
+        if (file.exists())
+        {
+            File[] files = file.listFiles();
+            for (File fe : files)
+            {
+                long time = fe.lastModified();
+                if (time > maxTime)
+                {
+                    maxTime = time;
+                    emptyFile = fe;
+                }
+            }
 
-			// write zip file to client
-			p_response.setContentType("application/zip");
-			p_response.setHeader("Content-Disposition",
-					"attachment; filename=\"" + downloadFileName + "\";");
-			if (p_request.isSecure())
-			{
-				PageHandler.setHeaderForHTTPSDownload(p_response);
-			}
-			p_response.setContentLength((int) zipFile.length());
+            long maxDate = 0;
+            File emptyDownFile = null;
+            if (emptyFile != null)
+            {
+                File[] downFiles = emptyFile.listFiles();
+                for (File f : downFiles)
+                {
+                    long time = f.lastModified();
+                    if (time > maxDate)
+                    {
+                        maxDate = time;
+                        emptyDownFile = f;
+                    }
+                }
+                if (emptyDownFile != null)
+                {
+                    filePath = emptyDownFile.getPath();
+                }
+            }
+        }
+        return filePath;
+    }
 
-			// Send the data to the client
-			byte[] inBuff = new byte[4096];
-			FileInputStream fis = new FileInputStream(zipFile);
-			int bytesRead = 0;
-			while ((bytesRead = fis.read(inBuff)) != -1)
-			{
-				p_response.getOutputStream().write(inBuff, 0, bytesRead);
-			}
+    public static void zippedFolder(HttpServletRequest p_request, HttpServletResponse p_response,
+            long companyId, Set<Long> jobIdSet, Set<File> exportListFiles, Set<String> locales)
+    {
+        String zipFileName = AmbFileStoragePathUtils.getReportsDir(companyId) + File.separator
+                + ReportConstants.REPORT_QA_CHECKS_REPORT + ".zip";
+        File zipFile = new File(zipFileName);
+        Map<File, String> entryFileToFileNameMap = getEntryFileToFileNameMap(exportListFiles,
+                jobIdSet, locales, AmbFileStoragePathUtils.getReportsDir(companyId).getPath()
+                        + File.separator + ReportConstants.REPORT_QA_CHECKS_REPORT);
+        try
+        {
+            ZipIt.addEntriesToZipFile(zipFile, entryFileToFileNameMap, "");
+            String downloadFileName = zipFile.getName();
+            if (entryFileToFileNameMap.entrySet().size() > 0)
+            {
+                if (jobIdSet != null && jobIdSet.size() == 1)
+                {
+                    Long jobId = jobIdSet.iterator().next();
+                    downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT + "_(" + jobId
+                            + ").zip";
+                }
+                else if (jobIdSet != null && jobIdSet.size() > 1)
+                {
+                    String tempS = jobIdSet.toString();
+                    String jobNamesstr = tempS.substring(1, tempS.length() - 1);
+                    downloadFileName = ReportConstants.REPORT_QA_CHECKS_REPORT + "_(" + jobNamesstr
+                            + ").zip";
+                }
+            }
+            else
+            {
+                downloadFileName = "No Report Download.zip";
+            }
 
-			if (bytesRead > 0)
-			{
-				p_response.getOutputStream().write(inBuff, 0, bytesRead);
-			}
+            // write zip file to client
+            p_response.setContentType("application/zip");
+            p_response.setHeader("Content-Disposition",
+                    "attachment; filename=\"" + downloadFileName + "\";");
+            if (p_request.isSecure())
+            {
+                PageHandler.setHeaderForHTTPSDownload(p_response);
+            }
+            p_response.setContentLength((int) zipFile.length());
 
-			fis.close();
-			FileUtil.deleteFile(zipFile);
-		}
-		catch (Exception e)
-		{
-			logger.error(e);
-		}
-		finally
-		{
-			if (zipFile.exists())
-				zipFile.deleteOnExit();
-		}
-	}
-    
-	public static Map<File, String> getEntryFileToFileNameMap(Set<File> entryFiles,
-			Set<Long> jobIdSet, Set<String> locales, String cxeDocsDirPath)
-	{
-		Map<File, String> entryFileToFileNameMap = new HashMap<File, String>();
-		File tempFile;
+            // Send the data to the client
+            byte[] inBuff = new byte[4096];
+            FileInputStream fis = new FileInputStream(zipFile);
+            int bytesRead = 0;
+            while ((bytesRead = fis.read(inBuff)) != -1)
+            {
+                p_response.getOutputStream().write(inBuff, 0, bytesRead);
+            }
 
-		for (Long jobId : jobIdSet)
-		{
-			ArrayList<String> entryNames = new ArrayList<String>();
+            if (bytesRead > 0)
+            {
+                p_response.getOutputStream().write(inBuff, 0, bytesRead);
+            }
 
-			for (String locale : locales)
-			{
-				entryNames.clear();
-				String prefixStr1 = cxeDocsDirPath + File.separator + jobId
-						+ File.separator + locale;
-				for (File entryFile : entryFiles)
-				{
-					String entryFilePath = entryFile.getPath();
-					if (entryFilePath.startsWith(prefixStr1))
-					{
-						entryNames.add(entryFilePath.replaceAll("\\\\", "/"));
-					}
-				}
-				if (entryNames.size() > 0)
-				{
-					Map<String, String> tempMap = ZipIt
-							.getEntryNamesMap(entryNames);
-					for (String key : tempMap.keySet())
-					{
-						tempFile = new File(key);
-						entryFileToFileNameMap.put(tempFile, locale
-								+ File.separator + jobId + File.separator
-								+ tempMap.get(key));
-					}
-				}
-			}
-		}
-		return entryFileToFileNameMap;
-	}
-    
-    
+            fis.close();
+            FileUtil.deleteFile(zipFile);
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+        }
+        finally
+        {
+            if (zipFile.exists())
+                zipFile.deleteOnExit();
+        }
+    }
+
+    public static Map<File, String> getEntryFileToFileNameMap(Set<File> entryFiles,
+            Set<Long> jobIdSet, Set<String> locales, String cxeDocsDirPath)
+    {
+        Map<File, String> entryFileToFileNameMap = new HashMap<File, String>();
+        File tempFile;
+
+        for (Long jobId : jobIdSet)
+        {
+            ArrayList<String> entryNames = new ArrayList<String>();
+
+            for (String locale : locales)
+            {
+                entryNames.clear();
+                String prefixStr1 = cxeDocsDirPath + File.separator + jobId + File.separator
+                        + locale;
+                for (File entryFile : entryFiles)
+                {
+                    String entryFilePath = entryFile.getPath();
+                    if (entryFilePath.startsWith(prefixStr1))
+                    {
+                        entryNames.add(entryFilePath.replaceAll("\\\\", "/"));
+                    }
+                }
+                if (entryNames.size() > 0)
+                {
+                    Map<String, String> tempMap = ZipIt.getEntryNamesMap(entryNames);
+                    for (String key : tempMap.keySet())
+                    {
+                        tempFile = new File(key);
+                        entryFileToFileNameMap.put(tempFile, locale + File.separator + jobId
+                                + File.separator + tempMap.get(key));
+                    }
+                }
+            }
+        }
+        return entryFileToFileNameMap;
+    }
+
     /**
      * Get the local file pathname of source file.
+     * 
      * @param displayName
      * @return
      */
@@ -1453,27 +1406,25 @@ public class WorkflowHandlerHelper
      * characters like "footer1", "header1", "diagram data1", "comments" etc.
      * Display name in DB:
      * "(Hyperlinks) en_US\4\GS\test\Files\testfile\FromBugs\Docx\test3_1415.docx"
-     * Expected: 
-     * "en_US\4\GS\test\Files\testfile\FromBugs\Docx\test3_1415.docx"
+     * Expected: "en_US\4\GS\test\Files\testfile\FromBugs\Docx\test3_1415.docx"
      */
-//    private static String fixDisplayNameForOffice(String displayName,
-//            GlobalSightLocale sourceLocale)
-//    {
-//        String fixedDisplayName = displayName.replace("\\", "/");
-//        int index = fixedDisplayName.indexOf("/");
-//        fixedDisplayName = fixedDisplayName.substring(index + 1);
-//        fixedDisplayName = sourceLocale.toString() + "/" + fixedDisplayName;
-//        fixedDisplayName = fixedDisplayName.replace("/", File.separator);
-//        return fixedDisplayName;
-//    }
+    // private static String fixDisplayNameForOffice(String displayName,
+    // GlobalSightLocale sourceLocale)
+    // {
+    // String fixedDisplayName = displayName.replace("\\", "/");
+    // int index = fixedDisplayName.indexOf("/");
+    // fixedDisplayName = fixedDisplayName.substring(index + 1);
+    // fixedDisplayName = sourceLocale.toString() + "/" + fixedDisplayName;
+    // fixedDisplayName = fixedDisplayName.replace("/", File.separator);
+    // return fixedDisplayName;
+    // }
 
-    private static long fixFileProfileId(long fpId) throws GeneralException,
-            RemoteException, NamingException
+    private static long fixFileProfileId(long fpId)
+            throws GeneralException, RemoteException, NamingException
     {
         long result = fpId;
 
-        FileProfilePersistenceManager fpManager = ServerProxy
-                .getFileProfilePersistenceManager();
+        FileProfilePersistenceManager fpManager = ServerProxy.getFileProfilePersistenceManager();
         FileProfile fp = fpManager.getFileProfileById(fpId, false);
         String fpName = fp.getName();
         boolean isXlzRef = fpManager.isXlzReferenceXlfFileProfile(fpName);
@@ -1487,8 +1438,7 @@ public class WorkflowHandlerHelper
         return result;
     }
 
-    private static boolean isJobCreatedOriginallyViaWS(
-            String modifiedDisplayName, long jobId)
+    private static boolean isJobCreatedOriginallyViaWS(String modifiedDisplayName, long jobId)
     {
         String fakeDisplayName = modifiedDisplayName.replace("\\", "/");
         if (fakeDisplayName.indexOf("/webservice/") > -1)
@@ -1501,5 +1451,153 @@ public class WorkflowHandlerHelper
             }
         }
         return false;
+    }
+
+    public static TaskEmailInfo getTaskEmailInfo(Workflow wf)
+    {
+        WorkflowTemplateInfo wfti = wf.getJob().getL10nProfile()
+                .getWorkflowTemplateInfo(wf.getTargetLocale());
+
+        TaskEmailInfo emailInfo = new TaskEmailInfo(
+                wf.getJob().getL10nProfile().getProject().getProjectManagerId(),
+                wf.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
+                wfti.notifyProjectManager(), wf.getJob().getPriority());
+        emailInfo.setJobName(wf.getJob().getJobName());
+        emailInfo.setProjectIdAsLong(new Long(wf.getJob().getL10nProfile().getProjectId()));
+        emailInfo.setSourceLocale(wf.getJob().getSourceLocale().toString());
+        emailInfo.setTargetLocale(wf.getTargetLocale().toString());
+        emailInfo.setCompanyId(String.valueOf(wf.getCompanyId()));
+
+        return emailInfo;
+    }
+
+    /**
+     * Removes the reserved times from the active workflow tasks.
+     */
+    public static void removeReservedTimes(Collection<WorkflowTaskInstance> p_activeWfTaskInstances)
+    {
+        for (WorkflowTaskInstance wfTaskInstance : p_activeWfTaskInstances)
+        {
+            removeReservedTime(wfTaskInstance.getTaskId());
+        }
+    }
+
+    /**
+     * Removes the reserved time associated with the given task from the user's
+     * calendar. The user is the finisher of the activity.
+     */
+    public static void removeReservedTime(long p_taskId, String p_userId)
+    {
+        try
+        {
+            ServerProxy.getCalendarManager().removeScheduledActivity(p_taskId, p_userId);
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to remove reserved times for task id " + p_taskId + " from user "
+                    + p_userId, e);
+        }
+    }
+
+    /**
+     * Remove the reserved time associated with the given task from the user's
+     * calendar. The user is the finisher of the activity.
+     */
+    public static void removeReservedTime(long p_taskId)
+    {
+        try
+        {
+            ServerProxy.getCalendarManager().removeScheduledActivities(p_taskId);
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to remove reserved times for task id " + p_taskId, e);
+        }
+    }
+
+    /**
+     * Updates the tasks to the specified state.
+     */
+    public static void updateTaskState(Collection<WorkflowTaskInstance> p_wfTaskInstances,
+            Hashtable<Long, Task> p_wfTasks, int p_state)
+    {
+        for (WorkflowTaskInstance wfTaskInstance : p_wfTaskInstances)
+        {
+            Task task = p_wfTasks.get(wfTaskInstance.getTaskId());
+            task.setState(p_state);
+            HibernateUtil.saveOrUpdate(task);
+        }
+    }
+
+    /**
+     * Return true if all workflows are in the given state.
+     * 
+     * If the given state is "CANCELLED" or "IMPORT_FAIL", check all workflows
+     * against it; Otherwise, only check the given state against non-CANCELLED
+     * workflows.
+     */
+    public static boolean workflowsAllHaveState(Collection p_workflows, String p_state)
+    {
+        boolean workflowsHaveState = true;
+        Iterator it = p_workflows.iterator();
+        if (p_state.equals(Workflow.CANCELLED) || p_state.equals(Workflow.IMPORT_FAILED))
+        {
+            while (workflowsHaveState && it.hasNext())
+            {
+                Workflow wf = (Workflow) it.next();
+                workflowsHaveState &= (wf.getState().equals(Workflow.CANCELLED)
+                        || wf.getState().equals(Workflow.IMPORT_FAILED));
+            }
+        }
+        else
+        {
+            while (workflowsHaveState && it.hasNext())
+            {
+                String wfState = ((Workflow) it.next()).getState();
+                if (!wfState.equals(Workflow.CANCELLED) && !wfState.equals(Workflow.IMPORT_FAILED))
+                {
+                    workflowsHaveState &= wfState.equals(p_state);
+                }
+            }
+        }
+        return workflowsHaveState;
+    }
+
+    /**
+     * Finds the index of the "lowest" state from the given workflows.
+     */
+    public static int findLowestStateIndex(Collection<Workflow> p_wfs)
+    {
+        int lowest = WorkflowManagerLocal.ORDERED_STATES.length - 1;
+        Iterator<Workflow> it = p_wfs.iterator();
+        while (lowest >= 0 && it.hasNext())
+        {
+            String state = it.next().getState();
+            for (int i = 0; i <= lowest; i++)
+            {
+                if (WorkflowManagerLocal.ORDERED_STATES[i].equals(state))
+                {
+                    lowest = i;
+                }
+            }
+        }
+        return lowest;
+    }
+
+    /**
+     * Deletes folder
+     * "[fileStore]\[companyName]\GlobalSight\DesktopIcon\exported\[jobID]" when
+     * job is archived.
+     * 
+     * This is for GBS-3652 and "getDownloadableJobs()" webservice API.
+     */
+    public static void deleteFolderForDI(long companyId, long jobId)
+    {
+        File diExportedDir = AmbFileStoragePathUtils.getDesktopIconExportedDir(companyId);
+        File jobDir = new File(diExportedDir, String.valueOf(jobId));
+        if (jobDir.exists())
+        {
+            jobDir.delete();
+        }
     }
 }

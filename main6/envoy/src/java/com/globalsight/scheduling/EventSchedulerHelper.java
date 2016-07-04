@@ -44,7 +44,6 @@ import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.scheduling.FluxEventMapDescriptorModifier;
 import com.globalsight.util.GeneralException;
@@ -57,8 +56,7 @@ import com.globalsight.util.resourcebundle.LocaleWrapper;
 
 public class EventSchedulerHelper
 {
-    private static final Logger s_category = Logger
-            .getLogger(EventSchedulerHelper.class);
+    private static final Logger s_category = Logger.getLogger(EventSchedulerHelper.class);
 
     private static Timestamp s_timestamp = new Timestamp();
 
@@ -79,8 +77,8 @@ public class EventSchedulerHelper
      * @param p_domainObjId
      *            - The id of the domain object.
      */
-    public static FluxEventMap findFluxEventMap(Integer p_eventType,
-            Integer p_domainObjType, Long p_domainObjId) throws Exception
+    public static FluxEventMap findFluxEventMap(Integer p_eventType, Integer p_domainObjType,
+            Long p_domainObjId) throws Exception
     {
         Vector args = new Vector();
         args.add(p_eventType);
@@ -92,8 +90,7 @@ public class EventSchedulerHelper
         params.put("DOID", p_domainObjId);
         params.put("DOT", p_domainObjType);
         params.put("ET", p_eventType);
-        List events = HibernateUtil.searchWithSql(sql, params,
-                FluxEventMap.class);
+        List events = HibernateUtil.searchWithSql(sql, params, FluxEventMap.class);
         FluxEventMap map = null;
         if (events != null && events.size() > 0)
         {
@@ -111,17 +108,13 @@ public class EventSchedulerHelper
      *            HashMap of event information
      * @return FluxEventMap
      */
-    public static FluxEventMap findFluxEventMap(HashMap p_eventInfo)
-            throws Exception
+    public static FluxEventMap findFluxEventMap(Map p_eventInfo) throws Exception
     {
-        Long objectId = (Long) p_eventInfo
-                .get(SchedulerConstants.SCHEDULE_DOMAIN_OBJ_ID);
-        Integer objectType = (Integer) p_eventInfo
-                .get(SchedulerConstants.DOMAIN_OBJ_TYPE);
-        Integer eventTypeKey = (Integer) p_eventInfo
-                .get(SchedulerConstants.SCHEDULE_EVENT_TYPE);
-        FluxEventMap fem = EventSchedulerHelper.findFluxEventMap(eventTypeKey,
-                objectType, objectId);
+        Long objectId = (Long) p_eventInfo.get(SchedulerConstants.SCHEDULE_DOMAIN_OBJ_ID);
+        Integer objectType = (Integer) p_eventInfo.get(SchedulerConstants.DOMAIN_OBJ_TYPE);
+        Integer eventTypeKey = (Integer) p_eventInfo.get(SchedulerConstants.SCHEDULE_EVENT_TYPE);
+        FluxEventMap fem = EventSchedulerHelper.findFluxEventMap(eventTypeKey, objectType,
+                objectId);
         return fem;
     }
 
@@ -151,8 +144,7 @@ public class EventSchedulerHelper
      * @param p_fluxEventMap
      *            - The object to be persisted.
      */
-    static void createFluxEventMap(FluxEventMap p_fluxEventMap)
-            throws Exception
+    public static void createFluxEventMap(FluxEventMap p_fluxEventMap) throws Exception
     {
         HibernateUtil.save(p_fluxEventMap);
     }
@@ -196,15 +188,14 @@ public class EventSchedulerHelper
      * @param p_domainObjId
      *            - The id of the domain object.
      */
-    static Iterator findFluxEventMaps(Integer p_domainObjType,
-            Long p_domainObjId) throws Exception
+    public static Iterator findFluxEventMaps(Integer p_domainObjType, Long p_domainObjId)
+            throws Exception
     {
         String sql = FluxEventMapDescriptorModifier.FLUX_EVENT_MAPS_SQL;
         Map params = new HashMap();
         params.put("DOID", p_domainObjId);
         params.put("DOT", p_domainObjType);
-        List events = HibernateUtil.searchWithSql(sql, params,
-                FluxEventMap.class);
+        List events = HibernateUtil.searchWithSql(sql, params, FluxEventMap.class);
 
         return events.iterator();
     }
@@ -221,8 +212,7 @@ public class EventSchedulerHelper
      * @return The string representation of the locale pair based on the display
      *         locale (i.e. English (United States) / French (France))
      */
-    static String localePair(Locale p_sourceLocale, Locale p_targetLocale,
-            Locale p_displayLocale)
+    static String localePair(Locale p_sourceLocale, Locale p_targetLocale, Locale p_displayLocale)
     {
         StringBuffer sb = new StringBuffer();
         sb.append(p_sourceLocale.getDisplayName(p_displayLocale));
@@ -239,11 +229,9 @@ public class EventSchedulerHelper
      * @param p_fluxEventMap
      *            - The object to be removed.
      */
-    static void removeFluxEventMap(FluxEventMap p_fluxEventMap)
-            throws Exception
+    public static void removeFluxEventMap(FluxEventMap p_fluxEventMap) throws Exception
     {
-        p_fluxEventMap = HibernateUtil.get(FluxEventMap.class,
-                p_fluxEventMap.getEventId());
+        p_fluxEventMap = HibernateUtil.get(FluxEventMap.class, p_fluxEventMap.getEventId());
         try
         {
             HibernateUtil.delete(p_fluxEventMap);
@@ -259,7 +247,7 @@ public class EventSchedulerHelper
     }
 
     /* Notify the Project Manager and other workflow owner(s) (if any) */
-    static void notifyProjectManager(Map p_emailInfo, String p_subjectKey,
+    public static void notifyProjectManager(Map p_emailInfo, String p_subjectKey,
             String p_messageKey) throws Exception
     {
         if (!m_systemNotificationEnabled)
@@ -268,12 +256,10 @@ public class EventSchedulerHelper
         }
 
         Long wfId = (Long) p_emailInfo.get(SchedulerConstants.WF_ID);
-		Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
-				wfId.longValue());
+        Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(wfId.longValue());
         WorkflowTemplateInfo wfti = wf.getJob().getL10nProfile()
                 .getWorkflowTemplateInfo(wf.getTargetLocale());
-        List wfManagerIds = wf
-                .getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER);
+        List wfManagerIds = wf.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER);
         int size = wfManagerIds.size();
         boolean notifyPm = wfti.notifyProjectManager();
 
@@ -286,17 +272,12 @@ public class EventSchedulerHelper
 
         Long projectId = (Long) p_emailInfo.get(SchedulerConstants.PROJECT_ID);
         String jobName = (String) p_emailInfo.get(SchedulerConstants.JOB_NAME);
-        String activityName = (String) p_emailInfo
-                .get(SchedulerConstants.ACTIVITY_NAME);
-        String sourceLocale = (String) p_emailInfo
-                .get(SchedulerConstants.SOURCE_LOCALE);
-        String targetLocale = (String) p_emailInfo
-                .get(SchedulerConstants.TARGET_LOCALE);
-        Date deadline = (Date) p_emailInfo
-                .get(SchedulerConstants.DEADLINE_DATE);
+        String activityName = (String) p_emailInfo.get(SchedulerConstants.ACTIVITY_NAME);
+        String sourceLocale = (String) p_emailInfo.get(SchedulerConstants.SOURCE_LOCALE);
+        String targetLocale = (String) p_emailInfo.get(SchedulerConstants.TARGET_LOCALE);
+        Date deadline = (Date) p_emailInfo.get(SchedulerConstants.DEADLINE_DATE);
 
-        Project project = ServerProxy.getProjectHandler().getProjectById(
-                projectId.longValue());
+        Project project = ServerProxy.getProjectHandler().getProjectById(projectId.longValue());
         String companyId = String.valueOf(project.getCompanyId());
         // convert string representation of a locale to Locale object
         Locale srcLocale = convertToLocale(sourceLocale);
@@ -311,25 +292,23 @@ public class EventSchedulerHelper
         if (notifyPm)
         {
             User user = project.getProjectManager();
-            sendEmail(user, srcLocale, trgtLocale, deadline, messageArguments,
-                    p_subjectKey, p_messageKey, companyId);
+            sendEmail(user, srcLocale, trgtLocale, deadline, messageArguments, p_subjectKey,
+                    p_messageKey, companyId);
         }
 
         // notify the workflow managers (if any)
         for (int i = 0; i < size; i++)
         {
-            User wfMgr = ServerProxy.getUserManager().getUser(
-                    (String) wfManagerIds.get(i));
-            sendEmail(wfMgr, srcLocale, trgtLocale, deadline, messageArguments,
-                    p_subjectKey, p_messageKey, companyId);
+            User wfMgr = ServerProxy.getUserManager().getUser((String) wfManagerIds.get(i));
+            sendEmail(wfMgr, srcLocale, trgtLocale, deadline, messageArguments, p_subjectKey,
+                    p_messageKey, companyId);
         }
 
     }
 
     /* Notify the PM that the task overdue for days */
-    static void notifyProjectManagerOverdue(Map p_emailInfo,
-            String p_subjectKey, String p_messageKey, String p_companyId)
-            throws Exception
+    static void notifyProjectManagerOverdue(Map p_emailInfo, String p_subjectKey,
+            String p_messageKey, String p_companyId) throws Exception
     {
         if (!m_systemNotificationEnabled)
         {
@@ -339,47 +318,43 @@ public class EventSchedulerHelper
         if (shouldNotifyPm(p_emailInfo))
         {
             sendEmailForOverdue(new User[]
-            { getProjectManager(p_emailInfo) }, p_emailInfo, p_subjectKey,
-                    p_messageKey, p_companyId);
+            { getProjectManager(p_emailInfo) }, p_emailInfo, p_subjectKey, p_messageKey,
+                    p_companyId);
         }
     }
 
     /* Notify the LPs the activity overdue (if any) */
-    static void notifyProjectUser(Map p_emailInfo, String p_subjectKey,
-            String p_messageKey, String p_companyId) throws Exception
+    static void notifyProjectUser(Map p_emailInfo, String p_subjectKey, String p_messageKey,
+            String p_companyId) throws Exception
     {
         if (!m_systemNotificationEnabled)
         {
             return;
         }
 
-        String assigneesName = (String) p_emailInfo
-                .get(SchedulerConstants.ASSIGNEES_NAME);
+        String assigneesName = (String) p_emailInfo.get(SchedulerConstants.ASSIGNEES_NAME);
         if (assigneesName != null && assigneesName.length() > 0)
         {
-            sendEmailForOverdue(toUsers(assigneesName), p_emailInfo,
-                    p_subjectKey, p_messageKey, p_companyId);
+            sendEmailForOverdue(toUsers(assigneesName), p_emailInfo, p_subjectKey, p_messageKey,
+                    p_companyId);
         }
     }
 
-    private static boolean shouldNotifyPm(Map p_emailInfo)
-            throws PersistenceException
+    private static boolean shouldNotifyPm(Map p_emailInfo) throws PersistenceException
     {
         Long wfId = (Long) p_emailInfo.get(SchedulerConstants.WF_ID);
         Workflow wf = null;
         try
         {
-			wf = ServerProxy.getWorkflowManager().getWorkflowById(
-					wfId.longValue());
-	        if (wf == null)
-	        {
-				throw new PersistenceException("Can't get workflow by id:"
-						+ wfId);
-	        }
+            wf = ServerProxy.getWorkflowManager().getWorkflowById(wfId.longValue());
+            if (wf == null)
+            {
+                throw new PersistenceException("Can't get workflow by id:" + wfId);
+            }
         }
         catch (Exception e)
         {
-        	s_category.error(e);
+            s_category.error(e);
             throw new PersistenceException(e);
         }
 
@@ -390,48 +365,39 @@ public class EventSchedulerHelper
 
     /* Gets the PM. */
     private static User getProjectManager(Map p_emailInfo)
-            throws RemoteException, ProjectHandlerException, GeneralException,
-            NamingException
+            throws RemoteException, ProjectHandlerException, GeneralException, NamingException
     {
         Long projectId = (Long) p_emailInfo.get(SchedulerConstants.PROJECT_ID);
 
-        Project project = ServerProxy.getProjectHandler().getProjectById(
-                projectId.longValue());
+        Project project = ServerProxy.getProjectHandler().getProjectById(projectId.longValue());
         return project.getProjectManager();
     }
 
     /* Sends email to users for overdue. */
-    private static void sendEmailForOverdue(User[] p_users, Map p_emailInfo,
-            String p_subjectKey, String p_messageKey, String p_sendFrom)
-            throws Exception
+    private static void sendEmailForOverdue(User[] p_users, Map p_emailInfo, String p_subjectKey,
+            String p_messageKey, String p_sendFrom) throws Exception
     {
-        String sourceLocale = (String) p_emailInfo
-                .get(SchedulerConstants.SOURCE_LOCALE);
-        String targetLocale = (String) p_emailInfo
-                .get(SchedulerConstants.TARGET_LOCALE);
+        String sourceLocale = (String) p_emailInfo.get(SchedulerConstants.SOURCE_LOCALE);
+        String targetLocale = (String) p_emailInfo.get(SchedulerConstants.TARGET_LOCALE);
         // convert string representation of a locale to Locale object
         Locale srcLocale = convertToLocale(sourceLocale);
         Locale trgtLocale = convertToLocale(targetLocale);
 
-        Date deadline = (Date) p_emailInfo
-                .get(SchedulerConstants.DEADLINE_DATE_COMPLETION);
+        Date deadline = (Date) p_emailInfo.get(SchedulerConstants.DEADLINE_DATE_COMPLETION);
         for (int i = 0; i < p_users.length; i++)
         {
-            sendEmail(p_users[i], srcLocale, trgtLocale, deadline,
-                    getArguments(p_emailInfo), p_subjectKey, p_messageKey,
-                    p_sendFrom);
+            sendEmail(p_users[i], srcLocale, trgtLocale, deadline, getArguments(p_emailInfo),
+                    p_subjectKey, p_messageKey, p_sendFrom);
         }
 
     }
 
     /* Prepares email arguments. */
-    private static String[] getArguments(Map p_emailInfo)
-            throws PersistenceException, RemoteException,
-            ProjectHandlerException, GeneralException, NamingException
+    private static String[] getArguments(Map p_emailInfo) throws PersistenceException,
+            RemoteException, ProjectHandlerException, GeneralException, NamingException
     {
         Long wfId = (Long) p_emailInfo.get(SchedulerConstants.WF_ID);
-		Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
-				wfId.longValue());
+        Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(wfId.longValue());
         if (wf == null)
         {
             throw new PersistenceException("Can't get workflow by Id: " + wfId);
@@ -439,20 +405,15 @@ public class EventSchedulerHelper
 
         long jobId = wf.getJob().getJobId();
         String jobName = (String) p_emailInfo.get(SchedulerConstants.JOB_NAME);
-        String activityName = (String) p_emailInfo
-                .get(SchedulerConstants.ACTIVITY_NAME);
+        String activityName = (String) p_emailInfo.get(SchedulerConstants.ACTIVITY_NAME);
 
         // Get the overdue days.
-        String overduePm = (String) p_emailInfo
-                .get(SchedulerConstants.OVERDUE_PM);
-        String overdueUser = (String) p_emailInfo
-                .get(SchedulerConstants.OVERDUE_USER);
-        String assigneesName = (String) p_emailInfo
-                .get(SchedulerConstants.ASSIGNEES_NAME);
+        String overduePm = (String) p_emailInfo.get(SchedulerConstants.OVERDUE_PM);
+        String overdueUser = (String) p_emailInfo.get(SchedulerConstants.OVERDUE_USER);
+        String assigneesName = (String) p_emailInfo.get(SchedulerConstants.ASSIGNEES_NAME);
 
         Long projectId = (Long) p_emailInfo.get(SchedulerConstants.PROJECT_ID);
-        Project project = ServerProxy.getProjectHandler().getProjectById(
-                projectId.longValue());
+        Project project = ServerProxy.getProjectHandler().getProjectById(projectId.longValue());
 
         // prepare email arguments
         String[] messageArguments = new String[9];
@@ -467,8 +428,8 @@ public class EventSchedulerHelper
     }
 
     /* Gets the users through the assigneesName. */
-    private static User[] toUsers(String assigneesName) throws RemoteException,
-            UserManagerException, GeneralException
+    private static User[] toUsers(String assigneesName)
+            throws RemoteException, UserManagerException, GeneralException
     {
         String[] allAssignee = assigneesName.split(",");
         int assigneeSize = allAssignee.length;
@@ -495,8 +456,7 @@ public class EventSchedulerHelper
         TimeZone timeZone = null;
         try
         {
-            timeZone = ServerProxy.getCalendarManager().findUserTimeZone(
-                    p_userId);
+            timeZone = ServerProxy.getCalendarManager().findUserTimeZone(p_userId);
         }
         catch (Exception e)
         {
@@ -516,8 +476,7 @@ public class EventSchedulerHelper
      *            - The locale used for formatting the date.
      * @return A formatted date based on the given locale.
      */
-    private static String getConvertedTime(Date p_date, Locale p_displayLocale,
-            TimeZone p_timeZone)
+    private static String getConvertedTime(Date p_date, Locale p_displayLocale, TimeZone p_timeZone)
     {
         s_timestamp.setDate(p_date);
         s_timestamp.setLocale(p_displayLocale);
@@ -528,10 +487,9 @@ public class EventSchedulerHelper
     /*
      * Notify the responsible PM or WFM.
      */
-    private static void sendEmail(User p_user, Locale p_srcLocale,
-            Locale p_trgtLocale, Date p_deadline, String[] p_messageArguments,
-            String p_subjectKey, String p_messageKey, String p_companyId)
-            throws Exception
+    private static void sendEmail(User p_user, Locale p_srcLocale, Locale p_trgtLocale,
+            Date p_deadline, String[] p_messageArguments, String p_subjectKey, String p_messageKey,
+            String p_companyId) throws Exception
     {
         if (!m_systemNotificationEnabled)
         {
@@ -539,15 +497,14 @@ public class EventSchedulerHelper
         }
 
         Locale userLocale = convertToLocale(p_user.getDefaultUILocale());
-        p_messageArguments[3] = localePair(p_srcLocale, p_trgtLocale,
-                userLocale);
+        p_messageArguments[3] = localePair(p_srcLocale, p_trgtLocale, userLocale);
         p_messageArguments[4] = getConvertedTime(p_deadline, userLocale,
                 getUserTimeZone(p_user.getUserId()));
 
         EmailInformation receipt = ServerProxy.getUserManager()
                 .getEmailInformationForUser(p_user.getUserId());
-        ServerProxy.getMailer().sendMail((EmailInformation) null, receipt,
-                p_subjectKey, p_messageKey, p_messageArguments, p_companyId);
+        ServerProxy.getMailer().sendMail((EmailInformation) null, receipt, p_subjectKey,
+                p_messageKey, p_messageArguments, p_companyId);
     }
     // ////////////////////////////////////////////////////////////////////
     // End: Private Methods

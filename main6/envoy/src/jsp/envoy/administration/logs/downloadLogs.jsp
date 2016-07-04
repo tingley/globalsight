@@ -20,15 +20,23 @@ String tmp = "";
 tmp = request.getParameter("globalsight");
 if (!StringUtil.isEmpty(tmp))
     logs.add(tmp);
+
 tmp = request.getParameter("activity");
 if (!StringUtil.isEmpty(tmp))
     logs.add(tmp);
+
 tmp = request.getParameter("operation");
 if (!StringUtil.isEmpty(tmp))
     logs.add(tmp);
+
 tmp = request.getParameter("webservices");
 if (!StringUtil.isEmpty(tmp))
     logs.add(tmp);
+
+tmp = request.getParameter("restWebservices");
+if (!StringUtil.isEmpty(tmp))
+    logs.add(tmp);
+
 tmp = request.getParameter("jboss");
 if (!StringUtil.isEmpty(tmp))
     logs.add(tmp);

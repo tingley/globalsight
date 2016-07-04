@@ -77,7 +77,6 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
                 }
             }
             else if (lastModUser != null
-                    && !lastModUser.equals(IFormatNames.FORMAT_TDA)
                     && !lastModUser.equals(IFormatNames.FORMAT_XLIFF_NAME)
                     && !lastModUser.equals(IFormatNames.FORMAT_PO))
             {

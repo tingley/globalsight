@@ -30,16 +30,12 @@ import java.util.*;
 public class HtmlEntities
     extends Entities
 {
-    public static final HashMap mHtmlCharToEntity = mapHtmlCharToEntity();
-    public static final HashMap mHtmlEntityToChar = mapHtmlEntityToChar();
-    public static final HashMap
-        mDefaultCharToEntity = mapHtmlDefaultCharToEntity();
-    public static final HashMap
-        mDefaultEntityToChar = mapHtmlDefaultEntityToChar();
-    private static final HashMap
-        WINDOWS1252_UNICODE_MAP = mapWindows1252ToUnicode();
+    public static final HashMap<Character, String> mHtmlCharToEntity = mapHtmlCharToEntity();
+    public static final HashMap<String, Character> mHtmlEntityToChar = mapHtmlEntityToChar();
+    public static final HashMap<Character, String> mDefaultCharToEntity = mapHtmlDefaultCharToEntity();
+    public static final HashMap<String, Character> mDefaultEntityToChar = mapHtmlDefaultEntityToChar();
+    private static final HashMap<Character, Character> WINDOWS1252_UNICODE_MAP = mapWindows1252ToUnicode();
     private boolean m_useDefaultHtmlEncoderChar = true;
-
 
     /**
      * a list of characters that are always encoded to character
@@ -350,9 +346,9 @@ public class HtmlEntities
     }
 
 
-    private static HashMap mapHtmlCharToEntity()
+    private static HashMap<Character, String> mapHtmlCharToEntity()
     {
-        HashMap h = new HashMap();
+        HashMap<Character, String> h = new HashMap<Character, String>();
         // ISO-8859-1 entities
         h.put(new Character('\u00a0'), "&nbsp;");
         h.put(new Character('\u00a1'), "&iexcl;");
@@ -615,21 +611,22 @@ public class HtmlEntities
         return h;
     }
 
-    private static HashMap mapHtmlDefaultCharToEntity()
+    private static HashMap<Character, String> mapHtmlDefaultCharToEntity()
     {
-        HashMap h = new HashMap();
+        HashMap<Character, String> h = new HashMap<Character, String>();
         h.put(new Character('<'), "&lt;");
         h.put(new Character('>'), "&gt;");
         h.put(new Character('&'), "&amp;");
         h.put(new Character('"'), "&quot;");
         //Low version IE does not support "&apos;".
-        h.put(new Character('\''), "&#39;");
+        //h.put(new Character('\''), "&#39;");
+        h.put(new Character('\''), "&apos;");
         return h;
     }
 
-    private static HashMap mapHtmlDefaultEntityToChar()
+    private static HashMap<String, Character> mapHtmlDefaultEntityToChar()
     {
-        HashMap h = new HashMap();
+        HashMap<String, Character> h = new HashMap<String, Character>();
         h.put("&lt;", new Character('<'));
         h.put("&gt;", new Character('>'));
         h.put("&amp;", new Character('&'));
@@ -643,9 +640,9 @@ public class HtmlEntities
         return h;
     }
 
-    private static final HashMap mapHtmlEntityToChar()
+    private static final HashMap<String, Character> mapHtmlEntityToChar()
     {
-        HashMap h = new HashMap();
+        HashMap<String, Character> h = new HashMap<String, Character>();
         // ISO-8859-1 entities
         h.put("&nbsp;", new Character('\u00a0'));
         h.put("&nbsp", new Character('\u00a0')); // hack for malformed entity
@@ -915,9 +912,9 @@ public class HtmlEntities
      * Data taken from unicode.org.
      * http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP1252.TXT
      */
-    private static HashMap mapWindows1252ToUnicode()
+    private static HashMap<Character, Character> mapWindows1252ToUnicode()
     {
-        HashMap h = new HashMap();
+        HashMap<Character, Character> h = new HashMap<Character, Character>();
         // EURO SIGN
         h.put(new Character('\u0080'), new Character('\u20AC'));
         // 0x81            //UNDEFINED

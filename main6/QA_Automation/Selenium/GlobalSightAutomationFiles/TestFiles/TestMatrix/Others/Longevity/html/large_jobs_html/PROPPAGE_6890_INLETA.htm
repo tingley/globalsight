@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:id="com_inse\PROPPAGE_6890_INLETA.htm" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="5081" MadCap:lastWidth="571">
+    <head><title>Inlet Tab (6890)</title>
+    </head>
+    <body>
+        <h1>Inlet 
+ tab (6890)</h1>
+        <p class="para">Use this tab to specify gas control parameters for the front 
+ or back inlet of the 6890 GC system.</p>
+        <h2>Inlet type</h2>
+        <p class="para">Type of front inlet used in the 6890 GC system. Choices: 
+ </p>
+        <ul>
+            <li class="listbull">PP EPC (Purged Packed, 
+ EPC)</li>
+            <li class="listbull">COC EPC (Cool on-Column, 
+ EPC)</li>
+            <li class="listbull">S/SL EPC (Split/Splitless, 
+ EPC)</li>
+            <li class="listbull">PTV (Programmed Temperature 
+ Vaporization, EPC)</li>
+            <li class="listbull">PP (Purged Packed, non-EPC)</li>
+            <li class="listbull">COC (Cool on-Column, 
+ non-EPC)</li>
+            <li class="listbull">S/SL (Split/Splitless, 
+ non-EPC)</li>
+            <li class="listbull">Unknown (used for other 
+ inlet types)</li>
+            <li class="listbull">None</li>
+            <li class="listbull">Volatiles Interface</li>
+            <li class="listbull">CIS4 (Gerstel PTV inlet 
+ with auxiliary temperature control)</li>
+        </ul>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ None. (You can also set Inlet type in the General tab.)</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ For the PTV, you can set only the front inlet.</p>
+        <h2>Mode</h2>
+        <p class="para">Inlet mode for CIS4, PTV, S/SL EPC, and Volatiles Interface 
+ types. The modes vary according to your Inlet Type selection. Choices:</p>
+        <ul>
+            <li class="listbull">Split 
+ – Typical for major component analysis; available choice for CIS4, PTV, 
+ S/SL EPC, and Volatiles Interface types.</li>
+            <li class="listbull">Splitless 
+ – Typical for trace analysis; available choice for CIS4, PTV, S/SL EPC, 
+ and Volatiles Interface types.</li>
+            <li class="listbull">Pulsed 
+ Split – Typical for major component analysis, but allows for large injection 
+ volumes; available choice for CIS4, PTV, and S/SL EPC inlet types.</li>
+            <li class="listbull">Pulsed 
+ Splitless – Typical for trace analysis, but allows for large injection 
+ volumes; available choice for CIS4, PTV, and S/SL EPC inlet types.</li>
+            <li class="listbull">Solvent Vent – Typical 
+ for large or multiple injections of low concentration sample where evaporated 
+ solvent is swept out of the vent; available choice for CIS4 and PTV inlet 
+ types.</li>
+        </ul>
+        <h2>Temperature parameters</h2>
+        <h3>Enable</h3>
+        <p class="para">Enables the inlet zone temperature control. Enable this check 
+ box to set an Initial Temp or use the temperature ramp table.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <h3>Initial temp</h3>
+        <p class="para">Inlet zone temperature control for the injector. When the 
+ inlet temperature ramp table is <span style="font-style: italic;">disabled</span>, 
+ the Initial Temp value is retained for the length of run. When the inlet 
+ temperature ramp table is <span style="font-style: italic;">enabled</span>, 
+ the Initial Temp value is retained for the length of time defined in the 
+ Initial Time parameter. Once the Total Time value expires (in the inlet 
+ temperature ramp table) at the end of the run, the inlet returns to the 
+ Initial Temp value.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 50 <span style="font-family: Symbol;">°</span>C</p>
+        <p class="para"><span class="emphasisbold">Attention:</span> 
+ To avoid a possibly unstable inlet temperature, set the inlet Initial 
+ Temp to a value at least 6 <span style="font-family: Symbol;">°</span>C higher or lower 
+ than the Oven Initial Temperature.</p>
+        <h3>Initial time</h3>
+        <p class="para">Length of time (from the start of the run) during which the 
+ initial ramped temperature value is to be maintained. This parameter is 
+ active only when Enable Ramps (see below) is selected. When you enter 
+ Rate, Final (temperature), and Hold Time values for row 1 in the inlet 
+ temperature table, temperature is maintained for the length of time you 
+ set for Initial Time, then ramps using the Rate and Final values you selected 
+ for row 1 in the table. After the Total Time value expires at the end 
+ of the run, the inlet returns to the Initial Temp value.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.00 min</p>
+        <h3>Track oven</h3>
+        <p class="para">Specifies that the inlet automatically maintain a temperature 
+ 3 <span style="font-family: Symbol;">°</span>C above the oven temperature throughout the 
+ run. This check box is active only when a COC or COC EPC inlet type is 
+ selected (and the Enable check box is selected). Enable Ramps is disabled 
+ when Track Oven is enabled. </p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> Disabled</p>
+        <h3>Enable ramps</h3>
+        <p class="para">Enables the inlet temperature ramp table. This check box 
+ is active only when a COC, COC EPC, or PTV inlet type is selected. Track 
+ Oven is disabled when Enable Ramps is selected.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Enabled or Disabled</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <h3>Inlet temperature ramp table</h3>
+        <p class="para">Allows you to program up to three inlet temperature ramps 
+ during a run. The table is active only when you select Enable Ramps. In 
+ each row of the table, define:</p>
+        <ul>
+            <li class="listbull">Rate – 
+ Rate at which the inlet is to be heated or cooled to Final Temp (in <span style="font-family: Symbol;">°</span>C/min).</li>
+        </ul>
+        <p class="paraindent"><span class="emphasisbold">Default:</span> 
+ 0.0 <span style="font-family: Symbol;">°</span>C/min</p>
+        <ul>
+            <li class="listbull">Final 
+ (temperature) – Temperature that the inlet is to reach at the end of the 
+ heating or cooling ramp. Final temperature is maintained for the Hold 
+ Time duration (see below). </li>
+            <li class="listbull">Hold Time 
+ – Time in minutes that the inlet temperature is to be held at the current 
+ Final temperature before starting the next ramp or terminating the run. 
+ </li>
+            <li class="listbull">Total Time – Total time 
+ as <span style="font-style: italic;">calculated</span> by Empower software. 
+ Total Time displayed in the first row is derived from the difference between 
+ the Initial Temp (at the start of the ramp) and the Final temperature 
+ (at the end of the ramp) divided by the Rate, plus Hold Time plus the 
+ Initial Time. Total Time displayed for subsequent rows is derived from 
+ the difference between the Final temperature from the previous row and 
+ the Final temperature for the current row divided by the Rate, plus Hold 
+ Time, plus the Total Time from the previous row.</li>
+        </ul>
+        <p class="para">When the run begins, inlet temperature is maintained at the 
+ Initial Temp for the length of time you entered for Initial Time. At the 
+ end of that time, inlet temperature ramps to the Final (temperature) value 
+ at the Rate you set in row 1 in the Inlet Temperature Ramp table. Final 
+ temperature is maintained for the length of time you entered for Hold 
+ Time. The ramp process continues for each row in the table.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ If an inlet temperature program ends before an oven temperature program 
+ ends, the inlet temperature remains at the Final value until the oven 
+ program and run end.</p>
+        <h2>Purge parameters</h2>
+        <p class="para">Use these parameters to open the purge valve at a specified 
+ time after injection and to sweep out the split vent and any vapors that 
+ remain in the liner. </p>
+        <h3>On time</h3>
+        <p class="para">Time after injection when the purge begins.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.00 min</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ If you are using Gas Saver, set Gas Saver On Time to a value greater than 
+ the Purge On Time value.</p>
+        <h3>Flow</h3>
+        <p class="para">Purge flow rate in mL/min.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.0 mL/min</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Configure your column before setting this parameter. See the <span style="font-style: italic;">Agilent 
+ 6890 Series Gas Chromatograph Operating Manual</span>.</p>
+        <h2>Sampling end time</h2>
+        <p class="para">Time in minutes after injection that sampling is to end (for 
+ Volatiles Interface types in Split mode). </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Blank</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ This value must be less than the Purge On Time and Gas Saver On Time.</p>
+        <h2>Gas saver parameters</h2>
+        <h3>Enable</h3>
+        <p class="para">Enables the gas saver feature for the inlet. Use this feature 
+ to reduce the flow of carrier gas into the inlet and out of the split 
+ vent after an injection. Gas saver does not alter column head pressure 
+ or flow through the column.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ See the <span style="font-style: italic;">HP 6890 Series Gas Chromatograph 
+ Operating Manual</span> for details.</p>
+        <h3>On time</h3>
+        <p class="para">Time when the gas saver flow is to begin. In Split mode, 
+ set the time after injection time; in Pulsed Split mode, set the time 
+ after pulse time; in Splitless or Pulsed Splitless mode, set the time 
+ after Purge On Time.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.00 min</p>
+        <h3>Flow</h3>
+        <p class="para">Gas saver flow rate.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 15.0 mL/min</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Set Flow to a value at least 15 mL/min greater than the maximum column 
+ flow.</p>
+        <h2>Split/splitless parameters</h2>
+        <p class="para">Use these parameters to further define your inlet when using 
+ S/SL EPC, PTV, CIS4, and Volatiles Interface types in Split or Pulsed 
+ Split mode. See the <span style="font-style: italic;">Agilent 6890 Series 
+ Gas Chromatograph Operating Manual</span> for more information.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Specify either Split Ratio or Split Flow. When you specify one parameter, 
+ Empower software calculates the second parameter.</p>
+        <h3>Split ratio</h3>
+        <p class="para">Ratio of split flow to column flow when Split or Pulsed Split 
+ operating mode is selected. </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.1</p>
+        <p class="para">When you enter a value for Split Flow, Split Ratio is <span style="font-style: italic;">calculated</span> according to this formula: 
+ </p>
+        <p class="para">Split Ratio = Split Flow/Column Flow</p>
+        <h3>Split flow</h3>
+        <p class="para">Flow from the split/purge vent (when Split or Pulsed Split 
+ operating mode is selected).</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.1</p>
+        <p class="para">When you enter a value for Split Ratio, Split Flow is calculated 
+ according to this formula:</p>
+        <p class="para">Split Flow = Split Ratio × Column Flow</p>
+        <p class="caption">Notes:</p>
+        <ul>
+            <li class="listbull">This field is disabled 
+ if the column mode in the Column tab is set to Constant Pressure or Ramped 
+ Pressure.</li>
+            <li class="listbull">Empower 4.0 does not 
+ use column length, diameter, film thickness, and gas type in this equation.</li>
+        </ul>
+        <h3>Pulse time</h3>
+        <p>Time during which the Pulse Pressure is to be maintained. When this 
+ time elapses, pressure returns to the Initial Pressure/Flow value set 
+ in the appropriate Column tab. Default: 0.00.</p>
+        <h3>Pulse pressure</h3>
+        <p class="para">Desired inlet pressure at the beginning of the run. Pressure 
+ rises to this value at the start of the run and remains constant until 
+ the Pulse Time elapses, at which time pressure returns to the Initial 
+ Pressure/Flow value specified in the appropriate Column tab.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.0</p>
+        <h2>Vent parameters</h2>
+        <p class="para">Use these parameters to specify vent parameters when a PTV 
+ inlet type is set to Solvent Vent mode. See the <span style="font-style: italic;">HP 
+ 6890 Series Gas Chromatograph Operating Manual, Volume 2, Inlets</span> 
+ for details.</p>
+        <h3>End time</h3>
+        <p class="para">Time, after the start of the run, when solvent venting ends.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.00 min</p>
+        <h3>Flow</h3>
+        <p class="para">Flow of carrier gas out of the split vent during venting. 
+ High flows sweep the liner more quickly and speed solvent elimination. 
+ For most columns, a 100 mL/min flow rate eliminates solvent at an acceptable 
+ rate and puts minimal material on the column.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.1 mL/min</p>
+        <h3>Pressure</h3>
+        <p class="para">Inlet pressure during venting. Decreasing pressure increases 
+ the speed of solvent elimination, while decreasing the amount of carrier 
+ gas and solvent vapor that enters the column during the venting period.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0.0 psi</p>
+    </body>
+</html>

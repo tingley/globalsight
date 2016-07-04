@@ -107,8 +107,7 @@ import com.globalsight.util.resourcebundle.SystemResourceBundle;
  */
 public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
 {
-    private static final Logger logger = Logger
-            .getLogger(PostReviewQAReportGenerator.class);
+    private static final Logger logger = Logger.getLogger(PostReviewQAReportGenerator.class);
 
     private static final String CATEGORY_FAILURE_DROP_DOWN_LIST = "categoryFailureDropDownList";
     private static final String QUALITY_ASSESSMENT_LIST = "qualityAssessmentList";
@@ -146,18 +145,17 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         m_companyName = p_currentCompanyName;
         CompanyThreadLocal.getInstance().setValue(m_companyName);
         m_uiLocale = Locale.US;
-        m_bundle = SystemResourceBundle.getInstance().getResourceBundle(
-                ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
+        m_bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
     }
 
-    public PostReviewQAReportGenerator(String p_currentCompanyName,
-            String p_userId)
+    public PostReviewQAReportGenerator(String p_currentCompanyName, String p_userId)
     {
         m_companyName = p_currentCompanyName;
         CompanyThreadLocal.getInstance().setValue(m_companyName);
         m_uiLocale = Locale.US;
-        m_bundle = SystemResourceBundle.getInstance().getResourceBundle(
-                ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
+        m_bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
         m_userId = p_userId;
     }
 
@@ -170,8 +168,8 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
      *            the response
      * @throws Exception
      */
-    public PostReviewQAReportGenerator(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws Exception
+    public PostReviewQAReportGenerator(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws Exception
     {
         HttpSession session = p_request.getSession();
         m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
@@ -180,8 +178,8 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         {
             m_uiLocale = Locale.US;
         }
-        m_bundle = SystemResourceBundle.getInstance().getResourceBundle(
-                ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
+        m_bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
 
         m_dateFormat = p_request.getParameter(WebAppConstants.DATE_FORMAT);
         if (m_dateFormat == null)
@@ -189,22 +187,18 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             m_dateFormat = DEFAULT_DATE_FORMAT;
         }
 
-        m_jobIDS = ReportHelper.getListOfLong(p_request
-                .getParameter(ReportConstants.JOB_IDS));
+        m_jobIDS = ReportHelper.getListOfLong(p_request.getParameter(ReportConstants.JOB_IDS));
         GlobalSightLocaleComparator comparator = new GlobalSightLocaleComparator(
                 GlobalSightLocaleComparator.ISO_CODE, m_uiLocale);
-        m_targetLocales = ReportHelper
-                .getTargetLocaleList(p_request
-                        .getParameterValues(ReportConstants.TARGETLOCALE_LIST),
-                        comparator);
+        m_targetLocales = ReportHelper.getTargetLocaleList(
+                p_request.getParameterValues(ReportConstants.TARGETLOCALE_LIST), comparator);
 
         m_companyName = UserUtil.getCurrentCompanyName(p_request);
-        if (CompanyWrapper.isSuperCompanyName(m_companyName)
-                && m_jobIDS != null && m_jobIDS.size() > 0)
+        if (CompanyWrapper.isSuperCompanyName(m_companyName) && m_jobIDS != null
+                && m_jobIDS.size() > 0)
         {
             Job job = ServerProxy.getJobHandler().getJobById(m_jobIDS.get(0));
-            m_companyName = CompanyWrapper.getCompanyNameById(job
-                    .getCompanyId());
+            m_companyName = CompanyWrapper.getCompanyNameById(job.getCompanyId());
         }
         CompanyThreadLocal.getInstance().setValue(m_companyName);
     }
@@ -217,12 +211,12 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         this.unlockedStyle = null;
         this.unlockedRightStyle = null;
     }
-    
+
     @Override
-    public File[] generateReports(List<Long> p_jobIDS,
-            List<GlobalSightLocale> p_targetLocales) throws Exception
+    public File[] generateReports(List<Long> p_jobIDS, List<GlobalSightLocale> p_targetLocales)
+            throws Exception
     {
-        
+
         List<File> workBooks = new ArrayList<File>();
         for (long jobID : p_jobIDS)
         {
@@ -297,12 +291,12 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                 createCategoryFailureNameArea(p_workbook);
 
                 createQualityAssessmentNameArea(p_workbook);
-                
+
                 createMarketSuitabilityNameArea(p_workbook);
-                
+
                 nameAreaDropDownAdded = true;
             }
-            
+
             // Insert Data into Report
             String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
             String trgLang = trgLocale.getDisplayName(m_uiLocale);
@@ -318,34 +312,32 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             addMarketSuitabilityValidation(sheet, 7, 7, 1, 1);
         }
     }
-    
-    private void addMarketSuitabilityValidation(Sheet p_sheet, int startRow,
-            int lastRow, int startColumn, int lastColumn)
+
+    private void addMarketSuitabilityValidation(Sheet p_sheet, int startRow, int lastRow,
+            int startColumn, int lastColumn)
     {
         // Add category failure drop down list here.
         DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
         DataValidationConstraint dvConstraint = dvHelper
                 .createFormulaListConstraint(MARKET_SUITABILITY_LIST);
-        CellRangeAddressList addressList = new CellRangeAddressList(startRow,
-                lastRow, startColumn, lastColumn);
-        DataValidation validation = dvHelper.createValidation(dvConstraint,
-                addressList);
+        CellRangeAddressList addressList = new CellRangeAddressList(startRow, lastRow, startColumn,
+                lastColumn);
+        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
         validation.setSuppressDropDownArrow(true);
         validation.setShowErrorBox(true);
         p_sheet.addValidationData(validation);
     }
 
-    private void addQualityAssessmentValidation(Sheet p_sheet, int startRow,
-            int lastRow, int startColumn, int lastColumn)
+    private void addQualityAssessmentValidation(Sheet p_sheet, int startRow, int lastRow,
+            int startColumn, int lastColumn)
     {
         // Add category failure drop down list here.
         DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
         DataValidationConstraint dvConstraint = dvHelper
                 .createFormulaListConstraint(QUALITY_ASSESSMENT_LIST);
-        CellRangeAddressList addressList = new CellRangeAddressList(startRow,
-                lastRow, startColumn, lastColumn);
-        DataValidation validation = dvHelper.createValidation(dvConstraint,
-                addressList);
+        CellRangeAddressList addressList = new CellRangeAddressList(startRow, lastRow, startColumn,
+                lastColumn);
+        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
         validation.setSuppressDropDownArrow(true);
         validation.setShowErrorBox(true);
         p_sheet.addValidationData(validation);
@@ -385,23 +377,22 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
      * @param p_targetLocale
      * @throws Exception
      */
-    private void addHidenInfoForUpload(Workbook p_workbook, Sheet p_sheet,
-            Job p_job, GlobalSightLocale p_targetLocale) throws Exception
+    private void addHidenInfoForUpload(Workbook p_workbook, Sheet p_sheet, Job p_job,
+            GlobalSightLocale p_targetLocale) throws Exception
     {
         String reportInfo = "";
         for (Workflow wf : p_job.getWorkflows())
         {
             if (p_targetLocale.getId() == wf.getTargetLocale().getId())
             {
-                Collection tasks = ServerProxy.getTaskManager()
-                        .getCurrentTasks(wf.getId());
+                Collection tasks = ServerProxy.getTaskManager().getCurrentTasks(wf.getId());
                 if (tasks != null)
                 {
                     for (Iterator it = tasks.iterator(); it.hasNext();)
                     {
                         Task task = (Task) it.next();
-                        reportInfo = ReportConstants.POST_REVIEW_REPORT_ABBREVIATION
-                                + "_" + task.getId();
+                        reportInfo = ReportConstants.POST_REVIEW_REPORT_ABBREVIATION + "_"
+                                + task.getId();
                     }
                 }
             }
@@ -423,8 +414,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
      *            the sheet
      * @throws Exception
      */
-    private void addLanguageHeader(Workbook p_workBook, Sheet p_sheet)
-            throws Exception
+    private void addLanguageHeader(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
         int col = 0;
         int row = LANGUAGE_HEADER_ROW;
@@ -440,21 +430,18 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         trgLangCell.setCellStyle(getHeaderStyle(p_workBook));
     }
 
-    private void addQuaAssessment(Workbook p_workBook, Sheet p_sheet)
-            throws Exception
+    private void addQuaAssessment(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
         int col = 0;
         int row = 6;
 
         Row langRow = getRow(p_sheet, row);
         Cell quaAssessmentCell = getCell(langRow, col);
-        quaAssessmentCell.setCellValue(m_bundle
-                .getString("lb_quality_assessment"));
+        quaAssessmentCell.setCellValue(m_bundle.getString("lb_quality_assessment"));
         quaAssessmentCell.setCellStyle(getHeaderStyle(p_workBook));
     }
 
-    private void addSuitMarket(Workbook p_workBook, Sheet p_sheet)
-            throws Exception
+    private void addSuitMarket(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
         int col = 0;
         int row = 7;
@@ -465,8 +452,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         marSuitCell.setCellStyle(getHeaderStyle(p_workBook));
     }
 
-    private void addReviwerCommet(Workbook p_workBook, Sheet p_sheet)
-            throws Exception
+    private void addReviwerCommet(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
         int col = 0;
         int row = 8;
@@ -485,8 +471,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
      *            the sheet
      * @throws Exception
      */
-    private void addSegmentHeader(Workbook p_workBook, Sheet p_sheet)
-            throws Exception
+    private void addSegmentHeader(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
         int col = 0;
         int row = SEGMENT_HEADER_ROW;
@@ -577,8 +562,8 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         col++;
     }
 
-    private void writeLanguageInfo(Workbook p_workbook, Sheet p_sheet,
-            String p_sourceLang, String p_targetLang) throws Exception
+    private void writeLanguageInfo(Workbook p_workbook, Sheet p_sheet, String p_sourceLang,
+            String p_targetLang) throws Exception
     {
         int col = 0;
         int row = LANGUAGE_INFO_ROW;
@@ -596,8 +581,8 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         trgLangCell.setCellStyle(contentStyle);
     }
 
-    private void writeQualityAssessmentInfo(Workbook p_workbook, Sheet p_sheet, Job p_job, GlobalSightLocale p_targetLocale)
-            throws Exception
+    private void writeQualityAssessmentInfo(Workbook p_workbook, Sheet p_sheet, Job p_job,
+            GlobalSightLocale p_targetLocale) throws Exception
     {
         String qualityAssessment = null;
         int col = 1;
@@ -615,8 +600,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         {
             if (p_targetLocale.getId() == wf.getTargetLocale().getId())
             {
-                Collection tasks = ServerProxy.getTaskManager()
-                        .getCurrentTasks(wf.getId());
+                Collection tasks = ServerProxy.getTaskManager().getCurrentTasks(wf.getId());
                 if (tasks != null)
                 {
                     for (Iterator it = tasks.iterator(); it.hasNext();)
@@ -640,8 +624,8 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
 
     }
 
-    private void writeMarketSuitabilityInfo(Workbook p_workbook, Sheet p_sheet, Job p_job, GlobalSightLocale p_targetLocale)
-            throws Exception
+    private void writeMarketSuitabilityInfo(Workbook p_workbook, Sheet p_sheet, Job p_job,
+            GlobalSightLocale p_targetLocale) throws Exception
     {
         String marketSuitabilty = null;
         int col = 1;
@@ -659,8 +643,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         {
             if (p_targetLocale.getId() == wf.getTargetLocale().getId())
             {
-                Collection tasks = ServerProxy.getTaskManager()
-                        .getCurrentTasks(wf.getId());
+                Collection tasks = ServerProxy.getTaskManager().getCurrentTasks(wf.getId());
                 if (tasks != null)
                 {
                     for (Iterator it = tasks.iterator(); it.hasNext();)
@@ -683,8 +666,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
 
     }
 
-    private void writeReviewerComment(Workbook p_workbook, Sheet p_sheet)
-            throws Exception
+    private void writeReviewerComment(Workbook p_workbook, Sheet p_sheet) throws Exception
     {
         int col = 1;
         int row = 8;
@@ -723,11 +705,11 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
     @SuppressWarnings(
     { "rawtypes", "unchecked" })
     private int writeSegmentInfo(Workbook p_workBook, Sheet p_sheet, Job p_job,
-            GlobalSightLocale p_targetLocale, String p_srcPageId,
-            String p_dateFormat, int p_row) throws Exception
+            GlobalSightLocale p_targetLocale, String p_srcPageId, String p_dateFormat, int p_row)
+            throws Exception
     {
         boolean review_only = false;
-        Vector<TargetPage> targetPages = new Vector<TargetPage>();
+        Collection<TargetPage> targetPages = null;
 
         TranslationMemoryProfile tmp = null;
         Vector<String> excludItems = null;
@@ -746,21 +728,19 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             if (p_targetLocale.getId() == workflow.getTargetLocale().getId())
             {
                 targetPages = workflow.getTargetPages();
-                tmp = workflow.getJob().getL10nProfile()
-                        .getTranslationMemoryProfile();
+                tmp = workflow.getJob().getL10nProfile().getTranslationMemoryProfile();
                 if (tmp != null)
                 {
                     excludItems = tmp.getJobExcludeTuTypes();
                 }
-                Collection tasks = ServerProxy.getTaskManager()
-                        .getCurrentTasks(workflow.getId());
+                Collection tasks = ServerProxy.getTaskManager().getCurrentTasks(workflow.getId());
                 if (tasks != null)
                 {
                     for (Iterator it = tasks.iterator(); it.hasNext();)
                     {
                         Task task = (Task) it.next();
                         review_only = task.isType(Task.TYPE_REVIEW);
-                        
+
                     }
                 }
             }
@@ -773,23 +753,19 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         }
         else
         {
-            LeverageMatchLingManager lmLingManager = LingServerProxy
-                    .getLeverageMatchLingManager();
-            TermLeverageManager termLeverageManager = ServerProxy
-                    .getTermLeverageManager();
+            LeverageMatchLingManager lmLingManager = LingServerProxy.getLeverageMatchLingManager();
+            TermLeverageManager termLeverageManager = ServerProxy.getTermLeverageManager();
 
             Locale sourcePageLocale = p_job.getSourceLocale().getLocale();
             Locale targetPageLocale = p_targetLocale.getLocale();
-            TermLeverageOptions termLeverageOptions = getTermLeverageOptions(
-                    sourcePageLocale, targetPageLocale, p_job.getL10nProfile()
-                            .getProject().getTermbaseName(),
+            TermLeverageOptions termLeverageOptions = getTermLeverageOptions(sourcePageLocale,
+                    targetPageLocale, p_job.getL10nProfile().getProject().getTermbaseName(),
                     String.valueOf(p_job.getCompanyId()));
             Map<Long, Set<TermLeverageMatch>> termLeverageMatchResultMap = null;
             if (termLeverageOptions != null)
             {
                 termLeverageMatchResultMap = termLeverageManager
-                        .getTermMatchesForPages(p_job.getSourcePages(),
-                                p_targetLocale);
+                        .getTermMatchesForPages(p_job.getSourcePages(), p_targetLocale);
             }
 
             String category = null;
@@ -797,17 +773,15 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             pData.setMode(PseudoConstants.PSEUDO_COMPACT);
             String sid = null;
             Set<Integer> rowsWithCommentSet = new HashSet<Integer>();
-            for (int i = 0; i < targetPages.size(); i++)
+            for (TargetPage targetPage : targetPages)
             {
                 if (cancel)
                     return 0;
 
-                TargetPage targetPage = (TargetPage) targetPages.get(i);
                 SourcePage sourcePage = targetPage.getSourcePage();
 
                 if (!"".equals(p_srcPageId)
-                        && !p_srcPageId.equals(String.valueOf(sourcePage
-                                .getId())))
+                        && !p_srcPageId.equals(String.valueOf(sourcePage.getId())))
                 {
                     // ignore the source pages not equal to the one
                     // if the request comes from pop up editor
@@ -818,28 +792,21 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                 List sourceTuvs = SegmentTuvUtil.getSourceTuvs(sourcePage);
                 List targetTuvs = SegmentTuvUtil.getTargetTuvs(targetPage);
 
-                MatchTypeStatistics tuvMatchTypes = lmLingManager
-                        .getMatchTypesForStatistics(sourcePage.getIdAsLong(),
-                                targetPage.getLocaleId(),
-                                p_job.getLeverageMatchThreshold());
-                Map<Long, Set<LeverageMatch>> fuzzyLeverageMatchMap = lmLingManager
-                        .getFuzzyMatches(sourcePage.getIdAsLong(), new Long(
-                                targetPage.getLocaleId()));
+                MatchTypeStatistics tuvMatchTypes = lmLingManager.getMatchTypesForStatistics(
+                        sourcePage.getIdAsLong(), targetPage.getLocaleId(),
+                        p_job.getLeverageMatchThreshold());
+                Map<Long, Set<LeverageMatch>> fuzzyLeverageMatchMap = lmLingManager.getFuzzyMatches(
+                        sourcePage.getIdAsLong(), new Long(targetPage.getLocaleId()));
                 Map<Long, Tuv> allTuvMap = this.getAllTuvsMap(targetPage);
 
-                sourcePageLocale = sourcePage.getGlobalSightLocale()
-                        .getLocale();
-                targetPageLocale = targetPage.getGlobalSightLocale()
-                        .getLocale();
+                sourcePageLocale = sourcePage.getGlobalSightLocale().getLocale();
+                targetPageLocale = targetPage.getGlobalSightLocale().getLocale();
 
-                boolean m_rtlSourceLocale = EditUtil
-                        .isRTLLocale(sourcePageLocale.toString());
-                boolean m_rtlTargetLocale = EditUtil
-                        .isRTLLocale(targetPageLocale.toString());
+                boolean m_rtlSourceLocale = EditUtil.isRTLLocale(sourcePageLocale.toString());
+                boolean m_rtlTargetLocale = EditUtil.isRTLLocale(targetPageLocale.toString());
 
                 // Find segment all comments belong to this target page
-                Map<Long, IssueImpl> issuesMap = CommentHelper
-                        .getIssuesMap(targetPage.getId());
+                Map<Long, IssueImpl> issuesMap = CommentHelper.getIssuesMap(targetPage.getId());
 
                 for (int j = 0; j < targetTuvs.size(); j++)
                 {
@@ -883,35 +850,32 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                     sid = sourceTuv.getSid();
 
                     StringBuilder matches = ReportGeneratorUtil.getMatches(fuzzyLeverageMatchMap,
-                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs, m_bundle,
-                            sourceTuv, targetTuv, p_job.getId());
+                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs, m_bundle, sourceTuv,
+                            targetTuv, p_job.getId());
 
                     // Get Terminology/Glossary Source and Target.
                     String sourceTerms = "";
                     String targetTerms = "";
-                    if (termLeverageMatchResultMap != null
-                            && termLeverageMatchResultMap.size() > 0)
+                    if (termLeverageMatchResultMap != null && termLeverageMatchResultMap.size() > 0)
                     {
                         Set<TermLeverageMatch> termLeverageMatchSet = termLeverageMatchResultMap
                                 .get(sourceTuv.getId());
-                        if (termLeverageMatchSet != null
-                                && termLeverageMatchSet.size() > 0)
+                        if (termLeverageMatchSet != null && termLeverageMatchSet.size() > 0)
                         {
-                            TermLeverageMatch tlm = termLeverageMatchSet
-                                    .iterator().next();
+                            TermLeverageMatch tlm = termLeverageMatchSet.iterator().next();
                             sourceTerms = tlm.getMatchedSourceTerm();
                             targetTerms = tlm.getMatchedTargetTerm();
                         }
                     }
 
                     Row currentRow = getRow(p_sheet, p_row);
-                   
+
                     // Source segment with compact tags
                     CellStyle srcStyle = m_rtlSourceLocale ? getRtlContentStyle(p_workBook)
                             : getContentStyle(p_workBook);
                     Cell cell_A = getCell(currentRow, col);
-                    cell_A.setCellValue(getSegment(pData, sourceTuv,
-                            m_rtlSourceLocale, p_job.getId()));
+                    cell_A.setCellValue(
+                            getSegment(pData, sourceTuv, m_rtlSourceLocale, p_job.getId()));
                     cell_A.setCellStyle(srcStyle);
                     col++;
 
@@ -926,12 +890,12 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                     col++;
 
                     // Modify the translation
-                    CellStyle modifyTranslationStyle = m_rtlTargetLocale ? getUnlockedRightStyle(p_workBook)
-                            : getUnlockedStyle(p_workBook);
+                    CellStyle modifyTranslationStyle = m_rtlTargetLocale
+                            ? getUnlockedRightStyle(p_workBook) : getUnlockedStyle(p_workBook);
                     modifyTranslationStyle.setLocked(false);
                     Cell cell_C = getCell(currentRow, col);
-                    cell_C.setCellValue(getSegment(pData, targetTuv, m_rtlTargetLocale,
-                            p_job.getId()));
+                    cell_C.setCellValue(
+                            getSegment(pData, targetTuv, m_rtlTargetLocale, p_job.getId()));
                     if (review_only)
                     {
                         modifyTranslationStyle.setLocked(true);
@@ -956,7 +920,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                     cell_F.setCellValue(commentStatus);
                     CellStyle commentCS = p_workBook.createCellStyle();
                     commentCS.cloneStyleFrom(getContentStyle(p_workBook));
-//                    commentCS.setLocked(false);
+                    // commentCS.setLocked(false);
                     cell_F.setCellStyle(commentCS);
                     // add comment status drop down list for current row.
                     String[] statusArray = getCommentStatusList(lastComment);
@@ -1033,18 +997,17 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             // Add category failure drop down list here.
             addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row - 1,
                     CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
-            addPriority(p_sheet, SEGMENT_START_ROW, p_row - 1, PRIORITY_COLUMN,
-                    PRIORITY_COLUMN);
+            addPriority(p_sheet, SEGMENT_START_ROW, p_row - 1, PRIORITY_COLUMN, PRIORITY_COLUMN);
         }
 
         return p_row;
     }
-    
+
     private String getMtName(String name)
     {
         return name.substring(0, name.length() - 3) + "()";
     }
-    
+
     private boolean addLeverageMatch(String name, List<String> previous,
             List<String> editorHistoryTask, LeverageMatch lm, long p_jobId, PseudoData pData,
             Tuv targetTuv) throws Exception
@@ -1062,7 +1025,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
 
         return false;
     }
-    
+
     @SuppressWarnings("unchecked")
     private String getPreviousSegments(Map<Long, Tuv> allTargetTuvsMap,
             MatchTypeStatistics tuvMatchTypes, long p_trgTuvId, Tuv sourceTuv, Tuv targetTuv,
@@ -1111,15 +1074,16 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
 
                 if (!isAddMatch)
                 {
-                    isAddMatch = addLeverageMatch(lm.getCreationUser(), previous,
-                            editorHistoryTask, lm, p_jobId, pData, targetTuv);
+                    isAddMatch = addLeverageMatch(lm.getCreationUser(), previous, editorHistoryTask,
+                            lm, p_jobId, pData, targetTuv);
                 }
             }
             for (int k = 0; k < previousTaskTuvs.size(); k++)
             {
                 TaskTuv taskTuv = (TaskTuv) previousTaskTuvs.get(k);
                 String taskUserName = UserUtil.getUserNameById(taskTuv.getTask().getAcceptor());
-                String taskName = taskTuv.getTaskName().substring(0,taskTuv.getTaskName().lastIndexOf("_"));
+                String taskName = taskTuv.getTaskName().substring(0,
+                        taskTuv.getTaskName().lastIndexOf("_"));
                 Tuv previousTuv = allTargetTuvsMap.get(taskTuv.getPreviousTuvId());
                 // generally it should not be null for performance
                 if (previousTuv != null)
@@ -1153,7 +1117,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             {
                 if (previousSegments.length() > 0)
                     previousSegments += "\r\n";
-                
+
                 previousSegment = previous.get(pi);
                 String previousTaskString = (String) editorHistoryTask.get(pi);
                 previousSegments += previousTaskString + "\r" + previousSegment;
@@ -1162,8 +1126,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         return previousSegments;
     }
 
-    private void addCommentStatus(Sheet p_sheet,
-            Set<Integer> rowsWithCommentSet, int last_row)
+    private void addCommentStatus(Sheet p_sheet, Set<Integer> rowsWithCommentSet, int last_row)
     {
         DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
         DataValidationConstraint dvConstraintAll = null;
@@ -1187,8 +1150,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             cellAddress = new CellRangeAddress(SEGMENT_START_ROW, last_row - 1,
                     COMMENT_STATUS_COLUMN, COMMENT_STATUS_COLUMN);
             addressListOne.addCellRangeAddress(cellAddress);
-            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintOne,
-                    addressListOne);
+            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintOne, addressListOne);
         }
         else
         {
@@ -1202,8 +1164,8 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                     if (!hasComment && row != SEGMENT_START_ROW)
                     {
                         endRow = row - 1;
-                        cellAddress = new CellRangeAddress(startRow, endRow,
-                                COMMENT_STATUS_COLUMN, COMMENT_STATUS_COLUMN);
+                        cellAddress = new CellRangeAddress(startRow, endRow, COMMENT_STATUS_COLUMN,
+                                COMMENT_STATUS_COLUMN);
                         addressListOne.addCellRangeAddress(cellAddress);
                         startRow = row;
                     }
@@ -1214,8 +1176,8 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                     if (hasComment)
                     {
                         endRow = row - 1;
-                        cellAddress = new CellRangeAddress(startRow, endRow,
-                                COMMENT_STATUS_COLUMN, COMMENT_STATUS_COLUMN);
+                        cellAddress = new CellRangeAddress(startRow, endRow, COMMENT_STATUS_COLUMN,
+                                COMMENT_STATUS_COLUMN);
                         addressListAll.addCellRangeAddress(cellAddress);
                         startRow = row;
                     }
@@ -1237,19 +1199,16 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                 }
             }
 
-            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintAll,
-                    addressListAll);
-            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintOne,
-                    addressListOne);
+            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintAll, addressListAll);
+            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintOne, addressListOne);
         }
     }
 
     /**
      * Populates a term leverage options object.
      */
-    private TermLeverageOptions getTermLeverageOptions(Locale p_sourceLocale,
-            Locale p_targetLocale, String p_termbaseName, String p_companyId)
-            throws Exception
+    private TermLeverageOptions getTermLeverageOptions(Locale p_sourceLocale, Locale p_targetLocale,
+            String p_termbaseName, String p_companyId) throws Exception
     {
         TermLeverageOptions options = null;
 
@@ -1286,19 +1245,16 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             ITermbase termbase = null;
             if (p_companyId != null)
             {
-                termbase = manager.connect(p_termbaseName,
-                        ITermbase.SYSTEM_USER, "", p_companyId);
+                termbase = manager.connect(p_termbaseName, ITermbase.SYSTEM_USER, "", p_companyId);
             }
             else
             {
-                termbase = manager.connect(p_termbaseName,
-                        ITermbase.SYSTEM_USER, "");
+                termbase = manager.connect(p_termbaseName, ITermbase.SYSTEM_USER, "");
             }
 
             // add source locale and lang names
             options.setSourcePageLocale(sourceLocale);
-            ArrayList sourceLangNames = termbase
-                    .getLanguagesByLocale(sourceLocale.toString());
+            ArrayList sourceLangNames = termbase.getLanguagesByLocale(sourceLocale.toString());
 
             for (int i = 0, max = sourceLangNames.size(); i < max; i++)
             {
@@ -1308,8 +1264,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             }
 
             // add target locales and lang names
-            ArrayList targetLangNames = termbase
-                    .getLanguagesByLocale(targetLocale.toString());
+            ArrayList targetLangNames = termbase.getLanguagesByLocale(targetLocale.toString());
             for (int i = 0, max = targetLangNames.size(); i < max; i++)
             {
                 String langName = (String) targetLangNames.get(i);
@@ -1412,8 +1367,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         return unlockedStyle;
     }
 
-    private CellStyle getUnlockedRightStyle(Workbook p_workbook)
-            throws Exception
+    private CellStyle getUnlockedRightStyle(Workbook p_workbook) throws Exception
     {
         if (unlockedRightStyle == null)
         {
@@ -1439,8 +1393,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         List<String> result = new ArrayList<String>();
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-        List failureCategories = IssueOptions.getAllCategories(m_bundle,
-                currentCompanyId);
+        List failureCategories = IssueOptions.getAllCategories(m_bundle, currentCompanyId);
         for (int i = 0; i < failureCategories.size(); i++)
         {
             Select aCategory = (Select) failureCategories.get(i);
@@ -1455,8 +1408,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         List<String> result = new ArrayList<String>();
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-        List qualityCategories = IssueOptions.getAllQualityCategories(m_bundle,
-                currentCompanyId);
+        List qualityCategories = IssueOptions.getAllQualityCategories(m_bundle, currentCompanyId);
         for (int i = 0; i < qualityCategories.size(); i++)
         {
             Select aCategory = (Select) qualityCategories.get(i);
@@ -1471,8 +1423,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         List<String> result = new ArrayList<String>();
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-        List marketCategories = IssueOptions.getAllMarketCategories(m_bundle,
-                currentCompanyId);
+        List marketCategories = IssueOptions.getAllMarketCategories(m_bundle, currentCompanyId);
         for (int i = 0; i < marketCategories.size(); i++)
         {
             Select aCategory = (Select) marketCategories.get(i);
@@ -1493,8 +1444,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
      *            the blank column length
      * @throws Exception
      */
-    private void writeBlank(Sheet p_sheet, int p_row, int p_colLen)
-            throws Exception
+    private void writeBlank(Sheet p_sheet, int p_row, int p_colLen) throws Exception
     {
         for (int col = 0; col < p_colLen; col++)
         {
@@ -1673,7 +1623,6 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         }
     }
 
-
     private String[] getCommentStatusList(String lastComment)
     {
         List<String> status = new ArrayList<String>();
@@ -1692,16 +1641,13 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         return statusArray;
     }
 
-    private void addCommentStatusValidation(Sheet p_sheet,
-            DataValidationHelper dvHelper,
-            DataValidationConstraint dvConstraint,
-            CellRangeAddressList addressList)
+    private void addCommentStatusValidation(Sheet p_sheet, DataValidationHelper dvHelper,
+            DataValidationConstraint dvConstraint, CellRangeAddressList addressList)
     {
         if (addressList == null || addressList.countRanges() == 0)
             return;
 
-        DataValidation validationOne = dvHelper.createValidation(dvConstraint,
-                addressList);
+        DataValidation validationOne = dvHelper.createValidation(dvConstraint, addressList);
         validationOne.setSuppressDropDownArrow(true);
         validationOne.setShowErrorBox(true);
         p_sheet.addValidationData(validationOne);
@@ -1716,24 +1662,23 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
      * @param startColumn
      * @param lastColumn
      */
-    private void addCategoryFailureValidation(Sheet p_sheet, int startRow,
-            int lastRow, int startColumn, int lastColumn)
+    private void addCategoryFailureValidation(Sheet p_sheet, int startRow, int lastRow,
+            int startColumn, int lastColumn)
     {
         // Add category failure drop down list here.
         DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
         DataValidationConstraint dvConstraint = dvHelper
                 .createFormulaListConstraint(CATEGORY_FAILURE_DROP_DOWN_LIST);
-        CellRangeAddressList addressList = new CellRangeAddressList(startRow,
-                lastRow, startColumn, lastColumn);
-        DataValidation validation = dvHelper.createValidation(dvConstraint,
-                addressList);
+        CellRangeAddressList addressList = new CellRangeAddressList(startRow, lastRow, startColumn,
+                lastColumn);
+        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
         validation.setSuppressDropDownArrow(true);
         validation.setShowErrorBox(true);
         p_sheet.addValidationData(validation);
     }
 
-    private void addPriority(Sheet p_sheet, int startRow, int lastRow,
-            int startColumn, int lastColumn)
+    private void addPriority(Sheet p_sheet, int startRow, int lastRow, int startColumn,
+            int lastColumn)
     {
         // Add category failure drop down list here.
         HashMap priorities = new HashMap();
@@ -1743,18 +1688,15 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         priorities.values().toArray(allpriorities);
         DataValidationConstraint dvConstraint = dvHelper
                 .createExplicitListConstraint(allpriorities);
-        CellRangeAddressList addressList = new CellRangeAddressList(startRow,
-                lastRow, startColumn, lastColumn);
-        DataValidation validation = dvHelper.createValidation(dvConstraint,
-                addressList);
+        CellRangeAddressList addressList = new CellRangeAddressList(startRow, lastRow, startColumn,
+                lastColumn);
+        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
         validation.setSuppressDropDownArrow(true);
         validation.setShowErrorBox(true);
         p_sheet.addValidationData(validation);
     }
 
-
-    private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale,
-            long p_jobId)
+    private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale, long p_jobId)
     {
         StringBuffer content = new StringBuffer();
         String dataType = null;
@@ -1774,8 +1716,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
                 {
                     GxmlElement sub = (GxmlElement) subFlows.get(i);
                     String subId = sub.getAttribute(GxmlNames.SUB_ID);
-                    content.append("\r\n#").append(tuId).append(":")
-                            .append(subId).append("\n")
+                    content.append("\r\n#").append(tuId).append(":").append(subId).append("\n")
                             .append(getCompactPtagString(sub, dataType));
                 }
             }
@@ -1793,8 +1734,7 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
         return result;
     }
 
-    private String getCompactPtagString(GxmlElement p_gxmlElement,
-            String p_dataType)
+    private String getCompactPtagString(GxmlElement p_gxmlElement, String p_dataType)
     {
         String compactPtags = null;
         OnlineTagHelper applet = new OnlineTagHelper();
@@ -1839,8 +1779,8 @@ public class PostReviewQAReportGenerator implements ReportGenerator, Cancelable
             }
         }
 
-        return ReportHelper.getReportFile(p_reportType, p_job,
-                ReportConstants.EXTENSION_XLSX, langInfo);
+        return ReportHelper.getReportFile(p_reportType, p_job, ReportConstants.EXTENSION_XLSX,
+                langInfo);
     }
 
     public void setUserId(String p_userId)

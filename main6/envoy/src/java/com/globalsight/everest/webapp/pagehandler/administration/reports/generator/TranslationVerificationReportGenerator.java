@@ -104,8 +104,7 @@ import com.globalsight.util.resourcebundle.SystemResourceBundle;
  * This Generator is used for creating Translation Verification Report (Include
  * Translation Verification Report in offline download report page)
  */
-public class TranslationVerificationReportGenerator implements ReportGenerator,
-        Cancelable
+public class TranslationVerificationReportGenerator implements ReportGenerator, Cancelable
 {
     private static final Logger logger = Logger
             .getLogger(TranslationVerificationReportGenerator.class);
@@ -142,18 +141,17 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
         m_companyName = p_currentCompanyName;
         CompanyThreadLocal.getInstance().setValue(m_companyName);
         m_uiLocale = Locale.US;
-        m_bundle = SystemResourceBundle.getInstance().getResourceBundle(
-                ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
+        m_bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
     }
 
-    public TranslationVerificationReportGenerator(String p_currentCompanyName,
-            String p_userId)
+    public TranslationVerificationReportGenerator(String p_currentCompanyName, String p_userId)
     {
         m_companyName = p_currentCompanyName;
         CompanyThreadLocal.getInstance().setValue(m_companyName);
         m_uiLocale = Locale.US;
-        m_bundle = SystemResourceBundle.getInstance().getResourceBundle(
-                ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
+        m_bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
         m_userId = p_userId;
     }
 
@@ -176,8 +174,8 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
         {
             m_uiLocale = Locale.US;
         }
-        m_bundle = SystemResourceBundle.getInstance().getResourceBundle(
-                ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
+        m_bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
 
         m_dateFormat = p_request.getParameter(WebAppConstants.DATE_FORMAT);
         if (m_dateFormat == null)
@@ -185,29 +183,25 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
             m_dateFormat = DEFAULT_DATE_FORMAT;
         }
 
-        m_jobIDS = ReportHelper.getListOfLong(p_request
-                .getParameter(ReportConstants.JOB_IDS));
+        m_jobIDS = ReportHelper.getListOfLong(p_request.getParameter(ReportConstants.JOB_IDS));
         GlobalSightLocaleComparator comparator = new GlobalSightLocaleComparator(
                 GlobalSightLocaleComparator.ISO_CODE, m_uiLocale);
-        m_targetLocales = ReportHelper
-                .getTargetLocaleList(p_request
-                        .getParameterValues(ReportConstants.TARGETLOCALE_LIST),
-                        comparator);
+        m_targetLocales = ReportHelper.getTargetLocaleList(
+                p_request.getParameterValues(ReportConstants.TARGETLOCALE_LIST), comparator);
 
         m_companyName = UserUtil.getCurrentCompanyName(p_request);
-        if (CompanyWrapper.isSuperCompanyName(m_companyName)
-                && m_jobIDS != null && m_jobIDS.size() > 0)
+        if (CompanyWrapper.isSuperCompanyName(m_companyName) && m_jobIDS != null
+                && m_jobIDS.size() > 0)
         {
             Job job = ServerProxy.getJobHandler().getJobById(m_jobIDS.get(0));
-            m_companyName = CompanyWrapper.getCompanyNameById(job
-                    .getCompanyId());
+            m_companyName = CompanyWrapper.getCompanyNameById(job.getCompanyId());
         }
         CompanyThreadLocal.getInstance().setValue(m_companyName);
     }
 
     @Override
-    public File[] generateReports(List<Long> p_jobIDS,
-            List<GlobalSightLocale> p_targetLocales) throws Exception
+    public File[] generateReports(List<Long> p_jobIDS, List<GlobalSightLocale> p_targetLocales)
+            throws Exception
     {
         List<File> workBooks = new ArrayList<File>();
         for (long jobID : p_jobIDS)
@@ -239,8 +233,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
      * @throws Exception
      */
     private void createReport(Workbook p_workbook, Job p_job,
-            List<GlobalSightLocale> p_targetLocales, String p_dateFormat)
-            throws Exception
+            List<GlobalSightLocale> p_targetLocales, String p_dateFormat) throws Exception
     {
         // Till now, only support one target locale.
         GlobalSightLocale trgLocale = p_targetLocales.get(0);
@@ -269,8 +262,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
         String trgLang = trgLocale.getDisplayName(m_uiLocale);
         writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
 
-        writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat,
-                SEGMENT_START_ROW);
+        writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat, SEGMENT_START_ROW);
     }
 
     /**
@@ -293,8 +285,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
 
         Row titleRow = getRow(p_sheet, 0);
         Cell titleCell = getCell(titleRow, 0);
-        titleCell.setCellValue(m_bundle
-                .getString("lb_translation_verification_report"));
+        titleCell.setCellValue(m_bundle.getString("lb_translation_verification_report"));
         titleCell.setCellStyle(cs);
     }
 
@@ -308,16 +299,15 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
      * @param p_targetLocale
      * @throws Exception
      */
-    private void addHidenInfoForUpload(Workbook p_workbook, Sheet p_sheet,
-            Job p_job, GlobalSightLocale p_targetLocale) throws Exception
+    private void addHidenInfoForUpload(Workbook p_workbook, Sheet p_sheet, Job p_job,
+            GlobalSightLocale p_targetLocale) throws Exception
     {
         String reportInfo = "";
         for (Workflow wf : p_job.getWorkflows())
         {
             if (p_targetLocale.getId() == wf.getTargetLocale().getId())
             {
-                Collection tasks = ServerProxy.getTaskManager()
-                        .getCurrentTasks(wf.getId());
+                Collection tasks = ServerProxy.getTaskManager().getCurrentTasks(wf.getId());
                 if (tasks != null)
                 {
                     for (Iterator it = tasks.iterator(); it.hasNext();)
@@ -346,8 +336,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
      *            the sheet
      * @throws Exception
      */
-    private void addLanguageHeader(Workbook p_workBook, Sheet p_sheet)
-            throws Exception
+    private void addLanguageHeader(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
         int col = 0;
         int row = LANGUAGE_HEADER_ROW;
@@ -371,8 +360,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
      *            the sheet
      * @throws Exception
      */
-    private void addSegmentHeader(Workbook p_workBook, Sheet p_sheet)
-            throws Exception
+    private void addSegmentHeader(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
         int col = 0;
         int row = SEGMENT_HEADER_ROW;
@@ -469,8 +457,8 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
         col++;
     }
 
-    private void writeLanguageInfo(Workbook p_workbook, Sheet p_sheet,
-            String p_sourceLang, String p_targetLang) throws Exception
+    private void writeLanguageInfo(Workbook p_workbook, Sheet p_sheet, String p_sourceLang,
+            String p_targetLang) throws Exception
     {
         int col = 0;
         int row = LANGUAGE_INFO_ROW;
@@ -505,13 +493,11 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
      * @param p_row
      *            the segment row in sheet
      */
-    @SuppressWarnings(
-    { "rawtypes", "unchecked" })
     private int writeSegmentInfo(Workbook p_workBook, Sheet p_sheet, Job p_job,
-            GlobalSightLocale p_targetLocale, String p_srcPageId,
-            String p_dateFormat, int p_row) throws Exception
+            GlobalSightLocale p_targetLocale, String p_srcPageId, String p_dateFormat, int p_row)
+            throws Exception
     {
-        Vector<TargetPage> targetPages = new Vector<TargetPage>();
+        Collection<TargetPage> targetPages = null;
 
         TranslationMemoryProfile tmp = null;
         Vector<String> excludItems = null;
@@ -531,8 +517,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
             if (p_targetLocale.getId() == workflow.getTargetLocale().getId())
             {
                 targetPages = workflow.getTargetPages();
-                tmp = workflow.getJob().getL10nProfile()
-                        .getTranslationMemoryProfile();
+                tmp = workflow.getJob().getL10nProfile().getTranslationMemoryProfile();
                 if (tmp != null)
                 {
                     excludItems = tmp.getJobExcludeTuTypes();
@@ -547,23 +532,19 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
         }
         else
         {
-            LeverageMatchLingManager lmLingManager = LingServerProxy
-                    .getLeverageMatchLingManager();
-            TermLeverageManager termLeverageManager = ServerProxy
-                    .getTermLeverageManager();
+            LeverageMatchLingManager lmLingManager = LingServerProxy.getLeverageMatchLingManager();
+            TermLeverageManager termLeverageManager = ServerProxy.getTermLeverageManager();
 
             Locale sourcePageLocale = p_job.getSourceLocale().getLocale();
             Locale targetPageLocale = p_targetLocale.getLocale();
-            TermLeverageOptions termLeverageOptions = getTermLeverageOptions(
-                    sourcePageLocale, targetPageLocale, p_job.getL10nProfile()
-                            .getProject().getTermbaseName(),
+            TermLeverageOptions termLeverageOptions = getTermLeverageOptions(sourcePageLocale,
+                    targetPageLocale, p_job.getL10nProfile().getProject().getTermbaseName(),
                     String.valueOf(p_job.getCompanyId()));
             Map<Long, Set<TermLeverageMatch>> termLeverageMatchResultMap = null;
             if (termLeverageOptions != null)
             {
                 termLeverageMatchResultMap = termLeverageManager
-                        .getTermMatchesForPages(p_job.getSourcePages(),
-                                p_targetLocale);
+                        .getTermMatchesForPages(p_job.getSourcePages(), p_targetLocale);
             }
 
             String category = null;
@@ -571,17 +552,15 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
             pData.setMode(PseudoConstants.PSEUDO_COMPACT);
             String sid = null;
             Set<Integer> rowsWithCommentSet = new HashSet<Integer>();
-            for (int i = 0; i < targetPages.size(); i++)
+            for (TargetPage targetPage : targetPages)
             {
                 if (cancel)
                     return 0;
 
-                TargetPage targetPage = (TargetPage) targetPages.get(i);
                 SourcePage sourcePage = targetPage.getSourcePage();
 
                 if (!"".equals(p_srcPageId)
-                        && !p_srcPageId.equals(String.valueOf(sourcePage
-                                .getId())))
+                        && !p_srcPageId.equals(String.valueOf(sourcePage.getId())))
                 {
                     // ignore the source pages not equal to the one
                     // if the request comes from pop up editor
@@ -592,28 +571,21 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
                 List sourceTuvs = SegmentTuvUtil.getSourceTuvs(sourcePage);
                 List targetTuvs = SegmentTuvUtil.getTargetTuvs(targetPage);
 
-                MatchTypeStatistics tuvMatchTypes = lmLingManager
-                        .getMatchTypesForStatistics(sourcePage.getIdAsLong(),
-                                targetPage.getLocaleId(),
-                                p_job.getLeverageMatchThreshold());
-                Map<Long, Set<LeverageMatch>> fuzzyLeverageMatchMap = lmLingManager
-                        .getFuzzyMatches(sourcePage.getIdAsLong(), new Long(
-                                targetPage.getLocaleId()));
+                MatchTypeStatistics tuvMatchTypes = lmLingManager.getMatchTypesForStatistics(
+                        sourcePage.getIdAsLong(), targetPage.getLocaleId(),
+                        p_job.getLeverageMatchThreshold());
+                Map<Long, Set<LeverageMatch>> fuzzyLeverageMatchMap = lmLingManager.getFuzzyMatches(
+                        sourcePage.getIdAsLong(), new Long(targetPage.getLocaleId()));
                 Map<Long, Tuv> allTuvMap = this.getAllTuvsMap(targetPage);
 
-                sourcePageLocale = sourcePage.getGlobalSightLocale()
-                        .getLocale();
-                targetPageLocale = targetPage.getGlobalSightLocale()
-                        .getLocale();
+                sourcePageLocale = sourcePage.getGlobalSightLocale().getLocale();
+                targetPageLocale = targetPage.getGlobalSightLocale().getLocale();
 
-                boolean m_rtlSourceLocale = EditUtil
-                        .isRTLLocale(sourcePageLocale.toString());
-                boolean m_rtlTargetLocale = EditUtil
-                        .isRTLLocale(targetPageLocale.toString());
+                boolean m_rtlSourceLocale = EditUtil.isRTLLocale(sourcePageLocale.toString());
+                boolean m_rtlTargetLocale = EditUtil.isRTLLocale(targetPageLocale.toString());
 
                 // Find segment all comments belong to this target page
-                Map<Long, IssueImpl> issuesMap = CommentHelper
-                        .getIssuesMap(targetPage.getId());
+                Map<Long, IssueImpl> issuesMap = CommentHelper.getIssuesMap(targetPage.getId());
 
                 for (int j = 0; j < targetTuvs.size(); j++)
                 {
@@ -644,30 +616,26 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
                     }
                     if (issueHistories != null && issueHistories.size() > 0)
                     {
-                        IssueHistory issueHistory = (IssueHistory) issueHistories
-                                .get(0);
+                        IssueHistory issueHistory = (IssueHistory) issueHistories.get(0);
                         lastComment = issueHistory.getComment();
                     }
 
                     sid = sourceTuv.getSid();
 
                     StringBuilder matches = ReportGeneratorUtil.getMatches(fuzzyLeverageMatchMap,
-                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs, m_bundle,
-                            sourceTuv, targetTuv, p_job.getId());
+                            tuvMatchTypes, excludItems, sourceTuvs, targetTuvs, m_bundle, sourceTuv,
+                            targetTuv, p_job.getId());
 
                     // Get Terminology/Glossary Source and Target.
                     String sourceTerms = "";
                     String targetTerms = "";
-                    if (termLeverageMatchResultMap != null
-                            && termLeverageMatchResultMap.size() > 0)
+                    if (termLeverageMatchResultMap != null && termLeverageMatchResultMap.size() > 0)
                     {
                         Set<TermLeverageMatch> termLeverageMatchSet = termLeverageMatchResultMap
                                 .get(sourceTuv.getId());
-                        if (termLeverageMatchSet != null
-                                && termLeverageMatchSet.size() > 0)
+                        if (termLeverageMatchSet != null && termLeverageMatchSet.size() > 0)
                         {
-                            TermLeverageMatch tlm = termLeverageMatchSet
-                                    .iterator().next();
+                            TermLeverageMatch tlm = termLeverageMatchSet.iterator().next();
                             sourceTerms = tlm.getMatchedSourceTerm();
                             targetTerms = tlm.getMatchedTargetTerm();
                         }
@@ -679,17 +647,17 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
                     CellStyle srcStyle = m_rtlSourceLocale ? getRtlContentStyle(p_workBook)
                             : getContentStyle(p_workBook);
                     Cell cell_A = getCell(currentRow, col);
-                    cell_A.setCellValue(getSegment(pData, sourceTuv,
-                            m_rtlSourceLocale, p_job.getId()));
+                    cell_A.setCellValue(
+                            getSegment(pData, sourceTuv, m_rtlSourceLocale, p_job.getId()));
                     cell_A.setCellStyle(srcStyle);
                     col++;
 
                     // the translation after the translation activity
                     CellStyle trgStyle = null;
-                    String previousSegments = getPreviousSegments(allTuvMap,
-                            targetTuv.getId(), targetTuv, p_job.getId(), pData);
-                    String currentSegments = getSegment(pData, targetTuv,
-                            m_rtlTargetLocale, p_job.getId());
+                    String previousSegments = getPreviousSegments(allTuvMap, targetTuv.getId(),
+                            targetTuv, p_job.getId(), pData);
+                    String currentSegments = getSegment(pData, targetTuv, m_rtlTargetLocale,
+                            p_job.getId());
                     Cell cell_B = getCell(currentRow, col);
                     cell_B.setCellValue(previousSegments);
                     if (StringUtil.isNotEmpty(previousSegments)
@@ -716,8 +684,8 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
                     col++;
 
                     // Modify the translation
-                    CellStyle modifyTranslationStyle = m_rtlTargetLocale ? getUnlockedRightStyle(p_workBook)
-                            : getUnlockedStyle(p_workBook);
+                    CellStyle modifyTranslationStyle = m_rtlTargetLocale
+                            ? getUnlockedRightStyle(p_workBook) : getUnlockedStyle(p_workBook);
                     Cell cell_D = getCell(currentRow, col);
                     cell_D.setCellValue("");
                     cell_D.setCellStyle(modifyTranslationStyle);
@@ -822,8 +790,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
         return p_row;
     }
 
-    private void addCommentStatus(Sheet p_sheet,
-            Set<Integer> rowsWithCommentSet, int last_row)
+    private void addCommentStatus(Sheet p_sheet, Set<Integer> rowsWithCommentSet, int last_row)
     {
         DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
         DataValidationConstraint dvConstraintAll = null;
@@ -847,8 +814,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
             cellAddress = new CellRangeAddress(SEGMENT_START_ROW, last_row - 1,
                     COMMENT_STATUS_COLUMN, COMMENT_STATUS_COLUMN);
             addressListOne.addCellRangeAddress(cellAddress);
-            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintOne,
-                    addressListOne);
+            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintOne, addressListOne);
         }
         else
         {
@@ -862,8 +828,8 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
                     if (!hasComment && row != SEGMENT_START_ROW)
                     {
                         endRow = row - 1;
-                        cellAddress = new CellRangeAddress(startRow, endRow,
-                                COMMENT_STATUS_COLUMN, COMMENT_STATUS_COLUMN);
+                        cellAddress = new CellRangeAddress(startRow, endRow, COMMENT_STATUS_COLUMN,
+                                COMMENT_STATUS_COLUMN);
                         addressListOne.addCellRangeAddress(cellAddress);
                         startRow = row;
                     }
@@ -874,8 +840,8 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
                     if (hasComment)
                     {
                         endRow = row - 1;
-                        cellAddress = new CellRangeAddress(startRow, endRow,
-                                COMMENT_STATUS_COLUMN, COMMENT_STATUS_COLUMN);
+                        cellAddress = new CellRangeAddress(startRow, endRow, COMMENT_STATUS_COLUMN,
+                                COMMENT_STATUS_COLUMN);
                         addressListAll.addCellRangeAddress(cellAddress);
                         startRow = row;
                     }
@@ -897,19 +863,16 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
                 }
             }
 
-            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintAll,
-                    addressListAll);
-            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintOne,
-                    addressListOne);
+            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintAll, addressListAll);
+            addCommentStatusValidation(p_sheet, dvHelper, dvConstraintOne, addressListOne);
         }
     }
 
     /**
      * Populates a term leverage options object.
      */
-    private TermLeverageOptions getTermLeverageOptions(Locale p_sourceLocale,
-            Locale p_targetLocale, String p_termbaseName, String p_companyId)
-            throws Exception
+    private TermLeverageOptions getTermLeverageOptions(Locale p_sourceLocale, Locale p_targetLocale,
+            String p_termbaseName, String p_companyId) throws Exception
     {
         TermLeverageOptions options = null;
 
@@ -946,19 +909,16 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
             ITermbase termbase = null;
             if (p_companyId != null)
             {
-                termbase = manager.connect(p_termbaseName,
-                        ITermbase.SYSTEM_USER, "", p_companyId);
+                termbase = manager.connect(p_termbaseName, ITermbase.SYSTEM_USER, "", p_companyId);
             }
             else
             {
-                termbase = manager.connect(p_termbaseName,
-                        ITermbase.SYSTEM_USER, "");
+                termbase = manager.connect(p_termbaseName, ITermbase.SYSTEM_USER, "");
             }
 
             // add source locale and lang names
             options.setSourcePageLocale(sourceLocale);
-            ArrayList sourceLangNames = termbase
-                    .getLanguagesByLocale(sourceLocale.toString());
+            ArrayList sourceLangNames = termbase.getLanguagesByLocale(sourceLocale.toString());
 
             for (int i = 0, max = sourceLangNames.size(); i < max; i++)
             {
@@ -968,8 +928,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
             }
 
             // add target locales and lang names
-            ArrayList targetLangNames = termbase
-                    .getLanguagesByLocale(targetLocale.toString());
+            ArrayList targetLangNames = termbase.getLanguagesByLocale(targetLocale.toString());
             for (int i = 0, max = targetLangNames.size(); i < max; i++)
             {
                 String langName = (String) targetLangNames.get(i);
@@ -1105,8 +1064,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
         return unlockedStyle;
     }
 
-    private CellStyle getUnlockedRightStyle(Workbook p_workbook)
-            throws Exception
+    private CellStyle getUnlockedRightStyle(Workbook p_workbook) throws Exception
     {
         if (unlockedRightStyle == null)
         {
@@ -1132,8 +1090,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
         List<String> result = new ArrayList<String>();
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-        List failureCategories = IssueOptions.getAllCategories(m_bundle,
-                currentCompanyId);
+        List failureCategories = IssueOptions.getAllCategories(m_bundle, currentCompanyId);
         for (int i = 0; i < failureCategories.size(); i++)
         {
             Select aCategory = (Select) failureCategories.get(i);
@@ -1154,8 +1111,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
      *            the blank column length
      * @throws Exception
      */
-    private void writeBlank(Sheet p_sheet, int p_row, int p_colLen)
-            throws Exception
+    private void writeBlank(Sheet p_sheet, int p_row, int p_colLen) throws Exception
     {
         for (int col = 0; col < p_colLen; col++)
         {
@@ -1263,9 +1219,8 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
                     cell.setCellValue(categories.get(i));
                 }
 
-                String formula = firstSheet.getSheetName() + "!$AA$"
-                        + (SEGMENT_START_ROW + 1) + ":$AA$"
-                        + (SEGMENT_START_ROW + categories.size());
+                String formula = firstSheet.getSheetName() + "!$AA$" + (SEGMENT_START_ROW + 1)
+                        + ":$AA$" + (SEGMENT_START_ROW + categories.size());
                 Name name = p_workbook.createName();
                 name.setRefersToFormula(formula);
                 name.setNameName(CATEGORY_FAILURE_DROP_DOWN_LIST);
@@ -1276,8 +1231,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Error when create hidden area for category failures.", e);
+            logger.error("Error when create hidden area for category failures.", e);
         }
     }
 
@@ -1299,16 +1253,13 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
         return statusArray;
     }
 
-    private void addCommentStatusValidation(Sheet p_sheet,
-            DataValidationHelper dvHelper,
-            DataValidationConstraint dvConstraint,
-            CellRangeAddressList addressList)
+    private void addCommentStatusValidation(Sheet p_sheet, DataValidationHelper dvHelper,
+            DataValidationConstraint dvConstraint, CellRangeAddressList addressList)
     {
         if (addressList == null || addressList.countRanges() == 0)
             return;
 
-        DataValidation validationOne = dvHelper.createValidation(dvConstraint,
-                addressList);
+        DataValidation validationOne = dvHelper.createValidation(dvConstraint, addressList);
         validationOne.setSuppressDropDownArrow(true);
         validationOne.setShowErrorBox(true);
         p_sheet.addValidationData(validationOne);
@@ -1323,25 +1274,22 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
      * @param startColumn
      * @param lastColumn
      */
-    private void addCategoryFailureValidation(Sheet p_sheet, int startRow,
-            int lastRow, int startColumn, int lastColumn)
+    private void addCategoryFailureValidation(Sheet p_sheet, int startRow, int lastRow,
+            int startColumn, int lastColumn)
     {
         // Add category failure drop down list here.
         DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
         DataValidationConstraint dvConstraint = dvHelper
                 .createFormulaListConstraint(CATEGORY_FAILURE_DROP_DOWN_LIST);
-        CellRangeAddressList addressList = new CellRangeAddressList(startRow,
-                lastRow, startColumn, lastColumn);
-        DataValidation validation = dvHelper.createValidation(dvConstraint,
-                addressList);
+        CellRangeAddressList addressList = new CellRangeAddressList(startRow, lastRow, startColumn,
+                lastColumn);
+        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
         validation.setSuppressDropDownArrow(true);
         validation.setShowErrorBox(true);
         p_sheet.addValidationData(validation);
     }
 
-
-    private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale,
-            long p_jobId)
+    private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale, long p_jobId)
     {
         StringBuffer content = new StringBuffer();
         String dataType = null;
@@ -1361,8 +1309,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
                 {
                     GxmlElement sub = (GxmlElement) subFlows.get(i);
                     String subId = sub.getAttribute(GxmlNames.SUB_ID);
-                    content.append("\r\n#").append(tuId).append(":")
-                            .append(subId).append("\n")
+                    content.append("\r\n#").append(tuId).append(":").append(subId).append("\n")
                             .append(getCompactPtagString(sub, dataType));
                 }
             }
@@ -1380,8 +1327,7 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
         return result;
     }
 
-    private String getCompactPtagString(GxmlElement p_gxmlElement,
-            String p_dataType)
+    private String getCompactPtagString(GxmlElement p_gxmlElement, String p_dataType)
     {
         String compactPtags = null;
         OnlineTagHelper applet = new OnlineTagHelper();
@@ -1426,8 +1372,8 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
             }
         }
 
-        return ReportHelper.getReportFile(p_reportType, p_job,
-                ReportConstants.EXTENSION_XLSX, langInfo);
+        return ReportHelper.getReportFile(p_reportType, p_job, ReportConstants.EXTENSION_XLSX,
+                langInfo);
     }
 
     public void setUserId(String p_userId)
@@ -1452,9 +1398,8 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
         return result;
     }
 
-    private String getPreviousSegments(Map<Long, Tuv> allTargetTuvsMap,
-            long p_trgTuvId, Tuv tuv, long p_jobId, PseudoData pData)
-            throws Exception
+    private String getPreviousSegments(Map<Long, Tuv> allTargetTuvsMap, long p_trgTuvId, Tuv tuv,
+            long p_jobId, PseudoData pData) throws Exception
     {
         List previousTaskTuvs = new ArrayList();
         TuvManager tuvManager = ServerProxy.getTuvManager();
@@ -1476,47 +1421,41 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
                 {
                     TaskTuv a = (TaskTuv) p_taskTuvA;
                     TaskTuv b = (TaskTuv) p_taskTuvB;
-                    return a.getTask().getCompletedDate()
-                            .compareTo(b.getTask().getCompletedDate());
+                    return a.getTask().getCompletedDate().compareTo(b.getTask().getCompletedDate());
                 }
             });
 
             int len = previousTaskTuvs.size() - 2;
             int lastReviewerCount = 0;
 
-            while ((len >= 0)
-                    && (((TaskTuv) previousTaskTuvs.get(len)).getTask()
-                            .getType() == Task.TYPE_REVIEW))
+            while ((len >= 0) && (((TaskTuv) previousTaskTuvs.get(len)).getTask()
+                    .getType() == Task.TYPE_REVIEW))
             {
                 // Review only task does not change segments
                 lastReviewerCount++;
                 len--;
             }
 
-            int beforeLastReviewerCount = previousTaskTuvs.size()
-                    - lastReviewerCount - 1;
+            int beforeLastReviewerCount = previousTaskTuvs.size() - lastReviewerCount - 1;
 
             if (beforeLastReviewerCount == 1)
             {
                 String previousSeg = "";
                 TaskTuv taskTuv = (TaskTuv) previousTaskTuvs.get(0);
-                Tuv previousTuv = allTargetTuvsMap.get(taskTuv
-                        .getPreviousTuvId());
+                Tuv previousTuv = allTargetTuvsMap.get(taskTuv.getPreviousTuvId());
                 // generally it should not be null for performance
                 if (previousTuv != null)
                 {
                     dataType = previousTuv.getDataType(p_jobId);
                     pData.setAddables(dataType);
-                    TmxPseudo.tmx2Pseudo(previousTuv.getGxmlExcludeTopTags(),
-                            pData);
+                    TmxPseudo.tmx2Pseudo(previousTuv.getGxmlExcludeTopTags(), pData);
                     previousSeg = pData.getPTagSourceString();
                 }
                 else
                 {
                     dataType = taskTuv.getTuv(p_jobId).getDataType(p_jobId);
                     pData.setAddables(dataType);
-                    TmxPseudo.tmx2Pseudo(taskTuv.getTuv(p_jobId)
-                            .getGxmlExcludeTopTags(), pData);
+                    TmxPseudo.tmx2Pseudo(taskTuv.getTuv(p_jobId).getGxmlExcludeTopTags(), pData);
                     previousSeg = pData.getPTagSourceString();
                 }
                 if (!previousSeg.equals(targetSegmentString))
@@ -1533,23 +1472,21 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
                 for (int k = 0; k <= beforeLastReviewerCount; k++)
                 {
                     TaskTuv taskTuv = (TaskTuv) previousTaskTuvs.get(k);
-                    Tuv previousTuv = allTargetTuvsMap.get(taskTuv
-                            .getPreviousTuvId());
+                    Tuv previousTuv = allTargetTuvsMap.get(taskTuv.getPreviousTuvId());
                     // generally it should not be null for performance
                     if (previousTuv != null)
                     {
                         dataType = previousTuv.getDataType(p_jobId);
                         pData.setAddables(dataType);
-                        TmxPseudo.tmx2Pseudo(
-                                previousTuv.getGxmlExcludeTopTags(), pData);
+                        TmxPseudo.tmx2Pseudo(previousTuv.getGxmlExcludeTopTags(), pData);
                         previousSegment = pData.getPTagSourceString();
                     }
                     else
                     {
                         dataType = taskTuv.getTuv(p_jobId).getDataType(p_jobId);
                         pData.setAddables(dataType);
-                        TmxPseudo.tmx2Pseudo(taskTuv.getTuv(p_jobId)
-                                .getGxmlExcludeTopTags(), pData);
+                        TmxPseudo.tmx2Pseudo(taskTuv.getTuv(p_jobId).getGxmlExcludeTopTags(),
+                                pData);
                         previousSegment = pData.getPTagSourceString();
                     }
                     if (!previous.contains(previousSegment))
@@ -1559,15 +1496,13 @@ public class TranslationVerificationReportGenerator implements ReportGenerator,
                 }
                 if (previous.size() > 1)
                 {
-                    String lastInPrevious = (String) previous.get(previous
-                            .size() - 1);
+                    String lastInPrevious = (String) previous.get(previous.size() - 1);
                     if (lastInPrevious.equals(targetSegmentString))
                     {
                         previous.remove(previous.size() - 1);
                     }
                 }
-                previousSegments = (String) previous.get(previous.size() - 1);
-                ;
+                previousSegments = (String) previous.get(previous.size() - 1);;
             }
         }
         return previousSegments;

@@ -52,10 +52,10 @@ public class Online2Service extends HttpServlet
     private SessionManager sessionMgr;
     private PrintWriter writer;
     private long companyId;
-    
+
     private OnlineHelper helper = null;
     private OnlineHelper tmHelper = null;
-    
+
     /**
      * The base method.
      */
@@ -64,9 +64,8 @@ public class Online2Service extends HttpServlet
         this.request = request;
         boolean check = setCompanyId();
         HttpSession session = request.getSession(false);
-        
-        sessionMgr = (SessionManager) session
-                .getAttribute(WebAppConstants.SESSION_MANAGER);
+
+        sessionMgr = (SessionManager) session.getAttribute(WebAppConstants.SESSION_MANAGER);
 
         helper = (OnlineHelper) sessionMgr.getAttribute("OnlineHelper");
         if (helper == null)
@@ -74,7 +73,7 @@ public class Online2Service extends HttpServlet
             helper = new OnlineHelper();
             sessionMgr.setAttribute("OnlineHelper", helper);
         }
-        
+
         response.setCharacterEncoding(request.getCharacterEncoding());
         String method = request.getParameter("action");
         try
@@ -86,8 +85,7 @@ public class Online2Service extends HttpServlet
             }
             else
             {
-                Online2Service.class.getMethod(method).invoke(
-                        Online2Service.this);
+                Online2Service.class.getMethod(method).invoke(Online2Service.this);
             }
         }
         catch (Exception e)
@@ -99,6 +97,7 @@ public class Online2Service extends HttpServlet
 
     /**
      * Sets company id.
+     * 
      * @return
      */
     public boolean setCompanyId()
@@ -108,8 +107,7 @@ public class Online2Service extends HttpServlet
         {
             try
             {
-                companyId = ServerProxy.getJobHandler().getCompany(companyName)
-                        .getIdAsLong();
+                companyId = ServerProxy.getJobHandler().getCompany(companyName).getIdAsLong();
                 CompanyThreadLocal.getInstance().setIdValue("" + companyId);
                 return true;
             }
@@ -120,7 +118,7 @@ public class Online2Service extends HttpServlet
         }
         return false;
     }
-    
+
     /**
      * Write the string back.
      * 
@@ -131,23 +129,23 @@ public class Online2Service extends HttpServlet
         writer.write(s);
         writer.close();
     }
-    
+
     /**
      * Gets the parameter from request with specified name.
      * 
      * @param name
      * @return
-     * @throws UnsupportedEncodingException 
+     * @throws UnsupportedEncodingException
      */
     private String get(String name) throws UnsupportedEncodingException
     {
         String text = request.getParameter(name);
         if (text == null)
             return null;
-        
+
         return text;
     }
-    
+
     /**
      * Inits the help with gxml.
      * 
@@ -156,9 +154,9 @@ public class Online2Service extends HttpServlet
     public void initGxml() throws Exception
     {
         String gxml = get("gxml");
-        helper.setInputSegment(gxml, "", get("datatype"));   
+        helper.setInputSegment(gxml, "", get("datatype"));
     }
-    
+
     /**
      * Init the tm helper.
      * 
@@ -172,14 +170,14 @@ public class Online2Service extends HttpServlet
             tmHelper = new OnlineHelper();
             sessionMgr.setAttribute("tmOnlineHelper", tmHelper);
         }
-        
+
         String gxml = get("gxml");
         tmHelper.setInputSegment(gxml, "", get("datatype"));
         tmHelper.getCompact();
-        
+
         writeString("end");
     }
-    
+
     /**
      * Inits the helper with display html.
      * 
@@ -189,7 +187,7 @@ public class Online2Service extends HttpServlet
     {
         String gxml = get("gxml");
         initGxml();
-        
+
         String result;
         if (Boolean.parseBoolean(get("ptagsVerbose")))
         {
@@ -201,10 +199,11 @@ public class Online2Service extends HttpServlet
             helper.getCompact();
             result = helper.makeCompactColoredPtags(gxml);
         }
-        
+
+        result = LfUtil.addHtlmLf(result);
         writeString(result);
     }
-    
+
     /**
      * Gets target display html.
      * 
@@ -214,7 +213,7 @@ public class Online2Service extends HttpServlet
     {
         getCompactColoredPtags();
     }
-    
+
     /**
      * Gets target display html for preview.
      * 
@@ -223,13 +222,13 @@ public class Online2Service extends HttpServlet
     public void getTargetDisplayHtmlForPreview() throws Exception
     {
         String gxml = get("gxml");
-        initGxml();  
+        initGxml();
         helper.getVerbose();
         String result = helper.makeInlineVerboseColoredPtags(gxml);
-        
+
         writeString(result);
     }
-    
+
     /**
      * Gets target display html for tm preview.
      * 
@@ -239,7 +238,7 @@ public class Online2Service extends HttpServlet
     {
         getCompactColoredPtags();
     }
-    
+
     /**
      * Gets target display html for tm preview.
      * 
@@ -248,8 +247,8 @@ public class Online2Service extends HttpServlet
     public void getTargetDisplayHtmlForTmPreview2() throws Exception
     {
         String gxml = get("gxml");
-        tmHelper.setInputSegment(gxml, "", get("datatype"));   
-        
+        tmHelper.setInputSegment(gxml, "", get("datatype"));
+
         String result;
         if (Boolean.parseBoolean(get("ptagsVerbose")))
         {
@@ -261,10 +260,10 @@ public class Online2Service extends HttpServlet
             tmHelper.getCompact();
             result = tmHelper.makeCompactColoredPtags(gxml);
         }
-       
+
         writeString(result);
     }
-    
+
     /**
      * Gets source display html.
      * 
@@ -274,7 +273,7 @@ public class Online2Service extends HttpServlet
     {
         getCompactColoredPtags();
     }
-    
+
     /**
      * Gets compact colored ptags.
      * 
@@ -284,12 +283,12 @@ public class Online2Service extends HttpServlet
     {
         String gxml = get("gxml");
         initGxml();
-        helper.getCompact(); 
+        helper.getCompact();
         String result = helper.makeCompactColoredPtags(gxml);
-        
+
         writeString(result);
     }
-    
+
     /**
      * Gets string with compact colored ptags.
      * 
@@ -299,9 +298,9 @@ public class Online2Service extends HttpServlet
     {
         getCompactColoredPtags();
     }
-    
+
     /**
-     * Gets ptag string  with OnlineHelper.
+     * Gets ptag string with OnlineHelper.
      * 
      * @throws DiplomatBasicParserException
      */
@@ -309,8 +308,7 @@ public class Online2Service extends HttpServlet
     {
         writeString(helper.getPtagString());
     }
-    
-    
+
     /**
      * Gets target diplomat.
      * 
@@ -319,11 +317,12 @@ public class Online2Service extends HttpServlet
     public void getTargetDiplomat() throws Exception
     {
         String gxml = get("gxml");
+        gxml = LfUtil.removeLf(gxml);
         String result = helper.getTargetDiplomat(gxml);
-        
+
         writeString(result);
     }
-    
+
     /**
      * Do error check and write back the result.
      * 
@@ -333,9 +332,9 @@ public class Online2Service extends HttpServlet
     {
         String text = get("text");
         String source = get("source");
-        
+        text = LfUtil.removeLf(text);
         Map<String, String> m = new HashMap<String, String>();
-        
+
         helper.setUntranslateStyle(SegmentUtil2.getTAGS());
         String msg = helper.errorCheck(text, source, 0, "UTF8", 0, "UTF8");
         String internalTagMsg = helper.getInternalErrMsg();
@@ -348,22 +347,22 @@ public class Online2Service extends HttpServlet
                 newTarget = helper.getTargetDiplomat(newTarget);
             }
         }
-        
+
         if (msg != null)
             m.put("msg", msg);
-        
+
         if (internalTagMsg != null)
             m.put("internalTagMsg", internalTagMsg);
-        
+
         if (newTarget != null)
             m.put("newTarget", newTarget);
-        
+
         writeString(JsonUtil.toJson(m));
     }
-    
+
     public void getPtagToNativeMappingTable() throws Exception
     {
         String seg = helper.getPtagToNativeMappingTable();
         writeString(seg);
     }
- }
+}

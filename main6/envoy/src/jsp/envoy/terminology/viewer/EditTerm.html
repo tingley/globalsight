@@ -20,7 +20,8 @@
   //-->  
 </SCRIPT>
 <SCRIPT language="Javascript">
-var g_args;
+var o=window.opener;
+var g_args=o.editTermParams;
 
 function doClose(ok)
 {
@@ -42,12 +43,7 @@ function doClose(ok)
     }
 
     g_args.setTerm(term);
-
-    window.returnValue = g_args;
-  }
-  else
-  {
-    window.returnValue = null;
+    o.editTermDialog(g_args);
   }
 
   window.close();
@@ -69,8 +65,6 @@ function doKeypress()
 
 function doLoad()
 {
-  g_args = window.dialogArguments;
-
   idLanguage.innerText = g_args.getLanguage();
   idTerm.value = g_args.getTerm();
 
@@ -119,7 +113,7 @@ function hasHtmlSpecialChars(theField) {
 <BR>
 
 <DIV ALIGN="CENTER">
-<INPUT id="idOk" TYPE=BUTTON VALUE=" Ok " TABINDEX="2" onclick="doClose(true);">
+<INPUT id="idOk" TYPE=BUTTON VALUE=" OK " TABINDEX="2" onclick="doClose(true);">
 <INPUT TYPE=BUTTON VALUE="Cancel" TABINDEX="3" onclick="doClose(false);">
 </DIV>
 

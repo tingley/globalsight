@@ -1,0 +1,495 @@
+﻿<textcomponents>
+ 
+<!-- stationary text -->
+<component id="ID_inst">
+	<text><![CDATA[&lt;b&gt; Welocalize click Play to see how a router uses the routing table to decide the best route for a packet.&lt;/b&gt;]]></text> 
+</component>
+<component id="ID_txt01">
+<text><![CDATA[&lt;b&gt;Welocalize Network 1&lt;b&gt;]]></text> 
+</component>
+
+<component id="ID_txt02">
+<text><![CDATA[<b>Welocalize Network 2</b>]]></text> 
+</component>
+
+<component id="ID_txt03">
+<text><![CDATA[This is tag of xml<abc>Network 3</abc>]]></text> 
+</component>
+
+<component id="ID_txt04">
+<text><![CDATA[This is tag of html<bcd>Network 4</bcd>]]></text> 
+</component>
+
+<component id="ID_txt05">
+<text><![CDATA[this is tag of default html <b>Internet</b>]]></text> 
+</component>
+
+
+<!-- bubble text -->
+<component id="bubble_txt_01">
+<text><![CDATA[<b>I want to send a message to H3 on Network 3.</b>]]></text> 
+</component>
+
+<component id="bubble_txt_02">
+<text><![CDATA[<b>Network 3 is not a directly connected network. I will take my default route!</b>]]></text> 
+</component>
+
+<component id="bubble_txt_03">
+<text><![CDATA[<b>Network 3 is directly connected to me, so I will deliver the packet.</b>]]></text> 
+</component>
+
+<!-- route table 1 -->
+<component id="ID_TableR1">
+<text><![CDATA[<table header='top' headerstyle='black' bordercolor='#CCCCCC' borderwidth='1' shadow='false' shadowcolor='#000000' glow='true' glowcolor='#808080' cellpadding='2'>
+	<tr>
+		<td colspan='3' glow='false' valign='top' type='dynamic'><font color='#FFFFFF'><p align='center'><b>R1 Routing Table</b></p></font></td>
+	</tr>
+	<tr>
+		<td width='85' bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Next Hop via Shortest Path</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Number of Hops</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network1</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Connected</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>0</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>default</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R2</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="10S"><b>0</b></font></td>
+	</tr>
+</table>]]></text>
+</component>
+
+<!-- route table 2 -->
+<component id="ID_TableR2">
+<text><![CDATA[<table header='top' headerstyle='black' bordercolor='#CCCCCC' borderwidth='1' shadow='false' shadowcolor='#000000' glow='true' glowcolor='#808080' cellpadding='2'>
+	<tr>
+		<td colspan='3' glow='false' valign='top' type='dynamic'><font color='#FFFFFF'><p align='center'><b>R2 Routing Table</b></p></font></td>
+	</tr>
+	<tr>
+		<td width='85' bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Next Hop via Shortest Path</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Number of Hops</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 1</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R1</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>1</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 2</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R3</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>3</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>4</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 4</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R7</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>4</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>default</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>0</b></font></td>
+	</tr>
+</table>]]></text>
+</component>
+
+<!-- route table 2 hilighted-->
+<component id="ID_TableR2_H">
+<text><![CDATA[<table header='top' headerstyle='black' bordercolor='#CCCCCC' borderwidth='1' shadow='false' shadowcolor='#000000' glow='true' glowcolor='#808080' cellpadding='2'>
+	<tr>
+		<td colspan='3' glow='false' valign='top' type='dynamic'><font color='#FFFFFF'><p align='center'><b>R2 Routing Table</b></p></font></td>
+	</tr>
+	<tr>
+		<td width='85' bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Next Hop via Shortest Path</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Number of Hops</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 1</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R1</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>1</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 2</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R3</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>3</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>4</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 4</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R7</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>4</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>default</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>0</b></font></td>
+	</tr>
+</table>]]></text>
+</component>
+
+<!-- route table 3 -->
+<component id="ID_TableR3">
+<text><![CDATA[<table header='top' headerstyle='black' bordercolor='#CCCCCC' borderwidth='1' shadow='false' shadowcolor='#000000' glow='true' glowcolor='#808080' cellpadding='2'>
+	<tr>
+		<td colspan='3' glow='false' valign='top' type='dynamic'><font color='#FFFFFF'><p align='center'><b>R3 Routing Table</b></p></font></td>
+	</tr>
+	<tr>
+		<td width='85' bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Next Hop via Shortest Path</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Number of Hops</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 1</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R2</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>2</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 2</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R4</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>2</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R4</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>3</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 4</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R9</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>3</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>default</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Internet</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>0</b></font></td>
+	</tr>
+</table>]]></text>
+</component>
+
+<!-- route table 3 hilighted-->
+<component id="ID_TableR3_H">
+<text><![CDATA[<table header='top' headerstyle='black' bordercolor='#CCCCCC' borderwidth='1' shadow='false' shadowcolor='#000000' glow='true' glowcolor='#808080' cellpadding='2'>
+	<tr>
+		<td colspan='3' glow='false' valign='top' type='dynamic'><font color='#FFFFFF'><p align='center'><b>R3 Routing Table</b></p></font></td>
+	</tr>
+	<tr>
+		<td width='85' bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Next Hop via Shortest Path</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Number of Hops</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 1</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R2</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>2</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 2</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R4</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>2</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R4</b></font></td>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>3</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 4</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R9</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>3</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>default</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Internet</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>0</b></font></td>
+	</tr>
+</table>]]></text>
+</component>
+
+<!-- route table 4 -->
+<component id="ID_TableR4">
+<text><![CDATA[<table header='top' headerstyle='black' bordercolor='#CCCCCC' borderwidth='1' shadow='false' shadowcolor='#000000' glow='true' glowcolor='#808080' cellpadding='2'>
+	<tr>
+		<td colspan='3' glow='false' valign='top' type='dynamic'><font color='#FFFFFF'><p align='center'><b>R4 Routing Table</b></p></font></td>
+	</tr>
+	<tr>
+		<td width='85' bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Next Hop via Shortest Path</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Number of Hops</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 1</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>3</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 2</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R13</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>1</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R5</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>2</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 4</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R5</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>3</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>default</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>0</b></font></td>
+	</tr>
+</table>]]></text>
+</component>
+
+<!-- route table 4 highlighted -->
+<component id="ID_TableR4_H">
+<text><![CDATA[<table header='top' headerstyle='black' bordercolor='#CCCCCC' borderwidth='1' shadow='false' shadowcolor='#000000' glow='true' glowcolor='#808080' cellpadding='2'>
+	<tr>
+		<td colspan='3' glow='false' valign='top' type='dynamic'><font color='#FFFFFF'><p align='center'><b>R4 Routing Table</b></p></font></td>
+	</tr>
+	<tr>
+		<td width='85' bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Next Hop via Shortest Path</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Number of Hops</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 1</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>3</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 2</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R13</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>1</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R5</b></font></td>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>2</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 4</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R5</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>3</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>default</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>0</b></font></td>
+	</tr>
+</table>]]></text>
+</component>
+
+
+
+<!-- route table 5 -->
+<component id="ID_TableR5">
+<text><![CDATA[<table header='top' headerstyle='black' bordercolor='#CCCCCC' borderwidth='1' shadow='false' shadowcolor='#000000' glow='true' glowcolor='#808080' cellpadding='2'>
+	<tr>
+		<td colspan='3' glow='false' valign='top' type='dynamic'><font color='#FFFFFF'><p align='center'><b>R5 Routing Table</b></p></font></td>
+	</tr>
+	<tr>
+		<td width='85' bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Next Hop via Shortest Path</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Number of Hops</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 1</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R4</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>4</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 2</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R4</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>2</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R6</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>1</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 4</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R11</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>2</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>default</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R4</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>0</b></font></td>
+	</tr>
+</table>]]></text>
+</component>
+
+<!-- route table 5 hilighted -->
+<component id="ID_TableR5_H">
+<text><![CDATA[<table header='top' headerstyle='black' bordercolor='#CCCCCC' borderwidth='1' shadow='false' shadowcolor='#000000' glow='true' glowcolor='#808080' cellpadding='2'>
+	<tr>
+		<td colspan='3' glow='false' valign='top' type='dynamic'><font color='#FFFFFF'><p align='center'><b>R5 Routing Table</b></p></font></td>
+	</tr>
+	<tr>
+		<td width='85' bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Next Hop via Shortest Path</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Number of Hops</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 1</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R4</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>4</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 2</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R4</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>2</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R6</b></font></td>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>1</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 4</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R11</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>2</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>default</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R4</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>0</b></font></td>
+	</tr>
+</table>]]></text>
+</component>
+
+
+<!-- route table 6 -->
+<component id="ID_TableR6">
+<text><![CDATA[<table header='top' headerstyle='black' bordercolor='#CCCCCC' borderwidth='1' shadow='false' shadowcolor='#000000' glow='true' glowcolor='#808080' cellpadding='2'>
+	<tr>
+		<td colspan='3' glow='false' valign='top' type='dynamic'><font color='#FFFFFF'><p align='center'><b>R6 Routing Table</b></p></font></td>
+	</tr>
+	<tr>
+		<td width='85' bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Next Hop via Shortest Path</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Number of Hops</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 1</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R5</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>5</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 2</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R5</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>3</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Connected</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>0</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 4</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R5</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>3</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>default</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R5</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>0</b></font></td>
+	</tr>
+</table>]]></text>
+</component>
+
+<!-- route table 6 hilighted -->
+<component id="ID_TableR6_H">
+<text><![CDATA[<table header='top' headerstyle='black' bordercolor='#CCCCCC' borderwidth='1' shadow='false' shadowcolor='#000000' glow='true' glowcolor='#808080' cellpadding='2'>
+	<tr>
+		<td colspan='3' glow='false' valign='top' type='dynamic'><font color='#FFFFFF'><p align='center'><b>R6 Routing Table</b></p></font></td>
+	</tr>
+	<tr>
+		<td width='85' bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Next Hop via Shortest Path</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Number of Hops</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 1</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R5</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>5</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 2</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R5</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>3</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 3</b></font></td>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Connected</b></font></td>
+		<td bgcolor='#F2F2F2' glow='true' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>0</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>Network 4</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R5</b></font></td>
+		<td bgcolor='#DDDDDD' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>3</b></font></td>
+	</tr>
+	<tr>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>default</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>R5</b></font></td>
+		<td bgcolor='#F2F2F2' glow='false' glowcolor='#FCA92E' valign='top' type='dynamic'><font size="12"><b>0</b></font></td>
+	</tr>
+</table>]]></text>
+</component>
+
+<!-- controller -->
+<component id="play">
+<text><![CDATA[Play]]></text>
+</component>
+
+<component id="pause"> 
+<text><![CDATA[Pause]]></text> 
+</component> 
+
+<component id="rewind"> 
+<text><![CDATA[Rewind]]></text> 
+</component> 
+
+<component id="forward"> 
+<text><![CDATA[Fast Forward]]></text> 
+</component> 
+
+<component id="mute"> 
+<text><![CDATA[Mute]]></text> 
+</component> 
+
+<component id="unmute"> 
+<text><![CDATA[UnMute]]></text> 
+</component> 
+
+<component id="previous"> 
+<text><![CDATA[Restart]]></text> 
+</component> 
+
+<component id="next"> 
+<text><![CDATA[End]]></text> 
+</component> 
+
+<component id="transcript"> 
+<text><![CDATA[Transcript]]></text> 
+</component>
+
+</textcomponents>

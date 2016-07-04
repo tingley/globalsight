@@ -17,10 +17,12 @@
 
 package com.globalsight.terminology;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.java.TbTerm;
-import com.globalsight.terminology.java.TbUtil;
 import com.globalsight.terminology.util.SqlUtil;
 
 public class ExactSearch extends AbstractTermSearch
@@ -40,7 +42,7 @@ public class ExactSearch extends AbstractTermSearch
      // Allow empty or null target language.
         if (trgLan != null && !"".equals(trgLan.trim()))
         {
-            hql = "select src from TbTerm src, TbTerm trg";
+            hql = "select distinct src from TbTerm src, TbTerm trg";
             hql = hql + " where src.tbLanguage.concept.termbase.id=:tbid";
             hql = hql + " and trg.tbLanguage.concept.termbase.id=:tbid";
             hql = hql + " and src.tbLanguage.name='" + SqlUtil.quote(srcLan)
@@ -57,7 +59,7 @@ public class ExactSearch extends AbstractTermSearch
         }
         else
         {
-           hql = "select tt from TbTerm tt where tt.tbLanguage.name='" 
+           hql = "select distinct tt from TbTerm tt where tt.tbLanguage.name='" 
                + SqlUtil.quote(srcLan) + "'";
            hql = hql + " and tt.tbLanguage.concept.termbase.id=:tbid";
            

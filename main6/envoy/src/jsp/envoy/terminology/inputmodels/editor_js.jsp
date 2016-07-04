@@ -219,6 +219,7 @@ function normalizeWS(s)
 
 function setSelectedItem()
 {
+    g_fields = this;
     g_selected = g_fields.getSelectedItems();
 
     updateMenu();
@@ -307,7 +308,7 @@ function updateMenu()
             idEditField.className = "menuItem";
             idAddFieldAfter.disabled = false;
             idAddFieldAfter.className = "menuSubItem";
-			var selType = sel.firstChild.type;
+			var selType = sel.firstChild.getAttribute("type");
 			if(selType != null && selType != 'undefined')
 			{
 				if (selType.toLowerCase() == 'note')
@@ -320,6 +321,11 @@ function updateMenu()
                   	idAddFieldTo.disabled = false;
                   	idAddFieldTo.className = "menuSubItem";
                 }
+			}
+			else
+			{
+			    idAddFieldTo.disabled = true;
+                idAddFieldTo.className = "menuSubItemD";
 			}
             
         }
@@ -368,9 +374,13 @@ function updateMenu()
     */
 }
 
+var editTermParams = null;
+var fieldType = "";
+var editTermField = null;
 function doEdit(field)
 {
-    var fieldType = getFieldType(field);
+	editTermField = field;
+    fieldType = getFieldType(field);
 
     if (fieldType == 'conceptGrp' || fieldType == 'languageGrp')
     {
@@ -393,17 +403,11 @@ function doEdit(field)
         var language =
             field.parentElement.parentElement.firstChild.children[1].innerText;
 
-        var params = new EditTermParameters(language, value, mainTerm);
+        editTermParams = new EditTermParameters(language, value, mainTerm);
 
-        var res = window.showModalDialog(
-            strBaseUrl + '/EditTerm.jsp', params,
-            "dialogHeight:200px; dialogWidth:350px; center:yes; " +
-            "resizable:no; status:no; help:no;");
-
-        if (res != null)
-        {
-            newValue = normalizeWS(res.getTerm());
-        }
+        window.open(
+            strBaseUrl + '/EditTerm.jsp', 
+            "EditTerm", "height=200, width=350, toolbar =no, menubar=no, location=no, status=no");
     }
     else if (fieldType == 'fieldGrp')
     {
@@ -419,18 +423,12 @@ function doEdit(field)
         }
         */
 
-        var params = new EditFieldParameters(level, type, value);
-        params.setDefinedFields(g_termbaseFields);
+        editTermParams = new EditFieldParameters(level, type, value);
+        editTermParams.setDefinedFields(g_termbaseFields);
 
-        var res = window.showModalDialog(
-            strBaseUrl + '/EditField.jsp', params,
-            "dialogHeight:300px; dialogWidth:370px; center:yes; " +
-            "resizable:no; status:no; help:no; ");
-
-        if (res != null)
-        {
-            newValue = normalizeWS(res.getValue());
-        }
+        window.open(
+            strBaseUrl + '/EditField.jsp',
+            "EditTerm", "height=300, width=370, toolbar =no, menubar=no, location=no, status=no");
     }
     else
     {
@@ -439,17 +437,28 @@ function doEdit(field)
 
         var newValue = prompt("<%=bundle.getString("jsmsg_tb_input_model_enter_new_value") %>".replace("%1", type) + ":", value);
     }
+}
 
-    if (newValue != null)
+function editTermDialog(res)
+{
+	var newValue = null;
+	 
+	if (fieldType == 'fakeTermGrp')
     {
-        field.children[1].innerText = newValue;
+		newValue = removeSpecialChars(normalizeWS(res.getTerm()));
+    }
+	else
+	{
+		newValue = normalizeWS(res.getValue());
+	}	
+	
+	if (newValue != null)
+    {
+        editTermField.children[1].innerText = newValue;
 
         g_dirty = true;
     }
-
-    cancelEvent();
 }
-
 function doDelete(field, event)
 {
     if (getFieldType(field).indexOf('fake') == 0)
@@ -692,14 +701,12 @@ function setTermbaseLanguages(p_definition)
     // compute cached array of allowed languages
     // g_termbaseLanguages = new Array();
 
-    var nodes = p_definition.selectNodes("/definition/languages/language");
+    var nodes = p_definition.languages;
     for (i = 0; i < nodes.length; i++)
     {
         var node = nodes[i];
-
-        var langloc = new LangLoc(node.selectSingleNode("name").text,
-            node.selectSingleNode("locale").text);
-
+        var langloc = new LangLoc(node.name,
+            node.locale);
         g_termbaseLanguages.push(langloc);
     }
 
@@ -711,16 +718,16 @@ function setTermbaseFields(p_definition)
     // compute cached array of known fields
     // g_termbaseFields = new Array();
 
-    var nodes = p_definition.selectNodes("/definition/fields/field");
+    var nodes = p_definition.fields;
     for (var i = 0; i < nodes.length; i++)
     {
         var node = nodes[i];
 
-        var name = node.selectSingleNode("name").text;
-        var type = node.selectSingleNode("type").text;
+        var name = node.name;
+        var type = node.type;
         var system =
-          (node.selectSingleNode("system").text == "true" ? true : false);
-        var values = node.selectSingleNode("values").text;
+          (node.system == "true" ? true : false);
+        var values = node.values;
         var format = getFieldFormatByType(type);
 
         var field = new Field(name, type, format, system, values);
@@ -733,9 +740,8 @@ function setTermbaseFields(p_definition)
 
 function SetEditiorDefinition()
 {
-    g_definition = loadXML('/globalsight/envoy/terminology/viewer/definition.jsp');
-    // alert(g_definition.xml);
-
+    g_definition=$.ajax({url:"/globalsight/envoy/terminology/viewer/definition.jsp",async:false, cache:false}).responseText;
+    g_definition = eval("(" + g_definition + ")");
     setTermbaseLanguages(g_definition);
     setTermbaseFields(g_definition);
 }
@@ -869,17 +875,6 @@ function StartEditing(p_value)
     if (!g_editing)
     {
         g_editing = true;
-
-        // idCreateButton.setEnabled(false);
-        // idEditButton.setEnabled(false);
-
-        // Undo the conversion in SaveEntry()
-        if (p_value)
-        {
-            p_value = p_value.replace(/&lt;/g, "<").replace(/&gt;/g, ">").
-                replace(/&quot;/g, "\"").replace(/&amp;/g, "&");
-        }
-
         initEditor(p_value);
     }
     else if (g_editing)
@@ -933,12 +928,14 @@ function AddLanguage()
     // alert("avail: " + availLangLocs);
 
     // Show dialog to select one of the languages and enter a term
-    var res = window.showModalDialog(
-        strBaseUrl + '/AddLanguage.jsp', availLangLocs,
-        "dialogHeight:200px; dialogWidth:350px; center:yes; " +
-        "resizable:no; status:no; help:no;");
+    window.open(
+        strBaseUrl + '/AddLanguage.jsp', 
+        "Add Language", "height=200, width=350, toolbar =no, menubar=no, location=no, status=no");
+}
 
-    if (res != null && res.getTerm() != '')
+function addTermLanguage(res)
+{
+	if (res != null && res.getTerm() != '')
     {
         insertLanguage(res.getLanguage(), res.getLocale(), res.getTerm());
     }
@@ -985,6 +982,7 @@ function RemoveLanguage()
 }
 
 // TODO: check main term + synonym, show only current language
+var addTermParams = null;
 function AddTerm()
 {
     var language = null;
@@ -1042,13 +1040,17 @@ function AddTerm()
     {
         return;
     }
+    
+    addTermParams = langlocs;
+    window.open(
+        strBaseUrl + '/AddTerm.jsp', 
+        "Add Term", 
+        "height=200, width=350, top=0,left=0, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no");
+}
 
-    var res = window.showModalDialog(
-        strBaseUrl + '/AddTerm.jsp', langlocs,
-        "dialogHeight:200px; dialogWidth:350px; center:yes; " +
-        "resizable:no; status:no; help:no;");
-
-    if (res == null)
+function addTermInDialog(res)
+{
+	if (res == null)
     {
         return;
     }
@@ -1110,47 +1112,46 @@ function RemoveTerm()
     updateMenu();
 }
 
+var addFieldParams = null;
+var isToCurrent = true;
+var fieldSel = null;
+var fieldLevel = null;
 function AddFieldToCurrent()
 {
+	isToCurrent = true;
     if (g_selected == null || idAddFieldTo.disabled == true)
     {
         return;
     }
 
     // Determine where in the structure we are
-    var sel = g_selected[0];
-    var level = getLevel(sel);
+    fieldSel = g_selected[0];
+    fieldLevel = getLevel(fieldSel);
     var type = null;
 
-    if (level == 'field')
+    if (fieldLevel == 'field')
     {
-        type = sel.firstChild.type.toLowerCase();
+        type = fieldSel.firstChild.getAttribute("type").toLowerCase();
     }
-    else if (level == 'term' && getFieldType(sel) == 'fakeTermGrp')
+    else if (fieldLevel == 'term' && getFieldType(fieldSel) == 'fakeTermGrp')
     {
-        sel = sel.parentElement;
-    }
-
-    var params = new FieldParameters();
-    params.setLevel(level);
-    params.setType(type);
-    params.setDefinedFields(g_termbaseFields);
-
-    var res = window.showModalDialog(
-        strBaseUrl + '/AddField.jsp', params,
-        "dialogHeight:400px; dialogWidth:370px; center:yes; " +
-        "resizable:no; status:no; help:no;");
-
-    if (res == null)
-    {
-        return;
+        fieldSel = fieldSel.parentElement;
     }
 
-    // TODO: check for presence of field.
+    addFieldParams = new FieldParameters();
+    addFieldParams.setLevel(fieldLevel);
+    addFieldParams.setType(type);
+    addFieldParams.setDefinedFields(g_termbaseFields);
 
+    window.open(
+        strBaseUrl + '/AddField.jsp',
+       "Add Field", "height=400, width=370, toolbar =no, menubar=no, location=no, status=no");       
+}
+
+function AddFieldToCurrentDialog(res)
+{
     var name = getFieldNameByType(res.getType(), g_termbaseFields);
-
-    insertFieldInCurrent(sel, level, name, res.getType(), res.getValue());
+    insertFieldInCurrent(fieldSel, fieldLevel, name, res.getType(), res.getValue());
 }
 
 // Situations:
@@ -1160,34 +1161,29 @@ function AddFieldToCurrent()
 // 4) embedded in fieldGrp (must be source, note (transac)), add in field
 function AddFieldAfterCurrent()
 {
+	isToCurrent = false;
     if (g_selected == null || idAddFieldAfter.disabled == true)
     {
         return;
     }
 
     // Determine where in the structure we are
-    var sel = g_selected[0];
-    var level = getParentLevel(sel);
+    fieldSel = g_selected[0];
+    fieldLevel = getParentLevel(fieldSel);
 
-    var params = new FieldParameters();
-    params.setLevel(level);
-    params.setDefinedFields(g_termbaseFields);
+    addFieldParams = new FieldParameters();
+    addFieldParams.setLevel(fieldLevel);
+    addFieldParams.setDefinedFields(g_termbaseFields);
 
-    var res = window.showModalDialog(
-        strBaseUrl + '/AddField.jsp', params,
-        "dialogHeight:400px; dialogWidth:370px; center:yes; " +
-        "resizable:no; status:no; help:no;");
+    window.open(
+        strBaseUrl + '/AddField.jsp', 
+        "Add Field", "height=400, width=370, toolbar =no, menubar=no, location=no, status=no");       
+}
 
-    if (res == null)
-    {
-        return;
-    }
-
-    // TODO: check for presence of field.
-
+function AddFieldAfterCurrentDialog(res)
+{
     var name = getFieldNameByType(res.getType(), g_termbaseFields);
-
-    insertFieldAfterCurrent(sel, name, res.getType(), res.getValue());
+    insertFieldAfterCurrent(fieldSel, name, res.getType(), res.getValue());
 }
 
 function EditField()
@@ -1330,7 +1326,7 @@ function insertFieldInCurrent(node, level, name, type, value)
     }
     else
     {
-        pos = node.children(1);
+        pos = node.children[1];
         insertHtml('afterEnd', pos, div);
         node = pos.nextSibling;
     }
@@ -1381,7 +1377,7 @@ function getLevel(node)
     }
     else if (fieldType == 'fieldGrp')
     {
-        if (node.firstChild.type.toLowerCase() == 'source')
+        if (node.firstChild.getAttribute("type").toLowerCase() == 'source')
         {
             return 'source';
         }
@@ -1418,7 +1414,7 @@ function getParentLevel(node)
     }
     else if (fieldType == 'fieldGrp')
     {
-        if (node.firstChild.type.toLowerCase() == 'source')
+        if (node.firstChild.getAttribute("type").toLowerCase() == 'source')
         {
             return 'source';
         }
@@ -1458,7 +1454,7 @@ function getConceptStatus()
         var fieldType = getFieldType(cnode);
         if (fieldType == 'fieldGrp')
         {
-            if (cnode.firstChild.type.toLowerCase() == 'status')
+            if (cnode.firstChild.getAttribute("type").toLowerCase() == 'status')
             {
                 return cnode;
             }
@@ -1623,31 +1619,18 @@ function initEditor(p_value)
 {
     var xmlDoc;
 
-    if (window.ActiveXObject){
-        xmlDoc = new ActiveXObject('Msxml2.DOMDocument');
-    }
-    else {
-        xmlDoc = document.implementation.createDocument("", "", null);
-    }
-
     if (!p_value)
     {
         g_NEWENTRY = true;
-
-        //g_canRemoveLanguage = false;
-
-        xmlDoc.async = false;
-        xmlDoc.loadXML('<conceptGrp><concept>1</concept></conceptGrp>');
+        xmlDoc = {
+            concept:1
+        };
     }
     else
     {
         g_NEWENTRY = false;
 
-        //g_canRemoveLanguage = true;
-
-        // Grab the entry's XMLDocument from the viewer
-        xmlDoc.async = false;
-        xmlDoc.loadXML(p_value);
+        xmlDoc = p_value;
     }
 
     setEditorEntry2(xmlDoc);

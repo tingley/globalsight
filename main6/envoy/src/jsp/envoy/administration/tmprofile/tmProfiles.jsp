@@ -39,8 +39,6 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="remove" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
- <jsp:useBean id="tda_edit" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="tmProfiles" class="java.util.ArrayList" scope="request"/>
 
 <%@ include file="/envoy/common/header.jspIncl" %>
@@ -61,7 +59,6 @@
     String newUrl = new1.getPageURL() + "&" + action + "=" + TMProfileConstants.NEW_ACTION;
     String modifyUrl = modify.getPageURL()+ "&" + action + "=" + TMProfileConstants.EDIT_ACTION;
     String removeUrl = remove.getPageURL() + "&" + action + "=" + TMProfileConstants.REMOVE_ACTION;
-    String tdaEditUrl = tda_edit.getPageURL() + "&" + action + "=" + TMProfileConstants.MT_EDIT_ACTION;
 
     boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
     
@@ -117,23 +114,19 @@ function buttonManagement() {
     var count = $("input[name='checkboxBtn']:checked").length;
 
     // Only one TM profile is selected
-    if (count == 1) {
-        if (TMProfileForm.removeBtn) {
+    if (count == 1)
+    {
+        if (TMProfileForm.removeBtn)
+        {
             TMProfileForm.removeBtn.disabled = false;
-        }
-
-        if (TMProfileForm.tdaEditBtn) {
-            TMProfileForm.tdaEditBtn.disabled = false;
         }
     }
     // count == 0 or count > 1
-    else {
-        if (TMProfileForm.removeBtn) {
+    else
+    {
+        if (TMProfileForm.removeBtn)
+        {
             TMProfileForm.removeBtn.disabled = true;
-        }
-
-        if (TMProfileForm.tdaEditBtn) {
-            TMProfileForm.tdaEditBtn.disabled = true;
         }
     }
 }
@@ -164,14 +157,6 @@ function removeTmProfile()
         alert(rtnMsg);
         return false;
     }
-}
-
-// Click "TDA Options" button
-function editTdaOptions()
-{
-    value = findSelectedTmProfiles();
-    TMProfileForm.action = "<%=tdaEditUrl%>&<%=TMProfileConstants.TM_PROFILE_ID%>=" + value;
-    TMProfileForm.submit();
 }
 
 //Find selected TM profiles' IDs.
@@ -310,9 +295,6 @@ function filterItems(e)
         </amb:permission>
         <amb:permission name="<%=Permission.TMP_REMOVE%>" >
             <INPUT TYPE="BUTTON" VALUE="<%=removeButton%>..." id="idRemoveBtn" name="removeBtn" onclick="removeTmProfile();" disabled>
-        </amb:permission>
-        <amb:permission name="<%=Permission.TMP_NEW%>" >
-            <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_tda_edit")%>..." id="idTdaEditBtn" name="tdaEditBtn" onclick="editTdaOptions();" disabled>
         </amb:permission>
         </DIV>
         </TD>

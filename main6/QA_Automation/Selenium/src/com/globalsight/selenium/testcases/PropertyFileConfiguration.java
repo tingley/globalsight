@@ -28,4 +28,5 @@ public class PropertyFileConfiguration {
 	public static final String CONFIG_PROPERTIES = "com.globalsight.selenium.properties.ConfigAndCommonData";
 	public static final String SMOKE_TEST_PROPERTIES = "com.globalsight.selenium.properties.SmokeTest";
 	public static final String PREPARE_OFFICE_TEST_PROPERTIES = "com.globalsight.selenium.properties.office.PrepareOfficeTest";
+	public static final String TestMatrix_PROPERTIES = "com.globalsight.selenium.properties.TestMatrix";
 }

@@ -102,42 +102,35 @@ function haveLanguage(p_languages, p_language)
     return false;
 }
 
+var languageParams = null;
+var isNew = true;
 function newLanguage()
 {
-   var diaHeight,diaWidth;
-   if(isFirefox)
-   {
-   		diaHeight = 190+"px";
-   		diaWidth  = 480+"px";
-   }
-   else
-   {
-   		diaHeight = 210+"px";
-   		diaWidth  = 440+"px";
-   }
-   
-   var oLanguage = window.showModalDialog(
-    "/globalsight/envoy/terminology/management/language.jsp", null,
-        "dialogHeight:"+diaHeight+"; dialogWidth:"+diaWidth+"; center:yes; " +
-            "resizable:no; status:no;");
+   isNew = true;
+   languageParams = null;
+   window.open(
+    "/globalsight/envoy/terminology/management/language.jsp",
+    "Add Language", "height=190, width=480, toolbar =no, menubar=no, location=no, status=no"); 
+}
 
-    if (oLanguage != null)
+function addLanguageDialog(oLanguage)
+{
+    if (haveLanguage(aLanguages, oLanguage))
     {
-        if (haveLanguage(aLanguages, oLanguage))
-        {
-            alert("The language already exists.");
-        }
-        else
-        {
-            aLanguages.push(oLanguage);
-        }
-
-        showLanguages();
+        alert("The language already exists.");
     }
+    else
+    {
+        aLanguages.push(new Language(oLanguage.name, oLanguage.locale, oLanguage.hasterms, oLanguage.exists));
+    }
+
+    showLanguages();
 }
 
 function modifyLanguage()
 {
+    isNew = false;
+   
     var langId = findSelectedRadioButton();
     if (!langId)
     {
@@ -145,19 +138,17 @@ function modifyLanguage()
     }
     else
     {
-        var oLanguage = aLanguages[langId - 1];
-        var oModifiedLanguage = window.showModalDialog(
-            "/globalsight/envoy/terminology/management/language.jsp", oLanguage,
-            "dialogHeight:150px; dialogWidth:350px; center:yes; " +
-            "resizable:no; status:no;");
-
-        // TODO: check for duplicates
-        if (oModifiedLanguage != null)
-        {
-            aLanguages[langId - 1] = oModifiedLanguage;
-            showLanguages();
-        }
+        languageParams = aLanguages[langId - 1];
+        window.open(
+            "/globalsight/envoy/terminology/management/language.jsp", 
+            "Modify Language", "height=190, width=480, toolbar =no, menubar=no, location=no, status=no"); 
     }
+}
+
+function modifyLanguageDialog(oModifiedLanguage)
+{
+    aLanguages[langId - 1] = oModifiedLanguage;
+    showLanguages();
 }
 
 function removeLanguage()
@@ -253,42 +244,46 @@ function showFields()
    }
 }
 
+var fieldParams = null;
+var isNew = true;
 function newField()
 {
-    var args = new FieldDialogArgs(aFields, null);
-    var result = window.showModalDialog(
-        "/globalsight/envoy/terminology/management/field.jsp", args,
-        "dialogHeight:320px; dialogWidth:600px; center:yes; " +
-        "resizable:no; status:no;");
-
-    if (result != null)
-    {
-        // need a copy of the object to run scripts
-        var oField = new Field(result.name, result.type, result.format,
-            result.system, result.values);
-
-        var msg = validateNewField(aFields, oField);
-
-        if (msg)
-        {
-            alert(msg);
-            return;
-        }
-
-        // assign new internal types to attribute and text fields
-        assignFieldType(oField);
-
-        // alert(oField);
-
-        aFields.push(oField);
-
-        showFields();
-    }
+    isNew = true;
+    fieldParams = new FieldDialogArgs(aFields, null);
+    window.open(
+        "/globalsight/envoy/terminology/management/field.jsp",
+        "New Field", "height=320, width=600, toolbar =no, menubar=no, location=no, status=no");        
 }
 
+function newFieldDialog(result)
+{
+    // need a copy of the object to run scripts
+    var oField = new Field(result.name, result.type, result.format,
+        result.system, result.values);
+
+    var msg = validateNewField(aFields, oField);
+
+    if (msg)
+    {
+        alert(msg);
+        return;
+    }
+
+    // assign new internal types to attribute and text fields
+    assignFieldType(oField);
+
+    // alert(oField);
+
+    aFields.push(oField);
+
+    showFields();
+}
+
+var fldId;
 function modifyField()
 {
-    var fldId = findSelectedRadioButton(fieldsForm);
+    isNew = false;
+    fldId = findSelectedRadioButton(fieldsForm);
 
     if (!fldId)
     {
@@ -297,35 +292,34 @@ function modifyField()
     else
     {
         var oField = aFields[fldId - 1];
-        var args = new FieldDialogArgs(aFields, oField);
-        var result = window.showModalDialog(
-            "/globalsight/envoy/terminology/management/field.jsp", args,
-            "dialogHeight:320px; dialogWidth:600px; center:yes; " +
-            "resizable:no; status:no;");
-
-        if (result != null)
-        {
-            // need a copy of the object to run scripts
-            var oNewField = new Field(result.name, result.type, result.format,
-                result.system, result.values);
-
-            var msg = validateModifiedField(aFields, fldId - 1, oNewField);
-
-            if (msg)
-            {
-                alert(msg);
-                return;
-            }
-
-            // assign new internal types to attribute and text fields
-            assignFieldType(oNewField);
-
-            // alert(oNewField);
-
-            aFields[fldId - 1] = oNewField;
-            showFields();
-        }
+        fieldParams = new FieldDialogArgs(aFields, oField);
+        window.open(
+            "/globalsight/envoy/terminology/management/field.jsp", 
+            "Modify Field", "height=320, width=600, toolbar =no, menubar=no, location=no, status=no");  
     }
+}
+
+function modifyFieldDialog(result)
+{
+    // need a copy of the object to run scripts
+    var oNewField = new Field(result.name, result.type, result.format,
+        result.system, result.values);
+
+    var msg = validateModifiedField(aFields, fldId - 1, oNewField);
+
+    if (msg)
+    {
+        alert(msg);
+        return;
+    }
+
+    // assign new internal types to attribute and text fields
+    assignFieldType(oNewField);
+
+    // alert(oNewField);
+
+    aFields[fldId - 1] = oNewField;
+    showFields();
 }
 
 function removeField()

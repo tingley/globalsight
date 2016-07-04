@@ -116,6 +116,26 @@
     display: none;
     z-index: 2;
 }
+
+#fullbg1 {
+    background-color: Gray;
+    display:none;
+    z-index:1;
+    position:absolute;
+    left:0px;
+    top:0px;
+    filter:Alpha(Opacity=30);
+    /* IE */
+    -moz-opacity:0.4;
+    /* Moz + FF */
+    opacity: 0.4;
+}
+
+#container1 {
+    position:absolute;
+    display: none;
+    z-index: 2;
+}
 </style>
 </head>
 <body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="loadGuides()"; onunload="closeOpenedWindow();"; id="idBody"  class="tundra">
@@ -130,6 +150,14 @@
 		<div id="updateWordCountsProgressBar"></div>
 	</div>
 </c:if>
+
+<c:if test="${isLeveragingMT}">
+	<div id="fullbg1"></div>
+	<div id="container1">
+		<div id="leverageMTProgressBar"></div>
+	</div>
+</c:if>
+
 <div id="includeSummaryTabs">
 	<%@ include file="/envoy/projects/workflows/includeJobSummaryTabs.jspIncl" %>
 </div>
@@ -150,7 +178,6 @@
 			    <td class="tableHeadingBasic myTableHeading"><input id="selectAllWorkflows" type="checkbox" onclick="selectAllWorkflows()"></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_target_locale")%>&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading" style="text-align:center"><%=bundle.getString("lb_word_count")%>&nbsp;&nbsp;&nbsp;</td>
-			    <td class="tableHeadingBasic myTableHeading" style="text-align:center"><span class="whiteBold">&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_percent_complete")%>&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_state")%>&nbsp;&nbsp;&nbsp;</span></td>
 			    <td class="tableHeadingBasic myTableHeading"><span class="whiteBold"><%=bundle.getString("lb_current_activity")%>&nbsp;&nbsp;&nbsp;</span></td>
 			    <c:if test="${customerAccessGroupIsDell}">
@@ -169,7 +196,25 @@
 		<c:forEach items="${JobWorkflowDisplayList}" var="item">
 			 <c:choose>
 				<c:when test="${(item.workflow.state == 'EXPORT_FAILED') || (item.workflow.state == 'IMPORT_FAILED')}">
-					<tr class="warningText">
+					<tr style="font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:red;font-weight:bold;">
+				</c:when>
+				<c:when test="${item.workflow.state == 'PENDING'}">
+				    <tr class="warningText">
+				</c:when>
+				<c:when test="${item.workflow.state == 'READY_TO_BE_DISPATCHED'}">
+				    <tr class="standardText">
+				</c:when>
+				<c:when test="${item.workflow.state  == 'DISPATCHED'}">
+				    <tr style="font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt;font-weight:bold;">
+				</c:when>
+				<c:when test="${item.workflow.state  == 'LOCALIZED'}">
+				    <tr style="font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:blue;">
+				</c:when>
+				<c:when test="${item.workflow.state  == 'EXPORTED'}">
+				    <tr class="greenText">
+				</c:when>
+				<c:when test="${item.workflow.state  == 'ARCHIVED'}">
+				    <tr style="font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:#888888;">
 				</c:when>
 				<c:otherwise>
 					<tr class="standardText">
@@ -190,7 +235,6 @@
 						</a>
 					</amb:permission>
 				</td>
-				<td style="text-align:center">${item.workflow.percentageCompletion}%</td>
 				<td>${item.stateBundleString}</td>
 				<td>${item.taskDisplayName}</td>
 				<c:if test="${customerAccessGroupIsDell}">
@@ -265,6 +309,9 @@
            </amb:permission>
            <amb:permission  name="<%=Permission.JOB_UPDATE_LEVERAGE%>" >
                 <input id="idUpdateLeverageBtn" class="standardText" type="button" name="UpdateLeverage" value="<%=bundle.getString("lb_update_leverage_title")%>..."  onclick="submitForm('UpdateLeverage');"/>
+           		<c:if test="${hasMtProfile}">
+                <input id="idLeverageMTBtn" class="standardText" type="button" name="leverageMT" value="<%=bundle.getString("lb_leverage_mt")%>"  onclick="submitForm('leverageMT');"/>
+                </c:if>
            </amb:permission>
            <amb:permission  name="<%=Permission.JOB_UPDATE_WORD_COUNTS%>" >
                <input id="UpdateWordCounts" class="standardText" type="button" name="UpdateWordCounts" value="<%=bundle.getString("lb_update_word_counts")%>" onclick="submitForm('UpdateWordCounts');"/>
@@ -310,9 +357,6 @@
            <amb:permission  name="<%=Permission.JOB_WORKFLOWS_SKIP%>" >
                <input id="skip" class="standardText" type="button" name="skip" value="<%=bundle.getString("lb_skip_activity")%>" onClick="submitForm('skip');"/>
            </amb:permission>
-           <c:if test="${sending_back_edition}">
-           	   <input class="standardText" type="button" name="ReSendingBack" value="<%=bundle.getString("lb_resendingback_edition_job")%>" onclick="submitForm('sendingbackEditionJob');"/>
-           </c:if>
             <%if(showButton && enableQAChecks && allowManualRunningQAChecks){ %>
   			<INPUT TYPE="BUTTON" NAME=downloadQAReport VALUE="<%=bundle.getString("lb_download_qa_reports")%>" onClick="submitForm('downloadQAReport')">
     		<% } %>
@@ -549,6 +593,7 @@ $(document).ready(function(){
 		$(".workflowPriority").css("display","none");
 		$(".workflowPrioritySelect").css("display","inline");
 	</amb:permission>
+
 	<c:if test="${isUpdatingWordCounts}">
 		var scrollHeight = document.body.scrollHeight-120;
 	    var scrollWidth = document.body.scrollWidth-40;
@@ -556,6 +601,15 @@ $(document).ready(function(){
 	    $("#container").css({top:"400px",left:"600px",display:"block"});
 		$("#updateWordCountsProgressBar").progressBar();
 		setTimeout(updateWordCountsProgress, 500);
+	</c:if>
+
+	<c:if test="${isLeveragingMT}">
+		var scrollHeight = document.body.scrollHeight-120;
+	    var scrollWidth = document.body.scrollWidth-40;
+	    $("#fullbg1").css({width:scrollWidth, height:scrollHeight, display:"block"});
+	    $("#container1").css({top:"400px",left:"600px",display:"block"});
+		$("#leverageMTProgressBar").progressBar();
+		setTimeout(leverageMTProgress, 500);
 	</c:if>
 })
 
@@ -584,6 +638,28 @@ function updateWordCountsProgress()
 function closeBg() {
 	$("#fullbg").css("display","none");
 	$("#container").css("display","none");
+}
+</c:if>
+
+<c:if test="${isLeveragingMT}">
+function leverageMTProgress()
+{
+	var getPercentageURL = "${self.pageURL}&action=getLeverageMTPercentage&t=" + new Date().getTime();
+
+	$.getJSON(getPercentageURL, function(data) {
+		var per = data.leverageMTPercentage;
+		$("#leverageMTProgressBar").progressBar(per);
+		if (per < 100) {
+			setTimeout(leverageMTProgress, 1000);
+		} else {
+			setTimeout(closeBg1, 1000);
+		}
+	});
+}
+
+function closeBg1() {
+	$("#fullbg1").css("display","none");
+	$("#container1").css("display","none");
 }
 </c:if>
 
@@ -820,6 +896,34 @@ function realSubmitForm(specificButton){
 			w_updateLeverage = window.open("${updateLeverage.pageURL}&wfId=" + readyWfIds + "&action=getAvailableJobsForWfs", "UpdateLeverage", "height=580,width=700,resizable=no,scrollbars=no");
 	    });
 	}
+	else if (specificButton == "leverageMT")
+	{
+		var url = "${updateLeverage.pageURL}&action=checkHaveNonReadyWFSelected";
+	    $.post(url, {selectedWorkFlows: wfId}, function(data){
+		    var dataObj = eval('(' + data + ')');
+		    var readyWfIds = dataObj.readyWfIds;
+		    if (readyWfIds.length == 0) {
+			    alert('<%=bundle.getString("msg_no_ready_workflow_selected")%>');
+			    return false;
+		    }
+		    var nonReadyWfs = dataObj.nonReadyWfs;
+		    if (nonReadyWfs.length > 0) {
+			    var msg = '<%=bundle.getString("msg_leverage_mt_ready_only")%>';
+				alert(msg);
+			    return false;
+		    }
+
+		    var wfsWithMtProfile = dataObj.wfsWithMtProfile;
+		    if (wfsWithMtProfile.length == 0) {
+		    	alert('<%=bundle.getString("msg_leverage_mt_no_mt_profile")%>');
+		    	return false;
+		    }
+
+		    var url = "${self.pageURL}&leverageMT=yes&wfId=" + wfId + "&jobId=${jobId}";
+		    $("#workflowForm").attr("action", url);
+		    $("#workflowForm").submit();
+	    });
+	}
    else if (specificButton == "UpdateWordCounts")
    {
 	    var url = "${self.pageURL}&updateWordCounts=yes&wfId=" + wfId + "&jobId=${jobId}";
@@ -950,12 +1054,6 @@ function realSubmitForm(specificButton){
 	   $("#workflowForm").attr("action", url);
 	   $("#workflowForm").submit();
    }
-   else if (specificButton == "sendingbackEditionJob")
-   {
-	   var url = "${self.pageURL}&action=sendingbackEditionJob&wfId=" + wfId + "&jobId=${jobId}";
-	   $("#workflowForm").attr("action", url);
-	   $("#workflowForm").submit();
-   }
    else if(specificButton == "downloadQAReport")
    {
 	   $.ajax({
@@ -1014,7 +1112,11 @@ function changeWorkflowPriority(wfId,priority){
 
 function closeOpenedWindow()
 {
-    try { w_updateLeverage.close(); } catch (e) {};
+    try {
+    	if (w_updateLeverage) {
+        	w_updateLeverage.close();
+    	}
+    } catch (e) {};
     w_updateLeverage = null;
 }
 </script>

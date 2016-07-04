@@ -120,6 +120,7 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
     private Choice m_participantChoice;
     private Checkbox[] m_rateSelectionCheckbox;
     private Checkbox m_reportUploadCheckBox;
+    private Checkbox m_activityCommentUploadCheck;
     private Hashtable m_allRates; // key into index is the activity chosen.
 
     private boolean m_isCalendarInstalled;
@@ -387,6 +388,9 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
         }
         m_reportUploadCheckBox = new Checkbox();
         m_reportUploadCheckBox.setFocusable(false);
+        
+        m_activityCommentUploadCheck = new Checkbox();
+        m_activityCommentUploadCheck.setFocusable(false);
 
         m_isCalendarInstalled = ((Boolean) getValue("isCalendarInstalled"))
                 .booleanValue();
@@ -538,6 +542,14 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
             }
         });
 
+        m_activityCommentUploadCheck.addItemListener(new ItemListener()
+        {
+            public void itemStateChanged(ItemEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
+        
         // create user role table
         createUserRoleTable();
         JScrollPane userRoleSp = new JScrollPane(m_userRoleTable,
@@ -669,10 +681,15 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                 EnvoyConstraints.X_RESIZABLE,
                 EnvoyConstraints.Y_NOT_RESIZABLE,
                 EnvoyConstraints.END_OF_LINE));
+        panel.add(m_activityCommentUploadCheck, new EnvoyConstraints(m_width,
+                40, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.END_OF_LINE));
         panel.add(timeToAcceptLabel, new EnvoyConstraints(m_width, m_height, 1,
                 EnvoyConstraints.LEFT, EnvoyConstraints.X_NOT_RESIZABLE,
                 EnvoyConstraints.Y_NOT_RESIZABLE,
-                EnvoyConstraints.NOT_END_OF_LINE));
+                EnvoyConstraints.NOT_END_OF_LINE));                                            
         panel.add(m_daysToAccept, new EnvoyConstraints(getDialogWidth() / 12,
                 m_height, 1, EnvoyConstraints.LEFT,
                 EnvoyConstraints.X_NOT_RESIZABLE,
@@ -1140,7 +1157,19 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
         {
         	m_reportUploadCheckBox.setState(true);
         }
-
+        
+        if(m_taskInfoBean == null)
+        {
+            if(p_workflowtask.getActivityCommentUploadCheck() == 1)
+            {
+                m_activityCommentUploadCheck.setState(true);
+            }
+        }
+        else if(m_taskInfoBean.getIsActivityCommentUploadCheck() == 1)
+        {
+            m_activityCommentUploadCheck.setState(true);
+        }
+        
         m_isModifyMode = p_workflowtask.getTaskId() > -1;
     }
 
@@ -1242,6 +1271,15 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
             	workflowtask.setReportUploadCheck(0);
             }
 
+            if(m_activityCommentUploadCheck.getState())
+            {
+                workflowtask.setActivityCommentUploadCheck(1);
+            }
+            else
+            {
+                workflowtask.setActivityCommentUploadCheck(0);
+            }
+            
             if (m_isCalendarInstalled)
             {
                 if (m_labels[32].equals(m_participantChoice.getSelectedItem()))
@@ -1293,6 +1331,7 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                 boolean hasRevenueChanged = false;
                 boolean hasRateSelectionChanged = false;
                 boolean hasReportUploadCheckChanged = false;
+                boolean hasIsActivityCommentUploadCheck = false;
                 String hours = null;
                 String text = null;
                 boolean useOnlySelectedRate = m_rateSelectionCheckbox[0]
@@ -1373,7 +1412,16 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                 	if(m_taskInfoBean.getIsReportUploadCheck() != isReportUploadCheck)
                 		hasReportUploadCheckChanged = true;
                 }
-                
+                int isActivityCommentUploadCheck = 0;
+                if(m_activityCommentUploadCheck.getState())
+                {
+                    isActivityCommentUploadCheck = 1;
+                }
+                if(m_taskInfoBean != null)
+                {
+                    if(m_taskInfoBean.getIsActivityCommentUploadCheck() != isActivityCommentUploadCheck)
+                        hasIsActivityCommentUploadCheck = true;
+                }
                 
                 // compare the currently selected rate with the initial value
                 // if they are not the same, add TaskInfoBean to m_values (if
@@ -1386,7 +1434,7 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                         && !m_expenseRateChoice.getSelectedItem().equals(
                                 m_initialExpenseRateName) || hasRevenueChanged
                         || hasAmountChanged || hasRateSelectionChanged
-                        || hasActivityChanged || hasReportUploadCheckChanged)
+                        || hasActivityChanged || hasReportUploadCheckChanged || hasIsActivityCommentUploadCheck)
                 {
                     String estimatedHours = null;
                     String actualHours = null;
@@ -1414,7 +1462,7 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                                     : m_taskInfoBean.getTaskId(),
                             estimatedHours, actualHours, expenseRate,
                             revenueRate, rateSelectionCriteria,
-                            selectedActivityName, isReportUploadCheck);
+                            selectedActivityName, isReportUploadCheck,isActivityCommentUploadCheck);
 
                     if (getValue("modifiedTaskInfoMap") != null)
                     {

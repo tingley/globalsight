@@ -62,6 +62,10 @@ public class TbUtil
     public static boolean ConceptIfHasTrcLan(long TbConceptId, String trgLan)
     {
         TbConcept tc = HibernateUtil.get(TbConcept.class, TbConceptId);
+        // sometimes the index is not updated after remove.
+        if (tc == null)
+            return false;
+        
         Set languages = tc.getLanguages();
         Iterator i = languages.iterator();
 

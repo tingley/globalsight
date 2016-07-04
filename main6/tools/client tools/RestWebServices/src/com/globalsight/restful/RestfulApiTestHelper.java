@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.client.config.CookieSpecs;
@@ -49,33 +48,35 @@ public class RestfulApiTestHelper
 {
     public final static int MAX_SEND_SIZE = 5 * 1024 * 1024;//5M
 
+    public final static String ACCESS_TOKEN = "accessToken";
+
     private CloseableHttpClient httpClient = null;
 
-    protected HttpPost getHttpPost(String url, String userName, String password)
+    protected HttpPost getHttpPost(String url, String accessToken)
     {
         HttpPost httppost = new HttpPost(url);
-        httppost.setHeader(HttpHeaders.AUTHORIZATION, authorizationHeader(userName, password));
+        httppost.setHeader(ACCESS_TOKEN, accessToken);
         return httppost;
     }
 
-    protected HttpGet getHttpGet(String url, String userName, String password)
+    protected HttpGet getHttpGet(String url, String accessToken)
     {
         HttpGet httpget = new HttpGet(url);
-        httpget.setHeader(HttpHeaders.AUTHORIZATION, authorizationHeader(userName, password));
+        httpget.setHeader(ACCESS_TOKEN, accessToken);
         return httpget;
     }
 
-    protected HttpPut getHttpPut(String url, String userName, String password)
+    protected HttpPut getHttpPut(String url, String accessToken)
     {
         HttpPut httpput = new HttpPut(url);
-        httpput.setHeader(HttpHeaders.AUTHORIZATION, authorizationHeader(userName, password));
+        httpput.setHeader(ACCESS_TOKEN, accessToken);
         return httpput;
     }
 
-    protected HttpDelete getHttpDelete(String url, String userName, String password)
+    protected HttpDelete getHttpDelete(String url, String accessToken)
     {
         HttpDelete httpdelete = new HttpDelete(url);
-        httpdelete.setHeader(HttpHeaders.AUTHORIZATION, authorizationHeader(userName, password));
+        httpdelete.setHeader(ACCESS_TOKEN, accessToken);
         return httpdelete;
     }
 

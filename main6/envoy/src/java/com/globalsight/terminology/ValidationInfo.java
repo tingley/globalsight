@@ -17,14 +17,14 @@
 
 package com.globalsight.terminology;
 
-import com.globalsight.terminology.TermbaseException;
-import com.globalsight.terminology.TermbaseExceptionMessages;
-
-import com.globalsight.util.edit.EditUtil;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import com.globalsight.util.edit.EditUtil;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 /**
  * A data class holding entry validation information:
@@ -96,6 +96,16 @@ public class ValidationInfo
             result.append("</term>\n");
 
             return result.toString();
+        }
+        
+        public JSONObject asJson()
+        {
+            JSONObject ob = new JSONObject();
+            ob.put("cid", m_cid);
+            ob.put("tid", m_tid);
+            ob.put("term", m_term);
+
+            return ob;
         }
     }
 
@@ -194,8 +204,38 @@ public class ValidationInfo
 
             return result.toString();
         }
+        
+        public JSONObject asJson()
+        {
+            JSONObject ob = new JSONObject();
+            JSONObject original = new JSONObject();
+            original.put("language", m_language);
+            original.put("term", m_term);
+            ob.put("original", original);
+            
+            JSONArray others = new JSONArray();
+            for (Iterator it = m_duplicates.keySet().iterator(); it.hasNext();)
+            {
+                String key = (String)it.next();
+                JSONObject other = new JSONObject();
+                other.put("language", key);
+                
+                JSONArray terms = new JSONArray();
+                ArrayList dups = (ArrayList)m_duplicates.get(key);
+                for (int i = 0, max = dups.size(); i < max; i++)
+                {
+                    DuplicateTerm info = (DuplicateTerm)dups.get(i);
+                    terms.add(info.asJson());
+                }
+                other.put("terms", terms);
+                others.add(other);
+            }
+            ob.put("others", others);
+            return ob;
+        }
     }
 
+    
     //
     // Members
     //
@@ -288,6 +328,21 @@ public class ValidationInfo
         result.append("</validationresult>");
 
         return result.toString();
+    }
+    
+    public String asJson()
+    {
+        JSONObject ob = new JSONObject();
+        ob.put("conceptid", m_conceptId);
+        JSONArray validation = new JSONArray();
+        for (int i = 0, max = m_duplicates.size(); i < max; ++i)
+        {
+            DuplicatesPerTerm list = (DuplicatesPerTerm)m_duplicates.get(i);
+            validation.add(list.asJson());
+        }
+        ob.put("validation", validation);
+        
+        return ob.toString();
     }
 
     /* TEST CODE

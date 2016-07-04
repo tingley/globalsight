@@ -25,6 +25,7 @@ import org.jbpm.graph.def.Node;
 import org.jbpm.graph.exe.ProcessInstance;
 
 import com.globalsight.calendar.BaseFluxCalendar;
+import com.globalsight.cxe.util.scheduling.SchedulerUtil;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -84,8 +85,7 @@ public class EventNotificationHelper
             long p_originalAcceptDuration, long p_originalCompleteDuration)
     {
         long currentAcceptDuration = p_workflowTaskInstance.getAcceptTime();
-        long currentCompleteDuration = p_workflowTaskInstance
-                .getCompletedTime();
+        long currentCompleteDuration = p_workflowTaskInstance.getCompletedTime();
 
         Map map = new HashMap(3);
         map.put(SchedulerConstants.ACTIVE_NODE, p_workflowTaskInstance);
@@ -114,16 +114,13 @@ public class EventNotificationHelper
      * @param p_threshold
      * @param p_emailInfo
      */
-    public static void performSchedulingProcess(Integer p_actionType,
-            long p_unsheduleTaskId, Integer p_unScheduleEventType, Node p_node,
-            TaskInfo p_taskInfo, Long p_creationTime,
-            Integer p_scheduleEventType, Float p_threshold,
-            TaskEmailInfo p_emailInfo)
+    public static void performSchedulingProcess(Integer p_actionType, long p_unsheduleTaskId,
+            Integer p_unScheduleEventType, Node p_node, TaskInfo p_taskInfo, Long p_creationTime,
+            Integer p_scheduleEventType, Float p_threshold, TaskEmailInfo p_emailInfo)
     {
 
-        performSchedulingProcess(p_actionType, p_unsheduleTaskId,
-                p_unScheduleEventType, p_node, p_taskInfo, p_creationTime,
-                p_scheduleEventType, p_threshold, p_emailInfo, null);
+        performSchedulingProcess(p_actionType, p_unsheduleTaskId, p_unScheduleEventType, p_node,
+                p_taskInfo, p_creationTime, p_scheduleEventType, p_threshold, p_emailInfo, null);
     }
 
     // Perform create/stop notification timer based on the info within the
@@ -141,16 +138,14 @@ public class EventNotificationHelper
      * @param p_additionalInfo
      */
     @SuppressWarnings("unchecked")
-    static void performSchedulingProcess(Integer p_actionType,
-            long p_unsheduleTaskId, Integer p_unScheduleEventType, Node p_node,
-            TaskInfo p_taskInfo, Long p_creationTime,
-            Integer p_scheduleEventType, Float p_threshold,
-            TaskEmailInfo p_emailInfo, Map p_additionalInfo)
+    static void performSchedulingProcess(Integer p_actionType, long p_unsheduleTaskId,
+            Integer p_unScheduleEventType, Node p_node, TaskInfo p_taskInfo, Long p_creationTime,
+            Integer p_scheduleEventType, Float p_threshold, TaskEmailInfo p_emailInfo,
+            Map p_additionalInfo)
     {
         try
         {
-            // first get common hash map
-            HashMap map = createSchedulingMap(p_actionType);
+            Map<String, Object> map = createSchedulingMap(p_actionType);
             if (p_unsheduleTaskId != INVALID_ID)
             {
                 unschedulingNotificationInfo(map, new Long(p_unsheduleTaskId),
@@ -162,23 +157,20 @@ public class EventNotificationHelper
             // null task if the workflow has been finished.
             if (p_scheduleEventType != null && p_node != null)
             {
-                schedulingNotificationInfo(map, p_node, p_taskInfo,
-                        p_creationTime, p_scheduleEventType, p_threshold,
-                        p_emailInfo);
+                schedulingNotificationInfo(map, p_node, p_taskInfo, p_creationTime,
+                        p_scheduleEventType, p_threshold, p_emailInfo);
             }
 
             long projectId = p_emailInfo.getProjectIdAsLong().longValue();
-            Project project = ServerProxy.getProjectHandler().getProjectById(
-                    projectId);
-            map.put(SchedulerConstants.CURRENT_COMPANY_ID,
-                    String.valueOf(project.getCompanyId()));
+            Project project = ServerProxy.getProjectHandler().getProjectById(projectId);
+            map.put(SchedulerConstants.CURRENT_COMPANY_ID, String.valueOf(project.getCompanyId()));
 
             if (p_additionalInfo != null)
             {
                 map.putAll(p_additionalInfo);
             }
-            // now perform action
-            ServerProxy.getEventScheduler().performSchedulingProcess(map);
+            // GBS-4400
+            SchedulerUtil.performSchedulingActionWithThread(map);
         }
         catch (Exception e)
         {
@@ -196,18 +188,15 @@ public class EventNotificationHelper
      * @param p_isNotificationActive
      * @param p_threshold
      */
-    static void scheduleNotificationForDispatch(Node p_activeNode,
-            TaskInfo p_taskInfo, TaskEmailInfo p_emailInfo,
-            boolean p_isNotificationActive, Float p_threshold)
+    static void scheduleNotificationForDispatch(Node p_activeNode, TaskInfo p_taskInfo,
+            TaskEmailInfo p_emailInfo, boolean p_isNotificationActive, Float p_threshold)
     {
         if (p_isNotificationActive)
         {
-            performSchedulingProcess(new Integer(
-                    SchedulerConstants.DISPATCH_WORKFLOW), INVALID_ID, null,
-                    p_activeNode, p_taskInfo, getCurrentTime(),
-                    (Integer) SchedulerConstants.s_eventTypes
-                            .get(SchedulerConstants.ACCEPT_TYPE), p_threshold,
-                    p_emailInfo);
+            performSchedulingProcess(new Integer(SchedulerConstants.DISPATCH_WORKFLOW), INVALID_ID,
+                    null, p_activeNode, p_taskInfo, getCurrentTime(),
+                    (Integer) SchedulerConstants.s_eventTypes.get(SchedulerConstants.ACCEPT_TYPE),
+                    p_threshold, p_emailInfo);
         }
     }
 
@@ -246,46 +235,39 @@ public class EventNotificationHelper
     // this is the first method that should be called which will return the
     // common HashMap used for both creating and stopping a timer.
     @SuppressWarnings("unchecked")
-    private static HashMap createSchedulingMap(Integer p_actionType)
+    private static Map<String, Object> createSchedulingMap(Integer p_actionType)
     {
-        HashMap map = new HashMap(16);
+        Map<String, Object> map = new HashMap<String, Object>(16);
         map.put(SchedulerConstants.ACTION_TYPE, p_actionType);
         map.put(SchedulerConstants.DOMAIN_OBJ_TYPE,
-                (Integer) SchedulerConstants.s_objectTypes
-                        .get(WorkflowTask.class));
+                (Integer) SchedulerConstants.s_objectTypes.get(WorkflowTask.class));
 
         return map;
     }
 
     //
     @SuppressWarnings("unchecked")
-    private static HashMap emailInfo(TaskEmailInfo p_emailInfo,
-            String p_activityName)
+    private static Map emailInfo(TaskEmailInfo p_emailInfo, String p_activityName)
     {
         // email info
-        HashMap emailMap = new HashMap(5);
-        emailMap.put(SchedulerConstants.PROJECT_ID,
-                p_emailInfo.getProjectIdAsLong());
+        Map emailMap = new HashMap(5);
+        emailMap.put(SchedulerConstants.PROJECT_ID, p_emailInfo.getProjectIdAsLong());
         emailMap.put(SchedulerConstants.WF_ID, p_emailInfo.getWfIdAsLong());
         emailMap.put(SchedulerConstants.JOB_NAME, p_emailInfo.getJobName());
         emailMap.put(SchedulerConstants.ACTIVITY_NAME, p_activityName);
-        emailMap.put(SchedulerConstants.SOURCE_LOCALE,
-                p_emailInfo.getSourceLocale());
-        emailMap.put(SchedulerConstants.TARGET_LOCALE,
-                p_emailInfo.getTargetLocale());
+        emailMap.put(SchedulerConstants.SOURCE_LOCALE, p_emailInfo.getSourceLocale());
+        emailMap.put(SchedulerConstants.TARGET_LOCALE, p_emailInfo.getTargetLocale());
 
         // Put the assignees' names to the emailMap, for the overdue issue
-        emailMap.put(SchedulerConstants.ASSIGNEES_NAME,
-                p_emailInfo.getAssigneesName());
+        emailMap.put(SchedulerConstants.ASSIGNEES_NAME, p_emailInfo.getAssigneesName());
 
         return emailMap;
     }
 
     @SuppressWarnings("unchecked")
-    private static HashMap schedulingNotificationInfo(HashMap p_map,
-            Node p_node, TaskInfo p_taskInfo, Long p_creationTime,
-            Integer p_eventType, Float p_threshold, TaskEmailInfo p_emailInfo)
-            throws Exception
+    private static Map<String, Object> schedulingNotificationInfo(Map<String, Object> p_map,
+            Node p_node, TaskInfo p_taskInfo, Long p_creationTime, Integer p_eventType,
+            Float p_threshold, TaskEmailInfo p_emailInfo) throws Exception
     {
         // TomyD -- we might not need this...
         BaseFluxCalendar calendar = null;
@@ -319,22 +301,20 @@ public class EventNotificationHelper
         p_map.put(SchedulerConstants.LISTENER, ActivityEmailDispatcher.class);
         // email information map
         long wfId = p_emailInfo.getWfIdAsLong();
-        ProcessInstance pi = WorkflowConfiguration.getInstance()
-                .getCurrentContext().getProcessInstance(wfId);
-        String activityName = WorkflowJbpmUtil.getActivityNameWithArrowName(
-                p_node, "_" + companyIdStr, pi, "");
-        p_map.put(SchedulerConstants.EMAIL_INFO,
-                emailInfo(p_emailInfo, activityName));
+        ProcessInstance pi = WorkflowConfiguration.getInstance().getCurrentContext()
+                .getProcessInstance(wfId);
+        String activityName = WorkflowJbpmUtil.getActivityNameWithArrowName(p_node,
+                "_" + companyIdStr, pi, "");
+        p_map.put(SchedulerConstants.EMAIL_INFO, emailInfo(p_emailInfo, activityName));
         // the id of the object for scheduling
-        p_map.put(SchedulerConstants.SCHEDULE_DOMAIN_OBJ_ID,
-                new Long(p_node.getId()));
+        p_map.put(SchedulerConstants.SCHEDULE_DOMAIN_OBJ_ID, new Long(p_node.getId()));
         return p_map;
     }
 
     // populate the scheduling map with information required for stopping
     // an event notification.
     @SuppressWarnings("unchecked")
-    private static HashMap unschedulingNotificationInfo(HashMap p_map,
+    private static Map<String, Object> unschedulingNotificationInfo(Map<String, Object> p_map,
             Long p_workflowTaskInstanceId, Integer p_eventType)
     {
         // accept, complete or etc. The event type can be null during workflow
@@ -348,8 +328,7 @@ public class EventNotificationHelper
         {
             p_map.put(SchedulerConstants.UNSCHEDULE_EVENT_TYPE, p_eventType);
         }
-        p_map.put(SchedulerConstants.UNSCHEDULE_DOMAIN_OBJ_ID,
-                p_workflowTaskInstanceId);
+        p_map.put(SchedulerConstants.UNSCHEDULE_DOMAIN_OBJ_ID, p_workflowTaskInstanceId);
 
         return p_map;
     }

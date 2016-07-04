@@ -14,6 +14,7 @@
                 com.globalsight.everest.util.system.SystemConfigParamNames,
                 com.globalsight.everest.secondarytargetfile.SecondaryTargetFile,
                 com.globalsight.everest.util.system.SystemConfiguration,
+                com.globalsight.everest.comment.CommentFile,
                 com.globalsight.everest.webapp.WebAppConstants,
                 com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
                 com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
@@ -26,6 +27,8 @@
                 com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
                 com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler,
                 com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
+                com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper,
+                com.globalsight.everest.projecthandler.MachineTranslationProfile,
                 com.globalsight.everest.page.TargetPage,
                 com.globalsight.everest.workflowmanager.Workflow,
                 com.globalsight.everest.util.system.SystemConfigParamNames,
@@ -222,6 +225,16 @@
     TaskImpl taskImpl = (TaskImpl)theTask;
     int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
     int isUploaded = taskImpl.getIsReportUploaded();
+
+    String labelActivitiesCommentUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_comment_upload_check");
+    int isActivityCommentUploadCheck = taskImpl.getIsActivityCommentUploadCheck();
+    int isActivityCommentUploaded = 0;
+    ArrayList<CommentFile> cf =  ServerProxy.getCommentManager().getActivityCommentAttachments(theTask);
+    if(cf != null && cf.size()>0)
+    {
+        isActivityCommentUploaded =1;
+    }
+    
     WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;
@@ -530,6 +543,18 @@
     }
     String qaReportUploadMsg = (String) sessionMgr.getAttribute("qaReportUploadMsg");
     sessionMgr.removeElement("qaReportUploadMsg");
+
+    String labelLeverageMT = bundle.getString("lb_leverage_mt");
+    String leverageMTUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
+        "=leverageMT" + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
+    
+    boolean hasMtProfile = false;
+    MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileByL10nProfile(
+            theJob.getL10nProfile(), workflowImpl.getTargetLocale());
+    if (mtProfile != null && mtProfile.isActive())
+    {
+        hasMtProfile = true;
+    }
 %>
 <HTML>
 <HEAD>

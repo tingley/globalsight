@@ -282,6 +282,10 @@ public class LocProfileMainHandler extends PageHandler implements
                 break;
         }
 
+        boolean useMtOnJobCreation = true;
+        value = (String) p_request.getParameter("useMtOnJobCreation");
+        useMtOnJobCreation = Boolean.parseBoolean(value);
+
         boolean automaticDispatch = false;
         value = (String) p_request.getParameter("AutomaticDispatch");
         automaticDispatch = Boolean.parseBoolean(value);
@@ -327,6 +331,7 @@ public class LocProfileMainHandler extends PageHandler implements
                     + projectId);
         }
         locprofile.setProject(project);
+        locprofile.setUseMtOnJobCreation(useMtOnJobCreation);
         locprofile.setAutomaticDispatch(automaticDispatch);
         locprofile.setRunScriptAtJobCreation(runSQLScript);
         locprofile.setJobCreationScriptName(SQLScript);

@@ -1,0 +1,298 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:comment="Conditionalized text for Breeze per FSpec 3.19.7." MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.Ready for Review" MadCap:lastBlockDepth="6" MadCap:lastHeight="2129" MadCap:lastWidth="732">
+    <head>
+        <link href="../Resources/TableStyles/WMouseOver.css" rel="stylesheet" MadCap:stylesheetType="table" /><title>Integration Tab</title>
+    </head>
+    <body>
+        <h1>Integration 
+ tab</h1>
+        <p class="para">Use this tab to define integration parameters (top area) 
+ and events (bottom area) of your processing method. The parameters affect 
+ the integration of the chromatogram displayed in the Review Main window, 
+ as well as all chromatograms processed using the processing method. </p>
+        <p class="para">The top area of the tab displays parameters that define peak 
+ detection and integration for the entire chromatogram.</p>
+        <h2 MadCap:conditions="Primary.Empower">Integration algorithm</h2>
+        <p MadCap:conditions="Primary.Empower">Select either ApexTrack or Traditional. 
+ The parameters vary for each integration algorithm. </p>
+        <p MadCap:conditions="Primary.Empower"><span class="emphasisbold">Note:</span> 
+ If Integration Algorithm is unavailable,  
+ the processing method uses the Traditional algorithm by default. </p>
+        <p MadCap:conditions="Primary.Breeze" class="caption">Peak detection/integration parameters:</p>
+        <p MadCap:conditions="Primary.Empower" class="caption">Traditional peak detection/integration 
+ parameters:</p>
+        <table class="TableStyle-WMouseOver" style="mc-table-style: url('../Resources/TableStyles/WMouseOver.css');" cellspacing="0">
+            <col class="Column-Column1" />
+            <col class="Column-Column1" />
+            <thead>
+                <tr class="Head-Header1">
+                    <th class="HeadE-Column1-Header1">
+                        <p class="tablehead">Parameter</p>
+                    </th>
+                    <th class="HeadD-Column1-Header1">
+                        <p class="tablehead">Description</p>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Peak width</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">Peak width used for calculating the data bunching factor 
+ applied to the raw data during peak detection. During peak detection, 
+ the integer product of Peak Width and the sampling rate (at which the 
+ data was acquired) divided by 15 determines the number of points bunched 
+ together to produce a single point in the chromatogram.</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Threshold</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">Liftoff and touchdown values (minimum rate of change of the 
+ signal) for peak detection. The software calculates slope changes across 
+ three bunched data points and compares this change against the Threshold 
+ value.</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Minimum area</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">Minimum peak area (in <span style="font-family: Symbol;">m</span>V<span style="font-family: Symbol;">·</span>sec) required for a peak to be reported. Any peak 
+ with less than the minimum area requirement is not included in the peak 
+ results. </p>
+                        <p class="tabledata"><span class="emphasisbold">Value range:</span> 
+ 0 to 1.000e+090 <span style="font-family: Symbol;">m</span>V<span style="font-family: Symbol;">·</span>sec 
+ </p>
+                        <p class="tabledata"><span class="emphasisbold">Default:</span> 
+ 0 <span style="font-family: Symbol;">m</span>V<span style="font-family: Symbol;">·</span>sec</p>
+                        <p class="tabledata">Set the minimum area using the Minimum Area field. </p>
+                        <p class="tabledata"><span class="emphasisbold">Note:</span> 
+ Selecting Minimum Area displays a reading of 95% of the total area of 
+ the selected peak. The software uses this percentage of the value to report
+ peaks of this size. If the area value equaled 100% of the 
+ selected peak, the peak might be excluded when processing a different chromatogram 
+ (with the same peak). </p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1">
+                    <td class="BodyB-Column1-Body1">
+                        <p class="tabledata">Minimum height</p>
+                    </td>
+                    <td class="BodyA-Column1-Body1">
+                        <p class="tabledata">Minimum peak height (in microvolts) required for a peak to 
+ be reported. Peaks below the minimum height requirement are excluded from 
+ the peak results.</p>
+                        <p class="tabledata"><span class="emphasisbold">Value range:</span> 
+ 0 to 1.000e+090 <span style="font-family: Symbol;">m</span>V</p>
+                        <p class="tabledata"><span class="emphasisbold">Default:</span> 
+ 0 <span style="font-family: Symbol;">m</span>V.</p>
+                        <p class="tabledata">Set the minimum height using the Minimum Height field. </p>
+                        <p class="tabledata"><span class="emphasisbold">Note:</span> 
+ Selecting Minimum Height displays a reading of 95% of the total height 
+ of the selected peak. The software uses this percentage of the value to report peaks of this height. If the height value equaled 
+ 100% of the selected peak, the peak might be excluded when processing a different 
+ chromatogram (with the same peak).</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="para" MadCap:conditions="Primary.Breeze">For GPC processing, set integration parameters 
+ (peak width, threshold, minimum area, and minimum height) and integration 
+ events for broad and narrow concentration (RI) and viscosity data channels 
+ by selecting these fields: </p>
+        <p class="para" MadCap:conditions="Primary.Empower">For GPC/V processing, set integration 
+ parameters (peak width, threshold, minimum area, and minimum height) and 
+ integration events for broad and narrow concentration (RI), viscosity 
+ data channels, and light scattering data channels by selecting these fields: 
+ </p>
+        <h3 MadCap:conditions="Primary.Breeze">GPC integration parameters:</h3>
+        <h3 MadCap:conditions="Primary.Empower">GPC/V/LS integration parameters:</h3>
+        <table class="TableStyle-WMouseOver" style="mc-table-style: url('../Resources/TableStyles/WMouseOver.css');" cellspacing="0">
+            <col class="Column-Column1" />
+            <col class="Column-Column1" />
+            <thead>
+                <tr class="Head-Header1">
+                    <th class="HeadE-Column1-Header1">
+                        <p class="tablehead">Field</p>
+                    </th>
+                    <th class="HeadD-Column1-Header1">
+                        <p class="tablehead">Description</p>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Narrow </p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">Narrow standard or unknown concentration data channels.</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Broad</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">Broad standard or unknown concentration data channels.</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1" MadCap:conditions="Primary.Empower">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Light Scattering</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">All 
+ light scattering data channels.</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1" MadCap:conditions="Primary.Empower">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Visco Narrow (GPCV Option)</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">Narrow standard or unknown viscosity data channels.</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1" MadCap:conditions="Primary.Empower">
+                    <td class="BodyB-Column1-Body1">
+                        <p class="tabledata">Visco Broad (GPCV Option)</p>
+                    </td>
+                    <td class="BodyA-Column1-Body1">
+                        <p class="tabledata">Broad standard or unknown viscosity data channels.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p MadCap:conditions="Primary.Empower" class="caption">ApexTrack peak detection/integration 
+ parameters:</p>
+        <table class="TableStyle-WMouseOver" style="mc-table-style: url('../Resources/TableStyles/WMouseOver.css');" cellspacing="0">
+            <col class="Column-Column1" />
+            <col class="Column-Column1" />
+            <thead>
+                <tr class="Head-Header1" onMouseOver="this.bgColor='#ebf3fe'" onMouseOut="this.bgColor='#ffffff'" MadCap:conditions="Primary.Empower">
+                    <th class="HeadE-Column1-Header1">
+                        <p class="tablehead">Parameter</p>
+                    </th>
+                    <th class="HeadD-Column1-Header1">
+                        <p class="tablehead">Description</p>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="Body-Body1" onMouseOver="this.bgColor='#ebf3fe'" onMouseOut="this.bgColor='#ffffff'" MadCap:conditions="Primary.Empower">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Start (min)</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata">Start detection/integration time.</p>
+                        <p class="tabledata"><span class="emphasisbold">Default:</span> 
+ Blank (which means start of data)</p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Range:</span> 
+ If a numerical value is entered, the range is 0 minutes (min) to 655 min. 
+ If both values are not blank, Start must be less than End</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1" onMouseOver="this.bgColor='#ebf3fe'" onMouseOut="this.bgColor='#ffffff'" MadCap:conditions="Primary.Empower">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Peak width</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata" MadCap:conditions="Primary.Empower">Peak Width @ 5% Height. Sets the filter 
+ width. </p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Default:</span> 
+ Blank (which invokes the Auto-Peak Width algorithm). If a numerical value 
+ is entered, it must be greater than 0 seconds (sec). </p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Range:</span> 
+ 0.01 to 9999.99 sec</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1" onMouseOver="this.bgColor='#ebf3fe'" onMouseOut="this.bgColor='#ffffff'" MadCap:conditions="Primary.Empower">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Detection threshold</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata" MadCap:conditions="Primary.Empower">Peak Detection Threshold. Sets the peak-to-peak 
+ baseline noise in response units scaled to the same units as peak height 
+ (microvolts). </p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Default:</span> 
+ Blank (which invokes the AutoThreshold feature)</p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Range:</span> 
+ 0.000 to 1.000e+090 microvolts (µV). This is the only field displayed 
+ in exponential notation.</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1" onMouseOver="this.bgColor='#ebf3fe'" onMouseOut="this.bgColor='#ffffff'" MadCap:conditions="Primary.Empower">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Liftoff %</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata" MadCap:conditions="Primary.Empower">A multiplier used to determine peak start. 
+ </p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Range:</span> 
+ A numerical value from 0 to 100% is required</p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Default:</span> 
+ 0.000%</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1" onMouseOver="this.bgColor='#ebf3fe'" onMouseOut="this.bgColor='#ffffff'" MadCap:conditions="Primary.Empower">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Touchdown %</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata" MadCap:conditions="Primary.Empower">A multiplier used to determine peak end. 
+ </p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Range:</span> 
+ A numerical value from 0 to 100% is required</p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Default:</span> 
+ 0.500%</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1" onMouseOver="this.bgColor='#ebf3fe'" onMouseOut="this.bgColor='#ffffff'" MadCap:conditions="Primary.Empower">
+                    <td class="BodyE-Column1-Body1">
+                        <p class="tabledata">Minimum area</p>
+                    </td>
+                    <td class="BodyD-Column1-Body1">
+                        <p class="tabledata" MadCap:conditions="Primary.Empower">Minimum peak area (in microvolts per 
+ second) required for a peak to be reported. Any peak with less than the 
+ minimum area requirement is not included in the peak results. </p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Entries:</span> 
+ 0 to 1.000e+090 <span style="font-family: Symbol;">m</span>V<span style="font-family: Symbol;">·</span>sec</p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Default:</span> 
+ 0 <span style="font-family: Symbol;">m</span>V<span style="font-family: Symbol;">·</span>sec</p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower">Set the minimum area using the Minimum 
+ Area text field.</p>
+                    </td>
+                </tr>
+                <tr class="Body-Body1" onMouseOver="this.bgColor='#ebf3fe'" onMouseOut="this.bgColor='#ffffff'" MadCap:conditions="Primary.Empower">
+                    <td class="BodyB-Column1-Body1">
+                        <p class="tabledata">Minimum height</p>
+                    </td>
+                    <td class="BodyA-Column1-Body1">
+                        <p class="tabledata" MadCap:conditions="Primary.Empower">Minimum peak height (in microvolts) required 
+ for a peak to be reported. Peaks below the minimum height requirement 
+ are excluded from the peak results. </p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Entries:</span> 
+ 0 to 1.000e+090 <span style="font-family: Symbol;">m</span>V</p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Default:</span> 
+ 0 <span style="font-family: Symbol;">m</span>V</p>
+                        <p class="tabledata" MadCap:conditions="Primary.Empower">Set the minimum height using the Minimum 
+ Height text field.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <h2>Integration event table</h2>
+        <p class="para">The bottom of the tab includes the Integration Event table, 
+ where you set time-specific detection/integration events for the selected 
+ chromatogram. The events override the individual global detection/integration 
+ parameters set in the top of the Integration tab or in the Review Main 
+ window. Apply events to a single peak or the entire chromatogram.</p>
+    </body>
+</html>

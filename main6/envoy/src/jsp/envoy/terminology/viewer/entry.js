@@ -124,6 +124,9 @@ function HtmlToXmlFieldGrp(node)
 {
     var result = "";
 
+    if (node.firstChild == null)
+    	return result;
+    
     var type = node.firstChild.getAttribute("type");
     var t = type.toLowerCase();
 
@@ -240,17 +243,17 @@ function HtmlToXmlTermGrp(node)
  *
  * Different results are returned for the Browser's viewer and editor(s).
  */
-function XmlToHtml(dom, context, inputmodel)
+function XmlToHtml(objJson, context, inputmodel)
 {
     var result;
 
     if (context.ui == "viewer")
     {
-        result = VXmlToHtmlConceptGrp(dom.selectSingleNode('//conceptGrp'), context);
+        result = VXmlToHtmlConceptGrp(objJson, context);
     }
     else
     {
-        result = XmlToHtmlConceptGrp(dom.selectSingleNode('//conceptGrp'), context, inputmodel);
+        result = XmlToHtmlConceptGrp(objJson, context, inputmodel);
     }
 
     return result;
@@ -261,8 +264,10 @@ function XmlToHtmlConceptGrp(node, ctxt, inputmodel)
     var result = new StringBuilder(
         '<DIV class="conceptGrp"><SPAN class="fakeConceptGrp">');
 
-    var temp = node.selectSingleNode('concept');
-    var id = temp ? temp.text : null;
+    var id = node.concept;
+    if (typeof(id) == "undefined"){
+    	id == null;
+    }
     
     if(inputmodel) {
         id = "";
@@ -283,17 +288,16 @@ function XmlToHtmlConceptGrp(node, ctxt, inputmodel)
 
     result.append('</SPAN>');
 
-    result.append(XmlToHtmlTransacGrp(node.selectNodes('transacGrp'), ctxt));
-    result.append(XmlToHtmlDescripGrp(node.selectNodes('descripGrp'), ctxt));
-    result.append(XmlToHtmlSourceGrp(node.selectNodes('sourceGrp'), ctxt));
-    result.append(XmlToHtmlNoteGrp(node.selectNodes('noteGrp'), ctxt));
+    result.append(XmlToHtmlTransacGrp(node.transacGrp, ctxt));
+    result.append(XmlToHtmlDescripGrp(node.descripGrp, ctxt));
+    result.append(XmlToHtmlSourceGrp(node.sourceGrp, ctxt));
+    result.append(XmlToHtmlNoteGrp(node.noteGrp, ctxt));
+    
+    var languageGrp = toArray(node.languageGrp);
 
-    result.append(XmlToHtmlLanguageGrp(node.selectNodes(
-        '//languageGrp[language/@source-lang]'), ctxt,inputmodel));
-    result.append(XmlToHtmlLanguageGrp(node.selectNodes(
-        '//languageGrp[language/@target-lang]'), ctxt, inputmodel));
-    result.append(XmlToHtmlLanguageGrp(node.selectNodes(
-        '//languageGrp[not(language/@source-lang) and not(language/@target-lang)]'), ctxt, inputmodel));
+    result.append(XmlToHtmlLanguageGrp(getSourceLang(languageGrp), ctxt,inputmodel));
+    result.append(XmlToHtmlLanguageGrp(getTargetLang(languageGrp), ctxt, inputmodel));
+    result.append(XmlToHtmlLanguageGrp(getOtherLang(languageGrp), ctxt, inputmodel));
 
     result.append('</DIV>');
 
@@ -303,27 +307,31 @@ function XmlToHtmlConceptGrp(node, ctxt, inputmodel)
 function XmlToHtmlTransacGrp(nodes, ctxt)
 {
     var result = "";
+    
+    if (typeof(nodes) == "undefined")
+		return "";
 
+    nodes = toArray(nodes);
     for (var i = 0; i < nodes.length; i++)
     {
         var node = nodes[i];
 
         result += '<div class="transacGrp" type="';
-        result += getAtrributeText(node.selectSingleNode("transac/@type"));
+        result += node.transac["@type"];
         result += '" author="';
-        result += node.selectSingleNode("transac").text;
+        result += node.transac["#text"];
         result += '" date="';
-        result += node.selectSingleNode("date").text;
+        result += node.date;
         result += '">';
 
         result += '<div CLASS="transaclabel">';
-        result += ctxt.mapTransac(getAtrributeText(node.selectSingleNode("transac/@type")));
+        result += ctxt.mapTransac(node.transac["@type"]);
         result += '</div>';
 
         result += '<div CLASS="transacvalue">';
-        result += node.selectSingleNode("date").text;
+        result += node.date;
         result += ' (';
-        result += node.selectSingleNode("transac").text;
+        result += node.transac["#text"];
         result += ')';
         result += '</div>';
 
@@ -335,15 +343,18 @@ function XmlToHtmlTransacGrp(nodes, ctxt)
 
 function XmlToHtmlNoteGrp(nodes, ctxt)
 {
+	if (typeof(nodes) == "undefined")
+		return "";
+	
     var result = "";
-
+    nodes = toArray(nodes);
     for (var i = 0; i < nodes.length; i++)
     {
         var node = nodes[i];
 
         result += '<DIV class="fieldGrp" ondblclick="doEdit(this, event);">';
 
-        result += XmlToHtmlNote(node.selectSingleNode('note'), ctxt);
+        result += XmlToHtmlNote(node.note, ctxt);
 
         result += '</DIV>';
     }
@@ -353,27 +364,33 @@ function XmlToHtmlNoteGrp(nodes, ctxt)
 
 function XmlToHtmlNote(node, ctxt)
 {
+	if (typeof(node) == "undefined")
+		return "";
+	
     var result = '<SPAN CLASS="fieldlabel" unselectable="on" type="note">';
     result += ctxt.mapNote('note');
     result += '</SPAN>';
 
-    result += '<SPAN CLASS="fieldvalue">' + getInnerXml(node) + '</SPAN>';
+    result += '<SPAN CLASS="fieldvalue">' + node + '</SPAN>';
 
     return result;
 }
 
 function XmlToHtmlSourceGrp(nodes, ctxt)
 {
+	if (typeof(nodes) == "undefined")
+		return "";
+	
     var result = "";
-
+    nodes = toArray(nodes);
     for (var i = 0; i < nodes.length; i++)
     {
         var node = nodes[i];
 
         result += '<DIV class="fieldGrp" ondblclick="doEdit(this, event);">';
 
-        result += XmlToHtmlSource(node.selectSingleNode('source'), ctxt);
-        result += XmlToHtmlNoteGrp(node.selectNodes('noteGrp'), ctxt);
+        result += XmlToHtmlSource(getSourceNode(node), ctxt);
+        result += XmlToHtmlNoteGrp(node.noteGrp, ctxt);
 
         result += '</DIV>';
     }
@@ -381,30 +398,48 @@ function XmlToHtmlSourceGrp(nodes, ctxt)
     return result;
 }
 
+function getSourceNode(sourceGrp)
+{
+	if(typeof(sourceGrp.source) != "undefined")
+		return sourceGrp.descrip;
+	
+	if (sourceGrp.length == 1)
+		return sourceGrp[0];
+	
+	return sourceGrp;
+}
+
+
 function XmlToHtmlSource(node, ctxt)
 {
+	if (typeof(node) == "undefined")
+		return "";
+	
     var result = '<SPAN CLASS="fieldlabel" unselectable="on" type="source">';
     result += ctxt.mapSource('source');
     result += '</SPAN>';
 
-    result += '<SPAN CLASS="fieldvalue">' + getInnerXml(node) + '</SPAN>';
+    result += '<SPAN CLASS="fieldvalue">' + node + '</SPAN>';
 
     return result;
 }
 
 function XmlToHtmlDescripGrp(nodes, ctxt)
 {
+	if (typeof(nodes) == "undefined")
+		return "";
+	
     var result = "";
-
+    nodes = toArray(nodes);
     for (var i = 0; i < nodes.length; i++)
     {
         var node = nodes[i];
 
         result += '<DIV class="fieldGrp" ondblclick="doEdit(this, event);">';
 
-        result += XmlToHtmlDescrip(node.selectSingleNode('descrip'), ctxt);
-        result += XmlToHtmlSourceGrp(node.selectNodes('sourceGrp'), ctxt);
-        result += XmlToHtmlNoteGrp(node.selectNodes('noteGrp'), ctxt);
+        result += XmlToHtmlDescrip(getDescripNode(node), ctxt);
+        result += XmlToHtmlSourceGrp(node.sourceGrp, ctxt);
+        result += XmlToHtmlNoteGrp(node.noteGrp, ctxt);
 
         result += '</DIV>';
     }
@@ -412,37 +447,54 @@ function XmlToHtmlDescripGrp(nodes, ctxt)
     return result;
 }
 
+function getDescripNode(descripGrp)
+{
+	if(typeof(descripGrp.descrip) != "undefined")
+		return descripGrp.descrip;
+	
+	if (descripGrp.length == 1)
+		return descripGrp[0];
+	
+	return descripGrp;
+}
+
 function XmlToHtmlDescrip(node, ctxt)
 {
+	if (typeof(node) == "undefined")
+		return "";
+	
     var result = '<SPAN CLASS="fieldlabel" unselectable="on" type="';
-    result += getAtrributeText(node.selectSingleNode('@type'));
+    result += node['@type'];
     result += '">';
-    result += ctxt.mapDescrip(getAtrributeText(node.selectSingleNode('@type')).toLowerCase());
+    result += ctxt.mapDescrip(node['@type'].toLowerCase());
     result += '</SPAN>';
 
-    result += '<SPAN CLASS="fieldvalue">' + getInnerXml(node) + '</SPAN>';
+    result += '<SPAN CLASS="fieldvalue">' + node['#text'] + '</SPAN>';
 
     return result;
 }
 
 function XmlToHtmlLanguageGrp(nodes, ctxt, inputmodel)
 {
+	if (typeof(nodes) == "undefined")
+		return "";
+	
     var result = "";
-
+    nodes = toArray(nodes);
     for (var i = 0; i < nodes.length; i++)
     {
         var node = nodes[i];
 
         result += '<DIV class="languageGrp">';
         result += '<SPAN class="fakeLanguageGrp">';
-        result += XmlToHtmlLanguage(node.selectSingleNode('language'), ctxt);
+        result += XmlToHtmlLanguage(node.language, ctxt);
         result += '</SPAN>';
 
-        result += XmlToHtmlDescripGrp(node.selectNodes('descripGrp'), ctxt);
-        result += XmlToHtmlSourceGrp(node.selectNodes('sourceGrp'), ctxt);
-        result += XmlToHtmlNoteGrp(node.selectNodes('noteGrp'), ctxt);
+        result += XmlToHtmlDescripGrp(node.descripGrp, ctxt);
+        result += XmlToHtmlSourceGrp(node.sourceGrp, ctxt);
+        result += XmlToHtmlNoteGrp(node.noteGrp, ctxt);
 
-        result += XmlToHtmlTermGrp(node.selectNodes('termGrp'), ctxt, inputmodel);
+        result += XmlToHtmlTermGrp(node.termGrp, ctxt, inputmodel);
 
         result += '</DIV>';
     }
@@ -452,15 +504,18 @@ function XmlToHtmlLanguageGrp(nodes, ctxt, inputmodel)
 
 function XmlToHtmlLanguage(node, ctxt)
 {
+	if (typeof(node) == "undefined")
+		return "";
+	
     var result = "";
 
     result += '<SPAN class="languagelabel">Language</SPAN>';
 
     result += '<SPAN class="language" unselectable="on" locale="';
-    result += getAtrributeText(node.selectSingleNode('@locale'));
+    result += node['@locale'];
     
     result += '">';
-    result += getAtrributeText(node.selectSingleNode('@name'));
+    result += node['@name'];
 
     result += '</SPAN>';
 
@@ -469,8 +524,11 @@ function XmlToHtmlLanguage(node, ctxt)
 
 function XmlToHtmlTermGrp(nodes, ctxt, inputmodel)
 {
+	if (typeof(nodes) == "undefined")
+		return "";
+	
     var result = "";
-
+    nodes = toArray(nodes);
     for (var i = 0; i < nodes.length; i++)
     {
         var node = nodes[i];
@@ -478,12 +536,12 @@ function XmlToHtmlTermGrp(nodes, ctxt, inputmodel)
 
         result += '<DIV class="termGrp">';
         result += '<DIV class="fakeTermGrp" ondblclick="doEdit(this, event);">';
-        result += XmlToHtmlTerm(node.selectSingleNode('term'), ctxt, inputmodel, isFirst);
+        result += XmlToHtmlTerm(getTermNode(node), ctxt, inputmodel, isFirst);
         result += '</DIV>';
 
-        result += XmlToHtmlDescripGrp(node.selectNodes('descripGrp'), ctxt);
-        result += XmlToHtmlSourceGrp(node.selectNodes('sourceGrp'), ctxt);
-        result += XmlToHtmlNoteGrp(node.selectNodes('noteGrp'), ctxt);
+        result += XmlToHtmlDescripGrp(node.descripGrp, ctxt);
+        result += XmlToHtmlSourceGrp(node.sourceGrp, ctxt);
+        result += XmlToHtmlNoteGrp(node.noteGrp, ctxt);
 
         result += '</DIV>';
     }
@@ -491,14 +549,28 @@ function XmlToHtmlTermGrp(nodes, ctxt, inputmodel)
     return result;
 }
 
+function getTermNode(termGrp)
+{
+	if(typeof(termGrp.term) != "undefined")
+		return termGrp.term;
+	
+	if (termGrp.length == 1)
+		return termGrp[0];
+	
+	return termGrp;
+}
+
 function XmlToHtmlTerm(node, ctxt, inputmodel, isFirst)
 {
+	if (typeof(node) == "undefined")
+		return "";
+	
     var result = '<SPAN class="termlabel">';
     
     var termId;
     
-    if(node.selectSingleNode('@termId') != null) {
-        termId = getAtrributeText(node.selectSingleNode('@termId'));
+    if(typeof(node['@termId']) != "undefined") {
+        termId = node['@termId'];
     }
 
     if(inputmodel) {
@@ -510,7 +582,7 @@ function XmlToHtmlTerm(node, ctxt, inputmodel, isFirst)
 
     result += '</SPAN>';
 
-    result += '<SPAN class="term" termId="' + termId +'">' + node.text + '</SPAN>';
+    result += '<SPAN class="term" termId="' + termId +'">' + node['#text'] + '</SPAN>';
 
     return result;
 }
@@ -519,13 +591,16 @@ function XmlToHtmlTerm(node, ctxt, inputmodel, isFirst)
 // XmlToHtml (for viewer)
 //
 
-function VXmlToHtmlConceptGrp(node, ctxt)
+function VXmlToHtmlConceptGrp(objJson, ctxt)
 {
     var result = new StringBuilder(
         '<DIV class="vconceptGrp"><SPAN class="vfakeConceptGrp">');
 
-    var temp = node.selectSingleNode('concept');
-    var id = temp ? temp.text : null;
+    var id = objJson.concept;
+    
+    if (typeof(id) == "undefined"){
+    	id == null;
+    }
 
     if (id && parseInt(id) > 0)
     {
@@ -541,26 +616,86 @@ function VXmlToHtmlConceptGrp(node, ctxt)
     }
 
     result.append('</SPAN>');
-    result.append(VXmlToHtmlTransacGrp(node.selectNodes('transacGrp'), ctxt));
-    result.append(VXmlToHtmlDefinitionGrp(node.selectNodes('descrip'), ctxt));
+    result.append(VXmlToHtmlTransacGrp(objJson.transacGrp, ctxt));
+    
+    //I don't know why there is a descrip
+    //result.append(VXmlToHtmlDefinitionGrp(node.selectNodes('descrip'), ctxt));
     // in tbx files, definition may be used to modify concept
-    result.append(VXmlToHtmlDescripGrp(node.selectNodes('descripGrp'), ctxt));
-    result.append(VXmlToHtmlSourceGrp(node.selectNodes('sourceGrp'), ctxt));
-    result.append(VXmlToHtmlNoteGrp(node.selectNodes('noteGrp'), ctxt));
-    result.append(VXmlToHtmlLanguageGrp(node.selectNodes(
-        '//languageGrp[language/@source-lang]'), ctxt));
-    result.append(VXmlToHtmlLanguageGrp(node.selectNodes(
-        '//languageGrp[language/@target-lang]'), ctxt));
-    result.append(VXmlToHtmlLanguageGrp(node.selectNodes(
-        '//languageGrp[not(language/@source-lang) and not(language/@target-lang)]'), ctxt));
+    result.append(VXmlToHtmlDescripGrp(objJson.descripGrp, ctxt));
+    result.append(VXmlToHtmlSourceGrp(objJson.sourceGrp, ctxt));
+    result.append(VXmlToHtmlNoteGrp(objJson.noteGrp, ctxt));
+    
+    var languageGrp = toArray(objJson.languageGrp);
+    
+    result.append(VXmlToHtmlLanguageGrp(getSourceLang(languageGrp), ctxt));
+    result.append(VXmlToHtmlLanguageGrp(getTargetLang(languageGrp), ctxt));
+    result.append(VXmlToHtmlLanguageGrp(getOtherLang(languageGrp), ctxt));
 
     result.append('</DIV>');
 
     return result.toString();
 }
 
+function getSourceLang(languageGrp)
+{
+	var lang = new Array();
+	
+	for (var i = 0; i < languageGrp.length; i++)
+	{
+		var language = languageGrp[i];
+
+		if (typeof(language["source-lang"]) != "undefined")
+		{
+			lang.push(language);
+		}	
+	}
+	
+	return lang;
+}
+
+function getTargetLang(languageGrp)
+{
+	var lang = new Array();
+	
+	for (var i = 0; i < languageGrp.length; i++)
+	{
+		var language = languageGrp[i];
+
+		if (typeof(language["target-lang"]) != "undefined")
+		{
+			lang.push(language);
+		}	
+	}
+	
+	return lang;
+}
+
+function getOtherLang(languageGrp)
+{
+	var lang = new Array();
+	
+	for (var i = 0; i < languageGrp.length; i++)
+	{
+		var language = languageGrp[i];
+
+		if (typeof(language["source-lang"]) == "undefined" &&
+				typeof(language["target-lang"]) == "undefined")
+		{
+			lang.push(language);
+		}	
+	}
+	
+	return lang;
+}
+
+
 function VXmlToHtmlDefinitionGrp(nodes, ctxt)
 {
+	if (typeof(nodes) == "undefined")
+		return "";
+	
+	nodes = toArray(nodes);
+	
 	var result = new StringBuilder();
 
 	for (var i = 0; i < nodes.length; i++)
@@ -578,6 +713,11 @@ function VXmlToHtmlDefinitionGrp(nodes, ctxt)
 
 function VXmlToHtmlTransacGrp(nodes, ctxt)
 {
+	if (typeof(nodes) == "undefined")
+		return "";
+	
+	nodes = toArray(nodes);
+	
     var result = new StringBuilder();
 
     for (var i = 0; i < nodes.length; i++)
@@ -586,23 +726,23 @@ function VXmlToHtmlTransacGrp(nodes, ctxt)
         var node = nodes[i];
 
         result.append('<div class="vtransacGrp" type="');
-        result.append(getAtrributeText(node.selectSingleNode("transac/@type")));
+        result.append(node.transac["@type"]);
      
         result.append('" author="');
-        result.append(node.selectSingleNode("transac").text);
+        result.append(node.transac["#text"]);
         result.append('" date="');
-        result.append(node.selectSingleNode("date").text);
+        result.append(node.date);
         result.append('">');
 
         result.append('<div CLASS="vtransaclabel">');
-        result.append(ctxt.mapTransac(getAtrributeText(node.selectSingleNode("transac/@type"))));
+        result.append(ctxt.mapTransac(node.transac["@type"]));
 
         result.append('</div>');
  
         result.append('<div CLASS="vtransacvalue">');
-        result.append(node.selectSingleNode("date").text);
+        result.append(node.date);
         result.append(' (');
-        result.append(node.selectSingleNode("transac").text);
+        result.append(node.transac["#text"]);
         result.append(')'); 
         result.append('</div>');
         result.append('</div>');
@@ -613,6 +753,11 @@ function VXmlToHtmlTransacGrp(nodes, ctxt)
 
 function VXmlToHtmlNoteGrp(nodes, ctxt)
 {
+	if (typeof(nodes) == "undefined")
+		return "";
+	
+	nodes = toArray(nodes);
+	
     var result = "";
 
     for (var i = 0; i < nodes.length; i++)
@@ -621,7 +766,7 @@ function VXmlToHtmlNoteGrp(nodes, ctxt)
 
         result += '<DIV class="vfieldGrp">';
 
-        result += VXmlToHtmlNote(node.selectSingleNode('note'), ctxt);
+        result += VXmlToHtmlNote(node.note, ctxt);
 
         result += '</DIV>';
     }
@@ -631,19 +776,42 @@ function VXmlToHtmlNoteGrp(nodes, ctxt)
 
 function VXmlToHtmlNote(node, ctxt)
 {
+	if (typeof(node) == "undefined")
+		return "";
+	
     var result = new StringBuilder();
 
     result.append('<SPAN class="vfieldlabel" unselectable="on" type="note">');
     result.append(ctxt.mapNote('note'));
     result.append('</SPAN>');
 
-    result.append('<SPAN class="vfieldvalue">' + getInnerXml(node) + '</SPAN>');
+    result.append('<SPAN class="vfieldvalue">' + node + '</SPAN>');
 
     return result.toString();
 }
 
+function toArray(nodes)
+{
+	if (typeof(nodes) == "undefined"){
+		return new Array();
+	}
+	
+	if (typeof(nodes.length) != "undefined"){
+		return nodes;
+	}
+	
+	var n = new Array();
+	n.push(nodes);
+	return n;
+}
+
 function VXmlToHtmlSourceGrp(nodes, ctxt)
 {
+	if (typeof(nodes) == "undefined")
+		return "";
+	
+	nodes = toArray(nodes);
+	
     var result = new StringBuilder();
 
     for (var i = 0; i < nodes.length; i++)
@@ -652,8 +820,8 @@ function VXmlToHtmlSourceGrp(nodes, ctxt)
 
         result.append('<DIV class="vfieldGrp">');
 
-        result.append(VXmlToHtmlSource(node.selectSingleNode('source'), ctxt));
-        result.append(VXmlToHtmlNoteGrp(node.selectNodes('noteGrp'), ctxt));
+        result.append(VXmlToHtmlSource(node.source, ctxt));
+        result.append(VXmlToHtmlNoteGrp(node.noteGrp, ctxt));
 
         result.append('</DIV>');
     }
@@ -663,19 +831,27 @@ function VXmlToHtmlSourceGrp(nodes, ctxt)
 
 function VXmlToHtmlSource(node, ctxt)
 {
+	if (typeof(node) == "undefined")
+		return "";
+	
     var result = new StringBuilder();
 
     result.append('<SPAN class="vfieldlabel" unselectable="on" type="source">');
     result.append(ctxt.mapSource('source'));
     result.append('</SPAN>');
 
-    result.append('<SPAN class="vfieldvalue">' + getInnerXml(node) + '</SPAN>');
+    result.append('<SPAN class="vfieldvalue">' + node + '</SPAN>');
 
     return result.toString();
 }
 
 function VXmlToHtmlDescripGrp(nodes, ctxt)
 {
+	if (typeof(nodes) == "undefined")
+		return "";
+	
+	nodes = toArray(nodes);
+	
     var result = new StringBuilder();
 
     for (var i = 0; i < nodes.length; i++)
@@ -684,9 +860,9 @@ function VXmlToHtmlDescripGrp(nodes, ctxt)
 
         result.append('<DIV class="vfieldGrp">');
 
-        result.append(VXmlToHtmlDescrip(node.selectSingleNode('descrip'), ctxt));
-        result.append(VXmlToHtmlSourceGrp(node.selectNodes('sourceGrp'), ctxt));
-        result.append(VXmlToHtmlNoteGrp(node.selectNodes('noteGrp'), ctxt));
+        result.append(VXmlToHtmlDescrip(node.descrip, ctxt));
+        result.append(VXmlToHtmlSourceGrp(node.sourceGrp, ctxt));
+        result.append(VXmlToHtmlNoteGrp(node.noteGrp, ctxt));
 
         result.append('</DIV>');
     }
@@ -696,22 +872,29 @@ function VXmlToHtmlDescripGrp(nodes, ctxt)
 
 function VXmlToHtmlDescrip(node, ctxt)
 {
+	if (typeof(node) == "undefined")
+		return "";
     var result = new StringBuilder();
 
     result.append('<SPAN class="vfieldlabel" unselectable="on" type="');
     
-    result.append(getAtrributeText(node.selectSingleNode('@type')));
+    result.append(node['@type']);
     result.append('">');
-    result.append(ctxt.mapDescrip(getAtrributeText(node.selectSingleNode('@type')).toLowerCase()));
+    result.append(ctxt.mapDescrip(node['@type'].toLowerCase()));
     result.append('</SPAN>');
 
-    result.append('<SPAN class="vfieldvalue">' + getInnerXml(node) + '</SPAN>');
+    result.append('<SPAN class="vfieldvalue">' + node['#text'] + '</SPAN>');
 
     return result.toString();
 }
 
 function VXmlToHtmlLanguageGrp(nodes, ctxt)
 {
+	if (typeof(nodes) == "undefined")
+		return "";
+	
+	nodes = toArray(nodes);
+	
     var result = new StringBuilder();
 
     for (var i = 0; i < nodes.length; i++)
@@ -720,11 +903,11 @@ function VXmlToHtmlLanguageGrp(nodes, ctxt)
 
         result.append('<DIV class="');
 
-        if (node.selectSingleNode('language/@source-lang'))
+        if (typeof(node.language["source-lang"]) != "undefined")
         {
             result.append('vsourceLanguageGrp');
         }
-        else if (node.selectSingleNode('language/@target-lang'))
+        else if (typeof(node.language["target-lang"]) != "undefined")
         {
             result.append('vtargetLanguageGrp');
         }
@@ -736,24 +919,26 @@ function VXmlToHtmlLanguageGrp(nodes, ctxt)
         result.append('">');
         result.append('<SPAN class="vfakeLanguageGrp">');
         result.append(
-            VXmlToHtmlLanguage(node.selectSingleNode('language'), ctxt));
+            VXmlToHtmlLanguage(node.language, ctxt));
         result.append('</SPAN>');
 
-        result.append(VXmlToHtmlDescripGrp(node.selectNodes('descripGrp'), ctxt));
-        result.append(VXmlToHtmlSourceGrp(node.selectNodes('sourceGrp'), ctxt));
-        result.append(VXmlToHtmlNoteGrp(node.selectNodes('noteGrp'), ctxt));
+        result.append(VXmlToHtmlDescripGrp(node.descripGrp, ctxt));
+        result.append(VXmlToHtmlSourceGrp(node.sourceGrp, ctxt));
+        result.append(VXmlToHtmlNoteGrp(node.noteGrp, ctxt));
 
-	      var langNode = node.selectSingleNode('language');
-	      var currentLocale = langNode.selectSingleNode('//@locale').text;
-	    
-	      if(!document.all) {
-	          currentLocale = langNode.selectSingleNode('//@locale').textContent;
-	      }
+        var langNode = node.language;
+        var currentLocale = langNode['@locale'];
+     
+        if(!document.all) {
+           currentLocale = langNode['@locale'];
+        }
 
+        var terms = toArray(node.termGrp);
+        
         result.append(VXmlToHtmlTermGrp(
-            node.selectNodes('termGrp[term/@search-term]'), ctxt, currentLocale));
+        		getSearchTerm(terms), ctxt, currentLocale));
         result.append(VXmlToHtmlTermGrp(
-            node.selectNodes('termGrp[not(term/@search-term)]'), ctxt, currentLocale));
+        		getNotSearchTerm(terms), ctxt, currentLocale));
 
         result.append('</DIV>');
     }
@@ -761,18 +946,47 @@ function VXmlToHtmlLanguageGrp(nodes, ctxt)
     return result.toString();
 }
 
+function getSearchTerm(terms)
+{
+	var ts = new Array();
+	for (var i = 0; i < terms.length; i++)
+    {
+		var term = terms[i];
+		if (typeof(term["@search-term"]) != "undefined")
+			ts.push(term);
+    }
+	
+	return ts;
+}
+
+function getNotSearchTerm(terms)
+{
+	var ts = new Array();
+	for (var i = 0; i < terms.length; i++)
+    {
+		var term = terms[i];
+		if (typeof(term["@search-term"]) == "undefined")
+			ts.push(term);
+    }
+	
+	return ts;
+}
+
 function VXmlToHtmlLanguage(node, ctxt)
 {
+	if (typeof(node) == "undefined")
+		return "";
+	
     var result = new StringBuilder();
 
     result.append('<SPAN class="vlanguagelabel">Language</SPAN>');
 
     result.append('<SPAN class="vlanguage" unselectable="on" locale="');
     
-    result.append(getAtrributeText(node.selectSingleNode('@locale')));
+    result.append(node['@locale']);
     
     result.append('">');
-    result.append(getAtrributeText(node.selectSingleNode('@name')));
+    result.append(node['@name']);
 
     result.append('</SPAN>');
 
@@ -781,6 +995,11 @@ function VXmlToHtmlLanguage(node, ctxt)
 
 function VXmlToHtmlTermGrp(nodes, ctxt, currentLocale)
 {
+	if (typeof(nodes) == "undefined")
+		return "";
+	
+	nodes = toArray(nodes);
+	
     var result = new StringBuilder();
 
     for (var i = 0; i < nodes.length; i++)
@@ -799,18 +1018,14 @@ function VXmlToHtmlTermGrp(nodes, ctxt, currentLocale)
 	          result.append('<DIV class="vfakeTermGrp">');	
 	      }
 	      
-        var termId;
+        var termId = node.term["@termId"];
         
-        if(node.selectSingleNode('term').selectSingleNode('@termId') != null) {
-            termId = getAtrributeText(node.selectSingleNode('term').selectSingleNode('@termId'));
-        }
-        
-        result.append(VXmlToHtmlTerm(node.selectSingleNode('term'), ctxt, currentLocale, termId));
+        result.append(VXmlToHtmlTerm(node.term, ctxt, currentLocale, termId));
         result.append('</DIV>');
 
-        result.append(VXmlToHtmlDescripGrp(node.selectNodes('descripGrp'), ctxt));
-        result.append(VXmlToHtmlSourceGrp(node.selectNodes('sourceGrp'), ctxt));
-        result.append(VXmlToHtmlNoteGrp(node.selectNodes('noteGrp'), ctxt));
+        result.append(VXmlToHtmlDescripGrp(node.descripGrp, ctxt));
+        result.append(VXmlToHtmlSourceGrp(node.sourceGrp, ctxt));
+        result.append(VXmlToHtmlNoteGrp(node.noteGrp, ctxt));
 
         result.append('</DIV>');
     }
@@ -820,36 +1035,39 @@ function VXmlToHtmlTermGrp(nodes, ctxt, currentLocale)
 
 function VXmlToHtmlTerm(node, ctxt, currentLocale, termId)
 {
+	if (typeof(node) == "undefined")
+		return "";
+	
     var result = new StringBuilder();
 
     result.append('<SPAN class="vtermlabel">');
     result.append(ctxt.mapTerm(null));
     result.append('</SPAN>');
 
-    if (node.selectSingleNode('@search-term'))
+    if (typeof(node["@search-term"]))
     {
     	if (currentLocale.substring(0,2) == 'ar' || currentLocale.substring(0,2) == 'he'
     	      || currentLocale.substring(0,2) == 'fa' || currentLocale.substring(0,2) == 'ur')
     	{
 
-            result.append('<SPAN style="direction: rtl; unicode-bidi: embed;" class="vsearchterm" termId="' + termId +'">' + node.text + '</SPAN>');
+            result.append('<SPAN style="direction: rtl; unicode-bidi: embed;" class="vsearchterm" termId="' + termId +'">' + node["#text"] + '</SPAN>');
     	}
         else
-	{
-            result.append('<SPAN class="vsearchterm" termId="' + termId +'">' + node.text + '</SPAN>');		
-	}
+		{
+	            result.append('<SPAN class="vsearchterm" termId="' + termId +'">' + node["#text"] + '</SPAN>');		
+		}
     }
     else
     {
     	if (currentLocale.substring(0,2) == 'ar' || currentLocale.substring(0,2) == 'he'
     	      || currentLocale.substring(0,2) == 'fa' || currentLocale.substring(0,2) == 'ur')
     	{
-            result.append('<SPAN style="direction: rtl; unicode-bidi: embed;" class="vterm" termId="' + termId +'">' + node.text + '</SPAN>');
+            result.append('<SPAN style="direction: rtl; unicode-bidi: embed;" class="vterm" termId="' + termId +'">' + node["#text"] + '</SPAN>');
     	}
         else
-	{
-            result.append('<SPAN class="vterm" termId="' + termId +'">' + node.text + '</SPAN>');		
-	}
+		{
+	            result.append('<SPAN class="vterm" termId="' + termId +'">' + node["#text"] + '</SPAN>');		
+		}
     }
 
     return result.toString();

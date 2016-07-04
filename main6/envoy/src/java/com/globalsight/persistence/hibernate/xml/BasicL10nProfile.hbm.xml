@@ -16,6 +16,8 @@
             type="int" not-null="true" />
         <property name="autoDispatch" column="IS_AUTO_DISPATCH"
             type="yes_no" not-null="true" />
+        <property name="useMtOnJobCreation" column="USE_MT_ON_JOB_CREATION"
+            type="yes_no" not-null="true" />
         <property name="timestamp" column="TIMESTAMP" type="timestamp"
             not-null="true" />
         <property name="runScript"

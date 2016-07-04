@@ -25,6 +25,8 @@ import java.net.URLDecoder;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +38,7 @@ import java.util.Vector;
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -55,6 +58,7 @@ import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
+import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.CostCalculator;
 import com.globalsight.everest.costing.CostingEngineLocal;
@@ -69,6 +73,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.Page;
 import com.globalsight.everest.page.PagePersistenceAccessor;
 import com.globalsight.everest.page.PageState;
+import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportHelper;
@@ -82,6 +87,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskImpl;
+import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -100,6 +106,8 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.ling.tm2.BaseTmTuv;
+import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
@@ -109,11 +117,9 @@ import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.zip.ZipIt;
 
-@SuppressWarnings("deprecation")
 public class TaskDetailHandler extends PageHandler
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(TaskDetailHandler.class);
+    private static final Logger CATEGORY = Logger.getLogger(TaskDetailHandler.class);
 
     public static final String TASK_HOURS = "taskHours";
     public static final String TASK_HOURS_STATE = "taskHours";
@@ -126,24 +132,25 @@ public class TaskDetailHandler extends PageHandler
     protected static boolean s_isRevenueEnabled = false;
     protected static boolean s_isParagraphEditorEnabled = false;
 
+    /**
+     * Map<Long, Long>: taskID:percentage
+     */
+    private static Map<Long, Integer> leverageMTPercentageMap = Collections
+            .synchronizedMap(new HashMap<Long, Integer>());
+
     static
     {
         try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-            s_isCostingEnabled = sc
-                    .getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED);
-            s_isRevenueEnabled = sc
-                    .getBooleanParameter(SystemConfigParamNames.REVENUE_ENABLED);
+            s_isCostingEnabled = sc.getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED);
+            s_isRevenueEnabled = sc.getBooleanParameter(SystemConfigParamNames.REVENUE_ENABLED);
 
-            s_isParagraphEditorEnabled = EditHelper
-                    .isParagraphEditorInstalled();
+            s_isParagraphEditorEnabled = EditHelper.isParagraphEditorInstalled();
         }
         catch (Throwable e)
         {
-            CATEGORY.error(
-                    "TaskDetailHandler: Problem getting costing parameter from database ",
-                    e);
+            CATEGORY.error("TaskDetailHandler: Problem getting costing parameter from database ", e);
         }
     }
 
@@ -165,10 +172,9 @@ public class TaskDetailHandler extends PageHandler
      * @throws NamingException
      */
     @SuppressWarnings("unchecked")
-    public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-            HttpServletRequest p_request, HttpServletResponse p_response,
-            ServletContext p_context) throws ServletException, IOException,
-            EnvoyServletException
+    public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
+            HttpServletResponse p_response, ServletContext p_context)
+            throws ServletException, IOException, EnvoyServletException
     {
         HttpSession httpSession = p_request.getSession();
         // Get user id of the person who has logged in.
@@ -178,8 +184,7 @@ public class TaskDetailHandler extends PageHandler
         try
         {
             perms = Permission.getPermissionManager().getPermissionSetForUser(
-                    httpSession.getAttribute(WebAppConstants.USER_NAME)
-                            .toString());
+                    httpSession.getAttribute(WebAppConstants.USER_NAME).toString());
         }
         catch (Exception e)
         {
@@ -189,19 +194,14 @@ public class TaskDetailHandler extends PageHandler
         httpSession.removeAttribute(WebAppConstants.PERMISSIONS);
         httpSession.setAttribute(WebAppConstants.PERMISSIONS, perms);
 
-        SessionManager sessionMgr = (SessionManager) httpSession
-                .getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) httpSession.getAttribute(SESSION_MANAGER);
 
         // Set the task complete delay time for this company
-        sessionMgr.setAttribute(
-                SystemConfigParamNames.TASK_COMPLETE_DELAY_TIME,
-                SystemConfiguration.getInstance().getStringParameter(
-                        SystemConfigParamNames.TASK_COMPLETE_DELAY_TIME));
-        sessionMgr.setAttribute(
-                SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME,
-                SystemConfiguration.getInstance().getStringParameter(
-                        SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME));
-        
+        sessionMgr.setAttribute(SystemConfigParamNames.TASK_COMPLETE_DELAY_TIME, SystemConfiguration
+                .getInstance().getStringParameter(SystemConfigParamNames.TASK_COMPLETE_DELAY_TIME));
+        sessionMgr.setAttribute(SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME, SystemConfiguration
+                .getInstance().getStringParameter(SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME));
+
         String action = p_request.getParameter(TASK_ACTION);
 
         if (TASK_ACTION_SAVEDETAILS.equals(action))
@@ -213,8 +213,7 @@ public class TaskDetailHandler extends PageHandler
             acceptTask(p_request, httpSession, user.getUserId());
 
             // set detail page id in session
-            TaskHelper.storeObject(httpSession, TASK_DETAILPAGE_ID,
-                    TaskHelper.DETAIL_PAGE_2);
+            TaskHelper.storeObject(httpSession, TASK_DETAILPAGE_ID, TaskHelper.DETAIL_PAGE_2);
         }
         else if (DTP_DOWNLOAD.equals(action))
         {
@@ -227,39 +226,36 @@ public class TaskDetailHandler extends PageHandler
         }
         else if (TASK_ACTION_CREATE_STF.equals(action))
         {
-            startStfCreationForWorkflow(p_request,httpSession, user.getUserId());
+            startStfCreationForWorkflow(p_request, httpSession, user.getUserId());
         }
         else if (TASK_ACTION_RETRIEVE.equals(action))
         {
-        	sessionMgr.removeElement("sourcePageIdList");
-        	if(!getTask(p_request,httpSession,p_response,p_context,perms,user.getUserId()))
-	        	return;
+            sessionMgr.removeElement("sourcePageIdList");
+            if (!getTask(p_request, httpSession, p_response, p_context, perms, user.getUserId()))
+                return;
         }
         // default case action==null but must also handle pagesearch action
         else if (action == null)
         {
-        	Task task = null;
-    		String taskIdParam = p_request.getParameter(TASK_ID);
-    		String taskStateParam = p_request.getParameter(TASK_STATE);
-    		if(taskIdParam != null && taskStateParam != null)
-    		{
-    			long taskId = TaskHelper.getLong(taskIdParam); 
-    			int taskState = TaskHelper.getInt(taskStateParam, -10);
-    			//get task
-    			task = TaskHelper.getTask(user.getUserId(), taskId,taskState);
-    			TaskHelper.storeObject(httpSession, TASK, task);
-    		}
+            Task task = null;
+            String taskIdParam = p_request.getParameter(TASK_ID);
+            String taskStateParam = p_request.getParameter(TASK_STATE);
+            if (taskIdParam != null && taskStateParam != null)
+            {
+                long taskId = TaskHelper.getLong(taskIdParam);
+                int taskState = TaskHelper.getInt(taskStateParam, -10);
+                // get task
+                task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
+                TaskHelper.storeObject(httpSession, TASK, task);
+            }
 
             Locale uiLocale = (Locale) httpSession.getAttribute(UILOCALE);
             // Save the target pages to session - sorted
             List targetPages = task.getTargetPages();
 
             // store the search text that the pages are filtered by
-            p_request
-                    .setAttribute(
-                            JobManagementHandler.PAGE_SEARCH_PARAM,
-                            p_request
-                                    .getParameter(JobManagementHandler.PAGE_SEARCH_PARAM));
+            p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_PARAM,
+                    p_request.getParameter(JobManagementHandler.PAGE_SEARCH_PARAM));
             // sorts the pages in the correct order and store the column and
             // sort order
             // also filters them according to the search params
@@ -292,8 +288,7 @@ public class TaskDetailHandler extends PageHandler
             String[] trgPageIds = pageIds.split(",");
             for (String trgPageId : trgPageIds)
             {
-                SegmentTuvUtil.approveTuvByTargetPageId(Long
-                        .parseLong(trgPageId));
+                SegmentTuvUtil.approveTuvByTargetPageId(Long.parseLong(trgPageId));
             }
             out.write("1");
             out.close();
@@ -321,114 +316,128 @@ public class TaskDetailHandler extends PageHandler
             downloadSourcePages(p_request, p_response, task);
             return;
         }
-        else if(TASK_ACTION_SAVECOMMENT.equals(action))
+        else if (TASK_ACTION_SAVECOMMENT.equals(action))
         {
-        	// Get taskId parameter
+            // Get taskId parameter
             String taskIdParam = p_request.getParameter(TASK_ID);
             long taskId = TaskHelper.getLong(taskIdParam);
             String taskStateParam = p_request.getParameter(TASK_STATE);
             int taskState = TaskHelper.getInt(taskStateParam, -10);
-            
+
             Task task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
             TaskHelper.storeObject(httpSession, WORK_OBJECT, task);
         }
-        else if(TASK_ACTION_SCORECARD.equals(action))
+        else if (TASK_ACTION_SCORECARD.equals(action))
         {
-        	// Get taskId parameter
+            // Get taskId parameter
             String taskIdParam = p_request.getParameter(TASK_ID);
             long taskId = TaskHelper.getLong(taskIdParam);
             String taskStateParam = p_request.getParameter(TASK_STATE);
-            int taskState = TaskHelper.getInt(taskStateParam, -10); 
+            int taskState = TaskHelper.getInt(taskStateParam, -10);
             Task task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
-            
-        	HashMap<String, Integer> scorecardMap = new HashMap<String, Integer>();
-        	long companyId = task.getCompanyId();
-        	ResourceBundle bundle = PageHandler.getBundle(httpSession);
-        	boolean isScored = isScored(scorecardMap,
-        			companyId, task.getWorkflow().getId(), bundle);
-        	List<Select> scorecardCategories = ScorecardScoreHelper.initSelectList(
-        			companyId, bundle);
-        	String scorecardComment = ((WorkflowImpl)task.getWorkflow()).getScorecardComment();
-        	sessionMgr.setAttribute("scorecardCategories", scorecardCategories);
-        	sessionMgr.setAttribute("scorecard", scorecardMap);
-        	sessionMgr.setAttribute("isScored", isScored);
-        	if(StringUtil.isEmpty(scorecardComment))
-        		scorecardComment = "";
-        	sessionMgr.setAttribute("scorecardComment", scorecardComment);
-        	TaskHelper.storeObject(httpSession, WORK_OBJECT, task);
-        	Locale uiLocale = (Locale) httpSession.getAttribute(UILOCALE);
+
+            HashMap<String, Integer> scorecardMap = new HashMap<String, Integer>();
+            long companyId = task.getCompanyId();
+            ResourceBundle bundle = PageHandler.getBundle(httpSession);
+            boolean isScored = isScored(scorecardMap, companyId, task.getWorkflow().getId(),
+                    bundle);
+            List<Select> scorecardCategories = ScorecardScoreHelper.initSelectList(companyId,
+                    bundle);
+            String scorecardComment = ((WorkflowImpl) task.getWorkflow()).getScorecardComment();
+            sessionMgr.setAttribute("scorecardCategories", scorecardCategories);
+            sessionMgr.setAttribute("scorecard", scorecardMap);
+            sessionMgr.setAttribute("isScored", isScored);
+            if (StringUtil.isEmpty(scorecardComment))
+                scorecardComment = "";
+            sessionMgr.setAttribute("scorecardComment", scorecardComment);
+            TaskHelper.storeObject(httpSession, WORK_OBJECT, task);
+            Locale uiLocale = (Locale) httpSession.getAttribute(UILOCALE);
             List targetPages = task.getTargetPages();
-        	setPages(p_request, httpSession, targetPages, uiLocale);
-        	getTask(p_request,httpSession,p_response,p_context,perms,user.getUserId());
+            setPages(p_request, httpSession, targetPages, uiLocale);
+            getTask(p_request, httpSession, p_response, p_context, perms, user.getUserId());
         }
-        else if(TASK_ACTION_SAVE_SCORECARD.equals(action))
+        else if (TASK_ACTION_SAVE_SCORECARD.equals(action))
         {
-        	// Get taskId parameter
+            // Get taskId parameter
             String taskIdParam = p_request.getParameter(TASK_ID);
             long taskId = TaskHelper.getLong(taskIdParam);
             String taskStateParam = p_request.getParameter(TASK_STATE);
-            int taskState = TaskHelper.getInt(taskStateParam, -10); 
+            int taskState = TaskHelper.getInt(taskStateParam, -10);
             Task task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
-    
-        	HashMap<String, Integer> scorecardMap = new HashMap<String, Integer>();
-        	long companyId = task.getCompanyId();
-        	ResourceBundle bundle = PageHandler.getBundle(httpSession);
-        	
-        	//save
-        	List<Select> scorecardCategories = ScorecardScoreHelper.initSelectList(
-        			companyId, bundle);
-        	long workflowId = task.getWorkflow().getId();
-        	long jobId = task.getJobId();
-        	String userId = (String) httpSession.getAttribute(WebAppConstants.USER_NAME);
-        	String scorecardComment = p_request.getParameter("scoreComment");
-        	
-        	Session session = HibernateUtil.getSession();
+
+            HashMap<String, Integer> scorecardMap = new HashMap<String, Integer>();
+            long companyId = task.getCompanyId();
+            ResourceBundle bundle = PageHandler.getBundle(httpSession);
+
+            // save
+            List<Select> scorecardCategories = ScorecardScoreHelper.initSelectList(companyId,
+                    bundle);
+            long workflowId = task.getWorkflow().getId();
+            long jobId = task.getJobId();
+            String userId = (String) httpSession.getAttribute(WebAppConstants.USER_NAME);
+            String scorecardComment = p_request.getParameter("scoreComment");
+
+            Session session = HibernateUtil.getSession();
             Transaction tx = session.beginTransaction();
-            try 
+            try
             {
-            	for(Select select: scorecardCategories)
-            	{
-            		ScorecardScore score= new ScorecardScore();
-            		score.setScorecardCategory(select.getValue());
-            		score.setScore(new Integer(p_request.getParameter(select.getValue())));
-            		score.setWorkflowId(workflowId);
-            		score.setJobId(jobId);
-            		score.setCompanyId(companyId);
-            		score.setModifyUserId(userId);
-            		score.setIsActive(true);
-            		HibernateUtil.save(score);
-            	}
-            	
-            	WorkflowImpl workflowImpl = (WorkflowImpl) task.getWorkflow();
-            	workflowImpl.setScorecardComment(scorecardComment);
-            	HibernateUtil.save(workflowImpl);	
-            	tx.commit();
-			} catch (Exception e) {
-				tx.rollback();
-				e.printStackTrace();
-			}
-			
-        	boolean isScored = isScored(scorecardMap,
-        			companyId, task.getWorkflow().getId(), bundle);
-        	sessionMgr.setAttribute("scorecardCategories", scorecardCategories);
-        	sessionMgr.setAttribute("scorecard", scorecardMap);
-        	sessionMgr.setAttribute("isScored", isScored);
-        	sessionMgr.setAttribute("scorecardComment", scorecardComment);
+                for (Select select : scorecardCategories)
+                {
+                    ScorecardScore score = new ScorecardScore();
+                    score.setScorecardCategory(select.getValue());
+                    score.setScore(new Integer(p_request.getParameter(select.getValue())));
+                    score.setWorkflowId(workflowId);
+                    score.setJobId(jobId);
+                    score.setCompanyId(companyId);
+                    score.setModifyUserId(userId);
+                    score.setIsActive(true);
+                    HibernateUtil.save(score);
+                }
+
+                WorkflowImpl workflowImpl = (WorkflowImpl) task.getWorkflow();
+                workflowImpl.setScorecardComment(scorecardComment);
+                HibernateUtil.save(workflowImpl);
+                tx.commit();
+            }
+            catch (Exception e)
+            {
+                tx.rollback();
+                e.printStackTrace();
+            }
+
+            boolean isScored = isScored(scorecardMap, companyId, task.getWorkflow().getId(),
+                    bundle);
+            sessionMgr.setAttribute("scorecardCategories", scorecardCategories);
+            sessionMgr.setAttribute("scorecard", scorecardMap);
+            sessionMgr.setAttribute("isScored", isScored);
+            sessionMgr.setAttribute("scorecardComment", scorecardComment);
         }
-        
-        //saveComment
+        else if ("leverageMT".equals(action))
+        {
+            String taskIdParam = p_request.getParameter(TASK_ID);
+            long taskId = TaskHelper.getLong(taskIdParam);
+            leverageMT(taskId);
+            p_request.setAttribute("isLeveragingMT", "true");
+        }
+        else if ("getLeverageMTPercentage".equals(action))
+        {
+            String taskIdParam = p_request.getParameter(TASK_ID);
+            long taskId = TaskHelper.getLong(taskIdParam);
+            getLeverageMTPercentage(p_response, taskId);
+            return;
+        }
+
+        // saveComment
 
         // Set the EXPORT_INIT_PARAM in the sessionMgr so we can bring
         // the user back here after they Export
-        sessionMgr.setAttribute(JobManagementHandler.EXPORT_INIT_PARAM,
-                BASE_BEAN);
+        sessionMgr.setAttribute(JobManagementHandler.EXPORT_INIT_PARAM, BASE_BEAN);
         Task task = (Task) TaskHelper.retrieveObject(httpSession, WORK_OBJECT);
         if (task != null)
         {
             sessionMgr.setAttribute(JobManagementHandler.JOB_ID,
                     (new Long(task.getJobId())).toString());
-            sessionMgr.setAttribute(WebAppConstants.TASK_ID,
-                    (new Long(task.getId())).toString());
+            sessionMgr.setAttribute(WebAppConstants.TASK_ID, (new Long(task.getId())).toString());
         }
 
         p_request.setAttribute(WebAppConstants.PARAGRAPH_EDITOR,
@@ -437,23 +446,20 @@ public class TaskDetailHandler extends PageHandler
         // Keeps page cache for JavaScript Function.
         isCache = true;
         CommentMainHandler commentMainHandler = new CommentMainHandler();
-        commentMainHandler.handleRequest(p_pageDescriptor, p_request,
-                p_response, p_context);
+        commentMainHandler.handleRequest(p_pageDescriptor, p_request, p_response, p_context);
 
         // Call parent invokePageHandler() to set link beans and invoke JSP
-        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
-                p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 
-    private void getPercent(HttpServletResponse p_response,
-            String[] pageIdsArray) throws IOException
+    private void getPercent(HttpServletResponse p_response, String[] pageIdsArray)
+            throws IOException
     {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < pageIdsArray.length; i++)
         {
             int percent = SegmentTuvUtil
-                    .getTranslatedPercentageForTargetPage(Long
-                            .parseLong(pageIdsArray[i]));
+                    .getTranslatedPercentageForTargetPage(Long.parseLong(pageIdsArray[i]));
             sb.append(percent).append(",");
         }
 
@@ -477,188 +483,205 @@ public class TaskDetailHandler extends PageHandler
         return WebAppConstants.ACTIVITY_ERROR_PAGE;
     }
 
-    private List setPages(HttpServletRequest p_request, HttpSession p_session,
-            List p_targetPages, Locale p_uiLocale)
+    private List setPages(HttpServletRequest p_request, HttpSession p_session, List p_targetPages,
+            Locale p_uiLocale)
     {
         // sorts the pages in the correct order and store the column and sort
         // order
         // also filters them according to the search params
         p_targetPages = filterPagesByName(p_request, p_session, p_targetPages);
         sortPages(p_request, p_session, p_uiLocale, p_targetPages);
-        TaskHelper.storeObject(p_session, WebAppConstants.TARGET_PAGES,
-                p_targetPages);
+        TaskHelper.storeObject(p_session, WebAppConstants.TARGET_PAGES, p_targetPages);
         return p_targetPages;
     }
-/**
- * Get more information on task
- * @param p_request
- * @param p_session
- * @param p_response
- * @param p_context
- * @param PermissionSet
- * @param p_userId
- * **/
-	private boolean getTask(HttpServletRequest p_request, HttpSession p_session,
-			HttpServletResponse p_response, ServletContext p_context,
-			PermissionSet perms, String p_userId) throws ServletException,
-			IOException, EnvoyServletException 
-	{
-		// Get taskId parameter
-		String taskIdParam = p_request.getParameter(TASK_ID);
-		long taskId = TaskHelper.getLong(taskIdParam);
-		Task task = null;
-		// get task state (determines from which tab, the task details is
-		// requested)
-		String taskStateParam = p_request.getParameter(TASK_STATE);
-		int taskState = TaskHelper.getInt(taskStateParam, -10);// -10 as
-																// default
-		try {
-			// Get task
-			task = TaskHelper.getTask(p_userId, taskId, taskState);
-		} catch (Exception e) {
-			CATEGORY.info(e);
-			ResourceBundle bundle = getBundle(p_session);
-			String stateLabel = "";
-			switch (taskState) {
-			case Task.STATE_ACCEPTED:
-				stateLabel = bundle.getString("lb_accepted");
-				break;
-			case Task.STATE_COMPLETED:
-				stateLabel = bundle.getString("lb_finished");
-				break;
-			case Task.STATE_REJECTED:
-				stateLabel = bundle.getString("lb_rejected");
-				break;
-			case Task.STATE_ACTIVE:
-				stateLabel = bundle.getString("lb_available");
-				break;
-			}
-			Object[] args = { p_request.getParameter("jobname"), stateLabel };
-			p_request.setAttribute("badresults", MessageFormat.format(
-					bundle.getString("msg_bad_task"), args));
-			// remove the task from the most recently used list
-			String menuName = p_request.getParameter("cookie");
-			TaskHelper.removeMRUtask(p_request, p_session, menuName, p_response);
 
-			// forward to the jsp page.
-			SessionManager sessionMgr = (SessionManager) p_session
-            		.getAttribute(PageHandler.SESSION_MANAGER);
-			sessionMgr.setMyactivitiesAttribute("badresults", MessageFormat.format(
-					bundle.getString("msg_bad_task"), args));
-			TaskListParams listParams = (TaskListParams) 
-        		sessionMgr.getMyactivitiesAttribute(TaskListConstants.TASK_LIST_PARAMS);
-			int targetState = listParams.getTaskState();
-	        if(targetState == 3)
-	        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=myactivities&state=3&listType=stateOnly&init=0");
-	        else if(targetState == 8)
-	        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=myactivities&state=8&listType=stateOnly&init=0");
-	        else if(targetState == -1)
-	        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=myactivities&state=-1&listType=stateOnly&init=0");
-	        else if(targetState == 6)
-	        	p_response.sendRedirect("/globalsight/ControlServlet?activityName=myactivities&state=6&listType=stateOnly&init=0");
-	        else
-        		p_response.sendRedirect("/globalsight/ControlServlet?activityName=myactivities&state=-10&listType=stateOnly&init=0");
-			return false;
-		}
+    /**
+     * Get more information on task
+     * 
+     * @param p_request
+     * @param p_session
+     * @param p_response
+     * @param p_context
+     * @param PermissionSet
+     * @param p_userId
+     **/
+    private boolean getTask(HttpServletRequest p_request, HttpSession p_session,
+            HttpServletResponse p_response, ServletContext p_context, PermissionSet perms,
+            String p_userId) throws ServletException, IOException, EnvoyServletException
+    {
+        // Get taskId parameter
+        String taskIdParam = p_request.getParameter(TASK_ID);
+        long taskId = TaskHelper.getLong(taskIdParam);
+        Task task = null;
+        // get task state (determines from which tab, the task details is
+        // requested)
+        String taskStateParam = p_request.getParameter(TASK_STATE);
+        int taskState = TaskHelper.getInt(taskStateParam, -10);// -10 as
+                                                               // default
+        try
+        {
+            // Get task
+            task = TaskHelper.getTask(p_userId, taskId, taskState);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.info(e);
+            ResourceBundle bundle = getBundle(p_session);
+            String stateLabel = "";
+            switch (taskState)
+            {
+                case Task.STATE_ACCEPTED:
+                    stateLabel = bundle.getString("lb_accepted");
+                    break;
+                case Task.STATE_COMPLETED:
+                    stateLabel = bundle.getString("lb_finished");
+                    break;
+                case Task.STATE_REJECTED:
+                    stateLabel = bundle.getString("lb_rejected");
+                    break;
+                case Task.STATE_ACTIVE:
+                    stateLabel = bundle.getString("lb_available");
+                    break;
+            }
+            Object[] args =
+            { p_request.getParameter("jobname"), stateLabel };
+            p_request.setAttribute("badresults",
+                    MessageFormat.format(bundle.getString("msg_bad_task"), args));
+            // remove the task from the most recently used list
+            String menuName = p_request.getParameter("cookie");
+            TaskHelper.removeMRUtask(p_request, p_session, menuName, p_response);
 
-		// store task state in the SessionManager
-		TaskHelper.storeObject(p_session, TASK_STATE, taskStateParam);
+            // forward to the jsp page.
+            SessionManager sessionMgr = (SessionManager) p_session
+                    .getAttribute(PageHandler.SESSION_MANAGER);
+            sessionMgr.setMyactivitiesAttribute("badresults",
+                    MessageFormat.format(bundle.getString("msg_bad_task"), args));
+            TaskListParams listParams = (TaskListParams) sessionMgr
+                    .getMyactivitiesAttribute(TaskListConstants.TASK_LIST_PARAMS);
+            int targetState = listParams.getTaskState();
+            if (targetState == 3)
+                p_response.sendRedirect(
+                        "/globalsight/ControlServlet?activityName=myactivities&state=3&listType=stateOnly&init=0");
+            else if (targetState == 8)
+                p_response.sendRedirect(
+                        "/globalsight/ControlServlet?activityName=myactivities&state=8&listType=stateOnly&init=0");
+            else if (targetState == -1)
+                p_response.sendRedirect(
+                        "/globalsight/ControlServlet?activityName=myactivities&state=-1&listType=stateOnly&init=0");
+            else if (targetState == 6)
+                p_response.sendRedirect(
+                        "/globalsight/ControlServlet?activityName=myactivities&state=6&listType=stateOnly&init=0");
+            else
+                p_response.sendRedirect(
+                        "/globalsight/ControlServlet?activityName=myactivities&state=-10&listType=stateOnly&init=0");
+            return false;
+        }
 
-		// Save the task to session
-		TaskHelper.storeObject(p_session, WORK_OBJECT, task);
-		
-		Locale uiLocale = (Locale) p_session.getAttribute(UILOCALE);
-		List targetPages = getTargetPages(p_session,task);
-		targetPages = setPages(p_request, p_session, targetPages, uiLocale);
+        // store task state in the SessionManager
+        TaskHelper.storeObject(p_session, TASK_STATE, taskStateParam);
 
-		// Set detail page id in session
-		TaskHelper.storeObject(p_session, TASK_DETAILPAGE_ID,
-				TaskHelper.DETAIL_PAGE_1);
+        // Save the task to session
+        TaskHelper.storeObject(p_session, WORK_OBJECT, task);
 
-		boolean isProjectMgr = perms
-				.getPermissionFor(Permission.PROJECTS_MANAGE);
-		if (isProjectMgr) {
-			TaskHelper.storeObject(p_session, IS_ASSIGNEE, new Boolean(task
-					.getAllAssignees().contains(p_userId)));
-		}
-		
-		// GBS-3189: Create PDF
-		boolean isPreviewPDF = PreviewPDFHelper.isEnablePreviewPDF(task);
-		p_request.setAttribute("isPreviewPDF", isPreviewPDF);
+        Locale uiLocale = (Locale) p_session.getAttribute(UILOCALE);
+        List targetPages = getTargetPages(p_session, task);
+        targetPages = setPages(p_request, p_session, targetPages, uiLocale);
 
-		// Determine whether we should display the Hourly rate field
-		boolean isHourlyRate = ((task.getState() == Task.STATE_ACCEPTED) && isHourlyRate(
-				task, null)) ? true : false;
-		TaskHelper.storeObject(p_session, TASK_HOURS_STATE, new Boolean(
-				isHourlyRate));
-		// Determine whether we should display the Page Count field
-		boolean isPageBasedRate = ((task.getState() == Task.STATE_ACCEPTED) && isPageBasedRate(
-				task, null)) ? true : false;
-		TaskHelper.storeObject(p_session, TASK_PAGES_STATE, new Boolean(
-				isPageBasedRate));
+        // Set detail page id in session
+        TaskHelper.storeObject(p_session, TASK_DETAILPAGE_ID, TaskHelper.DETAIL_PAGE_1);
 
-		TaskHelper.updateMRUtask(p_request, p_session, task, p_response,
-				task.getState());
-		
-		// Get the number of open and closed issues.
-		// get just the number of issues in OPEN state
-		// query is also considered a subset of the OPEN state
-		int openSegmentCount = 0, closedSegmentCount = 0;
-		List<String> oStates = new ArrayList<String>();
-		oStates.add(Issue.STATUS_OPEN);
-		oStates.add(Issue.STATUS_QUERY);
-		oStates.add(Issue.STATUS_REJECTED);
-		openSegmentCount = getIssueCount(task, p_session, oStates);
-		// Closed Comments
-		List<String> cStates = new ArrayList<String>();
-		cStates.add(Issue.STATUS_CLOSED);
-		closedSegmentCount = getIssueCount(task, p_session, cStates);
-		p_session.setAttribute(
-				JobManagementHandler.OPEN_AND_QUERY_SEGMENT_COMMENTS,
-				new Integer(openSegmentCount).toString());
-		p_session.setAttribute(JobManagementHandler.CLOSED_SEGMENT_COMMENTS,
-				new Integer(closedSegmentCount).toString());
-		return true;
+        boolean isProjectMgr = perms.getPermissionFor(Permission.PROJECTS_MANAGE);
+        if (isProjectMgr)
+        {
+            TaskHelper.storeObject(p_session, IS_ASSIGNEE,
+                    new Boolean(task.getAllAssignees().contains(p_userId)));
+        }
 
-	}
-	/**
-	 * Get TargetPages
-	 * @param p_session
-	 * @param task
-	 * */
-	private List getTargetPages	(HttpSession p_session, Task task) {
-		
-		// Save the target pages to session - sorted
-		List targetPages = null;
-		if (task.getTaskType().equals(Task.TYPE_TRANSLATION)) {
-			targetPages = task.getTargetPages();
-		} else {
-			try {
-				Job job = ServerProxy.getJobHandler().getJobById(
-						task.getJobId());
-				List workflows = new ArrayList();
-				workflows.addAll(job.getWorkflows());
-				for (int i = 0; i < workflows.size(); i++) {
-					Workflow workflow = (Workflow) workflows.get(i);
-					if (workflow.getTargetLocale().equals(
-							task.getTargetLocale())) {
-						if (workflow.getWorkflowType().equals(
-								WorkflowTypeConstants.TYPE_TRANSLATION)) {
-							targetPages = new ArrayList();
-							targetPages.addAll(workflow.getTargetPages());
-							break;
-						}
-					}
-				}
-				if (targetPages == null) {
-					targetPages = new ArrayList();
-				}
-			} catch (Exception e) {
-				throw new EnvoyServletException(e);
-			}
-		}
-		return targetPages;
-	}
+        // GBS-3189: Create PDF
+        boolean isPreviewPDF = PreviewPDFHelper.isEnablePreviewPDF(task);
+        p_request.setAttribute("isPreviewPDF", isPreviewPDF);
+
+        // Determine whether we should display the Hourly rate field
+        boolean isHourlyRate = ((task.getState() == Task.STATE_ACCEPTED)
+                && isHourlyRate(task, null)) ? true : false;
+        TaskHelper.storeObject(p_session, TASK_HOURS_STATE, new Boolean(isHourlyRate));
+        // Determine whether we should display the Page Count field
+        boolean isPageBasedRate = ((task.getState() == Task.STATE_ACCEPTED)
+                && isPageBasedRate(task, null)) ? true : false;
+        TaskHelper.storeObject(p_session, TASK_PAGES_STATE, new Boolean(isPageBasedRate));
+
+        TaskHelper.updateMRUtask(p_request, p_session, task, p_response, task.getState());
+
+        // Get the number of open and closed issues.
+        // get just the number of issues in OPEN state
+        // query is also considered a subset of the OPEN state
+        int openSegmentCount = 0, closedSegmentCount = 0;
+        List<String> oStates = new ArrayList<String>();
+        oStates.add(Issue.STATUS_OPEN);
+        oStates.add(Issue.STATUS_QUERY);
+        oStates.add(Issue.STATUS_REJECTED);
+        openSegmentCount = getIssueCount(task, p_session, oStates);
+        // Closed Comments
+        List<String> cStates = new ArrayList<String>();
+        cStates.add(Issue.STATUS_CLOSED);
+        closedSegmentCount = getIssueCount(task, p_session, cStates);
+        p_session.setAttribute(JobManagementHandler.OPEN_AND_QUERY_SEGMENT_COMMENTS,
+                new Integer(openSegmentCount).toString());
+        p_session.setAttribute(JobManagementHandler.CLOSED_SEGMENT_COMMENTS,
+                new Integer(closedSegmentCount).toString());
+        return true;
+
+    }
+
+    /**
+     * Get TargetPages
+     * 
+     * @param p_session
+     * @param task
+     */
+    private List getTargetPages(HttpSession p_session, Task task)
+    {
+
+        // Save the target pages to session - sorted
+        List targetPages = null;
+        if (task.getTaskType().equals(Task.TYPE_TRANSLATION))
+        {
+            targetPages = task.getTargetPages();
+        }
+        else
+        {
+            try
+            {
+                Job job = ServerProxy.getJobHandler().getJobById(task.getJobId());
+                List workflows = new ArrayList();
+                workflows.addAll(job.getWorkflows());
+                for (int i = 0; i < workflows.size(); i++)
+                {
+                    Workflow workflow = (Workflow) workflows.get(i);
+                    if (workflow.getTargetLocale().equals(task.getTargetLocale()))
+                    {
+                        if (workflow.getWorkflowType()
+                                .equals(WorkflowTypeConstants.TYPE_TRANSLATION))
+                        {
+                            targetPages = new ArrayList();
+                            targetPages.addAll(workflow.getTargetPages());
+                            break;
+                        }
+                    }
+                }
+                if (targetPages == null)
+                {
+                    targetPages = new ArrayList();
+                }
+            }
+            catch (Exception e)
+            {
+                throw new EnvoyServletException(e);
+            }
+        }
+        return targetPages;
+    }
+
     /**
      * Accepts the task.
      * 
@@ -670,12 +693,11 @@ public class TaskDetailHandler extends PageHandler
      * @exception EnvoyServletException
      * @throws NamingException
      */
-    private void acceptTask(HttpServletRequest p_request,
-            HttpSession p_session, String p_userId)
+    private void acceptTask(HttpServletRequest p_request, HttpSession p_session, String p_userId)
             throws EnvoyServletException
     {
         // Get task from session
-        //Task task = (Task) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
+        // Task task = (Task) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
         String taskIdParam = p_request.getParameter(TASK_ID);
         long taskId = TaskHelper.getLong(taskIdParam);
         Task task = null;
@@ -701,8 +723,8 @@ public class TaskDetailHandler extends PageHandler
             {
                 // update task in session (need to get task in accepted
                 // state now).
-                TaskHelper.updateTaskInSession(p_session, p_userId,
-                        task.getId(), Task.STATE_ACCEPTED);
+                TaskHelper.updateTaskInSession(p_session, p_userId, task.getId(),
+                        Task.STATE_ACCEPTED);
 
                 // store hourly rate state in the SessionManager
                 TaskHelper.storeObject(p_session, TASK_HOURS_STATE,
@@ -722,22 +744,19 @@ public class TaskDetailHandler extends PageHandler
     /**
      * For dtpDownload and dtpUpload.
      */
-    private String getTargetFileName(HttpServletRequest p_request)
-            throws EnvoyServletException
+    private String getTargetFileName(HttpServletRequest p_request) throws EnvoyServletException
     {
         String filePath = null;
 
         try
         {
-            long targetPageId = new Long(
-                    p_request.getParameter(WebAppConstants.TARGET_PAGE_ID))
+            long targetPageId = new Long(p_request.getParameter(WebAppConstants.TARGET_PAGE_ID))
                     .longValue();
-            TargetPage targetPage = PagePersistenceAccessor
-                    .getTargetPageById(targetPageId);
+            TargetPage targetPage = PagePersistenceAccessor.getTargetPageById(targetPageId);
 
             // Get sub file path
-            filePath = this.makeDirectoryNameOperatingSystemSafe(targetPage
-                    .getSourcePage().getExternalPageId());
+            filePath = this.makeDirectoryNameOperatingSystemSafe(
+                    targetPage.getSourcePage().getExternalPageId());
             String[] subStrings = null;
             if (System.getProperty("os.name").startsWith("Windows"))
             {
@@ -759,8 +778,7 @@ public class TaskDetailHandler extends PageHandler
             }
 
             String targetLocale = targetPage.getGlobalSightLocale().toString();
-            filePath = ExportHelper.transformExportedFilename(filePath,
-                    targetLocale);
+            filePath = ExportHelper.transformExportedFilename(filePath, targetLocale);
         }
         catch (GeneralException e)
         {
@@ -780,16 +798,12 @@ public class TaskDetailHandler extends PageHandler
         try
         {
             SystemConfiguration config = SystemConfiguration.getInstance();
-            long targetPageId = new Long(
-                    p_request.getParameter(WebAppConstants.TARGET_PAGE_ID))
+            long targetPageId = new Long(p_request.getParameter(WebAppConstants.TARGET_PAGE_ID))
                     .longValue();
-            TargetPage targetPage = PagePersistenceAccessor
-                    .getTargetPageById(targetPageId);
+            TargetPage targetPage = PagePersistenceAccessor.getTargetPageById(targetPageId);
 
-            filePath.append(
-                    config.getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR))
-                    .append(targetPage.getExportSubDir())
-                    .append(File.separatorChar);
+            filePath.append(config.getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR))
+                    .append(targetPage.getExportSubDir()).append(File.separatorChar);
         }
         catch (GeneralException e)
         {
@@ -799,11 +813,9 @@ public class TaskDetailHandler extends PageHandler
         return filePath.toString();
     }
 
-    private String getFullTargetFilePath(HttpServletRequest p_request)
-            throws EnvoyServletException
+    private String getFullTargetFilePath(HttpServletRequest p_request) throws EnvoyServletException
     {
-        return this.getTargetFilePath(p_request)
-                + this.getTargetFileName(p_request);
+        return this.getTargetFilePath(p_request) + this.getTargetFileName(p_request);
     }
 
     private String makeDirectoryNameOperatingSystemSafe(String p_dirName)
@@ -829,16 +841,15 @@ public class TaskDetailHandler extends PageHandler
         return newName;
     }
 
-    private void downloadSourcePages(HttpServletRequest p_request,
-            HttpServletResponse p_response, Task p_task) throws IOException
+    private void downloadSourcePages(HttpServletRequest p_request, HttpServletResponse p_response,
+            Task p_task) throws IOException
     {
         HttpSession session = p_request.getSession(false);
         List sourcePages = (List) p_task.getSourcePages();
 
         Iterator it = sourcePages.iterator();
-        String m_cxeDocsDir = SystemConfiguration.getInstance()
-                .getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR,
-                		String.valueOf(p_task.getCompanyId()));
+        String m_cxeDocsDir = SystemConfiguration.getInstance().getStringParameter(
+                SystemConfigParamNames.CXE_DOCS_DIR, String.valueOf(p_task.getCompanyId()));
         ArrayList<String> fileNames = new ArrayList<String>();
         ArrayList<String> filePaths = new ArrayList<String>();
         Map<String, String> mapOfNamePath = new HashMap<String, String>();
@@ -851,8 +862,7 @@ public class TaskDetailHandler extends PageHandler
                 continue;
             }
 
-            StringBuffer sourceSb = new StringBuffer().append(m_cxeDocsDir)
-                    .append("/");
+            StringBuffer sourceSb = new StringBuffer().append(m_cxeDocsDir).append("/");
             String externalPageId = sourcePage.getExternalPageId();
             externalPageId = externalPageId.replace("\\", "/");
 
@@ -883,14 +893,12 @@ public class TaskDetailHandler extends PageHandler
             entryNamesMap = ZipIt.getEntryNamesMap(filePaths);
             for (int i = 0; i < fileNames.size(); i++)
             {
-                filePaths.set(i,
-                        entryNamesMap.get(mapOfNamePath.get(fileNames.get(i))));
+                filePaths.set(i, entryNamesMap.get(mapOfNamePath.get(fileNames.get(i))));
             }
             addSourcePages(m_zipper, fileNames, filePaths, zipFileName);
             m_zipper.closeZipFile();
             CommentFilesDownLoad commentFilesDownload = new CommentFilesDownLoad();
-            commentFilesDownload.sendFileToClient(p_request, p_response,
-            		jobName + ".zip", tmpFile);
+            commentFilesDownload.sendFileToClient(p_request, p_response, jobName + ".zip", tmpFile);
         }
         finally
         {
@@ -898,8 +906,8 @@ public class TaskDetailHandler extends PageHandler
         }
     }
 
-    private void addSourcePages(JobPackageZipper m_zipper,
-            List<String> fileNames, List<String> filePaths, String zipFileName)
+    private void addSourcePages(JobPackageZipper m_zipper, List<String> fileNames,
+            List<String> filePaths, String zipFileName)
     {
         for (int i = 0; i < fileNames.size(); i++)
         {
@@ -914,8 +922,7 @@ public class TaskDetailHandler extends PageHandler
                     File[] files = dir.listFiles();
                     for (File f : files)
                     {
-                        if (file.getName().equals(
-                                entity.decodeStringBasic(f.getName())))
+                        if (file.getName().equals(entity.decodeStringBasic(f.getName())))
                         {
                             file = f;
                             break;
@@ -936,8 +943,7 @@ public class TaskDetailHandler extends PageHandler
                 }
                 catch (IOException ex)
                 {
-                    CATEGORY.warn("cannot write file: " + file
-                            + " to zip stream.", ex);
+                    CATEGORY.warn("cannot write file: " + file + " to zip stream.", ex);
                 }
                 finally
                 {
@@ -956,9 +962,8 @@ public class TaskDetailHandler extends PageHandler
         }
     }
 
-    private void dtpDownload(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws IOException,
-            EnvoyServletException
+    private void dtpDownload(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws IOException, EnvoyServletException
     {
 
         byte[] buf = new byte[4096];
@@ -967,13 +972,10 @@ public class TaskDetailHandler extends PageHandler
         File downloadFile = new File(this.getFullTargetFilePath(p_request));
         FileInputStream inDownloadFile = new FileInputStream(downloadFile);
 
-        File zipFile = new File(this.getTargetFilePath(p_request)
-                + "dtpDownloadFile.zip");
-        ZipOutputStream outZipFile = new ZipOutputStream(new FileOutputStream(
-                zipFile));
+        File zipFile = new File(this.getTargetFilePath(p_request) + "dtpDownloadFile.zip");
+        ZipOutputStream outZipFile = new ZipOutputStream(new FileOutputStream(zipFile));
 
-        outZipFile
-                .putNextEntry(new ZipEntry(this.getTargetFileName(p_request)));
+        outZipFile.putNextEntry(new ZipEntry(this.getTargetFileName(p_request)));
         for (int len = 0; (len = inDownloadFile.read(buf)) > 0;)
         {
             outZipFile.write(buf, 0, len);
@@ -983,8 +985,8 @@ public class TaskDetailHandler extends PageHandler
         outZipFile.close();
 
         p_response.setContentType("application/zip");
-        p_response.setHeader("Content-Disposition", "attachment; filename="
-                + zipFile.getName() + ";");
+        p_response.setHeader("Content-Disposition",
+                "attachment; filename=" + zipFile.getName() + ";");
         if (p_request.isSecure())
         {
             setHeaderForHTTPSDownload(p_response);
@@ -1009,8 +1011,7 @@ public class TaskDetailHandler extends PageHandler
         zipFile.delete();
     }
 
-    private void dtpUpload(HttpServletRequest p_request)
-            throws EnvoyServletException
+    private void dtpUpload(HttpServletRequest p_request) throws EnvoyServletException
     {
         String uploadFileName = this.getFullTargetFilePath(p_request);
 
@@ -1053,18 +1054,16 @@ public class TaskDetailHandler extends PageHandler
      * @param p_userId
      * @exception EnvoyServletException
      */
-    private void saveTaskDetails(HttpServletRequest p_request,
-            HttpSession p_session, String p_userId)
-            throws EnvoyServletException
+    private void saveTaskDetails(HttpServletRequest p_request, HttpSession p_session,
+            String p_userId) throws EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
 
-        //Task task = (Task) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
+        // Task task = (Task) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
         String taskIdParam = p_request.getParameter(TASK_ID);
         long taskId = TaskHelper.getLong(taskIdParam);
-        
+
         int state = 0;
         try
         {
@@ -1074,68 +1073,59 @@ public class TaskDetailHandler extends PageHandler
         {
             state = Task.STATE_ACCEPTED;
         }
-        Task task = TaskHelper.getTask(p_userId, taskId,state);
-        
+        Task task = TaskHelper.getTask(p_userId, taskId, state);
+
         if (task != null)
         {
             // Save the hourly amount-of-work...
             // but first, check if the hourly rate field has been enabled
-            boolean isHourlyJobCosting = ((Boolean) TaskHelper.retrieveObject(
-                    p_session, TASK_HOURS_STATE)).booleanValue();
+            boolean isHourlyJobCosting = ((Boolean) TaskHelper.retrieveObject(p_session,
+                    TASK_HOURS_STATE)).booleanValue();
             if (isHourlyJobCosting)
             {
                 TaskHelper.setActualAmountOfWork(task, Rate.UnitOfWork.HOURLY,
                         p_request.getParameter(TASK_HOURS));
 
                 // update task in session
-                TaskHelper.updateTaskInSession(p_session, p_userId,
-                        task.getId(), state);
+                TaskHelper.updateTaskInSession(p_session, p_userId, task.getId(), state);
             }
-            boolean isPageBasedJobCosting = ((Boolean) TaskHelper
-                    .retrieveObject(p_session, TASK_PAGES_STATE))
-                    .booleanValue();
+            boolean isPageBasedJobCosting = ((Boolean) TaskHelper.retrieveObject(p_session,
+                    TASK_PAGES_STATE)).booleanValue();
             if (isPageBasedJobCosting)
             {
-                TaskHelper.setActualAmountOfWork(task,
-                        Rate.UnitOfWork.PAGE_COUNT,
+                TaskHelper.setActualAmountOfWork(task, Rate.UnitOfWork.PAGE_COUNT,
                         p_request.getParameter(TASK_PAGES));
 
                 // update task in session
-                TaskHelper.updateTaskInSession(p_session, p_userId,
-                        task.getId(), state);
+                TaskHelper.updateTaskInSession(p_session, p_userId, task.getId(), state);
             }
             if (s_isCostingEnabled)
             {
                 try
                 {
                     Job job = task.getWorkflow().getJob();
-                    String curr = (String) sessionMgr
-                            .getAttribute(JobManagementHandler.CURRENCY);
+                    String curr = (String) sessionMgr.getAttribute(JobManagementHandler.CURRENCY);
                     if (curr == null)
                     {
                         // Get the pivot currency;
-                        Currency c = ServerProxy.getCostingEngine()
-                                .getPivotCurrency();
+                        Currency c = ServerProxy.getCostingEngine().getPivotCurrency();
                         curr = c.getIsoCode();
                     }
-                    Currency oCurrency = ServerProxy.getCostingEngine()
-                            .getCurrency(curr);
+                    Currency oCurrency = ServerProxy.getCostingEngine().getCurrency(curr);
                     // Calculate Expenses
-                    CostCalculator calculator = new CostCalculator(job.getId(),
-                            oCurrency, true, Cost.EXPENSE);
+                    CostCalculator calculator = new CostCalculator(job.getId(), oCurrency, true,
+                            Cost.EXPENSE);
                     calculator.sendToCalculateCost();
                     if (s_isRevenueEnabled)
                     {
                         // Calculate Revenue
-                        calculator = new CostCalculator(job.getId(), oCurrency,
-                                true, Cost.REVENUE);
+                        calculator = new CostCalculator(job.getId(), oCurrency, true, Cost.REVENUE);
                         calculator.sendToCalculateCost();
                     }
                 }
                 catch (Exception e)
                 {
-                    throw new EnvoyServletException(
-                            GeneralExceptionConstants.EX_GENERAL, e);
+                    throw new EnvoyServletException(GeneralExceptionConstants.EX_GENERAL, e);
                 }
             }
         }
@@ -1145,25 +1135,25 @@ public class TaskDetailHandler extends PageHandler
      * Start the process for creation of secondary target file using this task
      * id. Note that the STFs are created for a given workflow only.
      */
-    private void startStfCreationForWorkflow(HttpServletRequest p_request,
-    		HttpSession p_session,String p_userId) throws EnvoyServletException
+    private void startStfCreationForWorkflow(HttpServletRequest p_request, HttpSession p_session,
+            String p_userId) throws EnvoyServletException
     {
-    	String taskIdParam = p_request.getParameter(TASK_ID);
-    	long taskId = TaskHelper.getLong(taskIdParam);
-    	
-    	String taskStateParam = p_request.getParameter(TASK_STATE);
-    	int taskState = TaskHelper.getInt(taskStateParam, -10);
-    	
-    	Task task = TaskHelper.getTask(p_userId, taskId,taskState);
-//        long taskId = -1;
+        String taskIdParam = p_request.getParameter(TASK_ID);
+        long taskId = TaskHelper.getLong(taskIdParam);
+
+        String taskStateParam = p_request.getParameter(TASK_STATE);
+        int taskState = TaskHelper.getInt(taskStateParam, -10);
+
+        Task task = TaskHelper.getTask(p_userId, taskId, taskState);
+        // long taskId = -1;
         try
         {
-//            Task task = (Task) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
-//            taskId = task.getId();
-            ServerProxy.getTaskManager().updateStfCreationState(taskId,
-                    Task.IN_PROGRESS);
-            ServerProxy.getWorkflowManager().startStfCreationForWorkflow(
-                    taskId, task.getWorkflow(), p_userId);
+            // Task task = (Task) TaskHelper.retrieveObject(p_session,
+            // WORK_OBJECT);
+            // taskId = task.getId();
+            ServerProxy.getTaskManager().updateStfCreationState(taskId, Task.IN_PROGRESS);
+            ServerProxy.getWorkflowManager().startStfCreationForWorkflow(taskId, task.getWorkflow(),
+                    p_userId);
 
             // now update task in session
             TaskHelper.updateTaskInSession(p_session, p_userId, taskId);
@@ -1172,14 +1162,11 @@ public class TaskDetailHandler extends PageHandler
         {
             try
             {
-                ServerProxy.getTaskManager().updateStfCreationState(taskId,
-                        Task.FAILED);
+                ServerProxy.getTaskManager().updateStfCreationState(taskId, Task.FAILED);
             }
             catch (Exception ex)
             {
-                CATEGORY.error(
-                        "Failed to update stf creation state of task to FAILED ",
-                        ex);
+                CATEGORY.error("Failed to update stf creation state of task to FAILED ", ex);
             }
             throw new EnvoyServletException(e);
         }
@@ -1193,10 +1180,8 @@ public class TaskDetailHandler extends PageHandler
         if (s_isCostingEnabled)
         {
             Rate actualRate = getActualRateToBeUsed(p_task, p_user);
-            if ((actualRate != null && actualRate.getRateType().equals(
-                    Rate.UnitOfWork.HOURLY))
-                    || ((p_task.getRevenueRate() != null) && p_task
-                            .getRevenueRate().getRateType()
+            if ((actualRate != null && actualRate.getRateType().equals(Rate.UnitOfWork.HOURLY))
+                    || ((p_task.getRevenueRate() != null) && p_task.getRevenueRate().getRateType()
                             .equals(Rate.UnitOfWork.HOURLY)))
             {
                 isHourly = true;
@@ -1213,10 +1198,8 @@ public class TaskDetailHandler extends PageHandler
         if (s_isCostingEnabled)
         {
             Rate actualRate = getActualRateToBeUsed(p_task, p_user);
-            if ((actualRate != null && actualRate.getRateType().equals(
-                    Rate.UnitOfWork.PAGE_COUNT))
-                    || ((p_task.getRevenueRate() != null) && p_task
-                            .getRevenueRate().getRateType()
+            if ((actualRate != null && actualRate.getRateType().equals(Rate.UnitOfWork.PAGE_COUNT))
+                    || ((p_task.getRevenueRate() != null) && p_task.getRevenueRate().getRateType()
                             .equals(Rate.UnitOfWork.PAGE_COUNT)))
             {
                 isPage = true;
@@ -1255,9 +1238,7 @@ public class TaskDetailHandler extends PageHandler
             }
             catch (Exception e)
             {
-                CATEGORY.error(
-                        "TaskDetailHandler::Problem getting user information ",
-                        e);
+                CATEGORY.error("TaskDetailHandler::Problem getting user information ", e);
             }
             try
             {
@@ -1265,8 +1246,7 @@ public class TaskDetailHandler extends PageHandler
                 if (user != null)
                 {
                     // find out user role
-                    Vector uRoles = new Vector(ServerProxy.getUserManager()
-                            .getUserRoles(user));
+                    Vector uRoles = new Vector(ServerProxy.getUserManager().getUserRoles(user));
                     String activity = t.getTaskName();
                     GlobalSightLocale source = t.getSourceLocale();
                     GlobalSightLocale target = t.getTargetLocale();
@@ -1296,9 +1276,7 @@ public class TaskDetailHandler extends PageHandler
             }
             catch (Exception e)
             {
-                CATEGORY.error(
-                        "TaskDetailHandler::Problem getting user information ",
-                        e);
+                CATEGORY.error("TaskDetailHandler::Problem getting user information ", e);
             }
         }
         return useRate;
@@ -1313,19 +1291,18 @@ public class TaskDetailHandler extends PageHandler
         return local.getRate(p_id);
     }
 
-    private int getIssueCount(Task task, HttpSession session,
-            List<String> states) throws EnvoyServletException
+    private int getIssueCount(Task task, HttpSession session, List<String> states)
+            throws EnvoyServletException
     {
         int count = 0;
 
         Workflow wf = task.getWorkflow();
         if (!(wf.getState().equals(Workflow.CANCELLED)))
         {
-            List pages = wf.getTargetPages();
+            Collection<TargetPage> pages = wf.getTargetPages();
             List<Long> targetPageIds = new ArrayList<Long>();
-            for (int j = 0; j < pages.size(); j++)
+            for (TargetPage tPage : pages)
             {
-                TargetPage tPage = (TargetPage) pages.get(j);
                 String state = tPage.getPageState();
                 if (!PageState.IMPORT_FAIL.equals(state))
                 {
@@ -1336,8 +1313,7 @@ public class TaskDetailHandler extends PageHandler
             try
             {
                 CommentManager manager = ServerProxy.getCommentManager();
-                count = manager.getIssueCount(Issue.TYPE_SEGMENT,
-                        targetPageIds, states);
+                count = manager.getIssueCount(Issue.TYPE_SEGMENT, targetPageIds, states);
             }
             catch (Exception ex)
             {
@@ -1351,115 +1327,110 @@ public class TaskDetailHandler extends PageHandler
      * Filter the pages by the specified search filter. Return only the pages
      * that match the filter.
      */
-    protected List filterPagesByName(HttpServletRequest p_request,
-            HttpSession p_session, List p_pages)
-	{
-    	SessionManager sessionMgr = (SessionManager) p_session
-    			.getAttribute(WebAppConstants.SESSION_MANAGER);
-		String thisFileSearch = (String) p_request
-				.getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
-		if (thisFileSearch == null)
-			thisFileSearch = (String) p_session
-					.getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
+    protected List filterPagesByName(HttpServletRequest p_request, HttpSession p_session,
+            List p_pages)
+    {
+        SessionManager sessionMgr = (SessionManager) p_session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        String thisFileSearch = (String) p_request
+                .getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
+        if (thisFileSearch == null)
+            thisFileSearch = (String) p_session
+                    .getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
 
-		String thisSearchText = (String) p_request
-				.getParameter(JobManagementHandler.PAGE_SEARCH_TEXT);
+        String thisSearchText = (String) p_request
+                .getParameter(JobManagementHandler.PAGE_SEARCH_TEXT);
 
-		String thisSearchLocale = (String) p_request
-				.getParameter(JobManagementHandler.PAGE_SEARCH_LOCALE);
-		
-		if (thisSearchText != null && !"".equals(thisSearchText))
-		{
-			try
-			{
-				thisSearchText = URLDecoder.decode(thisSearchText, "UTF-8");
-			}
-			catch (Exception e)
-			{
-				throw new EnvoyServletException(e);
-			}
-		}
-		p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_TEXT,
-				thisSearchText);
-		p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_LOCALE,
-				thisSearchLocale);
-		if (thisSearchLocale != null && !"".equals(thisSearchText)
-				&& thisSearchText != null)
-		{
-			Task task = (Task) TaskHelper.getStoredObject(p_session, TASK);
-			List<Long> sourcePageIdList = new ArrayList<Long>();
-			Job job = task.getWorkflow().getJob();
-			String tuTableName = null;
-			String tuvTableName = null;
-			try
-			{
-				tuTableName = BigTableUtil.getTuTableJobDataInByJobId(job
-						.getId());
-				tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(job
-						.getId());
-			}
-			catch (Exception e)
-			{
-				throw new EnvoyServletException(e);
-			}
-			List newPages = new ArrayList();
-			
-			long pageId = -1;
-			long localeId = -1;
-			long sourcePageId = -1;
-			for (Iterator fi = p_pages.iterator(); fi.hasNext();)
-			{
-				TargetPage page = (TargetPage) fi.next();
-				if ("targetLocale".equals(thisSearchLocale))
-				{
-					pageId = page.getId();
-					localeId = page.getLocaleId();
-					sourcePageId = page.getSourcePage().getId();
-				}
-				else if ("sourceLocale".equals(thisSearchLocale))
-				{
-					localeId = page.getSourcePage().getLocaleId();
-					pageId = page.getSourcePage().getId();
-					sourcePageId = pageId;
-				}
-				boolean check = TaskHelper.checkPageContainText(tuTableName,
-						tuvTableName, thisSearchLocale, thisSearchText, pageId,
-						localeId);
+        String thisSearchLocale = (String) p_request
+                .getParameter(JobManagementHandler.PAGE_SEARCH_LOCALE);
 
-				if (check){
-					newPages.add(page);
-					sourcePageIdList.add(sourcePageId);
-				}
-			}
-			sessionMgr.setAttribute("sourcePageIdList", sourcePageIdList);
-			return newPages;
-		}
-		sessionMgr.removeElement("sourcePageIdList");
+        if (thisSearchText != null && !"".equals(thisSearchText))
+        {
+            try
+            {
+                thisSearchText = URLDecoder.decode(thisSearchText, "UTF-8");
+            }
+            catch (Exception e)
+            {
+                throw new EnvoyServletException(e);
+            }
+        }
+        p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_TEXT, thisSearchText);
+        p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_LOCALE, thisSearchLocale);
+        if (thisSearchLocale != null && !"".equals(thisSearchText) && thisSearchText != null)
+        {
+            Task task = (Task) TaskHelper.getStoredObject(p_session, TASK);
+            List<Long> sourcePageIdList = new ArrayList<Long>();
+            Job job = task.getWorkflow().getJob();
+            String tuTableName = null;
+            String tuvTableName = null;
+            try
+            {
+                tuTableName = BigTableUtil.getTuTableJobDataInByJobId(job.getId());
+                tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(job.getId());
+            }
+            catch (Exception e)
+            {
+                throw new EnvoyServletException(e);
+            }
+            List newPages = new ArrayList();
 
-		if (thisFileSearch != null)
-		{
-			ArrayList filteredFiles = new ArrayList();
-			for (Iterator fi = p_pages.iterator(); fi.hasNext();)
-			{
-				Page p = (Page) fi.next();
-				if (p.getExternalPageId().indexOf(thisFileSearch) >= 0)
-				{
-					filteredFiles.add(p);
-				}
-			}
-			return filteredFiles;
-		}
-			// just return all - no filter
-		return p_pages;
-	}
+            long pageId = -1;
+            long localeId = -1;
+            long sourcePageId = -1;
+            for (Iterator fi = p_pages.iterator(); fi.hasNext();)
+            {
+                TargetPage page = (TargetPage) fi.next();
+                if ("targetLocale".equals(thisSearchLocale))
+                {
+                    pageId = page.getId();
+                    localeId = page.getLocaleId();
+                    sourcePageId = page.getSourcePage().getId();
+                }
+                else if ("sourceLocale".equals(thisSearchLocale))
+                {
+                    localeId = page.getSourcePage().getLocaleId();
+                    pageId = page.getSourcePage().getId();
+                    sourcePageId = pageId;
+                }
+                boolean check = TaskHelper.checkPageContainText(tuTableName, tuvTableName,
+                        thisSearchLocale, thisSearchText, pageId, localeId);
+
+                if (check)
+                {
+                    newPages.add(page);
+                    sourcePageIdList.add(sourcePageId);
+                }
+            }
+            sessionMgr.setAttribute("sourcePageIdList", sourcePageIdList);
+            return newPages;
+        }
+        sessionMgr.removeElement("sourcePageIdList");
+
+        if (thisFileSearch != null)
+        {
+            ArrayList filteredFiles = new ArrayList();
+            for (Iterator fi = p_pages.iterator(); fi.hasNext();)
+            {
+                Page p = (Page) fi.next();
+                if (p.getExternalPageId().indexOf(thisFileSearch) >= 0)
+                {
+                    filteredFiles.add(p);
+                }
+            }
+            return filteredFiles;
+        }
+        // just return all - no filter
+        return p_pages;
+    }
 
     /**
      * Sorts the target pages for the task specified by the sort column and
      * direction.
      */
     @SuppressWarnings("unchecked")
-    protected void sortPages(HttpServletRequest p_request,
-            HttpSession p_session, Locale p_uiLocale, List p_pages)
+    protected void sortPages(HttpServletRequest p_request, HttpSession p_session, Locale p_uiLocale,
+            List p_pages)
     {
         // first get comparator from session
         PageComparator comparator = (PageComparator) p_session
@@ -1468,14 +1439,11 @@ public class TaskDetailHandler extends PageHandler
         {
             // Default: Sort by external page id (page name) ascending, so it'll
             // be alphabetized
-            comparator = new PageComparator(PageComparator.EXTERNAL_PAGE_ID,
-                    true, p_uiLocale);
-            p_session.setAttribute(JobManagementHandler.PAGE_COMPARATOR,
-                    comparator);
+            comparator = new PageComparator(PageComparator.EXTERNAL_PAGE_ID, true, p_uiLocale);
+            p_session.setAttribute(JobManagementHandler.PAGE_COMPARATOR, comparator);
         }
 
-        String criteria = p_request
-                .getParameter(JobManagementHandler.PAGE_SORT_PARAM);
+        String criteria = p_request.getParameter(JobManagementHandler.PAGE_SORT_PARAM);
         if (criteria != null)
         {
             int sortCriteria = Integer.parseInt(criteria);
@@ -1497,39 +1465,140 @@ public class TaskDetailHandler extends PageHandler
         p_session.setAttribute(JobManagementHandler.PAGE_SORT_ASCENDING,
                 new Boolean(comparator.getSortAscending()));
     }
-    
-    private boolean isScored(HashMap<String, Integer> scorecardMap, long companyId,
-    		long workflowId, ResourceBundle bundle)
+
+    private boolean isScored(HashMap<String, Integer> scorecardMap, long companyId, long workflowId,
+            ResourceBundle bundle)
     {
-    	List<Select> scorecardCategories = ScorecardScoreHelper.initSelectList(
-    			companyId, bundle);
-    	
-    	List<ScorecardScore> scoreList = ScorecardScoreHelper.getScoreByWrkflowId(workflowId);
-    	
-    	boolean isScored = false;
-    	for(Select category:scorecardCategories)
-    	{
-    		String categoryString = category.getValue();
-    		boolean isCategoryScored = false;
-    		for(ScorecardScore score:scoreList)
-    		{
-    			if(score.getScorecardCategory().equals(categoryString))
-    			{
-    				isCategoryScored = true;
-    				isScored = true;
-    				scorecardMap.put(categoryString, score.getScore());
-    				break;
-    			}
-    		}
-    		 
-    		if(!isCategoryScored)
-    		{
-    			scorecardMap.put(categoryString, 0);
-    		}
-    	}
-    	return isScored;
+        List<Select> scorecardCategories = ScorecardScoreHelper.initSelectList(companyId, bundle);
+
+        List<ScorecardScore> scoreList = ScorecardScoreHelper.getScoreByWrkflowId(workflowId);
+
+        boolean isScored = false;
+        for (Select category : scorecardCategories)
+        {
+            String categoryString = category.getValue();
+            boolean isCategoryScored = false;
+            for (ScorecardScore score : scoreList)
+            {
+                if (score.getScorecardCategory().equals(categoryString))
+                {
+                    isCategoryScored = true;
+                    isScored = true;
+                    scorecardMap.put(categoryString, score.getScore());
+                    break;
+                }
+            }
+
+            if (!isCategoryScored)
+            {
+                scorecardMap.put(categoryString, 0);
+            }
+        }
+        return isScored;
     }
-    
-    
-    
+
+    private void leverageMT(final long taskId)
+    {
+        Runnable runnable = new Runnable()
+        {
+            @SuppressWarnings("unchecked")
+            public void run()
+            {
+                try
+                {
+                    Task task = (Task) HibernateUtil.get(TaskImpl.class, taskId);
+                    if (task == null)
+                        return;
+
+                    Workflow wf = task.getWorkflow();
+                    if (!Workflow.DISPATCHED.equals(wf.getState()))
+                        return;
+
+                    Job job = wf.getJob();
+                    int sourcePageNumber = job.getSourcePages(PrimaryFile.EXTRACTED_FILE).size();
+                    int total = sourcePageNumber;
+                    // Initialize this task's percentage to 0.
+                    leverageMTPercentageMap.put(task.getId(), 0);
+
+                    int count = 0;
+                    List<TargetPage> targetPages = wf.getTargetPages(PrimaryFile.EXTRACTED_FILE);
+                    for (TargetPage tp : targetPages)
+                    {
+                        updateFromMT(wf, tp);
+                        count++;
+                        leverageMTPercentageMap.put(task.getId(), Math.round(count * 100 / total));
+                    }
+
+                    // Anyway, set this to ensure the process bar will end.
+                    leverageMTPercentageMap.put(task.getId(), 100);
+                }
+                catch (Exception ex)
+                {
+                    CATEGORY.error(ex);
+                }
+                finally
+                {
+                    CATEGORY.info("Leveraging MT is done for task:" + taskId);
+                    HibernateUtil.closeSession();
+                }
+            }
+        };
+
+        // Set the percentage to 0 to ensure previous operation won't impact
+        // this time.
+        leverageMTPercentageMap.put(taskId, 0);
+        Thread t = new MultiCompanySupportedThread(runnable);
+        t.setName("Leverage MT for task: " + taskId);
+        t.start();
+    }
+
+    private void updateFromMT(Workflow p_wf, TargetPage p_targetPage) throws Exception
+    {
+        GlobalSightLocale sourceLocale = p_wf.getJob().getSourceLocale();
+        GlobalSightLocale targetLocale = p_wf.getTargetLocale();
+
+        SourcePage p_sourcePage = p_targetPage.getSourcePage();
+        long jobId = p_sourcePage.getJobId();
+
+        // 1. Untranslated source segments
+        Collection<Tuv> untranslatedSrcTuvs = UpdateLeverageHelper.getUntranslatedTuvsForMT(
+                p_targetPage, sourceLocale.getId());
+
+        // 2. Convert all untranslated source TUVs to "BaseTmTuv".
+        List<BaseTmTuv> sourceTuvs = new ArrayList<BaseTmTuv>();
+        for (Tuv srcTuv : untranslatedSrcTuvs)
+        {
+            BaseTmTuv btt = TmUtil.createTmSegment(srcTuv, "0", jobId);
+            sourceTuvs.add(btt);
+        }
+        // 3.Re-save target tuv
+        if (sourceTuvs.size() > 0)
+        {
+            UpdateLeverageHelper.applyMTMatches(p_sourcePage, sourceLocale, targetLocale,
+                    untranslatedSrcTuvs);
+        }
+    }
+
+    private void getLeverageMTPercentage(HttpServletResponse p_response, long p_taskId)
+            throws IOException
+    {
+        ServletOutputStream out = p_response.getOutputStream();
+        try
+        {
+            p_response.setContentType("text/plain");
+            out = p_response.getOutputStream();
+            StringBuffer sb = new StringBuffer();
+            sb.append("{\"leverageMTPercentage\":");
+            sb.append(leverageMTPercentageMap.get(p_taskId)).append("}");
+            out.write(sb.toString().getBytes("UTF-8"));
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error(e);
+        }
+        finally
+        {
+            out.close();
+        }
+    }
 }

@@ -26,6 +26,9 @@ import java.util.Iterator;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 /**
  * <p>
  * A hitlist represents the result of a termbase search. It is a collection of
@@ -106,6 +109,17 @@ public class Hitlist implements Serializable
             result.append("</hit>");
 
             return result.toString();
+        }
+        
+        public JSONObject getJson()
+        {
+            JSONObject ob = new JSONObject();
+            ob.put("score", m_score);
+            ob.put("term", m_term);
+            ob.put("conceptid", m_conceptId);
+            ob.put("termid", m_termId);
+            
+            return ob;
         }
 
         public String getDescXML()
@@ -240,4 +254,17 @@ public class Hitlist implements Serializable
         return result.toString();
     }
 
+    public JSONObject getJson()
+    {
+        JSONArray hits = new JSONArray();
+        for (int i = 0, max = m_hits.size(); i < max; i++)
+        {
+            Hit hit = (Hit) m_hits.get(i);
+            hits.add(hit.getJson());
+        }
+        
+        JSONObject ob = new JSONObject();
+        ob.put("hits", hits);
+        return ob;
+    }
 }

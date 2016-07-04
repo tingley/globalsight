@@ -40,7 +40,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.proxy.HibernateProxy;
-import org.hibernate.service.ServiceRegistryBuilder;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
@@ -51,8 +51,7 @@ import com.globalsight.ling.tm2.persistence.DbUtil;
  */
 public class HibernateUtil
 {
-    static private final Logger s_logger = Logger
-            .getLogger(HibernateUtil.class);
+    static private final Logger s_logger = Logger.getLogger(HibernateUtil.class);
 
     private static ThreadLocal<Session> sessionContext = new ThreadLocal<Session>();
 
@@ -65,23 +64,19 @@ public class HibernateUtil
             URL url = HibernateUtil.class.getResource("");
             String path = url.getPath();
             String path2 = path.substring(0, path.indexOf("globalsight.jar"))
-                    + "lib\\classes\\c3p0-config.xml";
+                    + "classes\\c3p0-config.xml";
             path2 = path2.replace("\\", "/").replace("/", File.separator);
             System.setProperty("com.mchange.v2.c3p0.cfg.xml", path2);
         }
         catch (Exception e)
         {
-            s_logger.error(
-                    "Fail to set system property 'com.mchange.v2.c3p0.cfg.xml'",
-                    e);
+            s_logger.error("Fail to set system property 'com.mchange.v2.c3p0.cfg.xml'", e);
         }
 
         try
         {
-            Configuration cfg = new Configuration().configure();
-            sessionFactory = cfg
-                    .buildSessionFactory(new ServiceRegistryBuilder()
-                            .buildServiceRegistry());
+            // for hibernate 5
+            sessionFactory = new Configuration().configure().buildSessionFactory();
         }
         catch (Throwable ex)
         {
@@ -153,8 +148,7 @@ public class HibernateUtil
      * @return the count result.
      * @throws HibernateException
      */
-    public static int count(String hql, Map<String, ?> params)
-            throws HibernateException
+    public static int count(String hql, Map<String, ?> params) throws HibernateException
     {
         Session session = getSession();
 
@@ -189,8 +183,7 @@ public class HibernateUtil
      * @return the count result.
      * @throws HibernateException
      */
-    public static int countWithSql(String sql, Map<String, ?> params)
-            throws HibernateException
+    public static int countWithSql(String sql, Map<String, ?> params) throws HibernateException
     {
         Session session = getSession();
 
@@ -285,8 +278,7 @@ public class HibernateUtil
         if (ob instanceof PersistentObject && isUseActive(ob))
         {
             PersistentObject pOb = (PersistentObject) ob;
-            pOb = (PersistentObject) session.get(ob.getClass(),
-                    pOb.getIdAsLong());
+            pOb = (PersistentObject) session.get(ob.getClass(), pOb.getIdAsLong());
             pOb.setIsActive(false);
             session.update(pOb);
         }
@@ -309,8 +301,7 @@ public class HibernateUtil
     {
         if (hql == null)
         {
-            throw new IllegalArgumentException(
-                    "Parameter 'hql' can not be null.");
+            throw new IllegalArgumentException("Parameter 'hql' can not be null.");
         }
 
         Session session = getSession();
@@ -341,13 +332,11 @@ public class HibernateUtil
      * @return
      * @throws Exception
      */
-    public static void excute(String hql, Map<String, ?> params)
-            throws HibernateException
+    public static void excute(String hql, Map<String, ?> params) throws HibernateException
     {
         if (hql == null)
         {
-            throw new IllegalArgumentException(
-                    "Parameter 'hql' can not be null.");
+            throw new IllegalArgumentException("Parameter 'hql' can not be null.");
         }
 
         Session session = getSession();
@@ -418,8 +407,7 @@ public class HibernateUtil
      * @return
      * @throws Exception
      */
-    public static <T> T getEvenInActic(Class<T> clazz, long id)
-            throws HibernateException
+    public static <T> T getEvenInActic(Class<T> clazz, long id) throws HibernateException
     {
         return get(clazz, new Long(id));
     }
@@ -438,8 +426,8 @@ public class HibernateUtil
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    public static <T> T get(Class<T> clazz, Serializable id,
-            boolean ignoreInActiveOb) throws HibernateException
+    public static <T> T get(Class<T> clazz, Serializable id, boolean ignoreInActiveOb)
+            throws HibernateException
     {
         T result = null;
         if (clazz != null)
@@ -453,8 +441,7 @@ public class HibernateUtil
                 if (ignoreInActiveOb && result != null && isUseActive(result))
                 {
                     Method method = result.getClass().getMethod("isActive");
-                    Boolean active = (Boolean) method.invoke(result,
-                            (Object[]) null);
+                    Boolean active = (Boolean) method.invoke(result, (Object[]) null);
                     if (active != null && !active.booleanValue())
                     {
                         result = null;
@@ -471,8 +458,7 @@ public class HibernateUtil
         return result;
     }
 
-    public static <T> T get(Class<T> clazz, Serializable id)
-            throws HibernateException
+    public static <T> T get(Class<T> clazz, Serializable id) throws HibernateException
     {
         return get(clazz, id, true);
     }
@@ -510,8 +496,7 @@ public class HibernateUtil
      * @return
      * @throws HibernateException
      */
-    public static Object getFirst(String hql, Map<String, ?> params)
-            throws HibernateException
+    public static Object getFirst(String hql, Map<String, ?> params) throws HibernateException
     {
         try
         {
@@ -528,8 +513,7 @@ public class HibernateUtil
         }
     }
 
-    public static Object getFirst(String hql, Object param1)
-            throws HibernateException
+    public static Object getFirst(String hql, Object param1) throws HibernateException
     {
         List<?> result = search(hql, param1);
         if (result == null || result.size() == 0)
@@ -550,8 +534,8 @@ public class HibernateUtil
         return result.get(0);
     }
 
-    public static Object getFirst(String hql, Object param1, Object param2,
-            Object param3) throws HibernateException
+    public static Object getFirst(String hql, Object param1, Object param2, Object param3)
+            throws HibernateException
     {
         List<?> result = search(hql, param1, param2, param3);
         if (result == null || result.size() == 0)
@@ -561,8 +545,8 @@ public class HibernateUtil
         return result.get(0);
     }
 
-    public static <T> T getFirstWithSql(Class<T> entityClass, String sql,
-            Object param1) throws HibernateException
+    public static <T> T getFirstWithSql(Class<T> entityClass, String sql, Object param1)
+            throws HibernateException
     {
         try
         {
@@ -579,8 +563,8 @@ public class HibernateUtil
         }
     }
 
-    public static Object getFirstWithSql(Class<?> entityClass, String sql,
-            Object param1, Object param2) throws HibernateException
+    public static Object getFirstWithSql(Class<?> entityClass, String sql, Object param1,
+            Object param2) throws HibernateException
     {
         try
         {
@@ -597,14 +581,12 @@ public class HibernateUtil
         }
     }
 
-    public static <T> T getFirstWithSql(Class<T> entityClass, String sql,
-            Object param1, Object param2, Object param3)
-            throws HibernateException
+    public static <T> T getFirstWithSql(Class<T> entityClass, String sql, Object param1,
+            Object param2, Object param3) throws HibernateException
     {
         try
         {
-            List<T> result = searchWithSql(entityClass, sql, param1, param2,
-                    param3);
+            List<T> result = searchWithSql(entityClass, sql, param1, param2, param3);
             if (result == null || result.size() == 0)
             {
                 return null;
@@ -667,8 +649,8 @@ public class HibernateUtil
      * @param clazz
      * @return
      */
-    public static <T> T getFirstWithSql(String sql, Map<String, ?> params,
-            Class<T> clazz) throws HibernateException
+    public static <T> T getFirstWithSql(String sql, Map<String, ?> params, Class<T> clazz)
+            throws HibernateException
     {
         try
         {
@@ -685,8 +667,7 @@ public class HibernateUtil
         }
     }
 
-    public static Object getFirstWithSql(String sql, Object param1)
-            throws HibernateException
+    public static Object getFirstWithSql(String sql, Object param1) throws HibernateException
     {
         Session session = getSession();
         SQLQuery query = session.createSQLQuery(sql);
@@ -719,7 +700,7 @@ public class HibernateUtil
 
         return result.get(0);
     }
-    
+
     /**
      * Gets the real object extends by <code>cglib</code>
      * 
@@ -731,8 +712,7 @@ public class HibernateUtil
     {
         if (obj instanceof HibernateProxy)
         {
-            return ((HibernateProxy) obj).getHibernateLazyInitializer()
-                    .getImplementation();
+            return ((HibernateProxy) obj).getHibernateLazyInitializer().getImplementation();
         }
 
         return obj;
@@ -761,7 +741,7 @@ public class HibernateUtil
     {
         Session session = getSession();
         Transaction tx = session.getTransaction();
-        if (!tx.isActive())
+        if (!TransactionStatus.ACTIVE.equals(tx.getStatus()))
         {
             tx.begin();
             return tx;
@@ -990,16 +970,14 @@ public class HibernateUtil
      *            need updated data
      * @throws Exception
      */
-    public static void saveOrUpdate(Session session, Collection<?> objects)
-            throws Exception
+    public static void saveOrUpdate(Session session, Collection<?> objects) throws Exception
     {
         if (objects != null && objects.size() > 0)
         {
 
             if (session == null)
             {
-                throw new Exception(
-                        "No Hibernate session provided, can not access database.");
+                throw new Exception("No Hibernate session provided, can not access database.");
             }
             Iterator<?> iterator = objects.iterator();
             int n = 0;
@@ -1063,8 +1041,7 @@ public class HibernateUtil
      *            includes list parameters.
      * @return The search result.
      */
-    public static List<?> search(String hql, Map<String, ?> map,
-            Map<String, Collection<?>> map2)
+    public static List<?> search(String hql, Map<String, ?> map, Map<String, Collection<?>> map2)
     {
         List<?> result = new ArrayList<Object>();
 
@@ -1108,8 +1085,7 @@ public class HibernateUtil
      * @return
      * @throws Exception
      */
-    public static List<?> search(String hql, Map<String, ?> map, int first,
-            int max)
+    public static List<?> search(String hql, Map<String, ?> map, int first, int max)
     {
         List<?> result = new ArrayList<Object>();
 
@@ -1144,8 +1120,7 @@ public class HibernateUtil
         return result;
     }
 
-    public static List<?> search(String hql, Object param1)
-            throws HibernateException
+    public static List<?> search(String hql, Object param1) throws HibernateException
     {
         List<?> result = new ArrayList<Object>();
 
@@ -1160,7 +1135,22 @@ public class HibernateUtil
         return result;
     }
 
-    public static List<?> search(String hql, Object param1, Object param2)
+    public static List<?> search(String hql, Object param1, Object param2) throws HibernateException
+    {
+        List<?> result = new ArrayList<Object>();
+
+        if (hql == null)
+        {
+            return result;
+        }
+
+        Session session = getSession();
+        result = session.createQuery(hql).setParameter(0, param1).setParameter(1, param2).list();
+
+        return result;
+    }
+
+    public static List<?> search(String hql, Object param1, Object param2, Object param3)
             throws HibernateException
     {
         List<?> result = new ArrayList<Object>();
@@ -1171,25 +1161,8 @@ public class HibernateUtil
         }
 
         Session session = getSession();
-        result = session.createQuery(hql).setParameter(0, param1)
-                .setParameter(1, param2).list();
-
-        return result;
-    }
-
-    public static List<?> search(String hql, Object param1, Object param2,
-            Object param3) throws HibernateException
-    {
-        List<?> result = new ArrayList<Object>();
-
-        if (hql == null)
-        {
-            return result;
-        }
-
-        Session session = getSession();
-        result = session.createQuery(hql).setParameter(0, param1)
-                .setParameter(1, param2).setParameter(2, param3).list();
+        result = session.createQuery(hql).setParameter(0, param1).setParameter(1, param2)
+                .setParameter(2, param3).list();
 
         return result;
     }
@@ -1208,8 +1181,8 @@ public class HibernateUtil
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> List<T> searchWithSql(Class<T> entityClass, String sql,
-            Object param1) throws HibernateException
+    public static <T> List<T> searchWithSql(Class<T> entityClass, String sql, Object param1)
+            throws HibernateException
     {
         Session session = getSession();
 
@@ -1222,8 +1195,8 @@ public class HibernateUtil
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> List<T> searchWithSql(Class<T> entityClass, String sql,
-            Object param1, Object param2) throws HibernateException
+    public static <T> List<T> searchWithSql(Class<T> entityClass, String sql, Object param1,
+            Object param2) throws HibernateException
     {
         Session session = getSession();
 
@@ -1237,9 +1210,8 @@ public class HibernateUtil
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> List<T> searchWithSql(Class<T> entityClass, String sql,
-            Object param1, Object param2, Object param3)
-            throws HibernateException
+    public static <T> List<T> searchWithSql(Class<T> entityClass, String sql, Object param1,
+            Object param2, Object param3) throws HibernateException
     {
         Session session = getSession();
 
@@ -1254,9 +1226,8 @@ public class HibernateUtil
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> List<T> searchWithSql(Class<T> entityClass, String sql,
-            Object param1, Object param2, Object param3, Object param4)
-            throws HibernateException
+    public static <T> List<T> searchWithSql(Class<T> entityClass, String sql, Object param1,
+            Object param2, Object param3, Object param4) throws HibernateException
     {
         Session session = getSession();
 
@@ -1278,8 +1249,7 @@ public class HibernateUtil
      * @param params
      * @return
      */
-    public static List<?> searchWithSql(String sql, Map<String, ?> params)
-            throws HibernateException
+    public static List<?> searchWithSql(String sql, Map<String, ?> params) throws HibernateException
     {
         Session session = getSession();
         SQLQuery query = session.createSQLQuery(sql);
@@ -1307,8 +1277,7 @@ public class HibernateUtil
      * @throws HibernateException
      * @throws SQLException
      */
-    public static int executeSql(String sql) throws HibernateException,
-            SQLException
+    public static int executeSql(String sql) throws HibernateException, SQLException
     {
         return executeSql(sql, null);
     }
@@ -1322,8 +1291,7 @@ public class HibernateUtil
      * @throws HibernateException
      * @throws SQLException
      */
-    public static int executeSql(String sql, List<?> params)
-            throws HibernateException, SQLException
+    public static int executeSql(String sql, List<?> params) throws HibernateException, SQLException
     {
         Connection connection = null;
         PreparedStatement stat = null;
@@ -1383,8 +1351,8 @@ public class HibernateUtil
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static <T> List<T> searchWithSql(String sql, Map<String, ?> params,
-            Class<T> clazz) throws HibernateException
+    public static <T> List<T> searchWithSql(String sql, Map<String, ?> params, Class<T> clazz)
+            throws HibernateException
     {
         Session session = getSession();
         SQLQuery query = session.createSQLQuery(sql);
@@ -1404,7 +1372,7 @@ public class HibernateUtil
 
         return result;
     }
-    
+
     /**
      * Execute sql, return the result.
      * 
@@ -1412,8 +1380,8 @@ public class HibernateUtil
      * @param params
      * @return
      */
-    public static List<?> searchWithSqlWithIn(String sql, Map<String, ?> params, Map<String, List<Object>> ins)
-            throws HibernateException
+    public static List<?> searchWithSqlWithIn(String sql, Map<String, ?> params,
+            Map<String, List<Object>> ins) throws HibernateException
     {
         Session session = getSession();
         SQLQuery query = session.createSQLQuery(sql);
@@ -1427,7 +1395,7 @@ public class HibernateUtil
                 query.setParameter(key, params.get(key));
             }
         }
-        
+
         if (ins != null)
         {
             Iterator<String> iterator = ins.keySet().iterator();
@@ -1501,19 +1469,20 @@ public class HibernateUtil
             throw e;
         }
     }
-    
+
     /**
-     * Copy the state of the given object onto the persistent object with the same
-     * identifier. If there is no persistent instance currently associated with
-     * the session, it will be loaded. Return the persistent instance. If the
-     * given instance is unsaved, save a copy of and return it as a newly persistent
-     * instance. The given instance does not become associated with the session.
-     * This operation cascades to associated instances if the association is mapped
-     * with <tt>cascade="merge"</tt>.<br>
+     * Copy the state of the given object onto the persistent object with the
+     * same identifier. If there is no persistent instance currently associated
+     * with the session, it will be loaded. Return the persistent instance. If
+     * the given instance is unsaved, save a copy of and return it as a newly
+     * persistent instance. The given instance does not become associated with
+     * the session. This operation cascades to associated instances if the
+     * association is mapped with <tt>cascade="merge"</tt>.<br>
      * <br>
      * The semantics of this method are defined by JSR-220.
      *
-     * @param object a detached instance with state to be copied
+     * @param object
+     *            a detached instance with state to be copied
      * @return an updated persistent instance
      */
     public static void merge(Object object) throws HibernateException

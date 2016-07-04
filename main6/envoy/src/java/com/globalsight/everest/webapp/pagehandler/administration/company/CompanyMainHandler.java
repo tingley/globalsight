@@ -20,10 +20,11 @@ import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -44,6 +45,7 @@ import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl;
 import com.globalsight.cxe.persistence.segmentationrulefile.SegmentationRuleFileEntityException;
+import com.globalsight.cxe.util.company.CreateCompanyUtil;
 import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.PostReviewCategory;
@@ -57,7 +59,6 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.CompanyComparator;
-import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
@@ -263,11 +264,11 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
 
             SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
             User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
-            ArrayList msg = new ArrayList();
-            msg.add(company.getName());
-            msg.add(Long.toString(companyId));
-            msg.add(user);
-            JmsHelper.sendMessageToQueue(msg, JmsHelper.JMS_NEW_COMPANY_QUEUE);
+            Map<String, String> data = new HashMap<String, String>();
+            data.put("companyId", String.valueOf(companyId));
+            data.put("creatorId", user.getUserId());
+            // GBS-4400
+            CreateCompanyUtil.createCompanyWithThread(data);
         }
     }
 
@@ -540,7 +541,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         }
     }
 
-    private boolean createQualityCategory(String[] qualityCategories, long companyId, boolean active)
+    private boolean createQualityCategory(String[] qualityCategories, long companyId,
+            boolean active)
     {
         try
         {
@@ -625,14 +627,14 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         String chEntry = tagsProperties.getProperty("convertHtmlEntity");
         // String defaultLocalizableInlineAtrributes = "href";
         // String localizableInlineAttributes = "";
-        boolean convertHtmlEntity = (chEntry == null || "".equals(chEntry) ? false : Boolean
-                .parseBoolean(chEntry));
+        boolean convertHtmlEntity = (chEntry == null || "".equals(chEntry) ? false
+                : Boolean.parseBoolean(chEntry));
         String IIHtmlTags = tagsProperties.getProperty("IgnoreInvalidHtmlTags");
-        boolean ignoreInvalidHtmlTags = ("".equals(IIHtmlTags) ? true : Boolean
-                .parseBoolean(IIHtmlTags));
+        boolean ignoreInvalidHtmlTags = ("".equals(IIHtmlTags) ? true
+                : Boolean.parseBoolean(IIHtmlTags));
         String aRDirectionality = tagsProperties.getProperty("addRtlDirectionality");
-        boolean addRtlDirectionality = (aRDirectionality == null || "".equals(aRDirectionality) ? false
-                : Boolean.parseBoolean(aRDirectionality));
+        boolean addRtlDirectionality = (aRDirectionality == null || "".equals(aRDirectionality)
+                ? false : Boolean.parseBoolean(aRDirectionality));
         HtmlFilter filter = new HtmlFilter(filterName, filterDescription, defaultEmbeddableTags,
                 embeddableTags, placeHolderTrim, companyId, convertHtmlEntity,
                 ignoreInvalidHtmlTags, addRtlDirectionality, jsFunctionText, defaultPairedTags,
@@ -664,8 +666,7 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         return HibernateUtil.searchWithSql(checkSql, null).size() > 0;
     }
 
-    private void initialFilterConfigurations(long companyId) throws HibernateException,
-            SQLException
+    private void initialFilterConfigurations(long companyId) throws HibernateException, SQLException
     {
         StringBuilder insertSql = new StringBuilder(
                 "insert into filter_configuration(name, known_format_id, filter_table_name, filter_description, company_id) values ");
@@ -842,7 +843,7 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         File jarFile = new File(CompanyMainHandler.class.getProtectionDomain().getCodeSource()
                 .getLocation().getFile());
         File rootDir = jarFile.getParentFile();
-        File gsSRX = new File(rootDir, "lib/classes/com/globalsight/resources/xml/default.srx");
+        File gsSRX = new File(rootDir, "classes/com/globalsight/resources/xml/default.srx");
         String rule = FileUtil.readFile(gsSRX, "UTF-8");
 
         // remove the encoding mark if have
@@ -953,10 +954,13 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         String enableInCtxRvOfficeP = p_request
                 .getParameter(CompanyConstants.ENABLE_INCTXRV_TOOL_OFFICE);
         String enableInCtxRvXMLP = p_request.getParameter(CompanyConstants.ENABLE_INCTXRV_TOOL_XML);
+        String enableInCtxRvHTMLP = p_request
+                .getParameter(CompanyConstants.ENABLE_INCTXRV_TOOL_HTML);
 
         String enableInCtxRvIndd = "on".equalsIgnoreCase(enableInCtxRvInddP) ? "true" : "false";
         String enableInCtxRvOffice = "on".equalsIgnoreCase(enableInCtxRvOfficeP) ? "true" : "false";
         String enableInCtxRvXML = "on".equalsIgnoreCase(enableInCtxRvXMLP) ? "true" : "false";
+        String enableInCtxRvHTML = "on".equalsIgnoreCase(enableInCtxRvHTMLP) ? "true" : "false";
 
         try
         {
@@ -971,6 +975,9 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
 
             updateInContextReview(company, spm, SystemConfigParamNames.INCTXRV_ENABLE_XML,
                     enableInCtxRvXML);
+
+            updateInContextReview(company, spm, SystemConfigParamNames.INCTXRV_ENABLE_HTML,
+                    enableInCtxRvHTML);
         }
         catch (Exception ex)
         {
@@ -979,8 +986,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
     }
 
     private void updateInContextReview(Company company, SystemParameterPersistenceManager spm,
-            String key, String value) throws Exception, RemoteException,
-            SystemParameterEntityException
+            String key, String value)
+            throws Exception, RemoteException, SystemParameterEntityException
     {
         String companyId = "" + company.getId();
         SystemParameter spEnableIndd = null;
@@ -1006,8 +1013,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
      * This method should be in a transacton to make sure each step is
      * successful. Store a company info.
      */
-    private Company createCompanyObject(HttpServletRequest p_request) throws RemoteException,
-            NamingException, GeneralException
+    private Company createCompanyObject(HttpServletRequest p_request)
+            throws RemoteException, NamingException, GeneralException
     {
         // create the company.
         Company company = new Company();

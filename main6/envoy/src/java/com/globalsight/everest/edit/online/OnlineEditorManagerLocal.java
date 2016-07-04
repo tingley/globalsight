@@ -2196,10 +2196,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 {
                     tmName = "Remote TM";
                 }
-                else if (match.getTmIndex() == Leverager.TDA_TM_PRIORITY)
-                {
-                    tmName = "TDA";
-                }
                 else if (match.getTmIndex() == Leverager.PO_TM_PRIORITY)
                 {
                     tmName = IFormatNames.FORMAT_PO.toUpperCase();
@@ -5475,9 +5471,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             String name = tuv.getLastModifiedUser();
 
-            if (name != null && !name.equals("") && !name.equals("Xliff")
-                    && !name.equals("po") && !name.equals("TDA")
-                    & (name.indexOf("_MT") < 0))
+            if (name != null && !name.equals("") && !name.equals("Xliff") && !name.equals("po")
+                    && (name.indexOf("_MT") < 0))
             {
                 if (!result.contains(name))
                 {
@@ -6657,6 +6652,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 	private String getNewSegement(String segment, String searchText,
 			String locale)
 	{
+	    if(StringUtil.isEmptyAndNull(searchText))
+	        return segment;
+	    
 		String beginSpan = "<span class=\"editorSegmentInternal\">";
 		String endSpan = "</span>";
 		if (segment.contains(beginSpan) && segment.contains(endSpan))

@@ -64,7 +64,6 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.tda.TdaHelper;
 import com.globalsight.everest.tm.exporter.TmxChecker;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
@@ -85,6 +84,7 @@ import com.globalsight.ling.tw.offline.parser.AmbassadorDwUpParser;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.NumberUtil;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -220,6 +220,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
     private boolean m_isXliff = false;
     private boolean m_isXliff20 = false;
     private boolean populate100 = false;
+    private boolean populateMT = false;
     private boolean preserveSourceFolder = false;
 
     // **MUST** start false to properly load an upload file.
@@ -246,8 +247,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
     // For XLF/OmegaT translation kit, store its tuID to target "state"
     // attribute value.
     private HashMap<String, String> tuId2XlfTrgStateMap = new HashMap<String, String>();
-    // GBS-4336
-    private final static Pattern P_LF = Pattern.compile("<ph type=\"x-lf\"[^>]*?>\n</ph>");
+
+    private static Pattern convertLfPattern = Pattern.compile("<ph[\\s].*?>[^<]*?</ph>");
 
     /**
      * Constructor.
@@ -335,6 +336,16 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
         this.populate100 = populate100;
     }
 
+    public boolean isPopulateMT()
+    {
+        return populateMT;
+    }
+    
+    public void setPopulateMT(boolean populateMT)
+    {
+        this.populateMT = populateMT;
+    }
+    
     /**
      * Adds a OfflineSegmentData to the segment list.
      * 
@@ -2375,12 +2386,6 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                 {
                 }
             }
-            // TDA matches
-            else if (match.getProjectTmIndex() == Leverager.TDA_TM_PRIORITY)
-            {
-                userId = "TDA";
-                sourceText = getMatchedOriginalSource(match, sourceText);
-            }
             // PO matches
             else if (match.getProjectTmIndex() == Leverager.PO_TM_PRIORITY)
             {
@@ -2488,15 +2493,45 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
 
     private String convertLf(String s, int tmxLevel)
     {
-        Matcher m = P_LF.matcher(s);
-        while (m.find())
+        if (tmxLevel == TmxUtil.TMX_LEVEL_ONE)
         {
-            if (tmxLevel == TmxUtil.TMX_LEVEL_ONE)
+            return StringUtil.replace(s, "\n", "");
+        }
+        else
+        {
+            if (s.indexOf("\n") == -1)
+                return s;
+            else
             {
-                s = StringUtil.replace(s, m.group(), "");
+                s = protectLfWithinPh(s);
+                s = StringUtil.replace(s, "\n", "<ph type=\"LF\">[LF]</ph>");
+                return StringUtil.replace(s, "[PHLF]", "\n");
             }
         }
-        return s;
+    }
+
+    /**
+     * "PH" tag does not allow nested tags, so replace "\n" within "ph" element
+     * to "[PHLF]" then replace them back finally to protect them (GBS-4426).
+     */
+    private String protectLfWithinPh(String src)
+    {
+        Matcher m = convertLfPattern.matcher(src);
+        StringBuilder output = new StringBuilder();
+        int start = 0;
+        String str = "";
+        while (m.find(start))
+        {
+            output.append(src.substring(start, m.start()));
+            str = src.substring(m.start(), m.end());
+            // "\n" within "<ph>" tag is replaced to "[PHLF]".
+            str = str.replace("\n", "[PHLF]");
+            output.append(str);
+            start = m.end();
+        }
+        output.append(src.substring(start));
+
+        return output.toString();
     }
 
     public void writeOfflineTmxFile(OutputStreamWriter p_outputStream, DownloadParams p_params,
@@ -2566,7 +2601,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                                 AmbassadorDwUpExceptionConstants.INVALID_FILE_FORMAT, msg);
                     }
 
-                    // Find the orignal non-ice segment.
+                    // Find the original non-ice segment.
                     if (p_mode == TmxUtil.TMX_MODE_NON_ICE && isContinue(osd))
                     {
                         continue;
@@ -2594,7 +2629,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                         sourceLocale = osd.getSourceTuv().getGlobalSightLocale().getLocaleCode();
                         targetLocale = osd.getTargetTuv().getGlobalSightLocale().getLocaleCode();
                     }
-
+                    
                     String translateTuString = null;
                     boolean isCreatedFromMT = false;
                     String[] translatedSrcTrgSegments = new String[2];
@@ -2619,7 +2654,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                     {
                         isAddTrasnlatedTU = false;
                     }
-
+                    
                     // Write TM matches into tmx.
                     StringBuffer exactAndFuzzy = new StringBuffer();
                     List<LeverageMatch> allLMs = new ArrayList<LeverageMatch>();
@@ -2661,17 +2696,17 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                                 targetText = convertLf(targetText, p_tmxLevel);
                             }
 
-                            if (p_mode == TmxUtil.TMX_MODE_INC_ALL
+                           if (p_mode == TmxUtil.TMX_MODE_INC_ALL
                                     || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
                                     || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT)
                                     || (p_mode == TmxUtil.TMX_MODE_NON_ICE && !isCreatedFromMT))
                             {
-                                if (isSameAsLocalizedSegments(translatedSrcTrgSegments, sourceText,
-                                        targetText))
-                                {
-                                    isAddTrasnlatedTU = false;
-                                }
-
+                               if (isSameAsLocalizedSegments(translatedSrcTrgSegments, sourceText,
+                                       targetText))
+                               {
+                                   isAddTrasnlatedTU = false;
+                               }
+                               
                                 TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(sourceText,
                                         m_sourceLocaleName, null, null, null, null);
                                 TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(targetText,
@@ -2687,6 +2722,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
 
                         p_outputStream.write(exactAndFuzzy.toString());
                     }
+                    
 
                     if (isAddTrasnlatedTU)
                     {
@@ -3051,7 +3087,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                 LeverageMatch lm = new LeverageMatch();
                 lm.setMatchedOriginalSource(EditUtil.decodeXmlEntities(alt.getSourceSegment()));
                 lm.setMatchedText(EditUtil.decodeXmlEntities(alt.getSegment()));
-                float score = (float) TdaHelper.PecentToDouble(alt.getQuality());
+                float score = (float) NumberUtil.PecentToDouble(alt.getQuality());
                 lm.setScoreNum(score);
                 lm.setProjectTmIndex(-100);
                 lm.setOriginalSourceTuvId(0);

@@ -17,7 +17,7 @@
 package com.globalsight.everest.jobhandler.jobmanagement;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -35,9 +35,7 @@ import com.globalsight.scheduling.KeyFlowContext;
  */
 public class TimedDispatchEventHandler extends EventHandler
 {
-    private static Logger s_logger =
-        Logger.getLogger(
-            TimedDispatchEventHandler.class.getName());
+    private static Logger s_logger = Logger.getLogger(TimedDispatchEventHandler.class.getName());
 
     // This is a hack to get around a flux 6.1 bug with one-time timers
     // Apparently one-time (repeat count==1) timers do not work and end
@@ -56,31 +54,30 @@ public class TimedDispatchEventHandler extends EventHandler
     {
         super();
     }
-    
+
     /**
      * Handles executing a timed dispatch when invoked by Quartz.
      * 
      * @param p_flowContext
      * @exception EventHandlerException
      */
-    public void eventFired(KeyFlowContext p_flowContext)
-        throws EventHandlerException
+    public void eventFired(KeyFlowContext p_flowContext) throws EventHandlerException
     {
         try
-        {      
-            EventInfo myEventInfo = (EventInfo)p_flowContext.getKey();
+        {
+            EventInfo myEventInfo = (EventInfo) p_flowContext.getKey();
             if (s_logger.isDebugEnabled())
             {
-                s_logger.debug("Got eventinfo " + myEventInfo);                
+                s_logger.debug("Got eventinfo " + myEventInfo);
             }
-            HashMap map = myEventInfo.getMap();
+            Map map = myEventInfo.getMap();
             if (s_logger.isDebugEnabled())
             {
-                s_logger.debug("Got hashmap " + map);                
+                s_logger.debug("Got hashmap " + map);
             }
             TimedDispatch td = (TimedDispatch) map.get("timedDispatch");
             Job job = td.getJob();
-            Long jobId = new Long (job.getId());
+            Long jobId = new Long(job.getId());
             s_logger.debug("Got timed dispatch for job " + jobId);
 
             if (s_handledEvents.contains(jobId))
@@ -103,25 +100,24 @@ public class TimedDispatchEventHandler extends EventHandler
     }
 
     /**
-     * Unschedules event without throwing
-     * any exceptions
+     * Unschedules event without throwing any exceptions
      * 
-     * @param p_map  map of event info
+     * @param p_map
+     *            map of event info
      */
-    private void unschedule(HashMap p_map)
+    private void unschedule(Map p_map)
     {
         try
         {
-            //now unschedule the event
+            // now unschedule the event
             FluxEventMap fem = EventSchedulerHelper.findFluxEventMap(p_map);
             ServerProxy.getEventScheduler().unschedule(fem);
             s_logger.debug("Unscheduled event.");
         }
         catch (Exception e)
         {
-            s_logger.error("Error unscheduling event.",e);
+            s_logger.error("Error unscheduling event.", e);
         }
     }
 
 }
-

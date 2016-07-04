@@ -45,7 +45,6 @@ public class DiplomatReader implements org.xml.sax.ContentHandler, DiplomatNames
     private Output m_output;
     private XmlEntities m_xmlEntities;
     private StringBuffer m_currentSegment = new StringBuffer(128);
-    private boolean m_preserveWhiteSpace = false;
     private Stack m_stateStack;
     private Exception m_error;
 
@@ -320,17 +319,6 @@ public class DiplomatReader implements org.xml.sax.ContentHandler, DiplomatNames
         {
             m_currentSegment.setLength(0);
             m_stateStack.push(new DiplomatParserState(DocumentElement.SEGMENT, null, null));
-            // GBS-4336 record the preserveWhiteSpace attribute in the
-            // SegmentNode
-            for (int i = 0; i < attrs.getLength(); i++)
-            {
-                String name = attrs.getQName(i);
-                if (DiplomatNames.Attribute.PRESERVEWHITESPACE.equalsIgnoreCase(name))
-                {
-                    m_preserveWhiteSpace = "yes".equals(attrs.getValue(i));
-                    break;
-                }
-            }
         }
         else // must be a TMX tag
         {
@@ -372,7 +360,6 @@ public class DiplomatReader implements org.xml.sax.ContentHandler, DiplomatNames
             {
                 SegmentNode sn = new SegmentNode();
                 sn.setSegment(m_currentSegment.toString());
-                sn.setPreserveWhiteSpace(m_preserveWhiteSpace);
                 m_output.addSegment(sn);
             }
             catch (DocumentElementException e)
@@ -381,7 +368,6 @@ public class DiplomatReader implements org.xml.sax.ContentHandler, DiplomatNames
             }
 
             m_currentSegment.setLength(0);
-            m_preserveWhiteSpace = false;
             m_stateStack.pop();
         }
         else // TMX

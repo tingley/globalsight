@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -80,8 +79,7 @@ public class ReservedTimeRemovalEvent extends EventHandler
      * @throws EventHandlerException
      *             if any error occurs.
      */
-    public void eventFired(KeyFlowContext p_flowContext)
-            throws EventHandlerException
+    public void eventFired(KeyFlowContext p_flowContext) throws EventHandlerException
     {
         try
         {
@@ -107,10 +105,9 @@ public class ReservedTimeRemovalEvent extends EventHandler
      * Remove the reserved times that are older than the given number of days
      * which is stated in the envoy.properties file.
      */
-    private void performRemovalOfReservedTimes(EventInfo p_eventInfo)
-            throws Exception
+    private void performRemovalOfReservedTimes(EventInfo p_eventInfo) throws Exception
     {
-        HashMap map = p_eventInfo.getMap();
+        Map map = p_eventInfo.getMap();
         Integer integer = (Integer) map.get(SchedulerConstants.NUM_OF_DAYS);
         Timestamp t = new Timestamp();
         t.add(Timestamp.DAY, -integer.intValue());
@@ -124,7 +121,7 @@ public class ReservedTimeRemovalEvent extends EventHandler
         Map params = new HashMap();
         params.put("ET", t.getDate());
         List times = HibernateUtil.searchWithSql(sql, params, ReservedTime.class);
-        
+
         Object[] rts = ReservedTimesQueryResultHandler.handleResult(times).toArray();;
 
         if (rts.length == 0)
@@ -152,14 +149,13 @@ public class ReservedTimeRemovalEvent extends EventHandler
                 {
                     ReservedTime rt = (ReservedTime) reservedTimes.get(h);
 
-                    ReservedTime cloneRt = (ReservedTime) session.get(
-                            ReservedTime.class, rt.getIdAsLong());
+                    ReservedTime cloneRt = (ReservedTime) session.get(ReservedTime.class,
+                            rt.getIdAsLong());
 
-                    UserFluxCalendar clone = (UserFluxCalendar) session.get(
-                            UserFluxCalendar.class, cal.getIdAsLong());
+                    UserFluxCalendar clone = (UserFluxCalendar) session.get(UserFluxCalendar.class,
+                            cal.getIdAsLong());
 
-                    clone.getCollectionByType(cloneRt.getType())
-                            .remove(cloneRt);
+                    clone.getCollectionByType(cloneRt.getType()).remove(cloneRt);
                     session.update(clone);
                 }
                 transaction.commit();
@@ -172,13 +168,6 @@ public class ReservedTimeRemovalEvent extends EventHandler
                 transaction.rollback();
             }
             throw e2;
-        }
-        finally
-        {
-            if (session != null)
-            {
-                //session.close();
-            }
         }
     }
     // ////////////////////////////////////////////////////////////////////

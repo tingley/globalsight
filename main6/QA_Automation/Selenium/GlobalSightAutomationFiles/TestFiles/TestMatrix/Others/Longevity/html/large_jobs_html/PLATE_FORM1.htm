@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1833" MadCap:lastWidth="571">
+    <head><title>Plate Tab</title>
+    </head>
+    <body>
+        <h1>Plate 
+ tab</h1>
+        <p class="para">
+            <MadCap:concept term="plate type" />Use this tab to view or modify the parameter values used 
+ to define the physical properties of a sample plate. When you create a 
+ sample set method in Run Samples, you select and define sample plates 
+ based on plate types you created in Configuration Manager.</p>
+        <p class="para"><span class="emphasisbold">Tip:</span>From 
+ the Plate Types table in Configuration Manager, you can also export a plate type to a text file, and then import it into Empower. 
+ This is useful when you want to reuse a plate type definition on other 
+ Empower systems that run the same type of autosampler.</p>
+        <h2>Plate type</h2>
+        <p class="caption">Name</p>
+        <p class="para">A unique name (up to 30 alphanumeric characters) for the 
+ plate type.</p>
+        <p class="caption">Format</p>
+        <p class="para">Physical layout of the plate. Choices:</p>
+        <ul>
+            <li class="listbull">XY – A configurable generic 
+ sample plate used in the Waters 2700 Autosampler</li>
+            <li class="listbull">W2790/5 – A configurable 
+ sample plate used in the Waters 2790/2795 Separations Module</li>
+            <li class="listbull">W2690/5 – Waters 2690/2695 
+ sample plate</li>
+            <li class="listbull">W48 – Waters 48-vial 
+ carousel</li>
+            <li class="listbull">W96 – Waters 96-vial 
+ carousel</li>
+            <li class="listbull">HP100 – Hewlett Packard 
+ 100-vial GC carousel</li>
+        </ul>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ W2790/5</p>
+        <p class="para"><span class="emphasisbold">Tip:</span> To create a plate type 
+ for the W2707 autosampler, import the plate type definition file "W2707_Plate_Type.txt" 
+ from the &lt;Drive:&gt;\Empower\Scripts directory.</p>
+        <h2>Plate dimensions </h2>
+        <p class="caption">X (XY format only)</p>
+        <p class="para">Physical size of the plate in millimeters along the x-axis.</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 1.00 to 1000.00</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 128.00</p>
+        <p class="caption">Y (XY format only)</p>
+        <p class="para">Physical size of the plate in millimeters along the y-axis.</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 1.00 to 1000.00</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 86.00</p>
+        <p class="caption">Height (XY and W2790/5 formats only)</p>
+        <p class="para">Physical size of the plate in millimeters along the z-axis.</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 1.00 to 1000.00</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 43.90</p>
+        <h2>Well dimensions (XY and W2790/5 formats only)</h2>
+        <p class="caption">Top Left Well Location, X</p>
+        <p class="para">Distance in millimeters from the left edge of the plate to 
+ the center of the top left well.</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 0.10 to 100.00</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 14.10</p>
+        <p class="caption">Top Left Well Location, Y</p>
+        <p class="para">Distance in millimeters from the top edge of the plate to 
+ the center of the top left well.</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 0.10 to 100.00</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 11.30</p>
+        <p class="caption">Well Size, Diameter</p>
+        <p class="para">Diameter in millimeters of each well in the plate.</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 1.00 to 1000.00</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 7.00</p>
+        <p class="caption">Well Size, Depth</p>
+        <p class="para">Depth in millimeters of each well in the plate relative to 
+ the top surface of the plate.</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ 1.00 to 1000.00</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 23.20</p>
+    </body>
+</html>

@@ -30,6 +30,7 @@ import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.page.PrimaryFile;
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.request.WorkflowRequest;
@@ -70,7 +71,7 @@ public interface Job extends WorkObject
     public static final String JOB_TYPE_GIT = "git";
     public static final String JOB_TYPE_CVS = "cvs";
     public static final String JOB_TYPE_MINDTOUCH = "mindtouch";
-    public static final String JOB_TYPE_ELOQUA  = "eloqua";
+    public static final String JOB_TYPE_ELOQUA = "eloqua";
     public static final String JOB_TYPE_COTI = "coti";
     public static final String JOB_TYPE_RSS = "rss";
 
@@ -124,11 +125,11 @@ public interface Job extends WorkObject
     public void setCompanyId(long companyId);
 
     public long getCompanyId();
-    
+
     public Long getGroupId();
-    
+
     public void setGroupId(Long groupId);
-    
+
     public void setJobName(String p_jobName);
 
     public String getJobName();
@@ -215,7 +216,7 @@ public interface Job extends WorkObject
     /**
      * Return all the source pages in the job.
      */
-    public Collection getSourcePages();
+    public Collection<SourcePage> getSourcePages();
 
     /**
      * Return all the source pages in the job that contain the specified primary
@@ -442,19 +443,23 @@ public interface Job extends WorkObject
 
     public String getLmExtTable();
 
-	public void setLmExtTable(String lmExtTable);
+    public void setLmExtTable(String lmExtTable);
 
-	public String getLmExtArchiveTable();
+    public String getLmExtArchiveTable();
 
-	public void setLmExtArchiveTable(String lmExtArchiveTable);
+    public void setLmExtArchiveTable(String lmExtArchiveTable);
 
     public String getJobType();
 
     public void setJobType(String jobType);
 
     public boolean isBlaiseJob();
+
     public boolean isCotiJob();
+
     public boolean isEloquaJob();
+
     public boolean isGitJob();
+
     public boolean isMindTouchJob();
 }

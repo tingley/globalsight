@@ -881,6 +881,11 @@ public class FilterHelper
         return HibernateUtil.get(HtmlFilter.class, filterId);
     }
 
+    public static JsonFilter getJsonFilter(long filterId)
+    {
+        return HibernateUtil.get(JsonFilter.class, filterId);
+    }
+    
     public static XMLRuleFilter getXmlFilter(long filterId)
     {
         return HibernateUtil.get(XMLRuleFilter.class, filterId);

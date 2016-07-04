@@ -239,6 +239,7 @@ public class XmlUtil
         try
         {
             XMLSerializer serializer = new XMLSerializer();
+            serializer.setTypeHintsCompatibility(false);
             JSON jsonObject = JSONSerializer.toJSON(json);
             return serializer.write(jsonObject);
         }

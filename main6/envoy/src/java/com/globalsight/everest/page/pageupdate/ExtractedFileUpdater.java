@@ -29,7 +29,8 @@ import java.util.ResourceBundle;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import com.globalsight.everest.company.CompanyWrapper;
+
+import com.globalsight.cxe.util.page.TrashCompactorUtil;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.edit.SynchronizationManager;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -54,7 +55,6 @@ import com.globalsight.everest.tuv.TuImplVo;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImplVo;
 import com.globalsight.everest.tuv.TuvJdbcQuery;
-import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.DiplomatAPI;
@@ -99,8 +99,7 @@ import com.globalsight.util.mail.MailerConstants;
  */
 class ExtractedFileUpdater
 {
-    private static Logger CATEGORY = Logger
-            .getLogger(ExtractedFileUpdater.class.getName());
+    private static Logger CATEGORY = Logger.getLogger(ExtractedFileUpdater.class.getName());
 
     static private final Integer s_INTONE = new Integer(1);
 
@@ -111,15 +110,16 @@ class ExtractedFileUpdater
     /** Debugging hook: delay the final commit by this many seconds. */
     static private int s_COMMIT_DELAY = 0;
 
-    /** Debugging hook: add a delay of this many seconds after the final commit. */
+    /**
+     * Debugging hook: add a delay of this many seconds after the final commit.
+     */
     static private int s_AFTER_COMMIT_DELAY = 0;
 
     static
     {
         try
         {
-            ResourceBundle res = ResourceBundle
-                    .getBundle("properties/pageupdate");
+            ResourceBundle res = ResourceBundle.getBundle("properties/pageupdate");
 
             try
             {
@@ -178,8 +178,7 @@ class ExtractedFileUpdater
         }
         catch (Exception e)
         {
-            CATEGORY.error("Get source page failed with id "
-                    + p_sourcePage.getIdAsLong());
+            CATEGORY.error("Get source page failed with id " + p_sourcePage.getIdAsLong());
             // just go on and use the cloned one passed in
             // tbd - clean up shouldn't be passing in a clone.
         }
@@ -216,8 +215,8 @@ class ExtractedFileUpdater
     ArrayList updateSourcePageGxml()
     {
         // validate the gxml and update the UpdateState object
-        ExtractedFileValidation validator = new ExtractedFileValidation(
-                m_state.getSourcePage(), m_state.getGxml());
+        ExtractedFileValidation validator = new ExtractedFileValidation(m_state.getSourcePage(),
+                m_state.getGxml());
         m_state = validator.validateGxml();
 
         if (!m_state.getValidated())
@@ -239,8 +238,7 @@ class ExtractedFileUpdater
         }
         catch (Exception e)
         {
-            CATEGORY.error("Could not start background thread to update page",
-                    e);
+            CATEGORY.error("Could not start background thread to update page", e);
             m_state.setValidated(false);
             m_state.addValidationMessage(e.getMessage());
             return m_state.getValidationMessages();
@@ -267,8 +265,7 @@ class ExtractedFileUpdater
 
             String state = page.getPageState();
 
-            if (state.equals(PageState.IMPORTING)
-                    || state.equals(PageState.IMPORT_FAIL))
+            if (state.equals(PageState.IMPORTING) || state.equals(PageState.IMPORT_FAIL))
             {
                 m_state.addValidationMessage("Page cannot be updated because "
                         + "it is in the wrong state (" + state + ").");
@@ -276,20 +273,20 @@ class ExtractedFileUpdater
             }
             else if (state.equals(PageState.OUT_OF_DATE))
             {
-                m_state.addValidationMessage("Page cannot be updated because "
-                        + "it was deleted (OUT_OF_DATE).");
+                m_state.addValidationMessage(
+                        "Page cannot be updated because " + "it was deleted (OUT_OF_DATE).");
                 m_state.setValidated(false);
             }
             else if (state.equals(PageState.EXPORT_IN_PROGRESS))
             {
-                m_state.addValidationMessage("Page cannot be updated because "
-                        + "it is being exported.");
+                m_state.addValidationMessage(
+                        "Page cannot be updated because " + "it is being exported.");
                 m_state.setValidated(false);
             }
             else if (state.equals(PageState.UPDATING))
             {
-                m_state.addValidationMessage("Page cannot be updated because "
-                        + "it is already being updated.");
+                m_state.addValidationMessage(
+                        "Page cannot be updated because " + "it is already being updated.");
                 m_state.setValidated(false);
             }
             else
@@ -341,9 +338,8 @@ class ExtractedFileUpdater
      */
     private void runUpdater()
     {
-        CATEGORY.info("Starting GXML update for source page "
-                + getSourcePage().getExternalPageId() + " (ID "
-                + getSourcePage().getId() + ")");
+        CATEGORY.info("Starting GXML update for source page " + getSourcePage().getExternalPageId()
+                + " (ID " + getSourcePage().getId() + ")");
 
         // Remember the current page states so they can be reset later.
         ArrayList targetPages = null;
@@ -361,11 +357,10 @@ class ExtractedFileUpdater
             allpages.addAll(targetPages);
 
             // Mark all pages as UPDATING.
-            PagePersistenceAccessor.updateStateOfPages(allpages,
-                    PageState.UPDATING);
+            PagePersistenceAccessor.updateStateOfPages(allpages, PageState.UPDATING);
 
             // Compute new data and persist it.
-            ArrayList deletedTuvIds = computeData();
+            List<Long> deletedTuvIds = computeData();
             commitData();
 
             // send the email now to notify that the page was updated properly.
@@ -381,32 +376,18 @@ class ExtractedFileUpdater
             // if the database or GlobalSight fails but can be repaired
             // manually. That's why we print out the TUV IDs.
 
-            try
-            {
-                CATEGORY.info("Deleting additional data for TUVs of source page "
-                        + getSourcePage().getId() + ": " + deletedTuvIds);
-
-                HashMap map = new HashMap();
-                CompanyWrapper.saveCurrentCompanyIdInMap(map, CATEGORY);
-                map.put("command", "DeleteTuvIds");
-                map.put("deletedTuvIds", deletedTuvIds);
-                JmsHelper.sendMessageToQueue(map,
-                        JmsHelper.JMS_TRASH_COMPACTION_QUEUE);
-            }
-            catch (Throwable ex)
-            {
-                // an error is logged by the comment manager
-                //
-                // just log the error - don't throw an exception since this
-                // isn't
-                // necessarily a failure. The page was updated successfully.
-            }
+            CATEGORY.info("Deleting additional data for TUVs of source page "
+                    + getSourcePage().getId() + ": " + deletedTuvIds);
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("action", TrashCompactorUtil.ACTION_DELETE_ISSUES);
+            data.put("deletedTuvIds", deletedTuvIds);
+            // GBS-4400
+            TrashCompactorUtil.compactTrashWithThread(data);
         }
         catch (Throwable ex)
         {
-            CATEGORY.error("Source page " + getSourcePage().getExternalPageId()
-                    + " (ID " + getSourcePage().getId()
-                    + ") could not be updated.", ex);
+            CATEGORY.error("Source page " + getSourcePage().getExternalPageId() + " (ID "
+                    + getSourcePage().getId() + ") could not be updated.", ex);
 
             sendFailureEmail(ex);
         }
@@ -423,23 +404,17 @@ class ExtractedFileUpdater
             }
             catch (Exception ex)
             {
-                CATEGORY.error(
-                        "Source page "
-                                + getSourcePage().getExternalPageId()
-                                + " (ID "
-                                + getSourcePage().getId()
-                                + ") was updated successfully "
-                                + "but the page state could not be reset. "
-                                + "GlobalSight should be restarted to correct the page state.",
-                        ex);
+                CATEGORY.error("Source page " + getSourcePage().getExternalPageId() + " (ID "
+                        + getSourcePage().getId() + ") was updated successfully "
+                        + "but the page state could not be reset. "
+                        + "GlobalSight should be restarted to correct the page state.", ex);
 
                 // The page data is committed, only the page
                 // state is wrong. Need to send special failure email.
                 sendFailureEmail(ex);
             }
 
-            CATEGORY.info("Completed GXML update for source page "
-                    + getSourcePage().getId());
+            CATEGORY.info("Completed GXML update for source page " + getSourcePage().getId());
         }
     }
 
@@ -460,7 +435,7 @@ class ExtractedFileUpdater
      *         the main transaction to keep the space requirements small
      *         (rollback segments).
      */
-    private ArrayList computeData() throws Throwable
+    private List<Long> computeData() throws Throwable
     {
         // Load the original page data into memory.
         ArrayList originalTus = getOriginalTusTuvs();
@@ -485,24 +460,12 @@ class ExtractedFileUpdater
                 {
                     TuvImplVo tuv = (TuvImplVo) it.next();
 
-                    System.err
-                            .println("Original Tu "
-                                    + tu.getId()
-                                    + " order "
-                                    + tu.getOrder()
-                                    + " pid "
-                                    + tu.getPid()
-                                    + " type "
-                                    + (tu.isLocalizable() ? "L" : "T")
-                                    + " tuv "
-                                    + tuv.getId()
-                                    + " order "
-                                    + tuv.getOrder()
-                                    + " locale "
-                                    + (localeId.longValue() == tuv
-                                            .getLocaleId() ? "src" : String
-                                            .valueOf(tuv.getLocaleId()))
-                                    + " seg " + truncate(tuv.getGxml(), 80));
+                    System.err.println("Original Tu " + tu.getId() + " order " + tu.getOrder()
+                            + " pid " + tu.getPid() + " type " + (tu.isLocalizable() ? "L" : "T")
+                            + " tuv " + tuv.getId() + " order " + tuv.getOrder() + " locale "
+                            + (localeId.longValue() == tuv.getLocaleId() ? "src"
+                                    : String.valueOf(tuv.getLocaleId()))
+                            + " seg " + truncate(tuv.getGxml(), 80));
                 }
 
                 System.err.println();
@@ -531,7 +494,7 @@ class ExtractedFileUpdater
         // (do this before new block ids are assigned).
         ArrayList obsoleteTus = getObsoleteTus();
 
-        ArrayList obsoleteTuvIds = new ArrayList();
+        List<Long> obsoleteTuvIds = new ArrayList<Long>();
         for (int i = 0, max = obsoleteTus.size(); i < max; i++)
         {
             TuImplVo tu = (TuImplVo) obsoleteTus.get(i);
@@ -539,7 +502,7 @@ class ExtractedFileUpdater
             for (Iterator it = tuvs.iterator(); it.hasNext();)
             {
                 Tuv tuv = (Tuv) it.next();
-                obsoleteTuvIds.add(tuv.getIdAsLong());
+                obsoleteTuvIds.add(tuv.getId());
             }
         }
 
@@ -587,9 +550,8 @@ class ExtractedFileUpdater
                 TuImplVo tu = (TuImplVo) allNewTus.get(i);
                 TuvImplVo tuv = (TuvImplVo) tu.getTuv(localeId);
 
-                System.err.println("Tu " + tu.getId() + " order "
-                        + tu.getOrder() + " pid " + tu.getPid() + " type "
-                        + (tu.isLocalizable() ? "L" : "T") + " tuv "
+                System.err.println("Tu " + tu.getId() + " order " + tu.getOrder() + " pid "
+                        + tu.getPid() + " type " + (tu.isLocalizable() ? "L" : "T") + " tuv "
                         + tuv.getId() + " order " + tuv.getOrder() + " seg "
                         + truncate(tuv.getGxml(), 80));
             }
@@ -635,9 +597,8 @@ class ExtractedFileUpdater
                 TuImplVo tu = (TuImplVo) allNewTus.get(i);
                 TuvImplVo tuv = (TuvImplVo) tu.getTuv(localeId);
 
-                System.err.println("Tu " + tu.getId() + " order "
-                        + tu.getOrder() + " pid " + tu.getPid() + " type "
-                        + (tu.isLocalizable() ? "L" : "T") + " tuv "
+                System.err.println("Tu " + tu.getId() + " order " + tu.getOrder() + " pid "
+                        + tu.getPid() + " type " + (tu.isLocalizable() ? "L" : "T") + " tuv "
                         + tuv.getId() + " order " + tuv.getOrder() + " seg "
                         + truncate(tuv.getGxml(), 80));
             }
@@ -651,8 +612,8 @@ class ExtractedFileUpdater
         Map oldTemplates = getPageTemplates();
 
         // Build the new template parts.
-        ArrayList templates = generateTemplates(getSourcePage(),
-                m_state.getGxmlRoot(), allNewTus, oldTemplates);
+        ArrayList templates = generateTemplates(getSourcePage(), m_state.getGxmlRoot(), allNewTus,
+                oldTemplates);
 
         assignTemplatePartIds(templates);
 
@@ -660,8 +621,7 @@ class ExtractedFileUpdater
         deleteObsoleteTemplateParts(oldTemplates);
 
         // Persist all TU, TUV and template part changes in one go.
-        createUpdateCommands(templates, unmodifiedTus, modifiedTus,
-                localizableTus, allNewTus);
+        createUpdateCommands(templates, unmodifiedTus, modifiedTus, localizableTus, allNewTus);
 
         // Persist all word count related changes (SP/TP/JOB/WF) in one go.
         // Also updates the source page gs tag flag.
@@ -681,8 +641,7 @@ class ExtractedFileUpdater
             ArrayList commands = m_state.getPersistenceCommands();
             while (commands.size() > 0)
             {
-                PersistenceCommand cmd = (PersistenceCommand) commands
-                        .remove(0);
+                PersistenceCommand cmd = (PersistenceCommand) commands.remove(0);
                 if (cmd instanceof DeleteTuPersistenceCommand)
                 {
                     long jobId = m_state.getSourcePage().getJobId();
@@ -693,23 +652,22 @@ class ExtractedFileUpdater
 
             if (s_COMMIT_DELAY != 0)
             {
-                CATEGORY.info("Delaying commit for page "
-                        + getSourcePage().getExternalPageId() + " by "
-                        + s_COMMIT_DELAY + " seconds.");
+                CATEGORY.info("Delaying commit for page " + getSourcePage().getExternalPageId()
+                        + " by " + s_COMMIT_DELAY + " seconds.");
 
                 Thread.sleep(s_COMMIT_DELAY * 1000);
 
-                CATEGORY.info("Commencing commit for page "
-                        + getSourcePage().getExternalPageId() + ".");
+                CATEGORY.info(
+                        "Commencing commit for page " + getSourcePage().getExternalPageId() + ".");
             }
 
             conn.commit();
 
             if (s_AFTER_COMMIT_DELAY != 0)
             {
-                CATEGORY.info("Delaying after commit for page "
-                        + getSourcePage().getExternalPageId() + " by "
-                        + s_AFTER_COMMIT_DELAY + " seconds.");
+                CATEGORY.info(
+                        "Delaying after commit for page " + getSourcePage().getExternalPageId()
+                                + " by " + s_AFTER_COMMIT_DELAY + " seconds.");
 
                 Thread.sleep(s_AFTER_COMMIT_DELAY * 1000);
 
@@ -744,8 +702,8 @@ class ExtractedFileUpdater
      */
     private void loadNewTuTuvData() throws Exception
     {
-        ArrayList newTus = createTus(m_state.getGxmlRoot(), getSourcePage()
-                .getGlobalSightLocale(), getLeverageGroupId());
+        ArrayList newTus = createTus(m_state.getGxmlRoot(), getSourcePage().getGlobalSightLocale(),
+                getLeverageGroupId());
 
         m_state.setNewTus(newTus);
 
@@ -753,8 +711,8 @@ class ExtractedFileUpdater
         {
             ArrayList originalTus = getOriginalTusTuvs();
 
-            CATEGORY.debug("Original TUs: " + originalTus.size()
-                    + " incoming TUs: " + newTus.size());
+            CATEGORY.debug(
+                    "Original TUs: " + originalTus.size() + " incoming TUs: " + newTus.size());
         }
 
         // Separate modified from unmodified TUs. If structurally
@@ -785,9 +743,8 @@ class ExtractedFileUpdater
 
         if (CATEGORY.isDebugEnabled())
         {
-            CATEGORY.debug("Unmodified TUs: "
-                    + m_state.getUnmodifiedTus().size() + " modified TUs: "
-                    + m_state.getModifiedTus().size());
+            CATEGORY.debug("Unmodified TUs: " + m_state.getUnmodifiedTus().size()
+                    + " modified TUs: " + m_state.getModifiedTus().size());
         }
     }
 
@@ -795,8 +752,8 @@ class ExtractedFileUpdater
      * Creates TUs for localizable and translatable segments of the GXML tree.
      * Fills in the correct ordernum, segmentId and leverageGroupId.
      */
-    private ArrayList createTus(GxmlRootElement p_gxmlRoot,
-            GlobalSightLocale p_sourceLocale, long p_lgid) throws Exception
+    private ArrayList createTus(GxmlRootElement p_gxmlRoot, GlobalSightLocale p_sourceLocale,
+            long p_lgid) throws Exception
     {
         ArrayList result = new ArrayList();
 
@@ -819,9 +776,8 @@ class ExtractedFileUpdater
         return result;
     }
 
-    private ArrayList createTus_1(GxmlElement p_gxmlElement,
-            GlobalSightLocale p_sourceLocale, IntHolder p_blockId,
-            ArrayList p_tuList) throws Exception
+    private ArrayList createTus_1(GxmlElement p_gxmlElement, GlobalSightLocale p_sourceLocale,
+            IntHolder p_blockId, ArrayList p_tuList) throws Exception
     {
         if (p_gxmlElement == null)
         {
@@ -838,20 +794,17 @@ class ExtractedFileUpdater
             switch (elem.getType())
             {
                 case GxmlElement.LOCALIZABLE:
-                    tu = createLocalizableSegment(elem, p_sourceLocale,
-                            p_blockId);
+                    tu = createLocalizableSegment(elem, p_sourceLocale, p_blockId);
                     p_tuList.add(tu);
                     break;
 
                 case GxmlElement.TRANSLATABLE:
-                    ArrayList tus = createTranslatableSegments(elem,
-                            p_sourceLocale, p_blockId);
+                    ArrayList tus = createTranslatableSegments(elem, p_sourceLocale, p_blockId);
                     p_tuList.addAll(tus);
                     break;
 
                 case GxmlElement.GS:
-                    p_tuList = createTus_1(elem, p_sourceLocale, p_blockId,
-                            p_tuList);
+                    p_tuList = createTus_1(elem, p_sourceLocale, p_blockId, p_tuList);
                     break;
                 default:
                     break;
@@ -861,8 +814,8 @@ class ExtractedFileUpdater
         return p_tuList;
     }
 
-    private Tu createLocalizableSegment(GxmlElement p_elem,
-            GlobalSightLocale p_sourceLocale, IntHolder p_blockId)
+    private Tu createLocalizableSegment(GxmlElement p_elem, GlobalSightLocale p_sourceLocale,
+            IntHolder p_blockId)
     {
         Long blockId = new Long(p_blockId.dec());
         Integer wordcount = s_INTONE;
@@ -902,8 +855,7 @@ class ExtractedFileUpdater
 
         if (tuType == null)
         {
-            throw new RuntimeException(
-                    "<localizable> must carry 'type' attribute.");
+            throw new RuntimeException("<localizable> must carry 'type' attribute.");
         }
 
         TuImplVo tu = new TuImplVo();
@@ -928,8 +880,7 @@ class ExtractedFileUpdater
     }
 
     private ArrayList createTranslatableSegments(GxmlElement p_elem,
-            GlobalSightLocale p_sourceLocale, IntHolder p_blockId)
-            throws Exception
+            GlobalSightLocale p_sourceLocale, IntHolder p_blockId) throws Exception
     {
         ArrayList tuList = new ArrayList();
 
@@ -982,8 +933,7 @@ class ExtractedFileUpdater
             tu.setLocalizableType('T');
             tu.setPid(blockId.longValue());
 
-            Integer segWordCount = segment
-                    .getAttributeAsInteger(GxmlNames.SEGMENT_WORDCOUNT);
+            Integer segWordCount = segment.getAttributeAsInteger(GxmlNames.SEGMENT_WORDCOUNT);
 
             // Note: Structural edits come in with blockId <= 0 but
             // in-place edits still have their original blockid, so
@@ -996,13 +946,11 @@ class ExtractedFileUpdater
             // separator, extract everything, and fish out the
             // original segments.
 
-            String text = EditUtil.decodeXmlEntities(segment
-                    .toGxmlExcludeTopTags());
+            String text = EditUtil.decodeXmlEntities(segment.toGxmlExcludeTopTags());
 
             if (CATEGORY.isDebugEnabled())
             {
-                System.err.println("Incoming segment (" + datatype + "): "
-                        + text);
+                System.err.println("Incoming segment (" + datatype + "): " + text);
             }
 
             /*
@@ -1021,8 +969,8 @@ class ExtractedFileUpdater
             if (text.equals("\u00a0") || text.equals("&nbsp;"))
             {
                 gxml = fakeGxmlFromText(
-                        "<ph type=\"x-nbspace\" x=\"1\" erasable=\"yes\">&amp;nbsp;</ph>",
-                        0, i + 1);
+                        "<ph type=\"x-nbspace\" x=\"1\" erasable=\"yes\">&amp;nbsp;</ph>", 0,
+                        i + 1);
             }
             // Also catch if somebody marks up whitespace as
             // translatable as this will cause the same NPE to occur
@@ -1031,8 +979,8 @@ class ExtractedFileUpdater
             else if (Text.isBlankOrNbsp(text))
             {
                 gxml = fakeGxmlFromText(
-                        "<ph type=\"x-nbspace\" x=\"1\" erasable=\"yes\">&amp;nbsp;</ph>",
-                        0, i + 1);
+                        "<ph type=\"x-nbspace\" x=\"1\" erasable=\"yes\">&amp;nbsp;</ph>", 0,
+                        i + 1);
             }
             // Ask the extractor to paragraph-extract the segment. If
             // that returns no usable string, the user made an error
@@ -1050,9 +998,8 @@ class ExtractedFileUpdater
                 }
                 else
                 {
-                    throw new Exception("Cannot extract text from input `"
-                            + text + "' (JS encoded: `"
-                            + EditUtil.toJavascript(text) + "') at index "
+                    throw new Exception("Cannot extract text from input `" + text
+                            + "' (JS encoded: `" + EditUtil.toJavascript(text) + "') at index "
                             + (i + 1) + ". Check the edited source page.");
                 }
             }
@@ -1099,8 +1046,8 @@ class ExtractedFileUpdater
         }
         else
         {
-            throw new RuntimeException("Source pages containing dataformat "
-                    + p_datatype + " cannot be updated.");
+            throw new RuntimeException(
+                    "Source pages containing dataformat " + p_datatype + " cannot be updated.");
         }
 
         api.extract();
@@ -1138,8 +1085,7 @@ class ExtractedFileUpdater
     }
 
     /** Fakes a GXML segment without needing to extract the text first. */
-    private String fakeGxmlFromText(String p_gxmlFragment, int p_wordcount,
-            int p_segmentId)
+    private String fakeGxmlFromText(String p_gxmlFragment, int p_wordcount, int p_segmentId)
     {
         StringBuffer result = new StringBuffer();
 
@@ -1159,8 +1105,8 @@ class ExtractedFileUpdater
      */
     private void copySourceTuvToTargets(TuImplVo p_tu) throws Exception
     {
-        TuvImplVo sourceTuv = (TuvImplVo) p_tu.getTuv(getSourcePage()
-                .getGlobalSightLocale().getIdAsLong());
+        TuvImplVo sourceTuv = (TuvImplVo) p_tu
+                .getTuv(getSourcePage().getGlobalSightLocale().getIdAsLong());
 
         ArrayList targetLocales = getTargetLocales();
 
@@ -1190,8 +1136,7 @@ class ExtractedFileUpdater
             TuImplVo tu = (TuImplVo) unmodifiedTus.get(i);
             TuvImplVo tuv = (TuvImplVo) tu.getTuv(localeId);
 
-            TuImplVo origTu = getOriginalTuByPidOrder(tu.getPid(),
-                    tuv.getOrder());
+            TuImplVo origTu = getOriginalTuByPidOrder(tu.getPid(), tuv.getOrder());
 
             unmodifiedTus.set(i, origTu);
         }
@@ -1303,8 +1248,8 @@ class ExtractedFileUpdater
         patchGxmlElements_1(p_root, p_allNewTus, index);
     }
 
-    private void patchGxmlElements_1(GxmlElement p_element,
-            ArrayList p_allNewTus, IntHolder p_index)
+    private void patchGxmlElements_1(GxmlElement p_element, ArrayList p_allNewTus,
+            IntHolder p_index)
     {
         if (p_element == null)
         {
@@ -1325,8 +1270,7 @@ class ExtractedFileUpdater
                     int index = p_index.inc();
                     TuImplVo tu = (TuImplVo) p_allNewTus.get(index);
 
-                    elem.setAttribute(GxmlNames.LOCALIZABLE_BLOCKID,
-                            String.valueOf(tu.getPid()));
+                    elem.setAttribute(GxmlNames.LOCALIZABLE_BLOCKID, String.valueOf(tu.getPid()));
 
                     // honor Diplomat.properties (wordcount_localizables)
                     // and count localizables as 0 if so requested.
@@ -1334,8 +1278,7 @@ class ExtractedFileUpdater
 
                     if (CATEGORY.isDebugEnabled())
                     {
-                        System.err.println("GXML loc " + i + ": "
-                                + elem.toLines());
+                        System.err.println("GXML loc " + i + ": " + elem.toLines());
                     }
                 }
                     break;
@@ -1348,16 +1291,13 @@ class ExtractedFileUpdater
                     Long localeId = getSourceLocaleId();
                     int wordcount = tu.getTuv(localeId).getWordCount();
 
-                    elem.setAttribute(GxmlNames.SEGMENT_SEGMENTID,
-                            String.valueOf(segmentId++));
+                    elem.setAttribute(GxmlNames.SEGMENT_SEGMENTID, String.valueOf(segmentId++));
 
-                    elem.setAttribute(GxmlNames.SEGMENT_WORDCOUNT,
-                            String.valueOf(wordcount));
+                    elem.setAttribute(GxmlNames.SEGMENT_WORDCOUNT, String.valueOf(wordcount));
 
                     if (CATEGORY.isDebugEnabled())
                     {
-                        System.err.println("GXML seg " + i + ": "
-                                + elem.toLines());
+                        System.err.println("GXML seg " + i + ": " + elem.toLines());
                     }
                 }
                     break;
@@ -1370,16 +1310,13 @@ class ExtractedFileUpdater
                     long pid = tu.getPid();
                     int wordcount = getParagraphWordCount(p_allNewTus, p_index);
 
-                    elem.setAttribute(GxmlNames.TRANSLATABLE_BLOCKID,
-                            String.valueOf(pid));
+                    elem.setAttribute(GxmlNames.TRANSLATABLE_BLOCKID, String.valueOf(pid));
 
-                    elem.setAttribute(GxmlNames.TRANSLATABLE_WORDCOUNT,
-                            String.valueOf(wordcount));
+                    elem.setAttribute(GxmlNames.TRANSLATABLE_WORDCOUNT, String.valueOf(wordcount));
 
                     if (CATEGORY.isDebugEnabled())
                     {
-                        System.err.println("GXML trans " + i + ": "
-                                + elem.toLines());
+                        System.err.println("GXML trans " + i + ": " + elem.toLines());
                     }
 
                     // Recurse into the segments.
@@ -1391,8 +1328,7 @@ class ExtractedFileUpdater
                 {
                     if (CATEGORY.isDebugEnabled())
                     {
-                        System.err.println("GXML GS " + i + ": "
-                                + elem.toLines());
+                        System.err.println("GXML GS " + i + ": " + elem.toLines());
                     }
 
                     // Recurse into the deletable region.
@@ -1403,16 +1339,14 @@ class ExtractedFileUpdater
                 case GxmlElement.SKELETON:
                     if (CATEGORY.isDebugEnabled())
                     {
-                        System.err.println("GXML skel " + i + ": "
-                                + elem.toLines());
+                        System.err.println("GXML skel " + i + ": " + elem.toLines());
                     }
                     break;
 
                 default:
                     if (CATEGORY.isDebugEnabled())
                     {
-                        System.err.println("GXML element " + i + ": "
-                                + elem.toLines());
+                        System.err.println("GXML element " + i + ": " + elem.toLines());
                     }
                     break;
             }
@@ -1527,10 +1461,8 @@ class ExtractedFileUpdater
             tpNeeded += template.getTemplateParts().size();
         }
 
-        long maxTp = getPersistenceService()
-                .getSequenceNumber(
-                        tpNeeded,
-                        ExtractedFileImportPersistenceHandler.TEMPLATEPART_SEQUENCENAME);
+        long maxTp = getPersistenceService().getSequenceNumber(tpNeeded,
+                ExtractedFileImportPersistenceHandler.TEMPLATEPART_SEQUENCENAME);
 
         long tpId = maxTp - tpNeeded + 1;
 
@@ -1572,11 +1504,10 @@ class ExtractedFileUpdater
 
                 if (CATEGORY.isDebugEnabled())
                 {
-                    TuvImplVo sourceTuv = (TuvImplVo) tu
-                            .getTuv(getSourceLocaleId());
+                    TuvImplVo sourceTuv = (TuvImplVo) tu.getTuv(getSourceLocaleId());
 
-                    System.err.println("Deleting TU " + tu.getId() + " pid="
-                            + tu.getPid() + ": " + sourceTuv.getGxml());
+                    System.err.println("Deleting TU " + tu.getId() + " pid=" + tu.getPid() + ": "
+                            + sourceTuv.getGxml());
 
                 }
             }
@@ -1673,12 +1604,8 @@ class ExtractedFileUpdater
             }
         }
 
-        throw new RuntimeException(
-                "TU with PID:ORDER "
-                        + p_pid
-                        + ":"
-                        + p_tuvOrder
-                        + " not found. UI didn't mark all segments in paragraph as modified!");
+        throw new RuntimeException("TU with PID:ORDER " + p_pid + ":" + p_tuvOrder
+                + " not found. UI didn't mark all segments in paragraph as modified!");
 
         // return null;
     }
@@ -1693,8 +1620,7 @@ class ExtractedFileUpdater
         Long localeId = getSourceLocaleId();
 
         TuvImplVo newTuv = (TuvImplVo) p_tu.getTuv(localeId);
-        TuImplVo oldTu = getOriginalTuByPidOrder(p_tu.getPid(),
-                newTuv.getOrder());
+        TuImplVo oldTu = getOriginalTuByPidOrder(p_tu.getPid(), newTuv.getOrder());
         TuvImplVo oldTuv = (TuvImplVo) oldTu.getTuv(localeId);
 
         /*
@@ -1712,8 +1638,7 @@ class ExtractedFileUpdater
         if (CATEGORY.isDebugEnabled())
         {
             System.err.println();
-            System.err.println("TU PID " + p_tu.getPid() + " TUV order "
-                    + newTuv.getOrder());
+            System.err.println("TU PID " + p_tu.getPid() + " TUV order " + newTuv.getOrder());
             System.err.println("Old = " + elemOld.toLines());
             System.err.println("New = " + elemNew.toLines());
             System.err.println((result ? "equal" : "NOT equal"));
@@ -1799,8 +1724,7 @@ class ExtractedFileUpdater
     private long getLeverageGroupId()
     {
         SourcePage page = getSourcePage();
-        List ids = ((ExtractedSourceFile) page.getPrimaryFile())
-                .getLeverageGroupIds();
+        List ids = ((ExtractedSourceFile) page.getPrimaryFile()).getLeverageGroupIds();
         return ((Long) ids.get(0)).longValue();
     }
 
@@ -1820,9 +1744,8 @@ class ExtractedFileUpdater
      * in the IDs of the old templates into the newly created ones so the
      * database update is easy.
      */
-    private ArrayList generateTemplates(SourcePage p_page,
-            GxmlRootElement p_gxml, ArrayList p_tus, Map p_oldTemplates)
-            throws Exception
+    private ArrayList generateTemplates(SourcePage p_page, GxmlRootElement p_gxml, ArrayList p_tus,
+            Map p_oldTemplates) throws Exception
     {
         ArrayList result = new ArrayList();
 
@@ -1844,16 +1767,15 @@ class ExtractedFileUpdater
         if (EditUtil.hasPreviewMode(m_state.getDataFormat()))
         {
             template = tg.generatePreview(p_gxml, p_tus);
-            template.setId(getTemplateId(p_oldTemplates,
-                    PageTemplate.TYPE_PREVIEW));
+            template.setId(getTemplateId(p_oldTemplates, PageTemplate.TYPE_PREVIEW));
             result.add(template);
         }
 
         return result;
     }
 
-    private void separateClobTemplateParts(ArrayList p_templates,
-            ArrayList p_nonClob, ArrayList p_clob)
+    private void separateClobTemplateParts(ArrayList p_templates, ArrayList p_nonClob,
+            ArrayList p_clob)
     {
         for (int i = 0, maxi = p_templates.size(); i < maxi; i++)
         {
@@ -1876,8 +1798,7 @@ class ExtractedFileUpdater
         }
     }
 
-    private void separateClobTuvs(ArrayList p_tus, ArrayList p_nonClob,
-            ArrayList p_clob)
+    private void separateClobTuvs(ArrayList p_tus, ArrayList p_nonClob, ArrayList p_clob)
     {
         for (int i = 0, max = p_tus.size(); i < max; i++)
         {
@@ -1909,8 +1830,7 @@ class ExtractedFileUpdater
 
             TuvImplVo tuv = (TuvImplVo) tu.getTuv(localeId);
 
-            tuv.setExactMatchKey(GlobalSightCrc.calculate(tuv
-                    .getExactMatchFormat()));
+            tuv.setExactMatchKey(GlobalSightCrc.calculate(tuv.getExactMatchFormat()));
         }
     }
 
@@ -1933,8 +1853,7 @@ class ExtractedFileUpdater
             args[3] = page.getExternalPageId();
             args[4] = getCapLoginUrl();
 
-            sendEmail(MailerConstants.GXML_EDIT_SUCCESS, EDIT_SUCCESS_MESSAGE,
-                    args);
+            sendEmail(MailerConstants.GXML_EDIT_SUCCESS, EDIT_SUCCESS_MESSAGE, args);
         }
         catch (Throwable ex)
         {
@@ -1957,8 +1876,7 @@ class ExtractedFileUpdater
             args[4] = p_exception.getMessage();
             args[5] = getCapLoginUrl();
 
-            sendEmail(MailerConstants.GXML_EDIT_FAILURE, EDIT_FAILURE_MESSAGE,
-                    args);
+            sendEmail(MailerConstants.GXML_EDIT_FAILURE, EDIT_FAILURE_MESSAGE, args);
         }
         catch (Throwable ex)
         {
@@ -1966,18 +1884,16 @@ class ExtractedFileUpdater
         }
     }
 
-    private void sendEmail(String p_subject, String p_message, String[] p_args)
-            throws Exception
+    private void sendEmail(String p_subject, String p_message, String[] p_args) throws Exception
     {
         L10nProfile l10nProfile = getL10nProfile();
-        Project project = ServerProxy.getProjectHandler().getProjectById(
-                l10nProfile.getProjectId());
+        Project project = ServerProxy.getProjectHandler()
+                .getProjectById(l10nProfile.getProjectId());
         String companyIdStr = String.valueOf(project.getCompanyId());
         String pmName = project.getProjectManagerId();
         User pm = ServerProxy.getUserManager().getUser(pmName);
 
-        ServerProxy.getMailer().sendMailFromAdmin(pm, p_args, p_subject,
-                p_message, companyIdStr);
+        ServerProxy.getMailer().sendMailFromAdmin(pm, p_args, p_subject, p_message, companyIdStr);
     }
 
     private String getCapLoginUrl() throws Exception
@@ -2050,17 +1966,14 @@ class ExtractedFileUpdater
 
         if (CATEGORY.isDebugEnabled())
         {
-            CATEGORY.debug("Number of template parts = " + parts.size()
-                    + ", number of tus = " + p_tus.size()
-                    + " (#parts should be #tus + 1)");
+            CATEGORY.debug("Number of template parts = " + parts.size() + ", number of tus = "
+                    + p_tus.size() + " (#parts should be #tus + 1)");
         }
 
         if (parts.size() < p_tus.size())
         {
-            throw new Exception(
-                    "Page "
-                            + m_state.getSourcePage().getId()
-                            + " contains more template parts than TUs! Cannot recompute PIDs.");
+            throw new Exception("Page " + m_state.getSourcePage().getId()
+                    + " contains more template parts than TUs! Cannot recompute PIDs.");
         }
 
         long pid = 1;
@@ -2073,9 +1986,8 @@ class ExtractedFileUpdater
 
             if (part.getTuId() != tu.getId())
             {
-                throw new Exception("Template part " + part.getId()
-                        + " points to TU " + part.getTuId()
-                        + " but the current TU is " + tu.getId() + ".");
+                throw new Exception("Template part " + part.getId() + " points to TU "
+                        + part.getTuId() + " but the current TU is " + tu.getId() + ".");
             }
 
             // Remember previous TU, for first tu use the same one.
@@ -2090,10 +2002,8 @@ class ExtractedFileUpdater
             // line break (\n). I hope that is true all the time since
             // my check is very specific.
             String skeleton = part.getSkeleton();
-            if ((skeleton.length() == 0 || (skeleton.length() == 1 && skeleton
-                    .equals("\n")))
-                    && !tu.isLocalizable()
-                    && !prevTu.isLocalizable())
+            if ((skeleton.length() == 0 || (skeleton.length() == 1 && skeleton.equals("\n")))
+                    && !tu.isLocalizable() && !prevTu.isLocalizable())
             {
                 // subsequent seg in same para, set to pid of first seg
                 tu.setPid(pid - 1);
@@ -2158,8 +2068,8 @@ class ExtractedFileUpdater
             // Collection pages = getPersistenceService().executeNamedQuery(
             // PageQueryNames.SOURCE_PAGE_BY_ID, queryArgs, false);
             // return (SourcePage) pages.iterator().next();
-            return (SourcePage) HibernateUtil.get(SourcePage.class, m_state
-                    .getSourcePage().getIdAsLong());
+            return (SourcePage) HibernateUtil.get(SourcePage.class,
+                    m_state.getSourcePage().getIdAsLong());
         }
         catch (Exception e)
         {
@@ -2222,8 +2132,7 @@ class ExtractedFileUpdater
 
     private Vector getExcludedItems()
     {
-        return getL10nProfile().getTranslationMemoryProfile()
-                .getJobExcludeTuTypes();
+        return getL10nProfile().getTranslationMemoryProfile().getJobExcludeTuTypes();
     }
 
     private Job getJob()
@@ -2244,9 +2153,8 @@ class ExtractedFileUpdater
             {
                 TuvJdbcQuery query = new TuvJdbcQuery(conn);
 
-                m_state.setOriginalTus(new ArrayList(query
-                        .getTusBySourcePageIdAndLocales(getSourcePage(),
-                                getTargetLocales())));
+                m_state.setOriginalTus(new ArrayList(
+                        query.getTusBySourcePageIdAndLocales(getSourcePage(), getTargetLocales())));
 
                 conn.commit();
             }
@@ -2275,9 +2183,9 @@ class ExtractedFileUpdater
 
     private ArrayList getExportTemplateParts() throws Exception
     {
-        return new ArrayList(m_pageManager.getTemplatePartsForSourcePage(
-                m_state.getSourcePage().getIdAsLong(),
-                PageTemplate.getTypeAsString(PageTemplate.TYPE_EXPORT)));
+        return new ArrayList(
+                m_pageManager.getTemplatePartsForSourcePage(m_state.getSourcePage().getIdAsLong(),
+                        PageTemplate.getTypeAsString(PageTemplate.TYPE_EXPORT)));
     }
 
     //
@@ -2299,23 +2207,20 @@ class ExtractedFileUpdater
     {
         ArrayList templates = new ArrayList(p_templates.values());
 
-        PersistenceCommand cmd = new DeleteTemplatePartPersistenceCommand(
-                templates);
+        PersistenceCommand cmd = new DeleteTemplatePartPersistenceCommand(templates);
         m_state.addPersistenceCommand(cmd);
     }
 
     /**
      * Create persistence commands to persist all changes in one go.
      */
-    private void createUpdateCommands(ArrayList p_templates,
-            ArrayList p_unmodifiedTus, ArrayList p_modifiedTus,
-            ArrayList p_localizableTus, ArrayList p_allTus)
+    private void createUpdateCommands(ArrayList p_templates, ArrayList p_unmodifiedTus,
+            ArrayList p_modifiedTus, ArrayList p_localizableTus, ArrayList p_allTus)
     {
         // Template parts get inserted.
         ArrayList nonClobTemplateParts = new ArrayList();
         ArrayList clobTemplateParts = new ArrayList();
-        separateClobTemplateParts(p_templates, nonClobTemplateParts,
-                clobTemplateParts);
+        separateClobTemplateParts(p_templates, nonClobTemplateParts, clobTemplateParts);
 
         // Modified (new) TUs get inserted, nonClobTUVs get inserted.
         ArrayList nonClobTuvs = new ArrayList();
@@ -2331,10 +2236,9 @@ class ExtractedFileUpdater
         // ALL TUVs have their order updated.
         ArrayList allTuvs = getAllTuvs(p_allTus);
 
-        PersistenceCommand cmd = new UpdateGxmlPersistenceCommand(
-                nonClobTemplateParts, clobTemplateParts, p_modifiedTus,
-                nonClobTuvs, clobTuvs, nonClobLocTuvs, clobLocTuvs, p_allTus,
-                allTuvs);
+        PersistenceCommand cmd = new UpdateGxmlPersistenceCommand(nonClobTemplateParts,
+                clobTemplateParts, p_modifiedTus, nonClobTuvs, clobTuvs, nonClobLocTuvs,
+                clobLocTuvs, p_allTus, allTuvs);
 
         long jobId = m_state.getSourcePage().getJobId();
         ((UpdateGxmlPersistenceCommand) cmd).setJobId(jobId);

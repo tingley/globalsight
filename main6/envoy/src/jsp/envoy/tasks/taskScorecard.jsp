@@ -6,7 +6,8 @@
       com.globalsight.config.UserParamNames,      
       com.globalsight.config.UserParameter,
       com.globalsight.cxe.entity.fileprofile.FileProfile,
-      com.globalsight.everest.comment.CommentFile,      
+      com.globalsight.everest.comment.CommentFile,
+      com.globalsight.everest.comment.CommentManagerLocal,      
       com.globalsight.everest.comment.CommentManager,
       com.globalsight.everest.company.CompanyThreadLocal,
       com.globalsight.everest.company.CompanyWrapper,
@@ -24,6 +25,7 @@
       com.globalsight.everest.permission.Permission,
       com.globalsight.everest.permission.PermissionSet,
       com.globalsight.everest.secondarytargetfile.SecondaryTargetFile,
+      com.globalsight.everest.webapp.pagehandler.administration.comment.CommentUploadHandler,
       com.globalsight.everest.servlet.util.ServerProxy,
       com.globalsight.everest.servlet.util.SessionManager,
       com.globalsight.everest.taskmanager.Task,
@@ -45,6 +47,8 @@
       com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler,  
       com.globalsight.everest.webapp.pagehandler.administration.company.Select,    
       com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
+      com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper,
+      com.globalsight.everest.projecthandler.MachineTranslationProfile,
       com.globalsight.everest.qachecks.QACheckerHelper,
       com.globalsight.everest.qachecks.DITAQACheckerHelper,
       com.globalsight.everest.workflow.Activity,
@@ -352,6 +356,14 @@ private static String toggleBgColor(int p_rowNumber)
     TaskImpl taskImpl = (TaskImpl)theTask;
     int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
     int isUploaded = taskImpl.getIsReportUploaded();
+    String labelActivitiesCommentUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_comment_upload_check");
+    int isActivityCommentUploadCheck = taskImpl.getIsActivityCommentUploadCheck();
+    int isActivityCommentUploaded = 0;
+    ArrayList<CommentFile> cf =  ServerProxy.getCommentManager().getActivityCommentAttachments(theTask);
+    if(cf != null && cf.size()>0)
+    {
+        isActivityCommentUploaded =1;
+    }
     WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;
@@ -838,6 +850,19 @@ private static String toggleBgColor(int p_rowNumber)
     List<Select> scorecardCategories = (List<Select>)sessionMgr.getAttribute("scorecardCategories");
     boolean isScored = (Boolean)sessionMgr.getAttribute("isScored");
     int categoryNum = scorecardMap.keySet().size();
+
+    String labelLeverageMT = bundle.getString("lb_leverage_mt");
+
+    String leverageMTUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
+        "=leverageMT" + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
+    
+	boolean hasMtProfile = false;
+    MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileByL10nProfile(
+            theJob.getL10nProfile(), workflowImpl.getTargetLocale());
+    if (mtProfile != null && mtProfile.isActive())
+    {
+        hasMtProfile = true;
+    }
 %>
 <HTML>
 <HEAD>
@@ -1084,10 +1109,6 @@ function doUnload()
 
     w_editor = null;
     w_updateLeverage = null;
-}
-
-function recreateGSEdition(urlSent) {
-    location.replace(urlSent);
 }
 
 function submitDtpForm(form, buttonClicked, linkParam) {

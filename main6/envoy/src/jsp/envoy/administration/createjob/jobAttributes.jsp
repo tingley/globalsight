@@ -262,7 +262,7 @@ function showUploadfileDialog(attributeName)
           else
           {
         	  initFileDialog(attributeName, returnData);
-        	  $("#uploadFormDiv").dialog({width: 600, height: 400, resizable:false});
+        	  $("#uploadFormDiv").dialog({width: 500, height: 400, resizable:false});
           }
 	   },
    	   error:function(error)
@@ -503,7 +503,7 @@ function showCalendar(attributeId) {
 	    <tr>
 	      <td colspan="2">
 	          <c:out value="${lb_all_files}"/>:
-	          <select name="allFiles" multiple="multiple" id="allFiles" size="15" style="width: 100%;">
+	          <select name="allFiles" multiple="multiple" id="allFiles" size="15" style="width: 400px;">
 			  </select>
 			  <div align="right">
 			  <input type="button" name="deleteFiles" id="deleteFiles" onclick="deleteSelectFiles()" value="<c:out value="${lb_delete}"/>">

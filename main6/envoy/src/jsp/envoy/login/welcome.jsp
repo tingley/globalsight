@@ -237,9 +237,6 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.LOCALE_PAIRS_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=localePairsUrl%>"><%=bundle.getString("lb_locale_pairs")%></A><BR>
         </amb:permission>
-        <amb:permission name="<%=Permission.GSEDITION_VIEW%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=gsEditionUrl%>"><%=bundle.getString("lb_gseditions")%></A><BR> 
-        </amb:permission>
         <amb:permission name="<%=Permission.ACTIVITY_TYPES_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=activityTypesUrl%>"><%=bundle.getString("lb_activity_types")%></A><BR>
         </amb:permission>
@@ -316,15 +313,6 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.SUPPORT_FILES_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=glossariesUrl%>"><%=bundle.getString("lb_supportFiles")%></A><BR>
         </amb:permission>
-        <%
-            if (b_snippets) {
-        %>
-        <amb:permission name="<%=Permission.SNIPPET_IMPORT%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=snippetImportUrl%>"><%=bundle.getString("lb_snippet_import")%></A><BR>
-        </amb:permission>
-        <%
-            }
-        %>
         <amb:permission name="<%=Permission.CVS_Servers%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=cvsServerUrl%>"><%=bundle.getString("lb_cvsservers")%></A><BR>
         </amb:permission>
@@ -391,21 +379,6 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.SEGMENTATIONRULE_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=segmentationRulesUrl%>"><%=bundle.getString("lb_segmentation_rules")%></A><BR>
         </amb:permission>
-        <amb:permission name="<%=Permission.SGMLRULE_VIEW%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=sgmlRulesUrl%>"><%=bundle.getString("lb_sgml_rules") /*"SGML Rules"*/%></A><BR>
-        </amb:permission>
-        <amb:permission name="<%=Permission.IMPORT%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=importUrl%>"><%=bundle.getString("lb_import")%></A><BR>
-        </amb:permission>
-        <%
-            if (b_customerAccessGroup) {
-        %>
-        <amb:permission name="<%=Permission.CUSTOMER_UPLOAD%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=customerUploadUrl%>"><%=bundle.getString("lb_upload")%></A><BR>
-        </amb:permission>
-        <%
-            }
-        %>
         <%
             if (b_database) {
         %>
@@ -430,23 +403,8 @@ function openWizardWindow(url)
         <%
             }
         %>
-        <%
-            if (b_corpusAligner) {
-        %>
-        <amb:permission name="<%=Permission.CORPUS_ALIGNER_VIEW%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=corpusAlignerUrl%>"><%=bundle.getString("lb_corpus_aligner")%></A><BR>
-        </amb:permission>
-        <%
-            }
-        %>
         <amb:permission name="<%=Permission.CVS_OPERATE%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=cvsJobUrl%>"><%=bundle.getString("lb_cvs_job")%></A><BR>
-        </amb:permission>
-        <amb:permission name="<%=Permission.RSS_READER%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=rssReaderUrl%>"><%=bundle.getString("lb_rss_reader")%></A><BR>
-        </amb:permission>
-        <amb:permission name="<%=Permission.CREATE_JOB%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=createJobUrl%>"><%=bundle.getString("lb_create_job")%> (deprecated)</A><BR>
         </amb:permission>
         <amb:permission name="<%=Permission.CREATE_JOB_NO_APPLET%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=createZipJobUrl%>"><%=bundle.getString("lb_create_job_without_java")%></A><BR>
@@ -456,9 +414,6 @@ function openWizardWindow(url)
         </amb:permission>
         <amb:permission name="<%=Permission.ELOQUA%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=eloquaUrl%>"><%=bundle.getString("lb_eloqua")%></A><BR>
-        </amb:permission>
-        <amb:permission name="<%=Permission.MIND_TOUCH%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=mindtouchUrl%>"><%=bundle.getString("lb_mindtouch")%></A><BR>
         </amb:permission>
         <amb:permission name="<%=Permission.GIT_CONNECTOR%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=gitconnectorUrl%>"><%=bundle.getString("lb_git_connector")%></A><BR>

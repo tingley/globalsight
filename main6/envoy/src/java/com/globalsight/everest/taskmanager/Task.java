@@ -644,6 +644,8 @@ public interface Task extends WorkObject
 
 	public int getIsReportUploaded();
 
+	public int getIsActivityCommentUploadCheck();
+
     public void setQualityAssessment(String qualityAssessment);
     
     public String getQualityAssessment();
@@ -652,5 +654,4 @@ public interface Task extends WorkObject
     
     public String getMarketSuitability();
     
-
 }

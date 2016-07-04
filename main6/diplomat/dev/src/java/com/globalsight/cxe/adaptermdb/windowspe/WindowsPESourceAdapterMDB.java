@@ -16,30 +16,13 @@
  */
 package com.globalsight.cxe.adaptermdb.windowspe;
 
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
-import javax.jms.MessageListener;
-
 import com.globalsight.cxe.adapter.BaseAdapter;
 import com.globalsight.cxe.adapter.windowspe.WindowsPEAdapter;
 import com.globalsight.cxe.adaptermdb.BaseAdapterMDB;
-import com.globalsight.cxe.adaptermdb.EventTopicMap;
-import com.globalsight.everest.util.jms.JmsHelper;
 
-@MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
-{
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
-                + EventTopicMap.JMS_PREFIX
-                + EventTopicMap.FOR_WINPE_SOURCE_ADAPTER),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE) })
-@TransactionManagement(value = TransactionManagementType.BEAN)
 public class WindowsPESourceAdapterMDB extends BaseAdapterMDB
 {
-    private static final long serialVersionUID = -2235227757233029769L;
-    private static String ADAPTER_NAME = WindowsPESourceAdapterMDB.class
-            .getName();
+    private static String ADAPTER_NAME = WindowsPESourceAdapterMDB.class.getName();
 
     protected String getAdapterName()
     {

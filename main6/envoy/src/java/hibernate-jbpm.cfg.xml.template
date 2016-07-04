@@ -25,7 +25,7 @@
     <!-- mysql connection properties -->
     <property name="hibernate.dialect">org.hibernate.dialect.MySQLInnoDBDialect</property>
     <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
-    <property name="hibernate.connection.url">jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%</property>
+    <property name="hibernate.connection.url">jdbc:mysql://%%database_server%%:%%database_port%%/%%database_instance_name%%?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false</property>
     <property name="hibernate.connection.username">%%database_username%%</property>
     <property name="hibernate.connection.password">%%database_password%%</property>
 

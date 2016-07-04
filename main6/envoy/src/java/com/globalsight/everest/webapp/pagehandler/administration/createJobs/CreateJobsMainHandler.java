@@ -74,7 +74,6 @@ import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.persistence.fileprofile.FileProfileEntityException;
 import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.cxe.util.fileImport.FileImportRunnable;
-import com.globalsight.cxe.util.fileImport.FileImportUtil;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
@@ -853,25 +852,14 @@ public class CreateJobsMainHandler extends PageHandler
 
                 String key = jobName + fileName + ++count;
                 CxeProxy.setTargetLocales(key, locs);
-                // If use JMS
-                if (FileImportUtil.USE_JMS)
-                {
-                    CxeProxy.importFromFileSystem(fileName, String.valueOf(job.getId()), jobName,
-                            fileProfileId, pageCount, count, 1, 1, Boolean.TRUE, Boolean.FALSE,
-                            CxeProxy.IMPORT_TYPE_L10N, exitValue, priority);
-                }
-                // If not use JMS, we control the concurrent threads number
-                else
-                {
-                    CxeMessage cxeMessage = CxeProxy.formCxeMessageType(fileName,
-                            String.valueOf(job.getId()), jobName, fileProfileId, pageCount, count,
-                            1, 1, Boolean.TRUE, Boolean.FALSE, CxeProxy.IMPORT_TYPE_L10N, exitValue,
-                            priority, String.valueOf(job.getCompanyId()));
-                    cxeMsgs.add(cxeMessage);
-                }
+
+                CxeMessage cxeMessage = CxeProxy.formCxeMessageType(fileName,
+                        String.valueOf(job.getId()), jobName, fileProfileId, pageCount, count, 1, 1,
+                        Boolean.TRUE, Boolean.FALSE, CxeProxy.IMPORT_TYPE_L10N, exitValue, priority,
+                        String.valueOf(job.getCompanyId()));
+                cxeMsgs.add(cxeMessage);
             }
 
-            // If not use JMS
             if (cxeMsgs.size() > 0)
             {
                 ExecutorService pool = Executors.newFixedThreadPool(100);

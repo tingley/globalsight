@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="2286" MadCap:lastWidth="577">
+    <head><title>New Sample Set Method Wizard - Describe Standard Injections Page</title>
+    </head>
+    <body>
+        <h1>New Sample 
+ Set Method wizard – Describe Standard Injections page</h1>
+        <p class="para" MadCap:conditions="Primary.Empower">Use this page of the Sample Set Method 
+ Wizard to describe your narrow standard injections for a GPC or GPCV sample 
+ set. You define the number of narrow or broad standard vials, the number 
+ of injections from each vial, the injection volume, the run time, the 
+ method set to be used, and so on. </p>
+        <p class="para" MadCap:conditions="Primary.Breeze">Use this page of the Sample Set Method 
+ Wizard to describe your narrow standard injections for a GPC sample set. 
+ You define the number narrow or broad of standard vials, the number of 
+ injections from each vial, the injection volume, the run time, the method 
+ set to be used, and so on. </p>
+        <h2>Inject narrow standards</h2>
+        <p class="para" MadCap:conditions="Primary.Empower">Specifies the use of narrow standards 
+ in your GPC or GPCV sample set. Empower software uses narrow integration 
+ parameters to detect and integrate the peak(s) in the chromatogram, uses 
+ viscosity narrow integration parameters to integrate the viscometer channel 
+ data (GPCV only), incorporates data from the integration results and sample 
+ information into a calibration curve, and creates a viscosity law plot 
+ for the calibration curve (GPCV only). When you enable this check box, 
+ the remaining fields and controls in this page are activated. </p>
+        <p class="para" MadCap:conditions="Primary.Breeze">Specifies the use of narrow standards 
+ in your GPC sample set. Breeze software uses narrow integration parameters 
+ to detect and integrate the peak(s) in the chromatogram and incorporates 
+ data from the integration results and sample information into a calibration 
+ curve. When you enable this check box, the remaining fields and controls 
+ in this page are activated.</p>
+        <h2>Inject broad standards</h2>
+        <p class="para" MadCap:conditions="Primary.Empower"><span MadCap:conditions="Primary.Empower">Specifies 
+ the use of broad standards in your GPC or GPCV sample set. Empower software 
+ uses broad integration parameters to detect and integrate the peak(s) 
+ in the chromatogram, uses viscosity broad integration parameters to integrate 
+ the viscometer channel data (GPCV only), incorporates data from the integration 
+ results and sample information into a calibration curve, and creates a 
+ viscosity law plot for the calibration curve (GPCV only). When you enable 
+ this check box, the remaining fields and controls in this page are activated. 
+ </span>
+        </p>
+        <p class="para" MadCap:conditions="Primary.Breeze">Specifies the use of broad standards in 
+ your GPC sample set. Breeze software uses broad integration parameters 
+ to detect and integrate the peak(s) in the chromatogram and incorporates 
+ data from the integration results and sample information into a calibration 
+ curve. When you enable this check box, the remaining fields and controls 
+ in this page are activated. </p>
+        <h2>Standard information section</h2>
+        <p class="para">Use this section to define information about your standards 
+ injections.</p>
+        <h3>Number of narrow standards</h3>
+        <p class="para">Specifies the number of narrow standard vials for the sample 
+ set. Valid entries: 1 to 99.</p>
+        <h3>Number of broad standards</h3>
+        <p class="para">Specifies the number of broad standard vials for the sample 
+ set. Valid entries: 1 to 99.</p>
+        <h3>Number of injections per vial</h3>
+        <p class="para">Specifies the number of injections from each standard vial. 
+ Valid entries: 1 to 99.</p>
+        <h3>Injection volume</h3>
+        <p class="para" MadCap:conditions="Primary.Empower">Specifies the volume in microliters of 
+ the injected sample, valid entries are 0.0 to 29999.9. Note the following 
+ considerations:</p>
+        <ul>
+            <li style="font-size: 9pt;" class="listbull" MadCap:conditions="Primary.Empower">For Waters autosamplers, 
+ small injector loops may omit the maximum volume. Ensure hardware configuration 
+ is compatible with your desired injector size.</li>
+            <li style="font-size: 9pt;" class="listbull" MadCap:conditions="Primary.Empower">For Agilent 1100 autosamplers, 
+ the maximum injection volume is the seat capillary volume, plus the syringe 
+ size. Ensure that the hardware configuration is specified correctly in 
+ your method.</li>
+        </ul>
+        <p class="para" MadCap:conditions="Primary.Breeze">Specifies the volume in microliters of 
+ the injected sample, valid entries are 0.0 to 29999.9. </p>
+        <p class="para" MadCap:conditions="Primary.Breeze"><span class="emphasisbold">Tip:</span> For 
+ Waters autosamplers, small injector loops may omit the maximum volume. 
+ Ensure hardware configuration is compatible with your desired injector 
+ size.</p>
+        <h3>Run time</h3>
+        <p class="para">Specifies the length of time in minutes to collect data for 
+ the standard.</p>
+        <p class="para"><span class="emphasisbold">Valid entries:</span> 
+ 0.01 to 655.90 minutes</p>
+        <h3>k</h3>
+        <p class="para">Specifies the optional Mark-Houwink constant, k, where Log 
+ k is the intercept of the viscosity law plot. Enter a value in this field 
+ if you specified Universal Calibration as a calibration technique when 
+ you created your processing method. Valid entries are 0.000000000 to 2.000000000. 
+ Leave this field set to the default of 1.000000000 if you specified Relative 
+ Calibration as a calibration technique in your processing method.</p>
+        <p class="para"><span class="emphasisbold">Tip:</span> If you decide to run 
+ multiple narrow standards in a vial, make sure that you enter the same 
+ k value for each standard in a sample vial.</p>
+        <h3>Alpha</h3>
+        <p class="para">Specifies the optional Mark-Houwink constant, alpha, which 
+ is the slope of the viscosity law plot. Enter a value in this field if 
+ you specified Universal Calibration as a calibration technique when you 
+ created your processing method. Valid entries are -1.000000 to 2.000000. 
+ Leave this field set to the default of 0.000000 if you specified Relative 
+ Calibration as a calibration technique in your processing method.</p>
+        <h3>Options button</h3>
+        <p class="para">Displays the Enter Optional Information page, where you can 
+ specify a Sample Weight factor, a Dilution factor, a Data Start time and/or 
+ a Next Injection Delay time.</p>
+        <h2>Method set section</h2>
+        <p class="para">Use this section to define or create the method set used 
+ to acquire, process, and/or report data for your standards.</p>
+        <h3>Select</h3>
+        <p class="para" MadCap:conditions="Primary.Empower">Specifies the method set used to acquire, 
+ process, and/or report data for the standards. Select the appropriate 
+ method set from the drop-down list. If you are using the Pro interface, 
+ click Create New if you need to create a new method set.</p>
+        <p class="para" MadCap:conditions="Primary.Breeze">Specifies the method set used to acquire, 
+ process, and/or report data for the standards. Select the appropriate 
+ method set from the drop-down list. </p>
+        <h3 MadCap:conditions="Primary.Empower">Create New button (Pro interface only)</h3>
+        <p class="para" MadCap:conditions="Primary.Empower">Displays the first page of the New Method 
+ Set Wizard, where Empower software interactively leads you through the 
+ steps to create a new method set.</p>
+        <p class="para">After making your selections, click Next to advance to the 
+ next wizard page.</p>
+    </body>
+</html>

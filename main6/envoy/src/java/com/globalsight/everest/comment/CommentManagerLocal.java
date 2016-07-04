@@ -158,6 +158,43 @@ public class CommentManagerLocal implements CommentManager
     }
 
     /**
+     * Update activity comment upload status to finished.
+     */
+    @SuppressWarnings("unchecked")
+    public ArrayList<CommentFile> getActivityCommentAttachments(Task p_task)
+            throws CommentException, RemoteException
+    {
+        ArrayList<CommentFile> commentFiles = new ArrayList<CommentFile>();
+        ArrayList<String> commentIds = getActivityCommentIds(p_task);
+        for (String commentId : commentIds)
+        {
+            commentFiles.addAll(getCommentReferences(commentId,
+                    WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS, true));
+            commentFiles.addAll(getCommentReferences(commentId,
+                    WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS, true));
+        }
+        return commentFiles;
+    }
+
+    /**
+     * Gets activity comment ids by searchWithSql().
+     */
+    private ArrayList<String> getActivityCommentIds(Task p_task)
+    {
+        ArrayList<String> arr = new ArrayList<String>(); 
+        String sql = "select ID from comments where COMMENT_OBJECT_ID = :COID"
+                + " and COMMENT_OBJECT_TYPE='T'";
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("COID", p_task.getId());
+        List<?> list =  HibernateUtil.searchWithSql(sql, map);
+        for(Object s : list)
+        {
+            arr.add(s.toString());
+        }
+        return arr;
+    }
+
+    /**
      * Deletes the specified comment reference file.
      */
     public void changeToRestrict(CommentFile p_file, String tmpDir)

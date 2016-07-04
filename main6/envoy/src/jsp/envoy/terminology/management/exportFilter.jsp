@@ -48,7 +48,8 @@ String lb_ok = bundle.getString("lb_ok");
 <SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT src="/globalsight/envoy/terminology/management/objects_js.jsp"></SCRIPT>
 <SCRIPT>
-var g_args;
+var o=window.opener;
+var g_args = o.advancedFilterParamets;
 var g_definedFields;
 var g_displayedFields;
 var g_oldLevel;
@@ -525,13 +526,7 @@ function doClose(ok)
   if (ok == true)
   {
     var result = getFilterConditions();
-    g_args.getWindow().SetFilterConditions(result);
-
-    window.returnValue = null;
-  }
-  else
-  {
-    window.returnValue = null;
+    o.SetFilterConditions(result);
   }
 
   window.close();
@@ -539,8 +534,6 @@ function doClose(ok)
 
 function doLoad()
 {
-  g_args = window.dialogArguments;
-
   initLevels();
   initFields();
 

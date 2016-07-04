@@ -241,7 +241,8 @@ public class StandardMerger implements IFormatNames
         // "&nbsp;" with " ", it will cause HTML formatting error.
         // also do not fix &nbsp; for xml because of GBS-3577
         if (m_cxeMessage.getMessageType().getValue() != CxeMessageType.HTML_LOCALIZED_EVENT
-                && m_cxeMessage.getMessageType().getValue() != CxeMessageType.XML_LOCALIZED_EVENT)
+                && m_cxeMessage.getMessageType().getValue() != CxeMessageType.XML_LOCALIZED_EVENT
+                && m_cxeMessage.getMessageType().getValue() != CxeMessageType.JSON_LOCALIZED_EVENT)
         {
             // this follows the original logic.
             p_mergeResult = fixGxml(p_mergeResult, "&nbsp;", " ");

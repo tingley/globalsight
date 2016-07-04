@@ -77,6 +77,10 @@ public class BaseTestCase
     public String getProperty(String propertyName) {
         return ConfigUtil.getProperty(propertyName);
     }
+    public String getProperty(String propertiesFiles, String propertyName) {
+        return ConfigUtil.getProperty(propertiesFiles,propertyName);
+    }
+    
 
     @BeforeSuite
     public void beforeSuite() {

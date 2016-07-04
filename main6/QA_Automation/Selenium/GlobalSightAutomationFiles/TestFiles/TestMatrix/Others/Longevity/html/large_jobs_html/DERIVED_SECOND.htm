@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1454" MadCap:lastWidth="571">
+    <head><title>Derived Channels - Second Channel Tab</title>
+    </head>
+    <body>
+        <h1>Derived Channels 
+ - Second channel tab</h1>
+        <p class="para">Use this tab to define the right side of the derivation equation 
+ for the second data channel. A description of the data channel appears 
+ at the bottom of the tab.</p>
+        <h2>Operator</h2>
+        <p>Specifies the mathematical function that combines the two data channels. 
+ If no second channel or constant is specified, set this parameter to None. 
+ When using a two-channel viscometer, set this parameter to (P1+2K*P2+B)/(P1–2K*P2+B).</p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ None, +, –, x, <span style="font-family: Symbol;">¸</span>, or (P1+2K*P2+B)/(P1–2K*P2+B).</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ None.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ For details on calculating first and second viscometer constants for a 
+ two-channel viscometer, click.</p>
+        <h2>Constant</h2>
+        <p class="para">Specifies the mathematical constant to apply to the second 
+ data channel (right side of the equation).</p>
+        <p class="para"><span class="emphasisbold">Entries:</span> 
+ –9999.999 to 9999.999 mV.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 1.000 mV.</p>
+        <p class="para">You can add a data offset to a single channel by entering 
+ an operator and a constant in the Second Channel tab and leaving the Channel 
+ list empty (no second channel selected). For example, to subtract a constant 
+ of 123.3&#160;mV from the first data channel (data channel 1), select 
+ <span style="font-weight: bold;">–</span> from the Operator list, enter 
+ 123.3 in the Constant text box, and leave the Channel list empty for the 
+ second data channel. The software subtracts 123.3 mV from each data point 
+ in the first channel to produce the resulting derived channel. </p>
+        <h2>Channel</h2>
+        <p class="para">Specifies the type of data channel selected from the list, 
+ which includes 2D channels, PDA: Single Wavelength (see below), and MS: 
+ Single Mass (see below). You can also enter the name of a named channel 
+ using the exact spelling of the name. Default: Blank.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ If you enter a channel name instead of selecting one from the list, it 
+ must be the name of an existing derived channel or one you derived and 
+ then saved. You cannot extract a chromatogram without a derived channel.</p>
+        <h3>PDA: single wavelength</h3>
+        <p class="para">Allows you to add, subtract, multiply, or divide the PDA 
+ extraction type specified in the First (Only) Channel tab by a second 
+ single wavelength from the same PDA data file. When you select PDA: Single 
+ Wavelength in the Second Channel tab, a Wavelength text box appears where 
+ you enter a wavelength value.</p>
+        <h3>MS: single mass</h3>
+        <p class="para">Allows you to add, subtract, multiply, or divide the first 
+ MS channel by a second single mass from the same MS data file. Only single 
+ mass extractions are allowed in the second channel portion of derived 
+ channels. You must complete the following entries.</p>
+        <p class="para"><span class="emphasisbold">Mass:</span> 
+ Specifies the mass to extract.</p>
+        <p class="para"><span class="emphasisbold">Peak Separation:</span> 
+ Defines a tolerance range or "window" that is used when extracting 
+ a chromatogram from a 3D MS data set. The values of the window are defined 
+ as:</p>
+        <ul>
+            <li class="listbull">Upper range: all masses 
+ &lt; [mass + (0.5 x peak separation value)]</li>
+            <li class="listbull">Lower range: all masses 
+ <span style="font-family: Symbol;">³</span> [mass – (0.5 x peak separation value)] </li>
+        </ul>
+        <p class="para">The intensity value used in the chromatogram is the sum of 
+ all peaks in the window (greater than or equal to the lower value and 
+ less than the upper value). If no peaks fall in the range, the intensity 
+ value is 0.</p>
+        <p class="ind-Normal">The peak separation value is expressed in daltons. 
+ The default is 1.0 daltons. </p>
+        <h2>From injection labeled</h2>
+        <p class="para">Specifies the labeled injection associated with the second 
+ data channel. You must enter the exact name of the labeled injection in 
+ the field to the right of the check box. You label a channel using the 
+ Label column of the Samples table in Run Samples or the Sample Set Method 
+ Editor (pre-acquisition), or the Alter Sample window (post-acquisition). 
+ </p>
+    </body>
+</html>

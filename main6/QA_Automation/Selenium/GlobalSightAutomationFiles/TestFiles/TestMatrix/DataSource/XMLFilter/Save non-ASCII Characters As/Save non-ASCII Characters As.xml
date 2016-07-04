@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dita>
+		<p>See also <href><book name="Book One"><i>Open File</i></book></href></p>
+		<p>See characters <href><book name="Book One"><i>é À à è</i></book></href></p>
+
+</dita>

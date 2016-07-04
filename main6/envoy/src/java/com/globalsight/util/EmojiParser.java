@@ -40,8 +40,7 @@ public class EmojiParser
         String result = input;
         for (Emoji emoji : EmojiManager.getAll())
         {
-            result = result.replace(emoji.getUnicode(), ":"
-                    + emoji.getAliases().get(0) + ":");
+            result = result.replace(emoji.getUnicode(), ":" + emoji.getAliases().get(0) + ":");
         }
         return result;
     }
@@ -76,8 +75,7 @@ public class EmojiParser
         // Replace the html
         for (Emoji emoji : EmojiManager.getAll())
         {
-            result = result.replace(emoji.getHtmlHexidecimal(),
-                    emoji.getUnicode());
+            result = result.replace(emoji.getHtmlHexidecimal(), emoji.getUnicode());
             result = result.replace(emoji.getHtml(), emoji.getUnicode());
         }
 
@@ -87,13 +85,11 @@ public class EmojiParser
     protected static List<String> getAliasesCandidates(String input)
     {
         List<String> candidates = new ArrayList<String>();
-        String regex = "(?<=:)\\+?\\w+(?=:)";
-        Pattern pattern = Pattern.compile(regex);
+        Pattern pattern = Pattern.compile(":(\\S+?):");
         Matcher matcher = pattern.matcher(input);
-        matcher = matcher.useTransparentBounds(true);
         while (matcher.find())
         {
-            candidates.add(matcher.group());
+            candidates.add(matcher.group(1));
         }
         return candidates;
     }
@@ -142,8 +138,7 @@ public class EmojiParser
         String result = input;
         for (Emoji emoji : EmojiManager.getAll())
         {
-            result = result.replace(emoji.getUnicode(),
-                    emoji.getHtmlHexidecimal());
+            result = result.replace(emoji.getUnicode(), emoji.getHtmlHexidecimal());
         }
         return result;
     }

@@ -63,7 +63,7 @@ import com.globalsight.util.edit.EditUtil;
 
 /**
  * The FileImportUtil class allows clients to make import requests without
- * having to use JMS.   
+ * having to use JMS.
  */
 public class FileImportUtil
 {
@@ -74,7 +74,6 @@ public class FileImportUtil
     // max size (in bytes) of the job name
     public static final int MAX_JOBNAME_SIZE = 320;
 
-    public static boolean USE_JMS = false;
     public static HashMap<String, Integer> RUN_MAX_MESSAGE = new HashMap<String, Integer>();
     public static HashMap<String, Integer> ON_RUN_MESSAGE = new HashMap<String, Integer>();
     public static HashMap<String, List<CxeMessage>> ON_HOLD_MESSAGE = new HashMap<String, List<CxeMessage>>();
@@ -83,26 +82,19 @@ public class FileImportUtil
     public static HashMap<String, CxeMessage> RUNNING_REQUEST = new HashMap<String, CxeMessage>();
     public static HashMap<String, List<BatchInfo>> CANCELED_REQUEST = new HashMap<String, List<BatchInfo>>();
 
-    // initialize the USE_JMS and RUN_MAX_MESSAGE from
-    // "properties/createJob.properties"
     static
     {
         try
         {
             Properties p = (new PropertiesFactory())
                     .getProperties("/properties/createJob.properties");
-            USE_JMS = "true".equalsIgnoreCase(p.getProperty("useJms"));
 
             Set<Object> keys = p.keySet();
             for (Object key : keys)
             {
-                if ("useJms".equals(key))
-                    continue;
-
                 String type = (String) key;
                 type = type.trim().toLowerCase();
-                RUN_MAX_MESSAGE.put(type,
-                        Integer.parseInt(p.getProperty((String) key)));
+                RUN_MAX_MESSAGE.put(type, Integer.parseInt(p.getProperty((String) key)));
             }
         }
         catch (Exception e)
@@ -135,7 +127,7 @@ public class FileImportUtil
 
         return true;
     }
-    
+
     static public HashMap<String, CxeMessage> getCloneRunningRequests()
     {
         synchronized (LOCKER)
@@ -143,7 +135,7 @@ public class FileImportUtil
             return ObjectUtil.deepClone(RUNNING_REQUEST);
         }
     }
-    
+
     static public HashMap<String, List<CxeMessage>> getCloneHoldingRequests()
     {
         synchronized (LOCKER)
@@ -151,7 +143,6 @@ public class FileImportUtil
             return ObjectUtil.deepClone(ON_HOLD_MESSAGE);
         }
     }
-    
 
     /**
      * This method uses the thread to create job, not JMS.
@@ -178,7 +169,7 @@ public class FileImportUtil
         {
             String hql = "from FileProfileImpl fp where fp.referenceFP = ?";
             fp = (FileProfileImpl) HibernateUtil.getFirst(hql, Long.parseLong(fileProfileId));
-            
+
             if (fp != null && 48 == fp.getKnownFormatTypeId())
             {
                 name = "xlz";
@@ -190,29 +181,30 @@ public class FileImportUtil
             String file = (String) map.get("Filename");
             name = getSuffix(file);
         }
-        
+
         return name;
     }
-    
+
     /**
      * Creates job without JMS.
      * 
      * @param cxeMessage
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     static public void importFile(CxeMessage cxeMessage)
     {
         HashMap map = cxeMessage.getParameters();
         String key = (String) map.get("uiKey");
-        
+
         // this is first time.
         if (map.get("requestTime") == null)
         {
             map.put("requestTime", new Date());
-            
+
             // the order is according to sort priority, sort time and sort axis.
             map.put("sortTime", new Date().getTime());
-            
+
             String n1 = (String) map.get("priority");
             if (n1 == null)
                 n1 = "3";
@@ -244,7 +236,7 @@ public class FileImportUtil
 
                 ms.add(cxeMessage);
                 sortMessages(ms);
-                
+
                 WAITING_REQUEST.put(key, cxeMessage);
                 return;
             }
@@ -273,7 +265,7 @@ public class FileImportUtil
         finally
         {
             HibernateUtil.closeSession();
-            
+
             RUNNING_REQUEST.remove(key);
 
             // Import a file that has been hold.
@@ -299,7 +291,7 @@ public class FileImportUtil
             }
         }
     }
-    
+
     public static void sortWaitingMessage()
     {
         synchronized (LOCKER)
@@ -310,8 +302,8 @@ public class FileImportUtil
             }
         }
     }
-    
-    private static void sortMessages(List<CxeMessage> ms) 
+
+    private static void sortMessages(List<CxeMessage> ms)
     {
         Collections.sort(ms, new Comparator<CxeMessage>()
         {
@@ -321,23 +313,23 @@ public class FileImportUtil
             {
                 HashMap p1 = o1.getParameters();
                 HashMap p2 = o2.getParameters();
-                
+
                 int n1 = (Integer) p1.get("sortPriority");
-                
+
                 int n2 = (Integer) p2.get("sortPriority");
-                
+
                 int k = n1 - n2;
                 if (k != 0)
                     return k;
-                
+
                 long d1 = (Long) p1.get("sortTime");
                 long d2 = (Long) p2.get("sortTime");
-                
+
                 k = (int) (d1 - d2);
-                
+
                 if (k != 0)
                     return k;
-                
+
                 int axis1 = (Integer) p1.get("sortAxis");
                 int axis2 = (Integer) p2.get("sortAxis");
                 return (int) (axis1 - axis2);
@@ -410,8 +402,7 @@ public class FileImportUtil
         int docPageCount = ((Integer) params.get("DocPageCount")).intValue();
         int docPageNumber = ((Integer) params.get("DocPageNum")).intValue();
 
-        BatchInfo bi = new BatchInfo(batchId, pageCount, pageNumber,
-                docPageCount, docPageNumber);
+        BatchInfo bi = new BatchInfo(batchId, pageCount, pageNumber, docPageCount, docPageNumber);
         List<BatchInfo> batchInfos = CANCELED_REQUEST.get(batchId);
         if (batchInfos == null)
         {
@@ -441,12 +432,10 @@ public class FileImportUtil
             HashMap params = p_cxeMessage.getParameters();
 
             filename = (String) params.get("Filename");
-            boolean isAutomaticImport = ((Boolean) params
-                    .get("IsAutomaticImport")).booleanValue();
+            boolean isAutomaticImport = ((Boolean) params.get("IsAutomaticImport")).booleanValue();
             Importer importer = new Importer(p_cxeMessage, logger);
 
-            EventFlowXml eventFlowObject = importer
-                    .makeEventFlowXmlObject(isAutomaticImport);
+            EventFlowXml eventFlowObject = importer.makeEventFlowXmlObject(isAutomaticImport);
             p_cxeMessage.setEventFlowObject(eventFlowObject);
             HashMap newParams = params;
             MessageData newMessageData = importer.readFile();
@@ -457,14 +446,13 @@ public class FileImportUtil
             // If the script on import return value 1, GlobalSight will report
             // an error on import.
             Object scriptOnImport = params.get("ScriptOnImport");
-            if (scriptOnImport != null
-                    && ((Integer) scriptOnImport).intValue() == 1)
+            if (scriptOnImport != null && ((Integer) scriptOnImport).intValue() == 1)
             {
                 String[] errorArgs = new String[2];
                 errorArgs[0] = logger.getName();
                 errorArgs[1] = filename;
-                FileSystemAdapterException fsae = new FileSystemAdapterException(
-                        "ScriptOnImport", errorArgs, new Exception());
+                FileSystemAdapterException fsae = new FileSystemAdapterException("ScriptOnImport",
+                        errorArgs, new Exception());
                 results = makeImportError(p_cxeMessage, fsae);
 
                 return results;
@@ -486,8 +474,8 @@ public class FileImportUtil
             String[] errorArgs = new String[2];
             errorArgs[0] = logger.getName();
             errorArgs[1] = filename;
-            FileSystemAdapterException fsae = new FileSystemAdapterException(
-                    "UnexpectedIm", errorArgs, e);
+            FileSystemAdapterException fsae = new FileSystemAdapterException("UnexpectedIm",
+                    errorArgs, e);
             results = makeImportError(p_cxeMessage, fsae);
         }
 
@@ -500,8 +488,7 @@ public class FileImportUtil
      * @param cxeMessage
      * @throws Exception
      */
-    static private void handleCxeMessage(CxeMessage cxeMessage)
-            throws Exception
+    static private void handleCxeMessage(CxeMessage cxeMessage) throws Exception
     {
         if (cxeMessage == null)
         {
@@ -528,10 +515,10 @@ public class FileImportUtil
             if (cxeMessage.getParameters().get("Exception") != null)
                 requestType = Request.REQUEST_WITH_CXE_ERROR;
 
-            GeneralException exception = (GeneralException) cxeMessage
-                    .getParameters().get("Exception");
-            addRequest(cxeMessage, requestType, cxeMessage.getMessageData()
-                    .getName(), cxeMessage.getEventFlowObject(), exception);
+            GeneralException exception = (GeneralException) cxeMessage.getParameters()
+                    .get("Exception");
+            addRequest(cxeMessage, requestType, cxeMessage.getMessageData().getName(),
+                    cxeMessage.getEventFlowObject(), exception);
         }
         else
         {
@@ -552,12 +539,12 @@ public class FileImportUtil
      * @throws Exception
      */
     static private void addRequest(CxeMessage p_cxeMessage, int p_requestType,
-            String p_contentFileName, EventFlowXml p_eventFlowXml,
-            GeneralException p_exception) throws Exception
+            String p_contentFileName, EventFlowXml p_eventFlowXml, GeneralException p_exception)
+            throws Exception
     {
         // 1.Create the request object
-        RequestImpl req = prepareL10nRequest(p_cxeMessage, p_requestType,
-                p_contentFileName, p_eventFlowXml, p_exception);
+        RequestImpl req = prepareL10nRequest(p_cxeMessage, p_requestType, p_contentFileName,
+                p_eventFlowXml, p_exception);
 
         // 2.Submit request
         RequestHandlerLocal h = new RequestHandlerLocal();
@@ -611,8 +598,7 @@ public class FileImportUtil
         r.setDataSourceId(dataSourceId);
 
         // is page preview able - convert to boolean
-        r.setPageCxePreviewable(CxeToCapRequest.TRUE.equals(source
-                .getPageIsCxePreviewable()));
+        r.setPageCxePreviewable(CxeToCapRequest.TRUE.equals(source.getPageIsCxePreviewable()));
         r.setBaseHref(eventFlowXml.getBatchInfo().getBaseHref());
 
         // set target locale
@@ -626,12 +612,10 @@ public class FileImportUtil
      * @return
      * @throws Exception
      */
-    static L10nProfile getL10nProfile(EventFlowXml eventFlowXml)
-            throws Exception
+    static L10nProfile getL10nProfile(EventFlowXml eventFlowXml) throws Exception
     {
         // l10nProfileId
-        String l10nProfileIdAsString = eventFlowXml.getBatchInfo()
-                .getL10NProfileId();
+        String l10nProfileIdAsString = eventFlowXml.getBatchInfo().getL10NProfileId();
         long l10nProfileId = -1;
         if (l10nProfileIdAsString != null)
         {
@@ -648,20 +632,19 @@ public class FileImportUtil
      * the L10nRequest Xml. This also stores some of the information of the
      * request that won't be part of the page.
      */
-    static private RequestImpl prepareL10nRequest(CxeMessage p_cxeMessage,
-            int p_requestType, String p_gxml, EventFlowXml eventFlowXml,
-            GeneralException p_exception) throws Exception
+    static private RequestImpl prepareL10nRequest(CxeMessage p_cxeMessage, int p_requestType,
+            String p_gxml, EventFlowXml eventFlowXml, GeneralException p_exception) throws Exception
     {
         Source source = eventFlowXml.getSource();
         L10nProfile profile = getL10nProfile(eventFlowXml);
 
         // Create a request
-        RequestImpl r = RequestFactory.createRequest(p_requestType, profile,
-                p_gxml, XmlUtil.object2String(eventFlowXml), p_exception);
+        RequestImpl r = RequestFactory.createRequest(p_requestType, profile, p_gxml,
+                XmlUtil.object2String(eventFlowXml), p_exception);
         updateRequest(r, eventFlowXml);
 
-        String originalSourceFileContent = (String) p_cxeMessage
-                .getParameters().get(BaseAdapter.PARAM_ORIGINAL_FILE_CONTENT);
+        String originalSourceFileContent = (String) p_cxeMessage.getParameters()
+                .get(BaseAdapter.PARAM_ORIGINAL_FILE_CONTENT);
         r.setOriginalSourceFileContent(originalSourceFileContent);
 
         // if the profile is set to batch requests add the batch
@@ -678,23 +661,23 @@ public class FileImportUtil
             {
                 String jobPrefixName = info.getJobName();
                 // truncate the jobPrefixName to the max byte size in the DB
-                jobPrefixName = EditUtil.truncateUTF8Len(jobPrefixName,
-                        MAX_JOBNAME_SIZE);
+                jobPrefixName = EditUtil.truncateUTF8Len(jobPrefixName, MAX_JOBNAME_SIZE);
 
-                BatchInfo bi = new BatchInfo(info.getBatchId(),
-                        info.getPageCount(), info.getPageNumber(),
-                        info.getDocPageCount(), info.getDocPageNumber(),
+                BatchInfo bi = new BatchInfo(info.getBatchId(), info.getPageCount(),
+                        info.getPageNumber(), info.getDocPageCount(), info.getDocPageNumber(),
                         jobPrefixName);
                 r.setBatchInfo(bi);
             }
 
             RequestPersistenceAccessor.insertRequest(r);
         }
-        else if (profile.getDispatchCriteria().getCondition() == DispatchCriteria.WORD_COUNT_OR_TIMER_CONDITION)
+        else if (profile.getDispatchCriteria()
+                .getCondition() == DispatchCriteria.WORD_COUNT_OR_TIMER_CONDITION)
         {
             RequestPersistenceAccessor.insertWordCountRequest(r);
         }
-        else if (profile.getDispatchCriteria().getCondition() == DispatchCriteria.WORD_COUNT_CONDITION)
+        else if (profile.getDispatchCriteria()
+                .getCondition() == DispatchCriteria.WORD_COUNT_CONDITION)
         {
             RequestPersistenceAccessor.insertWordCountRequest(r);
         }
@@ -714,8 +697,7 @@ public class FileImportUtil
      * @param p_eventFlowXml
      * @param r
      */
-    static private void setUnimportedLocales(EventFlowXml p_eventFlowXml,
-            RequestImpl r)
+    static private void setUnimportedLocales(EventFlowXml p_eventFlowXml, RequestImpl r)
     {
         try
         {
@@ -773,8 +755,7 @@ public class FileImportUtil
         }
         catch (IOException ioe)
         {
-            logger.error(
-                    "Could not create message data in import error event.", ioe);
+            logger.error("Could not create message data in import error event.", ioe);
         }
         errorMsg.setParameters(p_cxeMessage.getParameters());
         p_exception.setLogger(null);
@@ -798,9 +779,8 @@ public class FileImportUtil
      * @return AdapterResult[]
      */
     @SuppressWarnings("rawtypes")
-    protected static AdapterResult[] makeSingleAdapterResult(
-            CxeMessageType p_msgType, MessageData p_messageData,
-            HashMap p_params, String p_eventFlowXml) throws IOException
+    protected static AdapterResult[] makeSingleAdapterResult(CxeMessageType p_msgType,
+            MessageData p_messageData, HashMap p_params, String p_eventFlowXml) throws IOException
     {
         CxeMessage outputMessage = new CxeMessage(p_msgType);
         outputMessage.setMessageData(p_messageData);
@@ -818,8 +798,7 @@ public class FileImportUtil
      *            the output cxe message
      * @return AdapterResult[]
      */
-    protected static AdapterResult[] makeSingleAdapterResult(
-            CxeMessage p_cxeMessage)
+    protected static AdapterResult[] makeSingleAdapterResult(CxeMessage p_cxeMessage)
     {
         AdapterResult[] results = new AdapterResult[1];
 

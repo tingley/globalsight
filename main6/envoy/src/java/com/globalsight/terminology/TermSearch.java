@@ -34,6 +34,8 @@ public interface TermSearch
     public void setDefinition(Definition definition);
     public String getXmlResults(String sourceLanguage, String targetLanguage,
             String p_query, int end, int begin) throws TermbaseException;
+    public String getJSONResults(String sourceLanguage, String targetLanguage,
+            String p_query, int end, int begin) throws TermbaseException;
     public Hitlist getHitListResults(String sourceLanguage, String targetLanguage,
             String p_query, int end, int begin) throws TermbaseException;
 }

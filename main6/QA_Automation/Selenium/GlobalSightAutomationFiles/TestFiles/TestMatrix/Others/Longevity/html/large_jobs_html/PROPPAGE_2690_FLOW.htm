@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1116" MadCap:lastWidth="515">
+    <head><title>Flow Tab (2690/2695, 2690D/2695D, and 2790/2795)</title>
+    </head>
+    <body>
+        <h1>Flow 
+ tab (2690/2695, 2690D/2695D, and 2790/2795)</h1>
+        <p class="para">Use this tab to define operating parameters that control 
+ system pressure limits, operating mode, flow acceleration, flow rate, 
+ and solvent compositions for isocratic mode. For gradient mode, program 
+ additional parameters in the Gradient table.</p>
+        <h2>High limit</h2>
+        <p class="para">High-pressure limit for the system. If the system pressure 
+ exceeds this limit within 5 seconds, the separations module displays a 
+ pressure alert message, Empower displays an instrument failure message, 
+ and flow is stopped.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 4000 psi</p>
+        <h2>Low limit</h2>
+        <p class="para">Low-pressure limit for the system. <span style="font-style: italic;">During 
+ an injection only</span>, if system pressure falls below this limit, the 
+ separations module displays a pressure alert message within 5 to 10 seconds, 
+ Empower displays an instrument failure message, and flow is stopped.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 0 psi</p>
+        <p class="para"><span class="emphasisbold">Attention:</span> 
+ The system will <span style="font-style: italic;">not</span> flag a low-pressure 
+ fault during Initial Conditions in Direct Control mode or during an Equilibration 
+ step. However, if an injection occurs after an Equilibration step and 
+ the pressure falls below the low-pressure limit, the system will detect 
+ the fault immediately.</p>
+        <h2>Pump mode</h2>
+        <p class="para">System operating modes:</p>
+        <ul>
+            <li style="color: #000000;" class="listbull">Isocratic (displays Total Flow and %A–%D 
+ text boxes)</li>
+            <li style="color: #000000;" class="listbull">Gradient (displays the Gradient table)</li>
+        </ul>
+        <h2>Accelerate to 10.0 mL/Min In</h2>
+        <p class="para">Time in minutes for the solvent delivery system to reach 
+ the maximum system flow rate of 10 mL/min. This limits the rate of change 
+ of the flow rate and protects the column from potentially damaging changes 
+ in pressure.</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 2.00 min</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ The Accelerate to 10 mL/Min selection overrides any time-based changes 
+ to flow rate defined in the Gradient table.</p>
+        <h2>Flow</h2>
+        <p class="para">Percentage of solvent flow from each reservoir. The total 
+ of all solvents in each gradient segment must equal 100%. The system calculates 
+ individual flow rates when you enter the percentage value for each solvent. 
+ Empower automatically fills in the solvent column in the next column to 
+ the right so that the total percentage of the current row yields 100%. 
+ For examples of how the autofill feature works, see the related topic 
+ link.</p>
+        <p class="reltopimg">
+            <img src="../pics/reltop.gif" style="border: none;width: 147px;height: 22px;float: none;border-style: none;border-style: none;" width="147" height="22" border="0" />
+        </p>
+        <p class="reltop">
+            <img src="../pics/rellink.gif" style="border: none;width: 13px;height: 7px;float: none;border-style: none;border-style: none;" width="13" height="7" border="0" /><a href="dataacquisition.chm::/Defining_Methods/Creating_instrument_methods.htm">Creating 
+ instrument methods</a>
+        </p>
+    </body>
+</html>

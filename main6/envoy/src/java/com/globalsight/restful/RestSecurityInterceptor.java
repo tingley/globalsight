@@ -1,5 +1,5 @@
 /**
- * Copyright 2009 Welocalize, Inc.
+ * Copyright 2016 Welocalize, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -55,7 +55,8 @@ import com.globalsight.util.StringUtil;
  *  
  */
 @Provider
-public class RestSecurityInterceptor implements ContainerRequestFilter, RestConstants
+public class RestSecurityInterceptor extends RestResource implements ContainerRequestFilter,
+        RestConstants
 {
     private static final Logger logger = Logger.getLogger(RestSecurityInterceptor.class);
 
@@ -77,6 +78,12 @@ public class RestSecurityInterceptor implements ContainerRequestFilter, RestCons
 
     private static final ServerResponse ACCESS_FORBIDDEN = new ServerResponse(
             "Nobody can access this resource", 403, new Headers<Object>());
+
+    private static final ServerResponse ACCESS_DENIED_EMPTY_ACCESS_TOKEN = new ServerResponse(
+            "Empty access token", 401, new Headers<Object>());
+
+    private static final ServerResponse ACCESS_DENIED_INVALID_ACCESS_TOKEN = new ServerResponse(
+            "Invalid access token", 401, new Headers<Object>());
 
     private static final ServerResponse SERVER_ERROR = new ServerResponse("INTERNAL SERVER ERROR",
             500, new Headers<Object>());
@@ -100,8 +107,8 @@ public class RestSecurityInterceptor implements ContainerRequestFilter, RestCons
         MultivaluedMap<String, String> pathParams = uriInfo.getPathParameters();
         String companyName = pathParams.getFirst(COMPANY_NAME);
 
-        // "getAuthorization" method is a helper method, no need to filter.
-        if ("getAuthorization".equals(method.getName()))
+        // "login" method is used to get access token, no need to filter.
+        if ("login".equals(method.getName()))
         {
             return;
         }
@@ -119,67 +126,94 @@ public class RestSecurityInterceptor implements ContainerRequestFilter, RestCons
             // Get request headers
             final MultivaluedMap<String, String> headers = requestContext.getHeaders();
 
-            // Fetch authorization header
-            final List<String> authorization = headers.get(AUTHORIZATION_PROPERTY);
-
-            // If no authorization information present; block access
-            if (authorization == null || authorization.isEmpty())
-            {
-                requestContext.abortWith(ACCESS_DENIED_EMPTY_USERNAME_PWD);
-                return;
-            }
-
-            // Get encoded username and password
-            final String encodedUserPassword = authorization.get(0).replaceFirst(
-                    AUTHENTICATION_SCHEME + " ", "");
-
-            // Decode username and password
-            String usernameAndPassword = null;
-            try
-            {
-                usernameAndPassword = new String(Base64.decode(encodedUserPassword));
-            }
-            catch (IOException e)
-            {
-                requestContext.abortWith(SERVER_ERROR);
-                return;
-            }
-
-            // Split username and password tokens
-            final StringTokenizer tokenizer = new StringTokenizer(usernameAndPassword, ":");
-            final String username = tokenizer.nextToken();
-            final String password = tokenizer.nextToken();
-            // Verifying username and password
             User user = null;
-            try
+            boolean filterByToken = true;
+            ////// Authenticate via token
+            if (filterByToken)
             {
-                user = ServerProxy.getUserManager().getUserByName(username);
-                if (user == null)
+                final List<String> gsAccessToken = headers.get(RestConstants.GLOBALSIGHT_ACCESS_TOKEN);
+                if (gsAccessToken == null || gsAccessToken.isEmpty())
                 {
-                    user = ServerProxy.getUserManager().getUser(username);
+                    requestContext.abortWith(ACCESS_DENIED_EMPTY_ACCESS_TOKEN);
+                    return;
                 }
-                if (user == null)
+
+                String accessToken = gsAccessToken.get(0);
+                try
+                {
+                    checkAccess(accessToken);
+
+                    user = getUser(getUserNameFromSession(accessToken));
+                }
+                catch (RestWebServiceException e)
+                {
+                    requestContext.abortWith(ACCESS_DENIED_INVALID_ACCESS_TOKEN);
+                    return;
+                }
+            }
+            ////// Basic authorization
+            else
+            {
+                // Fetch authorization header
+                final List<String> authorization = headers.get(AUTHORIZATION_PROPERTY);
+                // If no authorization information present; block access
+                if (authorization == null || authorization.isEmpty())
+                {
+                    requestContext.abortWith(ACCESS_DENIED_EMPTY_USERNAME_PWD);
+                    return;
+                }
+
+                // Get encoded username and password
+                final String encodedUserPassword = authorization.get(0).replaceFirst(
+                        AUTHENTICATION_SCHEME + " ", "");
+
+                // Decode username and password
+                String usernameAndPassword = null;
+                try
+                {
+                    usernameAndPassword = new String(Base64.decode(encodedUserPassword));
+                }
+                catch (IOException e)
+                {
+                    requestContext.abortWith(SERVER_ERROR);
+                    return;
+                }
+
+                // Split username and password tokens
+                final StringTokenizer tokenizer = new StringTokenizer(usernameAndPassword, ":");
+                final String username = tokenizer.nextToken();
+                final String password = tokenizer.nextToken();
+                // Verifying username and password
+                try
+                {
+                    user = ServerProxy.getUserManager().getUserByName(username);
+                    if (user == null)
+                    {
+                        user = ServerProxy.getUserManager().getUser(username);
+                    }
+                    if (user == null)
+                    {
+                        requestContext.abortWith(ACCESS_DENIED_INVALID_USER);
+                        return;
+                    }
+                }
+                catch (Exception e)
                 {
                     requestContext.abortWith(ACCESS_DENIED_INVALID_USER);
                     return;
                 }
-            }
-            catch (Exception e)
-            {
-                requestContext.abortWith(ACCESS_DENIED_INVALID_USER);
-                return;
-            }
 
-            try
-            {
-                UserLdapHelper.authenticate(password, user.getPassword());
-                logger.info("User '" + user.getUserName() + "' is requesting '" + method.getName()
-                        + "' method with URL: " + uriInfo.getAbsolutePath());
-            }
-            catch (NamingException e)
-            {
-                requestContext.abortWith(ACCESS_DENIED_INVALID_PASSWORD);
-                return;
+                try
+                {
+                    UserLdapHelper.authenticate(password, user.getPassword());
+                    logger.info("User '" + user.getUserName() + "' is requesting '" + method.getName()
+                            + "' method with URL: " + uriInfo.getAbsolutePath());
+                }
+                catch (NamingException e)
+                {
+                    requestContext.abortWith(ACCESS_DENIED_INVALID_PASSWORD);
+                    return;
+                }
             }
 
             // Check "companyName" parameter
@@ -210,7 +244,7 @@ public class RestSecurityInterceptor implements ContainerRequestFilter, RestCons
                 Set<String> rolesSet = new HashSet<String>(Arrays.asList(rolesAnnotation.value()));
 
                 // Is user valid?
-                if (!isUserAllowed(username, password, rolesSet))
+                if (!isUserAllowed(user.getUserName(), user.getPassword(), rolesSet))
                 {
                     requestContext.abortWith(ACCESS_DENIED);
                     return;

@@ -846,11 +846,14 @@ function contextForSegment(obj, e)
 function contextForReadOnly(obj, e)
 {
     var ids = get3Ids(obj);
-    var popupoptions = [
-        new ContextItem("<B>Segment details</B>",
-        function(){showDetails(ids[0], ids[1], ids[2])})];
+    if (ids.length>1)
+    {
+    	var popupoptions = [
+    	      new ContextItem("<B>Segment details</B>",
+    	        function(){showDetails(ids[0], ids[1], ids[2])})];
 
-    ContextMenu.display(popupoptions, e);
+    	ContextMenu.display(popupoptions, e);
+    }
 }
 
 function getSegmentIdFromHref(href)

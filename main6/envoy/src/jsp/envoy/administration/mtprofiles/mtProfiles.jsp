@@ -43,10 +43,6 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="remove" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
- <jsp:useBean id="mt_active" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean" />
- <jsp:useBean id="tda_edit" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="mtProfiles" class="java.util.ArrayList" scope="request"/>
 
 <%@ include file="/envoy/common/header.jspIncl" %>
@@ -55,23 +51,23 @@
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
     SessionManager sessionManager =
       (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
+
     String title= bundle.getString("lb_mt_profiles");
     String helperText = bundle.getString("helper_text_mt_profile_main");
     String confirm = bundle.getString("mt_remove_confirm");
-    //Button names
     String newButton = bundle.getString("lb_new");
     String removeButton = bundle.getString("lb_remove");
-    String mtActive = bundle.getString("lb_mt_active");
+
     //Urls of the links on this page
     String action = MTProfileConstants.ACTION;
     String selfUrl = self.getPageURL();
     String newUrl = new1.getPageURL() + "&" + action + "=" + MTProfileConstants.NEW_ACTION;
     String modifyUrl = modify.getPageURL();
     String removeUrl = remove.getPageURL() + "&" + action + "=" + MTProfileConstants.REMOVE_ACTION;
-    String mtActiveUrl = mt_active.getPageURL() + "&" + action + "=" + MTProfileConstants.MT_ACTIVE_ACTION;
 	String exportUrl = export.getPageURL() + "&" + action + "=" + MTProfileConstants.EXPORT_ACTION;
 	String mtpImportUrl = mtpImport.getPageURL() + "&" + action + "=" + MTProfileConstants.IMPORT_ACTION;
-    boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
+
+	boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
     PermissionSet userPermissions = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
 
     String filterNameValue = (String) sessionManager.getAttribute(MTProfileConstants.FILTER_NAME);
@@ -111,9 +107,12 @@ $(function(){
 		alert(msg);
 	}
 })
-function handleSelectAll() {
+
+function handleSelectAll()
+{
     var selectAll = $("#selectAll").is(":checked");
-    $("input[name='checkboxBtn']").each(function() {
+    $("input[name='checkboxBtn']").each(function()
+    {
         if (selectAll == true){
             $(this).attr("checked", true);
         } else {
@@ -124,33 +123,24 @@ function handleSelectAll() {
     buttonManagement();
 }
 
-function buttonManagement() {
+function buttonManagement()
+{
     var count = $("input[name='checkboxBtn']:checked").length;
 
     // Only one TM profile is selected
-    if (count == 1) {
-        if (MTProfileConstants.removeBtn) {
-            MTProfileConstants.removeBtn.disabled = false;
-        }
-        if (MTProfileConstants.mtEditBtn) {
-            MTProfileConstants.mtEditBtn.disabled = false;
-        }
-
-        if (MTProfileConstants.tdaEditBtn) {
-            MTProfileConstants.tdaEditBtn.disabled = false;
+    if (count == 1)
+    {
+        if (mtProfileForm.removeBtn)
+        {
+            mtProfileForm.removeBtn.disabled = false;
         }
     }
     // count == 0 or count > 1
-    else {
-        if (MTProfileConstants.removeBtn) {
-            MTProfileConstants.removeBtn.disabled = true;
-        }
-        if (MTProfileConstants.mtEditBtn) {
-            MTProfileConstants.mtEditBtn.disabled = true;
-        }
-
-        if (MTProfileConstants.tdaEditBtn) {
-            MTProfileConstants.tdaEditBtn.disabled = true;
+    else
+    {
+        if (mtProfileForm.removeBtn)
+        {
+            mtProfileForm.removeBtn.disabled = true;
         }
     }
 }
@@ -158,40 +148,26 @@ function buttonManagement() {
 // Click "New" button
 function newTmProfile()
 {
-    MTProfileConstants.action = '<%=newUrl%>';
-    MTProfileConstants.submit();
+    mtProfileForm.action = '<%=newUrl%>';
+    mtProfileForm.submit();
 }
 
 // Edit
 function modifyTMProfile(mtProfileId)
 {
-    MTProfileConstants.action = "<%=modifyUrl%>&<%=MTProfileConstants.MT_PROFILE_ID%>=" + mtProfileId;
-    MTProfileConstants.submit();
+    mtProfileForm.action = "<%=modifyUrl%>&<%=MTProfileConstants.MT_PROFILE_ID%>=" + mtProfileId;
+    mtProfileForm.submit();
 }
 
 // Click "Remove" button
 function removeTmProfile()
 {
     value = findSelectedTmProfiles();
-    if (confirm(confirmRemove)) {
-        MTProfileConstants.action = "<%=removeUrl%>&<%=MTProfileConstants.MT_PROFILE_ID%>=" + value;
-        MTProfileConstants.submit();
+    if (confirm(confirmRemove))
+    {
+        mtProfileForm.action = "<%=removeUrl%>&<%=MTProfileConstants.MT_PROFILE_ID%>=" + value;
+        mtProfileForm.submit();
     } 
-}
-
-//Click "MT Options" button
-function activeMtOptions()
-{
-    value = findSelectedTmProfiles();
-    MTProfileConstants.action = "<%=mtActiveUrl%>&<%=MTProfileConstants.MT_PROFILE_ID%>=" + value;
-    MTProfileConstants.submit();
-}
-
-// Click "TDA Options" button
-function editTdaOptions()
-{
-    value = findSelectedTmProfiles();
-    MTProfileConstants.submit();
 }
 
 //Find selected TM profiles' IDs.
@@ -208,32 +184,35 @@ function findSelectedTmProfiles()
     return ids;
 }
 
-
 function filterItems(e)
 {
     e = e ? e : window.event;
     var keyCode = e.which ? e.which : e.keyCode;
     if (keyCode == 13)
     {
-        MTProfileConstants.action = "<%=selfUrl%>";
-        MTProfileConstants.submit();
+    	mtProfileForm.action = "<%=selfUrl%>";
+    	mtProfileForm.submit();
     }
 }
 
-function exportLocalePair(){
+function exportTMProfile()
+{
 	var value = findSelectedMTP();
-	if(value.length == 0){
-		alert("Please select at least one locale pair!");
+	if(value.length == 0)
+	{
+		alert("Please select at least one machine translation profile!");
 		return;
 	}
-	MTProfileConstants.action = "<%=exportUrl%>" + "&id=" + value;
-	MTProfileConstants.submit();
+	mtProfileForm.action = "<%=exportUrl%>" + "&id=" + value;
+	mtProfileForm.submit();
 }
 
-function importLocalePair(){
-	MTProfileConstants.action = "<%=mtpImportUrl%>";
-	MTProfileConstants.submit();
+function importMTProfile()
+{
+	mtProfileForm.action = "<%=mtpImportUrl%>";
+	mtProfileForm.submit();
 }
+
 //Find selected Machine Translation Profiles Ids
 function findSelectedMTP()
 {
@@ -256,7 +235,7 @@ function findSelectedMTP()
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108; LEFT: 20px; RIGHT: 20px;">
 <amb:header title="<%=title%>" helperText="<%=helperText%>" />
 
-<FORM NAME="MTProfileConstants" id="MTProfileConstants" METHOD="POST">
+<FORM NAME="mtProfileForm" id="mtProfileForm" METHOD="POST">
 <table cellpadding=0 cellspacing=0 border=0 class="standardText" width="100%" align="left" style="min-width:1024px;">
     <tr valign="top">
         <td align="right">
@@ -325,11 +304,11 @@ function findSelectedMTP()
         </amb:permission>
         <amb:permission name="<%=Permission.MTP_EXPORT%>" >
 	         <input type="button" value="<%=bundle.getString("lb_export")%>..." 
-	         name="exportBtn" id="exportBtn" onClick="exportLocalePair();">
+	         name="exportBtn" id="exportBtn" onClick="exportTMProfile();">
      	</amb:permission>
         <amb:permission name="<%=Permission.MTP_IMPORT%>" >
 	         <input type="button" value="<%=bundle.getString("lb_import")%>..." 
-	         name="importBtn" id="importBtn" onClick="importLocalePair();">
+	         name="importBtn" id="importBtn" onClick="importMTProfile();">
      	</amb:permission>
         </DIV>
         </TD>

@@ -42,7 +42,6 @@ public class ProjectTM extends PersistentObject implements Tm
     private String m_domain = "";
     private String m_creationUser = "";
     private boolean m_isRemoteTm = false;
-    private long m_gsEditionId = -1;
     private long m_remoteTmProfileId = -1;
     private String m_remoteTmProfileName = null;
     private Long m_tm3Id;
@@ -157,16 +156,6 @@ public class ProjectTM extends PersistentObject implements Tm
     public boolean getIsRemoteTm()
     {
         return this.m_isRemoteTm;
-    }
-
-    public void setGsEditionId(long p_gsEditionId)
-    {
-        this.m_gsEditionId = p_gsEditionId;
-    }
-
-    public long getGsEditionId()
-    {
-        return this.m_gsEditionId;
     }
 
     public void setRemoteTmProfileId(long p_remoteTmProfileId)

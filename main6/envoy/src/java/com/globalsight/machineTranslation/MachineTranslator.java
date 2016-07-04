@@ -67,6 +67,9 @@ public interface MachineTranslator
     public static final String CONTAIN_TAGS = "containTags";
     public static final String TARGET_LOCALE_ID = "targetLocaleId";
 
+    // MT translation applies fixed score "60".
+    public static final float MT_SCORE = 60f;
+
     /**
      * In GlobalSight, segments from XLF file are "wrapped" with "ph" again.
      * So, before send such segments to MT engine, need revert them back; After

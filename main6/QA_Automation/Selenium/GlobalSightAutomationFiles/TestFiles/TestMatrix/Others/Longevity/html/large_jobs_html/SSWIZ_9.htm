@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="2026" MadCap:lastWidth="577">
+    <head><title>New Sample Set Method Wizard - Describe Samples Page</title>
+    </head>
+    <body>
+        <h1>New Sample 
+ Set Method wizard – Describe Samples page</h1>
+        <p class="para">Use this page to define information about your samples. The 
+ Describe Samples page contains the fields and controls described below.</p>
+        <h2>Sample information section</h2>
+        <p class="para">Use this section to define information about your sample 
+ injections.</p>
+        <h3>Number of samples</h3>
+        <p class="para">Specifies the total number of sample vials in the tray. The 
+ software determines the maximum number of samples you can enter in this 
+ field according to:</p>
+        <ul>
+            <li class="listbull">Previously entered New 
+ Sample Set Method Wizard parameters (for example, parameters that define 
+ standard vial locations, number of standard vials in a group, and so on).</li>
+            <li class="listbull">The capacity of your 
+ autoinjector or autosampler tray or carousel.</li>
+        </ul>
+        <h3>Number of injections per vial</h3>
+        <p class="para">Specifies the number of injections to be taken from each 
+ sample vial.</p>
+        <p class="para"><span class="emphasisbold">Valid entries:</span> 
+ 1 to 99</p>
+        <p class="para" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Note:</span> 
+ If you are creating a sample set method for dual tower GC operation, you 
+ must select the same value for Number of Injections per Vial for both 
+ the Front and Back tower to allow for simultaneous injections. To create 
+ a dual tower sample set method, you use the wizard twice, once for each 
+ tower.</p>
+        <h3>Injection volume</h3>
+        <p class="para" MadCap:conditions="Primary.Empower">Specifies the volume in microliters of 
+ the injected sample, valid entries are 0.0 to 29999.9. Note the following 
+ considerations:</p>
+        <ul>
+            <li class="listbull" MadCap:conditions="Primary.Empower">For Waters autosamplers, 
+ small injector loops may omit the maximum volume. Ensure hardware configuration 
+ is compatible with your desired injector size.</li>
+            <li class="listbull" MadCap:conditions="Primary.Empower">For Agilent 1100 autosamplers, 
+ the maximum injection volume is the seat capillary volume, plus the syringe 
+ size. Ensure that the hardware configuration is specified correctly in 
+ your method.</li>
+        </ul>
+        <p class="para" MadCap:conditions="Primary.Breeze">Specifies the volume in microliters of 
+ the injected sample, valid entries are 0.0 to 29999.9. </p>
+        <p class="para" MadCap:conditions="Primary.Breeze"><span class="emphasisbold">Tip:</span> Small injector loops may omit the 
+ maximum volume. Ensure hardware configuration is compatible with your 
+ desired injector size.</p>
+        <p class="para" MadCap:conditions="Primary.Empower">For Agilent GCs, valid entries are 1 
+ to 5 units. Each unit corresponds to 10 percent of syringe capacity. For 
+ example, 2 units of a 25 microliter syringe is 10 microliters. So entering 
+ 2 will cause a 10 microliter injection. However, if you are using the 
+ optional nanoliter adaptor, these percentages change. Please consult the 
+ manufacturer’s documentation to determine the correct setting for injection 
+ volume.</p>
+        <p class="para" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Note:</span> 
+ If you are using a 2690D/2695D, creating a Dissolution Sample Set Method, 
+ and pooling injections, the pool volume and injection volume must be equal.</p>
+        <h3>Run time</h3>
+        <p class="para">Specifies the length of time in minutes to collect data for 
+ a sample. Valid entries are 0 to 650.0.</p>
+        <p class="para" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Note:</span> 
+ If you are creating a sample set method for dual tower GC operation, you 
+ must select the same value for Run Time for both the Front and Back tower 
+ to allow for simultaneous injections. To create a dual tower sample set 
+ method, you use the wizard twice, once for each tower.</p>
+        <h3>Maximum # of samples per group</h3>
+        <p class="para">Specifies the maximum number of samples in a sample group. 
+ This field appears only if you chose to inject standards before or around 
+ sample groups (in the Select Location of Standards page). The software 
+ determines the maximum number you can enter in this field according to 
+ your Number of Sample selection and the capacity of your autoinjector 
+ or autosampler tray or carousel. The value you enter for Number of Samples 
+ is divided by the value for Maximum # of Samples Per Group to determine 
+ the number of sample groups for your sample set. </p>
+        <p class="para">For example, if you entered a value of 25 for Number of Samples, 
+ and 6 for Maximum # of Samples Per Group, your sample set would contain 
+ a total of five sample groups—four groups containing six samples, and 
+ one group containing one sample.</p>
+        <h3>Options button</h3>
+        <p class="para">Displays the Enter Optional Information page, where you can 
+ specify a Sample Weight factor, a Dilution factor, a Data Start time and 
+ a Next Injection Delay time.</p>
+        <h2>Method set section</h2>
+        <p class="para">Use this section to define or create the method set used 
+ to acquire, process, and/or report data for your samples.</p>
+        <h3>Select</h3>
+        <p class="para" MadCap:conditions="Primary.Empower">Specifies the method set used to acquire, 
+ process, and/or report data for the samples (this could be the same or 
+ a different method set from the one you selected in the previous wizard 
+ page for acquiring, processing, and/or reporting standards). Select the 
+ appropriate method set from the drop-down list. If you are using the Pro 
+ interface, click Create New if you need to create a new method set. </p>
+        <p class="para" MadCap:conditions="Primary.Breeze">Specifies the method set used to acquire, 
+ process, and/or report data for the samples (this could be the same or 
+ a different method set from the one you selected in the previous wizard 
+ page for acquiring, processing, and/or reporting standards). Select the 
+ appropriate method set from the drop-down list. </p>
+        <p class="para" MadCap:conditions="Primary.Empower"><span class="emphasisbold">Note:</span> 
+ If you are creating a sample set method for dual tower GC operation, you 
+ must select the same method set for both the Front and Back tower. To 
+ create a dual tower sample set method, you use the wizard twice, once 
+ for each tower.</p>
+        <h3 MadCap:conditions="Primary.Empower">Create new button (Pro interface only)</h3>
+        <p class="para" MadCap:conditions="Primary.Empower">Displays the first page of the New Method 
+ Set Wizard, where Empower software interactively leads you through the 
+ steps to create a new method set. </p>
+        <p class="para">After making your selections, click Next to advance to the 
+ next wizard page. </p>
+    </body>
+</html>

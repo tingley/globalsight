@@ -4,7 +4,20 @@
          com.globalsight.util.resourcebundle.ResourceBundleConstants,
          com.globalsight.everest.webapp.pagehandler.PageHandler,
          com.globalsight.config.UserParamNames,
+         com.globalsight.util.resourcebundle.SystemResourceBundle,
+         com.globalsight.util.mail.MailerLocal,
+         com.globalsight.everest.localemgr.LocaleManagerLocal,
+         com.globalsight.everest.servlet.util.SessionManager,
+         com.globalsight.everest.webapp.WebAppConstants,
+         com.globalsight.util.edit.EditUtil,
+         com.globalsight.everest.permission.PermissionSet,
+         com.globalsight.everest.permission.Permission,
+         com.globalsight.everest.foundation.User,
+         com.globalsight.everest.servlet.util.ServerProxy,
+         com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
          java.util.ArrayList,
+         java.util.Locale,
+         com.globalsight.util.mail.MailerConstants,
          java.util.List,
          java.util.ResourceBundle" 
          session="true" %>
@@ -34,12 +47,19 @@
             PageHandler.ADDED_NOTIFICATION_OPTIONS);
     String emailNotification = (String)request.getAttribute(UserParamNames.NOTIFICATION_ENABLED);
     String emailNotificationChecked = emailNotification.equals("0") ? "" : "CHECKED";
-    String disabled = emailNotification.equals("0") ? "DISABLED" : "";
+    String disabled = emailNotification.equals("0") ? "DISABLED" : ""; 
+    PermissionSet perms = (PermissionSet)session.getAttribute(WebAppConstants.PERMISSIONS);
+    boolean b_editEmailTemp=true;
+    if(!perms.getPermissionFor(Permission.ACCOUNT_NOTIFICATION_EDIT_EMAIL_TEMPLATE)){
+        b_editEmailTemp=false;
+    }
+
 %>
 <HTML>
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
+<script type="text/javascript"src="/globalsight/jquery/jquery-1.11.3.min.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -205,6 +225,130 @@ function checkItems(notificationCheckbox)
    }
 }
 
+$(document).ready(function() {
+	
+	$("#edit").click(function(){
+	    $.ajax({
+	    	type:'post',
+	    	url:"/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&action=edit",
+	        data:{
+	        	'selectFromValue':document.getElementById("from").value,
+	        	'selectToValue':document.getElementById("to").value,
+	        },
+	        dataType:"json",
+	        success:function(data)
+	        {
+	        	$("#subjectKey").val(data.subjectKey);
+	        	$("#messageKey").val(data.messageKey);
+	        	$("#subjectText").val(data.subjectText);
+	        	$("#messageText").val(data.messageText);
+	        	document.getElementById("editEmailTable").style.display="block";
+	        }
+	    });
+	})
+
+	$("#reset").click(function(){
+		$.ajax({
+			type:'post',
+			url:"/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&action=reset",
+	        data:{
+		          'subjectKey':$("#subjectKey").val(),
+		          'messageKey':$("#messageKey").val(),
+	        },
+		    dataType:"json",
+		    success:function(data)
+		    {
+	        	$("#subjectKey").val(data.subjectKey);
+	        	$("#messageKey").val(data.messageKey);
+	        	$("#subjectText").val(data.subjectText);
+	        	$("#messageText").val(data.messageText);
+		    }
+		});
+	})
+	
+	$("#save").click(function(){
+		$.ajax({
+		    type:'post',
+			url:"/globalsight/ControlServlet?linkName=notification&pageName=MYACCT&&action=save",
+			data:{
+				  'subjectText':$("#subjectText").val(),
+	              'messageText':$("#messageText").val(),
+		          'subjectKey':$("#subjectKey").val(),
+		          'messageKey':$("#messageKey").val(),
+	              },              
+			dataType: "text", 
+			success:function(data){
+				alert(data);
+			},
+			});	
+	})
+	
+ 	$("#from").click(function(){
+ 		var countTo=$("#to option").length;
+ 		var countFrom=$("#from option").length;
+ 		var i=0;
+ 		
+ 		for(var j=0;j<countTo;j++)
+ 		{
+ 			$("#to").get(0).options[j].selected = false;
+ 		}
+ 		
+ 		for(var j=0;j<countFrom;j++) 
+ 		{  
+ 		   if($("#from").get(0).options[j].selected)
+ 		   {
+ 			   i++;
+ 		   }
+ 		}
+ 		
+ 		if(i>1 || i==0)
+ 		{
+ 			document.getElementById("edit").disabled=true;
+ 		}
+ 		else
+ 		{
+ 			document.getElementById("edit").disabled=false;
+ 		}
+ 		
+	}) 
+	
+ 	$("#to").click(function(){
+ 		var countTo=$("#to option").length;
+ 		var countFrom=$("#from option").length;
+ 		var i=0;
+ 		
+ 		for(var j=0;j<countFrom;j++)
+ 		{
+ 			$("#from").get(0).options[j].selected = false;
+ 		}
+ 		
+ 		for(var j=0;j<countTo;j++) 
+ 		{  
+ 		   if($("#to").get(0).options[j].selected)
+ 		   {
+ 			   i++;
+ 		   }
+ 		}
+ 		
+ 		if(i>1 || i==0)
+ 		{
+ 			document.getElementById("edit").disabled=true;
+ 		}
+ 		else
+ 		{
+ 			document.getElementById("edit").disabled=false;
+ 		}
+	}) 
+	
+	$("#addButton").click(function(){
+		document.getElementById("edit").disabled=true;
+	})
+	
+	$("#removeButton").click(function(){
+		document.getElementById("edit").disabled=true;
+	})
+	})
+
 </SCRIPT>
 <style type="text/css">
 .list {
@@ -213,16 +357,18 @@ function checkItems(notificationCheckbox)
 </style>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
-    ONLOAD="loadGuides()">
+    ONLOAD="loadGuides();">
 <%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
     <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108; LEFT: 20px; RIGHT: 20px;">
     <span class="mainHeading"><%=title%></span>
     <p>    
-<form name="notifyForm" method="post">
+<form name="notifyForm" id="notifyForm" method="post">
 <input type="hidden" name="toField" >
 <input type="hidden" name="<%=UserParamNames.NOTIFICATION_ENABLED%>">
+<input type="hidden" id="subjectKey">
+<input type="hidden" id="messageKey">
 <table border="0" bordercolor="green" cellpadding="0" cellspacing="0" >      
   <TR>
     <TD>
@@ -246,7 +392,7 @@ function checkItems(notificationCheckbox)
   </tr>
     <tr>
         <td width="20%">
-        <select name="from" <%=disabled%> multiple class="standardText" size=15 style="width:250">
+        <select name="from"  id="from" <%=disabled%> class="standardText" multiple size=15 style="width:250">
 <%
             if (availableOptions != null)
             {
@@ -264,21 +410,19 @@ function checkItems(notificationCheckbox)
                 			   checkTag = true;
                 		   }
                 	   }
-                	   if(!checkTag)
-                	   {
-%>
-                		   <option value="<%=availableOption%>" ><%=bundle.getString(availableOption)%></option>
-<%
-                	   }
-                   }		       
+                	        if(!checkTag)
+                	        {   
+%>                           
+                		       <option value="<%=availableOption%>"><%=bundle.getString(availableOption)%></option>
+<%               	         }
+               	    }
 					else
 					{
-%>
-                   		<option value="<%=availableOption%>" ><%=bundle.getString(availableOption)%></option>
-<%
-                   	}
+%>                       
+               		   <option value="<%=availableOption%>" ><%=bundle.getString(availableOption)%></option>
+<%               	}
+                   }		       
                 }
-            }
 %>
         </select>
         </td>
@@ -286,21 +430,21 @@ function checkItems(notificationCheckbox)
           <table>
             <tr>
               <td>
-                <input type="button" name="addButton" <%=disabled%> value=" >> "
+                <input type="button" name="addButton" id="addButton" <%=disabled%> value=" >> "
                     onclick="addOption()"><br>
               </td>
             </tr>
             <tr><td>&nbsp;</td></tr>
             <tr>
                 <td>
-                <input type="button" name="removedButton" <%=disabled%> value=" << "
+                <input type="button" name="removedButton" id="removeButton" <%=disabled%> value=" << "
                     onclick="removeOption()">
               </td>
             </tr>
           </table>
         </td>
         <td>
-            <select name="to" <%=disabled%> multiple class="standardText" size=15 style="width:250px">
+            <select name="to" id="to" <%=disabled%> class="standardText" multiple size=15 style="width:250px">
 <%
                 if (addedOptions != null && addedOptions.size() != 0)
                 {
@@ -329,8 +473,23 @@ function checkItems(notificationCheckbox)
             onclick="submitForm('cancel')">    
           <input type="button" name="<%=doneButton %>" value="<%=doneButton %>"
             onclick="submitForm('saveOptions')">
+            <%if(b_editEmailTemp){%>
+          <input type="button" disabled id="edit" value="Edit">
+          <%}%>
         </td>
       </tr>
+</table>
+<table id="editEmailTable" style="display:none">
+<tr><td>&nbsp;&nbsp;</td></tr>
+      <tr><td class="standardText">Subject</td><tr>
+      <tr><td><textarea rows="1" cols="80" id="subjectText"></textarea><td></tr>
+      <tr><td>&nbsp;&nbsp;</td></tr>
+      <tr><td class="standardText">Message</td></tr>
+      <tr><td><textarea rows="10" cols="80" id="messageText"></textarea></td></tr>
+      <tr><td style="padding-top:10px" colspan="3">
+           <input type="button" value="Reset" id="reset">
+           <input type="button" value="Save" id="save">
+      <td></tr>
 </table>
 </form>
 </BODY>

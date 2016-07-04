@@ -33,7 +33,6 @@ import com.globalsight.scheduling.EventSchedulerHelper;
 import com.globalsight.scheduling.FluxEventMap;
 import com.globalsight.scheduling.KeyFlowContext;
 
-
 /**
  * Executes the actual active page reimport when triggered by Quartz
  */
@@ -66,25 +65,24 @@ public class ActivePageReimportEventHandler extends EventHandler
      * @param p_flowContext
      * @exception EventHandlerException
      */
-    public void eventFired(KeyFlowContext p_flowContext)
-            throws EventHandlerException
+    public void eventFired(KeyFlowContext p_flowContext) throws EventHandlerException
     {
         try
         {
             EventInfo myEventInfo = (EventInfo) p_flowContext.getKey();
             if (s_logger.isDebugEnabled())
             {
-                s_logger.debug("Got eventinfo " + myEventInfo);                
+                s_logger.debug("Got eventinfo " + myEventInfo);
             }
-            HashMap map = myEventInfo.getMap();
+            Map map = myEventInfo.getMap();
             if (s_logger.isDebugEnabled())
             {
-                s_logger.debug("Got hashmap " + map);                
+                s_logger.debug("Got hashmap " + map);
             }
             Long id = (Long) map.get("delayedImportRequestId");
             if (s_logger.isDebugEnabled())
             {
-                s_logger.debug("Got delayed import req " + id);                
+                s_logger.debug("Got delayed import req " + id);
             }
             if (s_handledEvents.contains(id))
             {
@@ -98,8 +96,7 @@ public class ActivePageReimportEventHandler extends EventHandler
             String sql = DelayedImportRequestDescriptorModifier.DELAYED_IMPORT_REQ_BY_REQ_ID_SQL;
             Map params = new HashMap();
             params.put("delayedImportRequestId", id);
-            List requests = HibernateUtil.searchWithSql(sql, params,
-                    DelayedImportRequest.class);
+            List requests = HibernateUtil.searchWithSql(sql, params, DelayedImportRequest.class);
             if (requests != null && requests.size() > 0)
             {
                 dir = (DelayedImportRequest) requests.get(0);
@@ -111,7 +108,7 @@ public class ActivePageReimportEventHandler extends EventHandler
             execute(dir);
             if (s_logger.isDebugEnabled())
             {
-                s_logger.debug("Executed task at " + new java.util.Date());                
+                s_logger.debug("Executed task at " + new java.util.Date());
             }
         }
         catch (Exception e)
@@ -142,7 +139,7 @@ public class ActivePageReimportEventHandler extends EventHandler
      * @param p_map
      *            map of event info
      */
-    private void unschedule(HashMap p_map)
+    private void unschedule(Map p_map)
     {
         try
         {

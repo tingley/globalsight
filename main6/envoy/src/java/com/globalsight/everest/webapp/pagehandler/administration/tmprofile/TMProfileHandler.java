@@ -150,10 +150,6 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         {
             clearSessionExceptTableInfo(sess, TMP_KEY);
         }
-        else if (TMProfileConstants.CANCEL_MT_OPTIONS_ACTION.equals(action))
-        {
-            clearSessionExceptTableInfo(sess, TMP_KEY);
-        }
         else if (TMProfileConstants.REMOVE_ACTION.equals(action)) 
         {
         	removeTmProfile(p_request, p_response);

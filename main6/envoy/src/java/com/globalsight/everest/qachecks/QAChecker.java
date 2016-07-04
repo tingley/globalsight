@@ -18,6 +18,7 @@ package com.globalsight.everest.qachecks;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -93,8 +94,7 @@ public class QAChecker
     private static Locale m_uiLocale = Locale.US;
 
     private static ResourceBundle m_bundle = SystemResourceBundle.getInstance()
-            .getResourceBundle(ResourceBundleConstants.LOCALE_RESOURCE_NAME,
-                    m_uiLocale);
+            .getResourceBundle(ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
 
     private CellStyle m_titleStyle = null;
     private CellStyle m_headerStyle = null;
@@ -125,9 +125,7 @@ public class QAChecker
         }
         catch (Exception e)
         {
-            logger.error(
-                    "An error occurred while trying to run QA checks and generate report.",
-                    e);
+            logger.error("An error occurred while trying to run QA checks and generate report.", e);
         }
     }
 
@@ -145,9 +143,8 @@ public class QAChecker
         String srcLang = sourceLocale.getDisplayName(m_uiLocale);
         String trgLang = targetLocale.getDisplayName(m_uiLocale);
 
-        logger.info("Running QA Checks and generating report on "
-                + task.getTaskDisplayName() + "[" + sourceLocale.toString()
-                + "_" + targetLocale.toString() + "].");
+        logger.info("Running QA Checks and generating report on " + task.getTaskDisplayName() + "["
+                + sourceLocale.toString() + "_" + targetLocale.toString() + "].");
 
         Workbook workbook = new SXSSFWorkbook();
 
@@ -173,14 +170,13 @@ public class QAChecker
         }
         else
         {
-            logger.info("Done QA Checks, no issues reported. Report "
-                    + reportPath + " is saved.");
+            logger.info("Done QA Checks, no issues reported. Report " + reportPath + " is saved.");
         }
         return reportPath;
     }
 
-    private boolean writeSegmentInfo(Workbook p_workbook, Sheet p_sheet,
-            Workflow p_workflow) throws Exception
+    private boolean writeSegmentInfo(Workbook p_workbook, Sheet p_sheet, Workflow p_workflow)
+            throws Exception
     {
         boolean processed = false;
         int row = ROW_SEGMENT_START;
@@ -198,21 +194,21 @@ public class QAChecker
         {
             excludItems = tmp.getJobExcludeTuTypes();
         }
-        
+
         long jobId = p_workflow.getJob().getId();
-        Vector<TargetPage> targetPages = p_workflow.getTargetPages();
+        Collection<TargetPage> targetPages = p_workflow.getTargetPages();
         LeverageMatchLingManager leverageMatchLingManager = LingServerProxy
                 .getLeverageMatchLingManager();
-        
+
         for (TargetPage targetPage : targetPages)
         {
             SourcePage sourcePage = targetPage.getSourcePage();
-            MatchTypeStatistics tuvMatchTypes = leverageMatchLingManager
-                    .getMatchTypesForStatistics(sourcePage.getIdAsLong(), targetPage.getLocaleId(),
-                            p_job.getLeverageMatchThreshold());
+            MatchTypeStatistics tuvMatchTypes = leverageMatchLingManager.getMatchTypesForStatistics(
+                    sourcePage.getIdAsLong(), targetPage.getLocaleId(),
+                    p_job.getLeverageMatchThreshold());
             Map<Long, Set<LeverageMatch>> fuzzyLeverageMatcheMap = leverageMatchLingManager
                     .getFuzzyMatches(sourcePage.getIdAsLong(), targetPage.getLocaleId());
-                       
+
             long fileProfileId = sourcePage.getRequest().getDataSourceId();
             FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
                     .readFileProfile(fileProfileId);
@@ -223,14 +219,12 @@ public class QAChecker
                 continue;
             }
             List<QARule> rules = QAFilterManager.getQARules(qaFilter);
-            List<QARuleDefault> rulesDefault = QAFilterManager
-                    .getQARulesDefault(qaFilter);
+            List<QARuleDefault> rulesDefault = QAFilterManager.getQARulesDefault(qaFilter);
             if (rules.size() == 0 && rulesDefault.size() == 0)
             {
                 continue;
             }
-            SortUtil.sort(rules, new QARuleComparator(
-                    QARuleComparator.PRIORITY, m_uiLocale));
+            SortUtil.sort(rules, new QARuleComparator(QARuleComparator.PRIORITY, m_uiLocale));
 
             SegmentTuUtil.getTusBySourcePageId(sourcePage.getId());
             List<Tuv> sourceTuvs = SegmentTuvUtil.getSourceTuvs(sourcePage);
@@ -241,12 +235,12 @@ public class QAChecker
                 Tuv targetTuv = (Tuv) targetTuvs.get(i);
                 Tuv sourceTuv = (Tuv) sourceTuvs.get(i);
                 String sourceSegment = getCompactSegment(sourceTuv, jobId);
-                String displaySourceSegment = rtlSourceLocale ? EditUtil
-                        .toRtlString(sourceSegment) : sourceSegment;
+                String displaySourceSegment = rtlSourceLocale ? EditUtil.toRtlString(sourceSegment)
+                        : sourceSegment;
 
                 String targetSegment = getCompactSegment(targetTuv, jobId);
-                String displayTargetSegment = rtlTargetLocale ? EditUtil
-                        .toRtlString(targetSegment) : targetSegment;
+                String displayTargetSegment = rtlTargetLocale ? EditUtil.toRtlString(targetSegment)
+                        : targetSegment;
 
                 StringBuilder matches = ReportGeneratorUtil.getMatches(fuzzyLeverageMatcheMap,
                         tuvMatchTypes, excludItems, sourceTuvs, targetTuvs, m_bundle, sourceTuv,
@@ -273,12 +267,10 @@ public class QAChecker
                     int matchesInSource = 0;
                     int matchesInTarget = 0;
 
-                    matchesInSource = QACheckerHelper.findMatches(
-                            sourceSegment, check, isRE);
+                    matchesInSource = QACheckerHelper.findMatches(sourceSegment, check, isRE);
                     if (matchesInSource > 0)
                     {
-                        matchesInTarget = QACheckerHelper.findMatches(
-                                targetSegment, check, isRE);
+                        matchesInTarget = QACheckerHelper.findMatches(targetSegment, check, isRE);
                     }
 
                     if (matchesInTarget < matchesInSource)
@@ -291,13 +283,10 @@ public class QAChecker
                             long language = exception.getLanguage();
                             if (language == targetLocale.getId())
                             {
-                                String exceptionContent = exception
-                                        .getExceptionContent();
-                                boolean exceptionIsRE = exception
-                                        .exceptionIsRE();
-                                int exceptionMatches = QACheckerHelper
-                                        .findMatches(targetSegment,
-                                                exceptionContent, exceptionIsRE);
+                                String exceptionContent = exception.getExceptionContent();
+                                boolean exceptionIsRE = exception.exceptionIsRE();
+                                int exceptionMatches = QACheckerHelper.findMatches(targetSegment,
+                                        exceptionContent, exceptionIsRE);
 
                                 matchesInTarget += exceptionMatches;
                             }
@@ -342,18 +331,15 @@ public class QAChecker
                             continue;
                         }
                     }
-                    else if (check
-                            .startsWith(QARuleDefault.TARGET_STRING_EXPANSION_OF))
+                    else if (check.startsWith(QARuleDefault.TARGET_STRING_EXPANSION_OF))
                     {
                         int targetExpansion = ruleDefault.getTargetExpansion();
                         if (targetExpansion > 0)
                         {
-                            int dif = targetSegment.length()
-                                    - sourceSegment.length();
+                            int dif = targetSegment.length() - sourceSegment.length();
                             if (dif > 0)
                             {
-                                int expansion = (int) ((float) dif
-                                        / sourceSegment.length() * 100);
+                                int expansion = (int) ((float) dif / sourceSegment.length() * 100);
                                 if (expansion < targetExpansion)
                                 {
                                     continue;
@@ -371,10 +357,9 @@ public class QAChecker
                     }
                     Row currentRow = getRow(p_sheet, row);
 
-                    fillCells(p_workbook, currentRow, p_workflow, jobId,
-                            rtlSourceLocale, rtlTargetLocale, sourcePage,
-                            sourceTuv, displaySourceSegment,
-                            displayTargetSegment,matches,ruleDefault.getDescription());
+                    fillCells(p_workbook, currentRow, p_workflow, jobId, rtlSourceLocale,
+                            rtlTargetLocale, sourcePage, sourceTuv, displaySourceSegment,
+                            displayTargetSegment, matches, ruleDefault.getDescription());
                     row++;
                     processed = true;
                 }
@@ -382,15 +367,15 @@ public class QAChecker
         }
         if (processed)
         {
-			addFalsePositiveValidation(p_sheet, row - 1);
+            addFalsePositiveValidation(p_sheet, row - 1);
         }
         return processed;
     }
-    
-    private void fillCells(Workbook p_workbook, Row p_currentRow, Workflow p_workflow,
-            long p_jobId, boolean p_rtlSourceLocale, boolean p_rtlTargetLocale,
-            SourcePage p_sourcePage, Tuv p_sourceTuv, String p_sourceSegment,
-            String p_targetSegment, StringBuilder matches, String p_desc)
+
+    private void fillCells(Workbook p_workbook, Row p_currentRow, Workflow p_workflow, long p_jobId,
+            boolean p_rtlSourceLocale, boolean p_rtlTargetLocale, SourcePage p_sourcePage,
+            Tuv p_sourceTuv, String p_sourceSegment, String p_targetSegment, StringBuilder matches,
+            String p_desc)
     {
         int col = 0;
 
@@ -402,8 +387,7 @@ public class QAChecker
 
         // Page Name
         StringBuilder sb = new StringBuilder();
-        sb.append(AmbFileStoragePathUtils.getCxeDocDir(p_workflow
-                .getCompanyId()));
+        sb.append(AmbFileStoragePathUtils.getCxeDocDir(p_workflow.getCompanyId()));
         sb.append(File.separator);
         sb.append(SourcePage.filtSpecialFile(p_sourcePage.getExternalPageId()));
 
@@ -446,7 +430,7 @@ public class QAChecker
         TMmatchCell.setCellValue(matches.toString());
         TMmatchCell.setCellStyle(contentStyle);
         col++;
-        
+
         // False Positive
         Cell falsePositiveCell = getCell(p_currentRow, col);
         falsePositiveCell.setCellValue(FALSE_POSITIVE_NO);
@@ -459,19 +443,16 @@ public class QAChecker
         commentsCell.setCellStyle(getUnlockedStyle(p_workbook));
     }
 
-	private void addFalsePositiveValidation(Sheet p_sheet, int p_lastRow)
+    private void addFalsePositiveValidation(Sheet p_sheet, int p_lastRow)
     {
         DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
 
-        DataValidationConstraint dvConstraint = dvHelper
-                .createExplicitListConstraint(new String[]
-                { FALSE_POSITIVE_YES, FALSE_POSITIVE_NO });
-        CellRangeAddressList addressList = new CellRangeAddressList(
-                ROW_SEGMENT_START, p_lastRow, COLUMN_FALSE_POSITIVE,
-                COLUMN_FALSE_POSITIVE);
+        DataValidationConstraint dvConstraint = dvHelper.createExplicitListConstraint(new String[]
+        { FALSE_POSITIVE_YES, FALSE_POSITIVE_NO });
+        CellRangeAddressList addressList = new CellRangeAddressList(ROW_SEGMENT_START, p_lastRow,
+                COLUMN_FALSE_POSITIVE, COLUMN_FALSE_POSITIVE);
 
-        DataValidation validation = dvHelper.createValidation(dvConstraint,
-                addressList);
+        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
         validation.setSuppressDropDownArrow(true);
         validation.setShowErrorBox(true);
 
@@ -499,8 +480,7 @@ public class QAChecker
             {
                 GxmlElement sub = (GxmlElement) subFlows.get(i);
                 String subId = sub.getAttribute(GxmlNames.SUB_ID);
-                segment.append("\r\n#").append(tuId).append(":").append(subId)
-                        .append("\n")
+                segment.append("\r\n#").append(tuId).append(":").append(subId).append("\n")
                         .append(getCompactPtagString(sub, dataType));
             }
         }
@@ -508,8 +488,8 @@ public class QAChecker
         return segment.toString();
     }
 
-    private String getCompactPtagString(GxmlElement p_gxmlElement,
-            String p_dataType) throws Exception
+    private String getCompactPtagString(GxmlElement p_gxmlElement, String p_dataType)
+            throws Exception
     {
         String compactPtags = null;
 
@@ -522,8 +502,7 @@ public class QAChecker
         return compactPtags;
     }
 
-    public String saveReportFile(Workbook p_workbook, Task p_task)
-            throws Exception
+    public String saveReportFile(Workbook p_workbook, Task p_task) throws Exception
     {
         StringBuilder sb = new StringBuilder();
 
@@ -547,43 +526,37 @@ public class QAChecker
         Row segHeaderRow = getRow(p_sheet, row);
 
         Cell descCell = getCell(segHeaderRow, col);
-        descCell.setCellValue(m_bundle
-                .getString("lb_report_qa_report_description"));
+        descCell.setCellValue(m_bundle.getString("lb_report_qa_report_description"));
         descCell.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col, 30 * 256);
         col++;
 
         Cell pageNamecell = getCell(segHeaderRow, col);
-        pageNamecell.setCellValue(m_bundle
-                .getString("lb_report_qa_report_page_name"));
+        pageNamecell.setCellValue(m_bundle.getString("lb_report_qa_report_page_name"));
         pageNamecell.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col, 30 * 256);
         col++;
 
         Cell jobIdCell = getCell(segHeaderRow, col);
-        jobIdCell
-                .setCellValue(m_bundle.getString("lb_report_qa_report_job_id"));
+        jobIdCell.setCellValue(m_bundle.getString("lb_report_qa_report_job_id"));
         jobIdCell.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col, 12 * 256);
         col++;
 
         Cell segmentIdCell = getCell(segHeaderRow, col);
-        segmentIdCell.setCellValue(m_bundle
-                .getString("lb_report_qa_report_segment_id"));
+        segmentIdCell.setCellValue(m_bundle.getString("lb_report_qa_report_segment_id"));
         segmentIdCell.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col, 12 * 256);
         col++;
 
         Cell sourceCell = getCell(segHeaderRow, col);
-        sourceCell.setCellValue(m_bundle
-                .getString("lb_report_qa_report_source"));
+        sourceCell.setCellValue(m_bundle.getString("lb_report_qa_report_source"));
         sourceCell.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
         Cell targetCell = getCell(segHeaderRow, col);
-        targetCell.setCellValue(m_bundle
-                .getString("lb_report_qa_report_target"));
+        targetCell.setCellValue(m_bundle.getString("lb_report_qa_report_target"));
         targetCell.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
@@ -593,17 +566,15 @@ public class QAChecker
         TMmatchCell.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
-        
+
         Cell falsePositiveCell = getCell(segHeaderRow, col);
-        falsePositiveCell.setCellValue(m_bundle
-                .getString("lb_report_qa_report_false_positive"));
+        falsePositiveCell.setCellValue(m_bundle.getString("lb_report_qa_report_false_positive"));
         falsePositiveCell.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
         Cell commentsCell = getCell(segHeaderRow, col);
-        commentsCell.setCellValue(m_bundle
-                .getString("lb_report_qa_report_comments"));
+        commentsCell.setCellValue(m_bundle.getString("lb_report_qa_report_comments"));
         commentsCell.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col, 40 * 256);
     }
@@ -615,19 +586,17 @@ public class QAChecker
 
         Row langRow = getRow(p_sheet, row);
         Cell srcLangCell = getCell(langRow, col);
-        srcLangCell.setCellValue(m_bundle
-                .getString("lb_report_qa_report_source_language"));
+        srcLangCell.setCellValue(m_bundle.getString("lb_report_qa_report_source_language"));
         srcLangCell.setCellStyle(getHeaderStyle(p_workbook));
         col++;
 
         Cell trgLangCell = getCell(langRow, col);
-        trgLangCell.setCellValue(m_bundle
-                .getString("lb_report_qa_report_target_language"));
+        trgLangCell.setCellValue(m_bundle.getString("lb_report_qa_report_target_language"));
         trgLangCell.setCellStyle(getHeaderStyle(p_workbook));
     }
 
-    private void writeLanguageInfo(Workbook p_workbook, Sheet p_sheet,
-            String p_sourceLang, String p_targetLang) throws Exception
+    private void writeLanguageInfo(Workbook p_workbook, Sheet p_sheet, String p_sourceLang,
+            String p_targetLang) throws Exception
     {
         int row = ROW_LANGUAGE_INFO;
         int col = 0;
@@ -643,12 +612,10 @@ public class QAChecker
         trgLangCell.setCellStyle(getContentStyle(p_workbook));
     }
 
-    private void addHiddenInfoForUpload(Workbook p_workbook, Sheet p_sheet,
-            long p_taskId)
+    private void addHiddenInfoForUpload(Workbook p_workbook, Sheet p_sheet, long p_taskId)
     {
         int hiddenColumn = COLUMN_HIDDEN_INFO;
-        String hiddenValue = ReportConstants.PREFIX_QA_CHECKS_REPORT + "_"
-                + p_taskId;
+        String hiddenValue = ReportConstants.PREFIX_QA_CHECKS_REPORT + "_" + p_taskId;
         Row titleRow = getRow(p_sheet, 0);
         Cell hiddenCell = getCell(titleRow, hiddenColumn);
         hiddenCell.setCellValue(hiddenValue);

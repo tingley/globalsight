@@ -16,16 +16,17 @@
  */
 package com.globalsight.everest.util.comparator;
 
-import java.util.Comparator;
 import java.util.Locale;
+
 import com.globalsight.util.GlobalSightLocale;
 
 /**
  * This class can be used to compare GlobalSightLocale objects
  */
-public class GlobalSightLocaleComparator
-    extends StringComparator
+public class GlobalSightLocaleComparator extends StringComparator
 {
+    private static final long serialVersionUID = 3676427632431857339L;
+
     //types of GlobalSightLocale comparison
     public static final int DISPLAYNAME = 0;
     public static final int ISO_CODE = 1;

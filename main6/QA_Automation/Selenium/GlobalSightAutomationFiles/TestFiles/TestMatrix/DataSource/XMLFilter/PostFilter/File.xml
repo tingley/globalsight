@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Export ID:c7b86da7-97dc-46c5-bdd4-f8b0b60b5fb0-->
+<!--Luminosity Version:1.0.0.0-->
+<!--Project ID:434d2ca2-62ac-46cf-9507-29fa01927a78-->
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file original="434d2ca2-62ac-46cf-9507-29fa01927a78/ProjectMetadata" source-language="en-US" target-language="fr-FR" datatype="x-xaml">
+        <body>
+            <group>
+                <trans-unit id="Description">
+                    <target>&lt;b&gt;&lt;font style='FONT-SIZE: 10pt; FONT-FAMILY: Arial; FONT-WEIGHT: strong; color:#003366'&gt;High scorers on Making &lt; 5% Effective Judgments and Decisions are more likely to demonstrate on-the-job behaviors such as:&lt;/font&gt;&lt;/b&gt;&lt;br&gt;
+&lt;font style='FONT-SIZE: 12pt; FONT-FAMILY: Arial;'&gt;&amp;#8226;&lt;/font&gt;&amp;nbsp;Seeking and using feedback and other sources of information to identify appropriate areas for learning.&lt;br&gt;
+&lt;font style='FONT-SIZE: 12pt; FONT-FAMILY: Arial;'&gt;&amp;#8226;&lt;/font&gt;&amp;nbsp;Actively participating in learning activities.&lt;br&gt;
+&lt;font style='FONT-SIZE: 12pt; FONT-FAMILY: Arial;'&gt;&amp;#8226;&lt;/font&gt;&amp;nbsp;Putting self in unfamiliar situations in order to learn.&lt;br&gt;
+&lt;font style='FONT-SIZE: 12pt; FONT-FAMILY: Arial;'&gt;&amp;#8226;&lt;/font&gt;&amp;nbsp;Clarifies expected performance of others.&lt;br&gt;
+&lt;font style='FONT-SIZE: 12pt; FONT-FAMILY: Arial;'&gt;&amp;#8226;&lt;/font&gt;&amp;nbsp;Provides instruction, positive models, and opportunities to practice newly acquired skills.&lt;br&gt;
+&lt;font style='FONT-SIZE: 12pt; FONT-FAMILY: Arial;'&gt;&amp;#8226;&lt;/font&gt;&amp;nbsp;Encourages questions to ensure understanding.&lt;br&gt;
+&lt;font style='FONT-SIZE: 12pt; FONT-FAMILY: Arial;'&gt;&amp;#8226;&lt;/font&gt;&amp;nbsp;Gives timely, appropriate feedback on performance.&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;</target>
+                </trans-unit>
+            </group>
+        </body>
+    </file>
+</xliff>

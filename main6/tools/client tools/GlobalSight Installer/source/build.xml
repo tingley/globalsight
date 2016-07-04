@@ -59,11 +59,6 @@
 				<include name="log4j.xml" />
 			</fileset>
 		</copy>
-		<copy verbose="${verbose}" overwrite="true" todir="installer_root">
-			<fileset dir=".">
-				<include name="config.properties" />
-			</fileset>
-		</copy>
 	</target>
 
 	<target name="buildPatch" depends="buildInstaller">

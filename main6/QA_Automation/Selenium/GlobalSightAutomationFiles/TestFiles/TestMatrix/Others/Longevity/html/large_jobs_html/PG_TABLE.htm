@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:conditions="Primary.Empower" MadCap:id="com_page\PG_TABLE.htm" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.In Progress" MadCap:lastBlockDepth="5" MadCap:lastHeight="1746" MadCap:lastWidth="577">
+    <head><title>Table Tab</title>
+    </head>
+    <body>
+        <h1>Table 
+ tab</h1>
+        <p class="para">Use this tab to define the content (table columns, column 
+ order) and general characteristics of a custom report group table.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ Units for the columns in a table appear in the table column headings.</p>
+        <h2>Available fields list</h2>
+        <p class="para">Fields in the Empower database available to include in the 
+ table. Click an item to view the list of available fields, then double-click 
+ (or drag) the desired field in the Available Fields tree. The field is 
+ added to the Table Template as a column. </p>
+        <p class="para">
+            <MadCap:concept term="Report Table" /><span class="emphasisbold">Note:</span> 
+ The Available Fields list also includes the Result Sign Off database fields 
+ (Sign Off Date, Sign Off Full Name, and Sign Off Reason). To view the 
+ result sign-off information, create a report table that contains the Result 
+ Signoff database fields. This table can also contain sample- and channel-level 
+ information to further identify results. </p>
+        <h2>Table title</h2>
+        <p class="para">Title directly above the table. The table title can have 
+ up to 250 alphanumeric characters without restrictions. If multiple lines 
+ are required, press Ctrl+Enter to force the title onto multiple lines. 
+ </p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ When you specify a table title, ensure that the title is not wider than 
+ the potential table-width. If the title is longer than the generated table, 
+ the title is truncated. Correct this problem by shortening the title or 
+ forcing it onto multiple lines.</p>
+        <h2>Alignment</h2>
+        <p class="para">Position of the title above the table. </p>
+        <p class="para"><span class="emphasisbold">Choices:</span> 
+ Left Alignment, Center Alignment, Right Alignment</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Center Alignment</p>
+        <h2>Table template</h2>
+        <p class="para">Headings and order of the table columns as they are moved 
+ from the Available Fields list. To move a column, drag it to a different 
+ location in the Table Template. </p>
+        <p class="para">You can also right-click a column to access shortcut menu 
+ options. The options that appear depend on the report group you select 
+ and the condition of the table.</p>
+        <p class="para"><span class="emphasisbold">Attention:</span> 
+ Do not select Ascend or Descend for a column if it is not available on 
+ the Order By tab. Doing so might result in data not appearing in the table.</p>
+        <p class="para"><span class="emphasisbold">Choices:</span>
+        </p>
+        <ul>
+            <li class="listbull" style="font-weight: normal;">Ascend 
+ – Sorts values in the column in ascending order.</li>
+            <li class="listbull" style="font-weight: normal;">Descend 
+ – Sorts values in the column in descending order.</li>
+            <li class="listbull" style="font-weight: normal;">No Order 
+ – Removes sorting from the column. This option is available if Ascend 
+ or Descend is used.</li>
+            <li class="listbull" style="font-weight: normal;">Hide Column 
+ – Hides the selected column.</li>
+            <li class="listbull" style="font-weight: normal;">Show All 
+ Columns – Displays all columns in the table.</li>
+            <li class="listbull" style="font-weight: normal;">Delete 
+ Column – Deletes the selected column.</li>
+            <li class="listbull" style="font-weight: normal;">Column 
+ Properties – Accesses the Column Properties dialog box, where you change 
+ the name, alignment, data precision, and summary function of the column.</li>
+            <li class="listbull">Table Properties – Accesses 
+ the Table Properties dialog box.</li>
+        </ul>
+        <p class="para">To delete a column from the Table Template, right-click the 
+ column name, then select Delete Column (or highlight the columns and press 
+ Delete). You cannot leave blanks between columns.</p>
+        <p class="para"><span class="emphasisbold">Note:</span> 
+ You can also specify sorting order in the individual columns of the Table 
+ Template.</p>
+        <h3><span style="font-weight: bold;font-style: normal;">Column properties</span>
+        </h3>
+        <p class="para">Accesses the Column Properties dialog box to modify the attributes 
+ of a specified column in the Table tab. To modify column attributes, select 
+ the corresponding column in the Table Template, then click Column Properties. 
+ After redefining column attributes, click OK to return to the Table tab.</p>
+        <h3><span style="font-weight: bold;font-style: normal;">Print blank columns</span>
+        </h3>
+        <p class="para">Prints table columns that do not contain values. </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Enabled</p>
+        <h3>Include Duplicate Results </h3>
+        <p class="para">Reported data includes duplicate results that have the same 
+ Channel ID. Duplicate results for standards occur when calibrating using 
+ bracketing with overlap. When calculating summary information, such as 
+ the % RSD, for bracketed standards throughout a sample set, to include 
+ each bracketed standard only once in the calculation, clear this checkbox 
+ to exclude the duplicate results (those with the smaller result ID). </p>
+        <p class="para"><span class="emphasisbold">Default:</span> Enabled</p>
+    </body>
+</html>

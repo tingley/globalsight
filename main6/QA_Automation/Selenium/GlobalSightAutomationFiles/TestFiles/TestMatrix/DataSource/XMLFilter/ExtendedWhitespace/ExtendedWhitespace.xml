@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dita>
+	<p name="no_bwcontacts">here are extended whitespaces. *****--*****</p>
+<p name="import_summary">%d contact(s) imported</p>
+<p name="wait_importing">Please wait while contacts are being imported...</p>
+<p name="wait_deleting">Please wait while contacts are being deleted...</p>
+<p>here are extended whitespaces. *****--*****</p>
+<p> ***** here are extended whitespaces 1 *****</p>
+<p> ----- here are extended whitespaces 2 -----</p>
+<p> *****--*****</p>
+<p>extended whitespaces 3: ~~~~~ !!!!! @@@@@@ </p>
+<p>extended whitespaces 4: ^^^^^ ((((( </p>
+<p>extended whitespaces 5: ))))) _____ +++++ </p>
+<p>extended whitespaces 6: ||||| {{{{{ }}}}} </p>
+<p>extended whitespaces 7: ::::: ????? </p>
+<p>extended whitespaces 8: ///// </p>
+</dita>

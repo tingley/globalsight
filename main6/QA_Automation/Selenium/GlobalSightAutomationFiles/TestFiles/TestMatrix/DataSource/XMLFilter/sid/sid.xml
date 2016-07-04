@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<MailblocksConfig>
+	   <IncludeFile name="KeyboardShortcuts.xml" required="false" />
+	   <Component name="Strings">
+		   <Setting key="sid_key_001"> value here </Setting>
+</Component>
+</MailblocksConfig>

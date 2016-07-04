@@ -1332,19 +1332,6 @@ function openAutoPropagate()
 	    <A href="#" onclick="showTermbases(); return false;"
 	     CLASS="HREFBoldWhite" title="<%=lb_showTermbases%>">
 	    <%=lb_termbases%></A> |
-	    <%
-	    if (b_snippets)
-	    {
-	      if (!state.getIsReviewActivity() && state.canEditSnippets())
-	      {
-	    %>
-	    <A href="#" onclick="showSnippetEditor(); return false;"
-	     CLASS="HREFBoldWhite" title="<%=lb_editLocaleContent%>">
-	     <%=lb_snippetEditor%></A> |
-	    <%
-	      }
-	    }
-	    %>
 	    <A HREF="#" onclick="showPageInfo(); return false;"
 	    CLASS="HREFBoldWhite"><%=lb_pageInfo%></A> |
 	    <A HREF="#" onclick="showOptions(); return false;"

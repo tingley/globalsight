@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.globalsight.everest.foundation.WorkObject;
+import com.globalsight.everest.taskmanager.Task;
 
 /**
  * Manages comments and their attachments (reference file information), and also
@@ -374,4 +375,6 @@ public interface CommentManager
     public void deleteIssues(int p_levelObjectType, List p_levelObjectIds)
             throws RemoteException, CommentException;
 
+    public ArrayList<CommentFile> getActivityCommentAttachments(Task p_task)
+            throws CommentException, RemoteException;
 }

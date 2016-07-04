@@ -2,18 +2,39 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
 <suite name="Smoke test" parallel="none">
-  <test name="CHECK 14 - ChangePermissionGroups" preserve-order="true">
+<!--
+    <test name="CHECK 01 and 02 - CreateNewCompany" preserve-order="true">
     <classes>
-      <class name="com.globalsight.selenium.testcases.smoketest.ChangePermissionGroups"/>
+      <class name="com.globalsight.selenium.testcases.smoketest.CreateCompany"/>
     </classes>
   </test>
   
+      
+      <test name="CHECK 03.01 - CreateSuperUsers" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.CreateSuperUsers"/>
+    </classes>
+    </test>
+    
+   <test name="CHECK 03.02 - AddDefaultRoles" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.AddDefaultRoles"/>
+    </classes>
+    </test>
+
+
   <test name="CHECK 05 - CreateLocalePairs" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.CreateLocalePairs"/>
     </classes>
-  </test> 
-  
+  </test>
+
+	<test name="CHECK 14 - ChangePermissionGroups" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.ChangePermissionGroups"/>
+    </classes>
+  </test>
+
   <test name="CHECK 06.01 - CreateAttribute" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.CreateAttribute"/>
@@ -26,11 +47,7 @@
     </classes>
   </test>  
   
-  <test name="CHECK 06.03 - RemoveAttribute" preserve-order="true">
-    <classes>
-      <class name="com.globalsight.selenium.testcases.smoketest.RemoveAttribute"/>
-  </classes>
-  </test> 
+
   <test name="CHECK 07.01 - CreateAttributeGroup" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.CreateAttributeGroup"/>
@@ -43,31 +60,7 @@
     </classes>
   </test>
   
-  <test name="CHECK 07.03 - RemoveAttributeGroups" preserve-order="true">
-    <classes>
-      <class name="com.globalsight.selenium.testcases.smoketest.RemoveAttributeGroups"/>
-    </classes>
-  </test>
-  
-  <test name="CHECK 11.01 - CreateActivityType" preserve-order="true">
-    <classes>
-      <class name="com.globalsight.selenium.testcases.smoketest.CreateActivityType"/>
-    </classes>
-  </test>
-  
-  <test name="CHECK 11.02 - EditActivityType" preserve-order="true">
-    <classes>
-      <class name="com.globalsight.selenium.testcases.smoketest.EditActivityType"/>
-    </classes>
-  </test>
-  
-  <test name="CHECK 11.03 - RemoveActivityType" preserve-order="true">
-    <classes>
-      <class name="com.globalsight.selenium.testcases.smoketest.RemoveActivityType"/>
-    </classes>
-  </test> 
-  
-  <test name="CHECK 08.01 - CreateAutomaticActions" preserve-order="true">
+   <test name="CHECK 08.01 - CreateAutomaticActions" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.CreateAutomaticActions"/>
     </classes>
@@ -79,11 +72,16 @@
     </classes>
   </test>
   
-  <test name="CHECK 08.03 - RemoveAutomaticActions" preserve-order="true">
+
+  <test name="CHECK 11.01 - CreateActivityType" preserve-order="true">
     <classes>
-      <class name="com.globalsight.selenium.testcases.smoketest.RemoveAutomaticActions"/>
+      <class name="com.globalsight.selenium.testcases.smoketest.CreateActivityType"/>
     </classes>
   </test>
+  
+
+  
+
   
   <test name="CHECK 12.01 - CreateCurrency" preserve-order="true">
     <classes>
@@ -120,17 +118,8 @@
       <class name="com.globalsight.selenium.testcases.smoketest.RemoveRates"/>
     </classes>
   </test>  
-  <test name="CHECK 03.01 - CreateSuperUsers" preserve-order="true">
-    <classes>
-      <class name="com.globalsight.selenium.testcases.smoketest.CreateSuperUsers"/>
-    </classes>
-    </test>
-   <test name="CHECK 03.02 - AddDefaultRoles" preserve-order="true">
-    <classes>
-      <class name="com.globalsight.selenium.testcases.smoketest.AddDefaultRoles"/>
-    </classes>
-    </test>
-    
+
+
    <test name="CHECK 15.01 - CreateUsers" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.CreateUsers"/>
@@ -232,7 +221,13 @@
       <class name="com.globalsight.selenium.testcases.smoketest.TMRemove"/>
     </classes>
   </test> 
-   
+  
+  
+   <test name="CHECK 16.01 - CreateTM" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.CreateTM"/>
+    </classes>
+  </test>
   <test name="CHECK 17.01 - CreateTMProfile" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.CreateTMProfile"/>
@@ -245,13 +240,13 @@
     </classes>
   </test>
   
-  <!--<test name="CHECK 17.03 - CreateMTOptions" preserve-order="true">
+  <test name="CHECK 17.03 - CreateMTOptions" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.CreateMTOptions"/>
     </classes>
   </test>
 
-  --><test name="CHECK 18.01 - Terminology" preserve-order="true">
+  <test name="CHECK 18.01 - Terminology" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.Terminology"/>
     </classes>
@@ -287,13 +282,13 @@
     </classes>
   </test> 
 
-<!-- Search term page is changed. So it may need to re-write.
+ Search term page is changed. So it may need to re-write.
    <test name="CHECK 18.07 - SearchTermforTermbase" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.SearchTermforTermbase"/>
     </classes>
   </test> 
--->
+
 
   <test name="CHECK 18.08 - TerminologyEdit" preserve-order="true">
     <classes>
@@ -367,7 +362,7 @@
     </classes>
   </test>
   
-  <!--<test name="CHECK 21.03 - AddWFofLocalizationProfile" preserve-order="true">
+  <test name="CHECK 21.03 - AddWFofLocalizationProfile" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.AddWFofLocalizationProfile"/>
     </classes>
@@ -378,31 +373,6 @@
       <class name="com.globalsight.selenium.testcases.smoketest.EditWFofLocalizationProfiles"/>
     </classes>
   </test>  
-  
-    --><test name="CHECK 26.01 - CreateFileProfile" preserve-order="true">
-    <classes>
-      <class name="com.globalsight.selenium.testcases.smoketest.CreateFileProfile"/>
-    </classes>
-  </test> 
-  
-  <test name="CHECK 26.02 - FileProfile_Remove" preserve-order="true">
-    <classes>
-      <class name="com.globalsight.selenium.testcases.smoketest.FileProfile_Remove"/>
-    </classes>
-  </test> 
-  
-    <test name="CHECK 24.01 - CreateFileExtension" preserve-order="true">
-    <classes>
-      <class name="com.globalsight.selenium.testcases.smoketest.CreateFileExtension"/>
-    </classes>
-  </test> 
-  
-  <test name="CHECK 24.02 - FileExtension_Remove" preserve-order="true">
-    <classes>
-      <class name="com.globalsight.selenium.testcases.smoketest.FileExtension_Remove"/>
-    </classes>
-  </test> 
-  
   <test name="CHECK 22.01 - CreateXMLRule" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.CreateXMLRule"/>
@@ -426,6 +396,17 @@
       <class name="com.globalsight.selenium.testcases.smoketest.TestXMLDTD"/>
     </classes>
   </test> 
+     <test name="CHECK 24.01 - CreateFileExtension" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.CreateFileExtension"/>
+    </classes>
+  </test> 
+  
+  <test name="CHECK 24.02 - FileExtension_Remove" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.FileExtension_Remove"/>
+    </classes>
+  </test> 
   
   <test name="CHECK 25.01 - CreateFilters" preserve-order="true">
     <classes>
@@ -443,8 +424,22 @@
     <classes>
       <class name="com.globalsight.selenium.testcases.smoketest.RemoveFilter"/>
     </classes>
+ 
   </test>
-     
+    <test name="CHECK 26.01 - CreateFileProfile" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.CreateFileProfile"/>
+    </classes>
+  </test> 
+  
+   -->
+  <test name="CreateJobs" preserve-order="true">
+        <classes>
+            <class name="com.globalsight.selenium.testcases.dataprepare.smoketest.job.CreateJobs"/>
+        </classes>
+    </test>
+  
+
 </suite>
 
 

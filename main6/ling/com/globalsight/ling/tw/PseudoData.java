@@ -53,6 +53,8 @@ public class PseudoData
     private int m_nBaseUniqueIndex = 1; // must start at 1
     // A array of objects that represent all tagss in te source
     private Vector m_SrcCompleteTagList = new Vector();
+    
+    private Vector unmapTags = null;
     // Locale (for now its just for error messages)
     private Locale m_locale = null;
     // Ptag resources
@@ -253,16 +255,6 @@ public class PseudoData
     public boolean isAddableAllowed()
     {
         return (m_nAddablesMode != PseudoConstants.ADDABLES_DISABLED) ? true : false;
-    }
-
-    /**
-     * "LF" tag is always taken as addable tag.
-     * 
-     * @since GBS-4336
-     */
-    public boolean isAddableAllowed(String p_tagName)
-    {
-        return "LF".equals(p_tagName) ? true : isAddableAllowed();
     }
 
     /**
@@ -729,14 +721,6 @@ public class PseudoData
         NBSP_Data.put(PseudoConstants.ADDABLE_HTML_CONTENT, "&nbsp;");
         NBSP_Data.put(PseudoConstants.ADDABLE_RTF_CONTENT, "\\~");
 
-        // LF
-        String strLf = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.LF);
-        Hashtable lfData = new Hashtable();
-        lfData.put(PseudoConstants.ADDABLE_TMX_TAG, "ph");
-        lfData.put(PseudoConstants.ADDABLE_TMX_TYPE, strLf);
-        lfData.put(PseudoConstants.ADDABLE_ATTR_ERASABLE, erasableVal);
-        lfData.put(PseudoConstants.ADDABLE_HTML_CONTENT, "\n");
-
         // br
         String strBr = TmxTagGenerator.getInlineTypeName(TmxTagGenerator.X_BR);
 
@@ -862,7 +846,6 @@ public class PseudoData
         p.put(strFF, new PseudoOverrideMapItem(strFF, false, "formfeed", "ff", true, null));
         p.put(cStrFF, new PseudoOverrideMapItem(cStrFF, false, "FORM_FEED", "FF", true, null));
         p.put(strNbsp, new PseudoOverrideMapItem(strNbsp, false, "nbsp", "nbsp", false, NBSP_Data));
-        p.put(strLf, new PseudoOverrideMapItem(strLf, false, "LF", "LF", false, lfData));
         p.put(strBr, new PseudoOverrideMapItem(strBr, false, "break", "br", false, BR_Data));
         p.put(cStrBr, new PseudoOverrideMapItem(cStrBr, false, "BREAK", "BR", false, C_BR_Data));
         p.put(strStrong,
@@ -1104,6 +1087,40 @@ public class PseudoData
             if (SrcItem.getPTagName().equals(p_TrgPTag))
             {
                 return SrcItem;
+            }
+        }
+
+        return null;
+    }
+    
+    private Vector getUnmapTags()
+    {
+        if (unmapTags == null)
+        {
+            unmapTags = new Vector<>();
+            if (m_SrcCompleteTagList != null)
+                unmapTags.addAll(m_SrcCompleteTagList);
+        }
+        
+        return unmapTags;
+    }
+    
+    public TagNode findUnmapSrcItemByTrgName(String p_TrgPTag)
+    {
+        Vector tags = getUnmapTags();
+        if (tags == null || (p_TrgPTag.length() == 0))
+        {
+            return null;
+        }
+
+        Enumeration SrcEnumerator = tags.elements();
+        while (SrcEnumerator.hasMoreElements())
+        {
+            TagNode srcItem = (TagNode) SrcEnumerator.nextElement();
+            if (srcItem.getPTagName().equals(p_TrgPTag))
+            {
+                tags.remove(srcItem);
+                return srcItem;
             }
         }
 
@@ -1453,7 +1470,7 @@ public class PseudoData
                 // for mapped types we can force them to be numbered.
                 if (nativeCodeID != null)
                 {
-                    if (PNameItem.m_bNumbered || !isAddableAllowed(tag))
+                    if (PNameItem.m_bNumbered || (p_bMakeNumbered == true) || (!isAddableAllowed()))
                     {
                         tag = tag + nativeCodeID;
                     }

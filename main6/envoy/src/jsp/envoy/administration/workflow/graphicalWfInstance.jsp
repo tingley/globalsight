@@ -255,14 +255,18 @@ function onClose() {
              </td>
          </tr>
          <tr class="tableRowOddTM">
-             <td>
+             <td colspan="2">
                  <b><%=bundle.getString("lb_report_upload_check")%>:</b>
-             </td>
-             <td>
                  <input type="checkbox" id="uploadCheckbox">
              </td>
          </tr>
          <tr class="tableRowEvenTM">
+              <td colspan="2">
+                  <b><%=bundle.getString("lb_activity_comment_upload_check")%>:</b>
+                  <input type="checkbox" id="activityCommentCheckbox">
+              </td>
+         </tr>
+         <tr class="tableRowOddTM">
              <td>
                  <b><%=bundle.getString("lb_time_accept")%>:</b>
              </td>
@@ -275,7 +279,7 @@ function onClose() {
                  <%=bundle.getString("lb_abbreviation_minute")%>
              </td>
          </tr>
-         <tr class="tableRowOddTM">
+         <tr class="tableRowEvenTM">
              <td>
                  <b><%=bundle.getString("lb_time_complete")%>:</b>
              </td>
@@ -288,7 +292,7 @@ function onClose() {
                  <%=bundle.getString("lb_abbreviation_minute")%>
              </td>
          </tr>
-         <tr class="tableRowEvenTM">
+         <tr class="tableRowOddTM">
              <td>
                  <b><%=bundle.getString("lb_Overdue_PM")%>:</b>
              </td>
@@ -301,7 +305,7 @@ function onClose() {
                  <%=bundle.getString("lb_abbreviation_minute")%>
              </td>
          </tr>
-         <tr class="tableRowOddTM">
+         <tr class="tableRowEvenTM">
              <td>
                  <b><%=bundle.getString("lb_Overdue_user")%>:</b>
              </td>
@@ -314,7 +318,7 @@ function onClose() {
                  <%=bundle.getString("lb_abbreviation_minute")%>
              </td>
          </tr>
-         <tr class="tableRowEvenTM">
+         <tr class="tableRowOddTM">
              <td>
                  <b><%=bundle.getString("lb_participant")%>:</b>
              </td>
@@ -345,7 +349,7 @@ function onClose() {
                  </div>
              </td>
          </tr>
-         <tr class="tableRowOddTM">
+         <tr class="tableRowEvenTM">
              <td>
                  <b><%=bundle.getString("lb_internal_costing_rate_selection")%>:</b>
              </td>
@@ -356,7 +360,7 @@ function onClose() {
                 <%=bundle.getString("lb_use_selected_rate_until_acceptance")%> 
              </td>
          </tr>
-         <tr class="tableRowEvenTM">
+         <tr class="tableRowOddTM">
              <td>
                  <b> <%=bundle.getString("lb_expense_rate")%>:</b>
              </td>
@@ -364,7 +368,7 @@ function onClose() {
                  <select style="width: 50%" id="internalCostRate"></select>
              </td>
          </tr>
-         <tr class="tableRowOddTM">
+         <tr class="tableRowEvenTM">
              <td>
                  <b><%=bundle.getString("lb_revenue_rate")%>:</b>
              </td>

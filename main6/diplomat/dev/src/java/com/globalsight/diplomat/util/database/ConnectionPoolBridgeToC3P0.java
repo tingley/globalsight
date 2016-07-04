@@ -35,12 +35,12 @@ import com.mchange.v2.c3p0.DataSources;
  */
 public class ConnectionPoolBridgeToC3P0
 {
-	private static final Logger logger = Logger
-			.getLogger(ConnectionPoolBridgeToC3P0.class.getName());
+    private static final Logger logger = Logger
+            .getLogger(ConnectionPoolBridgeToC3P0.class.getName());
 
-	private static ConnectionPoolBridgeToC3P0 instance;
+    private static ConnectionPoolBridgeToC3P0 instance;
 
-	private ComboPooledDataSource ds;
+    private ComboPooledDataSource ds;
 
     private static int MAX_CONNECTIONS = 200;
     private static final String CONNECTION_POOL_NAME = "ConnectionPoolBridgeToC3P0";
@@ -56,115 +56,111 @@ public class ConnectionPoolBridgeToC3P0
     {
         try
         {
-            InputStream is = ConnectionPool.class
-                    .getResourceAsStream(PROPERTIES);
+            InputStream is = ConnectionPool.class.getResourceAsStream(PROPERTIES);
             s_props.load(is);
 
-			MAX_CONNECTIONS = Integer.parseInt(s_props
-					.getProperty(PROP_MAX_CONNECTIONS));
+            MAX_CONNECTIONS = Integer.parseInt(s_props.getProperty(PROP_MAX_CONNECTIONS));
         }
         catch (Throwable e)
         {
-        	logger.error("Could not set property for connection pool.", e);
+            logger.error("Could not set property for connection pool.", e);
         }
     }
 
-	public static final ConnectionPoolBridgeToC3P0 getInstance()
-			throws ConnectionPoolException
-	{
-		if (instance == null)
-		{
-			try
-			{
-				instance = new ConnectionPoolBridgeToC3P0();
-			}
-			catch (Exception e)
-			{
-				logger.error(e);
-				throw new ConnectionPoolException(
-						"Faile to initialize ConnectionPoolBridgeToC3P0 pool");
-			}
-		}
+    public static final ConnectionPoolBridgeToC3P0 getInstance() throws ConnectionPoolException
+    {
+        if (instance == null)
+        {
+            try
+            {
+                instance = new ConnectionPoolBridgeToC3P0();
+            }
+            catch (Exception e)
+            {
+                logger.error(e);
+                throw new ConnectionPoolException(
+                        "Faile to initialize ConnectionPoolBridgeToC3P0 pool");
+            }
+        }
 
-		return instance;
-	}
+        return instance;
+    }
 
-	private ConnectionPoolBridgeToC3P0() throws PropertyVetoException
-	{
-		String driver = s_props.getProperty(DRIVER);
-		String connect_string = s_props.getProperty(CONNECT_STRING)
-				+ "?useUnicode=true&characterEncoding=UTF-8";
-		String userName = s_props.getProperty(USER_NAME);
+    private ConnectionPoolBridgeToC3P0() throws PropertyVetoException
+    {
+        String driver = s_props.getProperty(DRIVER);
+        String connect_string = s_props.getProperty(CONNECT_STRING)
+                + "?useUnicode=true&characterEncoding=UTF-8&useSSL=false";
+        String userName = s_props.getProperty(USER_NAME);
         String password = s_props.getProperty(PASSWORD);
 
         ds = new ComboPooledDataSource();
 
         ds.setUser(userName);
-		ds.setPassword(password);
-		ds.setJdbcUrl(connect_string);
-		ds.setDriverClass(driver);
+        ds.setPassword(password);
+        ds.setJdbcUrl(connect_string);
+        ds.setDriverClass(driver);
 
-		ds.setInitialPoolSize(3);
-		ds.setMinPoolSize(1);
-		ds.setMaxPoolSize(MAX_CONNECTIONS);
-		ds.setAcquireIncrement(2);
+        ds.setInitialPoolSize(3);
+        ds.setMinPoolSize(1);
+        ds.setMaxPoolSize(MAX_CONNECTIONS);
+        ds.setAcquireIncrement(2);
 
-		// 0 is the best choice?
-		ds.setMaxStatements(0);
-		ds.setMaxStatementsPerConnection(0);
+        // 0 is the best choice?
+        ds.setMaxStatements(0);
+        ds.setMaxStatementsPerConnection(0);
 
-		// Every 5 minutes check all idle connections asynchronously.
-		ds.setIdleConnectionTestPeriod(300);
+        // Every 5 minutes check all idle connections asynchronously.
+        ds.setIdleConnectionTestPeriod(300);
 
-		// 30 minutes
-		ds.setMaxIdleTime(1800);
-		// Test connection when check out. for performance, this must be "false".
+        // 30 minutes
+        ds.setMaxIdleTime(1800);
+        // Test connection when check out. for performance, this must be
+        // "false".
         ds.setTestConnectionOnCheckout(false);
-		// Test connection when check in. for performance, had better be "false".
+        // Test connection when check in. for performance, had better be
+        // "false".
         ds.setTestConnectionOnCheckin(false);
 
-		ds.setPreferredTestQuery("SELECT id FROM company WHERE id = 1");
+        ds.setPreferredTestQuery("SELECT id FROM company WHERE id = 1");
 
-		ds.setAcquireRetryAttempts(30);
+        ds.setAcquireRetryAttempts(30);
 
-		ds.setAutoCommitOnClose(true);
-	}
+        ds.setAutoCommitOnClose(true);
+    }
 
-	public synchronized Connection getConnection()
-			throws ConnectionPoolException
-	{
-		try
-		{
-			return ds.getConnection();
-		}
-		catch (SQLException e)
-		{
-			logger.error(e);
-			throw new ConnectionPoolException(
-					"Faile to get connection from c3p0 pool: " + CONNECTION_POOL_NAME);
-		}
-	}
+    public synchronized Connection getConnection() throws ConnectionPoolException
+    {
+        try
+        {
+            return ds.getConnection();
+        }
+        catch (SQLException e)
+        {
+            logger.error(e);
+            throw new ConnectionPoolException(
+                    "Faile to get connection from c3p0 pool: " + CONNECTION_POOL_NAME);
+        }
+    }
 
-	public void returnConnection(Connection conn)
-			throws ConnectionPoolException
-	{
-		try
-		{
-			// NewProxyConnection.close() is synchronized
-			conn.close();
-		}
-		catch (SQLException e)
-		{
-			logger.error(e);
-			throw new ConnectionPoolException(
-					"Faile to return connection back to c3p0 pool: "
-							+ CONNECTION_POOL_NAME);
-		}
-	}
+    public void returnConnection(Connection conn) throws ConnectionPoolException
+    {
+        try
+        {
+            // NewProxyConnection.close() is synchronized
+            conn.close();
+        }
+        catch (SQLException e)
+        {
+            logger.error(e);
+            throw new ConnectionPoolException(
+                    "Faile to return connection back to c3p0 pool: " + CONNECTION_POOL_NAME);
+        }
+    }
 
-	public void finalize() throws Throwable
-	{
-		DataSources.destroy(ds);
-		super.finalize();
-	}
+    public void finalize() throws Throwable
+    {
+        DataSources.destroy(ds);
+        super.finalize();
+    }
 }

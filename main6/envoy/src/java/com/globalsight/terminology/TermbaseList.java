@@ -257,47 +257,23 @@ public class TermbaseList
 
     public static Termbase get(long id)
     {
-        String companyId = null;
         HashMap companyMap = null;
         Termbase tb = null;
 
         synchronized (s_termbases)
         {
-            companyId = CompanyThreadLocal.getInstance().getValue();
-            if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
+            loop: for (Iterator iter = s_termbases.values().iterator(); iter
+                    .hasNext();)
             {
-                loop: for (Iterator iter = s_termbases.values().iterator(); iter
+                companyMap = (HashMap) iter.next();
+                for (Iterator it = companyMap.values().iterator(); it
                         .hasNext();)
                 {
-                    companyMap = (HashMap) iter.next();
-                    for (Iterator it = companyMap.values().iterator(); it
-                            .hasNext();)
-                    {
-                        Termbase termbase = (Termbase) it.next();
-                        if (termbase.getId() == id)
-                        {
-                            tb = termbase;
-                            break loop;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                companyMap = (HashMap) s_termbases.get(companyId);
-                if (companyMap == null)
-                {
-                    companyMap = new HashMap();
-                    s_termbases.put(companyId, companyMap);
-                }
-                for (Iterator iter = companyMap.values().iterator(); iter
-                        .hasNext();)
-                {
-                    Termbase termbase = (Termbase) iter.next();
+                    Termbase termbase = (Termbase) it.next();
                     if (termbase.getId() == id)
                     {
                         tb = termbase;
-                        break;
+                        break loop;
                     }
                 }
             }
@@ -313,7 +289,6 @@ public class TermbaseList
 
         synchronized (s_termbases)
         {
-            companyId = CompanyThreadLocal.getInstance().getValue();
             if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
             {
                 loop: for (Iterator iter = s_termbases.values().iterator(); iter

@@ -48,7 +48,7 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
 
     // TUV constants
     public static final String XLIFF_ALT = "xliff_alt";
-    public static final String ISSUE_EDITION_RELATION = "issue_edition_relation";
+
     // tuvId : TuvImpl
 //    private static ConcurrentHashMap<Long, TuvImpl> tuvCache = new ConcurrentHashMap<Long, TuvImpl>();
     // tuvId : time
@@ -238,10 +238,9 @@ public abstract class SegmentTuTuvCacheManager implements TuvQueryConstants
      * 
      * @param p_tuvId
      * @param p_extraInfoName
-     *            -- options:XLIFF_ALT, ISSUE_EDITION_RELATION
+     *            -- options:XLIFF_ALT
      */
-    public static void recordWhichTuvExtraDataAlreadyLoaded(Long p_tuvId,
-            String p_extraInfoName)
+    public static void recordWhichTuvExtraDataAlreadyLoaded(Long p_tuvId, String p_extraInfoName)
     {
     	ConcurrentHashMap<Long, Set<String>> tuvExtraDataCache = getTuvExtraDataCache();
     	

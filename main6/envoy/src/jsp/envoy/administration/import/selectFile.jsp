@@ -496,8 +496,12 @@ DIV ID="AvailableCheckAllLayer"
         folderSelected = "";
     }
 
-    ArrayList importFileList =
-        new ArrayList((HashSet)sessionMgr.getAttribute(SelectFileHandler.FILE_LIST));
+    ArrayList importFileList = new ArrayList();
+    Object fileList = sessionMgr.getAttribute(SelectFileHandler.FILE_LIST);
+    if (fileList != null)
+    {
+    	importFileList = new ArrayList((HashSet)fileList);
+    }
 	SortUtil.sort(importFileList);
     int rowCount = 0;
 	for (int i=0; i < importFileList.size(); i++)

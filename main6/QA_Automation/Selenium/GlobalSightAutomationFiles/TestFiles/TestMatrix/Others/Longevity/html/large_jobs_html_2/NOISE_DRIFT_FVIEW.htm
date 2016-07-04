@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" MadCap:comment="Changed Empower to Breeze" MadCap:timeEstimate="0" MadCap:priority="0" MadCap:fileTags="RoboHelpStatus.Ready for Review" MadCap:lastBlockDepth="5" MadCap:lastHeight="1074" MadCap:lastWidth="577">
+    <head><title>Noise and Drift Tab</title>
+    </head>
+    <body>
+        <h1>Noise 
+ and Drift tab</h1>
+        <p class="para">Use this tab to report detector noise and drift results for 
+ each chromatogram. Specify a section of the chromatogram over which you 
+ want the software to calculate these results. The software calculates 
+ total noise/drift values based on the chromatogram time window (in minutes). 
+ To calculate averaged noise and drift values, specify a segment width 
+ (in seconds) and the software divides the data into segments and averages 
+ the values for each segment.</p>
+        <p class="para"><span class="emphasisbold">Requirement:</span> The segment 
+ used to calculate the noise interval must include at least 30 data points. 
+ For example, when collecting data at 1 Hz, select an interval of at least 
+ 30 seconds. This prevents the artificially low noise value that would 
+ be produced if the linear regression was performed on a small number of 
+ points. &#160;</p>
+        <p class="para">After you process your data, the software displays the noise 
+ and drift results in the Results window, the Chromatogram Result table. 
+ The noise and drift chromatogram results include:</p>
+        <ul>
+            <li class="listbull" style="font-weight: normal;">Total 
+ Values – Detector Noise, Peak to Peak Noise, and Detector Drift</li>
+            <li class="listbull">Average Values – Average 
+ Detector Noise, Average Peak to Peak Noise, and Average Detector Drift</li>
+        </ul>
+        <h2>Calculate detector noise and drift</h2>
+        <p class="para">Enables/disables the calculation of detector noise and drift 
+ for each chromatogram as part of your processing method. </p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Disabled</p>
+        <h2>Start time (min.), stop time (min.)</h2>
+        <p class="para">The chromatogram time window (in minutes) that the software 
+ uses to calculate total and average noise and drift values. </p>
+        <p class="para"><span class="emphasisbold">Range:</span> 
+ 0.000 to 655.000 min</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ Blank</p>
+        <p class="para"><span class="emphasisbold">Requirements:</span>
+        </p>
+        <ul>
+            <li class="listbull">You must enter a value 
+ in both fields. </li>
+            <li class="listbull">The Start Time must be 
+ less than the Stop Time. </li>
+            <li class="listbull">The difference between 
+ the two times must be equal to or greater than the specified segment width.</li>
+            <li class="listbull">The interval between 
+ the two times must contain at least 60 data points.</li>
+        </ul>
+        <h2>Segment width (sec)</h2>
+        <p class="para">Segment width (in seconds) of the chromatogram the software 
+ uses as the basis for calculating average noise and drift values. </p>
+        <p class="para"><span class="emphasisbold">Range:</span> 
+ 10 to 300 sec</p>
+        <p class="para"><span class="emphasisbold">Default:</span> 
+ 60 sec</p>
+        <p class="para"><span class="emphasisbold">Requirement:</span> The segment 
+ width must contain at least 30 data points.</p>
+    </body>
+</html>

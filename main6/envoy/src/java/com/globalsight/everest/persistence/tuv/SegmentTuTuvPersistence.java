@@ -164,7 +164,7 @@ public class SegmentTuTuvPersistence
             // Save TUV data
             SegmentTuvUtil.saveTuvs(conn, p_targetTuvs, p_jobId);
 
-            // Save XliffAlt & IssueEditionRelation
+            // Save XliffAlt
             Set<XliffAlt> xlfAlts = new HashSet<XliffAlt>();
             for (Iterator it = p_targetTuvs.iterator(); it.hasNext();)
             {

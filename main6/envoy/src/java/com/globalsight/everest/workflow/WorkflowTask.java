@@ -92,6 +92,7 @@ public class WorkflowTask implements Serializable
     private String m_roleName = DEFAULT_ROLE_NAME;
     private String m_systemActionType = NO_ACTION;
     private int m_reportUploadCheck = 0;//0: Not check . 1: Check.
+    private int m_isActivityCommentUploadCheck = 0;//0:not check; 1: check.
 
     // ////////////////////////////////////////////////////////////////////
     // Begin: Constructors
@@ -1286,4 +1287,14 @@ public class WorkflowTask implements Serializable
 	public int getReportUploadCheck() {
 		return m_reportUploadCheck;
 	}
+	
+    public void setActivityCommentUploadCheck(int p_isActivityCommentUploadCheck)
+    {
+        this.m_isActivityCommentUploadCheck = p_isActivityCommentUploadCheck;
+    }
+
+    public int getActivityCommentUploadCheck()
+    {
+        return m_isActivityCommentUploadCheck;
+    }
 }

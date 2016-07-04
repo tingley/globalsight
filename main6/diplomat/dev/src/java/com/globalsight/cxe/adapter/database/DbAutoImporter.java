@@ -31,12 +31,10 @@ import org.xml.sax.InputSource;
 
 import com.globalsight.cxe.adapter.AdapterResult;
 import com.globalsight.cxe.adapter.database.source.TaskQueueTableMonitor;
-import com.globalsight.cxe.adaptermdb.EventTopicMap;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
-import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.diplomat.util.Utility;
 import com.globalsight.diplomat.util.database.ConnectionPool;
@@ -88,12 +86,11 @@ public class DbAutoImporter extends TimerTask
                 s_logger.debug("Nothing returned from TaskQueueMonitor.");
                 return;
             }
-            s_logger.info("There are " + taskXmlVector.size()
-                    + " tasks in the database.");
+            s_logger.info("There are " + taskXmlVector.size() + " tasks in the database.");
             connection = ConnectionPool.getConnection();
-            AdapterResult[] results = createOutputMessages(taskXmlVector,
-                    connection);
-            CxeProxy.publishEvents(results, EventTopicMap.FOR_EXTRACTOR);
+            AdapterResult[] results = createOutputMessages(taskXmlVector, connection);
+            // GBS-4400, leave this function to implement in the future if we
+            // want it
         }
         catch (Exception e)
         {
@@ -115,8 +112,8 @@ public class DbAutoImporter extends TimerTask
         }
     }
 
-    private AdapterResult[] createOutputMessages(Vector p_taskXmlVector,
-            Connection p_connection) throws Exception
+    private AdapterResult[] createOutputMessages(Vector p_taskXmlVector, Connection p_connection)
+            throws Exception
     {
         CxeMessageType msgType = CxeMessageType
                 .getCxeMessageType(CxeMessageType.PRSXML_IMPORTED_EVENT);
@@ -126,8 +123,7 @@ public class DbAutoImporter extends TimerTask
             TaskXml taskxml = (TaskXml) p_taskXmlVector.elementAt(t);
             String prsXml = taskxml.getPaginatedResultSetXml();
             FileMessageData fmd = MessageDataFactory.createFileMessageData();
-            BufferedOutputStream bos = new BufferedOutputStream(
-                    fmd.getOutputStream());
+            BufferedOutputStream bos = new BufferedOutputStream(fmd.getOutputStream());
             OutputStreamWriter osw = new OutputStreamWriter(bos, "UTF8");
             osw.write(prsXml, 0, prsXml.length());
             osw.close();
@@ -145,8 +141,7 @@ public class DbAutoImporter extends TimerTask
         return results;
     }
 
-    private void storePrsXml(String p_prsXml, Connection p_connection)
-            throws Exception
+    private void storePrsXml(String p_prsXml, Connection p_connection) throws Exception
     {
         PreparedStatement st = null;
         try
@@ -214,8 +209,8 @@ public class DbAutoImporter extends TimerTask
             String period = config.getStringParameter("period");
             m_delay = Long.valueOf(delay).longValue() * 60L * 1000L;
             m_period = Long.valueOf(period).longValue() * 60L * 1000L;
-            s_logger.info("Using a delay of " + delay
-                    + " minutes and a period of " + period + " minutes.");
+            s_logger.info("Using a delay of " + delay + " minutes and a period of " + period
+                    + " minutes.");
         }
         catch (Exception e)
         {

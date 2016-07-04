@@ -14,10 +14,10 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileConstants;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileConstants;
 import com.microsofttranslator.api.V2.adm.AdmAccessToken;
 
-public class MSMTUtil implements TMProfileConstants
+public class MSMTUtil implements MTProfileConstants
 {
     private static final Logger logger = Logger.getLogger(MSMTUtil.class);
     

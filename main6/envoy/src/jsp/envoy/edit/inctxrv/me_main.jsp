@@ -48,7 +48,7 @@
 
 	if (state.isReviewMode())
 	{
-		lb_title = "Page Review";
+		lb_title = "In-context Review Editor";
 	}
 	else if (state.isReadOnly())
 	{

@@ -870,7 +870,7 @@ function contextForPage(url, e, displayName)
     }
     
     var showInContextReview = (1 == incontextReviewPDF);
-    var inctxTitle = "Open In Context Review";
+    var inctxTitle = "Open in in-context review editor";
     var inlineEditorUrl = url + "&openEditorType=inlineEditor";
     var popupEditorUrl = url + "&openEditorType=popupEditor";
     var postRwEditorUrl = url + "&openEditorType=postReviewEditor";

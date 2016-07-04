@@ -76,6 +76,7 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.StringUtil;
 
 public class FilterConfigurationImportHandler extends PageHandler
 {
@@ -2137,7 +2138,10 @@ public class FilterConfigurationImportHandler extends PageHandler
                 }
                 else if (keyField.equalsIgnoreCase("BASE_FILTER_ID"))
                 {
-                    jsonFilter.setBaseFilterId(Long.parseLong(valueField));
+                    if (StringUtil.isNotEmptyAndNull(valueField))
+                    {
+                        jsonFilter.setBaseFilterId(Long.parseLong(valueField));
+                    }
                 }
                 else if (keyField.equalsIgnoreCase("ELEMENT_POST_FILTER_ID"))
                 {

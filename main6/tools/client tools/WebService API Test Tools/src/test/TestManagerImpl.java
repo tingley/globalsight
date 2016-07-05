@@ -1,15 +1,26 @@
 package test;
 
-import org.apache.log4j.Logger;
-import util.*;
-
-import javax.swing.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.PrintStream;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
+
+import javax.swing.JOptionPane;
+
+import org.apache.log4j.Logger;
+
+import util.Account;
+import util.Operation;
+import util.TypeMap;
+import util.WebServiceConstants;
+import util.WriteLog;
 
 public class TestManagerImpl extends AbstractTestManager
 {
@@ -27,6 +38,7 @@ public class TestManagerImpl extends AbstractTestManager
      * Test method
      * For different type of parameters
      */
+    @SuppressWarnings("unchecked")
     public String testOperation(Operation operation, HashMap params) throws Exception {
         //Write Log Info
         logger.info("Test Operation: " + operation.getName());
@@ -180,8 +192,17 @@ public class TestManagerImpl extends AbstractTestManager
         }
         catch (Exception e) {
             for (int i = 0; i < parameterTypes.length; i++) {
-                if (parameterTypes[i].equals(long.class)) {
+                if (parameterTypes[i].equals(int.class)) {
+                    parameterTypes[i] = Integer.class;
+                }
+                else if (parameterTypes[i].equals(long.class)) {
                     parameterTypes[i] = Long.class;
+                }
+                else if (parameterTypes[i].equals(double.class)) {
+                    parameterTypes[i] = Double.class;
+                }
+                else if (parameterTypes[i].equals(boolean.class)) {
+                    parameterTypes[i] = Boolean.class;
                 }
             }
             try {

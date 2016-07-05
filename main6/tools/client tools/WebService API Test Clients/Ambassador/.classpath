@@ -2,19 +2,19 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="lib/activation-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/axis.jar"/>
-	<classpathentry kind="lib" path="lib/commons-discovery-0.2.jar"/>
-	<classpathentry kind="lib" path="lib/javax.wsdl_1.6.2.v201012040545.jar"/>
-	<classpathentry kind="lib" path="lib/jaxrpc.jar"/>
-	<classpathentry kind="lib" path="lib/mail-1.4.5.jar"/>
-	<classpathentry kind="lib" path="lib/org.apache.commons.logging_1.0.4.v201101211617.jar"/>
-	<classpathentry kind="lib" path="lib/saaj.jar"/>
-	<classpathentry kind="lib" path="lib/dom4j-1.6.1.jar"/>
-	<classpathentry kind="lib" path="lib/poi-3.9-20121203.jar"/>
-	<classpathentry kind="lib" path="lib/poi-ooxml-3.9-20121203.jar"/>
-	<classpathentry kind="lib" path="lib/poi-ooxml-schemas-3.9-20121203.jar"/>
-	<classpathentry kind="lib" path="lib/poi-scratchpad-3.9-20121203.jar"/>
-	<classpathentry kind="lib" path="lib/xmlbeans-2.3.0.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador/lib/activation-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador/lib/axis.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador/lib/commons-discovery-0.2.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador/lib/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador/lib/javax.wsdl_1.6.2.v201012040545.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador/lib/jaxrpc.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador/lib/mail-1.4.5.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador/lib/org.apache.commons.logging_1.0.4.v201101211617.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador/lib/poi-3.9-20121203.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador/lib/poi-ooxml-3.9-20121203.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador/lib/poi-ooxml-schemas-3.9-20121203.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador/lib/poi-scratchpad-3.9-20121203.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador/lib/saaj.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador/lib/xmlbeans-2.3.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

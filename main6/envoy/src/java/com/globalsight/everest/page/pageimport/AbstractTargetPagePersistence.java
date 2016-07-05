@@ -470,14 +470,12 @@ public abstract class AbstractTargetPagePersistence implements
 
             // 4. For XLF/PO/Passolo files
             boolean savePassoloAltTrans = true;
+            String xlfOrPoTargetLan = processor.getTargetLanguage(tu, p_sourceLocale,
+                    p_targetLocale);
+            boolean isTargetLangMatched = isTargetLanguagesMatched(p_targetLocale, xlfOrPoTargetLan);
             if (tu.getXliffTarget() != null)
             {
                 boolean isPassolo = PassoloUtil.isPassoloFile(p_sourcePage);
-                String xlfOrPoTargetLan = processor.getTargetLanguage(tu,
-                        p_sourceLocale, p_targetLocale);
-                boolean isTargetLangMatched = isTargetLanguagesMatched(
-                        p_targetLocale, xlfOrPoTargetLan);
-
                 if (isPassolo || isTargetLangMatched)
                 {
                     // "src"
@@ -551,8 +549,8 @@ public abstract class AbstractTargetPagePersistence implements
             }
 
             //save all alt-trans to "leverage_match"
-            if (sourceTuv.getXliffAlt(false) != null
-                    && sourceTuv.getXliffAlt(false).size() > 0 && savePassoloAltTrans)
+            if (isTargetLangMatched && savePassoloAltTrans && sourceTuv.getXliffAlt(false) != null
+                    && sourceTuv.getXliffAlt(false).size() > 0)
             {
                 for (XliffAlt alt : sourceTuv.getXliffAlt(false))
                 {

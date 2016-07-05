@@ -23,6 +23,7 @@ import java.util.Set;
 
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.NumberUtil;
 
 /**
  * Used to process the tuv from xliff file.
@@ -70,16 +71,8 @@ public class XliffProcessor implements IXliffProcessor
             while (ite.hasNext())
             {
                 XliffAlt alt = (XliffAlt) ite.next();
-
-                double altTransScore = 0;
-                try
-                {
-                    altTransScore = Double.parseDouble(alt.getQuality());
-                }
-                catch (Exception ignore)
-                {
-                }
-
+                
+                double altTransScore = NumberUtil.PecentToDouble(alt.getQuality());
                 boolean isValidXlfAltTrans = isValidXlfAltTrans(alt,
                         xlfOrPoTargetLan, p_targetLocale);
 

@@ -197,7 +197,7 @@ public class InstallUtil
 
     public static String getInput(InputOption option, String Connector)
     {
-        logger.info(option.getDesplayValue() + " " + Connector + " ");
+        System.out.print(option.getDesplayValue() + " " + Connector + " ");
         String userInput = getString();
 
         if (userInput.length() == 0 || option.matches(userInput))
@@ -215,7 +215,7 @@ public class InstallUtil
 
     public static File getSettingsFile()
     {
-        logger.info(RESOURCE_NO_UI.getString(INPUT_FILE_PATH));
+        System.out.print(RESOURCE_NO_UI.getString(INPUT_FILE_PATH));
         String userInput = getString();
         userInput = userInput.replace('\\', '/');
         if (userInput.length() > 0)
@@ -359,7 +359,7 @@ public class InstallUtil
                 logger.info(message);
             }
 
-            logger.info(RESOURCE_NO_UI.getString(INPUT_SELECT));
+            System.out.print(RESOURCE_NO_UI.getString(INPUT_SELECT));
             userInput = getString();
             for (int i = 0; i < actions.size(); i++)
             {

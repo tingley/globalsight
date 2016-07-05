@@ -481,10 +481,11 @@ public class Install extends installer.EventBroadcaster
         actions.add(NEXT_ACTION);
 
         logger.info(m_installAmbassador.getProperty("pre_install_message_no_ui"));
+        System.out.println();
         for (int i = 0; i < actions.size(); i++)
         {
             Action action = (Action) actions.get(i);
-            logger.info(action.toString());
+            System.out.print(action.toString());
         }
 
         System.out.println("\n");
@@ -639,6 +640,7 @@ public class Install extends installer.EventBroadcaster
             if (!r.isFile())
             {
                 logger.info(m_installAmbassador.getProperty("error.keystore_file"));
+                System.out.println();
                 try
                 {
                     System.in.read();
@@ -705,7 +707,9 @@ public class Install extends installer.EventBroadcaster
         if (generate.equalsIgnoreCase("true"))
         {
             logger.info(INSTALL_OPTION_RESOURCE.getString(InstallUtil.GENERATE_CONFGURATEION_FILE));
+            System.out.println();
             processFiles();
+            System.out.println();
         }
 
         String createService = InstallUtil.getInstallOptions()
@@ -713,16 +717,20 @@ public class Install extends installer.EventBroadcaster
         if (createService.equalsIgnoreCase("true"))
         {
             logger.info(INSTALL_OPTION_RESOURCE.getString(InstallUtil.CREATE_NT_SERVICE));
+            System.out.println();
             installGlobalSightService();
         }
 
         if (createDatabase.equalsIgnoreCase("true"))
         {
+            System.out.println();
             logger.info(INSTALL_OPTION_RESOURCE.getString(InstallUtil.CREATE_DATABASE));
+            System.out.println();
             createDatabaseTables();
         }
         else
         {
+            System.out.println();
             logger.info("Update tables");
             updateDatabaseTables();
         }
@@ -737,6 +745,7 @@ public class Install extends installer.EventBroadcaster
 
         signJar();
 
+        System.out.println();
         logger.info(RESOURCE.getString("install_finish"));
         System.in.read();
     }
@@ -1053,7 +1062,7 @@ public class Install extends installer.EventBroadcaster
     {
         try
         {
-            logger.info("Saving your settings to " + p_fileName);
+            System.out.print("\nSaving your settings to " + p_fileName + ".\n\n");
             addAdditionalInstallValues();
             String p_fileName_forwardslash = replace(p_fileName.toString(), BACKSLASH,
                     FORWARDSLASH);
@@ -1368,7 +1377,7 @@ public class Install extends installer.EventBroadcaster
         File sourceFile = new File(sourceFileStr);
         File destFile = new File(destFileStr);
 
-        logger.info("Processing " + sourceFile.getName() + "...");
+        System.out.print("\nProcessing " + sourceFile.getName() + "...");
         fireActionEvent(sourceFile.getName());
 
         destFile.getParentFile().mkdirs();
@@ -1502,8 +1511,6 @@ public class Install extends installer.EventBroadcaster
         }
         logger.info("Creating GlobalSight views.");
         importSqlFile(concatPath(INSTALLATION_DATA_DIRECTORY, "/mysql/create_views_mysql.sql"));
-
-        // initOpenLDAP();
     }
 
     public int countUpdateDatabaseCommands()
@@ -1640,7 +1647,8 @@ public class Install extends installer.EventBroadcaster
     // if 'q' is hit, it will exit
     private String readEntry(String prompt, String p_default) throws IOException
     {
-        logger.info(prompt + "[" + p_default + "]: ");
+        System.out.print(prompt + "[" + p_default + "]: ");
+        System.out.flush();
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         String userInput = input.readLine();
         String entry = null;

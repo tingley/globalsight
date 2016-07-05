@@ -370,7 +370,9 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     || DOCX_SUFFIX.equalsIgnoreCase(fileSuffix)
                     || PPTX_SUFFIX.equalsIgnoreCase(fileSuffix)
                     || XLSX_SUFFIX.equalsIgnoreCase(fileSuffix)
-                    | ".xml".equalsIgnoreCase(fileSuffix))
+                    || ".xml".equalsIgnoreCase(fileSuffix)
+                    || ".html".equalsIgnoreCase(fileSuffix)
+                    || ".htm".equalsIgnoreCase(fileSuffix))
             {
 
                 if (targetLocale == null)

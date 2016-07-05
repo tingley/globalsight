@@ -247,8 +247,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             future = serviceForXML.submit(task);
             createPDFMap.put(key, future);
         }
-        else if (externalPageId.endsWith(".html") || externalPageId.endsWith(".xhtml")
-                || externalPageId.endsWith(".htm"))
+        else if (externalPageId.endsWith(".html") || externalPageId.endsWith(".htm"))
         {
             task = new CreatePDFTask(p_page, p_userId, TYPE_HTML, isTarget);
             future = serviceForHTML.submit(task);
@@ -1777,7 +1776,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             {
                 formatType = "xml";
             }
-            else if (displayNameLower.endsWith(".html"))
+            else if (displayNameLower.endsWith(".html") || displayNameLower.endsWith(".htm"))
             {
                 formatType = "html";
             }
@@ -1870,7 +1869,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             return new PreviewPDFBO(fileVersionType, fileType, fileSuffix, isTranslateMaster,
                     isTranslateHiddenLayer, relSafeName, safeBaseFileName);
         }
-        else if (displayNameLower.endsWith(".html"))
+        else if (displayNameLower.endsWith(".html") || displayNameLower.endsWith(".htm"))
         {
             fileType = FILETYPE_HTML;
             fileSuffix = HTML_SUFFIX;

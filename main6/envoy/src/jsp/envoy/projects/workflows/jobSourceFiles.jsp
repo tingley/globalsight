@@ -1090,7 +1090,7 @@ for (int i = 0; i < jobSourcePageDisplayList.size(); i++)
 	
 	String pageNameLow = jobSourcePageDisplay.getSourcePage().getExternalPageId().toLowerCase();
 	boolean isXml = pageNameLow.endsWith(".xml");
-	boolean isHTML = pageNameLow.endsWith(".html") || pageNameLow.endsWith(".xhtml") || pageNameLow.endsWith(".htm");
+	boolean isHTML = pageNameLow.endsWith(".html") || pageNameLow.endsWith(".htm");
     boolean isInDesign = pageNameLow.endsWith(".indd") || pageNameLow.endsWith(".idml");
     boolean isOffice = pageNameLow.endsWith(".docx") || pageNameLow.endsWith(".pptx") || pageNameLow.endsWith(".xlsx");
     

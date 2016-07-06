@@ -231,7 +231,7 @@ public class LeverageUtil
 	{
 		int iceType = getIsIncontextMatchType(index, p_sourceTuvs,
 				p_targetTuvs, p_matchTypes,
-				p_excludedItemTypes, p_subId, p_jobId);
+                p_excludedItemTypes, p_subId, p_jobId);
 		if (iceType > 0)
 			return true;
 		else
@@ -268,6 +268,12 @@ public class LeverageUtil
             return ICE_TYPE_PASSOLO_MATCHING;
         }
 
+        // Check current tuv is exact match.
+        if (!isExactMatchLocalized(index, p_sourceTuvs, p_targetTuvs, p_matchTypes, p_subId, p_jobId))
+        {
+            return ICE_TYPE_NOT_ICE;
+        }
+
         if (isInvalidPoXlfTarget(index, p_sourceTuvs, p_targetTuvs, p_matchTypes, p_jobId))
         {
             return ICE_TYPE_NOT_ICE;
@@ -300,13 +306,6 @@ public class LeverageUtil
 		{
 			return ICE_TYPE_NOT_ICE;
 		}
-
-		// Check current tuv is exact match.
-        if (!isExactMatchLocalized(index, p_sourceTuvs, p_targetTuvs, p_matchTypes, p_subId,
-                p_jobId))
-        {
-            return ICE_TYPE_NOT_ICE;
-        }
 
 		// Check if it is bracketed ICE:
 		// Check previous tuv is exact match.
@@ -684,22 +683,22 @@ public class LeverageUtil
     {
 		LeverageMatch lm = getLeverageMatchObject(index, p_sourceTuvs,
 				p_matchTypes, p_subId);
-		if (lm == null)
-			return false;
-		//(GBS-4360) Online and offline, determine the status of the target tuv
-	     if (lm.getMatchState().equals(MatchState.MULTIPLE_TRANSLATION))
-         {
-             Tuv targetTuv = (Tuv) p_targetTuvs.get(index);
-             if (targetTuv.getState().equals(TuvState.NOT_LOCALIZED))
-             {
-                 return false;
-             }
-         }
-	     
+        if (lm == null)
+            return false;
+        // (GBS-4360) Online and offline, determine the status of the target tuv
+        if (lm.getMatchState().equals(MatchState.MULTIPLE_TRANSLATION))
+        {
+            Tuv targetTuv = (Tuv) p_targetTuvs.get(index);
+            if (targetTuv.getState().equals(TuvState.NOT_LOCALIZED))
+            {
+                return false;
+            }
+        }
+
         long preHash = -1;
         long nextHash = -1;
         Object o = p_sourceTuvs.get(index);
-    	if (isExactMatch(o, p_matchTypes))
+        if (isExactMatch(o, p_matchTypes))
         {
             if (o instanceof Tuv)
             {

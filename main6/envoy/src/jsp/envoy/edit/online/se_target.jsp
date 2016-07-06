@@ -35,7 +35,8 @@
             com.globalsight.machineTranslation.MachineTranslator,
             com.globalsight.machineTranslation.MTHelper2,
             com.globalsight.everest.tuv.Tuv,
-            java.text.DecimalFormat"
+            java.text.DecimalFormat,
+            com.globalsight.util.NumberUtil"
     session="true"
 %>
 <jsp:useBean id="mtTranslation" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
@@ -291,7 +292,7 @@ if (xliffAltSet != null && xliffAltSet.size() > 0)
 
         if(altTrans.getQuality() != null) {
             DecimalFormat df = new DecimalFormat("0.00"); 
-            double qua = Double.parseDouble(altTrans.getQuality());
+            double qua = NumberUtil.PecentToDouble(altTrans.getQuality());
             String str = df.format(qua) + "%";
             alt_segments.append(str);
         }
@@ -2056,8 +2057,8 @@ function showMatchdetailInfo()
   if (xliffAltSet != null && xliffAltSet.size() > 0)
   {
 %>
+<DIV id="idXliffTrans" STYLE="position: relative; margin-left: 5px;overflow: hidden;display:none">
 <HR style="position: relative; top: 0; left: 0;" COLOR="#0C1476" WIDTH="95%">
-<DIV id="idXliffTrans" STYLE="position: relative; margin-left: 5px;overflow: hidden;">
 <nobr>
   <SPAN CLASS="standardTextBold">Xliff Alt</SPAN>
   <SPAN CLASS="standardTextItalic">right-click for actions</SPAN>

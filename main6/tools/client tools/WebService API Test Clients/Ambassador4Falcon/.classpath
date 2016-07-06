@@ -2,13 +2,13 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="/GlobalSight_SRC_HEAD/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/activation-1.1.1.jar"/>
-	<classpathentry kind="lib" path="/GlobalSight_SRC_HEAD/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/axis.jar"/>
-	<classpathentry kind="lib" path="/GlobalSight_SRC_HEAD/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/commons-discovery-0.2.jar"/>
-	<classpathentry kind="lib" path="/GlobalSight_SRC_HEAD/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/javax.wsdl_1.6.2.v201012040545.jar"/>
-	<classpathentry kind="lib" path="/GlobalSight_SRC_HEAD/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/jaxrpc.jar"/>
-	<classpathentry kind="lib" path="/GlobalSight_SRC_HEAD/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/mail-1.4.5.jar"/>
-	<classpathentry kind="lib" path="/GlobalSight_SRC_HEAD/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/org.apache.commons.logging_1.0.4.v201101211617.jar"/>
-	<classpathentry kind="lib" path="/GlobalSight_SRC_HEAD/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/saaj.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/activation-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/axis.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/commons-discovery-0.2.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/javax.wsdl_1.6.2.v201012040545.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/jaxrpc.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/mail-1.4.5.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/org.apache.commons.logging_1.0.4.v201101211617.jar"/>
+	<classpathentry kind="lib" path="/GlobalSight_SRC_Master/main6/tools/client tools/WebService API Test Clients/Ambassador4Falcon/lib/saaj.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

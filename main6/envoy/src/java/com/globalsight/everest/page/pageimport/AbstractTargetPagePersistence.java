@@ -82,6 +82,7 @@ import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecordL
 import com.globalsight.terminology.termleverager.replacer.TermReplacer;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.NumberUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -454,43 +455,36 @@ public abstract class AbstractTargetPagePersistence implements
         {
             TuImpl tu = (TuImpl) it.next();
             Tuv sourceTuv = (Tuv) p_sourceTuvMap.get(tu);
-            Tuv targetTuv = getTuvManager().cloneToTarget(sourceTuv,
-                    p_targetLocale);
+            Tuv targetTuv = getTuvManager().cloneToTarget(sourceTuv, p_targetLocale);
 
             // 3. Add all valid "alt-trans" to target TUV, and find the best
             // "alt-trans" which is to be stored into "leverage_match".
             if (sourceTuv.getXliffAlt(false) != null
                     && sourceTuv.getXliffAlt(false).size() > 0)
             {
-                processor.addAltTrans(targetTuv, sourceTuv, p_targetLocale,
-                        jobId);
+                processor.addAltTrans(targetTuv, sourceTuv, p_targetLocale, jobId);
             }
 
-            ExtractedSourceFile esf = (ExtractedSourceFile) p_sourcePage
-                    .getExtractedFile();
+            ExtractedSourceFile esf = (ExtractedSourceFile) p_sourcePage.getExtractedFile();
             boolean isPO = IFormatNames.FORMAT_PO.equals(esf.getDataType());
 
             // 4. For XLF/PO/Passolo files
+            boolean savePassoloAltTrans = true;
+            String xlfOrPoTargetLan = processor.getTargetLanguage(tu, p_sourceLocale,
+                    p_targetLocale);
+            boolean isTargetLangMatched = isTargetLanguagesMatched(p_targetLocale, xlfOrPoTargetLan);
             if (tu.getXliffTarget() != null)
             {
                 boolean isPassolo = PassoloUtil.isPassoloFile(p_sourcePage);
-                String xlfOrPoTargetLan = processor.getTargetLanguage(tu,
-                        p_sourceLocale, p_targetLocale);
-                boolean isTargetLangMatched = isTargetLanguagesMatched(
-                        p_targetLocale, xlfOrPoTargetLan);
-
                 if (isPassolo || isTargetLangMatched)
                 {
                     // "src"
-                    String sourceGxmlWithoutTopTags = sourceTuv
-                            .getGxmlExcludeTopTags();
+                    String sourceGxmlWithoutTopTags = sourceTuv.getGxmlExcludeTopTags();
                     String src = sourceGxmlWithoutTopTags.trim();
                     // "trg"
                     String targetGxml = tu.getXliffTargetGxml().toGxml();
-                    targetGxml = ((TuvImpl) targetTuv)
-                            .encodeGxmlAttributeEntities(targetGxml);
-                    String targetGxmlWithoutTopTags = GxmlUtil
-                            .stripRootTag(targetGxml);
+                    targetGxml = ((TuvImpl) targetTuv).encodeGxmlAttributeEntities(targetGxml);
+                    String targetGxmlWithoutTopTags = GxmlUtil.stripRootTag(targetGxml);
                     String trg = targetGxmlWithoutTopTags.trim();
                     String textValue = tu.getXliffTargetGxml().getTextValue();
                     if (textValue.trim().isEmpty())
@@ -498,33 +492,28 @@ public abstract class AbstractTargetPagePersistence implements
                         trg = "";
                     }
 
-                    // Perhaps need re-factor below 2 methods in future.
-                    float tmScore = getTMScore(tu, src, trg, isPassolo,
-                            tu.getPassoloState());
-                    if (isPassolo && "New".equals(tu.getPassoloState()))
+                    float tmScore = getTMScore(tu, src, trg, isPassolo, tu.getPassoloState());
+
+                    boolean isValidTarget = hasValidTarget(tu, src, trg, sourceTuv, tmScore);
+
+                    // handle passolo target
+                    if (isPassolo)
                     {
                         boolean equals = isSrcEqualsTrg(src, trg);
-                        if (!Text.isBlank(trg)
+                        if (!Text.isBlank(trg) && "New".equals(tu.getPassoloState())
                                 && ("no".equalsIgnoreCase(tu.getTranslate()) || !equals))
                         {
                             targetTuv.setGxml(targetGxml);
                             tu.addTuv(targetTuv);
                             p_appliedTuTuvMap.put(tu, targetTuv);
+                            savePassoloAltTrans = false;
                         }
                     }
-                    //save xlf/po target into "leverage_match
-                    if (!isSrcEqualsTrg(src, trg) || (!"".equals(src) && !"".equals(src)
-                            && "no".equals(tu.getTranslate())) && !isPassolo)
+                    // normal xliff and PO
+                    else if (isValidTarget)
                     {
-                        LeverageMatch lm = saveToLev(p_sourcePage, sourceTuv, targetTuv,
-                                isPO, tmProfile, tmScore);
-                        lm.setMatchedText(tu.getXliffTarget());
-                        lm.setMatchedOriginalSource(sourceTuv.getGxml());
-                        lm.setScoreNum(tmScore);
-                        lmCollection.add(lm);
-
+                        // handle target
                         IXliffMatchesProcessor xlfProcess = new XliffMatchesProcess();
-
                         if (tu.hasXliffTMScoreStr())
                         {
                             xlfProcess = new WSMatchesProcess();
@@ -534,52 +523,68 @@ public abstract class AbstractTargetPagePersistence implements
                             xlfProcess.addTargetTuvToTu(tu, sourceTuv, targetTuv, src, trg,
                                     p_appliedTuTuvMap, tmScore, threshold, isPO);
                         }
-                    }
-                    //save all alt-trans to "leverage_match"
-                    if (sourceTuv.getXliffAlt(false) != null
-                            && sourceTuv.getXliffAlt(false).size() > 0 && !isPassolo)
-                    {
-                        Set<XliffAlt> altSet = new HashSet<XliffAlt>();
-                        altSet.addAll(sourceTuv.getXliffAlt(false));
-                        if (altSet != null)
+
+                        // save xlf/po target into leverage match table
+                        LeverageMatch lm = toLeverageMatch(p_sourcePage, sourceTuv, targetTuv,
+                                isPO, tmProfile);
+                        lm.setMatchedText(tu.getXliffTarget());
+                        lm.setMatchedOriginalSource(sourceTuv.getGxml());
+                        lm.setScoreNum(tmScore);
+                        if (tmScore < 100)
                         {
-                            Iterator ite = altSet.iterator();
-                            while (ite.hasNext())
-                            {
-                                XliffAlt alt = (XliffAlt) ite.next();
-                                LeverageMatch lm = saveToLev(p_sourcePage, sourceTuv, targetTuv,
-                                        isPO, tmProfile, tmScore);
-                                lm.setMatchedText(alt.getSegment());
-                                lm.setMatchedOriginalSource(alt.getSourceSegment());
-                                lm.setScoreNum(Float.parseFloat(alt.getQuality()));
-                                lmCollection.add(lm);
-
-                                IXliffMatchesProcessor xlfProcess = new XliffMatchesProcess();
-
-                                if (tu.hasXliffTMScoreStr())
-                                {
-                                    xlfProcess = new WSMatchesProcess();
-                                }
-                                if (!trg.isEmpty())
-                                {
-                                    xlfProcess.addTargetTuvToTu(tu, sourceTuv, targetTuv, src, trg,
-                                            p_appliedTuTuvMap, tmScore, threshold, isPO);
-                                }
-                            }
+                            lm.setMatchType(MatchState.FUZZY_MATCH.getName());
                         }
+                        else if (isPO)
+                        {
+                            lm.setMatchType(MatchState.PO_EXACT_MATCH.getName());
+                        }
+                        else
+                        {
+                            lm.setMatchType(MatchState.XLIFF_EXACT_MATCH.getName());
+                        }
+
+                        lmCollection.add(lm);
                     }
+                }
+            }
+
+            //save all alt-trans to "leverage_match"
+            if (isTargetLangMatched && savePassoloAltTrans && sourceTuv.getXliffAlt(false) != null
+                    && sourceTuv.getXliffAlt(false).size() > 0)
+            {
+                for (XliffAlt alt : sourceTuv.getXliffAlt(false))
+                {
+                    LeverageMatch lm = toLeverageMatch(p_sourcePage, sourceTuv, targetTuv, isPO,
+                            tmProfile);
+                    lm.setMatchedText(alt.getSegment());
+                    lm.setMatchedOriginalSource(alt.getSourceSegment());
+                    float quality = (float) NumberUtil.PecentToDouble(alt.getQuality());
+                    lm.setScoreNum(quality);
+                    if (quality < 100)
+                    {
+                        lm.setMatchType(MatchState.FUZZY_MATCH.getName());
+                    }
+                    else if (isPO)
+                    {
+                        lm.setMatchType(MatchState.PO_EXACT_MATCH.getName());
+                    }
+                    else
+                    {
+                        lm.setMatchType(MatchState.XLIFF_EXACT_MATCH.getName());
+                    }
+
+                    lmCollection.add(lm);
                 }
             }
         }
         // Save all leverage matches into DB.
-        LingServerProxy.getLeverageMatchLingManager().saveLeveragedMatches(
-                lmCollection, jobId);
+        LingServerProxy.getLeverageMatchLingManager().saveLeveragedMatches(lmCollection, jobId);
 
         return p_appliedTuTuvMap;
     }
 
-    private LeverageMatch saveToLev(SourcePage p_sourcePage, Tuv sourceTuv, Tuv targetTuv,
-            boolean isPO, TranslationMemoryProfile tmProfile, float tmScore)
+    private LeverageMatch toLeverageMatch(SourcePage p_sourcePage, Tuv sourceTuv, Tuv targetTuv,
+            boolean isPO, TranslationMemoryProfile tmProfile)
     {
         LeverageMatch lm = new LeverageMatch();
         lm.setSourcePageId(p_sourcePage.getIdAsLong());
@@ -589,19 +594,6 @@ public abstract class AbstractTargetPagePersistence implements
         lm.setTargetLocale(targetTuv.getGlobalSightLocale());
         // XLF and PO target use "-1" as "order_num".
         lm.setOrderNum((short) TmCoreManager.LM_ORDER_NUM_START_XLF_PO_TARGET);
-        if (tmScore < 100)
-        {
-            lm.setMatchType(MatchState.FUZZY_MATCH.getName());
-        }
-        else if (isPO)
-        {
-            lm.setMatchType(MatchState.PO_EXACT_MATCH.getName());
-        }
-        else
-        {
-            lm.setMatchType(MatchState.XLIFF_EXACT_MATCH.getName());
-        }
-
         lm.setMatchedTuvId(-1);
         lm.setProjectTmIndex(isPO ? Leverager.PO_TM_PRIORITY : Leverager.XLIFF_PRIORITY);
         lm.setTmId(0);
@@ -1231,58 +1223,40 @@ public abstract class AbstractTargetPagePersistence implements
         return equals;
     }
 
-    private boolean hasValidLeverageMatch(TuImpl tu, String p_srcSegment,
+    private boolean hasValidTarget(TuImpl tu, String p_srcSegment,
             String p_trgSegment, Tuv p_sourceTuv, float p_tmScore)
     {
-        boolean result = false;
+        if (Text.isBlank(p_srcSegment) || Text.isBlank(p_trgSegment))
+            return false;
 
-        if (!"".equals(p_srcSegment) && !"".equals(p_trgSegment)
-                && "no".equals(tu.getTranslate()))
+        if ("no".equals(tu.getTranslate()))
         {
             return true;
         }
 
-        if (p_sourceTuv.getXliffAlt(false) != null && p_sourceTuv.getXliffAlt(false).size() > 0)
-        {
-            return true;
-        }
         boolean equals = isSrcEqualsTrg(p_srcSegment, p_trgSegment);
-
         if (!tu.hasXliffTMScoreStr())
         {
-            if (!equals && !Text.isBlank(p_trgSegment))
+            if (!equals)
             {
-                result = true;
-            }
-            else
-            {
-                result = false;
+                return true;
             }
         }
         // If tmscore is 100, but target is null or empty, should not save the
         // empty leverage match.
-        else if (p_tmScore == 100 && !"".equals(p_trgSegment))
+        else if (p_tmScore == 100)
         {
-            result = true;
+            return true;
         }
         else
         {
-            if (!Text.isBlank(p_trgSegment) && !equals)
+            if (!equals)
             {
-                result = true;
-            }
-            else if (p_sourceTuv.getXliffAlt(false) != null
-                    && p_sourceTuv.getXliffAlt(false).size() > 0)
-            {
-                result = true;
-            }
-            else
-            {
-                result = false;
+                return true;
             }
         }
 
-        return result;
+        return false;
     }
 
     private float getTMScore(TuImpl tu, String p_srcSegment,

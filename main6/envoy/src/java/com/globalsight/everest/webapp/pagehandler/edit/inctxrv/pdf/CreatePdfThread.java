@@ -85,7 +85,8 @@ public class CreatePdfThread extends MultiCompanySupportedThread
                         || pageName.endsWith(".pptx")
                         || pageName.endsWith(".xlsx")
                         || pageName.endsWith(".xml")
-                        || pageName.endsWith(".html"))
+                        || pageName.endsWith(".html")
+                        || pageName.endsWith(".htm"))
                 {
                     if (pageName.endsWith(".xml"))
                     {
@@ -104,7 +105,7 @@ public class CreatePdfThread extends MultiCompanySupportedThread
                         }
                     }
                     
-                    if (pageName.endsWith(".html") || pageName.endsWith(".xhtml") || pageName.endsWith(".htm"))
+                    if (pageName.endsWith(".html") || pageName.endsWith(".htm"))
                     {
                         if (!enableHTML)
                         {

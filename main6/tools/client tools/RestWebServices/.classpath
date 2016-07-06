@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.5.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang-2.6.0.redhat-4.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.3.6.redhat-1.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.3.3.redhat-1.jar"/>
+	<classpathentry kind="lib" path="lib/httpmime-4.3.6.redhat-1.jar"/>
+	<classpathentry kind="lib" path="lib/jboss-jaxrs-api_2.0_spec-1.0.0.Final.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

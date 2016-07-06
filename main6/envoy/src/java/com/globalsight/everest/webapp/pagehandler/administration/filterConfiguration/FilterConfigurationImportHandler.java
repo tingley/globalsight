@@ -354,7 +354,7 @@ public class FilterConfigurationImportHandler extends PageHandler
         private void analysisAndImport(File uploadedFile)
         {
             Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
-
+            Map<String, List> dataMap = new HashMap<String, List>();
             try
             {
                 String[] keyArr = null;
@@ -391,18 +391,21 @@ public class FilterConfigurationImportHandler extends PageHandler
 
                 }
                 // Data analysis
-                analysisData(map);
+                dataMap = analysisData(map);
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                logger.error("Failed to parse data.", e);
+                addToError("Upload failed, because there are errors data in the file.");
             }
+            // Storing data
+            storeDataToDatabase(dataMap);
         }
 
-        private void analysisData(Map<String, Map<String, String>> map)
+        private Map<String, List> analysisData(Map<String, Map<String, String>> map)
         {
             if (map.isEmpty())
-                return;
+                return null;
 
             Map<String, List> dataMap = new HashMap<String, List>();
             List<FMFilter> frameMakerFilterList = new ArrayList<FMFilter>();
@@ -587,9 +590,8 @@ public class FilterConfigurationImportHandler extends PageHandler
 
             if (qaFilterList.size() > 0)
                 dataMap.put(FilterConstants.QA_TABLENAME, qaFilterList);
-
-            // Storing data
-            storeDataToDatabase(dataMap);
+            
+            return dataMap;
         }
 
         private void storeDataToDatabase(Map<String, List> dataMap)
@@ -2138,10 +2140,7 @@ public class FilterConfigurationImportHandler extends PageHandler
                 }
                 else if (keyField.equalsIgnoreCase("BASE_FILTER_ID"))
                 {
-                    if (StringUtil.isNotEmptyAndNull(valueField))
-                    {
-                        jsonFilter.setBaseFilterId(Long.parseLong(valueField));
-                    }
+                    jsonFilter.setBaseFilterId(Long.parseLong(valueField));
                 }
                 else if (keyField.equalsIgnoreCase("ELEMENT_POST_FILTER_ID"))
                 {

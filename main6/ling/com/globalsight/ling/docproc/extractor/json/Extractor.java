@@ -19,6 +19,7 @@ import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.JsonFilter;
 import com.globalsight.ling.common.PTEscapeSequence;
+import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.DocumentElement;
 import com.globalsight.ling.docproc.ExtractorException;
@@ -249,6 +250,8 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
 
     private void gotoPostFilter(String str, String sid)
     {
+        XmlEntities entity = new XmlEntities();
+        str = str.replace("\\\"", "\"");
         Output output = switchExtractor(str, m_postFormat, m_elementPostFilter);
         Iterator it = output.documentElementIterator();
         while (it.hasNext())
@@ -260,11 +263,33 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
                 case DocumentElement.LOCALIZABLE:
                     Segmentable segmentableElement = (Segmentable) element;
                     String chunk = segmentableElement.getChunk();
-                    extractString(new StringReader(chunk), true,sid);
+                    extractString(new StringReader(chunk), true, sid);
                     break;
 
                 case DocumentElement.SKELETON:
                     String skeleton = ((SkeletonElement) element).getSkeleton();
+                    skeleton = entity.decodeStringBasic(skeleton);
+                    if (skeleton.contains("\""))
+                    {
+                        StringBuffer strBuffer = new StringBuffer();
+                        char[] chrArr = skeleton.toCharArray();
+                        for (int i = 0; i < chrArr.length; i++)
+                        {
+                            if (chrArr[i] == '"')
+                            {
+                                if (i == 0 || (i > 0 && chrArr[i - 1] != '\\'))
+                                {
+                                    strBuffer.append("\\");
+                                }
+                            }
+                            strBuffer.append(chrArr[i]);
+                        }
+                        skeleton = entity.encodeStringBasic(strBuffer.toString());
+                    }
+                    else
+                    {
+                        skeleton = entity.encodeStringBasic(skeleton);
+                    }
                     m_output.addSkeletonTmx(skeleton);
                     break;
             }

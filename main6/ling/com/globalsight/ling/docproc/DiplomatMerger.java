@@ -724,33 +724,24 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                             m_l10nContent.getLastChar());
                 }
             }
-
-            if (isContent() && FORMAT_JSON.equals(mainFormat)
+            //Ensure '"' preceded by '\'
+            if (FORMAT_JSON.equals(mainFormat)
                     && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format))
             {
-                // "Convert HTML Entity For Export" is selected
-                if (m_convertHtmlEntityForJson)
+                StringBuffer strBuffer = new StringBuffer();
+                char[] chrArr = tmp.toCharArray();
+                for (int i = 0; i < chrArr.length; i++)
                 {
-                    tmp = encoding(tmp, false);
-                }
-                // "Convert HTML Entity For Export" is not selected
-                else
-                {
-                    StringBuffer strBuffer = new StringBuffer();
-                    char[] chrArr = tmp.toCharArray();
-                    for (int i = 0; i < chrArr.length; i++)
+                    if (chrArr[i] == '"')
                     {
-                        if (chrArr[i] == '"')
+                        if (i == 0 || (i > 0 && chrArr[i - 1] != '\\'))
                         {
-                            if (i == 0 || (i > 0 && chrArr[i - 1] != '\\'))
-                            {
-                                strBuffer.append("\\");
-                            }
+                            strBuffer.append("\\");
                         }
-                        strBuffer.append(chrArr[i]);
                     }
-                    tmp = strBuffer.toString();
+                    strBuffer.append(chrArr[i]);
                 }
+                tmp = strBuffer.toString();
             }
 
             // For "Entity Encode issue"
@@ -1102,7 +1093,6 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                     }
                     // GBS-3997&GBS-4066
                     tmp = EmojiUtil.parseEmojiAliasToUnicode(tmp);
-
                     m_l10nContent.addContent(tmp);
 
                     m_stateStack.pop();

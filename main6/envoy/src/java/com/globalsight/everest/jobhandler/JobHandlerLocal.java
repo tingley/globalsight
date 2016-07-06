@@ -2805,14 +2805,12 @@ public class JobHandlerLocal implements JobHandler
             sb.append("  left outer join PROJECT p on l.PROJECT_ID = p.PROJECT_SEQ ");
             sb.append("  left outer join WORKFLOW w on j.ID=w.JOB_ID ");
             sb.append("  left outer join WORKFLOW_OWNER wo on w.IFLOW_INSTANCE_ID=wo.WORKFLOW_ID ");
-            sb.append("WHERE 1=1");
+            sb.append("WHERE 1=1 ");
             if (!StringUtil.isEmpty(p_creatorUserId))
             {
-                sb.append(" AND j.CREATE_USER_ID = ('").append(p_creatorUserId)
-                        .append("')");
+                sb.append(" AND j.CREATE_USER_ID = ('").append(p_creatorUserId).append("')");
             }
-            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String
-                    .valueOf(p_companyId)))
+            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String.valueOf(p_companyId)))
             {
                 sb.append(" AND j.COMPANY_ID = ");
                 sb.append(p_companyId);
@@ -2830,7 +2828,11 @@ public class JobHandlerLocal implements JobHandler
                 sb.append(" ASC");
 
             sb.append(" LIMIT ").append(p_offset).append(",").append(p_count);
-            c_category.debug("The query is " + sb.toString());
+
+            if (c_category.isDebugEnabled())
+            {
+                c_category.debug("The query is " + sb.toString());                
+            }
 
             results = HibernateUtil.searchWithSql(JobImpl.class, sb.toString());
 
@@ -2859,8 +2861,7 @@ public class JobHandlerLocal implements JobHandler
         JobVoSearchCriteria vo = new JobVoSearchCriteria();
         try
         {
-            perms = Permission.getPermissionManager().getPermissionSetForUser(
-            		currentUserId);
+            perms = Permission.getPermissionManager().getPermissionSetForUser(currentUserId);
         }
         catch (Exception e)
         {
@@ -2876,8 +2877,7 @@ public class JobHandlerLocal implements JobHandler
             if (perms.getPermissionFor(Permission.PROJECTS_MANAGE))
             {
             	sb.append(" and ( p.MANAGER_USER_ID ='").append(currentUserId).append("'");
-                if (perms
-                        .getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
+                if (perms.getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
                 {
                     sb.append(" or wo.OWNER_ID = '").append(currentUserId).append("'");
                 }
@@ -2885,23 +2885,20 @@ public class JobHandlerLocal implements JobHandler
                 {
                     List allProjectsIds = vo.getMyProjects(currentUserId);
                     String projectsIdsStr = convertList(allProjectsIds);
-                    sb.append(" or l.PROJECT_ID in ("
-                            + projectsIdsStr + ") ");
+                    sb.append(" or l.PROJECT_ID in (" + projectsIdsStr + ") ");
                 }
                 sb.append(")");
             }
             else
             {
-                if (perms
-                        .getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
+                if (perms.getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
                 {
                 	sb.append(" and ( wo.OWNER_ID = '").append(currentUserId).append("'");
                     if (perms.getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS))
                     {
                         List allProjectsIds = vo.getMyProjects(currentUserId);
                         String projectsIdsStr = convertList(allProjectsIds);
-                        sb.append(" or l.PROJECT_ID in ("
-                                + projectsIdsStr + ") ");
+                        sb.append(" or l.PROJECT_ID in (" + projectsIdsStr + ") ");
                     }
                     sb.append(")");
                 }
@@ -2911,13 +2908,12 @@ public class JobHandlerLocal implements JobHandler
                     {
                         List allProjectsIds = vo.getMyProjects(currentUserId);
                         String projectsIdsStr = convertList(allProjectsIds);
-                        sb.append(" and ( l.PROJECT_ID in ("
-                                + projectsIdsStr + ") ");
+                        sb.append(" and ( l.PROJECT_ID in (" + projectsIdsStr + ") ");
                         sb.append(")");
                     }
                     else
                     {
-                        sb.append("and 1=2");
+                        sb.append(" and 1=2 ");
                     }
                 }
             }

@@ -50,11 +50,11 @@ public class MatchTypeStatistics
     public static final int IN_PROGRESS_TM_EXACT = 11;
 
     // word count calculated by threshold
-    public static final int THRESHOLD_NO_MATCH = 11;
-    public static final int THRESHOLD_HI_FUZZY = 12;
-    public static final int THRESHOLD_MED_HI_FUZZY = 13;
-    public static final int THRESHOLD_MED_FUZZY = 14;
-    public static final int THRESHOLD_LOW_FUZZY = 15;
+    public static final int THRESHOLD_NO_MATCH = 21;
+    public static final int THRESHOLD_HI_FUZZY = 22;
+    public static final int THRESHOLD_MED_HI_FUZZY = 23;
+    public static final int THRESHOLD_MED_FUZZY = 24;
+    public static final int THRESHOLD_LOW_FUZZY = 25;
 
     private int m_threshold = 0;
 

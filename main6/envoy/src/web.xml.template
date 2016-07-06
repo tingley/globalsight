@@ -1119,6 +1119,11 @@
         <exception-type>java.lang.Exception</exception-type>
         <location>/envoy/common/error.jsp</location>
    </error-page>
+   
+   <error-page>
+	<error-code id="error403">403</error-code>
+	<location>/envoy/common/error404.jsp</location>
+   </error-page>
 
    <error-page>
 	<error-code id="error404">404</error-code>

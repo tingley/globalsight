@@ -30,7 +30,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -52,7 +51,6 @@ import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.everest.edit.ImageHelper;
 import com.globalsight.everest.edit.SegmentProtectionManager;
 import com.globalsight.everest.edit.SegmentRepetitions;
-import com.globalsight.everest.edit.offline.xliff.XLIFFStandardUtil;
 import com.globalsight.everest.edit.online.imagereplace.ImageReplaceFileMap;
 import com.globalsight.everest.edit.online.imagereplace.ImageReplaceFileMapPersistenceManager;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -95,7 +93,6 @@ import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.common.RegExMatchInterface;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.IFormatNames;
-import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.inprogresstm.DynamicLeverageResults;
 import com.globalsight.ling.inprogresstm.DynamicLeveragedSegment;
 import com.globalsight.ling.inprogresstm.InProgressTmManager;
@@ -1876,11 +1873,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         p_targetLocaleId, jobId);
             }
 
+        	/**
             Set<XliffAlt> xliffAltSet = targetTuv.getXliffAlt(true);
             if (xliffAltSet != null && !xliffAltSet.isEmpty())
             {
-                for (Iterator iterator = xliffAltSet.iterator(); iterator
-                        .hasNext();)
+                for (Iterator iterator = xliffAltSet.iterator(); iterator.hasNext();)
                 {
                     XliffAlt xliffAlt = (XliffAlt) iterator.next();
                     String s = xliffAlt.getSourceSegment();
@@ -1895,10 +1892,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 
                 result.setXliffAlt(xliffAltSet);
             }
+            **/
 
-            
-
-            boolean isWSXlf = false;
+        	boolean isWSXlf = false;
             boolean isAutoCommit = false;
             if (TuImpl.FROM_WORLDSERVER.equalsIgnoreCase(targetTuv.getTu(
                     jobId).getGenerateFrom()))

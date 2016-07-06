@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.dom4j.DocumentException;
@@ -63,13 +62,11 @@ import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
-import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.ling.tw.internal.XliffInternalTag;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
-import com.globalsight.util.NumberUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -408,56 +405,18 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         return altTrans;
     }
 
-    private void writeTmMatch(OfflineSegmentData p_osd, long p_jobId)
-            throws IOException
+    @SuppressWarnings("unchecked")
+    private void writeTmMatch(OfflineSegmentData p_osd, long p_jobId) throws IOException
     {
         List<LeverageMatch> list = p_osd.getOriginalFuzzyLeverageMatchList();
-        List<LeverageMatch> list2 = new ArrayList<LeverageMatch>();
-
         if (list != null)
         {
-            list2.addAll(list);
-        }
+            LeverageMatch.orderMatchResult(list);
 
-        Tuv tuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
-                p_osd.getTrgTuvId(), p_jobId);
-        Tuv sourceTuv = p_osd.getSourceTuv();
-
-        Set xliffAltSet = tuv.getXliffAlt(true);
-        int altFlag = -100;
-
-        if (xliffAltSet != null && xliffAltSet.size() > 0)
-        {
-            Iterator it = xliffAltSet.iterator();
-
-            while (it.hasNext())
+            for (int i = 0; i < list.size(); i++)
             {
-                XliffAlt alt = (XliffAlt) it.next();
-                LeverageMatch lm = new LeverageMatch();
-                if (sourceTuv != null)
-                {
-                    lm.setOriginalSourceTuvId(sourceTuv.getId());
-                }
-                String str = EditUtil.decodeXmlEntities(alt.getSourceSegment());
-                float score = (float) NumberUtil.PecentToDouble(alt.getQuality());
-
-                lm.setMatchedOriginalSource(str);
-                lm.setMatchedText(EditUtil.decodeXmlEntities(alt.getSegment()));
-                lm.setScoreNum(score);
-                lm.setProjectTmIndex(altFlag);
-                list2.add(lm);
-            }
-        }
-
-        if (list2 != null)
-        {
-            LeverageMatch.orderMatchResult(list2);
-
-            for (int i = 0; i < list2.size(); i++)
-            {
-                LeverageMatch leverageMatch = list2.get(i);
-                m_outputStream.write(getAltByMatch(leverageMatch, p_osd,
-                        getSAXReader(), p_jobId));
+                LeverageMatch leverageMatch = list.get(i);
+                m_outputStream.write(getAltByMatch(leverageMatch, p_osd, getSAXReader(), p_jobId));
             }
         }
     }

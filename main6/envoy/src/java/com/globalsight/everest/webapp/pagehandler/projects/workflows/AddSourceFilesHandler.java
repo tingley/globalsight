@@ -803,7 +803,7 @@ public class AddSourceFilesHandler extends PageHandler
             String zipEntryName = entry.getFileName();
             String filePath = file.getName().substring(0, file.getName().lastIndexOf(".")) + "_"
                     + CreateJobUtil.getFileExtension(file) +File.separator+ zipEntryName;
-            if (existedAndAddedFiles.contains(filePath.replace("/", "\\")))
+            if (existedAndAddedFiles.contains(filePath.replace("/", File.separator)))
             {
                 duplicateFiles.add(filePath.replace("\\", "\\\\").replace("/", "\\\\"));
             }
@@ -868,7 +868,7 @@ public class AddSourceFilesHandler extends PageHandler
             }
             String filePath = file.getName().substring(0, file.getName().lastIndexOf(".")) + "_"
                     + CreateJobUtil.getFileExtension(file) +File.separator+ rarEntryName;
-            if (existedAndAddedFiles.contains(filePath.replace("/", "\\")))
+            if (existedAndAddedFiles.contains(filePath.replace("/", File.separator)))
             {
                 duplicateFiles.add(filePath.replace("\\", "\\\\").replace("/", "\\\\"));
             }
@@ -928,7 +928,7 @@ public class AddSourceFilesHandler extends PageHandler
             String zip7zEntryName = item.getName();
             String filePath = file.getName().substring(0, file.getName().lastIndexOf(".")) + "_"
                     + CreateJobUtil.getFileExtension(file) +File.separator+ zip7zEntryName;
-            if (existedAndAddedFiles.contains(filePath.replace("/", "\\")))
+            if (existedAndAddedFiles.contains(filePath.replace("/", File.separator)))
             {
                 duplicateFiles.add(filePath.replace("\\", "\\\\").replace("/", "\\\\"));
             }

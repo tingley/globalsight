@@ -470,16 +470,14 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
     }
 
     /**
-     * The state is always "new" in below cases: 1. For xliff 1.2, if
-     * "Populate 100% Target Segments" is not checked; 2. For OmegaT, it has no
-     * "Populate 100% Target Segments" option on UI, always use
-     * "isPopulate100=false" setting.
+     * The state is always "new" in below cases:
+     * 1. For xliff 1.2, if "Populate 100% Target Segments" and "Populate MT Target Segments" are both not checked;
+     * 2. For OmegaT, the 3 populate options are all fixed "false".
      */
-    private String getState(OfflineSegmentData data,
-            DownloadParams p_downloadParams)
+    private String getState(OfflineSegmentData data, DownloadParams p_downloadParams)
     {
         String state = "new";
-        if (p_downloadParams.isPopulate100())
+        if (p_downloadParams.isPopulate100() || p_downloadParams.isPopulateMT())
         {
             if (isInContextMatch(data) || isExactMatch(data))
             {

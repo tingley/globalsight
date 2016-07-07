@@ -743,15 +743,9 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         }
     }
 
-    /**
-     * The state is always "new" in below cases: 1. For xliff 2.0, if
-     * "Populate 100% Target Segments" is not checked; 2. For OmegaT, it has no
-     * "Populate 100% Target Segments" option on UI, always use
-     * "isPopulate100=false" setting.
-     */
     private StateType getState(OfflineSegmentData data)
     {
-        if (downloadParams.isPopulate100())
+        if (downloadParams.isPopulate100() || downloadParams.isPopulateMT())
         {
             if (isInContextMatch(data) || isExactMatch(data))
             {

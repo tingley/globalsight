@@ -293,13 +293,28 @@ public class WordCountHandler extends PageHandler
 
     private void setMtColumnFlag(List<Workflow> wfList, HttpServletRequest p_request)
     {
-        boolean hasMtColumnFlag = false;
+        // If any workflow is not since 8.7, the job must be created before 8.7.
+        boolean isJobCreatedSince87 = true;
         for (Workflow wf : wfList)
         {
-            hasMtColumnFlag = (wf.getIsSinceVersion87() && wf.getMtTotalWordCount() > 0);
-            if (hasMtColumnFlag)
+            if (!wf.getIsSinceVersion87())
+            {
+                isJobCreatedSince87 = false;
+                break;
+            }
+        }
+
+        // If any workflow has MT word counts, we need show "MT" column
+        boolean hasMTWordCounts = false;
+        for (Workflow wf : wfList)
+        {
+            hasMTWordCounts = (wf.getMtTotalWordCount() > 0);
+            if (hasMTWordCounts)
                 break;
         }
+
+        boolean hasMtColumnFlag = (isJobCreatedSince87 && hasMTWordCounts);
+
         p_request.setAttribute(MT_COLUMN_FLAG, hasMtColumnFlag);
     }
 }

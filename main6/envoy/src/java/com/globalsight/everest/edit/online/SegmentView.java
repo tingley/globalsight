@@ -61,7 +61,6 @@ public class SegmentView implements Serializable
     /** A list of {@link SegmentVersion} objects. */
     private ArrayList m_segmentVersions = null;
 
-    private String xliffTarget = null;
     private Set xliffAlt = null;
     private Tuv targetTuv = null;
     private String pagePath = "";
@@ -276,11 +275,17 @@ public class SegmentView implements Serializable
         m_wordCount = p_wordCount;
     }
 
+    /**
+     * @deprecated
+     */
     public void setXliffAlt(Set p_alt)
     {
         this.xliffAlt = p_alt;
     }
 
+    /**
+     * @deprecated
+     */
     public List getXliffAlt()
     {
         if (xliffAlt != null)

@@ -52,7 +52,7 @@ import com.globalsight.util.date.DateHelper;
 public class TaskImpl extends PersistentObject implements Task, WorkObject
 {
     private Logger logger = Logger.getLogger(TaskImpl.class);
-    
+
     private static final long serialVersionUID = 1L;
 
     public static final String EMPTY_DATE = "--";
@@ -117,11 +117,11 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
 
     // for gbs-1939
     private char m_isUploading;
-    
-    //for gbs-3574
-    private int m_isReportUploaded = 0;//0:not upload; 1: uploaded.
-    private int m_isReportUploadCheck = 0;//0:not check; 1: check.
-    
+
+    // for gbs-3574
+    private int m_isReportUploaded = 0;// 0:not upload; 1: uploaded.
+    private int m_isReportUploadCheck = 0;// 0:not check; 1: check.
+
     private String m_qualityAssessment = null;
     private String m_marketSuitability = null;
 
@@ -144,15 +144,30 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     {
         this.m_isUploading = p_isUploading;
     }
-    
-    public void setIsReportUploadCheck(int p_isReportUploadCheck) {
-    	this.m_isReportUploadCheck = p_isReportUploadCheck;
-	}
 
-	public int getIsReportUploadCheck() {
-		return this.m_isReportUploadCheck;
-	}
-	
+    public void setIsReportUploadCheck(int p_isReportUploadCheck)
+    {
+        this.m_isReportUploadCheck = p_isReportUploadCheck;
+    }
+
+    public int getIsReportUploadCheck()
+    {
+        if (this.m_wfTaskInstance == null)
+        {
+            try
+            {
+                m_wfTaskInstance = (WorkflowTaskInstance) ServerProxy.getWorkflowServer()
+                        .getWorkflowTaskInstance(this.getWorkflow().getId(), this.getId());
+            }
+            catch (Exception e)
+            {
+                logger.error(e);
+            }
+        }
+
+        return (m_wfTaskInstance != null ? m_wfTaskInstance.getReportUploadCheck() : 0);
+    }
+
     public int getIsActivityCommentUploadCheck()
     {
         if (this.m_wfTaskInstance == null)
@@ -170,14 +185,16 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
 
         return (m_wfTaskInstance != null ? m_wfTaskInstance.getActivityCommentUploadCheck() : 0);
     }
-	
-	public void setIsReportUploaded(int p_isReportUploaded) {
-		this.m_isReportUploaded = p_isReportUploaded;
-	}
 
-	public int getIsReportUploaded() {
-		return this.m_isReportUploaded;
-	}
+    public void setIsReportUploaded(int p_isReportUploaded)
+    {
+        this.m_isReportUploaded = p_isReportUploaded;
+    }
+
+    public int getIsReportUploaded()
+    {
+        return this.m_isReportUploaded;
+    }
 
     /**
      * Default constructor to be used by TopLink only.
@@ -261,8 +278,7 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         {
             return new ArrayList(0);
         }
-        return new ArrayList(m_workflow.getJob().getSourcePages(
-                p_primaryFileType));
+        return new ArrayList(m_workflow.getJob().getSourcePages(p_primaryFileType));
     }
 
     /**
@@ -375,14 +391,13 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
      * @return a string representation of the duration in terms of days, hours,
      *         and minutes.
      */
-    public String getTaskDurationAsString(String p_dayAbbrev,
-            String p_hourAbbrev, String p_minuteAbbrev)
+    public String getTaskDurationAsString(String p_dayAbbrev, String p_hourAbbrev,
+            String p_minuteAbbrev)
     {
-        long completionTime = m_wfTaskInstance == null ? 0 : m_wfTaskInstance
-                .getCompletedTime();
+        long completionTime = m_wfTaskInstance == null ? 0 : m_wfTaskInstance.getCompletedTime();
 
-        return DateHelper.daysHoursMinutes(completionTime, p_dayAbbrev,
-                p_hourAbbrev, p_minuteAbbrev);
+        return DateHelper.daysHoursMinutes(completionTime, p_dayAbbrev, p_hourAbbrev,
+                p_minuteAbbrev);
     }
 
     /**
@@ -403,10 +418,8 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
      */
     public long getDuration()
     {
-        long completedTime = m_completedDate == null ? -1 : m_completedDate
-                .getTime();
-        long acceptTime = m_acceptedDate == null ? -1 : m_acceptedDate
-                .getTime();
+        long completedTime = m_completedDate == null ? -1 : m_completedDate.getTime();
+        long acceptTime = m_acceptedDate == null ? -1 : m_acceptedDate.getTime();
 
         long duration = completedTime - acceptTime;
 
@@ -604,8 +617,7 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         {
             return "";
         }
-        return m_workflow.getJob().getL10nProfile().getProject()
-                .getProjectManagerId();
+        return m_workflow.getJob().getL10nProfile().getProject().getProjectManagerId();
     }
 
     /**
@@ -640,7 +652,7 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         }
         if (m_wfTaskInstance != null)
         {
-        	return m_wfTaskInstance.getTaskStateForAssignee();
+            return m_wfTaskInstance.getTaskStateForAssignee();
         }
 
         return m_state;
@@ -742,9 +754,9 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     public void setState(int p_state)
     {
         m_state = p_state;
-        if(m_state == STATE_ACTIVE)
+        if (m_state == STATE_ACTIVE)
         {
-        	setIsReportUploaded(0);
+            setIsReportUploaded(0);
         }
     }
 
@@ -773,8 +785,7 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         String displayName = getName();
         try
         {
-            Activity act = (Activity) ServerProxy.getJobHandler().getActivity(
-                    getName());
+            Activity act = (Activity) ServerProxy.getJobHandler().getActivity(getName());
             displayName = act.getDisplayName();
         }
         catch (Exception e)
@@ -801,50 +812,31 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     public String toString()
     {
         // m_taskComments.size();
-        return super.toString()
-                + " TaskName="
-                + (getTaskName() != null ? getTaskName() : "null")
-                + ", ProjectName="
-                + (getProjectName() != null ? getProjectName() : "null")
-                + ", DueDate="
-                + (getEstimatedCompletionDate())
-                + ", ProjectManagerId="
-                + (getProjectManagerId() != null ? getProjectManagerId()
-                        : "null")
+        return super.toString() + " TaskName=" + (getTaskName() != null ? getTaskName() : "null")
+                + ", ProjectName=" + (getProjectName() != null ? getProjectName() : "null")
+                + ", DueDate=" + (getEstimatedCompletionDate()) + ", ProjectManagerId="
+                + (getProjectManagerId() != null ? getProjectManagerId() : "null")
                 + ", ProjectManagerName="
-                + (getProjectManagerName() != null ? getProjectManagerName()
-                        : "null")
+                + (getProjectManagerName() != null ? getProjectManagerName() : "null")
                 + ", CompletedDate="
-                + (getCompletedDateAsString() != null ? getCompletedDateAsString()
-                        : "null")
+                + (getCompletedDateAsString() != null ? getCompletedDateAsString() : "null")
                 + ", AcceptedDate="
-                + (getAcceptedDateAsString() != null ? getAcceptedDateAsString()
-                        : "null")
+                + (getAcceptedDateAsString() != null ? getAcceptedDateAsString() : "null")
                 + ", SourceLocale="
-                + (getSourceLocale() != null ? getSourceLocale()
-                        .toDebugString() : "null")
-                + ", State="
-                + getState()
-                + ", TargetLocale="
-                + (getTargetLocale() != null ? getTargetLocale()
-                        .toDebugString() : "null")
-                + ", TaskComments="
-                + (getTaskComments() != null ? getTaskComments() : "null")
+                + (getSourceLocale() != null ? getSourceLocale().toDebugString() : "null")
+                + ", State=" + getState() + ", TargetLocale="
+                + (getTargetLocale() != null ? getTargetLocale().toDebugString() : "null")
+                + ", TaskComments=" + (getTaskComments() != null ? getTaskComments() : "null")
                 + ", Workflow="
-                + (getWorkflow() != null ? getWorkflow().getIdAsLong()
-                        .toString() : "null")
+                + (getWorkflow() != null ? getWorkflow().getIdAsLong().toString() : "null")
                 + "\nWorkflowTaskInstance="
-                + (m_wfTaskInstance != null ? m_wfTaskInstance.toDebugString()
-                        : "null")
-                + ", m_rateSelectionCriteria="
-                + (m_rateSelectionCriteria)
-                + ", m_expenseRate="
+                + (m_wfTaskInstance != null ? m_wfTaskInstance.toDebugString() : "null")
+                + ", m_rateSelectionCriteria=" + (m_rateSelectionCriteria) + ", m_expenseRate="
                 + (m_expenseRate == null ? "No rate" : m_expenseRate.toString())
                 + ", m_revenueRate="
-                + (m_revenueRate == null ? "No rate" : m_revenueRate.toString())
-                + ", m_work="
-                + (m_work == null ? "No amount of work " : m_work.toString())
-                + ", m_taskType=" + m_taskType + "\n";
+                + (m_revenueRate == null ? "No rate" : m_revenueRate.toString()) + ", m_work="
+                + (m_work == null ? "No amount of work " : m_work.toString()) + ", m_taskType="
+                + m_taskType + "\n";
     }
 
     /**
@@ -908,8 +900,7 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < sz; i++)
         {
-            sb.append(UserUtil.getUserNameById((String) allAssignees
-                    .elementAt(i)));
+            sb.append(UserUtil.getUserNameById((String) allAssignees.elementAt(i)));
             if (i < sz - 1)
             {
                 sb.append("<BR>");
@@ -964,8 +955,7 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
      */
     public String getActivityRolesAsString()
     {
-        return m_wfTaskInstance == null ? null : m_wfTaskInstance
-                .getRolesAsString();
+        return m_wfTaskInstance == null ? null : m_wfTaskInstance.getRolesAsString();
     }
 
     /**
@@ -1095,28 +1085,26 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     /**
      * @see Task.getEstimatedAcceptanceDate()
      */
-	public Date getEstimatedAcceptanceDate()
-	{
-		if (m_workflow != null
-				&& m_workflow.isEstimatedCompletionDateOverrided())
-		{
-			m_estimatedAcceptanceDate = m_workflow.getEstimatedCompletionDate();
-		}
-		return m_estimatedAcceptanceDate;
-	}
+    public Date getEstimatedAcceptanceDate()
+    {
+        if (m_workflow != null && m_workflow.isEstimatedCompletionDateOverrided())
+        {
+            m_estimatedAcceptanceDate = m_workflow.getEstimatedCompletionDate();
+        }
+        return m_estimatedAcceptanceDate;
+    }
 
     /**
      * @see Task.getEstimatedCompletionDate()
      */
     public Date getEstimatedCompletionDate()
-	{
-		if (m_workflow != null
-				&& m_workflow.isEstimatedCompletionDateOverrided())
-		{
-			m_estimatedCompletionDate = m_workflow.getEstimatedCompletionDate();
-		}
-		return m_estimatedCompletionDate;
-	}
+    {
+        if (m_workflow != null && m_workflow.isEstimatedCompletionDateOverrided())
+        {
+            m_estimatedCompletionDate = m_workflow.getEstimatedCompletionDate();
+        }
+        return m_estimatedCompletionDate;
+    }
 
     /**
      * @see Task.setEstimatedAcceptanceDate(Date)
@@ -1183,7 +1171,7 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
 
         return m_type == p_type;
     }
-    
+
     public boolean isReviewOnly()
     {
         try
@@ -1243,8 +1231,7 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
      * the query to happen so when it is serialized all pieces of the object are
      * serialized and availble to the client.
      */
-    protected void writeObject(java.io.ObjectOutputStream out)
-            throws java.io.IOException
+    protected void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException
     {
         // touch task comments - since they are set up to only
         // populate when needed
@@ -1269,9 +1256,9 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     public void setStateStr(String p_state)
     {
         m_state = getStateAsInt(p_state);
-        if(m_state == STATE_ACTIVE)
+        if (m_state == STATE_ACTIVE)
         {
-        	setIsReportUploaded(0);
+            setIsReportUploaded(0);
         }
     }
 
@@ -1303,8 +1290,7 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
 
     public void setWorkSet(Set<AmountOfWork> p_workSet)
     {
-        this.m_workSet = (p_workSet == null) ? new HashSet<AmountOfWork>()
-                : p_workSet;
+        this.m_workSet = (p_workSet == null) ? new HashSet<AmountOfWork>() : p_workSet;
         m_workNeedsCalculating = true;
     }
 
@@ -1353,8 +1339,8 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         }
 
         long accetpDate = m_acceptedDate.getTime();
-        long duration = m_completedDate == null ? new Date().getTime()
-                - accetpDate : m_completedDate.getTime() - accetpDate;
+        long duration = m_completedDate == null ? new Date().getTime() - accetpDate
+                : m_completedDate.getTime() - accetpDate;
 
         return DateHelper.daysHoursMinutes(duration, "d", "h", "m");
     }
@@ -1372,7 +1358,7 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     @Override
     public void setQualityAssessment(String qualityAssessment)
     {
-       this.m_qualityAssessment = qualityAssessment; 
+        this.m_qualityAssessment = qualityAssessment;
     }
 
     @Override

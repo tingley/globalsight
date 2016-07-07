@@ -154,7 +154,7 @@ public class BlaiseHelper
             if (client == null)
             {
                 logger.error("TranslationAgencyClient is null, cannot list inbox.");
-                return null;
+                return results;
             }
 
             List<InboxEntry> inboxEntries = client.listInbox(command);
@@ -175,15 +175,16 @@ public class BlaiseHelper
 
     public List<TranslationInboxEntryVo> listInboxByIds(Set<Long> ids, TranslationPageCommand command)
     {
-    	TranslationAgencyClient client = getTranslationClient();
+        List<TranslationInboxEntryVo> results = new ArrayList<TranslationInboxEntryVo>();
+
+        TranslationAgencyClient client = getTranslationClient();
         if (client == null)
         {
             logger.error("TranslationAgencyClient is null, cannot list inbox by Ids: "
                     + listToString(ids));
-            return null;
+            return results;
         }
 
-        List<TranslationInboxEntryVo> results = new ArrayList<TranslationInboxEntryVo>();
         try
         {
             List<InboxEntry> inboxEntries = client.listInbox(ids, command);

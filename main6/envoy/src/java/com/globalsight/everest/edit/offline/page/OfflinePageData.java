@@ -72,7 +72,6 @@ import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
-import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.rtf.RtfDocument;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tw.PseudoConstants;
@@ -84,7 +83,6 @@ import com.globalsight.ling.tw.offline.parser.AmbassadorDwUpParser;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
-import com.globalsight.util.NumberUtil;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -3037,14 +3035,6 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
             allLMs.addAll(osd.getOriginalFuzzyLeverageMatchList());
         }
 
-        Tuv currTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(osd.getTrgTuvId(),
-                p_jobId);
-
-        // Add all xliff alts into the match list
-        List<LeverageMatch> lmFromXliffAlts = convertXliffAltToLeverageMatches(
-                currTuv.getXliffAlt(true));
-        allLMs.addAll(lmFromXliffAlts);
-
         LeverageMatch.orderMatchResult(allLMs);
         SortUtil.sort(allLMs, new GeneralComparatorBySID());
 
@@ -3071,31 +3061,6 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
         {
 
         }
-    }
-
-    /**
-     * Need write matches from xliff file "alt-trans" into offline tmx, so
-     * convert "XliffAlt" to "LeverageMatch" object.
-     */
-    private List<LeverageMatch> convertXliffAltToLeverageMatches(Set<XliffAlt> xliffAltSet)
-    {
-        List<LeverageMatch> lms = new ArrayList<LeverageMatch>();
-        if (xliffAltSet != null && xliffAltSet.size() > 0)
-        {
-            for (XliffAlt alt : xliffAltSet)
-            {
-                LeverageMatch lm = new LeverageMatch();
-                lm.setMatchedOriginalSource(EditUtil.decodeXmlEntities(alt.getSourceSegment()));
-                lm.setMatchedText(EditUtil.decodeXmlEntities(alt.getSegment()));
-                float score = (float) NumberUtil.PecentToDouble(alt.getQuality());
-                lm.setScoreNum(score);
-                lm.setProjectTmIndex(-100);
-                lm.setOriginalSourceTuvId(0);
-                lms.add(lm);
-            }
-        }
-
-        return lms;
     }
 
     /**

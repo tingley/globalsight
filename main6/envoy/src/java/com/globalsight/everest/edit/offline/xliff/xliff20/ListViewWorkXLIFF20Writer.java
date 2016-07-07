@@ -24,11 +24,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,14 +71,12 @@ import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
-import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.ling.tw.internal.XliffInternalTag;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
 import com.globalsight.util.FileUtil;
-import com.globalsight.util.NumberUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -747,15 +743,9 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
         }
     }
 
-    /**
-     * The state is always "new" in below cases: 1. For xliff 2.0, if
-     * "Populate 100% Target Segments" is not checked; 2. For OmegaT, it has no
-     * "Populate 100% Target Segments" option on UI, always use
-     * "isPopulate100=false" setting.
-     */
     private StateType getState(OfflineSegmentData data)
     {
-        if (downloadParams.isPopulate100())
+        if (downloadParams.isPopulate100() || downloadParams.isPopulateMT())
         {
             if (isInContextMatch(data) || isExactMatch(data))
             {
@@ -833,55 +823,19 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
      * @param unit
      * @throws IOException
      */
-    @SuppressWarnings(
-    { "unchecked", "rawtypes" })
-    private void writeTmMatch(OfflineSegmentData osd, long jobId, Unit unit)
-            throws IOException
+    @SuppressWarnings("unchecked")
+    private void writeTmMatch(OfflineSegmentData osd, long jobId, Unit unit) throws IOException
     {
         List<LeverageMatch> list = osd.getOriginalFuzzyLeverageMatchList();
-        List<LeverageMatch> list2 = new ArrayList<LeverageMatch>();
-
         if (list != null)
         {
-            list2.addAll(list);
-        }
-
-        Tuv tuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
-                osd.getTrgTuvId(), jobId);
-        Tuv sourceTuv = osd.getSourceTuv();
-        Set xliffAltSet = tuv.getXliffAlt(true);
-        if (xliffAltSet != null && xliffAltSet.size() > 0)
-        {
-            Iterator it = xliffAltSet.iterator();
-
-            while (it.hasNext())
-            {
-                XliffAlt alt = (XliffAlt) it.next();
-                LeverageMatch lm = new LeverageMatch();
-                if (sourceTuv != null)
-                {
-                    lm.setOriginalSourceTuvId(sourceTuv.getId());
-                }
-                String str = EditUtil.decodeXmlEntities(alt.getSourceSegment());
-                float score = (float) NumberUtil.PecentToDouble(alt.getQuality());
-
-                lm.setMatchedOriginalSource(str);
-                lm.setMatchedText(EditUtil.decodeXmlEntities(alt.getSegment()));
-                lm.setScoreNum(score);
-                lm.setProjectTmIndex(altFlag);
-                list2.add(lm);
-            }
-        }
-
-        if (list2 != null)
-        {
-            LeverageMatch.orderMatchResult(list2);
+            LeverageMatch.orderMatchResult(list);
 
             Matches ms = new Matches();
 
-            for (int i = 0; i < list2.size(); i++)
+            for (int i = 0; i < list.size(); i++)
             {
-                LeverageMatch leverageMatch = list2.get(i);
+                LeverageMatch leverageMatch = list.get(i);
                 Match m = getMatch(leverageMatch, osd, jobId);
                 if (m != null)
                 {
@@ -900,11 +854,8 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
      * If the osd is null, this method is called by the PageTemplate, use for
      * writing leverage match results into exported xliff file
      */
-    public Match getMatch(LeverageMatch leverageMatch, OfflineSegmentData osd,
-            long p_jobId)
+    public Match getMatch(LeverageMatch leverageMatch, OfflineSegmentData osd, long p_jobId)
     {
-        String altTrans = new String();
-
         // altFlag to flag the leverageMatch form alt-trans
         int altFlag = -100;
 

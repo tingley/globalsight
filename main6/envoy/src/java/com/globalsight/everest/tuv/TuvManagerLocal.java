@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
@@ -37,7 +36,6 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
-import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.tm.LeverageMatchType;
 import com.globalsight.ling.tm.TuvLing;
 import com.globalsight.ling.tm2.persistence.DbUtil;
@@ -292,21 +290,6 @@ public final class TuvManagerLocal implements TuvManager
             CATEGORY.error("Cannot save offline TUV", ex);
             CATEGORY.error("id: " + tuvInDb.getId());
             CATEGORY.error("segment: " + tuvInDb.getSegmentString());
-            // Ensure xliffAlt is loaded if it has
-            Set<XliffAlt> alts = tuvInDb.getXliffAlt(true);
-            CATEGORY.error("xliffAlt size: " + alts.size());
-            int i = 0;
-            for (XliffAlt alt : alts)
-            {
-                i++;
-                CATEGORY.error("  XliffAlt " + i);
-                CATEGORY.error("    id :" + alt.getId());
-                CATEGORY.error("    segment :" + alt.getSegment());
-                CATEGORY.error("    language :" + alt.getLanguage());
-                CATEGORY.error("    quality :" + alt.getQuality());
-                CATEGORY.error("    tuv id :" + alt.getTuvId());
-            }
-
             throw new TuvException("Cannot save offline TUVs", ex);
         }
         finally

@@ -100,6 +100,10 @@ import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.file.FileWaiter;
 import com.globalsight.util.system.ConfigException;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.tool.xml.XMLWorkerFontProvider;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Rectangle;
@@ -890,7 +894,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     .getInstance(document, new FileOutputStream(pdfFile));
             document.open();
             com.itextpdf.tool.xml.XMLWorkerHelper.getInstance().parseXHtml(writer, document,
-                    new FileInputStream(htmlFilePath), Charset.forName("UTF-8"));
+                    new FileInputStream(htmlFilePath), Charset.forName("UTF-8"), new AsianFontProvider());
             document.close();
         }
         catch (ConfigException ce)
@@ -1996,8 +2000,26 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         return (isTarget ? "target_" : "source_") + p_page.getId() + "_" + p_userId;
     }
 
-    /*
-     * public void removeMapValue(TargetPage p_tp, String p_userId) { String key
-     * = getKey(p_tp, p_userId); createPDFMap.remove(key); }
-     */
+    class AsianFontProvider extends XMLWorkerFontProvider
+    {
+
+        public Font getFont(final String fontname, final String encoding, final boolean embedded,
+                final float size, final int style, final BaseColor color)
+        {
+            BaseFont bf = null;
+            try
+            {
+                bf = BaseFont.createFont( "STSong-Light", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            Font font = new Font(bf, size, style, color);
+            font.setColor(color);
+            return font;
+        }
+    }
 }
+
+

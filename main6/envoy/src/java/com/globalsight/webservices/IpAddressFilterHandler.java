@@ -62,7 +62,7 @@ public class IpAddressFilterHandler extends BasicHandler
      * and if that IP address is not in the list of allowed IP addresses, then
      * it is disallowed.
      */
-    public void invoke(MessageContext p_msgContext) throws AxisFault
+    public synchronized void invoke(MessageContext p_msgContext) throws AxisFault
     {
         try
         {
@@ -79,8 +79,7 @@ public class IpAddressFilterHandler extends BasicHandler
                     String userID = UserUtil.getUserIdByName(loginUser);
                     User user = ServerProxy.getUserManager().getUser(userID);
                     String companyName = user.getCompanyName();
-                    Company company = ServerProxy.getJobHandler().getCompany(
-                            companyName);
+                    Company company = ServerProxy.getJobHandler().getCompany(companyName);
                     enableIPFiler = company.getEnableIPFilter();
                 }
                 catch (Exception e)
@@ -91,8 +90,7 @@ public class IpAddressFilterHandler extends BasicHandler
 
             if (enableIPFiler)
             {
-                InetAddress remoteIP = InetAddress.getByName(request
-                        .getRemoteAddr());
+                InetAddress remoteIP = InetAddress.getByName(request.getRemoteAddr());
                 if (!RemoteIpManager.allowed(remoteIP.getHostAddress()))
                 {
                     String msg = "Illegal web service access attempt from IP address "

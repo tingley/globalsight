@@ -831,7 +831,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             else if (populate100 && trgScore == 100)
             {
             }
-            else if (populateFuzzy && !isMtTranslated(trgTuv) && trgScore !=100)
+            else if (populateFuzzy && !isMtTranslated(trgTuv) && trgScore !=100 && trgScore != 60)
             {
 
             }
@@ -2121,8 +2121,9 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      */
     private boolean isPopulateSrcAsTrg(float p_targetScore)
     {
-        return (p_targetScore == 100 && !populate100)
-                || (p_targetScore > 0 && p_targetScore != 100 && (!populateFuzzy || !populateMT));
+       boolean result = (p_targetScore == 100 && !populate100)
+                || (p_targetScore > 0 && p_targetScore != 100 && (!populateFuzzy || !populateMT||p_targetScore ==60));
+       return result;
     }
 
     private boolean isMtTranslated(Tuv tuv)

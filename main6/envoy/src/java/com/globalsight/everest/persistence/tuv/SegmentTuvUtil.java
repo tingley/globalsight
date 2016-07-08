@@ -1279,6 +1279,8 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
                     tuvUpdateStmt.executeBatch();
                     batchUpdate = 0;
                 }
+
+                setTuvIntoCache(tuv);
             }
 
             // execute the rest of the added batch
@@ -1297,6 +1299,11 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         }
         catch (Exception e)
         {
+            logger.error("Error when update TUVs " + e.getMessage(), e);
+            for (TuvImpl tuv : p_tuvs)
+            {
+                removeTuvFromCache(tuv.getId());
+            }
             throw e;
         }
         finally

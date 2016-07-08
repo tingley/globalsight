@@ -2177,11 +2177,12 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
 
             long workflowId = p_task.getWorkflow().getId();
             L10nProfile l10nProfile = p_task.getWorkflow().getJob().getL10nProfile();
-            int downloadEditAll = 4;
-            if (l10nProfile.getTmChoice() == LocProfileStateConstants.ALLOW_EDIT_TM_USAGE)
+
+            int userTmEditType = helper.getEditAllState(downloadOfflineFilesOptions.get(15),
+                    l10nProfile);
+            if (l10nProfile.getTMEditType() == LocProfileStateConstants.DENY_EDIT_TM_USAGE)
             {
-                downloadEditAll = helper.getEditAllState(downloadOfflineFilesOptions.get(15),
-                        l10nProfile);
+                userTmEditType = LocProfileStateConstants.TM_EDIT_TYPE_DENY;// 4
             }
             Vector excludeTypes = l10nProfile.getTranslationMemoryProfile().getJobExcludeTuTypes();
             List primarySourceFiles = helper.getAllPSFList(p_task);
@@ -2192,7 +2193,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                     Long.toString(workflowId), Long.toString(p_task.getId()), pageIdList,
                     pageNameList, canUseUrlList, primarySourceFiles, stfList, editorId, platformId,
                     encoding, ptagFormat, uiLocale, p_task.getSourceLocale(),
-                    p_task.getTargetLocale(), true, fileFormat, excludeTypes, downloadEditAll,
+                    p_task.getTargetLocale(), true, fileFormat, excludeTypes, userTmEditType,
                     supportFileList, resInsMode, user);
             downloadParams.setConsolidateTmxFiles("yes".equalsIgnoreCase(consolidateTM));
             downloadParams.setConsolidateTermFiles("yes".equalsIgnoreCase(consolidateTerm));

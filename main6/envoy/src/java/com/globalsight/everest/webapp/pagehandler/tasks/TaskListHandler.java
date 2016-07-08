@@ -944,8 +944,7 @@ public class TaskListHandler extends PageHandler
         String TMEditType = downloadOfflineFilesOptions.get(15);
         String excludeFullyLeveragedFiles = downloadOfflineFilesOptions.get(16);
         String preserveSourceFolder = downloadOfflineFilesOptions.get(17);
-        String includeXmlNodeContextInformation = downloadOfflineFilesOptions
-                .get(18);
+        String includeXmlNodeContextInformation = downloadOfflineFilesOptions.get(18);
         String consolidateFileType = downloadOfflineFilesOptions.get(19);
         String wordCountForDownload = downloadOfflineFilesOptions.get(20);
         String penalizedReferenceTmPre = downloadOfflineFilesOptions.get(21);
@@ -1010,16 +1009,14 @@ public class TaskListHandler extends PageHandler
             }
 
             long workflowId = task.getWorkflow().getId();
-            L10nProfile l10nProfile = task.getWorkflow().getJob()
-                    .getL10nProfile();
-            int downloadEditAll = LocProfileStateConstants.TM_EDIT_TYPE_DENY;// 4
-            if (l10nProfile.getTmChoice() == LocProfileStateConstants.ALLOW_EDIT_TM_USAGE)
+            int userTmEditType = Integer.parseInt(TMEditType);
+            L10nProfile l10nProfile = task.getWorkflow().getJob().getL10nProfile();
+            if (l10nProfile.getTMEditType() == LocProfileStateConstants.DENY_EDIT_TM_USAGE)
             {
-                downloadEditAll = help.getEditAllState(
-                        downloadOfflineFilesOptions.get(15), l10nProfile);
+                userTmEditType = LocProfileStateConstants.TM_EDIT_TYPE_DENY;// 4
             }
-            Vector excludeTypes = l10nProfile.getTranslationMemoryProfile()
-                    .getJobExcludeTuTypes();
+
+            Vector excludeTypes = l10nProfile.getTranslationMemoryProfile().getJobExcludeTuTypes();
             List primarySourceFiles = help.getAllPSFList(task);
             List stfList = help.getAllSTFList(task);
             List supportFileList = help.getAllSupportFileList(task);
@@ -1035,7 +1032,7 @@ public class TaskListHandler extends PageHandler
                     canUseUrlList, primarySourceFiles, stfList, editorId,
                     platformId, encoding, ptagFormat, uiLocale,
                     task.getSourceLocale(), task.getTargetLocale(), true,
-                    fileFormat, excludeTypes, downloadEditAll, supportFileList,
+                    fileFormat, excludeTypes, userTmEditType, supportFileList,
                     resInsMode, user);
             downloadParams.setConsolidateTmxFiles("yes".equalsIgnoreCase(consolidateTM));
             downloadParams.setConsolidateTermFiles("yes".equalsIgnoreCase(consolidateTerm));
@@ -1051,7 +1048,6 @@ public class TaskListHandler extends PageHandler
             downloadParams.setConsolidateFileType(consolidateFileType);
             downloadParams.setWordCountForDownload(Integer.parseInt(wordCountForDownload));
             downloadParams.setIncludeRepetitions("yes".equalsIgnoreCase(includeRepetitions));
-            downloadParams.setTMEditType(Integer.parseInt(TMEditType));
             downloadParams.setChangeCreationIdForMTSegments("yes"
                     .equalsIgnoreCase(changeCreationIdForMt));
             downloadParams.setExcludeFullyLeveragedFiles("yes"

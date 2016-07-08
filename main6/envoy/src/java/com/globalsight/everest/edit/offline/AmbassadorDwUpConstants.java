@@ -231,6 +231,9 @@ public interface AmbassadorDwUpConstants
     static public final int DOWNLOAD_EDITALL_STATE_YES = 41;
     static public final int DOWNLOAD_EDITALL_STATE_NO = 42;
 
+    /**
+     * @deprecated
+     */
     static public final int TM_EDIT_TYPE_NONE = 0;
     static public final int TM_EDIT_TYPE_BOTH = 1;
     static public final int TM_EDIT_TYPE_ICE = 2;

@@ -810,10 +810,10 @@ public class WorkflowManagerLocal implements WorkflowManager
 
         long workflowId = task.getWorkflow().getId();
         L10nProfile l10nProfile = task.getWorkflow().getJob().getL10nProfile();
-        int downloadEditAll = 4;
-        if (l10nProfile.getTmChoice() == LocProfileStateConstants.ALLOW_EDIT_TM_USAGE)
+        int tmEditType = LocProfileStateConstants.TM_EDIT_TYPE_BOTH;// 1
+        if (l10nProfile.getTMEditType() == LocProfileStateConstants.DENY_EDIT_TM_USAGE)
         {
-            downloadEditAll = 1;
+            tmEditType = LocProfileStateConstants.TM_EDIT_TYPE_DENY;// 4
         }
         Vector excludeTypes = l10nProfile.getTranslationMemoryProfile().getJobExcludeTuTypes();
         List primarySourceFiles = help.getAllPSFList(task);
@@ -825,7 +825,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                 Long.toString(workflowId), Long.toString(task.getId()), pageIdList, pageNameList,
                 canUseUrlList, primarySourceFiles, stfList, editorId, platformId, encoding,
                 ptagFormat, uiLocale, task.getSourceLocale(), task.getTargetLocale(), true,
-                fileFormat, excludeTypes, downloadEditAll, supportFileList, resInsMode,
+                fileFormat, excludeTypes, tmEditType, supportFileList, resInsMode,
                 UserHandlerHelper.getUser(task.getAcceptor()));
 
         // activity type
@@ -855,20 +855,17 @@ public class WorkflowManagerLocal implements WorkflowManager
         DownloadParams downloadParams = getDownloadParams(task, p_job);
         downloadParams.setIncludeXmlNodeContextInformation(isIncludeXmlNodeContextInformation);
         downloadParams.setAutoActionNodeEmail(p_nodeEmail);
-        if (lockedSegEditType != null)
+        try
         {
-            try
+            int type = Integer.parseInt(lockedSegEditType);
+            if (type >= 1 && type <= 4)
             {
-                int type = Integer.parseInt(lockedSegEditType);
-                if (type >= 1 && type <= 4)
-                {
-                    downloadParams.setTMEditType(type);
-                }
+                downloadParams.setTMEditType(type);
             }
-            catch (Exception e)
-            {
-                // still use default "tmEditType".
-            }
+        }
+        catch (Exception e)
+        {
+            // still use default "tmEditType".
         }
 
         File tmpDir = AmbFileStoragePathUtils

@@ -55,6 +55,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.glossaries.GlossaryState;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
+import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileStateConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.ling.tw.PseudoConstants;
@@ -742,13 +743,13 @@ public class SendDownloadFileHelper implements WebAppConstants
 
     private int mapTmEditType(L10nProfile p_l10nProfile)
     {
-        if (p_l10nProfile.getTMEditType() == 0 || p_l10nProfile.getTMEditType() == 1)
+        if (p_l10nProfile.getTMEditType() == LocProfileStateConstants.DENY_EDIT_TM_USAGE)
         {
-            return AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY; // 4
+            return LocProfileStateConstants.TM_EDIT_TYPE_DENY; // 4
         }
         else
         {
-            return AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH; // 1
+            return LocProfileStateConstants.TM_EDIT_TYPE_BOTH; // 1
         }
     }
 

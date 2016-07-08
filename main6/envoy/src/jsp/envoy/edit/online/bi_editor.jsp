@@ -62,11 +62,14 @@ String str_langAttr = EditUtil.getLanguageAttributes(
   state.getSourceLocale(), view.isLocalizable());
 
 //if show mt in segment editor
-boolean show_in_editor = false;
-try {
-	String showInEditor = (String) sessionMgr.getAttribute("SHOW_IN_EDITOR");
-	show_in_editor = (new Boolean(showInEditor)).booleanValue();
-} catch (Exception e) { }
+boolean show_MT = false;
+try 
+{
+	  String showMachineTranslation = (String) sessionMgr.getAttribute("showMachineTranslation");
+	  show_MT = (new Boolean(showMachineTranslation)).booleanValue();
+	  System.out.println("show_MT="+show_MT);
+} 
+catch (Exception e) { }
 %>
 <HTML>
 <HEAD>
@@ -112,7 +115,7 @@ function CanClose()
 }
 </SCRIPT>
 </HEAD>
-<% if (show_in_editor) { %>
+<% if (show_MT) { %>
 <FRAMESET ROWS="15%,23%,14%,14%,14%,14%"
   FRAMEBORDER="no" BORDER="0" FRAMESCAPING="no">
   <FRAME NAME="source" SRC="<%=url_source%>" 

@@ -94,7 +94,13 @@ public class FileImportUtil
             {
                 String type = (String) key;
                 type = type.trim().toLowerCase();
-                RUN_MAX_MESSAGE.put(type, Integer.parseInt(p.getProperty((String) key)));
+                try
+                {
+                    RUN_MAX_MESSAGE.put(type, Integer.parseInt(p.getProperty((String) key)));
+                }
+                catch (NumberFormatException ignore)
+                {
+                }
             }
         }
         catch (Exception e)

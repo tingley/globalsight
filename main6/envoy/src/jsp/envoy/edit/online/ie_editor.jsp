@@ -48,11 +48,14 @@ String lb_url = bundle.getString("lb_url")+bundle.getString("lb_colon");
 String str_langAttr = EditUtil.getLanguageAttributes(state.getSourceLocale(),
     view.isLocalizable());
 
-boolean show_in_editor = false;
-try {
-	String showInEditor = (String) sessionMgr.getAttribute("SHOW_IN_EDITOR");
-	show_in_editor = (new Boolean(showInEditor)).booleanValue();
-} catch (Exception e) { }
+boolean show_MT = false;
+try 
+{
+	  String showMachineTranslation = (String) sessionMgr.getAttribute("showMachineTranslation");
+	  show_MT = (new Boolean(showMachineTranslation)).booleanValue();
+	  System.out.println("show_MT="+show_MT);
+} 
+catch (Exception e) { }
 %>
 
 <HTML>
@@ -99,7 +102,7 @@ function CanClose()
 }
 </SCRIPT>
 </HEAD>
-<% if (show_in_editor) { %>
+<% if (show_MT) { %>
 <FRAMESET ROWS="28%,32%,13%,13%,13%" FRAMEBORDER="no" BORDER="0" FRAMESCAPING="no">
   <FRAME NAME="source" SRC="<%=url_source%>" 
          SCROLLING="auto" NORESIZE MARGINHEIGHT="0" MARGINWIDTH="0">

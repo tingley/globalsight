@@ -354,6 +354,7 @@ public class JobResource extends RestResource
             @QueryParam("attributes") String p_attributes) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
+        boolean reCreate = false;
         Job job = null;
         try
         {
@@ -397,7 +398,15 @@ public class JobResource extends RestResource
                 String msg = "current jobId : " + p_jobId + " does not exist.";
                 throw new RestWebServiceException(msg);
             }
+            
+            String msg = checkIfCreateJobCalled(CREATE_JOB, job.getId(), job.getJobName());
+            if (msg != null)
+            {
+                reCreate = true;
+                throw new RestWebServiceException(msg);
+            }
             cachedJobIds.add(job.getId());
+
             validateParameters(job, p_filePaths, p_fileProfileIds, p_targetLocales,
                     fileProfileIds, filePaths, targetLocales);
 
@@ -546,7 +555,7 @@ public class JobResource extends RestResource
         }
         catch (Exception e)
         {
-            if (job != null)
+            if (job != null && !reCreate)
             {
                 JobCreationMonitor.updateJobState(job, Job.IMPORTFAILED);
             }

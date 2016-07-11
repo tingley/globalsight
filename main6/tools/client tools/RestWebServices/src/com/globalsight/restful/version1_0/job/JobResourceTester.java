@@ -153,7 +153,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 			// required params
 			url.append("?jobId=").append(jobId);
 			url.append("&filePaths=").append(URLEncoder.encode(filePaths));
-			url.append("&fileProfileIds=").append(p_fileProfileIds);
+			url.append("&fileProfileIds=").append(URLEncoder.encode(p_fileProfileIds));
 			url.append("&targetLocales=").append(URLEncoder.encode(p_targetLocales));
 			// optional query params
 			url.append("&comment=").append(URLEncoder.encode(comment));

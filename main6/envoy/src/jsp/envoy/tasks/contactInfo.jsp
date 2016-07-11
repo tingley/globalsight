@@ -121,22 +121,31 @@ function submitForm(btnName) {
 
 function confirmForm(formSent) {
 	var theAddress = formSent.address.value;
-        theAddress = stripBlanks(theAddress);
+    theAddress = stripBlanks(theAddress);
 	var theEmail = formSent.email.value;
-        theEmail = stripBlanks(theEmail);
-
-        if (isEmptyString(theEmail)) {
-          alert(" <%=jsmsgEmail%>");
-          formSent.email.value = "";
-          formSent.email.focus();
-          return false;
-        } else 
-        { 
-        	if ((theEmail !="@") && (!isValidEmail(theEmail,"<%=bundle.getString("jsmsg_email_invalid")%>"))) {
-                formSent.email.focus();
-                return false;
-            }
+	if (isEmptyString(theEmail))
+	{
+        alert(" <%=jsmsgEmail%>");
+        formSent.email.value = "";
+        formSent.email.focus();
+        return false;
+    }
+	else if (theEmail !="@")
+	{
+        if (!isValidEmail(theEmail,"<%=bundle.getString("jsmsg_email_invalid")%>"))
+        {
+            formSent.email.focus();
+            return false;
         }
+        // As CC and Bcc mail allow multiple mails comma separated, they can not use this check.
+        else if (!validEmail(theEmail))
+        {
+            formSent.email.focus();
+            alert("<%=bundle.getString("jsmsg_email_invalid")%>");
+        	return false;
+        }
+    }
+
 	if (formSent.homePhone)
 	{
 		var theHomephone = formSent.homePhone.value;
@@ -244,8 +253,8 @@ function isValidEmail(mail,msg)
 		alert(msg);
 	    return false;
 	}
-	
-	var regm = /^[a-zA-Z0-9]+([a-zA-Z0-9-_.]+)*@([a-zA-Z0-9-_.]+[.])+[a-zA-Z0-9]{2,5}$/;  
+
+	var regm = /^[a-zA-Z0-9]+([a-zA-Z0-9-_.]+)*@([a-zA-Z0-9-_.]+[.])+[a-zA-Z0-9]{2,5}$/;
 	var result = mail.split(",");
 	for(var i=0;i<result.length;i++)
 	{
@@ -256,7 +265,8 @@ function isValidEmail(mail,msg)
 		    return false;
 		}
 	}
-    return true;
+
+	return true;
 }
 </SCRIPT>
 </HEAD>

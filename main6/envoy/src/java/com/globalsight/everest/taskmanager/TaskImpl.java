@@ -645,16 +645,6 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
      */
     public int getState()
     {
-        // GBS-3160
-        if (m_state == STATE_FINISHING)
-        {
-            return m_state;
-        }
-        if (m_wfTaskInstance != null)
-        {
-            return m_wfTaskInstance.getTaskStateForAssignee();
-        }
-
         return m_state;
     }
 

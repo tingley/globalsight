@@ -183,9 +183,9 @@ public class AccountInfoHandler extends PageHandler
         user.setOfficePhoneNumber(workPhone);
         user.setCellPhoneNumber(cellPhone);
         user.setFaxPhoneNumber(fax);
-        user.setEmail(email);
-        user.setCCEmail(ccEmail);
-        user.setBCCEmail(bccEmail);
+        user.setEmail(email == null ? "" : email.trim());
+        user.setCCEmail(ccEmail == null ? "" : ccEmail.trim());
+        user.setBCCEmail(bccEmail == null ? "" : bccEmail.trim());
         user.setDefaultUILocale(regionalPref);
 
         sessionMgr.setAttribute("myAccountUser", user);

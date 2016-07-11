@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,196 +27,283 @@ public class TestManagerImpl extends AbstractTestManager
 {
     private static Logger logger = Logger.getLogger(TestManagerImpl.class);
 
-    public TestManagerImpl() {
+    public TestManagerImpl()
+    {
         super();
     }
 
-    public TestManagerImpl(Account account) {
+    public TestManagerImpl(Account account)
+    {
         super(account);
     }
 
     /*
-     * Test method
-     * For different type of parameters
+     * Test method For different type of parameters
      */
-    @SuppressWarnings("unchecked")
-    public String testOperation(Operation operation, HashMap params) throws Exception {
-        //Write Log Info
+    @SuppressWarnings(
+    { "unchecked", "rawtypes" })
+    public String testOperation(Operation operation, HashMap params) throws Exception
+    {
+        // Write Log Info
         logger.info("Test Operation: " + operation.getName());
         logger.info("Parameter Types: " + operation.getParaList());
         logger.info("Parameter Input: " + getInputParams(params));
 
-        //get parameterTypes
+        // get parameterTypes
         int paramSize = operation.getParaList().size();
         Class[] parameterTypes = new Class[paramSize];
         Object[] realParams = new Object[paramSize];
-        for (int i = 0; i < paramSize; i++) {
+        for (int i = 0; i < paramSize; i++)
+        {
             String typeName = operation.getParaList().get(i).getType().toLowerCase();
-            String Name = operation.getParaList().get(i).getName();//the name of the parameter
-            String type = operation.getParaList().get(i).getType();//the type of the parameter
+            // the name of the parameter
+            String Name = operation.getParaList().get(i).getName();
+            // the type of the parameter
+            String type = operation.getParaList().get(i).getType();
             String dataNotMap = null;
-            if (TypeMap.TYPE_INFO.containsKey(typeName)) {
+            if (TypeMap.TYPE_INFO.containsKey(typeName))
+            {
                 parameterTypes[i] = TypeMap.TYPE_INFO.get(typeName);
-            } else {
+            }
+            else
+            {
                 parameterTypes[i] = TypeMap.TYPE_INFO.get("others");
             }
             if (!"map".equalsIgnoreCase(typeName))
                 dataNotMap = params.get(Name + "(" + type + ")").toString();
 
-            if ("string".equalsIgnoreCase(typeName)) {
+            if ("string".equalsIgnoreCase(typeName))
+            {
                 realParams[i] = "".equals(dataNotMap) ? null : dataNotMap;
-            } else if ("arrayof_soapenc_string".equalsIgnoreCase(typeName)) {
-                if ("".equals(dataNotMap)) {
+            }
+            else if ("arrayof_soapenc_string".equalsIgnoreCase(typeName))
+            {
+                if ("".equals(dataNotMap))
+                {
                     realParams[i] = null;
-                } else {
+                }
+                else
+                {
                     StringTokenizer str = new StringTokenizer(dataNotMap, ",");
                     List strList = new ArrayList();
-                    while (str.hasMoreTokens()) {
+                    while (str.hasMoreTokens())
+                    {
                         strList.add(str.nextToken().trim());
                     }
                     String[] strs = new String[strList.size()];
-                    for (int k = 0; k < strList.size(); k++)//Get the data of the parameter in map and create the map
+                    // Get the data of the parameter in map and create the map
+                    for (int k = 0; k < strList.size(); k++)
                     {
                         strs[k] = strList.get(k).toString();
                     }
                     realParams[i] = strs;
                 }
-            } else if ("int".equalsIgnoreCase(typeName)) {
-                try {
-                    realParams[i] = "".equals(dataNotMap) ? null : (new Integer(dataNotMap)).intValue();
+            }
+            else if ("int".equalsIgnoreCase(typeName))
+            {
+                try
+                {
+                    realParams[i] = "".equals(dataNotMap) ? null : (new Integer(dataNotMap))
+                            .intValue();
                 }
-                catch (Exception e) {
-                    JOptionPane.showMessageDialog(null, "Type error: Please input an 'int' type in the int type fileld", "Type error", JOptionPane.ERROR_MESSAGE);
+                catch (Exception e)
+                {
+                    JOptionPane.showMessageDialog(null,
+                            "Type error: Please input an 'int' type in the int type fileld",
+                            "Type error", JOptionPane.ERROR_MESSAGE);
                     return null;
                 }
-            } else if ("long".equalsIgnoreCase(typeName)) {
-                try {
-                    realParams[i] = "".equals(dataNotMap) ? null : (new Long(dataNotMap)).longValue();
+            }
+            else if ("long".equalsIgnoreCase(typeName))
+            {
+                try
+                {
+                    realParams[i] = "".equals(dataNotMap) ? null : (new Long(dataNotMap))
+                            .longValue();
                 }
-                catch (Exception e) {
-                    JOptionPane.showMessageDialog(null, "Type error: Please input an 'long' type in the long type fileld", "Type error", JOptionPane.ERROR_MESSAGE);
+                catch (Exception e)
+                {
+                    JOptionPane.showMessageDialog(null,
+                            "Type error: Please input an 'long' type in the long type fileld",
+                            "Type error", JOptionPane.ERROR_MESSAGE);
                     return null;
                 }
-            } else if ("double".equalsIgnoreCase(typeName)) {
-                realParams[i] = "".equals(dataNotMap) ? null : (new Double(dataNotMap)).doubleValue();
-            } else if ("base64binary".equalsIgnoreCase(typeName)) {
+            }
+            else if ("double".equalsIgnoreCase(typeName))
+            {
+                realParams[i] = "".equals(dataNotMap) ? null : (new Double(dataNotMap))
+                        .doubleValue();
+            }
+            else if ("base64binary".equalsIgnoreCase(typeName))
+            {
                 File file = new File(dataNotMap);
                 byte[] content = new byte[(int) file.length()];
-                if (!file.exists()) {
+                if (!file.exists())
+                {
                     logger.info(file.getAbsolutePath() + " does not exist.");
                 }
                 BufferedInputStream inputStream = null;
-                try {
+                try
+                {
                     inputStream = new BufferedInputStream(new FileInputStream(file));
                     inputStream.read(content, 0, content.length);
                 }
-                catch (Exception e) {
+                catch (Exception e)
+                {
                     logger.error("Failed to read content from file " + file.getAbsolutePath(), e);
                 }
                 realParams[i] = content;
-            } else if ("boolean".equalsIgnoreCase(typeName)) {
-                realParams[i] = "".equals(dataNotMap) ? null : (new Boolean(dataNotMap)).booleanValue();
-            } else if ("map".equalsIgnoreCase(typeName)) {
-                //For map types
+            }
+            else if ("boolean".equalsIgnoreCase(typeName))
+            {
+                realParams[i] = "".equals(dataNotMap) ? null : (new Boolean(dataNotMap))
+                        .booleanValue();
+            }
+            else if ("map".equalsIgnoreCase(typeName))
+            {
+                // For map types
                 HashMap args = new HashMap();
 
                 Properties p = WriteLog.getResourceFile();
-                String parameterList = p.getProperty(operation.getName());//get the method name then get the parameters of the map in the method in properties
+                // get the method name then get the parameters of the map in the
+                // method in properties
+                String parameterList = p.getProperty(operation.getName());
                 StringTokenizer st = new StringTokenizer(parameterList, ",");
                 List parametersList = new ArrayList();
-                while (st.hasMoreTokens()) {
+                while (st.hasMoreTokens())
+                {
                     parametersList.add(st.nextToken().trim());
                 }
-                for (int j = 0; j < parametersList.size(); j = j + 2)//Get the data of the parameter in map and create the map
+                // Get the data of the parameter in map and create the map
+                for (int j = 0; j < parametersList.size(); j = j + 2)
                 {
-                    String typeInMap = parametersList.get(j).toString().toLowerCase();//the type of parameter in the map
-                    String data = params.get(parametersList.get(j + 1) + "(" + parametersList.get(j) + ")").toString();//the data of the parameter
-                    if ("string".equalsIgnoreCase(typeInMap)) {
+                    // the type of parameter in the map
+                    String typeInMap = parametersList.get(j).toString().toLowerCase();
+                    // the data of the parameter
+                    String data = params.get(
+                            parametersList.get(j + 1) + "(" + parametersList.get(j) + ")")
+                            .toString();
+                    if ("string".equalsIgnoreCase(typeInMap))
+                    {
                         args.put(parametersList.get(j + 1), "".equals(data) ? null : data);
-                    } else if ("int".equalsIgnoreCase(typeInMap)) {
-                        try {
-                            args.put(parametersList.get(j + 1), "".equals(data) ? null : (new Integer(data)).intValue());
+                    }
+                    else if ("int".equalsIgnoreCase(typeInMap))
+                    {
+                        try
+                        {
+                            args.put(parametersList.get(j + 1), "".equals(data) ? null
+                                    : (new Integer(data)).intValue());
                         }
-                        catch (Exception e) {
-                            JOptionPane.showMessageDialog(null, "Type error: Please input an 'int' type in the int type fileld", "Type error", JOptionPane.ERROR_MESSAGE);
+                        catch (Exception e)
+                        {
+                            JOptionPane
+                                    .showMessageDialog(
+                                            null,
+                                            "Type error: Please input an 'int' type in the int type fileld",
+                                            "Type error", JOptionPane.ERROR_MESSAGE);
                             return null;
                         }
-                    } else if ("long".equalsIgnoreCase(typeInMap)) {
-                        try {
-                            args.put(parametersList.get(j + 1), "".equals(data) ? null : (new Long(data)).longValue());
+                    }
+                    else if ("long".equalsIgnoreCase(typeInMap))
+                    {
+                        try
+                        {
+                            args.put(parametersList.get(j + 1), "".equals(data) ? null : (new Long(
+                                    data)).longValue());
                         }
-                        catch (Exception e) {
-                            JOptionPane.showMessageDialog(null, "Type error: Please input an 'long' type in the long type fileld", "Type error", JOptionPane.ERROR_MESSAGE);
+                        catch (Exception e)
+                        {
+                            JOptionPane
+                                    .showMessageDialog(
+                                            null,
+                                            "Type error: Please input an 'long' type in the long type fileld",
+                                            "Type error", JOptionPane.ERROR_MESSAGE);
                             return null;
                         }
-                    } else if ("double".equalsIgnoreCase(typeInMap)) {
-                        args.put(parametersList.get(j + 1), "".equals(data) ? null : (new Double(data)).doubleValue());
-                    } else if ("base64binary".equalsIgnoreCase(typeInMap)) {
+                    }
+                    else if ("double".equalsIgnoreCase(typeInMap))
+                    {
+                        args.put(parametersList.get(j + 1), "".equals(data) ? null : (new Double(
+                                data)).doubleValue());
+                    }
+                    else if ("base64binary".equalsIgnoreCase(typeInMap))
+                    {
                         File file = new File(data.toString());
                         byte[] content = new byte[(int) file.length()];
-                        if (!file.exists()) {
+                        if (!file.exists())
+                        {
                             logger.info(file.getAbsolutePath() + " does not exist.");
                         }
                         BufferedInputStream inputStream = null;
-                        try {
+                        try
+                        {
                             inputStream = new BufferedInputStream(new FileInputStream(file));
                             inputStream.read(content, 0, content.length);
                         }
-                        catch (Exception e) {
-                            logger.error("Failed to read content from file " + file.getAbsolutePath(), e);
+                        catch (Exception e)
+                        {
+                            logger.error(
+                                    "Failed to read content from file " + file.getAbsolutePath(), e);
                         }
                         args.put(parametersList.get(j + 1), content);
-                    } else if ("boolean".equalsIgnoreCase(typeInMap)) {
-                        args.put(parametersList.get(j + 1), "".equals(data) ? null : (new Boolean(data)).booleanValue());
-                    } else {
-                        args.put(parametersList.get(j + 1), "".equals(data) ? null : (new Boolean(data)).booleanValue());
+                    }
+                    else if ("boolean".equalsIgnoreCase(typeInMap))
+                    {
+                        args.put(parametersList.get(j + 1), "".equals(data) ? null : (new Boolean(
+                                data)).booleanValue());
+                    }
+                    else
+                    {
+                        args.put(parametersList.get(j + 1), "".equals(data) ? null : (new Boolean(
+                                data)).booleanValue());
                     }
                 }
                 realParams[i] = args;
-            } else {
+            }
+            else
+            {
                 realParams[i] = "".equals(dataNotMap) ? null : dataNotMap;
             }
         }
 
-        //get method
+        // get method
         Class cls = null;
         Method method = null;
-        try {
+        try
+        {
             cls = Class.forName(defaultWSDLClass);
         }
-        catch (Exception e) {
-            WriteLog.info(WebServiceConstants.IS_LOG, "class.forName() Exception in TestMangerImpl.testOpeation()");
+        catch (Exception e)
+        {
+            WriteLog.info(WebServiceConstants.IS_LOG,
+                    "class.forName() Exception in TestMangerImpl.testOpeation()");
             logger.error("Cannot find the class " + defaultWSDLClass, e);
         }
-        try {
+
+        try
+        {
             method = cls.getMethod(operation.getName(), parameterTypes);
         }
-        catch (Exception e) {
-            for (int i = 0; i < parameterTypes.length; i++) {
-                if (parameterTypes[i].equals(int.class)) {
-                    parameterTypes[i] = Integer.class;
-                }
-                else if (parameterTypes[i].equals(long.class)) {
-                    parameterTypes[i] = Long.class;
-                }
-                else if (parameterTypes[i].equals(double.class)) {
-                    parameterTypes[i] = Double.class;
-                }
-                else if (parameterTypes[i].equals(boolean.class)) {
-                    parameterTypes[i] = Boolean.class;
-                }
+        catch (Exception e)
+        {
+            try
+            {
+                method = findMethod(cls, operation, parameterTypes);
             }
-            try {
-                method = cls.getMethod(operation.getName(), parameterTypes);
-            }
-            catch (Exception e1) {
+            catch (Exception e1)
+            {
                 logger.error("Failed to get method info.", e1);
             }
         }
+        if (method == null)
+        {
+            logger.error("Failed to find method '" + operation.getName() + "'.");
+        }
 
-        // involk method
+        // invoke method
         String result = null;
-        if (operation.getReturnType() != null) {
+        if (operation.getReturnType() != null)
+        {
             result = String.valueOf(method.invoke(this.getProxy(), realParams));
             logger.info("Return content for method " + method.getName() + "\r\n" + result);
         }
@@ -223,13 +311,17 @@ public class TestManagerImpl extends AbstractTestManager
         return result;
     }
 
-    private static String getInputParams(HashMap obs) {
+    @SuppressWarnings("rawtypes")
+    private static String getInputParams(HashMap obs)
+    {
         String result = "[ ";
         Iterator iter = obs.entrySet().iterator();
-        while (iter.hasNext()) {
+        while (iter.hasNext())
+        {
             Map.Entry entry = (Map.Entry) iter.next();
             Object val = entry.getValue();
-            if (val != null) {
+            if (val != null)
+            {
                 result = result + val.toString() + "  ";
             }
         }
@@ -237,5 +329,51 @@ public class TestManagerImpl extends AbstractTestManager
         return result;
     }
 
-}
+    @SuppressWarnings("rawtypes")
+    private Method findMethod(Class WSDLClass, Operation operation, Class[] parameterTypes)
+    {
+        Method[] methods = WSDLClass.getMethods();
+        String requestMethodName = operation.getName();
+        for (Method method : methods)
+        {
+            if (!requestMethodName.equals(method.getName()))
+                continue;
 
+            if (method.getParameterCount() != parameterTypes.length)
+                continue;
+
+            boolean isMatched = true;
+            Parameter[] ps = method.getParameters();
+            for (int i = 0; i < method.getParameterCount(); i++)
+            {
+                String typeName = ps[i].getType().getName();
+
+                // convert parameter type to basic data type as "parameterTypes"
+                // are using that.
+                if ("java.lang.Long".equals(typeName))
+                    typeName = "long";
+                else if ("java.lang.Integer".equals(typeName))
+                    typeName = "int";
+                else if ("java.lang.Float".equals(typeName))
+                    typeName = "float";
+                else if ("java.lang.Double".equals(typeName))
+                    typeName = "double";
+                else if ("java.lang.Boolean".equals(typeName))
+                    typeName = "boolean";
+
+                if (!typeName.equals(parameterTypes[i].getName()))
+                {
+                    isMatched = false;
+                    break;
+                }
+            }
+
+            if (isMatched)
+            {
+                return method;
+            }
+        }
+
+        return null;
+    }
+}

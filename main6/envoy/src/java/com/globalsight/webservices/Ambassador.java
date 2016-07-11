@@ -1397,15 +1397,10 @@ public class Ambassador extends AbstractWebService
      * Creates a job on the instance initialized during upload process.
      * <p>
      * From GBS-2137.
-     * 
-     * @throws NamingException
-     * @throws GeneralException
-     * @throws RemoteException
-     * @throws NumberFormatException
+     * @throws WebServiceException 
      */
     @SuppressWarnings("unchecked")
-    public void createJobOnInitial(HashMap args) throws WebServiceException, NumberFormatException,
-            RemoteException, GeneralException, NamingException
+    public void createJobOnInitial(HashMap args) throws WebServiceException
     {
         Job job = null;
 

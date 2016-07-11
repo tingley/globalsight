@@ -34,6 +34,7 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.idml.IdmlHelper;
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
+import com.globalsight.everest.edit.offline.xliff.XLIFFStandardUtil;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
@@ -556,8 +557,9 @@ public abstract class AbstractTargetPagePersistence implements
                 {
                     LeverageMatch lm = toLeverageMatch(p_sourcePage, sourceTuv, targetTuv, isPO,
                             tmProfile);
-                    lm.setMatchedText(alt.getSegment());
-                    lm.setMatchedOriginalSource(alt.getSourceSegment());
+                    lm.setMatchedText(XLIFFStandardUtil.convertToTmx(alt.getSegment()));
+                    lm.setMatchedOriginalSource(XLIFFStandardUtil.convertToTmx(alt
+                            .getSourceSegment()));
                     float quality = (float) NumberUtil.PecentToDouble(alt.getQuality());
                     lm.setScoreNum(quality);
                     if (quality < 100)

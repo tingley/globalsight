@@ -72,6 +72,7 @@ import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -162,8 +163,8 @@ public class QAChecker
         addSegmentHeader(workbook, sheet);
 
         boolean hasErrors = writeSegmentInfo(workbook, sheet, workflow);
-        String reportPath = saveReportFile(workbook, task);
 
+        String reportPath = saveReportFile(workbook, task);
         if (hasErrors)
         {
             logger.info("Done QA Checks, report " + reportPath + " is saved.");
@@ -502,21 +503,22 @@ public class QAChecker
         return compactPtags;
     }
 
-    public String saveReportFile(Workbook p_workbook, Task p_task) throws Exception
+    private String saveReportFile(Workbook p_workbook, Task p_task) throws Exception
     {
-        StringBuilder sb = new StringBuilder();
+        File reportDir = new File(QACheckerHelper.getQAReportPath(p_task));
+        // Only store one copy report file for each task, then delete old report
+        // before generating new one
+        FileUtil.deleteFile(reportDir);
+        reportDir.mkdirs();
 
-        sb.append(QACheckerHelper.getQAReportPath(p_task));
-        new File(sb.toString()).mkdirs();
-        sb.append(QACheckerHelper.getQAReportName(p_task));
-
-        File file = new File(sb.toString());
+        String fileName = QACheckerHelper.getQAReportName(p_task);
+        File file = new File(reportDir, fileName);
         FileOutputStream out = new FileOutputStream(file);
         p_workbook.write(out);
         out.close();
         ((SXSSFWorkbook) p_workbook).dispose();
 
-        return sb.toString();
+        return file.getAbsolutePath();
     }
 
     private void addSegmentHeader(Workbook p_workbook, Sheet p_sheet)

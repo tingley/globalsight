@@ -2027,7 +2027,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
 
                 Cell cell_Score = getCell(theRow, col++);
-                cell_Score.setCellValue(data.mtConfidenceScore);
+                cell_Score.setCellValue(data.mtThreshold);
                 cell_Score.setCellStyle(temp_normalStyle);
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 13 * 256);
 
@@ -2306,7 +2306,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                             numwidth * 256);
 
 //                    Cell cell_Score_Review = getCell(theRow, col++);
-//                    cell_Score_Review.setCellValue(data.mtConfidenceScore);
+//                    cell_Score_Review.setCellValue(data.mtThreshold);
 //                    cell_Score_Review.setCellStyle(getContentStyle(p_workbook));
 //                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 13 * 256);
 //                    
@@ -2943,7 +2943,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             HashMap<Long, Cost> workflowMap = jobCost.getWorkflowCost();
             for (Workflow w : j.getWorkflows())
             {
-                int mtConfidenceScore = w.getMtConfidenceScore();
+                int mtThreshold = w.getMtThreshold();
                 int tmEngineWordCounts = w.getMtEngineWordCount();
                 String state = w.getState();
                 // skip certain workflows
@@ -2983,7 +2983,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 data.targetLang = w.getTargetLocale().toString();
                 data.creationDate = j.getCreateDate();
                 data.status = j.getDisplayState();
-                data.mtConfidenceScore = mtConfidenceScore;
+                data.mtThreshold = mtThreshold;
                 data.tmEngineWordCounts = tmEngineWordCounts;
                 if (Workflow.EXPORTED.equals(state))
                 {
@@ -3333,7 +3333,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         public String targetLang;
 
         /* word counts */
-        public long mtConfidenceScore = 0;
+        public long mtThreshold = 0;
         
         public long repetitionWordCount = 0;
 

@@ -95,7 +95,7 @@
             not-null="true" unique="false" />
         <property name="mtProfileName" column="MT_PROFILE_NAME" length="60" 
             type="string" not-null="false" />
-        <property name="mtConfidenceScore" column="MT_CONFIDENCE_SCORE" type="int"
+        <property name="mtThreshold" column="MT_THRESHOLD" type="int"
             not-null="false" unique="false" />
         <property name="scorecardComment" column="SCORECARD_COMMENT"
 			type="string" not-null="false" />

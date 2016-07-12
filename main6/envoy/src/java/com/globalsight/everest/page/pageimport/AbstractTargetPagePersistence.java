@@ -1399,7 +1399,7 @@ public abstract class AbstractTargetPagePersistence implements
 
         if (mt != null && mt.isActive())
         {
-            result = mt.getMtConfidenceScore();
+            result = mt.getMtThreshold();
         }
 
         return result;

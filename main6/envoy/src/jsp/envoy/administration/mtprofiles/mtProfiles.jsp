@@ -271,8 +271,8 @@ function findSelectedMTP()
                     out.print(mtProfile.getMtEngine());
                 %>
             </amb:column>
-             <amb:column label="lb_tm_mt_threshold_level2" sortBy="<%=MTProfileComparator.MT_CONFIDENCE_SCORE%>" width="11%">
-                <% out.print(mtProfile.getMtConfidenceScore()); %>
+             <amb:column label="lb_tm_mt_threshold_level2" sortBy="<%=MTProfileComparator.MT_THRESHOLD%>" width="11%">
+                <% out.print(mtProfile.getMtThreshold()); %>
             </amb:column>
             <% if (isSuperAdmin) { %>
             <amb:column label="lb_company_name" sortBy="<%=MTProfileComparator.ASC_COMPANY%>" 

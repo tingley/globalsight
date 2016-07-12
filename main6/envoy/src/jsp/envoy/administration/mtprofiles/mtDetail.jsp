@@ -110,7 +110,7 @@
 			    setDisableTR('mtIdentifierTrailingTR', true);
 			}
 		});
-		if(<%=mtProfile.getMtConfidenceScore()%> ==100)
+		if(<%=mtProfile.getMtThreshold()%> ==100)
 		{
 			MTOptionsForm.ignoreTmMatches.disabled = false;
 		}else{
@@ -382,28 +382,6 @@
 	    return true;
 	}
 
-	function checkMtConfidenceScoreValid()
-	{
-        var mtConfidenceScore = document.getElementById('mtConfidenceScore').value;
-
-        if (mtConfidenceScore == null || trim(mtConfidenceScore)== "" ) 
-        {
-            alert("<%=bundle.getString("msg_tm_mt_confidence_score_null")%>");
-            return false;
-        }
-        else if (!isAllDigits(mtConfidenceScore)) 
-        {
-            alert("<%=bundle.getString("msg_tm_mt_confidence_score_invalid")%>");
-            return false;
-        }
-        else if (!checkIsVaildPercent(mtConfidenceScore)) 
-        {
-           return false;
-        }
-
-        return true;
-	}
-
 	function safabaInputChanged()
 	{
 		var formerHost = "<c:out value='${safa_mt_host}'/>";
@@ -633,9 +611,9 @@
 	} 
 	
 	function checkValue(){
-		var mtConfidenceScore = $("#mtConfidenceScore").val().trim();
+		var mtThreshold = $("#mtThreshold").val().trim();
 		 var disable = new Boolean();
-		if(mtConfidenceScore==100){
+		if(mtThreshold==100){
 			disable = false;
 		}else{
 			MTOptionsForm.ignoreTmMatches.checked = false;
@@ -701,9 +679,9 @@
 
 					<TR>
 						<TD ALIGN="LEFT" STYLE="vertical-align: middle"><%=bundle.getString("lb_tm_mt_threshold_level")%>:</TD>
-						<TD><INPUT CLASS="standardText" ID="mtConfidenceScore" NAME="mtConfidenceScore"
+						<TD><INPUT CLASS="standardText" ID="mtThreshold" NAME="mtThreshold"
 							SIZE="1" MAXLENGTH="3"
-							VALUE="<%=mtProfile.getMtConfidenceScore()%>" onblur = "checkValue()">%</TD>
+							VALUE="<%=mtProfile.getMtThreshold()%>" onblur = "checkValue()">%</TD>
 					</TR>
 						<TR>
 						<TD align="left">

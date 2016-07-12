@@ -33,7 +33,7 @@ public class MTProfileComparator extends StringComparator
 	public static final int DESCRIPTION = 1;
 	public static final int ASC_COMPANY = 2;
     public static final int MT_ENGINE = 3;
-    public static final int MT_CONFIDENCE_SCORE = 4;
+    public static final int MT_THRESHOLD = 4;
     public static final int MT_ACTIVE = 5;
 
 	/**
@@ -101,12 +101,12 @@ public class MTProfileComparator extends StringComparator
                 bValue = b.getMtEngine();
                 rv = this.compareStrings(aValue, bValue);
                 break;
-            case MT_CONFIDENCE_SCORE:
-                long aMtConfidenceScore = a.getMtConfidenceScore();
-                long bMtConfidenceScore = b.getMtConfidenceScore();
-                if (aMtConfidenceScore > bMtConfidenceScore)
+            case MT_THRESHOLD:
+                long aMtThreshold = a.getMtThreshold();
+                long bMtThreshold = b.getMtThreshold();
+                if (aMtThreshold > bMtThreshold)
                     rv = 1;
-                else if (aMtConfidenceScore == bMtConfidenceScore)
+                else if (aMtThreshold == bMtThreshold)
                     rv = 0;
                 else
                     rv = -1;

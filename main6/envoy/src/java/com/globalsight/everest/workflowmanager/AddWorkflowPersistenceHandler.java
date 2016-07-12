@@ -199,16 +199,16 @@ public class AddWorkflowPersistenceHandler
                 MachineTranslationProfile mtProfile = MTProfileHandlerHelper
                         .getMTProfileByRelation(lpId, wfInfo.getId());
                 boolean useMT = false;
-                long mtConfidenceScore = 0;
+                long mtThreshold = 0;
                 String mtProfileName = null;
                 if (mtProfile != null && mtProfile.isActive())
                 {
                     useMT = true;
-                    mtConfidenceScore = mtProfile.getMtConfidenceScore();
+                    mtThreshold = mtProfile.getMtThreshold();
                     mtProfileName = mtProfile.getMtProfileName();
                 }
                 wf.setUseMT(useMT);
-                wf.setMtConfidenceScore((int) mtConfidenceScore);
+                wf.setMtThreshold((int) mtThreshold);
                 wf.setMtProfileName(mtProfileName);
 
                 // set workflow owners (PM and WFM)

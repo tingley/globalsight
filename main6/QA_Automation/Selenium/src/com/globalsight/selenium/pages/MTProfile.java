@@ -19,7 +19,7 @@ public class MTProfile implements BasePage
     public static final String MTP_DESCRIPTION_TEXT = "id=description";
     public static final String MTP_ENGINE_SELECT = "id=mtEngine";
     public static final String MTP_ENGINE_MSMT_lABEL = "label=MS_Translator";
-    public static final String MTP_CONFIDENCE_SCORE_TEXT = "id=mtConfidenceScore";
+    public static final String MTP_CONFIDENCE_SCORE_TEXT = "id=mtThreshold";
     public static final String MTP_IGNORE_TM_MATCHES_CHECKBOX = "id=ignoreTmMatches";
     public static final String MTP_LOG_DEBUG_INFO_CHECKBOX = "id=logDebugInfo";
     public static final String MTP_INCLUDE_MT_IDENTIFIERS_CHECKBOX = "id=includeMTIdentifiers";

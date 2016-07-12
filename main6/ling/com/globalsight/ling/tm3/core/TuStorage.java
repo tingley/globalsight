@@ -660,17 +660,15 @@ abstract class TuStorage<T extends TM3Data>
         TM3Event firstEvent = null;
         if (rawData.firstEventId > 0)
         {
-            // Check for null value (Is not used at all, set null for performance)
-//            firstEvent = (TM3Event) HibernateUtil.get(TM3Event.class,
-//                    rawData.firstEventId, false);
+            // Check for null value
+            firstEvent = (TM3Event) HibernateUtil.get(TM3Event.class, rawData.firstEventId, false);
         }
         tuv.setFirstEvent(firstEvent);
         TM3Event latestEvent = null;
         if (rawData.lastEventId > 0)
         {
-            // Check for null value (Is not used at all, set null for performance)
-//            latestEvent = (TM3Event) HibernateUtil.get(TM3Event.class,
-//                    rawData.lastEventId, false);
+            // Check for null value
+            latestEvent = (TM3Event) HibernateUtil.get(TM3Event.class, rawData.lastEventId, false);
         }
         tuv.setLatestEvent(latestEvent);
 

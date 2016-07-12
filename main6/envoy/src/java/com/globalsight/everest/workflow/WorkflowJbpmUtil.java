@@ -317,18 +317,21 @@ public class WorkflowJbpmUtil
                 }
                 else if (isConditionNode(tNode))
                 {
-                    Node node1 = null;
-                    do
+                    boolean flag = false;
+                    Iterator it = tNode.getArrivingTransitions().iterator();
+                    while (it.hasNext())
                     {
-                        node1 = ((Transition) tNode.getArrivingTransitions()
-                                .iterator().next()).getFrom();
-                    } while (!isActivityNode(node1));
-
-                    if (tiName.equals(getTaskName(node1.getName())))
-                    {
-                        arrTrans = tTran;
-                        break;
+                        Node node1 = ((Transition) it.next()).getFrom();
+                        if (isActivityNode(node1) && tiName.equals(getTaskName(node1.getName())))
+                        {
+                            arrTrans = tTran;
+                            flag = true;
+                            break;
+                        }
                     }
+
+                    if (flag)
+                        break;
                 }
                 else
                 {

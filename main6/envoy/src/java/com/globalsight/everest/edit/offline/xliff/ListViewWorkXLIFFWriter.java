@@ -477,7 +477,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
     private String getState(OfflineSegmentData data, DownloadParams p_downloadParams)
     {
         String state = "new";
-        if (p_downloadParams.isPopulate100() || p_downloadParams.isPopulateMT())
+         if (p_downloadParams.isPopulate100() || p_downloadParams.isPopulateMT())
         {
             if (isInContextMatch(data) || isExactMatch(data))
             {
@@ -496,13 +496,31 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             }
             else if (isFuzzyMatch(data))
             {
-                state = "needs-review-translation";
+                if (isMTMatch(data) && !p_downloadParams.isPopulateMT())
+                {
+                    state = "new";
+                }
+                else
+                {
+                    state = "needs-review-translation";
+                }
+                
             }
         }
 
         return state;
     }
 
+    private boolean isMTMatch(OfflineSegmentData data)
+    {
+        String matchType = data.getDisplayMatchType();
+        if (matchType != null && matchType.startsWith("Machine Translation"))
+        {
+            return true;
+        }
+
+        return false;
+    }
     private void writeTranslationUnit(OfflineSegmentData p_osd,
             OfflinePageData m_page, boolean isTmx, int TMEditType,
             DownloadParams p_downloadParams, HashMap<Long, String> p_skeletonMap)

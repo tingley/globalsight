@@ -525,16 +525,27 @@ public class Tmx2Xliff20
         {
             if (o instanceof Pc)
             {
-                Pc pc = (Pc) o;
-
-                if (pc.getSubType() != null && pc.getSubType().length() > 0)
-                {
-                    types.put(pc.getId(), pc.getSubType().trim());
-                }
+                addSubTypes((Pc) o, types);
             }
         }
         
         return types;
+    }
+    
+    private static void addSubTypes(Pc pc, Map<String, String> types)
+    {
+        if (pc.getSubType() != null && pc.getSubType().length() > 0)
+        {
+            types.put(pc.getId(), pc.getSubType().trim());
+        }
+        
+        for (Object o : pc.getContent())
+        {
+            if (o instanceof Pc)
+            {
+                addSubTypes((Pc) o, types);
+            }
+        }
     }
 
     /**

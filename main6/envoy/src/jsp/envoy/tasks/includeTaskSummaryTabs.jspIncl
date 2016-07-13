@@ -30,6 +30,7 @@ var exportEnd = false;
 var exportDownloadRandom;
 var exportFrom = "task";
 var exportPercent = 0;
+var taskCompleteUrl = "";
 
 function startExport()
 {
@@ -257,7 +258,7 @@ var dialogParam1={
 				$(this).dialog("close");
             }
         }
-    }
+    };
 var dialogParam2={
         modal: true,
 		autoOpen: false,
@@ -292,11 +293,11 @@ var dialogParam3={
     };
 
 $(function () {
-	for(var i=0;i<popDialogId.length;i++){
-		var temp=$(popDiv).clone(true);
+    for(var i = 0; i < popDialogId.length; i++) {
+		var temp = $(popDiv).clone(true);
 		temp.attr("id",popDialogId[i]);
 		temp.attr("title",popTile[i]);
-		if(i< popDialogId.length - 3)
+		if(i < popDialogId.length - 3)
 		{
 			temp.dialog(dialogParam1);
 		}
@@ -329,12 +330,11 @@ $(function () {
  
 function checkActivityCommentAttaches(obj)
 {
-    var urlSent = "<%= finishUrl %>";
+    var urlSent = taskCompleteUrl;
 	var isActivityCommentUploadCheck = <%=isActivityCommentUploadCheck%>;
 	var isActivityCommentUploaded = <%=isActivityCommentUploaded%>;
 	var labelActivityCommentUploadCheckWarningMessage ="<%=labelActivitiesCommentUploadCheckWarningMessage%>";
-    if(isActivityCommentUploadCheck==1 &&
-				         isActivityCommentUploaded !=1)
+    if(isActivityCommentUploadCheck==1 && isActivityCommentUploaded !=1)
 	{
 	    var urlCancel = "<%=commentUrl%>";
 		$("#dialog-activityCommentUploadCheck").html(labelActivityCommentUploadCheckWarningMessage);
@@ -348,139 +348,168 @@ function checkActivityCommentAttaches(obj)
     }
 }
 
-function doFinished(urlSent) {
-	var isReportUploadCheck = <%=isReportUploadCheck%>;
-	var isUploaded = <%=isUploaded%>;
-	var labelReportUploadCheckWarningMessage = "<%=labelReportUploadCheckWarningMessage%>";
-	var isActivityCommentUploadCheck = <%=isActivityCommentUploadCheck%>;
-	var isActivityCommentUploaded = <%=isActivityCommentUploaded%>;
+function doFinished(urlSent)
+{
+    var isReportUploadCheck = <%=isReportUploadCheck%>;
+    var isUploaded = <%=isUploaded%>;
+    var labelReportUploadCheckWarningMessage = "<%=labelReportUploadCheckWarningMessage%>";
+    var isActivityCommentUploadCheck = <%=isActivityCommentUploadCheck%>;
+    var isActivityCommentUploaded = <%=isActivityCommentUploaded%>;
     var stfStatusMessage = "<%=stfStatusMessage%>";
     var isExportSTF = "<%=isExportSTF%>";
     var labelActivityCommentUploadCheckWarningMessage ="<%=labelActivitiesCommentUploadCheckWarningMessage%>";
-    if (stfStatusMessage != "null" && isExportSTF == "true") {
-        if (stfStatusMessage == "inprogress") {
+    if (stfStatusMessage != "null" && isExportSTF == "true")
+    {
+        if (stfStatusMessage == "inprogress")
+        {
             alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_inprogress")%>');
-        } else if (stfStatusMessage == "failed") {
+        }
+        else if (stfStatusMessage == "failed")
+        {
             alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_failed")%>');
         }
         return false;
     }
-    if (!checkDelayTime()) {
+    if (!checkDelayTime())
+    {
         return false;
     }
-    if (dirty) {
+    if (dirty)
+    {
         alert('<%=bundle.getString("jsmsg_activity_details_unsaved")%>');
         return false;
     }
-    if (!keepZero()) {
+    if (!keepZero())
+    {
         return false;
     }
+
     if("<%=needScore%>" == 'true')
     {
-    	alert('Please score before finishing the activity.');
+        alert('Please score before finishing the activity.');
         return false;
-   	}
-    
-        var checked = false;
-        var selectedRadioBtn = null;
-        if (DetailsForm.RadioBtn != null) {
-            // If more than one radio button is displayed, the length
-            // attribute of the radio button array will be non-zero,
-            // so find which one is checked
-            if (DetailsForm.RadioBtn.length) {
-                for (i = 0; i < DetailsForm.RadioBtn.length; i++) {
-                    if (DetailsForm.RadioBtn[i].checked == true) {
-                        checked = true;
-                        selectedRadioBtn = DetailsForm.RadioBtn[i].value;
-                        break;
-                    }
-                }
-            }
-            // If only one is displayed, there is no radio button array, so
-            // just check if the single radio button is checked.
-            else {
-                if (DetailsForm.RadioBtn.checked == true) {
+    }
+
+    var checked = false;
+    var selectedRadioBtn = null;
+    if (DetailsForm.RadioBtn != null)
+    {
+        // If more than one radio button is displayed, the length
+        // attribute of the radio button array will be non-zero,
+        // so find which one is checked
+        if (DetailsForm.RadioBtn.length)
+        {
+            for (i = 0; i < DetailsForm.RadioBtn.length; i++)
+            {
+                if (DetailsForm.RadioBtn[i].checked == true)
+                {
                     checked = true;
-                    selectedRadioBtn = DetailsForm.RadioBtn.value;
+                    selectedRadioBtn = DetailsForm.RadioBtn[i].value;
+                    break;
                 }
             }
-            urlSent = conditionUrls[selectedRadioBtn];
-        } else {
-            checked = true;
         }
-        if (!checked) {
-            alert("<%= labelSelectionWarning %>");
-            return false;
-        } else {
-            var warningMessage = '';
-			var taskUploadingStatus = "<%=OfflineConstants.TASK_UPLOADSTATUS_UPLOADING%>";
-			var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatusAll&taskId="+taskId+"&t=" + new Date();
-			var pagesArr;
-			var tempMsg;
-			
-			$.getJSON(url, function (data) {
-				// Check task status
-			    if (taskUploadingStatus == data.uploadStatus && taskId == data.taskId) {
-			        alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_uploading")%>');
-			        return;
-			    }
-			    
-			 	// Check Secondary Target Files Status
-			 	var stfStatusMessage = "<%=stfStatusMessage%>";
-			    if(stfStatusMessage == "inprogress") {
-			        warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_inprogress")%>';
-			    } else if(stfStatusMessage == "failed") {
-			        warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_failed")%>';
-			    }
-			 	if(warningMessage){
-			 		$("#dialog-fileState").html(warningMessage);
-					$("#dialog-fileState").prop("urlSent", urlSent);
-					$("#dialog-fileState").dialog("open").height("auto");
-					return;
-			 	}
-			    // Check un-translated Segments Page Array
-			    pagesArr = data.pagesWithUnTranslatedSeg;
-			    tempMsg = '<%=bundle.getString("msg_task_finish_warning_unTransSegment")%>';
-				warningMessage += getScrollableDiv(tempMsg, pagesArr);
-			    
-				if(warningMessage){
-			 		$("#dialog-unTranslated").html(warningMessage);
-					$("#dialog-unTranslated").prop("urlSent", urlSent);
-					$("#dialog-unTranslated").dialog("open").height("auto");
-					return;
-			 	}
-			 	// Check un-closed Comments Page Array
-			    pagesArr = data.pagesWithUnClosedComment;
-				tempMsg = '<%=bundle.getString("msg_task_finish_warning_unClosedComment")%>';
-				warningMessage += getScrollableDiv(tempMsg, pagesArr);
-				warningMessage += '<%=bundle.getString("msg_task_finish_desc")%>';
-				
-				if(isReportUploadCheck == 1 &&
-						isUploaded != 1)
-				{
-					var urlCancel = "<%=uploadReportUrl%>";
-					$("#dialog-reportUploadCheck").html(labelReportUploadCheckWarningMessage);
-					$("#dialog-reportUploadCheck").prop("urlSent", urlSent);
-					$("#dialog-reportUploadCheck").prop("urlCancel", urlCancel);
-					$("#dialog-reportUploadCheck").dialog("open").height("auto");
-				}
-				else if(isActivityCommentUploadCheck==1 &&
-				         isActivityCommentUploaded !=1)
-				{
-				    var urlCancel = "<%=commentUrl%>";
-					$("#dialog-activityCommentUploadCheck").html(labelActivityCommentUploadCheckWarningMessage);
-					$("#dialog-activityCommentUploadCheck").prop("urlSent", urlSent);
-					$("#dialog-activityCommentUploadCheck").prop("urlCancel", urlCancel);
-					$("#dialog-activityCommentUploadCheck").dialog("open").height("auto");
-				}
-				else 
-				{
-					$("#dialog-complActivity").html(warningMessage);
-					$("#dialog-complActivity").prop("urlSent", urlSent);
-					$("#dialog-complActivity").dialog("open").height("auto");
-				}
-			});
+        // If only one is displayed, there is no radio button array, so
+        // just check if the single radio button is checked.
+        else
+        {
+            if (DetailsForm.RadioBtn.checked == true)
+            {
+                checked = true;
+                selectedRadioBtn = DetailsForm.RadioBtn.value;
+            }
         }
+
+        urlSent = conditionUrls[selectedRadioBtn];
+        taskCompleteUrl = urlSent;
+    }
+    else
+    {
+        checked = true;
+    }
+
+    if (!checked)
+    {
+        alert("<%= labelSelectionWarning %>");
+        return false;
+    }
+    else
+    {
+        var warningMessage = '';
+        var taskUploadingStatus = "<%=OfflineConstants.TASK_UPLOADSTATUS_UPLOADING%>";
+        var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatusAll&taskId="+taskId+"&t=" + new Date();
+        var pagesArr;
+        var tempMsg;
+
+        $.getJSON(url, function (data) {
+            // Check task status
+            if (taskUploadingStatus == data.uploadStatus && taskId == data.taskId) {
+                alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_uploading")%>');
+                return;
+            }
+
+            // Check Secondary Target Files Status
+            var stfStatusMessage = "<%=stfStatusMessage%>";
+            if(stfStatusMessage == "inprogress")
+            {
+                warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_inprogress")%>';
+            }
+            else if(stfStatusMessage == "failed")
+            {
+                warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_failed")%>';
+            }
+
+            if(warningMessage)
+            {
+                $("#dialog-fileState").html(warningMessage);
+                $("#dialog-fileState").prop("urlSent", urlSent);
+                $("#dialog-fileState").dialog("open").height("auto");
+                return;
+            }
+
+            // Check un-translated Segments Page Array
+            pagesArr = data.pagesWithUnTranslatedSeg;
+            tempMsg = '<%=bundle.getString("msg_task_finish_warning_unTransSegment")%>';
+            warningMessage += getScrollableDiv(tempMsg, pagesArr);
+
+            if(warningMessage)
+            {
+                $("#dialog-unTranslated").html(warningMessage);
+                $("#dialog-unTranslated").prop("urlSent", urlSent);
+                $("#dialog-unTranslated").dialog("open").height("auto");
+                return;
+            }
+
+            // Check un-closed Comments Page Array
+            pagesArr = data.pagesWithUnClosedComment;
+            tempMsg = '<%=bundle.getString("msg_task_finish_warning_unClosedComment")%>';
+            warningMessage += getScrollableDiv(tempMsg, pagesArr);
+            warningMessage += '<%=bundle.getString("msg_task_finish_desc")%>';
+
+            if(isReportUploadCheck == 1 && isUploaded != 1)
+            {
+                var urlCancel = "<%=uploadReportUrl%>";
+                $("#dialog-reportUploadCheck").html(labelReportUploadCheckWarningMessage);
+                $("#dialog-reportUploadCheck").prop("urlSent", urlSent);
+                $("#dialog-reportUploadCheck").prop("urlCancel", urlCancel);
+                $("#dialog-reportUploadCheck").dialog("open").height("auto");
+            }
+            else if(isActivityCommentUploadCheck==1 && isActivityCommentUploaded != 1)
+            {
+                var urlCancel = "<%=commentUrl%>";
+                $("#dialog-activityCommentUploadCheck").html(labelActivityCommentUploadCheckWarningMessage);
+                $("#dialog-activityCommentUploadCheck").prop("urlSent", urlSent);
+                $("#dialog-activityCommentUploadCheck").prop("urlCancel", urlCancel);
+                $("#dialog-activityCommentUploadCheck").dialog("open").height("auto");
+            }
+            else
+            {
+                $("#dialog-complActivity").html(warningMessage);
+                $("#dialog-complActivity").prop("urlSent", urlSent);
+                $("#dialog-complActivity").dialog("open").height("auto");
+            }
+        });
+    }
 }
 
  function checkDelayTime()

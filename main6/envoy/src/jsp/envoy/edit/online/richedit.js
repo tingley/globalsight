@@ -186,7 +186,7 @@ function initRichEdit(el)
             // not that it matters when it comes to innerText.
 			var text = "";
         	
-            if(!!window.ActiveXObject || "ActiveXObject" in window) 
+            if(!!window.ActiveXObject || "ActiveXObject" in window)
 			{
             	text = el.frameWindow.document.body.innerText;
 			}
@@ -247,7 +247,7 @@ function initRichEdit(el)
 
         el.insertText = function (text) {
             el.focus();
-           	if(!!window.ActiveXObject || "ActiveXObject" in window)
+           	if(document.recalc)
 			{
 				var sel = el.frameWindow.document.selection;
 				if (sel.type == "Control")
@@ -273,7 +273,7 @@ function initRichEdit(el)
 
         el.insertHTML = function (html) {
             el.focus();
-            if(!!window.ActiveXObject || "ActiveXObject" in window)
+            if(document.recalc)
 			{
 				var sel = el.frameWindow.document.selection;
 				if (sel.type == "Control")
@@ -302,7 +302,7 @@ function initRichEdit(el)
         el.setPtagColor = function (sArg) {
             el.ptagColor = sArg;
 
-           	if(!!window.ActiveXObject || "ActiveXObject" in window)
+           	if(document.recalc)
 			{
 				 var css = el.frameWindow.document.styleSheets.item(0);
 			}
@@ -310,7 +310,7 @@ function initRichEdit(el)
 			{
 				var css = document.getElementById(el.id).contentWindow.document.styleSheets.item(0);
 			}
-            if (!!!window.ActiveXObject || "ActiveXObject" in window) 
+            if (!document.recalc) 
 			{
 				try {var rule =  css.cssRules[0]; } catch (e) {};
             }
@@ -675,7 +675,7 @@ function initRichEdit(el)
 
     function execCommand(el, execProp, execVal, bUI)
     {
-        if(!!window.ActiveXObject || "ActiveXObject" in window)
+        if(document.recalc)
 		{
 			var doc = el.frameWindow.document;
 			var type = doc.selection.type;
@@ -692,7 +692,7 @@ function initRichEdit(el)
 		}
     }
 }
-function getEvent(){
+function getEvent(){     //Í¬Ê±ï¿½ï¿½ï¿½ï¿½ieï¿½ï¿½ffï¿½ï¿½Ð´ï¿½ï¿½
          if(document.all)    return window.event;        
          func=getEvent.caller;            
          while(func!=null){    

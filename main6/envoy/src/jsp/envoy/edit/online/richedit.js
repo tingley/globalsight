@@ -186,7 +186,7 @@ function initRichEdit(el)
             // not that it matters when it comes to innerText.
 			var text = "";
         	
-            if(document.recalc)
+            if(!!window.ActiveXObject || "ActiveXObject" in window) 
 			{
             	text = el.frameWindow.document.body.innerText;
 			}
@@ -247,7 +247,7 @@ function initRichEdit(el)
 
         el.insertText = function (text) {
             el.focus();
-           	if(document.recalc)
+           	if(!!window.ActiveXObject || "ActiveXObject" in window)
 			{
 				var sel = el.frameWindow.document.selection;
 				if (sel.type == "Control")
@@ -273,7 +273,7 @@ function initRichEdit(el)
 
         el.insertHTML = function (html) {
             el.focus();
-            if(document.recalc)
+            if(!!window.ActiveXObject || "ActiveXObject" in window)
 			{
 				var sel = el.frameWindow.document.selection;
 				if (sel.type == "Control")
@@ -302,7 +302,7 @@ function initRichEdit(el)
         el.setPtagColor = function (sArg) {
             el.ptagColor = sArg;
 
-           	if(document.recalc)
+           	if(!!window.ActiveXObject || "ActiveXObject" in window)
 			{
 				 var css = el.frameWindow.document.styleSheets.item(0);
 			}
@@ -310,7 +310,7 @@ function initRichEdit(el)
 			{
 				var css = document.getElementById(el.id).contentWindow.document.styleSheets.item(0);
 			}
-            if (!document.recalc) 
+            if (!!!window.ActiveXObject || "ActiveXObject" in window) 
 			{
 				try {var rule =  css.cssRules[0]; } catch (e) {};
             }
@@ -675,7 +675,7 @@ function initRichEdit(el)
 
     function execCommand(el, execProp, execVal, bUI)
     {
-        if(document.recalc)
+        if(!!window.ActiveXObject || "ActiveXObject" in window)
 		{
 			var doc = el.frameWindow.document;
 			var type = doc.selection.type;
@@ -692,7 +692,7 @@ function initRichEdit(el)
 		}
     }
 }
-function getEvent(){     //ͬʱ����ie��ff��д��
+function getEvent(){
          if(document.all)    return window.event;        
          func=getEvent.caller;            
          while(func!=null){    

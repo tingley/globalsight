@@ -1150,6 +1150,7 @@ function doOnload()
   translatedText();
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
     onbeforeunload="return doBeforeUnload()" onload="doOnload()" onunload="doUnload()" id="idBody">

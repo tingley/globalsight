@@ -76,6 +76,7 @@
             #divFooter {position: absolute; top: 858px; z-index: 1;}
         </style>
         <title><%=bundle.getString("workflow_status_title")%></title>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
     </head>
     <body onload="onAfterAction()" style="padding: 0;margin: 0">
         <table><tr><td>

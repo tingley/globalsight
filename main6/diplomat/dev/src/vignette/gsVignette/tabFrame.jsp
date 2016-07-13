@@ -23,6 +23,7 @@ response.setDateHeader ("Expires", 0); //prevents caching at the proxy server
   <LINK href="Includes/stylesIE.css" type=text/css rel="stylesheet">
   <link href="Includes/default.css" rel="stylesheet" type="text/css">
   <SCRIPT LANGUAGE="JavaScript" SRC="Includes/setStyleSheet.js"></SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body>
 <br>

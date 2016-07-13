@@ -1457,6 +1457,7 @@ function disableLastUsageOption(){
 	}
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body>
 	<%@ include file="/envoy/common/header.jspIncl"%>

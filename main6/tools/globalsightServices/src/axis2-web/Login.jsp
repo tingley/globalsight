@@ -23,6 +23,7 @@
     <jsp:include page="include/httpbase.jsp"/>
     <title>Login to Axis2 :: Administration page</title>
     <link href="axis2-web/css/axis-style.css" rel="stylesheet" type="text/css">
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
   </head>
 
   <body onload="javascript:document.LoginForm.userName.focus();">

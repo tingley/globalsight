@@ -25,6 +25,7 @@ String xmlCurrency = "<currencyOptions> <currency> <name> us dollar </name> <val
 <HEAD>
 <TITLE><%=bundle.getString("lb_currencies")%></TITLE>
 <SCRIPT LANGUAGE="JavaScript" src="/globalsight/envoy/projects/workflows/Currency.js"> </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY ID="idBody" onload="doOnLoad()">
 <H2 id="idHeading"><%=bundle.getString("lb_currencies")%></H2>

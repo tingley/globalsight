@@ -262,7 +262,7 @@ if (logoImage.equals(logoBackgroundImage))
 		});
   });
   </SCRIPT>
-
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
     <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -326,6 +326,5 @@ if (logoImage.equals(logoBackgroundImage))
     <DIV ID="shutdown" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 260px">
 <%@ include file="/envoy/common/shutdownBanner.jspIncl" %>    
     </DIV>   
-    <link rel="shortcut icon" href="/globalsight/images/GlobalSight_Icon.ico" >     
     </BODY>
 </HTML>

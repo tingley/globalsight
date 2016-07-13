@@ -520,6 +520,7 @@ function mapTargetLocales(o)
     o.style.background="#4F94CD";
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0">
 <DIV id="idDiv" style="POSITION: ABSOLUTE;height:100%;width: 100%;  TOP: 0px; LEFT: 0px; RIGHT: 0px;">

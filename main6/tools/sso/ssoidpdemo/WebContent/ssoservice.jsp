@@ -51,6 +51,7 @@ function init()
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>SSO IdP Demo Site</title>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body onload="init()">
 

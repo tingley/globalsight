@@ -2,6 +2,7 @@
 <html>
 <head>
 <script language="JavaScript" src="/globalsight/includes/setStyleSheet.js"></script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <script language="JavaScript">
 var docObj = window.opener.document;

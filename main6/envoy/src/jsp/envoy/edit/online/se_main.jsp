@@ -825,6 +825,7 @@ function doRefresh(direction, save)
 }
 
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <script>
 function finishFrame() {

@@ -34,6 +34,7 @@ BODY {
   margin-bottom: 10px;
 }
 </STYLE>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY CLASS="standardText">
 <DIV CLASS="mainHeading" ID="idHeading"><%=lb_title%></DIV>

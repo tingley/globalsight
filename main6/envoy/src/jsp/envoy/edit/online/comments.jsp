@@ -243,6 +243,7 @@ function doOnUnload()
     saveComments();
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 <BODY id="idBody" BGCOLOR="lightgrey" onload="doOnload()" onbeforeunload="doOnUnload()">

@@ -154,7 +154,7 @@ function submitForm(selectedButton)
     SysCalForm.submit();
 }
 </script>
-
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <form name="SysCalForm" method="post">

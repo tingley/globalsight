@@ -234,6 +234,7 @@ function saveForm(p_action)
 	theForm.submit();
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 

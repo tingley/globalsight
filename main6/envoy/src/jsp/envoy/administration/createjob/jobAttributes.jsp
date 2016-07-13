@@ -362,6 +362,7 @@ function showCalendar(attributeId) {
 }
 
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" class="tundra" onload="onload()" style="padding:10px">
 <table CELLSPACING="0" CELLPADDING="0" BORDER="0" CLASS="standardText"><tr><td width="100%"><c:out value="${helper_text_set_attribute}"/></td></tr></table>

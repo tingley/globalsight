@@ -87,6 +87,7 @@ function doClick(elem)
   opener.InsertPTag(elem.parentNode.value);
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 <BODY onload="doOnLoad()">

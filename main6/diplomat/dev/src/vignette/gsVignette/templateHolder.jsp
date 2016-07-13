@@ -13,7 +13,7 @@
 <SCRIPT LANGUAGE="JavaScript" SRC="/gs/Common/Includes/setStyleSheet.js"></SCRIPT>
 <script type="text/javascript" src="/gs/Common/Includes/tablesort.js"></script>
 <link rel="STYLESHEET" type="text/css" href="/gs/Common/Includes/tablesort.css">
-
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF">				
 <table width="100%" cellspacing="0" onclick="sortColumn(event)">

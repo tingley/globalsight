@@ -42,7 +42,7 @@
 	<script  src="/globalsight/includes/tree/js/dhtmlXCommon.js"></script>
 	<script  src="/globalsight/includes/tree/js/dhtmlXTree.js"></script>		
 	<script  src="/globalsight/includes/tree/js/dhtmlXTreeExtend.js"></script>
-
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <%
 String mode = request.getParameter("mode");

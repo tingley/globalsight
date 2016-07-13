@@ -28,6 +28,7 @@ function submitSsoForm()
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>SSO IdP Demo Site</title>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body>
 <h4>SSO Logon Case 2 - assume "<%=userId %>" is logged on this system</h4>

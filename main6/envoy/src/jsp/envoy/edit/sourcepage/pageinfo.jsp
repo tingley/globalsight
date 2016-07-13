@@ -76,6 +76,7 @@ function doKeyDown()
   }
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY onload="window.focus(); idClose.focus();" onkeydown="doKeyDown()"
  oncontextmenu="return false">

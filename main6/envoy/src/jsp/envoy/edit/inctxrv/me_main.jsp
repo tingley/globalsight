@@ -410,6 +410,7 @@ if (!g_refreshing)
     try { window.opener.RefreshComments(); } catch (ignore) {}
 }
 </SCRIPT-->
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <%
 	if (state.isReviewMode())

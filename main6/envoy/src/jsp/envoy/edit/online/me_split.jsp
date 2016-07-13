@@ -62,6 +62,7 @@ function RefreshTargetPane()
     target.RefreshTargetPane();
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <FRAMESET <%=splitAttribute%> FRAMEBORDER="yes" BORDER="5">
  <FRAME SRC="<%=pane1URL%>" NAME="source" SCROLLING="auto" NORESIZE

@@ -383,6 +383,7 @@ function termImgShow(divName) {
     window.open ('terminologyImg/'+ divName,'newwindow','top=0,left=0,toolbar=no,menubar=no,scrollbars=yes, resizable=yes,location=no, status=no') ;
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY>
 <HR id="hr_line" COLOR="#0C1476" WIDTH="95%">

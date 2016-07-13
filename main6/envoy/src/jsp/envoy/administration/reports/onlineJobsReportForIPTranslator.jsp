@@ -43,6 +43,7 @@
 <!-- This JSP is: /envoy/administration/reports/onlineJobsReportForIPTranslator.jsp  -->
 <head>
 <title><%= EMEA%> <%=bundle.getString("online_jobs_for_ip_translator_report")%></title>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0"
 bgcolor="LIGHTGREY">

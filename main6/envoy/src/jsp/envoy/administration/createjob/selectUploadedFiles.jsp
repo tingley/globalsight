@@ -148,6 +148,7 @@ $(document).ready(function() {
 });
 
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body>
 <table CELLSPACING="0" CELLPADDING="0" BORDER="0" CLASS="standardText"><tr><td width="100%"><c:out value="${helper_text_recent_files}"/></td></tr></table>

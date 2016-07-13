@@ -67,6 +67,7 @@ function doLoad()
   parent.saveSegmentDone(g_syncMessage, g_syncClose);
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY onload="doLoad()"></BODY>
 </HTML>

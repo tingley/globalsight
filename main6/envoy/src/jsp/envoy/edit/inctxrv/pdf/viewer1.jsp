@@ -214,6 +214,7 @@ navigateToDiv(pagennn, pageLeft, pageTop, curScale);
 }
 
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
   </head>
 
   <body tabindex="1" class="loadingInProgress" onload="load()">

@@ -120,7 +120,7 @@ function doOnload()
 	<script  src="/globalsight/includes/tree/js/dhtmlXCommon.js"></script>
 	<script  src="/globalsight/includes/tree/js/dhtmlXTree.js"></script>		
 	<script  src="/globalsight/includes/tree/js/dhtmlXTreeExtend.js"></script>
-
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0"

@@ -164,6 +164,7 @@ function localize(form)
 </SCRIPT>          
 
 <link rel="STYLESHEET" type="text/css" href="<%=Utils.GetStylesheetName(request)%>">
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body class="foregroundLight">
 <FORM NAME="localizeForm" ACTION="" METHOD="post" >

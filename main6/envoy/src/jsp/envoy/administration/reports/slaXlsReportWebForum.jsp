@@ -33,6 +33,7 @@
 <!-- This JSP is: /envoy/administration/reports/slaXlsReportWebForum.jsp-->
 <head>
 <title><%=bundle.getString("translation_sla_performance_report")%></title>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>

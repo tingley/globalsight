@@ -162,5 +162,6 @@ function RefreshTargetPane(){}
   <FRAME SRC="<%=sourceMenu.getPageURL()%>" NAME="sourceMenu" SCROLLING="no"
    NORESIZE MARGINHEIGHT="0" MARGINWIDTH="0">
 </FRAMESET>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 </HTML>

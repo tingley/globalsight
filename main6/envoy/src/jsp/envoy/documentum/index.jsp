@@ -10,6 +10,7 @@ response.setDateHeader ("Expires", 0); //prevents caching at the proxy server
 <HTML>
 <HEAD>
 <TITLE>Select Files to Import from Documentum</TITLE>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <frameset cols="40%,60%" frameborder="no" border="0" framespacing="0">;
 	<frame src="folderListing.jsp" name="folderList" scrolling="auto" marginheight="0" marginwidth="0">

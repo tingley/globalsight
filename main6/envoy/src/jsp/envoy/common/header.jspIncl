@@ -103,4 +103,3 @@ a.headerText:hover {color: #fe7b23}
 <DIV ID="shutdownBanner" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 260px;">
 <%@ include file="/envoy/common/shutdownBanner.jspIncl" %>
 </DIV>
-<link rel="shortcut icon" href="/globalsight/images/GlobalSight_Icon.ico" >

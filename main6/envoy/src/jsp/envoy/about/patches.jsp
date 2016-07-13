@@ -128,7 +128,7 @@ public class PatchComparator implements Comparator {
 <HEAD>
 <TITLE><%= lbInstalledPatches %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY BRCOLOR="#FFFFFF">
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 10; TOP: 20px; LEFT: 20px;">

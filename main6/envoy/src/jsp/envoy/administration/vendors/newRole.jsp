@@ -70,6 +70,7 @@ function submitForm(btnName) {
 }
 
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="loadGuides()">
 <%@ include file="/envoy/common/header.jspIncl" %>

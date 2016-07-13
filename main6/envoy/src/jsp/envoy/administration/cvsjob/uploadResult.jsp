@@ -21,7 +21,7 @@
 <%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
-
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <%
 ResourceBundle bundle = PageHandler.getBundle(session);

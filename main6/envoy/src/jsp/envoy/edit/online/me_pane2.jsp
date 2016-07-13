@@ -159,6 +159,7 @@ function showPreviewPage2(pageName, type, pageId)
   }
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <FRAMESET ROWS="*,25" BORDER="0">
  <FRAME SRC="<%=contentUrl%>" NAME="content" SCROLLING="auto"

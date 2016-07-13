@@ -279,6 +279,7 @@ function doLoad()
   idName.focus();
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body LEFTMARGIN="20" RIGHTMARGIN="20" TOPMARGIN="20"

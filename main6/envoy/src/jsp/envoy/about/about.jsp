@@ -27,6 +27,7 @@
 <HEAD>
 <TITLE><%=lbAboutGlobalsightSystem%></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF">
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 10; TOP: 0px; LEFT: 20px; RIGHT: 20px;">

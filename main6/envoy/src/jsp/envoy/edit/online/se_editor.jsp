@@ -108,6 +108,7 @@ function CanClose()
     return target.CanClose();
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <FRAMESET ROWS="15%,85%"
   FRAMEBORDER="no" BORDER="0" FRAMESCAPING="no">

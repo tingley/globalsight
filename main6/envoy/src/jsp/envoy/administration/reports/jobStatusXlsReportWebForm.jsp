@@ -40,6 +40,7 @@
 <!-- This JSP is: /envoy/administration/reports/jobStatusXlsReportWebForm.jsp-->
 <head>
 <title><%= EMEA%> <%=bundle.getString("job_status_report_web_form")%></title>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>

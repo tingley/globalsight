@@ -92,6 +92,7 @@ function doWindowLoad()
   }
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body onload="doWindowLoad()" onkeypress="doKeypress()">

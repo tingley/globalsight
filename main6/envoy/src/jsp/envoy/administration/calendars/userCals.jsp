@@ -111,7 +111,7 @@ function enableButtons()
 }
 
 </script>
-
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <form name="UserCalForm" method="post">

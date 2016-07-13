@@ -301,6 +301,7 @@
     }
 
     </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body>
 <form id="hiddenForm">

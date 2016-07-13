@@ -202,6 +202,7 @@ if(!document.all){
     });
 }  
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 <BODY onload="doLoad();" LEFTMARGIN="0" RIGHTMARGIN="0"

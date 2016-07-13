@@ -62,6 +62,7 @@ function closeThis()
     window.close();
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY onload="window.focus()" oncontextmenu="return false">
 <SPAN CLASS="mainHeading"><%=lb_details%></SPAN>

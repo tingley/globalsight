@@ -123,6 +123,7 @@ function CanClose()
     return target.CanClose();
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <% if (show_MT) { %>
 <FRAMESET ROWS="15%,25%,15%,15%,15%,15%"

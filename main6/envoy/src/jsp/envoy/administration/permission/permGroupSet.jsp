@@ -274,6 +274,7 @@ function initPermissions()
 
 
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body id="idBody" leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0"

@@ -302,6 +302,7 @@ $(document).ready(function editPage(){
 }
 
 </style>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body onload="loadGuides()">
 	<%@ include file="/envoy/common/header.jspIncl" %>

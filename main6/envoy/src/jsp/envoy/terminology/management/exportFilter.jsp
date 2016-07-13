@@ -540,6 +540,7 @@ function doLoad()
   initFilterConditions(g_args.getFilter());
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body LEFTMARGIN="8" RIGHTMARGIN="8" TOPMARGIN="8" BOTTOMMARGIN="8"

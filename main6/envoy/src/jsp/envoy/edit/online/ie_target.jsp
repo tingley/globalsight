@@ -182,6 +182,7 @@ function trapKeys()
     }
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY onkeydown="trapKeys()">
 <HR COLOR="#0C1476" WIDTH="95%">

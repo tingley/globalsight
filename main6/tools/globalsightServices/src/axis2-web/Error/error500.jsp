@@ -25,6 +25,7 @@
     <title>Axis2 :: Internal server error</title>
     <link href="axis2-web/css/axis-style.css" rel="stylesheet" type="text/css"/>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
   </head>
 
   <body>

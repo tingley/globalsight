@@ -92,6 +92,7 @@ function doLoad()
   initLangLocs();
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body onload="doLoad()" onkeypress="doKeypress()">

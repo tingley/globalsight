@@ -6,6 +6,7 @@
 <!-- This JSP is: /envoy/tasks/accountInfo.jsp --> 
 <HEAD>
 <TITLE>this is title</TITLE>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY>
 <TABLE>

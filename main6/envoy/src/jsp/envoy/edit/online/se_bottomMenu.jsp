@@ -35,6 +35,7 @@ img_next = "<IMG SRC=\"" + img_next + "\" BORDER=\"0\">";
 <HTML>
 <HEAD>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY BGCOLOR="<%=skin.getProperty("skin.editor.bgColor")%>">
 <DIV ID="sourceBoxTitle"

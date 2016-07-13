@@ -237,6 +237,7 @@ $(document).ready(function(){
   });
 })
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body>
 <div id="contentLayer">

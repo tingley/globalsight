@@ -280,6 +280,7 @@ var w_editor;
      return menu.RaiseEditor();
  }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY id="idBody" onload="">
 	<input type="hidden" name="<%=ReportConstants.JOB_IDS%>" value="<%=jobId%>">

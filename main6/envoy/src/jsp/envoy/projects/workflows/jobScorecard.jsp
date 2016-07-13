@@ -148,6 +148,7 @@ $("#lb_style").attr("title","<%=bundle.getString("lb_style_title")%>");
 $("#lb_terminology").attr("title","<%=bundle.getString("lb_terminology_title")%>");
 })
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="loadGuides()"; onunload="closeOpenedWindow();"; id="idBody"  class="tundra">
 <%@ include file="/envoy/common/header.jspIncl" %>

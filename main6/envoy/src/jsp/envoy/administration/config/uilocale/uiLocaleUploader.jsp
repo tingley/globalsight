@@ -117,6 +117,7 @@ function uploadRes()
 	uploadResForm.submit();
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" onload="loadGuides()">
 <%@ include file="/envoy/common/header.jspIncl"%>

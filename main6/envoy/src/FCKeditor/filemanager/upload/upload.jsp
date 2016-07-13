@@ -81,6 +81,7 @@ upBean.setFolderstore(s_basedir + selectedDir);
 <HTML>
 <HEAD>
 <TITLE>File Upload</TITLE>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY>
 <!--<%=upBean.getFolderstore()%>-->

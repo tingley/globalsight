@@ -81,6 +81,7 @@ function ShowPTagBox()
     pTagBox.style.visibility = "visible";
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY BGCOLOR="<%=skin.getProperty("skin.editor.bgColor")%>">
 <DIV ID="menu"

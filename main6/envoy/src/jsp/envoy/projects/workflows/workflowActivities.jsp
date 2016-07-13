@@ -126,7 +126,7 @@ var w_viewer;
 	padding: 0px;
 }
 </STYLE>
-
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" CLASS=standardText>
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 20px; LEFT: 20px; RIGHT: 20px;">

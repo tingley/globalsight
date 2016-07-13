@@ -154,6 +154,7 @@ function closeThis()
 }
 
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY style="margin:1ex" id="idBody">
 <SPAN CLASS="mainHeading"><%=lb_title%></SPAN>

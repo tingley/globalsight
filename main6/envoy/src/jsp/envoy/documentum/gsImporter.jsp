@@ -17,6 +17,7 @@ response.setDateHeader ("Expires", 0); //prevents caching at the proxy server
 %>
 <HTML>
 <HEAD>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY>
 <%

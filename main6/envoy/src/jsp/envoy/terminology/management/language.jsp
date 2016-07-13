@@ -335,6 +335,7 @@ function doLoad()
   }
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body onload="doLoad()">

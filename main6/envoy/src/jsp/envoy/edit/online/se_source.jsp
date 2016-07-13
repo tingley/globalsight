@@ -92,6 +92,7 @@ function getCheckBoxIsChanged() {
 }
 
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY>
 <DIV STYLE="POSITION: ABSOLUTE; TOP: 0px; LEFT: 0px;">

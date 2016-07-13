@@ -1311,7 +1311,7 @@ function doSegmentFilter(p_segmentFilter)
     }
 //-->
 </script>
-
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY id="idBody" oncontextmenu="contextForX(event)"
  onload="doLoad()" onunload="doUnload()" >

@@ -183,6 +183,7 @@ function doUnload()
     w_editor = null;
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <body LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
     onload="loadGuides(); initSelection();" onunload="doUnload()">

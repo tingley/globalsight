@@ -12,6 +12,7 @@ $Date: 2009/04/14 15:42:52 $
 <HEAD>
 <TITLE>Spell Checker Statistics</TITLE>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 <body>

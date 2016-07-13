@@ -47,6 +47,7 @@ function doLoad()
   idOk.focus();
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY onload="doLoad()" oncontextmenu="return false">
 <SPAN CLASS="mainHeading"><%=lb_details%></SPAN>

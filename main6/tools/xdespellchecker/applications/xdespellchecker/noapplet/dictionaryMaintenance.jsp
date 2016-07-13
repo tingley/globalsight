@@ -23,6 +23,7 @@ body {
 	border-left-width: thin;
 }
 </style>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 <body>

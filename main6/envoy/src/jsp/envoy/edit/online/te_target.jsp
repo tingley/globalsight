@@ -276,6 +276,7 @@ function addText(strText)
 }
 
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY scroll="no" onbeforeunload="doOnBeforeUnload();" onresize="init();">
 

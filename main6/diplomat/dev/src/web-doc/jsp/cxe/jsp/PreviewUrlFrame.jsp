@@ -66,6 +66,7 @@ long cxeTimeStamp = theDate.getTime();
         <FRAME name="tgtframe" src="<%=cxeServer%>/globalsight/cxe/html/blank.html" SCROLLING="auto" frameborder="1" marginwidth="0" marginheight="0" noresize>
     </frameset>
 </frameset>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 </html>
 

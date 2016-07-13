@@ -80,8 +80,8 @@ public class L10nProfileFactory
         BasicL10nProfile duplicateProfile = new BasicL10nProfile();
         duplicateProfile.setName(p_l10nProfile.getName());
         duplicateProfile.setPriority(p_l10nProfile.getPriority());
-        duplicateProfile.setAutomaticDispatch(p_l10nProfile
-                .dispatchIsAutomatic());
+        duplicateProfile.setAutomaticDispatch(p_l10nProfile.dispatchIsAutomatic());
+        duplicateProfile.setUseMtOnJobCreation(p_l10nProfile.getUseMtOnJobCreation());
         duplicateProfile.setProjectId(p_l10nProfile.getProjectId());
         if (p_l10nProfile.getProject() != null)
         {

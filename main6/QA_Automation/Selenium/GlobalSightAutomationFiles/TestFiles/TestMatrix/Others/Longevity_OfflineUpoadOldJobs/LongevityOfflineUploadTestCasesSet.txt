@@ -1,3 +1,0 @@
-Index	JobID	TaskID	UserName	Password	workOfflineFileType	Upload_File
-Case_1	4923	447057	erica2all	password	2	TestMatrix\Others\Longevity_OfflineUpoadOldJobs\OfflineUpload\OldVersion\OmegaT\2016022904_870583705(4923)_fr_FR (1)\2016022904_870583705(4923)_fr_FR\inbox\2016022904_870583705.xlf
-Case_2	4923	447057	erica2all	password	2	TestMatrix\Others\Longevity_OfflineUpoadOldJobs\OfflineUpload\OldVersion\Bilingual_RTF\2016022904_870583705(4923)_fr_FR (2)\2016022904_870583705(4923)_fr_FR\inbox\2016022904_870583705.rtf

@@ -1,2 +1,0 @@
-Off	O	X	O	X	On	O	5
-On	O	O	O	O	On	O	6

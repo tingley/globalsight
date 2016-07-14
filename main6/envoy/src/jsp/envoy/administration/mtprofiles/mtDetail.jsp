@@ -14,7 +14,6 @@
     com.globalsight.ling.common.XmlEntities,
 	java.util.ResourceBundle"
 	session="true"%>
-<%@ include file="/envoy/common/header.jspIncl"%>
 
 <jsp:useBean id="saveMTOptions" scope="request"
 	class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -626,6 +625,7 @@
 </HEAD>
 
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" ONLOAD="loadGuides()">
+<%@ include file="/envoy/common/header.jspIncl"%>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 

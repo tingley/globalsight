@@ -35,9 +35,6 @@
             java.util.Enumeration,
             java.util.ResourceBundle"
     session="true" %>
-<%@ include file="/envoy/common/header.jspIncl" %>
-<%@ include file="/envoy/common/navigation.jspIncl" %>
-<%@ include file="/envoy/wizards/guides.jspIncl" %>
 <jsp:useBean id="save" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="cancel" scope="request"
@@ -1363,6 +1360,9 @@ function doOnLoad()
 </HEAD>
    <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
     ONLOAD="doOnLoad();initProjectTmsInDatabase()">
+<%@ include file="/envoy/common/header.jspIncl" %>
+<%@ include file="/envoy/common/navigation.jspIncl" %>
+<%@ include file="/envoy/wizards/guides.jspIncl" %>
    <DIV ID="contentLayer" STYLE="Z-INDEX: 9; RIGHT: 20px; LEFT: 20px; POSITION: absolute; WIDTH: 880px; TOP: 108px">
     <SPAN CLASS="mainHeading"><%= lbEditTmProfile%></SPAN><p/>
 

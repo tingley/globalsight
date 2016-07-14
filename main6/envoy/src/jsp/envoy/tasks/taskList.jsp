@@ -27,10 +27,6 @@
 <jsp:useBean id="search" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="wordcountlist" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 
-<%@ include file="/envoy/common/header.jspIncl" %>
-<%@ include file="/envoy/common/navigation.jspIncl" %>
-<%@ include file="/envoy/wizards/guides.jspIncl" %>
-
 <%
     final String AND = "&";
     final String EQUAL = "=";
@@ -304,6 +300,9 @@
 <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body>
+<%@ include file="/envoy/common/header.jspIncl" %>
+<%@ include file="/envoy/common/navigation.jspIncl" %>
+<%@ include file="/envoy/wizards/guides.jspIncl" %>
 <form id="hiddenForm">
     <input type="hidden" id="selfUrl" value="<%=selfUrl %>" />
     <input type="hidden" id="detailUrl" value="<%=detailUrl %>" />

@@ -1529,6 +1529,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 		boolean okForInContextReviewXml = helper.isXMLEnabled(companyId);
 		boolean okForInContextReviewIndd = helper.isInDesignEnabled(companyId);
 		boolean okForInContextReviewOffice = helper.isOfficeEnabled(companyId);
+		boolean okForInContextReviewHtml = helper.isHTMLEnabled(companyId);
 		FileProfile fp = null;
 		try
 		{
@@ -1545,6 +1546,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 				boolean isOffice = pageNameLow.endsWith(".docx")
 						|| pageNameLow.endsWith(".pptx")
 						|| pageNameLow.endsWith(".xlsx");
+				boolean isHtml = pageNameLow.endsWith(".html") || pageNameLow.endsWith(".htm");
 				boolean enableInContextReivew = false;
 				if (isXml)
 				{
@@ -1559,6 +1561,12 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 				{
 					enableInContextReivew = okForInContextReviewOffice;
 				}
+				
+				if (isHtml)
+				{
+				    enableInContextReivew = okForInContextReviewHtml;
+				}
+				
 				if (!enableInContextReivew)
 				{
 					newPages.add(page);

@@ -894,7 +894,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                     .getInstance(document, new FileOutputStream(pdfFile));
             document.open();
             com.itextpdf.tool.xml.XMLWorkerHelper.getInstance().parseXHtml(writer, document,
-                    new FileInputStream(htmlFilePath), Charset.forName("UTF-8"), new AsianFontProvider());
+                    new FileInputStream(htmlFilePath), Charset.forName("UTF-8"));
+            
             document.close();
         }
         catch (ConfigException ce)

@@ -824,7 +824,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 // GBS-3722, just use MT tagged target segment, do not use
                 // source
             }
-            else if (populateMT && isMtTranslated(trgTuv))
+            else if (populateMT && (isMtTranslated(trgTuv) || trgScore == 60))
             {
 
             }
@@ -2122,7 +2122,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     private boolean isPopulateSrcAsTrg(float p_targetScore)
     {
        boolean result = (p_targetScore == 100 && !populate100)
-                || (p_targetScore > 0 && p_targetScore != 100 && (!populateFuzzy || !populateMT||p_targetScore ==60));
+                || (p_targetScore > 0 && p_targetScore != 100 && (!populateFuzzy || !populateMT));
        return result;
     }
 

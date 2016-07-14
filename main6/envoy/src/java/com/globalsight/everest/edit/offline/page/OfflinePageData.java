@@ -69,7 +69,6 @@ import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvException;
 import com.globalsight.everest.tuv.TuvImpl;
-import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
 import com.globalsight.ling.rtf.RtfDocument;
@@ -2294,23 +2293,19 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
             String sourceText, String targetText, String userId, boolean isFromXliff,
             String sourceLocal, String targetLocal, boolean changeCreationId, long p_jobId)
     {
-        int altFlag = -100;
         targetText = match.getLeveragedTargetString();
         ArrayList<String> array = new ArrayList<String>();
         String tmpSourceText = "";
 
         try
         {
-            if (match.getProjectTmIndex() != altFlag)
+            long originalSrcTuvId = match.getOriginalSourceTuvId();
+            Tuv sourceTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(originalSrcTuvId,
+                    p_jobId);
+            if (sourceTuv != null)
             {
-                long originalSrcTuvId = match.getOriginalSourceTuvId();
-                Tuv sourceTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(originalSrcTuvId,
-                        p_jobId);
-                if (sourceTuv != null)
-                {
-                    sourceText = sourceTuv.getGxml();
-                    sourceText = match.getLeveragedString(sourceText);
-                }
+                sourceText = sourceTuv.getGxml();
+                sourceText = match.getLeveragedString(sourceText);
             }
 
             // MT matches
@@ -2340,26 +2335,10 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
             else if (match.getProjectTmIndex() == Leverager.XLIFF_PRIORITY)
             {
                 userId = "XLF";
-
                 if (isFromXliff)
                 {
-                    Tuv tuvTemp = ServerProxy.getTuvManager()
-                            .getTuvForSegmentEditor(osd.getTrgTuvId(), p_jobId);
-                    String xliffTarget = tuvTemp.getTu(p_jobId).getXliffTargetGxml().getTextValue();
-
-                    if (xliffTarget != null && Text.isBlank(xliffTarget))
-                    {
-                        // is populate from alt-trans
-                        tmpSourceText = getMatchedOriginalSource(match, sourceText);
-                        sourceText = GxmlUtil.stripRootTag(tmpSourceText);
-                        sourceText = EditUtil.decodeXmlEntities(sourceText);
-                        targetText = EditUtil.decodeXmlEntities(targetText);
-                    }
-                    else
-                    {
-                        sourceText = SegmentUtil.restoreSegment(sourceText, sourceLocal);
-                        targetText = SegmentUtil.restoreSegment(targetText, targetLocal);
-                    }
+                    sourceText = SegmentUtil.restoreSegment(sourceText, sourceLocal);
+                    targetText = SegmentUtil.restoreSegment(targetText, targetLocal);
                 }
 
                 // When the data is from MT
@@ -2384,17 +2363,19 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
                 {
                 }
             }
-            // PO matches
-            else if (match.getProjectTmIndex() == Leverager.PO_TM_PRIORITY)
-            {
-                userId = "PO";
-            }
-            else if (match.getProjectTmIndex() == altFlag)
+            else if (match.getProjectTmIndex() == Leverager.XLIFF_ALT_TRANS_PRIORITY)
             {
                 userId = "XLF Source";
 
                 tmpSourceText = getMatchedOriginalSource(match, sourceText);
                 sourceText = GxmlUtil.stripRootTag(tmpSourceText);
+                sourceText = EditUtil.decodeXmlEntities(sourceText);
+                targetText = EditUtil.decodeXmlEntities(targetText);
+            }
+            // PO matches
+            else if (match.getProjectTmIndex() == Leverager.PO_TM_PRIORITY)
+            {
+                userId = "PO";
             }
             else if (match.getProjectTmIndex() == Leverager.IN_PROGRESS_TM_PRIORITY)
             {
@@ -2469,7 +2450,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
      */
     private String getMatchedOriginalSource(LeverageMatch match, String sourceText)
     {
-        if (!StringUtil.isEmpty(match.getMatchedOriginalSource()))
+        if (StringUtil.isNotEmpty(match.getMatchedOriginalSource()))
             return match.getMatchedOriginalSource();
         else
             return sourceText;

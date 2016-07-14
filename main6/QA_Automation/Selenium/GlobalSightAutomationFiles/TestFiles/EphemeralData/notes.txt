@@ -1,1 +1,0 @@
-This folder is used for saving the ephemeral data during running all the test case!

@@ -22,8 +22,8 @@
 		<property name="jsonInfo" type="text">
 			<column name="EXTENT_JSON_INFO" length="16777216" />
 		</property>
-		<property name="mtConfidenceScore" type="long">
-			<column name="MT_CONFIDENCE_SCORE" />
+		<property name="mtThreshold" type="long">
+			<column name="MT_THRESHOLD" />
 		</property>
 		<property name="url" type="string">
 			<column name="URL" length="100" />

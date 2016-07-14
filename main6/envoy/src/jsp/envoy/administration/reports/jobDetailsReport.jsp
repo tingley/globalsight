@@ -47,6 +47,7 @@
             #divEntire {position: absolute; left:0px; top:0px ; z-index:1;background-color:#ffffff;layer-background-color:#ffffff;}
         </style>
         <title><%=bundle.getString("lb_job_details")%></title>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
     </head>
     <BODY bgcolor="white" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="onAfterAction()">
         <%

@@ -64,6 +64,7 @@ ArrayList list = (ArrayList) sessionMgr.getAttribute("searchResults");
         return false;
     }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <Body>
 <FORM id="ReplaceForm" name="form" method="post" action="">

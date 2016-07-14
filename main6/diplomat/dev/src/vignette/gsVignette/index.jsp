@@ -23,7 +23,7 @@ response.setDateHeader ("Expires", 0); //prevents caching at the proxy server
 <HTML>
 <HEAD>
 <TITLE>Select Files to Import</TITLE>
-
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 <frameset rows="108,*" frameborder="no" border="0" framespacing="0">;	

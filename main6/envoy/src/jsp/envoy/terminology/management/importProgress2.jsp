@@ -112,6 +112,7 @@ if("<%=done%>" != "false")
   }
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY onload="doLoad()"></BODY>
 </HTML>

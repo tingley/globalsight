@@ -20,6 +20,7 @@ String lb_loading = bundle.getString("msg_loading");
 <html>
 <head>
 <title><%=lb_title%></title>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body>
 <P><%=lb_loading%> <img src="bullet2.gif"></P>

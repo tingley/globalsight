@@ -117,6 +117,7 @@ function closeThis()
     window.close();
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY onload="doLoad()" oncontextmenu="return false">
 <DIV style="display:none">

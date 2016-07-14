@@ -88,6 +88,7 @@ if (top.location != location) top.location.href = location.href;
        return true;
     }
     </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>    
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0">
     <DIV ID="header" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 0px;">

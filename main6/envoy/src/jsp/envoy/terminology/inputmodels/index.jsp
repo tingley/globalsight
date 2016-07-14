@@ -136,6 +136,7 @@ function doLoad()
 
 centerWindow(300,0);
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 <body id="idBody" style="overflow: hidden"

@@ -145,23 +145,23 @@ public class MachineTranslateAdapter
             mtProfile.setDescription(description);
         }
 
-        // MtConfidenceScore
-        String mtConfidenceScore = p_request.getParameter("mtConfidenceScore");
+        // MtThreshold
+        String mtThreshold = p_request.getParameter("mtThreshold");
 
-        long long_mtConfidenceScore = 0;
+        long long_mtThreshold = 0;
         try
         {
-            long_mtConfidenceScore = Long.parseLong(mtConfidenceScore);
-            if (long_mtConfidenceScore < 0 || long_mtConfidenceScore > 100)
+            long_mtThreshold = Long.parseLong(mtThreshold);
+            if (long_mtThreshold < 0 || long_mtThreshold > 100)
             {
-                long_mtConfidenceScore = 0;
+                long_mtThreshold = 0;
             }
         }
         catch (Exception ex)
         {
 
         }
-        mtProfile.setMtConfidenceScore(long_mtConfidenceScore);
+        mtProfile.setMtThreshold(long_mtThreshold);
         
        String mtIgnoreTmMatches = p_request.getParameter(MTProfileConstants.MT_IGNORE_TM_MATCHES);
        if (mtIgnoreTmMatches == null || !"on".equals(mtIgnoreTmMatches))

@@ -242,7 +242,7 @@ function update_tr(id)
 	}
 //-->
 </script>
-
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY  onload="doLoad()" onerror="return true">
 

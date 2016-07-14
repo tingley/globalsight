@@ -62,6 +62,7 @@ function RefreshTargetPane()
     target.RefreshTargetPane();
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <FRAMESET <%=splitAttribute%> FRAMEBORDER="yes" BORDER="5" id="inctxrv_fset">
 <FRAME SRC="envoy/edit/inctxrv/pdf/filelist.jsp" NAME="filelist" SCROLLING="auto" NORESIZE

@@ -15,6 +15,7 @@ function onClickHelp()
 fireClientEvent("InvokeHelp");
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <%
 Form form = (Form)pageContext.getAttribute(Form.FORM, PageContext.REQUEST_SCOPE);

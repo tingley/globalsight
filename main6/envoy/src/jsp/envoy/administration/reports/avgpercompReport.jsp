@@ -83,6 +83,7 @@
             #divEntire {position: absolute; left:0px; top:0px ; z-index:1;background-color:#ffffff;layer-background-color:#ffffff;}
         </style>
         <title><%=bundle.getString("avg_per_compAvg")%></title>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
     </head>
     <body onload="onAfterAction()">
         <div id="divEntire">

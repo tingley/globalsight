@@ -16,7 +16,7 @@ response.setDateHeader ("Expires", 0); //prevents caching at the proxy server
 <script type="text/javascript" src="Includes/tablesort.js"></script>
 
 <link rel="STYLESHEET" type="text/css" href="Includes/tablesort.css">
-
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF">
 				

@@ -368,6 +368,7 @@ function showHelp()
     helpWindow.focus();
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 <BODY onload="selectType()" onbeforeunload="Reset()" onkeypress="doKeyPress()">

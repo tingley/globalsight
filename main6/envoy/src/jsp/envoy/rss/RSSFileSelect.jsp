@@ -54,6 +54,7 @@ var objectName = "selectFile";
 var guideNode="rename";
 var helpFile = "";
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <%

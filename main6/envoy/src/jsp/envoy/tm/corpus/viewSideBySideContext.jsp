@@ -57,6 +57,7 @@ String name = info.getSourceCorpusDoc().getCorpusDocGroup().getCorpusName();
      noresize>
   </frameset>
 </frameset>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 </html>
 

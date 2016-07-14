@@ -771,7 +771,7 @@ public class JobResource extends RestResource
                 }
                 catch (Exception e)
                 {
-                    logger.error("Error found in getJobExportFilesInZip.", e);
+                    logger.error("Error found in getJobExportedFiles.", e);
                     throw new RestWebServiceException(e.getMessage());
                 }
             }
@@ -788,13 +788,14 @@ public class JobResource extends RestResource
                     }
                     exportJobFiles.setMessage("");
                     exportJobFiles.setPath("");
-                    return Response.status(200).entity(exportJobFiles).build();
+                    
+                    return Response.ok().entity(exportJobFiles).build();
                 }
                 else if (jobFileList.size() == 0)
                 {
                     exportJobFiles.setMessage("No exported files found");
                     exportJobFiles.setPath("");
-                    return Response.status(200).entity(exportJobFiles).build();
+                    return Response.ok().entity(exportJobFiles).build();
                 }
             }
         }

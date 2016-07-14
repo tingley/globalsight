@@ -1,8 +1,0 @@
-Index	File_Profile_name	Filter_Name	Translate_Left_Master_Page	Translate_Right_Master_Page	Translate_Other_Master_Page	FM_SourceFile
-Case_1	FM_Empty	FM_Empty	x	x	x	x
-Case_2	FM_Translate_Left_Master_Page	FM_Translate_Left_Master_Page	x	x	x	x
-Case_3	FM_Translate_Right_Master_Page	FM_Translate_Right_Master_Page	o	x	x	x
-Case_4	FM_Translate_Other_Master_Page	FM_Translate_Other_Master_Page	x	o	x	x
-Case_5	FM_All_Filter_Option	FM_All_Filter_Option	o	o	o	x
-Case_6	FM_No_Filter	x	x	x	x	x
-Case_7	FM_Empty,FM_Translate_Left_Master_Page,FM_Translate_Right_Master_Page,FM_Translate_Other_Master_Page,FM_All_Filter_Option,FM_No_Filter	x	x	x	x	TestMatrix\DataSource\FrameMaker_9\Trinity OPSG IX no.fm,TestMatrix\DataSource\FrameMaker_9\Trinity OPSG IX empty.fm,TestMatrix\DataSource\FrameMaker_9\Trinity OPSG IX left.fm,TestMatrix\DataSource\FrameMaker_9\Trinity OPSG IX right.fm,TestMatrix\DataSource\FrameMaker_9\Trinity OPSG IX other.fm,TestMatrix\DataSource\FrameMaker_9\Trinity OPSG IX all.fm

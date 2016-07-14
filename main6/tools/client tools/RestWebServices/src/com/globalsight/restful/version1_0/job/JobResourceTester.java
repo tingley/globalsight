@@ -212,7 +212,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 		try
 		{
 			StringBuffer url = new StringBuffer();
-			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/1460/targetFiles");
+			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/1528/targetFiles");
 			HttpGet httpGet = getHttpGet(url.toString(), accessToken);
 			httpResponse = httpClient.execute(httpGet);
 
@@ -221,45 +221,58 @@ public class JobResourceTester extends RestfulApiTestHelper
 
 			String res = httpResponse.getStatusLine().toString();
 			System.out.println("Status line: " + res + "\r\n");
-
-			InputStream is = httpResponse.getEntity().getContent();
-
-			BufferedInputStream inputStream = null;
-			File file = new File("E:\\down\\test_abc.zip");
-			if (file.exists())
+			
+			boolean isZip = false;
+			if (httpResponse.getFirstHeader("Content-Disposition") != null)
 			{
-				file.delete();
+				isZip = true;
 			}
-			try
+			
+			if (isZip)
 			{
-				inputStream = new BufferedInputStream(is);
-				byte[] fileBytes = new byte[MAX_SEND_SIZE];
-				int count = inputStream.read(fileBytes);
+				InputStream is = httpResponse.getEntity().getContent();
 
-				while (count != -1 && count == MAX_SEND_SIZE)
+				BufferedInputStream inputStream = null;
+				File file = new File("E:\\down\\test_zip02.zip");
+				if (file.exists())
 				{
-					FileUtil.writeFile(file, fileBytes, true);
-					fileBytes = new byte[MAX_SEND_SIZE];
-					count = inputStream.read(fileBytes);
+					file.delete();
 				}
+				try
+				{
+					inputStream = new BufferedInputStream(is);
+					byte[] fileBytes = new byte[MAX_SEND_SIZE];
+					int count = inputStream.read(fileBytes);
 
-				byte[] fileBytes2 = new byte[count];
-				for (int i = 0; i < count; i++)
-				{
-					fileBytes2[i] = fileBytes[i];
+					while (count != -1 && count == MAX_SEND_SIZE)
+					{
+						FileUtil.writeFile(file, fileBytes, true);
+						fileBytes = new byte[MAX_SEND_SIZE];
+						count = inputStream.read(fileBytes);
+					}
+
+					byte[] fileBytes2 = new byte[count];
+					for (int i = 0; i < count; i++)
+					{
+						fileBytes2[i] = fileBytes[i];
+					}
+					FileUtil.writeFile(file, fileBytes2, true);
 				}
-				FileUtil.writeFile(file, fileBytes2, true);
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-			finally
-			{
-				if (inputStream != null)
+				catch (Exception e)
 				{
-					inputStream.close();
+					e.printStackTrace();
 				}
+				finally
+				{
+					if (inputStream != null)
+					{
+						inputStream.close();
+					}
+				}
+			}
+			else
+			{
+				 printHttpResponse(httpResponse);
 			}
 		}
 		catch (Exception e)

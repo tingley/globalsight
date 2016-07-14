@@ -54,6 +54,7 @@ function submitForm()
 	else formToSubmit.submit();
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF">
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 10; TOP: 20px; LEFT: 20px;">

@@ -24,6 +24,7 @@
 %><html>
 <head>
 <title>GlobalSight: <%=title%></title>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body bgcolor="#e5e5e5"

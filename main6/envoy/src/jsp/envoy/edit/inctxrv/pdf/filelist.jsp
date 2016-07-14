@@ -138,6 +138,7 @@ var pageParas = new Array();
 
 	}
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body>
 	<div

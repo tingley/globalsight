@@ -188,8 +188,8 @@ public class MTProfileHandler extends PageHandler
                 .append(".DESCRIPTION=").append(mtp.getDescription())
                 .append(NEW_LINE);
         buffer.append("MachineTranslationProfile.").append(mtp.getId())
-                .append(".MT_CONFIDENCE_SCORE=")
-                .append(mtp.getMtConfidenceScore()).append(NEW_LINE);
+                .append(".MT_THRESHOLD=")
+                .append(mtp.getMtThreshold()).append(NEW_LINE);
         buffer.append("MachineTranslationProfile.").append(mtp.getId())
                 .append(".URL=").append(mtp.getUrl()).append(NEW_LINE);
         buffer.append("MachineTranslationProfile.").append(mtp.getId())

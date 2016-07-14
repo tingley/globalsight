@@ -266,6 +266,7 @@ function doLoad()
   setup(level, definedFields);
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body onload="doLoad()" onkeypress="doKeypress()">

@@ -28,6 +28,7 @@ eval('window.showModelessDialog(url,"SHUTDOWN MESSAGE","help:0;resizable:0;statu
 //}
 }
 %>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY>
 </BODY>

@@ -106,6 +106,7 @@ function getDoc(fileName)
 	window.close();
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY>
 <TABLE height="100%" cellspacing="0" cellpadding="0" width="100%" border="0">

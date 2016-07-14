@@ -465,7 +465,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             Workflow p_workflow, IntHolder p_row) throws Exception
     {
         int threshold = p_job.getLeverageMatchThreshold();
-        int mtConfidenceScore = p_workflow.getMtConfidenceScore();
+        int mtThreshold = p_workflow.getMtThreshold();
         // write word count and file info
         for (TargetPage tg : p_workflow.getTargetPages())
         {
@@ -512,8 +512,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
 
             try
             {
-                addWordCountForXlsx(p_workBook, tg, p_row, p_sheet, threshold,
-                        mtConfidenceScore);
+                addWordCountForXlsx(p_workBook, tg, p_row, p_sheet, threshold, mtThreshold);
             }
             catch (Exception e)
             {
@@ -528,7 +527,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
      * Add word count for Excel File
      */
     private int addWordCountForXlsx(Workbook p_workBook, TargetPage tg,
-            IntHolder p_row, Sheet p_sheet, int threshold, int mtConfidenceScore)
+            IntHolder p_row, Sheet p_sheet, int threshold, int mtThreshold)
             throws Exception
     {
         Job job = tg.getSourcePage().getRequest().getJob();
@@ -575,31 +574,31 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             }
             else
             {
-                if (mtConfidenceScore == 100)
+                if (mtThreshold == 100)
                 {
                     _100MatchWordCount = _100MatchWordCount - mtExactMatchWordCount;
                 }
-                else if (mtConfidenceScore < 100 && mtConfidenceScore >= threshold)
+                else if (mtThreshold < 100 && mtThreshold >= threshold)
                 {
-                    if (mtConfidenceScore >= 95)
+                    if (mtThreshold >= 95)
                     {
                         hiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
                     }
-                    else if (mtConfidenceScore < 95 && mtConfidenceScore >= 85)
+                    else if (mtThreshold < 95 && mtThreshold >= 85)
                     {
                         medHiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
                     }
-                    else if (mtConfidenceScore < 85 && mtConfidenceScore >= 75)
+                    else if (mtThreshold < 85 && mtThreshold >= 75)
                     {
                         medFuzzyWordCount -= mtFuzzyNoMatchWordCount;
                     }
-                    else if (mtConfidenceScore < 75)
+                    else if (mtThreshold < 75)
                     {
                         noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
                     }
                     repetitionsWordCount -= mtRepetitionsWordCount;
                 }
-                else if (mtConfidenceScore < threshold)
+                else if (mtThreshold < threshold)
                 {
                     noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
                     repetitionsWordCount -= mtRepetitionsWordCount;
@@ -665,7 +664,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         {
             cursor++;
             Cell cell_Score = getCell(row, cursor);
-            cell_Score.setCellValue(mtConfidenceScore);
+            cell_Score.setCellValue(mtThreshold);
             cell_Score.setCellStyle(cs);
         }
 
@@ -1239,7 +1238,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             throws Exception
     {
         int threshold = p_job.getLeverageMatchThreshold();
-        int mtConfidenceScore = p_workflow.getMtConfidenceScore();
+        int mtThreshold = p_workflow.getMtThreshold();
         // write word count and file info
         for (TargetPage tg : p_workflow.getTargetPages())
         {
@@ -1258,7 +1257,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
 
             try
             {
-                addWordCountForCsv(tg, threshold, mtConfidenceScore);
+                addWordCountForCsv(tg, threshold, mtThreshold);
             }
             catch (Exception e)
             {
@@ -1296,8 +1295,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         return filePathName;
     }
 
-    private void addWordCountForCsv(TargetPage tg, int threshold,
-            int mtConfidenceScore) throws Exception
+    private void addWordCountForCsv(TargetPage tg, int threshold, int mtThreshold) throws Exception
     {
         Job job = tg.getSourcePage().getRequest().getJob();
         boolean isInContextMatch = PageHandler.isInContextMatch(job);
@@ -1349,31 +1347,31 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             }
             else
             {
-                if (mtConfidenceScore == 100)
+                if (mtThreshold == 100)
                 {
                     _100MatchWordCount = _100MatchWordCount - mtExactMatchWordCount;
                 }
-                else if (mtConfidenceScore < 100 && mtConfidenceScore >= threshold)
+                else if (mtThreshold < 100 && mtThreshold >= threshold)
                 {
-                    if (mtConfidenceScore >= 95)
+                    if (mtThreshold >= 95)
                     {
                         hiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
                     }
-                    else if (mtConfidenceScore < 95 && mtConfidenceScore >= 85)
+                    else if (mtThreshold < 95 && mtThreshold >= 85)
                     {
                         medHiFuzzyWordCount -= mtFuzzyNoMatchWordCount;
                     }
-                    else if (mtConfidenceScore < 85 && mtConfidenceScore >= 75)
+                    else if (mtThreshold < 85 && mtThreshold >= 75)
                     {
                         medFuzzyWordCount -= mtFuzzyNoMatchWordCount;
                     }
-                    else if (mtConfidenceScore < 75)
+                    else if (mtThreshold < 75)
                     {
                         noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
                     }
                     repetitionsWordCount -= mtRepetitionsWordCount;
                 }
-                else if (mtConfidenceScore < threshold)
+                else if (mtThreshold < threshold)
                 {
                     noMatchWorcCountForDisplay -= mtFuzzyNoMatchWordCount;
                     repetitionsWordCount -= mtRepetitionsWordCount;
@@ -1407,7 +1405,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
 
         if (data.inludeMtColumn)
         {
-            csvWriter.write(String.valueOf(mtConfidenceScore));
+            csvWriter.write(String.valueOf(mtThreshold));
         }
     }
     

@@ -419,6 +419,7 @@ function showMatchdetailInfo()
     parent.parent.match_details = window.open("envoy/edit/online/se_match_details.jsp","MatchDetail","resizable,scrollbars=yes,width=400,height=400");
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY VLINK="#0000FF">
 <HR COLOR="#0C1476" WIDTH="95%">

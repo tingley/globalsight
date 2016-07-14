@@ -280,6 +280,7 @@ function addOption(box, name, value, className)
     	ContextMenu.intializeContextMenu();
     }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body bgcolor="#FFFFFF" text="#000000" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" class="nihilo" onload="load()">
 <table border="0" cellspacing="0" cellpadding="5" height="452" width="100%">

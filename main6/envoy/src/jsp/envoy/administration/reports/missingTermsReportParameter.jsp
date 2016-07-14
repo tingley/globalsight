@@ -13,6 +13,7 @@
 <html>
     <head>
         <title><%=bundle.getString("report_parameters")%></title>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
     </head>
     <body bgcolor="#FFFFFF" text="#000000" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
         <table border="0" cellspacing="0" cellpadding="5" height="543" width="100%">

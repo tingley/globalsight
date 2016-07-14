@@ -37,8 +37,7 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 
 public class QACheckerHelper
 {
-    private static final Logger logger = Logger
-            .getLogger(QACheckerHelper.class);
+    private static final Logger logger = Logger.getLogger(QACheckerHelper.class);
 
     public static int findMatches(String content, String check, boolean isRE)
     {
@@ -59,22 +58,34 @@ public class QACheckerHelper
             {
                 matches++;
                 int index = content.indexOf(check);
-                content = content.substring(0, index)
-                        + content.substring(index + 1);
+                content = content.substring(0, index) + content.substring(index + 1);
             }
         }
 
         return matches;
     }
 
-    public static File getQAReportFile(Task p_task)
+    public static File getQAReportFile(Task p_task) throws Exception
     {
-        StringBuilder sb = new StringBuilder();
+        File qaReport = null;
 
-        sb.append(getQAReportPath(p_task));
-        sb.append(getQAReportName(p_task));
+        File reportDir = new File(getQAReportPath(p_task));
+        if (reportDir.exists() && reportDir.isDirectory())
+        {
+            File[] files = reportDir.listFiles();
+            if (files != null && files.length > 0)
+            {
+                qaReport = files[0];
+            }
+        }
 
-        return new File(sb.toString());
+        if (qaReport == null || !qaReport.isFile())
+        {
+            QAChecker qaChecker = new QAChecker();
+            qaReport = new File(qaChecker.runQAChecksAndGenerateReport(p_task.getId()));
+        }
+
+        return qaReport;
     }
 
     public static File getQAReportWorkflowFolder(Task p_task)
@@ -119,9 +130,8 @@ public class QACheckerHelper
     public static String getQAReportName(Task p_task)
     {
         StringBuilder sb = new StringBuilder();
-        String dateSuffix = new SimpleDateFormat("yyyyMMdd HHmmss")
-		.format(new Date());
-        
+        String dateSuffix = new SimpleDateFormat("yyyyMMdd HHmmss").format(new Date());
+
         sb.append(ReportConstants.REPORT_QA_CHECKS_REPORT);
         sb.append("_");
         sb.append(p_task.getJobName());
@@ -142,8 +152,7 @@ public class QACheckerHelper
 
     public static boolean isQAActivity(TaskInstance taskInstance)
     {
-        String activityName = WorkflowJbpmUtil.getActivityName(taskInstance
-                .getName());
+        String activityName = WorkflowJbpmUtil.getActivityName(taskInstance.getName());
 
         return isQAActivity(activityName);
     }
@@ -157,8 +166,7 @@ public class QACheckerHelper
         }
         catch (Exception e)
         {
-            logger.error("An error occurred while finding activity "
-                    + activityName);
+            logger.error("An error occurred while finding activity " + activityName);
             return false;
         }
         if (activity == null)
@@ -175,12 +183,12 @@ public class QACheckerHelper
 
     public static boolean isShowQAChecksTab(Task p_task)
     {
-        if (p_task == null) return false;
+        if (p_task == null)
+            return false;
 
         Company company = CompanyWrapper.getCompanyById(p_task.getCompanyId());
         Project project = p_task.getWorkflow().getJob().getProject();
         return company.getEnableQAChecks()
-                && (project.getAllowManualQAChecks() || QACheckerHelper
-                        .isQAActivity(p_task));
+                && (project.getAllowManualQAChecks() || QACheckerHelper.isQAActivity(p_task));
     }
 }

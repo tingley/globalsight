@@ -64,6 +64,7 @@ if (foundDoc)
 <TITLE><%=bundle.getString("lb_corpus_del_title")%></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY LEFTMARGIN="10" RIGHTMARGIN="10" TOPMARGIN="10" MARGINWIDTH="0" MARGINHEIGHT="0" CLASS="standardText">
 <BR><BR>

@@ -558,6 +558,7 @@ var lb_sid ="<%=bundle.getString("lb_sid")%>";
 var lb_modify_by = "<%=bundle.getString("lb_modify_by")%>";
 var lb_title = "<%=bundle.getString("lb_segment_details")%>";
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY id="idBody" oncontextmenu="contextForX(event)" onbeforeunload="exit()">
 <FORM name="ShutdownForm" METHOD="POST" TARGET="idShutdown" ACTION="/globalsight/envoy/common/shutdownPopup.jsp">

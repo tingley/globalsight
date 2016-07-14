@@ -55,6 +55,7 @@
 <!--  This JSP is: /envoy/administration/reports/translationProgressXlsReportWebForm.jsp-->
 <head>
 <title><%=EMEA%> <%=bundle.getString("review_translation_progress_report")%></title>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>

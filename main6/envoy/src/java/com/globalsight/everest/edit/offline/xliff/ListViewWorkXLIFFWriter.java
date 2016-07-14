@@ -496,11 +496,25 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             }
             else if (isFuzzyMatch(data))
             {
-                state = "needs-review-translation";
+                if (isMTFuzzyMatch(data) && p_downloadParams.isPopulateMT())
+                {
+                    state = "needs-review-translation";
+                }
             }
         }
 
         return state;
+    }
+
+    private boolean isMTFuzzyMatch(OfflineSegmentData data)
+    {
+        String matchType = data.getDisplayMatchType();
+        if (matchType != null && matchType.toLowerCase().indexOf("machine translation") > -1)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private void writeTranslationUnit(OfflineSegmentData p_osd,

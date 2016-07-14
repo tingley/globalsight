@@ -1,5 +1,0 @@
-Index	File_Profile_name	Filter_Name	Add_Additional_Head	Enable_Entity_Escape	Base_Text_post_filter	Base_Text_Filter_Internal_Text	Base_Text_Filter_Escaping	Jsp_SourceFile
-Case_1	Jsp_Empty	Jsp_Empty	x	x	x	x	x	TestMatrix\DataSource\Jsp\Empty_filter\helpenus.jsp
-Case_2	Jsp_Add_Additional_Head	Jsp_Add_Additional_Head	L10n	x	x	x	x	TestMatrix\DataSource\Jsp\Add_Additional_Head\helpenus.jsp
-Case_3	Jsp_Enable_Entity_Escape	Jsp_Enable_Entity_Escape	x	o	x	x	x	TestMatrix\DataSource\Jsp\Enable_Entity_Escape\helpenus.jsp
-Case_4	Jsp_Base_Text_post_filter	Jsp_Base_Text_post_filter	x	x	Base Text Filter For Jsp	AOL sites,change my password	\	TestMatrix\DataSource\Jsp\Base_Text_post_filter\helpenus.jsp

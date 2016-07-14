@@ -563,9 +563,9 @@ public class MTProfileImportHandler extends PageHandler
                 {
                     mtp.setDescription(valueField);
                 }
-                else if (keyField.equalsIgnoreCase("MT_CONFIDENCE_SCORE"))
+                else if (keyField.equalsIgnoreCase("MT_THRESHOLD"))
                 {
-                    mtp.setMtConfidenceScore(Long.parseLong(valueField));
+                    mtp.setMtThreshold(Long.parseLong(valueField));
                 }
                 else if (keyField.equalsIgnoreCase("URL"))
                 {

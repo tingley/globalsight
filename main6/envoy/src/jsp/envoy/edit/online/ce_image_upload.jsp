@@ -117,6 +117,7 @@ BODY { margin: 0; }
 <SCRIPT SRC="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/Ajax.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/dojo.js"></SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body>
   <table id="idTable" width="100%" border=0 >

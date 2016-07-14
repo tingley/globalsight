@@ -471,6 +471,7 @@ function doOnLoad()
     g_dirty = false;
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body onload="doOnLoad()" onunload="doOnUnload()"
  onkeypress="doKeypress(event)" onkeydown="doKeydown(event)">

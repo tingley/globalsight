@@ -186,7 +186,7 @@ function initRichEdit(el)
             // not that it matters when it comes to innerText.
 			var text = "";
         	
-            if(document.recalc)
+            if(!!window.ActiveXObject || "ActiveXObject" in window)
 			{
             	text = el.frameWindow.document.body.innerText;
 			}
@@ -692,7 +692,7 @@ function initRichEdit(el)
 		}
     }
 }
-function getEvent(){     //ͬʱ����ie��ff��д��
+function getEvent(){     //Í¬Ê±ï¿½ï¿½ï¿½ï¿½ieï¿½ï¿½ffï¿½ï¿½Ð´ï¿½ï¿½
          if(document.all)    return window.event;        
          func=getEvent.caller;            
          while(func!=null){    

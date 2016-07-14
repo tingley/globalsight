@@ -28,6 +28,7 @@
     <jsp:include page="include/httpbase.jsp"/>
     <title>List Single service</title>
     <link href="axis2-web/css/axis-style.css" rel="stylesheet" type="text/css">
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
   </head>
   <body>
   <jsp:include page="include/header.inc"></jsp:include>

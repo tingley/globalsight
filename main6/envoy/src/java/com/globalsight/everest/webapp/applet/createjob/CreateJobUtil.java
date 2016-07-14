@@ -398,6 +398,7 @@ public class CreateJobUtil
                     {
                         compressFileName = fileHeader.getFileNameString().trim();
                     }
+                    compressFileName = compressFileName.replace("\\", File.separator);
                     File file = new File(destDirFile, compressFileName);
                     file.getParentFile().mkdirs();
 

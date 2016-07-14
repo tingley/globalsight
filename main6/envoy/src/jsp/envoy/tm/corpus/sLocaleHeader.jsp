@@ -30,6 +30,7 @@ function changeViewMode(viewMode)
    parent.srcFrame.location = url;
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY BGCOLOR="beige">
 <CENTER>

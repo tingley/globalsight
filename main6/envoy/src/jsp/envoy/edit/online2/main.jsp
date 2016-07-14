@@ -2982,6 +2982,7 @@ function refresh(direction)
                 background:white; position:absolute; 
                 z-index:1000; visibility:hidden;}
 </style>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body id="idBody" return onkeydown='doKeyDown()' onkeypress='return doKeyPress()'

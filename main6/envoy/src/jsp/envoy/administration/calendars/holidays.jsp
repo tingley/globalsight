@@ -130,7 +130,7 @@ function submitForm(selectedButton)
 
 
 </script>
-
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <form name="HolidayForm" method="post">

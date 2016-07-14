@@ -66,6 +66,7 @@ function doLoad()
   loadGuides();
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY onload="doLoad();" LEFTMARGIN="0" RIGHTMARGIN="0"
   TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0">

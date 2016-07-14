@@ -45,7 +45,6 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="mtProfiles" class="java.util.ArrayList" scope="request"/>
 
-<%@ include file="/envoy/common/header.jspIncl" %>
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
@@ -227,9 +226,11 @@ function findSelectedMTP()
     return ids;
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
     ONLOAD="loadGuides()">
+<%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108; LEFT: 20px; RIGHT: 20px;">
@@ -271,8 +272,8 @@ function findSelectedMTP()
                     out.print(mtProfile.getMtEngine());
                 %>
             </amb:column>
-             <amb:column label="lb_tm_mt_threshold_level2" sortBy="<%=MTProfileComparator.MT_CONFIDENCE_SCORE%>" width="11%">
-                <% out.print(mtProfile.getMtConfidenceScore()); %>
+             <amb:column label="lb_tm_mt_threshold_level2" sortBy="<%=MTProfileComparator.MT_THRESHOLD%>" width="11%">
+                <% out.print(mtProfile.getMtThreshold()); %>
             </amb:column>
             <% if (isSuperAdmin) { %>
             <amb:column label="lb_company_name" sortBy="<%=MTProfileComparator.ASC_COMPANY%>" 

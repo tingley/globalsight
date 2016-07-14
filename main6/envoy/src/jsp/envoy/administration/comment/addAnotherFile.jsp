@@ -456,6 +456,7 @@ obody.appendChild(of);
        helpWindow.focus();
     }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 

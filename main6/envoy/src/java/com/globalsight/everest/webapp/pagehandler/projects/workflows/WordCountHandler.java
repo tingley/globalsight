@@ -92,6 +92,15 @@ public class WordCountHandler extends PageHandler
             // sorting or paging
             refresh(p_request, session, sessionMgr);
         }
+
+        @SuppressWarnings("unchecked")
+        ArrayList<Workflow> sublist = (ArrayList<Workflow>) sessionMgr.getAttribute("sublist");
+        if (sublist != null && sublist.size() > 0)
+        {
+            // Decide whether to show "MT" column on GUI
+            p_request.setAttribute(MT_COLUMN_FLAG, hasMtColumn(sublist));
+        }
+
         super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 
@@ -114,9 +123,6 @@ public class WordCountHandler extends PageHandler
 
             p_sessionMgr.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, PageHandler.isInContextMatch(job));
             p_request.setAttribute(WebAppConstants.JOB_ID,job.getId()+"");
-
-            // Decide whether to show "MT" column on GUI
-            setMtColumnFlag(wfs, p_request);
 
             prepareWorkflowList(p_request, p_session, p_sessionMgr, wfs,
                                 job.getJobName(), String.valueOf(
@@ -172,9 +178,6 @@ public class WordCountHandler extends PageHandler
                 sublist.add(wf);
             }
         }
-
-        // Decide whether to show "MT" column on GUI
-        setMtColumnFlag(sublist, p_request);
 
         prepareWorkflowList(p_request, p_session, p_sessionMgr, sublist, 
                             job.getJobName(), String.valueOf(
@@ -233,7 +236,7 @@ public class WordCountHandler extends PageHandler
             new Boolean(isSpecialCustomer));
     }
 
-    private void setMtColumnFlag(List<Workflow> wfList, HttpServletRequest p_request)
+    private boolean hasMtColumn(List<Workflow> wfList)
     {
         // If any workflow is not since 8.7, the job must be created before 8.7.
         boolean isJobCreatedSince87 = true;
@@ -255,9 +258,7 @@ public class WordCountHandler extends PageHandler
                 break;
         }
 
-        boolean hasMtColumnFlag = (isJobCreatedSince87 && hasMTWordCounts);
-
-        p_request.setAttribute(MT_COLUMN_FLAG, hasMtColumnFlag);
+        return (isJobCreatedSince87 && hasMTWordCounts);
     }
 }
 

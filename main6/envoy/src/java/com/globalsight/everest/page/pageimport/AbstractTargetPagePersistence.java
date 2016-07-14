@@ -543,6 +543,8 @@ public abstract class AbstractTargetPagePersistence implements
                         {
                             lm.setMatchType(MatchState.XLIFF_EXACT_MATCH.getName());
                         }
+                        lm.setProjectTmIndex(isPO ? Leverager.PO_TM_PRIORITY
+                                : Leverager.XLIFF_PRIORITY);
 
                         lmCollection.add(lm);
                     }
@@ -574,7 +576,8 @@ public abstract class AbstractTargetPagePersistence implements
                     {
                         lm.setMatchType(MatchState.XLIFF_EXACT_MATCH.getName());
                     }
-
+                    lm.setProjectTmIndex(isPO ? Leverager.PO_TM_PRIORITY
+                            : Leverager.XLIFF_ALT_TRANS_PRIORITY);
                     lmCollection.add(lm);
                 }
             }
@@ -597,7 +600,6 @@ public abstract class AbstractTargetPagePersistence implements
         // XLF and PO target use "-1" as "order_num".
         lm.setOrderNum((short) TmCoreManager.LM_ORDER_NUM_START_XLF_PO_TARGET);
         lm.setMatchedTuvId(-1);
-        lm.setProjectTmIndex(isPO ? Leverager.PO_TM_PRIORITY : Leverager.XLIFF_PRIORITY);
         lm.setTmId(0);
         lm.setTmProfileId(tmProfile.getIdAsLong());
         lm.setMtName(null);
@@ -1399,7 +1401,7 @@ public abstract class AbstractTargetPagePersistence implements
 
         if (mt != null && mt.isActive())
         {
-            result = mt.getMtConfidenceScore();
+            result = mt.getMtThreshold();
         }
 
         return result;

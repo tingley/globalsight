@@ -1,3 +1,0 @@
-text-report layout:side-by-side &
-  options:ignore-unimportant,display-context,line-numbers &
-  output-to:%3 output-options:html-color,wrap-word %1 %2

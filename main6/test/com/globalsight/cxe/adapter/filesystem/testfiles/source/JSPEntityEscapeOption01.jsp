@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=ISO-8859-1" %>
 <HTML>
 <HEAD>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY>
 <TABLE>

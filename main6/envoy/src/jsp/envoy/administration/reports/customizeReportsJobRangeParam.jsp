@@ -36,6 +36,7 @@
 <!-- This is customizeReportsJobRangeParam.jsp -->
 <head>
 <title><%=bundle.getString("lb_customize_reports_params_title")%></title>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>

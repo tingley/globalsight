@@ -246,6 +246,7 @@ function doEditorKeydown(event)
     }
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 <body id="idBody" style="overflow: hidden" onunload="doOnunload();"

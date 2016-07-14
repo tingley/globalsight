@@ -201,6 +201,7 @@ function init()
     }
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY id="idBody" style="margin:1ex" onload="init();" onkeypress="doKeyPress()">
 <SPAN CLASS="mainHeading"><%=lb_options%></SPAN>

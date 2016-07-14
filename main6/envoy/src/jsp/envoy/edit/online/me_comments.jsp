@@ -553,6 +553,7 @@ $(document).ready(function(){
 	});	
 });
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 <%-- The cursor style visualizes that the comment frame can be resized. --%>

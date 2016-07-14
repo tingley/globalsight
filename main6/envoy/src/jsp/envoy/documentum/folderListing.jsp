@@ -20,6 +20,7 @@ response.setDateHeader ("Expires", 0); //prevents caching at the proxy server
 <HEAD>
 <TITLE>Documentum UI</TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="Includes/setStyleSheet.js"></SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <%!
 	static String myTemplateName = "folderListing";

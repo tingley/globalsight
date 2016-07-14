@@ -75,6 +75,7 @@ TD.size14 { Font-Size: 14pt}
 #divEntire {position: absolute; left:0px; top:24px ; z-index:1;background-color:#ffffff;layer-background-color:#ffffff;}
 </STYLE>
 <TITLE><%=bundle.getString("term_audit")%></TITLE>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 <BODY bgcolor="white" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="onAfterAction()">

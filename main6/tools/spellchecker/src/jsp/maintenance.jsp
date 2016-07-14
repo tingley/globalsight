@@ -95,6 +95,7 @@ function init()
   }
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 <body onload="init()">

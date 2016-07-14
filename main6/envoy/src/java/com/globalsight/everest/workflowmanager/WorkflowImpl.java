@@ -192,7 +192,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow, WorkObje
     private int m_priority;
 
     private boolean useMT = false;
-    private int mtConfidenceScore = 0;
+    private int mtThreshold = 0;
     private String mtProfileName = null;
     private String scorecardComment;
     private int scorecardShowType = -1;// -1:Not Showing,0:Optional,1:Required
@@ -1624,14 +1624,14 @@ public class WorkflowImpl extends PersistentObject implements Workflow, WorkObje
         return this.useMT;
     }
 
-    public void setMtConfidenceScore(int p_mtConfidenceScore)
+    public void setMtThreshold(int mtThreshold)
     {
-        this.mtConfidenceScore = p_mtConfidenceScore;
+        this.mtThreshold = mtThreshold;
     }
 
-    public int getMtConfidenceScore()
+    public int getMtThreshold()
     {
-        return this.mtConfidenceScore;
+        return this.mtThreshold;
     }
 
     public void setScorecardComment(String p_scorecardComment)

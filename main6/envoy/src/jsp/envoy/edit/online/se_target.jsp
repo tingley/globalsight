@@ -1920,6 +1920,7 @@ function showMatchdetailInfo()
 }
 
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY id="idBody" onbeforeunload="doOnBeforeUnload()" onLoad="doLoad();">
 <div id="idSourceSegment" style="display:none"></div>

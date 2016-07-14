@@ -204,6 +204,7 @@ function fnInit()
 
 window.onload = fnInit;
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY VLINK="#0000FF">
 <HR COLOR="#0C1476" WIDTH="95%">

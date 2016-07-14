@@ -15,6 +15,7 @@ response.setDateHeader ("Expires", 0); //prevents caching at the proxy server
 <TITLE></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="Includes/setStyleSheet.js"></SCRIPT>
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <%!
 	static String myTemplateName = "folderListing";

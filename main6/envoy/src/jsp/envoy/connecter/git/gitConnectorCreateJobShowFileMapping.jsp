@@ -21,6 +21,7 @@ ResourceBundle bundle = PageHandler.getBundle(session);
 <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT TYPE="text/javascript" SRC="envoy/tm/management/protocol.js"></SCRIPT>
 <SCRIPT TYPE="text/javascript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body>

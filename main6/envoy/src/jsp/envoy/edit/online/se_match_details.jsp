@@ -22,6 +22,7 @@
 <HEAD>
 <TITLE><%=lb_match_details%></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY oncontextmenu="return false">
 <SPAN CLASS="mainHeading"><%=lb_match_details%></SPAN>

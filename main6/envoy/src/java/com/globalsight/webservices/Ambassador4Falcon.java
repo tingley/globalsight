@@ -318,7 +318,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
      * <p>
      * Return job ID, jobName, description, creationDate, lang, Matches, 95-99%,
      * 85-94%, 75-84%, noMatch, repetitions, inContextMatches, MT, total,
-     * MTConfidenceScore, filePath, fileName for specified jobs. This is similar
+     * MT Threshold, filePath, fileName for specified jobs. This is similar
      * with "Detailed Word Counts By Job" report.
      * </p>
      * <p>
@@ -404,7 +404,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
                     String createDate = dateFormat.format(job.getCreateDate());
                     for (Workflow p_workflow : job.getWorkflows())
                     {
-                        int mtThreshold = p_workflow.getMtConfidenceScore();
+                        int mtThreshold = p_workflow.getMtThreshold();
                         String lang = p_workflow.getTargetLocale().toString();
                         for (TargetPage tg : p_workflow.getTargetPages())
                         {
@@ -913,7 +913,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
                             workflowJson.put("mtProfileName", mt.getMtProfileName());
                             workflowJson.put("mtProfileEngine", mt.getMtEngine());
                             workflowJson.put("mtProfileConfidenceScore",
-                                    mt.getMtConfidenceScore() + "%");
+                                    mt.getMtThreshold() + "%");
                         }
                         workflowArray.put(workflowJson);
                     }

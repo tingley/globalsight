@@ -66,6 +66,7 @@ TD.size14 { Font-Size: 14pt}
 </STYLE>
 
 <TITLE><%=bundle.getString("missing_terms")%></TITLE>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 <BODY bgcolor="white" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="onAfterAction()">

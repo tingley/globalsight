@@ -277,6 +277,7 @@ function filterItems(e)
     border: 1px solid <%=skinbean.getProperty("skin.list.borderColor")%>;
 }
 </style>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
     ONLOAD="loadGuides()">

@@ -48,7 +48,7 @@ public class MachineTranslationProfile implements java.io.Serializable
     private Long companyid;
     private Set<MachineTranslationExtentInfo> exInfo = new HashSet<MachineTranslationExtentInfo>();
     private String jsonInfo;
-    private long mtConfidenceScore;
+    private long mtThreshold;
     private boolean includeMTIdentifiers = false;
     private String mtIdentifierLeading;
     private String mtIdentifierTrailing;
@@ -129,14 +129,14 @@ public class MachineTranslationProfile implements java.io.Serializable
 
     private boolean active;
 
-    public long getMtConfidenceScore()
+    public long getMtThreshold()
     {
-        return mtConfidenceScore;
+        return mtThreshold;
     }
 
-    public void setMtConfidenceScore(long mtConfidenceScore)
+    public void setMtThreshold(long mtThreshold)
     {
-        this.mtConfidenceScore = mtConfidenceScore;
+        this.mtThreshold = mtThreshold;
     }
 
     public String getExInfoVal()
@@ -187,7 +187,7 @@ public class MachineTranslationProfile implements java.io.Serializable
         this.username = "";
         this.category = "";
         this.accountinfo = "";
-        this.mtConfidenceScore = 100;
+        this.mtThreshold = 100;
     }
 
     public MachineTranslationProfile(long id)
@@ -196,7 +196,7 @@ public class MachineTranslationProfile implements java.io.Serializable
     }
 
     public MachineTranslationProfile(long id, String mtProfileName,
-            String mtEngin, String description, long mtConfidenceScore,
+            String mtEngin, String description, long mtThreshold,
             String url, Integer port, String username, String password,
             String category, String accountinfo, Long companyid)
     {
@@ -204,7 +204,7 @@ public class MachineTranslationProfile implements java.io.Serializable
         this.mtProfileName = mtProfileName;
         this.mtEngine = mtEngin;
         this.description = description;
-        this.mtConfidenceScore = mtConfidenceScore;
+        this.mtThreshold = mtThreshold;
         this.url = url;
         this.port = port;
         this.username = username;

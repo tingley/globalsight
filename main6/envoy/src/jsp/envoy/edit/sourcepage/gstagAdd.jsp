@@ -628,6 +628,7 @@ function doOnLoad()
     idAddName.focus();
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body id="idBody" onload="doOnLoad()" onkeypress="doKeypress()">
 

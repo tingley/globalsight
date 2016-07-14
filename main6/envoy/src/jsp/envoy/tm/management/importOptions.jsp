@@ -304,6 +304,7 @@ function lookFile(url)
   window.open(url);
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY onload="doOnLoad()" LEFTMARGIN="0" RIGHTMARGIN="0"
         TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"

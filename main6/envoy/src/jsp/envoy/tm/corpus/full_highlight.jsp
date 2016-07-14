@@ -16,6 +16,7 @@ if ("list".equals(request.getParameter("view")))
     <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache"></META>
     <META HTTP-EQUIV="Expires" CONTENT="0"></META>
     <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8"></META>
+    <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 	</head>
 	<body>
     <% if (textMode) { %>

@@ -30,6 +30,7 @@
   <jsp:include page="include/httpbase.jsp"/>
   <title>List Services</title>
   <link href="axis2-web/css/axis-style.css" rel="stylesheet" type="text/css" />
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body>

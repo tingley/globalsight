@@ -120,6 +120,7 @@ function doOnUnload()
 }
 
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY LEFTMARGIN="10" RIGHTMARGIN="10" TOPMARGIN="10" MARGINWIDTH="0" MARGINHEIGHT="0" CLASS="standardText" onunload="doOnUnload()">
 <CENTER>

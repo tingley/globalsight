@@ -730,6 +730,7 @@ function context(url, e)
     }
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body id="idBody" onload="doOnload()" onbeforeunload="doBeforeUnload()"
  onkeydown="doKeyDown()">

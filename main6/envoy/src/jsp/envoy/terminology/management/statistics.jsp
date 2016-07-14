@@ -82,6 +82,7 @@ function doLoad()
   window.focus();
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body onload="doLoad()" onkeypress="doKeypress()">

@@ -757,11 +757,25 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             }
             else if (isFuzzyMatch(data))
             {
-                return StateType.TRANSLATED;
+                if (isMTFuzzyMatch(data) && downloadParams.isPopulateMT())
+                {
+                    return StateType.TRANSLATED;
+                }
             }
         }
 
         return StateType.INITIAL;
+    }
+
+    private boolean isMTFuzzyMatch(OfflineSegmentData data)
+    {
+        String matchType = data.getDisplayMatchType();
+        if (matchType != null && matchType.toLowerCase().indexOf("machine translation") > -1)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -770,7 +784,7 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
      * @param data
      * @return
      */
-    private boolean isInContextMatch(OfflineSegmentData data)
+    private boolean isInContextMatch(OfflineSegmentData data)  
     {
         String matchType = data.getDisplayMatchType();
         if (matchType != null && matchType.startsWith("Context Exact Match"))

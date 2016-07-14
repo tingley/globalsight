@@ -1,7 +1,0 @@
-Index	File_Profile_name	Filter_Name	Enable_SID_Support	Enable_Unicode_Escape	Preserve_Trailing_Spaces	Content_post_filter	Base_Text_post_filter	Base_Text_Filter_Internal_Text	Base_Text_Filter_Escaping	Java_Properties_SourceFile
-Case_1	Java_Properties_Empty	Java_Properties_Empty	x	x	x	x	x	x	x	TestMatrix\DataSource\Java_Properties\Empty_filter\textmessages.properties
-Case_2	Java_Properties_Enable_SID_Support	Java_Properties_Enable_SID_Support	o	x	x	x	x	x	x	TestMatrix\DataSource\Java_Properties\Enable_SID_Support\SID_NoFilter.properties
-Case_3	Java_Properties_Enable_Unicode_Escape	Java_Properties_Enable_Unicode_Escape	x	o	x	x	x	x	x	TestMatrix\DataSource\Java_Properties\Enable_Unicode_Escape\forms-stringsJA.properties
-Case_4	Java_Properties_Preserve_Trailing_Spaces	Java_Properties_Preserve_Trailing_Spaces	x	x	o	x	x	x	x	TestMatrix\DataSource\Java_Properties\Preserve_Trailing_Spaces\PostFilter.properties
-Case_5	Java_Properties_Content_post_filter	Java_Properties_Content_post_filter	x	x	x	o	x	x	x	TestMatrix\DataSource\Java_Properties\Content_post_filter\PostFilter.properties
-Case_6	Java_Properties_Base_Text_post_filter	Java_Properties_Base_Text_post_filter	x	x	x	x	Base Text Filter For Java Properties	AOL Image Search,results	\	TestMatrix\DataSource\Java_Properties\Base_Text_post_filter\PostFilter.properties

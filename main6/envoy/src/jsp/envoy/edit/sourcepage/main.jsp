@@ -714,6 +714,7 @@ function doExit()
     try { w_validation.close(); } catch(ignore) {}
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body id="idBody" onkeydown="return doKeyDown()" onkeypress="return doKeyPress()"

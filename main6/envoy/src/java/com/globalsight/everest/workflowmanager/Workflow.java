@@ -637,9 +637,9 @@ public interface Workflow extends WorkObject
 
     public boolean getUseMT();
 
-    public void setMtConfidenceScore(int p_mtConfidenceScore);
+    public void setMtThreshold(int p_mtThreshold);
 
-    public int getMtConfidenceScore();
+    public int getMtThreshold();
 
     public int getScorecardShowType();
 

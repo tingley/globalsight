@@ -114,6 +114,7 @@ function doOnLoad()
   idClose.onclick = closeWindow;
 }
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body id="idBody" onload="doOnLoad();">

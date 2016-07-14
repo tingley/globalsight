@@ -1597,8 +1597,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 {
                     jobList.add(m_downloadParams.getRightJob());
                 }
-                Set<Integer> mtConfidenceScoreSet = new HashSet<Integer>();
-                int mtConfidenceScore = 100;
+                Set<Integer> mtThresholdSet = new HashSet<Integer>();
                 boolean useMT = false;
                 for (Job j : jobList)
                 {
@@ -1632,7 +1631,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                             {
                                 if (wf.getUseMT())
                                 {
-                                    mtConfidenceScoreSet.add(wf.getMtConfidenceScore());
+                                    mtThresholdSet.add(wf.getMtThreshold());
                                     useMT = true;
                                 }
                             }
@@ -1644,11 +1643,10 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 sb = new StringBuffer();
                 if (useMT)
                 {
-                    for (Integer score : mtConfidenceScoreSet)
+                    for (Integer score : mtThresholdSet)
                     {
                         String tmxPenalty = DownloadHelper.makeTmxParentPath(m_downloadParams);
-                        mtConfidenceScore = 100 - score;
-                        String penaltyDir = "mt/penalty-" + mtConfidenceScore + "/";
+                        String penaltyDir = "mt/penalty-" + (100 - score) + "/";
                         tmxPenalty = tmxPenalty + penaltyDir + fname;
 
                         sb.setLength(0);

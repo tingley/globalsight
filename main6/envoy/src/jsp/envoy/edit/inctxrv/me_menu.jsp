@@ -941,6 +941,7 @@ function showPtags()
 }
 
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY id="idBody" onload="init()" onbeforeunload="exit()">
 

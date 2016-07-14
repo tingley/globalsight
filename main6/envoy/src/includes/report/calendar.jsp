@@ -106,6 +106,7 @@ function set_datetime(n_datetime, b_close) {
 }
 
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body bgcolor="#FFFFFF" marginheight="5" marginwidth="5" topmargin="5" leftmargin="5" rightmargin="5">
 <table class="clsOTable" cellspacing="0" border="0" width="100%">

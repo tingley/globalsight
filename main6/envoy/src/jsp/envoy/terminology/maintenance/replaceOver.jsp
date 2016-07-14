@@ -14,6 +14,7 @@
     	color:	red;
     }
 </style>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
 <body>

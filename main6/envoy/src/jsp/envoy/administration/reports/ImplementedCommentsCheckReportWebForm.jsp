@@ -381,6 +381,7 @@ function sortNumber(a,b)
 	return a - b 
 } 
 </script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" bgcolor="LIGHTGREY" onLoad="doOnload()">
 <TABLE WIDTH="100%" BGCOLOR="WHITE">

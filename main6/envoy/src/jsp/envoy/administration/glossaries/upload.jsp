@@ -133,6 +133,7 @@ function doOnunload()
     if (!reload) opener.location = opener.location;
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY id="idBody" bgcolor="#FFFFFF" onload="doOnload()" onunload="doOnunload()">
 <DIV ID="targetLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 10; TOP: 20px; LEFT: 20px; RIGHT: 20px;">

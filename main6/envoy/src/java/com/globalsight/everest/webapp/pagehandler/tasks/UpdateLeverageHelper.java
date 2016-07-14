@@ -193,7 +193,7 @@ public class UpdateLeverageHelper
             return new ArrayList<Tuv>();
         }
 
-        long mtThreshold = mtProfile.getMtConfidenceScore();
+        long mtThreshold = mtProfile.getMtThreshold();
         Collection<Tuv> untranslatedSrcTuvs = new ArrayList<Tuv>();
         try
         {

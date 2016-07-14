@@ -28,6 +28,7 @@ function doOnLoad()
   idMessage.innerHTML = message;
 }
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 
 <BODY id="idBody" onload="doOnLoad();">

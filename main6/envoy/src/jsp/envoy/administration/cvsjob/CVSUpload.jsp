@@ -243,6 +243,7 @@ function doOnload()
 }
 
 </SCRIPT>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 <!-- This DIV is for used for the default selection of locales -->
 <DIV id="idPreferences" STYLE="behavior:url(#default#userData); display: none;" class="preferences"></DIV>

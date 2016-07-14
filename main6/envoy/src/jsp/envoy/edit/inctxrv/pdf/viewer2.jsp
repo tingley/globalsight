@@ -325,6 +325,7 @@ function editComment(o)
 </script>
 
 <script type="text/javascript" src="/globalsight/jquery/me_table.js"></script>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
   </head>
 
   <body tabindex="1" class="loadingInProgress" onload="load()"> <!-- oncontextmenu="contextForPage(event)" -->

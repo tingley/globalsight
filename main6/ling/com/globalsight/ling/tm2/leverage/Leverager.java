@@ -63,6 +63,10 @@ public class Leverager
     public static final int MT_PRIORITY = -2;
     /** Xliff project TM index is -3 */
     public static final int XLIFF_PRIORITY = -3;
+
+    /** Xliff alt-trans project TM index is -100 */
+    public static final int XLIFF_ALT_TRANS_PRIORITY = -100;
+
     /** Remote TM project TM index is -4 */
     public static final int REMOTE_TM_PRIORITY = -4;
     /** Remote TM project TM index is -5 */

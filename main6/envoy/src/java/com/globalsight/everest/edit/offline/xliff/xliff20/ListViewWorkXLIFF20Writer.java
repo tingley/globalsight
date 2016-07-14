@@ -757,21 +757,20 @@ public class ListViewWorkXLIFF20Writer implements XliffConstants
             }
             else if (isFuzzyMatch(data))
             {
-                if (isMTMatch(data) && !downloadParams.isPopulateMT())
+                if (isMTFuzzyMatch(data) && downloadParams.isPopulateMT())
                 {
-                    return StateType.INITIAL;
+                    return StateType.TRANSLATED;
                 }
-                return StateType.TRANSLATED;
             }
         }
 
         return StateType.INITIAL;
     }
 
-    private boolean isMTMatch(OfflineSegmentData data)
+    private boolean isMTFuzzyMatch(OfflineSegmentData data)
     {
         String matchType = data.getDisplayMatchType();
-        if (matchType != null && matchType.startsWith("Machine Translation"))
+        if (matchType != null && matchType.toLowerCase().indexOf("machine translation") > -1)
         {
             return true;
         }

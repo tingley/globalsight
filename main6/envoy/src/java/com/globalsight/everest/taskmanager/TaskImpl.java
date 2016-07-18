@@ -51,7 +51,7 @@ import com.globalsight.util.date.DateHelper;
  */
 public class TaskImpl extends PersistentObject implements Task, WorkObject
 {
-    private Logger logger = Logger.getLogger(TaskImpl.class);
+    private static final Logger logger = Logger.getLogger(TaskImpl.class);
 
     private static final long serialVersionUID = 1L;
 

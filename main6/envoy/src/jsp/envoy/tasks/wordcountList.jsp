@@ -270,6 +270,7 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS))
         	        reps = wf.getRepetitionWordCount() - wf.getMtRepetitionsWordCount();
         	    }
         	}
+        	out.print(reps);
         %>
         </amb:column>
 

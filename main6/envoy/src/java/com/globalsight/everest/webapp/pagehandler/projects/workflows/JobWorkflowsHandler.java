@@ -624,8 +624,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             while (tokenizer.hasMoreTokens())
             {
                 wfId = tokenizer.nextToken();
-                WorkflowHandlerHelper.dispatchWF(WorkflowHandlerHelper.getWorkflowById(Long
-                        .parseLong(wfId)));
+                WorkflowHandlerHelper
+                        .dispatchWF(WorkflowHandlerHelper.getWorkflowById(Long.parseLong(wfId)));
             }
 
             sessionMgr.setAttribute(JobManagementHandler.WF_PREVIOUS_ACTION,
@@ -639,8 +639,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             {
                 for (String id : readyWorkflowIds.split(","))
                 {
-                    WorkflowHandlerHelper.dispatchWF(WorkflowHandlerHelper.getWorkflowById(Long
-                            .parseLong(id)));
+                    WorkflowHandlerHelper
+                            .dispatchWF(WorkflowHandlerHelper.getWorkflowById(Long.parseLong(id)));
                 }
             }
         }
@@ -679,8 +679,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         }
         else if (p_request.getParameter(JobManagementHandler.ASSIGN_PARAM) != null)
         {
-            if ("saveAssign".equalsIgnoreCase(p_request
-                    .getParameter(JobManagementHandler.ASSIGN_PARAM)))
+            if ("saveAssign"
+                    .equalsIgnoreCase(p_request.getParameter(JobManagementHandler.ASSIGN_PARAM)))
             {
                 doSaveAssign(p_request, sessionMgr);
             }
@@ -839,8 +839,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         p_request.setAttribute("isSuperAdmin", isSuperAdmin(p_request));
         p_request.setAttribute("isCustomerAccessGroupInstalled",
                 Modules.isCustomerAccessGroupInstalled());
-        p_request
-                .setAttribute("isVendorManagementInstalled", Modules.isVendorManagementInstalled());
+        p_request.setAttribute("isVendorManagementInstalled",
+                Modules.isVendorManagementInstalled());
         p_request.setAttribute("reimportOption", getReimportOption());
         // control Estimated Review Start column access permission
         p_request.setAttribute("customerAccessGroupIsDell", s_isSpecialCustomer);
@@ -860,8 +860,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         boolean hasMtProfile = false;
         for (Workflow wf : job.getWorkflows())
         {
-            MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileByL10nProfile(
-                    job.getL10nProfile(), wf.getTargetLocale());
+            MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                    .getMtProfileByL10nProfile(job.getL10nProfile(), wf.getTargetLocale());
             if (mtProfile != null && mtProfile.isActive())
             {
                 hasMtProfile = true;
@@ -893,7 +893,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         return reimportOption;
     }
 
-    private List<JobWorkflowDisplay> getJobWorkflowDisplayList(HttpServletRequest p_request, Job job)
+    private List<JobWorkflowDisplay> getJobWorkflowDisplayList(HttpServletRequest p_request,
+            Job job)
     {
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
@@ -928,8 +929,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                     break;
                 }
             }
-            jobWorkflowDisplay.setTargetLocaleDisplayName(workflow.getTargetLocale()
-                    .getDisplayName(uiLocale));
+            jobWorkflowDisplay.setTargetLocaleDisplayName(
+                    workflow.getTargetLocale().getDisplayName(uiLocale));
             jobWorkflowDisplay.setTotalWordCount(getTotalWordCount(workflow));
             jobWorkflowDisplay.setStateBundleString(bundle.getString(workflow.getState()));
             jobWorkflowDisplay.setIsWorkflowEditable(isWorkflowEditable(perms, workflow));
@@ -1092,8 +1093,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 String taskId = String.valueOf(task.getId());
                 Activity activity = ServerProxy.getJobHandler().getActivityByCompanyId(
                         task.getTaskName(), String.valueOf(task.getCompanyId()));
-                ContainerRole containerRole = ServerProxy.getUserManager().getContainerRole(
-                        activity, srcLocale, targLocale);
+                ContainerRole containerRole = ServerProxy.getUserManager()
+                        .getContainerRole(activity, srcLocale, targLocale);
                 String userParam = p_request.getParameter("users" + taskId);
                 /*
                  * userParam =
@@ -1106,7 +1107,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                  * userInfos[1]=user2Name userInfos[0] = "userId3" and
                  * userInfos[1]=user3Name
                  */
-                if (userParam != null && userParam != "")
+                if (!StringUtil.isEmpty(userParam))
                 {
                     String[] users = userParam.split(":");
                     String[] userInfos = null;
@@ -1133,8 +1134,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
             boolean shouldModifyWf = false;
             Long id = Long.valueOf(wfId);
-            WorkflowInstance wi = ServerProxy.getWorkflowServer().getWorkflowInstanceById(
-                    id.longValue());
+            WorkflowInstance wi = ServerProxy.getWorkflowServer()
+                    .getWorkflowInstanceById(id.longValue());
 
             Vector tasks = wi.getWorkflowInstanceTasks();
 
@@ -1462,10 +1463,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
                 copyFilesName = getAllCopiedFilesForWinPE(rootElement);
                 baseConv = sc.getStringParameter(SystemConfigParamNames.WINDOWS_PE_DIR,
-                        CompanyWrapper.SUPER_COMPANY_ID)
-                        + File.separator
-                        + "winpe"
-                        + File.separator + companyName;
+                        CompanyWrapper.SUPER_COMPANY_ID) + File.separator + "winpe" + File.separator
+                        + companyName;
             }
 
             // Copy files to target folder
@@ -1714,8 +1713,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                     // Initialize this job's percentage to 0.
                     leverageMTPercentageMap.put(jobId, 0);
 
-                    List<Long> validWfIds = UpdateLeverageHelper.filterWorkflowsByState(
-                            p_workflowIds, Workflow.READY_TO_BE_DISPATCHED);
+                    List<Long> validWfIds = UpdateLeverageHelper
+                            .filterWorkflowsByState(p_workflowIds, Workflow.READY_TO_BE_DISPATCHED);
                     if (validWfIds != null && validWfIds.size() > 0)
                     {
                         List<Workflow> validWfs = new ArrayList<Workflow>();
@@ -1751,8 +1750,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
                             wfList.clear();
                             wfList.add(wf);
-                            StatisticsService
-                                    .calculateWorkflowStatistics(wfList, jobExcludeTuTypes);
+                            StatisticsService.calculateWorkflowStatistics(wfList,
+                                    jobExcludeTuTypes);
 
                             count++;
                             leverageMTPercentageMap.put(jobId, Math.round(count * 100 / total));
@@ -1790,8 +1789,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         long jobId = p_sourcePage.getJobId();
 
         // 1. Untranslated source segments
-        Collection<Tuv> untranslatedSrcTuvs = UpdateLeverageHelper.getUntranslatedTuvsForMT(
-                p_targetPage, sourceLocale.getId());
+        Collection<Tuv> untranslatedSrcTuvs = UpdateLeverageHelper
+                .getUntranslatedTuvsForMT(p_targetPage, sourceLocale.getId());
 
         // 2. Convert all untranslated source TUVs to "BaseTmTuv".
         List<BaseTmTuv> sourceTuvs = new ArrayList<BaseTmTuv>();
@@ -1834,8 +1833,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                     int count = 0;
                     for (Iterator it = wfIds.iterator(); it.hasNext();)
                     {
-                        Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(
-                                (Long) it.next());
+                        Workflow wf = ServerProxy.getWorkflowManager()
+                                .getWorkflowById((Long) it.next());
 
                         TranslationMemoryProfile tmProfile = wf.getJob().getL10nProfile()
                                 .getTranslationMemoryProfile();
@@ -1848,8 +1847,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                         StatisticsService.calculateWorkflowStatistics(wfList, jobExcludeTuTypes);
 
                         count++;
-                        updateWordCountsPercentageMap
-                                .put(jobId, Math.round(count * 100 / wfNumber));
+                        updateWordCountsPercentageMap.put(jobId,
+                                Math.round(count * 100 / wfNumber));
                     }
                     // Add this to ensure the progressBar will go to end 100.
                     updateWordCountsPercentageMap.put(jobId, 100);

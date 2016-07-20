@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,8 +42,10 @@ import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
 import org.hibernate.Transaction;
 
+import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
+import com.globalsight.cxe.util.addSource.AddSourceFileUtil;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
@@ -51,6 +55,7 @@ import com.globalsight.everest.page.ExtractedFile;
 import com.globalsight.everest.page.PageTemplate;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.page.UpdatedSourcePage;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.request.BatchInfo;
 import com.globalsight.everest.request.Request;
@@ -59,18 +64,22 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.statistics.StatisticsService;
 import com.globalsight.everest.tuv.LeverageGroupImpl;
+import com.globalsight.everest.util.applet.AddFileVo;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.FileUploader;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.ProcessStatus;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.file.XliffFileUtil;
+import com.globalsight.util.zip.ZipIt;
 
 public class AddSourceHandler extends PageActionHandler
 {
@@ -386,6 +395,307 @@ public class AddSourceHandler extends PageActionHandler
         {
             return e.getMessage();
         }
+    }
+
+    private Map<String, String> updateSouceFiles(long jobId, List<String> paths, String randomNum)
+    {
+        Map<String, String> error = new HashMap<String, String>();
+
+        if (paths.size() == 0)
+        {
+            return error;
+        }
+
+        JobImpl job = HibernateUtil.get(JobImpl.class, jobId);
+        String errorMsgKey = job.canAddSourceFiles();
+        if (errorMsgKey != null)
+        {
+            throw new IllegalArgumentException(bundle.getString(errorMsgKey));
+        }
+
+        AddFileVo vo = new AddFileVo();
+        vo.setJobId(jobId);
+        vo.setLocale(job.getSourceLocale().toString());
+        List<Long> pageIds = new ArrayList<Long>();
+        List<Long> fileProfileIds = new ArrayList<Long>();
+        List<String> filePaths = new ArrayList<String>();
+        List<UpdatedSourcePage> updatedPages = new ArrayList<UpdatedSourcePage>();
+
+        for (String path : paths)
+        {
+            File f = new File(path);
+            String name = f.getName();
+            try
+            {
+                List<Long> ids = getPageId(job, name);
+
+                SourcePage page = HibernateUtil.get(SourcePage.class, ids.get(0));
+                String externalPageId = page.getExternalPageId().replace("\\", "/");
+                // Remove source locale
+                String tmpStr = externalPageId.substring(externalPageId.indexOf("/") + 1);
+                boolean fromWebService = false;
+                if (tmpStr.startsWith("webservice/"))
+                {
+                    fromWebService = true;
+                    // Remove "webservice"
+                    tmpStr = tmpStr.substring(tmpStr.indexOf("/") + 1);
+                }
+                String originalJobName = tmpStr.substring(0, tmpStr.indexOf("/"));
+                String fPath = tmpStr.substring(tmpStr.indexOf("/") + 1);
+
+                GlobalSightLocale locale = job.getSourceLocale();
+                StringBuffer nPath = new StringBuffer(locale.toString());
+                nPath.append(File.separator);
+                if (fromWebService)
+                {
+                    nPath.append("webservice").append(File.separator);
+                }
+
+                String newPath = nPath.append(originalJobName).append(File.separator).append(fPath)
+                        .toString();
+
+                File targetFile = new File(AmbFileStoragePathUtils.getCxeDocDir(), newPath);
+
+                if (!targetFile.exists())
+                {
+                    targetFile = page.getFile();
+                }
+
+                FileUtils.copyFile(new File(path), targetFile);
+
+                long fpId = page.getRequest().getFileProfileId();
+                if (fpId < 0 || HibernateUtil.get(FileProfileImpl.class, fpId, false) == null)
+                {
+                    error.put(name, bundle.getString("msg_no_mapped_file_profile"));
+                    continue;
+                }
+
+                UpdatedSourcePage updatedSourcePage = new UpdatedSourcePage();
+                updatedSourcePage.init(page);
+                updatedSourcePage.setExternalPageId(newPath);
+                updatedPages.add(updatedSourcePage);
+
+                pageIds.addAll(ids);
+                fileProfileIds.add(fpId);
+                filePaths.add(newPath);
+            }
+            catch (Exception e)
+            {
+                if (e instanceof IllegalArgumentException)
+                {
+
+                }
+                else
+                {
+                    logger.error(e.getMessage(), e);
+                }
+
+                error.put(name, e.getMessage());
+                continue;
+            }
+        }
+
+        if (pageIds.size() > 0)
+        {
+
+            try
+            {
+                deletePages(jobId, pageIds, randomNum);
+                // UpdateSourcePageManager.removeUpdatedPage(jobId);
+                HibernateUtil.save(updatedPages);
+                vo.setFilePaths(filePaths);
+                vo.setFileProfileIds(fileProfileIds);
+                // GBS-4400
+                AddSourceFileUtil.addSourceFileWithThread(vo);
+            }
+            catch (Exception e)
+            {
+                logger.error(e.getMessage(), e);
+            }
+        }
+
+        return error;
+    }
+
+    private List<Long> getPageId(JobImpl job, String name)
+    {
+        String regex = "^\\(([\\d,]+)\\)";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher match = pattern.matcher(name);
+
+        List<Long> pageIds = new ArrayList<Long>();
+        if (match.find())
+        {
+            String ids = match.group(1);
+            String[] allIds = ids.split(",");
+
+            boolean found = true;
+            for (String pId : allIds)
+            {
+                long id = Long.parseLong(pId);
+                SourcePage page = HibernateUtil.get(SourcePage.class, id);
+                if (page == null)
+                {
+                    found = false;
+                    break;
+                }
+
+                pageIds.add(id);
+            }
+
+            if (found)
+            {
+                return pageIds;
+            }
+        }
+
+        pageIds = new ArrayList<Long>();
+
+        String sName = name.replaceFirst(regex, "");
+
+        String path = null;
+        for (Object ob : job.getSourcePages())
+        {
+            SourcePage page = (SourcePage) ob;
+            File f = page.getFile();
+            String pName = f.getName();
+            if (name.equals(pName) || sName.equals(pName))
+            {
+                if (path == null)
+                {
+                    path = f.getPath();
+                }
+
+                if (!path.equals(f.getPath()))
+                {
+                    throw new IllegalArgumentException(bundle.getString("msg_no_mapped_file"));
+                }
+
+                pageIds.add(page.getId());
+            }
+        }
+
+        if (pageIds.size() == 0)
+        {
+            throw new IllegalArgumentException(bundle.getString("msg_no_mapped_file"));
+        }
+
+        return pageIds;
+    }
+
+    @ActionHandler(action = UPLOAD_SOURCE_FILES, formClass = "")
+    public void updateSouceFiles(HttpServletRequest request, HttpServletResponse response,
+            Object form) throws Exception
+    {
+        logger.debug("Update souce files ...");
+
+        PrintWriter out = response.getWriter();
+        response.setContentType("text/html");
+        try
+        {
+            String randomNum = request.getParameter("randomNum");
+            ProcessStatus status = UPDATE_PROGRESS.get(randomNum);
+            if (status == null)
+            {
+                status = new ProcessStatus();
+                UPDATE_PROGRESS.put(randomNum, status);
+            }
+
+            FileUploader uploader = new FileUploader();
+            uploader.addListener(status);
+            File file = uploader.upload(request);
+            if ("".equals(uploader.getName()))
+            {
+                throw new IllegalArgumentException(bundle.getString("msg_no_file_remove"));
+            }
+
+            String jobId = uploader.getFieldValue("jobId");
+
+            String sysTemp = System.getProperty("java.io.tmpdir");
+            String tempRoot = sysTemp + File.separator + "globalsight";
+            File dir = new File(tempRoot);
+            dir.mkdirs();
+            File trg = new File(dir.getPath() + File.separator + uploader.getName());
+            FileUtil.copyFile(file, trg);
+
+            List<String> paths = new ArrayList<String>();
+            if (trg.getName().endsWith(".zip"))
+            {
+                List<String> names = ZipIt.unpackZipPackage(trg.getPath());
+                for (String name : names)
+                {
+                    paths.add(tempRoot + File.separator + name);
+                }
+                trg.delete();
+            }
+            else
+            {
+                paths.add(trg.getPath());
+            }
+
+            if (file.exists())
+            {
+                file.delete();
+            }
+
+            StringBuffer result = new StringBuffer();
+
+            Map<String, String> error = updateSouceFiles(Long.parseLong(jobId), paths, randomNum);
+            if (error.size() > 0)
+            {
+                result.append(
+                        "<html><body onload='parent.popupUploadErrorMessage()'><div id='uploadFileErroInfo' style='margin:20px 50px'>");
+                StringBuffer html = new StringBuffer();
+                html.append(bundle.getString("msg_add_failed"));
+                html.append(
+                        "<table CLASS='listborder' CELLPADDING='3' style='width:480px; ' CELLSPACING='0' BORDER='0'>");
+                html.append(
+                        "<tr CLASS=\"tableHeadingBasic\" style='padding:5px; height:24px;'><td>");
+                html.append(bundle.getString("lb_file")).append("</td><td>");
+                html.append(bundle.getString("lb_error")).append("</td></tr>");
+                html.append("<tr height='3'/>");
+
+                int i = 0;
+                for (String path : error.keySet())
+                {
+                    String style = i % 2 == 0 ? "tableRowOdd" : "tableRowEven";
+                    html.append("<tr CLASS='").append(style);
+                    html.append("'style='padding:5px; height:24px;'><td>").append(path)
+                            .append("</td><td>");
+                    html.append(error.get(path)).append("</td></tr>");
+
+                    i++;
+                }
+
+                result.append(html.toString());
+                result.append("</div></body></html>");
+            }
+            else
+            {
+                result.append("<script type='text/javascript'>");
+                result.append("parent.refreshJobPage();");
+                result.append("</script>");
+            }
+
+            out.write(result.toString());
+        }
+        catch (Exception e)
+        {
+            StringBuffer result = new StringBuffer();
+            result.append("<script type='text/javascript'>");
+            result.append("alert(\"" + e.getMessage() + "\")");
+            result.append("</script>");
+            out.write(result.toString());
+            logger.error(e.getMessage(), e);
+        }
+        finally
+        {
+            out.close();
+            out.flush();
+            pageReturn();
+        }
+
+        logger.debug("Updating souce files finished.");
     }
 
     private void deletePages(long jobId, List<Long> ids, String randomNum) throws Exception

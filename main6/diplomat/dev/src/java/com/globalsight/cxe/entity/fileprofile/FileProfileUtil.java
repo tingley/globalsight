@@ -1,7 +1,22 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.cxe.entity.fileprofile;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,11 +32,10 @@ import com.globalsight.util.ProcessRunner;
 
 public class FileProfileUtil
 {
-    static private final Logger logger = Logger
-            .getLogger(FileProfileUtil.class);
+    static private final Logger logger = Logger.getLogger(FileProfileUtil.class);
 
-    public static Map<String, long[]> excuteScriptOfFileProfile(
-            List<String> descList, List<FileProfile> fileProfileList, Job p_job)
+    public static Map<String, long[]> excuteScriptOfFileProfile(List<String> descList,
+            List<FileProfile> fileProfileList, Job p_job)
     {
         Map<String, long[]> filesToFpId = new HashMap<String, long[]>();
 
@@ -34,45 +48,35 @@ public class FileProfileUtil
             long exitValue = 0;
             if (StringUtils.isNotEmpty(scriptOnImport))
             {
-                String oldScriptedDir = fileName.substring(0,
-                        fileName.lastIndexOf("."));
+                String oldScriptedDir = fileName.substring(0, fileName.lastIndexOf("."));
                 String oldScriptedFolderPath = AmbFileStoragePathUtils
-                        .getCxeDocDirPath(fp.getCompanyId()) + File.separator
-                        + oldScriptedDir;
+                        .getCxeDocDirPath(fp.getCompanyId()) + File.separator + oldScriptedDir;
                 File oldScriptedFolder = new File(oldScriptedFolderPath);
 
                 String scriptedFolderNamePrefix = FileSystemUtil
                         .getScriptedFolderNamePrefixByJob(p_job.getId());
-                String name = fileName.substring(
-                        fileName.lastIndexOf(File.separator) + 1,
+                String name = fileName.substring(fileName.lastIndexOf(File.separator) + 1,
                         fileName.lastIndexOf("."));
-                String extension = fileName
-                        .substring(fileName.lastIndexOf(".") + 1);
+                String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
 
-                String scriptedDir = fileName.substring(0,
-                        fileName.lastIndexOf(File.separator)) + File.separator
-                        + scriptedFolderNamePrefix + "_" + name + "_"
-                        + extension;
+                String scriptedDir = fileName.substring(0, fileName.lastIndexOf(File.separator))
+                        + File.separator + scriptedFolderNamePrefix + "_" + name + "_" + extension;
                 String scriptedFolderPath = AmbFileStoragePathUtils
-                        .getCxeDocDirPath(fp.getCompanyId()) + File.separator
-                        + scriptedDir;
+                        .getCxeDocDirPath(fp.getCompanyId()) + File.separator + scriptedDir;
                 File scriptedFolder = new File(scriptedFolderPath);
                 if (!scriptedFolder.exists())
                 {
                     File file = new File(fileName);
-                    String filePath = AmbFileStoragePathUtils
-                            .getCxeDocDirPath(fp.getCompanyId())
+                    String filePath = AmbFileStoragePathUtils.getCxeDocDirPath(fp.getCompanyId())
                             + File.separator + file.getParent();
                     // Call the script on import to convert the file
                     try
                     {
-                        String cmd = "cmd.exe /c " + scriptOnImport + " \""
-                                + filePath + "\" \"" + scriptedFolderNamePrefix
-                                + "\"";
+                        String cmd = "cmd.exe /c " + scriptOnImport + " \"" + filePath + "\" \""
+                                + scriptedFolderNamePrefix + "\"";
                         // If the script is Lexmark tool, another parameter
                         // -encoding is passed.
-                        if ("lexmarktool.bat".equalsIgnoreCase(
-                                new File(scriptOnImport).getName()))
+                        if ("lexmarktool.bat".equalsIgnoreCase(new File(scriptOnImport).getName()))
                         {
                             cmd += " \"-encoding " + fp.getCodeSet() + "\"";
                         }
@@ -86,14 +90,13 @@ public class FileProfileUtil
                         catch (InterruptedException ie)
                         {
                         }
-                        logger.info("Script on Import " + scriptOnImport
-                                + " is called to handle " + filePath);
+                        logger.info("Script on Import " + scriptOnImport + " is called to handle "
+                                + filePath);
                     }
                     catch (Exception e)
                     {
                         exitValue = 1;
-                        logger.error(
-                                "The script on import was not executed successfully.");
+                        logger.error("The script on import was not executed successfully.");
                     }
                 }
 
@@ -115,8 +118,8 @@ public class FileProfileUtil
                         for (int j = 0; j < scriptedFiles.length; j++)
                         {
                             String scriptedFileName = scriptedFiles[j];
-                            String oldName = fileName.substring(
-                                    fileName.lastIndexOf(File.separator) + 1);
+                            String oldName = fileName
+                                    .substring(fileName.lastIndexOf(File.separator) + 1);
                             if (!oldName.equals(scriptedFileName))
                             {
                                 continue;
@@ -125,41 +128,40 @@ public class FileProfileUtil
                             String key_fileName;
                             if (scriptedFolder.exists())
                             {
-                                key_fileName = scriptedDir + File.separator
-                                        + scriptedFileName;
+                                key_fileName = scriptedDir + File.separator + scriptedFileName;
                             }
                             else
                             {
-                                key_fileName = oldScriptedDir + File.separator
-                                        + scriptedFileName;
+                                key_fileName = oldScriptedDir + File.separator + scriptedFileName;
                             }
-                            filesToFpId.put(key_fileName,
-                                    new long[] { fileProfileId, exitValue });
+                            filesToFpId.put(key_fileName, new long[]
+                            { fileProfileId, exitValue });
                         }
                     }
                     else
                     // there are no scripted files in the folder
                     {
-                        filesToFpId.put(fileName,
-                                new long[] { fp.getId(), exitValue });
+                        filesToFpId.put(fileName, new long[]
+                        { fp.getId(), exitValue });
                     }
                 }
                 else
                 // the corresponding folder was not created by the script.
                 {
-                    filesToFpId.put(fileName,
-                            new long[] { fp.getId(), exitValue });
+                    filesToFpId.put(fileName, new long[]
+                    { fp.getId(), exitValue });
                 }
             }
             else
             {
-                filesToFpId.put(fileName, new long[] { fp.getId(), exitValue });
+                filesToFpId.put(fileName, new long[]
+                { fp.getId(), exitValue });
             }
         }
 
         return filesToFpId;
     }
-    
+
     public static boolean isXmlPreviewPDF(FileProfile fp) throws Exception
     {
         File xlsFile = getXsl(fp);
@@ -167,7 +169,7 @@ public class FileProfileUtil
         {
             return false;
         }
-        
+
         String content = FileUtil.readFile(xlsFile, "UTF-8");
         if (content.contains("<fo:root"))
         {
@@ -185,12 +187,12 @@ public class FileProfileUtil
         {
             return null;
         }
-        
+
         File xslFile = null;
 
         StringBuffer xslPath = new StringBuffer(
-                AmbFileStoragePathUtils.getXslDir(fp.getId()).getPath())
-                        .append("/").append(fp.getId()).append("/");
+                AmbFileStoragePathUtils.getXslDir(fp.getId()).getPath()).append("/")
+                        .append(fp.getId()).append("/");
         File xslParent = new File(xslPath.toString());
         if (xslParent.exists())
         {
@@ -198,8 +200,7 @@ public class FileProfileUtil
             if (files.length > 0)
             {
                 String fileName = files[0].getName();
-                if (fileName.toLowerCase().endsWith("xsl")
-                        || fileName.toLowerCase().endsWith("xml")
+                if (fileName.toLowerCase().endsWith("xsl") || fileName.toLowerCase().endsWith("xml")
                         || fileName.toLowerCase().endsWith("xslt"))
                 {
                     xslFile = files[0];

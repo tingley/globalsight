@@ -259,9 +259,19 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
                     Properties atts = (Properties) n.getAttributes();
                     if (atts != null)
                     {
-                        String i = Tmx2Xliff20Handler.getId(p_hAttributes);
-                        String i2 = Tmx2Xliff20Handler.getId(atts);
-                        if (i.equals(i2))
+                        if (p_hAttributes.getProperty("x") != null && p_hAttributes.getProperty("x").equals(atts.getProperty("x")))
+                        {
+                            p_hAttributes.putAll(atts);
+                            break;
+                        }
+                        
+                        if (p_hAttributes.getProperty("i") != null && p_hAttributes.getProperty("i").equals(atts.getProperty("i")))
+                        {
+                            p_hAttributes.putAll(atts);
+                            break;
+                        }
+                        
+                        if (p_hAttributes.getProperty("id") != null && p_hAttributes.getProperty("id").equals(atts.getProperty("id")))
                         {
                             p_hAttributes.putAll(atts);
                             break;

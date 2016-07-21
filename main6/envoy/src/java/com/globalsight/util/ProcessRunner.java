@@ -100,9 +100,7 @@ public class ProcessRunner implements Runnable
         {
             String threadName = Thread.currentThread().getName();
 
-            ProcessBuilder ps = new ProcessBuilder(m_command);
-            ps.redirectErrorStream(true);
-            Process p = ps.start();
+            Process p = Runtime.getRuntime().exec(m_command);
 
             ProcessInputStreamHandler outputHandler = new ProcessInputStreamHandler(
                     p.getInputStream(), m_out);

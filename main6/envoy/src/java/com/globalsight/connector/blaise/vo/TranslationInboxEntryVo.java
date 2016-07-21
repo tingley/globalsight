@@ -20,28 +20,60 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+
 import com.cognitran.translation.client.workflow.TranslationInboxEntry;
 import com.globalsight.connector.blaise.util.BlaiseHelper;
 import com.globalsight.connector.blaise.util.BlaiseManager;
 
 public class TranslationInboxEntryVo
 {
-	private TranslationInboxEntry entry = null;
+    static private final Logger logger = Logger.getLogger(TranslationInboxEntryVo.class);
+
+    private TranslationInboxEntry entry = null;
 
 	// GlobalSight Job ID if job created
 	private List<Long> jobIds = null;
 
-	public TranslationInboxEntryVo(TranslationInboxEntry entry)
-			throws Exception
+    public TranslationInboxEntryVo(TranslationInboxEntry entry) throws Exception
 	{
 		if (entry == null)
 		{
+		    logger.error("The TranslationInboxEntry object is null.");
 			throw new Exception("The TranslationInboxEntry object is null.");
 		}
+
+        if (entry.getSourceLocale() == null)
+        {
+            String msg = "The TranslationInboxEntry object has no source locale: " + entry.getId();
+            logBadEntryInfo(entry, msg);
+            throw new Exception(msg);
+        }
+
+        if (entry.getTargetLocale() == null)
+        {
+            String msg = "The TranslationInboxEntry object has no target locale: " + entry.getId();
+            logBadEntryInfo(entry, msg);
+            throw new Exception(msg);
+        }
+
 		this.entry = entry;
 	}
 
-	public TranslationInboxEntry getEntry()
+    private void logBadEntryInfo(TranslationInboxEntry entry, String msg)
+    {
+        logger.info("------------------------------------------------------------");
+        logger.warn(msg);
+        logger.info("entry.getId(): " + entry.getId());
+        logger.info("entry.getRelatedObjectId(): " + entry.getRelatedObjectId());
+        logger.info("entry.getCompanyName(): " + entry.getCompanyName());
+        logger.info("entry.getDescription(): " + entry.getDescription());
+        logger.info("entry.getSourceLocale(): " + entry.getSourceLocale());
+        logger.info("entry.getTargetLocale(): " + entry.getTargetLocale());
+        logger.info("------------------------------------------------------------");
+    }
+
+    public TranslationInboxEntry getEntry()
 	{
 		return entry;
 	}

@@ -651,14 +651,15 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         {
             sourceTagList.add(node);
         }
+        Enumeration trgEnumerator = m_TrgTagList.elements();
         int nInvalidCnt = 0;
         int nMissingCnt = 0;
         int nMissingInternalCnt = 0;
 
         // search for illegal names
-        for (int j = 0; j < m_TrgTagList.size(); j++)
+        while (trgEnumerator.hasMoreElements())
         {
-            strTrgTagName = (String) m_TrgTagList.get(j);
+            strTrgTagName = (String) trgEnumerator.nextElement();
             firstUnusedErasable = firstUnusedNonErasable = null;
 
             // search the source tags for the first two occurances of
@@ -719,33 +720,6 @@ public class PseudoErrorChecker implements PseudoBaseHandler
                     }
                 }
 
-                // for xliff 2.0 offline upload
-                // for example [b] is changed to [g1]
-                if (MOVABLE_TAG.contains(srcItemTag) && strTrgTagName.startsWith("g"))
-                {
-                    String temp = strTrgTagName.substring(1);
-                    try
-                    {
-                        long tt = Long.parseLong(temp);
-                        Hashtable atts = srcItem.getAttributes();
-
-                        String i = (String) atts.get("i");
-                        if (i == null)
-                        {
-                            i = (String) atts.get("x");
-                        }
-
-                        if (i != null && tt == Long.parseLong(i))
-                        {
-                            isEquals = true;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        isEquals = false;
-                    }
-                }
-
                 if (isEquals)
                 {
                     String erasable = (String) srcItem.getAttributes().get("erasable");
@@ -777,7 +751,8 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
                 // replace target element with source element that we
                 // mapped to.
-                m_TrgTagList.setElementAt(firstUnusedNonErasable,j);
+                m_TrgTagList.setElementAt(firstUnusedNonErasable,
+                        m_TrgTagList.indexOf(strTrgTagName));
             }
             else if (firstUnusedErasable != null)
             {
@@ -785,7 +760,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
                 // replace target element with source element that we
                 // mapped to.
-                m_TrgTagList.setElementAt(firstUnusedErasable, j);
+                m_TrgTagList.setElementAt(firstUnusedErasable, m_TrgTagList.indexOf(strTrgTagName));
             }
             else if (m_PseudoData.isAddableAllowed())
             {
@@ -846,7 +821,8 @@ public class PseudoErrorChecker implements PseudoBaseHandler
                         TagNode dynamicMapItem = new TagNode(tmxName, strTrgTagName,
                                 POMI.m_hAttributes);
 
-                        m_TrgTagList.setElementAt(dynamicMapItem, j);
+                        m_TrgTagList.setElementAt(dynamicMapItem,
+                                m_TrgTagList.indexOf(strTrgTagName));
                     }
                 }
             }

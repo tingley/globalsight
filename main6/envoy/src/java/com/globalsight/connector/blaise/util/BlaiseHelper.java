@@ -160,9 +160,16 @@ public class BlaiseHelper
             List<InboxEntry> inboxEntries = client.listInbox(command);
             for (InboxEntry entry : inboxEntries)
             {
-                TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
-                        (TranslationInboxEntry) entry);
-                results.add(vo);
+                try
+                {
+                    TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
+                            (TranslationInboxEntry) entry);
+                    results.add(vo);
+                }
+                catch (Exception ignore)
+                {
+                    // ignore this entry if it has no required target locale
+                }
             }
         }
         catch (Exception e)
@@ -190,9 +197,16 @@ public class BlaiseHelper
             List<InboxEntry> inboxEntries = client.listInbox(ids, command);
             for (InboxEntry entry : inboxEntries)
             {
-                TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
-                        (TranslationInboxEntry) entry);
-                results.add(vo);
+                try
+                {
+                    TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
+                            (TranslationInboxEntry) entry);
+                    results.add(vo);                    
+                }
+                catch (Exception ignore)
+                {
+                    // ignore this entry if it has no required target locale
+                }
             }
         }
         catch (Exception e)
@@ -605,8 +619,7 @@ public class BlaiseHelper
 			}
 		}
 
-		String localeInfo = fixLocale(entry.getEntry().getTargetLocale()
-				.getLocaleCode());
+        String localeInfo = fixLocale(entry.getEntry().getTargetLocale().getLocaleCode());
 		fileName.append("Blaise ID ").append(entry.getRelatedObjectId())
 		        .append(DASH).append(entry.getSourceRevision())
 				.append(DASH).append(des)

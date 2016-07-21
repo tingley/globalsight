@@ -651,15 +651,14 @@ public class PseudoErrorChecker implements PseudoBaseHandler
         {
             sourceTagList.add(node);
         }
-        Enumeration trgEnumerator = m_TrgTagList.elements();
         int nInvalidCnt = 0;
         int nMissingCnt = 0;
         int nMissingInternalCnt = 0;
 
         // search for illegal names
-        while (trgEnumerator.hasMoreElements())
+        for (int j = 0; j < m_TrgTagList.size(); j++)
         {
-            strTrgTagName = (String) trgEnumerator.nextElement();
+            strTrgTagName = (String) m_TrgTagList.get(j);
             firstUnusedErasable = firstUnusedNonErasable = null;
 
             // search the source tags for the first two occurances of
@@ -747,39 +746,6 @@ public class PseudoErrorChecker implements PseudoBaseHandler
                     }
                 }
 
-                // for xliff 2.0 offline upload
-                // for example [/b] is changed to [/g1]
-                if (srcItemTag.startsWith("/") && strTrgTagName.startsWith("/"))
-                {
-                    String src = srcItemTag.substring(1);
-                    String trg = strTrgTagName.substring(1);
-
-                    if (MOVABLE_TAG.contains(src) && trg.startsWith("g"))
-                    {
-                        String temp = trg.substring(1);
-                        try
-                        {
-                            long tt = Long.parseLong(temp);
-                            Hashtable atts = srcItem.getAttributes();
-
-                            String i = (String) atts.get("i");
-                            if (i == null)
-                            {
-                                i = (String) atts.get("x");
-                            }
-
-                            if (i != null && tt == Long.parseLong(i))
-                            {
-                                isEquals = true;
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            isEquals = false;
-                        }
-                    }
-                }
-
                 if (isEquals)
                 {
                     String erasable = (String) srcItem.getAttributes().get("erasable");
@@ -811,8 +777,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
                 // replace target element with source element that we
                 // mapped to.
-                m_TrgTagList.setElementAt(firstUnusedNonErasable,
-                        m_TrgTagList.indexOf(strTrgTagName));
+                m_TrgTagList.setElementAt(firstUnusedNonErasable,j);
             }
             else if (firstUnusedErasable != null)
             {
@@ -820,7 +785,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
 
                 // replace target element with source element that we
                 // mapped to.
-                m_TrgTagList.setElementAt(firstUnusedErasable, m_TrgTagList.indexOf(strTrgTagName));
+                m_TrgTagList.setElementAt(firstUnusedErasable, j);
             }
             else if (m_PseudoData.isAddableAllowed())
             {
@@ -881,8 +846,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
                         TagNode dynamicMapItem = new TagNode(tmxName, strTrgTagName,
                                 POMI.m_hAttributes);
 
-                        m_TrgTagList.setElementAt(dynamicMapItem,
-                                m_TrgTagList.indexOf(strTrgTagName));
+                        m_TrgTagList.setElementAt(dynamicMapItem, j);
                     }
                 }
             }

@@ -26,10 +26,8 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -50,14 +48,12 @@ import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.BaseTm;
 import com.globalsight.ling.tm3.core.DefaultManager;
 import com.globalsight.ling.tm3.core.TM3Attribute;
-import com.globalsight.ling.tm3.core.TM3Event;
 import com.globalsight.ling.tm3.core.TM3Exception;
 import com.globalsight.ling.tm3.core.TM3Manager;
 import com.globalsight.ling.tm3.core.TM3SaveMode;
 import com.globalsight.ling.tm3.core.TM3Saver;
 import com.globalsight.ling.tm3.core.TM3Tm;
 import com.globalsight.ling.tm3.core.TM3Tu;
-import com.globalsight.ling.tm3.integration.segmenttm.EventType;
 import com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute;
 import com.globalsight.ling.tm3.integration.segmenttm.TM3Util;
 import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
@@ -115,7 +111,6 @@ public class Tm3Migrator
 
             // Create an event for this import
             // TODO: factor out segment save from TM3SegmentTmInfo
-            EventMap events = new EventMap(tm3tm);
             TM3Attribute typeAttr = TM3Util.getAttr(tm3tm, TYPE);
             TM3Attribute formatAttr = TM3Util.getAttr(tm3tm, FORMAT);
             TM3Attribute sidAttr = TM3Util.getAttr(tm3tm, SID);
@@ -189,7 +184,6 @@ public class Tm3Migrator
                     TM3Saver<GSTuvData>.Tu tu = saver
                             .tu(new GSTuvData(oldSrcTuv),
                                     oldTu.getSourceLocale(),
-                                    events.get(oldSrcTuv),
                                     oldSrcTuv.getCreationUser(),
                                     oldSrcTuv.getCreationDate(),
                                     oldSrcTuv.getModifyUser(),
@@ -221,7 +215,7 @@ public class Tm3Migrator
                             continue;
                         }
 						tu.target(new GSTuvData(tuv), tuv.getLocale(),
-								events.get(tuv), tuv.getCreationUser(),
+								tuv.getCreationUser(),
 								tuv.getCreationDate(), tuv.getModifyUser(),
 								tuv.getModifyDate(), tuv.getLastUsageDate(),
 								tuv.getJobId(), tuv.getJobName(),
@@ -446,7 +440,6 @@ public class Tm3Migrator
             updateTMConvertProcess(basePercentage, lastTUId,
                     WebAppConstants.TM_STATUS_CONVERTING);
 
-            EventMap events = new EventMap(tm3tm);
             TM3Attribute typeAttr = TM3Util.getAttr(tm3tm, TYPE);
             TM3Attribute formatAttr = TM3Util.getAttr(tm3tm, FORMAT);
             TM3Attribute sidAttr = TM3Util.getAttr(tm3tm, SID);
@@ -502,7 +495,6 @@ public class Tm3Migrator
                     TM3Saver<GSTuvData>.Tu tu = saver
                             .tu(new GSTuvData(oldSrcTuv),
                                     oldTu.getSourceLocale(),
-                                    events.get(oldSrcTuv),
                                     oldSrcTuv.getCreationUser(),
                                     oldSrcTuv.getCreationDate(),
                                     oldSrcTuv.getModifyUser(),
@@ -534,7 +526,7 @@ public class Tm3Migrator
                             continue;
                         }
 						tu.target(new GSTuvData(tuv), tuv.getLocale(),
-								events.get(tuv), tuv.getCreationUser(),
+								tuv.getCreationUser(),
 								tuv.getCreationDate(), tuv.getModifyUser(),
 								tuv.getModifyDate(), tuv.getLastUsageDate(),
 								tuv.getJobId(), tuv.getJobName(),
@@ -742,34 +734,6 @@ public class Tm3Migrator
         {
             logger.error(
                     "Error when update project TM status to 'Cancelling'.", e);
-        }
-    }
-
-    static class EventMap
-    {
-        private TM3Tm<GSTuvData> tm;
-        private Map<LegacyEventKey, TM3Event> events = new HashMap<LegacyEventKey, TM3Event>();
-
-        EventMap(TM3Tm<GSTuvData> tm)
-        {
-            this.tm = tm;
-        }
-
-        public TM3Event get(BaseTmTuv tuv)
-        {
-            String username = tuv.getModifyUser() != null ? tuv.getModifyUser()
-                    : tuv.getCreationUser();
-            Date date = tuv.getModifyDate() != null ? tuv.getModifyDate() : tuv
-                    .getCreationDate();
-            LegacyEventKey k = new LegacyEventKey(username, date);
-            TM3Event e = events.get(k);
-            if (e == null)
-            {
-                e = tm.addEvent(EventType.LEGACY_MIGRATE.getValue(), username,
-                        null, date);
-                events.put(k, e);
-            }
-            return e;
         }
     }
 

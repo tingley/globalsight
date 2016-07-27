@@ -24,27 +24,6 @@ public interface TM3Tm<T extends TM3Data> {
     public TM3TmType getType();
     
     /**
-     * Add a new event to this TM's event record.  This may be subsequently
-     * used to tag save() and updateTuv() events.  The timestamp for this
-     * event will be set to the current time.
-     */
-    public TM3Event addEvent(int type, String username, String arg);
-
-    /**
-     * Add a new event to this TM's event record, specifying a timestamp.  
-     * This may be subsequently used to tag save() and updateTuv() events. 
-     */
-    public TM3Event addEvent(int type, String username, String arg, Date date);
-    
-    /**
-     * Load an existing event by ID.
-     * @param id ID of a previously saved event.
-     * @return TM3Event
-     * @throws TM3Exception
-     */
-    public TM3Event getEvent(long id) throws TM3Exception;
-    
-    /**
      * Lookup an existing TU by ID.
      * @param id ID of a TU in this TM
      * @return TM3Tu
@@ -119,64 +98,6 @@ public interface TM3Tm<T extends TM3Data> {
             List<Long> tm3TmIds) throws TM3Exception;
 
     /**
-     * Save a simple TUV pair to the segment.  Is this signature really needed? 
-     * 
-     * @param sourceLocale locale of source segment
-     * @param source Source segment data
-     * @param attributes segment attributes, if any
-     * @param targetLocale locale of target segment
-     * @param target Target segment data
-     * @param mode
-     * @param event
-     * @return the TM3Tu to which the TUV data was saved
-     * @throws TM3Exception
-     */
-//    public TM3Tu<T> save(TM3Locale srcLocale, T source,
-//            Map<TM3Attribute, Object> attributes,
-//            TM3Locale tgtLocale, T target, 
-//            TM3SaveMode mode, TM3Event event) throws TM3Exception;
-
-    /**
-     * Save a segment with an arbitrary number of target translations.
-     * 
-     * Note the mode parameter.  The behavior of this function varies depending
-     * on its value:
-     * <ul>
-     * <li><tt>OVERWRITE_ALL</tt>: If a TU exists with this source information 
-     * and attributes, it will be completely replaced.</li>
-     * <li><tt>OVERWRITE_TARGET</tt>: If a TU exists with this source information
-     * and attributes, the data in <tt>targets</tt> will replace any target
-     * data in those locales.</li>
-     * <li><tt>MERGE</tt>: If a TU exists with this source information and 
-     * attributes, the data in <tt>targets</tt> will be added to existing 
-     * target data.</li>
-     * <li><tt>DISCARD</tt>: If a TU exists with this source information and 
-     * attributes, the data in <tt>targets</tt> will be ignored and the 
-     * TU will be left untouched.</li>
-     * </ul>
-     * 
-     * Note that segment attributes must exactly match an existing entry in
-     * order for their to be a conflict that requires examination of the save
-     * mode.  This is different from how attributes are handled when finding
-     * matches, where they may match a subset of the attributes of a given 
-     * segment in the TM.
-     * 
-     * @param srcLocale source locale
-     * @param source source segment data
-     * @param attributes segment attributes, if any
-     * @param targets map of target locales to corresponding target 
-     *        translations
-     * @param mode
-     * @param event
-     * @return
-     * @throws TM3Exception
-     */
-//    public TM3Tu<T> save(TM3Locale srcLocale, T source, 
-//                      Map<TM3Attribute, Object> attributes, 
-//                      Map<TM3Locale, T> targets, 
-//                      TM3SaveMode mode, TM3Event event) throws TM3Exception;
-
-    /**
      * Create a {@link TM3Saver} instance that can be used to perform 
      * complex save operations.  See the {@link TM3Saver} docs for details.
      * @return saver instance
@@ -205,13 +126,11 @@ public interface TM3Tm<T extends TM3Data> {
      * save mechanism, so any necessary merging will be transparent.
      *
      * @param tu TU to be updated
-     * @param event event to add to the TU's event history, or null
      * @param indexTarget
      * @return updated TM3Tu instance.  
      * @throws TM3Exception
      */
-    public TM3Tu<T> modifyTu(TM3Tu<T> tu, TM3Event event, boolean indexTarget)
-            throws TM3Exception;
+    public TM3Tu<T> modifyTu(TM3Tu<T> tu, boolean indexTarget) throws TM3Exception;
     
     /**
      * Get a TU attribute defined on this TM, by name.
@@ -243,12 +162,6 @@ public interface TM3Tm<T extends TM3Data> {
      * @throws TM3Exception
      */
     public void removeAttribute(TM3Attribute name);
-
-    /**
-     * Access events that affect this TM.
-     * @return
-     */
-    public TM3EventLog getEventLog();
 
     /**
      * Access the data factory used to deserialize TUV content in this TM.

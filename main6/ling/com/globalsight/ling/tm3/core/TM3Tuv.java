@@ -12,13 +12,13 @@ import java.util.Date;
  * implementation capable of creating new TM3TuvData instances from the 
  * serialized (DB) form.
  */
-public class TM3Tuv<T extends TM3Data> {
+public class TM3Tuv<T extends TM3Data>
+{
     private Long id;
     private TM3Locale locale;
     private String serializedData;
     private Long fingerprint;
     private TM3Tu<T> tu;
-    private TM3Event firstEvent, latestEvent;
 
     private String creationUser;
     private Date creationDate;
@@ -32,20 +32,16 @@ public class TM3Tuv<T extends TM3Data> {
     private String sid = null;
     
     private T data; // Transient
-    private TM3EventLog eventLog;
     private TuStorage<T> storage;
 
     TM3Tuv() { }
 
-    TM3Tuv(TM3Locale locale, T data, TM3Event creationEvent,
-            String creationUser, Date creationDate, String modifyUser,
-			Date modifyDate, Date lastUsageDate, long jobId, String jobName,
-			long previousHash, long nextHash, String sid)
+    TM3Tuv(TM3Locale locale, T data, String creationUser, Date creationDate, String modifyUser,
+            Date modifyDate, Date lastUsageDate, long jobId, String jobName, long previousHash,
+            long nextHash, String sid)
     {
         this.locale = locale;
         setContent(data);
-        this.firstEvent = creationEvent;
-        this.latestEvent = creationEvent;
         this.creationUser = creationUser;
         this.creationDate = creationDate;
         this.modifyUser = modifyUser;
@@ -123,29 +119,6 @@ public class TM3Tuv<T extends TM3Data> {
         this.fingerprint = null;
     }
 
-    public TM3Event getFirstEvent() {
-        return firstEvent;
-    }
-    
-    void setFirstEvent(TM3Event firstEvent) {
-        this.firstEvent = firstEvent;
-    }    
-    
-    /**
-     * Returns the most recent event affecting this TUV.  
-     * Note that this value can not be set directly; it will be
-     * updated automatically to the event passed in calls like
-     * {@link TM3Tm#save()} or {@link TM3Tm#modifyTu(TM3Tu, TM3Event)}.
-     * @return most recent event affecting this tuv
-     */
-    public TM3Event getLatestEvent() {
-        return latestEvent;
-    }
-    
-    void setLatestEvent(TM3Event latestEvent) {
-        this.latestEvent = latestEvent;
-    }
-    
     protected TuStorage<T> getStorage() {
         return storage;
     }

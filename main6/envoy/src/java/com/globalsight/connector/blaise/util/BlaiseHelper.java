@@ -61,24 +61,19 @@ public class BlaiseHelper
     private static final String DASH = " - ";
     private static List<String> specialChars = new ArrayList<String>();
 
-    private static final String blaiseSupportedLangs =
-              "ar_SA, bg_BG, cs_CZ, da_DK, de_DE, el_GR, en_GB, en_US, es_ES, es_MX,"
-            + "et_EE, fi_FI, fr_CA, fr_FR, he_IL, hi_IN, hr_HR, hu_HU, hy_AM, id_ID,"
-            + "is_IS, it_IT, ja_JP, kk_KZ, ko_KR, lt_LT, lv_LV, nl_NL, no_NO, pl_PL,"
-            + "pt_BR, pt_PT, ro_RO, ru_RU, sk_SK, sl_SI, sv_SE, tr_TR, zh_CN, zh_TW";
-
     public static final List<java.util.Locale> blaiseSupportedLocales = new ArrayList<java.util.Locale>();
     public static final HashMap<String, java.util.Locale> blaiseSupportedLocalesMap = new HashMap<String, java.util.Locale>(); 
 
     static
     {
-        java.util.Locale locale = null;
-        for (String localeCode : blaiseSupportedLangs.split(","))
+        java.util.Locale javaLocale = null;
+        com.cognitran.core.model.i18n.Locale[] blaiseLocales = com.cognitran.core.model.i18n.Locale.values();
+        for (com.cognitran.core.model.i18n.Locale blaiseLocale : blaiseLocales)
         {
-            localeCode = localeCode.trim();
-            locale = getLocale(localeCode);
-            blaiseSupportedLocales.add(locale);
-            blaiseSupportedLocalesMap.put(localeCode.toLowerCase(), locale);
+            javaLocale = blaiseLocale.toLocale();
+            blaiseSupportedLocales.add(javaLocale);
+            String key = javaLocale.getLanguage() + "_" + javaLocale.getCountry();
+            blaiseSupportedLocalesMap.put(key.toLowerCase(), javaLocale);
         }
     }
 
@@ -201,7 +196,7 @@ public class BlaiseHelper
                 {
                     TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
                             (TranslationInboxEntry) entry);
-                    results.add(vo);                    
+                    results.add(vo);
                 }
                 catch (Exception ignore)
                 {
@@ -670,12 +665,6 @@ public class BlaiseHelper
 			specialChars.add("|");
 		}
 	}
-
-	private static java.util.Locale getLocale(String localeCode)
-	{
-	    String[] locs = localeCode.split("_");
-	    return new java.util.Locale(locs[0], locs[1]);
- 	}
 
 	public static String fixLocale(String localeString)
     {

@@ -11,7 +11,6 @@ import com.globalsight.ling.tm2.leverage.LeveragedSegmentTuv;
 import com.globalsight.ling.tm3.core.DefaultManager;
 import com.globalsight.ling.tm3.core.TM3Attribute;
 import com.globalsight.ling.tm3.core.TM3AttributeValueType;
-import com.globalsight.ling.tm3.core.TM3Event;
 import com.globalsight.ling.tm3.core.TM3Tm;
 import com.globalsight.ling.tm3.core.BaseTm;
 import com.globalsight.ling.tm3.core.TM3Tu;
@@ -29,11 +28,6 @@ public class TM3Util
             SegmentTmAttribute attr)
     {
         return tm.getAttributeByName(attr.getKey());
-    }
-
-    public static Timestamp toTimestamp(TM3Event e)
-    {
-        return new Timestamp(e.getTimestamp().getTime());
     }
 
     public static TM3Attribute toTM3Attribute(ProjectTmTuTProp prop)

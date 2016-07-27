@@ -76,10 +76,8 @@ import com.globalsight.ling.tm3.core.DefaultManager;
 import com.globalsight.ling.tm3.core.TM3Attribute;
 import com.globalsight.ling.tm3.core.TM3AttributeValueType;
 import com.globalsight.ling.tm3.core.TM3Attributes;
-import com.globalsight.ling.tm3.core.TM3Event;
 import com.globalsight.ling.tm3.core.TM3Exception;
 import com.globalsight.ling.tm3.core.TM3Handle;
-import com.globalsight.ling.tm3.core.TM3ImportHelper;
 import com.globalsight.ling.tm3.core.TM3Locale;
 import com.globalsight.ling.tm3.core.TM3Manager;
 import com.globalsight.ling.tm3.core.TM3SaveMode;
@@ -118,8 +116,7 @@ import com.globalsight.util.progress.ProgressReporter;
 public class Tm3SegmentTmInfo implements SegmentTmInfo
 {
 
-    private static final Logger LOGGER = Logger
-            .getLogger(Tm3SegmentTmInfo.class);
+    private static final Logger LOGGER = Logger.getLogger(Tm3SegmentTmInfo.class);
 
     private TM3Manager manager = DefaultManager.create();
     
@@ -208,8 +205,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             TM3Tm<GSTuvData> tm3tm = manager.getTm(factory, pTm.getTm3Id());
             if (tm3tm == null)
             {
-                throw new IllegalArgumentException("Non-existent tm3 tm: "
-                        + pTm.getTm3Id());
+                throw new IllegalArgumentException("Non-existent tm3 tm: " + pTm.getTm3Id());
             }
 
             /**
@@ -237,20 +233,14 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 							+ ": " + stuv);
 					continue;
 				}
-				tu.removeTargetTuv(
-						stuv.getLocale(),
-						factory.fromSerializedForm(stuv.getLocale(),
-								stuv.getSegment()));
+                tu.removeTargetTuv(stuv.getLocale(),
+                        factory.fromSerializedForm(stuv.getLocale(), stuv.getSegment()));
 				if (tu.getTargetTuvs().size() == 0)
 				{
 					removeTus.add(tu);
 				}
 			}
             // Now update the affected TUs in the DB.
-            // XXX This requires an event, even though TM3 doesn't currently
-            // record it for TUV deletion
-            TM3Event event = tm3tm.addEvent(EventType.TUV_DELETE.getValue(),
-                    "system", null);
             List<TM3Tu<GSTuvData>> newTus = new ArrayList<TM3Tu<GSTuvData>>();
             for (TM3Tu<GSTuvData> tu : map.values())
 			{
@@ -258,8 +248,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 				{
 					continue;
 				}
-				TM3Tu<GSTuvData> newTu = tm3tm.modifyTu(tu, event,
-						pTm.isIndexTarget());
+                TM3Tu<GSTuvData> newTu = tm3tm.modifyTu(tu, pTm.isIndexTarget());
 				newTus.add(newTu);
 			}
 
@@ -380,13 +369,10 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                 }
             }
 
-            TM3Event event = tm3tm.addEvent(EventType.TUV_MODIFY.getValue(),
-                    modifyUser, null);
             List<TM3Tu<GSTuvData>> newTus = new ArrayList<TM3Tu<GSTuvData>>();
             for (TM3Tu<GSTuvData> tu : map.values())
             {
-                TM3Tu<GSTuvData> newTu = tm3tm.modifyTu(tu, event,
-                        pTm.isIndexTarget());
+                TM3Tu<GSTuvData> newTu = tm3tm.modifyTu(tu, pTm.isIndexTarget());
                 newTus.add(newTu);
             }
 
@@ -660,14 +646,13 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             GlobalSightLocale locale = null;
             for (TM3Locale l : tm3tm.getTuvLocales())
             {
-               locale = (GlobalSightLocale) l;
-               localeList = new ArrayList();
-               localeList.add(locale);
+                locale = (GlobalSightLocale) l;
+                localeList = new ArrayList();
+                localeList.add(locale);
                 int localeTuCount = (int) handle.getTuCountByLocale(locale.getId());
                 int localeTuvCount = (int) handle.getTuvCountByLocale(localeList);
-                stats.addLanguageInfo(locale.getId(), locale.getLocale(),
-                        locale.getLocale().getDisplayName(pUILocale),
-                        localeTuCount, localeTuvCount);
+                stats.addLanguageInfo(locale.getId(), locale.getLocale(), locale.getLocale()
+                        .getDisplayName(pUILocale), localeTuCount, localeTuvCount);
                 tuvCount += localeTuvCount;
             }
             stats.setTm(pTm.getName());
@@ -788,8 +773,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             // pReporter.setPercentage(35);
             List localeList = new ArrayList();
             localeList.add(pLocale);
-			TM3Handle<GSTuvData> handle = tm3tm.getDataByLocales(localeList,
-					null, null);
+            TM3Handle<GSTuvData> handle = tm3tm.getDataByLocales(localeList, null, null);
             //XXX: this is bad for a big TM, should be batched
             List<TM3Tu<GSTuvData>> tus = new ArrayList<TM3Tu<GSTuvData>>();
             for (TM3Tu<GSTuvData> tu : handle)
@@ -1060,33 +1044,10 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 
             UniqueSegmentRepositoryForCorpus usr = getUniqueRepository(
                     pSourceLocale, pSegmentsToSave);
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug(pSegmentsToSave.size()
-						+ " TUs from TMX are merged into " + usr.getAllTus().size());
-			}
-
-            // Use the first TU's filename/username info for the even, on the
-            // assumption that they are all the same.
-            BaseTmTu firstTu = pSegmentsToSave.iterator().next();
-            BaseTmTuv firstTuv = firstTu.getFirstTuv(pSourceLocale);
-            EventProducer sourceEvents = null;
-            EventProducer targetEvents = null;
-            if (pFromTmImport)
+            if (LOGGER.isDebugEnabled())
             {
-                sourceEvents = new MultiUserEventProducer(tm,
-                        EventType.TM_IMPORT, firstTu.getSourceTmName());
-                targetEvents = sourceEvents;
-            }
-            else
-            {
-                // Completed translations being saved or from TM Search. Events
-                // here are more complex because we have a source creator and
-                // one or more target creators.
-                TM3Event sourceTuvEvent = addSaveEvent(tm,
-                        firstTuv.getCreationUser(),
-                        firstTuv.getUpdatedProject());
-                sourceEvents = new SingleEventProducer(sourceTuvEvent);
-                targetEvents = new MultiUserEventProducer(tm, sourceTuvEvent);
+                LOGGER.debug(pSegmentsToSave.size() + " TUs from TMX are merged into "
+                        + usr.getAllTus().size());
             }
 
 			// pTargetLocales is just the set of all locales for which there is
@@ -1100,8 +1061,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             TM3Attribute projectAttr = TM3Util.getAttr(tm, UPDATED_BY_PROJECT);
 
             TuvMappingHolder holder = new TuvMappingHolder();
-            ProjectTM projectTM = (pTm instanceof ProjectTM) ? (ProjectTM) pTm
-                    : null;
+            ProjectTM projectTM = (pTm instanceof ProjectTM) ? (ProjectTM) pTm : null;
             Map<String, String> attValues = TMAttributeManager
                     .getTUAttributesForPopulator(projectTM, m_job);
 
@@ -1135,8 +1095,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                     // the source locale
                     BaseTmTuv srcTuv = srcTu.getSourceTuv();
 					TM3Saver<GSTuvData>.Tu tuToSave = saver.tu(new GSTuvData(
-							srcTuv), pSourceLocale, sourceEvents
-							.getEventForTuv(srcTuv), srcTuv.getCreationUser(),
+							srcTuv), pSourceLocale, srcTuv.getCreationUser(),
 							srcTuv.getCreationDate(), srcTuv.getModifyUser(),
 							srcTuv.getModifyDate(), srcTuv.getLastUsageDate(),
 							srcTuv.getJobId(), srcTuv.getJobName(),
@@ -1151,7 +1110,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 						tuToSave.target(
 								new GSTuvData(tuv),
 								tuv.getLocale(),
-								targetEvents.getEventForTuv(tuv),
 								decideTargetTuvCreationUser(srcTuv, tuv, pFromTmImport),
 								tuv.getCreationDate(),
 								tuv.getModifyUser(), tuv.getModifyDate(),
@@ -1561,42 +1519,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         return StringUtil.isEmpty(s) ? null : new Date(s);
     }
 
-    /**
-     * Add a TM Import event to this TM's history.
-     * 
-     * @param tm
-     *            TM3Tm
-     * @param userName
-     *            Name of the user performing the import
-     * @param importFileName
-     *            Name of the TMX file that is being imported
-     * @return persisted TM3Event
-     */
-    TM3Event addImportEvent(TM3Tm<GSTuvData> tm, String userName,
-            String importFileName)
-    {
-        return tm.addEvent(EventType.TM_IMPORT.getValue(), userName,
-                importFileName);
-    }
-
-    /**
-     * Add a TM Import event to this TM's history.
-     * 
-     * @param tm
-     *            TM3Tm
-     * @param userName
-     *            Name of the user performing the import
-     * @param projectName
-     *            Name of the project that this job is part of
-     * @return persisted TM3Event
-     */
-    TM3Event addSaveEvent(TM3Tm<GSTuvData> tm, String userName,
-            String projectName)
-    {
-        return tm.addEvent(EventType.SEGMENT_SAVE.getValue(), userName,
-                projectName);
-    }
-
     // Whether index target is determined by project TM option "index target"
     // default.
     public void luceneIndexTus(long ptmId, Collection<TM3Tu<GSTuvData>> tus)
@@ -1775,71 +1697,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             {
                 indexWriter.close();
             }
-        }
-    }
-
-    interface EventProducer
-    {
-        TM3Event getEventForTuv(BaseTmTuv tuv);
-    }
-
-    class SingleEventProducer implements EventProducer
-    {
-        private TM3Event event;
-
-        SingleEventProducer(TM3Event event)
-        {
-            this.event = event;
-        }
-
-        @Override
-        public TM3Event getEventForTuv(BaseTmTuv tuv)
-        {
-            return event;
-        }
-    }
-
-    class MultiUserEventProducer implements EventProducer
-    {
-        private Map<String, TM3Event> map = new HashMap<String, TM3Event>();
-        private TM3Tm<GSTuvData> tm;
-        private int eventType;
-        private String attr;
-
-        MultiUserEventProducer(TM3Tm<GSTuvData> tm, EventType eventType,
-                String attr)
-        {
-            this.tm = tm;
-            this.eventType = eventType.getValue();
-            this.attr = attr;
-        }
-
-        // For segment save events only
-        MultiUserEventProducer(TM3Tm<GSTuvData> tm, TM3Event sourceEvent)
-        {
-            this.tm = tm;
-            this.attr = sourceEvent.getArgument();
-            this.eventType = EventType.SEGMENT_SAVE.getValue();
-            map.put(sourceEvent.getUsername(), sourceEvent);
-        }
-
-        @Override
-        public TM3Event getEventForTuv(BaseTmTuv tuv)
-        {
-
-            String user = tuv.getModifyUser();
-            if (user == null)
-            {
-                user = tuv.getCreationUser();
-            }
-            if (map.containsKey(user))
-            {
-                return map.get(user);
-            }
-            TM3Event event = TM3ImportHelper.createTM3Event(tm, user, eventType, attr, new Date());
-            map.put(user, event);
-
-            return event;
         }
     }
 

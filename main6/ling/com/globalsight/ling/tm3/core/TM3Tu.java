@@ -29,7 +29,7 @@ import java.util.Map;
  * <p>
  * Note that all changes to a TU, its TUVs, and any of its dependent data
  * structures are considered transient and are not persisted unless a subsequent
- * call to {@link TM3Tm#modifyTu(TM3Tu, TM3Event)} is made.
+ * call to {@link TM3Tm#modifyTu(TM3Tu)} is made.
  */
 public class TM3Tu<T extends TM3Data>
 {
@@ -217,30 +217,23 @@ public class TM3Tu<T extends TM3Data>
      * 
      * @param locale
      * @param content
-     * @param event
      * @return Returns the new TUV, or null if an identical TUV already exists.
      */
-    public TM3Tuv<T> addTargetTuv(TM3Locale locale, T content, TM3Event event,
-            String creationUser, Date creationDate, String modifyUser,
-			Date modifyDate, Date lastUsageDate, long jobId, String jobName,
-			long previousHash, long nextHash, String sid)
+    public TM3Tuv<T> addTargetTuv(TM3Locale locale, T content, String creationUser,
+            Date creationDate, String modifyUser, Date modifyDate, Date lastUsageDate, long jobId,
+            String jobName, long previousHash, long nextHash, String sid)
     {
-        if (event == null)
-        {
-            throw new IllegalArgumentException("event can not be null");
-        }
         // Don't save identical (in both locale and content) targets
-    	for (TM3Tuv<T> trgTuv : targetTuvs)
-    	{
+        for (TM3Tuv<T> trgTuv : targetTuvs)
+        {
             if (isIdenticalTuv(trgTuv, locale, content, previousHash, nextHash))
             {
-            	return null;
+                return null;
             }
-    	}
+        }
 
-        TM3Tuv<T> tuv = new TM3Tuv<T>(locale, content, event, creationUser,
-				creationDate, modifyUser, modifyDate, lastUsageDate, jobId,
-				jobName, previousHash, nextHash, sid);
+        TM3Tuv<T> tuv = new TM3Tuv<T>(locale, content, creationUser, creationDate, modifyUser,
+                modifyDate, lastUsageDate, jobId, jobName, previousHash, nextHash, sid);
         targetTuvs.add(tuv);
         tuv.setTu(this);
         return tuv;
@@ -281,11 +274,6 @@ public class TM3Tu<T extends TM3Data>
         }
 
     	return false;
-    }
-
-    public TM3EventLog getHistory()
-    {
-        throw new UnsupportedOperationException(); // TODO
     }
 
     /**

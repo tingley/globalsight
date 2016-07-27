@@ -222,7 +222,6 @@ CREATE INDEX ST_TU_L_SOURCE_LOCALE_ID ON PROJECT_TM_TU_L(SOURCE_LOCALE_ID);
 
 
 -- TM3 Segment storage
-DROP TABLE IF EXISTS `TM3_EVENTS`;
 DROP TABLE IF EXISTS `TM3_ATTR`;
 DROP TABLE IF EXISTS `TM3_ID`;
 DROP TABLE IF EXISTS `TM3_TM`;
@@ -255,22 +254,6 @@ CREATE TABLE `TM3_ATTR` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `tmId` (`tmId`,`name`),
   CONSTRAINT `tm3_attr_ibfk_1` FOREIGN KEY (`tmId`) REFERENCES `TM3_TM` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8;
-
-
---
--- Table structure for table `tm3_events`
---
-
-CREATE TABLE `TM3_EVENTS` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `time` datetime NOT NULL,
-  `userName` varchar(128) NOT NULL,
-  `tmId` bigint(20) NOT NULL,
-  `type` smallint(6) NOT NULL,
-  `arg` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  CONSTRAINT `tm3_events_ibfk_1` FOREIGN KEY (`tmId`) REFERENCES `TM3_TM` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8;
 
 CREATE TABLE `TM3_ID` (

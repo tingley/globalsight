@@ -63,14 +63,13 @@ abstract class TuStorage<T extends TM3Data>
     }
 
     public TM3Tu<T> createTu(TM3Locale sourceLocale, T sourceTuvData,
-            Map<TM3Attribute, Object> attributes, TM3Event event,
-            String creationUser, Date creationDate, String modifyUser,
-			Date modifyDate, Date lastUsageDate, long jobId, String jobName,
-			long previousHash, long nextHash, String sid)
+            Map<TM3Attribute, Object> attributes, String creationUser, Date creationDate,
+            String modifyUser, Date modifyDate, Date lastUsageDate, long jobId, String jobName,
+            long previousHash, long nextHash, String sid)
     {
-		TM3Tuv<T> sourceTuv = new TM3Tuv<T>(sourceLocale, sourceTuvData, event,
-				creationUser, creationDate, modifyUser, modifyDate,
-				lastUsageDate, jobId, jobName, previousHash, nextHash, sid);
+        TM3Tuv<T> sourceTuv = new TM3Tuv<T>(sourceLocale, sourceTuvData, creationUser,
+                creationDate, modifyUser, modifyDate, lastUsageDate, jobId, jobName, previousHash,
+                nextHash, sid);
         return new TM3Tu<T>(storage.getTm(), this, sourceTuv, attributes);
     }
 
@@ -108,7 +107,7 @@ abstract class TuStorage<T extends TM3Data>
             SQLUtil.exec(conn, new StatementBuilder().append("DELETE FROM ")
                     .append(storage.getTuvExtTableName()).append(" WHERE tuId = ?")
                     .addValue(tu.getId()));
-            // TODO: not care event table
+
             // tm3_tuv_shared_xx
             SQLUtil.exec(conn, new StatementBuilder().append("DELETE FROM ")
                     .append(storage.getTuvTableName()).append(" WHERE tuId = ?")
@@ -248,8 +247,8 @@ abstract class TuStorage<T extends TM3Data>
         }
     }
 
-    public abstract void updateTuvs(Connection conn, TM3Tu<T> tu,
-            List<TM3Tuv<T>> tuvs, TM3Event event) throws SQLException;
+    public abstract void updateTuvs(Connection conn, TM3Tu<T> tu, List<TM3Tuv<T>> tuvs)
+            throws SQLException;
 
     public void updateAttributes(Connection conn, TM3Tu<T> tu,
             Map<TM3Attribute, Object> inlineAttributes,
@@ -508,7 +507,7 @@ abstract class TuStorage<T extends TM3Data>
             List<TuData<T>> tuDatas, boolean locking) throws SQLException
     {
         StatementBuilder sb = new StatementBuilder("SELECT ")
-                .append("tuId, id, localeId, fingerprint, content, firstEventId, lastEventId, creationUser, creationDate, modifyUser, modifyDate")
+                .append("tuId, id, localeId, fingerprint, content, creationUser, creationDate, modifyUser, modifyDate")
                 .append(" FROM ").append(getStorage().getTuvTableName())
                 .append(" WHERE tuId IN").append(SQLUtil.longGroup(tuIds))
                 .append("ORDER BY tuId");
@@ -524,9 +523,8 @@ abstract class TuStorage<T extends TM3Data>
             while (rs.next())
             {
                 rawTuvs.add(new TuvData<T>(rs.getLong(1), rs.getLong(2), rs
-                        .getLong(3), rs.getLong(4), rs.getString(5), rs
-                        .getLong(6), rs.getLong(7), rs.getString(8), rs
-                        .getTimestamp(9), rs.getString(10), rs.getTimestamp(11)));
+                        .getLong(3), rs.getLong(4), rs.getString(5), rs.getString(6), rs
+                        .getTimestamp(7), rs.getString(8), rs.getTimestamp(9)));
             }
             ps.close();
 
@@ -657,20 +655,6 @@ abstract class TuStorage<T extends TM3Data>
         tuv.setFingerprint(rawData.fingerprint);
         tuv.setContent(storage.getTm().getDataFactory()
                 .fromSerializedForm(locale, rawData.content));
-        TM3Event firstEvent = null;
-        if (rawData.firstEventId > 0)
-        {
-            // Check for null value
-            firstEvent = (TM3Event) HibernateUtil.get(TM3Event.class, rawData.firstEventId, false);
-        }
-        tuv.setFirstEvent(firstEvent);
-        TM3Event latestEvent = null;
-        if (rawData.lastEventId > 0)
-        {
-            // Check for null value
-            latestEvent = (TM3Event) HibernateUtil.get(TM3Event.class, rawData.lastEventId, false);
-        }
-        tuv.setLatestEvent(latestEvent);
 
         tuv.setCreationUser(rawData.creationUser);
         tuv.setCreationDate(rawData.creationDate);
@@ -721,8 +705,6 @@ abstract class TuStorage<T extends TM3Data>
         long localeId;
         long fingerprint;
         String content;
-        long firstEventId;
-        long lastEventId;
         String creationUser = null;
         Date creationDate = null;
         String modifyUser = null;
@@ -734,18 +716,14 @@ abstract class TuStorage<T extends TM3Data>
         long nextHash = -1;
         String sid = null;
 
-        TuvData(long tuId, long id, long localeId, long fingerprint,
-                String content, long firstEventId, long lastEventId,
-                String creationUser, Date creationDate, String modifyUser,
-                Date modifyDate)
+        TuvData(long tuId, long id, long localeId, long fingerprint, String content,
+                String creationUser, Date creationDate, String modifyUser, Date modifyDate)
         {
             this.id = id;
             this.tuId = tuId;
             this.localeId = localeId;
             this.fingerprint = fingerprint;
             this.content = content;
-            this.firstEventId = firstEventId;
-            this.lastEventId = lastEventId;
             this.creationUser = creationUser;
             this.creationDate = creationDate;
             this.modifyUser = modifyUser;
@@ -1136,22 +1114,6 @@ abstract class TuStorage<T extends TM3Data>
      */
     protected abstract StatementBuilder getAttributeMatchWrapper(
             StatementBuilder inner, Map<TM3Attribute, String> attributes);
-
-    protected TM3EventLog loadEvents(ResultSet rs) throws SQLException
-    {
-        List<TM3Event> events = new ArrayList<TM3Event>();
-        while (rs.next())
-        {
-            TM3Event event = new TM3Event();
-            event.setId(rs.getLong(1));
-            event.setTimestamp(rs.getDate(2));
-            event.setUsername(rs.getString(3));
-            event.setType(rs.getInt(4));
-            event.setArgument(rs.getString(5));
-            events.add(event);
-        }
-        return new TM3EventLog(events);
-    }
 
     public abstract Set<TM3Locale> getTuvLocales() throws SQLException;
 

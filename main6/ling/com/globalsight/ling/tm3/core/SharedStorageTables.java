@@ -132,8 +132,6 @@ class SharedStorageTables {
 	                "localeId bigint NOT NULL, " +
 	                "fingerprint bigint NOT NULL, " +
 	                "content mediumtext NOT NULL, " + 
-	                "firstEventId bigint NOT NULL, " +
-	                "lastEventId bigint NOT NULL, " +
 	                "creationUser varchar(80) DEFAULT NULL, " +
 	                "creationDate datetime NOT NULL, " +
 	                "modifyUser varchar(80) DEFAULT NULL, " +
@@ -141,9 +139,7 @@ class SharedStorageTables {
 	                "PRIMARY KEY (id), " +
 	                "KEY (tmId, localeId, fingerprint), " +
 	                "KEY (tuId, localeId), " + 
-	                "FOREIGN KEY (tuId) REFERENCES " + tuTableName + " (id) ON DELETE CASCADE, " +
-	                "FOREIGN KEY (firstEventID) REFERENCES TM3_EVENTS (id), " +
-	                "FOREIGN KEY (lastEventID) REFERENCES TM3_EVENTS (id) " +
+	                "FOREIGN KEY (tuId) REFERENCES " + tuTableName + " (id) ON DELETE CASCADE " +
 	                ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
 	            );
 

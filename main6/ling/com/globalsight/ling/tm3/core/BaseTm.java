@@ -35,8 +35,6 @@ import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.LockOptions;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.integration.GSTuvData;
@@ -176,23 +174,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     void setDataFactory(TM3DataFactory<T> factory)
     {
         this.factory = factory;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public TM3EventLog getEventLog() throws TM3Exception
-    {
-        try
-        {
-            return new TM3EventLog(getSession().createCriteria(TM3Event.class)
-                    .add(Restrictions.eq("tm", this))
-                    .addOrder(Order.desc("timestamp"))
-                    .addOrder(Order.desc("id")).list());
-        }
-        catch (HibernateException e)
-        {
-            throw new TM3Exception(e);
-        }
     }
 
     @Override
@@ -526,7 +507,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                 {
                     tu = tuStorage.createTu(tuData.srcTuv.locale,
                             tuData.srcTuv.content, tuData.attrs,
-                            tuData.srcTuv.event,
                             tuData.srcTuv.getCreationUser(),
                             tuData.srcTuv.getCreationDate(),
                             tuData.srcTuv.getModifyUser(),
@@ -540,7 +520,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                     for (TM3Saver<T>.Tuv tuvData : tuData.targets)
                     {
                         tu.addTargetTuv(tuvData.locale, tuvData.content,
-                                tuvData.event, tuvData.getCreationUser(),
+                                tuvData.getCreationUser(),
                                 tuvData.getCreationDate(),
                                 tuvData.getModifyUser(),
                                 tuvData.getModifyDate(),
@@ -576,7 +556,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                             TM3Tu<T> newTu = tuStorage.createTu(
                                     tuData.srcTuv.locale,
                                     tuData.srcTuv.content, tuData.attrs,
-                                    tuData.srcTuv.event,
                                     tuData.srcTuv.getCreationUser(),
                                     tuData.srcTuv.getCreationDate(),
                                     tuData.srcTuv.getModifyUser(),
@@ -592,7 +571,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                             {
                             	overWritedLocales.add(tuvData.locale);
                                 newTu.addTargetTuv(tuvData.locale,
-                                        tuvData.content, tuvData.event,
+                                        tuvData.content,
                                         tuvData.getCreationUser(),
                                         tuvData.getCreationDate(),
                                         tuvData.getModifyUser(),
@@ -610,7 +589,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                             	{
                             		newTu.addTargetTuv(oldTuv.getLocale(),
                             				oldTuv.getContent(),
-                            				oldTuv.getLatestEvent(),
                             				oldTuv.getCreationUser(),
                             				oldTuv.getCreationDate(),
                             				oldTuv.getModifyUser(),
@@ -678,7 +656,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                                 newtu = tuStorage.createTu(
                                         tuData.srcTuv.locale,
                                         tuData.srcTuv.content, tuData.attrs,
-                                        tuData.srcTuv.event,
                                         tuData.srcTuv.getCreationUser(),
                                         tuData.srcTuv.getCreationDate(),
                                         tuData.srcTuv.getModifyUser(),
@@ -692,7 +669,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                                 for (TM3Saver<T>.Tuv tuvData : tuData.targets)
                                 {
                                     newtu.addTargetTuv(tuvData.locale,
-                                            tuvData.content, tuvData.event,
+                                            tuvData.content, 
                                             tuvData.getCreationUser(),
                                             tuvData.getCreationDate(),
                                             tuvData.getModifyUser(),
@@ -726,7 +703,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                                 {
                                     TM3Tuv<T> newTuv = tu.addTargetTuv(
                                             tuvData.locale, tuvData.content,
-                                            tuvData.event,
                                             tuvData.getCreationUser(),
                                             tuvData.getCreationDate(),
                                             tuvData.getModifyUser(),
@@ -747,7 +723,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                                     	addedTuvs.add(newTuv);
                                     }
                                 }
-                                tuStorage.updateTuvs(conn, newtu, updatedTuvs, null);
+                                tuStorage.updateTuvs(conn, newtu, updatedTuvs);
                                 tuStorage.addTuvs(conn, tu, addedTuvs);
                                 if (indexTarget)
                                 {
@@ -1019,8 +995,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     }
 
     @Override
-    public TM3Tu<T> modifyTu(TM3Tu<T> tu, TM3Event event, boolean indexTarget)
-            throws TM3Exception
+    public TM3Tu<T> modifyTu(TM3Tu<T> tu, boolean indexTarget) throws TM3Exception
     {
         // The strategy for now is to blindly replace the existing data.
         // This could be simpler if we just deleted the old rows, but then we
@@ -1029,10 +1004,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         {
             throw new IllegalArgumentException("Can't update a transient TU");
         }
-        if (event == null)
-        {
-            throw new IllegalArgumentException("Null event value");
-        }
+
         // to be safe...
         for (TM3Tuv<T> tuv : tu.getAllTuv())
         {
@@ -1104,7 +1076,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             }
             storage.deleteTuvs(conn, deleted);
             storage.addTuvs(conn, tu, added);
-            storage.updateTuvs(conn, tu, modified, event);
+            storage.updateTuvs(conn, tu, modified);
             // delete old fingerprints from updated tuv even without
             // indexTarget, because it might have been indexed in the past
 			for (TM3Tuv<T> tuv : modified)
@@ -1148,42 +1120,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             map.put(tuv.getId(), tuv);
         }
         return map;
-    }
-
-    @Override
-    public TM3Event addEvent(int type, String username, String arg)
-    {
-        return addEvent(type, username, arg, new Date());
-    }
-
-    public TM3Event addEvent(int type, String username, String arg, Date date)
-    {
-        TM3Event event = new TM3Event(this, type, username, arg, date);
-        lockForWrite();
-        try
-        {
-            HibernateUtil.save(event);
-        }
-        catch (Exception e)
-        {
-            LOGGER.error("Error saving TM3Event", e);
-        }
-        return event;
-    }
-
-    @Override
-    public TM3Event getEvent(long id) throws TM3Exception
-    {
-        try
-        {
-            return (TM3Event) getSession().createCriteria(TM3Event.class)
-                    .add(Restrictions.eq("id", id))
-                    .add(Restrictions.eq("tm", this)).uniqueResult();
-        }
-        catch (HibernateException e)
-        {
-            throw new TM3Exception(e);
-        }
     }
 
     @Override

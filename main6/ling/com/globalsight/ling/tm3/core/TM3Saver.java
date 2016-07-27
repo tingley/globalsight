@@ -14,11 +14,11 @@ import java.util.Map;
  * <pre>
  *   TM3Saver<T> saver = tm.createSaver();
  *   for (<i>some condition</i>) {
- *      saver.tu(srcContent, srcLocale, event)
+ *      saver.tu(srcContent, srcLocale)
  *           .attr(attr1, value1)
  *           .attr(attr2, value2)
- *           .tuv(frenchContent, frenchLocale, event)
- *           .tuv(germanContent, germanLocale, event);
+ *           .tuv(frenchContent, frenchLocale)
+ *           .tuv(germanContent, germanLocale);
  *   }
  *   saver.save(TM3SaveMode.MERGE);
  * </pre>
@@ -40,17 +40,14 @@ public abstract class TM3Saver<T extends TM3Data>
      * {{@link #save(TM3SaveMode)} is made. 
      * @param content source content
      * @param locale source locale
-     * @param event source tuv event
      * @return
      */
-	public Tu tu(T content, TM3Locale locale, TM3Event event,
-			String creationUser, Date creationDate, String modifyUser,
-			Date modifyDate, Date lastUsageDate, long jobId, String jobName,
-			long previousHash, long nextHash, String sid)
+    public Tu tu(T content, TM3Locale locale, String creationUser, Date creationDate,
+            String modifyUser, Date modifyDate, Date lastUsageDate, long jobId, String jobName,
+            long previousHash, long nextHash, String sid)
     {
-		Tu tu = new Tu(content, locale, event, creationUser, creationDate,
-				modifyUser, modifyDate, lastUsageDate, jobId, jobName,
-				previousHash, nextHash, sid);
+        Tu tu = new Tu(content, locale, creationUser, creationDate, modifyUser, modifyDate,
+                lastUsageDate, jobId, jobName, previousHash, nextHash, sid);
         tus.add(tu);
         return tu;
     }
@@ -62,28 +59,20 @@ public abstract class TM3Saver<T extends TM3Data>
      * @return
      * @throws TM3Exception
      */
-    public abstract List<TM3Tu<T>> save(TM3SaveMode mode, boolean indexTarget)
-            throws TM3Exception;
+    public abstract List<TM3Tu<T>> save(TM3SaveMode mode, boolean indexTarget) throws TM3Exception;
     
-    /**
-     * Representation of an unsaved TU, created by a call to 
-     * {@link TM3Saver#tu(TM3Data, TM3Locale, TM3Event)}.  Method calls
-     * on this object can add target TUV data or attributes.
-     */
     public class Tu
     {
         Tuv srcTuv;
         List<Tuv> targets = new ArrayList<Tuv>();
         Map<TM3Attribute, Object> attrs = new HashMap<TM3Attribute, Object>();
 
-		Tu(T content, TM3Locale locale, TM3Event event, String creationUser,
-                Date creationDate, String modifyUser, Date modifyDate,
-				Date lastUsageDate, long jobId, String jobName,
-				long previousHash, long nextHash, String sid)
+        Tu(T content, TM3Locale locale, String creationUser, Date creationDate, String modifyUser,
+                Date modifyDate, Date lastUsageDate, long jobId, String jobName, long previousHash,
+                long nextHash, String sid)
         {
-			srcTuv = new Tuv(content, locale, event, creationUser,
-					creationDate, modifyUser, modifyDate, lastUsageDate, jobId,
-					jobName, previousHash, nextHash, sid);
+            srcTuv = new Tuv(content, locale, creationUser, creationDate, modifyUser, modifyDate,
+                    lastUsageDate, jobId, jobName, previousHash, nextHash, sid);
         }
 
         /**
@@ -113,17 +102,14 @@ public abstract class TM3Saver<T extends TM3Data>
          * Add a single target TUV to this TU.
          * @param content target content
          * @param locale target locale
-         * @param event target TUV event
          * @return this
          */
-		public Tu target(T content, TM3Locale locale, TM3Event event,
-				String creationUser, Date creationDate, String modifyUser,
-				Date modifyDate, Date lastUsageDate, long jobId,
-				String jobName, long previousHash, long nextHash, String sid)
+        public Tu target(T content, TM3Locale locale, String creationUser, Date creationDate,
+                String modifyUser, Date modifyDate, Date lastUsageDate, long jobId, String jobName,
+                long previousHash, long nextHash, String sid)
         {
-			targets.add(new Tuv(content, locale, event, creationUser,
-					creationDate, modifyUser, modifyDate, lastUsageDate, jobId,
-					jobName, previousHash, nextHash, sid));
+            targets.add(new Tuv(content, locale, creationUser, creationDate, modifyUser,
+                    modifyDate, lastUsageDate, jobId, jobName, previousHash, nextHash, sid));
             return this;
         }
         
@@ -146,7 +132,6 @@ public abstract class TM3Saver<T extends TM3Data>
     {
         T content;
         TM3Locale locale;
-        TM3Event event;
         String creationUser = null;
         Date creationDate = null;
         String modifyUser = null;
@@ -158,14 +143,13 @@ public abstract class TM3Saver<T extends TM3Data>
         long nextHash = -1;
         String sid = null;
 
-		Tuv(T content, TM3Locale locale, TM3Event event, String creationUser,
+		Tuv(T content, TM3Locale locale, String creationUser,
 				Date creationDate, String modifyUser, Date modifyDate,
 				Date lastUsageDate, long jobId, String jobName,
 				long previousHash, long nextHash, String sid)
         {
             this.content = content;
             this.locale = locale;
-            this.event = event;
             this.creationUser = creationUser;
             this.creationDate = creationDate;
             this.modifyUser = modifyUser;
@@ -186,11 +170,6 @@ public abstract class TM3Saver<T extends TM3Data>
         public TM3Locale getLocale()
         {
             return locale;
-        }
-
-        public TM3Event getEvent()
-        {
-            return event;
         }
 
         public String getCreationUser()

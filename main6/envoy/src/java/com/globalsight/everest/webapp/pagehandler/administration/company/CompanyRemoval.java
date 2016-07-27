@@ -225,7 +225,6 @@ public class CompanyRemoval
     private static final String SQL_DELETE_TM_PROFILE = "delete from TM_PROFILE where PROJECT_TM_ID_FOR_SAVE in ";
     private static final String SQL_DELETE_TM_PROFILE_ATTRIBUTE = "delete from TM_PROFILE_ATTRIBUTE where TMP_ID in ";
     private static final String SQL_DELETE_TM3_ATTR = "delete from TM3_ATTR where TMID in ";
-    private static final String SQL_DELETE_TM3_EVENTS = "delete from TM3_EVENTS where TMID in ";
     private static final String SQL_DELETE_TM3_TM = "delete from TM3_TM where SHAREDSTORAGEID=?";
     private static final String SQL_DELETE_TM_TB_USERS = "delete from TM_TB_USERS where USER_ID in ";
     private static final String SQL_DELETE_TRANSLATION_TU_TUV_INDEX = "delete from TRANSLATION_TU_TUV_INDEX where COMPANY_ID=?";
@@ -3553,14 +3552,6 @@ public class CompanyRemoval
         logEnd("TM3_ATTR");
     }
 
-    private void removeTm3Events(Connection conn, List<List<Object>> tm3Ids)
-            throws SQLException
-    {
-        logStart("TM3_EVENTS");
-        exec(conn, SQL_DELETE_TM3_EVENTS, tm3Ids);
-        logEnd("TM3_EVENTS");
-    }
-
     private void removeTm3Tables(Connection conn)
     {
         String companyName = company.getCompanyName();
@@ -3579,7 +3570,6 @@ public class CompanyRemoval
         if (tm3Ids.size() > 0)
         {
             removeTm3Attr(conn, tm3Ids);
-            removeTm3Events(conn, tm3Ids);
         }
         logStart("TM3_TM");
         execOnce(conn, SQL_DELETE_TM3_TM, companyId);

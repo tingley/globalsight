@@ -309,7 +309,6 @@ SET @v = (SELECT CONCAT('drop table ', GROUP_CONCAT(a.table_name)) FROM informat
 SET @v = (SELECT CONCAT('drop table ', GROUP_CONCAT(a.table_name)) FROM information_schema.tables a where a.table_schema = DATABASE() AND a.table_name like 'tm3_tuv_ext_%' ); SET @y = (SELECT IF (@v IS NOT NULL, @v, 'select 1')); PREPARE s FROM @y; EXECUTE s;
 SET @v = (SELECT CONCAT('drop table ', GROUP_CONCAT(a.table_name)) FROM information_schema.tables a where a.table_schema = DATABASE() AND a.table_name like 'tm3_tuv_%' ); SET @y = (SELECT IF (@v IS NOT NULL, @v, 'select 1')); PREPARE s FROM @y; EXECUTE s;
 SET @v = (SELECT CONCAT('drop table ', GROUP_CONCAT(a.table_name)) FROM information_schema.tables a where a.table_schema = DATABASE() AND a.table_name like 'tm3_tu_%' ); SET @y = (SELECT IF (@v IS NOT NULL, @v, 'select 1')); PREPARE s FROM @y; EXECUTE s;
-DROP TABLE IF EXISTS `TM3_EVENTS`;
 DROP TABLE IF EXISTS `TM3_ATTR`;
 DROP TABLE IF EXISTS `TM3_ID`;
 DROP TABLE IF EXISTS `TM3_TM`;

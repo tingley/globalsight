@@ -61,14 +61,16 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
         {
             tuv.setId(getStorage().getTuvId(conn));
         }
+        // "firstEventId" and "lastEventId" are abandoned. As it takes too much
+        // time to drop them when upgrade, we keep them and set -1 as default value.
         BatchStatementBuilder sb = new BatchStatementBuilder("INSERT INTO ")
                 .append(getStorage().getTuvTableName())
-                .append(" (id, tuId, tmId, localeId, content, fingerprint, creationUser, creationDate, modifyUser, modifyDate) ")
-                .append("VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                .append(" (id, tuId, tmId, localeId, content, fingerprint, firstEventId, lastEventId, creationUser, creationDate, modifyUser, modifyDate) ")
+                .append("VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         for (TM3Tuv<T> tuv : tuvs)
         {
             sb.addBatch(tuv.getId(), tu.getId(), tmId, tuv.getLocale().getId(),
-                    tuv.getSerializedForm(), tuv.getFingerprint(), tuv.getCreationUser(),
+                    tuv.getSerializedForm(), tuv.getFingerprint(), -1, -1, tuv.getCreationUser(),
                     tuv.getCreationDate(), tuv.getModifyUser(), tuv.getModifyDate());
         }
         SQLUtil.execBatch(conn, sb);

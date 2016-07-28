@@ -45,14 +45,14 @@ BEGIN
 		COMMIT;
 
 		-- drop "firstEventId" column
-		SET @sql2 = CONCAT("ALTER TABLE ", tm3TuvTable, " DROP COLUMN firstEventId; ");
+		-- SET @sql2 = CONCAT("ALTER TABLE ", tm3TuvTable, " DROP COLUMN firstEventId; ");
 		## logger
-		SELECT @sql2 AS drop_firstEventId_sql;
+		-- SELECT @sql2 AS drop_firstEventId_sql;
 
-		PREPARE stmt FROM @sql2;
-		EXECUTE stmt;
-		DEALLOCATE PREPARE stmt;
-		COMMIT;
+		-- PREPARE stmt FROM @sql2;
+		-- EXECUTE stmt;
+		-- DEALLOCATE PREPARE stmt;
+		-- COMMIT;
 
 	END LOOP;
 	CLOSE tm3_tuv_table_cur;
@@ -112,14 +112,14 @@ BEGIN
 		COMMIT;
 
 		-- drop "lastEventId" column
-		SET @sql2 = CONCAT("ALTER TABLE ", tm3TuvTable, " DROP COLUMN lastEventId; ");
+		-- SET @sql2 = CONCAT("ALTER TABLE ", tm3TuvTable, " DROP COLUMN lastEventId; ");
 		## logger
-		SELECT @sql2 AS drop_lastEventId_sql;
+		-- SELECT @sql2 AS drop_lastEventId_sql;
 
-		PREPARE stmt FROM @sql2;
-		EXECUTE stmt;
-		DEALLOCATE PREPARE stmt;
-		COMMIT;
+		-- PREPARE stmt FROM @sql2;
+		-- EXECUTE stmt;
+		-- DEALLOCATE PREPARE stmt;
+		-- COMMIT;
 
 	END LOOP;
 	CLOSE tm3_tuv_table_cur;

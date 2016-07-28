@@ -47,6 +47,7 @@ import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowEventObserver;
 import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.pageimport.UpdateSourcePageCommand;
 import com.globalsight.persistence.pageimport.UpdateTargetPageCommand;
@@ -883,31 +884,26 @@ public class PageEventObserverLocal implements PageEventObserver
         }
     }
 
-    // check to see if all pages of a workflow have been exported...
-    private boolean isExported(Collection p_targetPages) throws PageException,
-            RemoteException
-    {
-        Object[] targetPages = p_targetPages.toArray();
-        int size = targetPages.length;
-        for (int i = 0; i < size; i++)
-        {
-            TargetPage page = (TargetPage) targetPages[i];
-            if (!PageState.EXPORTED.equals(page.getPageState()))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     /**
      * Notifies the workflow event observer if all pages have been exported;
      * also call the notify all target pages exported method.
      */
     private void notifyWorkflowIfLastPage(Workflow p_workflow) throws Exception
     {
-        if (isExported(p_workflow.getTargetPages()))
+        List args = new ArrayList<>();
+        args.add(p_workflow.getIdAsLong());
+        String sql = "select state from target_page where WORKFLOW_IFLOW_INSTANCE_ID = ? and state != '" + PageState.IMPORT_FAIL +"'";
+        List<String> states = DbUtil.queryForSingleColumn(sql, args);
+        boolean isExported = true;
+        for (String state : states)
+        {
+            if (!PageState.EXPORTED.equals(state))
+            {
+                isExported = false;
+            }
+        }
+        
+        if (isExported)
         {
             if (s_category.isDebugEnabled())
             {

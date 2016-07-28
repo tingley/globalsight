@@ -17,6 +17,7 @@
 
 package com.globalsight.everest.page;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,6 +32,7 @@ import org.hibernate.Transaction;
 
 import com.globalsight.everest.persistence.page.SourcePageDescriptorModifier;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -42,6 +44,8 @@ import com.globalsight.util.GlobalSightLocale;
 public final class PagePersistenceAccessor
 {
     static private final Logger CATEGORY = Logger.getLogger(PagePersistenceAccessor.class);
+    static private final String UPDATE_SOURCE_PAGE_STATE = "update `source_page` set `STATE` = ? where `ID` = ?";
+    static private final String UPDATE_TARGET_PAGE_STATE = "update `target_page` set `STATE` = ? where `ID` = ?";
 
     // ////////////////////////////////////////////////////////////////////
     // Begin: Static package level methods
@@ -924,18 +928,14 @@ public final class PagePersistenceAccessor
      */
     private static void updateStateOfPages(Object[] p_pages, String p_state) throws PageException
     {
-        Session session = null;
-        Transaction transaction = null;
+        List<List> sourcePages = new ArrayList<>();
+        List<List> targetPages = new ArrayList<>();
 
         try
         {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
             for (int i = 0, max = p_pages.length; i < max; i++)
             {
                 Page page = (Page) p_pages[i];
-
                 if (CATEGORY.isDebugEnabled())
                 {
                     CATEGORY.debug("Setting page " + page.getId() + " to state " + p_state);
@@ -944,35 +944,31 @@ public final class PagePersistenceAccessor
                 // only change the state if not of IMPORT_FAIL state
                 if (!page.getPageState().equals(PageState.IMPORT_FAIL))
                 {
-                    Class<?> ob = page.getClass().getName().startsWith(SourcePage.class.getName())
-                            ? SourcePage.class : TargetPage.class;
-                    // register the object and use the clone for updating
-                    Page pageClone = (Page) session.get(ob, page.getIdAsLong());
-                    if (pageClone != null)
+                    List pages = new ArrayList<>();
+                    pages.add(p_state);
+                    pages.add(page.getIdAsLong());
+                    if (page instanceof SourcePage)
                     {
-                        pageClone.setPageState(p_state);
-                        session.update(pageClone);
+                        sourcePages.add(pages);
+                    }
+                    else if (page instanceof TargetPage)
+                    {
+                        targetPages.add(pages);
+                    }
+                    else 
+                    {
+                        CATEGORY.error("Can not update the state for " + page.getClass().getName());
                     }
                 }
             }
-
-            transaction.commit();
+            
+            DbUtil.batchUpdate(UPDATE_SOURCE_PAGE_STATE, sourcePages);
+            DbUtil.batchUpdate(UPDATE_TARGET_PAGE_STATE, targetPages);
         }
         catch (Exception ex) // PersistenceException and TOPLinkException
         {
-            if (transaction != null)
-            {
-                transaction.rollback();
-            }
             CATEGORY.error("PagePersistenceAccessor :: updateStateOfPage -- ", ex);
             throw new PageException(PageException.MSG_FAILED_TO_UPDATE_PAGE_STATE, null, ex);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                // session.close();
-            }
         }
     }
 

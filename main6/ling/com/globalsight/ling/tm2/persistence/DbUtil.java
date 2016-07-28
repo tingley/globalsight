@@ -477,4 +477,76 @@ public class DbUtil
 
         return false;
     }
+    
+    @SuppressWarnings("rawtypes")
+    public static void batchUpdate(String sqlUpdate, List args)
+    {
+        if (args.size() ==0)
+            return;
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try
+        {
+
+            conn = DbUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            stmt = conn.prepareStatement(sqlUpdate);
+
+            int batchUpdate = 0;
+            
+            for (Object ob : args)
+            {
+                if (ob instanceof List)
+                {
+                    List as = (List) ob;
+                    for (int i = 0; i < as.size(); i++)
+                    {
+                        stmt.setObject(i + 1, as.get(i));
+                    }
+                    
+                }
+                else
+                {
+                    stmt.setObject(1, ob);
+                }
+                
+                stmt.addBatch();
+                batchUpdate++;
+                if (batchUpdate > DbUtil.BATCH_INSERT_UNIT)
+                {
+                    stmt.executeBatch();
+                    batchUpdate = 0;
+                }
+            }
+
+            if (batchUpdate > 0)
+            {
+                stmt.executeBatch();
+            }
+
+        }
+        catch (Exception ex)
+        {
+            c_logger.error(ex);
+        }
+        finally
+        {
+            DbUtil.silentClose(stmt);
+            if (conn != null)
+            {
+                try
+                {
+                    conn.commit();
+                }
+                catch (SQLException e)
+                {
+                    c_logger.error(e);
+                }
+
+                DbUtil.silentReturnConnection(conn);
+            }
+        }
+    }
 }

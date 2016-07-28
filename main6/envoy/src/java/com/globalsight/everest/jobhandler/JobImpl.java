@@ -1307,7 +1307,19 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         Set<JobAttribute> jobAtts = getAttributes();
         if (jobAtts != null)
         {
-            atts.addAll(jobAtts);
+            try
+            {
+                atts.addAll(jobAtts);
+            }
+            catch (Exception e)
+            {
+                atts = new ArrayList<JobAttribute>();
+                for (JobAttribute att : jobAtts)
+                {
+                    atts.add(HibernateUtil.get(JobAttribute.class, att.getId()));
+                }
+            }
+            
         }
 
         return atts;

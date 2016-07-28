@@ -706,8 +706,8 @@ public abstract class AbstractTargetPagePersistence implements
                             //GBS-4360: Part of ICE matches can't be locked in offline file
                             if (hashMatchedNum == 1
                                     && isHashValueMatched(sourceTuv, segment)
-                                    && !segment.getMatchType().equals(
-                                            MatchState.MULTIPLE_TRANSLATION.getName()))
+                                    && !MatchState.MULTIPLE_TRANSLATION.getName().equals(
+                                            segment.getMatchType()))
                             {
                                 targetTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
                             }

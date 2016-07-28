@@ -44,7 +44,7 @@ public class WorkflowCancelHelper
 {
     private static final Logger logger = Logger.getLogger(WorkflowCancelHelper.class.getName());
 
-    private static final int BATCH_CAPACITY = 1000;
+    private static final int BATCH_CAPACITY = 100;
 
     private static long runtime = -1l;
     private static String runningMessage = "";
@@ -401,7 +401,7 @@ public class WorkflowCancelHelper
             spIdList.add(sp.getIdAsLong());
         }
 
-        return toBatchList(spIdList, 10);
+        return toBatchList(spIdList, 2);
     }
 
     private static List<List<Object>> getTargetPageIds(Workflow workflow)
@@ -413,7 +413,7 @@ public class WorkflowCancelHelper
             tpIdList.add(tp.getIdAsLong());
         }
 
-        return toBatchList(tpIdList, 10);
+        return toBatchList(tpIdList, 2);
     }
 
     private static List<List<Object>> queryBatchList(Connection conn, String sql, Object param)

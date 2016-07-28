@@ -69,7 +69,7 @@ public class CompanyRemoval
     private String runningMessage = "";
     private String doneMessage = "";
 
-    private static final int BATCH_CAPACITY = 1000;
+    private static final int BATCH_CAPACITY = 100;
 
     private static final String TABLE_BACKUP_COMPANY = "COMPANY_BACKUP";
     private static final String TABLE_BACKUP_JOB = "JOB_BACKUP";

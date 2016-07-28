@@ -19,6 +19,7 @@ package com.globalsight.ling.tm2.persistence;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -334,6 +335,33 @@ public class DbUtil
 
         return result;
     }
+    
+    public static List queryForSingleColumn(String sql, List<Object> args) throws Exception
+    {
+        Connection conn = getConnection();
+        List list = new ArrayList();
+        ResultSet rs = null;
+        PreparedStatement st = null;
+        ResultSetMetaData rsmd = null;
+        try
+        {
+            st = conn.prepareStatement(sql);
+            putArgsToStatement(st, args);
+            rs = st.executeQuery();
+            rsmd = rs.getMetaData();
+            while (rs.next())
+            {
+                list.add(rs.getObject(1));
+            }
+        }
+        finally
+        {
+            rs.close();
+            silentClose(st);
+            returnConnection(conn);
+        }
+        return list;
+    }
 
     /**
      * create in clause of locale ids. It produces somethig like this: (9238,
@@ -476,5 +504,77 @@ public class DbUtil
         }
 
         return false;
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public static void batchUpdate(String sqlUpdate, List args)
+    {
+        if (args.size() ==0)
+            return;
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try
+        {
+
+            conn = DbUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            stmt = conn.prepareStatement(sqlUpdate);
+
+            int batchUpdate = 0;
+            
+            for (Object ob : args)
+            {
+                if (ob instanceof List)
+                {
+                    List as = (List) ob;
+                    for (int i = 0; i < as.size(); i++)
+                    {
+                        stmt.setObject(i + 1, as.get(i));
+                    }
+                    
+                }
+                else
+                {
+                    stmt.setObject(1, ob);
+                }
+                
+                stmt.addBatch();
+                batchUpdate++;
+                if (batchUpdate > DbUtil.BATCH_INSERT_UNIT)
+                {
+                    stmt.executeBatch();
+                    batchUpdate = 0;
+                }
+            }
+
+            if (batchUpdate > 0)
+            {
+                stmt.executeBatch();
+            }
+
+        }
+        catch (Exception ex)
+        {
+            c_logger.error(ex);
+        }
+        finally
+        {
+            DbUtil.silentClose(stmt);
+            if (conn != null)
+            {
+                try
+                {
+                    conn.commit();
+                }
+                catch (SQLException e)
+                {
+                    c_logger.error(e);
+                }
+
+                DbUtil.silentReturnConnection(conn);
+            }
+        }
     }
 }

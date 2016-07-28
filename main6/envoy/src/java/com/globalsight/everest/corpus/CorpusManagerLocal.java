@@ -378,6 +378,7 @@ public class CorpusManagerLocal implements CorpusManager
             doc.setStoreDate(new Date());
             CorpusDocGroup cdg = p_src.getCorpusDocGroup();
             doc.setCorpusDocGroup(cdg);
+            HibernateUtil.getSession().clear();
             HibernateUtil.save(doc);
 
             c_logger.debug("After commit cdg id is " + cdg.getId());

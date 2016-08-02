@@ -73,11 +73,9 @@ import com.globalsight.util.edit.EditUtil;
  * will be output as type "string" and not type "text" (the default).
  * </P>
  */
-class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
-        ExtractorExceptionConstants
+class ExtractionHandler implements IHtmlHandler, IHTMLConstants, ExtractorExceptionConstants
 {
-    static private final Logger logger = Logger
-            .getLogger(ExtractionHandler.class);
+    static private final Logger logger = Logger.getLogger(ExtractionHandler.class);
     //
     // Constants Section
     //
@@ -134,8 +132,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
     /**
      * <p>
      * List of all the candidates for extraction (i.e non-breaking tags, text,
-     * comments...).
-     * </P
+     * comments...). </P
      */
     private List<HtmlObjects.HtmlElement> m_extractionCandidates;
 
@@ -267,8 +264,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
     // Constructor Section
     //
 
-    public ExtractionHandler(EFInputData p_input, Output p_output,
-            Extractor p_Extractor, ExtractionRules p_rules, int p_xspLanguage)
+    public ExtractionHandler(EFInputData p_input, Output p_output, Extractor p_Extractor,
+            ExtractionRules p_rules, int p_xspLanguage)
     {
         super();
 
@@ -283,8 +280,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         {
             ExtractorRegistry er = ExtractorRegistry.getObject();
 
-            if (p_Extractor.getParentType() == er
-                    .getFormatId(ExtractorRegistry.FORMAT_JAVASCRIPT))
+            if (p_Extractor.getParentType() == er.getFormatId(ExtractorRegistry.FORMAT_JAVASCRIPT))
             {
                 m_isInsideJavaScript = true;
             }
@@ -356,8 +352,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                                 int beginIndex = line.indexOf("mso-style-name")
                                         + "mso-style-name:".length();
                                 int endIndex = line.indexOf(";", beginIndex);
-                                styleName = line
-                                        .substring(beginIndex, endIndex);
+                                styleName = line.substring(beginIndex, endIndex);
                                 // Map style mark (without ".") to name in the
                                 // tem Map
                                 tempMap.put(style.substring(1), styleName);
@@ -390,16 +385,13 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                             else if ((line.indexOf("mso-style-parent") != -1))
                             {
                                 // Find style parent
-                                int beginIndex = line
-                                        .indexOf("mso-style-parent")
+                                int beginIndex = line.indexOf("mso-style-parent")
                                         + "mso-style-parent:".length();
                                 int endIndex = line.indexOf(";", beginIndex);
-                                styleName = tempMap.get(line.substring(
-                                        beginIndex, endIndex));
+                                styleName = tempMap.get(line.substring(beginIndex, endIndex));
                                 // Map class (html class element) name to style
                                 // parent name.
-                                m_excelStyle2NameMap.put(style.substring(1),
-                                        styleName);
+                                m_excelStyle2NameMap.put(style.substring(1), styleName);
                             }
                         }
                         line = br.readLine();
@@ -442,14 +434,12 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
     private boolean isXSPExtractor()
     {
-        return m_extractor instanceof ASPExtractor
-                || m_extractor instanceof JSPExtractor;
+        return m_extractor instanceof ASPExtractor || m_extractor instanceof JSPExtractor;
     }
 
     private boolean isMsOfficeExtractor()
     {
-        return isWordExtractor() || isPowerPointExtractor()
-                || isExcelExtractor();
+        return isWordExtractor() || isPowerPointExtractor() || isExcelExtractor();
     }
 
     private boolean isWordExtractor()
@@ -527,8 +517,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
             if (m_gsaCounter > 0)
             {
-                throw new ExtractorException(HTML_GS_TAG_ERROR,
-                        "GS start tag not closed");
+                throw new ExtractorException(HTML_GS_TAG_ERROR, "GS start tag not closed");
             }
         }
         catch (ExtractorException e)
@@ -586,8 +575,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             // comments that contain a paragraph ID (PID). We convert
             // the comment to a different object so it won't be moved
             // out of the paragraph in flushText().
-            if (strTempComment.startsWith("BOLOC")
-                    || strTempComment.startsWith("EOLOC"))
+            if (strTempComment.startsWith("BOLOC") || strTempComment.startsWith("EOLOC"))
             {
                 addToText(new HtmlObjects.PidComment(c.getComment()));
             }
@@ -612,8 +600,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             }
             else
             {
-                if (this.isExcelExtractor()
-                        && strTempComment.indexOf("SheetHidden") >= 0)
+                if (this.isExcelExtractor() && strTempComment.indexOf("SheetHidden") >= 0)
                 {
                     this.m_excelHiddenSheet = true;
                 }
@@ -857,10 +844,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             {
                 boolean isNotesTag = isNotesTagInMaster(t);
                 m_pptNotes = m_pptNotes || isNotesTag;
-                MSOfficePPTFilter filter = (MSOfficePPTFilter) m_extractor
-                        .getMainFilter();
-                boolean shouldExtractNotes = (filter != null && filter
-                        .isNotesTranslate());
+                MSOfficePPTFilter filter = (MSOfficePPTFilter) m_extractor.getMainFilter();
+                boolean shouldExtractNotes = (filter != null && filter.isNotesTranslate());
                 if (isNotesTag && !shouldExtractNotes)
                 {
                     setSkippableContext(t);
@@ -874,8 +859,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     return;
                 }
                 String isMasterTranslate = SystemConfiguration.getInstance()
-                        .getStringParameter(
-                                SystemConfigParamNames.PPT_MASTER_TRANSLATE);
+                        .getStringParameter(SystemConfigParamNames.PPT_MASTER_TRANSLATE);
                 if (!m_pptNotes && !Boolean.parseBoolean(isMasterTranslate)
                         && isContentFromMaster(t))
                 {
@@ -889,8 +873,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             // extracting
             if (isWordExtractor())
             {
-                MSOfficeDocFilter filter = (MSOfficeDocFilter) m_extractor
-                        .getMainFilter();
+                MSOfficeDocFilter filter = (MSOfficeDocFilter) m_extractor.getMainFilter();
 
                 if (filter != null && !filter.isTocTranslate())
                 {
@@ -908,8 +891,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
             // Tue Aug 30 21:29:53 2005: check for Word paragraph
             // or Excel Cell styles that are marked as not translatable.
-            if ((isWordExtractor() || isExcelExtractor())
-                    && isSkippableContextStart(t))
+            if ((isWordExtractor() || isExcelExtractor()) && isSkippableContextStart(t))
             {
                 setSkippableContext(t);
 
@@ -917,15 +899,13 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 return;
             }
 
-            if (isWordExtractor()
-                    && (isUntranslatableStart(t) || isInsideUntranslatableContext())
+            if (isWordExtractor() && (isUntranslatableStart(t) || isInsideUntranslatableContext())
                     && !t.isClosed && !isUnpairedTag(t))
             {
                 setUntranslatableContext(t);
             }
 
-            if (isWordExtractor()
-                    && (isInternalStyleStart(t) || isInsideInternalStyleContext())
+            if (isWordExtractor() && (isInternalStyleStart(t) || isInsideInternalStyleContext())
                     && !t.isClosed && !isUnpairedTag(t))
             {
                 setInternalStyleContext(t);
@@ -1015,8 +995,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     {
                         // Extract numbers on demand (untested) but
                         // never extract formulas.
-                        if (m_rules.doExtractNumbers()
-                                && !isExcelFormulaCell(t))
+                        if (m_rules.doExtractNumbers() && !isExcelFormulaCell(t))
                         {
                             t.attributes.getAttribute("x:num").deleteValue();
                         }
@@ -1244,13 +1223,12 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
                 boolean b_script = false;
 
-                b_script = skippedText.length() > 0
-                        && !Text.isBlank(skippedText); // non-null xml
+                b_script = skippedText.length() > 0 && !Text.isBlank(skippedText); // non-null
+                                                                                   // xml
 
                 // m_strSwitchTo set by handleStartTag(). If allowed
                 // by dynamic rules, send content to XML extractor.
-                if (b_script && m_strSwitchTo.equalsIgnoreCase("xml")
-                        && m_rules.doExtractXml()
+                if (b_script && m_strSwitchTo.equalsIgnoreCase("xml") && m_rules.doExtractXml()
                         && m_rules.isSwitchTag(m_strSwitchTo))
                 {
                     try
@@ -1269,8 +1247,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 }
             }
 
-            m_bPreserveWhite = m_bPreserveWhite
-                    && !m_rules.isWhitePreservingTag(t.tag);
+            m_bPreserveWhite = m_bPreserveWhite && !m_rules.isWhitePreservingTag(t.tag);
 
             boolean isInternalEndTag = isInternalEndTag(t);
             if (isInternalEndTag)
@@ -1346,8 +1323,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 m_strSkippedText.setLength(0);
             }
 
-            m_bPreserveWhite = m_bPreserveWhite
-                    && !m_rules.isWhitePreservingTag(t.tag);
+            m_bPreserveWhite = m_bPreserveWhite && !m_rules.isWhitePreservingTag(t.tag);
 
             if (!m_bExtracting)
             {
@@ -1401,8 +1377,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         {
             // Code to skip text between tags that start in skeleton,
             // like Excel's <TD x:xxx>...</TD>.
-            if (m_bSkipExcelCell || this.m_excelHiddenRow
-                    || this.m_excelHiddenSheet)
+            if (m_bSkipExcelCell || this.m_excelHiddenRow || this.m_excelHiddenSheet)
             {
                 m_output.addSkeleton(t.toString());
             }
@@ -1480,8 +1455,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 try
                 {
                     mr = null;
-                    mr = RegEx.matchSubstring(s.text, "^(\\s*@)(.*|\\n*)",
-                            false);
+                    mr = RegEx.matchSubstring(s.text, "^(\\s*@)(.*|\\n*)", false);
                 }
                 catch (RegExException e)
                 {
@@ -1501,8 +1475,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     try
                     {
                         mr = null;
-                        mr = RegEx.matchSubstring(s.text,
-                                "^(.*|\\n*)language\\s*=\\s*\"([^\"]*)\"",
+                        mr = RegEx.matchSubstring(s.text, "^(.*|\\n*)language\\s*=\\s*\"([^\"]*)\"",
                                 false);
                     }
                     catch (RegExException e)
@@ -1528,8 +1501,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                                 mr = null;
                                 if (s.text.trim().startsWith("="))
                                 {
-                                    mr = RegEx.matchSubstring(s.text,
-                                            "^(\\s*=)(.*|\\n*)", false);
+                                    mr = RegEx.matchSubstring(s.text, "^(\\s*=)(.*|\\n*)", false);
                                 }
                             }
                             catch (RegExException e)
@@ -1551,8 +1523,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                                 try
                                 {
                                     mr = null;
-                                    mr = RegEx.matchSubstring(s.text,
-                                            "^(\\s*!)((.|\\r|\\n)*)", false);
+                                    mr = RegEx.matchSubstring(s.text, "^(\\s*!)((.|\\r|\\n)*)",
+                                            false);
                                 }
                                 catch (RegExException e)
                                 {
@@ -1573,8 +1545,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                                     try
                                     {
                                         mr = null;
-                                        mr = RegEx.matchSubstring(s.text,
-                                                "^--", false);
+                                        mr = RegEx.matchSubstring(s.text, "^--", false);
                                     }
                                     catch (RegExException e)
                                     {
@@ -1660,8 +1631,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 // and the dynamic rules allow extraction, then switch
                 // to javascript
                 if (!m_extractor.exclude() && m_rules.doExtractScripts()
-                        && m_rules.isSwitchTag(s.tag) && b_script
-                        && isInswitchMap)
+                        && m_rules.isSwitchTag(s.tag) && b_script && isInswitchMap)
                 {
                     m_iEmbeddedLine = s.iLine;
                     m_iEmbeddedCol = s.iCol;
@@ -1779,8 +1749,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 else
                 {
                     type = s.attributes.getValue("type");
-                    if (type.equalsIgnoreCase("code")
-                            || type.equalsIgnoreCase("print")
+                    if (type.equalsIgnoreCase("code") || type.equalsIgnoreCase("print")
                             || type.equalsIgnoreCase("class"))
                     {
                         b_script = true;
@@ -1788,8 +1757,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 }
 
                 // if there's any script to deal with
-                if (!m_extractor.exclude() && m_rules.isSwitchTag(s.tag)
-                        && b_script)
+                if (!m_extractor.exclude() && m_rules.isSwitchTag(s.tag) && b_script)
                 {
                     m_iEmbeddedLine = s.iLine;
                     m_iEmbeddedCol = s.iCol;
@@ -1844,8 +1812,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 boolean b_script = s.text.length() > 0 && !Text.isBlank(s.text);
 
                 // if there's any script to deal with
-                if (!m_extractor.exclude() && m_rules.isSwitchTag(s.tag)
-                        && b_script)
+                if (!m_extractor.exclude() && m_rules.isSwitchTag(s.tag) && b_script)
                 {
                     m_iEmbeddedLine = s.iLine;
                     m_iEmbeddedCol = s.iCol;
@@ -1900,8 +1867,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 boolean b_sql = s.text.length() > 0 && !Text.isBlank(s.text);
 
                 // if there's any SQL to deal with
-                if (!m_extractor.exclude() && m_rules.isSwitchTag(s.tag)
-                        && b_sql)
+                if (!m_extractor.exclude() && m_rules.isSwitchTag(s.tag) && b_sql)
                 {
                     // Handle SQL later
                     // switchToSQL(s.m_strText, false);
@@ -1961,8 +1927,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 // and if there's any style to deal with, then switch
                 // to CSS
                 if (!m_extractor.exclude() && m_rules.doExtractStylesheets()
-                        && m_rules.isSwitchTag(s.tag) && isCSSStyleSheet(s)
-                        && b_style && isInswitchMap)
+                        && m_rules.isSwitchTag(s.tag) && isCSSStyleSheet(s) && b_style
+                        && isInswitchMap)
                 {
                     switchToStylesheet(s.text, false);
                 }
@@ -2012,9 +1978,9 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             return;
         }
 
-        if (isInsideUntranslatableContext() || isInsideSkippableContext()
-                || m_bSkipExcelCell || this.m_excelHiddenRow
-                || this.m_excelHiddenSheet || isInsideInternalStyleContext())
+        if (isInsideUntranslatableContext() || isInsideSkippableContext() || m_bSkipExcelCell
+                || this.m_excelHiddenRow || this.m_excelHiddenSheet
+                || isInsideInternalStyleContext())
         {
             // Keep markup content in text not mixed with style tags.
             // Here, markup content means anything between "<" (inclusive) and
@@ -2058,8 +2024,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             String mainFormat = m_extractor.getMainFormat();
             // Code to skip text between tags that start in skeleton,
             // like Excel's <TD x:xxx>...</TD>.
-            if (m_bSkipExcelCell || this.m_excelHiddenRow
-                    || this.m_excelHiddenSheet)
+            if (m_bSkipExcelCell || this.m_excelHiddenRow || this.m_excelHiddenSheet)
             {
                 m_output.addSkeleton(t.toString());
             }
@@ -2081,9 +2046,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             }
             else
             {
-                List<String> handled = InternalTextHelper
-                        .handleStringWithListReturn(t.toString(),
-                                getInternalTexts(), IFormatNames.FORMAT_HTML);
+                List<String> handled = InternalTextHelper.handleStringWithListReturn(t.toString(),
+                        getInternalTexts(), IFormatNames.FORMAT_HTML);
 
                 if (handled == null || handled.size() == 0)
                 {
@@ -2093,8 +2057,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 {
                     for (String subtext : handled)
                     {
-                        if (subtext
-                                .startsWith(InternalTextHelper.GS_INTERNALT_TAG_START))
+                        if (subtext.startsWith(InternalTextHelper.GS_INTERNALT_TAG_START))
                         {
                             addToText(new HtmlObjects.InternalText(subtext));
                         }
@@ -2120,15 +2083,12 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         {
             try
             {
-                return BaseFilterManager.getInternalTexts(m_extractor
-                        .getMainBaseFilter());
+                return BaseFilterManager.getInternalTexts(m_extractor.getMainBaseFilter());
             }
             catch (Exception e)
             {
-                logger.error(
-                        "Error when load InternalTexts from base filter : "
-                                + m_extractor.getMainBaseFilter()
-                                        .getFilterName(), e);
+                logger.error("Error when load InternalTexts from base filter : "
+                        + m_extractor.getMainBaseFilter().getFilterName(), e);
                 return new ArrayList<InternalText>();
             }
         }
@@ -2172,31 +2132,27 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      *            : indicates whether entities in the attribute need to be
      *            decoded when outputting as trans/loc.
      */
-    protected void addAttributeToSkeleton(HtmlObjects.Tag t,
-            HtmlObjects.Attribute attrib, boolean decode)
-            throws ExtractorException
+    protected void addAttributeToSkeleton(HtmlObjects.Tag t, HtmlObjects.Attribute attrib,
+            boolean decode) throws ExtractorException
     {
         String strValue = Text.removeQuotes(attrib.value);
 
         // Value-less Attribute - quick exit
-        if (strValue == null || strValue.length() == 0
-                || Text.isBlank(strValue))
+        if (strValue == null || strValue.length() == 0 || Text.isBlank(strValue))
         {
             m_output.addSkeleton(" " + attrib.toString());
             return;
         }
 
         // When extracting ASP/JSP, check for att="<%=...%>".
-        if (isXSPExtractor() && strValue.indexOf("<%") >= 0
-                && strValue.indexOf("%>") >= 0)
+        if (isXSPExtractor() && strValue.indexOf("<%") >= 0 && strValue.indexOf("%>") >= 0)
         {
             m_output.addSkeleton(" " + attrib.toString());
             return;
         }
 
         // When extracting CFM, check for att="<cf ... >".
-        if (isCFExtractor()
-                && (strValue.indexOf("<cf") >= 0 || strValue.indexOf("<CF") >= 0))
+        if (isCFExtractor() && (strValue.indexOf("<cf") >= 0 || strValue.indexOf("<CF") >= 0))
         {
             m_output.addSkeleton(" " + attrib.toString());
             return;
@@ -2286,10 +2242,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         // }
 
         // Translatable Attribute. Do not extract url in the attribute value.
-        else if ((t.isFromOfficeContent ? m_rules
-                .isContentTranslatableAttribute(attrib.name) : m_rules
-                .isTranslatableAttribute(t.tag, attrib.name))
-                && !m_extractor.exclude())
+        else if ((t.isFromOfficeContent ? m_rules.isContentTranslatableAttribute(attrib.name)
+                : m_rules.isTranslatableAttribute(t.tag, attrib.name)) && !m_extractor.exclude())
         {
             m_output.addSkeleton(" " + attrib.name + "=" + quote);
             m_output.addTranslatable(strValue);
@@ -2315,9 +2269,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
     }
 
-    protected void addAttributeToSkeleton(HtmlObjects.Tag t,
-            HtmlObjects.SimpleTag embeddedTag, boolean decode)
-            throws ExtractorException
+    protected void addAttributeToSkeleton(HtmlObjects.Tag t, HtmlObjects.SimpleTag embeddedTag,
+            boolean decode) throws ExtractorException
     {
         // embedded tags are in attribute position, so output a space
         m_output.addSkeleton(" ");
@@ -2340,9 +2293,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      *            : indicates whether entities in the attribute need to be
      *            decoded when outputting as trans/loc.
      */
-    protected void addAttributeToSkeleton(HtmlObjects.CFTag t,
-            HtmlObjects.Attribute attrib, boolean decode)
-            throws ExtractorException
+    protected void addAttributeToSkeleton(HtmlObjects.CFTag t, HtmlObjects.Attribute attrib,
+            boolean decode) throws ExtractorException
     {
         if (decode)
         {
@@ -2352,8 +2304,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         String strValue = Text.removeQuotes(attrib.value);
 
         // Value-less Attribute - quick exit
-        if (strValue == null || strValue.length() == 0
-                || Text.isBlank(strValue))
+        if (strValue == null || strValue.length() == 0 || Text.isBlank(strValue))
         {
             m_output.addSkeleton(" " + attrib.toString());
             return;
@@ -2366,16 +2317,14 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         // Localizable Attributes
         if (m_rules.isLocalizableAttribute(t.tag, attrib.name))
         {
-            String strAttributeType = m_rules.getLocalizableAttribType(t.tag,
-                    attrib.name);
+            String strAttributeType = m_rules.getLocalizableAttribType(t.tag, attrib.name);
 
             m_output.addSkeleton(" " + attrib.name + "=" + quote);
             m_output.addLocalizable(strValue);
 
             try
             {
-                m_output.setLocalizableAttrs(ExtractorRegistry.FORMAT_HTML,
-                        strAttributeType);
+                m_output.setLocalizableAttrs(ExtractorRegistry.FORMAT_HTML, strAttributeType);
             }
             catch (DocumentElementException e)
             {
@@ -2386,8 +2335,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
 
         // Translatable Attribute
-        else if (m_rules.isTranslatableAttribute(t.tag, attrib.name)
-                && !m_extractor.exclude())
+        else if (m_rules.isTranslatableAttribute(t.tag, attrib.name) && !m_extractor.exclude())
         {
             m_output.addSkeleton(" " + attrib.name + "=" + quote);
             m_output.addTranslatable(strValue);
@@ -2430,8 +2378,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * decoded when output as translatable/localizable or not.
      * </p>
      */
-    protected void addTagToSkeleton(HtmlObjects.Tag t, boolean decode)
-            throws ExtractorException
+    protected void addTagToSkeleton(HtmlObjects.Tag t, boolean decode) throws ExtractorException
     {
         if (!t.isFromOfficeContent)
         {
@@ -2445,9 +2392,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             // meta tag are a little special and deserve a special method...
             if (t.tag.equalsIgnoreCase("meta"))
             {
-                // processMeta(t); // nothing to decode
-                // For GBS-740, meta tags exposed as non translatable
-                m_output.addSkeleton(t.original);
+                // GBS-3784, handle meta attribute translation
+                processMeta(t);
                 return;
             }
 
@@ -2477,8 +2423,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             // Wed Mar 12 20:55:47 2003 CvdL: spacer gifs, reduce number
             // of dreadful HP localizables here.
             String value;
-            if ((t.tag.equalsIgnoreCase("img"))
-                    && t.isDefinedAttribute(SRC)
+            if ((t.tag.equalsIgnoreCase("img")) && t.isDefinedAttribute(SRC)
                     && (value = t.attributes.getAttribute(SRC).getValue()) != null
                     && m_rules.isSpacerGif(value))
             {
@@ -2560,8 +2505,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * if we should decode attributes or not.
      * </p>
      */
-    protected void addTagToSkeleton(HtmlObjects.CFTag t, boolean decode)
-            throws ExtractorException
+    protected void addTagToSkeleton(HtmlObjects.CFTag t, boolean decode) throws ExtractorException
     {
         // all other tags
         m_output.addSkeleton("<" + t.tag);
@@ -2604,11 +2548,9 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * Note this function duplicates code in addCommentToTranslatable().
      * </p>
      */
-    protected void addCommentToSkeleton(HtmlObjects.Comment t)
-            throws ExtractorException
+    protected void addCommentToSkeleton(HtmlObjects.Comment t) throws ExtractorException
     {
-        if (isSSIComment(t) && !m_extractor.exclude()
-                && m_rules.doExtractSSIInclude())
+        if (isSSIComment(t) && !m_extractor.exclude() && m_rules.doExtractSSIInclude())
         {
             String str_comment = t.getComment();
 
@@ -2642,8 +2584,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
                 try
                 {
-                    m_output.setLocalizableAttrs(ExtractorRegistry.FORMAT_HTML,
-                            "ssi-include");
+                    m_output.setLocalizableAttrs(ExtractorRegistry.FORMAT_HTML, "ssi-include");
                 }
                 catch (DocumentElementException e) // SNH
                 {
@@ -2679,14 +2620,11 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * Note this function duplicates code in addCommentToSkeleton().
      * </p>
      */
-    protected void addCommentToTranslatable(HtmlObjects.Comment t)
-            throws ExtractorException
+    protected void addCommentToTranslatable(HtmlObjects.Comment t) throws ExtractorException
     {
-        TmxTagGenerator tg = m_html2TmxMap
-                .getPlaceholderTmxTag("comment", true);
+        TmxTagGenerator tg = m_html2TmxMap.getPlaceholderTmxTag("comment", true);
 
-        if (isSSIComment(t) && !m_extractor.exclude()
-                && m_rules.doExtractSSIInclude())
+        if (isSSIComment(t) && !m_extractor.exclude() && m_rules.doExtractSSIInclude())
         {
             String str_comment = t.getComment();
 
@@ -2716,8 +2654,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 m_output.addTranslatable(first);
 
                 String second = str_comment.substring(i_fileStart, i_fileEnd);
-                m_output.addTranslatableTmx("<sub type=\"ssi-include\" "
-                        + "locType=\"localizable\">");
+                m_output.addTranslatableTmx(
+                        "<sub type=\"ssi-include\" " + "locType=\"localizable\">");
                 second = Text.removeCRNL(second);
                 m_output.addTranslatable(second);
                 m_output.addTranslatableTmx("</sub>");
@@ -2807,8 +2745,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             {
                 for (Iterator it = tag.attributes.iterator(); it.hasNext();)
                 {
-                    HtmlObjects.Attribute attr = (HtmlObjects.Attribute) it
-                            .next();
+                    HtmlObjects.Attribute attr = (HtmlObjects.Attribute) it.next();
                     decodeEntities(attr);
                 }
             }
@@ -2825,8 +2762,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      */
     protected void assignPairingStatus(List<HtmlObjects.HtmlElement> p_segment)
     {
-        List<HtmlObjects.HtmlElement> tags = new ArrayList<HtmlObjects.HtmlElement>(
-                p_segment);
+        List<HtmlObjects.HtmlElement> tags = new ArrayList<HtmlObjects.HtmlElement>(p_segment);
         Object o1, o2;
         int i_start, i_end, i_max;
         int i_level, i_partner = 1;
@@ -2895,9 +2831,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 }
 
                 // tag with no buddy - if it requires one, mark as isolated
-                if (t_start.isFromOfficeContent ? m_rules
-                        .isContentPairedTag(t_start.tag) : m_rules
-                        .isPairedTag(t_start.tag))
+                if (t_start.isFromOfficeContent ? m_rules.isContentPairedTag(t_start.tag)
+                        : m_rules.isPairedTag(t_start.tag))
                 {
                     t_start.isIsolated = true;
                 }
@@ -2962,9 +2897,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 }
 
                 // tag with no buddy - if it requires one, mark as isolated
-                if (t_CFstart.isFromOfficeContent ? m_rules
-                        .isContentPairedTag(t_CFstart.tag) : m_rules
-                        .isPairedTag(t_CFstart.tag))
+                if (t_CFstart.isFromOfficeContent ? m_rules.isContentPairedTag(t_CFstart.tag)
+                        : m_rules.isPairedTag(t_CFstart.tag))
                 {
                     t_CFstart.isIsolated = true;
                 }
@@ -2988,8 +2922,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         // only isolated begin/end tags are left in the list
         for (i_start = 0; i_start < i_max; ++i_start)
         {
-            HtmlObjects.HtmlElement t = (HtmlObjects.HtmlElement) tags
-                    .get(i_start);
+            HtmlObjects.HtmlElement t = (HtmlObjects.HtmlElement) tags.get(i_start);
 
             t.isIsolated = true;
         }
@@ -3006,8 +2939,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * to remove the leading isolated tags, and then to remove all tags that are
      * in the list passed in.
      */
-    protected void flushLeadingIsolatedEndTags(
-            List<HtmlObjects.HtmlElement> p_segments) throws ExtractorException
+    protected void flushLeadingIsolatedEndTags(List<HtmlObjects.HtmlElement> p_segments)
+            throws ExtractorException
     {
         while (p_segments.size() > 0)
         {
@@ -3018,8 +2951,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 HtmlObjects.EndTag t = (HtmlObjects.EndTag) o;
 
                 if (t.isIsolated
-                        && (isMsOfficeExtractor() || m_html2TmxMap
-                                .peekExternalId(t.tag) == -1))
+                        && (isMsOfficeExtractor() || m_html2TmxMap.peekExternalId(t.tag) == -1))
                 {
                     m_output.addSkeleton(t.toString());
                     p_segments.remove(0);
@@ -3039,8 +2971,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     continue;
                 }
             }
-            else if (o instanceof HtmlObjects.Text
-                    || o instanceof HtmlObjects.Newline)
+            else if (o instanceof HtmlObjects.Text || o instanceof HtmlObjects.Newline)
             {
                 String text = o.toString();
 
@@ -3090,8 +3021,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
     }
 
-    protected void flushLeadingIsolatedFontTags(
-            List<HtmlObjects.HtmlElement> p_segments) throws ExtractorException
+    protected void flushLeadingIsolatedFontTags(List<HtmlObjects.HtmlElement> p_segments)
+            throws ExtractorException
     {
         // While the first element is an isolated starting font tag,
         // flush it to the skeleton.
@@ -3109,8 +3040,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     continue;
                 }
             }
-            else if (o instanceof HtmlObjects.Text
-                    || o instanceof HtmlObjects.Newline)
+            else if (o instanceof HtmlObjects.Text || o instanceof HtmlObjects.Newline)
             {
                 if (Text.isBlank(o.toString()))
                 {
@@ -3131,16 +3061,14 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * 
      * For MS Word: flush all isolated tags.
      */
-    protected void removeTrailingIsolatedEndTags(
-            List<HtmlObjects.HtmlElement> p_segments,
+    protected void removeTrailingIsolatedEndTags(List<HtmlObjects.HtmlElement> p_segments,
             List<HtmlObjects.HtmlElement> p_after)
     {
         while (p_segments.size() > 0)
         {
             Object o = p_segments.get(p_segments.size() - 1);
 
-            if (o instanceof HtmlObjects.Text
-                    || o instanceof HtmlObjects.Newline)
+            if (o instanceof HtmlObjects.Text || o instanceof HtmlObjects.Newline)
             {
                 if (Text.isBlank(o.toString()))
                 {
@@ -3153,8 +3081,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 HtmlObjects.EndTag t = (HtmlObjects.EndTag) o;
 
                 if (t.isIsolated
-                        && (isMsOfficeExtractor() || m_html2TmxMap
-                                .peekExternalId(t.tag) == -1))
+                        && (isMsOfficeExtractor() || m_html2TmxMap.peekExternalId(t.tag) == -1))
                 {
                     p_after.add(0, p_segments.remove(p_segments.size() - 1));
                     continue;
@@ -3184,8 +3111,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      */
     protected void flushLeftOverTags(List<HtmlObjects.HtmlElement> p_segments)
     {
-        for (Iterator<HtmlObjects.HtmlElement> it = p_segments.iterator(); it
-                .hasNext();)
+        for (Iterator<HtmlObjects.HtmlElement> it = p_segments.iterator(); it.hasNext();)
         {
             HtmlObjects.HtmlElement tag = it.next();
             if (tag.isFromOfficeContent)
@@ -3216,8 +3142,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             }
         }
 
-        if (m_bContainsText && !m_extractor.exclude()
-                && !m_isUntranslatableEndTag)
+        if (m_bContainsText && !m_extractor.exclude() && !m_isUntranslatableEndTag)
         {
             List<HtmlObjects.HtmlElement> tagsBefore = new ArrayList<HtmlObjects.HtmlElement>();
             List<HtmlObjects.HtmlElement> tagsAfter = new ArrayList<HtmlObjects.HtmlElement>();
@@ -3249,8 +3174,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
             if (isMsOfficeExtractor() && simplifySegments())
             {
-                MsOfficeSimplifier s = new MsOfficeSimplifier(m_rules,
-                        tagsBefore, m_extractionCandidates, tagsAfter);
+                MsOfficeSimplifier s = new MsOfficeSimplifier(m_rules, tagsBefore,
+                        m_extractionCandidates, tagsAfter);
 
                 // For PPT issue
                 if (isPowerPointExtractor())
@@ -3275,8 +3200,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 // Simplification creates a list of lists of tags. The
                 // individual lists must be flushed to skeleton and
                 // segments, alternately. The lists can be empty.
-                Iterator<List<HtmlObjects.HtmlElement>> it = s.getTagLists()
-                        .iterator();
+                Iterator<List<HtmlObjects.HtmlElement>> it = s.getTagLists().iterator();
                 List<HtmlObjects.HtmlElement> tags = it.next();
                 // this is flushing the before tag list
                 flushLeftOverTags(tags);
@@ -3290,8 +3214,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                         // For GBS-2073, handle tags in the embedded contents
                         tags = helper.handleTagsInContent(tags);
                     }
-                    if (m_rules.useInternalTextFilter()
-                            && !m_extractor.isDoSegBeforeInlText())
+                    if (m_rules.useInternalTextFilter() && !m_extractor.isDoSegBeforeInlText())
                     {
                         // For GBS-2073, handle internal text in embedded
                         // contents
@@ -3304,10 +3227,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     }
                     else
                     {
-                        List<HtmlObjects.HtmlElement> leadingTags = helper
-                                .getLeadingTags(tags);
-                        List<HtmlObjects.HtmlElement> trailingTags = helper
-                                .getTrailingTags(tags);
+                        List<HtmlObjects.HtmlElement> leadingTags = helper.getLeadingTags(tags);
+                        List<HtmlObjects.HtmlElement> trailingTags = helper.getTrailingTags(tags);
                         flushTextToSkeleton(leadingTags);
                         // flushing the main tag list
                         flushTextToTranslatable(tags);
@@ -3344,8 +3265,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * section.
      * </p>
      */
-    protected void flushTextToSkeleton(HtmlObjects.HtmlElement o,
-            HtmlObjects.HtmlElement last) throws ExtractorException
+    protected void flushTextToSkeleton(HtmlObjects.HtmlElement o, HtmlObjects.HtmlElement last)
+            throws ExtractorException
     {
         if (o instanceof HtmlObjects.Tag)
         {
@@ -3381,15 +3302,14 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             }
 
             // restore lastCR &#13; for ppt files
-            if (isPowerPointExtractor() && o instanceof HtmlObjects.Text
-                    && last != null && last instanceof HtmlObjects.Tag)
+            if (isPowerPointExtractor() && o instanceof HtmlObjects.Text && last != null
+                    && last instanceof HtmlObjects.Tag)
             {
                 HtmlObjects.Tag t = (HtmlObjects.Tag) last;
                 ExtendedAttributeList atts = t.attributes;
-                String styleValue = (atts == null) ? "" : atts
-                        .getValue("style");
-                if (styleValue.contains("lastCR") && tt != null
-                        && tt.length() == 1 && tt.charAt(0) == 13)
+                String styleValue = (atts == null) ? "" : atts.getValue("style");
+                if (styleValue.contains("lastCR") && tt != null && tt.length() == 1
+                        && tt.charAt(0) == 13)
                 {
                     tt = "&#13;";
                 }
@@ -3430,19 +3350,17 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * TODO: this is the place where the tag list can be modified for MS Office
      * fields and so on.
      */
-    protected void flushTextToTranslatable(
-            List<HtmlObjects.HtmlElement> p_segments) throws ExtractorException
+    protected void flushTextToTranslatable(List<HtmlObjects.HtmlElement> p_segments)
+            throws ExtractorException
     {
         boolean endTagToSkeleton = false;
         int forCount = 0;
-        for (ListIterator<HtmlObjects.HtmlElement> it = p_segments
-                .listIterator(); it.hasNext();)
+        for (ListIterator<HtmlObjects.HtmlElement> it = p_segments.listIterator(); it.hasNext();)
         {
             HtmlObjects.HtmlElement o = it.next();
             forCount++;
 
-            if (o instanceof HtmlObjects.Text
-                    || o instanceof HtmlObjects.Newline)
+            if (o instanceof HtmlObjects.Text || o instanceof HtmlObjects.Newline)
             {
                 HtmlObjects.HtmlElement he = (HtmlObjects.HtmlElement) o;
                 // Combine consecutive text and newline nodes to get
@@ -3453,8 +3371,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 {
                     o = it.next();
 
-                    if (o instanceof HtmlObjects.Text
-                            || o instanceof HtmlObjects.Newline)
+                    if (o instanceof HtmlObjects.Text || o instanceof HtmlObjects.Newline)
                     {
                         buf.append(o.toString());
                     }
@@ -3483,13 +3400,11 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 {
                     if (m_isInsideJavaScript)
                     {
-                        m_output.setTranslatableAttrs(
-                                ExtractorRegistry.FORMAT_HTML, "string");
+                        m_output.setTranslatableAttrs(ExtractorRegistry.FORMAT_HTML, "string");
                     }
                     else
                     {
-                        m_output.setTranslatableAttrs(
-                                ExtractorRegistry.FORMAT_HTML, "text");
+                        m_output.setTranslatableAttrs(ExtractorRegistry.FORMAT_HTML, "text");
                     }
                 }
                 catch (DocumentElementException e) // SNH
@@ -3526,8 +3441,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                             if (o instanceof HtmlObjects.Text)
                             {
                                 hasText = true;
-                                if (!Text.isBlank(o.toString().replace("\r\n",
-                                        "")))
+                                if (!Text.isBlank(o.toString().replace("\r\n", "")))
                                 {
                                     isBlankInTag = false;
                                 }
@@ -3543,8 +3457,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                             {
                                 HtmlObjects.EndTag e = (HtmlObjects.EndTag) o;
 
-                                if (t.tag.equalsIgnoreCase(e.tag) && t.isPaired
-                                        && e.isPaired
+                                if (t.tag.equalsIgnoreCase(e.tag) && t.isPaired && e.isPaired
                                         && t.partnerId == e.partnerId)
                                 {
                                     break;
@@ -3554,8 +3467,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                                     || o instanceof HtmlObjects.Newline)
                             {
                                 hasText = true;
-                                if (!Text.isBlank(o.toString().replace("\r\n",
-                                        "")))
+                                if (!Text.isBlank(o.toString().replace("\r\n", "")))
                                 {
                                     isBlankInTag = false;
                                 }
@@ -3592,8 +3504,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                         {
                             HtmlObjects.Tag nextT = (HtmlObjects.Tag) nextO;
 
-                            outputToSkeleton = isUntranslatableSpan(nextT)
-                                    && t.isPaired;
+                            outputToSkeleton = isUntranslatableSpan(nextT) && t.isPaired;
                         }
 
                         it.previous();
@@ -3630,8 +3541,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                                 endTag.append(o.toString());
                                 e = (HtmlObjects.EndTag) o;
 
-                                if (t.tag.equalsIgnoreCase(e.tag) && t.isPaired
-                                        && e.isPaired
+                                if (t.tag.equalsIgnoreCase(e.tag) && t.isPaired && e.isPaired
                                         && t.partnerId == e.partnerId)
                                 {
                                     break;
@@ -3670,16 +3580,13 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                         {
                             if (outputTogether)
                             {
-                                tg = m_html2TmxMap.getPairedInternalTmxTag(t,
-                                        true);
+                                tg = m_html2TmxMap.getPairedInternalTmxTag(t, true);
                                 m_output.addTranslatableTmx(tg.getStart());
                                 m_output.addTranslatable(startTag.toString());
                                 m_output.addTranslatableTmx(tg.getEnd());
 
-                                String tempText = normalizeString(textBuf
-                                        .toString());
-                                if (tempText.contains("&lt;")
-                                        || tempText.contains("&gt;")
+                                String tempText = normalizeString(textBuf.toString());
+                                if (tempText.contains("&lt;") || tempText.contains("&gt;")
                                         || tempText.contains("&nbsp;")
                                         || tempText.contains("&amp;"))
                                 {
@@ -3690,16 +3597,14 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                                     m_output.addTranslatable(tempText);
                                 }
 
-                                tg = m_html2TmxMap.getPairedTmxTag(e, false,
-                                        e.isIsolated);
+                                tg = m_html2TmxMap.getPairedTmxTag(e, false, e.isIsolated);
                                 m_output.addTranslatableTmx(tg.getStart());
                                 m_output.addTranslatable(endTag.toString());
                                 m_output.addTranslatableTmx(tg.getEnd());
                             }
                             else
                             {
-                                ListIterator<Object> itemsIt = items
-                                        .listIterator();
+                                ListIterator<Object> itemsIt = items.listIterator();
                                 while (itemsIt.hasNext())
                                 {
                                     Object oo = itemsIt.next();
@@ -3707,17 +3612,15 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                                     if (oo instanceof HtmlObjects.Tag)
                                     {
                                         HtmlObjects.Tag too = (HtmlObjects.Tag) oo;
-                                        tg = m_html2TmxMap.getPairedTmxTag(too,
-                                                true, t.isIsolated);
+                                        tg = m_html2TmxMap.getPairedTmxTag(too, true, t.isIsolated);
                                         flushTagToTranslatable(tg, too);
                                     }
                                     else if (oo instanceof HtmlObjects.EndTag)
                                     {
                                         HtmlObjects.EndTag eoo = (HtmlObjects.EndTag) oo;
-                                        tg = m_html2TmxMap.getPairedTmxTag(eoo,
-                                                false, e.isIsolated);
-                                        m_output.addTranslatableTmx(tg
-                                                .getStart());
+                                        tg = m_html2TmxMap.getPairedTmxTag(eoo, false,
+                                                e.isIsolated);
+                                        m_output.addTranslatableTmx(tg.getStart());
                                         m_output.addTranslatable(oo.toString());
                                         m_output.addTranslatableTmx(tg.getEnd());
                                     }
@@ -3735,8 +3638,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                                                     || oo instanceof HtmlObjects.Newline
                                                     || oo instanceof HtmlObjects.InternalText)
                                             {
-                                                text = text
-                                                        + getElementText(oo);
+                                                text = text + getElementText(oo);
                                             }
                                             else
                                             {
@@ -3772,8 +3674,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                         {
                             o = it.next();
 
-                            if (o instanceof HtmlObjects.Text
-                                    || o instanceof HtmlObjects.Newline)
+                            if (o instanceof HtmlObjects.Text || o instanceof HtmlObjects.Newline)
                             {
                                 buf.append(o.toString());
                             }
@@ -3808,8 +3709,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                         {
                             o = it.next();
 
-                            if (o instanceof HtmlObjects.Text
-                                    || o instanceof HtmlObjects.Newline)
+                            if (o instanceof HtmlObjects.Text || o instanceof HtmlObjects.Newline)
                             {
                                 String txt = o.toString();
                                 buf.append(replaceSpaceWithNbsp(txt));
@@ -3875,8 +3775,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                         {
                             o = it.next();
 
-                            if (o instanceof HtmlObjects.Text
-                                    || o instanceof HtmlObjects.Newline)
+                            if (o instanceof HtmlObjects.Text || o instanceof HtmlObjects.Newline)
                             {
                                 buf.append(o.toString());
                             }
@@ -3903,8 +3802,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     }
                     // Wed Apr 06 20:14:49 2005 Office Additions:
                     // write out footnote markers as a single PH.
-                    else if (t.isPaired && !t.isIsolated
-                            && isMsoReferenceMarker(t))
+                    else if (t.isPaired && !t.isIsolated && isMsoReferenceMarker(t))
                     {
                         StringBuffer buf = new StringBuffer();
 
@@ -3977,8 +3875,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                             {
                                 HtmlObjects.EndTag e = (HtmlObjects.EndTag) o;
 
-                                if (t.tag.equalsIgnoreCase(e.tag) && t.isPaired
-                                        && e.isPaired
+                                if (t.tag.equalsIgnoreCase(e.tag) && t.isPaired && e.isPaired
                                         && t.partnerId == e.partnerId)
                                 {
                                     it.previous();
@@ -3993,8 +3890,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                             }
                             else
                             {
-                                if ((isExcelExtractor())
-                                        && ((o instanceof HtmlObjects.Newline) || (o instanceof HtmlObjects.Text)))
+                                if ((isExcelExtractor()) && ((o instanceof HtmlObjects.Newline)
+                                        || (o instanceof HtmlObjects.Text)))
                                 {
                                     buf.append(o.toString());
                                 }
@@ -4006,8 +3903,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                             }
                         }
 
-                        HtmlObjects.EndTag endtag = (HtmlObjects.EndTag) it
-                                .next();
+                        HtmlObjects.EndTag endtag = (HtmlObjects.EndTag) it.next();
                         if (!isExcelExtractor())
                         {
                             m_output.addTranslatableTmx("<ph type=\"x-mso-hidden\">");
@@ -4044,8 +3940,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     }
                     else
                     {
-                        tg = m_html2TmxMap.getPairedTmxTag(t, true,
-                                t.isIsolated);
+                        tg = m_html2TmxMap.getPairedTmxTag(t, true, t.isIsolated);
                     }
                 }
 
@@ -4054,8 +3949,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             else if (o instanceof HtmlObjects.InternalText)
             {
                 HtmlObjects.InternalText internalText = (HtmlObjects.InternalText) o;
-                TmxTagGenerator tg = m_html2TmxMap
-                        .getPairedTagForInternalText(internalText);
+                TmxTagGenerator tg = m_html2TmxMap.getPairedTagForInternalText(internalText);
 
                 m_output.addTranslatableTmx(tg.getStart());
                 m_output.addTranslatable(internalText.internalText);
@@ -4089,8 +3983,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 }
                 else
                 {
-                    TmxTagGenerator tg = m_html2TmxMap.getPairedTmxTag(t,
-                            false, t.isIsolated);
+                    TmxTagGenerator tg = m_html2TmxMap.getPairedTmxTag(t, false, t.isIsolated);
 
                     m_output.addTranslatableTmx(tg.getStart());
                     m_output.addTranslatable(o.toString());
@@ -4115,8 +4008,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             }
             else if (o instanceof HtmlObjects.Declaration)
             {
-                TmxTagGenerator tg = m_html2TmxMap.getPlaceholderTmxTag(
-                        "declaration", true);
+                TmxTagGenerator tg = m_html2TmxMap.getPlaceholderTmxTag("declaration", true);
 
                 m_output.addTranslatableTmx(tg.getStart());
                 m_output.addTranslatable(o.toString());
@@ -4131,14 +4023,12 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
     {
         String itext = InternalTextHelper.GS_INTERNALT_TAG_START + text
                 + InternalTextHelper.GS_INTERNALT_TAG_END;
-        HtmlObjects.InternalText internalText = new HtmlObjects.InternalText(
-                itext);
-        TmxTagGenerator tg = m_html2TmxMap
-                .getPairedTagForInternalText(internalText);
+        HtmlObjects.InternalText internalText = new HtmlObjects.InternalText(itext);
+        TmxTagGenerator tg = m_html2TmxMap.getPairedTagForInternalText(internalText);
 
         m_output.addTranslatableTmx(tg.getStart());
-        if (text.contains("&lt;") || text.contains("&gt;")
-                || text.contains("&nbsp;") || text.contains("&amp;"))
+        if (text.contains("&lt;") || text.contains("&gt;") || text.contains("&nbsp;")
+                || text.contains("&amp;"))
         {
             m_output.addTranslatableTmx(text);
         }
@@ -4167,8 +4057,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
     /**
      * Flushes the tags after a paragraph break to skeleton as well.
      */
-    private void flushNextTagsToSkeleton(
-            List<HtmlObjects.HtmlElement> segments,
+    private void flushNextTagsToSkeleton(List<HtmlObjects.HtmlElement> segments,
             ListIterator<HtmlObjects.HtmlElement> it)
     {
         loop: while (it.hasNext())
@@ -4184,8 +4073,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                         HtmlObjects.HtmlElement o2 = it.next();
                         if (o2 instanceof HtmlObjects.Text)
                         {
-                            if (!Text
-                                    .isBlank(o2.toString().replace("\r\n", "")))
+                            if (!Text.isBlank(o2.toString().replace("\r\n", "")))
                             {
                                 it.previous();
                                 it.previous();
@@ -4211,8 +4099,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     }
                 }
             }
-            else if (o instanceof HtmlObjects.CFTag
-                    && (!o.isPaired || o.isIsolated))
+            else if (o instanceof HtmlObjects.CFTag && (!o.isPaired || o.isIsolated))
             {
                 flushTextToSkeleton(o, null);
             }
@@ -4224,8 +4111,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     if (e instanceof HtmlObjects.Tag)
                     {
                         HtmlObjects.Tag t = (HtmlObjects.Tag) e;
-                        if (t.tag.equalsIgnoreCase(et.tag) && t.isPaired
-                                && et.isPaired && t.partnerId == et.partnerId)
+                        if (t.tag.equalsIgnoreCase(et.tag) && t.isPaired && et.isPaired
+                                && t.partnerId == et.partnerId)
                         {
                             if (t.isInTranslatable)
                             {
@@ -4260,8 +4147,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
     /**
      * Sets the end tag which is paired with the tag isolated.
      */
-    private void setPairedEndTagIsolated(
-            ListIterator<HtmlObjects.HtmlElement> it, HtmlObjects.Tag t)
+    private void setPairedEndTagIsolated(ListIterator<HtmlObjects.HtmlElement> it,
+            HtmlObjects.Tag t)
     {
         int flag = 0;
         while (it.hasNext())
@@ -4295,8 +4182,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      */
     private boolean isGSInternalTag(HtmlObjects.Tag t)
     {
-        return InternalTextHelper.GS_INTERNALT_TAG_START.equals("<" + t.tag
-                + ">");
+        return InternalTextHelper.GS_INTERNALT_TAG_START.equals("<" + t.tag + ">");
     }
 
     private boolean isInternalTag(HtmlObjects.Tag tag)
@@ -4375,8 +4261,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 String strValue = Text.removeQuotes(attrib.value);
 
                 // Value-less Attribute - quick exit
-                if (strValue == null || strValue.length() == 0
-                        || Text.isBlank(strValue))
+                if (strValue == null || strValue.length() == 0 || Text.isBlank(strValue))
                 {
                     m_output.addTranslatable(" " + attrib.toString());
                     continue;
@@ -4384,8 +4269,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
                 // When extracting ASP/JSP, check for att="<%=...%>"
                 if (isXSPExtractor()
-                        && (strValue.indexOf("<%") >= 0 || strValue
-                                .indexOf("%>") >= 0))
+                        && (strValue.indexOf("<%") >= 0 || strValue.indexOf("%>") >= 0))
                 {
                     m_output.addTranslatable(" " + attrib.toString());
                     continue;
@@ -4393,8 +4277,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
                 // When extracting CFM, check for att="<cf ... >".
                 if (isCFExtractor()
-                        && (strValue.indexOf("<cf") >= 0 || strValue
-                                .indexOf("<CF") >= 0))
+                        && (strValue.indexOf("<cf") >= 0 || strValue.indexOf("<CF") >= 0))
                 {
                     m_output.addTranslatable(" " + attrib.toString());
                     continue;
@@ -4417,25 +4300,21 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 }
 
                 // Style Attribute: <tag style="...">
-                else if (!isIgnoreInvalidHtmlTags()
-                        && attrib.name.equalsIgnoreCase(STYLE))
+                else if (!isIgnoreInvalidHtmlTags() && attrib.name.equalsIgnoreCase(STYLE))
                 {
                     m_output.addTranslatable(" " + attrib.name + "=" + quote);
-                    m_output.addTranslatableTmx(switchToStyles(
-                            EditUtil.decodeXmlEntities(strValue), true));
+                    m_output.addTranslatableTmx(
+                            switchToStyles(EditUtil.decodeXmlEntities(strValue), true));
                     m_output.addTranslatable(quote);
                 }
 
                 // Event Handler Attribute: <div onClick="...">
-                else if (m_rules.isEventHandlerAttribute(attrib.name)
-                        && (t.isFromOfficeContent ? m_rules
-                                .isContentTranslatableAttribute(attrib.name)
-                                : m_rules.isTranslatableAttribute(t.tag,
-                                        attrib.name)))
+                else if (m_rules.isEventHandlerAttribute(attrib.name) && (t.isFromOfficeContent
+                        ? m_rules.isContentTranslatableAttribute(attrib.name)
+                        : m_rules.isTranslatableAttribute(t.tag, attrib.name)))
                 {
                     m_output.addTranslatable(" " + attrib.name + "=" + quote);
-                    m_output.addTranslatableTmx(switchToJavaScript(strValue,
-                            true, true));
+                    m_output.addTranslatableTmx(switchToJavaScript(strValue, true, true));
                     m_output.addTranslatable(quote);
                 }
 
@@ -4443,8 +4322,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 else if (!t.isFromOfficeContent
                         && m_rules.isLocalizableAttribute(t.tag, attrib.name))
                 {
-                    String strAttributeType = m_rules.getLocalizableAttribType(
-                            t.tag, attrib.name);
+                    String strAttributeType = m_rules.getLocalizableAttribType(t.tag, attrib.name);
 
                     // CvdL: can't decode - information loss - can't merge
                     // if (strAttributeType.startsWith("url"))
@@ -4462,9 +4340,9 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 }
 
                 // Translatable Attribute
-                else if ((t.isFromOfficeContent ? m_rules
-                        .isContentTranslatableAttribute(attrib.name) : m_rules
-                        .isTranslatableAttribute(t.tag, attrib.name))
+                else if ((t.isFromOfficeContent
+                        ? m_rules.isContentTranslatableAttribute(attrib.name)
+                        : m_rules.isTranslatableAttribute(t.tag, attrib.name))
                         && !m_extractor.exclude())
                 {
                     m_output.addTranslatable(" " + attrib.name + "=" + quote);
@@ -4524,13 +4402,11 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         {
             for (Iterator it = t.attributes.iterator(); it.hasNext();)
             {
-                HtmlObjects.Attribute attrib = (HtmlObjects.Attribute) it
-                        .next();
+                HtmlObjects.Attribute attrib = (HtmlObjects.Attribute) it.next();
                 String strValue = Text.removeQuotes(attrib.value);
 
                 // Value-less Attribute - quick exit
-                if (strValue == null || strValue.length() == 0
-                        || Text.isBlank(strValue))
+                if (strValue == null || strValue.length() == 0 || Text.isBlank(strValue))
                 {
                     m_output.addTranslatable(" " + attrib.toString());
                     continue;
@@ -4542,16 +4418,14 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 if (m_rules.isEventHandlerAttribute(attrib.name))
                 {
                     m_output.addTranslatable(" " + attrib.name + "=" + quote);
-                    m_output.addTranslatableTmx(switchToJavaScript(strValue,
-                            true));
+                    m_output.addTranslatableTmx(switchToJavaScript(strValue, true));
                     m_output.addTranslatable(quote);
                 }
 
                 // Localizable Attribute
                 else if (m_rules.isLocalizableAttribute(t.tag, attrib.name))
                 {
-                    String strAttributeType = m_rules.getLocalizableAttribType(
-                            t.tag, attrib.name);
+                    String strAttributeType = m_rules.getLocalizableAttribType(t.tag, attrib.name);
 
                     m_output.addTranslatable(" " + attrib.name + "=" + quote);
                     m_output.addTranslatableTmx("<sub type=\"");
@@ -4689,8 +4563,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * <code>message=</code> parameter.
      * </p>
      */
-    private RegExMatchInterface matchGeneratorText(String p_value)
-            throws ExtractorException
+    private RegExMatchInterface matchGeneratorText(String p_value) throws ExtractorException
     {
         RegEx regex = new RegEx();
         String generator = null;
@@ -4698,8 +4571,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
         try
         {
-            mr = regex.matchSubstring(p_value,
-                    "\\.swt\\?.*(mytext|message)=([^\\&\\'\"]+)", false);
+            mr = regex.matchSubstring(p_value, "\\.swt\\?.*(mytext|message)=([^\\&\\'\"]+)", false);
         }
         catch (RegExException e) // if the regex was improper
         {
@@ -4714,8 +4586,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * Matches embedded text in a JHTML <param value=""> attribute.
      * </p>
      */
-    private RegExMatchInterface matchValueText(String p_value)
-            throws ExtractorException
+    private RegExMatchInterface matchValueText(String p_value) throws ExtractorException
     {
         RegEx regex = new RegEx();
         String generator = null;
@@ -4761,10 +4632,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             String strValue = Text.removeQuotes(attrib.value);
 
             // When extracting ASP/JSP, check for att="<%=...%>"
-            if (strValue.length() == 0
-                    || (m_xspLanguage != EC_UNKNOWNSCRIPT
-                            && strValue.startsWith("<%") && strValue
-                                .endsWith("%>")))
+            if (strValue.length() == 0 || (m_xspLanguage != EC_UNKNOWNSCRIPT
+                    && strValue.startsWith("<%") && strValue.endsWith("%>")))
             {
                 m_output.addSkeleton(" " + attrib.toString());
                 continue;
@@ -4867,15 +4736,13 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 // XXXX This is a URL and should be localizable.
                 m_output.addSkeleton(first);
 
-                String second = strValue
-                        .substring(generatorStart, generatorEnd);
+                String second = strValue.substring(generatorStart, generatorEnd);
                 // XXXX This should not be localizable, but TRANSLATABLE.
                 m_output.addLocalizable(second);
 
                 try
                 {
-                    m_output.setLocalizableAttrs(ExtractorRegistry.FORMAT_HTML,
-                            "generator");
+                    m_output.setLocalizableAttrs(ExtractorRegistry.FORMAT_HTML, "generator");
                 }
                 catch (DocumentElementException e) // SNH (Should Not Happen)
                 {
@@ -4889,8 +4756,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             // value="message=Enter an address" but not
             // value="bean=some.java.class".
             // In JHTML mode we should extract all non-qualified values.
-            else if (attrib.name.equals(VALUE)
-                    && (mr = matchValueText(strValue)) != null)
+            else if (attrib.name.equals(VALUE) && (mr = matchValueText(strValue)) != null)
             {
                 int textStart = mr.beginOffset(2);
                 int textEnd = mr.endOffset(2);
@@ -4908,10 +4774,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
                 try
                 {
-                    String strAttributeType = m_rules.getLocalizableAttribType(
-                            t.tag, attrib.name);
-                    m_output.setLocalizableAttrs(ExtractorRegistry.FORMAT_HTML,
-                            strAttributeType);
+                    String strAttributeType = m_rules.getLocalizableAttribType(t.tag, attrib.name);
+                    m_output.setLocalizableAttrs(ExtractorRegistry.FORMAT_HTML, strAttributeType);
                 }
                 catch (DocumentElementException e)
                 {
@@ -4976,13 +4840,11 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             {
                 extract = Text.removeQuotes(attrib.value);
             }
-            else if (attrib.name
-                    .equalsIgnoreCase(DiplomatNames.Attribute.DESCRIPTION))
+            else if (attrib.name.equalsIgnoreCase(DiplomatNames.Attribute.DESCRIPTION))
             {
                 desc = Text.removeQuotes(attrib.value);
             }
-            else if (attrib.name
-                    .equalsIgnoreCase(DiplomatNames.Attribute.LOCALE))
+            else if (attrib.name.equalsIgnoreCase(DiplomatNames.Attribute.LOCALE))
             {
                 locale = Text.removeQuotes(attrib.value);
             }
@@ -4990,13 +4852,11 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             {
                 add = Text.removeQuotes(attrib.value);
             }
-            else if (attrib.name
-                    .equalsIgnoreCase(DiplomatNames.Attribute.DELETE))
+            else if (attrib.name.equalsIgnoreCase(DiplomatNames.Attribute.DELETE))
             {
                 delete = true;
             }
-            else if (attrib.name
-                    .equalsIgnoreCase(DiplomatNames.Attribute.ADDED))
+            else if (attrib.name.equalsIgnoreCase(DiplomatNames.Attribute.ADDED))
             {
                 added = Text.removeQuotes(attrib.value);
             }
@@ -5008,8 +4868,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             {
                 snippetId = Text.removeQuotes(attrib.value);
             }
-            else if (attrib.name
-                    .equalsIgnoreCase(DiplomatNames.Attribute.DELETED))
+            else if (attrib.name.equalsIgnoreCase(DiplomatNames.Attribute.DELETED))
             {
                 deleted = Text.removeQuotes(attrib.value);
             }
@@ -5023,13 +4882,13 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         {
             if (t.isClosed)
             {
-                m_output.addEmptyGsa(extract, desc, locale, add, delete, added,
-                        deleted, snippetName, snippetId);
+                m_output.addEmptyGsa(extract, desc, locale, add, delete, added, deleted,
+                        snippetName, snippetId);
             }
             else
             {
-                m_output.addGsaStart(extract, desc, locale, add, delete, added,
-                        deleted, snippetName, snippetId);
+                m_output.addGsaStart(extract, desc, locale, add, delete, added, deleted,
+                        snippetName, snippetId);
                 ++m_gsaCounter;
             }
         }
@@ -5083,14 +4942,12 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      */
     protected void processMeta(HtmlObjects.Tag t) throws ExtractorException
     {
-        boolean bExtractCharset = false;
-        boolean bContentIsTranslatable = true;
+        boolean needTranslateAttr = true;
 
         // A meta tag usually has 2 attributes in any order.
         // First, find out if a NAME/HTTP-EQUIV exists that
         // prevents translatability of the CONTENT attribute.
         // Also canonicalize the order of the attributes.
-
         List<HtmlObjects.Attribute> canonicalList = new ArrayList<HtmlObjects.Attribute>();
 
         for (Iterator it = t.attributes.iterator(); it.hasNext();)
@@ -5099,28 +4956,11 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
             if (attrib.name.equalsIgnoreCase(HTTP_EQUIV))
             {
-                String strValue = Text.removeQuotes(attrib.value);
-
-                if (strValue.equalsIgnoreCase("content-type"))
-                {
-                    bExtractCharset = true;
-                }
-                else if (m_rules.isNonTranslatableMetaAttribute(strValue))
-                {
-                    bContentIsTranslatable = false;
-                }
-
+                needTranslateAttr = false;
                 canonicalList.add(attrib);
             }
             else if (attrib.name.equalsIgnoreCase(NAME))
             {
-                String strValue = Text.removeQuotes(attrib.value);
-
-                if (m_rules.isNonTranslatableMetaAttribute(strValue))
-                {
-                    bContentIsTranslatable = false;
-                }
-
                 canonicalList.add(0, attrib);
             }
             else
@@ -5154,76 +4994,16 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
             String quote = Text.getQuoteCharacter(attrib.value);
 
-            if (attrib.name.equalsIgnoreCase(CONTENT))
+            if (CONTENT.equalsIgnoreCase(attrib.name) || NAME.equalsIgnoreCase(attrib.name))
             {
                 m_output.addSkeleton(" " + attrib.name + "=" + quote);
 
-                if (bExtractCharset)
-                {
-                    // try pulling out codeset, other parts of attr
-                    // value go to skeleton
-                    RegEx regex = new RegEx();
-                    RegExMatchInterface mr = null;
-
-                    try
-                    {
-                        mr = regex.matchSubstring(strValue,
-                                "charset=([^ \t\r\n\'\"]+)", false);
-                    }
-                    catch (RegExException e) // Should Not Happen
-                    {
-                        // System.err.println(e.toString());
-                        throw new ExtractorException(REGEX_ERROR, e);
-                    }
-
-                    // found a charset and we're allowed to extract it
-                    if (mr != null && m_rules.doExtractCharset())
-                    {
-                        int charsetStart = mr.beginOffset(1);
-                        int charsetEnd = mr.endOffset(1);
-
-                        String first = strValue.substring(0, charsetStart);
-                        m_output.addSkeleton(first);
-
-                        String second = strValue.substring(charsetStart,
-                                charsetEnd);
-                        m_output.addLocalizable(second);
-
-                        try
-                        {
-                            m_output.setLocalizableAttrs(
-                                    ExtractorRegistry.FORMAT_HTML, "charset");
-                        }
-                        catch (DocumentElementException e) // SNH
-                        {
-                            throw new ExtractorException(HTML_UNEXPECTED_ERROR,
-                                    e);
-                        }
-
-                        String third = strValue.substring(charsetEnd,
-                                strValue.length());
-
-                        m_output.addSkeleton(third);
-                    }
-                    else
-                    // no charset send to skeleton
-                    {
-                        m_output.addSkeleton(strValue);
-                    }
-                }
-                else if (bContentIsTranslatable)
+                if (needTranslateAttr && ((t.isFromOfficeContent
+                        ? m_rules.isContentTranslatableAttribute(attrib.name)
+                        : m_rules.isTranslatableAttribute(t.tag, attrib.name))
+                        && !m_extractor.exclude()))
                 {
                     m_output.addTranslatable(strValue);
-
-                    try
-                    {
-                        m_output.setTranslatableAttrs(
-                                ExtractorRegistry.FORMAT_HTML, "meta-content");
-                    }
-                    catch (DocumentElementException e) // SNH
-                    {
-                        throw new ExtractorException(HTML_UNEXPECTED_ERROR, e);
-                    }
                 }
                 else
                 {
@@ -5257,8 +5037,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * Dumps a spacer gif to skeleton. Can only be called from
      * addTagToSkeleton().
      */
-    protected void processSpacerGif(HtmlObjects.Tag t)
-            throws ExtractorException
+    protected void processSpacerGif(HtmlObjects.Tag t) throws ExtractorException
     {
         m_output.addSkeleton(t.toString());
     }
@@ -5363,8 +5142,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         {
             ExtractorRegistry er = ExtractorRegistry.getObject();
 
-            if ((javascript = er
-                    .getFormatId(ExtractorRegistry.FORMAT_JAVASCRIPT)) == -1)
+            if ((javascript = er.getFormatId(ExtractorRegistry.FORMAT_JAVASCRIPT)) == -1)
             {
                 throw new ExtractorException(FORMAT_NOT_REGISTERED);
             }
@@ -5381,54 +5159,46 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
             try
             {
-                if (noUseJsFunction != null && noUseJsFunction.length != 0
-                        && noUseJsFunction[0])
+                if (noUseJsFunction != null && noUseJsFunction.length != 0 && noUseJsFunction[0])
                 {
                     String[] jsFunctionTexts = new String[]
                     { jsFunctionText, "" + noUseJsFunction[0] };
                     if (p_Embedded)
                     {
-                        result = m_extractor.switchExtractorEmbedded(html,
-                                input, jsFunctionTexts);
+                        result = m_extractor.switchExtractorEmbedded(html, input, jsFunctionTexts);
                     }
                     else
                     {
-                        m_extractor.switchExtractor(html, input,
-                                jsFunctionTexts);
+                        m_extractor.switchExtractor(html, input, jsFunctionTexts);
                     }
                 }
                 else
                 {
                     if (p_Embedded)
                     {
-                        result = m_extractor.switchExtractorEmbedded(html,
-                                input, jsFunctionText);
+                        result = m_extractor.switchExtractorEmbedded(html, input, jsFunctionText);
                     }
                     else
                     {
-                        m_extractor
-                                .switchExtractor(html, input, jsFunctionText);
+                        m_extractor.switchExtractor(html, input, jsFunctionText);
                     }
                 }
             }
             catch (ExtractorException e)
             {
                 throw new ExtractorException(HTML_EMBEDDED_JS_ERROR,
-                        "Embedded JavaScript parse exception between " + "("
-                                + m_iEmbeddedLine + ":" + m_iEmbeddedCol + ") "
-                                + "and ("
-                                + m_extractor.getParser().getCurrentLine()
-                                + ":"
-                                + m_extractor.getParser().getCurrentColumn()
-                                + "):\n" + e.toString());
+                        "Embedded JavaScript parse exception between " + "(" + m_iEmbeddedLine + ":"
+                                + m_iEmbeddedCol + ") " + "and ("
+                                + m_extractor.getParser().getCurrentLine() + ":"
+                                + m_extractor.getParser().getCurrentColumn() + "):\n"
+                                + e.toString());
             }
         }
 
         return result;
     }
 
-    protected String switchToVB(String p_strVBCode, boolean p_Embedded)
-            throws ExtractorException
+    protected String switchToVB(String p_strVBCode, boolean p_Embedded) throws ExtractorException
     {
         int vb = -1;
         int html = -1;
@@ -5467,21 +5237,19 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             catch (ExtractorException e)
             {
                 throw new ExtractorException(HTML_EMBEDDED_VB_ERROR,
-                        "Embedded VB parse exception between " + "("
-                                + m_iEmbeddedLine + ":" + m_iEmbeddedCol + ") "
-                                + "and ("
-                                + m_extractor.getParser().getCurrentLine()
-                                + ":"
-                                + m_extractor.getParser().getCurrentColumn()
-                                + "):\n" + e.toString());
+                        "Embedded VB parse exception between " + "(" + m_iEmbeddedLine + ":"
+                                + m_iEmbeddedCol + ") " + "and ("
+                                + m_extractor.getParser().getCurrentLine() + ":"
+                                + m_extractor.getParser().getCurrentColumn() + "):\n"
+                                + e.toString());
             }
         }
 
         return result;
     }
 
-    protected String switchToJava(String p_strJSCode, boolean p_embedded,
-            String p_parseMode) throws ExtractorException
+    protected String switchToJava(String p_strJSCode, boolean p_embedded, String p_parseMode)
+            throws ExtractorException
     {
         int java = -1;
         int html = -1;
@@ -5522,21 +5290,19 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             catch (ExtractorException e)
             {
                 throw new ExtractorException(HTML_EMBEDDED_JAVA_ERROR,
-                        "Embedded Java parse exception between " + "("
-                                + m_iEmbeddedLine + ":" + m_iEmbeddedCol + ") "
-                                + "and ("
-                                + m_extractor.getParser().getCurrentLine()
-                                + ":"
-                                + m_extractor.getParser().getCurrentColumn()
-                                + "):\n" + e.toString());
+                        "Embedded Java parse exception between " + "(" + m_iEmbeddedLine + ":"
+                                + m_iEmbeddedCol + ") " + "and ("
+                                + m_extractor.getParser().getCurrentLine() + ":"
+                                + m_extractor.getParser().getCurrentColumn() + "):\n"
+                                + e.toString());
             }
         }
 
         return result;
     }
 
-    protected String switchToStylesheet(String p_strStylesheet,
-            boolean p_embedded) throws ExtractorException
+    protected String switchToStylesheet(String p_strStylesheet, boolean p_embedded)
+            throws ExtractorException
     {
         int css = -1;
         int html = -1;
@@ -5575,10 +5341,9 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             {
                 throw new ExtractorException(HTML_EMBEDDED_CSS_ERROR,
                         "Embedded CSS parse exception in line "
-                                + m_extractor.getParser().getCurrentLine()
-                                + " column "
-                                + m_extractor.getParser().getCurrentColumn()
-                                + ":\n" + e.toString());
+                                + m_extractor.getParser().getCurrentLine() + " column "
+                                + m_extractor.getParser().getCurrentColumn() + ":\n"
+                                + e.toString());
             }
         }
 
@@ -5595,8 +5360,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         {
             ExtractorRegistry er = ExtractorRegistry.getObject();
 
-            if ((css_styles = er
-                    .getFormatId(ExtractorRegistry.FORMAT_CSS_STYLE)) == -1)
+            if ((css_styles = er.getFormatId(ExtractorRegistry.FORMAT_CSS_STYLE)) == -1)
             {
                 throw new ExtractorException(FORMAT_NOT_REGISTERED);
             }
@@ -5626,18 +5390,16 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             {
                 throw new ExtractorException(HTML_EMBEDDED_CSS_ERROR,
                         "Embedded CSS STYLE parse exception in line "
-                                + m_extractor.getParser().getCurrentLine()
-                                + " column "
-                                + m_extractor.getParser().getCurrentColumn()
-                                + ":\n" + e.toString());
+                                + m_extractor.getParser().getCurrentLine() + " column "
+                                + m_extractor.getParser().getCurrentColumn() + ":\n"
+                                + e.toString());
             }
         }
 
         return "";
     }
 
-    protected String switchToXml(String p_strXml, boolean p_embedded)
-            throws ExtractorException
+    protected String switchToXml(String p_strXml, boolean p_embedded) throws ExtractorException
     {
         int xml = -1;
         int html = -1;
@@ -5676,10 +5438,9 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             {
                 throw new ExtractorException(HTML_EMBEDDED_XML_ERROR,
                         "Embedded XML parse exception in line "
-                                + m_extractor.getParser().getCurrentLine()
-                                + " column "
-                                + m_extractor.getParser().getCurrentColumn()
-                                + ":\n" + e.toString());
+                                + m_extractor.getParser().getCurrentLine() + " column "
+                                + m_extractor.getParser().getCurrentColumn() + ":\n"
+                                + e.toString());
             }
         }
 
@@ -5726,13 +5487,11 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             catch (ExtractorException e)
             {
                 throw new ExtractorException(HTML_EMBEDDED_CF_ERROR,
-                        "Embedded CFScript parse exception between " + "("
-                                + m_iEmbeddedLine + ":" + m_iEmbeddedCol + ") "
-                                + "and ("
-                                + m_extractor.getParser().getCurrentLine()
-                                + ":"
-                                + m_extractor.getParser().getCurrentColumn()
-                                + "):\n" + e.toString());
+                        "Embedded CFScript parse exception between " + "(" + m_iEmbeddedLine + ":"
+                                + m_iEmbeddedCol + ") " + "and ("
+                                + m_extractor.getParser().getCurrentLine() + ":"
+                                + m_extractor.getParser().getCurrentColumn() + "):\n"
+                                + e.toString());
             }
         }
 
@@ -5746,8 +5505,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         String after = p_vml.substring(p_vml.length() - 9);
         String vml = p_vml.substring(15, p_vml.length() - 9);
 
-        Output output = m_extractor.switchExtractor(vml,
-                m_extractor.getMainFormat());
+        Output output = m_extractor.switchExtractor(vml, m_extractor.getMainFormat());
 
         // No exception, output the results.
         m_output.addSkeleton(before);
@@ -5767,8 +5525,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      */
     private boolean isVmlComment(String p_text)
     {
-        if (p_text.startsWith("[if gte vml 1]>")
-                && p_text.endsWith("<![endif]"))
+        if (p_text.startsWith("[if gte vml 1]>") && p_text.endsWith("<![endif]"))
         {
             return true;
         }
@@ -5785,12 +5542,9 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      */
     private boolean isMsoTabCountSpan(HtmlObjects.Tag t)
     {
-        if (t.isPaired
-                && !t.isIsolated
-                && t.tag.equalsIgnoreCase("SPAN")
+        if (t.isPaired && !t.isIsolated && t.tag.equalsIgnoreCase("SPAN")
                 && t.attributes.isDefined("style")
-                && t.attributes.getValue("style").startsWith("mso-tab-count:",
-                        1))
+                && t.attributes.getValue("style").startsWith("mso-tab-count:", 1))
         {
             // also needs to check that content consists of only &nbsp;
             return true;
@@ -5805,12 +5559,9 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      */
     private boolean isMsoSpecailChar(HtmlObjects.Tag t, String ttype)
     {
-        if (t.isPaired
-                && !t.isIsolated
-                && t.tag.equalsIgnoreCase("SPAN")
+        if (t.isPaired && !t.isIsolated && t.tag.equalsIgnoreCase("SPAN")
                 && t.attributes.isDefined("style")
-                && t.attributes.getValue("style").startsWith(
-                        "mso-special-character:", 1)
+                && t.attributes.getValue("style").startsWith("mso-special-character:", 1)
                 && t.attributes.getValue("style").contains(":" + ttype))
         {
             return true;
@@ -5828,12 +5579,9 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      */
     private boolean isMsoSpaceRun(HtmlObjects.Tag t)
     {
-        if (t.isPaired
-                && !t.isIsolated
-                && t.tag.equalsIgnoreCase("SPAN")
+        if (t.isPaired && !t.isIsolated && t.tag.equalsIgnoreCase("SPAN")
                 && t.attributes.isDefined("style")
-                && t.attributes.getValue("style")
-                        .startsWith("mso-spacerun:", 1))
+                && t.attributes.getValue("style").startsWith("mso-spacerun:", 1))
         {
             return true;
         }
@@ -5849,14 +5597,10 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      */
     private boolean isMsoSymbolRun(HtmlObjects.Tag t)
     {
-        if (t.isPaired
-                && !t.isIsolated
-                && t.tag.equalsIgnoreCase("SPAN")
+        if (t.isPaired && !t.isIsolated && t.tag.equalsIgnoreCase("SPAN")
                 && t.attributes.isDefined("style")
-                && t.attributes.getValue("style").startsWith(
-                        "font-family:Symbol", 1)
-                && t.attributes.getValue("style").endsWith(
-                        "mso-symbol-font-family:Symbol'"))
+                && t.attributes.getValue("style").startsWith("font-family:Symbol", 1)
+                && t.attributes.getValue("style").endsWith("mso-symbol-font-family:Symbol'"))
         {
             return true;
         }
@@ -5868,19 +5612,17 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * Wed Apr 06 20:14:49 2005 Office Additions: footnote and endnote markers
      * get output as a single PH.
      * 
-     * looks like <a style='mso-footnote-id:ftn1' href="#_ftn1" name="_ftnref1"
-     * title=""><span class=MsoFootnoteReference><span
-     * style='mso-special-character:footnote'></span></span></a>
+     * looks like
+     * <a style='mso-footnote-id:ftn1' href="#_ftn1" name="_ftnref1" title="">
+     * <span class=MsoFootnoteReference><span style=
+     * 'mso-special-character:footnote'></span></span></a>
      */
     private boolean isMsoReferenceMarker(HtmlObjects.Tag t)
     {
-        if (t.isPaired
-                && !t.isIsolated
-                && t.tag.equalsIgnoreCase("A")
+        if (t.isPaired && !t.isIsolated && t.tag.equalsIgnoreCase("A")
                 && t.attributes.isDefined("style")
-                && (t.attributes.getValue("style").startsWith(
-                        "mso-footnote-id", 1) || t.attributes.getValue("style")
-                        .startsWith("mso-endnote-id", 1)))
+                && (t.attributes.getValue("style").startsWith("mso-footnote-id", 1)
+                        || t.attributes.getValue("style").startsWith("mso-endnote-id", 1)))
         {
             return true;
         }
@@ -5901,9 +5643,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      */
     private boolean isMsoHiddenText(HtmlObjects.Tag t)
     {
-        if (t.isPaired
-                && !t.isIsolated
-                && t.tag.equalsIgnoreCase("SPAN")
+        if (t.isPaired && !t.isIsolated && t.tag.equalsIgnoreCase("SPAN")
                 && t.attributes.isDefined("style")
                 && (t.attributes.getValue("style").indexOf("display:none") >= 0))
         {
@@ -5916,7 +5656,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
     /**
      * Thu Nov 14 00:44:48 2002 Office Additions: detect the
      * 
-     * Looks like <TD x:str="'text with apos">text without apos</TD>.
+     * Looks like
+     * <TD x:str="'text with apos">text without apos</TD>.
      */
     private boolean isExcelStringCell(HtmlObjects.Tag t)
     {
@@ -5933,9 +5674,11 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * Number cells are used for dates, currencies, scientific numbers,
      * accounting numbers, percentages etc.
      * 
-     * Looks like: <TD x:num>number</TD>. <TD style="s1" x:num="123.45">$ 123.45
-     * </TD>. <TD style="s2" x:num="32760">01-Jan-02</TD>. <TD style="s3" x:num="123.45">
-     * 1.23E2</TD>. <TD style="s3" x:num x:fmla="=A1+A2">123</TD>.
+     * Looks like: <TD x:num>number</TD>.
+     * <TD style="s1" x:num="123.45">$ 123.45</TD>.
+     * <TD style="s2" x:num="32760">01-Jan-02</TD>.
+     * <TD style="s3" x:num="123.45">1.23E2</TD>. <TD style="s3" x:num
+     * x:fmla="=A1+A2">123</TD>.
      */
     private boolean isExcelNumberCell(HtmlObjects.Tag t)
     {
@@ -5950,8 +5693,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
     private boolean isExcelFormulaCell(HtmlObjects.Tag t)
     {
         if (t.tag.equalsIgnoreCase("TD") && t.attributes.isDefined("x:num")
-                && t.attributes.isDefined("x:fmla")
-                && t.attributes.hasValue("x:fmla"))
+                && t.attributes.isDefined("x:fmla") && t.attributes.hasValue("x:fmla"))
         {
             return true;
         }
@@ -5961,16 +5703,14 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
     private void pushDeclarationContext(String p_decl)
     {
-        m_declarationStack.push(new DeclarationContext(p_decl, m_bExtracting,
-                m_strSkippedText));
+        m_declarationStack.push(new DeclarationContext(p_decl, m_bExtracting, m_strSkippedText));
     }
 
     private void popDeclarationContext()
     {
         if (m_declarationStack.size() > 0)
         {
-            DeclarationContext ctxt = (DeclarationContext) m_declarationStack
-                    .pop();
+            DeclarationContext ctxt = (DeclarationContext) m_declarationStack.pop();
 
             m_bExtracting = ctxt.m_bExtracting;
             m_strSkippedText = ctxt.m_strSkippedText;
@@ -5988,8 +5728,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
         for (int i = m_declarationStack.size() - 1; i >= 0; --i)
         {
-            DeclarationContext ctxt = (DeclarationContext) m_declarationStack
-                    .get(i);
+            DeclarationContext ctxt = (DeclarationContext) m_declarationStack.get(i);
 
             if (isDiscardableDecl(ctxt.m_context))
             {
@@ -6214,14 +5953,12 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
     /*
      * If the col attribute is <span>, it should re-count the column number.
      */
-    private void setExcelColSpanStyle(int colNumber, String value,
-            HtmlObjects.Tag t)
+    private void setExcelColSpanStyle(int colNumber, String value, HtmlObjects.Tag t)
     {
         String key = "col_" + colNumber;
         this.m_excelColStyleMap.put(key, value);
 
-        if (!"".equals(t.attributes.getValue("span"))
-                && t.attributes.getValue("span") != null)
+        if (!"".equals(t.attributes.getValue("span")) && t.attributes.getValue("span") != null)
         {
             for (int i = 1; i < Integer.parseInt(t.attributes.getValue("span")); i++)
             {
@@ -6320,8 +6057,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      */
     private boolean isNotesTagInMaster(HtmlObjects.Tag t)
     {
-        if (t.tag.equalsIgnoreCase("p:notes")
-                && t.attributes.isDefined("layout"))
+        if (t.tag.equalsIgnoreCase("p:notes") && t.attributes.isDefined("layout"))
         {
             return "\"notes\"".equals(t.attributes.getValue("layout"));
         }
@@ -6358,7 +6094,6 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
     private boolean containsDiv(HtmlObjects.Tag t)
     {
-        return t.toString().startsWith("<div v:shape=")
-                || t.toString().startsWith("<div class=");
+        return t.toString().startsWith("<div v:shape=") || t.toString().startsWith("<div class=");
     }
 }

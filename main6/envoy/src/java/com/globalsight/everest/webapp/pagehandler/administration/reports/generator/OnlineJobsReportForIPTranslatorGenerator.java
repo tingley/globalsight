@@ -90,14 +90,14 @@ import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
 import com.globalsight.util.JfreeCharUtil;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 
 /**
  * Online Jobs For IPTranslator Report Generator
  * 
  * @Date Feb 14, 2012
  */
-public class OnlineJobsReportForIPTranslatorGenerator implements
-        ReportGenerator
+public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
 {
     private static Logger logger = Logger
             .getLogger(OnlineJobsReportForIPTranslatorGenerator.class.getName());
@@ -161,8 +161,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             getJobsInWrongProject();
     }
 
-    public void sendReports(List<Long> p_jobIDS,
-            List<GlobalSightLocale> p_targetLocales,
+    public void sendReports(List<Long> p_jobIDS, List<GlobalSightLocale> p_targetLocales,
             HttpServletResponse p_response) throws Exception
     {
         File[] reports = generateReports(p_jobIDS, p_targetLocales);
@@ -170,8 +169,8 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
     }
 
     @Override
-    public File[] generateReports(List<Long> p_jobIDS,
-            List<GlobalSightLocale> p_targetLocales) throws Exception
+    public File[] generateReports(List<Long> p_jobIDS, List<GlobalSightLocale> p_targetLocales)
+            throws Exception
     {
         // Generate Report from HttpServletRequest.
         if (p_jobIDS == null || p_jobIDS.size() == 0)
@@ -181,14 +180,13 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
         File file = ReportHelper.getXLSReportFile(getReportType(), null);
         Workbook workbook = new SXSSFWorkbook();
-        HashSet<Job> jobs = new HashSet<Job>(
-                ReportHelper.getJobListByIDS(p_jobIDS));
+        HashSet<Job> jobs = new HashSet<Job>(ReportHelper.getJobListByIDS(p_jobIDS));
         m_data.wantsAllLocales = true;
         m_data.wantsAllProjects = true;
         m_data.setDateFormatString("MM/dd/yy hh:mm:ss a z");
         m_data.jobIds = p_jobIDS;
-        HashMap<String, HashMap<String, ProjectWorkflowData>> projectMap = reportDataMap(
-                jobs, false, false);
+        HashMap<String, HashMap<String, ProjectWorkflowData>> projectMap = reportDataMap(jobs,
+                false, false);
         if (projectMap != null && projectMap.size() > 0)
         {
             // Create sheets in Workbook.
@@ -196,7 +194,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             FileOutputStream out = new FileOutputStream(file);
             workbook.write(out);
             out.close();
-            ((SXSSFWorkbook)workbook).dispose();
+            ((SXSSFWorkbook) workbook).dispose();
             List<File> workBooks = new ArrayList<File>();
             workBooks.add(file);
             return ReportHelper.moveReports(workBooks, m_userId);
@@ -215,8 +213,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
      * @return File
      * @exception Exception
      */
-    private File[] generateReport(HttpServletRequest p_request)
-            throws Exception
+    private File[] generateReport(HttpServletRequest p_request) throws Exception
     {
         String[] months = getMonths();
         File file = ReportHelper.getXLSReportFile(getReportType(), null);
@@ -239,8 +236,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         String recalcParam = p_request.getParameter("recalc");
         if (recalcParam != null && recalcParam.length() > 0)
         {
-            recalculateFinishedWorkflow = java.lang.Boolean
-                    .valueOf(recalcParam).booleanValue();
+            recalculateFinishedWorkflow = java.lang.Boolean.valueOf(recalcParam).booleanValue();
         }
 
         // For "Dell Review Report Issue"
@@ -252,8 +248,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         String reviewParam = p_request.getParameter("review");
         if ((reviewParam != null) && (reviewParam.length() > 0))
         {
-            includeExReview = java.lang.Boolean.valueOf(reviewParam)
-                    .booleanValue();
+            includeExReview = java.lang.Boolean.valueOf(reviewParam).booleanValue();
         }
 
         // For "Add Job Id into online job report" issue
@@ -269,8 +264,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 // For "Dell Review Report Issue"
                 // Add new parameter "includeExReview" to the signature.
                 HashMap<String, HashMap<String, ProjectWorkflowData>> projectMap = getProjectDataForMonth(
-                        p_request, i, recalculateFinishedWorkflow,
-                        includeExReview);
+                        p_request, i, recalculateFinishedWorkflow, includeExReview);
 
                 // Cancel the report.
                 if (isCancelled())
@@ -287,16 +281,17 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
                     String sheetTitle = months[i] + " " + year;
                     sheets[MONTH_SHEET] = p_workbook.createSheet(sheetTitle);
-                    
-                    // m_data.isTradosStyle by default is true, matches trados for UI is hidden
+
+                    // m_data.isTradosStyle by default is true, matches trados
+                    // for UI is hidden
                     if (m_data.isTradosStyle())
                     {
-                    	addTitle(p_workbook, sheets[MONTH_SHEET]);
+                        addTitle(p_workbook, sheets[MONTH_SHEET]);
                         addHeaderTradosStyle(p_workbook, sheets[MONTH_SHEET], MONTH_SHEET);
                     }
                     else
                     {
-                    	addTitle(p_workbook, sheets[MONTH_SHEET]);
+                        addTitle(p_workbook, sheets[MONTH_SHEET]);
                         addHeader(p_workbook, sheets[MONTH_SHEET], MONTH_SHEET);
                     }
 
@@ -304,38 +299,31 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
                     if (includeExReview)
                     {
-                        String sheetReviewTitle = m_bundle
-                                .getString("lb_review")
-                                + " "
-                                + months[i]
-                                + " "
-                                + year;
-                        sheets[MONTH_REVIEW_SHEET] = p_workbook.createSheet(
-                                sheetReviewTitle);
+                        String sheetReviewTitle = m_bundle.getString("lb_review") + " " + months[i]
+                                + " " + year;
+                        sheets[MONTH_REVIEW_SHEET] = p_workbook.createSheet(sheetReviewTitle);
                         if (m_data.isTradosStyle())
                         {
-                        	addTitle(p_workbook, sheets[MONTH_REVIEW_SHEET]);
+                            addTitle(p_workbook, sheets[MONTH_REVIEW_SHEET]);
                             addHeaderTradosStyle(p_workbook, sheets[MONTH_REVIEW_SHEET],
                                     MONTH_REVIEW_SHEET);
                         }
                         else
                         {
-                        	addTitle(p_workbook, sheets[MONTH_REVIEW_SHEET]);
-                            addHeader(p_workbook, sheets[MONTH_REVIEW_SHEET],
-                                    MONTH_REVIEW_SHEET);
+                            addTitle(p_workbook, sheets[MONTH_REVIEW_SHEET]);
+                            addHeader(p_workbook, sheets[MONTH_REVIEW_SHEET], MONTH_REVIEW_SHEET);
                         }
                         rows[MONTH_REVIEW_SHEET] = new IntHolder(4);
                     }
 
                     if (m_data.isTradosStyle())
                     {
-                        writeProjectDataTradosStyle(projectMap,p_workbook, sheets,
-                                includeExReview, rows);
+                        writeProjectDataTradosStyle(projectMap, p_workbook, sheets, includeExReview,
+                                rows);
                     }
                     else
                     {
-                        writeProjectData(projectMap,p_workbook, sheets, includeExReview,
-                                rows);
+                        writeProjectData(projectMap, p_workbook, sheets, includeExReview, rows);
                     }
                     wroteSomething = true;
                 }
@@ -349,43 +337,40 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 Sheet monthSheet = p_workbook.createSheet(sheetTitle);
                 if (m_data.isTradosStyle())
                 {
-                	addTitle(p_workbook, monthSheet);
+                    addTitle(p_workbook, monthSheet);
                     addHeaderTradosStyle(p_workbook, monthSheet, MONTH_SHEET);
                 }
                 else
                 {
-                	addTitle(p_workbook, monthSheet);
+                    addTitle(p_workbook, monthSheet);
                     addHeader(p_workbook, monthSheet, MONTH_SHEET);
                 }
 
                 if (includeExReview)
                 {
-                    String sheetReviewTitle = "Review " + months[currentMonth]
-                            + " " + year;
-                    Sheet monthReviewSheet = p_workbook.createSheet(
-                            sheetReviewTitle);
+                    String sheetReviewTitle = "Review " + months[currentMonth] + " " + year;
+                    Sheet monthReviewSheet = p_workbook.createSheet(sheetReviewTitle);
                     if (m_data.isTradosStyle())
                     {
-                    	addTitle(p_workbook, monthReviewSheet);
-                        addHeaderTradosStyle(p_workbook, monthReviewSheet,
-                                MONTH_REVIEW_SHEET);
+                        addTitle(p_workbook, monthReviewSheet);
+                        addHeaderTradosStyle(p_workbook, monthReviewSheet, MONTH_REVIEW_SHEET);
                     }
                     else
                     {
-                    	addTitle(p_workbook, monthReviewSheet);
+                        addTitle(p_workbook, monthReviewSheet);
                         addHeader(p_workbook, monthReviewSheet, MONTH_REVIEW_SHEET);
                     }
                 }
             }
 
             // Create "Criteria" Sheet
-            addParamsSheet(p_workbook,(String) p_request
-                    .getParameter("year") , recalculateFinishedWorkflow);
+            addParamsSheet(p_workbook, (String) p_request.getParameter("year"),
+                    recalculateFinishedWorkflow);
 
             FileOutputStream out = new FileOutputStream(file);
             p_workbook.write(out);
             out.close();
-            ((SXSSFWorkbook)p_workbook).dispose();
+            ((SXSSFWorkbook) p_workbook).dispose();
         }
         // Generate Report by Creation Date Range.
         else if (isReportForDetail != null && isReportForDetail.endsWith("on"))
@@ -402,22 +387,22 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             // Create sheets in Workbook.
             createSheets(p_workbook, projectMap, includeExReview);
 
-            // Create "Criteria" Sheet  
-            addParamsSheet(p_workbook, (String) p_request
-                    .getParameter("year"), recalculateFinishedWorkflow);
+            // Create "Criteria" Sheet
+            addParamsSheet(p_workbook, (String) p_request.getParameter("year"),
+                    recalculateFinishedWorkflow);
 
             FileOutputStream out = new FileOutputStream(file);
             p_workbook.write(out);
             out.close();
-            ((SXSSFWorkbook)p_workbook).dispose();
+            ((SXSSFWorkbook) p_workbook).dispose();
         }
-        
+
         List<File> workBooks = new ArrayList<File>();
         workBooks.add(file);
         return ReportHelper.moveReports(workBooks, m_userId);
     }
 
-    /** 
+    /**
      * Create sheets in Workbook, include 2 sheets by Creation Date Range. The
      * sheets are the original month Sheet("Detail Report") and monthly
      * Dell_Review sheet("Review Detail Report").
@@ -439,12 +424,12 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             sheets[MONTH_SHEET] = p_workbook.createSheet(sheetTitle);
             if (m_data.isTradosStyle())
             {
-            	addTitle(p_workbook, sheets[MONTH_SHEET]);
+                addTitle(p_workbook, sheets[MONTH_SHEET]);
                 addHeaderTradosStyle(p_workbook, sheets[MONTH_SHEET], MONTH_SHEET);
             }
             else
             {
-            	addTitle(p_workbook, sheets[MONTH_SHEET]);
+                addTitle(p_workbook, sheets[MONTH_SHEET]);
                 addHeader(p_workbook, sheets[MONTH_SHEET], MONTH_SHEET);
             }
 
@@ -452,19 +437,17 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
             if (p_includeExReview)
             {
-                String sheetReviewTitle = m_bundle
-                        .getString("lb_review_detail_report");
-                sheets[MONTH_REVIEW_SHEET] = p_workbook.createSheet(
-                        sheetReviewTitle);
+                String sheetReviewTitle = m_bundle.getString("lb_review_detail_report");
+                sheets[MONTH_REVIEW_SHEET] = p_workbook.createSheet(sheetReviewTitle);
                 if (m_data.isTradosStyle())
                 {
-                	addTitle(p_workbook, sheets[MONTH_REVIEW_SHEET]);
+                    addTitle(p_workbook, sheets[MONTH_REVIEW_SHEET]);
                     addHeaderTradosStyle(p_workbook, sheets[MONTH_REVIEW_SHEET],
                             MONTH_REVIEW_SHEET);
                 }
                 else
                 {
-                	addTitle(p_workbook, sheets[MONTH_REVIEW_SHEET]);
+                    addTitle(p_workbook, sheets[MONTH_REVIEW_SHEET]);
                     addHeader(p_workbook, sheets[MONTH_REVIEW_SHEET], MONTH_REVIEW_SHEET);
                 }
 
@@ -473,20 +456,19 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
             if (m_data.isTradosStyle())
             {
-                writeProjectDataTradosStyle(p_projectMap,p_workbook,  sheets,
-                        p_includeExReview, rows);
+                writeProjectDataTradosStyle(p_projectMap, p_workbook, sheets, p_includeExReview,
+                        rows);
             }
             else
             {
-                writeProjectData(p_projectMap,p_workbook,  sheets, p_includeExReview, rows);
+                writeProjectData(p_projectMap, p_workbook, sheets, p_includeExReview, rows);
             }
         }
     }
-    
-    private void addTitle(Workbook p_workbook,
-    		Sheet p_sheet) throws Exception
-	{
-    	String EMEA = CompanyWrapper.getCurrentCompanyName();
+
+    private void addTitle(Workbook p_workbook, Sheet p_sheet) throws Exception
+    {
+        String EMEA = CompanyWrapper.getCurrentCompanyName();
         Font titleFont = p_workbook.createFont();
         titleFont.setUnderline(Font.U_NONE);
         titleFont.setFontName("Arial");
@@ -495,19 +477,18 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         CellStyle titleStyle = p_workbook.createCellStyle();
         titleStyle.setWrapText(false);
         titleStyle.setFont(titleFont);
-        
+
         Row firRow = getRow(p_sheet, 0);
         Cell titleCell = getCell(firRow, 0);
-        titleCell.setCellValue(EMEA + " "
-                + m_bundle.getString("online_jobs_for_ip_translator"));
+        titleCell.setCellValue(EMEA + " " + m_bundle.getString("online_jobs_for_ip_translator"));
         titleCell.setCellStyle(titleStyle);
         p_sheet.setColumnWidth(0, 20 * 256);
-	}
+    }
 
-    private void addHeader(Workbook p_workbook, Sheet p_sheet, 
-    		final int p_sheetCategory) throws Exception
+    private void addHeader(Workbook p_workbook, Sheet p_sheet, final int p_sheetCategory)
+            throws Exception
     {
-    	String EMEA = CompanyWrapper.getCurrentCompanyName();
+        String EMEA = CompanyWrapper.getCurrentCompanyName();
         int col = -1;
         Row thirRow = getRow(p_sheet, 2);
         Row fourRow = getRow(p_sheet, 3);
@@ -516,126 +497,112 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         cell_A.setCellValue(m_bundle.getString("lb_company_name"));
         cell_A.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
         // Project Description
         Cell cell_B = getCell(thirRow, ++col);
         cell_B.setCellValue(m_bundle.getString("lb_project"));
         cell_B.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
 
         // For "Add Job Id into online job report" issue
         if (isJobIdVisible)
         {
-        	Cell cell_C = getCell(thirRow, ++col);
+            Cell cell_C = getCell(thirRow, ++col);
             cell_C.setCellValue(m_bundle.getString("lb_job_id"));
             cell_C.setCellStyle(getHeaderStyle(p_workbook));
             p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
             setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-            		getHeaderStyle(p_workbook));
+                    getHeaderStyle(p_workbook));
         }
 
         Cell cell_CorD = getCell(thirRow, ++col);
         cell_CorD.setCellValue(m_bundle.getString("lb_job_name"));
         cell_CorD.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_DorE = getCell(thirRow, ++col);
         cell_DorE.setCellValue(m_bundle.getString("lb_source_file_format"));
         cell_DorE.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-        		getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_EorF = getCell(thirRow, ++col);
         cell_EorF.setCellValue(m_bundle.getString("lb_loc_profile"));
         cell_EorF.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-        		getHeaderStyle(p_workbook));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
 
         Cell cell_MTPro = getCell(thirRow, ++col);
         cell_MTPro.setCellValue(m_bundle.getString("lb_mt_translation_name"));
         cell_MTPro.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-                getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_ForG = getCell(thirRow, ++col);
         cell_ForG.setCellValue(m_bundle.getString("lb_file_profiles"));
         cell_ForG.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
 
         Cell cell_GorH = getCell(thirRow, ++col);
         cell_GorH.setCellValue(m_bundle.getString("lb_creation_date"));
         cell_GorH.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
 
         Cell cell_HorI = getCell(thirRow, ++col);
         cell_HorI.setCellValue(m_bundle.getString("lb_creation_time"));
         cell_HorI.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-        		getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_IorJ = getCell(thirRow, ++col);
         cell_IorJ.setCellValue(m_bundle.getString("lb_export_date"));
         cell_IorJ.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_JorK = getCell(thirRow, ++col);
         cell_JorK.setCellValue(m_bundle.getString("lb_export_time"));
         cell_JorK.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-        		getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_KorL = getCell(thirRow, ++col);
         cell_KorL.setCellValue(m_bundle.getString("lb_status"));
         cell_KorL.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_LorM = getCell(thirRow, ++col);
         cell_LorM.setCellValue(m_bundle.getString("lb_lang"));
         cell_LorM.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_MorN_Header = getCell(thirRow, ++col);
         cell_MorN_Header.setCellValue(m_bundle.getString("lb_word_counts"));
         cell_MorN_Header.setCellStyle(getHeaderStyle(p_workbook));
 
         if (m_data.useInContext)
         {
-        	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 5));
-            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 5), 
-            		getHeaderStyle(p_workbook));
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 5));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 5),
+                    getHeaderStyle(p_workbook));
         }
         else
         {
-        	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 4));
-            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 4), 
-            		getHeaderStyle(p_workbook));
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 4));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 4),
+                    getHeaderStyle(p_workbook));
         }
 
         Cell cell_MorN = getCell(fourRow, col);
-        cell_MorN.setCellValue(m_bundle
-        		.getString("jobinfo.tmmatches.wordcounts.internalreps"));
+        cell_MorN.setCellValue(m_bundle.getString("jobinfo.tmmatches.wordcounts.internalreps"));
         cell_MorN.setCellStyle(getHeaderStyle(p_workbook));
-        
+
         col++;
         Cell cell_NorO = getCell(fourRow, col);
         cell_NorO.setCellValue(m_bundle.getString("lb_100_exact_matches"));
@@ -645,183 +612,171 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         {
             col++;
             Cell cell_InContext = getCell(fourRow, col);
-            cell_InContext.setCellValue(m_bundle
-                   .getString("lb_in_context_tm"));
+            cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
             cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
         }
 
         col++;
         Cell cell_FuzzyMatches = getCell(fourRow, col);
-        cell_FuzzyMatches.setCellValue(m_bundle
-               .getString("jobinfo.tmmatches.wordcounts.fuzzymatches"));
+        cell_FuzzyMatches
+                .setCellValue(m_bundle.getString("jobinfo.tmmatches.wordcounts.fuzzymatches"));
         cell_FuzzyMatches.setCellStyle(getHeaderStyle(p_workbook));
 
         col++;
         Cell cell_NewWords = getCell(fourRow, col);
-        cell_NewWords.setCellValue(m_bundle
-               .getString("jobinfo.tmmatches.wordcounts.newwords"));
+        cell_NewWords.setCellValue(m_bundle.getString("jobinfo.tmmatches.wordcounts.newwords"));
         cell_NewWords.setCellStyle(getHeaderStyle(p_workbook));
 
         col++;
         Cell cell_Total = getCell(fourRow, col);
-        cell_Total.setCellValue(m_bundle
-               .getString("lb_total_source_word_count"));
+        cell_Total.setCellValue(m_bundle.getString("lb_total_source_word_count"));
         cell_Total.setCellStyle(getHeaderStyle(p_workbook));
 
         col++;
         Cell cell_Invoice = getCell(thirRow, col);
-        cell_Invoice.setCellValue(m_bundle
-               .getString("jobinfo.tmmatches.invoice"));
+        cell_Invoice.setCellValue(m_bundle.getString("jobinfo.tmmatches.invoice"));
         cell_Invoice.setCellStyle(getHeaderStyle(p_workbook));
 
         if (p_sheetCategory == MONTH_SHEET)
         {
             if (m_data.useInContext)
             {
-            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
+                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
                 setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
-                		getHeaderStyle(p_workbook));
+                        getHeaderStyle(p_workbook));
             }
             else
             {
-            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 6));
+                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 6));
                 setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 6),
-                		getHeaderStyle(p_workbook));
+                        getHeaderStyle(p_workbook));
             }
 
             Cell cell_InternalReps = getCell(fourRow, col);
-            cell_InternalReps.setCellValue(m_bundle
-                   .getString("jobinfo.tmmatches.invoice.internalreps"));
+            cell_InternalReps
+                    .setCellValue(m_bundle.getString("jobinfo.tmmatches.invoice.internalreps"));
             cell_InternalReps.setCellStyle(getHeaderStyle(p_workbook));
             col++;
-            
+
             Cell cell_ExactMatches = getCell(fourRow, col);
-            cell_ExactMatches.setCellValue(m_bundle
-                   .getString("lb_100_exact_matches"));
+            cell_ExactMatches.setCellValue(m_bundle.getString("lb_100_exact_matches"));
             cell_ExactMatches.setCellStyle(getHeaderStyle(p_workbook));
             col++;
             if (m_data.useInContext)
             {
-            	Cell cell_InContext = getCell(fourRow, col);
-                cell_InContext.setCellValue(m_bundle
-                       .getString("lb_in_context_tm"));
+                Cell cell_InContext = getCell(fourRow, col);
+                cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
                 cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
                 col++;
             }
 
             Cell cell_FM_Invoice = getCell(fourRow, col);
-            cell_FM_Invoice.setCellValue(m_bundle
-                   .getString("jobinfo.tmmatches.wordcounts.fuzzymatches"));
+            cell_FM_Invoice
+                    .setCellValue(m_bundle.getString("jobinfo.tmmatches.wordcounts.fuzzymatches"));
             cell_FM_Invoice.setCellStyle(getHeaderStyle(p_workbook));
             col++;
-            
+
             Cell cell_NW_Invoice = getCell(fourRow, col);
-            cell_NW_Invoice.setCellValue(m_bundle
-                   .getString("jobinfo.tmmatches.wordcounts.newwords"));
+            cell_NW_Invoice
+                    .setCellValue(m_bundle.getString("jobinfo.tmmatches.wordcounts.newwords"));
             cell_NW_Invoice.setCellStyle(getHeaderStyle(p_workbook));
             col++;
-            
+
             Cell cell_Total_Invoice = getCell(fourRow, col);
-            cell_Total_Invoice.setCellValue(m_bundle
-                   .getString("jobinfo.tmmatches.wordcounts.total"));
+            cell_Total_Invoice
+                    .setCellValue(m_bundle.getString("jobinfo.tmmatches.wordcounts.total"));
             cell_Total_Invoice.setCellStyle(getHeaderStyle(p_workbook));
             col++;
 
             Cell cell_AdditionalCharges = getCell(fourRow, col);
-            cell_AdditionalCharges.setCellValue(m_bundle
-                   .getString("jobinfo.tmmatches.invoice.additionalCharges"));
+            cell_AdditionalCharges.setCellValue(
+                    m_bundle.getString("jobinfo.tmmatches.invoice.additionalCharges"));
             cell_AdditionalCharges.setCellStyle(getHeaderStyle(p_workbook));
             col++;
 
             Cell cell_JobTotal = getCell(fourRow, col);
-            cell_JobTotal.setCellValue(m_bundle
-                   .getString("jobinfo.tmmatches.invoice.jobtotal"));
+            cell_JobTotal.setCellValue(m_bundle.getString("jobinfo.tmmatches.invoice.jobtotal"));
             cell_JobTotal.setCellStyle(getHeaderStyle(p_workbook));
             col++;
 
             Cell cell_Tracking = getCell(thirRow, col);
-            cell_Tracking.setCellValue(m_bundle.getString("lb_tracking")
-                    + " " + EMEA + " " + m_bundle.getString("lb_use") + ")");
+            cell_Tracking.setCellValue(m_bundle.getString("lb_tracking") + " " + EMEA + " "
+                    + m_bundle.getString("lb_use") + ")");
             cell_Tracking.setCellStyle(getHeaderStyle(p_workbook));
-            
+
             p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
             setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-            		getHeaderStyle(p_workbook));
+                    getHeaderStyle(p_workbook));
 
         }
         else if (p_sheetCategory == MONTH_REVIEW_SHEET)
         {
             if (m_data.useInContext)
             {
-            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
+                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
                 setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
-                		getHeaderStyle(p_workbook));
+                        getHeaderStyle(p_workbook));
             }
             else
             {
-            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 6));
+                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 6));
                 setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 6),
-                		getHeaderStyle(p_workbook));
+                        getHeaderStyle(p_workbook));
             }
 
             Cell cell_InternalReps = getCell(fourRow, col);
-            cell_InternalReps.setCellValue(m_bundle
-                   .getString("jobinfo.tmmatches.wordcounts.internalreps"));
+            cell_InternalReps
+                    .setCellValue(m_bundle.getString("jobinfo.tmmatches.wordcounts.internalreps"));
             cell_InternalReps.setCellStyle(getHeaderStyle(p_workbook));
             col++;
-            
+
             Cell cell_ExactMatches = getCell(fourRow, col);
-            cell_ExactMatches.setCellValue(m_bundle
-                   .getString("lb_100_exact_matches"));
+            cell_ExactMatches.setCellValue(m_bundle.getString("lb_100_exact_matches"));
             cell_ExactMatches.setCellStyle(getHeaderStyle(p_workbook));
             col++;
             if (m_data.useInContext)
             {
-            	Cell cell_InContext = getCell(fourRow, col);
-            	cell_InContext.setCellValue(m_bundle
-                       .getString("lb_in_context_tm"));
-            	cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
+                Cell cell_InContext = getCell(fourRow, col);
+                cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
+                cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
                 col++;
             }
 
             Cell cell_FM_Invoice = getCell(fourRow, col);
-            cell_FM_Invoice.setCellValue(m_bundle
-                   .getString("jobinfo.tmmatches.wordcounts.fuzzymatches"));
+            cell_FM_Invoice
+                    .setCellValue(m_bundle.getString("jobinfo.tmmatches.wordcounts.fuzzymatches"));
             cell_FM_Invoice.setCellStyle(getHeaderStyle(p_workbook));
             col++;
-            
+
             Cell cell_NW_Invoice = getCell(fourRow, col);
-            cell_NW_Invoice.setCellValue(m_bundle
-                   .getString("jobinfo.tmmatches.wordcounts.newwords"));
+            cell_NW_Invoice
+                    .setCellValue(m_bundle.getString("jobinfo.tmmatches.wordcounts.newwords"));
             cell_NW_Invoice.setCellStyle(getHeaderStyle(p_workbook));
             col++;
-            
+
             Cell cell_Total_Invoice = getCell(fourRow, col);
-            cell_Total_Invoice.setCellValue(m_bundle
-                   .getString("lb_translation_total"));
+            cell_Total_Invoice.setCellValue(m_bundle.getString("lb_translation_total"));
             cell_Total_Invoice.setCellStyle(getHeaderStyle(p_workbook));
             col++;
-            
+
             Cell cell_Review = getCell(fourRow, col);
-            cell_Review.setCellValue(m_bundle
-                   .getString("lb_review"));
+            cell_Review.setCellValue(m_bundle.getString("lb_review"));
             cell_Review.setCellStyle(getHeaderStyle(p_workbook));
             col++;
-            
+
             Cell cell_JobTotal = getCell(fourRow, col);
-            cell_JobTotal.setCellValue(m_bundle
-                   .getString("jobinfo.tmmatches.invoice.jobtotal"));
+            cell_JobTotal.setCellValue(m_bundle.getString("jobinfo.tmmatches.invoice.jobtotal"));
             cell_JobTotal.setCellStyle(getHeaderStyle(p_workbook));
             col++;
-            
+
             Cell cell_Tracking = getCell(thirRow, col);
-            cell_Tracking.setCellValue(m_bundle.getString("lb_tracking")
-                    + " " + EMEA + " " + m_bundle.getString("lb_use") + ")");
+            cell_Tracking.setCellValue(m_bundle.getString("lb_tracking") + " " + EMEA + " "
+                    + m_bundle.getString("lb_use") + ")");
             cell_Tracking.setCellStyle(getHeaderStyle(p_workbook));
-            
+
             p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
             setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-            		getHeaderStyle(p_workbook));
+                    getHeaderStyle(p_workbook));
         }
         else
         {
@@ -838,17 +793,16 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
      * @param bundle
      * @throws Exception
      */
-    private void addHeaderTradosStyle(Workbook p_workbook, Sheet p_sheet,
-            final int p_sheetCategory)
+    private void addHeaderTradosStyle(Workbook p_workbook, Sheet p_sheet, final int p_sheetCategory)
             throws Exception
     {
         String EMEA = CompanyWrapper.getCurrentCompanyName();
-        
+
         Row secRow = getRow(p_sheet, 1);
         Cell cell_Ldfl = getCell(secRow, 0);
         cell_Ldfl.setCellValue(m_bundle.getString("lb_desp_file_list"));
         cell_Ldfl.setCellStyle(getContentStyle(p_workbook));
-        
+
         int col = -1;
         Row thirRow = getRow(p_sheet, 2);
         Row fourRow = getRow(p_sheet, 3);
@@ -857,119 +811,106 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         cell_A.setCellValue(m_bundle.getString("lb_company_name"));
         cell_A.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
 
         // Project Description
         Cell cell_B = getCell(thirRow, ++col);
         cell_B.setCellValue(m_bundle.getString("lb_project"));
         cell_B.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-        		getHeaderStyle(p_workbook));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
 
         if (isJobIdVisible)
         {
-        	Cell cell_C = getCell(thirRow, ++col);
+            Cell cell_C = getCell(thirRow, ++col);
             cell_C.setCellValue(m_bundle.getString("lb_job_id"));
             cell_C.setCellStyle(getHeaderStyle(p_workbook));
             p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
             setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-            		getHeaderStyle(p_workbook));
+                    getHeaderStyle(p_workbook));
         }
-        
+
         Cell cell_CorD = getCell(thirRow, ++col);
         cell_CorD.setCellValue(m_bundle.getString("lb_job_name"));
         cell_CorD.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
 
         Cell cell_DorE = getCell(thirRow, ++col);
         cell_DorE.setCellValue(m_bundle.getString("lb_source_file_format"));
         cell_DorE.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
 
         Cell cell_EorF = getCell(thirRow, ++col);
         cell_EorF.setCellValue(m_bundle.getString("lb_loc_profile"));
         cell_EorF.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_MTPro = getCell(thirRow, ++col);
         cell_MTPro.setCellValue(m_bundle.getString("lb_mt_translation_name"));
         cell_MTPro.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-                getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_ForG = getCell(thirRow, ++col);
         cell_ForG.setCellValue(m_bundle.getString("lb_file_profiles"));
         cell_ForG.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
 
         Cell cell_GorH = getCell(thirRow, ++col);
         cell_GorH.setCellValue(m_bundle.getString("lb_creation_date"));
         cell_GorH.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
 
         Cell cell_HorI = getCell(thirRow, ++col);
         cell_HorI.setCellValue(m_bundle.getString("lb_creation_time"));
         cell_HorI.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-        		getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_IorJ = getCell(thirRow, ++col);
         cell_IorJ.setCellValue(m_bundle.getString("lb_export_date"));
         cell_IorJ.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), 
-        		getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_JorK = getCell(thirRow, ++col);
         cell_JorK.setCellValue(m_bundle.getString("lb_export_time"));
         cell_JorK.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-        		getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_KorL = getCell(thirRow, ++col);
         cell_KorL.setCellValue(m_bundle.getString("lb_status"));
         cell_KorL.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-        		getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_LorM = getCell(thirRow, ++col);
         cell_LorM.setCellValue(m_bundle.getString("lb_lang"));
         cell_LorM.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-        		getHeaderStyle(p_workbook));
-        
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
+
         Cell cell_MorN_Header = getCell(thirRow, ++col);
         cell_MorN_Header.setCellValue(m_bundle.getString("lb_word_counts"));
         cell_MorN_Header.setCellStyle(getHeaderStyle(p_workbook));
 
         if (m_data.useInContext)
         {
-        	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 8));
-            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 8), 
-            		getHeaderStyle(p_workbook));
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 8));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 8),
+                    getHeaderStyle(p_workbook));
         }
         else
         {
-        	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
-            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7), 
-            		getHeaderStyle(p_workbook));
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
+                    getHeaderStyle(p_workbook));
         }
 
         Cell cell_MorN = getCell(fourRow, col);
@@ -995,7 +936,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         Cell cell_QorR = getCell(fourRow, col);
         cell_QorR.setCellValue(m_bundle.getString("lb_no_match"));
         cell_QorR.setCellStyle(getHeaderStyle(p_workbook));
-        
+
         col++;
         Cell cell_RorS = getCell(fourRow, col);
         cell_RorS.setCellValue(m_bundle.getString("lb_repetition_word_cnt"));
@@ -1023,15 +964,13 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         cell_Score.setCellValue(m_bundle.getString("lb_tm_mt_threshold_level"));
         cell_Score.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-                getHeaderStyle(p_workbook));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
 
         Cell cell_Count = getCell(thirRow, ++col);
         cell_Count.setCellValue(m_bundle.getString("lb_tm_mt_engine_word_counts"));
         cell_Count.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
-        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-                getHeaderStyle(p_workbook));
+        setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col), getHeaderStyle(p_workbook));
 
         col++;
         Cell cell_Invoice = getCell(thirRow, col);
@@ -1042,20 +981,20 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         {
             if (m_data.useInContext)
             {
-            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 9));
+                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 9));
                 setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 9),
-                		getHeaderStyle(p_workbook));
+                        getHeaderStyle(p_workbook));
             }
             else
             {
-            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 8));
+                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 8));
                 setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 8),
-                		getHeaderStyle(p_workbook));
+                        getHeaderStyle(p_workbook));
             }
 
             Cell cell_Per100Matches = getCell(fourRow, col);
-            cell_Per100Matches.setCellValue(m_bundle
-            		.getString("jobinfo.tradosmatches.invoice.per100matches"));
+            cell_Per100Matches.setCellValue(
+                    m_bundle.getString("jobinfo.tradosmatches.invoice.per100matches"));
             cell_Per100Matches.setCellStyle(getHeaderStyle(p_workbook));
 
             col++;
@@ -1086,75 +1025,74 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             col++;
             if (m_data.useInContext)
             {
-            	Cell cell_InContext = getCell(fourRow, col);
-            	cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
-            	cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
+                Cell cell_InContext = getCell(fourRow, col);
+                cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
+                cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
                 col++;
             }
 
             Cell cell_Total_Invoice = getCell(fourRow, col);
-            cell_Total_Invoice.setCellValue(m_bundle
-                    .getString("jobinfo.tmmatches.wordcounts.total"));
+            cell_Total_Invoice
+                    .setCellValue(m_bundle.getString("jobinfo.tmmatches.wordcounts.total"));
             cell_Total_Invoice.setCellStyle(getHeaderStyle(p_workbook));
             col++;
 
             Cell cell_AdditionalCharges = getCell(fourRow, col);
-            cell_AdditionalCharges.setCellValue(m_bundle
-                    .getString("jobinfo.tmmatches.invoice.additionalCharges"));
+            cell_AdditionalCharges.setCellValue(
+                    m_bundle.getString("jobinfo.tmmatches.invoice.additionalCharges"));
             cell_AdditionalCharges.setCellStyle(getHeaderStyle(p_workbook));
             col++;
 
             Cell cell_JobTotal = getCell(fourRow, col);
-            cell_JobTotal.setCellValue(m_bundle
-                    .getString("jobinfo.tmmatches.invoice.jobtotal"));
+            cell_JobTotal.setCellValue(m_bundle.getString("jobinfo.tmmatches.invoice.jobtotal"));
             cell_JobTotal.setCellStyle(getHeaderStyle(p_workbook));
             col++;
-            
+
             Cell cell_Tracking = getCell(thirRow, col);
-            cell_Tracking.setCellValue(m_bundle.getString("lb_tracking")
-                    + " " + EMEA + " " + m_bundle.getString("lb_use") + ")");
+            cell_Tracking.setCellValue(m_bundle.getString("lb_tracking") + " " + EMEA + " "
+                    + m_bundle.getString("lb_use") + ")");
             cell_Tracking.setCellStyle(getHeaderStyle(p_workbook));
-            
+
             p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
             setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-            		getHeaderStyle(p_workbook));
+                    getHeaderStyle(p_workbook));
 
         }
         else if (p_sheetCategory == MONTH_REVIEW_SHEET)
         {
             if (m_data.useInContext)
             {
-            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 9));
+                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 9));
                 setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 9),
-                		getHeaderStyle(p_workbook));
+                        getHeaderStyle(p_workbook));
             }
             else
             {
-            	p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
+                p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
                 setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
-                		getHeaderStyle(p_workbook));
+                        getHeaderStyle(p_workbook));
             }
 
             Cell cell_Per100Matches = getCell(fourRow, col);
-            cell_Per100Matches.setCellValue(m_bundle
-                    .getString("jobinfo.tradosmatches.invoice.per100matches"));
+            cell_Per100Matches.setCellValue(
+                    m_bundle.getString("jobinfo.tradosmatches.invoice.per100matches"));
             cell_Per100Matches.setCellStyle(getHeaderStyle(p_workbook));
 
             col++;
             Cell cell_95_99 = getCell(fourRow, col);
             cell_95_99.setCellValue(m_bundle.getString("lb_95_99"));
             cell_95_99.setCellStyle(getHeaderStyle(p_workbook));
-            
+
             col++;
             Cell cell_85_94 = getCell(fourRow, col);
             cell_85_94.setCellValue(m_bundle.getString("lb_85_94"));
             cell_85_94.setCellStyle(getHeaderStyle(p_workbook));
-            
+
             col++;
             Cell cell_75_84 = getCell(fourRow, col);
             cell_75_84.setCellValue(m_bundle.getString("lb_75_84"));
             cell_75_84.setCellStyle(getHeaderStyle(p_workbook));
-            
+
             col++;
             Cell cell_NoMatch = getCell(fourRow, col);
             cell_NoMatch.setCellValue(m_bundle.getString("lb_no_match"));
@@ -1168,35 +1106,34 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             col++;
             if (m_data.useInContext)
             {
-            	Cell cell_InContext = getCell(fourRow, col);
-            	cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
-            	cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
+                Cell cell_InContext = getCell(fourRow, col);
+                cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
+                cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
                 col++;
             }
 
             Cell cell_TranTotal = getCell(fourRow, col);
             cell_TranTotal.setCellValue(m_bundle.getString("lb_translation_total"));
             cell_TranTotal.setCellStyle(getHeaderStyle(p_workbook));
-            
+
             col++;
             Cell cell_Review = getCell(fourRow, col);
             cell_Review.setCellValue(m_bundle.getString("lb_review"));
             cell_Review.setCellStyle(getHeaderStyle(p_workbook));
-            
+
             col++;
             Cell cell_JobTotal = getCell(fourRow, col);
-            cell_JobTotal.setCellValue(m_bundle
-            		.getString("jobinfo.tmmatches.invoice.jobtotal"));
+            cell_JobTotal.setCellValue(m_bundle.getString("jobinfo.tmmatches.invoice.jobtotal"));
             cell_JobTotal.setCellStyle(getHeaderStyle(p_workbook));
 
             col++;
             Cell cell_Tracking = getCell(thirRow, col);
-            cell_Tracking.setCellValue(m_bundle.getString("lb_tracking")
-                    + " " + EMEA + " " + m_bundle.getString("lb_use") + ")");
+            cell_Tracking.setCellValue(m_bundle.getString("lb_tracking") + " " + EMEA + " "
+                    + m_bundle.getString("lb_use") + ")");
             cell_Tracking.setCellStyle(getHeaderStyle(p_workbook));
             p_sheet.addMergedRegion(new CellRangeAddress(2, 3, col, col));
             setRegionStyle(p_sheet, new CellRangeAddress(2, 3, col, col),
-            		getHeaderStyle(p_workbook));
+                    getHeaderStyle(p_workbook));
         }
         else
         {
@@ -1218,10 +1155,8 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
      */
 
     private void writeProjectData(
-            HashMap<String, HashMap<String, ProjectWorkflowData>> p_projectMap,
-            Workbook p_workbook, Sheet[] p_sheets, boolean p_includeExReview,
-            IntHolder[] p_rows)
-            throws Exception
+            HashMap<String, HashMap<String, ProjectWorkflowData>> p_projectMap, Workbook p_workbook,
+            Sheet[] p_sheets, boolean p_includeExReview, IntHolder[] p_rows) throws Exception
     {
         ArrayList<String> keys = new ArrayList<String>(p_projectMap.keySet());
         SortUtil.sort(keys);
@@ -1240,16 +1175,12 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             String key = keysIter.next();
             String jobId = getJobIdFromMapKey(key);
             boolean isWrongJob = m_data.wrongJobNames.contains(jobId);
-            HashMap<String, ProjectWorkflowData> localeMap = p_projectMap
-                    .get(key);
-            ArrayList<String> locales = new ArrayList<String>(
-                    localeMap.keySet());
+            HashMap<String, ProjectWorkflowData> localeMap = p_projectMap.get(key);
+            ArrayList<String> locales = new ArrayList<String>(localeMap.keySet());
             SortUtil.sort(locales);
             Iterator<String> localeIter = locales.iterator();
-            BigDecimal projectTotalWordCountCost = new BigDecimal(
-                    BIG_DECIMAL_ZERO_STRING);
-            BigDecimal reviewTotalWordCountCost = new BigDecimal(
-                    BIG_DECIMAL_ZERO_STRING);
+            BigDecimal projectTotalWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
+            BigDecimal reviewTotalWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
             // Counts the review costing total and the translation costing
             // total.
@@ -1273,8 +1204,8 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
                 if (data.wasExportFailed)
                 {
-                	temp_moneyStyle = getFailedMoneyStyle(p_workbook);
-                	temp_normalStyle =  getRedCellStyle(p_workbook);
+                    temp_moneyStyle = getFailedMoneyStyle(p_workbook);
+                    temp_normalStyle = getRedCellStyle(p_workbook);
                 }
 
                 // Company Name
@@ -1294,7 +1225,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     // For "Add Job Id into online job report" issue
                     if (isJobIdVisible)
                     {
-                    	Cell cell_C = getCell(theRow, col++);
+                        Cell cell_C = getCell(theRow, col++);
                         cell_C.setCellValue(Long.valueOf(jobId));
                         cell_C.setCellStyle(getWrongJobStyle(p_workbook));
                     }
@@ -1308,9 +1239,9 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     // For "Add Job Id into online job report" issue
                     if (isJobIdVisible)
                     {
-                    	Cell cell_C = getCell(theRow, col++);
-                    	cell_C.setCellValue(Long.valueOf(jobId));
-                    	cell_C.setCellStyle(temp_normalStyle);
+                        Cell cell_C = getCell(theRow, col++);
+                        cell_C.setCellValue(Long.valueOf(jobId));
+                        cell_C.setCellStyle(temp_normalStyle);
                     }
                     Cell cell_CorD = getCell(theRow, col++);
                     cell_CorD.setCellValue(data.jobName);
@@ -1340,9 +1271,9 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
                 if (data.wasExportFailed)
                 {
-                	Cell cell_GorH = getCell(theRow, col++);
-                	cell_GorH.setCellValue(data.creationDate);
-                	cell_GorH.setCellStyle(getFailedDateStyle(p_workbook));
+                    Cell cell_GorH = getCell(theRow, col++);
+                    cell_GorH.setCellValue(data.creationDate);
+                    cell_GorH.setCellStyle(getFailedDateStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
                     Cell cell_HorI = getCell(theRow, col++);
                     cell_HorI.setCellValue(data.creationDate);
@@ -1358,9 +1289,9 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 }
                 else
                 {
-                	Cell cell_GorH = getCell(theRow, col++);
-                	cell_GorH.setCellValue(getDateFormat().format(data.creationDate));
-                	cell_GorH.setCellStyle(getDateStyle(p_workbook));
+                    Cell cell_GorH = getCell(theRow, col++);
+                    cell_GorH.setCellValue(getDateFormat().format(data.creationDate));
+                    cell_GorH.setCellStyle(getDateStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
                     Cell cell_HorI = getCell(theRow, col++);
                     cell_HorI.setCellValue(getTimeFormat().format(data.creationDate));
@@ -1370,16 +1301,17 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     if (data.wasExported)
                     {
                         cell_IorJ.setCellValue(getDateFormat().format(data.exportDate));
-                    }else {
-                    	cell_IorJ.setCellValue("");
-					}
+                    }
+                    else
+                    {
+                        cell_IorJ.setCellValue("");
+                    }
                     cell_IorJ.setCellStyle(getDateStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
                     String labelExportTime = "";
                     if (data.wasExported)
                     {
-                        labelExportTime = getExportDateStr(getTimeFormat(),
-                                data.exportDate);
+                        labelExportTime = getExportDateStr(getTimeFormat(), data.exportDate);
                     }
                     Cell cell_JorK = getCell(theRow, col++);
                     cell_JorK.setCellValue(labelExportTime);
@@ -1412,9 +1344,9 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
                 if (m_data.useInContext)
                 {
-                	Cell cell_InContext = getCell(theRow, col++);
-                	cell_InContext.setCellValue(data.inContextMatchWordCount);
-                	cell_InContext.setCellStyle(temp_normalStyle);
+                    Cell cell_InContext = getCell(theRow, col++);
+                    cell_InContext.setCellValue(data.inContextMatchWordCount);
+                    cell_InContext.setCellStyle(temp_normalStyle);
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
                 }
 
@@ -1438,19 +1370,19 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 cell_RepetitionWordCountCost.setCellValue(asDouble(data.repetitionWordCountCost));
                 cell_RepetitionWordCountCost.setCellStyle(temp_moneyStyle);
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
-                
+
                 Cell cell_SegmentTmWordCountCost = getCell(theRow, col++);
                 cell_SegmentTmWordCountCost.setCellValue(asDouble(data.segmentTmWordCountCost));
                 cell_SegmentTmWordCountCost.setCellStyle(temp_moneyStyle);
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
                 if (m_data.useInContext)
                 {
-                	Cell cell_InContext = getCell(theRow, col++);
+                    Cell cell_InContext = getCell(theRow, col++);
                     cell_InContext.setCellValue(asDouble(data.inContextMatchWordCountCost));
                     cell_InContext.setCellStyle(temp_moneyStyle);
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
                 }
-                
+
                 Cell cell_FuzzyMatchCost = getCell(theRow, col++);
                 cell_FuzzyMatchCost.setCellValue(asDouble(data.fuzzyMatchWordCountCost));
                 cell_FuzzyMatchCost.setCellStyle(temp_moneyStyle);
@@ -1474,8 +1406,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 // asDouble(data.totalAdditionalCost), temp_moneyFormat));
 
                 // p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                projectTotalWordCountCost = projectTotalWordCountCost
-                        .add(data.totalWordCountCost);
+                projectTotalWordCountCost = projectTotalWordCountCost.add(data.totalWordCountCost);
 
                 List<Integer> indexs = totalCost.get(data.targetLang);
                 if (indexs == null)
@@ -1497,9 +1428,9 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 // map(1,moneyFormat)
                 if (localeIter.hasNext() == false)
                 {
-                	Cell cell_TotalAdditionalCost = getCell(theRow, col++);
-                	cell_TotalAdditionalCost.setCellValue(asDouble(data.totalAdditionalCost));
-                	cell_TotalAdditionalCost.setCellStyle(temp_moneyStyle);
+                    Cell cell_TotalAdditionalCost = getCell(theRow, col++);
+                    cell_TotalAdditionalCost.setCellValue(asDouble(data.totalAdditionalCost));
+                    cell_TotalAdditionalCost.setCellStyle(temp_moneyStyle);
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
 
                     Cell cell_ProjectTotalCost = getCell(theRow, col++);
@@ -1509,8 +1440,8 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 }
                 else
                 {
-                	Cell cell_TotalAdditionalCost = getCell(theRow, col++);
-                	cell_TotalAdditionalCost.setCellStyle(temp_moneyStyle);
+                    Cell cell_TotalAdditionalCost = getCell(theRow, col++);
+                    cell_TotalAdditionalCost.setCellStyle(temp_moneyStyle);
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
 
                     Cell cell_ProjectTotalCost = getCell(theRow, col++);
@@ -1527,7 +1458,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     row = p_rows[MONTH_REVIEW_SHEET].getValue();
                     theRow = getRow(p_sheets[MONTH_REVIEW_SHEET], row);
                     col = 0;
-                    
+
                     // Company Name
                     Cell cell_A_Review = getCell(theRow, col++);
                     cell_A_Review.setCellValue(data.companyName);
@@ -1546,7 +1477,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                         // Issue
                         if (isJobIdVisible)
                         {
-                        	Cell cell_C_Review = getCell(theRow, col++);
+                            Cell cell_C_Review = getCell(theRow, col++);
                             cell_C_Review.setCellValue(data.jobId);
                             cell_C_Review.setCellStyle(getWrongJobStyle(p_workbook));
                         }
@@ -1560,9 +1491,9 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                         // Issue
                         if (isJobIdVisible)
                         {
-                        	Cell cell_C_Review = getCell(theRow, col++);
-                        	cell_C_Review.setCellValue(data.jobId);
-                        	cell_C_Review.setCellStyle(temp_normalStyle);
+                            Cell cell_C_Review = getCell(theRow, col++);
+                            cell_C_Review.setCellValue(data.jobId);
+                            cell_C_Review.setCellStyle(temp_normalStyle);
                         }
                         Cell cell_CorD_Review = getCell(theRow, col++);
                         cell_CorD_Review.setCellValue(data.jobName);
@@ -1580,9 +1511,9 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                          * p_sheets[MONTH_SHEET].addCell(new DateTime(col++,
                          * row, data.creationDate, failed_dateFormat));
                          */
-                    	Cell cell_EorF_Review = getCell(theRow, col++);
-                    	cell_EorF_Review.setCellValue(data.creationDate);
-                    	cell_EorF_Review.setCellStyle(getFailedDateStyle(p_workbook));
+                        Cell cell_EorF_Review = getCell(theRow, col++);
+                        cell_EorF_Review.setCellValue(data.creationDate);
+                        cell_EorF_Review.setCellStyle(getFailedDateStyle(p_workbook));
                         p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
                         Cell cell_ForG_Review = getCell(theRow, col++);
                         cell_ForG_Review.setCellValue(data.creationDate);
@@ -1602,9 +1533,9 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                          * p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
                          * dateFormat.format(data.creationDate)));
                          */
-                    	Cell cell_EorF_Review = getCell(theRow, col++);
-                    	cell_EorF_Review.setCellValue(getDateFormat().format(data.creationDate));
-                    	cell_EorF_Review.setCellStyle(getContentStyle(p_workbook));
+                        Cell cell_EorF_Review = getCell(theRow, col++);
+                        cell_EorF_Review.setCellValue(getDateFormat().format(data.creationDate));
+                        cell_EorF_Review.setCellStyle(getContentStyle(p_workbook));
                         p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
                         Cell cell_ForG_Review = getCell(theRow, col++);
                         cell_ForG_Review.setCellValue(getTimeFormat().format(data.creationDate));
@@ -1613,8 +1544,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                         String labelExportDate = "";
                         if (data.wasExported)
                         {
-                            labelExportDate = getExportDateStr(getDateFormat(),
-                                    data.exportDate);
+                            labelExportDate = getExportDateStr(getDateFormat(), data.exportDate);
                         }
                         Cell cell_GorH_Review = getCell(theRow, col++);
                         cell_GorH_Review.setCellValue(labelExportDate);
@@ -1623,8 +1553,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                         String labelExportTime = "";
                         if (data.wasExported)
                         {
-                            labelExportTime = getExportDateStr(getTimeFormat(),
-                                    data.exportDate);
+                            labelExportTime = getExportDateStr(getTimeFormat(), data.exportDate);
                         }
                         Cell cell_HorI_Review = getCell(theRow, col++);
                         cell_HorI_Review.setCellValue(labelExportTime);
@@ -1635,84 +1564,73 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     Cell cell_IorJ_Review = getCell(theRow, col++);
                     cell_IorJ_Review.setCellValue(data.targetLang);
                     cell_IorJ_Review.setCellStyle(temp_normalStyle);
-                    
+
                     Cell cell_JorK_Review = getCell(theRow, col++);
                     cell_JorK_Review.setCellValue(data.repetitionWordCount);
                     cell_JorK_Review.setCellStyle(temp_normalStyle);
 
                     numwidth = 10;
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            numwidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
                     Cell cell_KorL_Review = getCell(theRow, col++);
                     cell_KorL_Review.setCellValue(data.segmentTmWordCount);
                     cell_KorL_Review.setCellStyle(temp_normalStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            numwidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
 
                     if (m_data.useInContext)
                     {
-                    	Cell cell_InContext = getCell(theRow, col++);
-                    	cell_InContext.setCellValue(data.inContextMatchWordCount);
-                    	cell_InContext.setCellStyle(temp_normalStyle);
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                                numwidth * 256);
+                        Cell cell_InContext = getCell(theRow, col++);
+                        cell_InContext.setCellValue(data.inContextMatchWordCount);
+                        cell_InContext.setCellStyle(temp_normalStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
                     }
 
                     Cell cell_FuzzyMatch_Review = getCell(theRow, col++);
                     cell_FuzzyMatch_Review.setCellValue(data.fuzzyMatchWordCount);
                     cell_FuzzyMatch_Review.setCellStyle(temp_normalStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            numwidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
 
                     Cell cell_NoMatch_Review = getCell(theRow, col++);
                     cell_NoMatch_Review.setCellValue(data.noMatchWordCount);
                     cell_NoMatch_Review.setCellStyle(temp_normalStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            numwidth * 256);
-                    
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
+
                     Cell cell_Total_Review = getCell(theRow, col++);
                     cell_Total_Review.setCellValue(data.totalWordCount);
                     cell_Total_Review.setCellStyle(temp_normalStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            numwidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
 
                     moneywidth = 12;
                     Cell cell_RepetitionCost_Review = getCell(theRow, col++);
                     cell_RepetitionCost_Review
-                    	.setCellValue(asDouble(data.repetitionWordCountCostForDellReview));
+                            .setCellValue(asDouble(data.repetitionWordCountCostForDellReview));
                     cell_RepetitionCost_Review.setCellStyle(temp_moneyStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            moneywidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
                     Cell cell_SegmentCost_Review = getCell(theRow, col++);
                     cell_SegmentCost_Review
-                    	.setCellValue(asDouble(data.segmentTmWordCountCostForDellReview));
+                            .setCellValue(asDouble(data.segmentTmWordCountCostForDellReview));
                     cell_SegmentCost_Review.setCellStyle(temp_moneyStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            moneywidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
 
                     if (m_data.useInContext)
                     {
-                    	Cell cell_InContext = getCell(theRow, col++);
-                    	cell_InContext.setCellValue(asDouble(data
-                    			.inContextMatchWordCountCostForDellReview));
-                    	cell_InContext.setCellStyle(temp_moneyStyle);
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                                moneywidth * 256);
+                        Cell cell_InContext = getCell(theRow, col++);
+                        cell_InContext.setCellValue(
+                                asDouble(data.inContextMatchWordCountCostForDellReview));
+                        cell_InContext.setCellStyle(temp_moneyStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
                     }
 
                     Cell cell_FuzzyMatchCost_Review = getCell(theRow, col++);
-                    cell_FuzzyMatchCost_Review.setCellValue(asDouble(data
-                    		.fuzzyMatchWordCountCostForDellReview));
+                    cell_FuzzyMatchCost_Review
+                            .setCellValue(asDouble(data.fuzzyMatchWordCountCostForDellReview));
                     cell_FuzzyMatchCost_Review.setCellStyle(temp_moneyStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            moneywidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
 
                     Cell cell_NoMatchCost_Review = getCell(theRow, col++);
-                    cell_NoMatchCost_Review.setCellValue(asDouble(data
-                    		.noMatchWordCountCostForDellReview));
+                    cell_NoMatchCost_Review
+                            .setCellValue(asDouble(data.noMatchWordCountCostForDellReview));
                     cell_NoMatchCost_Review.setCellStyle(temp_moneyStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            moneywidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
 
                     reviewTotalWordCountCost = reviewTotalWordCountCost
                             .add(data.totalWordCountCostForDellReview);
@@ -1721,33 +1639,30 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     Cell cell_TotalCost_Review = getCell(theRow, col++);
                     cell_TotalCost_Review.setCellValue(asDouble(data.totalWordCountCost));
                     cell_TotalCost_Review.setCellStyle(temp_moneyStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            moneywidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
                     // Writes the "Review" column.
                     Cell cell_Review = getCell(theRow, col++);
                     cell_Review.setCellValue(asDouble(data.totalWordCountCostForDellReview));
                     cell_Review.setCellStyle(temp_moneyStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            moneywidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
 
                     // add "job total" cost over the locales
                     if (localeIter.hasNext() == false)
                     {
-                    	Cell cell_JobTotal = getCell(theRow, col++);
-                    	cell_JobTotal.setCellValue(asDouble(projectTotalWordCountCost
-                                .add(reviewTotalWordCountCost)));
-                    	cell_JobTotal.setCellStyle(temp_moneyStyle);
+                        Cell cell_JobTotal = getCell(theRow, col++);
+                        cell_JobTotal.setCellValue(
+                                asDouble(projectTotalWordCountCost.add(reviewTotalWordCountCost)));
+                        cell_JobTotal.setCellStyle(temp_moneyStyle);
                     }
                     else
                     {
-                    	Cell cell_JobTotal = getCell(theRow, col++);
-                    	cell_JobTotal.setCellStyle(temp_moneyStyle);
+                        Cell cell_JobTotal = getCell(theRow, col++);
+                        cell_JobTotal.setCellStyle(temp_moneyStyle);
                     }
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            moneywidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
                     p_rows[MONTH_REVIEW_SHEET].inc();
-                }// End if (p_includeExReview && data.containsDellReview)
-            }// End loop while (localeIter.hasNext())
+                } // End if (p_includeExReview && data.containsDellReview)
+            } // End loop while (localeIter.hasNext())
 
             p_rows[MONTH_SHEET].inc();
             if (p_includeExReview && containsDellReview)
@@ -1755,7 +1670,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 p_rows[MONTH_REVIEW_SHEET].inc();
             }
 
-        }// End loop while (projectIter.hasNext())
+        } // End loop while (projectIter.hasNext())
 
         p_rows[MONTH_SHEET].inc();
         addTotals(p_workbook, p_sheets[MONTH_SHEET], MONTH_SHEET, p_rows[MONTH_SHEET]);
@@ -1769,8 +1684,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
         if (totalCol != null)
         {
-            addTotalsPerLang(p_workbook, p_sheets[MONTH_SHEET], MONTH_SHEET,
-                    p_rows[MONTH_SHEET]);
+            addTotalsPerLang(p_workbook, p_sheets[MONTH_SHEET], MONTH_SHEET, p_rows[MONTH_SHEET]);
         }
     }
 
@@ -1786,10 +1700,8 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
      * @throws Exception
      */
     private void writeProjectDataTradosStyle(
-            HashMap<String, HashMap<String, ProjectWorkflowData>> p_projectMap,
-            Workbook p_workbook, Sheet[] p_sheets, boolean p_includeExReview,
-            IntHolder[] p_rows)
-            throws Exception
+            HashMap<String, HashMap<String, ProjectWorkflowData>> p_projectMap, Workbook p_workbook,
+            Sheet[] p_sheets, boolean p_includeExReview, IntHolder[] p_rows) throws Exception
     {
         ArrayList<String> keys = new ArrayList<String>(p_projectMap.keySet());
         SortUtil.sort(keys);
@@ -1809,16 +1721,12 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             String key = keysIter.next();
             String jobId = getJobIdFromMapKey(key);
             boolean isWrongJob = m_data.wrongJobNames.contains(jobId);
-            HashMap<String, ProjectWorkflowData> localeMap = p_projectMap
-                    .get(key);
-            ArrayList<String> locales = new ArrayList<String>(
-                    localeMap.keySet());
+            HashMap<String, ProjectWorkflowData> localeMap = p_projectMap.get(key);
+            ArrayList<String> locales = new ArrayList<String>(localeMap.keySet());
             SortUtil.sort(locales);
             Iterator<String> localeIter = locales.iterator();
-            BigDecimal projectTotalWordCountCost = new BigDecimal(
-                    BIG_DECIMAL_ZERO_STRING);
-            BigDecimal reviewTotalWordCountCost = new BigDecimal(
-                    BIG_DECIMAL_ZERO_STRING);
+            BigDecimal projectTotalWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
+            BigDecimal reviewTotalWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
             // Counts the review costing total and the translation costing
             // total.
@@ -1836,14 +1744,14 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
                 int row = p_rows[MONTH_SHEET].getValue();
                 Row theRow = getRow(p_sheets[MONTH_SHEET], row);
-                
+
                 CellStyle temp_moneyStyle = getMoneyStyle(p_workbook);
                 CellStyle temp_normalStyle = getContentStyle(p_workbook);
 
                 if (data.wasExportFailed)
                 {
-                	temp_moneyStyle = getFailedMoneyStyle(p_workbook);
-                	temp_normalStyle =  getRedCellStyle(p_workbook);
+                    temp_moneyStyle = getFailedMoneyStyle(p_workbook);
+                    temp_normalStyle = getRedCellStyle(p_workbook);
                 }
 
                 // Company Name
@@ -1863,7 +1771,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     // For "Add Job Id into online job report" issue
                     if (isJobIdVisible)
                     {
-                    	Cell cell_C = getCell(theRow, col++);
+                        Cell cell_C = getCell(theRow, col++);
                         cell_C.setCellValue(Long.valueOf(jobId));
                         cell_C.setCellStyle(getWrongJobStyle(p_workbook));
                     }
@@ -1877,21 +1785,21 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     // For "Add Job Id into online job report" issue
                     if (isJobIdVisible)
                     {
-                    	Cell cell_C = getCell(theRow, col++);
-                    	cell_C.setCellValue(Long.valueOf(jobId));
-                    	cell_C.setCellStyle(temp_normalStyle);
+                        Cell cell_C = getCell(theRow, col++);
+                        cell_C.setCellValue(Long.valueOf(jobId));
+                        cell_C.setCellStyle(temp_normalStyle);
                     }
                     Cell cell_CorD = getCell(theRow, col++);
                     cell_CorD.setCellValue(data.jobName);
                     cell_CorD.setCellStyle(temp_normalStyle);
                 }
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 50 * 256);
-                
+
                 Cell cell_DorE = getCell(theRow, col++);
                 cell_DorE.setCellValue(getAllSouceFileFormats(data.allFileProfiles));
                 cell_DorE.setCellStyle(temp_normalStyle);
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 20 * 256);
-                
+
                 Cell cell_EorF = getCell(theRow, col++);
                 cell_EorF.setCellValue(data.l10nProfileName);
                 cell_EorF.setCellStyle(temp_normalStyle);
@@ -1909,52 +1817,53 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
                 if (data.wasExportFailed)
                 {
-                	Cell cell_GorH = getCell(theRow, col++);
-                	cell_GorH.setCellValue(data.creationDate);
-                	cell_GorH.setCellStyle(getFailedDateStyle(p_workbook));
+                    Cell cell_GorH = getCell(theRow, col++);
+                    cell_GorH.setCellValue(data.creationDate);
+                    cell_GorH.setCellStyle(getFailedDateStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
-                    
+
                     Cell cell_HorI = getCell(theRow, col++);
                     cell_HorI.setCellValue(data.creationDate);
                     cell_HorI.setCellStyle(getFailedTimeStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 18 * 256);
-                    
+
                     Cell cell_IorJ = getCell(theRow, col++);
                     cell_IorJ.setCellValue("");
                     cell_IorJ.setCellStyle(getFailedDateStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
-                    
+
                     Cell cell_JorK = getCell(theRow, col++);
                     cell_JorK.setCellValue("");
                     cell_JorK.setCellStyle(getFailedTimeStyle(p_workbook));
                 }
                 else
                 {
-                	Cell cell_GorH = getCell(theRow, col++);
-                	cell_GorH.setCellValue(getDateFormat().format(data.creationDate));
-                	cell_GorH.setCellStyle(getDateStyle(p_workbook));
+                    Cell cell_GorH = getCell(theRow, col++);
+                    cell_GorH.setCellValue(getDateFormat().format(data.creationDate));
+                    cell_GorH.setCellStyle(getDateStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
-                    
+
                     Cell cell_HorI = getCell(theRow, col++);
                     cell_HorI.setCellValue(getTimeFormat().format(data.creationDate));
                     cell_HorI.setCellStyle(getContentStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 18 * 256);
-                    
+
                     Cell cell_IorJ = getCell(theRow, col++);
                     if (data.wasExported)
                     {
                         cell_IorJ.setCellValue(getDateFormat().format(data.exportDate));
-                    }else {
-                    	cell_IorJ.setCellValue("");
-					}
+                    }
+                    else
+                    {
+                        cell_IorJ.setCellValue("");
+                    }
                     cell_IorJ.setCellStyle(getDateStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
-                    
+
                     String labelExportTime = "";
                     if (data.wasExported)
                     {
-                        labelExportTime = getExportDateStr(getTimeFormat(),
-                                data.exportDate);
+                        labelExportTime = getExportDateStr(getTimeFormat(), data.exportDate);
                     }
                     Cell cell_JorK = getCell(theRow, col++);
                     cell_JorK.setCellValue(labelExportTime);
@@ -1977,12 +1886,12 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
                 // Summary Start Column
                 m_data.initSumStartCol(col);
-                
+
                 Cell cell_MorN = getCell(theRow, col++);
                 cell_MorN.setCellValue(data.segmentTmWordCount);
                 cell_MorN.setCellStyle(temp_normalStyle);
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
-                
+
                 Cell cell_NorO = getCell(theRow, col++);
                 cell_NorO.setCellValue(data.hiFuzzyMatchWordCount);
                 cell_NorO.setCellStyle(temp_normalStyle);
@@ -1997,7 +1906,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 cell_PorQ.setCellValue(data.medFuzzyMatchWordCount);
                 cell_PorQ.setCellStyle(temp_normalStyle);
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
-                
+
                 Cell cell_QorR = getCell(theRow, col++);
                 cell_QorR.setCellValue(data.noMatchWordCount);
                 cell_QorR.setCellStyle(temp_normalStyle);
@@ -2007,10 +1916,10 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 cell_RorS.setCellValue(data.repetitionWordCount);
                 cell_RorS.setCellStyle(temp_normalStyle);
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
-                
+
                 if (m_data.useInContext)
                 {
-                	Cell cell_InContext = getCell(theRow, col++);
+                    Cell cell_InContext = getCell(theRow, col++);
                     cell_InContext.setCellValue(data.inContextMatchWordCount);
                     cell_InContext.setCellStyle(temp_normalStyle);
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
@@ -2042,16 +1951,14 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 cell_SegmentCost.setCellValue(asDouble(data.segmentTmWordCountCost));
                 cell_SegmentCost.setCellStyle(temp_moneyStyle);
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
-                
+
                 Cell cell_HiFuzzyMatchCost = getCell(theRow, col++);
-                cell_HiFuzzyMatchCost.setCellValue(asDouble(data
-                		.hiFuzzyMatchWordCountCost));
+                cell_HiFuzzyMatchCost.setCellValue(asDouble(data.hiFuzzyMatchWordCountCost));
                 cell_HiFuzzyMatchCost.setCellStyle(temp_moneyStyle);
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
-                
+
                 Cell cell_MedHiFuzzyMatchCost = getCell(theRow, col++);
-                cell_MedHiFuzzyMatchCost.setCellValue(asDouble(data
-                		.medHiFuzzyMatchWordCountCost));
+                cell_MedHiFuzzyMatchCost.setCellValue(asDouble(data.medHiFuzzyMatchWordCountCost));
                 cell_MedHiFuzzyMatchCost.setCellStyle(temp_moneyStyle);
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
 
@@ -2059,7 +1966,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 cell_MedFuzzyMatchCost.setCellValue(asDouble(data.medFuzzyMatchWordCountCost));
                 cell_MedFuzzyMatchCost.setCellStyle(temp_moneyStyle);
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
-                
+
                 Cell cell_NoMatchCost = getCell(theRow, col++);
                 cell_NoMatchCost.setCellValue(asDouble(data.noMatchWordCountCost));
                 cell_NoMatchCost.setCellStyle(temp_moneyStyle);
@@ -2071,10 +1978,10 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
 
                 if (m_data.useInContext)
-                {           	
-                	Cell cell_InContextCost = getCell(theRow, col++);
-                	cell_InContextCost.setCellValue(asDouble(data.inContextMatchWordCountCost));
-                	cell_InContextCost.setCellStyle(temp_moneyStyle);
+                {
+                    Cell cell_InContextCost = getCell(theRow, col++);
+                    cell_InContextCost.setCellValue(asDouble(data.inContextMatchWordCountCost));
+                    cell_InContextCost.setCellStyle(temp_moneyStyle);
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
                 }
 
@@ -2092,8 +1999,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 // asDouble(data.totalAdditionalCost), temp_moneyFormat));
 
                 // p_sheets[MONTH_SHEET].setColumnView(col - 1, moneywidth);
-                projectTotalWordCountCost = projectTotalWordCountCost
-                        .add(data.totalWordCountCost);
+                projectTotalWordCountCost = projectTotalWordCountCost.add(data.totalWordCountCost);
 
                 List<Integer> indexs = totalCost.get(data.targetLang);
                 if (indexs == null)
@@ -2115,9 +2021,9 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 // map(1,moneyFormat)
                 if (localeIter.hasNext() == false)
                 {
-                	Cell cell_TotalAdditionalCost = getCell(theRow, col++);
-                	cell_TotalAdditionalCost.setCellValue(asDouble(data.totalAdditionalCost));
-                	cell_TotalAdditionalCost.setCellStyle(temp_moneyStyle);
+                    Cell cell_TotalAdditionalCost = getCell(theRow, col++);
+                    cell_TotalAdditionalCost.setCellValue(asDouble(data.totalAdditionalCost));
+                    cell_TotalAdditionalCost.setCellStyle(temp_moneyStyle);
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
 
                     Cell cell_ProjectTotalCost = getCell(theRow, col++);
@@ -2127,8 +2033,8 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 }
                 else
                 {
-                	Cell cell_TotalAdditionalCost = getCell(theRow, col++);
-                	cell_TotalAdditionalCost.setCellStyle(temp_moneyStyle);
+                    Cell cell_TotalAdditionalCost = getCell(theRow, col++);
+                    cell_TotalAdditionalCost.setCellStyle(temp_moneyStyle);
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, moneywidth * 256);
 
                     Cell cell_ProjectTotalCost = getCell(theRow, col++);
@@ -2156,16 +2062,16 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     cell_B_Review.setCellValue(data.projectDesc);
                     cell_B_Review.setCellStyle(temp_normalStyle);
                     p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 22 * 256);
-                    
+
                     if (isWrongJob)
                     {
                         // For "Job id not showing in external review tabs"
                         // Issue
                         if (isJobIdVisible)
                         {
-                        	Cell cell_C_Review = getCell(theRow, col++);
-                        	cell_C_Review.setCellValue(data.jobId);
-                        	cell_C_Review.setCellStyle(getWrongJobStyle(p_workbook));
+                            Cell cell_C_Review = getCell(theRow, col++);
+                            cell_C_Review.setCellValue(data.jobId);
+                            cell_C_Review.setCellStyle(getWrongJobStyle(p_workbook));
                         }
                         Cell cell_CorD_Review = getCell(theRow, col++);
                         cell_CorD_Review.setCellValue(data.jobName);
@@ -2177,9 +2083,9 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                         // Issue
                         if (isJobIdVisible)
                         {
-                        	Cell cell_C_Review = getCell(theRow, col++);
-                        	cell_C_Review.setCellValue(data.jobId);
-                        	cell_C_Review.setCellStyle(temp_normalStyle);
+                            Cell cell_C_Review = getCell(theRow, col++);
+                            cell_C_Review.setCellValue(data.jobId);
+                            cell_C_Review.setCellStyle(temp_normalStyle);
                         }
                         Cell cell_CorD_Review = getCell(theRow, col++);
                         cell_CorD_Review.setCellValue(data.jobName);
@@ -2197,21 +2103,21 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                          * p_sheets[MONTH_SHEET].addCell(new DateTime(col++,
                          * row, data.creationDate, failed_dateFormat));
                          */
-                    	Cell cell_EorF_Review = getCell(theRow, col++);
-                    	cell_EorF_Review.setCellValue(data.creationDate);
-                    	cell_EorF_Review.setCellStyle(getFailedDateStyle(p_workbook));
+                        Cell cell_EorF_Review = getCell(theRow, col++);
+                        cell_EorF_Review.setCellValue(data.creationDate);
+                        cell_EorF_Review.setCellStyle(getFailedDateStyle(p_workbook));
                         p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
-                        
+
                         Cell cell_ForG_Review = getCell(theRow, col++);
                         cell_ForG_Review.setCellValue(data.creationDate);
                         cell_ForG_Review.setCellStyle(getFailedTimeStyle(p_workbook));
                         p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 18 * 256);
-                        
+
                         Cell cell_GorH_Review = getCell(theRow, col++);
                         cell_GorH_Review.setCellValue("");
                         cell_GorH_Review.setCellStyle(getFailedDateStyle(p_workbook));
                         p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
-                        
+
                         Cell cell_HorI_Review = getCell(theRow, col++);
                         cell_HorI_Review.setCellValue("");
                         cell_HorI_Review.setCellStyle(getFailedTimeStyle(p_workbook));
@@ -2222,32 +2128,30 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                          * p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
                          * dateFormat.format(data.creationDate)));
                          */
-                    	Cell cell_EorF_Review = getCell(theRow, col++);
-                    	cell_EorF_Review.setCellValue(getDateFormat().format(data.creationDate));
+                        Cell cell_EorF_Review = getCell(theRow, col++);
+                        cell_EorF_Review.setCellValue(getDateFormat().format(data.creationDate));
                         cell_EorF_Review.setCellStyle(getContentStyle(p_workbook));
                         p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
-                        
+
                         Cell cell_ForG_Review = getCell(theRow, col++);
                         cell_ForG_Review.setCellValue(getTimeFormat().format(data.creationDate));
                         cell_ForG_Review.setCellStyle(getContentStyle(p_workbook));
                         p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 18 * 256);
-                        
+
                         String labelExportDate = "";
                         if (data.wasExported)
                         {
-                            labelExportDate = getExportDateStr(getDateFormat(),
-                                    data.exportDate);
+                            labelExportDate = getExportDateStr(getDateFormat(), data.exportDate);
                         }
                         Cell cell_GorH_Review = getCell(theRow, col++);
                         cell_GorH_Review.setCellValue(labelExportDate);
                         cell_GorH_Review.setCellStyle(getContentStyle(p_workbook));
                         p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 15 * 256);
-                        
+
                         String labelExportTime = "";
                         if (data.wasExported)
                         {
-                            labelExportTime = getExportDateStr(getTimeFormat(),
-                                    data.exportDate);
+                            labelExportTime = getExportDateStr(getTimeFormat(), data.exportDate);
                         }
                         Cell cell_HorI_Review = getCell(theRow, col++);
                         cell_HorI_Review.setCellValue(labelExportTime);
@@ -2258,100 +2162,91 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     Cell cell_IorJ_Review = getCell(theRow, col++);
                     cell_IorJ_Review.setCellValue(data.targetLang);
                     cell_IorJ_Review.setCellStyle(temp_normalStyle);
-                    
+
                     Cell cell_JorK_Review = getCell(theRow, col++);
                     cell_JorK_Review.setCellValue(data.repetitionWordCount);
                     cell_JorK_Review.setCellStyle(temp_normalStyle);
 
                     numwidth = 10;
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            numwidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
                     Cell cell_KorL_Review = getCell(theRow, col++);
                     cell_KorL_Review.setCellValue(data.segmentTmWordCount);
                     cell_KorL_Review.setCellStyle(temp_normalStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            numwidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
 
                     if (m_data.useInContext)
                     {
-                    	Cell cell_InContext = getCell(theRow, col++);
-                    	cell_InContext.setCellValue(data.inContextMatchWordCount);
-                    	cell_InContext.setCellStyle(temp_normalStyle);
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                                numwidth * 256);
+                        Cell cell_InContext = getCell(theRow, col++);
+                        cell_InContext.setCellValue(data.inContextMatchWordCount);
+                        cell_InContext.setCellStyle(temp_normalStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
                     }
-                    
+
                     Cell cell_FuzzyMatch_Review = getCell(theRow, col++);
                     cell_FuzzyMatch_Review.setCellValue(data.fuzzyMatchWordCount);
                     cell_FuzzyMatch_Review.setCellStyle(temp_normalStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            numwidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
 
                     Cell cell_NoMatch_Review = getCell(theRow, col++);
                     cell_NoMatch_Review.setCellValue(data.noMatchWordCount);
                     cell_NoMatch_Review.setCellStyle(temp_normalStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            numwidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
 
-//                    Cell cell_MT_Review = getCell(theRow, col++);
-//                    cell_MT_Review.setCellValue(data.mtFuzzyNoMatchWordCount);
-//                    cell_MT_Review.setCellStyle(temp_normalStyle);
-//                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-//                            numwidth * 256);
+                    // Cell cell_MT_Review = getCell(theRow, col++);
+                    // cell_MT_Review.setCellValue(data.mtFuzzyNoMatchWordCount);
+                    // cell_MT_Review.setCellStyle(temp_normalStyle);
+                    // p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
+                    // numwidth * 256);
 
                     Cell cell_Total_Review = getCell(theRow, col++);
                     cell_Total_Review.setCellValue(data.totalWordCount);
                     cell_Total_Review.setCellStyle(temp_normalStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            numwidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, numwidth * 256);
 
-//                    Cell cell_Score_Review = getCell(theRow, col++);
-//                    cell_Score_Review.setCellValue(data.mtThreshold);
-//                    cell_Score_Review.setCellStyle(getContentStyle(p_workbook));
-//                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 13 * 256);
-//                    
-//                    Cell cell_Count_Review = getCell(theRow, col++);
-//                    cell_Count_Review.setCellValue(data.tmEngineWordCounts);
-//                    cell_Count_Review.setCellStyle(getContentStyle(p_workbook));
-//                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 13 * 256);
+                    // Cell cell_Score_Review = getCell(theRow, col++);
+                    // cell_Score_Review.setCellValue(data.mtThreshold);
+                    // cell_Score_Review.setCellStyle(getContentStyle(p_workbook));
+                    // p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 13 *
+                    // 256);
+                    //
+                    // Cell cell_Count_Review = getCell(theRow, col++);
+                    // cell_Count_Review.setCellValue(data.tmEngineWordCounts);
+                    // cell_Count_Review.setCellStyle(getContentStyle(p_workbook));
+                    // p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, 13 *
+                    // 256);
 
                     moneywidth = 12;
                     Cell cell_RepetitionCost_Review = getCell(theRow, col++);
-                    cell_RepetitionCost_Review.setCellValue(asDouble(data
-                    		.repetitionWordCountCostForDellReview));
+                    cell_RepetitionCost_Review
+                            .setCellValue(asDouble(data.repetitionWordCountCostForDellReview));
                     cell_RepetitionCost_Review.setCellStyle(temp_moneyStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            moneywidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
                     Cell cell_SegmentCost_Review = getCell(theRow, col++);
-                    cell_SegmentCost_Review.setCellValue(asDouble(data
-                    		.segmentTmWordCountCostForDellReview));
+                    cell_SegmentCost_Review
+                            .setCellValue(asDouble(data.segmentTmWordCountCostForDellReview));
                     cell_SegmentCost_Review.setCellStyle(temp_moneyStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            moneywidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
 
                     if (m_data.useInContext)
                     {
-                    	Cell cell_InContext = getCell(theRow, col++);
-                    	cell_InContext.setCellValue(asDouble(data
-                    			.inContextMatchWordCountCostForDellReview));
-                    	cell_InContext.setCellStyle(temp_moneyStyle);
-                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                                moneywidth * 256);
+                        Cell cell_InContext = getCell(theRow, col++);
+                        cell_InContext.setCellValue(
+                                asDouble(data.inContextMatchWordCountCostForDellReview));
+                        cell_InContext.setCellStyle(temp_moneyStyle);
+                        p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
                     }
 
                     Cell cell_FuzzyMatchCost_Review = getCell(theRow, col++);
-                    cell_FuzzyMatchCost_Review.setCellValue(asDouble(data
-                    		.fuzzyMatchWordCountCostForDellReview));
+                    cell_FuzzyMatchCost_Review
+                            .setCellValue(asDouble(data.fuzzyMatchWordCountCostForDellReview));
                     cell_FuzzyMatchCost_Review.setCellStyle(temp_moneyStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            moneywidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
 
                     Cell cell_NoMatchCost_Review = getCell(theRow, col++);
-                    cell_NoMatchCost_Review.setCellValue(asDouble(data
-                    		.noMatchWordCountCostForDellReview));
+                    cell_NoMatchCost_Review
+                            .setCellValue(asDouble(data.noMatchWordCountCostForDellReview));
                     cell_NoMatchCost_Review.setCellStyle(temp_moneyStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            moneywidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
 
                     reviewTotalWordCountCost = reviewTotalWordCountCost
                             .add(data.totalWordCountCostForDellReview);
@@ -2360,33 +2255,30 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     Cell cell_TotalCost_Review = getCell(theRow, col++);
                     cell_TotalCost_Review.setCellValue(asDouble(data.totalWordCountCost));
                     cell_TotalCost_Review.setCellStyle(temp_moneyStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            moneywidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
                     // Writes the "Review" column.
                     Cell cell_Rview = getCell(theRow, col++);
                     cell_Rview.setCellValue(asDouble(data.totalWordCountCostForDellReview));
                     cell_Rview.setCellStyle(temp_moneyStyle);
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            moneywidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
 
                     // add "job total" cost over the locales
                     if (localeIter.hasNext() == false)
                     {
-                    	Cell cell_JobTotal = getCell(theRow, col++);
-                    	cell_JobTotal.setCellValue(asDouble(projectTotalWordCountCost
-                                .add(reviewTotalWordCountCost)));
-                    	cell_JobTotal.setCellStyle(temp_moneyStyle);
+                        Cell cell_JobTotal = getCell(theRow, col++);
+                        cell_JobTotal.setCellValue(
+                                asDouble(projectTotalWordCountCost.add(reviewTotalWordCountCost)));
+                        cell_JobTotal.setCellStyle(temp_moneyStyle);
                     }
                     else
                     {
-                    	Cell cell_JobTotal = getCell(theRow, col++);
-                    	cell_JobTotal.setCellStyle(temp_moneyStyle);
+                        Cell cell_JobTotal = getCell(theRow, col++);
+                        cell_JobTotal.setCellStyle(temp_moneyStyle);
                     }
-                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1,
-                            moneywidth * 256);
+                    p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
                     p_rows[MONTH_REVIEW_SHEET].inc();
-                }// End if (p_includeExReview && data.containsDellReview)
-            }// End loop while (localeIter.hasNext())
+                } // End if (p_includeExReview && data.containsDellReview)
+            } // End loop while (localeIter.hasNext())
 
             p_rows[MONTH_SHEET].inc();
             if (p_includeExReview && containsDellReview)
@@ -2394,7 +2286,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 p_rows[MONTH_REVIEW_SHEET].inc();
             }
 
-        }// End loop while (projectIter.hasNext())
+        } // End loop while (projectIter.hasNext())
 
         p_rows[MONTH_SHEET].inc();
         addTotals(p_workbook, p_sheets[MONTH_SHEET], MONTH_SHEET, p_rows[MONTH_SHEET]);
@@ -2408,24 +2300,23 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
         if (totalCol != null)
         {
-            addTotalsPerLang(p_workbook, p_sheets[MONTH_SHEET], MONTH_SHEET,
-                    p_rows[MONTH_SHEET]);
+            addTotalsPerLang(p_workbook, p_sheets[MONTH_SHEET], MONTH_SHEET, p_rows[MONTH_SHEET]);
         }
     }
 
-    private void addTotalsPerLang(Workbook p_workbook, Sheet p_sheet,
-            final int p_sheetCategory, IntHolder p_row) throws Exception
+    private void addTotalsPerLang(Workbook p_workbook, Sheet p_sheet, final int p_sheetCategory,
+            IntHolder p_row) throws Exception
     {
-    	Font subTotalFont = p_workbook.createFont();
-    	subTotalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
-    	subTotalFont.setColor(IndexedColors.BLACK.getIndex());
-    	subTotalFont.setUnderline(Font.U_NONE);
-    	subTotalFont.setFontName("Arial");
-    	subTotalFont.setFontHeightInPoints((short) 10);
-    	
+        Font subTotalFont = p_workbook.createFont();
+        subTotalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        subTotalFont.setColor(IndexedColors.BLACK.getIndex());
+        subTotalFont.setUnderline(Font.U_NONE);
+        subTotalFont.setFontName("Arial");
+        subTotalFont.setFontHeightInPoints((short) 10);
+
         CellStyle subTotalStyle = p_workbook.createCellStyle();
         subTotalStyle.setFont(subTotalFont);
-        
+
         String title = m_bundle.getString("lb_total_cost_per_lang");
         int row = p_row.getValue() + 4; // skip a row
         ArrayList<String> locales = new ArrayList<String>(totalCost.keySet());
@@ -2433,7 +2324,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
         int col = m_data.getSumStartCol();
         Row theRow = getRow(p_sheet, row);
-        
+
         Cell cell_Title = getCell(theRow, col - 3);
         cell_Title.setCellValue(title);
         cell_Title.setCellStyle(subTotalStyle);
@@ -2441,11 +2332,12 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         File imgFile = File.createTempFile("GSJobChart", ".png");
         JfreeCharUtil.drawPieChart2D("", totalCostDate, imgFile);
         Drawing patriarch = p_sheet.createDrawingPatriarch();
-        XSSFClientAnchor anchor = new XSSFClientAnchor(0, 0, 0, 0, 15, row - 1, 22, row + 24);      
+        XSSFClientAnchor anchor = new XSSFClientAnchor(0, 0, 0, 0, 15, row - 1, 22, row + 24);
         ByteArrayOutputStream img_bytes = new ByteArrayOutputStream();
         InputStream is = imgFile.toURI().toURL().openStream();
         int b;
-        while ((b = is.read()) != -1){
+        while ((b = is.read()) != -1)
+        {
             img_bytes.write(b);
         }
         is.close();
@@ -2471,7 +2363,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             values.append(")");
 
             Row perRow = getRow(p_sheet, row);
-            
+
             Cell cell_Locale = getCell(perRow, col - 1);
             cell_Locale.setCellValue(locale);
             cell_Locale.setCellStyle(getContentStyle(p_workbook));
@@ -2496,8 +2388,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
      * @throws Exception
      */
     private void addTotals(Workbook p_workbook, Sheet p_sheet, final int p_sheetCategory,
-            IntHolder p_row)
-            throws Exception
+            IntHolder p_row) throws Exception
     {
         int row = p_row.getValue() + 1; // skip a row
 
@@ -2515,146 +2406,127 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         // online job report" issue
         p_sheet.addMergedRegion(new CellRangeAddress(row, row, 0, sumStartCol.charAt(0) - 'B'));
         setRegionStyle(p_sheet, new CellRangeAddress(row, row, 0, sumStartCol.charAt(0) - 'B'),
-        		getSubTotalStyle(p_workbook));
+                getSubTotalStyle(p_workbook));
         int lastRow = p_row.getValue() - 2;
 
         // add in word count totals
         // word counts
         Cell cell_B = getCell(theRow, c++);
-        cell_B.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_B.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_B.setCellStyle(getSubTotalStyle(p_workbook));
-        
+
         sumStartCol = getColumnName(c);
         Cell cell_C = getCell(theRow, c++);
-        cell_C.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_C.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_C.setCellStyle(getSubTotalStyle(p_workbook));
-        
+
         sumStartCol = getColumnName(c);
         Cell cell_D = getCell(theRow, c++);
-        cell_D.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_D.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_D.setCellStyle(getSubTotalStyle(p_workbook));
-        
+
         sumStartCol = getColumnName(c);
         Cell cell_E = getCell(theRow, c++);
-        cell_E.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_E.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_E.setCellStyle(getSubTotalStyle(p_workbook));
-        
+
         sumStartCol = getColumnName(c);
         Cell cell_F = getCell(theRow, c++);
-        cell_F.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_F.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_F.setCellStyle(getSubTotalStyle(p_workbook));
-        
+
         sumStartCol = getColumnName(c);
         if (m_data.isTradosStyle())
         {
-        	Cell cell_G = getCell(theRow, c++);
-            cell_G.setCellFormula("SUM(" + sumStartCol + "5:"
-                    + sumStartCol + lastRow + ")");
+            Cell cell_G = getCell(theRow, c++);
+            cell_G.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
             cell_G.setCellStyle(getSubTotalStyle(p_workbook));
             sumStartCol = getColumnName(c);
-            
+
             Cell cell_H = getCell(theRow, c++);
-            cell_H.setCellFormula("SUM(" + sumStartCol + "5:"
-                    + sumStartCol + lastRow + ")");
+            cell_H.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
             cell_H.setCellStyle(getSubTotalStyle(p_workbook));
             sumStartCol = getColumnName(c);
         }
 
         Cell cell_MT = getCell(theRow, c++);
-        cell_MT.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_MT.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_MT.setCellStyle(getSubTotalStyle(p_workbook));
         sumStartCol = getColumnName(c);
-        
+
         if (m_data.useInContext)
         {
-        	Cell cell_InContext = getCell(theRow, c++);
-        	cell_InContext.setCellFormula("SUM(" + sumStartCol + "5:"
-                    + sumStartCol + lastRow + ")");
-        	cell_InContext.setCellStyle(getSubTotalStyle(p_workbook));
+            Cell cell_InContext = getCell(theRow, c++);
+            cell_InContext
+                    .setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
+            cell_InContext.setCellStyle(getSubTotalStyle(p_workbook));
             sumStartCol = getColumnName(c);
         }
 
         Cell cell_Score = getCell(theRow, c++);
-        cell_Score.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_Score.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_Score.setCellStyle(getSubTotalStyle(p_workbook));
         sumStartCol = getColumnName(c);
 
         Cell cell_MTEWC = getCell(theRow, c++);
-        cell_MTEWC.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_MTEWC.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_MTEWC.setCellStyle(getSubTotalStyle(p_workbook));
         sumStartCol = getColumnName(c);
 
         // word count costs
         Cell cell_K = getCell(theRow, c++);
-        cell_K.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_K.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_K.setCellStyle(getTotalMoneyStyle(p_workbook));
         sumStartCol = getColumnName(c);
-        
+
         Cell cell_L = getCell(theRow, c++);
-        cell_L.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_L.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_L.setCellStyle(getTotalMoneyStyle(p_workbook));
         sumStartCol = getColumnName(c);
-        
+
         Cell cell_M = getCell(theRow, c++);
-        cell_M.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_M.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_M.setCellStyle(getTotalMoneyStyle(p_workbook));
         sumStartCol = getColumnName(c);
-        
+
         Cell cell_N = getCell(theRow, c++);
-        cell_N.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_N.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_N.setCellStyle(getTotalMoneyStyle(p_workbook));
         sumStartCol = getColumnName(c);
-        
+
         Cell cell_O = getCell(theRow, c++);
-        cell_O.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_O.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_O.setCellStyle(getTotalMoneyStyle(p_workbook));
         sumStartCol = getColumnName(c);
-        
+
         Cell cell_P = getCell(theRow, c++);
-        cell_P.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_P.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_P.setCellStyle(getTotalMoneyStyle(p_workbook));
         sumStartCol = getColumnName(c);
-        
+
         Cell cell_Q = getCell(theRow, c++);
-        cell_Q.setCellFormula("SUM(" + sumStartCol + "5:"
-                + sumStartCol + lastRow + ")");
+        cell_Q.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
         cell_Q.setCellStyle(getTotalMoneyStyle(p_workbook));
         sumStartCol = getColumnName(c);
 
         if (m_data.isTradosStyle())
         {
-        	Cell cell_R = getCell(theRow, c++);
-            cell_R.setCellFormula("SUM(" + sumStartCol + "5:"
-                    + sumStartCol + lastRow + ")");
+            Cell cell_R = getCell(theRow, c++);
+            cell_R.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
             cell_R.setCellStyle(getTotalMoneyStyle(p_workbook));
             sumStartCol = getColumnName(c);
-            
+
             Cell cell_S = getCell(theRow, c++);
-            cell_S.setCellFormula("SUM(" + sumStartCol + "5:"
-                    + sumStartCol + lastRow + ")");
+            cell_S.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
             cell_S.setCellStyle(getTotalMoneyStyle(p_workbook));
             sumStartCol = getColumnName(c);
         }
 
         if (m_data.useInContext)
         {
-        	Cell cell_InContext = getCell(theRow, c++);
-            cell_InContext.setCellFormula("SUM(" + sumStartCol + "5:"
-                    + sumStartCol + lastRow + ")");
+            Cell cell_InContext = getCell(theRow, c++);
+            cell_InContext
+                    .setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
             cell_InContext.setCellStyle(getTotalMoneyStyle(p_workbook));
             sumStartCol = getColumnName(c);
         }
@@ -2664,16 +2536,14 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         cell_V.setCellValue("");
         cell_V.setCellStyle(getTotalMoneyStyle(p_workbook));
     }
-    
+
     private void addParamsSheet(Workbook p_workbook, String year,
-    		boolean recalculateFinishedWorkflow) throws Exception
+            boolean recalculateFinishedWorkflow) throws Exception
     {
-    	Sheet paramsSheet = p_workbook.createSheet(
-                m_bundle.getString("lb_criteria"));
+        Sheet paramsSheet = p_workbook.createSheet(m_bundle.getString("lb_criteria"));
         Row firRow = getRow(paramsSheet, 0);
         Cell cell_A_Header = getCell(firRow, 0);
-        cell_A_Header.setCellValue(m_bundle
-                .getString("lb_report_criteria"));
+        cell_A_Header.setCellValue(m_bundle.getString("lb_report_criteria"));
         cell_A_Header.setCellStyle(getContentStyle(p_workbook));
         paramsSheet.setColumnWidth(0, 50 * 256);
 
@@ -2681,17 +2551,14 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         Cell cell_A_Project = getCell(secRow, 0);
         if (m_data.wantsAllProjects)
         {
-        	cell_A_Project.setCellValue(m_bundle
-                    .getString("lb_selected_projects")
-                    + " "
-                    + m_bundle.getString("all"));
-        	cell_A_Project.setCellStyle(getContentStyle(p_workbook));
+            cell_A_Project.setCellValue(
+                    m_bundle.getString("lb_selected_projects") + " " + m_bundle.getString("all"));
+            cell_A_Project.setCellStyle(getContentStyle(p_workbook));
         }
         else
         {
-        	cell_A_Project.setCellValue(m_bundle
-                    .getString("lb_selected_projects"));
-        	cell_A_Project.setCellStyle(getContentStyle(p_workbook));
+            cell_A_Project.setCellValue(m_bundle.getString("lb_selected_projects"));
+            cell_A_Project.setCellStyle(getContentStyle(p_workbook));
             Iterator<Long> iter = m_data.projectIdList.iterator();
             int r = 3;
             while (iter.hasNext())
@@ -2700,8 +2567,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 String projectName = "??";
                 try
                 {
-                    Project p = ServerProxy.getProjectHandler()
-                            .getProjectById(pid.longValue());
+                    Project p = ServerProxy.getProjectHandler().getProjectById(pid.longValue());
                     projectName = p.getName();
                 }
                 catch (Exception e)
@@ -2711,45 +2577,40 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 Cell cell_A = getCell(row, 0);
                 cell_A.setCellValue(projectName);
                 cell_A.setCellStyle(getContentStyle(p_workbook));
-                
+
                 Cell cell_B = getCell(row, 1);
-                cell_B.setCellValue(m_bundle
-                        .getString("lb_id") + "=" + pid.toString());
+                cell_B.setCellValue(m_bundle.getString("lb_id") + "=" + pid.toString());
                 cell_B.setCellStyle(getContentStyle(p_workbook));
                 r++;
             }
         }
 
         Cell cell_C_Header = getCell(firRow, 2);
-        cell_C_Header.setCellValue(m_bundle
-                .getString("lb_Year"));
+        cell_C_Header.setCellValue(m_bundle.getString("lb_Year"));
         cell_C_Header.setCellStyle(getContentStyle(p_workbook));
-        
+
         Cell cell_C = getCell(secRow, 2);
         cell_C.setCellValue(year);
         cell_C.setCellStyle(getContentStyle(p_workbook));
-        
+
         Cell cell_D_Header = getCell(firRow, 3);
-        cell_D_Header.setCellValue(m_bundle
-                .getString("lb_re_cost_jobs"));
+        cell_D_Header.setCellValue(m_bundle.getString("lb_re_cost_jobs"));
         cell_D_Header.setCellStyle(getContentStyle(p_workbook));
-        
+
         Cell cell_D = getCell(secRow, 3);
-        cell_D.setCellValue(java.lang.Boolean
-                .toString(recalculateFinishedWorkflow));
+        cell_D.setCellValue(java.lang.Boolean.toString(recalculateFinishedWorkflow));
         cell_D.setCellStyle(getContentStyle(p_workbook));
     }
-    
+
     /**
      * For "Dell Review Report Issue" Add a new parameter "includeExReview" to
      * the signature.
      */
     private HashMap<String, HashMap<String, ProjectWorkflowData>> getProjectDataForMonth(
-            HttpServletRequest p_request, int p_month,
-            boolean p_recalculateFinishedWorkflow, boolean p_includeExReview)
-            throws Exception
+            HttpServletRequest p_request, int p_month, boolean p_recalculateFinishedWorkflow,
+            boolean p_includeExReview) throws Exception
     {
-    	SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
         String isReportForYear = p_request.getParameter("reportForThisYear");
         String isReportForDetail = p_request.getParameter("reportForDetail");
         JobSearchParameters searchParams = new JobSearchParameters();
@@ -2759,25 +2620,25 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         }
         if (isReportForDetail != null && isReportForDetail.endsWith("on"))
         {
-//            if (m_data.wantsAllProjects == false)
-//            {
-                searchParams.setProjectId(m_data.projectIdList);
-//            }
+            // if (m_data.wantsAllProjects == false)
+            // {
+            searchParams.setProjectId(m_data.projectIdList);
+            // }
 
             String paramCreateDateStartCount = p_request
                     .getParameter(JobSearchConstants.CREATION_START);
-            if (paramCreateDateStartCount != null && paramCreateDateStartCount != "")
+            if (!StringUtil.isEmpty(paramCreateDateStartCount))
             {
-            	
+
                 searchParams.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
             }
 
             String paramCreateDateEndCount = p_request
                     .getParameter(JobSearchConstants.CREATION_END);
-           if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
+            if (!StringUtil.isEmpty(paramCreateDateEndCount))
             {
-        	   Date date = simpleDateFormat.parse(paramCreateDateEndCount);
-        	   long endLong = date.getTime()+(24*60*60*1000-1);
+                Date date = simpleDateFormat.parse(paramCreateDateEndCount);
+                long endLong = date.getTime() + (24 * 60 * 60 * 1000 - 1);
                 searchParams.setCreationEnd(new Date(endLong));
             }
 
@@ -2832,8 +2693,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         }
 
         ArrayList<Job> queriedJobs = statusParams == null ? new ArrayList<Job>()
-                : new ArrayList<Job>(ServerProxy.getJobHandler().getJobs(
-                        searchParams));
+                : new ArrayList<Job>(ServerProxy.getJobHandler().getJobs(searchParams));
         int year = Integer.parseInt(p_request.getParameter("year"));
         ArrayList<Job> wrongJobsThisMonth = getWrongJobsForThisMonth(p_month, year);
         // now create a Set of all the jobs
@@ -2843,8 +2703,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         jobs.removeAll(m_data.ignoreJobs);
 
         setJobIds(jobs);
-        return reportDataMap(jobs, p_recalculateFinishedWorkflow,
-                p_includeExReview);
+        return reportDataMap(jobs, p_recalculateFinishedWorkflow, p_includeExReview);
     }
 
     /**
@@ -2853,20 +2712,18 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
      * @return HashMap<key, HashMap<TargetLocale, ProjectWorkflowData>>. String
      *         key = getMapKey(companyName, projectDesc, jobId);
      */
-    private HashMap<String, HashMap<String, ProjectWorkflowData>> reportDataMap(
-            HashSet<Job> p_jobs, boolean p_recalculateFinishedWorkflow,
-            boolean p_includeExReview) throws CostingException,
-            RemoteException, GeneralException
+    private HashMap<String, HashMap<String, ProjectWorkflowData>> reportDataMap(HashSet<Job> p_jobs,
+            boolean p_recalculateFinishedWorkflow, boolean p_includeExReview)
+            throws CostingException, RemoteException, GeneralException
     {
         m_data.useInContext = getUseInContext(p_jobs);
 
         // first iterate through the Jobs and group by Project/workflow because
         // Dell doesn't want to see actual Jobs
         HashMap<String, HashMap<String, ProjectWorkflowData>> projectMap = new HashMap<String, HashMap<String, ProjectWorkflowData>>();
-        Currency pivotCurrency = ServerProxy.getCostingEngine()
-                .getCurrencyByName(
-                        ReportUtil.getCurrencyName(m_data.getCurrency()),
-                        CompanyThreadLocal.getInstance().getValue());
+        Currency pivotCurrency = ServerProxy.getCostingEngine().getCurrencyByName(
+                ReportUtil.getCurrencyName(m_data.getCurrency()),
+                CompanyThreadLocal.getInstance().getValue());
 
         for (Job j : p_jobs)
         {
@@ -2893,13 +2750,12 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
             // Calculate additional charges
             // GBS-1698, Vincent Yan, 2011/02/21
-            Cost jobCost = ServerProxy.getCostingEngine().calculateCost(j,
-                    pivotCurrency, true, Cost.REVENUE);
+            Cost jobCost = ServerProxy.getCostingEngine().calculateCost(j, pivotCurrency, true,
+                    Cost.REVENUE);
 
             float totalAdditionalCost = jobCost.getEstimatedCost().getAmount();
             float tmpTotalAdditionalCost = totalAdditionalCost;
-            ArrayList<Surcharge> surcharges = new ArrayList<Surcharge>(
-                    jobCost.getSurcharges());
+            ArrayList<Surcharge> surcharges = new ArrayList<Surcharge>(jobCost.getSurcharges());
             if (surcharges != null && surcharges.size() > 0)
             {
                 // calculate total additional charges
@@ -2916,14 +2772,12 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     if ("FlatSurcharge".equals(surcharge.getType()))
                     {
                         flatSurcharge = (FlatSurcharge) surcharge;
-                        totalAdditionalCost += flatSurcharge.getAmount()
-                                .getAmount();
+                        totalAdditionalCost += flatSurcharge.getAmount().getAmount();
                     }
                     else if ("PercentageSurcharge".equals(surcharge.getType()))
                     {
                         perSurcharge = (PercentageSurcharge) surcharge;
-                        perSurcharges.add(Float.valueOf(perSurcharge
-                                .getPercentage()));
+                        perSurcharges.add(Float.valueOf(perSurcharge.getPercentage()));
                     }
                 }
 
@@ -2939,7 +2793,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             // cost only
             totalAdditionalCost -= tmpTotalAdditionalCost;
 
-			boolean isInContextMatch = PageHandler.isInContextMatch(j);
+            boolean isInContextMatch = PageHandler.isInContextMatch(j);
             HashMap<Long, Cost> workflowMap = jobCost.getWorkflowCost();
             for (Workflow w : j.getWorkflows())
             {
@@ -2947,22 +2801,19 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 int tmEngineWordCounts = w.getMtEngineWordCount();
                 String state = w.getState();
                 // skip certain workflows
-                if (Workflow.IMPORT_FAILED.equals(state)
-                        || Workflow.CANCELLED.equals(state)
+                if (Workflow.IMPORT_FAILED.equals(state) || Workflow.CANCELLED.equals(state)
                         || Workflow.BATCHRESERVED.equals(state))
                 {
                     continue;
                 }
                 String targetLang = Long.toString(w.getTargetLocale().getId());
-                if (!m_data.wantsAllLocales
-                        && !m_data.trgLocaleList.contains(targetLang))
+                if (!m_data.wantsAllLocales && !m_data.trgLocaleList.contains(targetLang))
                 {
                     continue;
                 }
 
                 String key = getMapKey(companyName, projectDesc, jobId);
-                HashMap<String, ProjectWorkflowData> localeMap = projectMap
-                        .get(key);
+                HashMap<String, ProjectWorkflowData> localeMap = projectMap.get(key);
                 if (localeMap == null)
                 {
                     localeMap = new HashMap<String, ProjectWorkflowData>();
@@ -2988,15 +2839,13 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 if (Workflow.EXPORTED.equals(state))
                 {
                     data.wasExported = true;
-                    data.exportDate = getExportDate(w.getTargetLocale().toString(), 
-                    		jobName ,jobId);
+                    data.exportDate = getExportDate(w.getTargetLocale().toString(), jobName, jobId);
                 }
                 if (Workflow.EXPORT_FAILED.equals(state))
                 {
                     // if the workflow is EXPORT_FAILED, color the line in red
                     data.wasExportFailed = true;
-                    data.exportDate = getExportDate(w.getTargetLocale().toString(), 
-                    		jobName ,jobId);
+                    data.exportDate = getExportDate(w.getTargetLocale().toString(), jobName, jobId);
                 }
 
                 // now add or amend the data in the ProjectWorkflowData based on
@@ -3006,28 +2855,26 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
                 data.repetitionWordCount = w.getRepetitionWordCount();
                 data.medFuzzyMatchWordCount = w.getThresholdMedFuzzyWordCount();
-                data.medHiFuzzyMatchWordCount = w
-                        .getThresholdMedHiFuzzyWordCount();
+                data.medHiFuzzyMatchWordCount = w.getThresholdMedHiFuzzyWordCount();
                 data.hiFuzzyMatchWordCount = w.getThresholdHiFuzzyWordCount();
 
                 // the fuzzyMatchWordCount is the sum of the top 3 categories
                 data.fuzzyMatchWordCount = data.medFuzzyMatchWordCount
-                        + data.medHiFuzzyMatchWordCount
-                        + data.hiFuzzyMatchWordCount;
+                        + data.medHiFuzzyMatchWordCount + data.hiFuzzyMatchWordCount;
 
                 // add the lowest fuzzies and sublev match to nomatch
                 data.noMatchWordCount = w.getThresholdNoMatchWordCount()
                         + w.getThresholdLowFuzzyWordCount();
 
-                data.segmentTmWordCount = (isInContextMatch) ? w.getSegmentTmWordCount() : w.getTotalExactMatchWordCount();
-                data.inContextMatchWordCount = (isInContextMatch) ? w
-                        .getInContextMatchWordCount() : w
-                        .getNoUseInContextMatchWordCount();
+                data.segmentTmWordCount = (isInContextMatch) ? w.getSegmentTmWordCount()
+                        : w.getTotalExactMatchWordCount();
+                data.inContextMatchWordCount = (isInContextMatch) ? w.getInContextMatchWordCount()
+                        : w.getNoUseInContextMatchWordCount();
                 data.totalWordCount = w.getTotalWordCount();
                 data.mtTotalWordCount = w.getMtTotalWordCount();
                 data.noMatchWordCount -= w.getMtFuzzyNoMatchWordCount();
                 data.repetitionWordCount -= w.getMtRepetitionsWordCount();
-                
+
                 /*
                  * Date da1 = new Date(); // They must be in front of calculate
                  * cost for activity // "Dell_Review".
@@ -3061,12 +2908,10 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                         Cost cost = null;
                         // For "Job id not showing in external review tabs"
                         // Issue
-                        SystemConfiguration config = SystemConfiguration
-                                .getInstance();
+                        SystemConfiguration config = SystemConfiguration.getInstance();
                         String reportActivityName = config
                                 .getStringParameter(SystemConfigParamNames.REPORTS_ACTIVITY);
-                        if (reportActivityName != null
-                                && !"".equals(reportActivityName))
+                        if (reportActivityName != null && !"".equals(reportActivityName))
                         {
                             DELL_REVIEW = reportActivityName;
                         }
@@ -3094,8 +2939,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     CostByWordCount dellReviewCostByWordCount = null;
                     if (data.containsDellReview)
                     {
-                        dellReviewCostByWordCount = dellReviewCost
-                                .getCostByWordCount();
+                        dellReviewCostByWordCount = dellReviewCost.getCostByWordCount();
                     }
                     if (dellReviewCostByWordCount != null)
                     {
@@ -3107,31 +2951,28 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                                 dellReviewCostByWordCount.getNoMatchCost());
                         data.lowFuzzyMatchWordCountCostForDellReview = add(
                                 data.lowFuzzyMatchWordCountCostForDellReview,
-                                dellReviewCostByWordCount
-                                        .getLowFuzzyMatchCost());
+                                dellReviewCostByWordCount.getLowFuzzyMatchCost());
                         data.medFuzzyMatchWordCountCostForDellReview = add(
                                 data.medFuzzyMatchWordCountCostForDellReview,
-                                dellReviewCostByWordCount
-                                        .getMedFuzzyMatchCost());
+                                dellReviewCostByWordCount.getMedFuzzyMatchCost());
                         data.medHiFuzzyMatchWordCountCostForDellReview = add(
                                 data.medHiFuzzyMatchWordCountCostForDellReview,
-                                dellReviewCostByWordCount
-                                        .getMedHiFuzzyMatchCost());
+                                dellReviewCostByWordCount.getMedHiFuzzyMatchCost());
                         data.hiFuzzyMatchWordCountCostForDellReview = add(
                                 data.hiFuzzyMatchWordCountCostForDellReview,
                                 dellReviewCostByWordCount.getHiFuzzyMatchCost());
                         data.segmentTmWordCountCostForDellReview = add(
                                 data.segmentTmWordCountCostForDellReview,
-                                (isInContextMatch) ? dellReviewCostByWordCount.getSegmentTmMatchCost()
+                                (isInContextMatch)
+                                        ? dellReviewCostByWordCount.getSegmentTmMatchCost()
                                         : dellReviewCostByWordCount.getNoUseExactMatchCost());
                         data.contextMatchWordCountCostForDellReview = add(
                                 data.contextMatchWordCountCostForDellReview, 0);
                         data.inContextMatchWordCountCostForDellReview = add(
                                 data.inContextMatchWordCountCostForDellReview,
-                                (isInContextMatch) ? dellReviewCostByWordCount
-                                        .getInContextMatchCost()
-                                        : dellReviewCostByWordCount
-                                                .getNoUseInContextMatchCost());
+                                (isInContextMatch)
+                                        ? dellReviewCostByWordCount.getInContextMatchCost()
+                                        : dellReviewCostByWordCount.getNoUseInContextMatchCost());
 
                         // fuzzy match cost is the sum of the top three fuzzy
                         // match categories
@@ -3161,18 +3002,15 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     data.noMatchWordCountCost = BigDecimalHelper.subtract(
                             costByWordCount.getNoMatchCost(),
                             data.noMatchWordCountCostForDellReview);
-                    data.lowFuzzyMatchWordCountCost = BigDecimalHelper
-                            .subtract(
-                                    costByWordCount.getLowFuzzyMatchCost(),
-                                    data.lowFuzzyMatchWordCountCostForDellReview);
-                    data.medFuzzyMatchWordCountCost = BigDecimalHelper
-                            .subtract(
-                                    costByWordCount.getMedFuzzyMatchCost(),
-                                    data.medFuzzyMatchWordCountCostForDellReview);
-                    data.medHiFuzzyMatchWordCountCost = BigDecimalHelper
-                            .subtract(
-                                    costByWordCount.getMedHiFuzzyMatchCost(),
-                                    data.medHiFuzzyMatchWordCountCostForDellReview);
+                    data.lowFuzzyMatchWordCountCost = BigDecimalHelper.subtract(
+                            costByWordCount.getLowFuzzyMatchCost(),
+                            data.lowFuzzyMatchWordCountCostForDellReview);
+                    data.medFuzzyMatchWordCountCost = BigDecimalHelper.subtract(
+                            costByWordCount.getMedFuzzyMatchCost(),
+                            data.medFuzzyMatchWordCountCostForDellReview);
+                    data.medHiFuzzyMatchWordCountCost = BigDecimalHelper.subtract(
+                            costByWordCount.getMedHiFuzzyMatchCost(),
+                            data.medHiFuzzyMatchWordCountCostForDellReview);
                     data.hiFuzzyMatchWordCountCost = BigDecimalHelper.subtract(
                             costByWordCount.getHiFuzzyMatchCost(),
                             data.hiFuzzyMatchWordCountCostForDellReview);
@@ -3180,21 +3018,18 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                             (isInContextMatch) ? costByWordCount.getSegmentTmMatchCost()
                                     : costByWordCount.getNoUseExactMatchCost(),
                             data.segmentTmWordCountCostForDellReview);
-                    data.contextMatchWordCountCost = BigDecimalHelper.subtract(
-                            0, data.contextMatchWordCountCostForDellReview);
-                    data.inContextMatchWordCountCost = BigDecimalHelper
-                            .subtract(
-                                    (isInContextMatch) ? costByWordCount
-                                            .getInContextMatchCost()
-                                            : costByWordCount
-                                                    .getNoUseInContextMatchCost(),
-                                    data.inContextMatchWordCountCostForDellReview);
+                    data.contextMatchWordCountCost = BigDecimalHelper.subtract(0,
+                            data.contextMatchWordCountCostForDellReview);
+                    data.inContextMatchWordCountCost = BigDecimalHelper.subtract(
+                            (isInContextMatch) ? costByWordCount.getInContextMatchCost()
+                                    : costByWordCount.getNoUseInContextMatchCost(),
+                            data.inContextMatchWordCountCostForDellReview);
 
                     // fuzzy match cost is the sum of the top three fuzzy match
                     // categories
                     data.fuzzyMatchWordCountCost = data.medFuzzyMatchWordCountCost
-                            .add(data.medHiFuzzyMatchWordCountCost).add(
-                                    data.hiFuzzyMatchWordCountCost);
+                            .add(data.medHiFuzzyMatchWordCountCost)
+                            .add(data.hiFuzzyMatchWordCountCost);
 
                     // this means that no match cost should include the lowest
                     // fuzzy match category
@@ -3202,15 +3037,12 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                             .add(data.lowFuzzyMatchWordCountCost);
 
                     data.totalWordCountCost = data.repetitionWordCountCost
-                            .add(data.noMatchWordCountCost)
-                            .add(data.fuzzyMatchWordCountCost)
-                            .add(data.segmentTmWordCountCost)
-                            .add(data.contextMatchWordCountCost)
+                            .add(data.noMatchWordCountCost).add(data.fuzzyMatchWordCountCost)
+                            .add(data.segmentTmWordCountCost).add(data.contextMatchWordCountCost)
                             .add(data.inContextMatchWordCountCost);
                 }
 
-                data.totalAdditionalCost = add(data.totalAdditionalCost,
-                        totalAdditionalCost);
+                data.totalAdditionalCost = add(data.totalAdditionalCost, totalAdditionalCost);
 
                 localeMap.put(targetLang, data);
             }
@@ -3219,8 +3051,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             // recalculated
             if (p_recalculateFinishedWorkflow)
             {
-                ServerProxy.getCostingEngine().reCostJob(j, pivotCurrency,
-                        Cost.REVENUE);
+                ServerProxy.getCostingEngine().reCostJob(j, pivotCurrency, Cost.REVENUE);
             }
         }
 
@@ -3230,8 +3061,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
     /*
      * Create the key for sorting the data by key.
      */
-    private String getMapKey(String p_companyName, String p_projectDesc,
-            String p_jobId)
+    private String getMapKey(String p_companyName, String p_projectDesc, String p_jobId)
     {
         return p_companyName + SEPARATOR + p_projectDesc + SEPARATOR + p_jobId;
     }
@@ -3243,8 +3073,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
      */
     private String getJobIdFromMapKey(String p_key)
     {
-        return p_key.substring(p_key.lastIndexOf(SEPARATOR)
-                + SEPARATOR.length());
+        return p_key.substring(p_key.lastIndexOf(SEPARATOR) + SEPARATOR.length());
     }
 
     private String[] getMonths()
@@ -3274,24 +3103,21 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         File file = new File(path);
         if (!file.exists())
         {
-            String newPath = cxePath + "/" + targetLang + "/webservice/"
-                    + jobName;
+            String newPath = cxePath + "/" + targetLang + "/webservice/" + jobName;
             file = new File(newPath);
         }
-        
+
         if (!file.exists())
         {
-            String newPath =cxePath + "/" + targetLang + "/" + jobId;
+            String newPath = cxePath + "/" + targetLang + "/" + jobId;
             file = new File(newPath);
         }
-        
+
         if (!file.exists())
         {
-            String newPath = cxePath + "/" + targetLang + "/webservice/"
-                    + jobId;
+            String newPath = cxePath + "/" + targetLang + "/webservice/" + jobId;
             file = new File(newPath);
         }
-        
 
         if (file.exists() && file.isDirectory())
         {
@@ -3334,7 +3160,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
         /* word counts */
         public long mtThreshold = 0;
-        
+
         public long repetitionWordCount = 0;
 
         public long medFuzzyMatchWordCount = 0;
@@ -3360,41 +3186,29 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         public long fuzzyMatchWordCount = 0;
 
         /* word count costs */
-        public BigDecimal fuzzyMatchWordCountCost = new BigDecimal(
-                BIG_DECIMAL_ZERO_STRING);
+        public BigDecimal fuzzyMatchWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
-        public BigDecimal repetitionWordCountCost = new BigDecimal(
-                BIG_DECIMAL_ZERO_STRING);
+        public BigDecimal repetitionWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
-        public BigDecimal lowFuzzyMatchWordCountCost = new BigDecimal(
-                BIG_DECIMAL_ZERO_STRING);
+        public BigDecimal lowFuzzyMatchWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
-        public BigDecimal medFuzzyMatchWordCountCost = new BigDecimal(
-                BIG_DECIMAL_ZERO_STRING);
+        public BigDecimal medFuzzyMatchWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
-        public BigDecimal medHiFuzzyMatchWordCountCost = new BigDecimal(
-                BIG_DECIMAL_ZERO_STRING);
+        public BigDecimal medHiFuzzyMatchWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
-        public BigDecimal hiFuzzyMatchWordCountCost = new BigDecimal(
-                BIG_DECIMAL_ZERO_STRING);
+        public BigDecimal hiFuzzyMatchWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
-        public BigDecimal contextMatchWordCountCost = new BigDecimal(
-                BIG_DECIMAL_ZERO_STRING);
+        public BigDecimal contextMatchWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
-        public BigDecimal inContextMatchWordCountCost = new BigDecimal(
-                BIG_DECIMAL_ZERO_STRING);
+        public BigDecimal inContextMatchWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
-        public BigDecimal segmentTmWordCountCost = new BigDecimal(
-                BIG_DECIMAL_ZERO_STRING);
+        public BigDecimal segmentTmWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
-        public BigDecimal noMatchWordCountCost = new BigDecimal(
-                BIG_DECIMAL_ZERO_STRING);
+        public BigDecimal noMatchWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
-        public BigDecimal totalWordCountCost = new BigDecimal(
-                BIG_DECIMAL_ZERO_STRING);
+        public BigDecimal totalWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
-        public BigDecimal totalAdditionalCost = new BigDecimal(
-                BIG_DECIMAL_ZERO_STRING);
+        public BigDecimal totalAdditionalCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
         public boolean containsDellReview = false;
 
@@ -3429,8 +3243,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         public BigDecimal noMatchWordCountCostForDellReview = new BigDecimal(
                 BIG_DECIMAL_ZERO_STRING);
 
-        public BigDecimal totalWordCountCostForDellReview = new BigDecimal(
-                BIG_DECIMAL_ZERO_STRING);
+        public BigDecimal totalWordCountCostForDellReview = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
         public boolean wasExportFailed = false;
 
@@ -3570,8 +3383,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                     try
                     {
                         List<Project> projectList = (ArrayList<Project>) ServerProxy
-                                .getProjectHandler()
-                                .getProjectsByUser(m_userId);
+                                .getProjectHandler().getProjectsByUser(m_userId);
                         for (Project project : projectList)
                         {
                             m_data.projectIdList.add(project.getIdAsLong());
@@ -3617,8 +3429,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
     private void setTargetLocales(HttpServletRequest p_request)
     {
-        String[] paramTrgLocales = p_request
-                .getParameterValues(ReportConstants.TARGETLOCALE_LIST);
+        String[] paramTrgLocales = p_request.getParameterValues(ReportConstants.TARGETLOCALE_LIST);
         if (paramTrgLocales != null)
         {
             for (int i = 0; i < paramTrgLocales.length; i++)
@@ -3643,14 +3454,13 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
      * 
      * @return JobSearchParams
      */
-    private JobSearchParameters getSearchParams(HttpServletRequest p_request,
-            int p_month)
+    private JobSearchParameters getSearchParams(HttpServletRequest p_request, int p_month)
     {
         JobSearchParameters sp = new JobSearchParameters();
-//        if (m_data.wantsAllProjects == false)
-//        {
-            sp.setProjectId(m_data.projectIdList);
-//        }
+        // if (m_data.wantsAllProjects == false)
+        // {
+        sp.setProjectId(m_data.projectIdList);
+        // }
 
         // job state EXPORTED,DISPATCHED,LOCALIZED
         ArrayList<String> list = new ArrayList<String>();
@@ -3706,7 +3516,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         try
         {
             m_data.wrongJobs.addAll(readJobNames());
-            for(Job j: m_data.wrongJobs)
+            for (Job j : m_data.wrongJobs)
             {
                 // p_data.wrongJobNames.add(j.getJobName());
                 m_data.wrongJobNames.add(Long.toString(j.getId()));
@@ -3714,8 +3524,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         }
         catch (Exception e)
         {
-            logger.error(
-                    "Failed to add jobs which are in the 'wrong' project.", e);
+            logger.error("Failed to add jobs which are in the 'wrong' project.", e);
         }
     }
 
@@ -3756,20 +3565,18 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 String[] tokens = line.split("=");
                 jobname = tokens[0].trim();
                 projectname = tokens[1].trim();
-                Project p = ServerProxy.getProjectHandler().getProjectByName(
-                        projectname);
+                Project p = ServerProxy.getProjectHandler().getProjectByName(projectname);
                 Long newProjectId = p.getIdAsLong();
 
                 JobSearchParameters sp = new JobSearchParameters();
                 sp.setJobName(jobname);
-                ArrayList<Job> jobs = new ArrayList<Job>(ServerProxy
-                        .getJobHandler().getJobs(sp));
+                ArrayList<Job> jobs = new ArrayList<Job>(ServerProxy.getJobHandler().getJobs(sp));
                 Job j = (Job) jobs.get(0);
 
                 if (m_data.wantsAllProjects == false
                         && m_data.projectIdList.contains(newProjectId) == false)
                 {
-                	m_data.ignoreJobs.add(j);
+                    m_data.ignoreJobs.add(j);
                     continue;
                 }
 
@@ -3777,12 +3584,11 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
                 // are reporting on, then skip it as well
                 // if the project id list contains the old project but not the
                 // new project
-                Long oldProjectId = j.getL10nProfile().getProject()
-                        .getIdAsLong();
+                Long oldProjectId = j.getL10nProfile().getProject().getIdAsLong();
                 if (m_data.projectIdList.contains(oldProjectId)
                         && !m_data.projectIdList.contains(newProjectId))
                 {
-                	m_data.ignoreJobs.add(j);
+                    m_data.ignoreJobs.add(j);
                     continue;
                 }
 
@@ -3793,10 +3599,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             }
             catch (Exception e)
             {
-                logger.warn("Ignoring mapping line for "
-                        + jobname
-                        + " => "
-                        + projectname
+                logger.warn("Ignoring mapping line for " + jobname + " => " + projectname
                         + ". Either the job doesn't exist, the project doesn't exist, or both.");
             }
         }
@@ -3820,16 +3623,14 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         return desc;
     }
 
-    private ArrayList<Job> getWrongJobsForThisMonth(int p_month,
-            int p_year)
+    private ArrayList<Job> getWrongJobsForThisMonth(int p_month, int p_year)
     {
         ArrayList<Job> wrongJobsThisMonth = new ArrayList<Job>();
         Calendar cal = Calendar.getInstance();
-        for(Job j: m_data.wrongJobs)
+        for (Job j : m_data.wrongJobs)
         {
             cal.setTime(j.getCreateDate());
-            if (p_month == cal.get(Calendar.MONTH)
-                    && p_year == cal.get(Calendar.YEAR))
+            if (p_month == cal.get(Calendar.MONTH) && p_year == cal.get(Calendar.YEAR))
             {
                 wrongJobsThisMonth.add(j);
             }
@@ -3899,13 +3700,11 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             long id = fp.getKnownFormatTypeId();
             try
             {
-                type = ServerProxy.getFileProfilePersistenceManager()
-                        .queryKnownFormatType(id);
+                type = ServerProxy.getFileProfilePersistenceManager().queryKnownFormatType(id);
             }
             catch (Exception e)
             {
-                logger.error("Can't get KnownFormatType in Online Jobs Report",
-                        e);
+                logger.error("Can't get KnownFormatType in Online Jobs Report", e);
             }
 
             if (type != null && !type.getName().isEmpty())
@@ -3918,11 +3717,11 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
         return resultStr.substring(1, resultStr.length() - 1);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     private void setJobIds(HashSet<Job> jobs)
     {
-        if (m_data != null
-                && (m_data.jobIds == null || m_data.jobIds.size() == 0))
+        if (m_data != null && (m_data.jobIds == null || m_data.jobIds.size() == 0))
         {
             m_data.jobIds = new ArrayList();
             for (Job job : jobs)
@@ -3941,16 +3740,14 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
     @Override
     public void setPercent(int p_finishedJobNum)
     {
-        ReportGeneratorHandler.setReportsMapByGenerator(m_userId,
-                m_data.jobIds, 100 * p_finishedJobNum / m_data.jobIds.size(),
-                getReportType());
+        ReportGeneratorHandler.setReportsMapByGenerator(m_userId, m_data.jobIds,
+                100 * p_finishedJobNum / m_data.jobIds.size(), getReportType());
     }
 
     @Override
     public boolean isCancelled()
     {
-        return ReportGeneratorHandler.isCancelled(m_userId, null,
-                getReportType());
+        return ReportGeneratorHandler.isCancelled(m_userId, null, getReportType());
     }
 
     private String getExportDateStr(SimpleDateFormat sdf, Date exportDate)
@@ -3964,33 +3761,34 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             return sdf.format(exportDate);
         }
     }
-    
-    private CellStyle getHeaderStyle(Workbook p_workbook){
-    	if (headerStyle == null)
-        { 
-	    	Font headerFont = p_workbook.createFont();
-	        headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
-	        headerFont.setColor(IndexedColors.BLACK.getIndex());
-	        headerFont.setUnderline(Font.U_NONE);
-	        headerFont.setFontName("Arial");
-	        headerFont.setFontHeightInPoints((short) 9);
-	    	
-	        CellStyle cs = p_workbook.createCellStyle();
-	        cs.setFont(headerFont);
-	        cs.setWrapText(true);
-	        cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
-	        cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-	        cs.setBorderTop(CellStyle.BORDER_THIN);
-	        cs.setBorderRight(CellStyle.BORDER_THIN);
-	        cs.setBorderBottom(CellStyle.BORDER_THIN);
-	        cs.setBorderLeft(CellStyle.BORDER_THIN);
-	        
-	        headerStyle = cs;
+
+    private CellStyle getHeaderStyle(Workbook p_workbook)
+    {
+        if (headerStyle == null)
+        {
+            Font headerFont = p_workbook.createFont();
+            headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            headerFont.setColor(IndexedColors.BLACK.getIndex());
+            headerFont.setUnderline(Font.U_NONE);
+            headerFont.setFontName("Arial");
+            headerFont.setFontHeightInPoints((short) 9);
+
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setFont(headerFont);
+            cs.setWrapText(true);
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
+            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            cs.setBorderTop(CellStyle.BORDER_THIN);
+            cs.setBorderRight(CellStyle.BORDER_THIN);
+            cs.setBorderBottom(CellStyle.BORDER_THIN);
+            cs.setBorderLeft(CellStyle.BORDER_THIN);
+
+            headerStyle = cs;
         }
-        
+
         return headerStyle;
     }
-    
+
     private CellStyle getContentStyle(Workbook p_workbook) throws Exception
     {
         if (contentStyle == null)
@@ -4006,193 +3804,195 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
 
         return contentStyle;
     }
-    
+
     private CellStyle getDateStyle(Workbook p_workbook) throws Exception
     {
-    	if(dateStyle == null)
-    	{   		
-    		DataFormat dataFormat = p_workbook.createDataFormat();
-    		
-    		Font dateFont = p_workbook.createFont();
+        if (dateStyle == null)
+        {
+            DataFormat dataFormat = p_workbook.createDataFormat();
+
+            Font dateFont = p_workbook.createFont();
             dateFont.setFontName("Arial");
             dateFont.setFontHeightInPoints((short) 10);
-    		
-    		CellStyle cs = p_workbook.createCellStyle();
-    		cs.setWrapText(false);
-    		cs.setFont(dateFont);
-    		cs.setDataFormat(dataFormat.getFormat("M/d/yy"));
-            
+
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setWrapText(false);
+            cs.setFont(dateFont);
+            cs.setDataFormat(dataFormat.getFormat("M/d/yy"));
+
             dateStyle = cs;
-    	}
-    	return dateStyle;
+        }
+        return dateStyle;
     }
-    
+
     private CellStyle getMoneyStyle(Workbook p_workbook) throws Exception
     {
-    	if(moneyStyle == null){  		
-    		String euroJavaNumberFormat = getCurrencyNumberFormat();
-    		DataFormat euroNumberFormat = p_workbook.createDataFormat();
-    		
-    		CellStyle cs = p_workbook.createCellStyle();
-    		cs.setDataFormat(euroNumberFormat.getFormat(euroJavaNumberFormat));
-    		cs.setWrapText(false);
-    		
-    		moneyStyle = cs;
-    	}
+        if (moneyStyle == null)
+        {
+            String euroJavaNumberFormat = getCurrencyNumberFormat();
+            DataFormat euroNumberFormat = p_workbook.createDataFormat();
+
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setDataFormat(euroNumberFormat.getFormat(euroJavaNumberFormat));
+            cs.setWrapText(false);
+
+            moneyStyle = cs;
+        }
 
         return moneyStyle;
     }
-    
+
     private CellStyle getRedCellStyle(Workbook p_workbook) throws Exception
     {
-    	if(redCellStyle == null)
-    	{   		
-    		Font redFont = p_workbook.createFont();
-    		redFont.setFontName("Arial");
-    		redFont.setUnderline(Font.U_NONE);
-    		redFont.setFontHeightInPoints((short) 10);
-	    	
-	    	CellStyle cs = p_workbook.createCellStyle();
-	    	cs.setFont(redFont);
-	    	cs.setWrapText(true);
-	    	cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
-	    	cs.setFillForegroundColor(IndexedColors.RED.getIndex());
-            
+        if (redCellStyle == null)
+        {
+            Font redFont = p_workbook.createFont();
+            redFont.setFontName("Arial");
+            redFont.setUnderline(Font.U_NONE);
+            redFont.setFontHeightInPoints((short) 10);
+
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setFont(redFont);
+            cs.setWrapText(true);
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
+            cs.setFillForegroundColor(IndexedColors.RED.getIndex());
+
             redCellStyle = cs;
-    	}
-    	return redCellStyle;
+        }
+        return redCellStyle;
     }
-    
+
     private CellStyle getFailedDateStyle(Workbook p_workbook) throws Exception
     {
-    	if(failedDateStyle == null)
-    	{
-    		DataFormat dataFormat = p_workbook.createDataFormat();
-    		
-    		Font dateFont = p_workbook.createFont();
+        if (failedDateStyle == null)
+        {
+            DataFormat dataFormat = p_workbook.createDataFormat();
+
+            Font dateFont = p_workbook.createFont();
             dateFont.setFontName("Arial");
             dateFont.setFontHeightInPoints((short) 10);
-    		
-    		CellStyle cs = p_workbook.createCellStyle();
-    		cs.setWrapText(false);
-    		cs.setFont(dateFont);
-    		cs.setDataFormat(dataFormat.getFormat("M/d/yy"));
-    		cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
-    		cs.setFillForegroundColor(IndexedColors.RED.getIndex()); 
-    		failedDateStyle = cs;
-    	}
+
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setWrapText(false);
+            cs.setFont(dateFont);
+            cs.setDataFormat(dataFormat.getFormat("M/d/yy"));
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
+            cs.setFillForegroundColor(IndexedColors.RED.getIndex());
+            failedDateStyle = cs;
+        }
         return failedDateStyle;
     }
-    
+
     private CellStyle getFailedTimeStyle(Workbook p_workbook) throws Exception
     {
-    	if(failedTimeStyle == null)
-    	{
-    		DataFormat dataFormat = p_workbook.createDataFormat();
-    		
-    		CellStyle cs = p_workbook.createCellStyle();
-    		cs.setWrapText(false);
-    		cs.setDataFormat(dataFormat.getFormat("h:mm:ss AM/PM"));
-    		cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
-    		cs.setFillForegroundColor(IndexedColors.RED.getIndex()); 
-    		failedTimeStyle = cs;
-    	}
+        if (failedTimeStyle == null)
+        {
+            DataFormat dataFormat = p_workbook.createDataFormat();
+
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setWrapText(false);
+            cs.setDataFormat(dataFormat.getFormat("h:mm:ss AM/PM"));
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
+            cs.setFillForegroundColor(IndexedColors.RED.getIndex());
+            failedTimeStyle = cs;
+        }
         return failedTimeStyle;
     }
-    
+
     private CellStyle getFailedMoneyStyle(Workbook p_workbook) throws Exception
     {
-    	if(failedMoneyStyle == null)
-    	{
-    		String euroJavaNumberFormat = getCurrencyNumberFormat();
-    		DataFormat euroNumberFormat = p_workbook.createDataFormat();
-    		
-    		CellStyle cs = p_workbook.createCellStyle();
-    		cs.setWrapText(false);
-    		cs.setDataFormat(euroNumberFormat.getFormat(euroJavaNumberFormat));
-    		cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
-    		cs.setFillForegroundColor(IndexedColors.RED.getIndex()); 
-    		failedMoneyStyle = cs;
-    	}
+        if (failedMoneyStyle == null)
+        {
+            String euroJavaNumberFormat = getCurrencyNumberFormat();
+            DataFormat euroNumberFormat = p_workbook.createDataFormat();
+
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setWrapText(false);
+            cs.setDataFormat(euroNumberFormat.getFormat(euroJavaNumberFormat));
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
+            cs.setFillForegroundColor(IndexedColors.RED.getIndex());
+            failedMoneyStyle = cs;
+        }
         return failedMoneyStyle;
     }
-    
+
     private CellStyle getWrongJobStyle(Workbook p_workbook) throws Exception
     {
-    	if(wrongJobStyle == null)
-    	{
-    		Font wrongJobFont = p_workbook.createFont();
+        if (wrongJobStyle == null)
+        {
+            Font wrongJobFont = p_workbook.createFont();
             wrongJobFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
             wrongJobFont.setColor(IndexedColors.GREY_50_PERCENT.getIndex());
             wrongJobFont.setUnderline(Font.U_NONE);
             wrongJobFont.setFontName("Times");
             wrongJobFont.setFontHeightInPoints((short) 11);
-            
+
             CellStyle cs = p_workbook.createCellStyle();
             cs.setFont(wrongJobFont);
-            
+
             wrongJobStyle = cs;
-    	}
+        }
         return wrongJobStyle;
     }
-    
+
     private CellStyle getSubTotalStyle(Workbook p_workbook) throws Exception
     {
-    	if(subTotalStyle == null)
-    	{
-    		Font subTotalFont = p_workbook.createFont();
-        	subTotalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
-        	subTotalFont.setColor(IndexedColors.BLACK.getIndex());
-        	subTotalFont.setUnderline(Font.U_NONE);
-        	subTotalFont.setFontName("Arial");
-        	subTotalFont.setFontHeightInPoints((short) 10);
-        	
+        if (subTotalStyle == null)
+        {
+            Font subTotalFont = p_workbook.createFont();
+            subTotalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            subTotalFont.setColor(IndexedColors.BLACK.getIndex());
+            subTotalFont.setUnderline(Font.U_NONE);
+            subTotalFont.setFontName("Arial");
+            subTotalFont.setFontHeightInPoints((short) 10);
+
             CellStyle cs = p_workbook.createCellStyle();
             cs.setFont(subTotalFont);
             cs.setWrapText(true);
             cs.setBorderTop(CellStyle.BORDER_THIN);
             cs.setBorderBottom(CellStyle.BORDER_THIN);
-            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
             cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-            
+
             subTotalStyle = cs;
-    	}
+        }
         return subTotalStyle;
     }
-    
+
     private CellStyle getTotalMoneyStyle(Workbook p_workbook) throws Exception
     {
-    	if(totalMoneyStyle == null)
-    	{
-    		String euroJavaNumberFormat = getCurrencyNumberFormat();
-    		DataFormat euroNumberFormat = p_workbook.createDataFormat();
-    		
-    		CellStyle cs = p_workbook.createCellStyle();
-    		cs.setDataFormat(euroNumberFormat.getFormat(euroJavaNumberFormat));
-    		cs.setWrapText(false);
-    		cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+        if (totalMoneyStyle == null)
+        {
+            String euroJavaNumberFormat = getCurrencyNumberFormat();
+            DataFormat euroNumberFormat = p_workbook.createDataFormat();
+
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setDataFormat(euroNumberFormat.getFormat(euroJavaNumberFormat));
+            cs.setWrapText(false);
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
             cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
             cs.setBorderTop(CellStyle.BORDER_THIN);
             cs.setBorderBottom(CellStyle.BORDER_THIN);
-            
+
             totalMoneyStyle = cs;
-    	}
+        }
         return totalMoneyStyle;
     }
- 
-    public void setRegionStyle(Sheet sheet, CellRangeAddress cellRangeAddress,
-    		CellStyle cs) {
-    		for (int i = cellRangeAddress.getFirstRow(); i <= cellRangeAddress.getLastRow();
-    			i++) {
-    			Row row = getRow(sheet, i);
-    			for (int j = cellRangeAddress.getFirstColumn(); 
-    				j <= cellRangeAddress.getLastColumn(); j++) {
-    				Cell cell = getCell(row, j);
-    				cell.setCellStyle(cs);
-    			}
-    	  }
+
+    public void setRegionStyle(Sheet sheet, CellRangeAddress cellRangeAddress, CellStyle cs)
+    {
+        for (int i = cellRangeAddress.getFirstRow(); i <= cellRangeAddress.getLastRow(); i++)
+        {
+            Row row = getRow(sheet, i);
+            for (int j = cellRangeAddress.getFirstColumn(); j <= cellRangeAddress
+                    .getLastColumn(); j++)
+            {
+                Cell cell = getCell(row, j);
+                cell.setCellStyle(cs);
+            }
+        }
     }
-    
+
     private Row getRow(Sheet p_sheet, int p_col)
     {
         Row row = p_sheet.getRow(p_col);
@@ -4208,33 +4008,32 @@ public class OnlineJobsReportForIPTranslatorGenerator implements
             cell = p_row.createCell(index);
         return cell;
     }
-    
+
     private SimpleDateFormat getDateFormat()
     {
-    	if(dateFormat == null)
-    	{
-	    	String datetimeFormatString = m_data.getDateFormatString();
-	        String dateFormatString = datetimeFormatString.substring(0,
-	                datetimeFormatString.indexOf(" ") - 1);
-	        SimpleDateFormat format = new SimpleDateFormat(dateFormatString);
-	        
-	        dateFormat = format;
-    	}
-    	return dateFormat;
+        if (dateFormat == null)
+        {
+            String datetimeFormatString = m_data.getDateFormatString();
+            String dateFormatString = datetimeFormatString.substring(0,
+                    datetimeFormatString.indexOf(" ") - 1);
+            SimpleDateFormat format = new SimpleDateFormat(dateFormatString);
+
+            dateFormat = format;
+        }
+        return dateFormat;
     }
-    
+
     private SimpleDateFormat getTimeFormat()
     {
-    	if(timeFormat == null)
-    	{
-    		String datetimeFormatString = m_data.getDateFormatString();
-    		String timeFormatString = datetimeFormatString.substring(
-    				datetimeFormatString.indexOf(" ") + 1,
-    				datetimeFormatString.length());
-    		SimpleDateFormat format = new SimpleDateFormat(timeFormatString);
-    		
-    		timeFormat = format;
-    	}
-    	return timeFormat;
+        if (timeFormat == null)
+        {
+            String datetimeFormatString = m_data.getDateFormatString();
+            String timeFormatString = datetimeFormatString.substring(
+                    datetimeFormatString.indexOf(" ") + 1, datetimeFormatString.length());
+            SimpleDateFormat format = new SimpleDateFormat(timeFormatString);
+
+            timeFormat = format;
+        }
+        return timeFormat;
     }
 }

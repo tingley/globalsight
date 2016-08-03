@@ -51,11 +51,11 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.util.StringUtil;
 
 public class ReviewerVendorPoReportDataAssembler
 {
-    private static Logger s_logger = Logger
-            .getLogger(ReviewerVendorPoReportDataAssembler.class);
+    private static Logger s_logger = Logger.getLogger(ReviewerVendorPoReportDataAssembler.class);
 
     private HttpServletRequest request = null;
 
@@ -99,8 +99,7 @@ public class ReviewerVendorPoReportDataAssembler
                         if (at.getActivityType() == Activity.TYPE_REVIEW
                                 || at.getActivityType() == Activity.TYPE_REVIEW_EDITABLE)
                         {
-                            reportData.activityNameList.add(at
-                                    .getActivityName());
+                            reportData.activityNameList.add(at.getActivityName());
                         }
                     }
                 }
@@ -142,12 +141,11 @@ public class ReviewerVendorPoReportDataAssembler
                 reportData.wantsAllProjects = true;
                 try
                 {
-                    List<Project> projectList = (ArrayList<Project>) ServerProxy
-                            .getProjectHandler().getProjectsByUser(userId);
+                    List<Project> projectList = (ArrayList<Project>) ServerProxy.getProjectHandler()
+                            .getProjectsByUser(userId);
                     for (Project project : projectList)
                     {
-                        reportData.projectIdList.add(String.valueOf(project
-                                .getIdAsLong()));
+                        reportData.projectIdList.add(String.valueOf(project.getIdAsLong()));
                     }
                     break;
                 }
@@ -193,8 +191,7 @@ public class ReviewerVendorPoReportDataAssembler
         }
         catch (Exception e)
         {
-            s_logger.error(
-                    "Failed to add jobs which are in the 'wrong' project.", e);
+            s_logger.error("Failed to add jobs which are in the 'wrong' project.", e);
         }
     }
 
@@ -202,15 +199,13 @@ public class ReviewerVendorPoReportDataAssembler
      * Adds data for the exported and in-progress jobs. Archived jobs are
      * ignored for now.
      */
-    public void setProjectData(boolean p_recalculateFinishedWorkflow)
-            throws Exception
+    public void setProjectData(boolean p_recalculateFinishedWorkflow) throws Exception
     {
         HashMap projectMap = new HashMap();
         Currency pivotCurrency = CurrencyThreadLocal.getCurrency();
 
         JobSearchParameters searchParams = getSearchParams();
-        ArrayList queriedJobs = new ArrayList(ServerProxy.getJobHandler()
-                .getJobs(searchParams));
+        ArrayList queriedJobs = new ArrayList(ServerProxy.getJobHandler().getJobs(searchParams));
         ArrayList wrongJobs = getWrongJobs();
 
         // now create a Set for all the jobs
@@ -254,8 +249,8 @@ public class ReviewerVendorPoReportDataAssembler
 
                 // skip workflows without special target lang
                 String targetLang = Long.toString(w.getTargetLocale().getId());
-                if (!(reportData.wantsAllTargetLangs || reportData.targetLangList
-                        .contains(targetLang)))
+                if (!(reportData.wantsAllTargetLangs
+                        || reportData.targetLangList.contains(targetLang)))
                 {
                     continue;
                 }
@@ -266,8 +261,7 @@ public class ReviewerVendorPoReportDataAssembler
                 while (tasksIterator.hasNext())
                 {
                     Task task = (Task) tasksIterator.next();
-                    if (reportData.activityNameList
-                            .contains(task.getTaskName()))
+                    if (reportData.activityNameList.contains(task.getTaskName()))
                     {
                         if (dellReviewActivities.get(task.getTaskName()) == null)
                         {
@@ -282,8 +276,7 @@ public class ReviewerVendorPoReportDataAssembler
                     Task dellReviewActivity = (Task) entry.getValue();
 
                     long jobId = j.getId();
-                    HashMap localeAvticityMap = (HashMap) projectMap.get(Long
-                            .toString(jobId));
+                    HashMap localeAvticityMap = (HashMap) projectMap.get(Long.toString(jobId));
                     if (localeAvticityMap == null)
                     {
                         localeAvticityMap = new HashMap();
@@ -295,20 +288,15 @@ public class ReviewerVendorPoReportDataAssembler
                     if (data == null)
                     {
                         data = new ProjectWorkflowData();
-                        localeAvticityMap.put(
-                                targetLang + dellReviewActivity.getTaskName(),
-                                data);
+                        localeAvticityMap.put(targetLang + dellReviewActivity.getTaskName(), data);
                         data.jobName = j.getJobName();
                         data.jobId = jobId;
                         data.projectDesc = getProjectDesc(j);
                         data.targetLang = w.getTargetLocale().toString();
                         data.creationDate = j.getCreateDate();
-                        data.dellReviewActivityState = dellReviewActivity
-                                .getState();
-                        data.acceptedReviewerDate = dellReviewActivity
-                                .getAcceptedDate();
-                        data.currentActivityName = dellReviewActivity
-                                .getTaskDisplayName();
+                        data.dellReviewActivityState = dellReviewActivity.getState();
+                        data.acceptedReviewerDate = dellReviewActivity.getAcceptedDate();
+                        data.currentActivityName = dellReviewActivity.getTaskDisplayName();
                     }
 
                     // now add or amend the data in the ProjectWorkflowData
@@ -322,38 +310,30 @@ public class ReviewerVendorPoReportDataAssembler
                     data.repetitionWordCount += w.getRepetitionWordCount();
                     data.dellInternalRepsWordCount += w.getRepetitionWordCount();
                     data.tradosRepsWordCount = data.dellInternalRepsWordCount;
-                    data.lowFuzzyMatchWordCount += w
-                            .getThresholdLowFuzzyWordCount();
-                    data.medFuzzyMatchWordCount += w
-                            .getThresholdMedFuzzyWordCount();
-                    data.medHiFuzzyMatchWordCount += w
-                            .getThresholdMedHiFuzzyWordCount();
-                    data.hiFuzzyMatchWordCount += w
-                            .getThresholdHiFuzzyWordCount();
+                    data.lowFuzzyMatchWordCount += w.getThresholdLowFuzzyWordCount();
+                    data.medFuzzyMatchWordCount += w.getThresholdMedFuzzyWordCount();
+                    data.medHiFuzzyMatchWordCount += w.getThresholdMedHiFuzzyWordCount();
+                    data.hiFuzzyMatchWordCount += w.getThresholdHiFuzzyWordCount();
 
                     // the Dell fuzzyMatchWordCount is the sum of the top 3
                     // categories
                     data.dellFuzzyMatchWordCount = data.medFuzzyMatchWordCount
-                            + data.medHiFuzzyMatchWordCount
-                            + data.hiFuzzyMatchWordCount;
+                            + data.medHiFuzzyMatchWordCount + data.hiFuzzyMatchWordCount;
                     data.trados95to99WordCount = data.hiFuzzyMatchWordCount;
                     data.trados85to94WordCount = data.medHiFuzzyMatchWordCount;
                     data.trados75to84WordCount = data.medFuzzyMatchWordCount;
                     data.trados50to74WordCount = data.lowFuzzyMatchWordCount;
 
                     // add the lowest fuzzies and sublev match to nomatch
-                    data.noMatchWordCount += w.getNoMatchWordCount()
-                            + data.lowFuzzyMatchWordCount;
+                    data.noMatchWordCount += w.getNoMatchWordCount() + data.lowFuzzyMatchWordCount;
                     data.dellNewWordsWordCount = w.getNoMatchWordCount()
                             + w.getLowFuzzyMatchWordCount();
                     data.tradosNoMatchWordCount = data.dellNewWordsWordCount;
 
-                    data.segmentTmWordCount += (isInContextMatch) ? w
-                            .getSegmentTmWordCount()
+                    data.segmentTmWordCount += (isInContextMatch) ? w.getSegmentTmWordCount()
                             : w.getTotalExactMatchWordCount();
-                    data.inContextMatchWordCount += (isInContextMatch) ? w
-                            .getInContextMatchWordCount() : w
-                            .getNoUseInContextMatchWordCount();
+                    data.inContextMatchWordCount += (isInContextMatch)
+                            ? w.getInContextMatchWordCount() : w.getNoUseInContextMatchWordCount();
                     data.dellExactMatchWordCount = data.segmentTmWordCount;
                     data.dellInContextMatchWordCount = data.inContextMatchWordCount;
                     data.trados100WordCount = data.dellExactMatchWordCount;
@@ -367,21 +347,16 @@ public class ReviewerVendorPoReportDataAssembler
                     data.dellTotalWordCount = w.getTotalWordCount();
 
                     data.tradosTotalWordCount = data.trados100WordCount
-                            + data.tradosInContextWordCount
-                            + data.tradosContextWordCount
-                            + data.trados95to99WordCount
-                            + data.trados85to94WordCount
-                            + data.trados75to84WordCount
-                            + data.trados50to74WordCount
-                            + data.tradosRepsWordCount
-                            + data.tradosNoMatchWordCount;
+                            + data.tradosInContextWordCount + data.tradosContextWordCount
+                            + data.trados95to99WordCount + data.trados85to94WordCount
+                            + data.trados75to84WordCount + data.trados50to74WordCount
+                            + data.tradosRepsWordCount + data.tradosNoMatchWordCount;
 
                     // Counts the total cost for dell activities in the same
                     // workflow.
                     // It's possible that existing mutiple activities with name
                     // "REPORT_ACTIVITY".
-                    CostByWordCount dellReivewCostByWordCount = ServerProxy
-                            .getCostingEngine()
+                    CostByWordCount dellReivewCostByWordCount = ServerProxy.getCostingEngine()
                             .calculateCost(dellReviewActivity, pivotCurrency,
                                     p_recalculateFinishedWorkflow, Cost.REVENUE)
                             .getCostByWordCount();
@@ -402,14 +377,15 @@ public class ReviewerVendorPoReportDataAssembler
 
                         data.inContextMatchWordCountCostForDellReview = add(
                                 data.inContextMatchWordCountCostForDellReview,
-                                (isInContextMatch) ? dellReivewCostByWordCount
-                                        .getInContextMatchCost()
-                                        : dellReivewCostByWordCount
-                                                .getNoUseInContextMatchCost());
+                                (isInContextMatch)
+                                        ? dellReivewCostByWordCount.getInContextMatchCost()
+                                        : dellReivewCostByWordCount.getNoUseInContextMatchCost());
 
                         data.segmentTmWordCountCostForDellReview = add(
                                 data.segmentTmWordCountCostForDellReview,
-                                (isInContextMatch) ? dellReivewCostByWordCount.getSegmentTmMatchCost() : dellReivewCostByWordCount.getNoUseExactMatchCost());
+                                (isInContextMatch)
+                                        ? dellReivewCostByWordCount.getSegmentTmMatchCost()
+                                        : dellReivewCostByWordCount.getNoUseExactMatchCost());
 
                         data.dellExactMatchWordCountCostForDellReview = data.segmentTmWordCountCostForDellReview;
                         data.trados100WordCountCostForDellReview = data.segmentTmWordCountCostForDellReview;
@@ -421,18 +397,15 @@ public class ReviewerVendorPoReportDataAssembler
                         // fuzzy match costs for activity "REPORT_ACTIVITY"
                         data.lowFuzzyMatchWordCountCostForDellReview = add(
                                 data.lowFuzzyMatchWordCountCostForDellReview,
-                                dellReivewCostByWordCount
-                                        .getLowFuzzyMatchCost());
+                                dellReivewCostByWordCount.getLowFuzzyMatchCost());
 
                         data.medFuzzyMatchWordCountCostForDellReview = add(
                                 data.medFuzzyMatchWordCountCostForDellReview,
-                                dellReivewCostByWordCount
-                                        .getMedFuzzyMatchCost());
+                                dellReivewCostByWordCount.getMedFuzzyMatchCost());
 
                         data.medHiFuzzyMatchWordCountCostForDellReview = add(
                                 data.medHiFuzzyMatchWordCountCostForDellReview,
-                                dellReivewCostByWordCount
-                                        .getMedHiFuzzyMatchCost());
+                                dellReivewCostByWordCount.getMedHiFuzzyMatchCost());
 
                         data.hiFuzzyMatchWordCountCostForDellReview = add(
                                 data.hiFuzzyMatchWordCountCostForDellReview,
@@ -482,36 +455,30 @@ public class ReviewerVendorPoReportDataAssembler
                                 .add(data.tradosNoMatchWordCountCostForDellReview);
                     }
 
-                    Cost wfCost = ServerProxy.getCostingEngine().calculateCost(
-                            w, pivotCurrency, p_recalculateFinishedWorkflow,
-                            Cost.REVENUE, p_recalculateFinishedWorkflow);
+                    Cost wfCost = ServerProxy.getCostingEngine().calculateCost(w, pivotCurrency,
+                            p_recalculateFinishedWorkflow, Cost.REVENUE,
+                            p_recalculateFinishedWorkflow);
 
-                    CostByWordCount costByWordCount = wfCost
-                            .getCostByWordCount();
+                    CostByWordCount costByWordCount = wfCost.getCostByWordCount();
                     if (costByWordCount != null)
                     {
                         // repetition costs
-                        data.repetitionWordCountCost = add(
-                                data.repetitionWordCountCost,
+                        data.repetitionWordCountCost = add(data.repetitionWordCountCost,
                                 costByWordCount.getRepetitionCost());
 
                         data.dellInternalRepsWordCountCost = data.repetitionWordCountCost;
                         data.tradosRepsWordCountCost = data.repetitionWordCountCost;
 
                         // exact match costs
-                        data.contextMatchWordCountCost = add(
-                                data.contextMatchWordCountCost, 0);
+                        data.contextMatchWordCountCost = add(data.contextMatchWordCountCost, 0);
 
-                        data.inContextMatchWordCountCost = add(
-                                data.inContextMatchWordCountCost,
-                                (isInContextMatch) ? costByWordCount
-                                        .getInContextMatchCost()
-                                        : costByWordCount
-                                                .getNoUseInContextMatchCost());
+                        data.inContextMatchWordCountCost = add(data.inContextMatchWordCountCost,
+                                (isInContextMatch) ? costByWordCount.getInContextMatchCost()
+                                        : costByWordCount.getNoUseInContextMatchCost());
 
-                        data.segmentTmWordCountCost = add(
-                                data.segmentTmWordCountCost,
-                                (isInContextMatch) ? costByWordCount.getSegmentTmMatchCost() : costByWordCount.getNoUseExactMatchCost());
+                        data.segmentTmWordCountCost = add(data.segmentTmWordCountCost,
+                                (isInContextMatch) ? costByWordCount.getSegmentTmMatchCost()
+                                        : costByWordCount.getNoUseExactMatchCost());
 
                         data.dellExactMatchWordCountCost = data.segmentTmWordCountCost;
                         data.trados100WordCountCost = data.segmentTmWordCountCost;
@@ -522,28 +489,24 @@ public class ReviewerVendorPoReportDataAssembler
                         data.tradosContextWordCountCost = data.contextMatchWordCountCost;
 
                         // fuzzy match costs
-                        data.lowFuzzyMatchWordCountCost = add(
-                                data.lowFuzzyMatchWordCountCost,
+                        data.lowFuzzyMatchWordCountCost = add(data.lowFuzzyMatchWordCountCost,
                                 costByWordCount.getLowFuzzyMatchCost());
 
-                        data.medFuzzyMatchWordCountCost = add(
-                                data.medFuzzyMatchWordCountCost,
+                        data.medFuzzyMatchWordCountCost = add(data.medFuzzyMatchWordCountCost,
                                 costByWordCount.getMedFuzzyMatchCost());
 
-                        data.medHiFuzzyMatchWordCountCost = add(
-                                data.medHiFuzzyMatchWordCountCost,
+                        data.medHiFuzzyMatchWordCountCost = add(data.medHiFuzzyMatchWordCountCost,
                                 costByWordCount.getMedHiFuzzyMatchCost());
 
-                        data.hiFuzzyMatchWordCountCost = add(
-                                data.hiFuzzyMatchWordCountCost,
+                        data.hiFuzzyMatchWordCountCost = add(data.hiFuzzyMatchWordCountCost,
                                 costByWordCount.getHiFuzzyMatchCost());
 
                         // Dell fuzzy match cost is the sum of the top three
                         // fuzzy
                         // match categories
                         data.dellFuzzyMatchWordCountCost = data.medFuzzyMatchWordCountCost
-                                .add(data.medHiFuzzyMatchWordCountCost).add(
-                                        data.hiFuzzyMatchWordCountCost);
+                                .add(data.medHiFuzzyMatchWordCountCost)
+                                .add(data.hiFuzzyMatchWordCountCost);
 
                         // Trados breakdown for fuzzy
                         data.trados95to99WordCountCost = data.hiFuzzyMatchWordCountCost;
@@ -555,8 +518,7 @@ public class ReviewerVendorPoReportDataAssembler
                         data.trados50to74WordCountCost = data.lowFuzzyMatchWordCountCost;
 
                         // new words, no match costs
-                        data.noMatchWordCountCost = add(
-                                data.noMatchWordCountCost,
+                        data.noMatchWordCountCost = add(data.noMatchWordCountCost,
                                 costByWordCount.getNoMatchCost());
 
                         data.tradosNoMatchWordCountCost = data.noMatchWordCountCost;
@@ -597,8 +559,7 @@ public class ReviewerVendorPoReportDataAssembler
                 // recalculated
                 if (p_recalculateFinishedWorkflow)
                 {
-                    ServerProxy.getCostingEngine().reCostJob(j, pivotCurrency,
-                            Cost.REVENUE);
+                    ServerProxy.getCostingEngine().reCostJob(j, pivotCurrency, Cost.REVENUE);
                 }
 
             }
@@ -652,19 +613,17 @@ public class ReviewerVendorPoReportDataAssembler
                 jobname = tokens[0].trim();
                 projectname = tokens[1].trim();
 
-                Project p = ServerProxy.getProjectHandler().getProjectByName(
-                        projectname);
+                Project p = ServerProxy.getProjectHandler().getProjectByName(projectname);
                 Long newProjectId = p.getIdAsLong();
 
                 // ISSUE: If two jobs have the same name, it goes wrong.
                 JobSearchParameters sp = new JobSearchParameters();
                 sp.setJobName(jobname);
-                ArrayList jobs = new ArrayList(ServerProxy.getJobHandler()
-                        .getJobs(sp));
+                ArrayList jobs = new ArrayList(ServerProxy.getJobHandler().getJobs(sp));
                 Job j = (Job) jobs.get(0);
 
-                if (!(reportData.wantsAllProjects || reportData.projectIdList
-                        .contains(newProjectId)))
+                if (!(reportData.wantsAllProjects
+                        || reportData.projectIdList.contains(newProjectId)))
                 {
                     reportData.ignoreJobs.add(j);
                     continue;
@@ -674,8 +633,7 @@ public class ReviewerVendorPoReportDataAssembler
                 // are reporting on, then skip it as well
                 // if the project id list contains the old project but not the
                 // new project
-                Long oldProjectId = j.getL10nProfile().getProject()
-                        .getIdAsLong();
+                Long oldProjectId = j.getL10nProfile().getProject().getIdAsLong();
                 if (reportData.projectIdList.contains(oldProjectId)
                         && !reportData.projectIdList.contains(newProjectId))
                 {
@@ -689,10 +647,7 @@ public class ReviewerVendorPoReportDataAssembler
             }
             catch (Exception e)
             {
-                s_logger.warn("Ignoring mapping line for "
-                        + jobname
-                        + " => "
-                        + projectname
+                s_logger.warn("Ignoring mapping line for " + jobname + " => " + projectname
                         + ". Either the job doesn't exist, the project doesn't exist, or both.");
             }
         }
@@ -727,13 +682,13 @@ public class ReviewerVendorPoReportDataAssembler
         {
             String paramCreateDateStartCount = request
                     .getParameter(JobSearchConstants.CREATION_START);
-            if (paramCreateDateStartCount != null && !"".equals(paramCreateDateStartCount.trim()))
+            if (!StringUtil.isEmpty(paramCreateDateStartCount))
             {
                 sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
             }
 
             String paramCreateDateEndCount = request.getParameter(JobSearchConstants.CREATION_END);
-            if (paramCreateDateEndCount != null && !"".equals(paramCreateDateEndCount.trim()))
+            if (!StringUtil.isEmpty(paramCreateDateEndCount))
             {
                 Date date = simpleDateFormat.parse(paramCreateDateEndCount);
                 long endLong = date.getTime() + (24 * 60 * 60 * 1000 - 1);
@@ -768,8 +723,7 @@ public class ReviewerVendorPoReportDataAssembler
     // Get project description
     private String getProjectDesc(Job p_job)
     {
-        Project p = (Project) reportData.wrongJobMap
-                .get(new Long(p_job.getId()));
+        Project p = (Project) reportData.wrongJobMap.get(new Long(p_job.getId()));
         if (p == null)
             p = p_job.getL10nProfile().getProject();
         String d = p.getDescription();
@@ -791,8 +745,7 @@ public class ReviewerVendorPoReportDataAssembler
     {
         String floatString = Float.toString(p_f);
         BigDecimal bd = new BigDecimal(floatString);
-        BigDecimal sbd = bd.setScale(ProjectWorkflowData.SCALE,
-                BigDecimal.ROUND_HALF_UP);
+        BigDecimal sbd = bd.setScale(ProjectWorkflowData.SCALE, BigDecimal.ROUND_HALF_UP);
         return p_a.add(sbd);
     }
 

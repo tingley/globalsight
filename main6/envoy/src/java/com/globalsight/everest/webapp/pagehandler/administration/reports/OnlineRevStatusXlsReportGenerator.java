@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.everest.webapp.pagehandler.administration.reports;
 
 import java.text.SimpleDateFormat;
@@ -49,10 +65,11 @@ import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.IntHolder;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 
 public class OnlineRevStatusXlsReportGenerator
 {
-	//String EMEA = CompanyWrapper.getCurrentCompanyName();
+    // String EMEA = CompanyWrapper.getCurrentCompanyName();
     private static Logger s_logger = Logger.getLogger("Reports");
     private ResourceBundle bundle = null;
     private String[] paramJobId = null;
@@ -65,28 +82,28 @@ public class OnlineRevStatusXlsReportGenerator
     private List<Long> m_jobIDS = null;
 
     /**
-     * Generates the Excel report and spits it to the outputstream
-     * The report consists of all in progress workflows that are
-     * currently at a reviewOnly stage.
+     * Generates the Excel report and spits it to the outputstream The report
+     * consists of all in progress workflows that are currently at a reviewOnly
+     * stage.
      * 
      * @return File
      * @exception Exception
      */
-    public void generateReport(HttpServletRequest p_request, HttpServletResponse p_response) throws Exception
+    public void generateReport(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws Exception
     {
-    	bundle = PageHandler.getBundle(p_request.getSession());
-        //print out the request parameters
+        bundle = PageHandler.getBundle(p_request.getSession());
+        // print out the request parameters
         paramJobId = p_request.getParameterValues("jobId");
         paramTrgLocales = p_request.getParameterValues("targetLocalesList");
         paramProjectIds = p_request.getParameterValues("projectId");
         paramStatus = p_request.getParameterValues("status");
-        userId = (String) p_request.getSession(false).getAttribute(
-                WebAppConstants.USER_NAME);
-    	
-    	Workbook p_workbook = new SXSSFWorkbook();
-    	Sheet sheet = p_workbook.createSheet(bundle.getString("lb_sheet") + "1");
-    	addTitle(p_workbook, sheet);
-    	addHeader(p_workbook, sheet);
+        userId = (String) p_request.getSession(false).getAttribute(WebAppConstants.USER_NAME);
+
+        Workbook p_workbook = new SXSSFWorkbook();
+        Sheet sheet = p_workbook.createSheet(bundle.getString("lb_sheet") + "1");
+        addTitle(p_workbook, sheet);
+        addHeader(p_workbook, sheet);
         addJobs(p_workbook, sheet, p_request, p_response);
         // Cancelled the report, return nothing.
         if (isCancelled())
@@ -98,12 +115,12 @@ public class OnlineRevStatusXlsReportGenerator
         ServletOutputStream out = p_response.getOutputStream();
         p_workbook.write(out);
         out.close();
-        ((SXSSFWorkbook)p_workbook).dispose();
+        ((SXSSFWorkbook) p_workbook).dispose();
     }
-    
+
     private void addTitle(Workbook p_workbook, Sheet p_sheet) throws Exception
     {
-    	String EMEA = CompanyWrapper.getCurrentCompanyName();
+        String EMEA = CompanyWrapper.getCurrentCompanyName();
         Font titleFont = p_workbook.createFont();
         titleFont.setUnderline(Font.U_NONE);
         titleFont.setFontName("Times");
@@ -113,14 +130,14 @@ public class OnlineRevStatusXlsReportGenerator
         CellStyle titleStyle = p_workbook.createCellStyle();
         titleStyle.setFont(titleFont);
         titleStyle.setWrapText(false);
-        
+
         Row titleRow = getRow(p_sheet, 0);
         Cell titleCell = getCell(titleRow, 0);
         titleCell.setCellValue(EMEA + " " + bundle.getString("online_review_status"));
         titleCell.setCellStyle(titleStyle);
         p_sheet.setColumnWidth(0, 22 * 256);
-    }   
-    
+    }
+
     /**
      * Adds the table header to the sheet
      * 
@@ -128,61 +145,62 @@ public class OnlineRevStatusXlsReportGenerator
      */
     private void addHeader(Workbook p_workbook, Sheet p_sheet) throws Exception
     {
-        int col=0;
-        int row=3;
+        int col = 0;
+        int row = 3;
         Row headerRow = getRow(p_sheet, row);
         Cell cell_A = getCell(headerRow, col++);
         cell_A.setCellValue(bundle.getString("job_id"));
         cell_A.setCellStyle(getHeaderStyle(p_workbook));
-        p_sheet.setColumnWidth(col -1,10 * 256);
-        
+        p_sheet.setColumnWidth(col - 1, 10 * 256);
+
         Cell cell_B = getCell(headerRow, col++);
         cell_B.setCellValue(bundle.getString("lb_job"));
         cell_B.setCellStyle(getHeaderStyle(p_workbook));
-        p_sheet.setColumnWidth(col -1,50 * 256);
-        
+        p_sheet.setColumnWidth(col - 1, 50 * 256);
+
         Cell cell_C = getCell(headerRow, col++);
         cell_C.setCellValue(bundle.getString("lb_lang"));
         cell_C.setCellStyle(getHeaderStyle(p_workbook));
-        
+
         Cell cell_D = getCell(headerRow, col++);
         cell_D.setCellValue(bundle.getString("word_count"));
         cell_D.setCellStyle(getHeaderStyle(p_workbook));
-        p_sheet.setColumnWidth(col -1,15 * 256);
-        
+        p_sheet.setColumnWidth(col - 1, 15 * 256);
+
         Cell cell_E = getCell(headerRow, col++);
         cell_E.setCellValue(bundle.getString("lb_actual_date_to_review"));
         cell_E.setCellStyle(getHeaderStyle(p_workbook));
-        p_sheet.setColumnWidth(col -1,25 * 256);
-        
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
+
         Cell cell_F = getCell(headerRow, col++);
         cell_F.setCellValue(bundle.getString("lb_current_activity"));
         cell_F.setCellStyle(getHeaderStyle(p_workbook));
-        p_sheet.setColumnWidth(col -1,20 * 256);
-        
+        p_sheet.setColumnWidth(col - 1, 20 * 256);
+
         Cell cell_G = getCell(headerRow, col++);
         cell_G.setCellValue(bundle.getString("lb_reviewer_accepted"));
         cell_G.setCellStyle(getHeaderStyle(p_workbook));
-        p_sheet.setColumnWidth(col -1,25 * 256);
-        
+        p_sheet.setColumnWidth(col - 1, 25 * 256);
+
         Cell cell_H = getCell(headerRow, col++);
         cell_H.setCellValue(bundle.getString("lb_reviewer_name"));
         cell_H.setCellStyle(getHeaderStyle(p_workbook));
-        p_sheet.setColumnWidth(col -1,30 * 256);
-        
+        p_sheet.setColumnWidth(col - 1, 30 * 256);
+
         Cell cell_I = getCell(headerRow, col++);
         cell_I.setCellValue(bundle.getString("lb_tracking"));
         cell_I.setCellStyle(getHeaderStyle(p_workbook));
-        p_sheet.setColumnWidth(col -1,20 * 256);        
+        p_sheet.setColumnWidth(col - 1, 20 * 256);
     }
 
     /**
      * Gets the jobs and outputs workflow information.
+     * 
      * @Return the write flag, whether write the workbook to OutputStream.
      * @exception Exception
      */
-    private void addJobs(Workbook p_workbook, Sheet p_sheet, 
-            HttpServletRequest p_request, HttpServletResponse p_response) throws Exception
+    private void addJobs(Workbook p_workbook, Sheet p_sheet, HttpServletRequest p_request,
+            HttpServletResponse p_response) throws Exception
     {
         ArrayList<Job> jobs = new ArrayList<Job>();
         if (paramJobId != null && "*".equals(paramJobId[0]))
@@ -206,38 +224,37 @@ public class OnlineRevStatusXlsReportGenerator
                 }
             }
         }
-        
+
         boolean wantsAllLocales = false;
         HashSet trgLocaleList = new HashSet();
-        if(paramTrgLocales != null)
+        if (paramTrgLocales != null)
         {
-        	for (int i=0; i<paramTrgLocales.length; i++)
-        	{
-        		if("*".equals(paramTrgLocales[i]))
-        		{
-        			wantsAllLocales = true;
-        			break;
-        		}
-        		else
-        		{
-        			trgLocaleList.add(paramTrgLocales[i]);
-        		}
-        	}
+            for (int i = 0; i < paramTrgLocales.length; i++)
+            {
+                if ("*".equals(paramTrgLocales[i]))
+                {
+                    wantsAllLocales = true;
+                    break;
+                }
+                else
+                {
+                    trgLocaleList.add(paramTrgLocales[i]);
+                }
+            }
         }
-          
-		m_jobIDS = ReportHelper.getJobIDS(jobs);
+
+        m_jobIDS = ReportHelper.getJobIDS(jobs);
         // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataInProgressStatus(userId,
-        		m_jobIDS, getReportType()))
+        if (ReportHelper.checkReportsDataInProgressStatus(userId, m_jobIDS, getReportType()))
         {
             p_response.sendError(p_response.SC_NO_CONTENT);
             return;
         }
         // Set m_reportsDataMap.
-        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(),
-        		0, ReportsData.STATUS_INPROGRESS);
+        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(), 0,
+                ReportsData.STATUS_INPROGRESS);
         IntHolder row = new IntHolder(4);
-        for(Job j: jobs)
+        for (Job j : jobs)
         {
             Collection c = j.getWorkflows();
             Iterator wfIter = c.iterator();
@@ -249,98 +266,104 @@ public class OnlineRevStatusXlsReportGenerator
                 }
                 Workflow w = (Workflow) wfIter.next();
                 String state = w.getState();
-                //skip certain workflow whose target locale is not selected
+                // skip certain workflow whose target locale is not selected
                 String trgLocale = Long.toString(w.getTargetLocale().getId());
-                if (!wantsAllLocales && !trgLocaleList.contains(trgLocale)) 
+                if (!wantsAllLocales && !trgLocaleList.contains(trgLocale))
                 {
-                	continue;
+                    continue;
                 }
                 if (Workflow.DISPATCHED.equals(state))
                 {
-                    addWorkflow(p_workbook, p_request,p_sheet,j,w,row);
+                    addWorkflow(p_workbook, p_request, p_sheet, j, w, row);
                 }
             }
         }
-        
-     	// Set m_reportsDataMap.
-        ReportHelper.setReportsData(userId, m_jobIDS,
-        		getReportType(), 100, ReportsData.STATUS_FINISHED);
+
+        // Set m_reportsDataMap.
+        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(), 100,
+                ReportsData.STATUS_FINISHED);
     }
 
     /**
-    * Gets the task for the workflow and outputs page information.
-    * @exception Exception
-    */
-    private void addWorkflow(Workbook p_workbook, HttpServletRequest p_request, Sheet p_sheet, Job j, Workflow w, IntHolder row) throws Exception
+     * Gets the task for the workflow and outputs page information.
+     * 
+     * @exception Exception
+     */
+    private void addWorkflow(Workbook p_workbook, HttpServletRequest p_request, Sheet p_sheet,
+            Job j, Workflow w, IntHolder row) throws Exception
     {
         SimpleDateFormat dateFormat = new SimpleDateFormat(p_request.getParameter("dateFormat"));
         HttpSession session = p_request.getSession();
         ResourceBundle bundle = PageHandler.getBundle(session);
-        
+
         Map activeTasks = null;
-        try {
-         activeTasks = ServerProxy.getWorkflowServer().getActiveTasksForWorkflow(w.getId());
+        try
+        {
+            activeTasks = ServerProxy.getWorkflowServer().getActiveTasksForWorkflow(w.getId());
         }
         catch (Exception e)
         {
-          activeTasks=null;
-          //just log the message since we don't want a full stack trace to clog the log
-          s_logger.error("Failed to get active tasks for workflow " + w.getId() + " " + e.getMessage());
+            activeTasks = null;
+            // just log the message since we don't want a full stack trace to
+            // clog the log
+            s_logger.error(
+                    "Failed to get active tasks for workflow " + w.getId() + " " + e.getMessage());
         }
-        
+
         // for now we'll only have one active task
-        Object[] tasks = (activeTasks == null) ? null :
-                         activeTasks.values().toArray();
+        Object[] tasks = (activeTasks == null) ? null : activeTasks.values().toArray();
         WorkflowTaskInstance activeTask = null;
         String activityName = null;
         if (tasks != null && tasks.length > 0)
         {
-            //assume just one active task for now
-            activeTask = (WorkflowTaskInstance)tasks[0];
-            //only write out if the Activity type is review only
+            // assume just one active task for now
+            activeTask = (WorkflowTaskInstance) tasks[0];
+            // only write out if the Activity type is review only
             Activity a = activeTask.getActivity();
             activityName = a.getDisplayName();
         }
-        
-        //don't output anything for this workflow if the task currently is one of the following
-        if (activityName==null || "Translation".equalsIgnoreCase(activityName) ||
-            "TW_POST_Translation".equalsIgnoreCase(activityName) ||
-            "Translation_Post_Review".equalsIgnoreCase(activityName))
-        
+
+        // don't output anything for this workflow if the task currently is one
+        // of the following
+        if (activityName == null || "Translation".equalsIgnoreCase(activityName)
+                || "TW_POST_Translation".equalsIgnoreCase(activityName)
+                || "Translation_Post_Review".equalsIgnoreCase(activityName))
+
         {
-          return;
+            return;
         }
-        
-        int c=0;
-        int r=row.getValue();
+
+        int c = 0;
+        int r = row.getValue();
         Row workbflowRow = getRow(p_sheet, r);
-        //2.3	Job ID column. Insert Ambassador job number here.
+        // 2.3 Job ID column. Insert Ambassador job number here.
         Cell cell_A = getCell(workbflowRow, c++);
         cell_A.setCellValue(j.getJobId());
         cell_A.setCellStyle(getContentStyle(p_workbook));
-        
-        //2.4	Job: Insert Job name here.
+
+        // 2.4 Job: Insert Job name here.
         Cell cell_B = getCell(workbflowRow, c++);
         cell_B.setCellValue(j.getJobName());
         cell_B.setCellStyle(getContentStyle(p_workbook));
-        
-        //2.5	Lang: Insert each target language identifier for each workflow
-        //in the retrieved Job on a different row.
+
+        // 2.5 Lang: Insert each target language identifier for each workflow
+        // in the retrieved Job on a different row.
         Cell cell_C = getCell(workbflowRow, c++);
         cell_C.setCellValue(w.getTargetLocale().getLanguageCode());
         cell_C.setCellStyle(getContentStyle(p_workbook));
-        
-        //2.6	Word count: Insert source word count for the job.
+
+        // 2.6 Word count: Insert source word count for the job.
         Cell cell_D = getCell(workbflowRow, c++);
         cell_D.setCellValue(w.getTotalWordCount());
         cell_D.setCellStyle(getContentStyle(p_workbook));
-        
-        //2.8 date due to review -- For the current workflow, find the activity 
-        //called "Dell_Review", then insert the Estimated Completion Date (and time)
+
+        // 2.8 date due to review -- For the current workflow, find the activity
+        // called "Dell_Review", then insert the Estimated Completion Date (and
+        // time)
         // for the activity prior to the "Dell_Review" activity.
         List taskInfos = ServerProxy.getWorkflowManager().getTaskInfosInDefaultPath(w);
-        if (taskInfos==null)
-          taskInfos=new ArrayList();
+        if (taskInfos == null)
+            taskInfos = new ArrayList();
         Iterator taskIter = taskInfos.iterator();
         Task priorTask = null;
         TaskInfo priorTaskInfo = null;
@@ -348,192 +371,199 @@ public class OnlineRevStatusXlsReportGenerator
         Task revTask = null;
         while (taskIter.hasNext())
         {
-          TaskInfo ti = (TaskInfo)taskIter.next();
-          if (ti.getType()==Task.TYPE_REVIEW)
-          {
-            revTaskInfo = ti;
-            revTask = ServerProxy.getTaskManager().getTask(revTaskInfo.getId());
-            if (priorTaskInfo!=null) {
-               priorTask = ServerProxy.getTaskManager().getTask(priorTaskInfo.getId());
+            TaskInfo ti = (TaskInfo) taskIter.next();
+            if (ti.getType() == Task.TYPE_REVIEW)
+            {
+                revTaskInfo = ti;
+                revTask = ServerProxy.getTaskManager().getTask(revTaskInfo.getId());
+                if (priorTaskInfo != null)
+                {
+                    priorTask = ServerProxy.getTaskManager().getTask(priorTaskInfo.getId());
+                }
+                break;
             }
-            break;
-          }
-          else
-          {
-            priorTaskInfo = ti;
-          }
+            else
+            {
+                priorTaskInfo = ti;
+            }
         }
-        
-        //2.9	Actual date to Review: Insert the date (and time) the "Dell_Review"
-        //activity became available for acceptance in the current workflow.
+
+        // 2.9 Actual date to Review: Insert the date (and time) the
+        // "Dell_Review"
+        // activity became available for acceptance in the current workflow.
         Cell cell_E = getCell(workbflowRow, c++);
-        if (revTask==null)
+        if (revTask == null)
         {
             cell_E.setCellValue(bundle.getString("lb_no_review"));
             cell_E.setCellStyle(getContentStyle(p_workbook));
         }
-        else if (priorTaskInfo != null && priorTask != null 
-        		&& priorTask.getCompletedDate() != null)
+        else if (priorTaskInfo != null && priorTask != null && priorTask.getCompletedDate() != null)
         {
-        	cell_E.setCellValue(dateFormat.format(priorTask.getCompletedDate()));
-    	    cell_E.setCellStyle(getContentStyle(p_workbook));
+            cell_E.setCellValue(dateFormat.format(priorTask.getCompletedDate()));
+            cell_E.setCellStyle(getContentStyle(p_workbook));
         }
         else
         {
-        	cell_E.setCellValue(bundle.getString("lb_na"));
-        	cell_E.setCellStyle(getContentStyle(p_workbook));
+            cell_E.setCellValue(bundle.getString("lb_na"));
+            cell_E.setCellStyle(getContentStyle(p_workbook));
         }
-        
-        //2.10	Current Activity: Currently active activity in the current workflow.   
+
+        // 2.10 Current Activity: Currently active activity in the current
+        // workflow.
         Cell cell_F = getCell(workbflowRow, c++);
         cell_F.setCellValue(activityName);
         cell_F.setCellStyle(getContentStyle(p_workbook));
-        
+
         boolean wasRejected = false;
         String rejectorName = null;
 
-        boolean revAccepted=false;        
-        //2.11	Reviewer accepted: If the "Dell_Review" activity has been accepted,
+        boolean revAccepted = false;
+        // 2.11 Reviewer accepted: If the "Dell_Review" activity has been
+        // accepted,
         // insert the date (and time) it was accepted. If not accepted yet,
         // put "not accepted yet".
         Cell cell_G = getCell(workbflowRow, c++);
-        if (revTask!=null)
+        if (revTask != null)
         {
-           if (revTask.getAcceptor()!=null)
-           {
-             revAccepted=true;
-             if (revTask.getAcceptedDate()!=null){
-            	 cell_G.setCellValue(dateFormat.format(revTask.getAcceptedDate()));
-            	 cell_G.setCellStyle(getContentStyle(p_workbook));
-             }
-             else
-             {
-            	 cell_G.setCellValue(bundle.getString("lb_na"));
-            	 cell_G.setCellStyle(getContentStyle(p_workbook)); 
-             }
-           }
-           else
-           {
-             //see if this task has been rejected and if so color the line in red
-             if (activeTask!=null)
-             {
-               Vector workItems = activeTask.getWorkItems();
-               for (int i=0; i < workItems.size(); i++)
-               {
-                   EnvoyWorkItem ewi = (EnvoyWorkItem) workItems.get(i);
-                   if (WorkflowConstants.TASK_DECLINED == ewi.getWorkItemState()) {
-                     wasRejected=true;
-                     rejectorName = UserUtil.getUserNameById(ewi.getAssignee());
-                     break;
-                   }
-               }
-             }
-             
-             if (wasRejected) {
-            	 Font rejectedFont = p_workbook.createFont();
-            	 rejectedFont.setUnderline(Font.U_NONE);
-                 rejectedFont.setFontName("Times");
-                 rejectedFont.setFontHeightInPoints((short) 11);
-                 rejectedFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
-                 rejectedFont.setColor(IndexedColors.RED.getIndex());
-                 CellStyle rejectedStyle = p_workbook.createCellStyle();
-                 rejectedStyle.setFont(rejectedFont);
-                 
-                 cell_G.setCellValue(bundle.getString("lb_rejected_by") + " " + rejectorName);
-                 cell_G.setCellStyle(rejectedStyle);
-             }
-             else {
-            	 cell_G.setCellValue(bundle.getString("lb_not_accepted_yet"));
-            	 cell_G.setCellStyle(getContentStyle(p_workbook));            
-             }
-           }
+            if (revTask.getAcceptor() != null)
+            {
+                revAccepted = true;
+                if (revTask.getAcceptedDate() != null)
+                {
+                    cell_G.setCellValue(dateFormat.format(revTask.getAcceptedDate()));
+                    cell_G.setCellStyle(getContentStyle(p_workbook));
+                }
+                else
+                {
+                    cell_G.setCellValue(bundle.getString("lb_na"));
+                    cell_G.setCellStyle(getContentStyle(p_workbook));
+                }
+            }
+            else
+            {
+                // see if this task has been rejected and if so color the line
+                // in red
+                if (activeTask != null)
+                {
+                    Vector workItems = activeTask.getWorkItems();
+                    for (int i = 0; i < workItems.size(); i++)
+                    {
+                        EnvoyWorkItem ewi = (EnvoyWorkItem) workItems.get(i);
+                        if (WorkflowConstants.TASK_DECLINED == ewi.getWorkItemState())
+                        {
+                            wasRejected = true;
+                            rejectorName = UserUtil.getUserNameById(ewi.getAssignee());
+                            break;
+                        }
+                    }
+                }
+
+                if (wasRejected)
+                {
+                    Font rejectedFont = p_workbook.createFont();
+                    rejectedFont.setUnderline(Font.U_NONE);
+                    rejectedFont.setFontName("Times");
+                    rejectedFont.setFontHeightInPoints((short) 11);
+                    rejectedFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+                    rejectedFont.setColor(IndexedColors.RED.getIndex());
+                    CellStyle rejectedStyle = p_workbook.createCellStyle();
+                    rejectedStyle.setFont(rejectedFont);
+
+                    cell_G.setCellValue(bundle.getString("lb_rejected_by") + " " + rejectorName);
+                    cell_G.setCellStyle(rejectedStyle);
+                }
+                else
+                {
+                    cell_G.setCellValue(bundle.getString("lb_not_accepted_yet"));
+                    cell_G.setCellStyle(getContentStyle(p_workbook));
+                }
+            }
         }
         else
         {
-        	cell_G.setCellValue(bundle.getString("lb_no_review"));
-        	cell_G.setCellStyle(getContentStyle(p_workbook));                    
+            cell_G.setCellValue(bundle.getString("lb_no_review"));
+            cell_G.setCellStyle(getContentStyle(p_workbook));
         }
-        
-        //2.12	Reviewer name: If not accepted, Insert all assignee(s
+
+        // 2.12 Reviewer name: If not accepted, Insert all assignee(s
         // assigned to the Dell_Review activity in the current workflow,
-        //delimited by commas; add multiple names if there are multiple
-        //assignees, until reaching 10 (cut it off at 10 names).
-        //If activity is accepted, put in name of accepter.
+        // delimited by commas; add multiple names if there are multiple
+        // assignees, until reaching 10 (cut it off at 10 names).
+        // If activity is accepted, put in name of accepter.
         Cell cell_H = getCell(workbflowRow, c++);
-        if (revTask==null)
+        if (revTask == null)
         {
-        	cell_H.setCellValue(bundle.getString("lb_no_review"));
-        	cell_H.setCellStyle(getContentStyle(p_workbook));
+            cell_H.setCellValue(bundle.getString("lb_no_review"));
+            cell_H.setCellStyle(getContentStyle(p_workbook));
         }
         else if (revAccepted)
         {
-        	//get accepter somehow
-         	cell_H.setCellValue(UserUtil.getUserNameById(revTask.getAcceptor()));
+            // get accepter somehow
+            cell_H.setCellValue(UserUtil.getUserNameById(revTask.getAcceptor()));
             cell_H.setCellStyle(getContentStyle(p_workbook));
         }
         else
         {
-			//get assignees
-			List assigneeList = null;
-			if (revTaskInfo!=null)
-				assigneeList = revTaskInfo.getTaskAssignees();
-			if (assigneeList==null)
-			{
-				assigneeList=new ArrayList();
-			}
+            // get assignees
+            List assigneeList = null;
+            if (revTaskInfo != null)
+                assigneeList = revTaskInfo.getTaskAssignees();
+            if (assigneeList == null)
+            {
+                assigneeList = new ArrayList();
+            }
 
-			StringBuffer assignees = new StringBuffer();
-			int count = 0;
-			Iterator iter = assigneeList.iterator();
-			while (iter.hasNext())
-			{
-				TaskAssignee assignee = (TaskAssignee) iter.next();
-				assignees.append(UserUtil.getUserNameById(assignee.getUserId()));
-				if (count++ == 10) {
-					break;
-				}
-				else
-				{
-					if (iter.hasNext())
-						assignees.append(",");
-				}
-			}
-			cell_H.setCellValue(assignees.toString());
-			cell_H.setCellStyle(getContentStyle(p_workbook));
-        }     
-          
+            StringBuffer assignees = new StringBuffer();
+            int count = 0;
+            Iterator iter = assigneeList.iterator();
+            while (iter.hasNext())
+            {
+                TaskAssignee assignee = (TaskAssignee) iter.next();
+                assignees.append(UserUtil.getUserNameById(assignee.getUserId()));
+                if (count++ == 10)
+                {
+                    break;
+                }
+                else
+                {
+                    if (iter.hasNext())
+                        assignees.append(",");
+                }
+            }
+            cell_H.setCellValue(assignees.toString());
+            cell_H.setCellStyle(getContentStyle(p_workbook));
+        }
+
         row.inc();
     }
 
     /**
-     * Returns search params used to find the in progress
-     * jobs for all PMs
+     * Returns search params used to find the in progress jobs for all PMs
      * 
      * @return JobSearchParams
      */
-    private JobSearchParameters getSearchParams(HttpServletRequest p_request)
-    throws Exception
+    private JobSearchParameters getSearchParams(HttpServletRequest p_request) throws Exception
     {
         JobSearchParameters sp = new JobSearchParameters();
 
-        ArrayList<String> stateList = new ArrayList<String>();        
-        if (paramStatus != null && "*".equals(paramStatus[0])==false)
+        ArrayList<String> stateList = new ArrayList<String>();
+        if (paramStatus != null && "*".equals(paramStatus[0]) == false)
         {
-          for (int i=0; i < paramStatus.length; i++)
-          {
-            stateList.add(paramStatus[i]);
-          }
+            for (int i = 0; i < paramStatus.length; i++)
+            {
+                stateList.add(paramStatus[i]);
+            }
         }
         else
         {
-          //just do a query for all in progress jobs, localized, and exported
-          stateList.add(Job.DISPATCHED);
-          stateList.add(Job.LOCALIZED);
-          stateList.add(Job.EXPORTED);
+            // just do a query for all in progress jobs, localized, and exported
+            stateList.add(Job.DISPATCHED);
+            stateList.add(Job.LOCALIZED);
+            stateList.add(Job.EXPORTED);
         }
         sp.setJobState(stateList);
 
-        //search by project        
+        // search by project
         ArrayList<Long> projectIdList = new ArrayList<Long>();
         for (int i = 0; i < paramProjectIds.length; i++)
         {
@@ -542,8 +572,8 @@ public class OnlineRevStatusXlsReportGenerator
             {
                 try
                 {
-                    List<Project> projectList = (ArrayList<Project>) ServerProxy
-                            .getProjectHandler().getProjectsByUser(userId);
+                    List<Project> projectList = (ArrayList<Project>) ServerProxy.getProjectHandler()
+                            .getProjectsByUser(userId);
                     for (Project project : projectList)
                     {
                         projectIdList.add(project.getIdAsLong());
@@ -559,53 +589,55 @@ public class OnlineRevStatusXlsReportGenerator
                 projectIdList.add(new Long(id));
             }
         }
-        
+
         sp.setProjectId(projectIdList);
-        
+
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
-        String paramCreateDateStartCount = p_request.getParameter(JobSearchConstants.CREATION_START);
-        if (paramCreateDateStartCount != null && paramCreateDateStartCount !="")
+        String paramCreateDateStartCount = p_request
+                .getParameter(JobSearchConstants.CREATION_START);
+        if (!StringUtil.isEmpty(paramCreateDateStartCount))
         {
-                sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
+            sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
         }
 
         String paramCreateDateEndCount = p_request.getParameter(JobSearchConstants.CREATION_END);
-        if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
+        if (!StringUtil.isEmpty(paramCreateDateEndCount))
         {
-        	Date date = simpleDateFormat.parse(paramCreateDateEndCount);
-        	long endLong = date.getTime()+(24*60*60*1000-1);
+            Date date = simpleDateFormat.parse(paramCreateDateEndCount);
+            long endLong = date.getTime() + (24 * 60 * 60 * 1000 - 1);
             sp.setCreationEnd(new Date(endLong));
         }
 
         return sp;
     }
-    
-    private CellStyle getHeaderStyle(Workbook p_workbook){
-    	if (headerStyle == null)
-        { 
-	    	Font headerFont = p_workbook.createFont();
-	        headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
-	        headerFont.setColor(IndexedColors.BLACK.getIndex());
-	        headerFont.setUnderline(Font.U_NONE);
-	        headerFont.setFontName("Times");
-	        headerFont.setFontHeightInPoints((short) 11);
-	    	
-	        CellStyle cs = p_workbook.createCellStyle();
-	        cs.setFont(headerFont);
-	        cs.setWrapText(true);
-	        cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
-	        cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-	        cs.setBorderTop(CellStyle.BORDER_THIN);
-	        cs.setBorderRight(CellStyle.BORDER_THIN);
-	        cs.setBorderBottom(CellStyle.BORDER_THIN);
-	        cs.setBorderLeft(CellStyle.BORDER_THIN);
-	        
-	        headerStyle = cs;
+
+    private CellStyle getHeaderStyle(Workbook p_workbook)
+    {
+        if (headerStyle == null)
+        {
+            Font headerFont = p_workbook.createFont();
+            headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            headerFont.setColor(IndexedColors.BLACK.getIndex());
+            headerFont.setUnderline(Font.U_NONE);
+            headerFont.setFontName("Times");
+            headerFont.setFontHeightInPoints((short) 11);
+
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setFont(headerFont);
+            cs.setWrapText(true);
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
+            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            cs.setBorderTop(CellStyle.BORDER_THIN);
+            cs.setBorderRight(CellStyle.BORDER_THIN);
+            cs.setBorderBottom(CellStyle.BORDER_THIN);
+            cs.setBorderLeft(CellStyle.BORDER_THIN);
+
+            headerStyle = cs;
         }
-        
+
         return headerStyle;
     }
-    
+
     private CellStyle getContentStyle(Workbook p_workbook) throws Exception
     {
         if (contentStyle == null)
@@ -621,7 +653,7 @@ public class OnlineRevStatusXlsReportGenerator
 
         return contentStyle;
     }
-    
+
     private Row getRow(Sheet p_sheet, int p_col)
     {
         Row row = p_sheet.getRow(p_col);
@@ -637,16 +669,15 @@ public class OnlineRevStatusXlsReportGenerator
             cell = p_row.createCell(index);
         return cell;
     }
-    
+
     public String getReportType()
     {
         return ReportConstants.ONLINE_REVIEW_STATUS_REPORT;
     }
-    
+
     public boolean isCancelled()
     {
-        ReportsData data = ReportGeneratorHandler.getReportsMap(userId,
-                m_jobIDS, getReportType());
+        ReportsData data = ReportGeneratorHandler.getReportsMap(userId, m_jobIDS, getReportType());
         if (data != null)
             return data.isCancle();
 

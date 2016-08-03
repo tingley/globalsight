@@ -41,17 +41,17 @@ import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.scheduling.EventScheduler;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.date.DateHelper;
 
 public class SlaReportDataAssembler
 {
-    private static Logger s_logger = Logger
-            .getLogger(SlaReportDataAssembler.class);
+    private static Logger s_logger = Logger.getLogger(SlaReportDataAssembler.class);
 
     private HttpServletRequest request = null;
 
     private XlsReportData reportData = null;
-    
+
     public SlaReportDataAssembler(HttpServletRequest p_request)
     {
         this.request = p_request;
@@ -90,8 +90,8 @@ public class SlaReportDataAssembler
             if ("*".equals(projectIds[i]))
             {
                 reportData.wantsAllProjects = true;
-                for (Project project : (ArrayList<Project>) ServerProxy
-                        .getProjectHandler().getProjectsByUser(userId))
+                for (Project project : (ArrayList<Project>) ServerProxy.getProjectHandler()
+                        .getProjectsByUser(userId))
                 {
                     reportData.projectIdList.add(project.getIdAsLong());
                 }
@@ -153,15 +153,13 @@ public class SlaReportDataAssembler
         HashMap projectMap = new HashMap();
 
         JobSearchParameters searchParams = getSearchParams();
-        ArrayList queriedJobs = new ArrayList(ServerProxy.getJobHandler()
-                .getJobs(searchParams));
+        ArrayList queriedJobs = new ArrayList(ServerProxy.getJobHandler().getJobs(searchParams));
 
         HashSet jobs = new HashSet(queriedJobs);
 
         String companyId = CompanyThreadLocal.getInstance().getValue();
 
-        BaseFluxCalendar calendar = ServerProxy.getCalendarManager()
-                .findDefaultCalendar(companyId);
+        BaseFluxCalendar calendar = ServerProxy.getCalendarManager().findDefaultCalendar(companyId);
         EventScheduler eventScheduler = ServerProxy.getEventScheduler();
 
         // first iterate through the Jobs and group by Project/workflow because
@@ -194,8 +192,8 @@ public class SlaReportDataAssembler
 
                 // skip workflows without special target lang
                 String targetLang = Long.toString(w.getTargetLocale().getId());
-                if (!(reportData.wantsAllTargetLangs || reportData.targetLangList
-                        .contains(targetLang)))
+                if (!(reportData.wantsAllTargetLangs
+                        || reportData.targetLangList.contains(targetLang)))
                 {
                     continue;
                 }
@@ -203,16 +201,14 @@ public class SlaReportDataAssembler
                 long jobId = j.getId();
                 L10nProfile l10nProfile = j.getL10nProfile();
 
-                HashMap localeMap = (HashMap) projectMap.get(Long
-                        .toString(jobId));
+                HashMap localeMap = (HashMap) projectMap.get(Long.toString(jobId));
                 if (localeMap == null)
                 {
                     localeMap = new HashMap();
                     projectMap.put(Long.toString(jobId), localeMap);
                 }
 
-                ProjectWorkflowData data = (ProjectWorkflowData) localeMap
-                        .get(targetLang);
+                ProjectWorkflowData data = (ProjectWorkflowData) localeMap.get(targetLang);
                 if (data == null)
                 {
                     data = new ProjectWorkflowData();
@@ -224,8 +220,8 @@ public class SlaReportDataAssembler
 
                     data.targetLang = w.getTargetLocale().toString();
 
-                    data.workflowName = l10nProfile.getWorkflowTemplateInfo(
-                            w.getTargetLocale()).getName();
+                    data.workflowName = l10nProfile.getWorkflowTemplateInfo(w.getTargetLocale())
+                            .getName();
 
                     data.totalWordCount = w.getTotalWordCount();
 
@@ -240,28 +236,24 @@ public class SlaReportDataAssembler
                     // So, it needs to calculate this dates.
                     w.updateTranslationCompletedDates();
 
-                    data.estimatedTranslateCompletionDate = w
-                            .getEstimatedTranslateCompletionDate();
+                    data.estimatedTranslateCompletionDate = w.getEstimatedTranslateCompletionDate();
 
                     if (data.estimatedTranslateCompletionDate != null)
                     {
                         // Get days and hours of leadtime
                         data.leadtime = getBusinessIntervals(data.creationDate,
-                                data.estimatedTranslateCompletionDate,
-                                calendar, eventScheduler,
+                                data.estimatedTranslateCompletionDate, calendar, eventScheduler,
                                 calendar.getHoursPerDay());
                     }
 
-                    data.actualTranslateCompletionDate = w
-                            .getTranslationCompletedDate();
+                    data.actualTranslateCompletionDate = w.getTranslationCompletedDate();
 
                     if (data.actualTranslateCompletionDate != null)
                     {
                         // Get days and hours of actualPerformance
-                        data.actualPerformance = getBusinessIntervals(
-                                data.creationDate,
-                                data.actualTranslateCompletionDate, calendar,
-                                eventScheduler, calendar.getHoursPerDay());
+                        data.actualPerformance = getBusinessIntervals(data.creationDate,
+                                data.actualTranslateCompletionDate, calendar, eventScheduler,
+                                calendar.getHoursPerDay());
                     }
                 }
 
@@ -300,28 +292,28 @@ public class SlaReportDataAssembler
         sp.setJobState(reportData.statusList);
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
-        try {
-        	String paramCreateDateStartCount = request
-        			.getParameter(JobSearchConstants.CREATION_START);
-        	if (paramCreateDateStartCount != null && paramCreateDateStartCount != "")
-        	{
-        		sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
-        	}
-        	
-        	String paramCreateDateEndCount = request
-                    .getParameter(JobSearchConstants.CREATION_END);
-            if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
+        try
+        {
+            String paramCreateDateStartCount = request
+                    .getParameter(JobSearchConstants.CREATION_START);
+            if (!StringUtil.isEmpty(paramCreateDateStartCount))
             {
-            	Date date = simpleDateFormat.parse(paramCreateDateEndCount);
-            	long endLong = date.getTime()+(24*60*60*1000-1);
+                sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
+            }
+
+            String paramCreateDateEndCount = request.getParameter(JobSearchConstants.CREATION_END);
+            if (!StringUtil.isEmpty(paramCreateDateEndCount))
+            {
+                Date date = simpleDateFormat.parse(paramCreateDateEndCount);
+                long endLong = date.getTime() + (24 * 60 * 60 * 1000 - 1);
                 sp.setCreationEnd(new Date(endLong));
             }
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-        
+        }
+        catch (ParseException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         return sp;
     }
@@ -333,19 +325,17 @@ public class SlaReportDataAssembler
         Map activeTasks = null;
         try
         {
-            activeTasks = ServerProxy.getWorkflowServer()
-                    .getActiveTasksForWorkflow(w.getId());
+            activeTasks = ServerProxy.getWorkflowServer().getActiveTasksForWorkflow(w.getId());
         }
         catch (Exception e)
         {
             activeTasks = null;
-            s_logger.error("Failed to get active tasks for workflow "
-                    + w.getId() + " " + e.getMessage());
+            s_logger.error(
+                    "Failed to get active tasks for workflow " + w.getId() + " " + e.getMessage());
         }
 
         // for now we'll only have one active task
-        Object[] tasks = (activeTasks == null) ? null : activeTasks.values()
-                .toArray();
+        Object[] tasks = (activeTasks == null) ? null : activeTasks.values().toArray();
 
         if ((tasks == null) || (tasks.length <= 0))
         {
@@ -379,9 +369,8 @@ public class SlaReportDataAssembler
         return result;
     }
 
-    private String getBusinessIntervals(Date startDate, Date endDate,
-            BaseFluxCalendar calendar, EventScheduler eventScheduler,
-            int workingHoursPerDay) throws Exception
+    private String getBusinessIntervals(Date startDate, Date endDate, BaseFluxCalendar calendar,
+            EventScheduler eventScheduler, int workingHoursPerDay) throws Exception
     {
         long MILLIS_PER_MIN = DateHelper.milliseconds(0, 0, 1);
         long MILLIS_PER_HOUR = DateHelper.milliseconds(0, 1, 0);
@@ -395,8 +384,8 @@ public class SlaReportDataAssembler
         Date determineDate = null;
 
         int intervalDays_min = 0;
-        int intervalDays_max = DateHelper.convertMillisecondsToDays(endDate
-                .getTime() - startDate.getTime());
+        int intervalDays_max = DateHelper
+                .convertMillisecondsToDays(endDate.getTime() - startDate.getTime());
         int intervalDays_temp = 0;
 
         // Determine date at day-level.
@@ -404,8 +393,7 @@ public class SlaReportDataAssembler
         {
             intervalDays_temp = (intervalDays_max + intervalDays_min) / 2;
             durations = intervalDays_temp * MILLIS_PER_DAY;
-            determineDate = eventScheduler.determineDate(startDate, calendar,
-                    durations);
+            determineDate = eventScheduler.determineDate(startDate, calendar, durations);
 
             if (intervalDays_max - intervalDays_min <= 1)
             {
@@ -448,8 +436,8 @@ public class SlaReportDataAssembler
                 // Outside working time.
                 intervalHours = 0;
             }
-            else if (endDate.compareTo(eventScheduler.determineDate(startDate,
-                    calendar, workingHoursPerDay * MILLIS_PER_HOUR)) >= 0)
+            else if (endDate.compareTo(eventScheduler.determineDate(startDate, calendar,
+                    workingHoursPerDay * MILLIS_PER_HOUR)) >= 0)
             {
                 // Outside working time.
                 intervalHours = workingHoursPerDay;
@@ -459,8 +447,8 @@ public class SlaReportDataAssembler
                 while (true)
                 {
                     intervalHours_temp = (intervalHours_min + intervalHours_max) / 2;
-                    determineDate = eventScheduler.determineDate(startDate,
-                            calendar, intervalHours_temp * MILLIS_PER_HOUR);
+                    determineDate = eventScheduler.determineDate(startDate, calendar,
+                            intervalHours_temp * MILLIS_PER_HOUR);
 
                     if (endDate.compareTo(determineDate) > 0)
                     {

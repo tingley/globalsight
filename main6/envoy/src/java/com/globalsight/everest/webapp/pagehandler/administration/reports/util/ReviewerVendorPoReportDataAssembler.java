@@ -709,7 +709,7 @@ public class ReviewerVendorPoReportDataAssembler
     private JobSearchParameters getSearchParams()
     {
         JobSearchParameters sp = new JobSearchParameters();
-        
+
         sp.setProjectId(reportData.projectIdList);
 
         // job state EXPORTED,DISPATCHED,LOCALIZED
@@ -723,28 +723,27 @@ public class ReviewerVendorPoReportDataAssembler
         sp.setJobState(list);
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
-        try {
-        	String paramCreateDateStartCount = request
-        			.getParameter(JobSearchConstants.CREATION_START);
-        	if (paramCreateDateStartCount != null && paramCreateDateStartCount != "")
-        	{
-        		sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
-        	}
-        	
-        	String paramCreateDateEndCount = request
-                    .getParameter(JobSearchConstants.CREATION_END);
-           if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
+        try
+        {
+            String paramCreateDateStartCount = request
+                    .getParameter(JobSearchConstants.CREATION_START);
+            if (paramCreateDateStartCount != null && !"".equals(paramCreateDateStartCount.trim()))
             {
-        	   Date date = simpleDateFormat.parse(paramCreateDateEndCount);
-        	   long endLong = date.getTime()+(24*60*60*1000-1);
+                sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
+            }
+
+            String paramCreateDateEndCount = request.getParameter(JobSearchConstants.CREATION_END);
+            if (paramCreateDateEndCount != null && !"".equals(paramCreateDateEndCount.trim()))
+            {
+                Date date = simpleDateFormat.parse(paramCreateDateEndCount);
+                long endLong = date.getTime() + (24 * 60 * 60 * 1000 - 1);
                 sp.setCreationEnd(new Date(endLong));
             }
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-        
+        }
+        catch (ParseException e)
+        {
+            s_logger.error(e);
+        }
 
         return sp;
     }

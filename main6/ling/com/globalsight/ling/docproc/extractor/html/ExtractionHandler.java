@@ -85,6 +85,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants, ExtractorExcept
     private static final String SRC = "src";
     private static final String CONTENT = "content";
     private static final String NAME = "name";
+    private static final String DATE = "date";
     private static final String HTTP_EQUIV = "http-equiv";
     private static final String VALUE = "value";
     private static final String STYLE = "style";
@@ -4994,7 +4995,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants, ExtractorExcept
 
             String quote = Text.getQuoteCharacter(attrib.value);
 
-            if (CONTENT.equalsIgnoreCase(attrib.name) || NAME.equalsIgnoreCase(attrib.name))
+            if (CONTENT.equalsIgnoreCase(attrib.name) || DATE.equalsIgnoreCase(attrib.name))
             {
                 m_output.addSkeleton(" " + attrib.name + "=" + quote);
 

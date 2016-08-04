@@ -3617,7 +3617,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         }
 
                         result.append(getEditableCellForPreview(style, tuId,
-                                tuvId, DUMMY_SUBID, segment, p_options.isAddBracketsForPreview(), dir));
+                                tuvId, DUMMY_SUBID, segment, true, dir));
                     }
                 }
                 else

@@ -29,7 +29,8 @@ public class RenderingOptions
     private TranslationMemoryProfile tmProfile = null;
     private String userName;
     private boolean needShowPTags = false;
-
+    private boolean fromIncontextReviewEdit = false;
+    
     /**
      * Default constructor
      */
@@ -80,6 +81,16 @@ public class RenderingOptions
     public void setNeedShowPTags(boolean needShowPTags)
     {
         this.needShowPTags = needShowPTags;
+    }
+
+    public boolean isFromIncontextReviewEdit()
+    {
+        return fromIncontextReviewEdit;
+    }
+
+    public void setFromIncontextReviewEdit(boolean fromIncontextReviewEdit)
+    {
+        this.fromIncontextReviewEdit = fromIncontextReviewEdit;
     }
 }
 

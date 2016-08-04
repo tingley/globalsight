@@ -318,7 +318,7 @@ function showPreview()
         //window.parent.showPreviewPage('<%=pageNamePath%>');
         <% } %>
         
-        highlight(idPreview);
+        highlight(idPDFPreview);
     }
 }
 
@@ -425,8 +425,14 @@ function doOnload()
 <TR CLASS="tableHeadingBasic">
     <TD><%=lb_targetLocale%>: <%=str_targetLocale.toString()%></TD>
     <TD ALIGN="RIGHT">
- <A id="idPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showPDFPreview()"
-      onfocus="this.blur();">Target PDF</A> |
+    <%if (pageFormat.equals(IFormatNames.FORMAT_HTML)) {%>
+ <A id="idPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showPreview()"
+      onfocus="this.blur();">Target </A> 
+       <%} else {%>
+        <A id="idPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showPDFPreview()"
+      onfocus="this.blur();">Target PDF</A> 
+      <%} %>
+      |
       <A id="idList" CLASS="HREFBoldWhite" HREF="#"
       onclick="showList(); return false;"
       onfocus="this.blur();"><%=lb_list%></A>

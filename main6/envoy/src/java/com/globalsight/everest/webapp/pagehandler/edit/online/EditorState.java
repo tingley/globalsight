@@ -445,6 +445,8 @@ public class EditorState extends PersistentObject implements EditorConstants
     // Member Variables
     //
 
+    private boolean sourceAsTarget = false;
+    
     /**
      * Flag indicating if the user is a project manager or
      * localization participant.
@@ -1329,6 +1331,7 @@ public class EditorState extends PersistentObject implements EditorConstants
         result.setNeedFindRepeatedSegments(p_state.getNeedFindRepeatedSegments());
         result.setNeedShowPTags(p_state.getNeedShowPTags());
         result.setSegmentFilter(p_state.getSegmentFilter());
+        result.setSourceAsTarget(p_state.isSourceAsTarget());
         
         return result;
     }
@@ -1336,5 +1339,15 @@ public class EditorState extends PersistentObject implements EditorConstants
     public long getJobId()
     {
         return BigTableUtil.getJobBySourcePageId(this.getSourcePageId()).getId();
+    }
+
+    public boolean isSourceAsTarget()
+    {
+        return sourceAsTarget;
+    }
+
+    public void setSourceAsTarget(boolean sourceAsTarget)
+    {
+        this.sourceAsTarget = sourceAsTarget;
     }
 }

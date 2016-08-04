@@ -44,7 +44,13 @@ String lb_loadingPreview = bundle.getString("lb_loading_preview");
 int i_viewMode = layout.getSourceViewMode();
 boolean b_singlePage = layout.isSinglePage();
 boolean b_autoSync = state.getOptions().getAutoSync(); 
-String str_pageHtml  = state.getSourcePageHtml(layout.getSourceViewMode());
+String str_pageHtml;
+if (state.isSourceAsTarget()) {
+	str_pageHtml = state.getTargetPageHtml();
+	i_viewMode = layout.getTargetViewMode();
+} else {
+	str_pageHtml  = state.getSourcePageHtml(layout.getSourceViewMode());
+}
 String str_targetLocale = state.getTargetLocale().toString();
 String str_segmentCount = String.valueOf(state.getPageInfo().getSegmentCount());
 
@@ -793,6 +799,7 @@ function update_tr(id)
 	<%=str_pageHtml%>
 </DIV>
 <% } %>
+
 <input type="hidden" id="segmentCount" name="segmentCount" value="<%=str_segmentCount %>" />
 </BODY>
 </HTML>

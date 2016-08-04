@@ -64,6 +64,7 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
+import com.globalsight.util.StringUtil;
 
 public class TranslationProgressReportHelper
 {
@@ -460,13 +461,13 @@ public class TranslationProgressReportHelper
         // job time
         String paramCreateDateStartCount = p_request
                 .getParameter(JobSearchConstants.CREATION_START);
-        if (paramCreateDateStartCount != null && paramCreateDateStartCount != "")
+        if (!StringUtil.isEmpty(paramCreateDateStartCount))
         {
             sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
         }
 
         String paramCreateDateEndCount = p_request.getParameter(JobSearchConstants.CREATION_END);
-        if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
+        if (!StringUtil.isEmpty(paramCreateDateEndCount))
         {
             Date date = simpleDateFormat.parse(paramCreateDateEndCount);
             long endLong = date.getTime() + (24 * 60 * 60 * 1000 - 1);

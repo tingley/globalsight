@@ -73,11 +73,11 @@ import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 
 public class CommentXlsReportHelper
 {
-    private static Logger s_logger = Logger
-            .getLogger(CommentXlsReportHelper.class);
+    private static Logger s_logger = Logger.getLogger(CommentXlsReportHelper.class);
 
     private TargetPage targetPageVar = null;
     private boolean oneSheet = true;
@@ -102,7 +102,7 @@ public class CommentXlsReportHelper
     private final int TASK_FLAG = 2;
     private final int SEGMENT_FLAG = 3;
     private List<Long> m_jobIDS = null;
-    
+
     /**
      * Generates the Excel report and spits it to the outputstream The report
      * consists of all in progress workflows that are currently at a reviewOnly
@@ -111,16 +111,13 @@ public class CommentXlsReportHelper
      * @return File
      * @exception Exception
      */
-    public void generateReport(HttpServletRequest p_request,
-            HttpServletResponse p_response) throws Exception
+    public void generateReport(HttpServletRequest p_request, HttpServletResponse p_response)
+            throws Exception
     {
-        uiLocale = (Locale) p_request.getSession().getAttribute(
-                WebAppConstants.UILOCALE);
+        uiLocale = (Locale) p_request.getSession().getAttribute(WebAppConstants.UILOCALE);
         bundle = PageHandler.getBundle(p_request.getSession());
-        userId = (String) p_request.getSession(false).getAttribute(
-                WebAppConstants.USER_NAME);
-        String companyId = (String) p_request.getSession().getAttribute(
-                "current_company_id");
+        userId = (String) p_request.getSession(false).getAttribute(WebAppConstants.USER_NAME);
+        String companyId = (String) p_request.getSession().getAttribute("current_company_id");
         CompanyThreadLocal.getInstance().setIdValue(companyId);
         // show Priority or not
         setShowPriority(p_request);
@@ -129,41 +126,38 @@ public class CommentXlsReportHelper
         setShowCategory(p_request);
         setStatus(p_request);
         setSourceAndTarget(p_request);
-        
-        Workbook p_workbook = new SXSSFWorkbook();     
+
+        Workbook p_workbook = new SXSSFWorkbook();
         createSheets(p_request, p_workbook, p_response);
-        
+
         // Cancelled the report, return nothing.
         if (isCancelled())
         {
             p_response.sendError(p_response.SC_NO_CONTENT);
             return;
         }
-        
+
         ServletOutputStream out = p_response.getOutputStream();
         p_workbook.write(out);
         out.close();
-        ((SXSSFWorkbook)p_workbook).dispose();
+        ((SXSSFWorkbook) p_workbook).dispose();
     }
 
     private void createSheets(HttpServletRequest p_request, Workbook p_workbook,
-    		HttpServletResponse p_response) throws Exception
+            HttpServletResponse p_response) throws Exception
     {
-    	Sheet segmentSheet = null;
+        Sheet segmentSheet = null;
         Sheet jobSheet = null;
         Sheet taskSheet = null;
-    	
+
         HashMap<String, Sheet> sheetMap = new HashMap<String, Sheet>();
-        String[] paramCommentTypeJob = p_request
-                .getParameterValues("commentType_Job");
-        String[] paramCommentTypeTask = p_request
-                .getParameterValues("commentType_Activity");
+        String[] paramCommentTypeJob = p_request.getParameterValues("commentType_Job");
+        String[] paramCommentTypeTask = p_request.getParameterValues("commentType_Activity");
         segmentSheet = p_workbook.createSheet(bundle.getString("segment_comments"));
         addTitle(p_workbook, segmentSheet, bundle.getString("segment_comments"));
         addHeader(p_workbook, segmentSheet);
         sheetMap.put("segmentSheet", segmentSheet);
-        if ((paramCommentTypeJob != null)
-                && ("Job".equals(paramCommentTypeJob[0]) == true))
+        if ((paramCommentTypeJob != null) && ("Job".equals(paramCommentTypeJob[0]) == true))
         {
             if (oneSheet == true)
             {
@@ -171,14 +165,13 @@ public class CommentXlsReportHelper
             }
             else
             {
-            	jobSheet = p_workbook.createSheet(bundle.getString("job_comments"));
-            	addTitle(p_workbook, jobSheet, bundle.getString("job_comments"));
+                jobSheet = p_workbook.createSheet(bundle.getString("job_comments"));
+                addTitle(p_workbook, jobSheet, bundle.getString("job_comments"));
                 addHeader(p_workbook, jobSheet);
             }
             sheetMap.put("jobSheet", jobSheet);
         }
-        if ((paramCommentTypeTask != null)
-                && ("Activity".equals(paramCommentTypeTask[0]) == true))
+        if ((paramCommentTypeTask != null) && ("Activity".equals(paramCommentTypeTask[0]) == true))
         {
             if (oneSheet == true)
             {
@@ -186,8 +179,8 @@ public class CommentXlsReportHelper
             }
             else
             {
-            	taskSheet = p_workbook.createSheet(bundle.getString("activity_comments"));
-            	addTitle(p_workbook, taskSheet, bundle.getString("activity_comments"));
+                taskSheet = p_workbook.createSheet(bundle.getString("activity_comments"));
+                addTitle(p_workbook, taskSheet, bundle.getString("activity_comments"));
                 addHeader(p_workbook, taskSheet);
             }
             sheetMap.put("taskSheet", taskSheet);
@@ -195,12 +188,11 @@ public class CommentXlsReportHelper
 
         addComments(p_workbook, p_request, sheetMap, p_response);
     }
-    
-    private void addTitle(Workbook p_workbook, Sheet p_sheet,
-    		String sheetTitle)throws Exception
-	{
-    	// title font is black bold on white
-    	Font titleFont = p_workbook.createFont();
+
+    private void addTitle(Workbook p_workbook, Sheet p_sheet, String sheetTitle) throws Exception
+    {
+        // title font is black bold on white
+        Font titleFont = p_workbook.createFont();
         titleFont.setUnderline(Font.U_NONE);
         titleFont.setFontName("Times");
         titleFont.setFontHeightInPoints((short) 14);
@@ -208,54 +200,54 @@ public class CommentXlsReportHelper
         CellStyle titileCs = p_workbook.createCellStyle();
         titileCs.setWrapText(false);
         titileCs.setFont(titleFont);
-        
+
         Row titleRow = getRow(p_sheet, 0);
         Cell titleCell = getCell(titleRow, 0);
         titleCell.setCellValue(sheetTitle);
         titleCell.setCellStyle(titileCs);
         p_sheet.setColumnWidth(0, 22 * 256);
-	}
-    
+    }
+
     /**
      * Adds the table header to the sheet
      * 
      * @param p_sheet
      */
     private void addHeader(Workbook p_workbook, Sheet p_sheet) throws Exception
-    {     
+    {
         int col = 0;
-        
+
         Row headerRow = getRow(p_sheet, 3);
         Cell cell_A = getCell(headerRow, col++);
         cell_A.setCellValue(bundle.getString("job_id"));
         cell_A.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col - 1, 10 * 256);
-        
+
         Cell cell_B = getCell(headerRow, col++);
         cell_B.setCellValue(bundle.getString("job_name"));
         cell_B.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col - 1, 20 * 256);
-        
+
         Cell cell_C = getCell(headerRow, col++);
         cell_C.setCellValue(bundle.getString("comment_type"));
         cell_C.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col - 1, 15 * 256);
-        
+
         Cell cell_D = getCell(headerRow, col++);
         cell_D.setCellValue(bundle.getString("language"));
         cell_D.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col - 1, 25 * 256);
-        
+
         Cell cell_E = getCell(headerRow, col++);
         cell_E.setCellValue(bundle.getString("segment_number"));
         cell_E.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col - 1, 15 * 256);
-        
+
         Cell cell_F = getCell(headerRow, col++);
         cell_F.setCellValue(bundle.getString("by_who"));
         cell_F.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col - 1, 15 * 256);
-        
+
         Cell cell_G = getCell(headerRow, col++);
         cell_G.setCellValue(bundle.getString("on_date"));
         cell_G.setCellStyle(getHeaderStyle(p_workbook));
@@ -263,26 +255,26 @@ public class CommentXlsReportHelper
 
         if (showStatus)
         {
-        	Cell cell_Status = getCell(headerRow, col++);
-        	cell_Status.setCellValue(bundle.getString("status"));
-        	cell_Status.setCellStyle(getHeaderStyle(p_workbook));
-        	p_sheet.setColumnWidth(col - 1, 10 * 256);
+            Cell cell_Status = getCell(headerRow, col++);
+            cell_Status.setCellValue(bundle.getString("status"));
+            cell_Status.setCellStyle(getHeaderStyle(p_workbook));
+            p_sheet.setColumnWidth(col - 1, 10 * 256);
         }
         if (showPriority)
         {
-        	Cell cell_Priority = getCell(headerRow, col++);
-        	cell_Priority.setCellValue(bundle.getString("priority"));
-        	cell_Priority.setCellStyle(getHeaderStyle(p_workbook));
-        	p_sheet.setColumnWidth(col - 1, 10 * 256);
+            Cell cell_Priority = getCell(headerRow, col++);
+            cell_Priority.setCellValue(bundle.getString("priority"));
+            cell_Priority.setCellStyle(getHeaderStyle(p_workbook));
+            p_sheet.setColumnWidth(col - 1, 10 * 256);
         }
         if (showCategory)
         {
-        	Cell cell_Category = getCell(headerRow, col++);
-        	cell_Category.setCellValue(bundle.getString("category"));
-        	cell_Category.setCellStyle(getHeaderStyle(p_workbook));
-        	p_sheet.setColumnWidth(col - 1, 40 * 256);
+            Cell cell_Category = getCell(headerRow, col++);
+            cell_Category.setCellValue(bundle.getString("category"));
+            cell_Category.setCellStyle(getHeaderStyle(p_workbook));
+            p_sheet.setColumnWidth(col - 1, 40 * 256);
         }
-        
+
         if (showSourAndTar)
         {
             Cell cell_Source = getCell(headerRow, col++);
@@ -295,36 +287,36 @@ public class CommentXlsReportHelper
             cell_Target.setCellStyle(getHeaderStyle(p_workbook));
             p_sheet.setColumnWidth(col - 1, 40 * 256);
         }
-        
+
         Cell cell_CommentHeader = getCell(headerRow, col++);
         cell_CommentHeader.setCellValue(bundle.getString("comment_header"));
         cell_CommentHeader.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col - 1, 20 * 256);
-        
+
         Cell cell_CommentBody = getCell(headerRow, col++);
         cell_CommentBody.setCellValue(bundle.getString("comment_body"));
         cell_CommentBody.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col - 1, 25 * 256);
-        
+
         Cell cell_Link = getCell(headerRow, col++);
         cell_Link.setCellValue(bundle.getString("link"));
         cell_Link.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col - 1, 40 * 256);
     }
-    
+
     /**
      * Gets the jobs and outputs workflow information.
      * 
      * @exception Exception
      */
-    private void addComments(Workbook p_workbook, HttpServletRequest p_request,
-            HashMap sheetMap, HttpServletResponse p_response) throws Exception
+    private void addComments(Workbook p_workbook, HttpServletRequest p_request, HashMap sheetMap,
+            HttpServletResponse p_response) throws Exception
     {
         // print out the request parameters
         setLang(p_request);
         if (s_logger.isDebugEnabled())
         {
-            s_logger.debug("status:" + statusList);            
+            s_logger.debug("status:" + statusList);
         }
 
         Sheet jobSheet = (Sheet) sheetMap.get("jobSheet");
@@ -345,14 +337,14 @@ public class CommentXlsReportHelper
             return;
         }
         // Set ReportsData.
-        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(),
-                0, ReportsData.STATUS_INPROGRESS);
+        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(), 0,
+                ReportsData.STATUS_INPROGRESS);
 
         if (s_logger.isDebugEnabled())
         {
             s_logger.debug("test");
             s_logger.debug("jobs " + jobs.size());
-            s_logger.debug("jobSheet " + jobSheet);            
+            s_logger.debug("jobSheet " + jobSheet);
         }
 
         if (oneSheet == true)
@@ -361,7 +353,7 @@ public class CommentXlsReportHelper
             IntHolder jobSheetRow = row;
             IntHolder taskSheetRow = row;
             IntHolder segmentSheetRow = row;
-            for (Job j: jobs)
+            for (Job j : jobs)
             {
                 if (isCancelled())
                 {
@@ -370,7 +362,7 @@ public class CommentXlsReportHelper
                 }
                 addSegmentComment(p_request, j, p_workbook, segmentSheet, segmentSheetRow);
             }
-            for (Job j: jobs)
+            for (Job j : jobs)
             {
                 if (isCancelled())
                 {
@@ -379,7 +371,7 @@ public class CommentXlsReportHelper
                 }
                 addTaskComment(p_request, j, p_workbook, taskSheet, taskSheetRow);
             }
-            for (Job j: jobs)
+            for (Job j : jobs)
             {
                 if (isCancelled())
                 {
@@ -395,7 +387,7 @@ public class CommentXlsReportHelper
             IntHolder taskSheetRow = new IntHolder(4);
             IntHolder segmentSheetRow = new IntHolder(4);
 
-            for (Job j: jobs)
+            for (Job j : jobs)
             {
                 if (isCancelled())
                 {
@@ -409,16 +401,16 @@ public class CommentXlsReportHelper
         }
 
         // Set ReportsData.
-        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(),
-                100, ReportsData.STATUS_FINISHED);
+        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(), 100,
+                ReportsData.STATUS_FINISHED);
     }
 
     /**
      * Gets Job comment.
      * 
      */
-    private void addJobComment(HttpServletRequest p_request, Job j,
-            Workbook p_workbook, Sheet jobSheet, IntHolder row) throws Exception
+    private void addJobComment(HttpServletRequest p_request, Job j, Workbook p_workbook,
+            Sheet jobSheet, IntHolder row) throws Exception
     {
         if (null == jobSheet)
         {
@@ -427,19 +419,20 @@ public class CommentXlsReportHelper
         int count = 0;
         for (Workflow wf : j.getWorkflows())
         {
-        	if (checkLang(wf) != true)
-        	{
-        		continue;
-        	}
-        	count++;
+            if (checkLang(wf) != true)
+            {
+                continue;
+            }
+            count++;
         }
-        if(count > 0){
-        	
-        	List jobComments = j.getJobComments();
-        	s_logger.debug("jobComments" + jobComments.size());
-        	int flag = JOB_FLAG;
-        	sortComment(jobComments, p_request);
-        	addSegmentCommentFilter(p_request, j, p_workbook, jobSheet, row, jobComments, flag);
+        if (count > 0)
+        {
+
+            List jobComments = j.getJobComments();
+            s_logger.debug("jobComments" + jobComments.size());
+            int flag = JOB_FLAG;
+            sortComment(jobComments, p_request);
+            addSegmentCommentFilter(p_request, j, p_workbook, jobSheet, row, jobComments, flag);
         }
 
     }
@@ -448,8 +441,8 @@ public class CommentXlsReportHelper
      * Gets Task comment.
      * 
      */
-    private void addTaskComment(HttpServletRequest p_request, Job j,
-            Workbook p_workbook, Sheet taskSheet, IntHolder row) throws Exception
+    private void addTaskComment(HttpServletRequest p_request, Job j, Workbook p_workbook,
+            Sheet taskSheet, IntHolder row) throws Exception
     {
         if (null == taskSheet)
             return;
@@ -464,7 +457,7 @@ public class CommentXlsReportHelper
             {
                 continue;
             }
-            
+
             for (TargetPage t : wf.getTargetPages())
             {
                 // used to SetPageURL;
@@ -486,12 +479,12 @@ public class CommentXlsReportHelper
         curLocale = null;
         targetPageVar = null;
     }
-    
+
     /**
      * Gets Segment comment.
      */
-    private void addSegmentComment(HttpServletRequest p_request, Job j,
-            Workbook p_workbook, Sheet segmentSheet, IntHolder row) throws Exception
+    private void addSegmentComment(HttpServletRequest p_request, Job j, Workbook p_workbook,
+            Sheet segmentSheet, IntHolder row) throws Exception
     {
         if (null == segmentSheet)
         {
@@ -528,14 +521,13 @@ public class CommentXlsReportHelper
         curLocale = null;
         targetPageVar = null;
     }
-    
+
     /**
      * Gets Segment comment helper.
      * 
      */
-    private void addSegmentCommentFilter(HttpServletRequest p_request, Job j,
-            Workbook p_workbook, Sheet segmentSheet, IntHolder row,
-            List comments, int flag) throws Exception
+    private void addSegmentCommentFilter(HttpServletRequest p_request, Job j, Workbook p_workbook,
+            Sheet segmentSheet, IntHolder row, List comments, int flag) throws Exception
     {
         // sortComment(comments, p_request);
         for (Iterator it = comments.iterator(); it.hasNext();)
@@ -549,8 +541,7 @@ public class CommentXlsReportHelper
                     {
                         if (s_logger.isDebugEnabled())
                         {
-                            s_logger.debug("ignore status:"
-                                    + ((Issue) comment).getStatus());                            
+                            s_logger.debug("ignore status:" + ((Issue) comment).getStatus());
                         }
                         continue;
                     }
@@ -575,24 +566,22 @@ public class CommentXlsReportHelper
             }
         }
     }
-    
+
     /**
      * add Comment for each row of each sheet
      * 
      * @exception Exception
      */
-    private void addComment(HttpServletRequest p_request, Job j,
-            Workbook p_workbook, Sheet p_sheet, IntHolder row, Comment comment,
-            int flag) throws Exception
+    private void addComment(HttpServletRequest p_request, Job j, Workbook p_workbook, Sheet p_sheet,
+            IntHolder row, Comment comment, int flag) throws Exception
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(
-                p_request.getParameter("dateFormat"));
+        SimpleDateFormat dateFormat = new SimpleDateFormat(p_request.getParameter("dateFormat"));
 
         String jobPrefix = "Job Comment ";
         String taskPrefix = "Activity Comment ";
         int c = 0;
         int r = row.getValue();
-        
+
         Row p_row = getRow(p_sheet, r);
         // 2.3 Job ID column. Insert GlobalSight job number here.
         Cell cell_A = getCell(p_row, c++);
@@ -603,8 +592,8 @@ public class CommentXlsReportHelper
         Cell cell_B = getCell(p_row, c++);
         cell_B.setCellValue(j.getJobName());
         cell_B.setCellStyle(getContentStyle(p_workbook));
-        
-        //Insert comment type
+
+        // Insert comment type
         Cell cell_C = getCell(p_row, c++);
         if (JOB_FLAG == flag)
         {
@@ -620,11 +609,9 @@ public class CommentXlsReportHelper
         // 2.5 Lang: Insert each target language identifier for each workflow
         // in the retrieved Job on a different row.
         Cell cell_D = getCell(p_row, c++);
-        if ((this.targetPageVar != null)
-                && (this.targetPageVar.getGlobalSightLocale() != null))
+        if ((this.targetPageVar != null) && (this.targetPageVar.getGlobalSightLocale() != null))
         {
-            cell_D.setCellValue(this.targetPageVar
-                    .getGlobalSightLocale().getDisplayName(uiLocale));
+            cell_D.setCellValue(this.targetPageVar.getGlobalSightLocale().getDisplayName(uiLocale));
             cell_D.setCellStyle(getContentStyle(p_workbook));
         }
         else
@@ -640,45 +627,43 @@ public class CommentXlsReportHelper
 
         // by who
         Cell cell_F = getCell(p_row, c++);
-    	cell_F.setCellValue(UserUtil.getUserNameById(comment
-                .getCreatorId()));
-    	cell_F.setCellStyle(getContentStyle(p_workbook));
+        cell_F.setCellValue(UserUtil.getUserNameById(comment.getCreatorId()));
+        cell_F.setCellStyle(getContentStyle(p_workbook));
 
         // 2.7 Comment create date: Insert Comment creation date.
-    	Cell cell_G = getCell(p_row, c++);
-    	cell_G.setCellValue(dateFormat.format(comment
-                .getCreatedDateAsDate()));
-    	cell_G.setCellStyle(getContentStyle(p_workbook));
+        Cell cell_G = getCell(p_row, c++);
+        cell_G.setCellValue(dateFormat.format(comment.getCreatedDateAsDate()));
+        cell_G.setCellStyle(getContentStyle(p_workbook));
 
         // 2.8 add Comment Status
         if (showStatus)
         {
-        	Cell cell_Status = getCell(p_row, c++);
-        	cell_Status.setCellValue("");
-        	cell_Status.setCellStyle(getContentStyle(p_workbook));
+            Cell cell_Status = getCell(p_row, c++);
+            cell_Status.setCellValue("");
+            cell_Status.setCellStyle(getContentStyle(p_workbook));
         }
         // 2.9 add Comment priority
         if (showPriority)
         {
-        	Cell cell_Priority = getCell(p_row, c++);
-        	cell_Priority.setCellValue("");
-        	cell_Priority.setCellStyle(getContentStyle(p_workbook));
+            Cell cell_Priority = getCell(p_row, c++);
+            cell_Priority.setCellValue("");
+            cell_Priority.setCellStyle(getContentStyle(p_workbook));
         }
 
         // 2.10 add Comment Category
         if (showCategory)
         {
-        	Cell cell_Category = getCell(p_row, c++);
-        	cell_Category.setCellValue("");
-        	cell_Category.setCellStyle(getContentStyle(p_workbook));
+            Cell cell_Category = getCell(p_row, c++);
+            cell_Category.setCellValue("");
+            cell_Category.setCellStyle(getContentStyle(p_workbook));
         }
-        //add source and target segment
+        // add source and target segment
         if (showSourAndTar)
         {
             Cell cell_Source = getCell(p_row, c++);
             cell_Source.setCellValue("");
             cell_Source.setCellStyle(getContentStyle(p_workbook));
-            
+
             Cell cell_Target = getCell(p_row, c++);
             cell_Target.setCellValue("");
             cell_Target.setCellStyle(getContentStyle(p_workbook));
@@ -692,16 +677,17 @@ public class CommentXlsReportHelper
         Cell cell_CommentBody = getCell(p_row, c++);
         cell_CommentBody.setCellValue(comment.getComment());
         cell_CommentBody.setCellStyle(getContentStyle(p_workbook));
-        
-    	Cell cell_Link = getCell(p_row, c++);
-    	if (flag != SEGMENT_FLAG)
+
+        Cell cell_Link = getCell(p_row, c++);
+        if (flag != SEGMENT_FLAG)
         {
             cell_Link.setCellValue("");
-        }else{
-            cell_Link.setCellFormula("HYPERLINK(\"" + pageUrl
-                    + "\",\"" + externalPageId + "\")");
         }
-    	cell_Link.setCellStyle(getContentStyle(p_workbook));
+        else
+        {
+            cell_Link.setCellFormula("HYPERLINK(\"" + pageUrl + "\",\"" + externalPageId + "\")");
+        }
+        cell_Link.setCellStyle(getContentStyle(p_workbook));
 
         row.inc();
 
@@ -713,13 +699,12 @@ public class CommentXlsReportHelper
      * 
      * @exception Exception
      */
-    private void addCommentHistory(HttpServletRequest p_request, Job j,	
-            Workbook p_workbook, Sheet p_sheet, IntHolder row, Comment comment,
-            IssueHistory issueHistory, int flag) throws Exception
+    private void addCommentHistory(HttpServletRequest p_request, Job j, Workbook p_workbook,
+            Sheet p_sheet, IntHolder row, Comment comment, IssueHistory issueHistory, int flag)
+            throws Exception
     {
         String segmentPrefix = "Segment Comment";
-        SimpleDateFormat dateFormat = new SimpleDateFormat(
-                p_request.getParameter("dateFormat"));
+        SimpleDateFormat dateFormat = new SimpleDateFormat(p_request.getParameter("dateFormat"));
         int c = 0;
         int r = row.getValue();
         // 2.3.2 Job ID column. Insert GlobalSight job number here.
@@ -730,9 +715,9 @@ public class CommentXlsReportHelper
 
         // 2.4.2 Job: Insert Job name here.
         Cell cell_B = getCell(p_row, c++);
-        cell_B.setCellValue( j.getJobName());
+        cell_B.setCellValue(j.getJobName());
         cell_B.setCellStyle(getContentStyle(p_workbook));
-        
+
         Cell cell_C = getCell(p_row, c++);
         cell_C.setCellValue(segmentPrefix);
         cell_C.setCellStyle(getContentStyle(p_workbook));
@@ -740,11 +725,9 @@ public class CommentXlsReportHelper
         // 2.5.2 Lang: Insert each target language identifier for each workflow
         // in the retrieved Job on a different row.
         Cell cell_D = getCell(p_row, c++);
-        if ((this.targetPageVar != null)
-                && (this.targetPageVar.getGlobalSightLocale() != null))
+        if ((this.targetPageVar != null) && (this.targetPageVar.getGlobalSightLocale() != null))
         {
-            cell_D.setCellValue(this.targetPageVar
-                    .getGlobalSightLocale().getDisplayName(uiLocale));
+            cell_D.setCellValue(this.targetPageVar.getGlobalSightLocale().getDisplayName(uiLocale));
             cell_D.setCellStyle(getContentStyle(p_workbook));
         }
         else
@@ -755,8 +738,8 @@ public class CommentXlsReportHelper
 
         // 2.6.2 Insert Segement Number for the job.
         Cell cell_E = getCell(p_row, c++);
-        Integer segmentNum = Integer.valueOf(CommentComparator
-                .getSegmentIdFromLogicalKey(((Issue) comment).getLogicalKey()));
+        Integer segmentNum = Integer.valueOf(
+                CommentComparator.getSegmentIdFromLogicalKey(((Issue) comment).getLogicalKey()));
         cell_E.setCellValue(segmentNum);
         cell_E.setCellStyle(getContentStyle(p_workbook));
 
@@ -773,43 +756,42 @@ public class CommentXlsReportHelper
         // 2.8.2 add Comment Status
         if (showStatus)
         {
-        	Cell cell_Status = getCell(p_row, c++);
-        	cell_Status.setCellValue(((Issue) comment).getStatus());
-        	cell_Status.setCellStyle(getContentStyle(p_workbook));
+            Cell cell_Status = getCell(p_row, c++);
+            cell_Status.setCellValue(((Issue) comment).getStatus());
+            cell_Status.setCellStyle(getContentStyle(p_workbook));
         }
         // 2.9.2 add Comment priority
         if (showPriority)
         {
-        	Cell cell_Priority = getCell(p_row, c++);
-        	cell_Priority.setCellValue(((Issue) comment).getPriority());
-        	cell_Priority.setCellStyle(getContentStyle(p_workbook));
+            Cell cell_Priority = getCell(p_row, c++);
+            cell_Priority.setCellValue(((Issue) comment).getPriority());
+            cell_Priority.setCellStyle(getContentStyle(p_workbook));
         }
 
         // 2.10.2 add Comment Category
         if (showCategory)
         {
-        	Cell cell_Category = getCell(p_row, c++);
-        	cell_Category.setCellValue(((Issue) comment).getCategory());
-        	cell_Category.setCellStyle(getContentStyle(p_workbook));
+            Cell cell_Category = getCell(p_row, c++);
+            cell_Category.setCellValue(((Issue) comment).getCategory());
+            cell_Category.setCellStyle(getContentStyle(p_workbook));
         }
-        
+
         if (showSourAndTar)
         {
-            long targetLocalId = this.targetPageVar.getGlobalSightLocale()
-                    .getId();
+            long targetLocalId = this.targetPageVar.getGlobalSightLocale().getId();
             long sourceLocalId = j.getSourceLocale().getId();
             Tuv sourceTuv = SegmentTuvUtil.getTuvByTuIdLocaleId(segmentNum, sourceLocalId,
                     j.getId());
-            
-            Tuv targetTuv = SegmentTuvUtil.getTuvByTuIdLocaleId(segmentNum,
-                    targetLocalId, j.getId());
+
+            Tuv targetTuv = SegmentTuvUtil.getTuvByTuIdLocaleId(segmentNum, targetLocalId,
+                    j.getId());
             PseudoData pData = new PseudoData();
             pData.setMode(PseudoConstants.PSEUDO_COMPACT);
-            
+
             Cell cell_SourceSegment = getCell(p_row, c++);
             cell_SourceSegment.setCellValue(getSegment(pData, sourceTuv, j.getId()));
             cell_SourceSegment.setCellStyle(getContentStyle(p_workbook));
-            
+
             Cell cell_TargetSegment = getCell(p_row, c++);
             cell_TargetSegment.setCellValue(getSegment(pData, targetTuv, j.getId()));
             cell_TargetSegment.setCellStyle(getContentStyle(p_workbook));
@@ -827,8 +809,7 @@ public class CommentXlsReportHelper
 
         // 2.13.2 add link
         Cell cell_Link = getCell(p_row, c++);
-        cell_Link.setCellFormula("HYPERLINK(\"" + pageUrl + "\",\""
-                + externalPageId + "\")");
+        cell_Link.setCellFormula("HYPERLINK(\"" + pageUrl + "\",\"" + externalPageId + "\")");
         cell_Link.setCellStyle(getContentStyle(p_workbook));
 
         row.inc();
@@ -858,10 +839,9 @@ public class CommentXlsReportHelper
      * 
      * @return JobSearchParams
      */
-    private JobSearchParameters getSearchParams(HttpServletRequest p_request)
-            throws Exception
+    private JobSearchParameters getSearchParams(HttpServletRequest p_request) throws Exception
     {
-    	SimpleDateFormat simpleDate = new SimpleDateFormat("MM/dd/yyyy");
+        SimpleDateFormat simpleDate = new SimpleDateFormat("MM/dd/yyyy");
         String[] paramProjectIds = p_request.getParameterValues("projectId");
         String[] paramStatus = p_request.getParameterValues("status");
 
@@ -892,42 +872,44 @@ public class CommentXlsReportHelper
 
         // Get project ids
         ArrayList projectIdList = new ArrayList();
-		if (paramProjectIds != null && !paramProjectIds[0].equals("*")) 
-		{
-			for (int i = 0; i < paramProjectIds.length; i++) {
-				projectIdList.add(new Long(paramProjectIds[i]));
-			}
-		} else 
-		{
-			try 
-			{
-				List<Project> projectList = (ArrayList<Project>) ServerProxy
-						.getProjectHandler().getProjectsByUser(userId);
-				for (Project project : projectList) {
-					projectIdList.add(project.getIdAsLong());
-				}
-			} 
-			catch (Exception e) 
-			{
-			}
-		}
+        if (paramProjectIds != null && !paramProjectIds[0].equals("*"))
+        {
+            for (int i = 0; i < paramProjectIds.length; i++)
+            {
+                projectIdList.add(new Long(paramProjectIds[i]));
+            }
+        }
+        else
+        {
+            try
+            {
+                List<Project> projectList = (ArrayList<Project>) ServerProxy.getProjectHandler()
+                        .getProjectsByUser(userId);
+                for (Project project : projectList)
+                {
+                    projectIdList.add(project.getIdAsLong());
+                }
+            }
+            catch (Exception e)
+            {
+            }
+        }
         sp.setProjectId(projectIdList);
 
         // Get creation start
         String paramCreateDateStartCount = p_request
                 .getParameter(JobSearchConstants.CREATION_START);
-        if (paramCreateDateStartCount != null && paramCreateDateStartCount != "")
+        if (!StringUtil.isEmpty(paramCreateDateStartCount))
         {
             sp.setCreationStart(simpleDate.parse(paramCreateDateStartCount));
         }
 
         // Get creation end
-        String paramCreateDateEndCount = p_request
-                .getParameter(JobSearchConstants.CREATION_END);
-        if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
+        String paramCreateDateEndCount = p_request.getParameter(JobSearchConstants.CREATION_END);
+        if (!StringUtil.isEmpty(paramCreateDateEndCount))
         {
-        	Date date = simpleDate.parse(paramCreateDateEndCount);
-        	long endLong = date.getTime()+(24*60*60*1000-1);
+            Date date = simpleDate.parse(paramCreateDateEndCount);
+            long endLong = date.getTime() + (24 * 60 * 60 * 1000 - 1);
             sp.setCreationEnd(new Date(endLong));
         }
 
@@ -945,8 +927,7 @@ public class CommentXlsReportHelper
         if (uiLocale == null)
             uiLocale = Locale.ENGLISH;
         int JOB_ID = 1;
-        JobComparator comparator = new JobComparator(JOB_ID, uiLocale, true,
-                null);
+        JobComparator comparator = new JobComparator(JOB_ID, uiLocale, true, null);
         comparator.setSortColumn(JobComparator.JOB_ID);
         SortUtil.sort(p_jobs, comparator);
     }
@@ -955,8 +936,7 @@ public class CommentXlsReportHelper
      * Gets the jobs .
      * 
      */
-    private void searchJob(ArrayList jobs, HttpServletRequest p_request)
-            throws Exception
+    private void searchJob(ArrayList jobs, HttpServletRequest p_request) throws Exception
     {
         String[] paramJobId = p_request.getParameterValues("jobId");
         paramJobId = (paramJobId == null) ? new String[]
@@ -972,8 +952,8 @@ public class CommentXlsReportHelper
             }
             catch (NumberFormatException e)
             {
-                s_logger.warn("NumberFormatException:"
-                        + "--please input legal number in data area");
+                s_logger.warn(
+                        "NumberFormatException:" + "--please input legal number in data area");
             }
             jobs.addAll(ServerProxy.getJobHandler().getJobs(searchParams));
         }
@@ -1000,11 +980,9 @@ public class CommentXlsReportHelper
      */
     private void setShowPriority(HttpServletRequest p_request)
     {
-        String[] paramCommentPriority = p_request
-                .getParameterValues("commentPriority_On");
+        String[] paramCommentPriority = p_request.getParameterValues("commentPriority_On");
 
-        if ((null != paramCommentPriority)
-                && ("on".equals(paramCommentPriority[0])))
+        if ((null != paramCommentPriority) && ("on".equals(paramCommentPriority[0])))
         {
             showPriority = true;
         }
@@ -1020,10 +998,8 @@ public class CommentXlsReportHelper
      */
     private void setShowCategory(HttpServletRequest p_request)
     {
-        String[] paramCommentCategory = p_request
-                .getParameterValues("commentCategory_On");
-        if ((null != paramCommentCategory)
-                && ("on".equals(paramCommentCategory[0])))
+        String[] paramCommentCategory = p_request.getParameterValues("commentCategory_On");
+        if ((null != paramCommentCategory) && ("on".equals(paramCommentCategory[0])))
         {
             showCategory = true;
         }
@@ -1041,35 +1017,27 @@ public class CommentXlsReportHelper
     {
         statusList = new ArrayList();
         List allList = IssueOptions.getAllStatus();
-        String[] paramCommentStatusOpen = p_request
-                .getParameterValues("commenStatus_open");
-        String[] paramCommentStatusQuery = p_request
-                .getParameterValues("commenStatus_query");
-        String[] paramCommentStatusClosed = p_request
-                .getParameterValues("commenStatus_closed");
-        String[] paramCommentStatusRejected = p_request
-                .getParameterValues("commenStatus_rejected");
+        String[] paramCommentStatusOpen = p_request.getParameterValues("commenStatus_open");
+        String[] paramCommentStatusQuery = p_request.getParameterValues("commenStatus_query");
+        String[] paramCommentStatusClosed = p_request.getParameterValues("commenStatus_closed");
+        String[] paramCommentStatusRejected = p_request.getParameterValues("commenStatus_rejected");
 
-        if ((paramCommentStatusOpen != null)
-                && allList.contains(paramCommentStatusOpen[0]))
+        if ((paramCommentStatusOpen != null) && allList.contains(paramCommentStatusOpen[0]))
         {
             statusList.add(paramCommentStatusOpen[0]);
         }
 
-        if ((paramCommentStatusQuery != null)
-                && allList.contains(paramCommentStatusQuery[0]))
+        if ((paramCommentStatusQuery != null) && allList.contains(paramCommentStatusQuery[0]))
         {
             statusList.add(paramCommentStatusQuery[0]);
         }
 
-        if ((paramCommentStatusClosed != null)
-                && allList.contains(paramCommentStatusClosed[0]))
+        if ((paramCommentStatusClosed != null) && allList.contains(paramCommentStatusClosed[0]))
         {
             statusList.add(paramCommentStatusClosed[0]);
         }
 
-        if ((paramCommentStatusRejected != null)
-                && allList.contains(paramCommentStatusRejected[0]))
+        if ((paramCommentStatusRejected != null) && allList.contains(paramCommentStatusRejected[0]))
         {
             statusList.add(paramCommentStatusRejected[0]);
         }
@@ -1084,29 +1052,29 @@ public class CommentXlsReportHelper
         }
 
     }
+
     /**
      * set source and target
      */
     private void setSourceAndTarget(HttpServletRequest p_request)
     {
-        String[] paramSourAndTar = p_request
-                .getParameterValues("show_SourceAndTarget");
-        if ((null != paramSourAndTar)
-                && ("on".equals(paramSourAndTar[0])))
+        String[] paramSourAndTar = p_request.getParameterValues("show_SourceAndTarget");
+        if ((null != paramSourAndTar) && ("on".equals(paramSourAndTar[0])))
         {
             showSourAndTar = true;
         }
         else
         {
             showSourAndTar = false;
-        }  
+        }
     }
 
     /**
      * set Targe lang list.
      * 
      */
-    private void setLang(HttpServletRequest p_request) {
+    private void setLang(HttpServletRequest p_request)
+    {
         langList = new ArrayList();
         String[] paramLang = p_request.getParameterValues("targetLang");
 
@@ -1147,25 +1115,21 @@ public class CommentXlsReportHelper
      * Set page name and URL .
      * 
      */
-    private void setPageURL(HttpServletRequest p_request, Comment comment,
-            long jobId)
+    private void setPageURL(HttpServletRequest p_request, Comment comment, long jobId)
     {
         String url = p_request.getHeader("Referer");
         s_logger.debug("url--:" + url);
         url = url.substring(0, (url.indexOf("?") + 1));
-        targetPageVar = (TargetPage) commentTargetPageMap.remove(new Long(
-                comment.getId()));
+        targetPageVar = (TargetPage) commentTargetPageMap.remove(new Long(comment.getId()));
 
         String key = ((Issue) comment).getLogicalKey();
         String[] ids = key.split("_");
 
-        String editorReviewUrl = url
-                + "linkName=editor&pageName=SEGCOMMENTS&reviewMode=true";
-        url = "&" + WebAppConstants.SOURCE_PAGE_ID + "="
-                + targetPageVar.getSourcePage().getId() + "&"
-                + WebAppConstants.TARGET_PAGE_ID + "=" + targetPageVar.getId()
-                + "&" + WebAppConstants.JOB_ID + "=" + jobId + "&curTuId="
-                + ids[1] + "&curTuvId=" + ids[2] + "&curSubId=" + ids[3];
+        String editorReviewUrl = url + "linkName=editor&pageName=SEGCOMMENTS&reviewMode=true";
+        url = "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + targetPageVar.getSourcePage().getId()
+                + "&" + WebAppConstants.TARGET_PAGE_ID + "=" + targetPageVar.getId() + "&"
+                + WebAppConstants.JOB_ID + "=" + jobId + "&curTuId=" + ids[1] + "&curTuvId="
+                + ids[2] + "&curSubId=" + ids[3];
         pageUrl = editorReviewUrl + url;
         externalPageId = targetPageVar.getExternalPageId();
         s_logger.debug("externalPageId: " + externalPageId);
@@ -1190,8 +1154,7 @@ public class CommentXlsReportHelper
      * Sort Segment Comment by Segment Number
      * 
      */
-    private void sortCommentBySegmentNumber(List list,
-            HttpServletRequest p_request)
+    private void sortCommentBySegmentNumber(List list, HttpServletRequest p_request)
     {
         HttpSession session = p_request.getSession(false);
         Locale uiLocale = (Locale) session.getAttribute("uiLocale");
@@ -1206,15 +1169,13 @@ public class CommentXlsReportHelper
      * Sort Segment Issue History by Date
      * 
      */
-    private void sortCommentByIssueHistoryDate(List list,
-            HttpServletRequest p_request)
+    private void sortCommentByIssueHistoryDate(List list, HttpServletRequest p_request)
     {
         HttpSession session = p_request.getSession(false);
         Locale uiLocale = (Locale) session.getAttribute("uiLocale");
         if (uiLocale == null)
             uiLocale = Locale.ENGLISH;
-        IssueHistoryComparator issueHistoryComparator = new IssueHistoryComparator(
-                uiLocale);
+        IssueHistoryComparator issueHistoryComparator = new IssueHistoryComparator(uiLocale);
         issueHistoryComparator.setType(IssueHistoryComparator.DATE);
         SortUtil.sort(list, issueHistoryComparator);
     }
@@ -1231,11 +1192,11 @@ public class CommentXlsReportHelper
             commentTargetPageMap.put(new Long(c.getId()), t);
         }
     }
-    
+
     private CellStyle getHeaderStyle(Workbook p_workbook) throws Exception
     {
         if (headerStyle == null)
-        {      	
+        {
             Font font = p_workbook.createFont();
             font.setBoldweight(Font.BOLDWEIGHT_BOLD);
             font.setColor(IndexedColors.BLACK.getIndex());
@@ -1246,7 +1207,7 @@ public class CommentXlsReportHelper
             CellStyle cs = p_workbook.createCellStyle();
             cs.setFont(font);
             cs.setWrapText(true);
-            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
             cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
             cs.setBorderTop(CellStyle.BORDER_THIN);
             cs.setBorderRight(CellStyle.BORDER_THIN);
@@ -1258,7 +1219,7 @@ public class CommentXlsReportHelper
 
         return headerStyle;
     }
-    
+
     private CellStyle getContentStyle(Workbook p_workbook) throws Exception
     {
         if (contentStyle == null)
@@ -1277,7 +1238,7 @@ public class CommentXlsReportHelper
 
         return contentStyle;
     }
-    
+
     private Row getRow(Sheet p_sheet, int p_col)
     {
         Row row = p_sheet.getRow(p_col);
@@ -1293,16 +1254,15 @@ public class CommentXlsReportHelper
             cell = p_row.createCell(index);
         return cell;
     }
-    
+
     public String getReportType()
     {
         return ReportConstants.COMMENTS_REPORT;
     }
-    
+
     public boolean isCancelled()
     {
-        ReportsData data = ReportGeneratorHandler.getReportsMap(userId,
-                m_jobIDS, getReportType());
+        ReportsData data = ReportGeneratorHandler.getReportsMap(userId, m_jobIDS, getReportType());
         if (data != null)
             return data.isCancle();
 

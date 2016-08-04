@@ -191,20 +191,25 @@ function showPreview()
     }
     window.parent.showPreviewPage2('<%=pageNamePath%>', '<%=state.getSourceLocale()%>', '<%=state.getSourcePageId()%>');
     <% } %>
-    highlight(idPreview);
+    highlight(idPDFPreview);
 }
 
-function showPDFPreview()
-{
-  try
-  {
-       window.parent.showProgressBar();
-  }
-  catch(e)
-  {
-  }
-  window.parent.showPDFPreview('<%=pageNamePath%>');
-  highlight(idPDFPreview);
+function showTargetPreview() {
+	try {
+		window.parent.showProgressBar();
+	} catch (e) {
+	}
+	window.parent.showTargetPreview();
+	highlight(idTargetPDFPreview);
+}
+
+function showPDFPreview() {
+	try {
+		window.parent.showProgressBar();
+	} catch (e) {
+	}
+	window.parent.showPDFPreview('<%=pageNamePath%>');
+    highlight(idPDFPreview);
 }
 
 function showTargetPDFPreview()
@@ -274,21 +279,22 @@ function doOnload()
 <BODY BGCOLOR="<%=skin.getProperty("skin.editor.bgColor")%>" onload="doOnload()">
 <DIV ID="main" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 10; LEFT: 2px; RIGHT: 2px; TOP: 5px;">
 <FORM>
-<TABLE WIDTH="100%" CELLSPACING="0" CELLPADDING="0" BORDER="0">
-  <TR CLASS="tableHeadingBasic">
-    <TD><%=lb_sourceLocale%>: <%=str_sourceLocale%></TD>
-    <TD ALIGN="RIGHT">
-    <A id="idTargetPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showTargetPDFPreview()"
-      onfocus="this.blur();">Target PDF</A> |
- <A id="idPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showPDFPreview()"
-      onfocus="this.blur();">Source PDF</A> |
-      <A id="idList" CLASS="HREFBoldWhite" HREF="javascript:showList();"
-      onfocus="this.blur();"><%=lb_list%></A>
-    </TD>
-  </TR>
-</TABLE>
-</FORM>
-
+			<TABLE WIDTH="100%" CELLSPACING="0" CELLPADDING="0" BORDER="0">
+				<TR CLASS="tableHeadingBasic">
+					<TD><%=lb_sourceLocale%>: <%=str_sourceLocale%></TD>
+					<TD ALIGN="RIGHT">
+						<%if (pageFormat.equals(IFormatNames.FORMAT_HTML)) {%> 
+						    <A id="idPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showPreview()" onfocus="this.blur();">Source</A> | 
+						    <A id="idTargetPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showTargetPreview()" onfocus="this.blur();">Target</A> | 
+ 	                    <%} else {%> 
+ 	                        <A id="idTargetPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showTargetPDFPreview()" onfocus="this.blur();">Target PDF</A> | 
+ 	                        <A id="idPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showPDFPreview()" onfocus="this.blur();">Source PDF</A>| 
+ 	                    <%}%> 
+ 	                    <A id="idList" CLASS="HREFBoldWhite" HREF="javascript:showList();" onfocus="this.blur();"><%=lb_list%></A>
+					</TD>
+				</TR>
+			</TABLE>
+		</FORM>
 </DIV>
 </BODY>
 </HTML>

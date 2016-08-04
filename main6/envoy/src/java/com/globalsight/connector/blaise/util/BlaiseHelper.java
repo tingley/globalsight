@@ -62,7 +62,7 @@ public class BlaiseHelper
     private static List<String> specialChars = new ArrayList<String>();
 
     public static final List<java.util.Locale> blaiseSupportedLocales = new ArrayList<java.util.Locale>();
-    public static final HashMap<String, java.util.Locale> blaiseSupportedLocalesMap = new HashMap<String, java.util.Locale>(); 
+    public static final HashMap<String, com.cognitran.core.model.i18n.Locale> blaiseSupportedLocalesMap = new HashMap<String, com.cognitran.core.model.i18n.Locale>();
 
     static
     {
@@ -73,7 +73,7 @@ public class BlaiseHelper
             javaLocale = blaiseLocale.toLocale();
             blaiseSupportedLocales.add(javaLocale);
             String key = javaLocale.getLanguage() + "_" + javaLocale.getCountry();
-            blaiseSupportedLocalesMap.put(key.toLowerCase(), javaLocale);
+            blaiseSupportedLocalesMap.put(key.toLowerCase(), blaiseLocale);
         }
     }
 
@@ -465,26 +465,22 @@ public class BlaiseHelper
         // Source Locale
         if (sourceLocaleFilter != null)
         {
-            java.util.Locale locale = blaiseSupportedLocalesMap.get(sourceLocaleFilter.trim()
-                    .toLowerCase());
+            com.cognitran.core.model.i18n.Locale locale = blaiseSupportedLocalesMap
+                    .get(sourceLocaleFilter.trim().toLowerCase());
             if (locale != null)
             {
-                com.cognitran.core.model.i18n.Locale srcLocale = com.cognitran.core.model.i18n.Locale
-                        .get(locale);
-                command.setSourceLocaleFilter(srcLocale);                
+                command.setSourceLocaleFilter(locale);
             }
         }
 
         // Target Locale
         if (targetLocaleFilter != null)
         {
-            java.util.Locale locale = blaiseSupportedLocalesMap.get(targetLocaleFilter.trim()
-                    .toLowerCase());
+            com.cognitran.core.model.i18n.Locale locale = blaiseSupportedLocalesMap
+                    .get(targetLocaleFilter.trim().toLowerCase());
             if (locale != null)
             {
-                com.cognitran.core.model.i18n.Locale trgLocale = com.cognitran.core.model.i18n.Locale
-                        .get(locale);
-                command.setTargetLocaleFilter(trgLocale);                
+                command.setTargetLocaleFilter(locale);
             }
         }
 

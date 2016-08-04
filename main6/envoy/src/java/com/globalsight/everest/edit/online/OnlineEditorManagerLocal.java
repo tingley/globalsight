@@ -3598,7 +3598,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                                 p_options.getViewMode());
                     }
 
-                    if ((!reviewMode || reviewReadOnly)
+                    if (p_options.isFromIncontextReviewEdit()) 
+                    {
+                        result.append("<gsTuv>" + segment + "</gsTuv>");
+                    }
+                    else if ((!reviewMode || reviewReadOnly)
                             && (isReadOnly || isExcluded))
                     {
                         result.append(getNonEditableCellForPreview(style,

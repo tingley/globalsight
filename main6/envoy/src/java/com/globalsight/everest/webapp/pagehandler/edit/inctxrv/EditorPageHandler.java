@@ -924,6 +924,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         boolean bUpdateSource = false;
         boolean bUpdateTarget = false;
 
+        p_state.setSourceAsTarget("1".equals(p_request.getParameter("asSource")));
+        
         EditorState.Layout layout = p_state.getLayout();
         String value;
         if ((value = p_request.getParameter("srcViewMode")) != null)
@@ -1616,6 +1618,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         RenderingOptions renderingOptions = initRenderingOptions(p_session,
                 uiMode, viewMode, UIConstants.EDITMODE_DEFAULT);
         p_state.setRenderingOptions(renderingOptions);
+        renderingOptions.setFromIncontextReviewEdit(true);
 
         String html;
         html = EditorHelper.getTargetPageView(p_state, false, p_searchMap);

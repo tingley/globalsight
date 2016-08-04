@@ -57,18 +57,18 @@ import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchCo
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 
 /**
  * Provides ability to add customize report for Excel reports
  */
 public class CustomizeReportsMainHandler extends PageHandler
 {
-	 List<Project> projectList = null;
-	 
-    public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-            HttpServletRequest p_request, HttpServletResponse p_response,
-            ServletContext p_context) throws ServletException, IOException,
-            EnvoyServletException
+    List<Project> projectList = null;
+
+    public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
+            HttpServletResponse p_response, ServletContext p_context)
+            throws ServletException, IOException, EnvoyServletException
     {
         HttpSession session = p_request.getSession();
         ResourceBundle bundle = PageHandler.getBundle(session);
@@ -78,39 +78,33 @@ public class CustomizeReportsMainHandler extends PageHandler
         String action = p_request.getParameter("action");
         if (WebAppConstants.ACTION_JOB_RANGE.equalsIgnoreCase(action))
         {
-            paramMap = (Map) session
-                    .getAttribute(WebAppConstants.CUSTOMIZE_REPORTS_PARAMMAP);
+            paramMap = (Map) session.getAttribute(WebAppConstants.CUSTOMIZE_REPORTS_PARAMMAP);
             if (paramMap == null)
             {
                 paramMap = new HashMap();
             }
 
             extractJobRangeParams(p_request, paramMap);
-            session.setAttribute(WebAppConstants.CUSTOMIZE_REPORTS_PARAMMAP,
-                    paramMap);
+            session.setAttribute(WebAppConstants.CUSTOMIZE_REPORTS_PARAMMAP, paramMap);
 
             // Prepare for job info param in customize report
             String xml = CustomizeReportsParamXmlHandler.getJobInfoParamXml();
 
             xml = CustomizeReportsParamXmlHandler.parseParamXml(bundle, xml);
 
-            p_request.setAttribute(
-                    WebAppConstants.CUSTOMIZE_REPORTS_JOB_INFO_PARAM_XML, xml);
+            p_request.setAttribute(WebAppConstants.CUSTOMIZE_REPORTS_JOB_INFO_PARAM_XML, xml);
 
-            super.invokePageHandler(p_pageDescriptor, p_request, p_response,
-                    p_context);
+            super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
         }
         else if (WebAppConstants.ACTION_JOB_CANCEL.equalsIgnoreCase(action))
         {
             session.removeAttribute(WebAppConstants.CUSTOMIZE_REPORTS_PARAMMAP);
 
-            super.invokePageHandler(p_pageDescriptor, p_request, p_response,
-                    p_context);
+            super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
         }
         else if (WebAppConstants.ACTION_JOB_INFO.equalsIgnoreCase(action))
         {
-            paramMap = (Map) session
-                    .getAttribute(WebAppConstants.CUSTOMIZE_REPORTS_PARAMMAP);
+            paramMap = (Map) session.getAttribute(WebAppConstants.CUSTOMIZE_REPORTS_PARAMMAP);
             // Clean garbage from session.
             // To avoid nullpointer exception.
             // session.removeAttribute(WebAppConstants.CUSTOMIZE_REPORTS_PARAMMAP);
@@ -136,8 +130,7 @@ public class CustomizeReportsMainHandler extends PageHandler
         // Prepare data for customizeReportsJobRange.jsp
         {
             prepareJobRangData(getUser(session).getUserId(), p_request);
-            super.invokePageHandler(p_pageDescriptor, p_request, p_response,
-                    p_context);
+            super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
         }
     }
 
@@ -146,16 +139,13 @@ public class CustomizeReportsMainHandler extends PageHandler
      * 
      * @throws JobException
      */
-    private void writeReports(HttpServletRequest request,
-            HttpServletResponse p_response, Map p_paramMap) throws IOException,
-            JobException
+    private void writeReports(HttpServletRequest request, HttpServletResponse p_response,
+            Map p_paramMap) throws IOException, JobException
     {
         // Set response header
-        p_response.setHeader("Content-Disposition",
-                "inline; filename=CustomizeReports.xlsx");
+        p_response.setHeader("Content-Disposition", "inline; filename=CustomizeReports.xlsx");
         p_response.setHeader("Expires", "0");
-        p_response.setHeader("Cache-Control",
-                "must-revalidate, post-check=0,pre-check=0");
+        p_response.setHeader("Cache-Control", "must-revalidate, post-check=0,pre-check=0");
         p_response.setHeader("Pragma", "public");
         p_response.setContentType("application/x-excel");
         ResourceBundle bundle = PageHandler.getBundle(request.getSession());
@@ -163,12 +153,11 @@ public class CustomizeReportsMainHandler extends PageHandler
 
         String currency = request.getParameter("currency");
         CurrencyThreadLocal.setCurrency(currency);
-        String userId = (String) request.getSession(false).getAttribute(
-                WebAppConstants.USER_NAME);
+        String userId = (String) request.getSession(false).getAttribute(WebAppConstants.USER_NAME);
         p_paramMap.put(WebAppConstants.USER_NAME, userId);
 
-        CustomizeReportsGenerator generator = new CustomizeReportsGenerator(
-                p_paramMap, reportWriter);
+        CustomizeReportsGenerator generator = new CustomizeReportsGenerator(p_paramMap,
+                reportWriter);
         generator.pupulate();
         // Cancelled the report, return nothing.
         if (generator.isCancelled())
@@ -193,8 +182,7 @@ public class CustomizeReportsMainHandler extends PageHandler
         String[] paramJobIds = p_request.getParameterValues("jobId");
         String[] paramProjectIds = p_request.getParameterValues("projectId");
         String[] paramStatus = p_request.getParameterValues("status");
-        String[] paramTargetLocales = p_request
-                .getParameterValues("targetLocale");
+        String[] paramTargetLocales = p_request.getParameterValues("targetLocale");
 
         List<JobSearchParameters> jobRangeParam = new ArrayList<JobSearchParameters>();
 
@@ -207,31 +195,31 @@ public class CustomizeReportsMainHandler extends PageHandler
                 {
                     for (int j = 0; j < paramProjectIds.length; j++)
                     {
-                    	JobSearchParameters sp = new JobSearchParameters();
-                    	sp.setJobId(paramJobIds[i]);
-                    	sp.setJobIdCondition(JobSearchParameters.EQUALS);
+                        JobSearchParameters sp = new JobSearchParameters();
+                        sp.setJobId(paramJobIds[i]);
+                        sp.setJobIdCondition(JobSearchParameters.EQUALS);
                         sp.setProjectId(paramProjectIds[j]);
-                        stateList =disposeSp(p_request, paramStatus, sp);
+                        stateList = disposeSp(p_request, paramStatus, sp);
                         jobRangeParam.add(sp);
                     }
                 }
-                else 
+                else
                 {
-                	JobSearchParameters sp = new JobSearchParameters();
-                	sp.setJobId(paramJobIds[i]);
-                	sp.setJobIdCondition(JobSearchParameters.EQUALS);
-                	stateList = disposeSp(p_request, paramStatus, sp);
+                    JobSearchParameters sp = new JobSearchParameters();
+                    sp.setJobId(paramJobIds[i]);
+                    sp.setJobIdCondition(JobSearchParameters.EQUALS);
+                    stateList = disposeSp(p_request, paramStatus, sp);
                     jobRangeParam.add(sp);
-				}
+                }
             }
         }
-        else 
+        else
         {
             if ((paramProjectIds != null) && !("*".equals(paramProjectIds[0])))
             {
                 for (int i = 0; i < paramProjectIds.length; i++)
                 {
-                	JobSearchParameters sp = new JobSearchParameters();
+                    JobSearchParameters sp = new JobSearchParameters();
                     sp.setProjectId(paramProjectIds[i]);
                     stateList = disposeSp(p_request, paramStatus, sp);
                     jobRangeParam.add(sp);
@@ -248,8 +236,8 @@ public class CustomizeReportsMainHandler extends PageHandler
                 }
 
             }
-		}
-        
+        }
+
         paramMap.put(WebAppConstants.JOB_RANGE_PARAM, jobRangeParam);
 
         //
@@ -280,10 +268,11 @@ public class CustomizeReportsMainHandler extends PageHandler
 
         return paramMap;
     }
-    
-    private List<String> disposeSp(HttpServletRequest p_request, String[] paramStatus, JobSearchParameters sp)
+
+    private List<String> disposeSp(HttpServletRequest p_request, String[] paramStatus,
+            JobSearchParameters sp)
     {
-    	// Get job status.
+        // Get job status.
         List<String> stateList = new ArrayList<String>();
         if ((paramStatus != null) && !("*".equals(paramStatus[0])))
         {
@@ -305,31 +294,34 @@ public class CustomizeReportsMainHandler extends PageHandler
             stateList.add(Job.EXPORT_FAIL);
         }
         sp.setJobState(stateList);
-		
+
         // Get creation start
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
-        try {
-        	String paramCreateDateStartCount = p_request
-        			.getParameter(JobSearchConstants.CREATION_START);
-        	if (paramCreateDateStartCount != null && paramCreateDateStartCount != "")
-        	{
-        		sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
-        	}
-        	
-        	// Get creation end
+        try
+        {
+            String paramCreateDateStartCount = p_request
+                    .getParameter(JobSearchConstants.CREATION_START);
+            if (!StringUtil.isEmpty(paramCreateDateStartCount))
+            {
+                sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
+            }
+
+            // Get creation end
             String paramCreateDateEndCount = p_request
                     .getParameter(JobSearchConstants.CREATION_END);
-            if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
+            if (!StringUtil.isEmpty(paramCreateDateEndCount))
             {
-            	Date date = simpleDateFormat.parse(paramCreateDateEndCount);
-            	long endLong = date.getTime()+(24*60*60*1000-1);
+                Date date = simpleDateFormat.parse(paramCreateDateEndCount);
+                long endLong = date.getTime() + (24 * 60 * 60 * 1000 - 1);
                 sp.setCreationEnd(new Date(endLong));
             }
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
+        }
+        catch (ParseException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
         return stateList;
     }
 
@@ -362,29 +354,26 @@ public class CustomizeReportsMainHandler extends PageHandler
                 paramManager.setParamByName(name.substring(4));
             }
         }
-        paramMap.put(WebAppConstants.JOB_INFO_PARAM,
-                paramManager.getRootParam());
+        paramMap.put(WebAppConstants.JOB_INFO_PARAM, paramManager.getRootParam());
 
         return paramMap;
     }
 
     @SuppressWarnings("unchecked")
-    private void prepareJobRangData(String p_curUserId, HttpServletRequest p_request) throws EnvoyServletException
+    private void prepareJobRangData(String p_curUserId, HttpServletRequest p_request)
+            throws EnvoyServletException
     {
         // Gets project list and target locale list
 
         List<GlobalSightLocale> targetLocaleList = new ArrayList<GlobalSightLocale>();
         try
         {
-            targetLocaleList.addAll(ServerProxy.getLocaleManager()
-                    .getAllTargetLocales());
-            SortUtil.sort(targetLocaleList, new GlobalSightLocaleComparator(
-                    getUILocale(p_request)));
+            targetLocaleList.addAll(ServerProxy.getLocaleManager().getAllTargetLocales());
+            SortUtil.sort(targetLocaleList,
+                    new GlobalSightLocaleComparator(getUILocale(p_request)));
 
-            projectList = ServerProxy.getProjectHandler().getProjectsByUser(
-                    p_curUserId);
-            SortUtil.sort(projectList, new ProjectComparator(
-                    getUILocale(p_request)));
+            projectList = ServerProxy.getProjectHandler().getProjectsByUser(p_curUserId);
+            SortUtil.sort(projectList, new ProjectComparator(getUILocale(p_request)));
         }
         catch (Exception e)
         {
@@ -392,13 +381,10 @@ public class CustomizeReportsMainHandler extends PageHandler
         }
         // Gets job list
         List<ReportJobInfo> jobList = getReportJobInfo(p_request);
-        p_request.setAttribute(WebAppConstants.CUSTOMIZE_REPORTS_JOB_LIST,
-                jobList);
-        p_request.setAttribute(
-                WebAppConstants.CUSTOMIZE_REPORTS_TARGETLOCALE_LIST,
+        p_request.setAttribute(WebAppConstants.CUSTOMIZE_REPORTS_JOB_LIST, jobList);
+        p_request.setAttribute(WebAppConstants.CUSTOMIZE_REPORTS_TARGETLOCALE_LIST,
                 targetLocaleList);
-        p_request.setAttribute(WebAppConstants.CUSTOMIZE_REPORTS_PROJECT_LIST,
-                projectList);
+        p_request.setAttribute(WebAppConstants.CUSTOMIZE_REPORTS_PROJECT_LIST, projectList);
     }
 
     /**
@@ -412,9 +398,9 @@ public class CustomizeReportsMainHandler extends PageHandler
                 ReportHelper.getJobInfo(stateList).values());
         if (reportJobInfoList != null && !reportJobInfoList.isEmpty())
         {
-        	filterReportJobInfoByProject(reportJobInfoList);
-            SortUtil.sort(reportJobInfoList, new ReportJobInfoComparator(
-                    JobComparator.NAME, getUILocale(p_request)));
+            filterReportJobInfoByProject(reportJobInfoList);
+            SortUtil.sort(reportJobInfoList,
+                    new ReportJobInfoComparator(JobComparator.NAME, getUILocale(p_request)));
         }
 
         return reportJobInfoList;
@@ -423,27 +409,27 @@ public class CustomizeReportsMainHandler extends PageHandler
     private Locale getUILocale(HttpServletRequest p_request)
     {
         HttpSession session = p_request.getSession();
-        Locale uiLocale = (Locale) session
-                .getAttribute(WebAppConstants.UILOCALE);
-        if (uiLocale == null) {
+        Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
+        if (uiLocale == null)
+        {
             uiLocale = Locale.US;
         }
         return uiLocale;
     }
-    
-    private void filterReportJobInfoByProject(List<ReportJobInfo> reportJobInfoList){
-    	 Set<String> projectIds = getProjectIdSet();
-         for (Iterator<ReportJobInfo> it = reportJobInfoList.iterator(); it
-                 .hasNext();)
-         {
-             ReportJobInfo info = it.next();
-             if (!projectIds.contains(info.getProjectId()))
-             {
-                 it.remove();
-             }
-         }
+
+    private void filterReportJobInfoByProject(List<ReportJobInfo> reportJobInfoList)
+    {
+        Set<String> projectIds = getProjectIdSet();
+        for (Iterator<ReportJobInfo> it = reportJobInfoList.iterator(); it.hasNext();)
+        {
+            ReportJobInfo info = it.next();
+            if (!projectIds.contains(info.getProjectId()))
+            {
+                it.remove();
+            }
+        }
     }
-    
+
     private Set<String> getProjectIdSet()
     {
         Set<String> projectIds = new HashSet<String>();

@@ -71,6 +71,18 @@ function reloadContent(modeId)
   }
 }
 
+function reloadTargetContent(modeId)
+{
+  try
+  {
+    content.document.location =
+      "<%=contentUrl%>" + "&asSource=1&trgViewMode=" + modeId;
+  }catch(e)
+  {
+     document.location= "/globalsight/ControlServlet?linkName=pane2&pageName=ED3&trgViewMode=" + modeId;
+  }
+}
+
 function showList()
 {
     mode = "list";
@@ -82,6 +94,13 @@ function showPreview()
     mode = "preview";
     reloadContent(<%=EditorConstants.VIEWMODE_PREVIEW%>);
 }
+
+function showTargetPreview()
+{
+    mode = "preview";
+    reloadTargetContent(<%=EditorConstants.VIEWMODE_PREVIEW%>);
+}
+
 function showPDFPreview(pageName)
 {
 	  try

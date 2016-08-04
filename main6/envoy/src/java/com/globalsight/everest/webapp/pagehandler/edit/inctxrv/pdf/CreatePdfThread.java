@@ -84,9 +84,7 @@ public class CreatePdfThread extends MultiCompanySupportedThread
                         || pageName.endsWith(".docx")
                         || pageName.endsWith(".pptx")
                         || pageName.endsWith(".xlsx")
-                        || pageName.endsWith(".xml")
-                        || pageName.endsWith(".html")
-                        || pageName.endsWith(".htm"))
+                        || pageName.endsWith(".xml"))
                 {
                     if (pageName.endsWith(".xml"))
                     {

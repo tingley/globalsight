@@ -284,8 +284,8 @@ function doOnload()
 					<TD><%=lb_sourceLocale%>: <%=str_sourceLocale%></TD>
 					<TD ALIGN="RIGHT">
 						<%if (pageFormat.equals(IFormatNames.FORMAT_HTML)) {%> 
-						    <A id="idPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showPreview()" onfocus="this.blur();">Source</A> | 
-						    <A id="idTargetPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showTargetPreview()" onfocus="this.blur();">Target</A> | 
+						    <A id="idPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showPreview()" onfocus="this.blur();">Source HTML</A> | 
+						    <A id="idTargetPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showTargetPreview()" onfocus="this.blur();">Target HTML</A> | 
  	                    <%} else {%> 
  	                        <A id="idTargetPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showTargetPDFPreview()" onfocus="this.blur();">Target PDF</A> | 
  	                        <A id="idPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showPDFPreview()" onfocus="this.blur();">Source PDF</A>| 

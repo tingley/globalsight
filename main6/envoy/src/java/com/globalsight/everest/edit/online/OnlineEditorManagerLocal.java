@@ -1141,7 +1141,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     Tuv srcTuv = (Tuv) sourceTuvs.get(i);
                     Tuv trgTuv = (Tuv) targetTuvs.get(i);
 
-                    if (LeverageUtil.isIncontextMatch(i, sourceTuvs,
+                    if (!options.isFromIncontextReviewEdit() &&LeverageUtil.isIncontextMatch(i, sourceTuvs,
                             targetTuvs, tuvMatchTypes, p_excludedItemTypes,
                             jobId))
                     {
@@ -3600,7 +3600,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
                     if (p_options.isFromIncontextReviewEdit()) 
                     {
-                        result.append("<gsTuv>" + segment + "</gsTuv>");
+                        result.append("<span " + dir + ">" + segment + "</span>");
                     }
                     else if ((!reviewMode || reviewReadOnly)
                             && (isReadOnly || isExcluded))

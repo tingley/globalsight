@@ -427,7 +427,7 @@ function doOnload()
     <TD ALIGN="RIGHT">
     <%if (pageFormat.equals(IFormatNames.FORMAT_HTML)) {%>
  <A id="idPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showPreview()"
-      onfocus="this.blur();">Target</A> 
+      onfocus="this.blur();">Target HTML</A> 
        <%} else {%>
         <A id="idPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showPDFPreview()"
       onfocus="this.blur();">Target PDF</A> 

@@ -67,7 +67,7 @@ function reloadContent(modeId)
       "<%=contentUrl%>" + "&srcViewMode=" + modeId;
   }catch(e)
   {
-     document.location= "/globalsight/ControlServlet?linkName=pane1&pageName=ED3&srcViewMode=" + modeId;
+     document.location= "/globalsight/ControlServlet?linkName=pane1&pageName=inctxrvED3&srcViewMode=" + modeId;
   }
 }
 
@@ -79,7 +79,7 @@ function reloadTargetContent(modeId)
       "<%=contentUrl%>" + "&asSource=1&trgViewMode=" + modeId;
   }catch(e)
   {
-     document.location= "/globalsight/ControlServlet?linkName=pane2&pageName=ED3&trgViewMode=" + modeId;
+     document.location= "/globalsight/ControlServlet?linkName=pane1&pageName=inctxrvED3&trgViewMode=" + modeId;
   }
 }
 

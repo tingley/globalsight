@@ -1076,6 +1076,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         // next & previous page
         if ((value = p_request.getParameter("refresh")) != null)
         {
+            layout.setSourceViewMode(VIEWMODE_DETAIL);
+            layout.setTargetViewMode(VIEWMODE_DETAIL);
+            
             int i_direction = 0;
             if (!value.startsWith("0"))
                 i_direction = Integer.parseInt(value);

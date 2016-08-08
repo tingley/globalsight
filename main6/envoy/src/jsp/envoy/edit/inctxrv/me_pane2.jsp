@@ -55,9 +55,10 @@ function reloadContent(modeId)
   {
     content.document.location =
       "<%=contentUrl%>" + "&trgViewMode=" + modeId;
-  }catch(e)
+  }
+  catch(e)
   {
-     document.location= "/globalsight/ControlServlet?linkName=pane2&pageName=ED3&trgViewMode=" + modeId;
+     document.location= "/globalsight/ControlServlet?linkName=pane2&pageName=inctxrvED3&trgViewMode=" + modeId;
   }
 }
 

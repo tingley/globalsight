@@ -1,0 +1,17 @@
+.highlight {
+  margin: 0px;
+  padding: 0px;
+  background-color: rgba(180, 0, 170, 0.3);
+  border-radius: 4px;
+}
+
+ .highlight.begin {
+  border-radius: 4px 0px 0px 4px;
+}
+
+ .highlight.end {
+  border-radius: 0px 4px 4px 0px;
+}
+ .highlight.middle {
+  border-radius: 0px;
+}

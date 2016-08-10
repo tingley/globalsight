@@ -194,6 +194,8 @@ File jsFile = new File(jsPath);
 <link type="text/css" rel="StyleSheet" id="cssEditorUntranslated" href="/globalsight/envoy/edit/online/editorUntranslated.css">
 <link rel="stylesheet" type="text/css" href="/globalsight/jquery/easyui.css">
 <link rel="stylesheet" type="text/css" href="/globalsight/jquery/icon.css">
+<script src="/globalsight/envoy/edit/inctxrv/htmlPreview.js"></script>
+<link rel="stylesheet" type="text/css" href="/globalsight/envoy/edit/inctxrv/htmlPreview.css">
 <link type="text/css" rel="StyleSheet" id="cssPtag"
   href="/globalsight/envoy/edit/online2/ptag.css">
 <STYLE>
@@ -668,6 +670,25 @@ function SE(tuId, tuvId, subId, p_forceComment)
       }
         
       parent.parent.source.content.findSegment(format, tuId, srcSegmentNoTag, tgtSegmentNoTag, donotMove, pageNum, repIndex);
+    } else if (typeof(parent.parent.source.HighlightHtmlPreviewSegment) != "undefined"){
+  	  
+  	  if (typeof(window.parent.parent.parent.localData) != "undefined"
+  		  && typeof(window.parent.parent.parent.localData.source) != "undefined"
+  		  && typeof(window.parent.parent.parent.localData.target) != "undefined")
+  	  {
+  		  format = window.parent.parent.parent.localData.source[0].format;
+  		  
+  		  for(var i0 = 0; i0 < window.parent.parent.parent.localData.target.length; i0++)
+  		  {
+  			  var seg0 = window.parent.parent.parent.localData.target[i0];
+  			  if (seg0.tuId == tuId && seg0.subId == subId)
+  		      {
+  				  parent.parent.source.HighlightHtmlPreviewSegment(tuId, seg0.tuvId, subId);
+  				  parent.parent.source.HighlightHtmlPreviewSegment(tuId, window.parent.parent.parent.localData.source[i0].tuvId, subId);
+  				  break;
+  		      }
+  		  }
+  	  }	  
     }
 
     if (g_reviewMode || p_forceComment)

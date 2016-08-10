@@ -128,6 +128,8 @@ pre {
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
 <script src="/globalsight/includes/ContextMenu.js"></script>
+<script src="/globalsight/envoy/edit/inctxrv/htmlPreview.js"></script>
+<link rel="stylesheet" type="text/css" href="/globalsight/envoy/edit/inctxrv/htmlPreview.css">
 <%if(jsFile.exists()){ %>
 <link href="/globalsight/javaScriptClient/jqueryUI/css/smoothness/jquery-ui-1.9.1.custom.min.css" rel="stylesheet"></link>
 <script src="/globalsight/javaScriptClient/jqueryUI/js/jquery-1.8.2.min.js"></script>
@@ -277,6 +279,24 @@ function SE(tuId, tuvId, subId, p_forceComment)
 	 }
 	  
       parent.parent.target.content.findSegment(format, tuId, tgtSegmentNoTag, "", donotMove, pageNum, repIndex);
+  } else if (typeof(parent.parent.target.HighlightHtmlPreviewSegment) != "undefined"){
+	  
+	  if (typeof(window.parent.parent.parent.localData) != "undefined"
+		  && typeof(window.parent.parent.parent.localData.source) != "undefined"
+		  && typeof(window.parent.parent.parent.localData.target) != "undefined")
+	  {
+		  format = window.parent.parent.parent.localData.source[0].format;
+		  
+		  for(var i0 = 0; i0 < window.parent.parent.parent.localData.target.length; i0++)
+		  {
+			  var seg0 = window.parent.parent.parent.localData.target[i0];
+			  if (seg0.tuId == tuId && seg0.subId == subId)
+		      {
+				  parent.parent.target.HighlightHtmlPreviewSegment(tuId, seg0.tuvId, subId);
+				  break;
+		      }
+		  }
+	  }	  
   }
 }
 

@@ -924,17 +924,17 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         boolean bUpdateSource = false;
         boolean bUpdateTarget = false;
 
-        p_state.setSourceAsTarget("1".equals(p_request.getParameter("asSource")));
-        
         EditorState.Layout layout = p_state.getLayout();
         String value;
         if ((value = p_request.getParameter("srcViewMode")) != null)
         {
+            p_state.setSourceAsTarget("1".equals(p_request.getParameter("asSource")));
             layout.setSourceViewMode(Integer.parseInt(value));
             bUpdateSource = true;
         }
         if ((value = p_request.getParameter("trgViewMode")) != null)
         {
+            p_state.setSourceAsTarget("1".equals(p_request.getParameter("asSource")));
             layout.setTargetViewMode(Integer.parseInt(value));
             bUpdateTarget = true;
         }
@@ -1604,6 +1604,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         }
         else
         {
+            p_state.getRenderingOptions().setFromIncontextReviewEdit(true);
             html = EditorHelper.getSourcePageView(p_state, false, p_searchMap);
             html = OfficeContentPostFilterHelper.fixHtmlForSkeleton(html);
             html = replaceImgForFirefox(html, p_isIE);

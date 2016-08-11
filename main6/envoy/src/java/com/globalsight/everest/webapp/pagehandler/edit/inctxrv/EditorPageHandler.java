@@ -963,6 +963,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             layout.setSourceViewMode(VIEWMODE_DETAIL);
             layout.setTargetViewMode(VIEWMODE_DETAIL);
             p_state.setTargetPageHtml(null);
+            p_state.setSourceAsTarget(false);
 
             if ("true".equals(value))
             {
@@ -1080,6 +1081,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         {
             layout.setSourceViewMode(VIEWMODE_DETAIL);
             layout.setTargetViewMode(VIEWMODE_DETAIL);
+            p_state.setSourceAsTarget(false);
             
             int i_direction = 0;
             if (!value.startsWith("0"))

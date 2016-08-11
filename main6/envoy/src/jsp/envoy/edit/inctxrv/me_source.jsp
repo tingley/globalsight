@@ -100,19 +100,11 @@ pre {
                 display: block;
               }
 
-<% if (layout.getTargetViewMode() == EditorConstants.VIEWMODE_PREVIEW) { %>
-A         { color: <%=styles.m_A_color%>; text-decoration: none}
-A:link    { color: <%=styles.m_A_color%>; }
-A:hover   { color: <%=styles.m_A_color%>; }
-A:active  { color: <%=styles.m_A_active%>; }
-A:visited { color: <%=styles.m_A_visited%>; }
-<% } else { %>
 A         { color: blue; text-decoration: none}
 A:link    { color: blue; }
 A:hover   { color: blue; }
 A:active  { color: blue; }
 A:visited { color: blue; }
-<% } %>
 .alt { background:#EEEEEE;} 
 .firsttd {height:'23';width:'32'} 
 .lbid{height:'23';width:'3'} 
@@ -128,6 +120,8 @@ pre {
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
 <script src="/globalsight/includes/ContextMenu.js"></script>
+<script src="/globalsight/envoy/edit/inctxrv/htmlPreview.js"></script>
+<link rel="stylesheet" type="text/css" href="/globalsight/envoy/edit/inctxrv/htmlPreview.css">
 <%if(jsFile.exists()){ %>
 <link href="/globalsight/javaScriptClient/jqueryUI/css/smoothness/jquery-ui-1.9.1.custom.min.css" rel="stylesheet"></link>
 <script src="/globalsight/javaScriptClient/jqueryUI/js/jquery-1.8.2.min.js"></script>
@@ -277,6 +271,24 @@ function SE(tuId, tuvId, subId, p_forceComment)
 	 }
 	  
       parent.parent.target.content.findSegment(format, tuId, tgtSegmentNoTag, "", donotMove, pageNum, repIndex);
+  } else if (typeof(parent.parent.target.HighlightHtmlPreviewSegment) != "undefined"){
+	  
+	  if (typeof(window.parent.parent.parent.localData) != "undefined"
+		  && typeof(window.parent.parent.parent.localData.source) != "undefined"
+		  && typeof(window.parent.parent.parent.localData.target) != "undefined")
+	  {
+		  format = window.parent.parent.parent.localData.source[0].format;
+		  
+		  for(var i0 = 0; i0 < window.parent.parent.parent.localData.target.length; i0++)
+		  {
+			  var seg0 = window.parent.parent.parent.localData.target[i0];
+			  if (seg0.tuId == tuId && seg0.subId == subId)
+		      {
+				  parent.parent.target.HighlightHtmlPreviewSegment(tuId, seg0.tuvId, subId);
+				  break;
+		      }
+		  }
+	  }	  
   }
 }
 

@@ -624,13 +624,38 @@ public class GxmlUtil
             String p_dataFormat, TargetPage p_page, Collection p_imageMaps,
             Long p_tuvId)
     {
+        return getDisplayHtmlForPreview(p_node, p_dataFormat, p_page, p_imageMaps, p_tuvId, true);
+    }
+    
+    /**
+     * <p>
+     * Converts a GXML fragment to an HTML display string for Preview Mode.
+     * </p>
+     * 
+     * <p>
+     * This is just a wrapper that sets up the recursion context for the worker
+     * function.
+     * </p>
+     */
+    static public String getDisplayHtmlForPreview(GxmlElement p_node,
+            String p_dataFormat, TargetPage p_page, Collection p_imageMaps,
+            Long p_tuvId, boolean showInternalTag)
+    {
         StringBuffer result = new StringBuffer();
         HashMap context = new HashMap();
 
         getDisplayHtmlForPreview(p_node, p_dataFormat, p_page, p_imageMaps,
-                p_tuvId, context, true, result);
+                p_tuvId, context, true, result, false);
 
         return result.toString();
+    }
+    
+    static private void getDisplayHtmlForPreview(GxmlElement p_node,
+            String p_dataFormat, TargetPage p_page, Collection p_imageMaps,
+            Long p_tuvId, HashMap p_context, boolean p_isRoot,
+            StringBuffer p_res){
+        getDisplayHtmlForPreview(p_node, p_dataFormat, p_page, p_imageMaps, p_tuvId, p_context,
+                p_isRoot, p_res, true);
     }
 
     /**
@@ -645,7 +670,7 @@ public class GxmlUtil
     static private void getDisplayHtmlForPreview(GxmlElement p_node,
             String p_dataFormat, TargetPage p_page, Collection p_imageMaps,
             Long p_tuvId, HashMap p_context, boolean p_isRoot,
-            StringBuffer p_res)
+            StringBuffer p_res, boolean showInternalTag)
     {
         if (p_node == null)
         {
@@ -672,7 +697,7 @@ public class GxmlUtil
                         GxmlElement child = (GxmlElement) it.next();
                         boolean isInternalNode = isInternalNode(child,
                                 p_context);
-                        if (isInternalNode
+                        if (showInternalTag && isInternalNode
                                 && child.getType() == GxmlElement.BPT)
                         {
                             p_res.append(getInternalDisplayHtml(child));
@@ -698,7 +723,7 @@ public class GxmlUtil
                                     false, p_res);
                         }
 
-                        if (isInternalNode
+                        if (showInternalTag && isInternalNode
                                 && child.getType() == GxmlElement.EPT)
                         {
                             p_res.append(getInternalDisplayHtml(child));

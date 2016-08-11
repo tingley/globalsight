@@ -84,6 +84,12 @@ function UnhighlightSegment(p_tuId, p_tuvId, p_subId)
     content.UnhighlightSegment(p_tuId, p_tuvId, p_subId);
 }
 
+
+function HighlightHtmlPreviewSegment(tuId, tuvId, subId)
+{
+	content.HighlightHtmlPreviewSegment(tuId, tuvId, subId);
+}
+
 function RefreshTargetPane()
 {
     content.Refresh();

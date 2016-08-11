@@ -79,7 +79,7 @@ function reloadTargetContent(modeId)
       "<%=contentUrl%>" + "&asSource=1&trgViewMode=" + modeId;
   }catch(e)
   {
-     document.location= "/globalsight/ControlServlet?linkName=pane1&pageName=inctxrvED3&trgViewMode=" + modeId;
+     document.location= "/globalsight/ControlServlet?linkName=pane1&pageName=inctxrvED3&asSource=1&trgViewMode=" + modeId;
   }
 }
 
@@ -131,6 +131,12 @@ function showTargetPDFPreview(pageName)
 function HighlightSegment(){}
 function UnhighlightSegment(){}
 function RefreshTargetPane(){}
+
+function HighlightHtmlPreviewSegment(tuId, tuvId, subId)
+{
+	content.HighlightHtmlPreviewSegment(tuId, tuvId, subId);
+}
+
 </SCRIPT>
 <FRAMESET ROWS="*,25" BORDER="0">
   <FRAME SRC="<%=contentUrl%>" NAME="content" SCROLLING="auto"

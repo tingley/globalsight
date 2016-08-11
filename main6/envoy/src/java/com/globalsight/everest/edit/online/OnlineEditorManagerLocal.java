@@ -4380,7 +4380,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 
                 if ("text".equals(p_srcTuv.getTu(jobId).getTuType()) && p_options.isFromIncontextReviewEdit()) 
                 {
-                    result.append("<span " + dir + " id=\"seg" + tuId + "_" + p_srcTuv.getId() + "_" + 0 + "\">" + segment + "</span>");
+                    result.append("<gsspan " + dir + " id=\"seg" + tuId + "_" + p_srcTuv.getId() + "_" + 0 + "\">" + segment + "</gsspan>");
                 } 
                 else
                 {

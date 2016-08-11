@@ -3600,7 +3600,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
                     if (p_options.isFromIncontextReviewEdit()) 
                     {
-                        result.append("<span " + dir + " id=\"seg" + tuId + "_" + tuvId + "_" + 0 + "\">" + segment + "</span>");
+                        result.append("<gsspan " + dir + " id=\"seg" + tuId + "_" + tuvId + "_" + 0 + "\">" + segment + "</gsspan>");
                     }
                     else if ((!reviewMode || reviewReadOnly)
                             && (isReadOnly || isExcluded))

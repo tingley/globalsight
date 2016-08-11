@@ -3589,7 +3589,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 {
                     segment = GxmlUtil.getDisplayHtmlForPreview(elem, dataType,
                             p_targetPage, p_imageMaps,
-                            p_targetTuv.getIdAsLong());
+                            p_targetTuv.getIdAsLong(), !p_options.isFromIncontextReviewEdit());
 
                     if (reviewMode || reviewReadOnly)
                     {

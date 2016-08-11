@@ -100,19 +100,11 @@ pre {
                 display: block;
               }
 
-<% if (layout.getTargetViewMode() == EditorConstants.VIEWMODE_PREVIEW) { %>
-A         { color: <%=styles.m_A_color%>; text-decoration: none}
-A:link    { color: <%=styles.m_A_color%>; }
-A:hover   { color: <%=styles.m_A_color%>; }
-A:active  { color: <%=styles.m_A_active%>; }
-A:visited { color: <%=styles.m_A_visited%>; }
-<% } else { %>
 A         { color: blue; text-decoration: none}
 A:link    { color: blue; }
 A:hover   { color: blue; }
 A:active  { color: blue; }
 A:visited { color: blue; }
-<% } %>
 .alt { background:#EEEEEE;} 
 .firsttd {height:'23';width:'32'} 
 .lbid{height:'23';width:'3'} 

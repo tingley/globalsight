@@ -960,6 +960,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         }
         if ((value = p_request.getParameter("reviewMode")) != null)
         {
+            layout.setSourceViewMode(VIEWMODE_DETAIL);
+            layout.setTargetViewMode(VIEWMODE_DETAIL);
             p_state.setTargetPageHtml(null);
 
             if ("true".equals(value))

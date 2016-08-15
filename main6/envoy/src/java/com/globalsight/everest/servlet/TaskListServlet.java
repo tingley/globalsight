@@ -618,7 +618,7 @@ public class TaskListServlet extends HttpServlet
 
                 ExportParameters ep = new ExportParameters(workflow, codeSet, exportLocation,
                         localeSubDir, bomType);
-                ep.setXlfSrcAsTrg(0);
+                ep.setXlfSrcAsTrg(ExportParameters.XLF_SRC_AS_TRG_NOT_SET);
 
                 ArrayList<Long> workflowIdList = new ArrayList<Long>();
                 workflowIdList.add(workflow.getId());

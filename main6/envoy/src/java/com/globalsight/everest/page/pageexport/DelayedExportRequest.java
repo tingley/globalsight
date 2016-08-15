@@ -16,26 +16,25 @@
  */
 package com.globalsight.everest.page.pageexport;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
+
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.persistence.PersistentObject;
-import com.globalsight.everest.request.RequestImpl;
 import com.globalsight.everest.page.PageException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Iterator;
-import java.util.Calendar;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
+import com.globalsight.everest.persistence.PersistentObject;
 
 /**
  * This class represents an export request whose export has been delayed.
  * It holds information necessary to perform the export at a later time.
  */
-public class DelayedExportRequest
-    extends PersistentObject
+public class DelayedExportRequest extends PersistentObject
 {
+    private static final long serialVersionUID = 8474892327751910339L;
+
     private static final String PIPE = "|";
 
     private String m_codeSet;

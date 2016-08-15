@@ -148,7 +148,7 @@ $(
 
 function initTree()
 {
-	// Initialize MindTouch Pages tree
+	// Initialize Pages tree
     $("#treeDIV").dynatree({
         title: "Loading Git Connector tree",
         persist: false,

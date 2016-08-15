@@ -162,7 +162,6 @@
    String createZipJobUrl = LinkHelper.getWebActivityURL(request, "createZipJobs");
    String createCotiJobUrl = LinkHelper.getWebActivityURL(request, "cotiJobs");
    String eloquaUrl = LinkHelper.getWebActivityURL(request, "eloqua");
-   String mindtouchUrl = LinkHelper.getWebActivityURL(request, "mindtouch");
    String systemParametersUrl = LinkHelper.getWebActivityURL(request, "configuration");
    String adminSystemParametersUrl = LinkHelper.getWebActivityURL(request, "adminConfiguration");
    String remoteIpUrl = LinkHelper.getWebActivityURL(request, "remoteIpConfiguration");

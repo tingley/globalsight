@@ -70,7 +70,6 @@ public interface Job extends WorkObject
     public static final String JOB_TYPE_BLAISE = "blaise";
     public static final String JOB_TYPE_GIT = "git";
     public static final String JOB_TYPE_CVS = "cvs";
-    public static final String JOB_TYPE_MINDTOUCH = "mindtouch";
     public static final String JOB_TYPE_ELOQUA = "eloqua";
     public static final String JOB_TYPE_COTI = "coti";
     public static final String JOB_TYPE_RSS = "rss";
@@ -460,6 +459,4 @@ public interface Job extends WorkObject
     public boolean isEloquaJob();
 
     public boolean isGitJob();
-
-    public boolean isMindTouchJob();
 }

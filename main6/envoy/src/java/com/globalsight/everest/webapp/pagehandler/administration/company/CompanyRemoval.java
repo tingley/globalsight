@@ -924,10 +924,6 @@ public class CompanyRemoval
             removeGitConnectorFileMapping(conn);
             //remove git connector
             removeGitConnector(conn);
-            // remove mindtouch target servers
-            removeMindTouchTargetServers(conn);
-            // remove mindtouch connectors
-            removeMindTouchConnectors(conn);
             // remove blaise connector job
             removeBlaiseConnectorJob(conn);
             // remove blaise connectors
@@ -3229,22 +3225,6 @@ public class CompanyRemoval
         execOnce(conn, SQL_DELETE_SCORECARD_CATEGORY_BY_COMPANY_ID, companyId);
 
         logEnd("CATEGORY_SCORECARD");
-    }
-
-    private void removeMindTouchTargetServers(Connection conn) throws SQLException
-    {
-        logStart("CONNECTOR_MINDTOUCH_TARGET_SERVER");
-		String sql = "delete from CONNECTOR_MINDTOUCH_TARGET_SERVER where company_id = ?";
-        execOnce(conn, sql, company.getId());
-        logEnd("CONNECTOR_MINDTOUCH_TARGET_SERVER");
-    }
-
-    private void removeMindTouchConnectors(Connection conn) throws SQLException
-    {
-        logStart("CONNECTOR_MINDTOUCH");
-		String sql = "delete from CONNECTOR_MINDTOUCH where company_id = ?";
-        execOnce(conn, sql, company.getId());
-        logEnd("CONNECTOR_MINDTOUCH");
     }
 
     private void removeBlaiseConnectorJob(Connection conn) throws SQLException

@@ -21,7 +21,7 @@ public class GitConnectorFileMappingComparator extends StringComparator
     }
 
     /**
-     * Performs a comparison of two MindTouchConnectorComparator objects.
+     * Performs a comparison of two GitConnectorFileMapping objects.
      */
     public int compare(java.lang.Object p_A, java.lang.Object p_B)
     {

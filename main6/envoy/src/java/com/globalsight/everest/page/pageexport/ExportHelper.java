@@ -588,11 +588,11 @@ public class ExportHelper
                     sourcePageBomType = m_sourcePage.getBOMType();
                     PageTemplate pageTemplate = getExportTemplate();
                     pageTemplate.setTabsTrip(isTabstrip);
-                    boolean srcAsTrg = ServerProxy.getJobHandler()
+                    boolean isBlaiseJob = ServerProxy.getJobHandler()
                             .getJobById(m_sourcePage.getJobId()).isBlaiseJob();
-                    if (srcAsTrg)
+                    if (isBlaiseJob)
                     {
-                        pageTemplate.setXlfSrcAsTrg(1);
+                        pageTemplate.setXlfSrcAsTrg(ExportParameters.XLF_SRC_AS_TRG_YES);
                     }
                     else
                     {

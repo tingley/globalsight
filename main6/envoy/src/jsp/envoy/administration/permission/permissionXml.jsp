@@ -196,6 +196,7 @@
      <permission id="<%=Permission.LOCPROFILES_DETAILS%>"/>
      <permission id="<%=Permission.LOCPROFILES_EDIT%>"/>
      <permission id="<%=Permission.LOCPROFILES_NEW%>"/>
+     <permission id="<%=Permission.LOCPROFILES_REPORT%>"/>
   </permission>
   <permission id="<%=Permission.SUPPORT_FILES_VIEW%>">
      <permission id="<%=Permission.SUPPORT_FILES_REMOVE%>"/>

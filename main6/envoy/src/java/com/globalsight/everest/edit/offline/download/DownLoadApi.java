@@ -1597,7 +1597,6 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 {
                     jobList.add(m_downloadParams.getRightJob());
                 }
-                Set<Integer> mtThresholdSet = new HashSet<Integer>();
                 boolean useMT = false;
                 for (Job j : jobList)
                 {
@@ -1631,7 +1630,6 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                             {
                                 if (wf.getUseMT())
                                 {
-                                    mtThresholdSet.add(wf.getMtThreshold());
                                     useMT = true;
                                 }
                             }
@@ -1643,10 +1641,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 sb = new StringBuffer();
                 if (useMT)
                 {
-                    for (Integer score : mtThresholdSet)
-                    {
                         String tmxPenalty = DownloadHelper.makeTmxParentPath(m_downloadParams);
-                        String penaltyDir = "mt/penalty-" + (100 - score) + "/";
+                        String penaltyDir = "mt/penalty-" + 40 + "/";
                         tmxPenalty = tmxPenalty + penaltyDir + fname;
 
                         sb.setLength(0);
@@ -1661,7 +1657,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                         Vector<OfflineSegmentData> tempSegments = new Vector<OfflineSegmentData>();
                         for (OfflineSegmentData segment : allSegments)
                         {
-                            if (segment.getMatchValue() == score)
+                            if (segment.getMatchValue() == 60)
                             {
                                 tempSegments.add(segment);
                             }
@@ -1670,7 +1666,6 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                         m_zipper.writePath(tmxPenalty);
                         m_zipper.writeTmxPage(p_page, p_downloadParams,
                                 TmxUtil.TMX_LEVEL_TWO, convertLF, mode, false);
-                    }
                 }
                 else
                 {

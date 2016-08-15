@@ -43,8 +43,7 @@ public class ExportParameters implements java.io.Serializable, Cloneable
 {
     private static final long serialVersionUID = 219733514107887560L;
 
-    static private final Logger s_category = Logger
-            .getLogger(ExportParameters.class);
+    static private final Logger s_category = Logger.getLogger(ExportParameters.class);
 
     private String m_exportCodeset = null;
     private String m_targetURL = null;
@@ -52,7 +51,12 @@ public class ExportParameters implements java.io.Serializable, Cloneable
     private String m_exportLocation = null;
     private String m_localeSubDir = null;
     private int m_bomType = 0;
-    private int m_xlfSrcAsTrg = -1;
+
+    private int m_xlfSrcAsTrg = XLF_SRC_AS_TRG_NOT_SET;
+
+    public static final int XLF_SRC_AS_TRG_NOT_SET = -1;
+    public static final int XLF_SRC_AS_TRG_NO = 0;
+    public static final int XLF_SRC_AS_TRG_YES = 1;
 
     // For documentum Job
     private long m_workflowId = 0;

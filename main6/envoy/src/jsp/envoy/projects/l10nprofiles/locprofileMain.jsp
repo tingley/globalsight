@@ -39,6 +39,7 @@
     String dupURL = duplicate.getPageURL() + "&action=dup";
     String detailsURL = details.getPageURL() + "&action=details";
     String removeURL = remove.getPageURL() + "&action=remove";
+    String reportURL = selfURL+"&action=report";
     String title = bundle.getString("lb_loc_profiles");
     String helperText = bundle.getString("helper_text_loc_profile_main");
 
@@ -85,37 +86,30 @@ var checkNewMessage;
 
 function enableButtons()
 {
-	if ($(":checked").not($("option")).not($("#selectAll")).length == 1) {
-		if(locprofileForm.detailsBtn){
-		    locprofileForm.detailsBtn.disabled = false;
+	var count = $(":checked").not($("option")).not($("#selectAll")).length;
+	if (count>0) {
+		$("#reportBtn").attr("disabled",false);
+		if(count==1)
+		{
+			$("#detailsBtn").attr("disabled",false);
+			$("#removeBtn").attr("disabled",false);
+			<% if (duplicationEnabled) { %>
+				$("#dupBtn").attr("disabled",false);
+			<% } %>
+		}else{
+			$("#detailsBtn").attr("disabled",true);
+			$("#removeBtn").attr("disabled",true);
+			<% if (duplicationEnabled) { %>
+				$("#dupBtn").attr("disabled",true);
+			<% } %>
 		}
-		if(locprofileForm.removeBtn){
-			locprofileForm.removeBtn.disabled = false;
 		}
-		if(locprofileForm.editBtn){
-			locprofileForm.editBtn.disabled = false;
-		}
-<% if (duplicationEnabled) { %>
-		if(locprofileForm.dupBtn){
-    		locprofileForm.dupBtn.disabled = false;
-		}
-<% } %>
-	}
 	else {
-		if(locprofileForm.detailsBtn){
-		    locprofileForm.detailsBtn.disabled = true;
-		}
-		if(locprofileForm.removeBtn){
-			locprofileForm.removeBtn.disabled = true;
-		}
-		if(locprofileForm.editBtn){
-			locprofileForm.editBtn.disabled = true;
-		}
-<% if (duplicationEnabled) { %>
-		if(locprofileForm.dupBtn){
-    		locprofileForm.dupBtn.disabled = true;
-		}
-<% } %>
+		$("#detailsBtn").attr("disabled",true);
+		$("#removeBtn").attr("disabled",true);
+		<% if (duplicationEnabled) { %>
+			$("#dupBtn").attr("disabled",true);
+		<% } %>
 	}
 }
 
@@ -150,6 +144,8 @@ function submitForm(button)
                  return;
             }
             locprofileForm.action = "<%=dupURL%>";
+        }else if(button =="Report"){
+        	locprofileForm.action="<%=reportURL%>";
         }
     }
     locprofileForm.submit();
@@ -214,6 +210,11 @@ function sendAjaxForCheckNewMessage(){
 		checkNewMessage = data;
 		$("#newButton").removeAttr("disabled");
 	})
+}
+
+function download(){
+	alert($(":checked").not($("option")).not($("#selectAll")).length);
+	value = getRadioValue(locprofileForm.radioBtn);
 }
 
 </SCRIPT>
@@ -306,21 +307,25 @@ function sendAjaxForCheckNewMessage(){
 		    <td style="padding-top:5px" align="left">
 		    <amb:permission name="<%=Permission.LOCPROFILES_REMOVE%>" >
 		        <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>"
-		            name="removeBtn" disabled onClick="submitForm('Remove');">
+		            name="removeBtn" id="removeBtn" disabled onClick="submitForm('Remove');">
 		    </amb:permission>
 		    <amb:permission name="<%=Permission.LOCPROFILES_DETAILS%>" >
 		        <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_details")%>..."
-		            name="detailsBtn" disabled onClick="submitForm('Details');">
+		            name="detailsBtn" id="detailsBtn" disabled onClick="submitForm('Details');">
 		    </amb:permission>
 <% if (duplicationEnabled) { %>
     <amb:permission name="<%=Permission.LOCPROFILES_DUP%>" >
         <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_duplicate")%>..."
-            name="dupBtn" disabled onClick="submitForm('Dup');">
+            name="dupBtn" id="dupBtn" disabled onClick="submitForm('Dup');">
     </amb:permission>
 <%  } %>
 		    <amb:permission name="<%=Permission.LOCPROFILES_NEW%>" >
 		        <INPUT id="newButton" TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..."
 		            onClick="submitForm('New');">
+		    </amb:permission>
+		    <amb:permission name="<%=Permission.LOCPROFILES_REPORT %>">
+		    	<INPUT id="reportBtn" TYPE="button" VALUE="<%=bundle.getString("report") %>"
+		    	   name="reportBtn" disabled onClick="submitForm('Report');">
 		    </amb:permission>
 		    </td>
 		 </tr>

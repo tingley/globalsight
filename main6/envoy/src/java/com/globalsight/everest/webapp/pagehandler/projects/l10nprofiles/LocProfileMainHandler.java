@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles;
 
+import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.LocProfileComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper;
 import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.log.OperationLog;
@@ -117,6 +119,16 @@ public class LocProfileMainHandler extends PageHandler implements
             p_response.getWriter().write(message);
             return;
         }
+      else if ("report".equals(action))
+      {
+          List<File> reports = new ArrayList<File>();
+          LocProfileReportGenerator generator = new LocProfileReportGenerator(p_request);
+          File[] files = generator.generateOneReport(p_request, p_response);
+          ReportHelper.addFiles(reports, files);
+          String fileName = getDownloadFileName(reports);
+          ReportHelper.sendFiles(reports, fileName, p_response);
+          return;
+      }
         try
         {
             dataForTable(p_request, session);
@@ -140,6 +152,14 @@ public class LocProfileMainHandler extends PageHandler implements
         // Call parent invokePageHandler() to set link beans and invoke JSP
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
+    }
+
+    private String getDownloadFileName(List<File> p_reports)
+    {
+        if (p_reports == null || p_reports.size() == 0)
+            return null;
+        else
+            return p_reports.get(0).getName();
     }
 
     private void createOrModifyL10nProfile(HttpServletRequest p_request)

@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -76,8 +77,7 @@ public class PageTemplate extends PersistentObject
 
     // Need to have a map that contains the corresponding string value of
     // the page template type (the value stored in db)
-    static private Map<Integer, String> s_typeMap = new HashMap<Integer, String>(
-            4);
+    static private Map<Integer, String> s_typeMap = new HashMap<Integer, String>(4);
     static
     {
         s_typeMap.put(new Integer(TYPE_EXPORT), "EXP");
@@ -108,7 +108,7 @@ public class PageTemplate extends PersistentObject
     // target as original, but sometimes it need source as target.
     // -1 means this is an automatic export, user does not specify this
     // parameter,it will refer to file profile definition.
-    private int populateSrcIntoUntranslatedTrg = -1;
+    private int populateSrcIntoUntranslatedTrg = ExportParameters.XLF_SRC_AS_TRG_NOT_SET;
 
     public void setXlfSrcAsTrg(int p_value)
     {
@@ -346,24 +346,20 @@ public class PageTemplate extends PersistentObject
                     String trgEnd = "&lt;/target&gt;";
 
                     // if the job creating file is from worldserver, then add
-                    // the
-                    // leverage match results into the alt-trans parts
+                    // the leverage match results into the alt-trans parts
                     if (tempStr.indexOf(trgEnd) > -1 && !altStr.isEmpty())
                     {
                         int index1 = tempStr.indexOf(trgEnd) + trgEnd.length();
                         String str0 = tempStr.substring(0, index1);
-                        String str1 = tempStr.substring(index1,
-                                tempStr.length());
-                        tempStr = str0 + EditUtil.encodeXmlEntities(altStr)
-                                + str1;
+                        String str1 = tempStr.substring(index1, tempStr.length());
+                        tempStr = str0 + EditUtil.encodeXmlEntities(altStr) + str1;
                         altStr = new String();
                     }
 
                     if (part.getTuId() > 0)
                     {
                         Tuv targetTuv = part.getTuv(target_locale_id, jobId);
-                        Tuv sourceTuv = part.getTuv(m_sourcePage.getLocaleId(),
-                                jobId);
+                        Tuv sourceTuv = part.getTuv(m_sourcePage.getLocaleId(), jobId);
                         Tu tu = part.getTu(jobId);
 
                         boolean isLocalized = isTuvLocalized(targetTuv);
@@ -371,14 +367,12 @@ public class PageTemplate extends PersistentObject
                                 .getValue());
 
                         if (tu.getGenerateFrom() != null
-                                && tu.getGenerateFrom().equals(
-                                        TuImpl.FROM_WORLDSERVER))
+                                && tu.getGenerateFrom().equals(TuImpl.FROM_WORLDSERVER))
                         {
                             // if the job creating file is from worldserver,
                             // then add the leverage match results into the
                             // alt-trans parts
-                            altStr = pt
-                                    .getAltTrans(sourceTuv, targetTuv, jobId);
+                            altStr = pt.getAltTrans(sourceTuv, targetTuv, jobId);
 
                             // If the tuv state is "localized" or
                             // "exact_match_localized"", add an attribute "isLocalized=yes"
@@ -386,8 +380,7 @@ public class PageTemplate extends PersistentObject
                             // "isLocalized = no"
                             if (isLocalized || isComplete)
                             {
-                                tempStr = pt.processSkeleton(tempStr,
-                                        targetTuv, jobId);
+                                tempStr = pt.processSkeleton(tempStr, targetTuv, jobId);
                             }
                         }
                     }
@@ -412,10 +405,8 @@ public class PageTemplate extends PersistentObject
                         && tu instanceof TuImpl)
                 {
                     // For GBS-1864 by York on 2011-03-07
-                    boolean revertTrgCase1 = needRevertXlfTargetCase1(
-                            sourceTuv, targetTuv);
-                    boolean revertTrgCase2 = needRevertXlfTargetCase2(tu,
-                            targetTuv);
+                    boolean revertTrgCase1 = needRevertXlfTargetCase1(sourceTuv, targetTuv);
+                    boolean revertTrgCase2 = needRevertXlfTargetCase2(tu, targetTuv);
                     if (revertTrgCase1 || revertTrgCase2)
                     {
                         tuvString = revertTargetForXlf(tu, sourceTuv, targetTuv);
@@ -445,8 +436,7 @@ public class PageTemplate extends PersistentObject
                         if (result.indexOf(sheetName) != -1)
                         {
                             i++;
-                            mapOfSheetTabs.put(sheetName,
-                                    getSheetValue(tuvString));
+                            mapOfSheetTabs.put(sheetName, getSheetValue(tuvString));
                         }
                     }
                 }
@@ -504,8 +494,7 @@ public class PageTemplate extends PersistentObject
         if (sourceTuv == null || targetTuv == null)
             return false;
 
-        boolean isSrcEqualsToTrg = sourceTuv.getGxml().equals(
-                targetTuv.getGxml());
+        boolean isSrcEqualsToTrg = sourceTuv.getGxml().equals(targetTuv.getGxml());
         boolean isNotLocalized = (targetTuv.getState().getValue() == TuvState.NOT_LOCALIZED
                 .getValue());
         if (isSrcEqualsToTrg && isNotLocalized)
@@ -518,15 +507,15 @@ public class PageTemplate extends PersistentObject
             {
                 return false;
             }
-            // user does not specify this, refer to file profile definition.
+            // If user does not specify "populateSrcIntoUntranslatedTrg" value,
+            // refer to file profile setting.
             else
             {
                 boolean populateSrcIntoTrg = false;
                 try
                 {
                     long fpId = m_sourcePage.getRequest().getDataSourceId();
-                    FileProfile fp = ServerProxy
-                            .getFileProfilePersistenceManager()
+                    FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
                             .getFileProfileById(fpId, false);
                     populateSrcIntoTrg = (fp.getXlfSourceAsUnTranslatedTarget() == 1);
                 }
@@ -579,8 +568,7 @@ public class PageTemplate extends PersistentObject
             {
                 String matchedSegment = m2.group();
                 String internalSegment = m2.group(1);
-                newSegment = newSegment
-                        .replace(matchedSegment, internalSegment);
+                newSegment = newSegment.replace(matchedSegment, internalSegment);
                 m = p.matcher(newSegment);
             }
             else
@@ -614,13 +602,11 @@ public class PageTemplate extends PersistentObject
             Set<TargetPage> trgPages = new HashSet<TargetPage>();
             if (m_sourcePage != null)
             {
-                SourcePage sp = ServerProxy.getPageManager().getSourcePage(
-                        m_sourcePage.getId());
+                SourcePage sp = ServerProxy.getPageManager().getSourcePage(m_sourcePage.getId());
                 trgPages = sp.getTargetPages();
             }
 
-            for (Iterator trgPageIter = trgPages.iterator(); trgPageIter
-                    .hasNext();)
+            for (Iterator trgPageIter = trgPages.iterator(); trgPageIter.hasNext();)
             {
                 TargetPage tp = (TargetPage) trgPageIter.next();
                 if (tp.getGlobalSightLocale().getId() == target_locale_id)
@@ -664,12 +650,9 @@ public class PageTemplate extends PersistentObject
 
         boolean result = false;
         result = (p_tuv.getState().getValue() == TuvState.LOCALIZED.getValue())
-                || (p_tuv.getState().getValue() == TuvState.EXACT_MATCH_LOCALIZED
-                        .getValue())
-                || (p_tuv.getState().getValue() == TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED
-                        .getValue())
-                || (p_tuv.getState().getValue() == TuvState.UNVERIFIED_EXACT_MATCH
-                        .getValue());
+                || (p_tuv.getState().getValue() == TuvState.EXACT_MATCH_LOCALIZED.getValue())
+                || (p_tuv.getState().getValue() == TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED.getValue())
+                || (p_tuv.getState().getValue() == TuvState.UNVERIFIED_EXACT_MATCH.getValue());
 
         return result;
     }

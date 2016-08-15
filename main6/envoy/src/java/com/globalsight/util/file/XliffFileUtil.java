@@ -588,11 +588,17 @@ public class XliffFileUtil
         String content = "";
         String footer = "";
 
-        int contentBeginIndex = -1, contentEndIndex = -1;
+        int headerBeginWithoutBomIndex = -1, contentBeginIndex = -1, contentEndIndex = -1;
 
+        // GBS-4469
+        headerBeginWithoutBomIndex = fileContent.indexOf("<");
         contentBeginIndex = fileContent.indexOf("<file ");
         // Get header of original Xliff file
-        header = contentBeginIndex != -1 ? fileContent.substring(0, contentBeginIndex) : "";
+        if (headerBeginWithoutBomIndex != -1 && contentBeginIndex != -1
+                && headerBeginWithoutBomIndex < contentBeginIndex)
+        {
+            header = fileContent.substring(headerBeginWithoutBomIndex, contentBeginIndex);
+        }
         contentEndIndex = fileContent.lastIndexOf("</file>") + "</file>".length();
         // Get footer of original Xliff file
         footer = contentEndIndex != -1 ? fileContent.substring(contentEndIndex) : "";

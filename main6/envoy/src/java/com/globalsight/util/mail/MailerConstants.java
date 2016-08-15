@@ -36,58 +36,35 @@ import com.globalsight.scheduling.SchedulerConstants;
 public class MailerConstants
 {
     // Email subject keys
-    public static final String CANCEL_FAILURE_SUBJECT =
-        "cancelFailureSubject";
-    public static final String DISPATCH_SUBJECT =
-        "subjectJobDispatch";
-    public static final String DISPATCH_MESSAGE =
-        "manualJobDispatch";
-    public static final String DISPATCH_FAILURE_SUBJECT =
-        "dispatchFailureSubject";
-    public static final String INITIAL_IMPORT_FAILED_SUBJECT =
-        "importFailedSubject";
-    public static final String JOB_IMPORT_FAILED_SUBJECT =
-        "jobImportFailedSubject";
-    public static final String JOB_IMPORT_CORRECTION_SUBJECT =
-        "jobImportCorrectionSubject";
-    public static String PAGE_REIMPORT_TO_PM_SUBJECT =
-        "pageReimportedToPmSubject";
-    public static String PAGE_FAILED_TO_REIMPORT_SUBJECT =
-        "pageFailedReimportToPmSubject";
-    public static String WF_PM_CHANGE_FAILED_SUBJECT =
-        "subject_wfUpdateFailed";
-    public static String WF_PM_CHANGE_COMPLETED_SUBJECT =
-        "subject_wfUpdateCompleted";
-    public static final String EXPORT_FAILED_SUBJECT =
-        "exportFailedSubject";
-    public static final String DTD_VALIDATE_FAILED_SUBJECT =
-        "dtdFailedSubject";
-    public static final String PAGE_EFU_TO_PM_SUBJECT =
-        "pageExportForUpdateToPmSubject";
-    public static final String PAGE_FAILED_TO_EFU_SUBJECT =
-        "pageFailedExportForUpdateToPmSubject";
-    public static final String REPORT_EXPORT_COMPLETED_SUBJECT =
-        "subject_export_completed";
-    public static final String REPORT_EXPORT_FAILED_SUBJECT =
-        "subject_export_failed";
-    public static final String ESTIMATED_EXCEEDS_PLANNED_DATE =
-        "subjectEstimatedExceedsPlanned";
-    public static final String WF_IMPORT_FAILURE_SUBJECT =
-        "importFailureSubject";
-    public static final String STF_CREATION_FAILED_SUBJECT =
-        "subject_stf_creation_failed";
-    public static final String CUSTOMER_UPLOAD_COMPLETED_SUBJECT =
-        "subject_customerUploadCompleted";
-    public static final String DESKTOPICON_UPLOAD_COMPLETED_SUBJECT =
-        "subject_desktopiconUploadCompleted";
-    public static final String GXML_EDIT_SUCCESS =
-        "subjectGxmlEditSuccess";
-    public static final String GXML_EDIT_FAILURE =
-        "subjectGxmlEditFailure";
-    public static final String LOGIN_RESET_PASSWORD_SUBJECT 		= "subject_login_resetPassword";
-    public static final String LOGIN_RETRIEVE_UESRNAME_SUBJECT 		= "subject_login_retrieveUsernames";
-    public static final String JOB_IMPORT_SUCC_SUBJECT              = "subject_job_import_succ";
-    public static final String SUBJECT_UPLOADALIGNMENTCOMPLETED     =   "subject_uploadAlignmentCompleted";
+    public static final String CANCEL_FAILURE_SUBJECT = "cancelFailureSubject";
+    public static final String DISPATCH_SUBJECT = "subjectJobDispatch";
+    public static final String DISPATCH_MESSAGE = "manualJobDispatch";
+    public static final String DISPATCH_FAILURE_SUBJECT = "dispatchFailureSubject";
+    public static final String INITIAL_IMPORT_FAILED_SUBJECT = "importFailedSubject";
+    public static final String JOB_IMPORT_FAILED_SUBJECT = "jobImportFailedSubject";
+    public static final String JOB_IMPORT_CORRECTION_SUBJECT = "jobImportCorrectionSubject";
+    public static final String PAGE_REIMPORT_TO_PM_SUBJECT = "pageReimportedToPmSubject";
+    public static final String PAGE_FAILED_TO_REIMPORT_SUBJECT = "pageFailedReimportToPmSubject";
+    public static final String WF_PM_CHANGE_FAILED_SUBJECT = "subject_wfUpdateFailed";
+    public static final String WF_PM_CHANGE_COMPLETED_SUBJECT = "subject_wfUpdateCompleted";
+    public static final String EXPORT_FAILED_SUBJECT = "exportFailedSubject";
+    public static final String DTD_VALIDATE_FAILED_SUBJECT = "dtdFailedSubject";
+    public static final String PAGE_EFU_TO_PM_SUBJECT = "pageExportForUpdateToPmSubject";
+    public static final String PAGE_FAILED_TO_EFU_SUBJECT = "pageFailedExportForUpdateToPmSubject";
+    public static final String REPORT_EXPORT_COMPLETED_SUBJECT = "subject_export_completed";
+    public static final String REPORT_EXPORT_FAILED_SUBJECT = "subject_export_failed";
+    public static final String ESTIMATED_EXCEEDS_PLANNED_DATE = "subjectEstimatedExceedsPlanned";
+    public static final String WF_IMPORT_FAILURE_SUBJECT = "importFailureSubject";
+    public static final String STF_CREATION_FAILED_SUBJECT = "subject_stf_creation_failed";
+    public static final String CUSTOMER_UPLOAD_COMPLETED_SUBJECT = "subject_customerUploadCompleted";
+    public static final String DESKTOPICON_UPLOAD_COMPLETED_SUBJECT = "subject_desktopiconUploadCompleted";
+    public static final String GXML_EDIT_SUCCESS = "subjectGxmlEditSuccess";
+    public static final String GXML_EDIT_FAILURE = "subjectGxmlEditFailure";
+    public static final String LOGIN_RESET_PASSWORD_SUBJECT = "subject_login_resetPassword";
+    public static final String LOGIN_RETRIEVE_UESRNAME_SUBJECT = "subject_login_retrieveUsernames";
+    public static final String JOB_IMPORT_SUCC_SUBJECT = "subject_job_import_succ";
+    public static final String SUBJECT_UPLOADALIGNMENTCOMPLETED = "subject_uploadAlignmentCompleted";
+
     // Email message keys
     public static final String MESSAGE_UPLOADALIGNMENTCOMPLETED    = "message_customerUploadCompleted";
     public static final String CUSTOMER_UPLOAD_COMPLETED_MESSAGE 	= "message_customerUploadCompleted";
@@ -95,7 +72,7 @@ public class MailerConstants
     public static final String LOGIN_RESET_PASSWORD_MESSAGE 		= "message_login_resetPassword";
     public static final String LOGIN_RETRIEVE_UESRNAME_MESSAGE 		= "message_login_retrieveUsernames";
     public static final String JOB_IMPORT_SUCC_MESSAGE              = "message_job_import_succ"; 
-    
+
     public static final String WORKFLOW_STATE_POST_FAILURE_SUBJECT = "subject_wfStatePostFailure";
     public static final String WORKFLOW_STATE_POST_FAILURE_MESSAGE = "message_wfStatePostFailure";
     
@@ -103,17 +80,20 @@ public class MailerConstants
     public static final String AUTO_ACCEPT_SUBJECT = "subject_autoaccept_task";
     public static final String AUTO_ACCEPT_MESSAGE = "message_autoaccept_task";
 
-    private static HashMap s_notificationMap = new HashMap();
+    public static final String SUBJECT_RESET_PASSWORD_NO_PERMISSION = "subject_noResetPasswordPermission";
+    public static final String MESSAGE_RESET_PASSWORD_NO_PERMISSION = "message_noResetPasswordPermission";
+
+    private static HashMap<String, String> s_notificationMap = new HashMap<String, String>();
 
     //keep lists of the categories of the notifications since these
     //are tied to permissions for system,workflow/project mgmt, and general
-    private static ArrayList s_systemNotifications = new ArrayList();
-    private static ArrayList s_wfNotifications = new ArrayList();
-    private static ArrayList s_generalNotifications = new ArrayList();
+    private static ArrayList<String> s_systemNotifications = new ArrayList<String>();
+    private static ArrayList<String> s_wfNotifications = new ArrayList<String>();
+    private static ArrayList<String> s_generalNotifications = new ArrayList<String>();
     
     //GBS-3736
-    private static HashMap s_userParaNamesSubject = new HashMap();
-    private static HashMap s_userParaNamesMessage = new HashMap();
+    private static HashMap<String, String> s_userParaNamesSubject = new HashMap<String, String>();
+    private static HashMap<String, String> s_userParaNamesMessage = new HashMap<String, String>();
     static
     {
         // MailerConstants
@@ -340,6 +320,7 @@ public class MailerConstants
         s_notificationMap.put(INITIAL_IMPORT_FAILED_SUBJECT,
                               UserParamNames.NOTIFY_INITIAL_IMPORT_FAILURE);
         s_systemNotifications.add(INITIAL_IMPORT_FAILED_SUBJECT);
+        s_systemNotifications.add(SUBJECT_RESET_PASSWORD_NO_PERMISSION);
 
         //////////////////////////////////////////////////////////////////////
         //  PM / WFM

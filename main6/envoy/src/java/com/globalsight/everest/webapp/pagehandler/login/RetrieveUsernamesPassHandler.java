@@ -17,10 +17,8 @@
 package com.globalsight.everest.webapp.pagehandler.login;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -36,8 +34,9 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.permission.Permission;
+import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.usermgr.UserManagerWLRemote;
 import com.globalsight.everest.util.netegrity.Netegrity;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -45,22 +44,20 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.RegexUtil;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.mail.MailerConstants;
-import com.globalsight.util.mail.MailerException;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
 
 public class RetrieveUsernamesPassHandler extends PageHandler
 {
+    private static Logger s_logger = Logger.getLogger(RetrieveUsernamesPassHandler.class.getName());
 
-    private static Logger s_logger = Logger
-            .getLogger(RetrieveUsernamesPassHandler.class.getName());
     public static final int password_length = 8;
     public static final String blackClass = "standardTextBoldLarge";
     public static final String redClass = "warningText";
+
     public static String serverURL = null;
     public static String message;
     private static ResourceBundle bundle;
@@ -112,8 +109,7 @@ public class RetrieveUsernamesPassHandler extends PageHandler
                     cookieUiLocale = cookie.getValue();
             }
         }
-        if (supportedLocales != null
-                && !Arrays.asList(supportedLocales).contains(cookieUiLocale))
+        if (supportedLocales != null && !Arrays.asList(supportedLocales).contains(cookieUiLocale))
             cookieUiLocale = defaultLocale;
         if (cookieUiLocale.equals(""))
             cookieUiLocale = defaultLocale;
@@ -150,8 +146,7 @@ public class RetrieveUsernamesPassHandler extends PageHandler
         // create the java beans and pass them to the request. use
         // dummy link, real link will be determined after the user
         // navigates out of the page
-        NavigationBean bean = new NavigationBean(DUMMY_LINK,
-                p_pageDescriptor.getPageName());
+        NavigationBean bean = new NavigationBean(DUMMY_LINK, p_pageDescriptor.getPageName());
         p_request.setAttribute(DUMMY_NAVIGATION_BEAN_NAME, bean);
         boolean isResetPass = false;
         boolean success = false;
@@ -187,9 +182,8 @@ public class RetrieveUsernamesPassHandler extends PageHandler
                 message = bundle.getString(LoginConstants.msg_invalidEmail);
             }
             isResetPass = true;
-            p_request
-                    .setAttribute(LoginConstants.form_action,
-                            "/globalsight/ControlServlet?linkName=resetPass&pageName=retrieve");
+            p_request.setAttribute(LoginConstants.form_action,
+                    "/globalsight/ControlServlet?linkName=resetPass&pageName=retrieve");
         }
         else if (null != linkName && linkName.equals("retrieveUsername"))
         {
@@ -202,9 +196,8 @@ public class RetrieveUsernamesPassHandler extends PageHandler
                 message = bundle.getString(LoginConstants.msg_invalidEmail);
             }
             isResetPass = false;
-            p_request
-                    .setAttribute(LoginConstants.form_action,
-                            "/globalsight/ControlServlet?linkName=retrieveUsername&pageName=retrieve");
+            p_request.setAttribute(LoginConstants.form_action,
+                    "/globalsight/ControlServlet?linkName=retrieveUsername&pageName=retrieve");
         }
 
         if (success)
@@ -241,23 +234,17 @@ public class RetrieveUsernamesPassHandler extends PageHandler
      * @param p_remoteHost
      *            the remote host for reseting password
      */
-    @SuppressWarnings("unchecked")
-    protected boolean resetPass(String p_userName, String p_email,
-            String p_remoteHost)
+    protected boolean resetPass(String p_userName, String p_email, String p_remoteHost)
     {
-        boolean result = false;
-
         User user = null;
         UserManagerWLRemote m_userManger = ServerProxy.getUserManager();
-
-        // get user from username
         try
         {
             user = m_userManger.getUserByName(p_userName);
         }
         catch (Exception e)
         {
-            s_logger.info("Failed to get user.");
+            s_logger.warn("Failed to get user by user name: " + p_userName);
         }
 
         if (user == null)
@@ -265,71 +252,75 @@ public class RetrieveUsernamesPassHandler extends PageHandler
             message = bundle.getString(LoginConstants.msg_resetPass_noUsername);
             return false;
         }
-        else
-        {
-            // validate email, and reset password
-            String m_email = user.getEmail();
-            String password = null;
-            if (m_email != null && m_email.equals(p_email))
-            {
-                password = new Password().generater(password_length);
-                user.setPasswordSet(true);
-                user.setPassword(password);
-                s_logger.info("The password of "
-                        + user.getSpecialNameForEmail() + " has been reset by "
-                        + p_remoteHost);
 
-                try
-                {
-                    m_userManger.modifyUser(user, user, null, null, null);
-                    result = true;
-                }
-                catch (Exception e)
-                {
-                    s_logger.info("Failed to modify user.");
-                }
-            }
-            else
+        // validate email
+        boolean isMailMatched = (user.getEmail() != null && user.getEmail().equals(p_email));
+        if (!isMailMatched)
+        {
+            message = bundle.getString(LoginConstants.msg_resetPass_noEmail);
+            return false;
+        }
+
+        // check permission
+        try
+        {
+            PermissionSet userPerms = Permission.getPermissionManager().getPermissionSetForUser(
+                    user.getUserId());
+            if (!userPerms.getPermissionFor(Permission.CHANGE_OWN_PASSWORD))
             {
-                message = bundle
-                        .getString(LoginConstants.msg_resetPass_noEmail);
+                message = bundle.getString(LoginConstants.msg_resetPass_no_permission);
+
+                // send a mail to company administrator to tell this.
+                notifyCompanyAdmin(user);
+
                 return false;
             }
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+
+        boolean result = false;
+        String password = new Password().generater(password_length);
+        user.setPasswordSet(true);
+        user.setPassword(password);
+        s_logger.info("The password of " + user.getSpecialNameForEmail() + " has been reset by "
+                + p_remoteHost);
+        try
+        {
+            m_userManger.modifyUser(user, user, null, null, null);
 
             // Send Email
+            StringBuffer strBuffer = new StringBuffer();
+            strBuffer.append(",").append(password); // 0
+            strBuffer.append(",").append(user.getUserName()); // 1
+            strBuffer.append(",").append(user.getEmail()); // 2
+            strBuffer.append(",").append(
+                    user.getDisplayName(LocaleWrapper.getLocale(user.getDefaultUILocale()))); // 3
+            strBuffer.append(",").append(serverURL); // 4
+
+            String[] messageArguments = strBuffer.toString().substring(1).split(",");
+
+            result = sendEmail(user, messageArguments,
+                    MailerConstants.LOGIN_RESET_PASSWORD_SUBJECT,
+                    MailerConstants.LOGIN_RESET_PASSWORD_MESSAGE);
+
             if (result)
             {
-
-                result = false;
-                StringBuffer strBuffer = new StringBuffer();
-                strBuffer.append(",").append(password); // 0
-                strBuffer.append(",").append(user.getUserName()); // 1
-                strBuffer.append(",").append(user.getEmail()); // 2
-                strBuffer.append(",").append(
-                        user.getDisplayName(LocaleWrapper.getLocale(user
-                                .getDefaultUILocale()))); // 3
-                strBuffer.append(",").append(serverURL); // 4
-
-                String[] messageArguments = strBuffer.toString().substring(1)
-                        .split(",");
-
-                result = sendEmail(user, messageArguments,
-                        MailerConstants.LOGIN_RESET_PASSWORD_SUBJECT,
-                        MailerConstants.LOGIN_RESET_PASSWORD_MESSAGE);
-
-                if (result)
-                {
-                    message = bundle
-                            .getString(LoginConstants.msg_resetPass_success);
-                }
+                message = bundle.getString(LoginConstants.msg_resetPass_success);
             }
+        }
+        catch (Exception e)
+        {
+            s_logger.warn("Failed to modify user.");
         }
 
         return result;
     }
 
     /**
-     * This methord is used for retriving username from email.
+     * This method is used to retrieve user names from email.
      * 
      * @param p_email
      *            email address of user
@@ -337,111 +328,118 @@ public class RetrieveUsernamesPassHandler extends PageHandler
     @SuppressWarnings("unchecked")
     protected boolean retrieveUsername(String p_email)
     {
-
         List<User> users = null;
         message = null;
-        boolean result = false;
-
         try
         {
             users = ServerProxy.getUserManager().getUsersByEmail(p_email);
         }
-        catch (UserManagerException e)
-        {
-
-        }
-        catch (RemoteException e)
-        {
-
-        }
-        catch (GeneralException e)
+        catch (Exception e)
         {
 
         }
 
-        if (null == users || users.size() == 0)
+        if (users == null || users.size() == 0)
         {
-            message = bundle
-                    .getString(LoginConstants.msg_retrieveUsernames_noUsername);
+            message = bundle.getString(LoginConstants.msg_retrieveUsernames_noUsername);
+            return false;
         }
-        else
+
+        try
         {
-
-            result = false;
-
-            // Get usernames and sort
-            List<String> names = new ArrayList<String>();
-            User user = null;
-            Iterator<User> it = users.iterator();
-            while (it.hasNext())
+            if (!ServerProxy.getMailer().isSystemNotificationEnabled())
             {
-                user = (User) it.next();
-                names.add(user.getUserName());
+                message = bundle.getString(LoginConstants.msg_noEmailServer);
+                return false;
             }
-            SortUtil.sort(names);
-            StringBuffer namesStr = new StringBuffer();
-            String lineBreakTag = "\r\n";
-            for (int i = 0; i < names.size(); i++)
-            {
-                namesStr.append(names.get(i)).append(lineBreakTag);
-            }
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
 
-            StringBuffer strBuffer = new StringBuffer();
-            strBuffer.append(",").append(namesStr); // 0
-            strBuffer.append(",").append(serverURL); // 1
+        boolean result = false;
+        // Get usernames and sort
+        List<String> names = new ArrayList<String>();
+        for (User user : users)
+        {
+            names.add(user.getUserName());
+        }
+        SortUtil.sort(names);
+        StringBuffer msgArgsBuffer = new StringBuffer();
+        for (String name : names)
+        {
+            msgArgsBuffer.append(name).append("\r\n");// 1
+        }
+        msgArgsBuffer.append(",").append(serverURL);// 2
 
-            String[] messageArguments = strBuffer.toString().substring(1)
-                    .split(",");
+        String[] messageArguments = msgArgsBuffer.toString().split(",");
 
+        // Send mail to all possible users
+        for (User user : users)
+        {
             result = sendEmail(user, messageArguments,
                     MailerConstants.LOGIN_RETRIEVE_UESRNAME_SUBJECT,
                     MailerConstants.LOGIN_RETRIEVE_UESRNAME_MESSAGE);
-            if (result)
-            {
-                message = bundle
-                        .getString(LoginConstants.msg_retrieveUsernames_success);
-            }
         }
+
+        if (result)
+        {
+            message = bundle.getString(LoginConstants.msg_retrieveUsernames_success);
+        }
+
         return result;
     }
 
     /**
      * This method is used for sending email
      */
-    protected boolean sendEmail(User p_user, String[] p_arguments,
-            String p_subject, String p_message)
+    protected boolean sendEmail(User p_user, String[] p_arguments, String p_subject,
+            String p_message)
     {
-
-        boolean result = false;
-
         try
         {
-            boolean isSystemNotificationEnabled = ServerProxy.getMailer()
-                    .isSystemNotificationEnabled();
-            if (!isSystemNotificationEnabled)
+            if (!ServerProxy.getMailer().isSystemNotificationEnabled())
             {
                 message = bundle.getString(LoginConstants.msg_noEmailServer);
-                return result;
+                return false;
             }
 
-            String companyIdStr = CompanyWrapper.getCompanyIdByName(p_user
-                    .getCompanyName());
-            ServerProxy.getMailer().sendMailFromAdmin(p_user, p_arguments,
-                    p_subject, p_message, companyIdStr);
+            String companyIdStr = CompanyWrapper.getCompanyIdByName(p_user.getCompanyName());
+            ServerProxy.getMailer().sendMailFromAdmin(p_user, p_arguments, p_subject, p_message,
+                    companyIdStr);
 
-            result = true;
+            return true;
         }
-        catch (MailerException e)
+        catch (Exception e)
         {
+            return false;
         }
-        catch (RemoteException e)
-        {
-        }
-        catch (GeneralException e)
-        {
-        }
+    }
 
-        return result;
+    /**
+     * Notify company administrator that current user has no change password permission.
+     */
+    private void notifyCompanyAdmin(User requester)
+    {
+        try
+        {
+            String[] messageArguments = new String[3];
+            messageArguments[0] = requester.getUserName();
+            messageArguments[1] = requester.getEmail();
+            messageArguments[2] = serverURL;
+            String companyIdStr = CompanyWrapper.getCompanyIdByName(requester.getCompanyName());
+
+            ServerProxy.getMailer().sendMailToAdmin(messageArguments,
+                    MailerConstants.SUBJECT_RESET_PASSWORD_NO_PERMISSION,
+                    MailerConstants.MESSAGE_RESET_PASSWORD_NO_PERMISSION, null, companyIdStr);
+        }
+        catch (Exception e)
+        {
+            s_logger.error(
+                    "Fail to notify company admin for no change password permission for user: "
+                            + requester.getUserName(), e);
+        }
     }
 
     /**

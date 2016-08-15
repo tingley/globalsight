@@ -70,6 +70,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.applet.createjob.CreateJobUtil;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflowmanager.JobStatePostThread;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -292,6 +293,11 @@ public class AddSourceFilesHandler extends PageHandler
             job.setState(Job.ADD_FILE);
             job.setOrgState(orgState);
             HibernateUtil.update(job);
+            long wfStatePostId = job.getL10nProfile().getWfStatePostId();
+            if (wfStatePostId != -1)
+            {
+                new JobStatePostThread(job, orgState, Job.ADD_FILE).start();
+            }
 
             for (int i = 0; i < pageCount; i++)
             {
@@ -866,6 +872,7 @@ public class AddSourceFilesHandler extends PageHandler
             {
                 rarEntryName = header.getFileNameString();
             }
+            rarEntryName = rarEntryName.replace("\\", File.separator);
             String filePath = file.getName().substring(0, file.getName().lastIndexOf(".")) + "_"
                     + CreateJobUtil.getFileExtension(file) +File.separator+ rarEntryName;
             if (existedAndAddedFiles.contains(filePath.replace("/", File.separator)))
@@ -924,7 +931,6 @@ public class AddSourceFilesHandler extends PageHandler
         StringBuffer ret = new StringBuffer("");
         for (SevenZArchiveEntry item : entriesInZip7z)
         {
-            
             String zip7zEntryName = item.getName();
             String filePath = file.getName().substring(0, file.getName().lastIndexOf(".")) + "_"
                     + CreateJobUtil.getFileExtension(file) +File.separator+ zip7zEntryName;

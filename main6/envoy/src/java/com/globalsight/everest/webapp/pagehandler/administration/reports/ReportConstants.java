@@ -96,6 +96,8 @@ public interface ReportConstants
 
     public static final String REPORT_QA_CHECKS_REPORT = "QAChecksReport";
     public static final String PREFIX_QA_CHECKS_REPORT = "QCR";
+    
+    public static final String LOCPROFILE_WFTEMPLATE_REPORT = "L10nProfileWfTemplateReport";
 
     // Attribute name in request/session
     public static final String JOB_IDS = "inputJobIDS";

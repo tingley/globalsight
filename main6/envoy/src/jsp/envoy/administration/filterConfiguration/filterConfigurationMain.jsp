@@ -181,13 +181,37 @@ session="true" %>
                                     <b><%=bundle.getString("lb_name")%></b>
                                 </Label>
                             </td>
-                            <td width="15%">
-                            </td>
-                            <td width="55%">
-                                <Label style="color:white;font-family:Arial,Helvetica,sans-serif;font-size:8pt">
-                                    <b><%=bundle.getString("lb_description")%></b>
-                                </Label>
-                            </td>
+                            <%
+                            if (hasBaseFilter)
+                            {
+                            %>
+                            	<td width="10%">
+                                </td>
+                                <td width="35%">
+                                    <Label style="color:white;font-family:Arial,Helvetica,sans-serif;font-size:8pt">
+                                        <b><%=bundle.getString("lb_description")%></b>
+                                    </Label>
+                                </td>
+                                <td width="25%">
+                                    <Label style="color:white;font-family:Arial,Helvetica,sans-serif;font-size:8pt">
+                                        <b><%=bundle.getString("lb_filter_basefilter")%></b>
+                                    </Label>
+                                </td>
+                            <%
+                            }
+                            else
+                            {
+                            %>
+                            	<td width="15%">
+                                </td>
+                                <td width="55%">
+                                    <Label style="color:white;font-family:Arial,Helvetica,sans-serif;font-size:8pt">
+                                        <b><%=bundle.getString("lb_description")%></b>
+                                    </Label>
+                                </td>
+                            <%
+                            }
+                            %>
                         </tr>
                     </table>
                     <span id="filterConfigurationTable">

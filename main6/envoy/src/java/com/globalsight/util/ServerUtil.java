@@ -19,17 +19,12 @@ package com.globalsight.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.BuildVersion;
 import com.globalsight.config.SystemParameter;
 import com.globalsight.config.SystemParameterPersistenceManager;
 import com.globalsight.cxe.util.XmlUtil;
@@ -46,8 +41,7 @@ public class ServerUtil
     public static List<Hotfix> getInstalledPatches()
     {
         SystemConfiguration sc = SystemConfiguration.getInstance();
-        String path = sc
-                .getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY);
+        String path = sc.getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY);
         path = path.replace("\\", "/");
         int index = path.indexOf("jboss/server");
         if (index > 0)
@@ -91,8 +85,7 @@ public class ServerUtil
 
             try
             {
-                p.load(ServerUtil.class
-                        .getResourceAsStream("/properties/server.properties"));
+                p.load(ServerUtil.class.getResourceAsStream("/properties/server.properties"));
                 version = (String) p.get("version");
             }
             catch (IOException e)
@@ -119,8 +112,7 @@ public class ServerUtil
         }
         else
         {
-            result = sc
-                    .getStringParameter(SystemConfigParamNames.CAP_LOGIN_URL);
+            result = sc.getStringParameter(SystemConfigParamNames.CAP_LOGIN_URL);
         }
 
         if (!result.endsWith("/"))
@@ -143,8 +135,7 @@ public class ServerUtil
                     .getSystemParameterPersistenceManager();
             SystemParameter sysParam = manager
                     .getAdminSystemParameter(SystemConfigParamNames.SERVER_INSTANCE_ID);
-            if (sysParam != null
-                    && sysParam.getValue().equals("GlobalSightInstanceID"))
+            if (sysParam != null && sysParam.getValue().equals("GlobalSightInstanceID"))
             {
                 sysParam.setValue(getServerURL());
                 manager.updateAdminSystemParameter(sysParam);

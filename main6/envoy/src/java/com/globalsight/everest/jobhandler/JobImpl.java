@@ -1705,9 +1705,4 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     {
         return Job.JOB_TYPE_GIT.equalsIgnoreCase(jobType);
     }
-
-    public boolean isMindTouchJob()
-    {
-        return Job.JOB_TYPE_MINDTOUCH.equalsIgnoreCase(jobType);
-    }
 }

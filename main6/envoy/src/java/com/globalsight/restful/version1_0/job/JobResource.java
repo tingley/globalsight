@@ -85,6 +85,7 @@ import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.importer.ImportUtil;
+import com.globalsight.everest.webapp.applet.createjob.CreateJobUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.EventNotificationHelper;
@@ -119,6 +120,7 @@ public class JobResource extends RestResource
 
     public static final String GET_UNIQUE_JOB_NAME = "getUniqueJobName";
     public static final String UPLOAD_SOURCE_FILE = "uploadSourceFile";
+    public static final String UPLOAD_ZIP_SOURCE_FILE = "uploadZipSourceFile";
     public static final String CREATE_JOB = "createJob";
     public static final String GET_JOB_STATUS = "getJobStatus";
     public static final String GET_JOB_EXPORT_FILES = "getJobExportFiles";
@@ -303,7 +305,7 @@ public class JobResource extends RestResource
         return Response.status(200).entity("File is uploaded successfully for job: " + jobId)
                 .build();
     }
-
+    
     /**
      * Create a job
      * 
@@ -316,7 +318,7 @@ public class JobResource extends RestResource
      * @param p_fileProfileIds
      *                  String ID of file profiles, split by "|". Required.
      * @param p_targetLocales
-     *                  String Target locales which like to be translated, split by "|". Optional.
+     *                  String Target locales which like to be translated. Optional.
      * @param p_comment
      *                  String Job comment. Optional.
      * @param p_attributes
@@ -368,7 +370,7 @@ public class JobResource extends RestResource
             String zipDir = "";
             String vTargetLocale = "";
             FileProfile fp = null, referenceFP = null;
-            File file = null, tmpFile = null;
+            File file = null;
             Vector fileProfiles = new Vector();
             Vector files = new Vector();
             Vector afterTargetLocales = new Vector();
@@ -407,8 +409,8 @@ public class JobResource extends RestResource
             }
             cachedJobIds.add(job.getId());
 
-            validateParameters(job, p_filePaths, p_fileProfileIds, p_targetLocales,
-                    fileProfileIds, filePaths, targetLocales);
+            validateParameters(job, p_filePaths, p_fileProfileIds, p_targetLocales, fileProfileIds,
+                    filePaths, targetLocales, false);
 
             fppm = ServerProxy.getFileProfilePersistenceManager();
             for (int i = 0; i < filePaths.size(); i++)
@@ -441,8 +443,6 @@ public class JobResource extends RestResource
                     String tmp = "";
                     for (String f : zipFiles)
                     {
-                        tmpFilename = zipDir + File.separator + f;
-                        tmpFile = new File(tmpFilename);
                         if (XliffFileUtil.isXliffFile(f))
                         {
                             tmp = relativePath + File.separator + f;
@@ -490,17 +490,20 @@ public class JobResource extends RestResource
             else
             {
                 AttributeSet as = ((JobImpl) job).getAttributeSet();
-                List<Attribute> jas = as.getAttributeAsList();
-                List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
-                atts = new ArrayList<JobAttributeVo>();
-
-                for (Attribute ja : jas)
+                if (as != null)
                 {
-                    JobAttributeVo vo = AttributeUtil.getAttributeVo(ja.getCloneAttribute());
-                    atts.add(vo);
-                    jobatts.add(AttributeUtil.createJobAttribute(vo));
+                    List<Attribute> jas = as.getAttributeAsList();
+                    List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
+                    atts = new ArrayList<JobAttributeVo>();
+
+                    for (Attribute ja : jas)
+                    {
+                        JobAttributeVo vo = AttributeUtil.getAttributeVo(ja.getCloneAttribute());
+                        atts.add(vo);
+                        jobatts.add(AttributeUtil.createJobAttribute(vo));
+                    }
+                    RuntimeCache.addJobAtttibutesCache(uuId, jobatts);
                 }
-                RuntimeCache.addJobAtttibutesCache(uuId, jobatts);
             }
 
             // Sends events to cxe.
@@ -571,7 +574,499 @@ public class JobResource extends RestResource
 
         return Response.status(200).entity("Create job success.").build();
     }
+    
+    /**
+     * Upload zip source file to server side.
+     * 
+     * @param p_companyName
+     *            Company name. Required.
+     * @param p_jobName
+     *            Job name. Required.
+     * @param p_fileProfileId
+     *            File profile ID for current file. Required.
+     * @param p_input
+     *            Uploading source file content. Required.
+     *
+     * @return A successful message
+     * 
+     * @throws RestWebServiceException
+     * 
+     */
+    @POST
+    @Path("/sourceFiles/zip")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response uploadZipSourceFile(
+            @HeaderParam("accessToken") List<String> accessToken,
+            @PathParam("companyName") String p_companyName,
+            @QueryParam("jobName") String p_jobName,
+            @QueryParam("fileProfileIds") String p_fileProfileIds,
+            MultipartInput p_input) throws RestWebServiceException
+    {
+        RestWebServiceLog.Start restStart = null;
+        boolean updateJobStateIfException = true;
+        Job job = null;
+        String jobId = null;
+        User user;
+        try
+        {
+            String userName = getUserNameFromSession(accessToken.get(0));
 
+            Map<Object, Object> restArgs = new HashMap<Object, Object>();
+            restArgs.put("loggedUserName", userName);
+            restArgs.put("companyName", p_companyName);
+            restArgs.put("jobName", p_jobName);
+            restArgs.put("fileProfileIds", p_fileProfileIds);
+            restStart = RestWebServiceLog.start(JobResource.class, UPLOAD_ZIP_SOURCE_FILE, restArgs);
+            checkPermission(userName, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
+            p_jobName = EditUtil.removeCRLF(p_jobName);
+            String jobNameValidation = validateJobName(p_jobName);
+            if (jobNameValidation != null)
+            {
+                throw new RestWebServiceException(jobNameValidation);
+            }
+            if (StringUtil.isEmpty(p_fileProfileIds))
+            {
+                throw new RestWebServiceException("Empty file profile id.");
+            }
+            String[] fileProfileIdArr = p_fileProfileIds.split(",");
+            List<Long> l10nProfileIds = new ArrayList<Long>();
+            List<Long> companyIds = new ArrayList<Long>();
+            for (int i = 0; i < fileProfileIdArr.length; i++)
+            {
+                FileProfile fp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(
+                        Long.parseLong(fileProfileIdArr[i]));
+                if (!l10nProfileIds.contains(fp.getL10nProfileId()))
+                {
+                    l10nProfileIds.add(fp.getL10nProfileId());
+                }
+                
+                if (!companyIds.contains(fp.getCompanyId()))
+                {
+                    companyIds.add(fp.getCompanyId());
+                }
+            }
+            
+            if (l10nProfileIds.size() > 1)
+            {
+                String message = "The p_fileProfileIds parameter of the ID values from different localize profile.";
+                throw new RestWebServiceException(message);
+            }
+            
+            if (companyIds.size() > 1)
+            {
+                String message = "The p_fileProfileIds parameter of the ID values from different company.";
+                throw new RestWebServiceException(message);
+            }
+            
+            long l10nProfileId = -1;
+            if(l10nProfileIds.size() == 1)
+                l10nProfileId = l10nProfileIds.get(0);
+            
+            long companyIdFromFileProfile = -1;
+            if(companyIds.size() == 1)
+                companyIdFromFileProfile = companyIds.get(0);
+
+            BasicL10nProfile blp = HibernateUtil.get(BasicL10nProfile.class, l10nProfileId);
+            String priority = String.valueOf(blp.getPriority());
+            user = ServerProxy.getUserManager().getUserByName(userName);
+            job = ServerProxy.getJobHandler().getJobByJobName(p_jobName);
+            if (job != null)
+                jobId = String.valueOf(job.getId());
+            else
+            {
+                job = JobCreationMonitor.initializeJob(p_jobName, user.getUserId(),
+                        l10nProfileId, priority, Job.UPLOADING);
+                jobId = String.valueOf(job.getId());
+            }
+
+            String msg = checkIfCreateJobCalled(UPLOAD_ZIP_SOURCE_FILE, Long.parseLong(jobId),
+                    p_jobName);
+            if (msg != null)
+            {
+                updateJobStateIfException = false;
+                throw new RestWebServiceException(msg);
+            }
+
+            if (!isInSameCompany(userName, String.valueOf(companyIdFromFileProfile))
+                    && !UserUtil.isSuperPM(user.getUserId()))
+            {
+                String message = "Current user cannot upload file with the file profile which is in other company.";
+                throw new RestWebServiceException(message);
+            }
+
+            String srcLocale = findSrcLocale(fileProfileIdArr[0]);
+            StringBuffer newPath = new StringBuffer();
+            newPath.append(AmbFileStoragePathUtils.getCxeDocDir(job.getCompanyId()));
+            newPath.append(File.separator).append(srcLocale);
+            newPath.append(File.separator).append("webservice");
+            newPath.append(File.separator).append(jobId);
+
+            List<InputPart> inputParts = p_input.getParts();
+            for (InputPart inputPart : inputParts)
+            {
+                MultivaluedMap<String, String> header = inputPart.getHeaders();
+                String contentDisposition = header.getFirst("Content-Disposition");
+                String fileName = getFileNameFromHeaderInfo(contentDisposition);
+                
+                String extension = fileName.substring(fileName.lastIndexOf("."), fileName.length());
+                if (!"rar".equalsIgnoreCase(extension) && "zip".equalsIgnoreCase(extension)
+                        && !"7z".equalsIgnoreCase(extension))
+                {
+                    String message = "Current interface only supports compressed file upload.";
+                    throw new RestWebServiceException(message);
+                }
+                if (fileName != null)
+                {
+                    // convert the uploaded file content to InputStream
+                    InputStream inputStream = inputPart.getBody(InputStream.class, null);
+                    byte[] bytes = IOUtils.toByteArray(inputStream);
+
+                    File sourceFile = new File(newPath.toString(), fileName);
+                    RestWebServiceUtil.writeFile(sourceFile, bytes);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            if (jobId != null && updateJobStateIfException)
+            {
+                JobCreationMonitor.updateJobState(Long.parseLong(jobId), Job.IMPORTFAILED);
+            }
+            logger.error(e);
+            throw new RestWebServiceException(makeErrorJson(UPLOAD_ZIP_SOURCE_FILE, e.getMessage()));
+        }
+        finally
+        {
+            if (restStart != null)
+            {
+                restStart.end();
+            }
+        }
+        return Response.status(200).entity("File is uploaded successfully for job: " + jobId)
+                .build();
+    }
+
+    /**
+     * Create a job for zip file
+     * 
+     * @param p_companyName
+     *            Company name. Required.
+     * @param p_jobId
+     *            Job id. Required.
+     * @param p_filePaths
+     *            String Path of files which are contained in job, split by
+     *            ",".Example:"test_zip_01.zip,test_zip_02.rar" Required.
+     * @param p_fileProfileIds
+     *            String ID of file profiles, split by ",".
+     *            Example:"1001,1002".This file profile id must correspond to
+     *            the files in a compressed file format. Required.
+     * @param p_targetLocales
+     *            String target locale which like to be translated,split by
+     *            ",".Example: "fr_FR,de_DE" or empty. The target language of
+     *            all files is the same. Optional.
+     * @param p_comment
+     *            String Job comment. Optional.
+     * @param p_attributes
+     *            String Attributes used to create job. Optional. Example:
+     *            <attributes> <attributes xsi:type="fileJobAttributeVo"
+     *            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+     *            <displayName>file_01</displayName>
+     *            <fromSuperCompany>false</fromSuperCompany>
+     *            <internalName>file_01</internalName>
+     *            <required>false</required> <type>file</type> </attributes>
+     *            <attributes xsi:type="textJobAttributeVo"
+     *            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+     *            <displayName>file_02</displayName>
+     *            <fromSuperCompany>false</fromSuperCompany>
+     *            <internalName>file_02</internalName>
+     *            <required>false</required> <type>text</type> </attributes>
+     *            </attributes>
+     * @return A "Create job success." message.
+     * 
+     */
+    @POST
+    @Path("/createJob/zip")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response createJobForZipFile(
+            @HeaderParam("accessToken") List<String> accessToken,
+            @PathParam("companyName") String p_companyName,
+            @QueryParam("jobId") String p_jobId,
+            @QueryParam("filePaths") String p_filePaths,
+            @QueryParam("fileProfileIds") String p_fileProfileIds,
+            @QueryParam("targetLocales") String p_targetLocales,
+            @QueryParam("comment") String p_comment,
+            @QueryParam("attributes") String p_attributes) throws RestWebServiceException
+    {
+        RestWebServiceLog.Start restStart = null;
+        boolean reCreate = false;
+        Job job = null;
+        try
+        {
+            Vector<String> fileProfileIds = new Vector<String>();
+            Vector<String> filePaths = new Vector<String>();
+            Vector<String> targetLocales = new Vector<String>();
+            Vector<String> realUploadFileList = new Vector<String>();
+            Vector<String> extensionList = new Vector<String>();
+            Vector<FileProfile> realFileProfiles = new Vector<FileProfile>();
+            String fpId = "",filename = "", zipFilename = "",zipDir = "",vTargetLocale = "";
+            FileProfile checkFp = null, referenceFP = null;
+            Vector fileProfiles = new Vector();
+            Vector files = new Vector();
+            Vector afterTargetLocales = new Vector();
+            ArrayList<String> zipFiles = null;
+            long referenceFPId = 0l;
+            boolean isWSFlag = true;
+            String userName = getUserNameFromSession(accessToken.get(0));
+            User user = ServerProxy.getUserManager().getUserByName(userName);
+
+            Map<Object, Object> restArgs = new HashMap<Object, Object>();
+            restArgs.put("loggedUserName", userName);
+            restArgs.put("companyName", p_companyName);
+            restArgs.put("jobId", p_jobId);
+            restArgs.put("comment", p_comment);
+            restArgs.put("filePaths", p_filePaths);
+            restArgs.put("fileProfileIds", p_fileProfileIds);
+            restArgs.put("targetLocales", p_targetLocales);
+            restArgs.put("attributes", p_attributes);
+            restStart = RestWebServiceLog.start(JobResource.class, CREATE_JOB, restArgs);
+
+            checkPermission(userName, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
+            Assert.assertIsInteger(p_jobId);
+            if (StringUtil.isNotEmpty(p_jobId))
+                job = JobCreationMonitor.loadJobFromDB(Long.parseLong(p_jobId));
+            if (job == null)
+            {
+                String msg = "current jobId : " + p_jobId + " does not exist.";
+                throw new RestWebServiceException(msg);
+            }
+            
+            String msg = checkIfCreateJobCalled(CREATE_JOB, job.getId(), job.getJobName());
+            if (msg != null)
+            {
+                reCreate = true;
+                throw new RestWebServiceException(msg);
+            }
+            cachedJobIds.add(job.getId());
+            if (StringUtil.isNotEmptyAndNull(p_targetLocales))
+            {
+                if (p_targetLocales.contains("|"))
+                {
+                    String message = "Target locales : " + p_targetLocales + " format not correct.";
+                    throw new RestWebServiceException(message);
+                }
+            }
+            validateParameters(job, p_filePaths, p_fileProfileIds, p_targetLocales, fileProfileIds,
+                    filePaths, targetLocales, true);
+            
+            fpId = (String) fileProfileIds.get(0);
+            for (int i = 0; i < filePaths.size(); i++)
+            {
+                filename = (String) filePaths.get(i);
+                filename = filename.replace('\\', File.separatorChar);
+                String srcLocale = findSrcLocale(fpId);
+                filename = getRealPath(p_jobId, filename, srcLocale, isWSFlag);
+                zipFilename = AmbFileStoragePathUtils.getCxeDocDir(job.getCompanyId())
+                        + File.separator + filename;
+                File zipFile = new File(zipFilename);
+                if (isSupportedZipFileFormat(zipFile) && isUnCompress(zipFile))
+                {
+                    addUploadFile(realUploadFileList,extensionList,zipFile);
+                }
+            }
+            Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
+            List<FileProfileImpl> fileProfileListOfCompany = (List) ServerProxy
+                    .getFileProfilePersistenceManager().getFileProfilesByExtension(extensionList,
+                            Long.valueOf(company.getId()));
+            for (String id : fileProfileIds)
+            {
+                checkFp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(
+                        Long.valueOf(id));
+                if (!fileProfileListOfCompany.contains(checkFp))
+                {
+                    String message = "Current file profile id: " + id
+                            + " is not corresponds the upload files.";
+                    throw new RestWebServiceException(message);
+                }
+                realFileProfiles.add(checkFp);
+            }
+            
+            FileProfilePersistenceManager fppm = ServerProxy.getFileProfilePersistenceManager();
+            for (int i = 0; i < realUploadFileList.size(); i++)
+            {
+                vTargetLocale = targetLocales.get(0);
+                File file = new File(realUploadFileList.get(i).replace('\\', File.separatorChar));
+                filename = file.getName();
+                String fileExtension = filename.substring(filename.lastIndexOf(".") + 1);
+                Vector<String> tempExtensionList = new Vector<String>();
+                tempExtensionList.add(fileExtension);
+                List<FileProfileImpl> fileProfileList = (List) ServerProxy
+                        .getFileProfilePersistenceManager().getFileProfilesByExtension(tempExtensionList,
+                                Long.valueOf(company.getId()));
+                if (realFileProfiles.contains(fileProfileList))
+                {
+                    for (FileProfile filePro : fileProfileList)
+                    {
+                        if (realFileProfiles.contains(filePro))
+                        {
+
+                            if (file.getAbsolutePath().endsWith(".xml"))
+                            {
+                                saveFileAsUTF8(file);
+                            }
+
+                            // indicates this is an "XLZ" format file profile
+                            if (48 == filePro.getKnownFormatTypeId())
+                            {
+                                referenceFPId = filePro.getReferenceFP();
+                                referenceFP = fppm.readFileProfile(referenceFPId);
+                                zipDir = realUploadFileList.get(i).substring(0,
+                                        realUploadFileList.get(i).lastIndexOf("."));
+                                zipFiles = ZipIt.unpackZipPackage(realUploadFileList.get(i), zipDir);
+                                String relativePath = filename.substring(0, filename.lastIndexOf("."));
+                                String tmp = "";
+                                for (String f : zipFiles)
+                                {
+                                    if (XliffFileUtil.isXliffFile(f))
+                                    {
+                                        tmp = relativePath + File.separator + f;
+                                        changeFileListByXliff(tmp, vTargetLocale, referenceFP,
+                                                fileProfiles, files, afterTargetLocales);
+                                    }
+                                }
+                            }
+                            else if (39 == filePro.getKnownFormatTypeId())
+                            {
+                                changeFileListByXliff(filename, vTargetLocale, filePro, fileProfiles,
+                                        files, afterTargetLocales);
+                            }
+                            else
+                            {
+                                fileProfiles.add(filePro);
+                                files.add(file);
+                                afterTargetLocales.add(vTargetLocale);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    String message = fileExtension
+                            + " format file can not find the corresponding fileprofile id.";
+                    throw new RestWebServiceException(message);
+                }
+            }
+
+            Vector result = FileSystemUtil.execScript(files, fileProfiles, afterTargetLocales,
+                    Long.parseLong(p_jobId), job.getJobName());
+            Vector sFiles = (Vector) result.get(0);
+            Vector sProFiles = (Vector) result.get(1);
+            Vector stargetLocales = (Vector) result.get(2);
+            Vector exitValues = (Vector) result.get(3);
+            // cache job attributes
+            List<JobAttributeVo> atts = null;
+            String companyId = CompanyThreadLocal.getInstance().getValue();
+            String uuId = ((JobImpl) job).getUuid();
+            if (StringUtil.isNotEmptyAndNull(p_attributes))
+            {
+                Attributes attributes = com.globalsight.cxe.util.XmlUtil.string2Object(
+                        Attributes.class, p_attributes);
+                atts = (List<JobAttributeVo>) attributes.getAttributes();
+
+                List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
+                for (JobAttributeVo jobAttributeVo : atts)
+                {
+                    jobatts.add(AttributeUtil.createJobAttribute(jobAttributeVo));
+                }
+                RuntimeCache.addJobAtttibutesCache(uuId, jobatts);
+            }
+            else
+            {
+                AttributeSet as = ((JobImpl) job).getAttributeSet();
+                if (as != null)
+                {
+                    List<Attribute> jas = as.getAttributeAsList();
+                    List<JobAttribute> jobatts = new ArrayList<JobAttribute>();
+                    atts = new ArrayList<JobAttributeVo>();
+
+                    for (Attribute ja : jas)
+                    {
+                        JobAttributeVo vo = AttributeUtil.getAttributeVo(ja.getCloneAttribute());
+                        atts.add(vo);
+                        jobatts.add(AttributeUtil.createJobAttribute(vo));
+                    }
+                    RuntimeCache.addJobAtttibutesCache(uuId, jobatts);
+                }
+            }
+
+            // Sends events to cxe.
+            int pageCount = sFiles.size();
+            for (int i = 0; i < pageCount; i++)
+            {
+                File realFile = (File) sFiles.get(i);
+                FileProfile realProfile = (FileProfile) sProFiles.get(i);
+                String targetLocale = (String) stargetLocales.get(i);
+                String path = realFile.getPath();
+                String relativeName = path.substring(AmbFileStoragePathUtils.getCxeDocDir()
+                        .getPath().length() + 1);
+
+                publishEventToCxe(String.valueOf(job.getJobId()), job.getJobName(), i + 1,
+                        pageCount, 1, 1, relativeName, Long.toString(realProfile.getId()),
+                        targetLocale, (Integer) exitValues.get(i),
+                        String.valueOf(job.getPriority()));
+            }
+
+            // set job attribute
+            if (atts != null && atts.size() > 0)
+            {
+                AddJobAttributeThread thread = new AddJobAttributeThread(uuId, companyId);
+                thread.setJobAttributeVos(atts);
+                thread.createJobAttributes();
+            }
+
+            // Send email at the end.
+            sendUploadCompletedEmail(filePaths, fileProfileIds, user, job.getJobName(), p_comment,
+                    new Date());
+
+            // It is allowed to create job with inactive file profile Ids, but
+            // throw exception to warn user.
+            ArrayList<String> inactive_list = new ArrayList<String>();
+            for (String s : fileProfileIds)
+            {
+                FileProfile fp_inactive = HibernateUtil.get(FileProfileImpl.class,
+                        Long.parseLong(s), true);
+                if (fp_inactive == null)
+                {
+                    inactive_list.add(s);
+                }
+            }
+            if (inactive_list.size() > 0)
+            {
+                String invalidFpIds = AmbassadorUtil.listToString(inactive_list);
+                String errMsg = "You are using inactive profile ids " + invalidFpIds
+                        + ", in a future release this create job may fail.";
+                logger.warn(errMsg);
+                throw new RestWebServiceException(errMsg);
+            }
+        }
+        catch (Exception e)
+        {
+            if (job != null && !reCreate)
+            {
+                JobCreationMonitor.updateJobState(job, Job.IMPORTFAILED);
+            }
+            throw new RestWebServiceException(makeErrorJson(CREATE_JOB, e.getMessage()));
+        }
+        finally
+        {
+            if (restStart != null)
+            {
+                restStart.end();
+            }
+        }
+
+        return Response.status(200).entity("Create job success.").build();
+    }
+    
     /**
      * Get job status by job id.
      * 
@@ -1096,29 +1591,45 @@ public class JobResource extends RestResource
 
     private void validateParameters(Job job, String p_filePaths, String p_fileProfileIds,
             String p_targetLocales, Vector<String> fileProfileIds, Vector<String> filePaths,
-            Vector<String> targetLocales) throws RestWebServiceException
+            Vector<String> targetLocales, boolean isZipFileCreateJob)
+            throws RestWebServiceException
     {
        
         try
         {
-            // filePaths
-            for (String path : (p_filePaths).split("\\|"))
+            if (isZipFileCreateJob)
             {
-                filePaths.add(path);
+                // filePaths
+                for (String path : (p_filePaths).split(","))
+                {
+                    filePaths.add(path);
+                }
+                for (String fId : (p_fileProfileIds).split(","))
+                {
+                    fileProfileIds.add(fId);
+                }
             }
-            // fileProfileIds
-            for (String fId : (p_fileProfileIds).split("\\|"))
+            else
             {
-                fileProfileIds.add(fId);
+                // filePaths
+                for (String path : (p_filePaths).split("\\|"))
+                {
+                    filePaths.add(path);
+                }
+                // fileProfileIds
+                for (String fId : (p_fileProfileIds).split("\\|"))
+                {
+                    fileProfileIds.add(fId);
+                }
             }
 
             ArrayList<String> list = new ArrayList<String>();
-            for (String s : fileProfileIds)
+            for (String id : fileProfileIds)
             {
-                FileProfile fp = HibernateUtil.get(FileProfileImpl.class, Long.parseLong(s), false);
+                FileProfile fp = HibernateUtil.get(FileProfileImpl.class, Long.parseLong(id), false);
                 if (fp == null)
                 {
-                    list.add(s);
+                    list.add(id);
                 }
             }
             if (list.size() > 0)
@@ -1143,11 +1654,12 @@ public class JobResource extends RestResource
             // targetLocales
             if (StringUtil.isNotEmpty(p_targetLocales))
             {
-                handleTargetLocales(targetLocales, p_targetLocales, fileProfileIds.size());
+                handleTargetLocales(targetLocales, p_targetLocales, fileProfileIds.size(),
+                        isZipFileCreateJob);
             }
             else
             {
-                handleTargetLocales(targetLocales, "", fileProfileIds.size());
+                handleTargetLocales(targetLocales, "", fileProfileIds.size(), isZipFileCreateJob);
             }
 
             GlobalSightLocale[] targetLocales_l10n = job.getL10nProfile().getTargetLocales();
@@ -1450,10 +1962,11 @@ public class JobResource extends RestResource
     }
 
     private void handleTargetLocales(Vector<String> targetLocales, String p_targetLocales,
-            int fileSize)
+            int fileSize, boolean isZipFileCreateJob)
     {
         if (StringUtil.isEmpty(p_targetLocales)
                 || StringUtil.isEmpty(p_targetLocales.replace("|", ""))
+                || StringUtil.isEmpty(p_targetLocales.replace(",", ""))
                 || p_targetLocales.trim().equals("*"))
         {
             for (int i = 0; i < fileSize; i++)
@@ -1463,29 +1976,51 @@ public class JobResource extends RestResource
         }
         else
         {
-            for (String tLocale : p_targetLocales.split("\\|"))
+            if (isZipFileCreateJob)
             {
-                if (tLocale.contains(","))
-                {
-                    String locales = "";
-                    for (String locale : tLocale.split(","))
-                    {
-                        locales += locale.trim() + ",";
-                    }
-                    if (locales != "" && locales.endsWith(","))
-                    {
-                        targetLocales.add(locales.substring(0, locales.lastIndexOf(",")));
-                    }
-                }
-                else
+                for (String tLocale : p_targetLocales.split(","))
                 {
                     if (tLocale.trim().equals("*"))
                     {
                         targetLocales.add(" ");
+                        break;
                     }
                     else
                     {
-                        targetLocales.add(tLocale.trim());
+                        String locales = tLocale.trim() + ",";
+                        if (locales != "" && locales.endsWith(","))
+                        {
+                            targetLocales.add(locales.substring(0, locales.lastIndexOf(",")));
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (String tLocale : p_targetLocales.split("\\|"))
+                {
+                    if (tLocale.contains(","))
+                    {
+                        String locales = "";
+                        for (String locale : tLocale.split(","))
+                        {
+                            locales += locale.trim() + ",";
+                        }
+                        if (locales != "" && locales.endsWith(","))
+                        {
+                            targetLocales.add(locales.substring(0, locales.lastIndexOf(",")));
+                        }
+                    }
+                    else
+                    {
+                        if (tLocale.trim().equals("*"))
+                        {
+                            targetLocales.add(" ");
+                        }
+                        else
+                        {
+                            targetLocales.add(tLocale.trim());
+                        }
                     }
                 }
             }
@@ -1731,5 +2266,64 @@ public class JobResource extends RestResource
         sb.append("\r\n");
 
         logger.info(sb.toString());
+    }
+    
+    private boolean isSupportedZipFileFormat(File file)
+    {
+        String extension = CreateJobUtil.getFileExtension(file);
+        if ("rar".equalsIgnoreCase(extension) || "zip".equalsIgnoreCase(extension)
+                || "7z".equalsIgnoreCase(extension))
+        {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Try to decompress "zip", "rar" or "7z" file to see if it can be
+     * decompressed successfully.
+     */
+    private boolean isUnCompress(File uploadedFile) throws Exception
+    {
+        boolean result = false;
+        if (CreateJobUtil.isZipFile(uploadedFile))
+        {
+            result = CreateJobUtil.unzipFile(uploadedFile);
+        }
+        else if (CreateJobUtil.isRarFile(uploadedFile))
+        {
+            result = CreateJobUtil.unrarFile(uploadedFile);
+        }
+        else if (CreateJobUtil.is7zFile(uploadedFile))
+        {
+            result = CreateJobUtil.un7zFile(uploadedFile);
+        }
+
+        return result;
+    }
+    
+    private void addUploadFile(List<String> realUploadFileList, List<String> extensionList,
+            File zipFile) throws Exception
+    {
+        String zipFileFullPath = zipFile.getPath();
+        String zipFilePath = zipFileFullPath.substring(0,
+                zipFileFullPath.indexOf(zipFile.getName()));
+
+        List<net.lingala.zip4j.model.FileHeader> entriesInZip = CreateJobUtil
+                .getFilesInZipFile(zipFile);
+
+        for (net.lingala.zip4j.model.FileHeader entry : entriesInZip)
+        {
+            String zipEntryName = entry.getFileName();
+            String fileExtension = zipEntryName.substring(zipEntryName.lastIndexOf(".") + 1);
+            extensionList.add(fileExtension);
+            /*
+             * The unzipped files are in folders named by the zip file name
+             */
+            String unzippedFileFullPath = zipFilePath
+                    + zipFile.getName().substring(0, zipFile.getName().lastIndexOf(".")) + "_"
+                    + CreateJobUtil.getFileExtension(zipFile) + File.separator + zipEntryName;
+            realUploadFileList.add(unzippedFileFullPath);
+        }
     }
 }

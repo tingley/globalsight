@@ -356,6 +356,7 @@ public class WordExtractor extends AbstractExtractor
     public void handleTranslateNode(Node node)
     {
         index = 0;
+        index2 = 0;
         handleChild(node);
     }
 

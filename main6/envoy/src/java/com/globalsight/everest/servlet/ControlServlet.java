@@ -80,8 +80,6 @@ public class ControlServlet extends HttpServlet
 
     static public final String WELCOME_PAGE = "LOG4";
 
-    static public final String RETRIEVE_PAGE = "retrieve";
-
     // Actually should have our own page, id est, "You do not have
     // permission to perform the selected activity." LOG1 for now.
     static public final String NO_PERMISSION_PAGE = ENTRY_PAGE;
@@ -283,17 +281,15 @@ public class ControlServlet extends HttpServlet
             String activityName = p_request.getParameter(LinkHelper.ACTIVITY_NAME);
             String pageName = p_request.getParameter(WebAppConstants.PAGE_NAME);
 
-            if (activityName != null && activityName.equals("termviewer"))
+            if ("termviewer".equals(activityName))
             {
                 WebActivityDescriptor activityDescriptor = WebSiteDescription.instance()
                         .getActivityDescriptor(activityName);
                 targetPageDescriptor = activityDescriptor.getDefaultPageDescriptor();
             }
-            else if (pageName != null && pageName.equals(RETRIEVE_PAGE)
-                    && LoginUtil.isFromLoginPage(p_request))
+            else if ("retrieve".equals(pageName))
             {
-                targetPageDescriptor = WebSiteDescription.instance()
-                        .getPageDescriptor(RETRIEVE_PAGE);
+                targetPageDescriptor = WebSiteDescription.instance().getPageDescriptor("retrieve");
             }
             else if ("inctxrvED1".equals(pageName))
             {

@@ -66,18 +66,91 @@ public class JobResourceTester extends RestfulApiTestHelper
 	{
 		CloseableHttpClient httpClient = getHttpClient();
 		HttpResponse httpResponse = null;
-		File file = new File("E:\\down\\test\\html\\work_with_legacy_tests.htm");
+		File file = new File("D:\\down\\test\\html\\work_with_legacy_tests.htm");
 		BufferedInputStream inputStream = null;
 		try
 		{
-			String jobName = "test_abc";
-			String fileProfileId = "1065";
+			String jobName = "test_abc_01";
+			String fileProfileId = "1001";
 
 			StringBuffer url = new StringBuffer();
 			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/sourceFiles");
 			// required params
 			url.append("?jobName=").append(URLEncoder.encode(jobName));
 			url.append("&fileProfileId=").append(fileProfileId);
+
+			// if tm file is large, we had better upload multiple times, 5M
+			// every time.
+			int len = (int) file.length();
+			ArrayList<byte[]> fileByteList = new ArrayList<byte[]>();
+			inputStream = new BufferedInputStream(new FileInputStream(file));
+			int size = len / MAX_SEND_SIZE;
+			// Separates the file to several parts according to the size.
+			for (int i = 0; i < size; i++)
+			{
+				byte[] fileBytes = new byte[MAX_SEND_SIZE];
+				inputStream.read(fileBytes);
+				fileByteList.add(fileBytes);
+			}
+			if (len % MAX_SEND_SIZE > 0)
+			{
+				byte[] fileBytes = new byte[len % MAX_SEND_SIZE];
+				inputStream.read(fileBytes);
+				fileByteList.add(fileBytes);
+			}
+			if (inputStream != null)
+			{
+				inputStream.close();
+			}
+
+			// Uploads all parts of files.
+			for (int i = 0; i < fileByteList.size(); i++)
+			{
+				ByteArrayBody byteBody = new ByteArrayBody(fileByteList.get(i),
+						file.getName());
+
+				// if file is not big, can use FileBody to upload one time
+				@SuppressWarnings("unused")
+				FileBody fileBody = new FileBody(file);
+
+				HttpEntity multiPartEntity = MultipartEntityBuilder.create()
+						.setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+						.addPart("anyNameIsOkay", byteBody).build();
+
+				HttpPost httpPost = getHttpPost(url.toString(), accessToken);
+				httpPost.setEntity(multiPartEntity);
+
+				httpResponse = httpClient.execute(httpPost);
+
+				printHttpResponse(httpResponse);
+
+				consumeQuietly(httpResponse);
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/jobs/sourceFiles/zip
+	 */
+	public void testUploadZipSourceFile()
+	{
+		CloseableHttpClient httpClient = getHttpClient();
+		HttpResponse httpResponse = null;
+		File file = new File("D:\\down\\4386_ZIP.zip");
+		BufferedInputStream inputStream = null;
+		try
+		{
+			String jobName = "test_4368_02";
+			String fileProfileId = "1001";
+			StringBuffer url = new StringBuffer();
+			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/sourceFiles/zip");
+			// required params
+			url.append("?jobName=").append(URLEncoder.encode(jobName));
+			url.append("&fileProfileIds=").append(fileProfileId);
 
 			// if tm file is large, we had better upload multiple times, 5M
 			// every time.
@@ -142,14 +215,55 @@ public class JobResourceTester extends RestfulApiTestHelper
 		HttpResponse httpResponse = null;
 		try
 		{
-			String jobId = "1471";
-			String comment = "test_abc";
+			String jobId = "1024";
+			String comment = "test_abc_01";
 			String filePaths = "work_with_legacy_tests.htm";
-			String p_fileProfileIds = "1065";
+			String p_fileProfileIds = "1001";
 			String p_targetLocales = "fr_FR";
-			String p_attributes = null;
+			String p_attributes = "";
 			StringBuffer url = new StringBuffer();
 			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/createJob");
+			// required params
+			url.append("?jobId=").append(jobId);
+			url.append("&filePaths=").append(URLEncoder.encode(filePaths));
+			url.append("&fileProfileIds=").append(URLEncoder.encode(p_fileProfileIds));
+			url.append("&targetLocales=").append(URLEncoder.encode(p_targetLocales));
+			// optional query params
+			url.append("&comment=").append(URLEncoder.encode(comment));
+			url.append("&attributes=").append(URLEncoder.encode(p_attributes));
+
+			HttpPost httpPost = getHttpPost(url.toString(), accessToken);
+			httpResponse = httpClient.execute(httpPost);
+
+			printHttpResponse(httpResponse);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			consumeQuietly(httpResponse);
+		}
+	}
+	
+	/**
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/jobs/createJob/zip"
+	 * */
+	public void testCreateJobForZipFile()
+	{
+		CloseableHttpClient httpClient = getHttpClient();
+		HttpResponse httpResponse = null;
+		try
+		{
+			String jobId = "1025";
+			String comment = "test_4368_02";
+			String filePaths = "4386_ZIP.zip";
+			String p_fileProfileIds = "1001";
+			String p_targetLocales = "fr_FR";
+			String p_attributes = "";
+			StringBuffer url = new StringBuffer();
+			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/createJob/zip");
 			// required params
 			url.append("?jobId=").append(jobId);
 			url.append("&filePaths=").append(URLEncoder.encode(filePaths));
@@ -296,11 +410,13 @@ public class JobResourceTester extends RestfulApiTestHelper
 			System.out.println("access token: " + accessToken);
 
 			tester = new JobResourceTester(accessToken);
-			tester.testGetUniqueJobName();
-			// tester.testUploadSourceFile();
-			// tester.testCreateJob();
-			// tester.testGetJobStatus();
-			// tester.testGetJobExportFiles();
+//			tester.testGetUniqueJobName();
+//			 tester.testUploadSourceFile();
+//			 tester.testCreateJob();
+//			 tester.testGetJobStatus();
+//			 tester.testGetJobExportFiles();
+			tester.testUploadZipSourceFile();
+//			tester.testCreateJobForZipFile();
 		}
 		finally
 		{

@@ -1037,21 +1037,6 @@ public class WorkflowHandlerHelper
                     }
                 }
 
-                // For MindTouch job, backup .obj help files too.
-                if (job.isMindTouchJob())
-                {
-                    String objFileName = srcFilePathName + ".obj";
-                    File objSrcFile = new File(docDir, objFileName);
-                    File objBackupFile = new File(docDir + File.separator + "recreateJob_tmp"
-                            + File.separator + objFileName);
-                    if (objSrcFile.exists() && objSrcFile.isFile())
-                    {
-                        FileUtil.copyFile(objSrcFile, objBackupFile);
-                        sourceFiles.add(objSrcFile);
-                        backupFiles.add(objBackupFile);
-                    }
-                }
-
                 filePaths.add(getSourceFileLocalPathName(srcFilePathName));
                 fileProfileIds.add(String.valueOf(fpId));
                 targetLocales.add(trgLocales);

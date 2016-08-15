@@ -1,6 +1,7 @@
 var filterConfigurations;
 var existXmlRules = new Array();
 var existBaseFilters;
+var baseTextFilterId;
 var specialFiltersMap = new Object();
 var companyId;
 var allFilterDialogIds = new Array();
@@ -121,6 +122,7 @@ function generateFilterTable(filterConfigurations)
 		{
 			if (filterConfigurations[j].filterTableName == "base_filter")
 			{
+				baseTextFilterId = filterConfigurations[j].id;
 				existBaseFilters = filterConfigurations[j].specialFilters;
 				filterConfigurations.splice(j,1);
 			}
@@ -147,7 +149,7 @@ function generateFilterTable(filterConfigurations)
 		}
 		
 		str.append("<td width='5%' class='main_table_head' align='center'>");
-		str.append("<img id=img_"+filter.id+" src='/globalsight/images/enlarge.jpg'   onclick='expand(this)'></img>");
+		str.append("<img id=img_"+filter.id+" src='/globalsight/images/enlarge.jpg' onclick='expand(this)'></img>");
 		str.append("</td>");
 		
 		str.append("<td width='25%' class='main_table_head'>");
@@ -156,26 +158,49 @@ function generateFilterTable(filterConfigurations)
 		str.append("</Label>");
 		str.append("</td>");
 		
-		str.append("<td width='15%' class='main_table_head'>");
+		// GBS-4471 Base Text Filter
+		if (hasBaseFilter == "true")
+		{
+		    str.append("<td width='10%' class='main_table_head'>");
+		}
+		else
+		{
+		    str.append("<td width='15%' class='main_table_head'>");
+		}
 		if(hasAddFilter == 'true')
 		{
 			str.append("<input type='button' id='" + filter.filterTableName + "_" + jsAdd + "' value='" + jsAdd + "' onclick='addSpecialFilter(\""+filter.filterTableName+"\",\""+filter.id+"\",\""+color+"\");'/>");
 		}
 		str.append("</td>");
 		
-		str.append("<td width='55%' class='main_table_head'>");
+		if (hasBaseFilter == "true")
+		{
+		    str.append("<td width='35%' class='main_table_head'>");
+		}
+		else
+		{
+		    str.append("<td width='55%' class='main_table_head'>");
+		}
 		str.append("<Label class='main_table_tr_label'>");
 		str.append(getFilterDescriptionByTableName(filter.filterTableName));
 		str.append("</Label>");
+		str.append("</td>");
+		
+		str.append("<td width='25%' class='main_table_head'>");
 		str.append("</td>");
 		str.append("</tr>");
 		
 		str.append("<tr style='padding:6px;border:1px;border-color:#0c1476;background:"+backgroundColor+"'>");
 		str.append("<td width='5%' class='main_table_head'>");
-		str.append("<Label class='main_table_tr_label'> ");
-		str.append("</Label>");
 		str.append("</td>");
-		str.append("<td width='20%' COLSPAN='3' class='main_table_head'>");
+		if (hasBaseFilter == "true")
+		{
+		    str.append("<td width='95%' COLSPAN='4' class='main_table_head'>");
+		}
+		else
+		{
+		    str.append("<td width='95%' COLSPAN='3' class='main_table_head'>");
+		}
 		str.append(generateSpecialFiltersDiv(filter.id, filter.specialFilters, color));
 		str.append("</td>");
 		str.append("</tr>");
@@ -183,7 +208,14 @@ function generateFilterTable(filterConfigurations)
 		if(i != filterConfigurations.length - 1)
 		{
 			str.append("<tr border=0 height='1'>");
-			str.append("<td border=0 height='1' colspan='4'>");
+			if (hasBaseFilter == "true")
+		    {
+		        str.append("<td border=0 height='1' colspan='5'>");
+		    }
+		    else
+		    {
+		        str.append("<td border=0 height='1' colspan='4'>");
+		    }
 			str.append("<div class='split_tr_div'>&nbsp;");
 			str.append("</div>");
 			str.append("</td>");
@@ -192,6 +224,7 @@ function generateFilterTable(filterConfigurations)
 		
 		if (filter.filterTableName == "base_filter")
 		{
+			baseTextFilterId = filter.id;
 			existBaseFilters = filter.specialFilters;
 		}
 	}
@@ -257,7 +290,7 @@ function removeZeroElementFromArray(array)
 function generateSpecialFiltersTable(filterId, specialFilters, color)
 {
 	specialFilters = removeZeroElementFromArray(specialFilters);
-	var str = new StringBuffer("<table width='100%' >");
+	var str = new StringBuffer("<table width='100%'>");
 	var backgroundColor;
 	if(color == 'white')
 	{
@@ -280,13 +313,21 @@ function generateSpecialFiltersTable(filterId, specialFilters, color)
 			continue;
 		}
 		str.append("<tr style='background:"+backgroundColor+"'>");
-		str.append("<td class='specialFilter_td'>");
+		// GBS-4471 Base Text Filter
+		if (hasBaseFilter == "true")
+		{
+		    str.append("<td width='26.3%' class='specialFilter_td'>");
+		}
+		else
+		{
+		    str.append("<td class='specialFilter_td'>");
+		}
 		str.append("<input type='checkbox' id='checkbox_" + filterId + "_" + specialFilter.id + "' topFilterId='"+filterId+"' specialFilterId='"+specialFilter.id+"' filterTable='"+specialFilter.filterTableName+"' firstColor='"+color+"' onclick='checkSpecialFilterToDel(this)'></input>");
 		if(hasEditFilter == 'true')
 		{
 			if (specialFilter.filterTableName == "base_filter")
 			{
-				if (hasBaseFilter_InternalText =='false' && hasBaseFilter_Escaping =='false')
+				if (hasBaseFilter_InternalText == "false" && hasBaseFilter_Escaping == "false")
 				{
 					str.append("<Label style='color:#810081'>");
 					str.append(specialFilter.filterName);
@@ -310,7 +351,7 @@ function generateSpecialFiltersTable(filterId, specialFilters, color)
 		{
 			if (specialFilter.filterTableName == "base_filter")
 			{
-				if (hasBaseFilter_InternalText =='true' || hasBaseFilter_Escaping =='true')
+				if (hasBaseFilter_InternalText == "true" || hasBaseFilter_Escaping == "true")
 				{
 					str.append("<a href='#' class='specialfilter_a' onclick='editFilter(\""+specialFilter.id+"\",\""+specialFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")' >");
 					str.append(specialFilter.filterName);
@@ -334,11 +375,50 @@ function generateSpecialFiltersTable(filterId, specialFilters, color)
 		str.append("<img style='display:none' id=delete_"+specialFilter.id+" src='"+imgSrc+"' onclick='deleteFilter(\""+specialFilter.id+"\",\""+specialFilter.filterTableName+"\",\""+color+"\",\""+filterId+"\")'></img>");
 		str.append("</td>");
 		
+		// GBS-4471 Base Text Filter
+		if (hasBaseFilter == "true")
+		{
+		    str.append("<td width='10.5%' class='specialFilter_td'>");
+		    str.append("</td>");
+		
+		    str.append("<td width='36.8%' class='specialFilter_td'>");
+		    str.append("</td>");
+		
+		    str.append("<td width='26.3%' class='specialFilter_td'>");
+		    var baseFilterId = specialFilter.baseFilterId;
+		    if (baseFilterId && baseFilterId != -2)
+		    {
+			    var baseFilter = getBaseFilterById(baseFilterId);
+			    if (baseFilter)
+			    {
+			    	if (hasBaseFilter_InternalText == "false" && hasBaseFilter_Escaping == "false")
+					{
+						str.append("<Label style='color:#810081'>");
+						str.append(baseFilter.filterName);
+						str.append("</Label>");	
+					}
+			    	else
+			    	{
+			    		str.append("<a href='#' class='specialfilter_a' onclick='editFilter(\""+baseFilter.id+"\",\""+baseFilter.filterTableName+"\",\""+color+"\",\""+baseTextFilterId+"\")'>");
+					    str.append(baseFilter.filterName);
+					    str.append("</a>");
+			    	}
+			    }
+		    }
+		    str.append("</td>");
+		}
 		str.append("</tr>");
 		if(i != specialFilters.length - 1)
 		{
 			str.append("<tr height='1px' style='background:"+color+"'>");
-			str.append("<td style='background:"+color+"'>");
+			if (hasBaseFilter == "true")
+		    {
+		        str.append("<td colspan='4' style='background:"+color+"'>");
+		    }
+		    else
+		    {
+		        str.append("<td style='background:"+color+"'>");
+		    }
 			str.append("</td>");
 			str.append("</tr>");
 		}
@@ -764,6 +844,23 @@ function closePopupDialog(dialogId)
 function showPopupDialog(dialogId)
 {
 	document.getElementById(dialogId).style.display = "";
+}
+
+function getBaseFilterById(baseFilterId)
+{
+	var baseFilter;
+	if (existBaseFilters)
+	{
+		for(var i = 0; i < existBaseFilters.length; i++)
+		{
+			var bf = existBaseFilters[i];
+			if(baseFilterId && baseFilterId == bf.id)
+			{
+				baseFilter = bf;
+			}
+		}
+	}
+	return baseFilter;
 }
 
 function getSpecialFilterById(filters, filterId)

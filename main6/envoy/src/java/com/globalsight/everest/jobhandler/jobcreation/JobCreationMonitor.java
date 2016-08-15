@@ -22,11 +22,14 @@ import java.util.Collection;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflow.WorkflowException;
+import com.globalsight.everest.workflowmanager.JobStatePostThread;
+import com.globalsight.everest.workflowmanager.WfStatePostThread;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -166,7 +169,13 @@ public class JobCreationMonitor
             job.setLmExtTable(lmExtTable);
             job.setLmExtArchiveTable(lmExtArchiveTable);
             HibernateUtil.saveOrUpdate(job);
-
+            L10nProfile l10nProfile = job.getL10nProfile();
+            long wfStatePostId = l10nProfile.getWfStatePostId();
+            if (wfStatePostId != -1)
+            {
+                new JobStatePostThread(job, "NULL", state).start();
+            }
+            
             if (!DbUtil.isTableExisted(tuTable))
             {
                 BigTableUtil.createTuTable(tuTable);
@@ -246,8 +255,15 @@ public class JobCreationMonitor
     {
         try
         {
+            String previousState = job.getState();
             job.setState(state);
             HibernateUtil.update(job);
+            L10nProfile l10nProfile = job.getL10nProfile();
+            long wfStatePostId = l10nProfile.getWfStatePostId();
+            if (wfStatePostId != -1)
+            {
+                new JobStatePostThread(job, previousState, state).start();
+            }
         }
         catch (Exception e)
         {

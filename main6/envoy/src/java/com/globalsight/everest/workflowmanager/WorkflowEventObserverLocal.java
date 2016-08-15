@@ -209,33 +209,15 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
             wfClone.setState(Workflow.EXPORTED);
             wfClone.setExportDate(new Date());
             WorkflowPersistenceAccessor.updateWorkflowState(p_workflow);
+
             possiblyUpdateJobForExport(wfClone, Workflow.EXPORTED);
 
-            // re-index the new added entry
+            // re-index the new added term-base entries
             FileProfile fileProfile = wfClone.getJob().getFileProfile();
-            String companyId = String.valueOf(fileProfile.getCompanyId());
-
             if (fileProfile.getTerminologyApproval() == 1)
             {
-                String termbaseName = wfClone.getJob().getL10nProfile().getProject()
-                        .getTermbaseName();
-                Termbase tb = TermbaseList.get(companyId, termbaseName);
-
-                try
-                {
-                    if (!tb.isIndexing())
-                    {
-                        ITermbaseManager s_manager = ServerProxy.getTermbaseManager();
-                        ITermbase itb = s_manager.connect(termbaseName, wfClone.getJob()
-                                .getL10nProfile().getProject().getProjectManagerId(), "",
-                                companyId);
-                        IIndexManager indexer = itb.getIndexer();
-                        indexer.doIndex();
-                    }
-                }
-                catch (Exception e)
-                {
-                }
+                String companyId = String.valueOf(fileProfile.getCompanyId());
+                doIndexForTermbase(wfClone, companyId);
             }
 
             /*
@@ -282,6 +264,7 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
         if (checkStateOfWorkflows(workflows, p_wfState))
         {
             JobImpl jobClone = (JobImpl) p_wf.getJob();
+            String previousState = jobClone.getState();
 
             if (Job.EXPORTED.equals(p_wfState))
             {
@@ -290,6 +273,11 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
 
             jobClone.setState(p_wfState);
             HibernateUtil.update(jobClone);
+            long wfStatePostId = jobClone.getL10nProfile().getWfStatePostId();
+            if (wfStatePostId != -1)
+            {
+                new JobStatePostThread(jobClone, previousState, jobClone.getState()).start();
+            }
 
             // update the source page and the TUVs since the Job is being
             // updated
@@ -500,6 +488,30 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
         {
             e.printStackTrace();
             throw new WorkflowManagerException(e);
+        }
+    }
+
+    /**
+     * Re-index the new added term-base entries if "Terminology Approval" option is "Yes".
+     */
+    private void doIndexForTermbase(WorkflowImpl wfClone, String companyId)
+    {
+        String termbaseName = wfClone.getJob().getL10nProfile().getProject().getTermbaseName();
+        Termbase tb = TermbaseList.get(companyId, termbaseName);
+
+        try
+        {
+            if (!tb.isIndexing())
+            {
+                ITermbaseManager s_manager = ServerProxy.getTermbaseManager();
+                ITermbase itb = s_manager.connect(termbaseName, wfClone.getJob().getL10nProfile()
+                        .getProject().getProjectManagerId(), "", companyId);
+                IIndexManager indexer = itb.getIndexer();
+                indexer.doIndex();
+            }
+        }
+        catch (Exception e)
+        {
         }
     }
 }

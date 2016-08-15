@@ -41,7 +41,11 @@ import org.apache.log4j.Logger;
 import com.globalsight.cxe.adapter.filesystem.Exporter;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.foundation.L10nProfile;
+import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.page.ExtractedSourceFile;
+import com.globalsight.everest.page.PageException;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -50,17 +54,22 @@ import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.page.pageexport.ExportEventObserverHelper;
 import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.projecthandler.ProjectHandlerException;
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFileState;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.tuv.TuvEventObserver;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
+import com.globalsight.ling.tm.LeveragingLocales;
+import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.log.ActivityLog;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.GlobalSightLocale;
 
 /**
  * <P>
@@ -80,9 +89,7 @@ public class CapExportServlet extends HttpServlet
 {
     private static final long serialVersionUID = 3601378874412599201L;
 
-    private static final Logger c_logger =
-        Logger.getLogger(
-            CapExportServlet.class.getName());
+    private static final Logger c_logger = Logger.getLogger(CapExportServlet.class.getName());
 
     public static final String EXPORT_STATUS = "33";
     public static final String PREVIEW_STATUS = "34";
@@ -422,7 +429,6 @@ public class CapExportServlet extends HttpServlet
                 ExportConstants.ORIG_CXE_REQUEST_TYPE);
     
             long pageId = Long.parseLong(p_pageId);
-//            PageManagerLocal.EXPORTING_TARGET_PAGE.remove(pageId);
             
             String responseType = p_request.getParameter(
                 ExportConstants.RESPONSE_TYPE);
@@ -454,7 +460,7 @@ public class CapExportServlet extends HttpServlet
         }
 
         // output to cxe's servlet just to have something to spit back
-	PrintWriter outputToPageExport = p_response.getWriter();
+        PrintWriter outputToPageExport = p_response.getWriter();
         outputToPageExport.println("Received Export Status.");
         outputToPageExport.close();
     }
@@ -515,7 +521,6 @@ public class CapExportServlet extends HttpServlet
             }
         }
     }
-       
 
     // process the result of the exported target page.
     private void handleTargetPageRequest(long p_pageId, 
@@ -552,23 +557,33 @@ public class CapExportServlet extends HttpServlet
         }
         else if (p_responseType.equals(ExportConstants.SUCCESS))
         {
-            
             state = Workflow.EXPORTED;
             // an interim export can happen during dispatch without
             // updating any states.
             // so only update the target page if it is marked in the
             // process of exporting
-            if (tp.getPageState().equals(PageState.EXPORT_IN_PROGRESS))
+            if (PageState.EXPORT_IN_PROGRESS.equals(tp.getPageState())
+                    && Workflow.EXPORTING.equals(tp.getWorkflowInstance().getState()))
             {
-                ServerProxy.getPageEventObserver().
-                    notifyExportSuccessEvent(tp);
+                // update target page state >> workflow state possibly >> job state possibly.
+                ServerProxy.getPageEventObserver().notifyExportSuccessEvent(tp);
+
+                // Must populate TM first
+                c_logger.debug("Populating TM...");
+                populateTm(tp.getSourcePage(), tp.getGlobalSightLocale());
+
+                // Then update target TUVs to 'COMPLETE' state.
+                if (tp.getPrimaryFileType() == ExtractedSourceFile.EXTRACTED_FILE)
+                {
+                    getTuvEventObserver().notifyPageExportedEvent(tp);
+                }
             }
         }
-        snedEmail(tp, state);
+
+        sendEmail(tp, state);
     }
 
-
-    private void snedEmail(TargetPage targetPage, String state)
+    private void sendEmail(TargetPage targetPage, String state)
             throws ProjectHandlerException, RemoteException, GeneralException,
             NamingException
     {
@@ -588,5 +603,40 @@ public class CapExportServlet extends HttpServlet
 
         ExportEventObserverHelper.notifyPageExportComplete(
             Long.parseLong(exportBatchId), p_pageId, p_request);
+    }
+
+    private void populateTm(SourcePage p_sourcePage, GlobalSightLocale p_targetLocale)
+            throws PageException
+    {
+        c_logger.info("Populating Tm for the page " + p_sourcePage.getExternalPageId());
+
+        try
+        {
+            L10nProfile l10nProfile = p_sourcePage.getRequest().getL10nProfile();
+            LeveragingLocales leveragingLocales = l10nProfile.getLeveragingLocales();
+            TranslationMemoryProfile tmProfile = l10nProfile.getTranslationMemoryProfile();
+            LeverageOptions leverageOptions = new LeverageOptions(tmProfile, leveragingLocales);
+
+            LingServerProxy.getTmCoreManager().populatePageByLocale(p_sourcePage, leverageOptions,
+                    p_targetLocale, p_sourcePage.getJobId());
+
+            c_logger.info("Populating Tm finished.");
+        }
+        catch (Exception e)
+        {
+            throw new PageException(e);
+        }
+    }
+
+    private TuvEventObserver getTuvEventObserver() throws PageException
+    {
+        try
+        {
+            return ServerProxy.getTuvEventObserver();
+        }
+        catch (GeneralException ge)
+        {
+            throw new PageException(PageException.MSG_FAILED_TO_LOCATE_TUV_EVENT_OBSERVER, null, ge);
+        }
     }
 }

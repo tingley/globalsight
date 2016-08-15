@@ -33,6 +33,7 @@ public interface WorkflowStatePostConstants
     public static final String NOTIFY_EMAIL_FIELD = "notifyEmailField";
     public static final String WF_STATE_POST_INFO = "wfStatePostInfo";
     public static final String WORKFLOW_STATE_POST_ID = "wfStatePostId";
+    public static final String JOB_STATUS_CHANGE_FIELD = "jobStatusChangeField";
 
     public static final String WFSPPROFILE_LIST = "wfStatePostProfiles";
     public static final String WFSPPROFILE_KEY = "wfStatePostProfile";

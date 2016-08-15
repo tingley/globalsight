@@ -18,7 +18,6 @@ package com.globalsight.cxe.adapter.filesystem;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -47,11 +46,7 @@ import com.globalsight.connector.eloqua.models.LandingPage;
 import com.globalsight.connector.eloqua.util.EloquaHelper;
 import com.globalsight.connector.git.GitConnectorManagerLocal;
 import com.globalsight.connector.git.util.GitConnectorHelper;
-import com.globalsight.connector.mindtouch.MindTouchManager;
-import com.globalsight.connector.mindtouch.util.MindTouchHelper;
-import com.globalsight.connector.mindtouch.vo.MindTouchPageInfo;
 import com.globalsight.cxe.adapter.BaseAdapter;
-import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
@@ -63,7 +58,6 @@ import com.globalsight.cxe.entity.gitconnector.GitConnectorCacheFile;
 import com.globalsight.cxe.entity.gitconnector.GitConnectorFileMapping;
 import com.globalsight.cxe.entity.gitconnector.GitConnectorJob;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
-import com.globalsight.cxe.entity.mindtouch.MindTouchConnector;
 import com.globalsight.cxe.entity.xmldtd.XmlDtd;
 import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
 import com.globalsight.cxe.message.CxeMessage;
@@ -570,26 +564,12 @@ public class Exporter
 
                 if (isLastFile())
                 {
-                    if (wf.getJob().isMindTouchJob())
-                    {
-                        // Post/push files back to MindTouch server
-                        handleMindTouchFiles(wf, FILE_STATES.get(m_batchId));
-                    }
-
                     addDtdValidationFailedComment();
                     FILE_STATES.remove(m_batchId);
 
                     XliffFileUtil.processXliffFiles(wf);
                     XliffFileUtil.processXLZFiles(wf);
                 }
-            }
-
-            // MindTouch files are handled together after all files exported.
-            // This logic cannot be synchronized because it need much time.
-            if (isLastFile && fileStates != null && fileStates.length > 0
-                    && wf.getJob().isMindTouchJob())
-            {
-                handleMindTouchFiles(wf, fileStates);
             }
         }
         catch (FileSystemAdapterException fsae)
@@ -648,174 +628,6 @@ public class Exporter
             }
         }
         return false;
-    }
-
-    /**
-     * When export, post contents/tags/properties back to MindTouch server.
-     *
-     */
-    private void handleMindTouchFiles(Workflow wf, FileState[] fileStates)
-    {
-        logger.info("Begin to handle MindTouch Files...");
-        File docDir = AmbFileStoragePathUtils.getCxeDocDir(wf.getCompanyId());
-
-        // Get all target files that are exported
-        List<File> trgFiles = new ArrayList<File>();
-        if (fileStates != null)
-        {
-            logger.info("MindTouch content/tag/properties files total size: " + fileStates.length);
-            for (FileState fs : fileStates)
-            {
-                String file = fs.getFile();
-                File f = new File(docDir, file);
-                // If it has script on import/export...
-                String prefix = "PreProcessed_" + wf.getJob().getId() + "_";
-                if (f != null && f.getParentFile().getName().startsWith(prefix))
-                {
-                    f = new File(f.getParentFile().getParentFile(), f.getName());
-                }
-
-                if (f != null && f.exists())
-                {
-                    trgFiles.add(f);
-                }
-            }
-        }
-
-        MindTouchHelper helper = null;
-        try
-        {
-            // Initialize one MindTouchHelper for all files from one job
-            String sourceLocale = wf.getJob().getL10nProfile().getSourceLocale().toString();
-            String targetLocale = wf.getTargetLocale().toString();
-            long jobId = wf.getJob().getJobId();
-            String srcLocale = "/" + sourceLocale + "/" + jobId + "/";
-            String trgLocale = "/" + targetLocale + "/" + jobId + "/";
-            MindTouchConnector mtc = null;
-            for (File trgFile : trgFiles)
-            {
-                MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale, trgLocale, trgFile);
-                if (pageInfo != null)
-                {
-                    long mtcId = Long.parseLong(pageInfo.getMindTouchConnectorId());
-                    mtc = MindTouchManager.getMindTouchConnectorById(mtcId);
-                    helper = new MindTouchHelper(mtc);
-
-                    break;
-                }
-            }
-
-            if (helper == null)
-            {
-                logger.error(
-                        "Fail to initialize MindTouchHelper, MindTouch files will NOT be pushed to target server, re-export is required!");
-            }
-
-            if (!helper.isTargetServerExist(targetLocale) && !mtc.getIsPostToSourceServer())
-            {
-                return;
-            }
-
-            // As need post content to create page first, group them first
-            List<File> contentFiles = new ArrayList<File>();
-            List<File> tagFiles = new ArrayList<File>();
-            List<File> propFiles = new ArrayList<File>();
-            String path = null;
-            for (File trgFile : trgFiles)
-            {
-                path = trgFile.getAbsolutePath();
-                if (path.endsWith("(contents).xml"))
-                {
-                    contentFiles.add(trgFile);
-                }
-                else if (path.endsWith("(tags).xml"))
-                {
-                    tagFiles.add(trgFile);
-                }
-                else if (path.endsWith("(properties).xml"))
-                {
-                    propFiles.add(trgFile);
-                }
-            }
-
-            // Post content files one by one
-            logger.info(contentFiles.size() + " content files need to be posted to target server.");
-            int count = 0;
-            for (File trgFile : contentFiles)
-            {
-                try
-                {
-                    count++;
-                    MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale, trgLocale,
-                            trgFile);
-                    logger.info("Begin to post MindTouch content to target server[" + count + "]: "
-                            + pageInfo.getPath());
-                    helper.postPageContents(trgFile, pageInfo, sourceLocale, targetLocale);
-                    logger.info("End to post MindTouch content to target server[" + count + "]: "
-                            + trgFile);
-                }
-                catch (Exception e)
-                {
-                    logger.error("postPageContents: " + trgFile, e);
-                }
-            }
-
-            // Put tag files one by one
-            count = 0;
-            for (File trgFile : tagFiles)
-            {
-                count++;
-                MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale, trgLocale, trgFile);
-                helper.putPageTags(trgFile, pageInfo, sourceLocale, targetLocale);
-                logger.info("MindTouch tag is put to target server[" + count + "]: " + trgFile);
-            }
-
-            // put properties files one by one
-            count = 0;
-            for (File trgFile : propFiles)
-            {
-                count++;
-                MindTouchPageInfo pageInfo = getMindTouchPageInfo(srcLocale, trgLocale, trgFile);
-                helper.putPageProperties(trgFile, pageInfo, sourceLocale, targetLocale);
-                logger.info(
-                        "MindTouch properties is put to target server[" + count + "]: " + trgFile);
-            }
-        }
-        catch (Exception e)
-        {
-            logger.error(e);
-        }
-        finally
-        {
-            if (helper != null)
-            {
-                helper.shutdownHttpClient();
-            }
-        }
-    }
-
-    /**
-     * 
-     * @param sourceLocale
-     *            -- like "/en_US/1234/"
-     * @param targetLocale
-     *            -- like "/fr_FR/1234/"
-     * @param trgFile
-     * @return
-     */
-    private MindTouchPageInfo getMindTouchPageInfo(String sourceLocale, String targetLocale,
-            File trgFile)
-    {
-        String trgPath = trgFile.getAbsolutePath().replace("\\", "/");
-        String srcPath = trgPath.replace(targetLocale, sourceLocale);
-
-        File objFile = new File(srcPath + ".obj");
-        if (objFile != null && objFile.exists())
-        {
-            return MindTouchHelper.parseObjFile(objFile);
-        }
-
-        return null;
     }
 
     /**
@@ -1568,35 +1380,6 @@ public class Exporter
     // ////////////////////////////////////
     // Private Methods //
     // ////////////////////////////////////
-
-    private void copyOriFilesToTargetFolder(String p_targetFolder, String p_companyId,
-            String fileName)
-    {
-        String sourceFolder = determineSourceFolder(p_companyId);
-        File targetFile = new File(p_targetFolder).getParentFile();
-        File sourceFile = new File(sourceFolder).getParentFile();
-        File[] fs = sourceFile.listFiles(new FileFilter()
-        {
-            public boolean accept(File pathname)
-            {
-                return pathname.isFile();
-            }
-        });
-        for (int i = 0; i < fs.length; i++)
-        {
-            File file = fs[i];
-            if (!isFileExist(file, targetFile) && file.getName().equals(fileName))
-            {
-                FileCopier.copyFile(file, targetFile);
-            }
-        }
-    }
-
-    private boolean isFileExist(File file, File targetFile)
-    {
-        File destFile = new File(targetFile, file.getName());
-        return destFile.exists();
-    }
 
     private boolean readyForScript(String p_targetFolder, String p_companyId)
     {

@@ -178,9 +178,6 @@ var helpFile = "<%=bundle.getString("help_workflow_state_post_profiles_main_scre
                  <amb:column label="lb_listener_url" sortBy="<%=WorkflowStatePostComparator.LISTENER_URL%>" filter="listenerURLFilter" filterValue="<%=listenerURLFilter%>" width="20%">
                      <%= wfStatePostProfile.getListenerURL()%>
                 </amb:column>
-                 <amb:column label="lb_secret_key" sortBy="<%=WorkflowStatePostComparator.SECRET_KEY%>"  width="10%">
-                     <%= wfStatePostProfile.getSecretKey()%>
-                </amb:column>
                 <% if (isSuperAdmin) { %>
                 <amb:column label="lb_company_name" sortBy="<%=WorkflowStatePostComparator.ASC_COMPANY%>" filter="wfStatePostCompanyNameFilter" filterValue="<%=wfStatePostCompanyNameFilter%>" width="8%">
                     <%=CompanyWrapper.getCompanyNameById(wfStatePostProfile.getCompanyId())%>

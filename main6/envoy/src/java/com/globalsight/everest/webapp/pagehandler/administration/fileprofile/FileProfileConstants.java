@@ -183,11 +183,10 @@ public interface FileProfileConstants
      * Default file extensions
      */
     public static final String[] extensions = {
-        "doc", "docx", "htm", "html", "indd", "fm", 
-        "inx", "java", "js", "jsp", "odp", 
-        "ods", "odt", "po", "ppt", "pptx", "properties", 
-        "rtf", "txt", "xlf", "xliff", "xls", 
-        "xlsx", "xml", "rc", "resx", "idml", "xlz", "mif", "lpu", "exe", "dll"
+        "doc", "docx", "htm", "html", "indd", "fm", "inx", "java", "js", "jsp",
+        "odp", "ods", "odt", "po", "ppt", "pptx", "properties", "rtf", "txt", "xlf",
+        "xliff", "xls", "xlsx", "xml", "rc", "resx", "idml", "xlz", "mif", "lpu",
+        "exe", "dll", "json"
         };
     
     /**

@@ -22,13 +22,13 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.page.PageEventObserver;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.workflowmanager.JobStatePostThread;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.ling.inprogresstm.InProgressTmManager;
@@ -191,6 +191,7 @@ public class JobEventObserverLocal implements JobEventObserver
         JobImpl jobImplClone = null;
         Session session = null;
         Transaction transaction = null;
+        String previousState = p_job.getState();
         try
         {
             session = HibernateUtil.getSession();
@@ -218,6 +219,12 @@ public class JobEventObserverLocal implements JobEventObserver
             session.saveOrUpdate(jobImplClone);
 
             transaction.commit();
+            long wfStatePostId = jobImplClone.getL10nProfile().getWfStatePostId();
+            if (wfStatePostId != -1)
+            {
+                new JobStatePostThread(jobImplClone, previousState, jobImplClone.getState())
+                        .start();
+            }
         }
         catch (Exception e)
         {

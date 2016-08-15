@@ -167,6 +167,7 @@ public class Permission
     static public final String LOCPROFILES_DETAILS = "locprofiles.details";
     static public final String LOCPROFILES_EDIT = "locprofiles.edit";
     static public final String LOCPROFILES_NEW = "locprofiles.new";
+    static public final String LOCPROFILES_REPORT = "locprofiles.report";
     static public final String SUPPORT_FILES_VIEW = "supportfiles.view";
     static public final String SUPPORT_FILES_REMOVE = "supportfiles.remove";
     static public final String SUPPORT_FILES_UPLOAD = "supportfiles.upload";
@@ -1060,6 +1061,9 @@ public class Permission
 
         added = addPermission(427, ACCOUNT_NOTIFICATION_EDIT_EMAIL_TEMPLATE) || added;
         added = addPermission(428, REPORTS_MT_POST_EDIT_DISTANCE) || added;
+        
+        //GBS-4312
+        added = addPermission(429, LOCPROFILES_REPORT) || added;
 
         return added;
     }

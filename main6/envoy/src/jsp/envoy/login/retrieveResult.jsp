@@ -319,7 +319,7 @@ if (logoImage.equals(logoBackgroundImage))
       </TABLE>
      </FORM>
 
-	 <P CLASS="standardText"><A CLASS="standardHREF" HREF="/globalsight/wl">Click here to return to GlobalSight.</A></P>
+	 <P CLASS="standardText"><A CLASS="standardHREF" HREF="/globalsight">Click here to return to GlobalSight.</A></P>
 
     </DIV>
     

@@ -272,6 +272,11 @@ public class MailerLocal implements Mailer
             String p_messageKey, String[] p_attachments, String p_companyIdStr)
             throws MailerException, RemoteException
     {
+        if (!m_systemNotificationEnabled)
+        {
+            return;
+        }
+
         if (CONTAINS_DURATION_IN_EMAIL.contains(p_messageKey))
         {
             p_messageArguments = buildMessageArguments(p_messageArguments);
@@ -290,13 +295,6 @@ public class MailerLocal implements Mailer
             throw new MailerException(MailerException.MSG_FAILED_TO_GET_EMAIL_ADDRESS, args, ge);
         }
 
-        String to = from;
-
-        if (!m_systemNotificationEnabled || !isNotificationEnabled(p_subjectKey, to))
-        {
-            return;
-        }
-
         String companyName = CompanyWrapper.getCompanyNameById(p_companyIdStr);
         ResourceBundle bundle = SystemResourceBundle.getInstance()
                 .getEmailResourceBundle(DEFAULT_RESOURCE_NAME, Locale.getDefault(), companyName);
@@ -305,6 +303,7 @@ public class MailerLocal implements Mailer
         String subject = MessageFormat.format(bundle.getString(p_subjectKey), messageArguments);
         String message = MessageFormat.format(bundle.getString(p_messageKey), messageArguments);
 
+        String to = from;
         sendMail(from, to, null, null, subject, message, p_attachments);
     }
 

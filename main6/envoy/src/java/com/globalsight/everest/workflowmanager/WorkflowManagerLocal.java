@@ -354,6 +354,11 @@ public class WorkflowManagerLocal implements WorkflowManager
                 JobCancelUtil.resetJobState(job, job.getWorkflows(), false);
                 session.saveOrUpdate(job);
                 session.saveOrUpdate(wf);
+                long wfStatePostId = job.getL10nProfile().getWfStatePostId();
+                if (wfStatePostId != -1)
+                {
+                    new JobStatePostThread(job, oldJobState, job.getState()).start();
+                }
 
                 tx.commit();
 
@@ -587,10 +592,16 @@ public class WorkflowManagerLocal implements WorkflowManager
         {
             job = (JobImpl) p_workflow.getJob();
             p_workflow.setState(WF_ARCHIVED);
+            String previousState = job.getState();
             if (WorkflowHandlerHelper.workflowsAllHaveState(job.getWorkflows(), WF_ARCHIVED))
             {
                 job.setState(WF_ARCHIVED);
                 canMigrateJobData = true;
+                long wfStatePostId = job.getL10nProfile().getWfStatePostId();
+                if (wfStatePostId != -1)
+                {
+                    new JobStatePostThread(job, previousState, WF_ARCHIVED).start();
+                }
             }
             session.saveOrUpdate(p_workflow);
             session.saveOrUpdate(job);
@@ -637,9 +648,15 @@ public class WorkflowManagerLocal implements WorkflowManager
             }
             if (WorkflowHandlerHelper.workflowsAllHaveState(p_job.getWorkflows(), WF_ARCHIVED))
             {
+                String previousState = p_job.getState();
                 p_job.setState(WF_ARCHIVED);
                 canMigrateJobData = true;
                 session.saveOrUpdate(p_job);
+                long wfStatePostId = p_job.getL10nProfile().getWfStatePostId();
+                if (wfStatePostId != -1)
+                {
+                    new JobStatePostThread(p_job, previousState, p_job.getState()).start();
+                }
             }
 
             tx.commit();
@@ -922,6 +939,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         Session session = HibernateUtil.getSession();
         Transaction transaction = null;
         JbpmContext ctx = null;
+        String previousState = p_job.getState();
 
         try
         {
@@ -995,7 +1013,12 @@ public class WorkflowManagerLocal implements WorkflowManager
             session.saveOrUpdate(jobClone);
 
             HibernateUtil.commit(transaction);
-
+            long wfStatePostId = jobClone.getL10nProfile().getWfStatePostId();
+            if (wfStatePostId != -1)
+            {
+                new JobStatePostThread(jobClone, previousState, jobClone.getState())
+                        .start();
+            }
             String pmId = p_job.getL10nProfile().getProject().getProjectManagerId();
             if (map.size() > 0)
             {
@@ -2775,6 +2798,11 @@ public class WorkflowManagerLocal implements WorkflowManager
                                 : PG_ACTIVE_JOB));
             }
             p_session.saveOrUpdate(jobClone);
+            long wfStatePostId = jobClone.getL10nProfile().getWfStatePostId();
+            if (wfStatePostId != -1)
+            {
+                new JobStatePostThread(jobClone, jobState, jobClone.getState()).start();
+            }
         }
         if (lowest >= LOCALIZED_STATE)
         {
@@ -3534,6 +3562,12 @@ public class WorkflowManagerLocal implements WorkflowManager
         WorkflowExportingHelper.setAsExporting(workflowIds);
 
         performExport(wf, p_userId, null, exportParams, shouldExportStf);
+        Job job = wf.getJob();
+        long wfStatePostId = job.getL10nProfile().getWfStatePostId();
+        if (wfStatePostId != -1)
+        {
+            new JobStatePostThread(job, job.getState(), Job.EXPORTED);
+        }
     }
 
     // perform an interim export for the purpose of secondary target file

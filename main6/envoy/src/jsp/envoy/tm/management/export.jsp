@@ -389,13 +389,13 @@ function doNext()
     }
     
     //Create User
-    if(hasSpecialChars(form.fltCreatedUser.value))
+    if(hasSomeSpecialChars(form.fltCreatedUser.value))
     {
     	alert("<%= bundle.getString("lb_export_create_user") %>" + "<%=bundle.getString("msg_invalid_entry")%>");
     	return false;	
     }
     //Modify User
-    if(hasSpecialChars(form.fltModifiedUser.value))
+    if(hasSomeSpecialChars(form.fltModifiedUser.value))
     {
     	alert("<%= bundle.getString("lb_export_modify_user") %>" + "<%=bundle.getString("msg_invalid_entry")%>");
     	return false;	

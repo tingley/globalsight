@@ -39,7 +39,7 @@ public class BlaiseConnectorComparator extends StringComparator
     }
 
     /**
-     * Performs a comparison of two MindTouchConnectorComparator objects.
+     * Performs a comparison of two BlaiseConnector objects.
      */
     public int compare(java.lang.Object p_A, java.lang.Object p_B)
     {

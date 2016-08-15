@@ -257,7 +257,7 @@ if(null==mess || mess.length()==0)
 	var form = document.loginForm;
 	if(type == "cancel")
 	{
-		window.location.href = "/globalsight/wl";
+		window.location.href = "/globalsight";
 	}
 	else
 	{

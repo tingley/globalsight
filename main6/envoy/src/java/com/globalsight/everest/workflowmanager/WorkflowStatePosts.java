@@ -22,7 +22,6 @@ import com.globalsight.everest.persistence.PersistentObject;
 
 public class WorkflowStatePosts extends PersistentObject
 {
-    private static Logger c_logger = Logger.getLogger(WorkflowStatePosts.class);
     private static final long serialVersionUID = 8507246584782247051L;
 
     private String m_description;
@@ -33,6 +32,7 @@ public class WorkflowStatePosts extends PersistentObject
     private int m_retryNumber;
     private String m_notifyEmail;
     private long m_companyId;
+    private boolean postJobChange;
 
     public WorkflowStatePosts()
     {
@@ -121,4 +121,16 @@ public class WorkflowStatePosts extends PersistentObject
     {
         this.m_companyId = m_companyId;
     }
+
+    public boolean isPostJobChange()
+    {
+        return postJobChange;
+    }
+
+    public void setPostJobChange(boolean postJobChange)
+    {
+        this.postJobChange = postJobChange;
+    }
+    
+    
 }

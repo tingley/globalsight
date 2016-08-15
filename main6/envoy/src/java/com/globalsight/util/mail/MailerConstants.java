@@ -76,6 +76,10 @@ public class MailerConstants
     public static final String WORKFLOW_STATE_POST_FAILURE_SUBJECT = "subject_wfStatePostFailure";
     public static final String WORKFLOW_STATE_POST_FAILURE_MESSAGE = "message_wfStatePostFailure";
     
+    
+    public static final String JOB_STATE_POST_FAILURE_SUBJECT = "subject_jobStatePostFailure";
+    public static final String JOB_STATE_POST_FAILURE_MESSAGE = "message_jobStatePostFailure";
+    
     // Auto-accept email
     public static final String AUTO_ACCEPT_SUBJECT = "subject_autoaccept_task";
     public static final String AUTO_ACCEPT_MESSAGE = "message_autoaccept_task";

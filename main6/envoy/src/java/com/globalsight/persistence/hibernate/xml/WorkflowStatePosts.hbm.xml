@@ -23,5 +23,7 @@
 			type="string" not-null="true" unique="false" />
 		<property name="companyId"  length="20" column="COMPANY_ID"
 			type="long" not-null="true" />
+		<property name="postJobChange" column="POST_JOB_CHANGE"
+			type="yes_no" not-null="false" />
 	</class>
 </hibernate-mapping>

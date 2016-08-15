@@ -129,6 +129,7 @@ public class WorkflowStatePostHandler extends PageHandler implements
         int retryNumber = Integer.parseInt(value);
         String notifyEmail = (String) p_request
                 .getParameter(NOTIFY_EMAIL_FIELD);
+        String isPostJobStatusChange = p_request.getParameter(JOB_STATUS_CHANGE_FIELD);
 
         wfStatePost.setName(name);
         wfStatePost.setDescription(description);
@@ -137,6 +138,7 @@ public class WorkflowStatePostHandler extends PageHandler implements
         wfStatePost.setTimeoutPeriod(timeoutPeriod);
         wfStatePost.setRetryNumber(retryNumber);
         wfStatePost.setNotifyEmail(notifyEmail);
+        wfStatePost.setPostJobChange("on".equals(isPostJobStatusChange));
         return wfStatePost;
     }
 

@@ -82,6 +82,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTPro
 import com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.CreatePdfThread;
 import com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.PreviewPDFHelper;
 import com.globalsight.everest.workflow.EventNotificationHelper;
+import com.globalsight.everest.workflowmanager.JobStatePostThread;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowOwner;
@@ -1441,6 +1442,7 @@ public class JobCreatorLocal implements JobCreator
     {
         Session session = null;
         Transaction transaction = null;
+        String previousState = p_job.getState();
         try
         {
             session = HibernateUtil.getSession();
@@ -1450,6 +1452,11 @@ public class JobCreatorLocal implements JobCreator
             jobClone.setState(p_state);
             session.update(jobClone);
             transaction.commit();
+            long wfStatePostId = p_job.getL10nProfile().getWfStatePostId();
+            if (wfStatePostId != -1)
+            {
+                new JobStatePostThread(p_job, previousState, p_state).start();
+            }
         }
         catch (Exception e)
         {

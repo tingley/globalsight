@@ -282,6 +282,7 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
         if (checkStateOfWorkflows(workflows, p_wfState))
         {
             JobImpl jobClone = (JobImpl) p_wf.getJob();
+            String previousState = jobClone.getState();
 
             if (Job.EXPORTED.equals(p_wfState))
             {
@@ -290,6 +291,11 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
 
             jobClone.setState(p_wfState);
             HibernateUtil.update(jobClone);
+            long wfStatePostId = jobClone.getL10nProfile().getWfStatePostId();
+            if (wfStatePostId != -1)
+            {
+                new JobStatePostThread(jobClone, previousState, jobClone.getState()).start();
+            }
 
             // update the source page and the TUVs since the Job is being
             // updated

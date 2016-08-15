@@ -54,6 +54,7 @@
 			String timeoutField = WorkflowStatePostConstants.TIMEOUT_FIELD;
 			String retryTimeField = WorkflowStatePostConstants.RETRY_TIME_FIELD;
 			String notifyEmailField = WorkflowStatePostConstants.NOTIFY_EMAIL_FIELD;
+			String jobStatusChangeField = WorkflowStatePostConstants.JOB_STATUS_CHANGE_FIELD;
 
 			//labels
 			String labelName = bundle.getString("lb_name");
@@ -63,6 +64,7 @@
 			String labelTimeoutPeriod = bundle.getString("lb_timeout_period");
 			String labelRetryTime = bundle.getString("lb_retry_time");
 			String labelNotifyEmail = bundle.getString("lb_notification_email");
+			String labelStatusChange = bundle.getString("lb_status_change");
 
 			// get the newly created or existing workflow state post info
 			WorkflowStatePosts wfsp = (WorkflowStatePosts) request
@@ -84,6 +86,7 @@
 			String wfStatePostTimeoutPeriod = String.valueOf(60);
 			String wfStatePostRetryTime = String.valueOf(3);
 			String wfStatePostNotifyEmail = "";
+			boolean isPostJobStatusChange = false;
 			if (wfsp != null) {
 				// values to be populated in the UI fields
 				wfStatePostName = wfsp.getName();
@@ -94,6 +97,7 @@
 						.getTimeoutPeriod());
 				wfStatePostRetryTime = String.valueOf(wfsp.getRetryNumber());
 				wfStatePostNotifyEmail = wfsp.getNotifyEmail();
+				isPostJobStatusChange = wfsp.isPostJobChange();
 			}
 
 			// links for the save and cancel buttons
@@ -301,7 +305,7 @@ function confirmTime()
 							</TR>
 							<TR>
 								<TD><%=labelSecretKey%>:</TD>
-								<TD><INPUT TYPE="TEXT" SIZE="40" MAXLENGTH="100"
+								<TD><INPUT TYPE="PASSWORD" SIZE="40" MAXLENGTH="100"
 									NAME="<%=secretKeyField%>" CLASS="standardText"
 									<%if (wfStatePostSecretKey != null)
             {%>
@@ -334,6 +338,9 @@ function confirmTime()
             {%>
 									VALUE="<%=wfStatePostNotifyEmail%>" <%}%>></INPUT>
 								</TD>
+							</TR>
+							<TR>
+							<TD><input type="checkbox" name="<%=jobStatusChangeField %>" id="<%=jobStatusChangeField %>" <%=isPostJobStatusChange ? "checked" : ""%>>&nbsp;&nbsp;&nbsp;<%=labelStatusChange%></TD>
 							</TR>
 							<TR>
 							</TR>

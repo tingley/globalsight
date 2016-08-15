@@ -87,7 +87,8 @@ var checkNewMessage;
 function enableButtons()
 {
 	var count = $(":checked").not($("option")).not($("#selectAll")).length;
-	if (count>0) {
+	if (count>0) 
+	{
 		$("#reportBtn").attr("disabled",false);
 		if(count==1)
 		{
@@ -96,20 +97,24 @@ function enableButtons()
 			<% if (duplicationEnabled) { %>
 				$("#dupBtn").attr("disabled",false);
 			<% } %>
-		}else{
+		}
+		else
+		{
 			$("#detailsBtn").attr("disabled",true);
 			$("#removeBtn").attr("disabled",true);
 			<% if (duplicationEnabled) { %>
 				$("#dupBtn").attr("disabled",true);
 			<% } %>
 		}
-		}
-	else {
+	}
+	else 
+	{
 		$("#detailsBtn").attr("disabled",true);
 		$("#removeBtn").attr("disabled",true);
 		<% if (duplicationEnabled) { %>
 			$("#dupBtn").attr("disabled",true);
 		<% } %>
+		$("#reportBtn").attr("disabled",true);
 	}
 }
 
@@ -144,7 +149,9 @@ function submitForm(button)
                  return;
             }
             locprofileForm.action = "<%=dupURL%>";
-        }else if(button =="Report"){
+        }
+        else if(button =="Report")
+        {
         	locprofileForm.action="<%=reportURL%>";
         }
     }

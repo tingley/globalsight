@@ -119,16 +119,16 @@ public class LocProfileMainHandler extends PageHandler implements
             p_response.getWriter().write(message);
             return;
         }
-      else if ("report".equals(action))
-      {
-          List<File> reports = new ArrayList<File>();
-          LocProfileReportGenerator generator = new LocProfileReportGenerator(p_request);
-          File[] files = generator.generateOneReport(p_request, p_response);
-          ReportHelper.addFiles(reports, files);
-          String fileName = getDownloadFileName(reports);
-          ReportHelper.sendFiles(reports, fileName, p_response);
-          return;
-      }
+        else if ("report".equals(action))
+        {
+            List<File> reports = new ArrayList<File>();
+            LocProfileReportGenerator generator = new LocProfileReportGenerator(p_request);
+            File[] files = generator.generateOneReport(p_request, p_response);
+            ReportHelper.addFiles(reports, files);
+            String fileName = getDownloadFileName(reports);
+            ReportHelper.sendFiles(reports, fileName, p_response);
+            return;
+        }
         try
         {
             dataForTable(p_request, session);

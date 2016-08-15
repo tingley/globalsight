@@ -17,13 +17,10 @@
 
 package com.globalsight.everest.page;
 
-// globalsight imports
-
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -185,8 +182,7 @@ public class PageEventObserverLocal implements PageEventObserver
                     PageState.EXPORT_IN_PROGRESS);
 
             // Does this refresh anything or is it useless?
-            TargetPage updatedPage = ServerProxy.getPageManager()
-                    .getTargetPage(id);
+            TargetPage updatedPage = ServerProxy.getPageManager().getTargetPage(id);
         }
         catch (GeneralException e)
         {
@@ -198,15 +194,11 @@ public class PageEventObserverLocal implements PageEventObserver
     }
 
     /**
-     * Set state of target page to EXPORTED. Call
-     * TuvEventObserver.notifyPageExportedEvent() on all its tuvs. (Used to
-     * index all target tuvs, reversing the TM.)
+     * Set state of target page to EXPORTED.
      * 
      * @see PageEventObserver#notifyExportSuccessEvent(Page)
      * @param p_targetPage
      *            target page that exported successfully.
-     * @throws PageException
-     *             when an error occurs.
      */
     public void notifyExportSuccessEvent(TargetPage p_targetPage)
             throws PageException, RemoteException
@@ -214,26 +206,14 @@ public class PageEventObserverLocal implements PageEventObserver
         try
         {
             long id = p_targetPage.getId();
-            PagePersistenceAccessor.updateStateOfPage(p_targetPage,
-                    PageState.EXPORTED);
+            PagePersistenceAccessor.updateStateOfPage(p_targetPage, PageState.EXPORTED);
 
-            TargetPage updatedPage = ServerProxy.getPageManager()
-                    .getTargetPage(id);
-
-            if (updatedPage.getPrimaryFileType() == ExtractedSourceFile.EXTRACTED_FILE)
-            {
-                // get all non deleted TUVs in the page
-                Collection tuvs = getNonDeletedTuvsOfTargetPage(updatedPage);
-
-                // notify and update the state of the TUVs that are not deleted
-                long jobId = p_targetPage.getSourcePage().getJobId();
-                getTuvEventObserver().notifyPageExportedEvent(tuvs, jobId);
-            }
+            TargetPage updatedPage = ServerProxy.getPageManager().getTargetPage(id);
 
             // if it's the last page, let WorkflowEventObserver know...
             notifyWorkflowIfLastPage(updatedPage.getWorkflowInstance());
         }
-        catch (Exception e) // TuvException and WorkflowManagerException
+        catch (Exception e)
         {
             throw new PageException(e);
         }
@@ -763,55 +743,9 @@ public class PageEventObserverLocal implements PageEventObserver
         return ServerProxy.getTuvManager().getSourceTuvsForStatistics(p_page);
     }
 
-    private Collection getTuvsOfTargetPage(TargetPage p_page) throws Exception
+    private Collection<Tuv> getTuvsOfTargetPage(TargetPage p_page) throws Exception
     {
         return ServerProxy.getTuvManager().getTargetTuvsForStatistics(p_page);
-    }
-
-    // get all the TUVs that are in a target page and have not been deleted
-    private Collection getNonDeletedTuvsOfTargetPage(TargetPage p_targetPage)
-            throws Exception
-    {
-        // get all TUVs in the page
-        Collection tuvs = getTuvsOfTargetPage(p_targetPage);
-
-        // if the page has deletable content - check for any
-        // deleted tuvs and remove from the collection
-
-        ExtractedSourceFile esf = (ExtractedSourceFile) p_targetPage
-                .getSourcePage().getPrimaryFile();
-        if (esf.containGsTags())
-        {
-            HashSet tuIds = getNonDeletedTuIds(p_targetPage.getSourcePage(),
-                    p_targetPage.getGlobalSightLocale());
-            // if they are less - so some were deleted
-            if (tuIds.size() < tuvs.size())
-            {
-                boolean removedAll = false;
-
-                for (Iterator tuvi = tuvs.iterator(); tuvi.hasNext()
-                        && !removedAll;)
-                {
-                    Tuv t = (Tuv) tuvi.next();
-                    // if it can't find th TU the TUV is associated with - then
-                    // remove from the
-                    // collection
-                    if (!tuIds.contains(t.getTuId()))
-                    {
-                        // remove the current one
-                        tuvi.remove();
-                        // the sizes are the same - so found and removed
-                        // all deleted TUVs
-                        if (tuIds.size() == tuvs.size())
-                        {
-                            removedAll = true;
-                        }
-                    }
-                }
-            }
-            // else none were deleted so just fall out and continue
-        }
-        return tuvs;
     }
 
     // notify the project manager
@@ -888,6 +822,7 @@ public class PageEventObserverLocal implements PageEventObserver
      * Notifies the workflow event observer if all pages have been exported;
      * also call the notify all target pages exported method.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private void notifyWorkflowIfLastPage(Workflow p_workflow) throws Exception
     {
         List args = new ArrayList<>();
@@ -916,62 +851,9 @@ public class PageEventObserverLocal implements PageEventObserver
         {
             if (s_category.isDebugEnabled())
             {
-                s_category.debug("All target pages are NOT exported!!!");
+                s_category.debug("NOT all target pages are exported!!!");
             }
         }
-    }
-
-    /**
-     * Return the list of TU ids that are part of the page and have not been
-     * deleted. tbd -
-     */
-    private HashSet getNonDeletedTuIds(SourcePage p_page,
-            GlobalSightLocale p_locale) throws PageException
-    {
-        HashSet result = new HashSet();
-
-        try
-        {
-            // Just return Caller guarantees source page contains GS tags.
-
-            // if the page contains an extracted file
-            if (p_page.getPrimaryFileType() == ExtractedSourceFile.EXTRACTED_FILE)
-            {
-                if (((ExtractedSourceFile) p_page.getPrimaryFile())
-                        .containGsTags())
-                {
-                    // get the Page Template
-
-                    PageTemplate template = ((ExtractedFile) p_page
-                            .getPrimaryFile())
-                            .getPageTemplate(PageTemplate.TYPE_DETAIL);
-                    String locale = p_locale.toString();
-                    template = new SnippetPageTemplate(template, locale);
-
-                    Collection parts = ServerProxy.getPageManager()
-                            .getTemplatePartsForSourcePage(
-                                    p_page.getIdAsLong(),
-                                    template.getTypeAsString());
-
-                    // ALWAYS set the template parts before getting the page
-                    // data
-                    template.setTemplateParts(new ArrayList(parts));
-                    result = template.getInterpretedTuIds();
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            String[] args =
-            { "Failed to get the snippet page template." };
-
-            s_category.error(args[0], e);
-            // tbd
-            throw new PageException(e); // OnlineEditorException.MSG_FAILED_TO_GET_PAGEVIEW,
-            // args, ge);
-        }
-
-        return result;
     }
 
     // ////////////////////////////////////////////////////////////////

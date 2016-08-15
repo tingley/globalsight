@@ -17,10 +17,10 @@
 
 package com.globalsight.everest.tuv;
 
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.tuv.TuvException;
 
 import java.util.Collection;
-
 import java.rmi.RemoteException;
 
 /**
@@ -46,6 +46,7 @@ public interface TuvEventObserver
     public void notifyPageExportedEvent(Collection p_targetTuvs, long p_jobId)
             throws TuvException, RemoteException;
 
+    public void notifyPageExportedEvent(TargetPage p_targetPage);
 
     /**
      * Updates the state of target page TUVs that are LOCALIZED to COMPLETED

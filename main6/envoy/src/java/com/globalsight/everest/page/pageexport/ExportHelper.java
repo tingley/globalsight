@@ -63,9 +63,6 @@ import com.globalsight.cxe.message.MessageDataFactory;
 import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.corpus.CorpusDoc;
-import com.globalsight.everest.corpus.CorpusManagerWLRemote;
 import com.globalsight.everest.edit.online.UIConstants;
 import com.globalsight.everest.edit.online.imagereplace.ImageReplaceFileMap;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -115,11 +112,6 @@ import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.merger.html.HtmlPreviewerHelper;
-import com.globalsight.ling.tm.LeveragingLocales;
-import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.ling.tm2.corpusinterface.TuvMapping;
-import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
-import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.util.GlobalSightCrc;
@@ -137,7 +129,6 @@ import com.globalsight.util.edit.SegmentUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.gxml.TextNode;
-import com.globalsight.util.modules.Modules;
 
 /**
  * ExportHelper performs the export process. It is normally triggered by the
@@ -959,7 +950,7 @@ public class ExportHelper
      */
     public File getTargetXmlPage(long pageId, int p_eventValue) throws IOException
     {
-        return getTargetXmlPage(pageId, p_eventValue, false);
+        return getTargetXmlPage(pageId, p_eventValue, true);
     }
 
     public String getTargetXmlContent(long pageId, int p_eventValue, boolean isPreview)
@@ -1275,21 +1266,8 @@ public class ExportHelper
     }
 
     /**
-     * If the page is not in the states defined here, it's valid. This is used
-     * for determining indexing.
-     */
-    private boolean isValidState()
-    {
-        String state = m_page.getPageState();
-
-        return (!PageState.ACTIVE_JOB.equals(state) && !PageState.EXPORTED.equals(state)
-                && !PageState.IMPORT_SUCCESS.equals(state));
-    }
-
-    /**
      * Populates the page by replacing place holders in the template with valid
-     * segments. This method also populates the TM and Corpus if appropriate (at
-     * first real export time)
+     * segments.
      * 
      * @param p_template
      *            The page template to use for populating the page.
@@ -1309,11 +1287,6 @@ public class ExportHelper
             GlobalSightLocale p_targetLocale, boolean p_isPreview, boolean p_isIncontextReview,
             List p_tuvIds) throws PageException
     {
-        TuvMappingHolder corpusMappings = null;
-        Map<Long, TuvMapping> targetCorpusSegments = null;
-        Map<Long, TuvMapping> sourceCorpusSegments = null;
-        boolean populateTm = false;
-
         // def 10057
         // strip extra leading and trailing whitespaces
         // this must be called before populating TM
@@ -1322,24 +1295,11 @@ public class ExportHelper
 
         p_segments = removeNotTranslateTag(p_segments);
 
-        // Populate TM
-        // do not populate TM for export source
-        if ((!p_isPreview && isValidState()) && m_page instanceof TargetPage)
-        {
-            populateTm = true;
-            s_logger.debug("Populating TM and getting corpus mappings.");
-
-            corpusMappings = populateTm(p_targetLocale);
-            targetCorpusSegments = corpusMappings.getMappingsByLocale(p_targetLocale);
-            sourceCorpusSegments = corpusMappings
-                    .getMappingsByLocale(m_sourcePage.getGlobalSightLocale());
-        }
-
         s_logger.debug("Populating template with target segments.");
         // Using cloned "template" to avoid adding extra spaces into TM.
         PageTemplate innerTemplate = new PageTemplate(p_template);
         populateTemplateWithUpdatedSegments(innerTemplate, p_segments, p_targetLocale, p_isPreview,
-                p_isIncontextReview, p_tuvIds, targetCorpusSegments, true);
+                p_isIncontextReview, p_tuvIds, true);
         // gxml is used to export (template maybe have been changed for java
         // properties)
         String gxml = getPageData(innerTemplate);
@@ -1350,90 +1310,6 @@ public class ExportHelper
         String newLocale = "locale=\"" + m_page.getGlobalSightLocale().toString() + "\"";
         sb.replace(idx, idx + newLocale.length(), newLocale);
         Logger.writeDebugFile("targetPage.xml", sb.toString());
-
-        // recombine source page GXML if we're populating the corpus TM
-        if (Modules.isCorpusInstalled() && (populateTm && (m_page instanceof TargetPage)))
-        {
-            try
-            {
-                CorpusManagerWLRemote corpusManager = ServerProxy.getCorpusManager();
-                Long srcPageCuvId = m_sourcePage.getCuvId();
-
-                if (srcPageCuvId != null && srcPageCuvId.longValue() > 0)
-                {
-                    CorpusDoc sourceCorpusDoc = corpusManager.getCorpusDoc(srcPageCuvId);
-
-                    if (sourceCorpusDoc != null && sourceCorpusDoc.isMapped() == false)
-                    {
-                        s_logger.debug("Populating template with source segments.");
-                        ArrayList srcSegments = getSegments(m_sourcePage.getGlobalSightLocale());
-                        populateTemplateWithUpdatedSegments(p_template, srcSegments,
-                                m_sourcePage.getGlobalSightLocale(), false, p_isIncontextReview,
-                                null, sourceCorpusSegments, false);
-
-                        s_logger.debug("Getting source page GXML.");
-                        String srcGxml = getPageData(p_template);
-                        Logger.writeDebugFile("sourcePage.xml", srcGxml);
-
-                        // overwrite the original src GXML
-                        s_logger.debug("Overwriting original source gxml.");
-                        ServerProxy.getNativeFileManager().save(srcGxml, ExportConstants.UTF8,
-                                sourceCorpusDoc.getGxmlPath());
-
-                        // add the source page mapping to the corpus
-                        if (sourceCorpusSegments != null && sourceCorpusSegments.size() > 0)
-                        {
-                            s_logger.debug("Mapping src segments to corpus doc.");
-                            List<TuvMapping> sourceCorpusSegmentList = new ArrayList<TuvMapping>(
-                                    sourceCorpusSegments.values());
-
-                            corpusManager.mapSegmentsToCorpusDoc(sourceCorpusSegmentList,
-                                    sourceCorpusDoc);
-                        }
-                        else
-                        {
-                            // nothing was saved to the TM
-                            s_logger.debug("No src segments to map to corpus doc.");
-                        }
-                    }
-
-                    // add the target page to the corpus, but not store target
-                    // files
-                    s_logger.debug("Adding target corpus doc.");
-                    CorpusDoc targetCorpusDoc = corpusManager.addNewTargetLanguageCorpusDoc(
-                            sourceCorpusDoc, p_targetLocale, gxml, null, false);
-
-                    if (targetCorpusSegments != null && targetCorpusSegments.size() > 0
-                            && targetCorpusDoc != null)
-                    {
-                        s_logger.debug("Mapping target segments to corpus doc.");
-                        List<TuvMapping> targetCorpusSegmentList = new ArrayList<TuvMapping>(
-                                targetCorpusSegments.values());
-                        corpusManager.mapSegmentsToCorpusDoc(targetCorpusSegmentList,
-                                targetCorpusDoc);
-                    }
-                    else
-                    {
-                        s_logger.debug("No target segments to map.");
-                    }
-
-                    Long cuvId = m_page.getCuvId();
-                    m_page = (TargetPage) HibernateUtil.get(TargetPage.class, m_page.getId());
-                    m_page.setCuvId(cuvId);
-                    HibernateUtil.update(m_page);
-                }
-                else
-                {
-                    s_logger.info("can NOT get source page cuvId of ["
-                            + m_sourcePage.getExternalPageId() + "]");
-                }
-            }
-            catch (Exception e)
-            {
-                s_logger.error("Failed to populate corpus TM.", e);
-            }
-
-        }
 
         return gxml;
     }
@@ -1447,14 +1323,12 @@ public class ExportHelper
      * @param p_locale
      * @param p_isPreview
      * @param p_tuvIds
-     * @param p_corpusSegments
      * @param p_restoreSpacesForJavaProerties
      */
     @SuppressWarnings("rawtypes")
     private void populateTemplateWithUpdatedSegments(PageTemplate p_template, List p_segments,
             GlobalSightLocale p_locale, boolean p_isPreview, boolean p_isIncontextReview,
-            List p_tuvIds, Map p_corpusSegments, boolean p_restoreSpacesForJavaProerties)
-            throws PageException
+            List p_tuvIds, boolean p_restoreSpacesForJavaProerties) throws PageException
     {
         boolean changeFont = determineIfNeedFontChange(p_locale);
         long jobId = p_template.getSourcePage().getJobId();
@@ -1508,8 +1382,7 @@ public class ExportHelper
 
                 boolean isLocalizable = (element == GxmlElement.LOCALIZABLE);
                 updateSegValue(p_template, segment, p_isPreview, needToAddGsColor,
-                        p_isIncontextReview, p_tuvIds, p_corpusSegments, isLocalizable,
-                        isInddOrIdml);
+                        p_isIncontextReview, p_tuvIds, isLocalizable, isInddOrIdml);
             }
         }
 
@@ -1517,9 +1390,6 @@ public class ExportHelper
         if (needToAddGsColor && IFormatNames.FORMAT_MIF.equals(m_format) && m_targetTuvs != null
                 && m_targetTuvs.size() > 0)
         {
-            SourcePage sp = p_template.getSourcePage();
-            long companyId = sp != null ? sp.getCompanyId()
-                    : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
             for (int i = 0, max = m_targetTuvs.size(); i < max; i++)
             {
                 Tuv tuv = m_targetTuvs.get(i);
@@ -1900,21 +1770,17 @@ public class ExportHelper
     /**
      * Update the segment (translatable/localizable item). Note that for a
      * dynamic preview, we need to replace the place holders in the template
-     * with a default GS segment. This also modifies the GXML segment tag to
-     * include the project_tm_tu id that corresponds to this segment if
-     * corpusMappings is not null.
+     * with a default GS segment.
      * 
      * @param p_template
      *            The page template to insert the content into.
-     * @param segment
+     * @param p_segment
      *            The segment to update.
      * @param p_isPreview
      *            Specifies if this for preview or not.
      * @param p_tuvIds
      *            This only needs to be set if this is for preview otherwise it
      *            can be null or an empty ArrayList.
-     * @param p_targetCorpusMappings
-     *            The mappings showing which tuv maps to which project_tm_tuv
      * @param p_isLocalizable
      *            -- true if a localizable, false if segment
      * @param p_restoreSpacesForJavaProerties
@@ -1923,7 +1789,7 @@ public class ExportHelper
     @SuppressWarnings("rawtypes")
     private void updateSegValue(PageTemplate p_template, Tuv p_segment, boolean p_isPreview,
             boolean p_needToAddGsColor, boolean p_isIncontextReview, List p_tuvIds,
-            Map p_targetCorpusMappings, boolean p_isLocalizable, boolean isInddOrIdml)
+            boolean p_isLocalizable, boolean isInddOrIdml)
     {
         long jobId = p_template.getSourcePage().getJobId();
         String tuvContent = null;
@@ -2002,11 +1868,6 @@ public class ExportHelper
                     tuvContent = addXmlSpacePreserve(tuvContent);
                 }
             }
-        }
-
-        if (p_targetCorpusMappings != null && !p_isLocalizable)
-        {
-            tuvContent = addProjectTmTuIdToSegment(p_targetCorpusMappings, p_segment, tuvContent);
         }
 
         // do not add this id for style issue.
@@ -2739,35 +2600,6 @@ public class ExportHelper
         return s;
     }
 
-    /**
-     * Adds the project_tm_tu_id to the segment gxml
-     * 
-     * @param p_corpusMappings
-     *            the HashMap containing TuvMapping objects
-     * @param p_segment
-     *            the Tuv segment
-     * @param p_tuvContent
-     *            the segment text as gxml
-     * @return new segment gxml
-     */
-    @SuppressWarnings("rawtypes")
-    private String addProjectTmTuIdToSegment(Map p_corpusMappings, Tuv p_segment,
-            String p_tuvContent)
-    {
-        TuvMapping mapping = (TuvMapping) p_corpusMappings.get(p_segment.getIdAsLong());
-
-        if (mapping == null)
-        {
-            return p_tuvContent;
-        }
-
-        long project_tm_tu_id = mapping.getProjectTmTuId();
-        String s = " tuid=\"" + project_tm_tu_id + "\" ";
-        StringBuffer sb = new StringBuffer(p_tuvContent);
-        sb.insert("<segment".length(), s);
-        return sb.toString();
-    }
-
     // writes a parameter/value pair to the string buffer
     private void writeParameterValuePair(StringBuffer p_sb, String p_parameterName,
             String p_parameterValue)
@@ -2846,49 +2678,6 @@ public class ExportHelper
                     p_isUnextracted, p_exportingFileName, p_sourcePageBomType,
                     p_exportParameters.getIsFinalExport(),
                     CompanyThreadLocal.getInstance().getValue());
-        }
-        catch (Exception e)
-        {
-            throw new PageException(e);
-        }
-    }
-
-    private TuvMappingHolder populateTm(GlobalSightLocale p_targetLocale) throws PageException
-    {
-        s_logger.info("Populating Tm for the page " + m_sourcePage.getExternalPageId());
-
-        try
-        {
-            L10nProfile l10nProfile = m_sourcePage.getRequest().getL10nProfile();
-            LeveragingLocales leveragingLocales = l10nProfile.getLeveragingLocales();
-
-            TranslationMemoryProfile tmProfile = l10nProfile.getTranslationMemoryProfile();
-
-            LeverageOptions leverageOptions = new LeverageOptions(tmProfile, leveragingLocales);
-
-            TmCoreManager tmCoreManager = LingServerProxy.getTmCoreManager();
-
-            TuvMappingHolder mappingHolder;
-            long jobId = m_sourcePage.getJobId();
-            if (m_genericPageType == PageManager.SOURCE_PAGE)
-            {
-                mappingHolder = tmCoreManager.populatePageForAllLocales(m_sourcePage,
-                        leverageOptions, jobId);
-            }
-            else
-            {
-                mappingHolder = tmCoreManager.populatePageByLocale(m_sourcePage, leverageOptions,
-                        p_targetLocale, jobId);
-            }
-
-            if (s_logger.isDebugEnabled())
-            {
-                s_logger.debug("CorpusMappings:\n" + mappingHolder.toDebugString());
-            }
-
-            s_logger.info("Populating Tm finished.");
-
-            return mappingHolder;
         }
         catch (Exception e)
         {

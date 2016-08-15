@@ -18,13 +18,14 @@
 package com.globalsight.everest.tuv;
 
 import com.globalsight.everest.util.system.RemoteServer;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.tuv.TuvEventObserver;
 import com.globalsight.everest.tuv.TuvEventObserverWLRemote;
 import com.globalsight.everest.tuv.TuvEventObserverLocal;
 import com.globalsight.everest.tuv.TuvException;
 import com.globalsight.everest.util.system.SystemStartupException;
-import java.util.Collection;
 
+import java.util.Collection;
 import java.rmi.RemoteException;
 
 
@@ -69,7 +70,12 @@ public final class TuvEventObserverWLImpl extends RemoteServer
     {
         m_tuvEventObserverLocal.notifyPageExportedEvent(p_targetTuvs, p_jobId);
     }
-        
+
+    public void notifyPageExportedEvent(TargetPage p_targetPage)
+    {
+        m_tuvEventObserverLocal.notifyPageExportedEvent(p_targetPage);
+    }
+
     /**
      * Updates the state of target page TUVs that are LOCALIZED to COMPLETED
      * otherwise leaves the state alone. Should be called after an export

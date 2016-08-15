@@ -28,6 +28,7 @@ import org.hibernate.Transaction;
 
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.integration.ling.LingServerProxy;
+import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportBatchEvent;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
@@ -468,12 +469,19 @@ public final class SecondaryTargetFileMgrLocal implements SecondaryTargetFileMgr
         long jobId = p_workflow.getJob().getId();
         for (TargetPage tp : targetPages)
         {
+            // Update page state along with its TUVs. Note that
+            // workflow state will also be set to exported in this method.
+            ServerProxy.getPageEventObserver().notifyExportSuccessEvent(tp);
+
+            // Populate TM first
             tmCoreManager.populatePageByLocale(tp.getSourcePage(), leverageOptions,
                     tp.getGlobalSightLocale(), jobId);
 
-            // also update page state along with its tuvs. Note that
-            // workflow state will also be set to exported in this method.
-            ServerProxy.getPageEventObserver().notifyExportSuccessEvent(tp);
+            // Then update TUVs state to 'COMPLETE'.
+            if (tp.getPrimaryFileType() == ExtractedSourceFile.EXTRACTED_FILE)
+            {
+                ServerProxy.getTuvEventObserver().notifyPageExportedEvent(tp);
+            }
         }
     }
 

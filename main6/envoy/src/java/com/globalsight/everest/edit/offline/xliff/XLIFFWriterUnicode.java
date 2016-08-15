@@ -19,8 +19,7 @@ import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
-public abstract class XLIFFWriterUnicode extends XLIFFUnicode implements
-        WriterInterface
+public abstract class XLIFFWriterUnicode extends XLIFFUnicode implements WriterInterface
 {
     static protected String XLIFF_ENCODING = FileUtil.UTF16LE;
 
@@ -52,7 +51,7 @@ public abstract class XLIFFWriterUnicode extends XLIFFUnicode implements
      * creation and revision dates etc.
      */
     protected String m_strEOL = "\r\n";
-    protected String m_space = "  ";
+    protected String m_space = " ";
 
     /**
      * The input page object from which the XLF output is derived.
@@ -63,8 +62,7 @@ public abstract class XLIFFWriterUnicode extends XLIFFUnicode implements
      * The ui locale. Used to write comments and other header text when
      * possible.
      */
-    protected Locale m_uiLocale = GlobalSightLocale
-            .makeLocaleFromString("en_US");
+    protected Locale m_uiLocale = GlobalSightLocale.makeLocaleFromString("en_US");
 
     /**
      * The output stream to which we write the XLF results.
@@ -150,8 +148,7 @@ public abstract class XLIFFWriterUnicode extends XLIFFUnicode implements
 
     private void writeXlfHeader() throws IOException, AmbassadorDwUpException
     {
-        m_outputStream.write("<?xml version=\"1.0\" encoding=\""
-                + XLIFF_ENCODING + "\"?>");
+        m_outputStream.write("<?xml version=\"1.0\" encoding=\"" + XLIFF_ENCODING + "\"?>");
         m_outputStream.write(m_strEOL);
         m_outputStream.write("<xliff version=\"1.2\">");
         m_outputStream.write(m_strEOL);

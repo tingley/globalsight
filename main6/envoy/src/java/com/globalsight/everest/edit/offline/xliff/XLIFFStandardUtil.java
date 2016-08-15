@@ -25,8 +25,7 @@ import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
  */
 public class XLIFFStandardUtil
 {
-    private static final Logger s_logger = Logger
-            .getLogger(XLIFFStandardUtil.class);
+    private static final Logger s_logger = Logger.getLogger(XLIFFStandardUtil.class);
 
     public static final String GS_SEPARATOR = "_GS_";
 
@@ -70,8 +69,7 @@ public class XLIFFStandardUtil
 
     private static final String att_end = "\"";
 
-    public static String convertToStandard(OfflineSegmentData p_osd,
-            String segment)
+    public static String convertToStandard(OfflineSegmentData p_osd, String segment)
     {
         if (segment == null)
         {
@@ -84,24 +82,22 @@ public class XLIFFStandardUtil
         }
 
         // bpt
-        segment = replaceAtts(segment, bpt_start, bpt_end, true, att_i, att_id,
-                att_type, att_ctype, att_x, att_xid);
+        segment = replaceAtts(segment, bpt_start, bpt_end, true, att_i, att_id, att_type,
+                att_ctype, att_x, att_xid);
 
         // ept
         segment = replaceAtts(segment, ept_start, ept_end, true, att_i, att_id);
 
         // it : add "id" by "x" first, then replace "x" to "xid" etc.
-        segment = addAtts(segment, it_start, it_end, att_x, att_id,
-                p_osd.getDisplaySegmentID());
-        segment = replaceAtts(segment, it_start, it_end, true, att_posBegin,
-                att_posOpen, att_posEnd, att_posClose, att_type, att_ctype,
-                att_x, att_xid);
+        segment = addAtts(segment, it_start, it_end, att_x, att_id, p_osd.getDisplaySegmentID());
+
+        segment = replaceAtts(segment, it_start, it_end, true, att_posBegin, att_posOpen,
+                att_posEnd, att_posClose, att_type, att_ctype, att_x, att_xid);
 
         // ph : add "id" by "x" first, then replace "x" to "xid" etc.
-        segment = addAtts(segment, ph_start, ph_end, att_x, att_id,
-                p_osd.getDisplaySegmentID());
-        segment = replaceAtts(segment, ph_start, ph_end, true, att_type,
-                att_ctype, att_x, att_xid);
+        segment = addAtts(segment, ph_start, ph_end, att_x, att_id, p_osd.getDisplaySegmentID());
+
+        segment = replaceAtts(segment, ph_start, ph_end, true, att_type, att_ctype, att_x, att_xid);
 
         return segment;
     }
@@ -150,19 +146,16 @@ public class XLIFFStandardUtil
         {
             String oriSeg = si.allValue;
             String newSeg = oriSeg;
-            if (oriAttSt != null && newAttSt != null
-                    && !oriSeg.contains(newAttSt))
+            if (oriAttSt != null && newAttSt != null && !oriSeg.contains(newAttSt))
             {
                 StringBuffer oriB = new StringBuffer(oriSeg);
-                StringIndex siB = StringIndex.getValueBetween(oriB, 0,
-                        oriAttSt, att_end);
+                StringIndex siB = StringIndex.getValueBetween(oriB, 0, oriAttSt, att_end);
 
                 if (siB != null)
                 {
-                    String newAtt = newAttSt + prefix + GS_SEPARATOR
-                            + siB.value + att_end;
-                    newSeg = tagStart + newAtt + " "
-                            + newSeg.substring(tagStart.length());
+                    String newAtt = newAttSt + prefix + GS_SEPARATOR + siB.value + att_end;
+                    newAtt = (tagStart + newAtt).replace("  ", " ");
+                    newSeg = newAtt + " " + newSeg.substring(tagStart.length());
 
                     segment = segment.replace(oriSeg, newSeg);
                 }
@@ -188,10 +181,8 @@ public class XLIFFStandardUtil
             if (attSt != null)
             {
                 StringBuffer oriB = new StringBuffer(oriSeg);
-                StringIndex siB = StringIndex.getValueBetween(oriB, 0, attSt,
-                        att_end);
-                if (siB != null && siB.allValue != null
-                        && siB.allValue.contains(GS_SEPARATOR))
+                StringIndex siB = StringIndex.getValueBetween(oriB, 0, attSt, att_end);
+                if (siB != null && siB.allValue != null && siB.allValue.contains(GS_SEPARATOR))
                 {
                     String ss = newSeg.substring(0, siB.allStart);
                     String ee = newSeg.substring(siB.allEnd);
@@ -273,6 +264,7 @@ public class XLIFFStandardUtil
         return segment;
     }
 
+    /**
     private static String processCType(String avalue, boolean toXliff)
     {
         if (toXliff)
@@ -297,4 +289,5 @@ public class XLIFFStandardUtil
 
         return avalue;
     }
+    */
 }

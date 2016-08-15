@@ -755,12 +755,12 @@ public class WorkflowManagerLocal implements WorkflowManager
                     L10nProfile l10nProfile = ServerProxy.getJobHandler()
                             .getL10nProfileByJobId(jobId);
                     long wfStatePostId = l10nProfile.getWfStatePostId();
-//                    if (wfStatePostId != -1)
-//                    {
-//                        WfStatePostThread myTask = new WfStatePostThread(task, null, true);
-//                        Thread t = new MultiCompanySupportedThread(myTask);
-//                        t.start();
-//                    }
+                    if (wfStatePostId != -1)
+                    {
+                        WfStatePostThread myTask = new WfStatePostThread(task, null, true);
+                        Thread t = new MultiCompanySupportedThread(myTask);
+                        t.start();
+                    }
 
                     task.setProjectManagerName(pm);
                     TaskHelper.autoAcceptTask(task);
@@ -982,11 +982,11 @@ public class WorkflowManagerLocal implements WorkflowManager
                         L10nProfile l10nProfile = ServerProxy.getJobHandler()
                                 .getL10nProfileByJobId(jobId);
                         long wfStatePostId = l10nProfile.getWfStatePostId();
-//                        if (wfStatePostId != -1)
-//                        {
-//                            WfStatePostThread myTask = new WfStatePostThread(task, null, true);
-//                            pool.execute(myTask);
-//                        }
+                        if (wfStatePostId != -1)
+                        {
+                            WfStatePostThread myTask = new WfStatePostThread(task, null, true);
+                            pool.execute(myTask);
+                        }
 
                         // For sla issue
                         if (wfClone.isEstimatedTranslateCompletionDateOverrided())
@@ -1116,12 +1116,12 @@ public class WorkflowManagerLocal implements WorkflowManager
             long jobId = p_task.getJobId();
             L10nProfile l10nProfile = ServerProxy.getJobHandler().getL10nProfileByJobId(jobId);
             long wfStatePostId = l10nProfile.getWfStatePostId();
-//            if (wfStatePostId != -1)
-//            {
-//                WfStatePostThread myTask = new WfStatePostThread(p_task, p_destinationArrow, false);
-//                Thread t = new MultiCompanySupportedThread(myTask);
-//                t.start();
-//            }
+            if (wfStatePostId != -1)
+            {
+                WfStatePostThread myTask = new WfStatePostThread(p_task, p_destinationArrow, false);
+                Thread t = new MultiCompanySupportedThread(myTask);
+                t.start();
+            }
         }
         catch (Exception e)
         {

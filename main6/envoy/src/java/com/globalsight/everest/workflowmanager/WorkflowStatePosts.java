@@ -131,6 +131,4 @@ public class WorkflowStatePosts extends PersistentObject
     {
         this.postJobChange = postJobChange;
     }
-    
-    
 }

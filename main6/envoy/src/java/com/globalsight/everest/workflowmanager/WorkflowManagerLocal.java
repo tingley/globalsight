@@ -69,7 +69,6 @@ import com.globalsight.everest.comment.CommentImpl;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
-import com.globalsight.everest.corpus.CorpusManagerWLRemote;
 import com.globalsight.everest.costing.AmountOfWork;
 import com.globalsight.everest.costing.CostingEngine;
 import com.globalsight.everest.costing.Rate;
@@ -527,7 +526,6 @@ public class WorkflowManagerLocal implements WorkflowManager
 
                 if (Job.CANCELLED.equals(lastJobState))
                 {
-                    // cleanCorpus(jobId);
                     // deleteInProgressTmData(jobClone);
                     // GBS-2915, discard a job to remove all job data
                     CompanyRemoval removal = new CompanyRemoval(jobClone.getCompanyId());
@@ -4158,45 +4156,6 @@ public class WorkflowManagerLocal implements WorkflowManager
             {
                 s_logger.error("Not updating default path tasks because originalBaseDate is null.");
             }
-        }
-    }
-
-    /**
-     * Removes the source corpus docs from the corpus and any applicable corpus
-     * mappings, and removes the link between the source page and the corpus
-     * doc. The assumption is that there is nothing to do with target pages
-     * because they only get created in the corpus at TM population time, and
-     * then it is too late to remove them.
-     * 
-     * @param p_job
-     *            canceled Job
-     */
-    public static void cleanCorpus(Long p_jobId)
-    {
-        if (!Modules.isCorpusInstalled())
-            return;
-
-        try
-        {
-            Job job = ServerProxy.getJobHandler().getJobById(p_jobId.longValue());
-            Collection<SourcePage> sourcePages = job.getSourcePages();
-            CorpusManagerWLRemote corpusMgr = ServerProxy.getCorpusManager();
-            for (SourcePage sp : sourcePages)
-            {
-                try
-                {
-                    corpusMgr.removeSourceCorpusDoc(sp);
-                }
-                catch (Exception e)
-                {
-                    s_logger.error(
-                            "Could not remove corpus doc for page " + sp.getExternalPageId());
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            s_logger.error("Could not remove corpus docs for job " + p_jobId, e);
         }
     }
 

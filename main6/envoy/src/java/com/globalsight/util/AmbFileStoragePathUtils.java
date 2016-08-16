@@ -85,8 +85,6 @@ public class AmbFileStoragePathUtils
 
     private static Map<String, File> wfTemplateXmlDir = new HashMap<String, File>();
 
-    private static Map<String, File> corpusDirs = new HashMap<String, File>();
-
     private static Map<String, File> m_uploadDir = new HashMap<String, File>();
 
     private static Map<String, File> m_reportsDir = new HashMap<String, File>();
@@ -148,8 +146,6 @@ public class AmbFileStoragePathUtils
     public final static String OFFLINE_FILE_DOWNLOAD_DIR = "workOfflineDownload";
 
     public final static String WEBSERVICE_DIR = "webservice";
-
-    public final static String CORPUS_DIR = "GlobalSight/Corpus";
 
     public final static String DIR_UPLOAD = "GlobalSight/Upload";
 
@@ -694,24 +690,6 @@ public class AmbFileStoragePathUtils
         }
 
         return (File) pdfPreviewDir.get(p_company_id);
-    }
-
-    public static File getCorpusDir(long companyId)
-    {
-        return getCorpusDir(String.valueOf(companyId));
-    }
-
-    public static File getCorpusDir(String p_company_id)
-    {
-        if (corpusDirs.get(p_company_id) == null)
-        {
-            File corpusDir = new File(getFileStorageDirPath(p_company_id),
-                    CORPUS_DIR);
-            corpusDir.mkdirs();
-            corpusDirs.put(p_company_id, corpusDir);
-        }
-
-        return (File) corpusDirs.get(p_company_id);
     }
 
     public static File getPdfPreviewDir(long companyId)

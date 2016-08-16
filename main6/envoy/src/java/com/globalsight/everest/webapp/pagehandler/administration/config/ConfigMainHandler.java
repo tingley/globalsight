@@ -112,27 +112,28 @@ public class ConfigMainHandler extends PageHandler {
             };  
     
     //registry key sensitive params
-    private static String[] companyParams1 = new String[] {
-            SystemConfigParamNames.CORPUS_STORE_NATIVE_FORMAT,
-            SystemConfigParamNames.CORPUS_SHOW_ALL_TMS_TO_LPS,
-            SystemConfigParamNames.PIVOT_CURRENCY,
-            SystemConfigParamNames.REVENUE_ENABLED };
+    private static String[] companyParams1 = new String[]
+    { SystemConfigParamNames.PIVOT_CURRENCY, SystemConfigParamNames.REVENUE_ENABLED };
     
     private static List<String> ignoredSysParams = null;
 
     //used when creat a company,get all params needing to creat
-    public static String[] getParams() {
+    public static String[] getParams()
+    {
         int len = companyParams.length + companyParams1.length;
         String[] params = new String[len];
         System.arraycopy(companyParams, 0, params, 0, companyParams.length);
-        System.arraycopy(companyParams1, 0, params, companyParams.length,
-                companyParams1.length);
+        System.arraycopy(companyParams1, 0, params, companyParams.length, companyParams1.length);
         return params;
     }
-    public static String[] getCompanySuffixedParams() {
+
+    public static String[] getCompanySuffixedParams()
+    {
         return companyParams0;
     }
-    public static String[] getCompanyParams(){
+
+    public static String[] getCompanyParams()
+    {
         return null;
     }
     
@@ -210,78 +211,44 @@ public class ConfigMainHandler extends PageHandler {
         
     }
 
-    private void getSystemParameters1(HttpServletRequest p_request) {
-        if (Modules.isCorpusInstalled()) {
-            p_request.setAttribute(
-                    SystemConfigParamNames.CORPUS_STORE_NATIVE_FORMAT,
-                    getSystemParameter(
-                            SystemConfigParamNames.CORPUS_STORE_NATIVE_FORMAT)
-                            .getValue());
-            p_request.setAttribute(
-                    SystemConfigParamNames.CORPUS_SHOW_ALL_TMS_TO_LPS,
-                    getSystemParameter(
-                            SystemConfigParamNames.CORPUS_SHOW_ALL_TMS_TO_LPS)
-                            .getValue());
-        }
-//
-//        String analyzeInterval = getSystemParameter(
-//                SystemConfigParamNames.ANALYZE_SCRIPT_INTERVAL).getValue();
-//        analyzeInterval = getNumerator(analyzeInterval);
-//        p_request.setAttribute(SystemConfigParamNames.ANALYZE_SCRIPT_INTERVAL,
-//                analyzeInterval);
-
-        boolean isDescendingComments = Boolean.valueOf(
-                getSystemParameter(SystemConfigParamNames.COMMENTS_SORTING)
-                        .getValue()).booleanValue();
+    private void getSystemParameters1(HttpServletRequest p_request)
+    {
         String sortComments = (String) (getSystemParameter(SystemConfigParamNames.COMMENTS_SORTING)
                 .getValue());
 
-        if ("asc".equals(sortComments)) {
-            p_request.setAttribute(SystemConfigParamNames.COMMENTS_SORTING,
-                    "asc");
-        } else if ("desc".equals(sortComments)) {
-            p_request.setAttribute(SystemConfigParamNames.COMMENTS_SORTING,
-                    "desc");
-        } else {
-            p_request.setAttribute(SystemConfigParamNames.COMMENTS_SORTING,
-                    "default");
+        if ("asc".equals(sortComments))
+        {
+            p_request.setAttribute(SystemConfigParamNames.COMMENTS_SORTING, "asc");
+        }
+        else if ("desc".equals(sortComments))
+        {
+            p_request.setAttribute(SystemConfigParamNames.COMMENTS_SORTING, "desc");
+        }
+        else
+        {
+            p_request.setAttribute(SystemConfigParamNames.COMMENTS_SORTING, "default");
         }
         getCosting(p_request);
     }
 
-    private void setSystemParameters1(HttpServletRequest p_request) {
-        //      Only needed if costing is enabled
+    private void setSystemParameters1(HttpServletRequest p_request)
+    {
+        // Only needed if costing is enabled
         SystemParameter currencySP = null;
         boolean isCostingEnabled = Boolean.valueOf(
-                getSystemParameter(SystemConfigParamNames.COSTING_ENABLED)
-                        .getValue()).booleanValue();
+                getSystemParameter(SystemConfigParamNames.COSTING_ENABLED).getValue())
+                .booleanValue();
         SystemParameter jreSP = getSystemParameter(SystemConfigParamNames.REVENUE_ENABLED);
-        SystemParameter corpusSP = getSystemParameter(SystemConfigParamNames.CORPUS_STORE_NATIVE_FORMAT);
-        SystemParameter corpusTMP = getSystemParameter(SystemConfigParamNames.CORPUS_SHOW_ALL_TMS_TO_LPS);
 
-        if (isCostingEnabled) {
+        if (isCostingEnabled)
+        {
             currencySP = getSystemParameter(SystemConfigParamNames.PIVOT_CURRENCY);
-            currencySP.setValue(p_request
-                    .getParameter(SystemConfigParamNames.PIVOT_CURRENCY));
-            jreSP.setValue(p_request
-                    .getParameter(SystemConfigParamNames.REVENUE_ENABLED));
+            currencySP.setValue(p_request.getParameter(SystemConfigParamNames.PIVOT_CURRENCY));
+            jreSP.setValue(p_request.getParameter(SystemConfigParamNames.REVENUE_ENABLED));
         }
 
-        if (Modules.isCorpusInstalled()) {
-            corpusSP
-                    .setValue(p_request
-                            .getParameter(SystemConfigParamNames.CORPUS_STORE_NATIVE_FORMAT));
-            corpusTMP
-                    .setValue(p_request
-                            .getParameter(SystemConfigParamNames.CORPUS_SHOW_ALL_TMS_TO_LPS));
-        }
-
-        if (Modules.isCorpusInstalled()) {
-            updateSystemParameter(corpusSP);
-            updateSystemParameter(corpusTMP);
-        }
-
-        if (isCostingEnabled) {
+        if (isCostingEnabled)
+        {
             updateSystemParameter(currencySP);
             updateSystemParameter(jreSP);
         }

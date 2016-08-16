@@ -16,24 +16,22 @@
  */
 package com.globalsight.ling.aligner.io;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import com.globalsight.everest.tuv.TuType;
 import com.globalsight.ling.aligner.gxml.AlignmentPage;
 import com.globalsight.ling.aligner.gxml.Skeleton;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.PageTmTu;
 import com.globalsight.ling.tm2.PageTmTuv;
-import com.globalsight.ling.tm2.corpusinterface.TuvMapping;
-
-import com.globalsight.util.gxml.GxmlNames;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlFragmentReader;
-import com.globalsight.util.gxml.GxmlRootElement;
 import com.globalsight.util.gxml.GxmlFragmentReaderPool;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.everest.tuv.TuType;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
+import com.globalsight.util.gxml.GxmlNames;
+import com.globalsight.util.gxml.GxmlRootElement;
 
 /**
  * GxmlReader reads GXML string and create AlignmentPage object.
@@ -54,22 +52,11 @@ public class GxmlReader
         return createAlignmentPage(m_gxmlRoot, p_locale);
     }
 
-
-    public String processGxmlForCorpus(String p_gxml, List p_corpusMappings)
-        throws Exception
-    {
-        m_gxmlRoot = parseGxml(p_gxml);
-        processGxml(p_corpusMappings);
-        return m_gxmlRoot.toGxml();
-    }
-    
-
     public String getGxml()
     {
         return m_gxmlRoot.toGxml();
     }
     
-
     /**
      * This method parses the GXML and creates a DOM tree
      * @return GxmlRootElement - the root of the DOM tree.
@@ -98,8 +85,6 @@ public class GxmlReader
         return gxmlRootElement;
     }
 
-
-
     private AlignmentPage createAlignmentPage(
         GxmlRootElement p_gxmlRoot, GlobalSightLocale p_locale)
     {
@@ -122,101 +107,42 @@ public class GxmlReader
 
             switch (elem.getType())
             {
-            case GxmlElement.TRANSLATABLE:
-                List segments
-                    = createTranslatableSegments(elem, segmentId, p_locale);
-                segmentId += segments.size();
-                
-                Iterator itSeg = segments.iterator();
-                while(itSeg.hasNext())
-                {
-                    BaseTmTuv tuv = (BaseTmTuv)itSeg.next();
-                    alignmentPage.addSegment(currentSkeleton.getId(), tuv);
-                }
-                break;
+                case GxmlElement.TRANSLATABLE:
+                    List segments = createTranslatableSegments(elem, segmentId, p_locale);
+                    segmentId += segments.size();
 
-            case GxmlElement.SKELETON:
-                currentSkeleton = new Skeleton(skeletonId++, elem.toGxml());
-                alignmentPage.addSkeleton(currentSkeleton);
-                break;
+                    Iterator itSeg = segments.iterator();
+                    while (itSeg.hasNext())
+                    {
+                        BaseTmTuv tuv = (BaseTmTuv) itSeg.next();
+                        alignmentPage.addSegment(currentSkeleton.getId(), tuv);
+                    }
+                    break;
 
-            default:
-                break;
+                case GxmlElement.SKELETON:
+                    currentSkeleton = new Skeleton(skeletonId++, elem.toGxml());
+                    alignmentPage.addSkeleton(currentSkeleton);
+                    break;
+
+                default:
+                    break;
             }
         }
 
         return alignmentPage;
     }
-    
-        
-    private void processGxml(List p_corpusMappings)
-    {
-        // gather <segment> elements
-        List segList = new ArrayList();
-        
-        List elements = m_gxmlRoot.getChildElements();
-        int size = elements.size();
 
-        for (int i = 0; i < size; i++)
-        {
-            GxmlElement elem = (GxmlElement)elements.get(i);
-
-            switch (elem.getType())
-            {
-            case GxmlElement.TRANSLATABLE:
-                Iterator itSeg = elem.getChildElements().iterator();
-                while(itSeg.hasNext())
-                {
-                    segList.add(itSeg.next());
-                }
-                break;
-
-            default:
-                break;
-            }
-        }
-
-
-        // add "tuid" for corpus mapping
-        Iterator itMapping = p_corpusMappings.iterator();
-        while(itMapping.hasNext())
-        {
-            TuvMapping tuvMapping = (TuvMapping)itMapping.next();
-            long orgTuId = tuvMapping.getTuvId(); // tuv id that is compared
-
-            Iterator itSeg = segList.iterator();
-            while(itSeg.hasNext())
-            {
-                GxmlElement seg = (GxmlElement)itSeg.next();
-                String orgIdStr = seg.getAttribute("org-tuid");
-                if(orgIdStr != null)
-                {
-                    long orgId = Long.parseLong(orgIdStr);
-                    if(orgId == orgTuId)
-                    {
-                        seg.setAttribute("tuid",
-                            Long.toString(tuvMapping.getProjectTmTuId()));
-                    }
-                }
-            }
-        }
-        
-    }
-    
-        
     private String getDataType(GxmlRootElement p_gxmlRoot)
     {
-        String tuDataType
-            = p_gxmlRoot.getAttribute(GxmlNames.GXMLROOT_DATATYPE);
+        String tuDataType = p_gxmlRoot.getAttribute(GxmlNames.GXMLROOT_DATATYPE);
         if (tuDataType == null)
         {
             // tuDataType shouldn't be null, but in case, default to html.
             tuDataType = "html";
         }
-        
+
         return tuDataType;
     }
-    
         
     private List createTranslatableSegments(
         GxmlElement p_elem, int p_segmentId, GlobalSightLocale p_locale)

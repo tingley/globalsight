@@ -16,42 +16,35 @@
  */
 package com.globalsight.ling.aligner;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+
 import org.apache.log4j.Logger;
 
-import com.globalsight.ling.aligner.AlignmentResult;
+import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
+import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
 import com.globalsight.ling.aligner.engine.GxmlAligner;
+import com.globalsight.ling.aligner.gxml.AlignmentPage;
+import com.globalsight.ling.aligner.io.GamReader;
+import com.globalsight.ling.aligner.io.GamWriter;
 import com.globalsight.ling.aligner.io.GxmlReader;
 import com.globalsight.ling.aligner.io.TmxReader;
 import com.globalsight.ling.aligner.io.TmxWriter;
-import com.globalsight.ling.aligner.io.GamReader;
-import com.globalsight.ling.aligner.io.GamWriter;
-import com.globalsight.ling.aligner.gxml.AlignmentPage;
-import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.util.GeneralException;
-import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
-import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
-import com.globalsight.everest.corpus.CorpusDoc;
-import com.globalsight.everest.servlet.util.ServerProxy;
-
-
-import java.io.File;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.io.File;
-import java.io.PrintWriter;
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
-import java.io.OutputStreamWriter;
-import java.io.FileOutputStream;
-import java.io.Reader;
-import java.io.InputStreamReader;
-import java.io.FileInputStream;
-import java.io.StringWriter;
-import java.io.StringReader;
-import java.io.PrintWriter;
+import com.globalsight.util.GlobalSightLocale;
 
 
 /**
@@ -88,10 +81,6 @@ public class AlignmentUnit
     // source and target TMX file names
     private String m_sourceTmx;
     private String m_targetTmx;
-
-    // source and target CorpusDoc objects
-    private CorpusDoc m_sourceCorpusDoc;
-    private CorpusDoc m_targetCorpusDoc;
 
     // GAM file name
     private String m_gam;
@@ -149,18 +138,8 @@ public class AlignmentUnit
             AlignmentPage sourcePage
                 = gxmlReader.createAlignmentPage(sourceGxml, p_sourceLocale);
 
-            //overwrite the original src GXML
-            ServerProxy.getNativeFileManager().save(
-                gxmlReader.getGxml(), "UTF8",
-                m_sourceCorpusDoc.getGxmlPath());
-
             AlignmentPage targetPage
                 = gxmlReader.createAlignmentPage(targetGxml, p_targetLocale);
-
-            //overwrite the original src GXML
-            ServerProxy.getNativeFileManager().save(
-                gxmlReader.getGxml(), "UTF8",
-                m_targetCorpusDoc.getGxmlPath());
 
             // write TMX files
             File sourceTmxFile = createTmxFile(
@@ -306,19 +285,6 @@ public class AlignmentUnit
         m_state = p_state;
     }
 
-
-    public void setSourceCorpusDoc(CorpusDoc p_corpusDoc)
-    {
-        m_sourceCorpusDoc = p_corpusDoc;
-    }
-
-
-    public void setTargetCorpusDoc(CorpusDoc p_corpusDoc)
-    {
-        m_targetCorpusDoc = p_corpusDoc;
-    }
-
-
     public String getOriginalSourceFileName()
     {
         return m_originalSourceFile;
@@ -341,19 +307,6 @@ public class AlignmentUnit
     {
         return m_targetTmx;
     }
-
-
-    public CorpusDoc getSourceCorpusDoc()
-    {
-        return m_sourceCorpusDoc;
-    }
-
-
-    public CorpusDoc getTargetCorpusDoc()
-    {
-        return m_targetCorpusDoc;
-    }
-
 
     public String getGamFileName()
     {

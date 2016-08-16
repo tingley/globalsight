@@ -51,15 +51,13 @@ import com.globalsight.util.GlobalSightLocale;
 
 public class SegmentTmPersistence
 {
-    private static final Logger c_logger = Logger
-            .getLogger(SegmentTmPersistence.class);
+    private static final Logger c_logger = Logger.getLogger(SegmentTmPersistence.class);
 
     private Connection m_connection;
 
     static public final String SEGMENT_TM_TU_T = "project_tm_tu_t";
     static public final String SEGMENT_TM_TU_T_PROP = "project_tm_tu_t_prop";
     static public final String SEGMENT_TM_TUV_T = "project_tm_tuv_t";
-    static public final String CORPUS_MAP = "corpus_map";
 
     static public final String SEGMENT_TM_TU_L = "project_tm_tu_l";
     static public final String SEGMENT_TM_TUV_L = "project_tm_tuv_l";
@@ -165,8 +163,6 @@ public class SegmentTmPersistence
         tableList.add(tuvTable + TUV_ALIAS_1);
         tableList.add(tuvTable + TUV_ALIAS_2);
         
-        tableList.add("corpus_map");
-
         DbUtil.lockTables(m_connection, tableList);
     }
     
@@ -187,8 +183,7 @@ public class SegmentTmPersistence
         tableList.add(SEGMENT_TM_TUV_L + TUV_L_ALIAS);
         
         tableList.add(SEGMENT_TM_TU_T_PROP);
-        
-        tableList.add(CORPUS_MAP);
+
         DbUtil.lockTables(m_connection, tableList);
     }
 
@@ -229,13 +224,11 @@ public class SegmentTmPersistence
         // remove Tuvs
         String tuvTable = p_translatable ? SEGMENT_TM_TUV_T : SEGMENT_TM_TUV_L;
         String deleteSql = DELETE_FROM + tuvTable + DELETE_WHERE_ID;
-        String deleteCorpusSql = "delete from corpus_map where project_tuv_id = ?";
+
         PreparedStatement ps = null;
-        PreparedStatement deleteCorpusPs = null;
         try
         {
             ps = m_connection.prepareStatement(deleteSql);
-            deleteCorpusPs = m_connection.prepareStatement(deleteCorpusSql);
             Iterator itTuv = p_tuvs.iterator();
             int count = 0;
             while (itTuv.hasNext())
@@ -246,22 +239,15 @@ public class SegmentTmPersistence
                 ps.setLong(1, tuv.getId());
                 ps.addBatch();
 
-                deleteCorpusPs.setLong(1, tuv.getId());
-                deleteCorpusPs.addBatch();
-                
                 if (count > DbUtil.BATCH_INSERT_UNIT)
                 {
-                	deleteCorpusPs.executeBatch();
                     ps.executeBatch();
                     count = 0;
                 }
             }
             if (count > 0)
             {
-            	deleteCorpusPs.executeBatch();
-
                 ps.executeBatch();
-
             }
         }
         finally
@@ -269,10 +255,6 @@ public class SegmentTmPersistence
             if (ps != null)
             {
                 ps.close();
-            }
-            if(deleteCorpusPs != null)
-            {
-            	deleteCorpusPs.close();
             }
         }
     }
@@ -285,18 +267,15 @@ public class SegmentTmPersistence
      * @param p_translatable
      *            indicates whether Tuvs are translatable or localizable
      */
-    public void removeTus(Collection p_tus, boolean p_translatable)
-            throws Exception
+    public void removeTus(Collection p_tus, boolean p_translatable) throws Exception
     {
         String tuTable = p_translatable ? SEGMENT_TM_TU_T : SEGMENT_TM_TU_L;
         String deleteSql = DELETE_FROM + tuTable + DELETE_WHERE_ID;
-        String deleteCorpusSql = "delete from corpus_map where project_tu_id = ?";
-        PreparedStatement deleteCorpusPS = null;
+
         PreparedStatement ps = null;
         try
         {
             ps = m_connection.prepareStatement(deleteSql);
-            deleteCorpusPS = m_connection.prepareStatement(deleteCorpusSql);
             
             Iterator itTu = p_tus.iterator();
             int count = 0;
@@ -308,18 +287,14 @@ public class SegmentTmPersistence
                 ps.setLong(1, tu.getId());
                 ps.addBatch();
 
-                deleteCorpusPS.setLong(1, tu.getId());
-                deleteCorpusPS.addBatch();
                 if (count > DbUtil.BATCH_INSERT_UNIT)
                 {
-                	deleteCorpusPS.executeBatch();
                     ps.executeBatch();
                     count = 0; 
                 }
             }
             if (count > 0)
             {
-            	deleteCorpusPS.executeBatch();
                 ps.executeBatch();
             }
         }

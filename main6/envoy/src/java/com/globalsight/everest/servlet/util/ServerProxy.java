@@ -17,6 +17,9 @@
 package com.globalsight.everest.servlet.util;
 
 
+import java.rmi.RemoteException;
+import java.util.HashMap;
+
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
@@ -31,15 +34,14 @@ import com.globalsight.cxe.persistence.documentum.DocumentumPersistenceManagerWL
 import com.globalsight.cxe.persistence.exportlocation.ExportLocationPersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.previewurl.PreviewUrlPersistenceManagerWLRemote;
-import com.globalsight.cxe.persistence.xmlrulefile.XmlRuleFilePersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.segmentationrulefile.SegmentationRuleFilePersistenceManagerWLRemote;
+import com.globalsight.cxe.persistence.xmlrulefile.XmlRuleFilePersistenceManagerWLRemote;
 import com.globalsight.everest.aligner.AlignerManagerWLRemote;
 import com.globalsight.everest.comment.CommentManagerWLRemote;
-import com.globalsight.everest.corpus.CorpusManagerWLRemote;
 import com.globalsight.everest.costing.CostingEngineWLRemote;
 import com.globalsight.everest.edit.SynchronizationManager;
-import com.globalsight.everest.edit.offline.OfflineEditManagerWLRemote;
 import com.globalsight.everest.edit.offline.OfflineEditManager;
+import com.globalsight.everest.edit.offline.OfflineEditManagerWLRemote;
 import com.globalsight.everest.edit.online.OnlineEditorManager;
 import com.globalsight.everest.edit.online.OnlineEditorManagerWLRemote;
 import com.globalsight.everest.edit.online.imagereplace.ImageReplaceFileMapPersistenceManagerWLRemote;
@@ -67,6 +69,8 @@ import com.globalsight.everest.tm.TmManager;
 import com.globalsight.everest.tuv.TuvEventObserverWLRemote;
 import com.globalsight.everest.tuv.TuvManagerWLRemote;
 import com.globalsight.everest.usermgr.UserManagerWLRemote;
+import com.globalsight.everest.util.server.RegistryLocator;
+import com.globalsight.everest.util.server.ServerRegistry;
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.vendormanagement.VendorManagementWLRemote;
 import com.globalsight.everest.webapp.pagehandler.rss.RSSPersistenceManagerWLRemote;
@@ -78,20 +82,10 @@ import com.globalsight.scheduling.EventSchedulerWLRemote;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.scheduler.ITermbaseScheduler;
 import com.globalsight.terminology.termleverager.TermLeverageManagerWLRemote;
-
-
-import com.globalsight.everest.util.server.RegistryLocator;
-import com.globalsight.everest.util.server.ServerRegistry;
-
-
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GeneralExceptionConstants;
 import com.globalsight.util.mail.MailerWLRemote;
 import com.globalsight.webservices.remoteaccess.RemoteAccessManagerWLRemote;
-
-import java.rmi.RemoteException;
-
-import java.util.HashMap;
 
 
 /**
@@ -109,7 +103,6 @@ public class ServerProxy
     private static CalendarManagerWLRemote m_calendarManager = null;
     private static CmsUserManagerWLRemote m_cmsUserManager = null;
     private static CommentManagerWLRemote m_commentReferenceManager = null;
-    private static CorpusManagerWLRemote m_corpusManager = null;
     private static CostingEngineWLRemote m_costingEngine = null;
     private static DBConnectionPersistenceManagerWLRemote m_dbconnectionManager = null;
     private static DatabaseColumnPersistenceManagerWLRemote m_dbColumnManager = null;
@@ -403,26 +396,6 @@ public class ServerProxy
         }
 
         return m_securityManager;
-    }
-
-    public static CorpusManagerWLRemote getCorpusManager()
-        throws GeneralException
-    {
-        if (m_corpusManager == null)
-        {
-            try
-            {
-                m_corpusManager = (CorpusManagerWLRemote)
-                    SERVER_REGISTRY.lookup(
-                        CorpusManagerWLRemote.SERVICE_NAME);
-            }
-            catch (NamingException ne)
-            {
-                throwException(ne);
-            }
-        }
-
-        return m_corpusManager;
     }
 
     public static SnippetLibraryWLRemote getSnippetLibrary()

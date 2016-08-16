@@ -50,7 +50,6 @@ import com.globalsight.ling.common.SegmentTmExactMatchFormatHandler;
 import com.globalsight.ling.inprogresstm.DynamicLeverageResults;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm.TuvBasicInfo;
-import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.indexer.Reindexer;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatchResults;
@@ -93,18 +92,14 @@ public class TmCoreManagerLocal implements TmCoreManager
      * @param p_options
      *            Tm options. It has information which Project TM segments
      *            should be saved and etc.
-     * @return mappings of translation_unit_variant id and project_tm_tuv_t id
-     *         of this page
      */
-    public TuvMappingHolder populatePageForAllLocales(SourcePage p_page,
+    public void populatePageForAllLocales(SourcePage p_page,
             LeverageOptions p_options, long p_jobId) throws LingManagerException
     {
-        TuvMappingHolder mappingHolder = null;
         try
         {
             TmPopulator tmPopulator = new TmPopulator();
-            mappingHolder = tmPopulator.populatePageForAllLocales(p_page,
-                    p_options, p_jobId);
+            tmPopulator.populatePageForAllLocales(p_page, p_options, p_jobId);
         }
         catch (LingManagerException le)
         {
@@ -115,7 +110,6 @@ public class TmCoreManagerLocal implements TmCoreManager
             e.printStackTrace();
             throw new LingManagerException(e);
         }
-        return mappingHolder;
     }
 
     /**
@@ -129,22 +123,16 @@ public class TmCoreManagerLocal implements TmCoreManager
      *            should be saved and etc.
      * @param p_locale
      *            target locale
-     * @return mappings of translation_unit_variant id and project_tm_tuv_t id
-     *         of this page
      */
-    public TuvMappingHolder populatePageByLocale(SourcePage p_page,
-            LeverageOptions p_options, GlobalSightLocale p_locale, long p_jobId)
-            throws LingManagerException
+    public void populatePageByLocale(SourcePage p_page, LeverageOptions p_options,
+            GlobalSightLocale p_locale, long p_jobId) throws LingManagerException
     {
-        TuvMappingHolder mappingHolder = null;
-
         try
         {
             synchronized (m_tmPopulationLock)
             {
                 TmPopulator tmPopulator = new TmPopulator();
-                mappingHolder = tmPopulator.populatePageByLocale(p_page,
-                        p_options, p_locale, p_jobId);
+                tmPopulator.populatePageByLocale(p_page, p_options, p_locale, p_jobId);
             }
         }
         catch (LingManagerException le)
@@ -156,8 +144,6 @@ public class TmCoreManagerLocal implements TmCoreManager
             e.printStackTrace();
             throw new LingManagerException(e);
         }
-
-        return mappingHolder;
     }
 
     /**
@@ -392,24 +378,22 @@ public class TmCoreManagerLocal implements TmCoreManager
      *            one of the "SYNC" constants, to overwrite existing TUs, merge
      *            existing TUs with new TUs, or to discard new TUs if they
      *            already exist in the TM.
-     * @return TuvMappingHolder. m_tuvId and m_tuId values are arbitrary.
      * 
      * @throws LingManagerException
      */
     @Override
-    public TuvMappingHolder saveToSegmentTm(Tm tm, Collection p_segments,
+    public void saveToSegmentTm(Tm tm, Collection p_segments,
             int p_mode) throws LingManagerException
     {
         if (p_segments.size() == 0)
         {
-            return new TuvMappingHolder();
+            return;
         }
 
-        TuvMappingHolder holder = null;
         try
         {
             TmPopulator tmPopulator = new TmPopulator();
-            holder = tmPopulator.saveSegmentToSegmentTm(p_segments, tm, p_mode);
+            tmPopulator.saveSegmentToSegmentTm(p_segments, tm, p_mode);
         }
         catch (LingManagerException le)
         {
@@ -420,8 +404,6 @@ public class TmCoreManagerLocal implements TmCoreManager
             e.printStackTrace();
             throw new LingManagerException(e);
         }
-
-        return holder;
     }
 
     /**
@@ -430,14 +412,15 @@ public class TmCoreManagerLocal implements TmCoreManager
      * (and the BatchException has the details).
      */
     @Override
-    public TuvMappingHolder saveToSegmentTm(Tm tm, Collection p_segments,
+    public void saveToSegmentTm(Tm tm, Collection p_segments,
             int p_mode, String p_sourceTmName) throws LingManagerException,
             BatchException
     {
         if (p_segments.size() == 0)
         {
-            return new TuvMappingHolder();
+            return;
         }
+
         Collection<SegmentTmTu> goodSegments = new ArrayList<SegmentTmTu>();
         Collection<BatchException.TuvError> errs = new ArrayList<BatchException.TuvError>();
         for (Object _tu : p_segments)
@@ -465,13 +448,10 @@ public class TmCoreManagerLocal implements TmCoreManager
             }
         }
 
-        TuvMappingHolder holder = null;
-
         try
         {
             TmPopulator tmPopulator = new TmPopulator();
-            holder = tmPopulator.saveSegmentToSegmentTm(goodSegments, tm,
-                    p_mode, p_sourceTmName);
+            tmPopulator.saveSegmentToSegmentTm(goodSegments, tm, p_mode, p_sourceTmName);
         }
         catch (LingManagerException le)
         {
@@ -487,7 +467,6 @@ public class TmCoreManagerLocal implements TmCoreManager
         {
             throw new BatchException(errs);
         }
-        return holder;
     }
 
     /**
@@ -622,23 +601,7 @@ public class TmCoreManagerLocal implements TmCoreManager
         try
         {
             conn = DbUtil.getConnection();
-            // WARNING: About transactions and this bit.
-            // Everything here is kept in a single transaction except for this
-            // statement.
-            // The reason is that removeCorpus() does two things:
-            // 1) Explicit JDBC query on the passed connection to fetch some
-            // corpus ids
-            // 2) Pass the corpus IDs to the CorpusManagerLocal, which deletes
-            // them by
-            // OPENING A SEPARATE SESSION AND TRANSACTION FOR EACH.
-            // Since the Hibernate session mgmt is global, this would trample
-            // our transaction.
-            // For now, we just do this stuff in its own (bad) individual
-            // transactions.
-            TmRemoveHelper.removeCorpus(conn, pTm.getId(), null);
-
-            boolean success = pTm.getSegmentTmInfo().removeTmData(pTm,
-                    pReporter, pMonitor);
+            boolean success = pTm.getSegmentTmInfo().removeTmData(pTm, pReporter, pMonitor);
             if (success)
             {
                 TmRemoveHelper.removeTm(pTm);
@@ -664,21 +627,11 @@ public class TmCoreManagerLocal implements TmCoreManager
             ProgressReporter pReporter, InterruptMonitor pMonitor)
             throws RemoteException, LingManagerException
     {
-
-        // pReporter.setMessageKey("lb_tm_remove_removing_corpus_tm",
-        // "Removing Corpus Tm...");
-        // pReporter.setPercentage(10);
-
         Connection conn = null;
         try
         {
             conn = DbUtil.getConnection();
-            // NOTE: this statement is outside the transaction. See the comment
-            // above.
-            TmRemoveHelper.removeCorpus(conn, pTm.getId(), pLocale.getId());
-            boolean b = pTm.getSegmentTmInfo().removeTmData(pTm, pLocale,
-                    pReporter, pMonitor);
-            return b;
+            return pTm.getSegmentTmInfo().removeTmData(pTm, pLocale, pReporter, pMonitor);
         }
         catch (Exception e)
         {

@@ -25,13 +25,10 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -40,21 +37,15 @@ import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
 import com.globalsight.everest.aligner.AlignerExtractor;
 import com.globalsight.everest.aligner.AlignerExtractorResult;
 import com.globalsight.everest.aligner.AlignmentStatus;
-import com.globalsight.everest.corpus.CorpusDoc;
-import com.globalsight.everest.corpus.CorpusManager;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.integration.ling.LingServerProxy;
-import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.aligner.io.AlignmentPackageWriter;
 import com.globalsight.ling.aligner.io.AlignmentProjectFileAccessor;
 import com.globalsight.ling.aligner.io.GapReader;
 import com.globalsight.ling.aligner.io.GapWriter;
-import com.globalsight.ling.aligner.io.GxmlReader;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTu;
-import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -99,7 +90,7 @@ public class AlignmentProject
     private int m_tmSaveMode;
     
     // List of AlignmentUnit objects
-    private List m_alignmentUnits;
+    private List<AlignmentUnit> m_alignmentUnits;
 
     private User m_uploadUser = null;
 
@@ -227,7 +218,7 @@ public class AlignmentProject
         m_xmlRule = p_xmlRule;
         
         m_projectTmpDirectory = createProjectTmpDir();
-        m_alignmentUnits = new ArrayList();
+        m_alignmentUnits = new ArrayList<AlignmentUnit>();
     }
     
 
@@ -248,7 +239,7 @@ public class AlignmentProject
         m_tmSaveMode = p_tmSaveMode;
         
         m_projectTmpDirectory = createProjectTmpDir();
-        m_alignmentUnits = new ArrayList();
+        m_alignmentUnits = new ArrayList<AlignmentUnit>();
     }
     
 
@@ -297,39 +288,31 @@ public class AlignmentProject
      * directory before calling this method. This can be done by
      * AlignmentPackageReader.
      */
-    public void saveToTm()
-        throws Exception
+    public void saveToTm() throws Exception
     {
         // read GAP file and create AlignmentUnit objects
         GapReader gapReader = new GapReader(this);
         File gapFile = new File(m_projectTmpDirectory, GAP_FILE_NAME);
-        Reader gapStream
-            = new InputStreamReader(new FileInputStream(gapFile), "UTF-8");
+        Reader gapStream = new InputStreamReader(new FileInputStream(gapFile), "UTF-8");
         gapReader.read(gapStream);
-        
+
         // Save segments to TM in each AlignmentUnit
         List alignmentUnits = getAlignmentUnits();
         Iterator it = alignmentUnits.iterator();
-        while(it.hasNext())
+        while (it.hasNext())
         {
-            AlignmentUnit unit = (AlignmentUnit)it.next();
-            if(unit.getState().equals(AlignmentUnit.COMPLETED))
+            AlignmentUnit unit = (AlignmentUnit) it.next();
+            if (unit.getState().equals(AlignmentUnit.COMPLETED))
             {
                 // read TMX and GAM files
-                AlignmentResult alignmentResult
-                    = unit.getAlignmentResult(m_sourceLocale, m_targetLocale);
+                AlignmentResult alignmentResult = unit.getAlignmentResult(m_sourceLocale,
+                        m_targetLocale);
 
                 // save aligned segments to TM
-                TuvMappingHolder mappingHolder
-                    = saveAlignedSegments(alignmentResult);
-
-                // populate corpus TM
-                populateCorpusTm(unit, mappingHolder);
+                saveAlignedSegments(alignmentResult);
             }
         }
-
     }
-    
         
     public void addAlignmentUnit(AlignmentUnit p_alignmentUnit)
     {
@@ -452,7 +435,7 @@ public class AlignmentProject
     }
     
 
-    public List getAlignmentUnits()
+    public List<AlignmentUnit> getAlignmentUnits()
     {
         return m_alignmentUnits;
     }
@@ -548,12 +531,9 @@ public class AlignmentProject
     }
     
 
-    private TuvMappingHolder saveAlignedSegments(
-        AlignmentResult p_alignmentResult)
-        throws Exception
+    private void saveAlignedSegments(AlignmentResult p_alignmentResult) throws Exception
     {
-        String userid = m_uploadUser == null ? "system" : m_uploadUser
-                .getUserId();
+        String userid = m_uploadUser == null ? "system" : m_uploadUser.getUserId();
         List tus = new ArrayList();
 
         Iterator it = p_alignmentResult.getAlignedSegments().iterator();
@@ -580,10 +560,8 @@ public class AlignmentProject
             tus.add(tu);
         }
 
-        TmCoreManager tmCoreManager = LingServerProxy.getTmCoreManager();
-        return tmCoreManager.saveToSegmentTm(m_tm, tus, m_tmSaveMode);
+        LingServerProxy.getTmCoreManager().saveToSegmentTm(m_tm, tus, m_tmSaveMode);
     }
-    
 
     private AlignmentStatus getAlignmentStatus()
     {
@@ -611,44 +589,26 @@ public class AlignmentProject
         
 
     private AlignmentUnit createAlignmentUnitFromExtractResult(
-        AlignerExtractorResult p_sourceResult,
-        AlignerExtractorResult p_targetResult,
-        String p_sourceFileName, String p_targetFileName)
-        throws Exception
+            AlignerExtractorResult p_sourceResult, AlignerExtractorResult p_targetResult,
+            String p_sourceFileName, String p_targetFileName) throws Exception
     {
         String sourceDisplayName = "";
-        if(p_sourceResult != null)
+        if (p_sourceResult != null)
         {
             sourceDisplayName = p_sourceResult.getDisplayName();
         }
-        
-        //for ppt,pptx,xls,xlsx, only store one copy of original source files
-        boolean canStoreNativeFormatDosc = true;
-        if (sourceDisplayName.endsWith(".ppt") || sourceDisplayName.endsWith(".pptx"))
-        {
-        	if (!sourceDisplayName.startsWith("(slide0001)")) {
-        		canStoreNativeFormatDosc = false;
-        	}
-        }
-        if (sourceDisplayName.endsWith(".xls") || sourceDisplayName.endsWith(".xlsx"))
-        {
-        	if (!sourceDisplayName.startsWith("(tabstrip)")) {
-        		canStoreNativeFormatDosc = false;
-        	}
-        }
-        
+
         String targetDisplayName = "";
-        if(p_targetResult != null)
+        if (p_targetResult != null)
         {
             targetDisplayName = p_targetResult.getDisplayName();
         }
-        
-        AlignmentUnit unit = new AlignmentUnit(
-                sourceDisplayName, targetDisplayName, m_projectTmpDirectory);
-                
-        String errorMessage
-            = getErrorMessage(p_sourceResult, p_targetResult);
-        if(errorMessage != null)
+
+        AlignmentUnit unit = new AlignmentUnit(sourceDisplayName, targetDisplayName,
+                m_projectTmpDirectory);
+
+        String errorMessage = getErrorMessage(p_sourceResult, p_targetResult);
+        if (errorMessage != null)
         {
             unit.setErrorMessage(errorMessage);
             unit.setState(AlignmentUnit.ALIGN_FAILED);
@@ -657,30 +617,11 @@ public class AlignmentProject
         {
             unit.setSourceGxml(p_sourceResult.gxml, m_sourceLocale);
             unit.setTargetGxml(p_targetResult.gxml, m_targetLocale);
-
-            CorpusManager corpusManager = ServerProxy.getCorpusManager();
-            CorpusDoc sourceCorpusDoc
-                = corpusManager.addNewSourceLanguageCorpusDoc(m_sourceLocale,
-                    p_sourceFileName, p_sourceResult.gxml,
-                    new File(AmbFileStoragePathUtils.getCxeDocDir(), p_sourceFileName),
-                    canStoreNativeFormatDosc);
-            
-            CorpusDoc targetCorpusDoc 
-                = corpusManager.addNewTargetLanguageCorpusDoc(sourceCorpusDoc,
-                    m_targetLocale, p_targetResult.gxml, 
-                    new File(AmbFileStoragePathUtils.getCxeDocDir(), p_targetFileName),
-                    canStoreNativeFormatDosc);
-
-            unit.setSourceCorpusDoc(sourceCorpusDoc);
-            unit.setTargetCorpusDoc(targetCorpusDoc);
-            
             unit.setState(AlignmentUnit.EXTRACTED);
         }
 
         return unit;
     }
-    
-
 
     private String getErrorMessage(
         AlignerExtractorResult p_sourceResult,
@@ -719,64 +660,8 @@ public class AlignmentProject
         return result;
     }
 
-
-    private void populateCorpusTm(
-        AlignmentUnit p_alignmentUnit, TuvMappingHolder p_mappingHolder)
-        throws Exception
-    {
-        CorpusManager corpusManager = ServerProxy.getCorpusManager();
-
-        Map sourceCorpusSegments
-            = p_mappingHolder.getMappingsByLocale(m_sourceLocale);
-        Map targetCorpusSegments
-            = p_mappingHolder.getMappingsByLocale(m_targetLocale);
-
-        //add the source segments to corpus
-        CorpusDoc sourceCorpusDoc = p_alignmentUnit.getSourceCorpusDoc();
-        if (sourceCorpusSegments != null && sourceCorpusSegments.size() > 0)
-        {
-            List sourceCorpusSegmentList
-                = new ArrayList(sourceCorpusSegments.values());
-            addTuidToGxml(sourceCorpusDoc, sourceCorpusSegmentList);
-            
-            corpusManager.mapSegmentsToCorpusDoc(
-                sourceCorpusSegmentList, sourceCorpusDoc);
-        }
-
-        //add the target segments to corpus
-        CorpusDoc targetCorpusDoc = p_alignmentUnit.getTargetCorpusDoc();
-        if (targetCorpusSegments != null && targetCorpusSegments.size() > 0)
-        {
-            List targetCorpusSegmentList
-                = new ArrayList(targetCorpusSegments.values());
-            addTuidToGxml(targetCorpusDoc, targetCorpusSegmentList);
-
-            corpusManager.mapSegmentsToCorpusDoc(
-                targetCorpusSegmentList, targetCorpusDoc);
-        }
-    }
-
-
-    private void addTuidToGxml(CorpusDoc p_corpusDoc, List p_corpusMappings)
-        throws Exception
-    {
-        byte[] gxml = ServerProxy.getNativeFileManager().getBytes(
-            p_corpusDoc.getGxmlPath());
-
-        GxmlReader gxmlReader = new GxmlReader();
-        String newGxml = gxmlReader.processGxmlForCorpus(
-            new String(gxml, "UTF-8"), p_corpusMappings);
-        ServerProxy.getNativeFileManager().save(newGxml, "UTF8",
-            p_corpusDoc.getGxmlPath());
-    }
-
-
     public void setUploadUser(User user)
     {
         m_uploadUser = user;
     }
-    
-    
-    
-    
 }

@@ -18,22 +18,21 @@ package com.globalsight.util.modules;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.calendar.CalendarManagerLocal;
+import com.globalsight.cxe.adapter.catalyst.CatalystAdapter;
 import com.globalsight.cxe.adapter.database.DatabaseAdapter;
+import com.globalsight.cxe.adapter.documentum.DocumentumAdapter;
 import com.globalsight.cxe.adapter.mediasurface.MediasurfaceAdapter;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
-import com.globalsight.cxe.adapter.vignette.VignetteAdapter;
 import com.globalsight.cxe.adapter.serviceware.ServiceWareAdapter;
-import com.globalsight.cxe.adapter.documentum.DocumentumAdapter;
-import com.globalsight.everest.corpus.CorpusTm;
+import com.globalsight.cxe.adapter.vignette.VignetteAdapter;
+import com.globalsight.everest.aligner.AlignerManagerLocal;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.vendormanagement.VendorManagementLocal;
-import com.globalsight.calendar.CalendarManagerLocal;
 import com.globalsight.webservices.Ambassador;
-import com.globalsight.cxe.adapter.catalyst.CatalystAdapter;
-import com.globalsight.everest.aligner.AlignerManagerLocal;
 
 /**
  * The Modules class allows clients to check whether a particular
@@ -41,8 +40,7 @@ import com.globalsight.everest.aligner.AlignerManagerLocal;
  */
 public class Modules
 {
-    private static Logger s_logger = Logger
-            .getLogger(Modules.class);
+    private static Logger s_logger = Logger.getLogger(Modules.class);
 
     // Keeps track of whether certain modules are installed
     private static boolean s_cms, s_db, s_vignette, s_serviceware = false;
@@ -57,7 +55,7 @@ public class Modules
 
     private static boolean s_l10nWebService, s_vmWebService = false;
 
-    private static boolean s_vendorMgmt, s_corpus = false;
+    private static boolean s_vendorMgmt = false;
 
     private static boolean s_calendar = false;
 
@@ -92,7 +90,6 @@ public class Modules
             s_vendorMgmt = VendorManagementLocal.isInstalled();
             s_l10nWebService = Ambassador.isInstalled();
             s_vmWebService = s_vendorMgmt && s_l10nWebService;
-            s_corpus = CorpusTm.isInstalled();
             s_calendar = CalendarManagerLocal.isInstalled();
             s_catalyst = CatalystAdapter.isInstalled();
             s_corpusAligner = AlignerManagerLocal.isInstalled();
@@ -226,16 +223,6 @@ public class Modules
     public static boolean isSnippetsInstalled()
     {
         return s_snippets;
-    }
-
-    /**
-     * Returns true if Corpus TM is installed
-     * 
-     * @return true | false
-     */
-    public static boolean isCorpusInstalled()
-    {
-        return s_corpus;
     }
 
     /**

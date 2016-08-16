@@ -18,7 +18,6 @@ package com.globalsight.everest.jobhandler;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
@@ -33,7 +32,6 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.ling.inprogresstm.InProgressTmManager;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.modules.Modules;
 
 public class JobEventObserverLocal implements JobEventObserver
 {
@@ -57,26 +55,6 @@ public class JobEventObserverLocal implements JobEventObserver
     {
         p_job.setState(Job.PENDING);
         JobPersistenceAccessor.updateJobState(p_job);
-
-        if (Modules.isCorpusInstalled())
-        {
-            try
-            {
-                // at this time, clean up the ms-office related information in
-                // the corpus
-                // all the ms-office pages in the same job use the same native
-                // format document
-                // but they're pointing to different copies of it.
-                ServerProxy.getCorpusManager().cleanUpMsOfficeJobSourcePages(
-                        p_job.getId());
-            }
-            catch (Exception e)
-            {
-                // don't let this exception affect the job
-                CATEGORY
-                        .error("Failed to clean ms-office data from corpus.", e);
-            }
-        }
     }
 
     /**

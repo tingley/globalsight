@@ -101,15 +101,6 @@ public interface SystemConfigParamNames
     // login name)
     public static final String CONCURRENT_DUP_LOGIN_ALLOWED = "login.concurrentDuplicate.allowed";
 
-    //
-    // Parameters for exporting
-    //
-
-    // System Parameters for Corpus TM
-    public static final String CORPUS_INSTALL_KEY = "corpus.installKey";
-    public static final String CORPUS_STORE_NATIVE_FORMAT = "corpus.storeNativeFormat";
-    public static final String CORPUS_SHOW_ALL_TMS_TO_LPS = "corpus.showAllTmsToLPs";
-
     // System parameter for customer access group
     public static final String CUSTOMER_INSTALL_KEY = "customerAccessGroup.installKey";
     public static final String IS_DELL = "customerAccessGroup.isDell";

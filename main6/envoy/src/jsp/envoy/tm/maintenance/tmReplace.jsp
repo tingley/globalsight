@@ -391,22 +391,9 @@ function doOnLoad()
 %>
 }
 
-var corpuswins= new Array();
-var numcorpuswins = 0;
-function showCorpus(p_tuvId, p_srcLocaleId)
-{
-   var url = "/globalsight/ControlServlet?activityName=viewCorpusMatches&tuvId=" + p_tuvId + "&localeDbId=" + p_srcLocaleId + "&showDelete=true";
-   var name = "corpus" + numcorpuswins;
-   corpuswins[numcorpuswins++] = window.open(url, name,
-   'location=no,menubar=no,resizable=yes,scrollbars=yes,WIDTH=600,HEIGHT=400');
-}
-
 function doOnUnload()
 {
-   for (var i=0; i < numcorpuswins; i++)
-   {
-      try { corpuswins[i].close(); } catch (ignore) {}
-   }
+
 }
 
 //for GBS-2599
@@ -555,20 +542,12 @@ function handleSelectAll() {
     STYLE="border: solid 1px <%=skin.getProperty("skin.list.borderColor")%>">
   <THEAD>
   <COL VALIGN="top"> <!-- checkbox -->
-  <COL VALIGN="top" ALIGN="center"
-    STYLE="padding-left: 4px; padding-right: 4px"> <!-- ID -->
-  <% if (b_corpus) {%>
-  <COL VALIGN="top" ALIGN="center"
-    STYLE="padding-left: 4px; padding-right: 4px"> <!-- Corpus Context -->
-  <%}%>  
+  <COL VALIGN="top" ALIGN="center" STYLE="padding-left: 4px; padding-right: 4px"> <!-- ID -->
   <COL VALIGN="top"> <!-- Source -->
   <COL VALIGN="top"> <!-- Target -->
   <TR CLASS="tableHeadingBasic">
    <TD HEIGHT="20"><input type="checkbox" onclick="handleSelectAll()" name="selectAll" checked="true"/></TD>
    <TD HEIGHT="20" ALIGN="CENTER"><%=lbId%></TD>
-   <% if (b_corpus) {%>
-   <TD HEIGHT="20" ALIGN="CENTER"><%=bundle.getString("lb_corpus_context")%></TD>
-   <%}%>
    <TD HEIGHT="20" ALIGN="LEFT"><%=lbSource%> <%=sourceSearchLocaleDisplayName%></TD>
    <TD HEIGHT="20" ALIGN="LEFT"><%=lbTarget%> <%=targetSearchLocaleDisplayName%></TD>
    <TD HEIGHT="20" ALIGN="LEFT" width=100><%=lbTMName%></TD>

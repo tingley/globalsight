@@ -52,7 +52,6 @@ insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (42, 'pdf.dir'
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (43, 'msoffice.dir', '%%msoffice_dir%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (44, 'fileStorage.dir', '%%file_storage_dir%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (45, 'calendar.installKey', '%%calendar_install_key%%', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (46, 'corpus.installKey', '%%corpus_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (47, 'websvc.installKey', '%%websvc_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (48, 'editor.installKey', '%%editor_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (49, 'terminology.features.installKey', '0', '1');

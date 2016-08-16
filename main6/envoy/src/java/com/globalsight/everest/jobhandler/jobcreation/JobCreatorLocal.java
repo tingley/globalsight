@@ -16,7 +16,6 @@
  */
 package com.globalsight.everest.jobhandler.jobcreation;
 
-// Java
 import java.io.File;
 import java.rmi.RemoteException;
 import java.sql.Connection;
@@ -46,9 +45,6 @@ import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.cxe.util.XmlUtil;
 import com.globalsight.cxe.util.fileImport.eventFlow.Category;
 import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
-import com.globalsight.everest.corpus.CorpusDoc;
-import com.globalsight.everest.corpus.CorpusDocGroup;
-import com.globalsight.everest.corpus.CorpusManagerWLRemote;
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
@@ -95,7 +91,6 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.RuntimeCache;
 import com.globalsight.util.mail.MailerConstants;
-import com.globalsight.util.modules.Modules;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
@@ -170,7 +165,7 @@ public class JobCreatorLocal implements JobCreator
                 // Update the job to "LEVERAGING" state (GBS-2137)
                 if (Job.EXTRACTING.equals(job.getState()))
                 {
-                	c_logger.info("Update job state from 'EXTRACTING' to 'LEVERAGING' for job ID: " + theJobId);
+                    c_logger.info("Update job state from 'EXTRACTING' to 'LEVERAGING' for job ID: " + theJobId);
                     JobCreationMonitor.updateJobState(Long.parseLong(theJobId),
                             Job.LEVERAGING);
                 }
@@ -202,11 +197,9 @@ public class JobCreatorLocal implements JobCreator
                 updateForWorkflowsWithoutTargetPages(job);
             }
 
-            // Add the source language document to the CorpusTM
             if (p_request.getType() == Request.EXTRACTED_LOCALIZATION_REQUEST)
             {
-                addSourceDocToCorpus(sp, p_request, job,
-                        p_request.getBatchInfo());
+                deleteOriginalTmpSourceFile(p_request);
             }
 
             // Update job state
@@ -300,7 +293,7 @@ public class JobCreatorLocal implements JobCreator
         Transaction transaction = HibernateUtil.getTransaction();
         try
         {
-        	// If workflows have not been created, create them...
+            // If workflows have not been created, create them...
             Collection<Workflow> listOfWorkflows = job.getWorkflows();
             if (listOfWorkflows == null || listOfWorkflows.size() == 0)
             {
@@ -733,7 +726,7 @@ public class JobCreatorLocal implements JobCreator
                     if (Job.LEVERAGING.equals(p_job.getState()))
                     {
                         JobCreationMonitor
-                        		.updateJobState(p_job, Job.PROCESSING);
+                                .updateJobState(p_job, Job.PROCESSING);
                     }
                 }
             }
@@ -1011,128 +1004,20 @@ public class JobCreatorLocal implements JobCreator
     }
 
     /**
-     * Adds the source language document to the CorpusTM. Does not impact the
-     * import process if there are CorpusTM errors. Those errors get logged.
-     * 
-     * @param p_sourcePage
-     * @param p_request
-     * @param p_job
-     * @param p_isBatchComplete
-     *            the source page that has successfully imported.
+     * Delete the original source file for current page in file storage direction:
+     * [fileStoragePath]/CXE/xxxx.tmp.
      */
-    private void addSourceDocToCorpus(SourcePage p_sourcePage,
-            Request p_request, Job p_job, BatchInfo p_batchInfo)
+    private void deleteOriginalTmpSourceFile(Request p_request)
     {
-        if (!Modules.isCorpusInstalled())
+        String fileName = p_request.getOriginalSourceFileContent();
+        if (fileName != null)
         {
-            // need to delete the original source file that would have
-            // been used as the native format corpus doc
-            String fileName = p_request.getOriginalSourceFileContent();
-
-            if (fileName != null)
+            File originalSourceFile = new File(fileName);
+            if (originalSourceFile.exists())
             {
-                File originalSourceFile = new File(fileName);
-
-                if (originalSourceFile.exists())
-                {
-                    originalSourceFile.delete();
-                }
-            }
-
-            return;
-        }
-
-        try
-        {
-            if (c_logger.isDebugEnabled())
-            {
-                c_logger.info("Begin adding source page to corpusTM : "
-                        + p_sourcePage.getExternalPageId());
-            }
-
-            boolean deleteOriginal = true;
-            String gxml = p_request.getGxml();
-            File originalSourceFile = new File(
-                    p_request.getOriginalSourceFileContent());
-
-            CorpusManagerWLRemote corpusManager = ServerProxy
-                    .getCorpusManager();
-            CorpusDoc sourceCorpusDoc = corpusManager
-                    .addNewSourceLanguageCorpusDoc(p_sourcePage, gxml,
-                            originalSourceFile, deleteOriginal);
-            CorpusDocGroup cdg = sourceCorpusDoc.getCorpusDocGroup();
-
-            StringBuffer msg = new StringBuffer("Done adding source page ");
-            msg.append(p_sourcePage.getExternalPageId());
-            msg.append(" (");
-            msg.append(cdg.getId()).append("/");
-            msg.append(p_sourcePage.getGlobalSightLocale().toString());
-            msg.append(") to corpusTM");
-            c_logger.info(msg.toString());
-
-            updateSourcePageCuvId(p_sourcePage, sourceCorpusDoc, p_job);
-
-            c_logger.debug("p_sourcePage cuv_id = " + p_sourcePage.getCuvId());
-        }
-        catch (Throwable ex)
-        {
-            // Tue Oct 04 21:11:58 2005 CvdL: when I did a delayed
-            // reimport of an office file into an existing job and
-            // restarted GlobalSight to fix some errors, when the
-            // reimport finally ran the call above "new File(
-            // p_request.getOriginalSourceFileContent())" encountered
-            // a null pointer exception.
-            c_logger.error(
-                    "Could not add source page "
-                            + p_sourcePage.getExternalPageId() + " to corpus.",
-                    ex);
-        }
-    }
-
-    /**
-     * Updates the cuv id in the SourcePage
-     * 
-     * @param p_sourcePage
-     * @param p_corpusDoc
-     * @exception Exception
-     */
-    private void updateSourcePageCuvId(SourcePage p_sourcePage,
-            CorpusDoc p_sourceCorpusDoc, Job p_job) throws Exception
-    {
-        // first get the SourcePage object refreshed in the cache
-        SourcePage sp = ServerProxy.getPageManager().getSourcePage(
-                p_sourcePage.getId());
-        Session session = null;
-        Transaction transaction = null;
-        try
-        {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-            SourcePage clone = (SourcePage) session.get(SourcePage.class,
-                    sp.getIdAsLong());
-            clone.setCuvId(p_sourceCorpusDoc.getIdAsLong());
-            session.update(clone);
-            transaction.commit();
-        }
-        catch (Exception e)
-        {
-            if (transaction != null)
-            {
-                transaction.rollback();
-            }
-            throw new Exception(e);
-        }
-        finally
-        {
-            if (session != null)
-            {
-                // session.close();
+                originalSourceFile.delete();
             }
         }
-
-        // replace the clone in the job's list of pages
-        p_job.getSourcePages();
-
     }
 
     // Sends mail from the Admin to the PM about a Job that contains Import

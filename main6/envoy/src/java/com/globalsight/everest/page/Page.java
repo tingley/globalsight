@@ -33,6 +33,8 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public abstract class Page extends PersistentObject implements GenericPage
 {
+    private static final long serialVersionUID = -3102326434801764882L;
+
     /**
      * Constant used for TopLink's query. The constant value has to be exactly
      * the same as the variable defined as the id of a page (for mapping
@@ -48,16 +50,8 @@ public abstract class Page extends PersistentObject implements GenericPage
      */
     public static final String EXTERNAL_PAGE_ID = "m_externalPageId";
 
-    /**
-     * Constant used for TopLink's query. The constant value has to be exactly
-     * the same as the variable defined as the id of a page (for mapping
-     * purposes). This is the corpus_unit_variant.id
-     */
-    public static final String CUV_ID = "m_cuvId";
-
     private String m_pageState = PageState.IMPORTING;
     private String m_externalPageId = null;
-    private Long m_cuvId = null;
     private String m_dataSourceType = null;
     protected GlobalSightLocale m_globalSightLocale = null;
     private String m_prevStateBeforeUpdate = null;
@@ -213,28 +207,6 @@ public abstract class Page extends PersistentObject implements GenericPage
     }
 
     /**
-     * Returns the corpus_unit_variant ID for the associated page in the corpus
-     * TM.
-     * 
-     * @return cuvId
-     */
-    public Long getCuvId()
-    {
-        return m_cuvId;
-    }
-
-    /**
-     * Set the corpus_unit_variant ID for the associated page in the corpus TM.
-     * 
-     * @param p_cuvId --
-     *            the new page in the corpus to which this page corresponds
-     */
-    public void setCuvId(Long p_cuvId)
-    {
-        m_cuvId = p_cuvId;
-    }
-
-    /**
      * Set the locale id of the page. Does not persist the change.
      * 
      * @param p_localeId
@@ -385,7 +357,6 @@ public abstract class Page extends PersistentObject implements GenericPage
         sb.append(" m_pageState=");
         sb.append(m_pageState != null ? m_pageState : "null");
         sb.append("\n");
-        sb.append(" m_cuvId=").append(m_cuvId).append("\n");
         sb.append(getPrimaryFile().toString());
 
         return sb.toString();

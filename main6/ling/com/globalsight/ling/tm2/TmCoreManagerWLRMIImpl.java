@@ -34,7 +34,6 @@ import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.ling.inprogresstm.DynamicLeverageResults;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm.TuvBasicInfo;
-import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.indexer.Reindexer;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
@@ -68,15 +67,12 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
      * @param p_options
      *            Tm options. It has information which Project TM segments
      *            should be saved and etc.
-     * @return mappings of translation_unit_variant id and project_tm_tuv_t id
-     *         of this page
      */
-    public TuvMappingHolder populatePageForAllLocales(SourcePage p_page,
+    public void populatePageForAllLocales(SourcePage p_page,
             LeverageOptions p_options, long p_jobId) throws RemoteException,
             LingManagerException
     {
-        return m_localInstance.populatePageForAllLocales(p_page, p_options,
-                p_jobId);
+        m_localInstance.populatePageForAllLocales(p_page, p_options, p_jobId);
     }
 
     /**
@@ -90,15 +86,12 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
      *            should be saved and etc.
      * @param p_locale
      *            target locale
-     * @return mappings of translation_unit_variant id and project_tm_tuv_t id
-     *         of this page
      */
-    public TuvMappingHolder populatePageByLocale(SourcePage p_page,
+    public void populatePageByLocale(SourcePage p_page,
             LeverageOptions p_options, GlobalSightLocale p_locale, long p_jobId)
             throws RemoteException, LingManagerException
     {
-        return m_localInstance.populatePageByLocale(p_page, p_options,
-                p_locale, p_jobId);
+        m_localInstance.populatePageByLocale(p_page, p_options, p_locale, p_jobId);
     }
 
     /**
@@ -172,22 +165,20 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
      *            one of the "SYNC" constants, to overwrite existing TUs, merge
      *            existing TUs with new TUs, or to discard new TUs if they
      *            already exist in the TM.
-     * @return TuvMappingHolder. m_tuvId and m_tuId values are arbitrary.
      * 
      * @throws LingManagerException
      */
-    public TuvMappingHolder saveToSegmentTm(Tm p_tm, Collection p_segments,
+    public void saveToSegmentTm(Tm p_tm, Collection p_segments,
             int p_mode) throws RemoteException, LingManagerException
     {
-        return m_localInstance.saveToSegmentTm(p_tm, p_segments, p_mode);
+        m_localInstance.saveToSegmentTm(p_tm, p_segments, p_mode);
     }
 
-    public TuvMappingHolder saveToSegmentTm(Tm p_tm, Collection p_segments,
+    public void saveToSegmentTm(Tm p_tm, Collection p_segments,
             int p_mode, String p_sourceTmName) throws RemoteException,
             LingManagerException, BatchException
     {
-        return m_localInstance.saveToSegmentTm(p_tm, p_segments, p_mode,
-                p_sourceTmName);
+        m_localInstance.saveToSegmentTm(p_tm, p_segments, p_mode, p_sourceTmName);
     }
 
     /**

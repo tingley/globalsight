@@ -139,7 +139,7 @@ public class Install extends installer.EventBroadcaster
             "insert_system_parameters_mysql.sql", "insert_UImodifiable_system_parameters_mysql.sql",
             "insert_extensions_mysql.sql", "insert_exportlocation_mysql.sql",
             "insert_default_calendar_mysql.sql", "insert_leverage_group_mysql.sql",
-            "create_tm_mysql.sql", "create_in_progress_tm_mysql.sql", "create_corpus_map_mysql.sql",
+            "create_tm_mysql.sql", "create_in_progress_tm_mysql.sql",
             "create_termbase_tables_mysql.sql", "insert_termbase_data_mysql.sql",
             "create_jbpm_tables.sql", "create_quartz_tables_mysql.sql" };
 

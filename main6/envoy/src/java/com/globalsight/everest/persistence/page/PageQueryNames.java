@@ -62,8 +62,7 @@ public interface PageQueryNames
      * Arguments: 1: Source page id
      *            2: Locale id
      */
-    public static String TARGET_PAGE_BY_SOURCE_ID_LOCALE_ID =
-        "getTargetPageBySourceIdLocaleId";
+    public static String TARGET_PAGE_BY_SOURCE_ID_LOCALE_ID = "getTargetPageBySourceIdLocaleId";
 
     /**
      * A named query to return all target pages associated with source pages
@@ -71,14 +70,7 @@ public interface PageQueryNames
      * <p>
      * Arguments: 1: Source page id
      */
-    public static String TARGET_PAGES_BY_SOURCE_PAGE_ID =
-        "getTargetPagesBySourceId";
-
-    /**
-    *  A named query to return the target page based on cuv id
-    */
-    public static String TARGET_PAGE_BY_CUV_ID = "getTargetPageByCuvId";
-
+    public static String TARGET_PAGES_BY_SOURCE_PAGE_ID = "getTargetPagesBySourceId";
 
     /**
      * A named query to return all template parts of a page template 
@@ -86,50 +78,40 @@ public interface PageQueryNames
      * <p>
      * Arguments: 1: Source page id
      */
-    public static String TEMPLATE_PARTS_BY_SOURCE_PAGE_ID =
-        "getTemplatePartsBySourcePageId";
+    public static String TEMPLATE_PARTS_BY_SOURCE_PAGE_ID = "getTemplatePartsBySourcePageId";
+
     /**
     *  A named query to return the source page based on job_id
     */
     public static String SOURCE_PAGE_BY_JOB_ID = "getSourcePageByJobId";
 
     /**
-    *  A named query to return the source page based on cuv id
-    */
-    public static String SOURCE_PAGE_BY_CUV_ID = "getSourcePageByCuvId";
-
-    /**
      * A named query to return all the source pages in a job that
      * are associated with an extracted file.
      */
-    public static String EXTRACTED_SOURCE_PAGES_BY_JOB_ID = 
-        "getExtractedSourcePagesByJobId";
+    public static String EXTRACTED_SOURCE_PAGES_BY_JOB_ID = "getExtractedSourcePagesByJobId";
 
     /**
      * A named query to return all the source pages in a job that
      * are associated with an un-extracted file.
      */
-    public static String UNEXTRACTED_SOURCE_PAGES_BY_JOB_ID = 
-        "getUnextractedSourcePagesByJobId";
+    public static String UNEXTRACTED_SOURCE_PAGES_BY_JOB_ID = "getUnextractedSourcePagesByJobId";
 
     /**
      * A named query to return all source pages that are stuck importing.
      * This happens when the system is shutdown and pages are still importing.
      * This is query is used on start-up to identify and handle these pages.
      */
-    public static String SOURCE_PAGES_STILL_IMPORTING = 
-        "getSourcePagesStillImporting";
+    public static String SOURCE_PAGES_STILL_IMPORTING = "getSourcePagesStillImporting";
 
     /**
      * A named query to return all source page that are in a specified state.
      */
-    public static String SOURCE_PAGES_BY_STATE = 
-        "getSourcePagesInState";
+    public static String SOURCE_PAGES_BY_STATE = "getSourcePagesInState";
 
     /**
      * A named query to return all target page that are in a specified state.
      */
-    public static String TARGET_PAGES_BY_STATE = 
-        "getTargetPagesInState";
+    public static String TARGET_PAGES_BY_STATE = "getTargetPagesInState";
 
 }

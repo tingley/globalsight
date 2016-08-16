@@ -50,12 +50,6 @@
         <http-method>GET</http-method>
         <http-method>POST</http-method>
     </web-resource-collection>
-    <web-resource-collection>
-        <web-resource-name>viewCorpus</web-resource-name>
-        <url-pattern>/GlobalSight/Corpus/*</url-pattern>
-        <http-method>GET</http-method>
-        <http-method>POST</http-method>
-    </web-resource-collection>
 	<web-resource-collection>
         <web-resource-name>tmcorpus</web-resource-name>
         <url-pattern>/envoy/tm/corpus/*</url-pattern>
@@ -633,20 +627,6 @@
     </init-param>
   </servlet>
   
-
-  <servlet>
-    <servlet-name>viewCorpus</servlet-name>
-    <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
-    <init-param>
-      <param-name>docHome</param-name>
-      <param-value>%%file_storage_dir_forwardslash%%</param-value>
-    </init-param>
-    <init-param>
-      <param-name>wl-dispatch-policy</param-name>
-      <param-value>ServletExecuteQueue</param-value>
-    </init-param>
-  </servlet>
-  
   <servlet>
     <servlet-name>viewVendorResume</servlet-name>
     <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
@@ -880,11 +860,6 @@
   <servlet-mapping>
     <servlet-name>viewStfFiles</servlet-name>
     <url-pattern>/GlobalSight/SecondaryTargetFiles/*</url-pattern>
-  </servlet-mapping>
-  
-  <servlet-mapping>
-    <servlet-name>viewCorpus</servlet-name>
-    <url-pattern>/GlobalSight/Corpus/*</url-pattern>
   </servlet-mapping>
   
   <servlet-mapping>

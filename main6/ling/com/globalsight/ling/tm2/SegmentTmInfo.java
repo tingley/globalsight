@@ -30,7 +30,6 @@ import com.globalsight.everest.tm.StatisticsInfo;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm.TuvBasicInfo;
-import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.indexer.Reindexer;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatchResults;
@@ -53,7 +52,7 @@ import com.globalsight.util.progress.ProgressReporter;
 public interface SegmentTmInfo
 {
 
-    public TuvMappingHolder saveToSegmentTm(
+    public void saveToSegmentTm(
             Collection<? extends BaseTmTu> p_segmentsToSave,
             GlobalSightLocale p_sourceLocale, Tm p_tm,
             Set<GlobalSightLocale> p_targetLocales, int p_mode,

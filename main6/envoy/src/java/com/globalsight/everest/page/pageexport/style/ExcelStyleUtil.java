@@ -71,8 +71,7 @@ public class ExcelStyleUtil extends StyleUtil
      */
     private Map<String, String> styles = new HashMap<String, String>();
 
-    static private final Logger s_logger = Logger
-            .getLogger(ExcelStyleUtil.class);
+    static private final Logger s_logger = Logger.getLogger(ExcelStyleUtil.class);
 
     private static Pattern PATTERN_SI_COUNT = Pattern
             .compile("(<sst[^>]*?count=\")([\\d]*?)(\"[^>]*?>)");
@@ -81,11 +80,14 @@ public class ExcelStyleUtil extends StyleUtil
     private static Pattern PATTERN_SHEET_ROW = Pattern
             .compile("(<c [^>]*)(><v>)([^<]*\\D+[^<]*)(</v></c>)");
 
-    private static Pattern PATTERN_SHARED_STRING_SI = Pattern
-            .compile("(</si>)([\r\n]*?</sst>)");
+    private static Pattern PATTERN_SHARED_STRING_SI = Pattern.compile("(</si>)([\r\n]*?</sst>)");
 
     private static Pattern PATTERN_WORKBOOK_RSID = Pattern
             .compile("<Relationship Id=\"rId(\\d+)\"");
+
+    // GBS-4504
+    private static Pattern PATTERN_ATTRIBUTE_XMLNS = Pattern
+            .compile("(<[^<>]*)xmlns=\"\"([^<>]*>)");
 
     /**
      * @see com.globalsight.everest.page.pageexport.style.StyleUtil#preHandle(java.lang.String)
@@ -174,8 +176,8 @@ public class ExcelStyleUtil extends StyleUtil
         File file = new File(path);
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
-        BufferedReader br = new BufferedReader(new InputStreamReader(
-                new FileInputStream(file), "utf-8"));
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file), "utf-8"));
 
         Document document = null;
         try
@@ -203,8 +205,7 @@ public class ExcelStyleUtil extends StyleUtil
                 }
                 FileUtil.writeFile(file, content, "UTF-8");
 
-                br = new BufferedReader(new InputStreamReader(
-                        new FileInputStream(file), "utf-8"));
+                br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "utf-8"));
                 document = db.parse(new InputSource(br));
             }
             catch (Exception e2)
@@ -212,7 +213,7 @@ public class ExcelStyleUtil extends StyleUtil
                 s_logger.error(e1);
             }
         }
-        
+
         List<Style> styles = getAllStyles();
 
         // For style node can be nested. Adding styles should be execute several
@@ -268,8 +269,8 @@ public class ExcelStyleUtil extends StyleUtil
             File file = new File(filePath);
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
-            BufferedReader br = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(file), "utf-8"));
+            BufferedReader br = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(file), "utf-8"));
             Document document = null;
             try
             {
@@ -296,8 +297,8 @@ public class ExcelStyleUtil extends StyleUtil
                     }
                     FileUtil.writeFile(file, content, "UTF-8");
 
-                    br = new BufferedReader(new InputStreamReader(
-                            new FileInputStream(file), "utf-8"));
+                    br = new BufferedReader(
+                            new InputStreamReader(new FileInputStream(file), "utf-8"));
                     document = db.parse(new InputSource(br));
                 }
                 catch (Exception e2)
@@ -305,8 +306,7 @@ public class ExcelStyleUtil extends StyleUtil
                     s_logger.error(e1);
                 }
             }
-            
-            
+
             String name = document.getFirstChild().getNodeName();
             if (ExcelExtractor.usePptxStyle(name))
             {
@@ -315,6 +315,7 @@ public class ExcelStyleUtil extends StyleUtil
             }
             else
             {
+                removeXmlnsAttribute(filePath);
                 recoverSheetRows(filePath);
                 repairAttributeValue(filePath);
                 forStylesInWt(filePath);
@@ -324,6 +325,38 @@ public class ExcelStyleUtil extends StyleUtil
         catch (Exception e)
         {
             s_logger.error(e);
+        }
+    }
+
+    /**
+     * Removes the xmlns="" attribute.
+     * <p>
+     * For GBS-4504, additional xmlns="" attributes being inserted into target
+     * files, breaks files opening.
+     */
+    private void removeXmlnsAttribute(String filePath) throws Exception
+    {
+        String fileName = FileUtils.getBaseName(filePath);
+        if ((fileName.startsWith("sheet") && fileName.endsWith(".xml"))
+                || "sharedStrings.xml".equals(fileName))
+        {
+            // only focus on sheetXX.xml and sharedStrings.xml
+            boolean replaced = false;
+
+            File file = new File(filePath);
+            String content = FileUtil.readFile(file, "utf-8");
+
+            Matcher m = PATTERN_ATTRIBUTE_XMLNS.matcher(content);
+            while (m.find())
+            {
+                // replace the content with xmlns="" attribute removed
+                content = StringUtil.replace(content, m.group(), m.group(1) + m.group(2));
+                replaced = true;
+            }
+            if (replaced)
+            {
+                FileUtil.writeFile(file, content, "utf-8");
+            }
         }
     }
 
@@ -382,16 +415,14 @@ public class ExcelStyleUtil extends StyleUtil
 
             String group1 = sheetMatcher.group(1);
             group1 = group1.replaceAll(" t=\"[^\"]*\"", "");
-            String newString = group1 + " t=\"s\"" + sheetMatcher.group(2)
-                    + siNumberInSharedString + sheetMatcher.group(4);
+            String newString = group1 + " t=\"s\"" + sheetMatcher.group(2) + siNumberInSharedString
+                    + sheetMatcher.group(4);
 
-            Matcher sharedStringMatcher = PATTERN_SHARED_STRING_SI
-                    .matcher(sharedString);
+            Matcher sharedStringMatcher = PATTERN_SHARED_STRING_SI.matcher(sharedString);
             if (sharedStringMatcher.find())
             {
                 needRecover = true;
-                sheet = StringUtil.replace(sheet, sheetMatcher.group(),
-                        newString);
+                sheet = StringUtil.replace(sheet, sheetMatcher.group(), newString);
 
                 String newSi = "<si><t>" + value + "</t></si>";
                 if (!sharedString.contains("<si>"))
@@ -400,11 +431,10 @@ public class ExcelStyleUtil extends StyleUtil
                 }
                 else
                 {
-                    newString = sharedStringMatcher.group(1) + newSi
-                            + sharedStringMatcher.group(2);
+                    newString = sharedStringMatcher.group(1) + newSi + sharedStringMatcher.group(2);
                 }
-                sharedString = StringUtil.replace(sharedString,
-                        sharedStringMatcher.group(), newString);
+                sharedString = StringUtil.replace(sharedString, sharedStringMatcher.group(),
+                        newString);
             }
             siNumberInSharedString++;
         }
@@ -426,12 +456,11 @@ public class ExcelStyleUtil extends StyleUtil
         // <Relationship Id="rIdXX"
         // Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings"
         // Target="sharedStrings.xml"/>
-        File workbookXmlRelsFile = new File(sheetFile.getParentFile()
-                .getParent(), "_rels/workbook.xml.rels");
+        File workbookXmlRelsFile = new File(sheetFile.getParentFile().getParent(),
+                "_rels/workbook.xml.rels");
         if (workbookXmlRelsFile.exists())
         {
-            String workbookXmlRels = FileUtil.readFile(workbookXmlRelsFile,
-                    "utf-8");
+            String workbookXmlRels = FileUtil.readFile(workbookXmlRelsFile, "utf-8");
             if (!workbookXmlRels.contains("sharedStrings.xml"))
             {
                 Matcher m = PATTERN_WORKBOOK_RSID.matcher(workbookXmlRels);
@@ -442,28 +471,25 @@ public class ExcelStyleUtil extends StyleUtil
                 }
                 SortUtil.sort(rIds);
                 int maxRId = rIds.get(rIds.size() - 1) + 1;
-                String toAdd = "<Relationship Id=\"rId"
-                        + maxRId
+                String toAdd = "<Relationship Id=\"rId" + maxRId
                         + "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings\" Target=\"sharedStrings.xml\"/>";
-                workbookXmlRels = StringUtil.replace(workbookXmlRels,
-                        "</Relationships>", toAdd + "</Relationships>");
-                FileUtil.writeFile(workbookXmlRelsFile, workbookXmlRels,
-                        "utf-8");
+                workbookXmlRels = StringUtil.replace(workbookXmlRels, "</Relationships>",
+                        toAdd + "</Relationships>");
+                FileUtil.writeFile(workbookXmlRelsFile, workbookXmlRels, "utf-8");
             }
         }
         // 2. update [Content_Types].xml, by adding
         // <Override PartName="/xl/sharedStrings.xml"
         // ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>
-        File contentTypesFile = new File(sheetFile.getParentFile()
-                .getParentFile().getParent(), "[Content_Types].xml");
+        File contentTypesFile = new File(sheetFile.getParentFile().getParentFile().getParent(),
+                "[Content_Types].xml");
         if (contentTypesFile.exists())
         {
             String contentTypes = FileUtil.readFile(contentTypesFile, "utf-8");
             if (!contentTypes.contains("sharedStrings.xml"))
             {
                 String toAdd = "<Override PartName=\"/xl/sharedStrings.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml\"/>";
-                contentTypes = StringUtil.replace(contentTypes, "</Types>",
-                        toAdd + "</Types>");
+                contentTypes = StringUtil.replace(contentTypes, "</Types>", toAdd + "</Types>");
                 FileUtil.writeFile(contentTypesFile, contentTypes, "utf-8");
             }
         }
@@ -478,8 +504,7 @@ public class ExcelStyleUtil extends StyleUtil
         if (m.find())
         {
             String newString = m.group(1) + newSiCount + m.group(3);
-            sharedString = StringUtil.replace(sharedString, m.group(),
-                    newString);
+            sharedString = StringUtil.replace(sharedString, m.group(), newString);
         }
         return sharedString;
     }
@@ -506,8 +531,7 @@ public class ExcelStyleUtil extends StyleUtil
             content = content.replaceAll("<[/]?su[bp]?>", "");
 
             // For text not in node.
-            content = content.replaceAll("</>\\s*[^\\t\\n\\x0B\\f\\r<]\\s*<",
-                    "");
+            content = content.replaceAll("</>\\s*[^\\t\\n\\x0B\\f\\r<]\\s*<", "");
             FileUtil.writeFile(new File(filePath), content, "utf-8");
         }
         catch (IOException e)
@@ -531,8 +555,7 @@ public class ExcelStyleUtil extends StyleUtil
         DOMSource source = new DOMSource(document);
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        OutputStreamWriter ou = new OutputStreamWriter(new FileOutputStream(
-                path), "UTF-8");
+        OutputStreamWriter ou = new OutputStreamWriter(new FileOutputStream(path), "UTF-8");
         StreamResult result = new StreamResult(ou);
         transformer.transform(source, result);
     }

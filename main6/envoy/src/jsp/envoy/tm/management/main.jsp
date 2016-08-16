@@ -402,18 +402,9 @@ function selectRow()
   }
 }
 
-//show the corpus browser for concordance searches
-var w_corpusBrowser = null;
-function showCorpusBrowser()
-{
-   var url = "/globalsight/ControlServlet?activityName=browseCorpus&pagename=CTMB&fromEditor=false";
-   w_corpusBrowser = window.open(url, "<%=bundle.getString("lb_concordance")%>",
-   'location=no,menubar=no,resizable=yes,scrollbars=yes,WIDTH=800,HEIGHT=600');
-}
-
 function doOnUnload()
 {
-    try { w_corpusBrowser.close(); } catch (ignore) {}
+
 }
 
 function doLoad()
@@ -568,15 +559,6 @@ function filterItems(e) {
     <TD>
       <P>
       <DIV ALIGN="left">
-      <!-- hide "Coupus Browser" button -->
-      <% if (false) { %>
-    <amb:permission name="<%=Permission.TM_BROWSER%>" >
-      <INPUT CLASS="standardText" TYPE="BUTTON"
-      VALUE="<%=bundle.getString("lb_corpus_browser")%>"
-      ID="corpusBtn" onclick="showCorpusBrowser()"
-      TITLE="<%=bundle.getString("lb_corpus_browser")%>">
-    </amb:permission>
-      <% } %>
 
     <amb:permission name="<%=Permission.TM_STATS%>" >
       <INPUT CLASS="standardText" TYPE="BUTTON" name="statBtn" disabled

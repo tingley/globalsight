@@ -667,7 +667,6 @@ var fontGray1 = "<font color='gray'>";
 var fontGray2 = "</font>";
 var lb_copy_to_editor 				= "<%=bundle.getString("lb_copy_to_editor")%>";
 var lb_insert_selection_in_editor 	= "<%=bundle.getString("lb_insert_selection_in_editor")%>";
-var lb_corpus_context 				= "<%=bundle.getString("lb_corpus_context")%>";
 
 function contextForSegmentContext(url, e)
 {
@@ -685,8 +684,7 @@ function contextForSegmentContext(url, e)
 	
     var popupoptions = [
 		new ContextItem(lb_copy_to_editor,  	function(){ copyMatchToEditor();}),
-		new ContextItem(lb_insert_selection, 	function(){ copySelectionToEditor();}),
-		new ContextItem(lb_corpus_context, 		function(){ showCorpus();})
+		new ContextItem(lb_insert_selection, 	function(){ copySelectionToEditor();})
     ];    	
     
     ContextMenu.display(popupoptions, e); 

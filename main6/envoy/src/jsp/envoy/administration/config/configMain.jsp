@@ -30,12 +30,6 @@ boolean isLanguage = ((String)request.getAttribute(
     SystemConfigParamNames.EXPORT_DIR_NAME_STYLE)).
       compareToIgnoreCase("language") == 0;
 
-boolean isCorpusStoringNativeFormatDocs =
-    Boolean.valueOf((String)request.getAttribute(
-      SystemConfigParamNames.CORPUS_STORE_NATIVE_FORMAT)).booleanValue();
-boolean isCorpusShowingAllTms =
-    Boolean.valueOf((String)request.getAttribute(
-      SystemConfigParamNames.CORPUS_SHOW_ALL_TMS_TO_LPS)).booleanValue();
 boolean isTermAutoReplace =
     Boolean.valueOf((String)request.getAttribute(
       SystemConfigParamNames.AUTO_REPLACE_TERMS)).booleanValue();
@@ -282,33 +276,6 @@ function setPerSurchargeTextInputValue(id,value)
       <%=bundle.getString("lb_no") %></SPAN>
     </TD>
   </TR>
-
-<% if (b_corpus) { %>  
-  <TR VALIGN="TOP">
-    <TD><SPAN CLASS="standardText"><%=bundle.getString("lb_corpus_cfg_nf")%>:</SPAN></TD>
-    <TD><SPAN CLASS="standardText">
-      <INPUT TYPE="radio" <%if (isCorpusStoringNativeFormatDocs) out.print(CHECKED);%>
-      NAME="<%=SystemConfigParamNames.CORPUS_STORE_NATIVE_FORMAT%>" VALUE="true">
-      <%=bundle.getString("lb_yes") %>
-      <INPUT TYPE="radio" <%if (!isCorpusStoringNativeFormatDocs) out.print(CHECKED);%>
-      NAME="<%=SystemConfigParamNames.CORPUS_STORE_NATIVE_FORMAT%>" VALUE="false">
-      <%=bundle.getString("lb_no") %></SPAN>
-    </TD>
-  </TR>
-  
-  <TR VALIGN="TOP">
-    <TD><SPAN CLASS="standardText"><%=bundle.getString("lb_corpus_cfg_showTms")%>:</SPAN></TD>
-    <TD><SPAN CLASS="standardText">
-      <INPUT TYPE="radio" <%if (isCorpusShowingAllTms) out.print(CHECKED);%>
-      NAME="<%=SystemConfigParamNames.CORPUS_SHOW_ALL_TMS_TO_LPS%>" VALUE="true">
-      <%=bundle.getString("lb_yes") %>
-      <INPUT TYPE="radio" <%if (!isCorpusShowingAllTms) out.print(CHECKED);%>
-      NAME="<%=SystemConfigParamNames.CORPUS_SHOW_ALL_TMS_TO_LPS%>" VALUE="false">
-      <%=bundle.getString("lb_no") %></SPAN>
-    </TD>
-  </TR>
-  
-<% } %>  
 
     <TR VALIGN="TOP">
     <TD><SPAN CLASS="standardText">Allow Localization Participants to use MT in Editor:</SPAN></TD>

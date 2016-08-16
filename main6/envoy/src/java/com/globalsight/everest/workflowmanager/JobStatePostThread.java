@@ -17,7 +17,6 @@
 package com.globalsight.everest.workflowmanager;
 
 import java.io.IOException;
-import java.util.Vector;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
@@ -46,13 +45,10 @@ import org.json.JSONObject;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.workflow.WorkflowArrowInstance;
-import com.globalsight.everest.workflow.WorkflowConstants;
-import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.mail.MailerConstants;
 
+@SuppressWarnings("deprecation")
 public class JobStatePostThread extends Thread implements Runnable
 {
     static private final Logger s_logger = Logger.getLogger(JobStatePostThread.class);
@@ -89,6 +85,7 @@ public class JobStatePostThread extends Thread implements Runnable
             jsonObj.put("previousState", previousState);
             jsonObj.put("currentState", currentState);
             s_logger.info("job transition post info: " + jsonObj);
+
             L10nProfile l10nProfile = job.getL10nProfile();
             long wfStatePostId = l10nProfile.getWfStatePostId();
             WorkflowStatePosts wfStatePost = ServerProxy.getProjectHandler()

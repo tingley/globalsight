@@ -49,6 +49,7 @@ import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.FormUtil;
+import com.globalsight.util.StringUtil;
 
 /**
  * <p>
@@ -218,11 +219,15 @@ public class CommentUploadHandler extends PageHandler implements
                         FormUtil.Forms.EDIT_COMMENT)
                         && value.equals(WebAppConstants.COMMENT_REFERENCE_DELETE))
                 {
+                    String fileTypes = p_request.getParameter("fileTypes");
+                    String[] typeArr = null;
+                    if (StringUtil.isNotEmptyAndNull(fileTypes))
+                    {
+                        typeArr = fileTypes.split(",");
+                    }
                     editCommentReferences(
-                            p_request
-                                    .getParameterValues(CommentConstants.FILE_CHECKBOXES),
-                            p_request.getParameterValues("restrict"), tmpDir,
-                            sessionMgr);
+                            p_request.getParameterValues(CommentConstants.FILE_CHECKBOXES),
+                            typeArr, tmpDir, sessionMgr);
                 }
             }
         }
@@ -294,20 +299,36 @@ public class CommentUploadHandler extends PageHandler implements
      * is specified in the array of strings.
      */
     private void editCommentReferences(String[] deleteIndexs,
-            String[] restractIndexs, String tmpDir, SessionManager sessionMgr)
+            String[] fileTypes, String tmpDir, SessionManager sessionMgr)
             throws EnvoyServletException
     {
         ArrayList commentReferences = getCommentReferences(tmpDir, sessionMgr);
         ArrayList deletedReferences = (ArrayList) sessionMgr
                 .getAttribute("deletedReferences");
-        Vector<CommentFile> changeToRestricts = new Vector<CommentFile>();
-        Vector<CommentFile> changeToGenerals = new Vector<CommentFile>();
-        Vector<String> restracts = new Vector<String>();
-        if (restractIndexs != null)
+        
+        Vector<String> changeToGeneralStr = new Vector<String>();
+        Vector<String> changeToRestrictStr = new Vector<String>();
+        Vector<String> changeToSupportStr = new Vector<String>();
+        if (fileTypes != null && fileTypes.length > 0)
         {
-            for (String index : restractIndexs)
+            for(int i=0;i<fileTypes.length;i++)
             {
-                restracts.add(index.trim());
+                String[] types = fileTypes[i].toString().split("_");
+                if (StringUtil.isNotEmpty(types[1]))
+                {
+                    if ("General".equalsIgnoreCase(types[1]))
+                    {
+                        changeToGeneralStr.add(types[0]);
+                    }
+                    else if ("Restrict".equalsIgnoreCase(types[1]))
+                    {
+                        changeToRestrictStr.add(types[0]);
+                    }
+                    else if ("Support".equalsIgnoreCase(types[1]))
+                    {
+                        changeToSupportStr.add(types[0]);
+                    }
+                }
             }
         }
 
@@ -330,6 +351,9 @@ public class CommentUploadHandler extends PageHandler implements
                 }
             }
 
+            Vector<CommentFile> changeToRestricts = new Vector<CommentFile>();
+            Vector<CommentFile> changeToGenerals = new Vector<CommentFile>();
+            Vector<CommentFile> changeToSupports = new Vector<CommentFile>();
             for (int i = 0; i < commentReferences.size(); i++)
             {
                 CommentFile item = (CommentFile) commentReferences.get(i);
@@ -338,17 +362,23 @@ public class CommentUploadHandler extends PageHandler implements
                     continue;
                 }
 
-                boolean isRestrictOld = WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS
-                        .equals(item.getFileAccess());
-                boolean isRestrictNew = restracts.contains(String.valueOf(item
-                        .getAbsolutePath().hashCode()));
-                if (isRestrictOld && !isRestrictNew)
+                if (changeToGeneralStr.size() > 0
+                        && changeToGeneralStr.contains(String.valueOf(item.getAbsolutePath()
+                                .hashCode())))
                 {
                     changeToGenerals.add(item);
                 }
-                else if (!isRestrictOld && isRestrictNew)
+                else if (changeToRestrictStr.size() > 0
+                        && changeToRestrictStr.contains(String.valueOf(item.getAbsolutePath()
+                                .hashCode())))
                 {
                     changeToRestricts.add(item);
+                }
+                else if (changeToSupportStr.size() > 0
+                        && changeToSupportStr.contains(String.valueOf(item.getAbsolutePath()
+                                .hashCode())))
+                {
+                    changeToSupports.add(item);
                 }
             }
 
@@ -356,8 +386,9 @@ public class CommentUploadHandler extends PageHandler implements
 
             String commentId = (String) sessionMgr.getAttribute("commentId");
             deleteCommentReferences(deleteFiles, tmpDir, commentId);
-            updateGeneralFiles(changeToRestricts, tmpDir, commentId);
-            updateStrictFiles(changeToGenerals, tmpDir, commentId);
+            updateToGeneralFiles(changeToGenerals, tmpDir, commentId);
+            updateToStrictFiles(changeToRestricts, tmpDir, commentId);
+            updateToSupportFiles(changeToSupports,tmpDir,commentId);
         }
         catch (Exception ex)
         {
@@ -404,7 +435,24 @@ public class CommentUploadHandler extends PageHandler implements
         }
     }
 
-    private void updateGeneralFiles(Vector<CommentFile> files, String tmpDir,
+    private void updateToGeneralFiles(Vector<CommentFile> files, String tmpDir,
+            String commentId)
+    {
+        try
+        {
+            for (CommentFile file : files)
+            {
+                String dir = file.isSaved() ? commentId : tmpDir;
+                ServerProxy.getCommentManager().changeToGeneral(file, dir);
+            }
+        }
+        catch (Exception ex)
+        {
+            CATEGORY.error(ex.getMessage(), ex);
+        }
+    }
+
+    private void updateToStrictFiles(Vector<CommentFile> files, String tmpDir,
             String commentId)
     {
         try
@@ -420,8 +468,8 @@ public class CommentUploadHandler extends PageHandler implements
             CATEGORY.error(ex.getMessage(), ex);
         }
     }
-
-    private void updateStrictFiles(Vector<CommentFile> files, String tmpDir,
+    
+    private void updateToSupportFiles(Vector<CommentFile> files, String tmpDir,
             String commentId)
     {
         try
@@ -429,7 +477,7 @@ public class CommentUploadHandler extends PageHandler implements
             for (CommentFile file : files)
             {
                 String dir = file.isSaved() ? commentId : tmpDir;
-                ServerProxy.getCommentManager().changeToGeneral(file, dir);
+                ServerProxy.getCommentManager().changeToSupport(file, dir);
             }
         }
         catch (Exception ex)

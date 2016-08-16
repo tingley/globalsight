@@ -61,6 +61,8 @@ public class GlossaryFile
      * The file name of this glossary relative to a root directory.
      */
     private String m_filename = "";
+    
+    private long m_commentId = -1;
 
     /**
      * Default constructor to be used by TopLink only.
@@ -73,7 +75,7 @@ public class GlossaryFile
     {
         super();
     }
-
+    
     public void setAnySourceLocale(boolean p_enable)
     {
         m_anySourceLocale = p_enable;
@@ -168,6 +170,16 @@ public class GlossaryFile
     public String getFilename()
     {
         return m_filename;
+    }
+    
+    public long getCommentId()
+    {
+        return m_commentId;
+    }
+
+    public void setCommentId(long commentId)
+    {
+        this.m_commentId = commentId;
     }
     
     /**

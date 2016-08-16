@@ -71,6 +71,9 @@ public class CommentUpload
 
     /** the general file directory */ 
     public final static String GENERAL = "General";
+    
+    /** the support file directory */ 
+    public final static String SUPPORT_FILE = "Support File";
 
 //    public static String UPLOAD_BASE_DIRECTORY = "/";
     
@@ -478,6 +481,7 @@ public class CommentUpload
                SecurityException
     {
         String restrictedValue = null;
+        String includeSupportFile = null;
         String tempDir = null;
         if(p_request != null)
         {
@@ -493,6 +497,17 @@ public class CommentUpload
                     restrictedValue = null;
                 }
             }
+            
+            includeSupportFile = p_request
+                    .getParameter(WebAppConstants.COMMENT_REFERENCE_INCLUDE_SUPPORT_FILE);
+            if (includeSupportFile != null)
+            {
+                includeSupportFile = includeSupportFile.trim();
+                if (includeSupportFile.length() == 0 || includeSupportFile.equals("false"))
+                {
+                    includeSupportFile = null;
+                }
+            }
         }
         else if(p_restrict.equals("true"))
         {
@@ -502,6 +517,7 @@ public class CommentUpload
         {
             restrictedValue = null;
         }
+        
         if (p_fromUI) 
         {
             tempDir = getTmpDir();
@@ -513,16 +529,22 @@ public class CommentUpload
                 + p_userId;
         }
         boolean restricted = (restrictedValue != null);
+        boolean isIncludeSupportFile = (includeSupportFile != null);
 
         String access = "";
-        if(restricted)
+        if (restricted)
         {
             access = RESTRICTED;
+        }
+        else if (isIncludeSupportFile)
+        {
+            access = SUPPORT_FILE;
         }
         else
         {
             access = GENERAL;
         }
+        
         if (m_tempFile != null && m_tempFile.exists())
         {
             try

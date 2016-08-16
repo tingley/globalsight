@@ -120,6 +120,9 @@ public interface CommentManager
 
     public void changeToRestrict(CommentFile p_file, String tmpDir)
             throws RemoteException, CommentException;
+    
+    public void changeToSupport(CommentFile p_file, String tmpDir)
+            throws RemoteException, CommentException;
 
     /**
      * Retrieves a list of comment reference file descriptors matching the given

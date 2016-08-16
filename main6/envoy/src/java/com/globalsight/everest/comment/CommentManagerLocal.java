@@ -92,7 +92,8 @@ public class CommentManagerLocal implements CommentManager
     {
 
         String[] access =
-        { WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS,
+        { WebAppConstants.COMMENT_REFERENCE_SUPPORT_FILE_ACCESS,
+                WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS,
                 WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS };
         try
         {
@@ -132,10 +133,17 @@ public class CommentManagerLocal implements CommentManager
             String oldPath = filePath
                     + WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS + "/"
                     + p_file.getFilename();
+            File file = new File(oldPath);
+            if (!file.exists())
+            {
+                oldPath = filePath + WebAppConstants.COMMENT_REFERENCE_SUPPORT_FILE_ACCESS + "/"
+                        + p_file.getFilename();
+                file = new File(oldPath);
+            }
             String newPath = filePath
                     + WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS + "/"
                     + p_file.getFilename();
-            File file = new File(oldPath);
+            
             File newFile = new File(newPath);
             if (file.exists())
             {
@@ -206,10 +214,59 @@ public class CommentManagerLocal implements CommentManager
             String oldPath = filePath
                     + WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS + "/"
                     + p_file.getFilename();
+            File file = new File(oldPath);
+            if (!file.exists())
+            {
+                oldPath = filePath + WebAppConstants.COMMENT_REFERENCE_SUPPORT_FILE_ACCESS + "/"
+                        + p_file.getFilename();
+                file = new File(oldPath);
+            }
+            
             String newPath = filePath
                     + WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS + "/"
                     + p_file.getFilename();
+
+            File newFile = new File(newPath);
+            if (file.exists())
+            {
+                int i = 2;
+                while (newFile.exists())
+                {
+                    newPath = newPath + "(" + i + ")";
+                    newFile = new File(newPath);
+                }
+
+                newFile.getParentFile().mkdirs();
+                file.renameTo(newFile);
+            }
+        }
+        catch (Exception ex)
+        {
+            CATEGORY.error(ex.getMessage(), ex);
+            throw new CommentException(ex.getMessage());
+        }
+    }
+    
+    public void changeToSupport(CommentFile p_file, String tmpDir)
+            throws RemoteException, CommentException
+    {
+        try
+        {
+            String filePath = getFilePath(p_file, tmpDir);
+            String oldPath = filePath
+                    + WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS + "/"
+                    + p_file.getFilename();
             File file = new File(oldPath);
+            if (!file.exists())
+            {
+                oldPath = filePath + WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS + "/"
+                        + p_file.getFilename();
+                file = new File(oldPath);
+            }
+            String newPath = filePath
+                    + WebAppConstants.COMMENT_REFERENCE_SUPPORT_FILE_ACCESS + "/"
+                    + p_file.getFilename();
+
             File newFile = new File(newPath);
             if (file.exists())
             {
@@ -945,17 +1002,17 @@ public class CommentManagerLocal implements CommentManager
         ArrayList result = new ArrayList();
 
         String[] accessLevel =
-        { WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS,
+        { WebAppConstants.COMMENT_REFERENCE_SUPPORT_FILE_ACCESS,
+                WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS,
                 WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS };
         int level = 0;
-        if (p_access
-                .equals(WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS))
+        if (p_access.equals(WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS))
         {
             level = 2;
         }
-        else
+        else if (p_access.equals(WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS))
         {
-            level = 1;
+            level = 3;
         }
 
         for (int x = 0; x < level; x++)

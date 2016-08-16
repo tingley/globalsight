@@ -17,6 +17,7 @@
 
 package com.globalsight.everest.webapp.pagehandler.offline.download;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,13 +32,17 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.comment.Comment;
+import com.globalsight.everest.glossaries.GlossaryFile;
 import com.globalsight.everest.glossaries.GlossaryManager;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.localemgr.CodeSet;
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.glossaries.GlossaryState;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
@@ -46,6 +51,7 @@ import com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -208,6 +214,9 @@ public class DownloadPageHandler extends PageHandler
 
         // The glossary state information for this locale pair
         GlossaryState glossaryState = getGlossaryState(task);
+        //GBS-4461: get job level support file
+        getJobSupportFile(task.getJobId(), glossaryState);
+  
         session.setAttribute(OfflineConstants.DOWNLOAD_GLOSSARY_STATE,
                 glossaryState);
         SessionManager sessionMgr = (SessionManager) session
@@ -219,6 +228,46 @@ public class DownloadPageHandler extends PageHandler
             optionsHash = new HashMap();
             setDownloadOptions(session, p_request);
             sessionMgr.setAttribute("optionsHash", optionsHash);
+        }
+    }
+    
+    private void getJobSupportFile(long jobId, GlossaryState glossaryState)
+    {
+        try
+        {
+            ArrayList result = new ArrayList();
+            Job job = ServerProxy.getJobHandler().getJobById(jobId);
+            List jobComments = job.getJobComments();
+            if (jobComments != null && jobComments.size() > 0)
+            {
+                String parentPath = AmbFileStoragePathUtils.getCommentReferenceDir()
+                        + File.separator;
+                for (int i = 0; i < jobComments.size(); i++)
+                {
+                    Comment com = (Comment) jobComments.get(i);
+                    String finaPath = parentPath + com.getId() + File.separator
+                            + WebAppConstants.COMMENT_REFERENCE_SUPPORT_FILE_ACCESS;
+                    File finalFile = new File(finaPath);
+                    if (finalFile.exists())
+                    {
+                        File[] files = finalFile.listFiles();
+                        for (int k = 0; k < files.length; ++k)
+                        {
+                            GlossaryFile g = new GlossaryFile();
+                            g.setFileSize(files[k].length());
+                            g.setLastModified(files[k].lastModified());
+                            g.setFilename(files[k].getName());
+                            g.setCommentId(com.getId());
+                            result.add(g);
+                        }
+                    }
+                }
+                glossaryState.getGlossaries().addAll(result);
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
     }
 

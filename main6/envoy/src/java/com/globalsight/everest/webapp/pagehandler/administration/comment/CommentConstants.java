@@ -24,7 +24,8 @@ public interface CommentConstants
     public static final String SORT = "sort";
     public static final String FILE_CHECKBOXES = "file";   
     public static final String RESTRICTED = "Restricted";   
-    public static final String GENERAL = "General";   
+    public static final String GENERAL = "General";
+    public static final String SUPPORT_FILE = "Support File";
 
     public static final String JOB_COMMENT_LIST  = "jobCommentList";
     public static final String JOB_COMMENT_KEY   = "jobComment";

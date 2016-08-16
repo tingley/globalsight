@@ -251,11 +251,18 @@ $(document).ready(function() {
             creating = false;
             return;
         }
+        
+        var isIncludeSupportFile = false;
+        if(createJobForm.includeSupportFile.checked==true){
+        	isIncludeSupportFile = true;
+        }else{
+        	isIncludeSupportFile = false;
+        }
         $("#tmpFolderName").val(tempFolder);
         $("#createJobForm").attr("target", "_self");
         $("#createJobForm").attr("enctype","application/x-www-form-urlencoded");
         $("#createJobForm").attr("encoding","application/x-www-form-urlencoded");
-        document.createJobForm.action += "&uploadAction=createJob&userName=<%=userName%>";
+        document.createJobForm.action += "&uploadAction=createJob&userName=<%=userName%>&includeSupportFile="+isIncludeSupportFile;
         document.createJobForm.submit();
     });
     // *************************************cancel button*************************************
@@ -815,7 +822,7 @@ function addAttachment(fileName) {
 
 function addTempAttachment(fileName) {
     $("#attachmentArea").html("<div style='line-height:25px;position:absolute;background-color:#0099FF;' id='ProgressBarAttach'></div>" 
-                            + "<div id='attName' style='width:336px' class='attachment_div'>" + fileName + "</div>" 
+                            + "<div id='attName' style='width:252.333px' class='attachment_div'>" + fileName + "</div>" 
                             + "<input type='hidden' name='attachment' value=\"" + fileName + "\">");
     $("#ProgressBarAttach").height($("#attachmentArea").height());
     runAttachProgress(10);
@@ -1040,8 +1047,12 @@ function isIE() { //ie?
                         <span id="uploadedFileNo" style="display:none">- <c:out value='${lb_uploaded}'/>: 0</span>
                         <span id="failedUpload" style="display:none">| <c:out value="${msg_failed}"/>: 0</span>
                     </td>
+                     <td width="110px" align="center">
+                    	<div id="attributeButtonDIV" style="display:none">
+                    	<input id="attributeButton" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_job_attributes}'/>" title="<c:out value='${lb_job_attributes}'/>">
+                    	</div>
+                    </td>
                     <td width="110px" align="center"><input id="cleanMap" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_clear_profile}'/>" title="<c:out value='${lb_create_job_clean_map_tip}'/>"></td>
-                    <td width="70px" style="border:0">&nbsp;</td>
                 </tr>
             </table>
         </td>
@@ -1091,13 +1102,14 @@ function isIE() { //ie?
                 <td width="15%" height="25" valign="middle" style="font-family:Arial,Helvetica,sans-serif;font-size:10pt;">
                     <c:out value="${lb_attachment}"/> / <c:out value="${lb_reference_file}"/>: 
                 </td>
-                <td width="51%" valign="middle"><div id="attachmentArea" style="border:1px solid #0C1476;padding-left:0;height:25px;line-height:25px"></div></td>
-                <td width="4%" valign="middle" align="center"><div id="delAtt" style="display:none;"><img src="/globalsight/images/createjob/delete.png" style="cursor:pointer;padding-top:4px;" onclick="delAttc()"></div></td>
-                <td width="15%" onmouseover="setInputFileDisable(1)">
-                <input type="button" id="attachmentFileBtn" class="standardBtn_mouseout" value="<c:out value='${lb_browse}'/>">
-                <input type="file" class="attachmentFile" name="selectedAttachmentFile" id="selectedAttachmentFile" class="standardBtn_mouseout" onclick="setType(1)" onchange="checkAndUpload()" title="<c:out value='${lb_create_job_browse_tip}'/>">
+                <td width="40%" valign="middle"><div id="attachmentArea" style="border:1px solid #0C1476;padding-left:0;height:25px;line-height:25px"></div></td>
+                <td width="30%" valign="middle" style="font-family:Arial,Helvetica,sans-serif;font-size:10pt;">
+                	<input type="checkbox" id="includeSupportFile" name="includeSupportFile" value="true"/>${lb_include_as_job_support_file}
                 </td>
-                <td width="15%"><div id="attributeButtonDIV" style="display:none"><input id="attributeButton" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_job_attributes}'/>" title="<c:out value='${lb_job_attributes}'/>"></div>
+                <td width="4%" valign="middle" align="center"><div id="delAtt" style="display:none;"><img src="/globalsight/images/createjob/delete.png" style="cursor:pointer;padding-top:4px;" onclick="delAttc()"></div></td>
+                <td width="11%" onmouseover="setInputFileDisable(1)">
+	                <input type="button" id="attachmentFileBtn" class="standardBtn_mouseout" value="<c:out value='${lb_browse}'/>">
+	                <input type="file" class="attachmentFile" name="selectedAttachmentFile" id="selectedAttachmentFile" class="standardBtn_mouseout" onclick="setType(1)" onchange="checkAndUpload()" title="<c:out value='${lb_create_job_browse_tip}'/>">
                 </td>
             </tr>
         </table>

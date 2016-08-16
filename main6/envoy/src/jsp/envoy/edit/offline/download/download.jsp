@@ -1714,26 +1714,34 @@ $(document).ready(function(){
         {
             GlossaryFile file = (GlossaryFile)glossaryList.get(i);
             StringBuffer url = new StringBuffer();
-            url.append("/globalsight/");
-	          url.append(AmbFileStoragePathUtils.SUPPORT_FILES_SUB_DIRECTORY);
-	          url.append("/");
-	          if (file.isForAnySourceLocale())
-            {
-                url.append(file.getGlobalSourceLocaleName());
-            }
-            else
-            {
-                url.append(file.getSourceLocale().toString());
-            }
-            url.append("/");
-            if (file.isForAnyTargetLocale())
-            {
-                url.append(file.getGlobalTargetLocaleName());
-            }
-            else
-            {
-                url.append(file.getTargetLocale().toString());
-            }
+             url.append("/globalsight/");
+             if(file.getCommentId() != -1)
+             {
+            	 url.append(AmbFileStoragePathUtils.COMMENT_REFERENCE_SUB_DIR).append("/");
+            	 url.append(file.getCommentId()).append("/");
+            	 url.append(WebAppConstants.COMMENT_REFERENCE_SUPPORT_FILE_ACCESS);
+             }
+             else
+             {
+            	  url.append(AmbFileStoragePathUtils.SUPPORT_FILES_SUB_DIRECTORY).append("/");
+	   	          if (file.isForAnySourceLocale())
+	               {
+	                   url.append(file.getGlobalSourceLocaleName());
+	               }
+	               else
+	               {
+	                   url.append(file.getSourceLocale().toString());
+	               }
+	               url.append("/");
+	               if (file.isForAnyTargetLocale())
+	               {
+	                   url.append(file.getGlobalTargetLocaleName());
+	               }
+	               else
+	               {
+	                   url.append(file.getTargetLocale().toString());
+	               }	 
+             }
             url.append("/");
             url.append(file.getFilename());
             String name = EditUtil.encodeHtmlEntities(file.getFilename());

@@ -5801,7 +5801,8 @@ public class Ambassador extends AbstractWebService
      * @param p_access
      *            - access specification of attachment file Restricted = Only
      *            the Project Manager can view this file. General = All
-     *            Participants of the Task can view this file.
+     *            Participants of the Task can view this file.Support File =
+     *            Only the job comment support.
      */
     public String addComment(String p_accessToken, long p_objectId, int p_objectType,
             String p_userId, String p_comment, byte[] p_file, String p_fileName, String p_access)
@@ -5826,6 +5827,13 @@ public class Ambassador extends AbstractWebService
             activityStart = WebServicesLog.start(Ambassador.class,
                     "addComment(p_accessToken,p_objectId,p_objectType,p_userId,p_comment,p_file,p_fileName,p_access)",
                     activityArgs);
+            
+            if (p_objectType == Comment.TASK && p_access != null
+                    && p_access.trim().equals(CommentUpload.SUPPORT_FILE))
+            {
+                return makeErrorXml("addComment",
+                        "Task comment only support 'General' and 'Restricted' styles file.");
+            }
             String userId = UserUtil.getUserIdByName(userName);
             long projectId = 0l;
 
@@ -5864,6 +5872,13 @@ public class Ambassador extends AbstractWebService
                 if (p_access != null && p_access.equals(CommentUpload.RESTRICTED))
                 {
                     access = p_access;
+                }
+                if (p_objectType == Comment.JOB)
+                {
+                    if (p_access != null && p_access.trim().equals(CommentUpload.SUPPORT_FILE))
+                    {
+                        access = p_access;
+                    }
                 }
 
                 StringBuffer finalPath = new StringBuffer(
@@ -5931,12 +5946,8 @@ public class Ambassador extends AbstractWebService
      * 
      * @param p_accessToken
      *            - the accessToken received from login()
-     * @param p_objectId
-     *            - The id of the object (Job or Task) to add the comment too.
-     *            The object must be DISPATCHED or part of a DISPATCHED job.
-     * @param p_objectType
-     *            - The type of the object that p_objectId refers to. 1 = JOB 3
-     *            = TASK
+     * @param p_jobName
+     *            - The job name.
      * @param p_userId
      *            - A valid user's user id that is adding the comment.
      * @param p_comment
@@ -5948,7 +5959,8 @@ public class Ambassador extends AbstractWebService
      * @param p_access
      *            - access specification of attachment file Restricted = Only
      *            the Project Manager can view this file. General = All
-     *            Participants of the Task can view this file.
+     *            Participants of the Task can view this file.Support File =
+     *            Only the job comment support.
      */
     public String addJobComment(String p_accessToken, String p_jobName, String p_userId,
             String p_comment, byte[] p_file, String p_fileName, String p_access)
@@ -5958,7 +5970,7 @@ public class Ambassador extends AbstractWebService
         String jobNameValidation = validateJobName(p_jobName);
         if (jobNameValidation != null)
         {
-            throw new WebServiceException(makeErrorXml("addJobComment", jobNameValidation));
+            return makeErrorXml("addJobComment", jobNameValidation);
         }
 
         StringBuffer errMessage = new StringBuffer("Could not add the comment to the object.  ");
@@ -5980,38 +5992,38 @@ public class Ambassador extends AbstractWebService
             String userId = UserUtil.getUserIdByName(userName);
             User user = ServerProxy.getUserManager().getUser(userId);
 
-            String fileName = null;
-            File file = null;
-            String baseDocDir = AmbFileStoragePathUtils.getCxeDocDir().getAbsolutePath();
-            String commentDir = baseDocDir.concat(File.separator).concat(p_jobName);
-
-            fileName = commentDir.concat(".txt");
-            file = new File(fileName);
-            FileWriter fout = new FileWriter(file);
-            StringBuilder comment = new StringBuilder();
-            comment.append(user.getUserName()).append(",").append(System.currentTimeMillis())
-                    .append(",");
-            comment.append(p_comment);
-            fout.write(comment.toString());
-            fout.close();
-
+            // save out the main part of the comment
+            Job job = queryJob(p_jobName, p_accessToken);
+            Comment comment = ServerProxy.getCommentManager().saveComment(job, job.getId(),
+                    ServerProxy.getUserManager().getUser(p_userId).getUserName(), p_comment);
+            
             // if there are attachments
             if (p_file != null && p_file.length > 0)
             {
                 String access = CommentUpload.GENERAL;
-                if (p_access != null && p_access.equals(CommentUpload.RESTRICTED))
+                if (p_access != null && p_access.trim().equals(CommentUpload.RESTRICTED))
+                {
+                    access = p_access;
+                }
+                else if (p_access != null && p_access.trim().equals(CommentUpload.SUPPORT_FILE))
                 {
                     access = p_access;
                 }
 
-                file = new File(commentDir, p_fileName);
-                file.getParentFile().mkdirs();
-                file.createNewFile();
-                DataOutputStream out = new DataOutputStream(
-                        new BufferedOutputStream(new FileOutputStream(file)));
+                StringBuffer finalPath = new StringBuffer(AmbFileStoragePathUtils
+                        .getCommentReferenceDir().getAbsolutePath());
+                finalPath.append(File.separator).append(comment.getId()).append(File.separator)
+                        .append(access);
+
+                File tempFile = new File(finalPath.toString(), p_fileName);
+                tempFile.getParentFile().mkdirs();
+                tempFile.createNewFile();
+                DataOutputStream out = new DataOutputStream(new BufferedOutputStream(
+                        new FileOutputStream(tempFile)));
                 out.write(p_file);
                 out.close();
             }
+
 
             StringBuffer xml = new StringBuffer();
             xml.append("<addCommentStatus>\r\n");

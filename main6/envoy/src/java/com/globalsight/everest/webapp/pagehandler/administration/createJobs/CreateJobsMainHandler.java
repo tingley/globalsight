@@ -406,6 +406,13 @@ public class CreateJobsMainHandler extends PageHandler
         dataMap.put("baseStorageFolder", baseStorageFolder);
         String attribute = request.getParameter("attributeString");
         dataMap.put("attributeString", attribute);
+        String includeSupportFile = request.getParameter("includeSupportFile");
+        boolean isIncludejobSupportFile =false;
+        if (includeSupportFile != null)
+        {
+            isIncludejobSupportFile = Boolean.valueOf(includeSupportFile);
+        }
+        dataMap.put("includeSupportFile", isIncludejobSupportFile);
 
         return dataMap;
     }
@@ -802,6 +809,7 @@ public class CreateJobsMainHandler extends PageHandler
             String[] targetLocales = (String[]) dataMap.get("targetLocale");
             String priority = (String) dataMap.get("priority");
             String baseFolder = (String) dataMap.get("baseFolder");
+            boolean isIncludeJobSupportFile = (boolean)dataMap.get("includeSupportFile");
             if (StringUtils.isNotEmpty(baseFolder))
             {
                 this.saveBaseFolder(user.getUserId(), SELECTED_FOLDER, baseFolder);
@@ -887,6 +895,7 @@ public class CreateJobsMainHandler extends PageHandler
                         + File.separator + "tmp" + File.separator + baseStorageFolder.split(",")[0];
                 SaveCommentThread sct = new SaveCommentThread(jobName, comment, attachmentName,
                         user.getUserId(), dir);
+                sct.setIncludeJobSupportFile(isIncludeJobSupportFile);
                 sct.start();
             }
             // Send email at the end.
@@ -1507,6 +1516,7 @@ public class CreateJobsMainHandler extends PageHandler
         setLableToJsp(request, bundle, "lb_job_creating");
         setLableToJsp(request, bundle, "lb_jobs_creating");
         setLableToJsp(request, bundle, "lb_job_attributes");
+        setLableToJsp(request, bundle, "lb_include_as_job_support_file");
     }
 
     /**

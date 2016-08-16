@@ -910,6 +910,7 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                 // User added more attached files to existing comment
                 rename(tmpPath.toString(), GENERAL, commentId);
                 rename(tmpPath.toString(), RESTRICTED, commentId);
+                rename(tmpPath.toString(), SUPPORT_FILE, commentId);
                 tmpPath.delete();
             }
             ArrayList list = (ArrayList) sessionMgr.getAttribute("deletedReferences");

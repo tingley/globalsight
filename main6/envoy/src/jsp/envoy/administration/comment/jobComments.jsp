@@ -34,6 +34,7 @@
          com.globalsight.util.AmbFileStoragePathUtils,
          java.text.MessageFormat,
          java.text.NumberFormat,
+         com.globalsight.everest.webapp.WebAppConstants,
          java.util.Locale, java.util.ResourceBundle" 
          session="true" %>
 <jsp:useBean id="skinbean" scope="application" class="com.globalsight.everest.webapp.javabean.SkinBean" />
@@ -473,6 +474,10 @@ $(document).ready(function(){
 	                        {
 	%>
 	                            <SPAN STYLE="color: red">(<%=bundle.getString("lb_restricted")%>)&nbsp;</SPAN>
+	<%
+	                        }else if(file.getFileAccess().equals("Support File")){
+	                        	%>
+	                            <SPAN STYLE="color: red">(<%=bundle.getString("lb_support_file")%>)&nbsp;</SPAN>
 	<%
 	                        }
 	%>

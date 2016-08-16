@@ -362,6 +362,8 @@ public interface WebAppConstants
     public static final String COMMENT_REFERENCE_RESTRICTED_ACCESS = "Restricted";
     public static final String COMMENT_REFERENCE_RESTRICTED = "restricted";
     public static final String COMMENT_REFERENCE_GENERAL_ACCESS = "General";
+    public static final String COMMENT_REFERENCE_SUPPORT_FILE_ACCESS = "Support File";
+    public static final String COMMENT_REFERENCE_INCLUDE_SUPPORT_FILE = "includeSupportFile";
     public static final String COMMENT_REFERENCE_NO_DELETE = "0";
     public static final String COMMENT_REFERENCE_DELETE = "1";
     public static final String COMMENT_REFERENCE_TRUE = "true";

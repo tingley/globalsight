@@ -41,7 +41,6 @@ import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.TmUtil;
-import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.indexer.TmSegmentIndexer;
 import com.globalsight.ling.tm2.persistence.SegmentQueryResult;
 import com.globalsight.ling.tm2.persistence.SegmentTmPersistence;
@@ -88,7 +87,7 @@ public class SegmentTmPopulator
      * @return mappings of translation_unit_variant id and project_tm_tuv_t id
      *         of this page
      */
-    public TuvMappingHolder populateSegmentTm(
+    public void populateSegmentTm(
             Collection<? extends BaseTmTu> p_segmentsToSave,
             GlobalSightLocale p_sourceLocale, Tm tm,
             Set<GlobalSightLocale> p_targetLocales, int p_mode,
@@ -108,7 +107,7 @@ public class SegmentTmPopulator
         if (p_segmentsToSave.size() == 0)
         {
             c_logger.debug("No segments to save to segment TM");
-            return new TuvMappingHolder();
+            return;
         }
 
         // save segments to UniqueSegmentRepositoryForCorpus to remove
@@ -305,8 +304,6 @@ public class SegmentTmPopulator
                 // DbUtil.unlockTables(m_connection);
             }
         }
-
-        return makeCorpusMapping(tm, segmentsForSave, jobDataToSave);
     }
 
     /**
@@ -836,80 +833,6 @@ public class SegmentTmPopulator
         p_stPersistence.removeTus(tus, LOCALIZABLE);
     }
 
-    private TuvMappingHolder makeCorpusMapping(Tm p_tm,
-            SegmentsForSave p_segmentsForSave,
-            UniqueSegmentRepositoryForCorpus p_uniqueData)
-    {
-        if (c_logger.isDebugEnabled())
-        {
-            c_logger.debug(p_segmentsForSave.toDebugString());
-            c_logger.debug(p_uniqueData.toDebugString());
-        }
-
-        TuvMappingHolder mappingHolder = new TuvMappingHolder();
-
-        // make mappings for tuvs whole tu of which are added in the Tm
-        Iterator itCreateTu = p_segmentsForSave.getTusForCreate(TRANSLATABLE)
-                .iterator();
-
-        while (itCreateTu.hasNext())
-        {
-            SegmentsForSave.CreateTu createTu = (SegmentsForSave.CreateTu) itCreateTu
-                    .next();
-            Iterator itAddTuv = createTu.getAddTuvIterator();
-            while (itAddTuv.hasNext())
-            {
-                SegmentsForSave.AddTuv addTuv = (SegmentsForSave.AddTuv) itAddTuv
-                        .next();
-                populateTuvMappingHolder(p_tm.getId(), createTu.getNewTuId(),
-                        addTuv.getNewTuvId(), addTuv.getTuv(), p_uniqueData,
-                        mappingHolder);
-            }
-        }
-
-        // make mappings for tuvs that are added in the Tm
-        Iterator itAddTuv = p_segmentsForSave.getTuvsForAdd(TRANSLATABLE)
-                .iterator();
-        while (itAddTuv.hasNext())
-        {
-            SegmentsForSave.AddTuv addTuv = (SegmentsForSave.AddTuv) itAddTuv
-                    .next();
-
-            populateTuvMappingHolder(p_tm.getId(), addTuv.getTuIdToAdd(),
-                    addTuv.getNewTuvId(), addTuv.getTuv(), p_uniqueData,
-                    mappingHolder);
-        }
-
-        // make mappings for tuvs the modify date of which are updated
-        // in the Tm
-        Iterator itUpdateTuv = p_segmentsForSave.getTuvsForUpdate(TRANSLATABLE)
-                .iterator();
-        while (itUpdateTuv.hasNext())
-        {
-            SegmentsForSave.UpdateTuv updateTuv = (SegmentsForSave.UpdateTuv) itUpdateTuv
-                    .next();
-
-            populateTuvMappingHolder(p_tm.getId(), updateTuv.getTuId(),
-                    updateTuv.getTuvIdToUpdate(), updateTuv.getTuv(),
-                    p_uniqueData, mappingHolder);
-        }
-
-        // make mappings for tuvs identical tuvs of which have been
-        // already in the Tm
-        itUpdateTuv = p_segmentsForSave.getTuvsForNoOp().iterator();
-        while (itUpdateTuv.hasNext())
-        {
-            SegmentsForSave.UpdateTuv updateTuv = (SegmentsForSave.UpdateTuv) itUpdateTuv
-                    .next();
-
-            populateTuvMappingHolder(p_tm.getId(), updateTuv.getTuId(),
-                    updateTuv.getTuvIdToUpdate(), updateTuv.getTuv(),
-                    p_uniqueData, mappingHolder);
-        }
-
-        return mappingHolder;
-    }
-
     private Map sortTuvsByLocale(Collection p_tuvs)
     {
         Map localeMap = new HashMap();
@@ -927,26 +850,6 @@ public class SegmentTmPopulator
         }
 
         return localeMap;
-    }
-
-    private void populateTuvMappingHolder(long p_tmId, long p_projectTmTuId,
-            long p_projectTmTuvId, BaseTmTuv p_tmTuv,
-            UniqueSegmentRepositoryForCorpus p_uniqueData,
-            TuvMappingHolder p_mappingHolder)
-    {
-        GlobalSightLocale locale = p_tmTuv.getLocale();
-
-        List tuvList = p_uniqueData.getIdenticalSegment(p_tmTuv);
-        if (tuvList != null)
-        {
-            Iterator itTuv = tuvList.iterator();
-            while (itTuv.hasNext())
-            {
-                BaseTmTuv tuv = (BaseTmTuv) itTuv.next();
-                p_mappingHolder.addMapping(locale, tuv.getId(), tuv.getTu()
-                        .getId(), p_tmId, p_projectTmTuId, p_projectTmTuvId);
-            }
-        }
     }
 
     private Job m_job;

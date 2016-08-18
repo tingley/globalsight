@@ -58,7 +58,6 @@ import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.TmUtil;
-import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.indexer.Reindexer;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatchResults;
@@ -1016,7 +1015,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
      * called. This is bad behavior for TM import.
      */
     @Override
-    public TuvMappingHolder saveToSegmentTm(
+    public void saveToSegmentTm(
             Collection<? extends BaseTmTu> pSegmentsToSave,
             GlobalSightLocale pSourceLocale, Tm pTm,
             Set<GlobalSightLocale> pTargetLocales, int pMode,
@@ -1030,7 +1029,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 
         if (pSegmentsToSave.size() == 0)
         {
-            return new TuvMappingHolder();
+            return;
         }
 
         Connection connection = null;
@@ -1060,7 +1059,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             TM3Attribute fromWsAttr = TM3Util.getAttr(tm, FROM_WORLDSERVER);
             TM3Attribute projectAttr = TM3Util.getAttr(tm, UPDATED_BY_PROJECT);
 
-            TuvMappingHolder holder = new TuvMappingHolder();
             ProjectTM projectTM = (pTm instanceof ProjectTM) ? (ProjectTM) pTm : null;
             Map<String, String> attValues = TMAttributeManager
                     .getTUAttributesForPopulator(projectTM, m_job);
@@ -1220,7 +1218,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 
             batches = null;
             savedTus = null;
-            return holder;
         }
         catch (Exception e)
         {

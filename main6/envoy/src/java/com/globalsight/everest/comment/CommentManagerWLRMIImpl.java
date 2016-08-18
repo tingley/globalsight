@@ -272,6 +272,13 @@ public class CommentManagerWLRMIImpl extends RemoteServer implements
     }
 
     @Override
+    public void changeToSupport(CommentFile p_file, String tmpDir)
+            throws RemoteException, CommentException
+    {
+        m_localInstance.changeToSupport(p_file, tmpDir);
+    }
+    
+    @Override
     public ArrayList getCommentReferences(String id, String p_access,
             String companyId) throws RemoteException, CommentException
     {

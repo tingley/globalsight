@@ -78,11 +78,15 @@
     {
     	isTaskComment = false;
     }
+    String lb_include_as_job_support_file = bundle.getString("lb_include_as_job_support_file");
+    String lb_general = bundle.getString("lb_general");
     String url_upload = referenceUpload.getPageURL() + "&"
 			+ CommentConstants.DELETE + "="
 			+ WebAppConstants.COMMENT_REFERENCE_NO_DELETE + "&"
 			+ WebAppConstants.COMMENT_REFERENCE_RESTRICTED + "="
-			+ WebAppConstants.COMMENT_REFERENCE_FALSE + "&"
+			+ WebAppConstants.COMMENT_REFERENCE_FALSE +"&"
+			+WebAppConstants.COMMENT_REFERENCE_INCLUDE_SUPPORT_FILE + "="
+			+WebAppConstants.COMMENT_REFERENCE_FALSE+ "&"
 			+ CommentConstants.SAVE_COMMENT_STATUS + "=" + saveCommStatus + "&";
 
 	String url_upload_true = referenceUpload.getPageURL() + "&"
@@ -90,6 +94,17 @@
 			+ WebAppConstants.COMMENT_REFERENCE_NO_DELETE + "&"
 			+ WebAppConstants.COMMENT_REFERENCE_RESTRICTED + "="
 			+ WebAppConstants.COMMENT_REFERENCE_TRUE+ "&"
+			+WebAppConstants.COMMENT_REFERENCE_INCLUDE_SUPPORT_FILE + "="
+			+WebAppConstants.COMMENT_REFERENCE_FALSE+ "&"
+			+ CommentConstants.SAVE_COMMENT_STATUS + "=" + saveCommStatus + "&";
+	
+	String url_upload_support_file = referenceUpload.getPageURL() + "&"
+			+ CommentConstants.DELETE + "="
+			+ WebAppConstants.COMMENT_REFERENCE_NO_DELETE + "&"
+			+ WebAppConstants.COMMENT_REFERENCE_RESTRICTED + "="
+			+ WebAppConstants.COMMENT_REFERENCE_FALSE+ "&"
+			+WebAppConstants.COMMENT_REFERENCE_INCLUDE_SUPPORT_FILE + "="
+			+WebAppConstants.COMMENT_REFERENCE_TRUE+ "&"
 			+ CommentConstants.SAVE_COMMENT_STATUS + "=" + saveCommStatus + "&";
 	
 	String url_delete = delete.getPageURL() + "&"
@@ -97,9 +112,11 @@
 			+ WebAppConstants.COMMENT_REFERENCE_DELETE+"&"
 			+ CommentConstants.SAVE_COMMENT_STATUS + "=" + saveCommStatus;
 
+	boolean displaySupportRadio = false;
 	if (wo != null) {
 		long companyId = -1;
 		if (wo instanceof Task) {
+			displaySupportRadio = false;
 			Task task = (Task) wo;
 			wid = (new Long(task.getId())).toString();
 			doneUrl = done.getPageURL() + "&"
@@ -142,6 +159,13 @@
 								+ "&" + WebAppConstants.TASK_COMMENT
 								+ "=" + comments
 								+ "&toTask=ture&";
+			url_upload_support_file += WebAppConstants.TASK_ID
+								+ "=" + task.getId()
+								+ "&" + WebAppConstants.TASK_STATE
+								+ "=" + task.getState()
+								+ "&" + WebAppConstants.TASK_COMMENT
+								+ "=" + comments
+								+ "&toTask=ture&";
 			//GBS 2913 add taskID and taskState
 			url_delete += "&" + WebAppConstants.TASK_ID
 						+ "=" + task.getId()
@@ -155,11 +179,13 @@
 				cancelUrl += "&commentId="+comment.getId();
 				url_upload += "&commentId="+comment.getId();
 				url_upload_true += "&commentId="+comment.getId();
+				url_upload_support_file += "&commentId="+comment.getId();
 				url_delete += "&commentId="+comment.getId();
 			}
 			companyId = ((Task) wo).getCompanyId();
 			jobName = ((Task) wo).getJobName();
 		} else if (wo instanceof Job) {
+			displaySupportRadio = true;
 			Job job = (Job) wo;
 			wid = (new Long(job.getId())).toString();
 			doneUrl = jobCommentsDone.getPageURL() + "&"
@@ -193,6 +219,11 @@
 								+ "&" + WebAppConstants.TASK_COMMENT
 								+ "=" + comments
 								+ "&toJob=ture";
+			url_upload_support_file += WebAppConstants.JOB_ID + "="
+								+ job.getId()
+								+ "&" + WebAppConstants.TASK_COMMENT
+								+ "=" + comments
+								+ "&toJob=ture";
 			//GBS 2913 add jobID
 			url_delete += "&" + WebAppConstants.JOB_ID + "="
 						+ job.getId()
@@ -205,11 +236,13 @@
 				cancelUrl += "&commentId="+comment.getId();
 				url_upload += "&commentId="+comment.getId();
 				url_upload_true += "&commentId="+comment.getId();
+				url_upload_support_file += "&commentId="+comment.getId();
 				url_delete += "&commentId="+comment.getId();
 			}
 			companyId = ((Job) wo).getCompanyId();
 			jobName = ((Job) wo).getJobName();
 		} else if (wo instanceof Workflow) {
+			displaySupportRadio = false;
 			Workflow wf = (Workflow) wo;
 			wid = (new Long(wf.getId())).toString();
 			doneUrl = done.getPageURL() + "&"
@@ -255,6 +288,8 @@
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/modalDialog.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
 var helpFile = "<%=bundle.getString("help_job_comment_attach_files")%>";
@@ -297,14 +332,24 @@ function isReady(form)
                 return false;
             }
         }
-    
-        if(uploadForm.restricted.checked==true)
-        {
-           uploadForm.action = "<%=url_upload_true%>";
-        }else
-        {
-           uploadForm.action = "<%=url_upload%>";
-        }
+        
+       var value = $("input[name='ckbox']:checked").val();
+       //Restrict File
+       if(value == 1)
+       {
+    	   uploadForm.action = "<%=url_upload_true%>";
+       }
+       // Support File
+       else if(value == 2)
+       {
+    	   uploadForm.action = "<%=url_upload_support_file%>";
+       }
+       //General
+       else
+       {
+    	   uploadForm.action = "<%=url_upload%>";
+       }
+       
         idBody.style.cursor = "wait";
         uploadForm.idSubmit.style.cursor = "wait";
         return true;
@@ -369,6 +414,20 @@ function validateForm()
 
 function submitForm()
 {
+	
+	var fileTypes="";
+	<%
+	 int k = 0;
+	 for (Iterator it = commentReferences.iterator(); it.hasNext(); ++k) {
+		CommentFile file = (CommentFile) it.next();
+	%>
+		var name = "fileType"+ <%=k%>;
+		var value = $("input[name='"+name+"']:checked").val();
+		fileTypes += value+",";
+	<%
+	}
+	%>	
+	
     if (document.layers)
     {
         theForm = document.contentLayer.document.deleteForm;
@@ -377,44 +436,24 @@ function submitForm()
     {
         theForm = document.all.deleteForm;
     }
-
-    if (optionTest(theForm))
-    {
-        theForm.submit();
-    }
+    
+    theForm.action = "<%=url_delete%>"+"&fileTypes="+fileTypes;
+    theForm.submit();
 }
 
-function optionTest(formSent)
+function removeFile(value)
 {
-    var pageChecked = false;
-
-    if (formSent.<%=CommentConstants.FILE_CHECKBOXES%>.value)
+	 if (document.layers)
     {
-        if (formSent.<%=CommentConstants.FILE_CHECKBOXES%>.checked)
-        {
-            pageChecked = true;
-        }
+        theForm = document.contentLayer.document.deleteForm;
     }
     else
-    { 
-        for (var i = 0;
-             i < formSent.<%=CommentConstants.FILE_CHECKBOXES%>.length; i++)
-        {
-            if (formSent.<%=CommentConstants.FILE_CHECKBOXES%>[i].checked == true)
-            {
-                pageChecked = true;
-                break;
-            }
-        }
-    }
-
-    if (pageChecked)
     {
-        return confirm("<%=lb_duuudeDoYouWantToDoThis%>");
-        
+        theForm = document.all.deleteForm;
     }
-
-    return(true);
+	 
+   	theForm.action = "<%=url_delete%>"+"&<%=CommentConstants.FILE_CHECKBOXES%>="+value;
+    theForm.submit();
 }
 
 function compareTrs(o1, o2)
@@ -444,6 +483,19 @@ for (var i=0; i < trs.length; i++)
 }
 
 obody.appendChild(of);
+}
+
+function checkBoxValidate(cb){
+	for (j = 0; j < 3; j++){
+		if (eval("document.uploadForm.ckbox[" + j + "].checked") == true)
+		{
+			document.uploadForm.ckbox[j].checked = false;
+			if (j == cb)
+			{
+				document.uploadForm.ckbox[j].checked = true;
+	        }
+      }
+   }
 }
 
 </SCRIPT>
@@ -519,7 +571,16 @@ if (commentReferences != null && commentReferences.size() > 0)
 		  <TD style="width:355px">
 		    <%=lb_fileName%>
 		  </TD>
+		  <TD><%=bundle.getString("lb_general")%></TD>
 		  <TD><%=bundle.getString("lb_restrict")%></TD>
+		  <%
+			if(displaySupportRadio)
+			{
+			%>
+			  <TD><%=bundle.getString("lb_support_file")%></TD>
+			<%
+			}
+		  %>
 		  <TD><%=bundle.getString("lb_remove")%></TD>
 		</TR>
 	</thead>
@@ -554,25 +615,47 @@ if (commentReferences != null && commentReferences.size() > 0)
 			out.print(EditUtil.encodeHtmlEntities(file.getFilename()));
 			out.print("</A>");
 			out.println("</TD>");
-
-			// Col 2: Restrict check box.
+			
+			// Col 2: General File check box.
+	        String checkedGF = "";
+            if (file.getFileAccess().equals(WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS)) 
+            {
+            	checkedGF = "checked";
+            }
+			out.print("<TD align=\"center\">");
+			out.print("<input name=\"fileType"+i+"\" value=\"" + file.getAbsolutePath().hashCode()+"_General" + "\" type=\"radio\" " + checkedGF + "/> ");
+			out.println("</TD>");
+			
+			// Col 3: Restrict check box.
             String checked = "";
             if (file.getFileAccess().equals(WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS)) 
             {
                 checked = "checked";
             }
 			out.print("<TD align=\"center\">");
-			out.print("<input name=\"restrict\" value=\"" + file.getAbsolutePath().hashCode() + "\" type=\"checkbox\" " + checked + "/> ");
+			out.print("<input name=\"fileType"+i+"\" value=\"" + file.getAbsolutePath().hashCode()+"_Restrict" + "\" type=\"radio\" " + checked + "/> ");
 			out.println("</TD>");
 			
-	        // Col 3: Remove checkbox
-            out.print("<TD align=\"center\"><INPUT TYPE='checkbox' CLASS='standardText' ");
-            out.print("NAME='");
-            out.print(CommentConstants.FILE_CHECKBOXES);
-            out.print("' VALUE='");
+			if(displaySupportRadio)
+			{
+				// Col 4: Support File check box.
+		        String checkedJSF = "";
+	            if (file.getFileAccess().equals(WebAppConstants.COMMENT_REFERENCE_SUPPORT_FILE_ACCESS)) 
+	            {
+	            	checkedJSF = "checked";
+	            }
+				out.print("<TD align=\"center\">");
+				out.print("<input name=\"fileType"+i+"\" value=\"" + file.getAbsolutePath().hashCode()+"_Support" + "\" type=\"radio\" " + checkedJSF + "/> ");
+				out.println("</TD>");
+			}
+			
+            
+            out.print("<TD align=\"center\">");
+            out.print("<img src=\"/globalsight/images/createjob/delete.png\" style=\"cursor:pointer;padding-top:4px;\" onclick=\"removeFile(");
             out.print(i);
-            out.print("'>");
-            out.println("</INPUT></TD>");
+            out.print(")\">");
+            out.print("</TD>");
+           
 
 			out.println("</TR>");
 		}
@@ -618,8 +701,19 @@ sort();
 <BR>
       <INPUT TYPE="file" SIZE="60" NAME="filename">
       <BR>
-        <INPUT TYPE="CHECKBOX" NAME="restricted" VALUE="true" > <%=bundle.getString("lb_restrict_access")%>
-      &nbsp;&nbsp;&nbsp;<INPUT TYPE="submit" VALUE="<%=lb_upload%>" name="idSubmit">
+      <input type="radio" name="ckbox" value="0"  checked><%=lb_general %>
+      <input type="radio" name="ckbox" value="1"><%=bundle.getString("lb_restrict_access")%>
+      <%
+      	if(displaySupportRadio)
+      	{
+  		%>
+     	 <input type="radio" name="ckbox" value="2"><%=lb_include_as_job_support_file %>
+  		<%
+      	}
+      %>
+      
+      <BR>
+      <INPUT TYPE="submit" VALUE="<%=lb_upload%>" name="idSubmit">
       <BR>
       <BR>
       <INPUT TYPE="BUTTON" NAME="<%=lb_cancel%>" VALUE="<%=lb_cancel%>" 

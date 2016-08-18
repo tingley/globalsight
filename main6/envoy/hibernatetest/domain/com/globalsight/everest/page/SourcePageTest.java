@@ -93,7 +93,6 @@ public class SourcePageTest extends TestCase
         impl.setWordCount(1);
         impl.setDataSourceType("s");
         impl.setPreviousPageId(1);
-        impl.setCuvId(new Long(12));
         impl.setOverrideWordCount(new Integer(1));
         impl.setPrevStateBeforeUpdate("LOCALIZED");
         impl.setCompanyId("1");

@@ -18,9 +18,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ScorecardScore.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Category.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/FMFilter.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/CorpusContext.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/CorpusDoc.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/CorpusDocGroup.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Cost.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CostByWordCount.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Currency.hbm.xml" />

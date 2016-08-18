@@ -57,8 +57,7 @@ public class DynamicLeveragedSegment implements Serializable, SidComparable
     // match category defined above
     private int m_matchCategory;
 
-    // matched segment TUV id (for mostly debug purpose and for corpus
-    // TM retrieval when the match is from Gold TM)
+    // matched segment TUV id
     private long m_matchedTuvId;
     private int m_orderNum;
     private String mtName = null;

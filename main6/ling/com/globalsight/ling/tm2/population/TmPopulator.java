@@ -41,7 +41,6 @@ import com.globalsight.ling.tm2.SegmentTmInfo;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.indexer.TmSegmentIndexer;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.persistence.DbUtil;
@@ -78,16 +77,13 @@ public class TmPopulator
      * @param p_options
      *            Tm options. It has information which Project TM segments
      *            should be saved and etc.
-     * @return mappings of translation_unit_variant id and project_tm_tuv_t id
-     *         of this page
      */
-    public TuvMappingHolder populatePageForAllLocales(SourcePage p_page,
-            LeverageOptions p_options, long p_jobId)
+    public void populatePageForAllLocales(SourcePage p_page, LeverageOptions p_options, long p_jobId)
             throws LingManagerException
     {
         Set<GlobalSightLocale> targetLocales = p_options.getLeveragingLocales()
                 .getAllTargetLocales();
-        return populatePage(p_page, p_options, targetLocales, p_jobId);
+        populatePage(p_page, p_options, targetLocales, p_jobId);
     }
 
     /**
@@ -102,16 +98,14 @@ public class TmPopulator
      *            should be saved and etc.
      * @param p_locale
      *            target locale
-     * @return mappings of translation_unit_variant id and project_tm_tuv_t id
-     *         of this page
      */
-    public TuvMappingHolder populatePageByLocale(SourcePage p_page,
+    public void populatePageByLocale(SourcePage p_page,
             LeverageOptions p_options, GlobalSightLocale p_locale, long p_jobId)
             throws LingManagerException
     {
         Set<GlobalSightLocale> targetLocales = new HashSet<GlobalSightLocale>();
         targetLocales.add(p_locale);
-        return populatePage(p_page, p_options, targetLocales, p_jobId);
+        populatePage(p_page, p_options, targetLocales, p_jobId);
     }
 
     /**
@@ -125,14 +119,10 @@ public class TmPopulator
      *            should be saved and etc.
      * @param p_targetLocales
      *            Set of target locales (GlobalSightLocale)
-     * @return mappings of translation_unit_variant id and project_tm_tuv_t id
-     *         of this page
      */
-    private TuvMappingHolder populatePage(SourcePage p_page,
-            LeverageOptions p_options, Set<GlobalSightLocale> p_targetLocales,
-            long p_jobId) throws LingManagerException
+    private void populatePage(SourcePage p_page, LeverageOptions p_options,
+            Set<GlobalSightLocale> p_targetLocales, long p_jobId) throws LingManagerException
     {
-        TuvMappingHolder mappingHolder = null;
         Connection conn = null;
         try
         {
@@ -169,10 +159,9 @@ public class TmPopulator
                     p_options.getSaveTmId(), true);
             SegmentTmInfo segtmInfo = tm.getSegmentTmInfo();
             segtmInfo.setJob(job);
-			mappingHolder = segtmInfo.saveToSegmentTm(
-					pageJobData.getTusToSaveToSegmentTm(p_options,
-							p_targetLocales, p_page), sourceLocale, tm,
-					p_targetLocales, TmCoreManager.SYNC_MERGE, false);
+            segtmInfo.saveToSegmentTm(
+                    pageJobData.getTusToSaveToSegmentTm(p_options, p_targetLocales, p_page),
+                    sourceLocale, tm, p_targetLocales, TmCoreManager.SYNC_MERGE, false);
         }
         catch (LingManagerException le)
         {
@@ -186,8 +175,6 @@ public class TmPopulator
         {
             DbUtil.silentReturnConnection(conn);
         }
-
-        return mappingHolder;
     }
 
 	private void populateIntoTermbase(PageJobData pageJobData, Job job,
@@ -198,36 +185,30 @@ public class TmPopulator
         {
             if (job.getFileProfile().getTerminologyApproval() == 1)
             {
-                String termbaseName = p_page.getRequest().getL10nProfile()
-                        .getProject().getTermbaseName();
-                Termbase tb = TermbaseList
-                        .get(String.valueOf(p_page.getCompanyId()),
-                                termbaseName);
+                String termbaseName = p_page.getRequest().getL10nProfile().getProject()
+                        .getTermbaseName();
+                Termbase tb = TermbaseList.get(String.valueOf(p_page.getCompanyId()), termbaseName);
                 if (tb != null)
-				{
-					TermbaseManager tbm = new TermbaseManager();
-					Collection p_segmentsToSave = pageJobData
-							.getTusToSaveToSegmentTm(p_options,
-									p_targetLocales, p_page);
-					Iterator it = p_segmentsToSave.iterator();
-					while (it.hasNext())
-					{
-						// separate subflows out of the main text and save
-						// them as
-						// independent segments
-						BaseTmTu baseTu = (BaseTmTu) it.next();
-						List baseTuvs = baseTu.getTuvs();
-						tbm.batchAddTuvsAsNew(tb.getId(), baseTuvs, p_page
-								.getRequest().getL10nProfile().getProject()
-								.getProjectManager().getUserId());
-					}
-				}
+                {
+                    TermbaseManager tbm = new TermbaseManager();
+                    Collection p_segmentsToSave = pageJobData.getTusToSaveToSegmentTm(p_options,
+                            p_targetLocales, p_page);
+                    Iterator it = p_segmentsToSave.iterator();
+                    while (it.hasNext())
+                    {
+                        // separate subflows out of the main text and save
+                        // them as independent segments
+                        BaseTmTu baseTu = (BaseTmTu) it.next();
+                        List baseTuvs = baseTu.getTuvs();
+                        tbm.batchAddTuvsAsNew(tb.getId(), baseTuvs, p_page.getRequest()
+                                .getL10nProfile().getProject().getProjectManager().getUserId());
+                    }
+                }
             }
         }
         catch (Exception e)
         {
-            LOGGER.error("Terminology populating error: "
-                    + e.getMessage());
+            LOGGER.error("Terminology populating error: " + e.getMessage());
         }
     }
 
@@ -244,29 +225,26 @@ public class TmPopulator
      *            one of the "SYNC" constants, to overwrite existing TUs, merge
      *            existing TUs with new TUs, or to discard new TUs if they
      *            already exist in the TM.
-     * @return TuvMappingHolder. m_tuvId and m_tuId values are arbitrary.
+     *
      */
-    public TuvMappingHolder saveSegmentToSegmentTm(
-            Collection<SegmentTmTu> p_segmentsToSave, Tm p_tm, int p_mode)
+    public void saveSegmentToSegmentTm(Collection<SegmentTmTu> p_segmentsToSave, Tm p_tm, int p_mode)
             throws LingManagerException
     {
         String sourceTmName = null;
         boolean isFromTmImport = false;
-        return saveSegmentToSegmentTm(p_segmentsToSave, p_tm, p_mode,
-                sourceTmName, isFromTmImport);
+        saveSegmentToSegmentTm(p_segmentsToSave, p_tm, p_mode, sourceTmName, isFromTmImport);
     }
 
     // if "p_sourceTmName" is valid, it should be from tm import. 
-    public TuvMappingHolder saveSegmentToSegmentTm(
+    public void saveSegmentToSegmentTm(
             Collection<SegmentTmTu> p_segmentsToSave, Tm p_tm, int p_mode,
             String p_sourceTmName) throws LingManagerException
     {
         boolean isFromTmImport = true;
-        return saveSegmentToSegmentTm(p_segmentsToSave, p_tm, p_mode,
-                p_sourceTmName, isFromTmImport);
+        saveSegmentToSegmentTm(p_segmentsToSave, p_tm, p_mode, p_sourceTmName, isFromTmImport);
     }
 
-    private TuvMappingHolder saveSegmentToSegmentTm(
+    private void saveSegmentToSegmentTm(
             Collection<SegmentTmTu> p_segmentsToSave, Tm p_tm, int p_mode,
             String p_sourceTmName, boolean isFromTmImport)
             throws LingManagerException
@@ -292,7 +270,6 @@ public class TmPopulator
             segmentTuCollector.addTu(tu);
         }
 
-        TuvMappingHolder mappingHolder = null;
         try
         {
             Iterator<GlobalSightLocale> itSourceLocale = segmentTuCollector
@@ -306,9 +283,8 @@ public class TmPopulator
                         .getTargetLocales(sourceLocale);
 
                 // call populateSegmentTm per source locale
-                mappingHolder = p_tm.getSegmentTmInfo().saveToSegmentTm(tus,
-                        sourceLocale, p_tm, targetLocales, p_mode,
-                        isFromTmImport);
+                p_tm.getSegmentTmInfo().saveToSegmentTm(tus, sourceLocale, p_tm, targetLocales,
+                        p_mode, isFromTmImport);
             }
         }
         catch (LingManagerException le)
@@ -319,8 +295,6 @@ public class TmPopulator
         {
             throw new LingManagerException(e);
         }
-
-        return mappingHolder;
     }
 
     /**
@@ -547,24 +521,6 @@ public class TmPopulator
         }
         pageTmData.setTmId(tmId);
         return pageTmData;
-    }
-
-    private Set getAllTargetLocales(BaseTmTu p_tu,
-            GlobalSightLocale p_sourceLocale)
-    {
-        HashSet targetLocales = null;
-        if (p_tu != null)
-        {
-            targetLocales = new HashSet(p_tu.getAllTuvLocales());
-            // remove source locale
-            targetLocales.remove(p_sourceLocale);
-        }
-        else
-        {
-            targetLocales = new HashSet();
-        }
-
-        return targetLocales;
     }
 
     private void updateSegmentTmTuvsSource(long p_tmId, Collection p_tuvs,

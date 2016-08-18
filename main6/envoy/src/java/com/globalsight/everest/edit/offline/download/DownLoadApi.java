@@ -80,6 +80,7 @@ import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -2453,9 +2454,19 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             while (it.hasNext())
             {
                 GlossaryFile gf = (GlossaryFile) it.next();
-                File fromFile = new File(
-                        DownloadHelper
-                                .getSupportFileAbsolutePath(gf, companyId));
+                File fromFile = null;
+                if (gf.getCommentId() != -1)
+                {
+                    String path = AmbFileStoragePathUtils.getCommentReferenceDir() + File.separator
+                            + gf.getCommentId() + File.separator
+                            + WebAppConstants.COMMENT_REFERENCE_SUPPORT_FILE_ACCESS
+                            + File.separator + gf.getFilename();
+                    fromFile = new File(path);
+                }
+                else
+                {
+                    fromFile = new File(DownloadHelper.getSupportFileAbsolutePath(gf, companyId));
+                }
                 String filepath = fromFile.getPath();
 
                 if (addedFile.contains(filepath))

@@ -44,8 +44,6 @@
 		</component>
 		<property name="companyId" column="COMPANY_ID" length="20"
 			type="long" not-null="true" unique="false" />
-		<property name="cuvId" column="CUV_ID" type="long" not-null="false"
-			unique="false" />
 		<property name="dataSourceType" length="20" column="DATA_SOURCE_TYPE"
 			type="string" not-null="false" unique="false" />
 		<property name="externalPageId" length="260" column="EXTERNAL_PAGE_ID"

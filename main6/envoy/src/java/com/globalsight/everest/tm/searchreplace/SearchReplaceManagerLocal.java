@@ -1,18 +1,18 @@
 /**
- *  Copyright 2009 Welocalize, Inc. 
- *  
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  
- *  You may obtain a copy of the License at 
- *  http://www.apache.org/licenses/LICENSE-2.0
- *  
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *  
+ * Copyright 2009 Welocalize, Inc.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.
+ * 
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ * 
  */
 package com.globalsight.everest.tm.searchreplace;
 
@@ -57,447 +57,405 @@ import com.globalsight.util.gxml.GxmlFragmentReaderPool;
 import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.util.progress.ProcessStatus;
 
-public class SearchReplaceManagerLocal implements SearchReplaceManager,
-		TmManagerExceptionMessages, Serializable
+public class SearchReplaceManagerLocal implements SearchReplaceManager, TmManagerExceptionMessages,
+        Serializable
 {
-	static private final Logger CATEGORY = Logger
-			.getLogger(SearchReplaceManagerLocal.class);
+    private static final long serialVersionUID = 259482289706505988L;
 
-	private ArrayList<Tm> m_tms; // list of Tm objects
+    static private final Logger CATEGORY = Logger.getLogger(SearchReplaceManagerLocal.class);
 
-	private SessionInfo m_session;
+    private ArrayList<Tm> m_tms; // list of Tm objects
 
-	private static int searchCounter = 0;
+    private SessionInfo m_session;
 
-	private static int replaceCounter = 0;
+    private static int searchCounter = 0;
 
-	private ProcessStatus m_listener;
+    private ProcessStatus m_listener;
 
-	/** Read 10 TUs at a time. */
-	private int m_pageSize = 10;
+    /** Read 10 TUs at a time. */
+    private int m_pageSize = 10;
 
-	//
-	// Constructor
-	//
+    //
+    // Constructor
+    //
 
-	public void attachListener(IProcessStatusListener p_listener)
-	{
-		m_listener = (ProcessStatus) p_listener;
-	}
+    public void attachListener(IProcessStatusListener p_listener)
+    {
+        m_listener = (ProcessStatus) p_listener;
+    }
 
-	public void detachListener(IProcessStatusListener p_listener)
-	{
-		m_listener = null;
-	}
+    public void detachListener(IProcessStatusListener p_listener)
+    {
+        m_listener = null;
+    }
 
-	public SearchReplaceManagerLocal(ArrayList<Tm> p_tms, SessionInfo p_session)
-	{
-		m_tms = p_tms;
-		m_session = p_session;
-	}
+    public SearchReplaceManagerLocal(ArrayList<Tm> p_tms, SessionInfo p_session)
+    {
+        m_tms = p_tms;
+        m_session = p_session;
+    }
 
-	//
-	// Interface Methods
-	//
+    //
+    // Interface Methods
+    //
 
-	public void search(String p_queryString, GlobalSightLocale p_sourceLocale,
-			GlobalSightLocale p_targetLocale, boolean p_caseSensitiveSearch, 
-			Map<Long, Integer> mapOfTmIdIndex)
-			throws TmManagerException, RemoteException
-	{
-		doSearch(p_queryString, p_sourceLocale, p_targetLocale,
-				p_caseSensitiveSearch, mapOfTmIdIndex);
-	}
+    public void search(String p_queryString, GlobalSightLocale p_sourceLocale,
+            GlobalSightLocale p_targetLocale, boolean p_caseSensitiveSearch,
+            Map<Long, Integer> mapOfTmIdIndex) throws TmManagerException, RemoteException
+    {
+        doSearch(p_queryString, p_sourceLocale, p_targetLocale, p_caseSensitiveSearch,
+                mapOfTmIdIndex);
+    }
 
-	private void doSearch(final String p_queryString,
-			final GlobalSightLocale p_sourceLocale,
-			final GlobalSightLocale p_targetLocale,
-			final boolean p_caseSensitiveSearch, 
-			final Map<Long, Integer> mapOfTmIdIndex)
-	{
-		Runnable runnable = new Runnable()
-		{
-			public void run()
-			{
-				try
-				{
-					runSearch(p_queryString, p_sourceLocale, p_targetLocale,
-							p_caseSensitiveSearch, mapOfTmIdIndex);
-				}
-				catch (Exception e)
-				{
-					CATEGORY.error("SearchReplaceManagerLocal::doSearch", e);
-				}
-			}
-		};
+    private void doSearch(final String p_queryString, final GlobalSightLocale p_sourceLocale,
+            final GlobalSightLocale p_targetLocale, final boolean p_caseSensitiveSearch,
+            final Map<Long, Integer> mapOfTmIdIndex)
+    {
+        Runnable runnable = new Runnable()
+        {
+            public void run()
+            {
+                try
+                {
+                    runSearch(p_queryString, p_sourceLocale, p_targetLocale, p_caseSensitiveSearch,
+                            mapOfTmIdIndex);
+                }
+                catch (Exception e)
+                {
+                    CATEGORY.error("SearchReplaceManagerLocal::doSearch", e);
+                }
+            }
+        };
 
-		Thread t = new MultiCompanySupportedThread(runnable);
-		t.setName("TMSEARCHER" + String.valueOf(searchCounter++));
-		t.start();
-	}
+        Thread t = new MultiCompanySupportedThread(runnable);
+        t.setName("TMSEARCHER" + String.valueOf(searchCounter++));
+        t.start();
+    }
 
-	private void runSearch(String p_queryString,
-			GlobalSightLocale p_sourceLocale, GlobalSightLocale p_targetLocale,
-			boolean p_caseSensitiveSearch, Map<Long, Integer> mapOfTmIdIndex) throws TmManagerException,
-			RemoteException
-	{
-		ArrayList targetLocales = new ArrayList();
-		targetLocales.add(p_targetLocale);
+    private void runSearch(String p_queryString, GlobalSightLocale p_sourceLocale,
+            GlobalSightLocale p_targetLocale, boolean p_caseSensitiveSearch,
+            Map<Long, Integer> mapOfTmIdIndex) throws TmManagerException, RemoteException
+    {
+        ArrayList targetLocales = new ArrayList();
+        targetLocales.add(p_targetLocale);
 
-		TmConcordanceResult result = null;
+        TmConcordanceResult result = null;
 
-		Connection con = null;
+        Connection con = null;
 
-		try
-		{
-			speak(25, 25, "lb_preparation_done", "Preparation Done", null);
+        try
+        {
+            speak(25, 25, "lb_preparation_done", "Preparation Done", null);
 
-			TmCoreManager mgr = LingServerProxy.getTmCoreManager();
-			List<TMidTUid> queryResult = mgr.tmConcordanceQuery(m_tms, 
-			                p_queryString, p_sourceLocale, p_targetLocale, 
-			                convertMap(mapOfTmIdIndex));
-
-	        speak(50, 50, "lb_query_done", "Query Done", null);
-
-            result = new TmConcordanceResult(p_sourceLocale,
-                    targetLocales, new TuQueryResult(queryResult, m_pageSize));
-	        
-			speak(75, 75, "lb_results_partially_retrieved", "Results Partially Retrieved", null);
-			Map<Long,String> tmIdName = generateMapForIdName(m_tms);
-			result.setMapIdName(tmIdName);
-			m_listener.setResults(result);
-			speak(100, 100, "lb_process_done", "Done", null);
-		}
-		catch (Exception e)
-		{
-			try
-			{
-			    e.printStackTrace();
-				speak(100, 100, "lb_error_in_search",  "Error in Search Operation", e);
-			}
-			catch (IOException ie)
-			{
-				throw new TmManagerException(MSG_FAILED_TO_SEARCH, null, ie);
-			}
-		}
-		finally
-		{
-			SqlUtil.fireConnection(con);
-		}
-	}
-
-	private Map<Tm, Integer> convertMap(Map<Long, Integer> orig) {
-	    if (orig == null) {
-	        return null;
-	    }
-	    Map<Tm, Integer> m = new HashMap<Tm, Integer>();
-        for (Map.Entry<Long, Integer> e : orig.entrySet()) {
-	        // Gross
-	        for (Tm tm : m_tms) {
-	            if (tm.getId() == e.getKey()) {
-	                m.put(tm, e.getValue());
-	                break;
-	            }
-	        }
-	    }
-        return m;
-	}
-	
-	private Map<Long, String> generateMapForIdName(ArrayList m_tms) {
-		Map<Long, String> map = new HashMap<Long, String>();
-		for(int i = 0; i < m_tms.size(); i++)
-		{
-			ProjectTM tm = (ProjectTM) m_tms.get(i);
-			map.put(tm.getId(), tm.getName());
-		}
-		return map;
-	}
-
-	/**
-	 * Remove this after making appropriate changes to
-	 * BrowseCorpusMainHandler.java
-	 * 
-	 * This appears to be no longer used?
-	 */
-	@Deprecated
-	public TmConcordanceResult searchIt(String p_queryString,
-			GlobalSightLocale p_sourceLocale, GlobalSightLocale p_targetLocale,
-			boolean p_caseSensitiveSearch) throws TmManagerException,
-			RemoteException
-	{
-		ArrayList targetLocales = new ArrayList();
-		targetLocales.add(p_targetLocale);
-
-		TmConcordanceResult result = null;
-		
-
-		Connection con = null;
-
-		try
-		{
-		    TmCoreManager mgr = LingServerProxy.getTmCoreManager();
-            List<TMidTUid> queryResult = mgr.tmConcordanceQuery(m_tms, 
-                            p_queryString, p_sourceLocale, p_targetLocale, 
-                            null);
+            TmCoreManager mgr = LingServerProxy.getTmCoreManager();
+            List<TMidTUid> queryResult = mgr.tmConcordanceQuery(m_tms, p_queryString,
+                    p_sourceLocale, p_targetLocale, convertMap(mapOfTmIdIndex));
 
             speak(50, 50, "lb_query_done", "Query Done", null);
 
-            result = new TmConcordanceResult(p_sourceLocale,
-                    targetLocales, new TuQueryResult(queryResult, m_pageSize));
-		}
-		catch (Exception e)
-		{
-			throw new TmManagerException(MSG_FAILED_TO_SEARCH, null, e);
-		}
-		finally
-		{
-			SqlUtil.fireConnection(con);
-		}
-		return result;
-	}
+            result = new TmConcordanceResult(p_sourceLocale, targetLocales, new TuQueryResult(
+                    queryResult, m_pageSize));
 
-	public ArrayList replace(String p_old, String p_new, ArrayList p_tuvs,
-			boolean p_caseSensitiveSearch) throws GeneralException,
-			RemoteException
-	{
-		ArrayList notReplaced = new ArrayList();
-		ArrayList replaced = new ArrayList(p_tuvs.size());
+            speak(75, 75, "lb_results_partially_retrieved", "Results Partially Retrieved", null);
+            Map<Long, String> tmIdName = generateMapForIdName(m_tms);
+            result.setMapIdName(tmIdName);
+            m_listener.setResults(result);
+            speak(100, 100, "lb_process_done", "Done", null);
+        }
+        catch (Exception e)
+        {
+            try
+            {
+                e.printStackTrace();
+                speak(100, 100, "lb_error_in_search", "Error in Search Operation", e);
+            }
+            catch (IOException ie)
+            {
+                throw new TmManagerException(MSG_FAILED_TO_SEARCH, null, ie);
+            }
+        }
+        finally
+        {
+            SqlUtil.fireConnection(con);
+        }
+    }
 
-		// all TUVs in p_tuvs should be the same locale
-		Locale locale = null;
-		if (p_tuvs.size() > 0)
-		{
-			locale = ((SegmentTmTuv) p_tuvs.get(0)).getLocale().getLocale();
+    private Map<Tm, Integer> convertMap(Map<Long, Integer> orig)
+    {
+        if (orig == null)
+        {
+            return null;
+        }
+        Map<Tm, Integer> m = new HashMap<Tm, Integer>();
+        for (Map.Entry<Long, Integer> e : orig.entrySet())
+        {
+            // Gross
+            for (Tm tm : m_tms)
+            {
+                if (tm.getId() == e.getKey())
+                {
+                    m.put(tm, e.getValue());
+                    break;
+                }
+            }
+        }
+        return m;
+    }
 
-			GxmlElementSubstringReplace substringReplacer = new GxmlElementSubstringReplace(
-					p_old, p_new, p_caseSensitiveSearch, locale);
+    private Map<Long, String> generateMapForIdName(ArrayList m_tms)
+    {
+        Map<Long, String> map = new HashMap<Long, String>();
+        for (int i = 0; i < m_tms.size(); i++)
+        {
+            ProjectTM tm = (ProjectTM) m_tms.get(i);
+            map.put(tm.getId(), tm.getName());
+        }
+        return map;
+    }
 
-			for (int i = 0, max = p_tuvs.size(); i < max; i++)
-			{
-				SegmentTmTuv tuv = (SegmentTmTuv) p_tuvs.get(i);
+    public ArrayList replace(String p_old, String p_new, ArrayList p_tuvs,
+            boolean p_caseSensitiveSearch) throws GeneralException, RemoteException
+    {
+        ArrayList notReplaced = new ArrayList();
+        ArrayList replaced = new ArrayList(p_tuvs.size());
 
-				if (replaceSubstring(tuv, substringReplacer))
-				{
-					replaced.add(tuv);
-				}
-				else
-				{
-					notReplaced.add(tuv);
-				}
-			}
+        // all TUVs in p_tuvs should be the same locale
+        Locale locale = null;
+        if (p_tuvs.size() > 0)
+        {
+            locale = ((SegmentTmTuv) p_tuvs.get(0)).getLocale().getLocale();
 
-			// save Tuvs
-			updateTuvs(replaced);
-		}
-		return replaced;
-	}
+            GxmlElementSubstringReplace substringReplacer = new GxmlElementSubstringReplace(p_old,
+                    p_new, p_caseSensitiveSearch, locale);
 
-	public ArrayList replace(String p_old, String p_new, ArrayList p_tuvs,
-			boolean p_caseSensitiveSearch, String p_userId)
-			throws GeneralException, RemoteException
-	{
-		ArrayList notReplaced = new ArrayList();
-		ArrayList replaced = new ArrayList(p_tuvs.size());
+            for (int i = 0, max = p_tuvs.size(); i < max; i++)
+            {
+                SegmentTmTuv tuv = (SegmentTmTuv) p_tuvs.get(i);
 
-		// all TUVs in p_tuvs should be the same locale
-		Locale locale = null;
-		if (p_tuvs.size() > 0)
-		{
-			locale = ((SegmentTmTuv) p_tuvs.get(0)).getLocale().getLocale();
+                if (replaceSubstring(tuv, substringReplacer))
+                {
+                    replaced.add(tuv);
+                }
+                else
+                {
+                    notReplaced.add(tuv);
+                }
+            }
 
-			GxmlElementSubstringReplace substringReplacer = new GxmlElementSubstringReplace(
-					p_old, p_new, p_caseSensitiveSearch, locale);
+            // save Tuvs
+            updateTuvs(replaced);
+        }
+        return replaced;
+    }
 
-			for (int i = 0, max = p_tuvs.size(); i < max; i++)
-			{
-				SegmentTmTuv tuv = (SegmentTmTuv) p_tuvs.get(i);
+    public ArrayList replace(String p_old, String p_new, ArrayList p_tuvs,
+            boolean p_caseSensitiveSearch, String p_userId) throws GeneralException,
+            RemoteException
+    {
+        ArrayList notReplaced = new ArrayList();
+        ArrayList replaced = new ArrayList(p_tuvs.size());
 
-				if (replaceSubstring(tuv, substringReplacer))
-				{
-					tuv.setModifyUser(p_userId);
-					replaced.add(tuv);
-				}
-				else
-				{
-					notReplaced.add(tuv);
-				}
-			}
+        // all TUVs in p_tuvs should be the same locale
+        Locale locale = null;
+        if (p_tuvs.size() > 0)
+        {
+            locale = ((SegmentTmTuv) p_tuvs.get(0)).getLocale().getLocale();
 
-			// save Tuvs
-			updateTuvs(replaced);
-		}
-		return replaced;
-	}
+            GxmlElementSubstringReplace substringReplacer = new GxmlElementSubstringReplace(p_old,
+                    p_new, p_caseSensitiveSearch, locale);
 
-	//
-	// Private Methods
-	//
+            for (int i = 0, max = p_tuvs.size(); i < max; i++)
+            {
+                SegmentTmTuv tuv = (SegmentTmTuv) p_tuvs.get(i);
 
-	private boolean replaceSubstring(SegmentTmTuv p_tuv,
-			GxmlElementSubstringReplace p_substringReplacer)
-			throws GeneralException, RemoteException
-	{
-		String segment = p_tuv.getSegment();
+                if (replaceSubstring(tuv, substringReplacer))
+                {
+                    tuv.setModifyUser(p_userId);
+                    replaced.add(tuv);
+                }
+                else
+                {
+                    notReplaced.add(tuv);
+                }
+            }
 
-		GxmlElement gxmlElement = getGxmlElement(segment);
+            // save Tuvs
+            updateTuvs(replaced);
+        }
+        return replaced;
+    }
 
-		boolean replaced = p_substringReplacer.replace(gxmlElement);
+    //
+    // Private Methods
+    //
 
-		if (replaced)
-		{
-			p_tuv.setSegment(gxmlElement.toGxml());
+    private boolean replaceSubstring(SegmentTmTuv p_tuv,
+            GxmlElementSubstringReplace p_substringReplacer) throws GeneralException,
+            RemoteException
+    {
+        String segment = p_tuv.getSegment();
 
-			// update exact match key - TODO - maybe the backend tm2
-			// code will perform more (all) necessary updates
-			String exactMatchFormat = p_tuv.getExactMatchFormat();
-			p_tuv.setExactMatchKey(GlobalSightCrc.calculate(exactMatchFormat));
-		}
+        GxmlElement gxmlElement = getGxmlElement(segment);
 
-		return replaced;
-	}
+        boolean replaced = p_substringReplacer.replace(gxmlElement);
 
-	private GxmlElement getGxmlElement(String p_segment) throws GxmlException
-	{
-		GxmlElement result = null;
+        if (replaced)
+        {
+            p_tuv.setSegment(gxmlElement.toGxml());
 
-		GxmlFragmentReader reader = GxmlFragmentReaderPool.instance()
-				.getGxmlFragmentReader();
+            // update exact match key - TODO - maybe the backend tm2
+            // code will perform more (all) necessary updates
+            String exactMatchFormat = p_tuv.getExactMatchFormat();
+            p_tuv.setExactMatchKey(GlobalSightCrc.calculate(exactMatchFormat));
+        }
 
-		try
-		{
-			result = reader.parseFragment(p_segment);
-		}
-		finally
-		{
-			GxmlFragmentReaderPool.instance().freeGxmlFragmentReader(reader);
-		}
+        return replaced;
+    }
 
-		return result;
-	}
+    private GxmlElement getGxmlElement(String p_segment) throws GxmlException
+    {
+        GxmlElement result = null;
 
-	private void updateTuvs(ArrayList p_tuvs) throws GeneralException,
-			RemoteException
-	{
-		// group tuvs by tm id
-		HashMap tuvsByTmId = new HashMap();
-		for (Iterator it = p_tuvs.iterator(); it.hasNext();)
-		{
-			SegmentTmTuv tuv = (SegmentTmTuv) it.next();
-			Long tmId = new Long(tuv.getTu().getTmId());
-			ArrayList tuvList = (ArrayList) tuvsByTmId.get(tmId);
-			if (tuvList == null)
-			{
-				tuvList = new ArrayList();
-				tuvsByTmId.put(tmId, tuvList);
-			}
-			tuvList.add(tuv);
-		}
+        GxmlFragmentReader reader = GxmlFragmentReaderPool.instance().getGxmlFragmentReader();
 
-		ProjectHandler ph;
-        try {
+        try
+        {
+            result = reader.parseFragment(p_segment);
+        }
+        finally
+        {
+            GxmlFragmentReaderPool.instance().freeGxmlFragmentReader(reader);
+        }
+
+        return result;
+    }
+
+    private void updateTuvs(ArrayList p_tuvs) throws GeneralException, RemoteException
+    {
+        // group tuvs by tm id
+        HashMap tuvsByTmId = new HashMap();
+        for (Iterator it = p_tuvs.iterator(); it.hasNext();)
+        {
+            SegmentTmTuv tuv = (SegmentTmTuv) it.next();
+            Long tmId = new Long(tuv.getTu().getTmId());
+            ArrayList tuvList = (ArrayList) tuvsByTmId.get(tmId);
+            if (tuvList == null)
+            {
+                tuvList = new ArrayList();
+                tuvsByTmId.put(tmId, tuvList);
+            }
+            tuvList.add(tuv);
+        }
+
+        ProjectHandler ph;
+        try
+        {
             ph = ServerProxy.getProjectHandler();
-        } catch (NamingException e) {
+        }
+        catch (NamingException e)
+        {
             throw new GeneralException(e);
         }
 
-		// call update method per tm
-		for (Iterator it = tuvsByTmId.keySet().iterator(); it.hasNext();)
-		{
-			Long tmId = (Long) it.next();
-			ArrayList tuvList = (ArrayList) tuvsByTmId.get(tmId);
+        // call update method per tm
+        for (Iterator it = tuvsByTmId.keySet().iterator(); it.hasNext();)
+        {
+            Long tmId = (Long) it.next();
+            ArrayList tuvList = (ArrayList) tuvsByTmId.get(tmId);
 
-			LingServerProxy.getTmCoreManager().updateSegmentTmTuvs(
-					ph.getProjectTMById(tmId, true), tuvList);
-		}
-	}
+            LingServerProxy.getTmCoreManager().updateSegmentTmTuvs(ph.getProjectTMById(tmId, true),
+                    tuvList);
+        }
+    }
 
-	/** Notifies the event listener of the current import status. */
-	private void speak(int p_entryCount, int p_percentage, String p_key, String p_defaultMessage, Exception ex)
-			throws RemoteException, IOException
-	{
-		IProcessStatusListener listener = m_listener;
+    /** Notifies the event listener of the current import status. */
+    private void speak(int p_entryCount, int p_percentage, String p_key, String p_defaultMessage,
+            Exception ex) throws RemoteException, IOException
+    {
+        IProcessStatusListener listener = m_listener;
 
-		if (listener != null)
-		{
-		    String msg = m_listener.getStringFromBundle(p_key, p_defaultMessage);
-			listener.listen(p_entryCount, p_percentage, (ex == null)? msg : msg + ex.toString());
-		}
-		// try {
-		// System.out.println("SLEEPING!!!!: " + p_percentage);
-		// Thread.sleep(1000 * 5);
-		// }
-		// catch (Exception e){
-		// }
-	}
+        if (listener != null)
+        {
+            String msg = m_listener.getStringFromBundle(p_key, p_defaultMessage);
+            listener.listen(p_entryCount, p_percentage, (ex == null) ? msg : msg + ex.toString());
+        }
+        // try {
+        // System.out.println("SLEEPING!!!!: " + p_percentage);
+        // Thread.sleep(1000 * 5);
+        // }
+        // catch (Exception e){
+        // }
+    }
 
-	/**
-	 * Helper method to speak unconditionally so the web-client receives
-	 * continues updates and has a chance to "cancel" by throwing an
-	 * IOException.
-	 */
-	private void showProgress(int p_current, int p_expected, String p_key, String p_defaultMessage, Exception ex)
-			throws IOException
-	{
-		int percentComplete = (int) ((p_current * 1.0 / p_expected * 1.0) * 100.0);
+    /**
+     * Helper method to speak unconditionally so the web-client receives
+     * continues updates and has a chance to "cancel" by throwing an
+     * IOException.
+     */
+    private void showProgress(int p_current, int p_expected, String p_key, String p_defaultMessage,
+            Exception ex) throws IOException
+    {
+        int percentComplete = (int) ((p_current * 1.0 / p_expected * 1.0) * 100.0);
 
-		if (percentComplete > 100)
-		{
-			percentComplete = 100;
-		}
+        if (percentComplete > 100)
+        {
+            percentComplete = 100;
+        }
 
-		speak(p_current, percentComplete, p_key, p_defaultMessage, ex);
-	}
+        speak(p_current, percentComplete, p_key, p_defaultMessage, ex);
+    }
 
-	/**
-	 * Helper method to speak only when appropriate so the web-client is not
-	 * flooded with traffic but still believes search has not died.
-	 */
-	private void showStatus(int p_current, int p_expected, String p_key, String p_defaultMessage, Exception ex)
-			throws IOException
-	{
-		int percentComplete = (int) ((p_current * 1.0 / p_expected * 1.0) * 100.0);
+    /**
+     * Helper method to speak only when appropriate so the web-client is not
+     * flooded with traffic but still believes search has not died.
+     */
+    private void showStatus(int p_current, int p_expected, String p_key, String p_defaultMessage,
+            Exception ex) throws IOException
+    {
+        int percentComplete = (int) ((p_current * 1.0 / p_expected * 1.0) * 100.0);
 
-		if (percentComplete > 100)
-		{
-			percentComplete = 100;
-		}
+        if (percentComplete > 100)
+        {
+            percentComplete = 100;
+        }
 
-		// Decide when to update the user's display.
-		// With error message: always
-		//
-		// For 1- 10 expected entries, always update
-		// For 11- 100 expected entries, update after every 5th entry
-		// For 101-1000 expected entries, update after every 20th
-		// For more than 1000 entries, update after every 50th
-		//
-		if ((p_defaultMessage != null && p_defaultMessage.length() > 0)
-				|| (p_expected < 10)
-				|| (p_expected >= 10 && p_expected < 100 && (p_current % 5 == 0))
-				|| (p_expected >= 100 && p_expected < 1000 && (p_current % 20 == 0))
-				|| (p_expected >= 1000 && (p_current % 50 == 0)))
-		{
-			speak(p_current, percentComplete, p_key, p_defaultMessage, ex);
-		}
-	}
-	
-	class CorpusTusComparatorByTm implements Comparator<SegmentTmTu>, Serializable
-	{
+        // Decide when to update the user's display.
+        // With error message: always
+        //
+        // For 1- 10 expected entries, always update
+        // For 11- 100 expected entries, update after every 5th entry
+        // For 101-1000 expected entries, update after every 20th
+        // For more than 1000 entries, update after every 50th
+        //
+        if ((p_defaultMessage != null && p_defaultMessage.length() > 0) || (p_expected < 10)
+                || (p_expected >= 10 && p_expected < 100 && (p_current % 5 == 0))
+                || (p_expected >= 100 && p_expected < 1000 && (p_current % 20 == 0))
+                || (p_expected >= 1000 && (p_current % 50 == 0)))
+        {
+            speak(p_current, percentComplete, p_key, p_defaultMessage, ex);
+        }
+    }
+
+    class CorpusTusComparatorByTm implements Comparator<SegmentTmTu>, Serializable
+    {
         private static final long serialVersionUID = 1L;
         private Map<Long, Integer> mapOfTmIdIndex;
-		public CorpusTusComparatorByTm(Map<Long, Integer> mapOfTmIdIndex) 
-		{
-			this.mapOfTmIdIndex = mapOfTmIdIndex;
-		}
 
-		public int compare(SegmentTmTu tu1, SegmentTmTu tu2) {
-			if(mapOfTmIdIndex == null)
-			{
-				return 0;
-			}
-			int index1 = mapOfTmIdIndex.get(tu1.getTmId());
-			int index2 = mapOfTmIdIndex.get(tu2.getTmId());
-			return index1 - index2;
-		}
-		
-	}
+        public CorpusTusComparatorByTm(Map<Long, Integer> mapOfTmIdIndex)
+        {
+            this.mapOfTmIdIndex = mapOfTmIdIndex;
+        }
+
+        public int compare(SegmentTmTu tu1, SegmentTmTu tu2)
+        {
+            if (mapOfTmIdIndex == null)
+            {
+                return 0;
+            }
+            int index1 = mapOfTmIdIndex.get(tu1.getTmId());
+            int index2 = mapOfTmIdIndex.get(tu2.getTmId());
+            return index1 - index2;
+        }
+
+    }
 }

@@ -63,14 +63,6 @@ public class Permission
     static public final String ACTIVITY_TYPES_REMOVE = "activityTypes.remove";
     static public final String ACTIVITY_TYPES_EDIT = "activityTypes.edit";
     static public final String ACTIVITY_TYPES_NEW = "activityTypes.new";
-    // static public final String AUTOMATIC_ACTIONS_VIEW =
-    // "automaticActions.view";
-    // static public final String AUTOMATIC_ACTIONS_REMOVE =
-    // "automaticActions.remove";
-    // static public final String AUTOMATIC_ACTIONS_EDIT =
-    // "automaticActions.edit";
-    // static public final String AUTOMATIC_ACTIONS_NEW =
-    // "automaticActions.new";
     static public final String CURRENCY_VIEW = "currency.view";
     static public final String CURRENCY_EDIT = "currency.edit";
     static public final String CURRENCY_NEW = "currency.new";
@@ -115,7 +107,6 @@ public class Permission
     static public final String USERS_EXPORT = "users.export";
     static public final String USERS_PROJECT_MEMBERSHIP = "users.projects.membership";
     static public final String TM_VIEW = "tm.view";
-    static public final String TM_BROWSER = "tm.browser";
     static public final String TM_STATS = "tm.stats";
     static public final String TM_MAINTENANCE = "tm.maintenance";
     static public final String TM_IMPORT = "tm.import";
@@ -492,11 +483,6 @@ public class Permission
     static public final String BASE_TEXT_FILTER_INTERNAL_TEXT = "base.text.filter.internal.text";
     static public final String BASE_TEXT_FILTER_ESCAPING = "base.text.filter.escaping";
 
-//    static public final String GSEDITION_VIEW = "gsedition.view";
-//    static public final String GSEDITION_REMOVE = "gsedition.remove";
-//    static public final String GSEDITION_EDIT = "gsedition.edit";
-//    static public final String GSEDITION_NEW = "gsedition.new";
-
     static public final String ADD_SOURCE_FILES = "sourceFiles.add";
     static public final String DELETE_SOURCE_FILES = "sourceFiles.delete";
     static public final String EDIT_SOURCE_FILES = "sourceFiles.edit";
@@ -609,7 +595,6 @@ public class Permission
         added = addPermission(40, USERS_NEW) || added;
         added = addPermission(41, USERS_PROJECT_MEMBERSHIP) || added;
         added = addPermission(42, TM_VIEW) || added;
-        added = addPermission(43, TM_BROWSER) || added;
         added = addPermission(44, TM_STATS) || added;
         added = addPermission(45, TM_MAINTENANCE) || added;
         added = addPermission(46, TM_IMPORT) || added;
@@ -930,12 +915,6 @@ public class Permission
 
         added = addPermission(330, JOB_ATTRIBUTE_REPORT) || added;
 
-        // GSEdition
-//        added = addPermission(331, GSEDITION_VIEW) || added;
-//        added = addPermission(332, GSEDITION_REMOVE) || added;
-//        added = addPermission(333, GSEDITION_EDIT) || added;
-//        added = addPermission(334, GSEDITION_NEW) || added;
-
         added = addPermission(339, CVS_Servers) || added;
         added = addPermission(340, CVS_Servers_NEW) || added;
         added = addPermission(341, CVS_Servers_EDIT) || added;
@@ -1061,7 +1040,7 @@ public class Permission
 
         added = addPermission(427, ACCOUNT_NOTIFICATION_EDIT_EMAIL_TEMPLATE) || added;
         added = addPermission(428, REPORTS_MT_POST_EDIT_DISTANCE) || added;
-        
+
         //GBS-4312
         added = addPermission(429, LOCPROFILES_REPORT) || added;
 

@@ -26,8 +26,9 @@ public class Plug_8_7_0 implements Plug
     public DbUtil dbUtil = DbUtilFactory.getDbUtil();
     private String propertiesPath = ServerUtil.getPath() + "/jboss/server/standalone/deployments/globalsight.ear/lib/classes/properties/";
 
-    // use "blaise-translation-supplier-api-example-1.3.0-jar-with-dependencies.jar" to replace this one
-    private static final String BLAISE_OLD_JAR_FILE = "/jboss/server/standalone/deployments/globalsight.ear/lib/blaise-translation-supplier-api-example-1.2.1.jar";
+    // use "blaise-translation-supplier-api-example-1.3.1-jar-with-dependencies.jar" to replace this one
+    private static final String BLAISE_OLD_JAR_FILE1 = "/jboss/server/standalone/deployments/globalsight.ear/lib/blaise-translation-supplier-api-example-1.2.1.jar";
+    private static final String BLAISE_OLD_JAR_FILE2 = "/jboss/server/standalone/deployments/globalsight.ear/lib/blaise-translation-supplier-api-example-1.3.0-jar-with-dependencies.jar";
 
     @Override
 	public void run()
@@ -37,7 +38,8 @@ public class Plug_8_7_0 implements Plug
 		installGlobalSightService();
 
         // Delete old Blaise jar file
-        deleteFiles(ServerUtil.getPath() + BLAISE_OLD_JAR_FILE);
+        deleteFiles(ServerUtil.getPath() + BLAISE_OLD_JAR_FILE1);
+        deleteFiles(ServerUtil.getPath() + BLAISE_OLD_JAR_FILE2);
 	}
 
 	private void executeCreateIndexSql()

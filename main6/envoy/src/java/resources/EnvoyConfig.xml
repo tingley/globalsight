@@ -1647,14 +1647,6 @@
       </WebPage>
     </WebActivity>
   </WebModule>
-  <WebModule webModuleName="corpusTM">
-    <WebActivity webActivityName="viewCorpusMatches" clearSession="false">
-      <WebPage pageName="CTM1" isDefault="true" jspName="/envoy/tm/corpus/viewCorpusMatches.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.corpus.ViewCorpusMainHandler"></WebPage>
-    </WebActivity>
-    <WebActivity webActivityName="browseCorpus" clearSession="false">
-      <WebPage pageName="CTMB" isDefault="true" jspName="/envoy/tm/corpus/corpusBrowser.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.corpus.BrowseCorpusMainHandler"></WebPage>
-    </WebActivity>
-  </WebModule>
   <WebModule webModuleName="serviceware">
     <WebActivity webActivityName="swimport" clearSession="false">
       <WebPage pageName="SW1" isDefault="true" jspName="/envoy/serviceware/swimport.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.serviceware.ServiceWareMainHandler"></WebPage>
@@ -1850,7 +1842,7 @@
       <WebPage pageName="TE2" isDefault="false" jspName="/envoy/edit/online/te_target.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online.SegmentEditorPageHandler">
         <Description>Shows a text-version (whitespace-preserving) of the editor.</Description>
       </WebPage>
-      <WebPage pageName="CTMB" isDefault="true" jspName="/envoy/tm/corpus/corpusBrowser.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tm.corpus.BrowseCorpusMainHandler"></WebPage>
+
 	  <!-- in context review tool start -->
 	  <WebPage pageName="inctxrvED1" isDefault="false" jspName="/envoy/edit/inctxrv/me_main.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.inctxrv.EditorPageHandler">
         <PageLink linkName="self" destinationPageName="inctxrvED1"></PageLink>

@@ -536,7 +536,6 @@ var g_selectedTerm = null;
 var w_scwin = null;
 
 var w_ptags = null;
-var w_corpus = null;
 
 var o_textbox = null;
 var b_inited = false;
@@ -545,7 +544,6 @@ var tmp;
 
 var lb_copy_to_editor;
 var lb_insert_selection_in_editor;
-var lb_corpus_context;
 var isIE 		= window.navigator.userAgent.indexOf("MSIE")>0;
 var isFirefox 	= window.navigator.userAgent.indexOf("Firefox")>0;
 var b_canEditInSameWindow = true;
@@ -579,10 +577,6 @@ tmMatchContextMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_insert_select
                        copySelectionToEditor));
 tmp.mnemonic = "s";
 var copyTmMatchSelectionMni = tmp;
-<% if (b_corpus) { %>
-tmMatchContextMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_corpus_context") %>", showCorpus));
-tmp.mnemonic = "x";
-<% } %>
 
 // Segment Version Context Menu
 var tmVersionContextMenu = new Menu();
@@ -1221,18 +1215,6 @@ function doStageClick()
 }
 --%>
 
-function showCorpus()
-{
-   if (a_tmSegments.length == 0) return;
-
-   var tuvId = a_tmSegments[g_segmentIndex].tuvId;
-   var srcLocaleId = a_tmSegments[g_segmentIndex].srcLocaleId;
-   var url = "/globalsight/ControlServlet?activityName=viewCorpusMatches&tuvId=" +
-     tuvId + "&localeDbId=" + srcLocaleId;
-   w_corpus = window.open(url, "corpus",
-     'location=no,menubar=no,resizable=yes,scrollbars=yes,WIDTH=600,HEIGHT=400');
-}
-
 var sc_customDict = null;
 var sc_dict;
 var sc_uiLang;
@@ -1344,7 +1326,6 @@ function doOnBeforeUnload()
 {
   try { w_scwin.close(); } catch (ignore) {};
   try { w_ptags.close(); } catch (ignore) {}
-  try { w_corpus.close(); } catch (ignore) {}
 }
 
 var flag = false;
@@ -1755,30 +1736,16 @@ function contextForTMMatches(url, e)
     {
     	lb_copy_to_editor 				= "<%=bundle.getString("lb_copy_to_editor")%>";
     	lb_insert_selection_in_editor 	= "<%=bundle.getString("lb_insert_selection_in_editor")%>";
-    	lb_corpus_context 				= "<%=bundle.getString("lb_corpus_context")%>";
 
     	lb_insert_selection_in_editor = 
         	fontGray1+lb_insert_selection_in_editor+fontGray2;
-    	
-    	<% if (b_corpus) { %>
-    		popupoptions = [
-				new ContextItem(lb_copy_to_editor,
-							function(){ copyMatchToEditor();}),
-    	        new ContextItem(lb_insert_selection_in_editor,
-    	                  	function(){ copySelectionToEditor();}),
-    	        new ContextItem(lb_corpus_context,
-    	                    function(){ showCorpus();})
-    	    ];
-    	<% }else{ %>
-    		popupoptions = [
-    			new ContextItem(lb_copy_to_editor,
-    								function(){ copyMatchToEditor();}),
-    	    	new ContextItem(lb_insert_selection_in_editor,
-    	    	                  	function(){ copySelectionToEditor();})
-    	    ];
-        <% } %>
+
+   		popupoptions = [
+   			new ContextItem(lb_copy_to_editor, function(){ copyMatchToEditor();}),
+   	    	new ContextItem(lb_insert_selection_in_editor, function(){ copySelectionToEditor();})
+    	];
     }
-    
+
     ContextMenu.display(popupoptions, e); 
 }
 

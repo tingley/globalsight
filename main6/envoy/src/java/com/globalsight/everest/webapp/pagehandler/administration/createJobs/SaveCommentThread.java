@@ -38,6 +38,7 @@ public class SaveCommentThread extends Thread
     private String userId;
     private String attachmentName;
     private String baseStorageFolder;
+    private boolean includeJobSupportFile = false;
 
     public SaveCommentThread(String jobName, String comment,
             String attachmentName, String userId, String baseStorageFolder)
@@ -49,6 +50,16 @@ public class SaveCommentThread extends Thread
         this.baseStorageFolder = baseStorageFolder;
     }
 
+    public boolean isIncludeJobSupportFile()
+    {
+        return includeJobSupportFile;
+    }
+
+    public void setIncludeJobSupportFile(boolean includeJobSupportFile)
+    {
+        this.includeJobSupportFile = includeJobSupportFile;
+    }
+    
     public void run()
     {
         try
@@ -67,8 +78,16 @@ public class SaveCommentThread extends Thread
                         + File.separator + commentId;
                 File src = new File(baseStorageFolder + File.separator
                         + attachmentName);
-                File des = new File(folder + File.separator + "General"
-                        + File.separator + attachmentName);
+                String path = folder + File.separator;
+                if (includeJobSupportFile)
+                {
+                    path += "Support File" + File.separator + attachmentName;
+                }
+                else
+                {
+                    path += "General" + File.separator + attachmentName;
+                }
+                File des = new File(path);
                 FileUtil.copyFile(src, des);
                 FileUtil.deleteFile(new File(baseStorageFolder));
             }

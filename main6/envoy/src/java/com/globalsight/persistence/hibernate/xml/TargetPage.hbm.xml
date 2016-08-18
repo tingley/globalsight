@@ -102,8 +102,6 @@
 	        <property name="thresholdNoMatchWordCount" length="10"
 	            column="THRESHOLD_NO_MATCH_WORD_COUNT" type="int" not-null="false" />
         </component>
-        <property name="cuvId" length="22" column="CUV_ID" type="long"
-            not-null="false" unique="false" />
         <property name="errorAsString" length="4000"
             column="EXCEPTION_XML" type="string" not-null="false"
             unique="false" />

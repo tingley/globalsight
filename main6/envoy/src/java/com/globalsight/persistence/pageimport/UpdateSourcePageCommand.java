@@ -17,22 +17,18 @@
 
 package com.globalsight.persistence.pageimport;
 
-import com.globalsight.persistence.PersistenceCommand;
-
-import com.globalsight.everest.page.SourcePage;
-
-import com.globalsight.everest.persistence.PersistenceException;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.Types;
+
+import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.persistence.PersistenceException;
+import com.globalsight.persistence.PersistenceCommand;
 
 public class UpdateSourcePageCommand extends PersistenceCommand
 {
     private PreparedStatement m_ps;
     private PreparedStatement m_ps1;
     private String m_updateCurrentSourcePage = "update source_page set state = ? where id = ? ";
-    private String m_updateCurrentSourcePageAndCuvId = "update source_page set state = ?, cuv_id = ? where id = ? ";
     private String m_updatePreviousSourcePage = "update source_page set state = ? where previous_page_id = ?";
     private SourcePage m_currentPage;
     
@@ -41,8 +37,7 @@ public class UpdateSourcePageCommand extends PersistenceCommand
         m_currentPage = p_currentPage;
     }
 
-    public void persistObjects(Connection p_connection) 
-        throws PersistenceException 
+    public void persistObjects(Connection p_connection) throws PersistenceException
     {
         try
         {
@@ -67,30 +62,20 @@ public class UpdateSourcePageCommand extends PersistenceCommand
             }
         }
     }
-    public void createPreparedStatement(Connection p_connection) 
-        throws Exception 
-    {
-        if (m_currentPage.getCuvId() == null)
-            m_ps = p_connection.prepareStatement(m_updateCurrentSourcePage);
-        else
-            m_ps = p_connection.prepareStatement(m_updateCurrentSourcePageAndCuvId);
 
-       if (m_currentPage.getPreviousPageId() > 0)
-       {
-           m_ps1 = p_connection.prepareStatement(m_updatePreviousSourcePage);
-       }
+    public void createPreparedStatement(Connection p_connection) throws Exception
+    {
+        m_ps = p_connection.prepareStatement(m_updateCurrentSourcePage);
+        if (m_currentPage.getPreviousPageId() > 0)
+        {
+            m_ps1 = p_connection.prepareStatement(m_updatePreviousSourcePage);
+        }
     }
 
     public void setData() throws Exception
     {
-        m_ps.setString(1,m_currentPage.getPageState());
-        if (m_currentPage.getCuvId() != null)
-        {
-            m_ps.setLong(2,m_currentPage.getCuvId().longValue());
-            m_ps.setLong(3, m_currentPage.getId());
-        }
-        else
-            m_ps.setLong(2, m_currentPage.getId());
+        m_ps.setString(1, m_currentPage.getPageState());
+        m_ps.setLong(2, m_currentPage.getId());
 
         if (m_ps1 != null)
         {

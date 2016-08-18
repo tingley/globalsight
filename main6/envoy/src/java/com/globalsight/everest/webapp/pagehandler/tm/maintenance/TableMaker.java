@@ -200,11 +200,6 @@ public class TableMaker
             makeCheckboxCells(sb, p_srcTuv, p_first);
         }
 
-        if (Modules.isCorpusInstalled())
-        {
-            makeCorpusIconCell(sb, p_srcTuv, p_trgTuv, p_first);
-        }
-
         // Make source segment cell (parent then subflows)
         // - Inner table is two cells wide
         // - parent seg spans both cells in first row
@@ -278,29 +273,6 @@ public class TableMaker
 		sb.append("</tr>");
 		return sb.toString();
 	}
-
-	private void makeCorpusIconCell(StringBuffer sb, BaseTmTuv p_srcTuv,
-        BaseTmTuv p_trgTuv, boolean p_first)
-    {
-        // Make segmentID cell
-        sb.append("<TD CLASS=\"clickable\" STYLE=\"padding-top: 2px\">");
-
-        if (p_first)
-        {
-            sb.append("<img src=\"/globalsight/images/corpus_icon.jpg\" ");
-            sb.append("onclick=\"showCorpus(");
-            sb.append(p_trgTuv.getId());
-            sb.append(",");
-            sb.append(p_srcTuv.getLocale().getId());
-            sb.append(")\"></img>");
-        }
-        else
-        {
-            sb.append("&nbsp;");
-        }
-
-        sb.append("</TD>\n");
-    }
 
     private void makeCheckboxCells(StringBuffer sb,BaseTmTuv p_srcTuv,
         boolean p_first)

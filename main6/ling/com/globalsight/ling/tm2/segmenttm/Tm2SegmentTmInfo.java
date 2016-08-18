@@ -51,7 +51,6 @@ import com.globalsight.ling.tm2.SegmentResultSet;
 import com.globalsight.ling.tm2.SegmentTmInfo;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
-import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.indexer.Reindexer;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatchResults;
@@ -140,7 +139,7 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
     // This handles saving for both "save" and "populatePage" calls in the
     // TmCoreManager.
     @Override
-    public TuvMappingHolder saveToSegmentTm(
+    public void saveToSegmentTm(
             Collection<? extends BaseTmTu> p_segmentsToSave,
             GlobalSightLocale p_sourceLocale, Tm p_tm,
             Set<GlobalSightLocale> p_targetLocales, int p_mode,
@@ -152,9 +151,8 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             conn = DbUtil.getConnection();
             SegmentTmPopulator segTmPopulator = new SegmentTmPopulator(conn);
             segTmPopulator.setJob(getJob());
-            return segTmPopulator.populateSegmentTm(p_segmentsToSave,
-                    p_sourceLocale, p_tm, p_targetLocales, p_mode,
-                    p_fromTmImport);
+            segTmPopulator.populateSegmentTm(p_segmentsToSave, p_sourceLocale, p_tm,
+                    p_targetLocales, p_mode, p_fromTmImport);
         }
         catch (Exception e)
         {

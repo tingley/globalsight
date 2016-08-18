@@ -17,8 +17,6 @@
 
 package com.globalsight.everest.page.pageexport;
 
-// globalsight
-import java.io.File;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,8 +39,6 @@ import org.dom4j.Node;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import com.globalsight.everest.corpus.CorpusDoc;
-import com.globalsight.everest.corpus.CorpusTm;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.GenericPage;
@@ -68,7 +64,6 @@ import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.XmlParser;
 import com.globalsight.util.date.DateHelper;
 import com.globalsight.util.mail.MailerConstants;
-import com.globalsight.util.modules.Modules;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
@@ -107,12 +102,6 @@ public class ExportEventObserverLocal implements ExportEventObserver
                     ExportEventObserverException.MSG_FAILED_TO_GET_SYS_PARAM,
                     null, ex);
         }
-
-        // remove the old events (older than a month)
-        // sometimes GS will generate some dirty data. Removing these data will
-        // result in exception.!!!
-        // so disable this.
-        // removeOldEvents();
     }
 
     //
@@ -230,19 +219,7 @@ public class ExportEventObserverLocal implements ExportEventObserver
 
         // If the exporting page was found we know the batchId is good.
         ExportBatchEvent event = getExportBatchEventById(p_exportBatchId, false);
-        boolean batchComplete = event.isCompleted();
-
-        if (ExportBatchEvent.FINAL_PRIMARY.equals(event.getExportType()))
-        {
-            if (Modules.isCorpusInstalled())
-            {
-                s_logger.debug("Calling updateCorpusWithTargetPage()");
-
-                updateCorpusWithTargetPage(p_pageId, p_request, batchComplete);
-            }
-        }
-
-        if (!batchComplete)
+        if (!event.isCompleted())
         {
             return;
         }
@@ -1135,100 +1112,5 @@ public class ExportEventObserverLocal implements ExportEventObserver
                 ResourceBundleConstants.LOCALE_RESOURCE_NAME, p_locale);
 
         return bundle.getString("lb_component_status_heading");
-    }
-
-    /**
-     * Upon server startup, removes all the export batch events that are older
-     * than a month.
-     */
-    private void removeOldEvents()
-    {
-        try
-        {
-            long monthInMilliSecs = 30l * (24 * 60 * 60 * 1000);
-            Long threshold = new Long((System.currentTimeMillis())
-                    - monthInMilliSecs);
-
-            Vector arg = new Vector();
-            arg.add(threshold);
-
-            String hql = "from ExportBatchEvent e where e.startTime <= :time";
-            Map map = new HashMap();
-            map.put("time", threshold);
-            List events = HibernateUtil.search(hql, map);
-            HibernateUtil.delete(events);
-        }
-        catch (Exception ex)
-        {
-            s_logger.error("Failed to delete old export batch events: ", ex);
-        }
-    }
-
-    private void updateCorpusWithTargetPage(String p_pageId,
-            HttpServletRequest p_request, boolean p_batchComplete)
-    {
-        try
-        {
-            String tempExportPath = p_request
-                    .getParameter(ExportConstants.TEMP_EXPORT_PATH);
-
-            if (tempExportPath == null)
-            {
-                // nothing to do
-                return;
-            }
-
-            // get target page
-            long targetPageId = Long.valueOf(p_pageId).longValue();
-            TargetPage tp = ServerProxy.getPageManager().getTargetPage(
-                    targetPageId);
-
-            if (Modules.isCorpusInstalled()
-                    && CorpusTm.isStoringNativeFormatDocs()
-                    && tp.getCuvId() != null)
-            {
-                // get cuv
-                CorpusDoc cuv = ServerProxy.getCorpusManager().getCorpusDoc(
-                        tp.getCuvId());
-
-                // This used to check if the file existed and then did
-                // not over-write it. This was changed to accomodate
-                // STF files.
-                s_logger.info("Saving target doc "
-                        + cuv.getCorpusDocGroup().getCorpusName()
-                        + " for locale " + cuv.getLocale().toString()
-                        + " to the corpus.");
-
-                ServerProxy.getNativeFileManager()
-                        .copyFileToStorage(tempExportPath,
-                                cuv.getNativeFormatPath(), true/* delete */);
-            }
-            else
-            {
-                // delete the temp file because it will not be used
-                File f = new File(tempExportPath);
-                if (f.exists())
-                {
-                    f.delete();
-                }
-            }
-
-            if (p_batchComplete)
-            {
-                // Make all target pages in the job use the same
-                // native format target file for their workflow if
-                // it's an ms-office job.
-                s_logger.debug("cleaning up ms office target pages.");
-
-                ServerProxy.getCorpusManager().cleanUpMsOfficeJobTargetPages(
-                        targetPageId);
-            }
-        }
-        catch (Exception ex)
-        {
-            // report the exception but don't hurt export
-            s_logger.error(
-                    "Could not save target corpus doc in native format.", ex);
-        }
     }
 }

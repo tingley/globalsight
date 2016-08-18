@@ -18,8 +18,6 @@ insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (111, 'anonymo
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (112, 'recordsPerPage.jobs','20', 1);
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (113, 'recordsPerPage.tasks','20', 1);
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (114, 'analyze_script.interval', '22/24', 1);
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (115, 'corpus.storeNativeFormat', 'true', 1);
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (116, 'corpus.showAllTmsToLPs', 'false', 1);
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (117, 'machineTranslation.showInEditor', 'false', 1);
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (118, 'indesign.master.translate', 'false', 1);
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (119, 'ppt.master.translate', 'true', 1);

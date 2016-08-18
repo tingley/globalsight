@@ -33,7 +33,6 @@ import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.inprogresstm.DynamicLeverageResults;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm.TuvBasicInfo;
-import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.indexer.Reindexer;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
@@ -82,12 +81,9 @@ public interface TmCoreManager
      * @param p_options
      *            Tm options. It has information which Project TM segments
      *            should be saved and etc.
-     * @return mappings of translation_unit_variant id and project_tm_tuv_t id
-     *         of this page
      */
-    TuvMappingHolder populatePageForAllLocales(SourcePage p_page,
-            LeverageOptions p_options, long p_jobId) throws RemoteException,
-            LingManagerException;
+    public void populatePageForAllLocales(SourcePage p_page, LeverageOptions p_options, long p_jobId)
+            throws RemoteException, LingManagerException;
 
     /**
      * Save source and a specified target segments that belong to the page.
@@ -100,12 +96,9 @@ public interface TmCoreManager
      *            should be saved and etc.
      * @param p_locale
      *            target locale
-     * @return mappings of translation_unit_variant id and project_tm_tuv_t id
-     *         of this page
      */
-    TuvMappingHolder populatePageByLocale(SourcePage p_page,
-            LeverageOptions p_options, GlobalSightLocale p_locale, long p_jobId)
-            throws RemoteException, LingManagerException;
+    public void populatePageByLocale(SourcePage p_page, LeverageOptions p_options,
+            GlobalSightLocale p_locale, long p_jobId) throws RemoteException, LingManagerException;
 
     /**
      * create LeverageDataCenter with original source segments from a source
@@ -167,14 +160,13 @@ public interface TmCoreManager
      *            one of the "SYNC" constants, to overwrite existing TUs, merge
      *            existing TUs with new TUs, or to discard new TUs if they
      *            already exist in the TM.
-     * @return TuvMappingHolder. m_tuvId and m_tuId values are arbitrary.
      * 
      * @throws LingManagerException
      */
-    public TuvMappingHolder saveToSegmentTm(Tm p_tm, Collection p_segments,
+    public void saveToSegmentTm(Tm p_tm, Collection p_segments,
             int p_mode) throws RemoteException, LingManagerException;
 
-    public TuvMappingHolder saveToSegmentTm(Tm p_tm, Collection p_segments,
+    public void saveToSegmentTm(Tm p_tm, Collection p_segments,
             int p_mode, String p_sourceTmName) throws RemoteException,
             LingManagerException, BatchException;
 

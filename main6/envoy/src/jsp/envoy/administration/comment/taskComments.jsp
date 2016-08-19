@@ -948,7 +948,11 @@ function handleMultiSelectAll_2() {
                                 (<%=bundle.getString("lb_restricted")%>)&nbsp;
                             </SPAN>
 <%
-                        }
+                        }else if(file.getFileAccess().equals("Support File")){
+                        	%>
+                            <SPAN STYLE="color: red">(<%=bundle.getString("lb_support_file")%>)&nbsp;</SPAN>
+<%					
+						}
 %>
                         </SPAN>
 						</div>

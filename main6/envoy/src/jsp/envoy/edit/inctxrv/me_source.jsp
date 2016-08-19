@@ -195,15 +195,7 @@ function HighlightSegment(tuId, tuvId, subId)
 {
     var o = getSegment(tuId, tuvId, subId);
 
-    if (o_currentSegment != null)
-    {
-        unhighlightSegment(o_currentSegment);
-    }
-
-    if (o != null)
-    {
-        highlightSegment(o);
-    }
+    HighlightHtmlPreviewSegment(tuId, tuvId, subId);
 
     o_currentSegment = o;
 }

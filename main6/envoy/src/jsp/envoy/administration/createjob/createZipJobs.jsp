@@ -1018,7 +1018,7 @@ function isIE() { //ie?
 <td>
   <table cellSpacing="10" cellPadding="0" width="100%" align="center" border="0" table-layout="fixed">
     <tr>
-    <td colspan="2" height="265">
+    <td style="width:70%;" colspan="2" height="265">
     <table class="listborder" width="100%" cellspacing="0" cellpadding="0" border="0">
       <tr height="30">
         <td width="50%" style="border:0"><div class="titletext" style="padding-left:10px;"><c:out value="${lb_name}"/></div></td>
@@ -1059,7 +1059,7 @@ function isIE() { //ie?
       </tr>
     </table>
     </td>
-    <td rowspan="4" style="width:28%;height:100%">
+    <td rowspan="4" style="width:30%;height:100%">
         <div style="background-color:#738EB5;height:91%" id="targetLocales">
             <div style="font: 11pt Verdana, Geneva, sans-serif;color:white;height:20px;padding-left:5px;padding-top:4px;padding-bottom:3px">
                 &nbsp;&nbsp;&nbsp;<input type="checkbox" id="tlControl" onclick="javascript:controlBoxes()" title="Select/Deselect All">&nbsp;<c:out value="${lb_target_locales}"/>

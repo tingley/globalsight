@@ -29,45 +29,45 @@ public class XLIFFStandardUtil
 
     public static final String GS_SEPARATOR = "_GS_";
 
-    private static final String att_posClose = " pos=\"close\"";
+    static final String att_posClose = " pos=\"close\"";
 
-    private static final String att_posEnd = " pos=\"end\"";
+    static final String att_posEnd = " pos=\"end\"";
 
-    private static final String att_posBegin = " pos=\"begin\"";
+    static final String att_posBegin = " pos=\"begin\"";
 
-    private static final String att_posOpen = " pos=\"open\"";
+    static final String att_posOpen = " pos=\"open\"";
 
-    private static final String att_ctype = " ctype=\"";
+    static final String att_ctype = " ctype=\"";
 
-    private static final String att_type = " type=\"";
+    static final String att_type = " type=\"";
 
-    private static final String att_id = " id=\"";
+    static final String att_id = " id=\"";
 
-    private static final String bpt_start = "<bpt ";
+    static final String bpt_start = "<bpt ";
 
-    private static final String bpt_end = ">";
+    static final String bpt_end = ">";
 
-    private static final String ept_start = "<ept ";
+    static final String ept_start = "<ept ";
 
-    private static final String ept_end = ">";
+    static final String ept_end = ">";
 
-    private static final String it_start = "<it ";
+    static final String it_start = "<it ";
 
-    private static final String it_end = ">";
+    static final String it_end = ">";
 
-    private static final String ph_start = "<ph ";
+    static final String ph_start = "<ph ";
 
-    private static final String ph_end = ">";
+    static final String ph_end = ">";
 
-    private static final String att_i = " i=\"";
+    static final String att_i = " i=\"";
 
-    private static final String att_rid = " rid=\"";
+    static final String att_rid = " rid=\"";
 
-    private static final String att_x = " x=\"";
+    static final String att_x = " x=\"";
 
-    private static final String att_xid = " xid=\"";
+    static final String att_xid = " xid=\"";
 
-    private static final String att_end = "\"";
+    static final String att_end = "\"";
 
     public static String convertToStandard(OfflineSegmentData p_osd, String segment)
     {
@@ -136,7 +136,7 @@ public class XLIFFStandardUtil
         return segment;
     }
 
-    private static String addAtts(String segment, String tagStart,
+    static String addAtts(String segment, String tagStart,
             String tagEnd, String oriAttSt, String newAttSt, String prefix)
     {
         StringBuffer src = new StringBuffer(segment);
@@ -168,8 +168,7 @@ public class XLIFFStandardUtil
         return segment;
     }
 
-    private static String removeAtts(String segment, String tagStart,
-            String tagEnd, String attSt)
+    static String removeAtts(String segment, String tagStart, String tagEnd, String attSt)
     {
         StringBuffer src = new StringBuffer(segment);
         int s = 0;
@@ -203,8 +202,8 @@ public class XLIFFStandardUtil
         return segment;
     }
 
-    private static String replaceAtts(String segment, String tagStart,
-            String tagEnd, boolean toXliff, String... strings)
+    static String replaceAtts(String segment, String tagStart, String tagEnd, boolean toXliff,
+            String... strings)
     {
         StringBuffer src = new StringBuffer(segment);
         int s = 0;

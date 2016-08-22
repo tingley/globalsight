@@ -1,4 +1,11 @@
 .gsHighlight {
-  background-color: rgba(255, 242, 0, 0.3);
-  border-radius: 4px;
+  background-color: rgba(255, 242, 0, 0.5) !important;
+}
+
+gsspan {
+	cursor:hand;
+}
+
+gsspan:HOVER {
+	background-color: rgba(255, 242, 0, 0.2);
 }

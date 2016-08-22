@@ -76,7 +76,10 @@
 	String saveCommStatus = (String) request.getParameter(CommentConstants.SAVE_COMMENT_STATUS);
     if(saveCommStatus!=null)
     {
-    	isTaskComment = false;
+    	if(saveCommStatus.equals(CommentConstants.SAVE_COMMENT_STATUS_JT))
+    	{
+    		isTaskComment = false;
+    	}
     }
     String lb_include_as_job_support_file = bundle.getString("lb_include_as_job_support_file");
     String lb_general = bundle.getString("lb_general");
@@ -258,6 +261,16 @@
 
 		CompanyThreadLocal.getInstance().setIdValue(String.valueOf(companyId));
 	}
+	
+	if(comment != null){
+		if(comment.getWorkObject()!=null)
+			if (comment.getWorkObject() instanceof Job){
+				isTaskComment = false;
+			}else if(comment.getWorkObject() instanceof Task){
+				displaySupportRadio = false;
+			}
+	}
+	
 	String tmpDir = WebAppConstants.COMMENT_REFERENCE_TEMP_DIR + wid
 			+ userId;
 	
@@ -574,7 +587,7 @@ if (commentReferences != null && commentReferences.size() > 0)
 		  <TD><%=bundle.getString("lb_general")%></TD>
 		  <TD><%=bundle.getString("lb_restrict")%></TD>
 		  <%
-			if(displaySupportRadio)
+			if(!isTaskComment || displaySupportRadio)
 			{
 			%>
 			  <TD><%=bundle.getString("lb_support_file")%></TD>
@@ -636,7 +649,7 @@ if (commentReferences != null && commentReferences.size() > 0)
 			out.print("<input name=\"fileType"+i+"\" value=\"" + file.getAbsolutePath().hashCode()+"_Restrict" + "\" type=\"radio\" " + checked + "/> ");
 			out.println("</TD>");
 			
-			if(displaySupportRadio)
+			if(!isTaskComment || displaySupportRadio)
 			{
 				// Col 4: Support File check box.
 		        String checkedJSF = "";
@@ -704,7 +717,7 @@ sort();
       <input type="radio" name="ckbox" value="0"  checked><%=lb_general %>
       <input type="radio" name="ckbox" value="1"><%=bundle.getString("lb_restrict_access")%>
       <%
-      	if(displaySupportRadio)
+      	if(!isTaskComment || displaySupportRadio)
       	{
   		%>
      	 <input type="radio" name="ckbox" value="2"><%=lb_include_as_job_support_file %>

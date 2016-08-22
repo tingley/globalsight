@@ -320,15 +320,7 @@ function HighlightSegment(tuId, tuvId, subId)
 {
     var o = getSegment(tuId, tuvId, subId);
 
-    if (o_currentSegment != null)
-    {
-        unhighlightSegment(o_currentSegment);
-    }
-
-    if (o != null)
-    {
-        highlightSegment(o);
-    }
+    HighlightHtmlPreviewSegment(tuId, tuvId, subId);
 
     o_currentSegment = o;
 }
@@ -1062,6 +1054,8 @@ function contextForReadOnly(obj, e)
 {
     var ids = get3Ids(obj);
     var popupoptions = [
+        new ContextItem("<B>Add/edit comment</B>",
+               function(){editComment(ids[0], ids[1], ids[2])}),
         new ContextItem("<B>Segment details</B>",
         function(){showDetails(ids[0], ids[1], ids[2])})];
 

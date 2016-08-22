@@ -937,6 +937,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             if (p_options.getViewMode() == VIEWMODE_PREVIEW)
             {
                 result = GxmlUtil.cleanUpDisplayHtml(result);
+                
+                if (p_options.isFromIncontextReviewEdit())
+                {
+                    result = GxmlUtil.disableLinks(result);
+                }
             }
         }
         catch (Exception ex)
@@ -3600,7 +3605,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
                     if (p_options.isFromIncontextReviewEdit()) 
                     {
-                        result.append("<gsspan " + dir + " id=\"seg" + tuId + "_" + tuvId + "_" + 0 + "\">" + segment + "</gsspan>");
+                        result.append("<gsspan onclick='SETarget(" + tuId  + "," + tuvId + "," + 0  + ")'" + dir + " id=\"seg" + tuId + "_" + tuvId + "_" + 0 + "\">" + segment + "</gsspan>");
                     }
                     else if ((!reviewMode || reviewReadOnly)
                             && (isReadOnly || isExcluded))
@@ -4380,7 +4385,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 
                 if ("text".equals(p_srcTuv.getTu(jobId).getTuType()) && p_options.isFromIncontextReviewEdit()) 
                 {
-                    result.append("<gsspan " + dir + " id=\"seg" + tuId + "_" + p_srcTuv.getId() + "_" + 0 + "\">" + segment + "</gsspan>");
+                    result.append("<gsspan onclick='SETarget(" + tuId  + "," +  p_srcTuv.getId() + "," + 0  + ")'" + dir + " id=\"seg" + tuId + "_" + p_srcTuv.getId() + "_" + 0 + "\">" + segment + "</gsspan>");
                 } 
                 else
                 {

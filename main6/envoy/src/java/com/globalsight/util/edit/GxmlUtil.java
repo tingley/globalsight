@@ -1278,8 +1278,11 @@ public class GxmlUtil
             buf.append(result.substring(index, re.getParenStart(0)));
 
             String tagWithEvent = re.getParen(0);
-            tagWithEvent = reEvents.subst(tagWithEvent,
-                    " _replacedEventHandler=");
+            if (!tagWithEvent.startsWith("<gsspan ")){
+                tagWithEvent = reEvents.subst(tagWithEvent,
+                        " _replacedEventHandler=");
+            }
+               
             buf.append(tagWithEvent);
             index = re.getParenEnd(0);
         }
@@ -1467,7 +1470,7 @@ public class GxmlUtil
      * Note: when the editor is rewritten to use <SPAN> around the segments,
      * this BS becomes irrelevant.
      */
-    static private String disableLinks(String p_content)
+    static public String disableLinks(String p_content)
     {
         String result = p_content;
         RE re = new RE();

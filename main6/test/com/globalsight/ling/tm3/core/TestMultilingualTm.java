@@ -45,10 +45,9 @@ public class TestMultilingualTm extends TM3Tests
         {
             tx = HibernateUtil.getTransaction();
             System.out.println("Creating TM id " + currentTestId);
-            TM3Tm<TestData> tm = manager.createMultilingualTm(FACTORY,
-                    inlineAttrs());
+            TM3Tm<TestData> tm = manager.createMultilingualSharedTm(FACTORY, inlineAttrs(), 1);
             currentTestId = tm.getId();
-            currentTestEvent = tm.addEvent(0, "test", "test " + currentTestId);
+
             HibernateUtil.commit(tx);
         }
         catch (Exception e)
@@ -67,7 +66,7 @@ public class TestMultilingualTm extends TM3Tests
             tx = HibernateUtil.getTransaction();
             TM3Tm<TestData> tm2 = manager.getTm(FACTORY, currentTestId);
             assertNotNull(tm2);
-            assertTrue(tm2 instanceof MultilingualTm);
+            assertTrue(tm2 instanceof MultilingualSharedTm);
 
             cleanupTestDb(manager);
 

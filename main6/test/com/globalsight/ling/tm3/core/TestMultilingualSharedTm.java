@@ -68,7 +68,7 @@ public class TestMultilingualSharedTm extends TM3Tests
             TM3Tm<TestData> tm = manager.createMultilingualSharedTm(FACTORY,
                     inlineAttrs(), SHARED_STORAGE_ID);
             currentTestId = tm.getId();
-            currentTestEvent = tm.addEvent(0, "test", "test " + currentTestId);
+
             HibernateUtil.commit(tx);
         }
         catch (Exception e)

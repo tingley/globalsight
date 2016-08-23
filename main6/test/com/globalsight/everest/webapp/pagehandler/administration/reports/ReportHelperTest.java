@@ -37,7 +37,7 @@ public class ReportHelperTest
         job.setJobName(m_jobName);
         job.setCompanyId(m_companyId);
         File file = ReportHelper.getReportFile(
-                ReportConstants.REVIEWERS_COMMENTS_REPORT, job, ".xls");
+                ReportConstants.REVIEWERS_COMMENTS_REPORT, job, ".xls", null);
         String expectedFileName = "ReviewersCommentsReport-[testJobName][1].xls";
         Assert.assertTrue("File name error." + file.getName(),
                 expectedFileName.equalsIgnoreCase(file.getName()));

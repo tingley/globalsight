@@ -151,7 +151,7 @@ public class OfficeXmlExtractorTest extends BaseExtractorTestClass
     {
         OfficeXmlHelper helper = new OfficeXmlHelper();
         helper.setParametersForTesting(OfficeXmlHelper.OFFICE_DOCX, true, false, false, false, false, false);
-        String[] files = helper.getLocalizeXmlFiles(wordDir);
+        String[] files = helper.getLocalizeXmlFiles(wordDir, false);
         System.out.println(files.length);
         System.out.println(files[files.length - 1]);
         
@@ -159,7 +159,7 @@ public class OfficeXmlExtractorTest extends BaseExtractorTestClass
         Assert.assertTrue("The last file is not right.", files[files.length -1].endsWith("header1.xml"));
         
         helper.setParametersForTesting(OfficeXmlHelper.OFFICE_DOCX, false, false, false, false, false, false);
-        files = helper.getLocalizeXmlFiles(wordDir);
+        files = helper.getLocalizeXmlFiles(wordDir, false);
         System.out.println(files.length);
         System.out.println(files[files.length - 1]);
         
@@ -175,7 +175,7 @@ public class OfficeXmlExtractorTest extends BaseExtractorTestClass
     {
         OfficeXmlHelper helper = new OfficeXmlHelper();
         helper.setParametersForTesting(OfficeXmlHelper.OFFICE_PPTX, false, true, true, true, true, true);
-        String[] files = helper.getLocalizeXmlFiles(pptDir);
+        String[] files = helper.getLocalizeXmlFiles(pptDir, false);
         System.out.println(files.length);
         System.out.println(files[files.length - 1]);
         
@@ -183,7 +183,7 @@ public class OfficeXmlExtractorTest extends BaseExtractorTestClass
         Assert.assertTrue("The last file is not right.", files[files.length -1].endsWith("handoutMaster1.xml"));
         
         helper.setParametersForTesting(OfficeXmlHelper.OFFICE_PPTX, false, false, false, false, false, false);
-        files = helper.getLocalizeXmlFiles(pptDir);
+        files = helper.getLocalizeXmlFiles(pptDir, false);
         System.out.println(files.length);
         System.out.println(files[files.length - 1]);
         
@@ -471,7 +471,7 @@ public class OfficeXmlExtractorTest extends BaseExtractorTestClass
         return output;
     }
 
-    private Output doSegment(Output output)
+    private Output doSegment(Output output) throws Exception
     {
         // Convert C0 control codes to PUA characters to avoid XML
         // parser error

@@ -43,14 +43,14 @@ public class XliffTuCreationTest
         GxmlElement seg = sourceTuv.getGxmlElement();
         boolean flag = 
                 tucreation.transProcess(p_request, 
-                        xliffpart, seg, lg, p_tuList, p_sourceLocale);
+                        xliffpart, seg, lg, p_tuList, p_sourceLocale, 1000);
         
         assertTrue(flag);
         
         xliffpart = "target";
         flag = 
                 tucreation.transProcess(p_request, 
-                        xliffpart, seg, lg, p_tuList, p_sourceLocale);
+                        xliffpart, seg, lg, p_tuList, p_sourceLocale, 1000);
         
         assertTrue(!flag);
         assertTrue(tu.getXliffTarget().equals("MobileMe Help"));
@@ -64,7 +64,7 @@ public class XliffTuCreationTest
         
         flag = 
                 tucreation.transProcess(p_request, 
-                        xliffpart, seg2, lg, p_tuList, p_sourceLocale);
+                        xliffpart, seg2, lg, p_tuList, p_sourceLocale, 1000);
         assertTrue(!flag);
         assertTrue(tu.getXliffTarget().trim().equals(""));
         assertTrue(tu.getXliffTargetLanguage().equals("fr_fr"));
@@ -75,7 +75,7 @@ public class XliffTuCreationTest
         xliffpart = "altSource";
         
         flag = tucreation.transProcess(p_request, 
-                        xliffpart, seg, lg, p_tuList, p_sourceLocale);
+                        xliffpart, seg, lg, p_tuList, p_sourceLocale, 1000);
         assertTrue(!flag);
         assertTrue(sourceTuv.getXliffAlt(false) == null);
 
@@ -83,7 +83,7 @@ public class XliffTuCreationTest
         seg.setAttribute("altLanguage", "fr");
         seg.setAttribute("altQuality", "88");
         flag = tucreation.transProcess(p_request, xliffpart, seg, lg, p_tuList,
-                p_sourceLocale);
+                p_sourceLocale, 1000);
         assertTrue(!flag);
         assertTrue(sourceTuv.getXliffAlt(false).size() == 1);
         

@@ -55,7 +55,7 @@ public class WsTuCreationTest
         seg.setAttribute(Extractor.IWS_LOCK_STATUS, "locked");
 
         boolean flag = tucreation.transProcess(p_request, xliffpart, seg, lg,
-                p_tuList, p_sourceLocale);
+                p_tuList, p_sourceLocale, 1000);
 
         assertTrue(!flag);
         assertTrue(tu.getXliffTarget().equals("MobileMe Help"));

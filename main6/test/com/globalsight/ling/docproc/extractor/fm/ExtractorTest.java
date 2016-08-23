@@ -107,7 +107,7 @@ public class ExtractorTest extends BaseExtractorTestClass
     }
     
     public String getFileContent(File file, AbstractExtractor extractor,
-            String encoding)
+            String encoding) throws Exception
     {
         Output output = new Output();
         EFInputData input = new EFInputData();

@@ -164,7 +164,7 @@ public class ExtractorTest extends BaseExtractorTestClass
     }
 
     @Test
-    public void testSwitchToHtml() throws FileNotFoundException, IOException
+    public void testSwitchToHtml() throws Exception
     {
         String ori = "test internal <GS-INTERNAL-TEXT>#message here#</GS-INTERNAL-TEXT>text";
         EFInputData input = createInput(caseSimpleXmlFile, null,
@@ -222,7 +222,7 @@ public class ExtractorTest extends BaseExtractorTestClass
         return output;
     }
 
-    private Output doSegment(Output output)
+    private Output doSegment(Output output) throws Exception
     {
         // Convert C0 control codes to PUA characters to avoid XML
         // parser error
@@ -444,11 +444,13 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.PH_TRIM_DONOT,
                     XmlFilterConfigParser.NON_ASCII_AS_CHARACTER,
                     XmlFilterConfigParser.WHITESPACE_HANDLE_PRESERVE,
-                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
-                    "-1", "", "", "False", "False", new JSONArray(),
+                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, 
+                    XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                    "", "-1", "", "-1", "", "", "False", "False",
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray(), new JSONArray(), new JSONArray());
+                    new JSONArray(), new JSONArray(), new JSONArray(),
+                    new JSONArray());
         }
         else if ("samplePhCon.xml".equalsIgnoreCase(name))
         {
@@ -459,11 +461,13 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.PH_TRIM_DONOT,
                     XmlFilterConfigParser.NON_ASCII_AS_CHARACTER,
                     XmlFilterConfigParser.WHITESPACE_HANDLE_PRESERVE,
-                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
-                    "-1", "", "", "False", "False", new JSONArray(), embTags,
+                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE,
+                    XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                    "", "-1", "", "-1", "", "", "False", "False",
+                    new JSONArray(), embTags, new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray(), new JSONArray());
+                    new JSONArray());
         }
         else if ("samplePhTrim.xml".equalsIgnoreCase(name))
         {
@@ -474,11 +478,12 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.PH_TRIM_DO,
                     XmlFilterConfigParser.NON_ASCII_AS_CHARACTER,
                     XmlFilterConfigParser.WHITESPACE_HANDLE_PRESERVE,
-                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
-                    "-1", "", "", "False", "False", new JSONArray(), embTags,
-                    new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray(), new JSONArray());
+                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE,
+                    XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                    "", "-1", "", "-1", "", "", "False", "False",
+                    new JSONArray(), embTags, new JSONArray(),
+                    new JSONArray(), new JSONArray(), new JSONArray(), new JSONArray(),
+                    new JSONArray(), new JSONArray(), new JSONArray());
         }
         else if ("sampleNonAsciiChar.xml".equalsIgnoreCase(name))
         {
@@ -487,8 +492,9 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.PH_TRIM_DONOT,
                     XmlFilterConfigParser.NON_ASCII_AS_ENTITY,
                     XmlFilterConfigParser.WHITESPACE_HANDLE_PRESERVE,
-                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
-                    "-1", "", "", "False", "False", new JSONArray(),
+                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE,
+                    XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                    "", "-1", "", "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray());
@@ -500,8 +506,9 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.PH_TRIM_DONOT,
                     XmlFilterConfigParser.NON_ASCII_AS_CHARACTER,
                     XmlFilterConfigParser.WHITESPACE_HANDLE_COLLAPSE,
-                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
-                    "-1", "", "", "False", "False", new JSONArray(),
+                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE,
+                    XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                    "", "-1", "", "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray());
@@ -513,8 +520,9 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.PH_TRIM_DONOT,
                     XmlFilterConfigParser.NON_ASCII_AS_CHARACTER,
                     XmlFilterConfigParser.WHITESPACE_HANDLE_PRESERVE,
-                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_OPEN, "", "-1", "",
-                    "-1", "", "", "False", "False", new JSONArray(),
+                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_OPEN,
+                    XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                    "", "-1", "", "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray());
@@ -526,8 +534,9 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.PH_TRIM_DONOT,
                     XmlFilterConfigParser.NON_ASCII_AS_CHARACTER,
                     XmlFilterConfigParser.WHITESPACE_HANDLE_PRESERVE,
-                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
-                    "-1", "aaa", "id", "False", "False", new JSONArray(),
+                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE,
+                    XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                    "", "-1", "", "-1", "aaa", "id", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray());
@@ -539,8 +548,9 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.PH_TRIM_DONOT,
                     XmlFilterConfigParser.NON_ASCII_AS_CHARACTER,
                     XmlFilterConfigParser.WHITESPACE_HANDLE_PRESERVE,
-                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
-                    "-1", "", "", "False", "True", new JSONArray(),
+                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE,
+                    XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                    "", "-1", "", "-1", "", "", "False", "True", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray());
@@ -555,8 +565,9 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.PH_TRIM_DONOT,
                     XmlFilterConfigParser.NON_ASCII_AS_CHARACTER,
                     XmlFilterConfigParser.WHITESPACE_HANDLE_COLLAPSE,
-                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
-                    "-1", "", "", "False", "False", preserveWsTags,
+                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE,
+                    XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                    "", "-1", "", "-1", "", "", "False", "False", preserveWsTags,
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray());
@@ -570,8 +581,9 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.PH_TRIM_DONOT,
                     XmlFilterConfigParser.NON_ASCII_AS_CHARACTER,
                     XmlFilterConfigParser.WHITESPACE_HANDLE_PRESERVE,
-                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
-                    "-1", "", "", "False", "False", new JSONArray(),
+                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE,
+                    XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                    "", "-1", "", "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), transAttTags, new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray());
@@ -585,8 +597,9 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.PH_TRIM_DONOT,
                     XmlFilterConfigParser.NON_ASCII_AS_CHARACTER,
                     XmlFilterConfigParser.WHITESPACE_HANDLE_PRESERVE,
-                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
-                    "-1", "", "", "False", "False", new JSONArray(),
+                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE,
+                    XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                    "", "-1", "", "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), contentIncTags,
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray());
@@ -601,8 +614,9 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.PH_TRIM_DONOT,
                     XmlFilterConfigParser.NON_ASCII_AS_CHARACTER,
                     XmlFilterConfigParser.WHITESPACE_HANDLE_PRESERVE,
-                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
-                    "-1", "", "", "False", "False", new JSONArray(),
+                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE,
+                    XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                    "", "-1", "", "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     CDATAPostTags, new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray());
@@ -616,8 +630,9 @@ public class ExtractorTest extends BaseExtractorTestClass
                             XmlFilterConfigParser.PH_TRIM_DONOT,
                             XmlFilterConfigParser.NON_ASCII_AS_CHARACTER,
                             XmlFilterConfigParser.WHITESPACE_HANDLE_PRESERVE,
-                            XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "",
-                            "-1", "", "-1", "", "", "False", "False",
+                            XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, 
+                            XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                            "", "-1", "", "-1", "", "", "False", "False",
                             new JSONArray(), new JSONArray(), new JSONArray(),
                             new JSONArray(), new JSONArray(), entities,
                             new JSONArray(), new JSONArray(), new JSONArray(),
@@ -632,8 +647,9 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.PH_TRIM_DONOT,
                     XmlFilterConfigParser.NON_ASCII_AS_CHARACTER,
                     XmlFilterConfigParser.WHITESPACE_HANDLE_PRESERVE,
-                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
-                    "-1", "", "", "False", "False", new JSONArray(),
+                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE,
+                    XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                    "", "-1", "", "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), pis, new JSONArray(),
                     new JSONArray(), new JSONArray());
@@ -647,8 +663,9 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.PH_TRIM_DONOT,
                     XmlFilterConfigParser.NON_ASCII_AS_CHARACTER,
                     XmlFilterConfigParser.WHITESPACE_HANDLE_PRESERVE,
-                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
-                    "-1", "", "", "False", "False", new JSONArray(),
+                    XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE,
+                    XmlFilterConfigParser.ENTITY_HANDLE_MODE_1,
+                    "", "-1", "", "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     internalTag, new JSONArray(), new JSONArray());

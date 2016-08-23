@@ -1616,7 +1616,7 @@ public class OfficeXmlHelper implements IConverterHelper2
      *            the root path where contain office xml files
      * @return
      */
-    private String[] getLocalizeXmlFiles(String dir, boolean useNewExtractor)
+    public String[] getLocalizeXmlFiles(String dir, boolean useNewExtractor)
     {
         List<String> list = new ArrayList<String>();
 

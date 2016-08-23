@@ -1,15 +1,16 @@
 package com.globalsight.util.edit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.Test;
 
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.SegmentNode;
-import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.gxml.GxmlElement;
 
 public class SegmentUtil2Test
@@ -49,12 +50,12 @@ public class SegmentUtil2Test
         segment.append("<ph id=\"196\" x=\"&lt;inlineGraphic&gt;\">{196}</ph>");
         segment.append("<ph id=\"197\" x=\"&lt;Graphic href=&quot;Art/S220_Actionmenu.png&quot; alt=&quot;\">{197}</ph>Image of Action menu-translated----.<ph id=\"198\" x=\"&quot;&gt;\">{198}</ph>");
         String dataType = "xlf";
-        GlobalSightLocale sourceLocale = new GlobalSightLocale("en", "US", true);
-        
+        Locale sourceLocale = new Locale("en", "US");
+
         SegmentNode result = SegmentUtil2.extractSegment(api,
                 segment.toString(), dataType, sourceLocale);
         String actual = result.getSegment();
-        
+
         StringBuffer expected = new StringBuffer();
         expected.append("Choose Delete from the Action menu <ph type=\"ph\" id=\"1\" x=\"1\">&lt;ph id=\"195\" x=\"&amp;lt;ConditionHelp&amp;gt;\"&gt;{195}&lt;/ph&gt;</ph>");
         expected.append("<ph type=\"ph\" id=\"2\" x=\"2\">&lt;ph id=\"196\" x=\"&amp;lt;inlineGraphic&amp;gt;\"&gt;{196}&lt;/ph&gt;</ph>");
@@ -62,6 +63,5 @@ public class SegmentUtil2Test
         
         assertEquals(expected.toString(), actual);
     }
-    
 
 }

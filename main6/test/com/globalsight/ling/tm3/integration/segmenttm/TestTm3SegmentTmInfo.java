@@ -44,7 +44,6 @@ import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm3.core.MockTM3Saver;
 import com.globalsight.ling.tm3.core.MockTM3Tm;
-import com.globalsight.ling.tm3.core.TM3Event;
 import com.globalsight.ling.tm3.core.TM3Locale;
 import com.globalsight.ling.tm3.core.TM3Saver;
 import com.globalsight.ling.tm3.core.TM3Tm;
@@ -170,8 +169,6 @@ public class TestTm3SegmentTmInfo
         String msg = "mismatch for tu " + index;
         assertEquals(msg, srcLocale, tu.getSourceTuv().getLocale());
         assertEquals(msg, srcData, tu.getSourceTuv().getContent());
-        TM3Event srcEvent = tu.getSourceTuv().getEvent();
-        assertEquals(msg, srcUser, srcEvent.getUsername());
 
         List<TM3Saver<GSTuvData>.Tuv> tuvs = tu.getTargets();
         boolean foundTarget = false;
@@ -186,7 +183,6 @@ public class TestTm3SegmentTmInfo
                 foundTarget = true;
                 // It's the target
                 assertEquals(msg, tgtData, tuv.getContent());
-                assertEquals(msg, tgtUser, tuv.getEvent().getUsername());
                 continue;
             }
             // What is this?

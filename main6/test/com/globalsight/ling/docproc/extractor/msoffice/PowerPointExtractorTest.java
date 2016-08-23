@@ -203,7 +203,7 @@ public class PowerPointExtractorTest extends BaseExtractorTestClass
         return output;
     }
 
-    private Output doSegment(Output output)
+    private Output doSegment(Output output) throws Exception
     {
         // Convert C0 control codes to PUA characters to avoid XML
         // parser error

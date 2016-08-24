@@ -55,7 +55,6 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.CostByWordCount;
 import com.globalsight.everest.costing.Currency;
-import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.localemgr.LocaleManagerLocal;
@@ -426,14 +425,14 @@ public class VendorPOXlsReport
 
         if (p_data.headers[0] != null)
         {
-            theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 7));
-            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 7),
+            theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 8));
+            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 8),
                     getHeaderStyle(p_workbook));
         }
         else
         {
-            theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 6));
-            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 6),
+            theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 7));
+            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 7),
                     getHeaderStyle(p_workbook));
         }
 
@@ -466,6 +465,11 @@ public class VendorPOXlsReport
             cell_InContext.setCellValue(bundle.getString("lb_in_context_tm"));
             cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
         }
+        
+        Cell cell_mt = getCell(fourRow, c++);
+        cell_mt.setCellValue(bundle.getString("lb_tm_mt"));
+        cell_mt.setCellStyle(getHeaderStyle(p_workbook));
+        
         Cell cell_Total = getCell(fourRow, c++);
         cell_Total.setCellValue(bundle.getString("lb_total"));
         cell_Total.setCellStyle(getHeaderStyle(p_workbook));
@@ -537,7 +541,6 @@ public class VendorPOXlsReport
             ArrayList locales = new ArrayList(localeMap.keySet());
             SortUtil.sort(locales);
             Iterator localeIter = locales.iterator();
-            BigDecimal projectTotalWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
             while (localeIter.hasNext())
             {
                 int row = p_row.getValue();
@@ -801,7 +804,6 @@ public class VendorPOXlsReport
             ArrayList locales = new ArrayList(localeMap.keySet());
             SortUtil.sort(locales);
             Iterator localeIter = locales.iterator();
-            BigDecimal projectTotalWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
             while (localeIter.hasNext())
             {
                 int row = p_row.getValue();
@@ -879,7 +881,7 @@ public class VendorPOXlsReport
                 theSheet.setColumnWidth(col - 1, numwidth * 256);
 
                 Cell cell_K = getCell(theRow, col++);
-                cell_K.setCellValue(data.tradosNoMatchWordCount + data.trados50to74WordCount);
+                cell_K.setCellValue(data.tradosNoMatchWordCount);
                 cell_K.setCellStyle(temp_normalStyle);
                 theSheet.setColumnWidth(col - 1, numwidth * 256);
 
@@ -894,6 +896,11 @@ public class VendorPOXlsReport
                     cell_InContext.setCellStyle(temp_normalStyle);
                     theSheet.setColumnWidth(col - 1, numwidth * 256);
                 }
+                
+                Cell cell_mt = getCell(theRow, col++);
+                cell_mt.setCellValue(data.tradosMTWordCount);
+                cell_mt.setCellStyle(temp_normalStyle);
+                theSheet.setColumnWidth(col - 1, numwidth * 256);
 
                 Cell cell_Total = getCell(theRow, col++);
                 cell_Total.setCellValue(data.tradosTotalWordCount);
@@ -1008,11 +1015,12 @@ public class VendorPOXlsReport
             Cell cell_N = getCell(theRow, c++);
             cell_N.setCellFormula("SUM(N5:N" + lastRow + ")");
             cell_N.setCellStyle(getSubTotalStyle(p_workbook));
-            // word count costs
+            
             Cell cell_O = getCell(theRow, c++);
             cell_O.setCellFormula("SUM(O5:O" + lastRow + ")");
-            cell_O.setCellStyle(getTotalMoneyStyle(p_workbook));
-
+            cell_O.setCellStyle(getSubTotalStyle(p_workbook));
+            
+            // word count costs
             Cell cell_P = getCell(theRow, c++);
             cell_P.setCellFormula("SUM(P5:P" + lastRow + ")");
             cell_P.setCellStyle(getTotalMoneyStyle(p_workbook));
@@ -1040,6 +1048,11 @@ public class VendorPOXlsReport
             Cell cell_V = getCell(theRow, c++);
             cell_V.setCellFormula("SUM(V5:V" + lastRow + ")");
             cell_V.setCellStyle(getTotalMoneyStyle(p_workbook));
+            
+            Cell cell_W = getCell(theRow, c++);
+            cell_W.setCellFormula("SUM(W5:W" + lastRow + ")");
+            cell_W.setCellStyle(getTotalMoneyStyle(p_workbook));
+            
         }
         else
         {
@@ -1071,11 +1084,11 @@ public class VendorPOXlsReport
             Cell cell_M = getCell(theRow, c++);
             cell_M.setCellFormula("SUM(M5:M" + lastRow + ")");
             cell_M.setCellStyle(getSubTotalStyle(p_workbook));
-            // word count costs
+            
             Cell cell_N = getCell(theRow, c++);
             cell_N.setCellFormula("SUM(N5:N" + lastRow + ")");
             cell_N.setCellStyle(getSubTotalStyle(p_workbook));
-
+            // word count costs
             Cell cell_O = getCell(theRow, c++);
             cell_O.setCellFormula("SUM(O5:O" + lastRow + ")");
             cell_O.setCellStyle(getTotalMoneyStyle(p_workbook));
@@ -1099,6 +1112,10 @@ public class VendorPOXlsReport
             Cell cell_T = getCell(theRow, c++);
             cell_T.setCellFormula("SUM(T5:T" + lastRow + ")");
             cell_T.setCellStyle(getTotalMoneyStyle(p_workbook));
+            
+            Cell cell_U = getCell(theRow, c++);
+            cell_U.setCellFormula("SUM(U5:U" + lastRow + ")");
+            cell_U.setCellStyle(getTotalMoneyStyle(p_workbook));
         }
     }
 
@@ -1207,22 +1224,6 @@ public class VendorPOXlsReport
         }
     }
 
-    private String getDateCritieraConditionValue(String p_condition)
-    {
-        String value = "N/A";
-        if (SearchCriteriaParameters.NOW.equals(p_condition))
-            value = bundle.getString("lb_now");
-        else if (SearchCriteriaParameters.DAYS_AGO.equals(p_condition))
-            value = bundle.getString("lb_days_ago");
-        else if (SearchCriteriaParameters.HOURS_AGO.equals(p_condition))
-            value = bundle.getString("lb_hours_ago");
-        else if (SearchCriteriaParameters.WEEKS_AGO.equals(p_condition))
-            value = bundle.getString("lb_weeks_ago");
-        else if (SearchCriteriaParameters.MONTHS_AGO.equals(p_condition))
-            value = bundle.getString("lb_months_ago");
-        return value;
-    }
-
     /**
      * Adds data for the exported and in-progress jobs. Archived jobs are
      * ignored for now.
@@ -1279,6 +1280,7 @@ public class VendorPOXlsReport
                 ReportUtil.getCurrencyName(currency), CompanyThreadLocal.getInstance().getValue());
         for (Job j : jobs)
         {
+            int threshold = j.getLeverageMatchThreshold();
             if (isCancelled())
             {
                 p_response.sendError(p_response.SC_NO_CONTENT);
@@ -1301,6 +1303,8 @@ public class VendorPOXlsReport
                 Workflow w = wfIter.next();
                 // TranslationMemoryProfile tmProfile =
                 // w.getJob().getL10nProfile().getTranslationMemoryProfile();
+                int mtThreshold = w.getMtThreshold();
+                int mtRepetitionsWordCount = w.getMtRepetitionsWordCount();
                 String state = w.getState();
                 // skip certain workflows
                 if (!(Workflow.READY_TO_BE_DISPATCHED.equals(state)
@@ -1349,7 +1353,6 @@ public class VendorPOXlsReport
                 if (j.getCreateDate().before(data.creationDate))
                     data.creationDate = j.getCreateDate();
 
-                data.repetitionWordCount += w.getRepetitionWordCount();
                 data.dellInternalRepsWordCount += w.getRepetitionWordCount();
                 data.tradosRepsWordCount = data.dellInternalRepsWordCount;
 
@@ -1366,40 +1369,66 @@ public class VendorPOXlsReport
                 data.trados85to94WordCount = data.medHiFuzzyMatchWordCount;
                 data.trados75to84WordCount = data.medFuzzyMatchWordCount;
                 data.trados50to74WordCount = data.lowFuzzyMatchWordCount;
-                // no match word count, do not consider Threshold
-
+                // all mt wordcount
+                data.tradosMTWordCount += w.getMtTotalWordCount();
                 // add the lowest fuzzies and sublev match to nomatch
                 data.dellNewWordsWordCount = w.getNoMatchWordCount()
                         + w.getLowFuzzyMatchWordCount();
-                data.tradosNoMatchWordCount += w.getThresholdNoMatchWordCount();
+                data.tradosNoMatchWordCount = data.dellNewWordsWordCount;
                 if (PageHandler.isInContextMatch(w.getJob()))
                 {
-                    data.segmentTmWordCount += w.getSegmentTmWordCount();
                     data.dellExactMatchWordCount += w.getSegmentTmWordCount();
                     data.dellInContextMatchWordCount += w.getInContextMatchWordCount();
                 }
                 else
                 {
-                    data.segmentTmWordCount += w.getTotalExactMatchWordCount();
                     data.dellExactMatchWordCount += w.getTotalExactMatchWordCount();
                     data.dellInContextMatchWordCount += w.getNoUseInContextMatchWordCount();
-                    data.contextMatchWordCount += 0;
                 }
                 data.trados100WordCount = data.dellExactMatchWordCount;
                 data.tradosInContextMatchWordCount = data.dellInContextMatchWordCount;
-                data.tradosContextMatchWordCount = data.contextMatchWordCount;
-                data.dellContextMatchWordCount = data.contextMatchWordCount;
-                data.totalWordCount += w.getTotalWordCount();
+                int mtExactMatchWordCount = w.getMtExactMatchWordCount();
+                int mtFuzzyNoMatchWordCount = w.getMtFuzzyNoMatchWordCount();
+                if (w.getIsSinceVersion87())
+                {
+                    data.tradosNoMatchWordCount -= mtFuzzyNoMatchWordCount;
+                    data.tradosRepsWordCount -= mtRepetitionsWordCount;
+                }
+                else
+                {
+                    if (mtThreshold == 100)
+                    {
+                        data.trados100WordCount -= mtExactMatchWordCount;
+                    }
+                    else if (mtThreshold < 100 && mtThreshold >= threshold)
+                    {
+                        if (mtThreshold >= 95)
+                        {
+                            data.trados95to99WordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        else if (mtThreshold < 95 && mtThreshold >= 85)
+                        {
+                            data.trados85to94WordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        else if (mtThreshold < 85 && mtThreshold >= 75)
+                        {
+                            data.trados75to84WordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        else if (mtThreshold < 75)
+                        {
+                            data.tradosNoMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        data.tradosRepsWordCount -= mtRepetitionsWordCount;
+                    }
+                    else if (mtThreshold < threshold)
+                    {
+                        data.tradosNoMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        data.tradosRepsWordCount -= mtRepetitionsWordCount;
+                    }
+                }
 
-                data.dellTotalWordCount = data.dellFuzzyMatchWordCount
-                        + data.dellInternalRepsWordCount + data.dellExactMatchWordCount
-                        + data.dellNewWordsWordCount + data.dellInContextMatchWordCount
-                        + data.dellContextMatchWordCount;
-                data.tradosTotalWordCount = data.trados100WordCount
-                        + data.tradosInContextMatchWordCount + data.tradosContextMatchWordCount
-                        + data.trados95to99WordCount + data.trados85to94WordCount
-                        + data.trados75to84WordCount + data.trados50to74WordCount
-                        + data.tradosNoMatchWordCount + data.tradosRepsWordCount;
+                data.dellTotalWordCount = w.getTotalWordCount();
+                data.tradosTotalWordCount = data.dellTotalWordCount;
 
                 Cost wfCost = ServerProxy.getCostingEngine().calculateCost(w, pivotCurrency,
                         p_recalculateFinishedWorkflow, Cost.EXPENSE, p_recalculateFinishedWorkflow);
@@ -1473,7 +1502,6 @@ public class VendorPOXlsReport
                             .add(data.dellContextMatchWordCountCost)
                             .add(data.dellFuzzyMatchWordCountCost)
                             .add(data.dellNewWordsWordCountCost);
-                    data.totalWordCountCost = data.dellTotalWordCountCost;
                     data.tradosTotalWordCountCost = data.trados100WordCountCost
                             .add(data.tradosInContextWordCountCost)
                             .add(data.tradosContextWordCountCost)
@@ -1521,7 +1549,6 @@ public class VendorPOXlsReport
         public long dellInternalRepsWordCount = 0;
         public long dellExactMatchWordCount = 0;
         public long dellInContextMatchWordCount = 0;
-        public long dellContextMatchWordCount = 0;
         public long dellFuzzyMatchWordCount = 0;
         public long dellNewWordsWordCount = 0;
         public long dellTotalWordCount = 0;
@@ -1529,7 +1556,6 @@ public class VendorPOXlsReport
         // "Trados" values
         public long trados100WordCount = 0;
         public long tradosInContextMatchWordCount = 0;
-        public long tradosContextMatchWordCount = 0;
         public long trados95to99WordCount = 0;
         public long trados85to94WordCount = 0;
         public long trados75to84WordCount = 0;
@@ -1537,16 +1563,13 @@ public class VendorPOXlsReport
         public long tradosNoMatchWordCount = 0;
         public long tradosRepsWordCount = 0;
         public long tradosTotalWordCount = 0;
+        public long tradosMTWordCount = 0;
 
         /* word counts */
-        public long repetitionWordCount = 0;
         public long lowFuzzyMatchWordCount = 0;
         public long medFuzzyMatchWordCount = 0;
         public long medHiFuzzyMatchWordCount = 0;
         public long hiFuzzyMatchWordCount = 0;
-        public long contextMatchWordCount = 0;
-        public long segmentTmWordCount = 0;
-        public long totalWordCount = 0;
 
         /* word count costs */
         public BigDecimal repetitionWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
@@ -1558,7 +1581,6 @@ public class VendorPOXlsReport
         public BigDecimal inContextMatchWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
         public BigDecimal segmentTmWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
         public BigDecimal noMatchWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
-        public BigDecimal totalWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);
 
         /* Dell values */
         public BigDecimal dellInternalRepsWordCountCost = new BigDecimal(BIG_DECIMAL_ZERO_STRING);

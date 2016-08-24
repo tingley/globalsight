@@ -345,14 +345,14 @@ public class ReviewerVendorPoXlsReportHelper
 
         if (data.headers[0] != null)
         {
-        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 7));
-            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 7), 
+        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 8));
+            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 8), 
             		getHeaderStyle(p_workbook));
         }
         else
         {
-        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 6));
-            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 6), 
+        	theSheet.addMergedRegion(new CellRangeAddress(2, 2, c, c + 7));
+            setRegionStyle(theSheet, new CellRangeAddress(2, 2, c, c + 7), 
             		getHeaderStyle(p_workbook));
         }
 
@@ -386,6 +386,11 @@ public class ReviewerVendorPoXlsReportHelper
         	cell_InContext.setCellValue(bundle.getString("lb_in_context_tm"));
         	cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
         }
+        
+        Cell cell_mt = getCell(fourRow, c++);
+        cell_mt.setCellValue(bundle.getString("lb_tm_mt"));
+        cell_mt.setCellStyle(getHeaderStyle(p_workbook));
+        
         Cell cell_Total = getCell(fourRow, c++);
         cell_Total.setCellValue(bundle.getString("lb_total"));
         cell_Total.setCellStyle(getHeaderStyle(p_workbook));
@@ -715,6 +720,11 @@ public class ReviewerVendorPoXlsReportHelper
                     theSheet.setColumnWidth(col - 1, numwidth * 256);
                 }
 
+                Cell cell_mt = getCell(theRow, col++);
+                cell_mt.setCellValue(data.tradosMTWordCount);
+                cell_mt.setCellStyle(getContentStyle(p_workbook));
+                theSheet.setColumnWidth(col - 1, numwidth * 256);
+                
                 Cell cell_Total = getCell(theRow, col++);
                 cell_Total.setCellValue(data.tradosTotalWordCount);
                 cell_Total.setCellStyle(getContentStyle(p_workbook));
@@ -840,7 +850,7 @@ public class ReviewerVendorPoXlsReportHelper
         	// word count costs
         	Cell cell_O = getCell(totalRow, c++);
         	cell_O.setCellFormula("SUM(O5:O" + lastRow + ")");
-        	cell_O.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	cell_O.setCellStyle(getSubTotalStyle(p_workbook));
         	
         	Cell cell_P = getCell(totalRow, c++);
         	cell_P.setCellFormula("SUM(P5:P" + lastRow + ")");
@@ -877,6 +887,10 @@ public class ReviewerVendorPoXlsReportHelper
         	Cell cell_X = getCell(totalRow, c++);
         	cell_X.setCellFormula("SUM(X5:X" + lastRow + ")");
         	cell_X.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	
+        	Cell cell_Y = getCell(totalRow, c++);
+            cell_Y.setCellFormula("SUM(Y5:Y" + lastRow + ")");
+            cell_Y.setCellStyle(getTotalMoneyStyle(p_workbook));
         }
         else
         {
@@ -910,7 +924,7 @@ public class ReviewerVendorPoXlsReportHelper
         	// word count costs
         	Cell cell_N = getCell(totalRow, c++);
         	cell_N.setCellFormula("SUM(N5:N" + lastRow + ")");
-        	cell_N.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	cell_N.setCellStyle(getSubTotalStyle(p_workbook));
         	
         	Cell cell_O = getCell(totalRow, c++);
         	cell_O.setCellFormula("SUM(O5:O" + lastRow + ")");
@@ -943,6 +957,10 @@ public class ReviewerVendorPoXlsReportHelper
         	Cell cell_V = getCell(totalRow, c++);
         	cell_V.setCellFormula("SUM(V5:V" + lastRow + ")");
         	cell_V.setCellStyle(getTotalMoneyStyle(p_workbook));
+        	
+        	Cell cell_W = getCell(totalRow, c++);
+            cell_W.setCellFormula("SUM(W5:W" + lastRow + ")");
+            cell_W.setCellStyle(getTotalMoneyStyle(p_workbook));
         }
 
         // add an extra column for Dell Tracking Use

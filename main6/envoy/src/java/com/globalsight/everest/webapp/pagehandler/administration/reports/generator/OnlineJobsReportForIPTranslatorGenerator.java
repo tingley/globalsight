@@ -2745,6 +2745,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
             String companyId = String.valueOf(j.getCompanyId());
             String companyName = CompanyWrapper.getCompanyNameById(companyId);
 
+            int threshold = j.getLeverageMatchThreshold();
             @SuppressWarnings("unchecked")
             List<FileProfile> allFileProfiles = j.getAllFileProfiles();
 
@@ -2799,6 +2800,7 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
             {
                 int mtThreshold = w.getMtThreshold();
                 int tmEngineWordCounts = w.getMtEngineWordCount();
+                int mtRepetitionsWordCount = w.getMtRepetitionsWordCount();
                 String state = w.getState();
                 // skip certain workflows
                 if (Workflow.IMPORT_FAILED.equals(state) || Workflow.CANCELLED.equals(state)
@@ -2872,8 +2874,45 @@ public class OnlineJobsReportForIPTranslatorGenerator implements ReportGenerator
                         : w.getNoUseInContextMatchWordCount();
                 data.totalWordCount = w.getTotalWordCount();
                 data.mtTotalWordCount = w.getMtTotalWordCount();
-                data.noMatchWordCount -= w.getMtFuzzyNoMatchWordCount();
-                data.repetitionWordCount -= w.getMtRepetitionsWordCount();
+                int mtExactMatchWordCount = w.getMtExactMatchWordCount();
+                int mtFuzzyNoMatchWordCount = w.getMtFuzzyNoMatchWordCount();
+                if (w.getIsSinceVersion87())
+                {
+                    data.noMatchWordCount -= mtFuzzyNoMatchWordCount;
+                    data.repetitionWordCount -= mtRepetitionsWordCount;
+                }
+                else
+                {
+                    if (mtThreshold == 100)
+                    {
+                        data.segmentTmWordCount -= mtExactMatchWordCount;
+                    }
+                    else if (mtThreshold < 100 && mtThreshold >= threshold)
+                    {
+                        if (mtThreshold >= 95)
+                        {
+                            data.hiFuzzyMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        else if (mtThreshold < 95 && mtThreshold >= 85)
+                        {
+                            data.medHiFuzzyMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        else if (mtThreshold < 85 && mtThreshold >= 75)
+                        {
+                            data.medFuzzyMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        else if (mtThreshold < 75)
+                        {
+                            data.noMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        data.repetitionWordCount -= mtRepetitionsWordCount;
+                    }
+                    else if (mtThreshold < threshold)
+                    {
+                        data.noMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        data.repetitionWordCount -= mtRepetitionsWordCount;
+                    }
+                }
 
                 /*
                  * Date da1 = new Date(); // They must be in front of calculate

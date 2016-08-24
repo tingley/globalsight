@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file original="ÜbersetzungsTest_WinForms\Resources-2" source-language="en-US" target-language="zh" datatype="resx">
+    <body>
+      <trans-unit id="TEXT1" extradata="1">
+        <source>Bill of materials</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="TEXT2" extradata="1">
+        <source>Material test</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="TITLE1" extradata="1">
+        <source>Translation Test WinForms</source>
+        <target state="new" />
+      </trans-unit>
+    </body>
+  </file>
+  <file original="ÜbersetzungsTest_WPF\MainWindow" source-language="en-US" target-language="zh" datatype="resx">
+    <body>
+      <trans-unit id="bCopy_Content" extradata="1">
+        <source>Copy</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="bHelp_Content" extradata="1">
+        <source>Help</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="bNew_Content" extradata="1">
+        <source>New</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="bOpen_Content" extradata="1">
+        <source>Open</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="bPaste_Content" extradata="1">
+        <source>Paste</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="bPrint_Content" extradata="1">
+        <source>Print</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="Button_Content1" extradata="1">
+        <source>Right Pane</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="Button_Content2" extradata="1">
+        <source>Botom Pane</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="Button_Content3" extradata="1">
+        <source>Right Pane</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="Button_Content4" extradata="1">
+        <source>Botom Pane</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="mmFile_Content" extradata="1">
+        <source>File</source>
+        <target state="new" />
+      </trans-unit>
+    </body>
+  </file>
+  <file original="ÜbersetzungsTest_WPF\Resources" source-language="en-US" target-language="zh" datatype="resx">
+    <body>
+      <trans-unit id="ARTICLE_NAME_TITLE" extradata="1">
+        <source>Article name</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="ARTICLE_NUMBER_TITLE" extradata="1">
+        <source>Article number</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="TEST" extradata="1">
+        <source>Test</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="TRANSLATION_TEST_TITLE" extradata="1">
+        <source>Translation Test</source>
+        <target state="new" />
+      </trans-unit>
+    </body>
+  </file>
+  <file original="WpfApplication1\MainWindow" source-language="en-US" target-language="zh" datatype="resx">
+    <body>
+      <trans-unit id="Button_Content1" extradata="1">
+        <source>Button</source>
+        <target state="new" />
+      </trans-unit>
+      <trans-unit id="Window_Title" extradata="1">
+        <source>MainWindow</source>
+        <target state="new" />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

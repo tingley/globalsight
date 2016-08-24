@@ -45,7 +45,7 @@ public class ParamTradosMatchesPair extends ParamObjectPair
     {
         List result = new ArrayList();
 
-        this.countWorkCount(workflowData, p_workflow);
+        this.countWordCount(workflowData, p_workflow);
         
         //For word count
         Param wordCountParam = this.getParam().getChildParams()[0];
@@ -89,6 +89,11 @@ public class ParamTradosMatchesPair extends ParamObjectPair
                 workflowData.setTradosInContextWordCount(0l);
             }
             if (children[7].getValue())
+            {
+                result.add(new Long(workflowData.getTradosMTWordCount()));
+                workflowData.setTradosMTWordCount(0l);
+            }
+            if (children[8].getValue())
             {
                 result.add(new Long(workflowData.getTradosTotalWordCount()));
                 workflowData.setTradosTotalWordCount(0l);
@@ -188,6 +193,10 @@ public class ParamTradosMatchesPair extends ParamObjectPair
             }
             if (children[7].getValue())
             {
+                result.add(new Long(workflowData.getTradosMTWordCountAmount()));
+            }
+            if (children[8].getValue())
+            {
                 result.add(new Long(workflowData.getTradosTotalWordCountAmount()));
             }
         }
@@ -235,38 +244,79 @@ public class ParamTradosMatchesPair extends ParamObjectPair
         return result;
     }
     
-    private void countWorkCount(ProjectWorkflowData p_workflowData, Workflow p_workflow)
+    private void countWordCount(ProjectWorkflowData p_workflowData, Workflow p_workflow)
     {
-        p_workflowData.setTradosRepsWordCount(p_workflow
-                .getRepetitionWordCount());
+        int mtThreshold = p_workflow.getMtThreshold();
+        int threshold = p_workflow.getJob().getLeverageMatchThreshold();
+        int trados95to99WordCount = p_workflow.getThresholdHiFuzzyWordCount();
+        int trados85to94WordCount = p_workflow.getThresholdMedHiFuzzyWordCount();
+        int trados75to84WordCount = p_workflow.getThresholdMedFuzzyWordCount();
+        int tradosNoMatchWordCount = p_workflow.getThresholdLowFuzzyWordCount()
+                + p_workflow.getThresholdNoMatchWordCount();
+        int trados100WordCount = (PageHandler.isInContextMatch(p_workflow.getJob())) ? p_workflow
+                .getSegmentTmWordCount() : p_workflow.getTotalExactMatchWordCount();
+        int tradosReptitionsWordCount = p_workflow.getRepetitionWordCount();
 
-        p_workflowData.setTrados95to99WordCount(p_workflow.getThresholdHiFuzzyWordCount());
-        p_workflowData.setTrados85to94WordCount(p_workflow.getThresholdMedHiFuzzyWordCount());
-        p_workflowData.setTrados75to84WordCount(p_workflow.getThresholdMedFuzzyWordCount());
+        int tradosMTWordCount = p_workflow.getMtTotalWordCount();
+        int mtExactMatchWordCount = p_workflow.getMtExactMatchWordCount();
+        int mtFuzzyNoMatchWordCount = p_workflow.getMtFuzzyNoMatchWordCount();
+        int mtRepetitionsWordCount = p_workflow.getMtRepetitionsWordCount();
+
+        if (p_workflow.getIsSinceVersion87())
+        {
+            tradosNoMatchWordCount -= mtFuzzyNoMatchWordCount;
+            tradosReptitionsWordCount -= mtRepetitionsWordCount;
+        }
+        else
+        {
+            if (mtThreshold == 100)
+            {
+                trados100WordCount = trados100WordCount - mtExactMatchWordCount;
+            }
+            else if (mtThreshold < 100 && mtThreshold >= threshold)
+            {
+                if (mtThreshold >= 95)
+                {
+                    trados95to99WordCount -= mtFuzzyNoMatchWordCount;
+                }
+                else if (mtThreshold < 95 && mtThreshold >= 85)
+                {
+                    trados85to94WordCount -= mtFuzzyNoMatchWordCount;
+                }
+                else if (mtThreshold < 85 && mtThreshold >= 75)
+                {
+                    trados75to84WordCount -= mtFuzzyNoMatchWordCount;
+                }
+                else if (mtThreshold < 75)
+                {
+                    tradosNoMatchWordCount -= mtFuzzyNoMatchWordCount;
+                }
+                tradosReptitionsWordCount -= mtRepetitionsWordCount;
+            }
+            else if (mtThreshold < threshold)
+            {
+                tradosNoMatchWordCount -= mtFuzzyNoMatchWordCount;
+                tradosReptitionsWordCount -= mtRepetitionsWordCount;
+            }
+        }
+        p_workflowData.setTradosRepsWordCount(tradosReptitionsWordCount);
+
+        p_workflowData.setTrados95to99WordCount(trados95to99WordCount);
+        p_workflowData.setTrados85to94WordCount(trados85to94WordCount);
+        p_workflowData.setTrados75to84WordCount(trados75to84WordCount);
         p_workflowData.setTrados50to74WordCount(p_workflow.getThresholdLowFuzzyWordCount());
 
-        p_workflowData.setTradosNoMatchWordCount(
-                p_workflow.getThresholdNoMatchWordCount());
+        p_workflowData.setTradosNoMatchWordCount(tradosNoMatchWordCount);
 
-		p_workflowData.setTrados100WordCount((PageHandler
-				.isInContextMatch(p_workflow.getJob())) ? p_workflow
-				.getSegmentTmWordCount() : p_workflow
-				.getTotalExactMatchWordCount());
+        p_workflowData.setTrados100WordCount(trados100WordCount);
+        
+        p_workflowData.setTradosMTWordCount(tradosMTWordCount);
 
-        p_workflowData.setTradosInContextWordCount((PageHandler
-                .isInContextMatch(p_workflow.getJob())) ? p_workflow
-                .getInContextMatchWordCount() : p_workflow
+        p_workflowData.setTradosInContextWordCount((PageHandler.isInContextMatch(p_workflow
+                .getJob())) ? p_workflow.getInContextMatchWordCount() : p_workflow
                 .getNoUseInContextMatchWordCount());
 
-        p_workflowData.setTradosTotalWordCount(
-                p_workflowData.getTrados100WordCount() + 
-                p_workflowData.getTradosInContextWordCount() + 
-                p_workflowData.getTrados95to99WordCount() +
-                p_workflowData.getTrados85to94WordCount() + 
-                p_workflowData.getTrados75to84WordCount() +
-                p_workflowData.getTrados50to74WordCount() +
-                p_workflowData.getTradosRepsWordCount() + 
-                p_workflowData.getTradosNoMatchWordCount());
+        p_workflowData.setTradosTotalWordCount(p_workflow.getTotalWordCount());
     }
     
     private void countWordCost(ProjectWorkflowData p_workflowData, Workflow p_workflow)

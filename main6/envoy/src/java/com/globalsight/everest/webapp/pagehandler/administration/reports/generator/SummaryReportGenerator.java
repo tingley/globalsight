@@ -94,7 +94,7 @@ public class SummaryReportGenerator implements
 
     public SummaryReportGenerator()
     {
-    	isHidden = true; // set hidden
+        isHidden = true; // set hidden
     }
 
     /**
@@ -108,7 +108,7 @@ public class SummaryReportGenerator implements
     {
         bundle = p_searchOptions.getBundle();
         moneyFormatString = ReportUtil.getCurrencySymbol(p_searchOptions
-        		.getCurrency()) + MONEY_FORMAT;
+                .getCurrency()) + MONEY_FORMAT;
         File file = ReportHelper.getXLSReportFile(getReportType(), null);
         Workbook workbook = new SXSSFWorkbook();
         String monthlySheetName = bundle.getString("lb_monthly");
@@ -155,21 +155,21 @@ public class SummaryReportGenerator implements
             ReportSearchOptions p_options,
             Map<String, ReportWordCount> p_wordCounts) throws Exception
     {
-    	List<String> searchMonths = p_options.getMonths();
-    	
+        List<String> searchMonths = p_options.getMonths();
+        
         CellStyle style = getHeaderStyle(p_workbook);
 
         CellStyle style1 = getHeaderStyle(p_workbook, null, null, null, null);
 
         CellStyle styleTB = getHeaderStyle(p_workbook, CellStyle.BORDER_THIN,
-        		null, CellStyle.BORDER_THIN, null);
+                null, CellStyle.BORDER_THIN, null);
 
         CellStyle styleTB2 = getHeaderStyle(p_workbook, CellStyle.BORDER_THIN,
-        		null, CellStyle.BORDER_THIN, null);
+                null, CellStyle.BORDER_THIN, null);
         styleTB2.setAlignment(CellStyle.ALIGN_RIGHT);
 
         CellStyle styleLR = getHeaderStyle(p_workbook, null,
-        		CellStyle.BORDER_THIN, null, CellStyle.BORDER_THIN);
+                CellStyle.BORDER_THIN, null, CellStyle.BORDER_THIN);
         
         int row = ROWNUMBER, column = 0;
 
@@ -179,9 +179,9 @@ public class SummaryReportGenerator implements
         cell_A_Header.setCellValue(bundle.getString("lb_sumOfTotal"));
         cell_A_Header.setCellStyle(style);
         p_sheet.addMergedRegion(new CellRangeAddress(row, row,
-        		column, column + searchMonths.size()));
+                column, column + searchMonths.size()));
         setRegionStyle(p_sheet, new CellRangeAddress(row, row,
-        		column, column + searchMonths.size()), style);
+                column, column + searchMonths.size()), style);
         Cell cell_B_Header = getCell(getRow(p_sheet, row), column);
         cell_B_Header.setCellValue(bundle.getString("lb_month"));
         cell_B_Header.setCellStyle(style);
@@ -193,9 +193,9 @@ public class SummaryReportGenerator implements
         cell_A.setCellStyle(style);
         for (String yearAndMonth : searchMonths)
         {
-        	Cell cell_Month = getCell(getRow(p_sheet, row), column++);
-        	cell_Month.setCellValue(Double.valueOf(yearAndMonth.substring(4)));
-        	cell_Month.setCellStyle(styleTB);
+            Cell cell_Month = getCell(getRow(p_sheet, row), column++);
+            cell_Month.setCellValue(Double.valueOf(yearAndMonth.substring(4)));
+            cell_Month.setCellStyle(styleTB);
         }
         p_sheet.setColumnWidth(column, 10 * 256);
         Cell cell_LocaleTotal = getCell(getRow(p_sheet, row), column++);
@@ -213,9 +213,9 @@ public class SummaryReportGenerator implements
         Set<String> locales = getLocals(p_wordCounts);
         for (String locale : locales)
         {
-        	Cell cell_A_Locale = getCell(getRow(p_sheet, row), column++);
-        	cell_A_Locale.setCellValue(locale);
-        	cell_A_Locale.setCellStyle(styleLR);
+            Cell cell_A_Locale = getCell(getRow(p_sheet, row), column++);
+            cell_A_Locale.setCellValue(locale);
+            cell_A_Locale.setCellStyle(styleLR);
             for (String yearAndMonth : searchMonths)
             {
                 ReportWordCount reportWordCount = p_wordCounts
@@ -242,10 +242,10 @@ public class SummaryReportGenerator implements
             cell_GrandTotal.setCellStyle(style);
             for (int i = 0; i < searchMonths.size(); i++)
             {
-            	Cell cell_MonthTotal = getCell(getRow(p_sheet, row), column);
-            	cell_MonthTotal.setCellFormula(getSumOfColumn(
+                Cell cell_MonthTotal = getCell(getRow(p_sheet, row), column);
+                cell_MonthTotal.setCellFormula(getSumOfColumn(
                         dataRow, row - 1, column));
-            	cell_MonthTotal.setCellStyle(styleTB);
+                cell_MonthTotal.setCellStyle(styleTB);
                 column++;
             }
             Cell cell_Total = getCell(getRow(p_sheet, row), column);
@@ -261,14 +261,14 @@ public class SummaryReportGenerator implements
     private void createLeveragingSheet(Workbook p_workbook, Sheet p_sheet,
             Map<String, ReportWordCount> p_wordCounts) throws Exception
     {
-    	addLeveragingSheetHeader(p_workbook, p_sheet);
-    	addLeveragingSheetData(p_workbook, p_sheet, p_wordCounts);
+        addLeveragingSheetHeader(p_workbook, p_sheet);
+        addLeveragingSheetData(p_workbook, p_sheet, p_wordCounts);
     }
     
     private void addLeveragingSheetHeader(Workbook p_workbook, Sheet p_sheet)
-    	throws Exception
-	{
-    	int row = ROWNUMBER, column = 0;
+        throws Exception
+    {
+        int row = ROWNUMBER, column = 0;
 
         Row thirRow = getRow(p_sheet, row);
         Cell cell_A = getCell(thirRow, column++);
@@ -277,7 +277,7 @@ public class SummaryReportGenerator implements
         
         Cell cell_B = getCell(thirRow, column++);
         cell_B.setCellValue(bundle
-        		.getString("jobinfo.tradosmatches.invoice.per100matches"));
+                .getString("jobinfo.tradosmatches.invoice.per100matches"));
         cell_B.setCellStyle(getHeaderOrangeStyle(p_workbook));
         
         Cell cell_C = getCell(thirRow, column++);
@@ -315,6 +315,10 @@ public class SummaryReportGenerator implements
             cell_Context.setCellValue(bundle.getString("lb_context_matches"));
             cell_Context.setCellStyle(getHeaderOrangeStyle(p_workbook));
         }
+        
+        Cell cell_MT = getCell(thirRow, column++);
+        cell_MT.setCellValue(bundle.getString("lb_tm_mt"));
+        cell_MT.setCellStyle(getHeaderOrangeStyle(p_workbook));
 
         Cell cell_Total = getCell(thirRow, column++);
         cell_Total.setCellValue(bundle.getString("lb_total"));
@@ -324,12 +328,12 @@ public class SummaryReportGenerator implements
         Cell cell_Leveraging = getCell(thirRow, column++);
         cell_Leveraging.setCellValue(bundle.getString("lb_leveraging"));
         cell_Leveraging.setCellStyle(getHeaderOrangeStyle(p_workbook));
-	}
+    }
     
     private void addLeveragingSheetData(Workbook p_workbook, Sheet p_sheet,
-    		Map<String, ReportWordCount> p_wordCounts)throws Exception
-	{
-    	// Prepare report data
+            Map<String, ReportWordCount> p_wordCounts)throws Exception
+    {
+        // Prepare report data
         Map<String, ReportWordCount> sumWordCounts = new HashMap<String, ReportWordCount>();
         for (String key : p_wordCounts.keySet())
         {
@@ -356,10 +360,10 @@ public class SummaryReportGenerator implements
             ReportWordCount sumWordCount = sumWordCounts.get(sumKey);
             if (sumWordCount != null)
             {
-            	Cell cell_A_Lang = getCell(getRow(p_sheet, row), column++);
-            	cell_A_Lang.setCellValue(sumKey);
-            	cell_A_Lang.setCellStyle(getHeaderStyle(p_workbook));
-            	
+                Cell cell_A_Lang = getCell(getRow(p_sheet, row), column++);
+                cell_A_Lang.setCellValue(sumKey);
+                cell_A_Lang.setCellStyle(getHeaderStyle(p_workbook));
+                
                 addNumberCell(p_sheet, column++, row,
                         sumWordCount.getTrados100WordCount(),
                         getHeaderStyle(p_workbook));
@@ -398,6 +402,9 @@ public class SummaryReportGenerator implements
                             getHeaderStyle(p_workbook));
                 }
                 
+                addNumberCell(p_sheet, column++, row, sumWordCount.getTradosMTWordCount(),
+                        getHeaderStyle(p_workbook));
+                
                 addNumberCell(p_sheet, column++, row,
                         sumWordCount.getTradosTotalWordCount(), getHeaderStyle(p_workbook));
                 String leveraging = "(1-F" + (row + 1) + "/"
@@ -413,12 +420,12 @@ public class SummaryReportGenerator implements
         }
         
         addLeveragingSheetTotal(p_workbook, p_sheet, row);
-	}
+    }
     
     private void addLeveragingSheetTotal(Workbook p_workbook, Sheet p_sheet,
-    		int row)throws Exception
-	{
-    	// Total Row
+            int row)throws Exception
+    {
+        // Total Row
         if (row > (ROWNUMBER + 1))
         {
             int column = 0;
@@ -427,10 +434,10 @@ public class SummaryReportGenerator implements
             cell_GrandTotal.setCellStyle(getHeaderOrangeStyle(p_workbook));
             while (column < (p_sheet.getRow(row - 1).getPhysicalNumberOfCells() - 1))
             {
-            	Cell totalCell = getCell(getRow(p_sheet, row), column);
-            	totalCell.setCellFormula(getSumOfColumn(
+                Cell totalCell = getCell(getRow(p_sheet, row), column);
+                totalCell.setCellFormula(getSumOfColumn(
                         ROWNUMBER + 1, row - 1, column));
-            	totalCell.setCellStyle(getHeaderOrangeStyle(p_workbook));
+                totalCell.setCellStyle(getHeaderOrangeStyle(p_workbook));
                 column++;
             }
             String leveraging = "(1-F" + (row + 1) + "/"
@@ -440,10 +447,10 @@ public class SummaryReportGenerator implements
             cell_TotalLeveraging.setCellFormula(leveraging);
             cell_TotalLeveraging.setCellStyle(getFloatSumStyle(p_workbook));
         }
-	}
+    }
     
     /**
-     * Creates Leveraging Sheet
+     * Creates Cost Sheet
      */
     private void createCostsSheet(Workbook p_workbook, Sheet p_sheet,
             ReportSearchOptions p_options,
@@ -456,25 +463,25 @@ public class SummaryReportGenerator implements
         int costCol;
         Map<String, Double> p_ratesMap = null;
         for(int r = 2; r < rowLen + ROWNUMBER; r++){
-        	Row theRow = getRow(p_sheet, r);
-        	theRow.removeCell(getCell(theRow, column));
+            Row theRow = getRow(p_sheet, r);
+            theRow.removeCell(getCell(theRow, column));
         }
         p_sheet.removeColumnBreak(column);
         // Rates Columns
         for (int dis = column - 1; column < colLen + dis - 2; column++)
         {
-        	Cell cell_From = p_sheet.getRow(row).getCell(column - dis);
-        	Cell cell_To = getCell(p_sheet.getRow(row), column);
-        	cell_To.setCellValue(cell_From.getStringCellValue());
-        	cell_To.setCellStyle(cell_From.getCellStyle());
+            Cell cell_From = p_sheet.getRow(row).getCell(column - dis);
+            Cell cell_To = getCell(p_sheet.getRow(row), column);
+            cell_To.setCellValue(cell_From.getStringCellValue());
+            cell_To.setCellStyle(cell_From.getCellStyle());
             p_sheet.setColumnWidth(column, p_sheet.getColumnWidth(column - dis));
             // Adds Rates for Match Type
             for (int rateRow = row + 1; rateRow <= rowLen; rateRow++)
             {
                 String matchType = p_sheet.getRow(ROWNUMBER)
-                	.getCell(column).getStringCellValue();
+                    .getCell(column).getStringCellValue();
                 String targetLocale = p_sheet.getRow(rateRow)
-                	.getCell(0).getStringCellValue();
+                    .getCell(0).getStringCellValue();
                 double rate = getRate(matchType, targetLocale, p_ratesMap);
                 addNumberCell(p_sheet, column, rateRow, rate, getMoneyStyle(p_workbook));
             }
@@ -491,7 +498,7 @@ public class SummaryReportGenerator implements
         p_sheet.setColumnWidth(column, 20 * 256);
         Cell cell_CostNoLeveraging = getCell(getRow(p_sheet, row), column++);
         cell_CostNoLeveraging.setCellValue(bundle
-        		.getString("lb_report_costNoLeveraging"));
+                .getString("lb_report_costNoLeveraging"));
         cell_CostNoLeveraging.setCellStyle(getHeaderOrangeStyle(p_workbook));
         
         p_sheet.setColumnWidth(column, 15 * 256);
@@ -538,14 +545,14 @@ public class SummaryReportGenerator implements
             column = 1;
             for (; column < colLen - 1; column++)
             {
-            	Cell cell_Total = getCell(getRow(p_sheet, row), column);
-            	cell_Total.setCellFormula(getSumOfColumn(
+                Cell cell_Total = getCell(getRow(p_sheet, row), column);
+                cell_Total.setCellFormula(getSumOfColumn(
                         ROWNUMBER + 1, row - 1, column));
-            	cell_Total.setCellStyle(getHeaderOrangeStyle(p_workbook));
+                cell_Total.setCellStyle(getHeaderOrangeStyle(p_workbook));
             }
             for (; column < costCol; column++)
             {
-            	Cell cell = getCell(getRow(p_sheet, row), column);
+                Cell cell = getCell(getRow(p_sheet, row), column);
                 cell.setCellValue("");
                 cell.setCellStyle(getHeaderOrangeStyle(p_workbook));
             }
@@ -616,12 +623,12 @@ public class SummaryReportGenerator implements
         // Project Search option
         Cell cell_Project = getCell(getRow(p_sheet, ++row), 0);
         cell_Project.setCellValue(bundle
-        		.getString("lb_project") + mark);
+                .getString("lb_project") + mark);
         cell_Project.setCellStyle(getContentStyle(p_workbook));        
         if (p_options.isAllProjects())
         {    
-        	temp.setLength(0);
-        	temp.append(bundle.getString("lb_all"));     
+            temp.setLength(0);
+            temp.append(bundle.getString("lb_all"));     
         }
         else
         {
@@ -641,12 +648,12 @@ public class SummaryReportGenerator implements
         // Status Search option
         Cell cell_Status = getCell(getRow(p_sheet, ++row), 0);
         cell_Status.setCellValue(bundle
-        		.getString("lb_status") + mark);
+                .getString("lb_status") + mark);
         cell_Status.setCellStyle(getContentStyle(p_workbook));
         if (p_options.isAllJobStatus())
         {          
-        	temp.setLength(0);
-        	temp.append(bundle.getString("lb_all")); 
+            temp.setLength(0);
+            temp.append(bundle.getString("lb_all")); 
         }
         else
         {
@@ -665,13 +672,13 @@ public class SummaryReportGenerator implements
         // Target Locales Search option
         Cell cell_TargetLang = getCell(getRow(p_sheet, ++row), 0);
         cell_TargetLang.setCellValue(bundle
-        		.getString("lb_target_language") + mark);
+                .getString("lb_target_language") + mark);
         cell_TargetLang.setCellStyle(getContentStyle(p_workbook));
         if (p_options.isAllTargetLangs())
         {
             
-        	temp.setLength(0);
-        	temp.append(bundle.getString("lb_all"));
+            temp.setLength(0);
+            temp.append(bundle.getString("lb_all"));
         }
         else
         {
@@ -792,10 +799,23 @@ public class SummaryReportGenerator implements
                     summaryDatas.put(key, reportWordCount);
                 }
 
+                int mtThreshold = w.getMtThreshold();
+                int threshold = w.getJob().getLeverageMatchThreshold();
+                int trados95to99WordCount = w.getThresholdHiFuzzyWordCount();
+                int trados85to94WordCount = w.getThresholdMedHiFuzzyWordCount();
+                int trados75to84WordCount = w.getThresholdMedFuzzyWordCount();
+                int tradosNoMatchWordCount = w.getThresholdLowFuzzyWordCount()
+                        + w.getThresholdNoMatchWordCount();
+                int trados100WordCount = 0;
+                int tradosReptitionsWordCount = w.getRepetitionWordCount();
+
+                int tradosMTWordCount = w.getMtTotalWordCount();
+                int mtExactMatchWordCount = w.getMtExactMatchWordCount();
+                int mtFuzzyNoMatchWordCount = w.getMtFuzzyNoMatchWordCount();
+                int mtRepetitionsWordCount = w.getMtRepetitionsWordCount();
                 if (PageHandler.isInContextMatch(w.getJob()))
                 {
-                    reportWordCount.addTrados100WordCount(w
-                            .getSegmentTmWordCount());
+                    trados100WordCount= w.getSegmentTmWordCount();
                     reportWordCount.addTradosInContextMatchWordCount(w
                             .getInContextMatchWordCount());
 
@@ -810,25 +830,57 @@ public class SummaryReportGenerator implements
                 }
                 else
                 {
-                    reportWordCount.addTrados100WordCount(w
-                            .getTotalExactMatchWordCount());
+                    trados100WordCount = w.getTotalExactMatchWordCount();
                     reportWordCount.addTradosInContextMatchWordCount(w
                             .getNoUseInContextMatchWordCount());
                     reportWordCount.addTradosContextMatchWordCount(0);
                 }
+                
+                if (w.getIsSinceVersion87())
+                {
+                    tradosNoMatchWordCount -= mtFuzzyNoMatchWordCount;
+                    tradosReptitionsWordCount -= mtRepetitionsWordCount;
+                }
+                else
+                {
+                    if (mtThreshold == 100)
+                    {
+                        trados100WordCount = trados100WordCount - mtExactMatchWordCount;
+                    }
+                    else if (mtThreshold < 100 && mtThreshold >= threshold)
+                    {
+                        if (mtThreshold >= 95)
+                        {
+                            trados95to99WordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        else if (mtThreshold < 95 && mtThreshold >= 85)
+                        {
+                            trados85to94WordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        else if (mtThreshold < 85 && mtThreshold >= 75)
+                        {
+                            trados75to84WordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        else if (mtThreshold < 75)
+                        {
+                            tradosNoMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        tradosReptitionsWordCount -= mtRepetitionsWordCount;
+                    }
+                    else if (mtThreshold < threshold)
+                    {
+                        tradosNoMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        tradosReptitionsWordCount -= mtRepetitionsWordCount;
+                    }
+                }
 
-                reportWordCount.addTrados95to99WordCount(w
-                        .getThresholdHiFuzzyWordCount());
-                reportWordCount.addTrados85to94WordCount(w
-                        .getThresholdMedHiFuzzyWordCount());
-                reportWordCount.addTrados75to84WordCount(w
-                        .getThresholdMedFuzzyWordCount());
-                reportWordCount.addTrados50to74WordCount(w
-                        .getThresholdLowFuzzyWordCount());
-                reportWordCount.addTradosNoMatchWordCount(w
-                        .getThresholdNoMatchWordCount());
-                reportWordCount.addTradosRepsWordCount(w
-                        .getRepetitionWordCount());
+                reportWordCount.addTrados100WordCount(trados100WordCount);
+                reportWordCount.addTrados95to99WordCount(trados95to99WordCount);
+                reportWordCount.addTrados85to94WordCount(trados85to94WordCount);
+                reportWordCount.addTrados75to84WordCount(trados75to84WordCount);
+                reportWordCount.addTradosNoMatchWordCount(tradosNoMatchWordCount);
+                reportWordCount.addTradosRepsWordCount(tradosReptitionsWordCount);
+                reportWordCount.addTradosMTWordCount(tradosMTWordCount);
             }
         }
         return summaryDatas;
@@ -1001,8 +1053,8 @@ public class SummaryReportGenerator implements
     {
         try
         {
-        	Cell cell = getCell(getRow(p_sheet, p_row), p_column);
-        	cell.setCellValue(p_value);
+            Cell cell = getCell(getRow(p_sheet, p_row), p_column);
+            cell.setCellValue(p_value);
             if (cs != null)
                 cell.setCellStyle(cs);
         }
@@ -1075,146 +1127,146 @@ public class SummaryReportGenerator implements
     }
     
     private CellStyle getHeaderStyle(Workbook p_workbook, Short top, Short right,
-    		Short bottom, Short left){
-    	Font headerFont = p_workbook.createFont();
+            Short bottom, Short left){
+        Font headerFont = p_workbook.createFont();
         headerFont.setColor(IndexedColors.BLACK.getIndex());
         headerFont.setUnderline(Font.U_NONE);
         headerFont.setFontName("Arial");
         headerFont.setFontHeightInPoints((short) 9);
-    	
+        
         CellStyle cs = p_workbook.createCellStyle();
         cs.setFont(headerFont);
-    	cs.setWrapText(true);
-        if(top != null){        	
-        	cs.setBorderTop(top);
+        cs.setWrapText(true);
+        if(top != null){            
+            cs.setBorderTop(top);
         }
-        if(right != null){      	
-        	cs.setBorderRight(right);
+        if(right != null){          
+            cs.setBorderRight(right);
         }
-        if(bottom != null){      	
-        	cs.setBorderBottom(bottom);
+        if(bottom != null){         
+            cs.setBorderBottom(bottom);
         }
-        if(left != null){	
-        	cs.setBorderLeft(left);
+        if(left != null){   
+            cs.setBorderLeft(left);
         }
         
         return cs;
     }
     
     private CellStyle getHeaderStyle(Workbook p_workbook){
-    	if(headerStyle == null)
-    	{   		   		
-    		headerStyle = getCommonHeaderStyle(p_workbook);
-    	}
+        if(headerStyle == null)
+        {                   
+            headerStyle = getCommonHeaderStyle(p_workbook);
+        }
         return headerStyle;
     }
     
     private CellStyle getCommonHeaderStyle(Workbook p_workbook)
-    {		
-		Font headerFont = p_workbook.createFont();
-		headerFont.setColor(IndexedColors.BLACK.getIndex());
-		headerFont.setUnderline(Font.U_NONE);
-		headerFont.setFontName("Arial");
-		headerFont.setFontHeightInPoints((short) 9);
-		
-		CellStyle cs = p_workbook.createCellStyle();
-		cs.setFont(headerFont);
-		cs.setWrapText(true);    	
-		cs.setBorderTop(CellStyle.BORDER_THIN);     	
-		cs.setBorderRight(CellStyle.BORDER_THIN);   	
-		cs.setBorderBottom(CellStyle.BORDER_THIN);
-		cs.setBorderLeft(CellStyle.BORDER_THIN);
-		return cs;
+    {       
+        Font headerFont = p_workbook.createFont();
+        headerFont.setColor(IndexedColors.BLACK.getIndex());
+        headerFont.setUnderline(Font.U_NONE);
+        headerFont.setFontName("Arial");
+        headerFont.setFontHeightInPoints((short) 9);
+        
+        CellStyle cs = p_workbook.createCellStyle();
+        cs.setFont(headerFont);
+        cs.setWrapText(true);       
+        cs.setBorderTop(CellStyle.BORDER_THIN);         
+        cs.setBorderRight(CellStyle.BORDER_THIN);       
+        cs.setBorderBottom(CellStyle.BORDER_THIN);
+        cs.setBorderLeft(CellStyle.BORDER_THIN);
+        return cs;
     }
     
     private CellStyle getHeaderOrangeStyle(Workbook p_workbook){
-    	if(headerOrangeStyle == null)
-    	{  		
-    		CellStyle cs = getCommonHeaderStyle(p_workbook);
-    		cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
-    		cs.setFillForegroundColor(IndexedColors.ORANGE.getIndex());
-    		
-    		headerOrangeStyle = cs;
-    	}
+        if(headerOrangeStyle == null)
+        {       
+            CellStyle cs = getCommonHeaderStyle(p_workbook);
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillForegroundColor(IndexedColors.ORANGE.getIndex());
+            
+            headerOrangeStyle = cs;
+        }
         return headerOrangeStyle;
     }
     
     private CellStyle getFloatStyle(Workbook p_workbook){
-    	if(floatStyle == null)
-    	{   		
-    		DataFormat formatDouble = p_workbook.createDataFormat();
-    		CellStyle cs = getCommonHeaderStyle(p_workbook);
-    		cs.setDataFormat(formatDouble.getFormat(DOUBLE_FORMAT));
-    		
-    		floatStyle = cs;
-    	}
+        if(floatStyle == null)
+        {           
+            DataFormat formatDouble = p_workbook.createDataFormat();
+            CellStyle cs = getCommonHeaderStyle(p_workbook);
+            cs.setDataFormat(formatDouble.getFormat(DOUBLE_FORMAT));
+            
+            floatStyle = cs;
+        }
         return floatStyle;
     }
     
     private CellStyle getFloatSumStyle(Workbook p_workbook){
-    	if(floatSumStyle == null)
-    	{   		
-    		DataFormat formatDouble = p_workbook.createDataFormat();
-    		CellStyle cs = getCommonHeaderStyle(p_workbook);
-    		cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
-    		cs.setFillForegroundColor(IndexedColors.ORANGE.getIndex());
-    		cs.setDataFormat(formatDouble.getFormat(DOUBLE_FORMAT));
-   		
-    		floatSumStyle = cs;
-    	}
+        if(floatSumStyle == null)
+        {           
+            DataFormat formatDouble = p_workbook.createDataFormat();
+            CellStyle cs = getCommonHeaderStyle(p_workbook);
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillForegroundColor(IndexedColors.ORANGE.getIndex());
+            cs.setDataFormat(formatDouble.getFormat(DOUBLE_FORMAT));
+        
+            floatSumStyle = cs;
+        }
         return floatSumStyle;
     }
     
     private CellStyle getMoneyStyle(Workbook p_workbook){
-    	if(moneyStyle == null)
-    	{   		
-    		DataFormat moneyFormat = p_workbook.createDataFormat();
-    		CellStyle cs = getCommonHeaderStyle(p_workbook);
-    		cs.setDataFormat(moneyFormat.getFormat(moneyFormatString));
-   		
-    		moneyStyle = cs;
-    	}
+        if(moneyStyle == null)
+        {           
+            DataFormat moneyFormat = p_workbook.createDataFormat();
+            CellStyle cs = getCommonHeaderStyle(p_workbook);
+            cs.setDataFormat(moneyFormat.getFormat(moneyFormatString));
+        
+            moneyStyle = cs;
+        }
         return moneyStyle;
     }
     
     private CellStyle getMoneySumStyle(Workbook p_workbook){
-    	if(moneySumStyle == null)
-    	{   		
-    		DataFormat moneyFormat = p_workbook.createDataFormat();
-    		CellStyle cs = getCommonHeaderStyle(p_workbook);
+        if(moneySumStyle == null)
+        {           
+            DataFormat moneyFormat = p_workbook.createDataFormat();
+            CellStyle cs = getCommonHeaderStyle(p_workbook);
             cs.setDataFormat(moneyFormat.getFormat(moneyFormatString));
             cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
             cs.setFillForegroundColor(IndexedColors.ORANGE.getIndex());
-   		
-    		moneySumStyle = cs;
-    	}
+        
+            moneySumStyle = cs;
+        }
         return moneySumStyle;
     }
     
     private CellStyle getPercentStyle(Workbook p_workbook){
-    	if(percentStyle == null)
-    	{
-    		DataFormat percentFormat = p_workbook.createDataFormat();   		
-    		CellStyle cs = getCommonHeaderStyle(p_workbook);
-    		cs.setDataFormat(percentFormat.getFormat(PERCENT_FORMAT));
-   		
+        if(percentStyle == null)
+        {
+            DataFormat percentFormat = p_workbook.createDataFormat();           
+            CellStyle cs = getCommonHeaderStyle(p_workbook);
+            cs.setDataFormat(percentFormat.getFormat(PERCENT_FORMAT));
+        
             percentStyle = cs;
-    	}
+        }
         return percentStyle;
     }
     
     private CellStyle getPercentSumStyle(Workbook p_workbook){
-    	if(percentSumStyle == null)
-    	{
-    		DataFormat percentFormat = p_workbook.createDataFormat();
-    		
-    		CellStyle cs = getCommonHeaderStyle(p_workbook);
-    		cs.setDataFormat(percentFormat.getFormat(PERCENT_FORMAT));
-    		cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
-    		cs.setFillForegroundColor(IndexedColors.ORANGE.getIndex());
-    		
-    		percentSumStyle = cs;
-    	}
+        if(percentSumStyle == null)
+        {
+            DataFormat percentFormat = p_workbook.createDataFormat();
+            
+            CellStyle cs = getCommonHeaderStyle(p_workbook);
+            cs.setDataFormat(percentFormat.getFormat(PERCENT_FORMAT));
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillForegroundColor(IndexedColors.ORANGE.getIndex());
+            
+            percentSumStyle = cs;
+        }
         return percentSumStyle;
     }
     

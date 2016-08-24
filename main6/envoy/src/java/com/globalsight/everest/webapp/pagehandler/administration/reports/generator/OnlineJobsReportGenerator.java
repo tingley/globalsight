@@ -886,14 +886,14 @@ public class OnlineJobsReportGenerator implements ReportGenerator
 
         if (m_data.useInContext)
         {
-            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
-            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 8));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 8),
                     getHeaderStyle(p_workbook));
         }
         else
         {
-            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 6));
-            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 6),
+            p_sheet.addMergedRegion(new CellRangeAddress(2, 2, col, col + 7));
+            setRegionStyle(p_sheet, new CellRangeAddress(2, 2, col, col + 7),
                     getHeaderStyle(p_workbook));
         }
 
@@ -933,6 +933,11 @@ public class OnlineJobsReportGenerator implements ReportGenerator
             cell_InContext.setCellValue(m_bundle.getString("lb_in_context_tm"));
             cell_InContext.setCellStyle(getHeaderStyle(p_workbook));
         }
+        
+        col++;
+        Cell cell_MT = getCell(fourRow, col);
+        cell_MT.setCellValue(m_bundle.getString("lb_tm_mt"));
+        cell_MT.setCellStyle(getHeaderStyle(p_workbook));
 
         col++;
         Cell cell_Total = getCell(fourRow, col);
@@ -1321,6 +1326,11 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                 Cell cell_NoMatch = getCell(theRow, col++);
                 cell_NoMatch.setCellValue(data.noMatchWordCount);
                 cell_NoMatch.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
+                
+                Cell cell_mtMatch = getCell(theRow, col++);
+                cell_mtMatch.setCellValue(data.mtTotalWordCount);
+                cell_mtMatch.setCellStyle(temp_normalStyle);
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
 
                 Cell cell_TotalWordCount = getCell(theRow, col++);
@@ -1882,6 +1892,11 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                     cell_InContext.setCellStyle(temp_normalStyle);
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
                 }
+                
+                Cell cell_MT = getCell(theRow, col++);
+                cell_MT.setCellValue(data.mtTotalWordCount);
+                cell_MT.setCellStyle(temp_normalStyle);
+                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
 
                 Cell cell_Total = getCell(theRow, col++);
                 cell_Total.setCellValue(data.totalWordCount);
@@ -2198,7 +2213,7 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                     else
                     {
                         Cell cell_JobTotal = getCell(theRow, col++);
-                        cell_JobTotal.setCellStyle(temp_moneyStyle);;
+                        cell_JobTotal.setCellStyle(temp_moneyStyle);
                     }
                     p_sheets[MONTH_REVIEW_SHEET].setColumnWidth(col - 1, moneywidth * 256);
                     p_rows[MONTH_REVIEW_SHEET].inc();
@@ -2373,7 +2388,12 @@ public class OnlineJobsReportGenerator implements ReportGenerator
             cell_H.setCellStyle(getSubTotalStyle(p_workbook));
             sumStartCol = getColumnName(c);
         }
-
+        
+        Cell cell_MT = getCell(theRow, c++);
+        cell_MT.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
+        cell_MT.setCellStyle(getSubTotalStyle(p_workbook));
+        sumStartCol = getColumnName(c);
+        
         if (m_data.useInContext)
         {
             Cell cell_InContext = getCell(theRow, c++);
@@ -2651,7 +2671,8 @@ public class OnlineJobsReportGenerator implements ReportGenerator
             String jobName = j.getJobName();
             String companyId = String.valueOf(j.getCompanyId());
             String companyName = CompanyWrapper.getCompanyNameById(companyId);
-
+            
+            int threshold = j.getLeverageMatchThreshold();
             List<FileProfile> allFileProfiles = j.getAllFileProfiles();
 
             // Calculate additional charges
@@ -2703,6 +2724,8 @@ public class OnlineJobsReportGenerator implements ReportGenerator
             HashMap<Long, Cost> workflowMap = jobCost.getWorkflowCost();
             for (Workflow w : j.getWorkflows())
             {
+                int mtThreshold = w.getMtThreshold();
+                int mtRepetitionsWordCount = w.getMtRepetitionsWordCount();
                 String state = w.getState();
                 // skip certain workflows
                 if (Workflow.IMPORT_FAILED.equals(w.getState())
@@ -2760,7 +2783,7 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                 data.medFuzzyMatchWordCount = w.getThresholdMedFuzzyWordCount();
                 data.medHiFuzzyMatchWordCount = w.getThresholdMedHiFuzzyWordCount();
                 data.hiFuzzyMatchWordCount = w.getThresholdHiFuzzyWordCount();
-
+                data.mtTotalWordCount = w.getMtTotalWordCount();
                 // the fuzzyMatchWordCount is the sum of the top 3 categories
                 data.fuzzyMatchWordCount = data.medFuzzyMatchWordCount
                         + data.medHiFuzzyMatchWordCount + data.hiFuzzyMatchWordCount;
@@ -2775,6 +2798,45 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                 data.inContextMatchWordCount = (isInContextMatch) ? w.getInContextMatchWordCount()
                         : w.getNoUseInContextMatchWordCount();
                 data.totalWordCount = w.getTotalWordCount();
+                int mtExactMatchWordCount = w.getMtExactMatchWordCount();
+                int mtFuzzyNoMatchWordCount = w.getMtFuzzyNoMatchWordCount();
+                if (w.getIsSinceVersion87())
+                {
+                    data.noMatchWordCount -= mtFuzzyNoMatchWordCount;
+                    data.repetitionWordCount -= mtRepetitionsWordCount;
+                }
+                else
+                {
+                    if (mtThreshold == 100)
+                    {
+                        data.segmentTmWordCount -= mtExactMatchWordCount;
+                    }
+                    else if (mtThreshold < 100 && mtThreshold >= threshold)
+                    {
+                        if (mtThreshold >= 95)
+                        {
+                            data.hiFuzzyMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        else if (mtThreshold < 95 && mtThreshold >= 85)
+                        {
+                            data.medHiFuzzyMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        else if (mtThreshold < 85 && mtThreshold >= 75)
+                        {
+                            data.medFuzzyMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        else if (mtThreshold < 75)
+                        {
+                            data.noMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        }
+                        data.repetitionWordCount -= mtRepetitionsWordCount;
+                    }
+                    else if (mtThreshold < threshold)
+                    {
+                        data.noMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        data.repetitionWordCount -= mtRepetitionsWordCount;
+                    }
+                }
                 /*
                  * Date da1 = new Date(); // They must be in front of calculate
                  * cost for activity // "Dell_Review".
@@ -3087,6 +3149,8 @@ public class OnlineJobsReportGenerator implements ReportGenerator
         public long noMatchWordCount = 0;
 
         public long totalWordCount = 0;
+        
+        public long mtTotalWordCount = 0;
 
         // Dell wants to see anything 75% and above as a fuzzy match
         // so this is the sum of all except the lowest band

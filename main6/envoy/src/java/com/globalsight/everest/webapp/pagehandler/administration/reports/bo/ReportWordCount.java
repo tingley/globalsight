@@ -41,6 +41,7 @@ public class ReportWordCount implements Cloneable
     private long trados50to74WordCount = 0;
     private long tradosNoMatchWordCount = 0;
     private long tradosRepsWordCount = 0;
+    private long tradosMTWordCount = 0;
     private long tradosTotalWordCount = 0;
 
     public int getMonth()
@@ -220,6 +221,21 @@ public class ReportWordCount implements Cloneable
     {
         this.tradosRepsWordCount += tradosRepsWordCount;
     }
+    
+    public long getTradosMTWordCount()
+    {
+        return tradosMTWordCount;
+    }
+    
+    public void setTradosMTWordCount(long tradosMTWordCount)
+    {
+        this.tradosMTWordCount = tradosMTWordCount;
+    }
+    
+    public void addTradosMTWordCount(long tradosMTWordCount)
+    {
+        this.tradosMTWordCount += tradosMTWordCount;
+    }
 
     public long getTradosTotalWordCount()
     {
@@ -231,7 +247,8 @@ public class ReportWordCount implements Cloneable
                     + trados75to84WordCount
                     + trados50to74WordCount 
                     + tradosNoMatchWordCount
-                    + tradosRepsWordCount;
+                    + tradosRepsWordCount
+                    + tradosMTWordCount;
         
         return tradosTotalWordCount;
     }
@@ -252,21 +269,20 @@ public class ReportWordCount implements Cloneable
         addTrados50to74WordCount(p_reportWordCount.getTrados50to74WordCount());
         addTradosNoMatchWordCount(p_reportWordCount.getTradosNoMatchWordCount());
         addTradosRepsWordCount(p_reportWordCount.getTradosRepsWordCount());
+        addTradosMTWordCount(p_reportWordCount.getTradosMTWordCount());
     }
 
     public ReportWordCount clone() 
     {
-		try 
-		{
-			return (ReportWordCount) super.clone();
-		} 
-		catch (CloneNotSupportedException e) 
-		{
-			e.printStackTrace();
-		}
-		
-		return new ReportWordCount();
-	}
-    
-    
+        try 
+        {
+            return (ReportWordCount) super.clone();
+        } 
+        catch (CloneNotSupportedException e) 
+        {
+            e.printStackTrace();
+        }
+        
+        return new ReportWordCount();
+    }
 }

@@ -75,6 +75,8 @@ public class ProjectWorkflowData {
 
     private long tradosTotalWordCount = 0;
     
+    private long tradosMTWordCount = 0;
+    
     // "Trados" values amount
     private long trados100WordCountAmount = 0;
     
@@ -93,6 +95,8 @@ public class ProjectWorkflowData {
     private long tradosRepsWordCountAmount = 0;
 
     private long tradosTotalWordCountAmount = 0;
+    
+    private long tradosMTWordCountAmount = 0;
 
     /* word counts */
     private long lowFuzzyMatchWordCount = 0;
@@ -505,6 +509,20 @@ public class ProjectWorkflowData {
     public void setTrados100WordCount(long trados100WordCount) {
         this.trados100WordCount = trados100WordCount;
         this.trados100WordCountAmount += trados100WordCount;
+    }
+    
+    public long getTradosMTWordCount() {
+        return this.tradosMTWordCount;
+    }
+    
+    public long getTradosMTWordCountAmount() {
+        return this.tradosMTWordCountAmount;
+    }
+    
+    public void setTradosMTWordCount(long tradosMTWordCount)
+    {
+        this.tradosMTWordCount = tradosMTWordCount;
+        this.tradosMTWordCountAmount += tradosMTWordCount;
     }
 
     public BigDecimal getTrados100WordCountCost() {

@@ -109,22 +109,9 @@ public class RestSecurityInterceptor extends RestResource implements ContainerRe
 
         UriInfo uriInfo = requestContext.getUriInfo();
         MultivaluedMap<String, String> pathParams = uriInfo.getPathParameters();
-        String companyID = pathParams.getFirst(COMPANY_ID);
 
-        // Check "companyID" parameter
-        HashMap<String, Object> checkRes = checkCompany(companyID);
-        if (checkRes.get(ERROR_MSG) != null)
-        {
-            ServerResponse invalidCompany = new ServerResponse((String) checkRes.get(ERROR_MSG),
-                    400, new Headers<Object>());
-            requestContext.abortWith(invalidCompany);
-            return;
-        }
-        // If error message is null, company must not be null.
-        Company company = (Company) checkRes.get(COMPANY);
-
-        boolean filterByToken = true;
         // "login" method is used to get access token, can not filter via token.
+        boolean filterByToken = true;
         if ("login".equals(method.getName()))
         {
             filterByToken = false;
@@ -232,15 +219,33 @@ public class RestSecurityInterceptor extends RestResource implements ContainerRe
                 }
             }
 
-            // User should belong to current company
-            if (!user.getCompanyName().equalsIgnoreCase(company.getCompanyName()))
+            // Check "companyID" path parameter
+            // All calls have "companyID" as path parameter except for "login".
+            Company company = null;
+            if (filterByToken)
             {
-                String msg = "User '" + user.getUserName() + "' does not belong to company '"
-                        + company.getCompanyName() + "'.";
-                ServerResponse fromDiffCompanies = new ServerResponse(msg, 400,
-                        new Headers<Object>());
-                requestContext.abortWith(fromDiffCompanies);
-                return;
+                String companyID = pathParams.getFirst(COMPANY_ID);
+                HashMap<String, Object> checkRes = checkCompany(companyID);
+                if (checkRes.get(ERROR_MSG) != null)
+                {
+                    ServerResponse invalidCompany = new ServerResponse((String) checkRes.get(ERROR_MSG),
+                            400, new Headers<Object>());
+                    requestContext.abortWith(invalidCompany);
+                    return;
+                }
+                // If error message is null, company must not be null.
+                company = (Company) checkRes.get(COMPANY);
+
+                // User should belong to current company (may be need adjusted in future?)
+                if (!user.getCompanyName().equalsIgnoreCase(company.getCompanyName()))
+                {
+                    String msg = "User '" + user.getUserName() + "' does not belong to company '"
+                            + company.getCompanyName() + "'.";
+                    ServerResponse fromDiffCompanies = new ServerResponse(msg, 400,
+                            new Headers<Object>());
+                    requestContext.abortWith(fromDiffCompanies);
+                    return;
+                }
             }
 
             // Verify user access
@@ -258,7 +263,8 @@ public class RestSecurityInterceptor extends RestResource implements ContainerRe
             }
 
             // required !!!
-            CompanyThreadLocal.getInstance().setValue(company.getCompanyName());
+            CompanyThreadLocal.getInstance().setValue(
+                    company != null ? company.getCompanyName() : user.getCompanyName());
         }
     }
 

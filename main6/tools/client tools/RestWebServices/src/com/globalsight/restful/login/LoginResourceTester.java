@@ -28,7 +28,7 @@ import com.globalsight.restful.RestfulApiTestHelper;
 public class LoginResourceTester extends RestfulApiTestHelper
 {
     /**
-     * http://localhost:8080/globalsight/restfulServices/companies/{companyID}/login-helper
+     * http://localhost:8080/globalsight/restfulServices/login-helper
      */
     public String testLogin(String userName, String password)
     {
@@ -36,7 +36,7 @@ public class LoginResourceTester extends RestfulApiTestHelper
         HttpResponse httpResponse = null;
         try
         {
-            String url = "http://localhost:8080/globalsight/restfulServices/companies/1000/login-helper";
+            String url = "http://localhost:8080/globalsight/restfulServices/login-helper";
 
             HttpGet httpGet = getHttpGet(url, userName, password);
 
@@ -68,7 +68,7 @@ public class LoginResourceTester extends RestfulApiTestHelper
 
         try
         {
-            tester.testLogin("york", "password");
+            tester.testLogin("superadmin", "password");
         }
         finally
         {

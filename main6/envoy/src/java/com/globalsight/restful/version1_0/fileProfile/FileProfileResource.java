@@ -47,7 +47,7 @@ import com.globalsight.restful.RestWebServiceException;
 import com.globalsight.restful.RestWebServiceLog;
 import com.globalsight.util.GlobalSightLocale;
 
-@Path("/1.0/companies/{companyName}/fileProfiles")
+@Path("/1.0/companies/{companyID}/fileProfiles")
 public class FileProfileResource extends RestResource
 {
     private static final Logger logger = Logger.getLogger(FileProfileResource.class);
@@ -57,8 +57,8 @@ public class FileProfileResource extends RestResource
     /**
      * Get all of the File Profile information from GlobalSight side as JSON
      * 
-     * @param p_companyName
-     *            Company name.
+     * @param p_companyID
+     *            Company ID.
      * @return Return all file profiles information for JSON.
      */
     @GET
@@ -66,7 +66,7 @@ public class FileProfileResource extends RestResource
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFileProfiles(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName) throws RestWebServiceException
+            @PathParam("companyID") String p_companyID) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         try
@@ -74,7 +74,7 @@ public class FileProfileResource extends RestResource
             String userName = getUserNameFromSession(accessToken.get(0));
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("p_companyID", p_companyID);
             restStart = RestWebServiceLog.start(FileProfileResource.class, GET_FILE_PROFILES, restArgs);
 
             Collection<FileProfile> filteredFileProfiles = new ArrayList<FileProfile>();

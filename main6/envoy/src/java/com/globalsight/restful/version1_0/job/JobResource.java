@@ -113,7 +113,7 @@ import com.globalsight.webservices.attribute.Attributes;
 import com.globalsight.webservices.attribute.JobAttributeVo;
 import com.globalsight.webservices.vo.JobFiles;
 
-@Path("/1.0/companies/{companyName}/jobs")
+@Path("/1.0/companies/{companyID}/jobs")
 public class JobResource extends RestResource
 {
     private static final Logger logger = Logger.getLogger(JobResource.class);
@@ -132,8 +132,8 @@ public class JobResource extends RestResource
     /**
      * Get an unique job name.
      * 
-     * @param p_companyName 
-     *                  Company name. Required.
+     * @param p_companyID
+     *                  Company ID. Required.
      * @param p_jobName 
      *                  Job name. Required.
      * @return Return an unique job name in current system.
@@ -144,7 +144,7 @@ public class JobResource extends RestResource
     @Produces(MediaType.TEXT_PLAIN)
     public Response getUniqueJobName(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @QueryParam("jobName") String p_jobName) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
@@ -153,7 +153,7 @@ public class JobResource extends RestResource
             String userName = getUserNameFromSession(accessToken.get(0));
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("jobName", p_jobName);
             restStart = RestWebServiceLog.start(JobResource.class, GET_UNIQUE_JOB_NAME, restArgs);
             String jobNameValidation = validateJobName(p_jobName);
@@ -181,8 +181,8 @@ public class JobResource extends RestResource
     /**
      * Upload source file to server side.
      * 
-     * @param p_companyName
-     *            Company name. Required.
+     * @param p_companyID
+     *            Company ID. Required.
      * @param p_jobName
      *            Job name. Required.
      * @param p_fileProfileId
@@ -200,7 +200,7 @@ public class JobResource extends RestResource
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response uploadSourceFile(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @QueryParam("jobName") String p_jobName,
             @QueryParam("fileProfileId") String p_fileProfileId,
             MultipartInput p_input) throws RestWebServiceException
@@ -216,7 +216,7 @@ public class JobResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("jobName", p_jobName);
             restArgs.put("fileProfileId", p_fileProfileId);
             restStart = RestWebServiceLog.start(JobResource.class, UPLOAD_SOURCE_FILE, restArgs);
@@ -309,8 +309,8 @@ public class JobResource extends RestResource
     /**
      * Create a job
      * 
-     * @param p_companyName 
-     *                  Company name. Required.
+     * @param p_companyID 
+     *                  Company ID. Required.
      * @param p_jobId
      *                  Job id. Required.
      * @param p_filePaths
@@ -347,7 +347,7 @@ public class JobResource extends RestResource
     @Produces(MediaType.TEXT_PLAIN)
     public Response createJob(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @QueryParam("jobId") String p_jobId,
             @QueryParam("filePaths") String p_filePaths,
             @QueryParam("fileProfileIds") String p_fileProfileIds,
@@ -382,7 +382,7 @@ public class JobResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("jobId", p_jobId);
             restArgs.put("comment", p_comment);
             restArgs.put("filePaths", p_filePaths);
@@ -576,10 +576,10 @@ public class JobResource extends RestResource
     }
     
     /**
-     * Upload zip source file to server side.
+     * Upload ZIP source file to server side.
      * 
-     * @param p_companyName
-     *            Company name. Required.
+     * @param p_companyID
+     *            Company ID. Required.
      * @param p_jobName
      *            Job name. Required.
      * @param p_fileProfileId
@@ -597,7 +597,7 @@ public class JobResource extends RestResource
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response uploadZipSourceFile(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @QueryParam("jobName") String p_jobName,
             @QueryParam("fileProfileIds") String p_fileProfileIds,
             MultipartInput p_input) throws RestWebServiceException
@@ -613,7 +613,7 @@ public class JobResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("jobName", p_jobName);
             restArgs.put("fileProfileIds", p_fileProfileIds);
             restStart = RestWebServiceLog.start(JobResource.class, UPLOAD_ZIP_SOURCE_FILE, restArgs);
@@ -749,8 +749,8 @@ public class JobResource extends RestResource
     /**
      * Create a job for zip file
      * 
-     * @param p_companyName
-     *            Company name. Required.
+     * @param p_companyID
+     *            Company ID. Required.
      * @param p_jobId
      *            Job id. Required.
      * @param p_filePaths
@@ -789,7 +789,7 @@ public class JobResource extends RestResource
     @Produces(MediaType.TEXT_PLAIN)
     public Response createJobForZipFile(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @QueryParam("jobId") String p_jobId,
             @QueryParam("filePaths") String p_filePaths,
             @QueryParam("fileProfileIds") String p_fileProfileIds,
@@ -821,7 +821,7 @@ public class JobResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("jobId", p_jobId);
             restArgs.put("comment", p_comment);
             restArgs.put("filePaths", p_filePaths);
@@ -873,7 +873,9 @@ public class JobResource extends RestResource
                     addUploadFile(realUploadFileList,extensionList,zipFile);
                 }
             }
-            Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
+            Company company = ServerProxy.getJobHandler().getCompanyById(
+                    Long.parseLong(p_companyID));
+            @SuppressWarnings({ "unchecked", "rawtypes" })
             List<FileProfileImpl> fileProfileListOfCompany = (List) ServerProxy
                     .getFileProfilePersistenceManager().getFileProfilesByExtension(extensionList,
                             Long.valueOf(company.getId()));
@@ -1070,8 +1072,8 @@ public class JobResource extends RestResource
     /**
      * Get job status by job id.
      * 
-     * @param p_companyName
-     *                  Company name. Required.
+     * @param p_companyID
+     *                  Company ID. Required.
      * @param p_jobId
      *                  Job id.  Required.
      * 
@@ -1083,7 +1085,7 @@ public class JobResource extends RestResource
     @Produces(MediaType.APPLICATION_JSON)
     public Response getJobStatus(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @PathParam("jobId") String p_jobId) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
@@ -1097,14 +1099,14 @@ public class JobResource extends RestResource
             String userName = getUserNameFromSession(accessToken.get(0));
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("jobId", p_jobId);
             restStart = RestWebServiceLog.start(JobResource.class, GET_JOB_STATUS, restArgs);
 
             String sql = "SELECT NAME,STATE FROM JOB WHERE COMPANY_ID=? AND ID=?";
             connection = ConnectionPool.getConnection();
             query = connection.prepareStatement(sql);
-            query.setLong(1, CompanyWrapper.getCompanyByName(p_companyName).getId());
+            query.setLong(1, CompanyWrapper.getCompanyById(p_companyID).getId());
             query.setString(2, p_jobId);
 
             results = query.executeQuery();
@@ -1142,8 +1144,8 @@ public class JobResource extends RestResource
     /**
      * Gets exported files in one zip by job ids
      * 
-     * @param p_companyName
-     *                  Company name. Required.
+     * @param p_companyID
+     *                  Company ID. Required.
      * @param p_jobIds
      *                  Job ids. Required.
      * 
@@ -1155,7 +1157,7 @@ public class JobResource extends RestResource
     @Produces(MediaType.APPLICATION_JSON)
     public Response getJobExportedFiles(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @PathParam("jobIds") String p_jobIds) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
@@ -1165,14 +1167,15 @@ public class JobResource extends RestResource
             User user = ServerProxy.getUserManager().getUserByName(userName);
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("jobIds", p_jobIds);
             restStart = RestWebServiceLog.start(JobResource.class, GET_JOB_EXPORT_FILES,
                     restArgs);
             checkPermission(userName, Permission.JOBS_VIEW);
             checkPermission(userName, Permission.JOBS_EXPORT);
             checkPermission(userName, Permission.JOBS_DOWNLOAD);
-            Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
+            Company company = ServerProxy.getJobHandler().getCompanyById(
+                    Long.parseLong(p_companyID));
 
             String errorMsg = "";
             p_jobIds = p_jobIds.replace(" ", "");

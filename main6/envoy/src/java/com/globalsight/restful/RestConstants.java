@@ -20,6 +20,8 @@ public interface RestConstants
 {
     public static final String COMPANY_NAME = "companyName";
 
+    public static final String COMPANY_ID = "companyID";
+
     public static final String TM_ID = "tmId";
 
     public static final String VERSION_1_0 = "1.0";

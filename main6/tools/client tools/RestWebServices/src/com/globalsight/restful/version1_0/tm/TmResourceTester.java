@@ -51,7 +51,7 @@ public class TmResourceTester extends RestfulApiTestHelper
     }
 
     /**
-     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/tms
+     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/tms
      */
     public void testGetTms()
     {
@@ -59,7 +59,7 @@ public class TmResourceTester extends RestfulApiTestHelper
         HttpResponse httpResponse = null;
         try
         {
-            String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms";
+            String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/tms";
 
             HttpGet httpGet = getHttpGet(url, accessToken);
 
@@ -78,7 +78,7 @@ public class TmResourceTester extends RestfulApiTestHelper
     }
 
     /**
-     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/tms/{tmId}/tus
+     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/tms/{tmId}/tus
      */
     public void testCreateTu()
     {
@@ -94,7 +94,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             String escapeString = "true"; // or "false"
 
             StringBuffer url = new StringBuffer();
-            url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms/5/tus");
+            url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/tms/5/tus");
             // required params
             url.append("?sourceLocale=").append(sourceLocale);
             url.append("&sourceSegment=").append(URLEncoder.encode(sourceSegment));
@@ -121,7 +121,7 @@ public class TmResourceTester extends RestfulApiTestHelper
     }
     
     /**
-     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/tms/{tmId}/tus/{id}
+     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/tms/{tmId}/tus/{id}
      */
     public String testGetTu()
     {
@@ -130,7 +130,7 @@ public class TmResourceTester extends RestfulApiTestHelper
         try
         {
             long id = 912902;
-            String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms/5/tus/" + id;
+            String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/tms/5/tus/" + id;
 
             HttpGet httpGet = getHttpGet(url, accessToken);
 
@@ -150,7 +150,7 @@ public class TmResourceTester extends RestfulApiTestHelper
     }
 
     /**
-     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/tms/{tmId}/tus
+     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/tms/{tmId}/tus
      */
     public String testGetTus()
     {
@@ -164,7 +164,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             int offset = 1; // default 1
 
             StringBuffer url = new StringBuffer();
-            url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms/5/tus");
+            url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/tms/5/tus");
             // required params
             url.append("?sourceLocale=").append(sourceLocale);
             // optional params
@@ -190,11 +190,11 @@ public class TmResourceTester extends RestfulApiTestHelper
     }
 
     /**
-     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/tms/{tmId}/tus
+     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/tms/{tmId}/tus
      */
     public void testEditTus(String tuXml)
     {
-        String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms/5/tus";
+        String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/tms/5/tus";
 
         CloseableHttpClient httpClient = getHttpClient();
         HttpResponse httpResponse = null;
@@ -222,12 +222,12 @@ public class TmResourceTester extends RestfulApiTestHelper
     }
 
     /**
-     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/tms/{tmId}/tus/{ids}
+     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/tms/{tmId}/tus/{ids}
      */
     public void testDeleteTus()
     {
-        String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms/5/tus/1,2,3";
-//        String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms/5/tus/1,2-5,6-10";
+        String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/tms/5/tus/1,2,3";
+//        String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/tms/5/tus/1,2-5,6-10";
 
         CloseableHttpClient httpClient = getHttpClient();
         HttpResponse httpResponse = null;
@@ -250,11 +250,11 @@ public class TmResourceTester extends RestfulApiTestHelper
     }
 
     /**
-     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/tms/{tmId}/upload
+     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/tms/{tmId}/upload
      */
     public void testUploadTmxFile()
     {
-        String strUrl = "http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms/5/upload";
+        String strUrl = "http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/tms/5/upload";
 
         File file = new File("D:\\_Middle Files\\TM Data\\tm_export_4.xml");
 
@@ -325,11 +325,11 @@ public class TmResourceTester extends RestfulApiTestHelper
     }
 
     /**
-     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/tms/{tmId}/import
+     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/tms/{tmId}/import
      */
     public void testImportTmxFile()
     {
-        String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms/5/import";
+        String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/tms/5/import";
         //optional params
         url += "?syncMode=merge";
 
@@ -354,7 +354,7 @@ public class TmResourceTester extends RestfulApiTestHelper
     }
 
     /**
-     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/tms/{tmId}/export
+     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/tms/{tmId}/export
      */
     public String testExportTM()
     {
@@ -371,7 +371,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             String exportedFileName = "abc_yyyymmdd.xml";
 
             StringBuffer url = new StringBuffer();
-            url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms/28/export");
+            url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/tms/28/export");
             // required params
             url.append("?startDate=").append(startDate);
             url.append("&exportFormat=").append(exportFormat);
@@ -399,7 +399,7 @@ public class TmResourceTester extends RestfulApiTestHelper
     }
 
     /**
-     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/tms/{tmId}/export/{identifyKey}
+     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/tms/{tmId}/export/{identifyKey}
      */
     public void testGetTmExportFile(String identifyKey)
     {
@@ -407,7 +407,7 @@ public class TmResourceTester extends RestfulApiTestHelper
         HttpResponse httpResponse = null;
         try
         {
-            String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms/4/export/" + identifyKey;
+            String url = "http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/tms/4/export/" + identifyKey;
 
             HttpGet httpGet = getHttpGet(url, accessToken);
 
@@ -470,7 +470,7 @@ public class TmResourceTester extends RestfulApiTestHelper
     }
 
     /**
-     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/tms/{tmIds}/fullTextSearch
+     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/tms/{tmIds}/fullTextSearch
      * ?searchText=searchText&sourceLocale=en_US&targetLocale=fr_FR
      * 
      * A sample returned xml:
@@ -507,7 +507,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             String modifyFinishDate = "20161231";
 
             StringBuffer url = new StringBuffer();
-            url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms/1,5/fullTextSearch");
+            url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/tms/1,5/fullTextSearch");
             // required params
             url.append("?sourceLocale=").append(sourceLocale);
             url.append("&targetLocale=").append(targetLocale);
@@ -535,7 +535,7 @@ public class TmResourceTester extends RestfulApiTestHelper
     }
 
     /**
-     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/tms/leverage?searchText=searchText&tmProfileName=tmpName&sourceLocale=en_US
+     * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/tms/leverage?searchText=searchText&tmProfileName=tmpName&sourceLocale=en_US
      * 
      * A sample returned xml:
      * <?xml version="1.0" encoding="UTF-8"?>
@@ -570,7 +570,7 @@ public class TmResourceTester extends RestfulApiTestHelper
             String escapeString = "true"; // or "false"
 
             StringBuffer url = new StringBuffer();
-            url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/York/tms/leverage");
+            url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/tms/leverage");
             // required params
             url.append("?searchText=").append(URLEncoder.encode(searchText));
             url.append("&tmProfileName=").append(tmProfileName);

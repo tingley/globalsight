@@ -20,6 +20,7 @@ package com.globalsight.restful;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -88,6 +89,9 @@ public class RestSecurityInterceptor extends RestResource implements ContainerRe
     private static final ServerResponse SERVER_ERROR = new ServerResponse("INTERNAL SERVER ERROR",
             500, new Headers<Object>());
 
+    private static final String ERROR_MSG = "errorMsg";
+    private static final String COMPANY = "company";
+
     /**
      * Filter requests:
      * 1. Validate basic authorization information.
@@ -105,12 +109,25 @@ public class RestSecurityInterceptor extends RestResource implements ContainerRe
 
         UriInfo uriInfo = requestContext.getUriInfo();
         MultivaluedMap<String, String> pathParams = uriInfo.getPathParameters();
-        String companyName = pathParams.getFirst(COMPANY_NAME);
+        String companyID = pathParams.getFirst(COMPANY_ID);
 
-        // "login" method is used to get access token, no need to filter.
+        // Check "companyID" parameter
+        HashMap<String, Object> checkRes = checkCompany(companyID);
+        if (checkRes.get(ERROR_MSG) != null)
+        {
+            ServerResponse invalidCompany = new ServerResponse((String) checkRes.get(ERROR_MSG),
+                    400, new Headers<Object>());
+            requestContext.abortWith(invalidCompany);
+            return;
+        }
+        // If error message is null, company must not be null.
+        Company company = (Company) checkRes.get(COMPANY);
+
+        boolean filterByToken = true;
+        // "login" method is used to get access token, can not filter via token.
         if ("login".equals(method.getName()))
         {
-            return;
+            filterByToken = false;
         }
 
         // Access allowed for all
@@ -127,7 +144,6 @@ public class RestSecurityInterceptor extends RestResource implements ContainerRe
             final MultivaluedMap<String, String> headers = requestContext.getHeaders();
 
             User user = null;
-            boolean filterByToken = true;
             ////// Authenticate via token
             if (filterByToken)
             {
@@ -216,21 +232,11 @@ public class RestSecurityInterceptor extends RestResource implements ContainerRe
                 }
             }
 
-            // Check "companyName" parameter
-            String errorMsg = checkCompany(companyName);
-            if (errorMsg != null)
-            {
-                ServerResponse invalidCompany = new ServerResponse(
-                        errorMsg, 400, new Headers<Object>());
-                requestContext.abortWith(invalidCompany);
-                return;
-            }
-
             // User should belong to current company
-            if (!user.getCompanyName().equalsIgnoreCase(companyName))
+            if (!user.getCompanyName().equalsIgnoreCase(company.getCompanyName()))
             {
                 String msg = "User '" + user.getUserName() + "' does not belong to company '"
-                        + companyName + "'.";
+                        + company.getCompanyName() + "'.";
                 ServerResponse fromDiffCompanies = new ServerResponse(msg, 400,
                         new Headers<Object>());
                 requestContext.abortWith(fromDiffCompanies);
@@ -252,7 +258,7 @@ public class RestSecurityInterceptor extends RestResource implements ContainerRe
             }
 
             // required !!!
-            CompanyThreadLocal.getInstance().setValue(companyName);
+            CompanyThreadLocal.getInstance().setValue(company.getCompanyName());
         }
     }
 
@@ -277,27 +283,34 @@ public class RestSecurityInterceptor extends RestResource implements ContainerRe
         return isAllowed;
     }
 
-    private String checkCompany(String p_companyName)
+    // The returning includes 2 objects: a string message and the "Company" object.
+    private HashMap<String, Object> checkCompany(String p_companyID)
     {
         String errorMsg = null;
-        if (StringUtil.isEmpty(p_companyName))
+        if (StringUtil.isEmpty(p_companyID))
         {
-            errorMsg = "Empty company name";
+            errorMsg = "Empty company ID";
         }
 
+        Company company = null;
         try
         {
-            Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
+            company = getCompanyById(p_companyID);
             if (company == null)
             {
-                errorMsg = "Company does not exist: " + p_companyName;
+                errorMsg = "Company does not exist for companyID: " + p_companyID;
             }
         }
         catch (Exception e)
         {
-            errorMsg = "Invalid company name: " + p_companyName;
+            errorMsg = "Invalid company ID: " + p_companyID;
         }
-        return errorMsg;
+
+        HashMap<String, Object> res = new HashMap<String, Object>();
+        res.put(ERROR_MSG, errorMsg);
+        res.put(COMPANY, company);
+
+        return res;
     }
 
     /**

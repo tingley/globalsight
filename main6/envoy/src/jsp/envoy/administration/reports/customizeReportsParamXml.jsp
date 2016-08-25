@@ -53,6 +53,7 @@
         <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_NOMATCH%>" />
         <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_REPETITION%>" />
         <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_PERINCONTEXT%>" />
+        <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_MT%>"/>
         <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_TOTAL%>" />
     </param>
     <param id="<%=Param.TRADOS_MATCHES_INVOICE%>" >

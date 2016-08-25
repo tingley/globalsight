@@ -31,7 +31,7 @@ public class JobResourceTester extends RestfulApiTestHelper
     }
 
 	/**
-	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/jobs/getUniqueJobName?jobName=ABC
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/jobs/getUniqueJobName?jobName=ABC
 	 */
 	public void testGetUniqueJobName()
 	{
@@ -40,7 +40,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 		try
 		{
 			StringBuffer url = new StringBuffer();
-			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/getUniqueJobName");
+			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/jobs/getUniqueJobName");
 			// required params
 			url.append("?jobName").append(URLEncoder.encode("ABC"));
 
@@ -60,7 +60,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 	}
 
 	/**
-	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/jobs/sourceFiles
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/jobs/sourceFiles
 	 */
 	public void testUploadSourceFile()
 	{
@@ -74,7 +74,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 			String fileProfileId = "1001";
 
 			StringBuffer url = new StringBuffer();
-			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/sourceFiles");
+			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/jobs/sourceFiles");
 			// required params
 			url.append("?jobName=").append(URLEncoder.encode(jobName));
 			url.append("&fileProfileId=").append(fileProfileId);
@@ -134,7 +134,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 	}
 	
 	/**
-	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/jobs/sourceFiles/zip
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/jobs/sourceFiles/zip
 	 */
 	public void testUploadZipSourceFile()
 	{
@@ -147,7 +147,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 			String jobName = "test_4368_02";
 			String fileProfileId = "1001";
 			StringBuffer url = new StringBuffer();
-			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/sourceFiles/zip");
+			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/jobs/sourceFiles/zip");
 			// required params
 			url.append("?jobName=").append(URLEncoder.encode(jobName));
 			url.append("&fileProfileIds=").append(fileProfileId);
@@ -207,7 +207,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 	}
 
 	/**
-	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/jobs/createJob"
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/jobs/createJob"
 	 */
 	public void testCreateJob()
 	{
@@ -222,7 +222,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 			String p_targetLocales = "fr_FR";
 			String p_attributes = "";
 			StringBuffer url = new StringBuffer();
-			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/createJob");
+			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/jobs/createJob");
 			// required params
 			url.append("?jobId=").append(jobId);
 			url.append("&filePaths=").append(URLEncoder.encode(filePaths));
@@ -248,7 +248,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 	}
 	
 	/**
-	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/jobs/createJob/zip"
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/jobs/createJob/zip"
 	 * */
 	public void testCreateJobForZipFile()
 	{
@@ -263,7 +263,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 			String p_targetLocales = "fr_FR";
 			String p_attributes = "";
 			StringBuffer url = new StringBuffer();
-			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/createJob/zip");
+			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/jobs/createJob/zip");
 			// required params
 			url.append("?jobId=").append(jobId);
 			url.append("&filePaths=").append(URLEncoder.encode(filePaths));
@@ -289,7 +289,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 	}
 
 	/**
-	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/jobs/{jobId}/status
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/jobs/{jobId}/status
 	 */
 	public String testGetJobStatus()
 	{
@@ -298,7 +298,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 		try
 		{
 			StringBuffer url = new StringBuffer();
-			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/1460/status");
+			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/jobs/1460/status");
 			HttpGet httpGet = getHttpGet(url.toString(), accessToken);
 
 			httpResponse = httpClient.execute(httpGet);
@@ -317,7 +317,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 	}
 
 	/**
-	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/jobs/{jobIds}/targetFiles
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/jobs/{jobIds}/targetFiles
 	 */
 	public void testGetJobExportFiles()
 	{
@@ -326,7 +326,7 @@ public class JobResourceTester extends RestfulApiTestHelper
 		try
 		{
 			StringBuffer url = new StringBuffer();
-			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/jobs/1528/targetFiles");
+			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/jobs/1528/targetFiles");
 			HttpGet httpGet = getHttpGet(url.toString(), accessToken);
 			httpResponse = httpClient.execute(httpGet);
 

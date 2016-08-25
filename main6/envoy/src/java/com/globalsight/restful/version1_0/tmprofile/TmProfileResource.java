@@ -43,7 +43,7 @@ import com.globalsight.restful.RestResource;
 import com.globalsight.restful.RestWebServiceException;
 import com.globalsight.restful.RestWebServiceLog;
 
-@Path("/1.0/companies/{companyName}/tmprofiles")
+@Path("/1.0/companies/{companyID}/tmprofiles")
 public class TmProfileResource extends RestResource
 {
     private static final Logger logger = Logger.getLogger(TmProfileResource.class);
@@ -55,15 +55,15 @@ public class TmProfileResource extends RestResource
      * Get translation memory profile by ID.
      * 
      * Sample URL:
-     * http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tmprofiles/{id}
+     * http://localhost:8080/globalsight/restfulServices/companies/{companyID}/tmprofiles/{id}
      * 
      * @since 8.6.9 release
      * 
      * @param authorization
      *            -- authorization information from request context header.
      *            Required.
-     * @param p_companyName
-     *            -- company name. Required.
+     * @param p_companyID
+     *            -- company ID. Required.
      * @param p_tmProfileId
      *            -- translation memory profile ID. Required.
      * 
@@ -78,7 +78,7 @@ public class TmProfileResource extends RestResource
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTmProfile(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @PathParam("id") long p_tmProfileId) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
@@ -88,13 +88,13 @@ public class TmProfileResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("id", p_tmProfileId);
             restStart = RestWebServiceLog.start(TmProfileResource.class, GET_TM_PROFILE, restArgs);
 
             checkPermission(userName, Permission.TMP_VIEW);
 
-            TranslationMemoryProfile tmp = checkTmProfileId(p_tmProfileId, p_companyName);
+            TranslationMemoryProfile tmp = checkTmProfileId(p_tmProfileId, p_companyID);
 
             TmProfileEntity tmpResponse = tmProfile2Entity(tmp);
 
@@ -118,14 +118,14 @@ public class TmProfileResource extends RestResource
      * Get all translation memory profiles.
      * 
      * Sample URL:
-     * http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tmprofiles
+     * http://localhost:8080/globalsight/restfulServices/companies/{companyID}/tmprofiles
      * 
      * @since 8.6.9 release
      * 
      * @param authorization
      *            -- authorization information from request context header.
-     * @param p_companyName
-     *            -- company name.
+     * @param p_companyID
+     *            -- company ID. Required.
      * 
      * @return translation memory profiles information in JSON.
      * A sample is:
@@ -140,7 +140,7 @@ public class TmProfileResource extends RestResource
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllTmProfiles(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName) throws RestWebServiceException
+            @PathParam("companyID") String p_companyID) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         try
@@ -149,7 +149,7 @@ public class TmProfileResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restStart = RestWebServiceLog.start(TmProfileResource.class, GET_ALL_TM_PROFILES,
                     restArgs);
 
@@ -186,7 +186,7 @@ public class TmProfileResource extends RestResource
         }
     }
 
-    private TranslationMemoryProfile checkTmProfileId(long p_tmpId, String p_companyName)
+    private TranslationMemoryProfile checkTmProfileId(long p_tmpId, String p_companyID)
             throws Exception
     {
         TranslationMemoryProfile tmp = TMProfileHandlerHelper.getTMProfileById(p_tmpId);
@@ -194,7 +194,7 @@ public class TmProfileResource extends RestResource
             throw new RestWebServiceException("Unable to find translation memory profile by ID: "
                     + p_tmpId);
 
-        Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
+        Company company = ServerProxy.getJobHandler().getCompanyById(Long.parseLong(p_companyID));
         if (company != null && company.getId() != tmp.getCompanyId())
         {
             String msg = "TM Profile " + p_tmpId + " does not belong to company "

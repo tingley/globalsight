@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Locale;
 
 import org.apache.log4j.Logger;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -326,7 +325,7 @@ public class TestExtractor extends BaseExtractorTestClass
     
     public Output doExtractWithSecondaryFilter(File p_file, AbstractExtractor extractor,
             String p_encoding, FileProfileImpl p_fp, String p_fpId, 
-            long p_secondFilterId, String p_secondFilterTableName)
+            long p_secondFilterId, String p_secondFilterTableName) throws Exception
     {
         Output output = new Output();
         EFInputData input = new EFInputData();
@@ -365,7 +364,7 @@ public class TestExtractor extends BaseExtractorTestClass
     
     @Override
     public Output doExtract(File file, AbstractExtractor extractor,
-            String encoding)
+            String encoding) throws Exception
     {
         Output output = new Output();
         EFInputData input = new EFInputData();

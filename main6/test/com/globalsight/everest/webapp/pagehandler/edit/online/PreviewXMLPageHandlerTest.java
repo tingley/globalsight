@@ -1,20 +1,13 @@
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 
-import org.apache.xalan.xpath.xdom.XercesLiaison;
-import org.apache.xalan.xslt.XSLTInputSource;
-import org.apache.xalan.xslt.XSLTProcessor;
-import org.apache.xalan.xslt.XSLTProcessorFactory;
-import org.apache.xalan.xslt.XSLTResultTarget;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,6 +36,8 @@ public class PreviewXMLPageHandlerTest
      * For GBS-1849 : popup editor XSL Preview displaying non-ASCII characters as '?'
      * @throws Exception
      */
+    
+    /**
     @Test
     public void testPreviewXmlWithXsl() throws Exception
     {
@@ -105,6 +100,7 @@ public class PreviewXMLPageHandlerTest
             throw ex;
         }
     }
+    */
 
     public static void main(String[] args)
     {

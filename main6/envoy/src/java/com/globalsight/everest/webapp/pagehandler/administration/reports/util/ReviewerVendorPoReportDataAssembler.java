@@ -223,6 +223,7 @@ public class ReviewerVendorPoReportDataAssembler
         while (jobIter.hasNext())
         {
             Job j = (Job) jobIter.next();
+            int threshold = j.getLeverageMatchThreshold();
             if (!reportData.allJobStatus)
             {
                 if (!reportData.jobStatusList.contains(j.getState()))
@@ -236,7 +237,8 @@ public class ReviewerVendorPoReportDataAssembler
             while (wfIter.hasNext())
             {
                 Workflow w = (Workflow) wfIter.next();
-
+                int mtThreshold = w.getMtThreshold();
+                int mtRepetitionsWordCount = w.getMtRepetitionsWordCount();
                 // skip certain workflows
                 if (Workflow.PENDING.equals(w.getState())
                         || Workflow.IMPORT_FAILED.equals(w.getState())
@@ -307,9 +309,10 @@ public class ReviewerVendorPoReportDataAssembler
                         data.creationDate = j.getCreateDate();
                     }
 
-                    data.repetitionWordCount += w.getRepetitionWordCount();
+//                    data.repetitionWordCount += w.getRepetitionWordCount();
                     data.dellInternalRepsWordCount += w.getRepetitionWordCount();
                     data.tradosRepsWordCount = data.dellInternalRepsWordCount;
+                    
                     data.lowFuzzyMatchWordCount += w.getThresholdLowFuzzyWordCount();
                     data.medFuzzyMatchWordCount += w.getThresholdMedFuzzyWordCount();
                     data.medHiFuzzyMatchWordCount += w.getThresholdMedHiFuzzyWordCount();
@@ -323,18 +326,20 @@ public class ReviewerVendorPoReportDataAssembler
                     data.trados85to94WordCount = data.medHiFuzzyMatchWordCount;
                     data.trados75to84WordCount = data.medFuzzyMatchWordCount;
                     data.trados50to74WordCount = data.lowFuzzyMatchWordCount;
+                    //all mt wordcount
+                    data.tradosMTWordCount += w.getMtTotalWordCount();
 
                     // add the lowest fuzzies and sublev match to nomatch
-                    data.noMatchWordCount += w.getNoMatchWordCount() + data.lowFuzzyMatchWordCount;
+//                    data.noMatchWordCount += w.getNoMatchWordCount() + data.lowFuzzyMatchWordCount;
                     data.dellNewWordsWordCount = w.getNoMatchWordCount()
                             + w.getLowFuzzyMatchWordCount();
                     data.tradosNoMatchWordCount = data.dellNewWordsWordCount;
 
-                    data.segmentTmWordCount += (isInContextMatch) ? w.getSegmentTmWordCount()
+                    data.dellExactMatchWordCount += (isInContextMatch) ? w.getSegmentTmWordCount()
                             : w.getTotalExactMatchWordCount();
                     data.inContextMatchWordCount += (isInContextMatch)
                             ? w.getInContextMatchWordCount() : w.getNoUseInContextMatchWordCount();
-                    data.dellExactMatchWordCount = data.segmentTmWordCount;
+//                    data.dellExactMatchWordCount = data.segmentTmWordCount;
                     data.dellInContextMatchWordCount = data.inContextMatchWordCount;
                     data.trados100WordCount = data.dellExactMatchWordCount;
                     data.tradosInContextWordCount = data.inContextMatchWordCount;
@@ -342,15 +347,49 @@ public class ReviewerVendorPoReportDataAssembler
 
                     // data.contextMatchWordCount +=
                     // w.getContextMatchWordCount();
-                    data.totalWordCount += w.getTotalWordCount();
-
+//                    data.totalWordCount += w.getTotalWordCount();
+                    int mtExactMatchWordCount = w.getMtExactMatchWordCount();
+                    int mtFuzzyNoMatchWordCount = w.getMtFuzzyNoMatchWordCount();
+                    if (w.getIsSinceVersion87())
+                    {
+                        data.tradosNoMatchWordCount -= mtFuzzyNoMatchWordCount;
+                        data.tradosRepsWordCount -= mtRepetitionsWordCount;
+                    }
+                    else
+                    {
+                        if (mtThreshold == 100)
+                        {
+                            data.trados100WordCount -= mtExactMatchWordCount;
+                        }
+                        else if (mtThreshold < 100 && mtThreshold >= threshold)
+                        {
+                            if (mtThreshold >= 95)
+                            {
+                                data.trados95to99WordCount -= mtFuzzyNoMatchWordCount;
+                            }
+                            else if (mtThreshold < 95 && mtThreshold >= 85)
+                            {
+                                data.trados85to94WordCount -= mtFuzzyNoMatchWordCount;
+                            }
+                            else if (mtThreshold < 85 && mtThreshold >= 75)
+                            {
+                                data.trados75to84WordCount -= mtFuzzyNoMatchWordCount;
+                            }
+                            else if (mtThreshold < 75)
+                            {
+                                data.tradosNoMatchWordCount -= mtFuzzyNoMatchWordCount;
+                            }
+                            data.tradosRepsWordCount -= mtRepetitionsWordCount;
+                        }
+                        else if (mtThreshold < threshold)
+                        {
+                            data.tradosNoMatchWordCount -= mtFuzzyNoMatchWordCount;
+                            data.tradosRepsWordCount -= mtRepetitionsWordCount;
+                        }
+                    }
                     data.dellTotalWordCount = w.getTotalWordCount();
 
-                    data.tradosTotalWordCount = data.trados100WordCount
-                            + data.tradosInContextWordCount + data.tradosContextWordCount
-                            + data.trados95to99WordCount + data.trados85to94WordCount
-                            + data.trados75to84WordCount + data.trados50to74WordCount
-                            + data.tradosRepsWordCount + data.tradosNoMatchWordCount;
+                    data.tradosTotalWordCount = data.dellTotalWordCount;
 
                     // Counts the total cost for dell activities in the same
                     // workflow.

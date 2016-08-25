@@ -17,16 +17,19 @@
 
 package com.globalsight.restful.login;
 
+import javax.ws.rs.core.HttpHeaders;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.json.JSONObject;
 
 import com.globalsight.restful.RestfulApiTestHelper;
 
 public class LoginResourceTester extends RestfulApiTestHelper
 {
     /**
-     * http://localhost:8080/globalsight/restfulServices/companies/{companyName}/login-helper
+     * http://localhost:8080/globalsight/restfulServices/login-helper
      */
     public String testLogin(String userName, String password)
     {
@@ -34,17 +37,17 @@ public class LoginResourceTester extends RestfulApiTestHelper
         HttpResponse httpResponse = null;
         try
         {
-            StringBuffer url = new StringBuffer();
-            url.append("http://localhost:8080/globalsight/restfulServices/companies/York/login-helper");
-            // required params
-            url.append("?userName=").append(userName);
-            url.append("&password=").append(password);
+            String url = "http://localhost:8080/globalsight/restfulServices/login-helper";
 
-            HttpGet httpGet = new HttpGet(url.toString());
+            HttpGet httpGet = getHttpGet(url, userName, password);
 
             httpResponse = httpClient.execute(httpGet);
 
-            return printHttpResponse(httpResponse);
+            String returning = printHttpResponse(httpResponse);
+            JSONObject json = new JSONObject(returning);
+            
+            String token = json.getString("accessToken");
+            return token;
         }
         catch (Exception e)
         {
@@ -57,13 +60,20 @@ public class LoginResourceTester extends RestfulApiTestHelper
         return null;
     }
 
+    private HttpGet getHttpGet(String url, String userName, String password)
+    {
+        HttpGet httpget = new HttpGet(url);
+        httpget.setHeader(HttpHeaders.AUTHORIZATION, authorizationHeader(userName, password));
+        return httpget;
+    }
+
     public static void main(String[] args)
     {
         LoginResourceTester tester = new LoginResourceTester();
 
         try
         {
-            tester.testLogin("york", "password");
+            tester.testLogin("superadmin", "password");
         }
         finally
         {

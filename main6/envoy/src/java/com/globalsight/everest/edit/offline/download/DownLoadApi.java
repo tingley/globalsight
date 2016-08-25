@@ -249,7 +249,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
     private Hashtable m_uniqueJobFileNames = null;
 
-    private Set<Object> m_uniqueSupportFileNames = null;
+    private Set<String> m_uniqueSupportFileNames = null;
 
     private boolean m_packageHasResources = false;
 
@@ -296,7 +296,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         m_segmentIdListWriter = new SegmentIdListWriter();
         m_ansiRtfWriter = new RTFWriterAnsi();
         m_uniqueJobFileNames = new Hashtable();
-        m_uniqueSupportFileNames = new HashSet<Object>();
+        m_uniqueSupportFileNames = new HashSet<String>();
 
         m_OPG = new OfflinePageDataGenerator();
     }
@@ -2901,14 +2901,14 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             StringBuffer uniqueName = new StringBuffer(p_name);
             uniqueName.insert(0, new Integer(i));
 
-            while (m_uniqueSupportFileNames.contains(uniqueName))
+            while (m_uniqueSupportFileNames.contains(uniqueName.toString()))
             {
                 i++;
                 uniqueName = new StringBuffer(p_name);
                 uniqueName.insert(0, new Integer(i));
             }
 
-            m_uniqueSupportFileNames.add(uniqueName);
+            m_uniqueSupportFileNames.add(uniqueName.toString());
 
             return uniqueName.toString();
         }

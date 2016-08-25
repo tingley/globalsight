@@ -331,7 +331,7 @@ public class TestExtractor extends BaseExtractorTestClass
 
     public Output doExtractWithFilter(File p_file, AbstractExtractor extractor,
             String p_encoding, FileProfileImpl p_fp, String p_fpId, 
-            long p_secondFilterId, String p_secondFilterTableName)
+            long p_secondFilterId, String p_secondFilterTableName) throws Exception
     {
         Output output = new Output();
         EFInputData input = new EFInputData();
@@ -368,7 +368,7 @@ public class TestExtractor extends BaseExtractorTestClass
     
     @Override
     public Output doExtract(File p_file, AbstractExtractor extractor,
-            String p_encoding)
+            String p_encoding) throws Exception
     {
         Output output = new Output();
         EFInputData input = new EFInputData();

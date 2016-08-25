@@ -92,17 +92,19 @@ public abstract class BaseExtractorTestClass
     /**
      * Get file content in String. Keep this as abstract to enforce to override
      * it.User can select to use this one or "doExtract(...)" method.
+     * @throws Exception 
      */
     public abstract String getFileContent(File file, AbstractExtractor extractor,
-            String encoding);
+            String encoding) throws Exception;
     
     /**
      * Get extract result in output. Keep this as abstract to enforce to
      * override it.User can select to use this one or "getFileContent(...)"
      * method.
+     * @throws Exception 
      */
     public abstract Output doExtract(File file, AbstractExtractor extractor,
-            String encoding);
+            String encoding) throws Exception;
 
     /**
      * Get class of file directory

@@ -34,7 +34,7 @@ public class FileProfileResourceTester extends RestfulApiTestHelper
     }
 
 	/**
-	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyName}/fileProfiles
+	 * http://localhost:8080/globalsight/restfulServices/1.0/companies/{companyID}/fileProfiles
 	 */
 	public void testGetFileProfiles()
 	{
@@ -43,7 +43,7 @@ public class FileProfileResourceTester extends RestfulApiTestHelper
 		try
 		{
 			StringBuffer url = new StringBuffer();
-			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/Allie/fileProfiles");
+			url.append("http://localhost:8080/globalsight/restfulServices/1.0/companies/1000/fileProfiles");
 			HttpGet httpGet = getHttpGet(url.toString(), accessToken);
 
 			httpResponse = httpClient.execute(httpGet);

@@ -117,10 +117,11 @@ public class ExtractorTest extends BaseExtractorTestClass
     
     /**
      * Do extract, segmentation, handle "x","nbsp" etc.
+     * @throws Exception 
      */
     @Override
     public Output doExtract(File file, AbstractExtractor extractor,
-            String encoding)
+            String encoding) throws Exception
     {
         Output output = new Output();
         EFInputData input = new EFInputData();

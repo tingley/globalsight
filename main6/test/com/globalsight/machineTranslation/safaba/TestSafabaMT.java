@@ -43,27 +43,27 @@ public class TestSafabaMT
         }
     }
 
-    @Test
-    public void testBatchTranslation()
-    {
-        String langPair = "enus-dede";
-        String[] segments = new String[2];
-        segments[0] = "Nice to see you.";
-        segments[1] = "How are you?";
-
-        try
-        {
-            String[] translations = SafabaTranslateUtil.batchTranslate(
-                    hostName, port, endClient, password, endClientLSP,
-                    langPair, segments, 30);
-            Assert.assertNotNull(translations);
-            Assert.assertEquals(translations.length, segments.length);
-        }
-        catch (Exception e)
-        {
-            fail(e.getMessage());
-        }
-    }
+//    @Test
+//    public void testBatchTranslation()
+//    {
+//        String langPair = "enus-dede";
+//        String[] segments = new String[2];
+//        segments[0] = "Nice to see you.";
+//        segments[1] = "How are you?";
+//
+//        try
+//        {
+//            String[] translations = SafabaTranslateUtil.batchTranslate(
+//                    hostName, port, endClient, password, endClientLSP,
+//                    langPair, segments, 30);
+//            Assert.assertNotNull(translations);
+//            Assert.assertEquals(translations.length, segments.length);
+//        }
+//        catch (Exception e)
+//        {
+//            fail(e.getMessage());
+//        }
+//    }
 
     @After
     public void tearDown()

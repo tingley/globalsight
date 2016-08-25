@@ -22,6 +22,7 @@ import javax.ws.rs.core.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.json.JSONObject;
 
 import com.globalsight.restful.RestfulApiTestHelper;
 
@@ -42,7 +43,11 @@ public class LoginResourceTester extends RestfulApiTestHelper
 
             httpResponse = httpClient.execute(httpGet);
 
-            return printHttpResponse(httpResponse);
+            String returning = printHttpResponse(httpResponse);
+            JSONObject json = new JSONObject(returning);
+            
+            String token = json.getString("accessToken");
+            return token;
         }
         catch (Exception e)
         {

@@ -1015,66 +1015,66 @@ function isIE() { //ie?
 
 <table class="listborder" cellspacing="0" cellpadding="0" width="979" align="left" border="1">
 <tr>
-<td>
-  <table cellSpacing="10" cellPadding="0" width="100%" align="center" border="0" table-layout="fixed">
-    <tr>
-    <td style="width:70%;" colspan="2" height="265">
-    <table class="listborder" width="100%" cellspacing="0" cellpadding="0" border="0">
-      <tr height="30">
-        <td width="50%" style="border:0"><div class="titletext" style="padding-left:10px;"><c:out value="${lb_name}"/></div></td>
-        <td width="10%" style="border:0"><div align="center"><span class="titletext"><c:out value="${lb_size}"/></span></div></td>
-        <td width="10%" style="border:0"><div align="center"><span class="titletext"><c:out value="${lb_status}"/></span></div></td>
-        <td width="20%" style="border:0"><div align="center"><span class="titletext"><c:out value="${lb_file_profile}"/></span></div></td>
-        <td width="10%" style="border:0">&nbsp;</td>
-      </tr>
-      <tr>
-        <td id="uploadArea" height="270" colspan="6">
-            <div id="fileQueue" class="fileQueue"></div>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="6"><div id="appl"></div><div id="attachment"></div>
-            <table cellSpacing="0" cellPadding="0" width="100%" align="center" border="0">
-                <tr>
-                    <td width="100px" height="30px" align="center" valign="middle" onmouseover="setInputFileDisable(0)">
-                    <input type="button" id="sourceFileBtn" class="standardBtn_mouseout" value="<c:out value='${lb_add_files}'/>">
-                    <input type="file" class="sourceFile" multiple value="Add File" name="selectedSourceFile" id="selectedSourceFile" onclick="setType(0)" onchange="checkAndUpload()" title="<c:out value='${lb_create_job_add_file_tip}'/>">
-                    </td>
-                    <td width="100px" align="center" valign="middle"><input id="uploadedFiles" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_uploaded_files}'/>" title="<c:out value='${lb_create_job_uploaded_files_tip}'/>"></td>
-                    <td align="center" class="footertext">
-                        <c:out value="${lb_total}"/>: <span id="fileNo">0</span>
-                        (<span id="totalFileSize">0.00KB</span>)
-                        <span id="uploadedFileNo" style="display:none">- <c:out value='${lb_uploaded}'/>: 0</span>
-                        <span id="failedUpload" style="display:none">| <c:out value="${msg_failed}"/>: 0</span>
-                    </td>
-                     <td width="110px" align="center">
-                    	<div id="attributeButtonDIV" style="display:none">
-                    	<input id="attributeButton" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_job_attributes}'/>" title="<c:out value='${lb_job_attributes}'/>">
-                    	</div>
-                    </td>
-                    <td width="110px" align="center"><input id="cleanMap" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_clear_profile}'/>" title="<c:out value='${lb_create_job_clean_map_tip}'/>"></td>
-                </tr>
-            </table>
-        </td>
-      </tr>
-    </table>
-    </td>
-    <td rowspan="4" style="width:30%;height:100%">
-        <div style="background-color:#738EB5;height:91%" id="targetLocales">
-            <div style="font: 11pt Verdana, Geneva, sans-serif;color:white;height:20px;padding-left:5px;padding-top:4px;padding-bottom:3px">
-                &nbsp;&nbsp;&nbsp;<input type="checkbox" id="tlControl" onclick="javascript:controlBoxes()" title="Select/Deselect All">&nbsp;<c:out value="${lb_target_locales}"/>
-            </div>
-            <div id="localeArea" style="background-color:white;height:88%;width:89%;left:15px;position:relative;">
-                <div id="targetLocaleArea" style="overflow:scroll;overflow-x:hidden;padding-left:5px">
-                </div>
-            </div>
-            <div style="height:5px"></div>
-        </div>
-        <div style="padding-left:30px;padding-top:15px;background-color:white">
-            <input id="create" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_create_job}'/>" title="<c:out value='${lb_create_job}'/>">&nbsp;&nbsp;&nbsp;
-            <input id="cancel" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_cancel}'/>" title="<c:out value='${lb_cancel}'/>">
-        </div>
-    </td>
+	<td>
+	  <table cellSpacing="10" cellPadding="0" width="100%" align="center" border="0" table-layout="fixed">
+	    <tr>
+	    <td style="width:70%;" colspan="2" height="265">
+		    <table class="listborder" width="100%" cellspacing="0" cellpadding="0" border="0">
+		      <tr height="30">
+		        <td width="50%" style="border:0"><div class="titletext" style="padding-left:10px;"><c:out value="${lb_name}"/></div></td>
+		        <td width="10%" style="border:0"><div align="center"><span class="titletext"><c:out value="${lb_size}"/></span></div></td>
+		        <td width="10%" style="border:0"><div align="center"><span class="titletext"><c:out value="${lb_status}"/></span></div></td>
+		        <td width="20%" style="border:0"><div align="center"><span class="titletext"><c:out value="${lb_file_profile}"/></span></div></td>
+		        <td width="10%" style="border:0">&nbsp;</td>
+		      </tr>
+		      <tr>
+		        <td id="uploadArea" height="270" colspan="6">
+		            <div id="fileQueue" class="fileQueue"></div>
+		        </td>
+		      </tr>
+		      <tr>
+		        <td colspan="5"><div id="appl"></div><div id="attachment"></div>
+		            <table cellSpacing="0" cellPadding="0" width="100%" align="center" border="0">
+		                <tr>
+		                    <td width="80px" height="30px" align="center" valign="middle" onmouseover="setInputFileDisable(0)">
+			                    <input type="button" id="sourceFileBtn" class="standardBtn_mouseout" value="<c:out value='${lb_add_files}'/>">
+			                    <input type="file" class="sourceFile" multiple value="Add File" name="selectedSourceFile" id="selectedSourceFile" onclick="setType(0)" onchange="checkAndUpload()" title="<c:out value='${lb_create_job_add_file_tip}'/>">
+		                    </td>
+		                    <td width="80px" align="center" valign="middle"><input id="uploadedFiles" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_uploaded_files}'/>" title="<c:out value='${lb_create_job_uploaded_files_tip}'/>"></td>
+		                    <td align="center" class="footertext">
+		                        <c:out value="${lb_total}"/>: <span id="fileNo">0</span>
+		                        (<span id="totalFileSize">0.00KB</span>)
+		                        <span id="uploadedFileNo" style="display:none">- <c:out value='${lb_uploaded}'/>: 0</span>
+		                        <span id="failedUpload" style="display:none">| <c:out value="${msg_failed}"/>: 0</span>
+		                    </td>
+		                    <td width="80px" align="center"><input id="cleanMap" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_clear_profile}'/>" title="<c:out value='${lb_create_job_clean_map_tip}'/>"></td>
+		                     <td width="80px" align="center">
+		                    	<div id="attributeButtonDIV" style="display:none">
+		                    	<input id="attributeButton" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_job_attributes}'/>" title="<c:out value='${lb_job_attributes}'/>">
+		                    	</div>
+		                    </td>
+		                </tr>
+		            </table>
+		        </td>
+		      </tr>
+		    </table>
+	    </td>
+	    <td rowspan="4" style="width:30%;height:100%">
+	        <div style="background-color:#738EB5;height:91%" id="targetLocales">
+	            <div style="font: 11pt Verdana, Geneva, sans-serif;color:white;height:20px;padding-left:5px;padding-top:4px;padding-bottom:3px">
+	                &nbsp;&nbsp;&nbsp;<input type="checkbox" id="tlControl" onclick="javascript:controlBoxes()" title="Select/Deselect All">&nbsp;<c:out value="${lb_target_locales}"/>
+	            </div>
+	            <div id="localeArea" style="background-color:white;height:88%;width:89%;left:15px;position:relative;">
+	                <div id="targetLocaleArea" style="overflow:scroll;overflow-x:hidden;padding-left:5px">
+	                </div>
+	            </div>
+	            <div style="height:5px"></div>
+	        </div>
+	        <div style="padding-left:30px;padding-top:15px;background-color:white">
+	            <input id="create" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_create_job}'/>" title="<c:out value='${lb_create_job}'/>">&nbsp;&nbsp;&nbsp;
+	            <input id="cancel" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_cancel}'/>" title="<c:out value='${lb_cancel}'/>">
+	        </div>
+	    </td>	
   </tr>
   <tr>
     <td width="50%" height="25">
@@ -1103,10 +1103,10 @@ function isIE() { //ie?
                     <c:out value="${lb_attachment}"/> / <c:out value="${lb_reference_file}"/>: 
                 </td>
                 <td width="40%" valign="middle"><div id="attachmentArea" style="border:1px solid #0C1476;padding-left:0;height:25px;line-height:25px"></div></td>
+                <td width="4%" valign="middle" align="center"><div id="delAtt" style="display:none;"><img src="/globalsight/images/createjob/delete.png" style="cursor:pointer;padding-top:4px;" onclick="delAttc()"></div></td>
                 <td width="30%" valign="middle" style="font-family:Arial,Helvetica,sans-serif;font-size:10pt;">
                 	<input type="checkbox" id="includeSupportFile" name="includeSupportFile" value="true"/>${lb_include_as_job_support_file}
                 </td>
-                <td width="4%" valign="middle" align="center"><div id="delAtt" style="display:none;"><img src="/globalsight/images/createjob/delete.png" style="cursor:pointer;padding-top:4px;" onclick="delAttc()"></div></td>
                 <td width="11%" onmouseover="setInputFileDisable(1)">
 	                <input type="button" id="attachmentFileBtn" class="standardBtn_mouseout" value="<c:out value='${lb_browse}'/>">
 	                <input type="file" class="attachmentFile" name="selectedAttachmentFile" id="selectedAttachmentFile" class="standardBtn_mouseout" onclick="setType(1)" onchange="checkAndUpload()" title="<c:out value='${lb_create_job_browse_tip}'/>">

@@ -31,6 +31,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.permission.Permission;
@@ -384,6 +385,25 @@ public class RestResource
         }
 
         return fileName;
+    }
+
+    protected Company getCompanyById(String p_companyID) throws RestWebServiceException
+    {
+        return getCompanyById(Long.parseLong(p_companyID));
+    }
+
+    protected Company getCompanyById(long p_companyID) throws RestWebServiceException
+    {
+        try
+        {
+            return ServerProxy.getJobHandler().getCompanyById(p_companyID);
+        }
+        catch (Exception e)
+        {
+            logger.warn(e);
+            String msg = "Fail to get company by ID: " + p_companyID;
+            throw new RestWebServiceException(msg);
+        }
     }
 
     protected String makeErrorJson(String p_method, String p_msg)

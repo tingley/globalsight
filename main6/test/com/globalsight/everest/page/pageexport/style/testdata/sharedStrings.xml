@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="2" uniqueCount="2">
+<si xmlns="">
+<r>
+<rPr/>
+<t xml:space="preserve">从HDCX运营指南</t>
+</r>
+<r>
+<rPr>
+<sz val="11"/>
+<color rgb="FF1F497D"/>
+<rFont val="Calibri"/>
+<family val="2"/>
+<scheme val="minor"/>
+</rPr>
+<t xml:space="preserve">下载“产品价值表”。服饰与精品“产品价值表”提供的详细信息将帮助您成功完成本课程。</t>
+</r>
+</si>
+<si xmlns="">
+<r>
+<rPr/>
+<t xml:space="preserve">从HDCX运营指南</t>
+</r>
+<r>
+<rPr>
+<sz val="11"/>
+<color rgb="FF1F497D"/>
+<rFont val="Calibri"/>
+<family val="2"/>
+<scheme val="minor"/>
+</rPr>
+<t xml:space="preserve">下载“产品价值表”。摩托车“产品价值表”提供的详细信息将帮助您成功完成本课程。</t>
+</r>
+</si>
+</sst>

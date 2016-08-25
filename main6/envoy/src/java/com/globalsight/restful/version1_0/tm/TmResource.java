@@ -148,7 +148,7 @@ import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.webservices.WebServiceException;
 
-@Path("/1.0/companies/{companyName}/tms")
+@Path("/1.0/companies/{companyID}/tms")
 public class TmResource extends RestResource
 {
     public static final String GET_TMS = "getTms";
@@ -199,14 +199,14 @@ public class TmResource extends RestResource
     /**
      * Get all project TM information.
      * 
-     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms
+     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyID}/tms
      * 
      * @since 8.6.9 release
      * 
      * @param authorization
      *            -- authorization information from request context header.
-     * @param p_companyName
-     *            -- company name. Required.
+     * @param p_companyID
+     *            -- company ID. Required.
      * 
      * @return All TM data in JSON.
      * 
@@ -217,7 +217,7 @@ public class TmResource extends RestResource
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTms(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName) throws RestWebServiceException
+            @PathParam("companyID") String p_companyID) throws RestWebServiceException
     {
         RestWebServiceLog.Start restStart = null;
         try
@@ -226,13 +226,14 @@ public class TmResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restStart = RestWebServiceLog.start(TmResource.class, GET_TMS, restArgs);
 
             checkPermission(userName, Permission.TM_VIEW);
 
             List<GetTmsResponse> tmsResponse = new ArrayList<GetTmsResponse>();
-            Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
+            Company company = ServerProxy.getJobHandler().getCompanyById(
+                    Long.parseLong(p_companyID));
             long companyId = company.getId();
             List<ProjectTM> tms = getTMs(userName, company);
             for (ProjectTM tm : tms)
@@ -361,14 +362,14 @@ public class TmResource extends RestResource
     /**
      * Create a new TU.
      * 
-     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms/{tmId}/tus
+     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyID}/tms/{tmId}/tus
      * 
      * @since 8.6.9 release
      * 
      * @param authorization
      *            -- authorization information from request context header.
-     * @param p_companyName
-     *            -- company name. Required.
+     * @param p_companyID
+     *            -- company ID. Required.
      * @param p_tmId
      *            -- TM ID. Required.
      * @param p_sourceLocale
@@ -394,7 +395,7 @@ public class TmResource extends RestResource
     @Path("/{tmId}/tus")
     public Response createTu(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @PathParam("tmId") String p_tmId,
             @QueryParam("sourceLocale") String p_sourceLocale,
             @QueryParam("sourceSegment") String p_sourceSegment,
@@ -411,7 +412,7 @@ public class TmResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("tmId", p_tmId);
             restArgs.put("sid", p_sid);
             restArgs.put("sourceLocale", p_sourceLocale);
@@ -423,7 +424,7 @@ public class TmResource extends RestResource
 
             checkPermission(userName, Permission.TM_ADD_ENTRY);
 
-            ProjectTM tm = checkTmId(p_tmId, p_companyName);
+            ProjectTM tm = checkTmId(p_tmId, p_companyID);
 
             String sid = clearSid(p_sid);
 
@@ -776,14 +777,14 @@ public class TmResource extends RestResource
     /**
      * Get TU data by ID.
      * 
-     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms/{tmId}/tus/{id}
+     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyID}/tms/{tmId}/tus/{id}
      * 
      * @since 8.6.9 release
      * 
      * @param authorization
      *            -- authorization information from request context header.
-     * @param p_companyName
-     *            -- company name.
+     * @param p_companyID
+     *            -- company ID. Required.
      * @param p_tmId
      *            -- TM ID. Required.
      * @param p_tuId
@@ -799,7 +800,7 @@ public class TmResource extends RestResource
     @Produces(MediaType.APPLICATION_XML)
     public Response getTu(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @PathParam("tmId") String p_tmId,
             @PathParam("id") String p_tuId) throws RestWebServiceException
     {
@@ -811,12 +812,12 @@ public class TmResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("tmId", p_tmId);
             restArgs.put("id", p_tuId);
             restStart = RestWebServiceLog.start(TmResource.class, GET_TU, restArgs);
 
-            ProjectTM ptm = checkTmId(p_tmId, p_companyName);
+            ProjectTM ptm = checkTmId(p_tmId, p_companyID);
             BaseTm tm = TM3Util.getBaseTm(ptm.getTm3Id());
             TM3Tu tm3Tu = tm.getTu(Long.parseLong(p_tuId));
             if (tm3Tu == null)
@@ -881,14 +882,14 @@ public class TmResource extends RestResource
     /**
      * Get TU data by specified start ID and offset.
      * 
-     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms/{tmId}/tus?startId=1000&offset=xx&sourceLocale="en_us"
+     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyID}/tms/{tmId}/tus?startId=1000&offset=xx&sourceLocale="en_us"
      * 
      * @since 8.6.9 release
      * 
      * @param authorization
      *            -- authorization information from request context header.
-     * @param p_companyName
-     *            -- company name. Required.
+     * @param p_companyID
+     *            -- company ID. Required.
      * @param p_tmId
      *            -- TM ID. Required.
      * @param p_startId
@@ -912,7 +913,7 @@ public class TmResource extends RestResource
     @Produces(MediaType.APPLICATION_XML)
     public Response getTus(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @PathParam("tmId") String p_tmId,
             @QueryParam("startId") @DefaultValue("0") String p_startId,
             @QueryParam("offset") @DefaultValue("1") String p_offset,
@@ -927,7 +928,7 @@ public class TmResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("tmId", p_tmId);
             restArgs.put("startId", p_startId);
             restArgs.put("offset", p_offset);
@@ -937,7 +938,7 @@ public class TmResource extends RestResource
 
             checkPermission(userName, Permission.TM_SEARCH);
 
-            ProjectTM tm = checkTmId(p_tmId, p_companyName);
+            ProjectTM tm = checkTmId(p_tmId, p_companyID);
 
             long startId = checkStartId(p_startId);
             int offset = checkOffset(p_offset);
@@ -1145,14 +1146,14 @@ public class TmResource extends RestResource
     /**
      * Edit TUs by TU XML.
      * 
-     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms/{tmId}/tus
+     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyID}/tms/{tmId}/tus
      * 
      * @since 8.6.9 release
      * 
      * @param authorization
      *            -- authorization information from request context header.
-     * @param p_companyName
-     *            -- company name. Required.
+     * @param p_companyID
+     *            -- company ID. Required.
      * @param p_tmId
      *            -- TM ID. Required.
      * 
@@ -1165,7 +1166,7 @@ public class TmResource extends RestResource
     @Consumes(MediaType.APPLICATION_XML)
     public Response editTus(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @PathParam("tmId") String p_tmId,
             InputStream inputStream) throws RestWebServiceException
     {
@@ -1177,14 +1178,14 @@ public class TmResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("tmId", p_tmId);
             restArgs.put("tmx", tuXml);
             restStart = RestWebServiceLog.start(TmResource.class, EDIT_TUS, restArgs);
 
             checkPermission(userName, Permission.TM_EDIT_ENTRY);
 
-            ProjectTM tm = checkTmId(p_tmId, p_companyName);
+            ProjectTM tm = checkTmId(p_tmId, p_companyID);
 
             SAXReader reader = new SAXReader();
             ElementHandler handler = new ElementHandler()
@@ -1418,14 +1419,14 @@ public class TmResource extends RestResource
     /**
      * Delete TU by TU ids.
      * 
-     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms/{tmId}/tus/{ids}
+     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyID}/tms/{tmId}/tus/{ids}
      * 
      * @since 8.6.9 release
      * 
      * @param authorization
      *            -- authorization information from request context header.
-     * @param p_companyName
-     *            -- company name. Required.
+     * @param p_companyID
+     *            -- company ID. Required.
      * @param p_tmId
      *            -- TM ID. Required.
      * @param p_tuIds
@@ -1439,7 +1440,7 @@ public class TmResource extends RestResource
     @Path("/{tmId}/tus/{ids}")
     public Response deleteTus(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @PathParam("tmId") String p_tmId,
             @PathParam("ids") String p_tuIds) throws RestWebServiceException
     {
@@ -1450,14 +1451,14 @@ public class TmResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("tmId", p_tmId);
             restArgs.put("tuIds", p_tuIds);
             restStart = RestWebServiceLog.start(TmResource.class, DELETE_TUS, restArgs);
 
             checkPermission(userName, Permission.TM_DELETE);
 
-            ProjectTM ptm = checkTmId(p_tmId, p_companyName);
+            ProjectTM ptm = checkTmId(p_tmId, p_companyID);
 
             List<Long> tuIdList = checkTuIds(p_tuIds);
 
@@ -1561,14 +1562,14 @@ public class TmResource extends RestResource
      * import the TM data file into TM. If a file is too large, API allows to
      * upload multiple times.
      * 
-     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms/{tmId}/upload
+     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyID}/tms/{tmId}/upload
      * 
      * @since 8.6.9 release
      * 
      * @param authorization
      *            -- authorization information from request context header.
-     * @param p_companyName
-     *            -- company name.
+     * @param p_companyID
+     *            -- company ID.
      * @param p_tmId
      *            -- TM ID. Required.
      * 
@@ -1581,7 +1582,7 @@ public class TmResource extends RestResource
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response uploadTmxFile(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @PathParam("tmId") String p_tmId,
             MultipartInput p_input) throws RestWebServiceException
     {
@@ -1592,13 +1593,13 @@ public class TmResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("tmId", p_tmId);
             restStart = RestWebServiceLog.start(TmResource.class, UPLOAD_TMX_FILE, restArgs);
 
             checkPermission(userName, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
 
-            ProjectTM tm = checkTmId(p_tmId, p_companyName);
+            ProjectTM tm = checkTmId(p_tmId, p_companyID);
 
             StringBuffer pathBuffer = new StringBuffer();
             pathBuffer.append(AmbFileStoragePathUtils.getFileStorageDirPath(tm.getCompanyId()));
@@ -1645,14 +1646,14 @@ public class TmResource extends RestResource
      * Import TM data file into TM. The TM data file is uploaded via "upload" requests.
      * 
      * Sample URL:
-     * http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms/{tmId}/import
+     * http://localhost:8080/globalsight/restfulServices/companies/{companyID}/tms/{tmId}/import
      * 
      * @since 8.6.9 release
      * 
      * @param authorization
      *            -- authorization information from request context header.
-     * @param p_companyName
-     *            -- company name. Required.
+     * @param p_companyID
+     *            -- company ID. Required.
      * @param p_tmId
      *            -- TM ID. Required.
      * @param p_syncMode
@@ -1667,7 +1668,7 @@ public class TmResource extends RestResource
     @Path("/{tmId}/import")
     public Response importTmxFile(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @PathParam("tmId") String p_tmId,
             @QueryParam("syncMode") String p_syncMode) throws RestWebServiceException
     {
@@ -1678,14 +1679,14 @@ public class TmResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("tmId", p_tmId);
             restArgs.put("syncMode", p_syncMode);
             restStart = RestWebServiceLog.start(TmResource.class, IMPORT_TMX_FILE, restArgs);
 
             checkPermission(userName, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
 
-            ProjectTM tm = checkTmId(p_tmId, p_companyName);
+            ProjectTM tm = checkTmId(p_tmId, p_companyID);
 
             com.globalsight.everest.tm.importer.ImportOptions tmImportOptions = initTmImportOptions(p_syncMode);
             IImportManager importer = new ImportManager(tm, new SessionInfo("", ""));
@@ -1770,14 +1771,14 @@ public class TmResource extends RestResource
      * identify key to check the export status.
      * 
      * Sample URL:
-     * http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms/{tmId}/export?startDate=yyyyMMdd&exportFormat=TMX1.4b
+     * http://localhost:8080/globalsight/restfulServices/companies/{companyID}/tms/{tmId}/export?startDate=yyyyMMdd&exportFormat=TMX1.4b
      * 
      * @since 8.6.9 release
      * 
      * @param authorization
      *            -- authorization information from request context header.
-     * @param p_companyName
-     *            -- company name. Required.
+     * @param p_companyID
+     *            -- company ID. Required.
      * @param p_tmId
      *            -- TM ID. Required.
      * @param p_languages
@@ -1809,7 +1810,7 @@ public class TmResource extends RestResource
     @Path("/{tmId}/export")
     public Response exportTM(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @PathParam("tmId") String p_tmId,
             @QueryParam("languages") String p_languages,
             @QueryParam("startDate") String p_startDate,
@@ -1827,7 +1828,7 @@ public class TmResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("tmId", p_tmId);
             restArgs.put("languages", p_languages);
             restArgs.put("startDate", p_startDate);
@@ -1837,7 +1838,7 @@ public class TmResource extends RestResource
             restArgs.put("exportedFileName", p_exportedFileName);
             restStart = RestWebServiceLog.start(TmResource.class, EXPORT_TM, restArgs);
 
-            ProjectTM tm = checkTmId(p_tmId, p_companyName);
+            ProjectTM tm = checkTmId(p_tmId, p_companyID);
 
             p_exportedFileName = checkExportedFileName(p_exportedFileName);
 
@@ -2012,7 +2013,7 @@ public class TmResource extends RestResource
     }
 
     // Common parameter check for all TM resource methods
-    private ProjectTM checkTmId(String p_tmId, String p_companyName) throws RestWebServiceException
+    private ProjectTM checkTmId(String p_tmId, String p_companyID) throws RestWebServiceException
     {
         ProjectTM tm = null;
         try
@@ -2020,7 +2021,8 @@ public class TmResource extends RestResource
             tm = ServerProxy.getProjectHandler().getProjectTMById(
                     Long.parseLong(p_tmId.trim()), false);
 
-            Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
+            Company company = ServerProxy.getJobHandler().getCompanyById(
+                    Long.parseLong(p_companyID));
             if (company != null && company.getId() != tm.getCompanyId())
             {
                 String msg = "TM " + p_tmId + " does not belong to company " + company.getName();
@@ -2173,14 +2175,14 @@ public class TmResource extends RestResource
      * Check TM export status and return exported TM data by identify key.
      * 
      * Sample URL:
-     * http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms/{tmId}/export/{identifyKey}
+     * http://localhost:8080/globalsight/restfulServices/companies/{companyID}/tms/{tmId}/export/{identifyKey}
      * 
      * @since 8.6.9 release
      * 
      * @param authorization
      *            -- authorization information from request context header.
-     * @param p_companyName
-     *            -- company name.
+     * @param p_companyID
+     *            -- company ID. Required.
      * @param p_identifyKey
      *            -- identifyKey to help locate where the export file is. Required.
      * 
@@ -2193,7 +2195,7 @@ public class TmResource extends RestResource
     @Produces({"application/xml;charset=UTF-8"})
     public Response getTmExportFile(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @PathParam("identifyKey") String p_identifyKey)
             throws RestWebServiceException
     {
@@ -2205,7 +2207,7 @@ public class TmResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("identifyKey", p_identifyKey);
             restStart = RestWebServiceLog.start(TmResource.class, GET_TM_EXPORT_FILE, restArgs);
 
@@ -2274,15 +2276,15 @@ public class TmResource extends RestResource
     /**
      * Full text search from specified TMs.
      * 
-     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyName}/tms/{tmIds}/fullTextSearch
+     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyID}/tms/{tmIds}/fullTextSearch
      * ?searchText=searchText&sourceLocale=en_US&targetLocale=fr_FR
      * 
      * @since 8.6.9 release
      * 
      * @param authorization
      *            -- authorization information from request context header.
-     * @param p_companyName
-     *            -- company name.
+     * @param p_companyID
+     *            -- company ID. Required.
      * @param p_tmIds
      *            -- tm IDs comma separated. Required.
      * @param p_searchText
@@ -2310,7 +2312,7 @@ public class TmResource extends RestResource
     @Produces(MediaType.APPLICATION_XML)
     public Response fullTextSearch(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @PathParam("tmIds") String p_tmIds,
             @QueryParam("searchText") String p_searchText,
             @QueryParam("sourceLocale") String p_sourceLocale,
@@ -2328,7 +2330,7 @@ public class TmResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("tmIds", p_tmIds);
             restArgs.put("searchText", p_searchText);
             restArgs.put("sourceLocale", p_sourceLocale);
@@ -2343,7 +2345,7 @@ public class TmResource extends RestResource
                 p_sourceLocale = p_sourceLocale.replace("-", "_");
             if (p_targetLocale != null)
                 p_targetLocale = p_targetLocale.replace("-", "_");
-            checkParamters(userName, p_companyName, p_tmIds, p_searchText, p_sourceLocale,
+            checkParamters(userName, p_companyID, p_tmIds, p_searchText, p_sourceLocale,
                     p_targetLocale, p_creationStartDate, p_creationFinishDate, p_modifyStartDate,
                     p_modifyFinishDate);
 
@@ -2488,7 +2490,7 @@ public class TmResource extends RestResource
         }
     }
 
-    private void checkParamters(String p_userName, String p_companyName, String p_tmIds,
+    private void checkParamters(String p_userName, String p_companyID, String p_tmIds,
             String p_searchText, String p_sourceLocale, String p_targetLocale,
             String p_creationStartDate, String p_creationFinishDate, String p_modifyStartDate,
             String p_modifyFinishDate) throws RestWebServiceException
@@ -2497,7 +2499,7 @@ public class TmResource extends RestResource
             throw new RestWebServiceException("Empty TM IDs");
         for (String tmId : p_tmIds.split(","))
         {
-            checkTmId(tmId, p_companyName);
+            checkTmId(tmId, p_companyID);
         }
 
         if (StringUtil.isEmpty(p_searchText))
@@ -2603,14 +2605,14 @@ public class TmResource extends RestResource
      * Leverage segment.
      * 
      * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{
-     * companyName}/tms/leverage?searchText=searchText&tmProfileName=tmpName&sourceLocale=en_US
+     * companyID}/tms/leverage?searchText=searchText&tmProfileName=tmpName&sourceLocale=en_US
      * 
      * @since 8.6.9 release
      * 
      * @param authorization
      *            -- authorization information from request context header.
-     * @param p_companyName
-     *            -- company name. Required.
+     * @param p_companyID
+     *            -- company ID. Required.
      * @param p_tmProfileName
      *            -- Translation memory profile name. Required.
      * @param p_searchText
@@ -2634,7 +2636,7 @@ public class TmResource extends RestResource
     @Produces(MediaType.APPLICATION_XML)
     public Response leverageSegment(
             @HeaderParam("accessToken") List<String> accessToken,
-            @PathParam("companyName") String p_companyName,
+            @PathParam("companyID") String p_companyID,
             @QueryParam("tmProfileName") String p_tmProfileName,
             @QueryParam("searchText") String p_searchText,
             @QueryParam("sourceLocale") String p_sourceLocale,
@@ -2649,14 +2651,14 @@ public class TmResource extends RestResource
 
             Map<Object, Object> restArgs = new HashMap<Object, Object>();
             restArgs.put("loggedUserName", userName);
-            restArgs.put("companyName", p_companyName);
+            restArgs.put("companyID", p_companyID);
             restArgs.put("tmProfileName", p_tmProfileName);
             restArgs.put("searchText", p_searchText);
             restArgs.put("sourceLocale", p_sourceLocale);
             restArgs.put("escapeString", escapeString);
             restStart = RestWebServiceLog.start(TmResource.class, LEVERAGE_SEGMENT, restArgs);
 
-            TranslationMemoryProfile tmp = checkTmProfileName(p_tmProfileName, p_companyName);
+            TranslationMemoryProfile tmp = checkTmProfileName(p_tmProfileName, p_companyID);
 
             GlobalSightLocale sourceLocale = getLocaleByName(p_sourceLocale);
             if (sourceLocale == null)
@@ -2866,7 +2868,7 @@ public class TmResource extends RestResource
         };
     }
 
-    private TranslationMemoryProfile checkTmProfileName(String p_tmProfileName, String p_companyName)
+    private TranslationMemoryProfile checkTmProfileName(String p_tmProfileName, String p_companyID)
             throws Exception
     {
         if (StringUtil.isEmpty(p_tmProfileName))
@@ -2880,7 +2882,7 @@ public class TmResource extends RestResource
             throw new RestWebServiceException(message);
         }
 
-        Company company = ServerProxy.getJobHandler().getCompany(p_companyName);
+        Company company = ServerProxy.getJobHandler().getCompanyById(Long.parseLong(p_companyID));
         if (company != null && company.getId() != tmp.getCompanyId())
         {
             String msg = "Translation memory profile '" + p_tmProfileName

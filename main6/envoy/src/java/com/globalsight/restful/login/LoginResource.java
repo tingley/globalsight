@@ -17,57 +17,104 @@
 
 package com.globalsight.restful.login;
 
+import java.util.Collection;
+import java.util.List;
+
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.restful.RestConstants;
 import com.globalsight.restful.RestResource;
 import com.globalsight.restful.RestWebServiceException;
+import com.globalsight.restful.RestWebServiceUtil;
 
-@Path("/companies/{companyName}/login-helper")
-public class LoginResource extends RestResource
+@Path("/login-helper")
+public class LoginResource extends RestResource implements RestConstants
 {
     public static final String LOGIN = "login";
 
-    private static final Logger logger = Logger.getLogger(LoginResource.class);
-
     /**
-     * Authenticate user name and password to return an access token.
+     * Authenticate user name and password to return access token and company information.
      * 
-     * Sample URL: http://localhost:8080/globalsight/restfulServices/companies/{companyName}/login-helper
+     * Sample URL: http://localhost:8080/globalsight/restfulServices/login-helper
      * 
-     * @param userName
-     *            -- user name to login. Required.
-     * @param password
-     *            -- password to login. Required.
-     * 
-     * @return Access token if user name and password are correct.
+     * @return Access token and company information if user name and password are correct.
+     * A sample is:
+     * <p>
+     *  {
+     *     "companies": [
+     *        {
+     *            "companyID": 1,
+     *            "companyName": "Welocalize"
+     *        },
+     *        {
+     *            "companyID": 1000,
+     *            "companyName": "York"
+     *        }
+     *     ],
+     *    "accessToken": "x0xrLh4QLza2I2DA1E3KkA==<separator>xAlMOEje5NQ=+_+Welocalize"
+     *  }
+     * </p>
      * 
      * @throws RestWebServiceException
      * 
      */
     @GET
     @Path("/")
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response login(
-            @QueryParam("userName") String p_userName,
-            @QueryParam("password") String p_password) throws RestWebServiceException
+            @HeaderParam("Authorization") List<String> authorization)
+            throws RestWebServiceException
     {
         try
         {
-            String accessToken = doLogin(p_userName, p_password);
-
-            User user = ServerProxy.getUserManager().getUserByName(p_userName);
+            String userName = RestWebServiceUtil
+                    .getUserNameFromBasicAuthorizationHeader(authorization);
+            User user = ServerProxy.getUserManager().getUserByName(userName);
+            // Username and password have been verified in
+            // "RestSecurityInterceptor", put the real password as parameter.
+            String accessToken = doLogin(userName, user.getPassword());
             accessToken = accessToken + "+_+" + user.getCompanyName();
 
-            return Response.status(200).entity(accessToken).build();
+            JSONObject json = new JSONObject();
+            json.put("accessToken", accessToken);
+
+            JSONArray comArray = new JSONArray();
+            Company company = ServerProxy.getJobHandler().getCompany(user.getCompanyName());
+            // return all companies if current user is super user
+            if (CompanyWrapper.SUPER_COMPANY_ID.equals(String.valueOf(company.getId())))
+            {
+                Collection<Company> companies = ServerProxy.getJobHandler().getAllCompanies();
+                for (Company c : companies)
+                {
+                    JSONObject com = new JSONObject();
+                    com.put(COMPANY_NAME, c.getCompanyName());
+                    com.put(COMPANY_ID, c.getIdAsLong());
+                    comArray.put(com);
+                }
+            }
+            else
+            {
+                JSONObject com = new JSONObject();
+                com.put(COMPANY_NAME, company.getCompanyName());
+                com.put(COMPANY_ID, company.getIdAsLong());
+                comArray.put(com);
+            }
+
+            json.put("companies", comArray);
+
+            return Response.status(200).entity(json.toString()).build();
         }
         catch (Exception e)
         {

@@ -107,6 +107,8 @@
             unique="false" />
         <property name="pageState" length="20" column="STATE"
             type="string" not-null="true" unique="false" />
+        <property name="exportedSubState" 
+            column="EXPORTED_SUB_STATE" type="int" not-null="false" />
         <property name="prevStateBeforeUpdate" length="20"
             column="PREV_UPDATE_STATE" type="string" not-null="false"
             unique="false" />

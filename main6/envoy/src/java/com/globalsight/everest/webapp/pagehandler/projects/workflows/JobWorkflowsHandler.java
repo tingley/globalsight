@@ -932,7 +932,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             jobWorkflowDisplay.setTargetLocaleDisplayName(
                     workflow.getTargetLocale().getDisplayName(uiLocale));
             jobWorkflowDisplay.setTotalWordCount(getTotalWordCount(workflow));
-            jobWorkflowDisplay.setStateBundleString(bundle.getString(workflow.getState()));
+            jobWorkflowDisplay.setStateBundleString(getDisplayState(workflow, bundle));
             jobWorkflowDisplay.setIsWorkflowEditable(isWorkflowEditable(perms, workflow));
             setJobWorkflowDisplayTaskDisplayName(workflow, jobWorkflowDisplay);
             setJobWorkflowDisplayEstimaedTimestamp(perms, uiLocale, ts, workflow,
@@ -942,6 +942,30 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         }
 
         return jobWorkflowDisplayList;
+    }
+
+    private String getDisplayState(Workflow workflow, ResourceBundle bundle)
+    {
+        String displayState = bundle.getString(workflow.getState());
+
+        int populatingTmTrgPageNum = getTmUpdatingTargetPageCount(workflow.getId());
+        // There are target pages which are populating TM...
+        if (Workflow.EXPORTED.equals(workflow.getState()) && populatingTmTrgPageNum > 0)
+        {
+            displayState += " " + bundle.getString("lb_exported_tm_updating");
+        }
+        return displayState;
+    }
+
+    private int getTmUpdatingTargetPageCount(long wfId)
+    {
+        StringBuffer sql = new StringBuffer();
+        sql.append("SELECT COUNT(*) FROM target_page");
+        sql.append(" WHERE WORKFLOW_IFLOW_INSTANCE_ID = ").append(wfId);
+        sql.append(" AND state = 'EXPORTED'");
+        sql.append(" AND EXPORTED_SUB_STATE = ").append(TargetPage.EXPORTED_TM_UPDATING);
+
+        return HibernateUtil.countWithSql(sql.toString(), null);
     }
 
     private void setJobWorkflowDisplayEstimaedTimestamp(PermissionSet perms, Locale uiLocale,

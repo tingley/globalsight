@@ -35,15 +35,12 @@ import com.globalsight.util.GlobalSightLocale;
  * TargetPage is the object containing information about a page with a
  * target locale.
  */
-public class TargetPage
-    extends Page
+public class TargetPage extends Page
 {
     private static final long serialVersionUID = -1230516788376282211L;
 
     //  static class variables
-    private static Logger s_logger =
-        Logger.getLogger(
-            TargetPage.class.getName());
+    private static Logger s_logger = Logger.getLogger(TargetPage.class.getName());
 
     /**
      * Constant.
@@ -59,6 +56,13 @@ public class TargetPage
     private String m_CVSTargetModule = null;
     private String m_CVSTargetFilename = null;
     private long m_companyId;
+
+    // If target page is in "EXPORTED" state, it need sub states to indicate TM updating status.
+    public static final int EXPORTED_FILE_AVAILABLE = 1; // default
+    public static final int EXPORTED_TM_UPDATING = 2;
+    public static final int EXPORTED_TM_UPDATING_DONE = 3;
+
+    private int exportedSubState = EXPORTED_FILE_AVAILABLE;
 
     //////////////////////////////////////////////////////////////////////
     //  Begin: Constructor
@@ -405,5 +409,15 @@ public class TargetPage
     public void setCompanyId(long p_companyId)
     {
         this.m_companyId = p_companyId;
+    }
+
+    public int getExportedSubState()
+    {
+        return exportedSubState;
+    }
+
+    public void setExportedSubState(int exportedSubState)
+    {
+        this.exportedSubState = exportedSubState;
     }
 }

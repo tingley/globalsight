@@ -67,6 +67,7 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.log.ActivityLog;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -568,19 +569,49 @@ public class CapExportServlet extends HttpServlet
                 // update target page state >> workflow state possibly >> job state possibly.
                 ServerProxy.getPageEventObserver().notifyExportSuccessEvent(tp);
 
-                // Must populate TM first
-                c_logger.debug("Populating TM...");
-                populateTm(tp.getSourcePage(), tp.getGlobalSightLocale());
-
-                // Then update target TUVs to 'COMPLETE' state.
-                if (tp.getPrimaryFileType() == ExtractedSourceFile.EXTRACTED_FILE)
+                // populate TM
+                try
                 {
-                    getTuvEventObserver().notifyPageExportedEvent(tp);
+                    updateExportedSubState(TargetPage.EXPORTED_TM_UPDATING, tp.getIdAsLong());
+
+                    // Must populate TM first
+                    c_logger.debug("Populating TM...");
+                    populateTm(tp.getSourcePage(), tp.getGlobalSightLocale());
+                    
+                    // Then update target TUVs to 'COMPLETE' state.
+                    if (tp.getPrimaryFileType() == ExtractedSourceFile.EXTRACTED_FILE)
+                    {
+                        getTuvEventObserver().notifyPageExportedEvent(tp);
+                    }
+                }
+                catch (PageException e)
+                {
+                    throw e;
+                }
+                finally
+                {
+                    // If populateTm fails, ensure "exported_sub_state" is not
+                    // "EXPORTED_TM_UPDATING".
+                    updateExportedSubState(TargetPage.EXPORTED_TM_UPDATING_DONE, tp.getIdAsLong());                    
                 }
             }
         }
 
         sendEmail(tp, state);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void updateExportedSubState(int exportedSubState, Long targetPageId)
+    {
+        String sql = "UPDATE target_page SET EXPORTED_SUB_STATE = ? WHERE ID = ?";
+
+        List<List> targetPages = new ArrayList<>();
+        List params = new ArrayList<>();
+        params.add(exportedSubState);
+        params.add(targetPageId);
+        targetPages.add(params);
+
+        DbUtil.batchUpdate(sql, targetPages);
     }
 
     private void sendEmail(TargetPage targetPage, String state)

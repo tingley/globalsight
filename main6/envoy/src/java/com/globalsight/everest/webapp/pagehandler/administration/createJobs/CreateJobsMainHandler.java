@@ -1742,7 +1742,7 @@ public class CreateJobsMainHandler extends PageHandler
             parentFile.mkdirs();
         }
 
-        fileNames = uploadFile(request, parentFile);
+        fileNames = uploadFile(request, parentFile,type);
         for (String fileName : fileNames)
         {
             File uploadedFile = new File(fileName);
@@ -1751,7 +1751,7 @@ public class CreateJobsMainHandler extends PageHandler
         return uploadedFiles;
     }
 
-    private List<String> uploadFile(HttpServletRequest p_request, File parentFile)
+    private List<String> uploadFile(HttpServletRequest p_request, File parentFile,String type)
             throws GlossaryException, IOException
     {
         byte[] inBuf = new byte[MAX_LINE_LENGTH];
@@ -1840,9 +1840,12 @@ public class CreateJobsMainHandler extends PageHandler
                     //
 
                     // if a file with same name has been uploaded, ignore this
-                    if (uploadedFileNames.contains(fileName))
+                    if (type.equals("0"))
                     {
-                        continue;
+                        if (uploadedFileNames.contains(fileName))
+                        {
+                            continue;
+                        }
                     }
 
                     filePath = path + fileName;

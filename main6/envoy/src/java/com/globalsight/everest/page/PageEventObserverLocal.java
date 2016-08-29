@@ -835,6 +835,7 @@ public class PageEventObserverLocal implements PageEventObserver
             if (!PageState.EXPORTED.equals(state))
             {
                 isExported = false;
+                break;
             }
         }
         

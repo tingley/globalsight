@@ -36,6 +36,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 
 import com.globalsight.config.UserParamNames;
+import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.edit.offline.OfflineEditHelper;
@@ -43,6 +44,8 @@ import com.globalsight.everest.edit.offline.OfflineEditManager;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.glossaries.GlossaryFile;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -59,6 +62,7 @@ import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfi
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.ling.tw.PseudoConstants;
+import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 
@@ -1069,10 +1073,50 @@ public class SendDownloadFileHelper implements WebAppConstants
         DownloadPageHandler handler = new DownloadPageHandler();
         GlossaryState glossaryState = handler.getGlossaryState(task);
         result = glossaryState.getGlossaries();
+        getJobSupportFile(glossaryState, task.getJobId(), result);
 
         return result.size() > 0 ? result : null;
     }
 
+    private void getJobSupportFile(GlossaryState glossaryState, long jobId, List result)
+    {
+        try
+        {
+            Job job = ServerProxy.getJobHandler().getJobById(jobId);
+            List jobComments = job.getJobComments();
+            if (jobComments != null && jobComments.size() > 0)
+            {
+                String parentPath = AmbFileStoragePathUtils.getCommentReferenceDir()
+                        + File.separator;
+                for (int i = 0; i < jobComments.size(); i++)
+                {
+                    Comment com = (Comment) jobComments.get(i);
+                    String finaPath = parentPath + com.getId() + File.separator
+                            + WebAppConstants.COMMENT_REFERENCE_SUPPORT_FILE_ACCESS;
+                    File finalFile = new File(finaPath);
+                    if (finalFile.exists())
+                    {
+                        File[] files = finalFile.listFiles();
+                        for (int k = 0; k < files.length; ++k)
+                        {
+                            GlossaryFile g = new GlossaryFile();
+                            g.setFileSize(files[k].length());
+                            g.setLastModified(files[k].lastModified());
+                            g.setFilename(files[k].getName());
+                            g.setCommentId(com.getId());
+                            result.add(g);
+                        }
+                    }
+                }
+                glossaryState.getGlossaries().addAll(result);
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
     private int getResourceInsertionMode(HttpServletRequest p_request)
             throws EnvoyServletException
     {

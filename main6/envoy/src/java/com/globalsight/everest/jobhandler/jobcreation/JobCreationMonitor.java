@@ -29,7 +29,6 @@ import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflow.WorkflowException;
 import com.globalsight.everest.workflowmanager.JobStatePostThread;
-import com.globalsight.everest.workflowmanager.WfStatePostThread;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -251,18 +250,25 @@ public class JobCreationMonitor
     /**
      * Updates the job state.
      */
-    public static void updateJobState(Job job, String state)
+    public synchronized static void updateJobState(Job job, String state)
     {
         try
         {
-            String previousState = job.getState();
+            // Filter duplicated updating to job state
+            String sql = "SELECT state FROM job WHERE id = " + job.getId();
+            String stateInDb = (String) HibernateUtil.getFirstWithSql(sql);
+            if (state == null || state.equalsIgnoreCase(stateInDb))
+            {
+                return;
+            }
+
             job.setState(state);
             HibernateUtil.update(job);
-            L10nProfile l10nProfile = job.getL10nProfile();
-            long wfStatePostId = l10nProfile.getWfStatePostId();
-            if (wfStatePostId != -1)
+
+            // Job state change posting...
+            if (job.getL10nProfile().getWfStatePostId() != -1)
             {
-                new JobStatePostThread(job, previousState, state).start();
+                new JobStatePostThread(job, stateInDb, state).start();
             }
         }
         catch (Exception e)

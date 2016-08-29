@@ -468,7 +468,7 @@ public class SummaryReportGenerator implements
         }
         p_sheet.removeColumnBreak(column);
         // Rates Columns
-        for (int dis = column - 1; column < colLen + dis - 2; column++)
+        for (int dis = column - 1; column < colLen + dis - 3; column++)
         {
             Cell cell_From = p_sheet.getRow(row).getCell(column - dis);
             Cell cell_To = getCell(p_sheet.getRow(row), column);
@@ -512,7 +512,7 @@ public class SummaryReportGenerator implements
         // Cost Columns Data
         for (row = ROWNUMBER + 1; row < (rowLen + ROWNUMBER); row++)
         {
-            String leveragingForm = getCostWithLeveraging(1, wordTotalCol - 1,
+            String leveragingForm = getCostWithLeveraging(1, wordTotalCol - 2,
                     wordTotalCol, (row + 1));
             String noLeveragingForm = getColumnName(wordTotalCol) + (row + 1)
                     + "*" + getColumnName(wordTotalCol + 5) + (row + 1);

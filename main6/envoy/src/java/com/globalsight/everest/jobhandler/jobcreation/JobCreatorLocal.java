@@ -103,8 +103,8 @@ import com.globalsight.util.resourcebundle.SystemResourceBundle;
 public class JobCreatorLocal implements JobCreator
 {
     private static Logger c_logger = Logger.getLogger(JobCreatorLocal.class);
-    private static SystemResourceBundle m_sysResBundle = SystemResourceBundle
-            .getInstance();
+
+    private static SystemResourceBundle m_sysResBundle = SystemResourceBundle.getInstance();
 
     private RequestProcessor m_requestProcessor;
     private JobAdditionEngine m_jobAdditionEngine;
@@ -144,8 +144,7 @@ public class JobCreatorLocal implements JobCreator
      * @throws RemoteException
      *             if there is a network issue
      */
-    public void addRequestToJob(Request p_request) throws RemoteException,
-            JobCreationException
+    public void addRequestToJob(Request p_request) throws RemoteException, JobCreationException
     {
         HashMap pages = null;
         Job job = null;
@@ -159,15 +158,21 @@ public class JobCreatorLocal implements JobCreator
             String theJobId = e.getBatchInfo().getJobId();
             if (theJobId != null)
             {
-                job = JobCreationMonitor
-                        .loadJobFromDB(Long.parseLong(theJobId));
-                c_logger.info("debug info: job state is: " + job.getState());
+                job = JobCreationMonitor.loadJobFromDB(Long.parseLong(theJobId));
+
+                if (c_logger.isDebugEnabled())
+                {
+                    c_logger.info("debug info: job state is: " + job.getState());                    
+                }
                 // Update the job to "LEVERAGING" state (GBS-2137)
                 if (Job.EXTRACTING.equals(job.getState()))
                 {
-                    c_logger.info("Update job state from 'EXTRACTING' to 'LEVERAGING' for job ID: " + theJobId);
-                    JobCreationMonitor.updateJobState(Long.parseLong(theJobId),
-                            Job.LEVERAGING);
+                    if (c_logger.isDebugEnabled())
+                    {
+                        c_logger.info("Update job state from 'EXTRACTING' to 'LEVERAGING' for job ID: "
+                                + theJobId);
+                    }
+                    JobCreationMonitor.updateJobState(Long.parseLong(theJobId), Job.LEVERAGING);
                 }
             }
 
@@ -206,8 +211,7 @@ public class JobCreatorLocal implements JobCreator
             updateJobState(job, isBatch, isBatchComplete, sp, e);
 
             // Handle Documentum job
-            if (DocumentumOperator.DCTM_CATEGORY.equalsIgnoreCase(p_request
-                    .getDataSourceType()))
+            if (DocumentumOperator.DCTM_CATEGORY.equalsIgnoreCase(p_request.getDataSourceType()))
             {
                 priorHandleDocumentumJob(e, job);
             }

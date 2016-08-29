@@ -41,11 +41,8 @@ import org.apache.log4j.Logger;
 import com.globalsight.cxe.adapter.filesystem.Exporter;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.everest.integration.ling.LingServerProxy;
+import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.page.ExtractedSourceFile;
-import com.globalsight.everest.page.PageException;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -54,23 +51,18 @@ import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.page.pageexport.ExportEventObserverHelper;
 import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.projecthandler.ProjectHandlerException;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFileState;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.tm.PopulatingTmThread;
 import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.tuv.TuvEventObserver;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
-import com.globalsight.ling.tm.LeveragingLocales;
-import com.globalsight.ling.tm2.leverage.LeverageOptions;
-import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.log.ActivityLog;
 import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
 
 /**
  * <P>
@@ -468,84 +460,69 @@ public class CapExportServlet extends HttpServlet
 
 
     // process the source page export (export for update)
-    private void handleSourcePageRequest(long pageId, 
-                                         HttpServletRequest p_request,
-                                         String responseType)
-        throws Exception
+    private void handleSourcePageRequest(long pageId, HttpServletRequest p_request,
+            String responseType) throws Exception
     {
-        SourcePage sp = ServerProxy.getPageManager().
-            getSourcePage(pageId);
+        SourcePage sp = ServerProxy.getPageManager().getSourcePage(pageId);
         
         if (responseType.equals(ExportConstants.FAILURE))
         {
             c_logger.error("NOTIFYING ABOUT FAILED EXPORT FOR UPDATE");
 
-            ServerProxy.getPageEventObserver().
-                notifyExportForUpdateFailEvent(sp);            
+            ServerProxy.getPageEventObserver().notifyExportForUpdateFailEvent(sp);
         }
         else if (responseType.equals(ExportConstants.SUCCESS))
         {
             c_logger.info("Notifying about successful export for update.");
-            ServerProxy.getPageEventObserver().
-                notifyExportForUpdateSuccessEvent(sp);
+            ServerProxy.getPageEventObserver().notifyExportForUpdateSuccessEvent(sp);
         }
     }
 
 
     // process the result of the exported secondary target file.
-    private void handleStfRequest(long p_pageId, 
-                            HttpServletRequest p_request,
-                            String p_responseType)
-        throws Exception
+    private void handleStfRequest(long p_pageId, HttpServletRequest p_request, String p_responseType)
+            throws Exception
     {
 
         if (p_responseType.equals(ExportConstants.FAILURE))
         {
-            ServerProxy.getSecondaryTargetFileManager().
-                notifyExportFailEvent(new Long(p_pageId));
-            WorkflowExportingHelper.setStfAsNotExporting(p_pageId);         
+            ServerProxy.getSecondaryTargetFileManager().notifyExportFailEvent(new Long(p_pageId));
+            WorkflowExportingHelper.setStfAsNotExporting(p_pageId);
         }
         else if (p_responseType.equals(ExportConstants.SUCCESS))
         {
-            
-            SecondaryTargetFile stf = 
-                ServerProxy.getSecondaryTargetFileManager().
-                getSecondaryTargetFile(p_pageId);
+
+            SecondaryTargetFile stf = ServerProxy.getSecondaryTargetFileManager()
+                    .getSecondaryTargetFile(p_pageId);
             // an interim export can happen during dispatch without
-            // updating any states.  So only update the STF if it's
+            // updating any states. So only update the STF if it's
             // current state is EXPORT_IN_PROGRESS
-            if (stf.getState().equals(
-                SecondaryTargetFileState.EXPORT_IN_PROGRESS))
-            {          
-                ServerProxy.getSecondaryTargetFileManager().
-                    notifyExportSuccessEvent(new Long(p_pageId));
+            if (stf.getState().equals(SecondaryTargetFileState.EXPORT_IN_PROGRESS))
+            {
+                ServerProxy.getSecondaryTargetFileManager().notifyExportSuccessEvent(
+                        new Long(p_pageId));
             }
         }
     }
 
     // process the result of the exported target page.
-    private void handleTargetPageRequest(long p_pageId, 
-                                         HttpServletRequest p_request,
-                                         String p_responseType)
-        throws Exception
+    private void handleTargetPageRequest(long p_pageId, HttpServletRequest p_request,
+            String p_responseType) throws Exception
     {
-        TargetPage tp = ServerProxy.getPageManager().
-            getTargetPage(p_pageId);
+        TargetPage tp = ServerProxy.getPageManager().getTargetPage(p_pageId);
         String state = null;
         if (p_responseType.equals(ExportConstants.FAILURE))
         {
             state = Workflow.EXPORT_FAILED;
             // details will always be a GeneralException
-            String details =
-                p_request.getParameter(ExportConstants.RESPONSE_DETAILS);
+            String details = p_request.getParameter(ExportConstants.RESPONSE_DETAILS);
 
             GeneralException ge = GeneralException.deserialize(details);
-            c_logger.error("CapExportServlet - Export for page id " +
-                p_pageId + " failed.", ge);
-            
+            c_logger.error("CapExportServlet - Export for page id " + p_pageId + " failed.", ge);
+
             String xmlDtdId = p_request.getParameter(Exporter.XML_DTD_ID);
             Long id = Long.parseLong(xmlDtdId);
-            
+
             // Xml dtd validation failed
             if (id > 0)
             {
@@ -553,8 +530,7 @@ public class CapExportServlet extends HttpServlet
             }
 
             // Id > 0 means it is because xml dtd validation failed.
-            ServerProxy.getPageEventObserver().notifyExportFailEvent(tp,
-                    details, id < 1);
+            ServerProxy.getPageEventObserver().notifyExportFailEvent(tp, details, id < 1);
         }
         else if (p_responseType.equals(ExportConstants.SUCCESS))
         {
@@ -566,52 +542,18 @@ public class CapExportServlet extends HttpServlet
             if (PageState.EXPORT_IN_PROGRESS.equals(tp.getPageState())
                     && Workflow.EXPORTING.equals(tp.getWorkflowInstance().getState()))
             {
-                // update target page state >> workflow state possibly >> job state possibly.
+                // update target page state >> workflow state possibly >> job
+                // state possibly.
                 ServerProxy.getPageEventObserver().notifyExportSuccessEvent(tp);
 
-                // populate TM
-                try
-                {
-                    updateExportedSubState(TargetPage.EXPORTED_TM_UPDATING, tp.getIdAsLong());
-
-                    // Must populate TM first
-                    c_logger.debug("Populating TM...");
-                    populateTm(tp.getSourcePage(), tp.getGlobalSightLocale());
-                    
-                    // Then update target TUVs to 'COMPLETE' state.
-                    if (tp.getPrimaryFileType() == ExtractedSourceFile.EXTRACTED_FILE)
-                    {
-                        getTuvEventObserver().notifyPageExportedEvent(tp);
-                    }
-                }
-                catch (PageException e)
-                {
-                    throw e;
-                }
-                finally
-                {
-                    // If populateTm fails, ensure "exported_sub_state" is not
-                    // "EXPORTED_TM_UPDATING".
-                    updateExportedSubState(TargetPage.EXPORTED_TM_UPDATING_DONE, tp.getIdAsLong());                    
-                }
+                // populate TM in separate thread
+                PopulatingTmThread thread = new PopulatingTmThread(tp.getId());
+                Thread t = new MultiCompanySupportedThread(thread);
+                t.start();
             }
         }
 
         sendEmail(tp, state);
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void updateExportedSubState(int exportedSubState, Long targetPageId)
-    {
-        String sql = "UPDATE target_page SET EXPORTED_SUB_STATE = ? WHERE ID = ?";
-
-        List<List> targetPages = new ArrayList<>();
-        List params = new ArrayList<>();
-        params.add(exportedSubState);
-        params.add(targetPageId);
-        targetPages.add(params);
-
-        DbUtil.batchUpdate(sql, targetPages);
     }
 
     private void sendEmail(TargetPage targetPage, String state)
@@ -620,8 +562,7 @@ public class CapExportServlet extends HttpServlet
     {
         Job job = targetPage.getWorkflowInstance().getJob();
         ServerProxy.getWorkflowServer().advanceWorkFlowNotification(
-                targetPage.getWorkflowInstance().getId() + job.getJobName(),
-                state);
+                targetPage.getWorkflowInstance().getId() + job.getJobName(), state);
     }
 
     // Let the export event observer set the state of the exported page to either
@@ -634,40 +575,5 @@ public class CapExportServlet extends HttpServlet
 
         ExportEventObserverHelper.notifyPageExportComplete(
             Long.parseLong(exportBatchId), p_pageId, p_request);
-    }
-
-    private void populateTm(SourcePage p_sourcePage, GlobalSightLocale p_targetLocale)
-            throws PageException
-    {
-        c_logger.info("Populating Tm for the page " + p_sourcePage.getExternalPageId());
-
-        try
-        {
-            L10nProfile l10nProfile = p_sourcePage.getRequest().getL10nProfile();
-            LeveragingLocales leveragingLocales = l10nProfile.getLeveragingLocales();
-            TranslationMemoryProfile tmProfile = l10nProfile.getTranslationMemoryProfile();
-            LeverageOptions leverageOptions = new LeverageOptions(tmProfile, leveragingLocales);
-
-            LingServerProxy.getTmCoreManager().populatePageByLocale(p_sourcePage, leverageOptions,
-                    p_targetLocale, p_sourcePage.getJobId());
-
-            c_logger.info("Populating Tm finished.");
-        }
-        catch (Exception e)
-        {
-            throw new PageException(e);
-        }
-    }
-
-    private TuvEventObserver getTuvEventObserver() throws PageException
-    {
-        try
-        {
-            return ServerProxy.getTuvEventObserver();
-        }
-        catch (GeneralException ge)
-        {
-            throw new PageException(PageException.MSG_FAILED_TO_LOCATE_TUV_EVENT_OBSERVER, null, ge);
-        }
     }
 }

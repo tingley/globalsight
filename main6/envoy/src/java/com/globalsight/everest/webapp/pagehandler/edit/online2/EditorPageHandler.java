@@ -48,7 +48,6 @@ import com.globalsight.everest.edit.online.UIConstants;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
@@ -497,8 +496,6 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
     private RenderingOptions initRenderingOptions(HttpSession p_session,
             int p_uiMode, int p_viewMode, int p_editMode)
     {
-        SessionManager mgr = (SessionManager) p_session
-                .getAttribute(WebAppConstants.SESSION_MANAGER);
         PermissionSet permSet = (PermissionSet) p_session
                 .getAttribute(WebAppConstants.PERMISSIONS);
         return new RenderingOptions(p_uiMode, p_viewMode, p_editMode, permSet);
@@ -582,17 +579,6 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             p_state.setEditAllState(EDIT_DEFAULT);
         }
 
-        boolean b_canEditSnippets = false;
-        if (!b_readOnly)
-        {
-            // snippet editor permission check
-            if (p_state.getCurrentPage().hasGsaTags()
-                    && perms.getPermissionFor(Permission.SNIPPET_EDIT))
-                b_canEditSnippets = true;
-        }
-
-        p_state.setAllowEditSnippets(b_canEditSnippets);
-
         // Indicate that main editor is in 'editor' mode.
         p_state.setEditorMode();
     }
@@ -634,9 +620,6 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
         // When coming from job page, target page is read only.
         p_state.setReadOnly(true);
-
-        // Snippets can not be edited.
-        p_state.setAllowEditSnippets(false);
 
         // Indicate that main editor is in 'viewer' mode.
         p_state.setViewerMode();

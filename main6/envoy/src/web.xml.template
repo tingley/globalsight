@@ -387,15 +387,6 @@
   </servlet>
 
   <servlet>
-    <servlet-name>SnippetServlet</servlet-name>
-    <servlet-class>com.globalsight.everest.webapp.servlet.SnippetLibraryServlet</servlet-class>
-    <init-param>
-      <param-name>wl-dispatch-policy</param-name>
-      <param-value>ServletExecuteQueue</param-value>
-    </init-param>
-  </servlet>
-
-  <servlet>
     <servlet-name>TerminologyServlet</servlet-name>
     <servlet-class>com.globalsight.terminology.servlet.TerminologyServlet</servlet-class>
     <init-param>
@@ -755,11 +746,6 @@
   <servlet-mapping>
     <servlet-name>ShowUrlFramesetServlet</servlet-name>
     <url-pattern>/ShowUrlFramesetServlet/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>SnippetServlet</servlet-name>
-    <url-pattern>/SnippetServlet/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

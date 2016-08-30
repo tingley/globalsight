@@ -3015,28 +3015,6 @@
       <WebPage pageName="FINISH" isDefault="true" jspName="/envoy/wizards/finish.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.guides.GuideHandler"></WebPage>
     </WebActivity>
   </WebModule>
-  <WebModule webModuleName="snippetlibrary">
-    <WebActivity webActivityName="snippetimport">
-      <WebPage pageName="SNIM1" isDefault="true" jspName="/envoy/administration/snippets/SnippetImport.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.snippets.SnippetImportPageHandler">
-        <PageLink linkName="next" destinationPageName="SNIM2"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="LOG4"></PageLink>
-      </WebPage>
-      <WebPage pageName="SNIM2" isDefault="false" jspName="/envoy/administration/snippets/SnippetImportTest.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.snippets.SnippetImportPageHandler">
-        <PageLink linkName="next" destinationPageName="SNIM3"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="SNIM1"></PageLink>
-        <PageLink linkName="refresh" destinationPageName="SNIM_status"></PageLink>
-      </WebPage>
-      <WebPage pageName="SNIM3" isDefault="false" jspName="/envoy/administration/snippets/SnippetImportProgress.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.snippets.SnippetImportPageHandler">
-        <PageLink linkName="ok" destinationPageName="LOG4"></PageLink>
-        <PageLink linkName="cancel" destinationPageName="SNIM1"></PageLink>
-        <PageLink linkName="refresh" destinationPageName="SNIM_status"></PageLink>
-      </WebPage>
-      <WebPage pageName="SNIM_status" isDefault="false" 
-      jspName="/envoy/administration/snippets/SnippetImportProgress2.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.snippets.SnippetImportPageHandler">
-      </WebPage>
-    </WebActivity>
-  </WebModule>
   <WebModule webModuleName="calendars">
     <WebActivity webActivityName="calendars">
       <WebPage pageName="SYSCALS" isDefault="true" jspName="/envoy/administration/calendars/sysCals.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHandler">

@@ -69,7 +69,6 @@ import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.page.ExtractedFile;
-import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.Page;
 import com.globalsight.everest.page.PageEventObserver;
 import com.globalsight.everest.page.PageException;
@@ -77,7 +76,6 @@ import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.PageTemplate;
 import com.globalsight.everest.page.RenderingOptions;
-import com.globalsight.everest.page.SnippetPageTemplate;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UnextractedFile;
@@ -1184,20 +1182,6 @@ public class ExportHelper
 
             // ALWAYS set the template parts before getting the page data
             p_pageTemplate.setTemplateParts(new ArrayList(tp));
-
-            boolean addDeleteEnabled = SystemConfiguration.getInstance()
-                    .getBooleanParameter(SystemConfigParamNames.ADD_DELETE_ENABLED);
-
-            // assume this page has an extracted file since it
-            // has reached this method.
-            ExtractedSourceFile esf = (ExtractedSourceFile) m_sourcePage.getPrimaryFile();
-
-            if (m_genericPageType == PageManager.TARGET_PAGE && addDeleteEnabled
-                    && esf.containGsTags())
-            {
-                p_pageTemplate = new SnippetPageTemplate(p_pageTemplate,
-                        m_page.getGlobalSightLocale().toString());
-            }
 
             p_pageTemplate.setTargetLocale(m_page.getGlobalSightLocale().getId());
             pageData = p_pageTemplate

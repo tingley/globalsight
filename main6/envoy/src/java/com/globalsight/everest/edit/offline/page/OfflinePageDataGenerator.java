@@ -28,7 +28,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -51,9 +50,7 @@ import com.globalsight.everest.integration.ling.tm2.Types;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.PageManager;
-import com.globalsight.everest.page.PageTemplate;
 import com.globalsight.everest.page.PageWordCounts;
-import com.globalsight.everest.page.SnippetPageTemplate;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
@@ -64,8 +61,6 @@ import com.globalsight.everest.tuv.SegmentPair;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.comparator.StringComparator;
-import com.globalsight.everest.util.system.SystemConfigParamNames;
-import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileStateConstants;
 import com.globalsight.ling.common.CodesetMapper;
@@ -175,7 +170,6 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 
     // Need target page to get words counts.
     private TargetPage m_trgPage = null;
-    private Set m_interpretedTuIds = null;
     protected Map m_fuzzyMatchMap = null;
     // GBS-3776
     protected Map m_fuzzyMatchRefTmsMap = null;
@@ -234,9 +228,6 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         }
     }
 
-    protected boolean m_addDeleteEnabled = false;
-    protected boolean m_pageHasGsTags = false;
-
     /** Creates new OfflinePageManagement. */
     public OfflinePageDataGenerator()
     {
@@ -253,10 +244,6 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             // Override default max number of segments allowed with annotations.
             tmp = bundle.getString(AmbassadorDwUpConstants.OFFLINE_CONFIG_KEY_ATN_THRESHOLD);
             m_annotationThreshold = Integer.parseInt(tmp);
-
-            // Check if Add/Delete is enabled.
-            m_addDeleteEnabled = SystemConfiguration.getInstance().getBooleanParameter(
-                    SystemConfigParamNames.ADD_DELETE_ENABLED);
         }
         catch (Exception ex)
         {
@@ -270,7 +257,6 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         m_srcPage = null;
         m_ref_pageSegs = null;
         m_trgPage = null;
-        m_interpretedTuIds = null;
         m_fuzzyMatchMap = null;
         m_fuzzyMatchRefTmsMap = null;
         m_matchTypeStats = null;
@@ -284,9 +270,6 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         m_lastPid = -1;
         m_hasMergeOverrideDirectives = false;
         m_mergeEnabled = false;
-
-        m_addDeleteEnabled = false;
-        m_pageHasGsTags = false;
 
         m_tagDisplayFormatID = -1;
         m_sourceLocale = null;
@@ -454,11 +437,6 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 
         // Get Add/Delete info (used to filter deleted segments)
         CATEGORY.debug("getting extracted source file");
-        m_pageHasGsTags = getExtractedSourceFile(m_srcPage).containGsTags();
-        if (m_addDeleteEnabled && m_pageHasGsTags)
-        {
-            getInterpretedTuIds();
-        }
 
         // Begin --
         // Migration of raw TuvManager Data to OfflineEditManager.
@@ -1216,41 +1194,6 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 
         long endTime = System.currentTimeMillis();
         Long duration = new Long(endTime - startTime);
-    }
-
-    /**
-     * Gets interpreted TU ids (meaning, the TU ids after interpreting GS
-     * add/delete tags). The set is later used to filter out deleted Tuvs.
-     */
-    private void getInterpretedTuIds() throws OfflinePageDataGeneratorException
-    {
-        try
-        {
-            // Assumes this source page has an extracted file.
-            // Shouldn't have reached this method if it doesn't.
-            PageTemplate srcPageTemplate = getExtractedSourceFile(m_srcPage).getPageTemplate(
-                    PageTemplate.TYPE_OFFLINE);
-
-            Collection tp = ServerProxy.getPageManager().getTemplatePartsForSourcePage(
-                    m_srcPage.getIdAsLong(), srcPageTemplate.getTypeAsString());
-
-            // ALWAYS set the template parts before getting the page data.
-            srcPageTemplate.setTemplateParts(new ArrayList(tp));
-
-            SnippetPageTemplate template = new SnippetPageTemplate(srcPageTemplate,
-                    m_targetLocale.toString());
-
-            m_interpretedTuIds = template.getInterpretedTuIds();
-        }
-        catch (Exception ex)
-        {
-            String[] args =
-            { String.valueOf(m_srcPage.getId()), m_targetLocale.toString() };
-            OfflinePageDataGeneratorException ex1 = new OfflinePageDataGeneratorException(
-                    OfflinePageDataGeneratorException.MSG_FAILED_TO_GET_INTERPRETED_TUIDS, args, ex);
-            CATEGORY.error(ex1.getMessage(), ex1);
-            throw ex1;
-        }
     }
 
     /**

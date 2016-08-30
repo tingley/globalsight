@@ -63,7 +63,6 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvAttributeUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
@@ -119,7 +118,6 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
 	private static int DEFAULT_VIEWMODE_IF_NO_PREVIEW = VIEWMODE_TEXT;
 
 	public static boolean s_pmCanEditTargetPages = false;
-	public static boolean s_pmCanEditSnippets = false;
 	private static int currentPageIndex = -1;
 
     static
@@ -127,18 +125,14 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
         try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-            s_pmCanEditTargetPages = sc
-                    .getBooleanParameter("editalltargetpages.allowed");
-            s_pmCanEditSnippets = sc
-                    .getBooleanParameter("editallsnippets.allowed");
+            s_pmCanEditTargetPages = sc.getBooleanParameter("editalltargetpages.allowed");
         }
         catch (Throwable e)
         {
             if (CATEGORY.isDebugEnabled())
             {
-                CATEGORY.debug("Error when get 'editalltargetpages.allowed' and 'editallsnippets.allowed' configurations");
+                CATEGORY.debug("Error when get 'editalltargetpages.allowed' configuration.");
             }
-            // Do nothing if configuration is not available.
         }
     }
 
@@ -1608,8 +1602,6 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
             p_state.setReadOnly(true);
         }
 
-        p_state.setAllowEditSnippets(s_pmCanEditSnippets);
-
         p_state.setReviewMode();
     }
     
@@ -1956,17 +1948,6 @@ public class EditorPageHandler extends PageActionHandler implements EditorConsta
         {
             p_state.setEditAllState(EDIT_DEFAULT);
         }
-
-        boolean b_canEditSnippets = false;
-        if (!b_readOnly)
-        {
-            // snippet editor permission check: everybody but
-            if (p_state.getCurrentPage().hasGsaTags()
-                    && perms.getPermissionFor(Permission.SNIPPET_EDIT))
-                b_canEditSnippets = true;
-        }
-
-        p_state.setAllowEditSnippets(b_canEditSnippets);
 
         // Indicate that main editor is in 'editor' mode -- see
         // dispatchJsp for switching to review mode.

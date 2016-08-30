@@ -480,11 +480,6 @@ public class EditorState extends PersistentObject implements EditorConstants
      */
     private boolean m_readOnly = false;
 
-    /**
-     * Controls editing of snippets. Default is false.
-     */
-    private boolean m_canEditSnippets = false;
-
     /** Edit all segments or just the default segments? */
     private int m_editAll = EDIT_DEFAULT;
 
@@ -740,16 +735,6 @@ public class EditorState extends PersistentObject implements EditorConstants
     public boolean isReviewMode()
     {
         return m_editorMode == EDITORMODE_REVIEW;
-    }
-
-    public boolean canEditSnippets()
-    {
-        return m_canEditSnippets;
-    }
-
-    public void setAllowEditSnippets(boolean p_flag)
-    {
-        m_canEditSnippets = p_flag;
     }
 
     public boolean canEditAll()
@@ -1293,7 +1278,6 @@ public class EditorState extends PersistentObject implements EditorConstants
         result.setLayout(p_state.getLayout());
         result.setRenderingOptions(p_state.getRenderingOptions());
         result.setReadOnly(p_state.isReadOnly());
-        result.setAllowEditSnippets(p_state.canEditSnippets());
         result.setEditAllState(p_state.getEditAllState());
         result.setAllowEditAll(p_state.canEditAll());
         result.setCanShowMt(p_state.canShowMt());

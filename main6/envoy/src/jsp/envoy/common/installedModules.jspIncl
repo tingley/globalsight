@@ -6,7 +6,6 @@
     static boolean b_cms = Modules.isCmsAdapterInstalled();
     static boolean b_costing = Modules.isCostingInstalled();
     static boolean b_reports = Modules.isReportsInstalled();
-    static boolean b_snippets = Modules.isSnippetsInstalled();
     static boolean b_catalyst = Modules.isCatalystAdapterInstalled();
     static boolean b_vendorManagement = Modules.isVendorManagementInstalled();
     static boolean b_calendaring = Modules.isCalendaringInstalled();

@@ -62,7 +62,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ReservedTime.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/SecondaryTargetFile.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/SegmentationRuleFileImpl.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/SnippetImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/SourcePage.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Surcharge.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/SystemParameterImpl.hbm.xml" />

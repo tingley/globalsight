@@ -62,7 +62,6 @@ import com.globalsight.everest.page.Page;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.PageTemplate;
-import com.globalsight.everest.page.SnippetPageTemplate;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.TemplatePart;
@@ -456,18 +455,15 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             return m_sourceTemplate;
         }
 
-        // p_template can be a SnippetPageTemplate.
         public void setSourceTemplate(PageTemplate p_template)
         {
             if (p_template == null)
             {
                 m_sourceTemplateParts = null;
             }
-            else if (m_sourceTemplate != null
-                    && m_sourceTemplate.getType() != p_template.getType())
+            else if (m_sourceTemplate != null && m_sourceTemplate.getType() != p_template.getType())
             {
-                if (m_targetTemplate != null
-                        && m_targetTemplate.getType() == p_template.getType())
+                if (m_targetTemplate != null && m_targetTemplate.getType() == p_template.getType())
                 {
                     m_sourceTemplateParts = m_targetTemplateParts;
                 }
@@ -485,18 +481,15 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             return m_targetTemplate;
         }
 
-        // p_template can be a SnippetPageTemplate.
         public void setTargetTemplate(PageTemplate p_template)
         {
             if (p_template == null)
             {
                 m_targetTemplateParts = null;
             }
-            else if (m_targetTemplate != null
-                    && m_targetTemplate.getType() != p_template.getType())
+            else if (m_targetTemplate != null && m_targetTemplate.getType() != p_template.getType())
             {
-                if (m_sourceTemplate != null
-                        && m_sourceTemplate.getType() == p_template.getType())
+                if (m_sourceTemplate != null && m_sourceTemplate.getType() == p_template.getType())
                 {
                     m_targetTemplateParts = m_sourceTemplateParts;
                 }
@@ -854,19 +847,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             getPageTus(srcPage);
 
             // get the Page Template
-            PageTemplate template = getPageTemplate(p_options.getViewMode(),
-                    srcPage);
-
-            // Sat Jun 08 16:27:59 2002 add/delete: if this page
-            // contains add/delete instructions, turn the template
-            // into its extended form. getPageData() will then execute
-            // the GS instructions in the template.
-            if (containGsTags(srcPage)
-                    && !(template instanceof SnippetPageTemplate))
-            {
-                template = makeSnippetPageTemplate(template, p_locale, srcPage);
-                m_pageCache.setSourceTemplate(template);
-            }
+            PageTemplate template = getPageTemplate(p_options.getViewMode(), srcPage);
 
             if (template.getTemplateParts() == null
                     || template.getTemplateParts().size() == 0)
@@ -1011,20 +992,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             if (useTemplate)
             {
                 template = getPageTemplate(options.getViewMode(), targetPage);
-
-                // Sat Jun 08 16:27:59 2002 add/delete: if this page
-                // contains add/delete instructions, turn the template
-                // into its extended form. getPageData() will then execute
-                // the template.
-                if (containGsTags(sourcePage)
-                        && !(template instanceof SnippetPageTemplate))
-                {
-                    GlobalSightLocale locale = targetPage
-                            .getGlobalSightLocale();
-                    template = makeSnippetPageTemplate(template, locale,
-                            sourcePage);
-                    m_pageCache.setTargetTemplate(template);
-                }
 
                 if (template.getTemplateParts() == null
                         || template.getTemplateParts().size() == 0)
@@ -1853,14 +1820,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         try
         {
-        	result.setSubId(new Long(p_subId));
-        	result.setTargetLocaleId(p_targetLocaleId);
-        	
-        	if (isTarget)
-        	{
-        	    targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId, jobId);
-        	    
-        	    String mergeState = targetTuv.getMergeState();
+            result.setSubId(new Long(p_subId));
+            result.setTargetLocaleId(p_targetLocaleId);
+            
+            if (isTarget)
+            {
+                targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId, jobId);
+                
+                String mergeState = targetTuv.getMergeState();
                 if (mergeState.equals(Tuv.NOT_MERGED))
                 {
                     sourceTuv = m_tuvManager.getTuvForSegmentEditor(p_tuId,
@@ -1870,15 +1837,15 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 {
                     sourceTuv = getMergedSourceTuvByTargetId(p_tuvId);
                 }
-        	}
-        	else
+            }
+            else
             {
                 sourceTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId, jobId);
                 targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuId,
                         p_targetLocaleId, jobId);
             }
 
-        	/**
+            /**
             Set<XliffAlt> xliffAltSet = targetTuv.getXliffAlt(true);
             if (xliffAltSet != null && !xliffAltSet.isEmpty())
             {
@@ -1899,7 +1866,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             }
             **/
 
-        	boolean isWSXlf = false;
+            boolean isWSXlf = false;
             boolean isAutoCommit = false;
             if (TuImpl.FROM_WORLDSERVER.equalsIgnoreCase(targetTuv.getTu(
                     jobId).getGenerateFrom()))
@@ -2044,10 +2011,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         ExtractedFile ef = getExtractedFile(p_page);
         String extUrl = ef.getExternalBaseHref();
 
-		String srcUrl = ImageHelper.getDisplayImageUrl(p_result
-				.getSourceSegment().getTotalTextValue(),
-				WebAppConstants.VIRTUALDIR_CXEDOCS, ef.getInternalBaseHref(),
-				extUrl);
+        String srcUrl = ImageHelper.getDisplayImageUrl(p_result
+                .getSourceSegment().getTotalTextValue(),
+                WebAppConstants.VIRTUALDIR_CXEDOCS, ef.getInternalBaseHref(),
+                extUrl);
 
         long subId = Long.parseLong(p_subId);
 
@@ -4611,7 +4578,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         
         if(p_trgTuv.getState().equals(TuvState.APPROVED))
         {
-        	return STYLE_APPROVED;
+            return STYLE_APPROVED;
         }
 
         return getMatchStyleByLM(p_matchTypes, p_srcTuv, p_trgTuv, p_subId,
@@ -4861,24 +4828,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     {
         return p_sub.getAttribute(GxmlNames.SUB_LOCTYPE).equals(
                 GxmlNames.TRANSLATABLE);
-    }
-
-    private SnippetPageTemplate makeSnippetPageTemplate(
-            PageTemplate p_template, GlobalSightLocale p_locale,
-            SourcePage p_srcPage)
-    {
-        String locale;
-
-        if (p_locale != null)
-        {
-            locale = p_locale.toString();
-        }
-        else
-        {
-            locale = p_srcPage.getGlobalSightLocale().toString();
-        }
-
-        return new SnippetPageTemplate(p_template, locale);
     }
 
     // Mapping the state here provides compile-time safety for the UI.
@@ -5400,15 +5349,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // private copy to prevent the source template cache
                 // from trashing, then load the template parts and run
                 // it once, then cache the resulting interpreted ids.
-                PageTemplate template = getPageTemplate(
-                        PageTemplate.TYPE_DETAIL, srcPage);
-
-                if (!(template instanceof SnippetPageTemplate))
-                {
-                    template = makeSnippetPageTemplate(template, p_locale,
-                            srcPage);
-                    m_pageCache.setSourceTemplate(template);
-                }
+                PageTemplate template = getPageTemplate(PageTemplate.TYPE_DETAIL, srcPage);
 
                 if (template.getTemplateParts() == null
                         || template.getTemplateParts().size() == 0)
@@ -5699,9 +5640,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return jsonArr;
     }
 
-	private JSONObject getSourceJsonResult(boolean b_rtlLocale, Tuv tuv,
-			boolean ptag, long p_jobId, boolean fromInCtxRv) throws JSONException
-	{
+    private JSONObject getSourceJsonResult(boolean b_rtlLocale, Tuv tuv,
+            boolean ptag, long p_jobId, boolean fromInCtxRv) throws JSONException
+    {
         JSONObject jsonObj = new JSONObject();
         String dataType = tuv.getDataType(p_jobId);
         Tu tu = tuv.getTu(p_jobId);
@@ -5716,17 +5657,17 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 ptag, p_jobId);
         String segmentNoTag = elem.getTextValue().trim();
         String searchText = null;
-		if (!editorState.getNeedShowPTags())
-		{
-			if (searchMap != null)
-			{
-				searchText = (String)searchMap.get("searchText");
-			}
-		}
-		if (searchText != null)
-		{
-			segment = getNewSegement(segment, searchText,"source");
-		}
+        if (!editorState.getNeedShowPTags())
+        {
+            if (searchMap != null)
+            {
+                searchText = (String)searchMap.get("searchText");
+            }
+        }
+        if (searchText != null)
+        {
+            segment = getNewSegement(segment, searchText,"source");
+        }
         jsonObj.put("tuId", tuId);
         jsonObj.put("segment", segment);
         if (fromInCtxRv)
@@ -5763,13 +5704,13 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 }
 
                 segment = GxmlUtil.getDisplayHtml(subElmt, dataType, 3);
-				if (!editorState.getNeedShowPTags())
-				{
-					if (searchText != null)
-					{
-						segment = getNewSegement(segment, searchText,"source");
-					}
-				}
+                if (!editorState.getNeedShowPTags())
+                {
+                    if (searchText != null)
+                    {
+                        segment = getNewSegement(segment, searchText,"source");
+                    }
+                }
                 subObj.put("tuId", tuId);
                 subObj.put("subId", subId);
                 subObj.put("segment", segment);
@@ -5789,60 +5730,60 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         jsonObj.put("mainstyle", mainClass);
         return jsonObj;
     }
-	
-	@Override
-	public void updateApprovedTuvCache(List<Long> approvedTuvIds, Date modifiedDate, String user) 
-	{
-		for(Tuv tuv: m_pageCache.getTargetTuvs())
-		{
-			if(approvedTuvIds.contains(tuv.getId()))
-			{
-				tuv.setState(TuvState.APPROVED);
-				tuv.setLastModified(modifiedDate);
-				tuv.setLastModifiedUser(user);
-			}
-		}
-	}
-	
-	@Override
-	public void updateUnapprovedTuvCache(List<Long> unapprovedTuvIds,
-			HashMap<Long, TuvState> originalStateMap, Date modifiedDate, String user)
-	{
-		for(Tuv tuv: m_pageCache.getTargetTuvs())
-		{
-			if(unapprovedTuvIds.contains(tuv.getId()))
-			{
-				tuv.setState(originalStateMap.get(tuv.getId()));
-				tuv.setLastModified(modifiedDate);
-				tuv.setLastModifiedUser(user);
-			}
-		}
-	}
-	
-	@Override
-	public void updateRevertTuvCache(List<Long> revertTuvIds,
-			HashMap<Long, String> originalGxmlMap, Date modifiedDate, String user) 
-	{
-		for(Tuv tuv: m_pageCache.getTargetTuvs())
-		{
-			if(revertTuvIds.contains(tuv.getId()))
-			{
-				tuv.setGxml(originalGxmlMap.get(tuv.getId()));
-				tuv.setState(TuvState.LOCALIZED);
-				tuv.setLastModified(modifiedDate);
-				tuv.setLastModifiedUser(user);
-			}
-		}
-	}
-	
-	@Override
-	public String getTargetJsonData(EditorState p_state, boolean isAssignee,
+    
+    @Override
+    public void updateApprovedTuvCache(List<Long> approvedTuvIds, Date modifiedDate, String user) 
+    {
+        for(Tuv tuv: m_pageCache.getTargetTuvs())
+        {
+            if(approvedTuvIds.contains(tuv.getId()))
+            {
+                tuv.setState(TuvState.APPROVED);
+                tuv.setLastModified(modifiedDate);
+                tuv.setLastModifiedUser(user);
+            }
+        }
+    }
+    
+    @Override
+    public void updateUnapprovedTuvCache(List<Long> unapprovedTuvIds,
+            HashMap<Long, TuvState> originalStateMap, Date modifiedDate, String user)
+    {
+        for(Tuv tuv: m_pageCache.getTargetTuvs())
+        {
+            if(unapprovedTuvIds.contains(tuv.getId()))
+            {
+                tuv.setState(originalStateMap.get(tuv.getId()));
+                tuv.setLastModified(modifiedDate);
+                tuv.setLastModifiedUser(user);
+            }
+        }
+    }
+    
+    @Override
+    public void updateRevertTuvCache(List<Long> revertTuvIds,
+            HashMap<Long, String> originalGxmlMap, Date modifiedDate, String user) 
+    {
+        for(Tuv tuv: m_pageCache.getTargetTuvs())
+        {
+            if(revertTuvIds.contains(tuv.getId()))
+            {
+                tuv.setGxml(originalGxmlMap.get(tuv.getId()));
+                tuv.setState(TuvState.LOCALIZED);
+                tuv.setLastModified(modifiedDate);
+                tuv.setLastModifiedUser(user);
+            }
+        }
+    }
+    
+    @Override
+    public String getTargetJsonData(EditorState p_state, boolean isAssignee,
             HashMap<String, String> p_searchMap)
-	{
-	    return getTargetJsonData(p_state, isAssignee, p_searchMap, false);
-	}
-	
-	@Override
+    {
+        return getTargetJsonData(p_state, isAssignee, p_searchMap, false);
+    }
+    
+    @Override
     public String getTargetJsonData(EditorState p_state, boolean isAssignee,
             HashMap<String, String> p_searchMap, boolean fromInCtxRv)
     {
@@ -5865,9 +5806,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         
         boolean needOriginalTarget = false;
         if(p_searchMap.get("needOriginalTarget") != null 
-        		&& p_searchMap.get("needOriginalTarget").equals("true"))
+                && p_searchMap.get("needOriginalTarget").equals("true"))
         {
-        	needOriginalTarget = true;
+            needOriginalTarget = true;
         }
 
         RenderingOptions options = p_state.getRenderingOptions();
@@ -5959,8 +5900,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             HashMap<Long, Tuv> originalTargetTuvMap = new HashMap<Long, Tuv>();
             if(needOriginalTarget)
             {
-            	List<Tuv> allTargetTuvs = SegmentTuvUtil.getAllTargetTuvs(targetPage);
-            	setOriginalTargetTuvMap(targetTuvs, allTargetTuvs, originalTargetTuvMap, targetLocaleId);
+                List<Tuv> allTargetTuvs = SegmentTuvUtil.getAllTargetTuvs(targetPage);
+                setOriginalTargetTuvMap(targetTuvs, allTargetTuvs, originalTargetTuvMap, targetLocaleId);
             }
 
             // Gets the filtered source and target tuvs, and reset
@@ -6057,88 +5998,88 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 
                 if(needOriginalTarget)
                 {
-                	JSONObject originalTargetj = new JSONObject();
-                	StringBuffer mainClass = new StringBuffer();
-                	String dir = "";
-                	String temp = "";
-					if (originalTargetTuvMap.size() > 0)
-					{
-                		Tuv tempTuv = originalTargetTuvMap.get(trgTuv.getId());
-                		if(tempTuv != null)
-                		{
-                	        String dataType = tempTuv.getDataType(jobId);
-                			String segment = GxmlUtil.getDisplayHtml(tempTuv.getGxmlElement(),
-                	                dataType, options.getViewMode());
-                			temp = getEditorSegment(tempTuv,
-                	                EditorConstants.PTAGS_COMPACT, segment,
-                	                editorState.getNeedShowPTags(), jobId);
-                			boolean b_rtlOriginalLocale = EditUtil.isRTLLocale(tempTuv.getGlobalSightLocale());
-                	        // Make the segment RTL if it's 1) Translatable 2) In an RTL
-                	        // language and 3) it has bidi characters in it.
-                	        if (b_rtlOriginalLocale && !tempTuv.isLocalizable(jobId)
-                	                && Text.containsBidiChar(tempTuv.getGxml()))
-                	        {
-                	            dir = "rtl ";
-                	        }
-                			List subflows = tempTuv.getSubflowsAsGxmlElements(true);
-                	        boolean b_subflows = (subflows != null && subflows.size() > 0);
-                	        if (!b_subflows)
-                	        {
-                	        	mainClass.append(dir);
-                	        }
-                	        
-                	        if (b_subflows)
-            	            {
-            	                JSONArray subArray = new JSONArray();
-            	                for (int j = 0; j < subflows.size(); j++)
-            	                {
-            	                    JSONObject subObj = new JSONObject();
-            	                    GxmlElement subElmt = (GxmlElement) subflows.get(j);
-            	                    String subId = subElmt.getAttribute(GxmlNames.SUB_ID);
-            	                    dataType = subElmt.getAttribute(GxmlNames.SUB_DATATYPE);
+                    JSONObject originalTargetj = new JSONObject();
+                    StringBuffer mainClass = new StringBuffer();
+                    String dir = "";
+                    String temp = "";
+                    if (originalTargetTuvMap.size() > 0)
+                    {
+                        Tuv tempTuv = originalTargetTuvMap.get(trgTuv.getId());
+                        if(tempTuv != null)
+                        {
+                            String dataType = tempTuv.getDataType(jobId);
+                            String segment = GxmlUtil.getDisplayHtml(tempTuv.getGxmlElement(),
+                                    dataType, options.getViewMode());
+                            temp = getEditorSegment(tempTuv,
+                                    EditorConstants.PTAGS_COMPACT, segment,
+                                    editorState.getNeedShowPTags(), jobId);
+                            boolean b_rtlOriginalLocale = EditUtil.isRTLLocale(tempTuv.getGlobalSightLocale());
+                            // Make the segment RTL if it's 1) Translatable 2) In an RTL
+                            // language and 3) it has bidi characters in it.
+                            if (b_rtlOriginalLocale && !tempTuv.isLocalizable(jobId)
+                                    && Text.containsBidiChar(tempTuv.getGxml()))
+                            {
+                                dir = "rtl ";
+                            }
+                            List subflows = tempTuv.getSubflowsAsGxmlElements(true);
+                            boolean b_subflows = (subflows != null && subflows.size() > 0);
+                            if (!b_subflows)
+                            {
+                                mainClass.append(dir);
+                            }
+                            
+                            if (b_subflows)
+                            {
+                                JSONArray subArray = new JSONArray();
+                                for (int j = 0; j < subflows.size(); j++)
+                                {
+                                    JSONObject subObj = new JSONObject();
+                                    GxmlElement subElmt = (GxmlElement) subflows.get(j);
+                                    String subId = subElmt.getAttribute(GxmlNames.SUB_ID);
+                                    dataType = subElmt.getAttribute(GxmlNames.SUB_DATATYPE);
 
-            	                    // Inherit datatype from parent element...
-            	                    if (dataType == null)
-            	                    {
-            	                        GxmlElement node = subElmt.getParent();
+                                    // Inherit datatype from parent element...
+                                    if (dataType == null)
+                                    {
+                                        GxmlElement node = subElmt.getParent();
 
-            	                        while (dataType == null && node != null)
-            	                        {
-            	                            dataType = node.getAttribute(GxmlNames.SUB_DATATYPE);
-            	                            node = node.getParent();
-            	                        }
-            	                    }
+                                        while (dataType == null && node != null)
+                                        {
+                                            dataType = node.getAttribute(GxmlNames.SUB_DATATYPE);
+                                            node = node.getParent();
+                                        }
+                                    }
 
-            	                    if (dataType == null)
-            	                    {
-            	                        dataType = trgTuv.getDataType(jobId);
-            	                    }
-            	                    
-            	                    segment = GxmlUtil.getDisplayHtml(subElmt, dataType,
-            	                            options.getViewMode());
-            	                    subObj.put("subId", subId);
-            	                    subObj.put("segment", segment);
-            	                    subArray.put(subObj);
-            	                }
-            	                originalTargetj.put("subArray", subArray);
-            	            }
-                		}
-                	}
-                	originalTargetj.put("mainstyle", mainClass);
-                	originalTargetj.put("tuId", trgTuv.getTuId());
-                	originalTargetj.put("originalTarget", temp);
-                	originalTargetjArray.put(originalTargetj);
-                	
-                	JSONObject approvej = new JSONObject();
-                	if(trgTuv.getState().getValue() == TuvState.APPROVED.getValue())
-                	{
-                		approvej.put("approve","checked");
-                	}
-                	else
-                	{
-                		approvej.put("approve","");
-                	}
-                	approvejArray.put(approvej);
+                                    if (dataType == null)
+                                    {
+                                        dataType = trgTuv.getDataType(jobId);
+                                    }
+                                    
+                                    segment = GxmlUtil.getDisplayHtml(subElmt, dataType,
+                                            options.getViewMode());
+                                    subObj.put("subId", subId);
+                                    subObj.put("segment", segment);
+                                    subArray.put(subObj);
+                                }
+                                originalTargetj.put("subArray", subArray);
+                            }
+                        }
+                    }
+                    originalTargetj.put("mainstyle", mainClass);
+                    originalTargetj.put("tuId", trgTuv.getTuId());
+                    originalTargetj.put("originalTarget", temp);
+                    originalTargetjArray.put(originalTargetj);
+                    
+                    JSONObject approvej = new JSONObject();
+                    if(trgTuv.getState().getValue() == TuvState.APPROVED.getValue())
+                    {
+                        approvej.put("approve","checked");
+                    }
+                    else
+                    {
+                        approvej.put("approve","");
+                    }
+                    approvejArray.put(approvej);
                 }
                 
             }
@@ -6147,12 +6088,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             mainJson.put("source", sourcejArray);
             if(needOriginalTarget)
             {
-            	mainJson.put("original", originalTargetjArray);
-            	mainJson.put("approve", approvejArray);
-            	mainJson.put("currentPageNum", pi.getCurrentPageNum());
-            	mainJson.put("totalPageNum", pi.getTotalPageNum());
-            	mainJson.put("isFirstBatch", p_state.isFirstBatch());
-            	mainJson.put("isLastBatch", p_state.isLastBatch());
+                mainJson.put("original", originalTargetjArray);
+                mainJson.put("approve", approvejArray);
+                mainJson.put("currentPageNum", pi.getCurrentPageNum());
+                mainJson.put("totalPageNum", pi.getTotalPageNum());
+                mainJson.put("isFirstBatch", p_state.isFirstBatch());
+                mainJson.put("isLastBatch", p_state.isLastBatch());
             }
         }
         catch (Exception ex)
@@ -6170,52 +6111,52 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     }
     
     private void setOriginalTargetTuvMap(List<Tuv> filterTargetTuvs, List<Tuv> allTargetTuvs, 
-    		HashMap<Long, Tuv> setOriginalTargetTuvMap, long targetLocaleId)
+            HashMap<Long, Tuv> setOriginalTargetTuvMap, long targetLocaleId)
     {
-    	HashMap<Long, List<Tuv>> tempHashMap = new HashMap<Long, List<Tuv>>();
-    	for(Tuv tuv: allTargetTuvs)
-    	{
-    		long tuId = tuv.getTuId();
-    		if(tuv.getLocaleId() == targetLocaleId && tuv.getState().equals(TuvState.OUT_OF_DATE))
-    		{
-    			if(tempHashMap.get(tuId) == null)
-    			{
-    				List<Tuv> tempTuvList = new ArrayList<Tuv>();
-    				tempTuvList.add(tuv);
-    				tempHashMap.put(tuId, tempTuvList);
-    			}
-    			else
-    			{
-    				tempHashMap.get(tuId).add(tuv);
-    			}
-    		}
-    	}
-    	
-    	for(Tuv tuv: filterTargetTuvs)
-    	{
-    		long tuId = tuv.getTuId();
-    		List<Tuv> tempTuvList = tempHashMap.get(tuId);
-    		if(tempTuvList != null)
-    		{
-    			sortById(tempTuvList);
-    			for(Tuv tempTuv: tempTuvList)
-    			{
-    				if(!tempTuv.getGxml().equals(tuv.getGxml()))
-    				{
-    					setOriginalTargetTuvMap.put(tuv.getId(), tempTuv);
-    					break;
-    				}
-    			}
-    		}
-    	}
+        HashMap<Long, List<Tuv>> tempHashMap = new HashMap<Long, List<Tuv>>();
+        for(Tuv tuv: allTargetTuvs)
+        {
+            long tuId = tuv.getTuId();
+            if(tuv.getLocaleId() == targetLocaleId && tuv.getState().equals(TuvState.OUT_OF_DATE))
+            {
+                if(tempHashMap.get(tuId) == null)
+                {
+                    List<Tuv> tempTuvList = new ArrayList<Tuv>();
+                    tempTuvList.add(tuv);
+                    tempHashMap.put(tuId, tempTuvList);
+                }
+                else
+                {
+                    tempHashMap.get(tuId).add(tuv);
+                }
+            }
+        }
+        
+        for(Tuv tuv: filterTargetTuvs)
+        {
+            long tuId = tuv.getTuId();
+            List<Tuv> tempTuvList = tempHashMap.get(tuId);
+            if(tempTuvList != null)
+            {
+                sortById(tempTuvList);
+                for(Tuv tempTuv: tempTuvList)
+                {
+                    if(!tempTuv.getGxml().equals(tuv.getGxml()))
+                    {
+                        setOriginalTargetTuvMap.put(tuv.getId(), tempTuv);
+                        break;
+                    }
+                }
+            }
+        }
     }
     
     private static void sortById(List<Tuv> tempTuvList)
     {
-    	if(tempTuvList.size() > 1)
-    	{
-    		Collections.sort(tempTuvList, new Comparator<Tuv>() 
-    		{  
+        if(tempTuvList.size() > 1)
+        {
+            Collections.sort(tempTuvList, new Comparator<Tuv>() 
+            {  
                 public int compare(Tuv arg0, Tuv arg1) 
                 {  
                     long id0 = arg0.getId();
@@ -6234,7 +6175,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     }  
                 }  
             });
-    	}
+        }
     }
 
     // THE KEY ONEreadyCase
@@ -6407,17 +6348,17 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 EditorConstants.PTAGS_COMPACT, segment,
                 p_editorState.getNeedShowPTags(), jobId);
         String searchText = null;
-		if (!p_editorState.getNeedShowPTags())
-		{
-			if (p_searchMap != null)
-			{
-				searchText = (String) p_searchMap.get("searchText");
-			}
-		}
-		if (searchText != null)
-		{
-			seg = getNewSegement(seg,searchText,"target");
-		}
+        if (!p_editorState.getNeedShowPTags())
+        {
+            if (p_searchMap != null)
+            {
+                searchText = (String) p_searchMap.get("searchText");
+            }
+        }
+        if (searchText != null)
+        {
+            seg = getNewSegement(seg,searchText,"target");
+        }
         jsonObj.put("segment", seg);
         if (fromInCtxRv)
         {
@@ -6524,21 +6465,21 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         p_options.getViewMode());
                 if (STYLE_UPDATED.equals(style))
                 {
-                	if(segment.trim().equals(segmentSrc.trim()))
-        			{                		
-                		if (readyCase == READY_CASE_3)
-                		{
+                    if(segment.trim().equals(segmentSrc.trim()))
+                    {                       
+                        if (readyCase == READY_CASE_3)
+                        {
                             style = getMatchStyleByLM(p_matchTypes, p_srcTuv,
                                     p_targetTuv, subId, unlock, p_repetitions,
                                     jobId);
-                		}
-                		else
-                		{
-                			style = STYLE_NO_MATCH;
-                			if (readyCase == READY_CASE_2)
-                				isSubReadOnly = false;
-                		}
-        			}
+                        }
+                        else
+                        {
+                            style = STYLE_NO_MATCH;
+                            if (readyCase == READY_CASE_2)
+                                isSubReadOnly = false;
+                        }
+                    }
                 }
                 subclass.append(style + " ");
                 subObj.put("subId", subId);
@@ -6551,13 +6492,13 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     segment = highlightTerms(p_srcTuv, p_targetTuv, segment,
                             p_termLMResultSet, p_options.getViewMode());
                 }
-				if (!p_editorState.getNeedShowPTags())
-				{
-					if (searchText != null)
-					{
-						segment = getNewSegement(segment, searchText,"target");
-					}
-				}
+                if (!p_editorState.getNeedShowPTags())
+                {
+                    if (searchText != null)
+                    {
+                        segment = getNewSegement(segment, searchText,"target");
+                    }
+                }
                 subObj.put("segment", segment);
                 // If the TUV is read-only, or the sub is
                 // excluded, don't show the sub as editable.
@@ -6588,244 +6529,244 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         .isTuvInProtectedState(p_targetTuv, p_jobId));
     }
 
-	private String highlightSearchText(String searchText, String segment,
-			int startPos)
-	{
-		List<Integer> allIndexs = findAllIndex(searchText, segment, startPos);
-		StringBuffer buffer = new StringBuffer();
-		int fontIndex = 0;
-		String begin = null;
-		String end = null;
-		String middle = null;
-		for (int i = 0; i < allIndexs.size(); i++)
-		{
-			int index = allIndexs.get(i);
-			if (i == 0)
-			{
-				begin = segment.substring(fontIndex, index);
-				buffer.append(begin);
-				middle = segment.substring(index, index + searchText.length());
-				buffer.append("<span class=\"searchText\">" + middle
-						+ "</span>");
-				if (i == allIndexs.size() - 1)
-				{
-					end = segment.substring(index + searchText.length(),
-							segment.length());
-					buffer.append(end);
-				}
-			}
-			else if (i > 0 && i == allIndexs.size() - 1)
-			{
-				begin = segment.substring(fontIndex + searchText.length(),
-						index);
-				middle = segment.substring(index, index + searchText.length());
-				end = segment.substring(index + searchText.length(),
-						segment.length());
-				buffer.append(begin);
-				buffer.append("<span class=\"searchText\">" + middle
-						+ "</span>");
-				buffer.append(end);
-			}
-			else
-			{
-				begin = segment.substring(fontIndex + searchText.length(),
-						index);
-				middle = segment.substring(index, index + searchText.length());
-				buffer.append(begin);
-				buffer.append("<span class=\"searchText\">" + middle
-						+ "</span>");
-			}
-			fontIndex = index;
-		}
+    private String highlightSearchText(String searchText, String segment,
+            int startPos)
+    {
+        List<Integer> allIndexs = findAllIndex(searchText, segment, startPos);
+        StringBuffer buffer = new StringBuffer();
+        int fontIndex = 0;
+        String begin = null;
+        String end = null;
+        String middle = null;
+        for (int i = 0; i < allIndexs.size(); i++)
+        {
+            int index = allIndexs.get(i);
+            if (i == 0)
+            {
+                begin = segment.substring(fontIndex, index);
+                buffer.append(begin);
+                middle = segment.substring(index, index + searchText.length());
+                buffer.append("<span class=\"searchText\">" + middle
+                        + "</span>");
+                if (i == allIndexs.size() - 1)
+                {
+                    end = segment.substring(index + searchText.length(),
+                            segment.length());
+                    buffer.append(end);
+                }
+            }
+            else if (i > 0 && i == allIndexs.size() - 1)
+            {
+                begin = segment.substring(fontIndex + searchText.length(),
+                        index);
+                middle = segment.substring(index, index + searchText.length());
+                end = segment.substring(index + searchText.length(),
+                        segment.length());
+                buffer.append(begin);
+                buffer.append("<span class=\"searchText\">" + middle
+                        + "</span>");
+                buffer.append(end);
+            }
+            else
+            {
+                begin = segment.substring(fontIndex + searchText.length(),
+                        index);
+                middle = segment.substring(index, index + searchText.length());
+                buffer.append(begin);
+                buffer.append("<span class=\"searchText\">" + middle
+                        + "</span>");
+            }
+            fontIndex = index;
+        }
 
-		if (buffer.toString().length() > 0)
-			return buffer.toString();
-		return null;
-	}
+        if (buffer.toString().length() > 0)
+            return buffer.toString();
+        return null;
+    }
 
-	private List<Integer> findAllIndex(String searchText, String segment,
-			int startPos)
-	{
-		int foundPos = -1; // -1 represents not found.
-		List<Integer> foundIndexs = new ArrayList<Integer>();
-		do
-		{
-			foundPos = segment.toLowerCase().indexOf(searchText.toLowerCase(),
-					startPos);
-			if (foundPos > -1)
-			{
-				startPos = foundPos + 1;
-				foundIndexs.add(foundPos);
-			}
-		}
-		while (foundPos > -1 && startPos < segment.length());
-		
-		return foundIndexs;
-	}
+    private List<Integer> findAllIndex(String searchText, String segment,
+            int startPos)
+    {
+        int foundPos = -1; // -1 represents not found.
+        List<Integer> foundIndexs = new ArrayList<Integer>();
+        do
+        {
+            foundPos = segment.toLowerCase().indexOf(searchText.toLowerCase(),
+                    startPos);
+            if (foundPos > -1)
+            {
+                startPos = foundPos + 1;
+                foundIndexs.add(foundPos);
+            }
+        }
+        while (foundPos > -1 && startPos < segment.length());
+        
+        return foundIndexs;
+    }
 
-	private String getNewSegement(String segment, String searchText,
-			String locale)
-	{
-	    if(StringUtil.isEmptyAndNull(searchText))
-	        return segment;
-	    
-		String beginSpan = "<span class=\"editorSegmentInternal\">";
-		String endSpan = "</span>";
-		if (segment.contains(beginSpan) && segment.contains(endSpan))
-		{
-			List<Integer> beginSpanIndexs = findAllIndex(beginSpan, segment, 0);
-			List<Integer> endSpanIndexs = findAllIndex(endSpan, segment, 0);
-			StringBuffer returnSeg = new StringBuffer();
-			String beginSegment = null;
-			String middleSegement = null;
-			String endSegment = null;
-			String begin = null;
-			String end = null;
-			String middle = null;
-			int frontEndIndex = -1;
-			for (int i = 0; i < beginSpanIndexs.size(); i++)
-			{
-				int beginSpanIndex = beginSpanIndexs.get(i);
-				int endSpanIndex = endSpanIndexs.get(i);
-				if (i == 0)
-				{
-					beginSegment = segment.substring(0, beginSpanIndex);
-					begin = highlightSearchText(searchText, beginSegment, 0);
-					if (begin == null)
-					{
-						returnSeg.append(beginSegment);
-					}
-					else
-					{
-						returnSeg.append(begin);
-					}
-					middleSegement = segment.substring(beginSpanIndex,
-							endSpanIndex + endSpan.length());
-					if (locale.equals("source"))
-					{
-						String middleStr = segment.substring(
-								beginSpanIndex+beginSpan.length(), endSpanIndex);
-						middle = highlightSearchText(searchText, middleStr, 0);
-						if (middle != null)
-						{
-							returnSeg.append(middle);
-						}
-						else
-						{
-							returnSeg.append(middleSegement);
-						}
-					}
-					else if (locale.equals("target"))
-					{
-						returnSeg.append(middleSegement);
-					}
+    private String getNewSegement(String segment, String searchText,
+            String locale)
+    {
+        if(StringUtil.isEmptyAndNull(searchText))
+            return segment;
+        
+        String beginSpan = "<span class=\"editorSegmentInternal\">";
+        String endSpan = "</span>";
+        if (segment.contains(beginSpan) && segment.contains(endSpan))
+        {
+            List<Integer> beginSpanIndexs = findAllIndex(beginSpan, segment, 0);
+            List<Integer> endSpanIndexs = findAllIndex(endSpan, segment, 0);
+            StringBuffer returnSeg = new StringBuffer();
+            String beginSegment = null;
+            String middleSegement = null;
+            String endSegment = null;
+            String begin = null;
+            String end = null;
+            String middle = null;
+            int frontEndIndex = -1;
+            for (int i = 0; i < beginSpanIndexs.size(); i++)
+            {
+                int beginSpanIndex = beginSpanIndexs.get(i);
+                int endSpanIndex = endSpanIndexs.get(i);
+                if (i == 0)
+                {
+                    beginSegment = segment.substring(0, beginSpanIndex);
+                    begin = highlightSearchText(searchText, beginSegment, 0);
+                    if (begin == null)
+                    {
+                        returnSeg.append(beginSegment);
+                    }
+                    else
+                    {
+                        returnSeg.append(begin);
+                    }
+                    middleSegement = segment.substring(beginSpanIndex,
+                            endSpanIndex + endSpan.length());
+                    if (locale.equals("source"))
+                    {
+                        String middleStr = segment.substring(
+                                beginSpanIndex+beginSpan.length(), endSpanIndex);
+                        middle = highlightSearchText(searchText, middleStr, 0);
+                        if (middle != null)
+                        {
+                            returnSeg.append(middle);
+                        }
+                        else
+                        {
+                            returnSeg.append(middleSegement);
+                        }
+                    }
+                    else if (locale.equals("target"))
+                    {
+                        returnSeg.append(middleSegement);
+                    }
 
-					if (i == beginSpanIndexs.size() - 1)
-					{
-						endSegment = segment.substring(
-								endSpanIndex + endSpan.length(),
-								segment.length());
-						end = highlightSearchText(searchText, endSegment, 0);
-						if (end == null)
-						{
-							returnSeg.append(endSegment);
-						}
-						else
-						{
-							returnSeg.append(end);
-						}
-					}
-				}
-				else if (i == beginSpanIndexs.size() - 1)
-				{
-					beginSegment = segment.substring(
-							frontEndIndex + endSpan.length(), beginSpanIndex);
-					begin = highlightSearchText(searchText, beginSegment, 0);
-					if (begin == null)
-					{
-						returnSeg.append(beginSegment);
-					}
-					else
-					{
-						returnSeg.append(begin);
-					}
-					middleSegement = segment.substring(beginSpanIndex,
-							endSpanIndex + endSpan.length());
-					if (locale.equals("source"))
-					{
-						String middleStr = segment.substring(
-								beginSpanIndex+beginSpan.length(), endSpanIndex);
-						middle = highlightSearchText(searchText, middleStr, 0);
-						if (middle != null)
-						{
-							returnSeg.append(middle);
-						}
-						else
-						{
-							returnSeg.append(middleSegement);
-						}
-					}
-					else if (locale.equals("target"))
-					{
-						returnSeg.append(middleSegement);
-					}
-					endSegment = segment.substring(
-							endSpanIndex + endSpan.length(), segment.length());
-					end = highlightSearchText(searchText, endSegment, 0);
-					if (end == null)
-					{
-						returnSeg.append(endSegment);
-					}
-					else
-					{
-						returnSeg.append(end);
-					}
-				}
-				else
-				{
-					beginSegment = segment.substring(
-							frontEndIndex + endSpan.length(), beginSpanIndex);
-					begin = highlightSearchText(searchText, beginSegment, 0);
-					if (begin == null)
-					{
-						returnSeg.append(beginSegment);
-					}
-					else
-					{
-						returnSeg.append(begin);
-					}
-					middleSegement = segment.substring(beginSpanIndex,
-							endSpanIndex + endSpan.length());
-					if (locale.equals("source"))
-					{
-						String middleStr = segment.substring(
-								beginSpanIndex+beginSpan.length(), endSpanIndex);
-						middle = highlightSearchText(searchText, middleStr, 0);
-						if (middle != null)
-						{
-							returnSeg.append(middle);
-						}
-						else
-						{
-							returnSeg.append(middleSegement);
-						}
-					}
-					else if (locale.equals("target"))
-					{
-						returnSeg.append(middleSegement);
-					}
-				}
-				frontEndIndex = endSpanIndex;
-			}
+                    if (i == beginSpanIndexs.size() - 1)
+                    {
+                        endSegment = segment.substring(
+                                endSpanIndex + endSpan.length(),
+                                segment.length());
+                        end = highlightSearchText(searchText, endSegment, 0);
+                        if (end == null)
+                        {
+                            returnSeg.append(endSegment);
+                        }
+                        else
+                        {
+                            returnSeg.append(end);
+                        }
+                    }
+                }
+                else if (i == beginSpanIndexs.size() - 1)
+                {
+                    beginSegment = segment.substring(
+                            frontEndIndex + endSpan.length(), beginSpanIndex);
+                    begin = highlightSearchText(searchText, beginSegment, 0);
+                    if (begin == null)
+                    {
+                        returnSeg.append(beginSegment);
+                    }
+                    else
+                    {
+                        returnSeg.append(begin);
+                    }
+                    middleSegement = segment.substring(beginSpanIndex,
+                            endSpanIndex + endSpan.length());
+                    if (locale.equals("source"))
+                    {
+                        String middleStr = segment.substring(
+                                beginSpanIndex+beginSpan.length(), endSpanIndex);
+                        middle = highlightSearchText(searchText, middleStr, 0);
+                        if (middle != null)
+                        {
+                            returnSeg.append(middle);
+                        }
+                        else
+                        {
+                            returnSeg.append(middleSegement);
+                        }
+                    }
+                    else if (locale.equals("target"))
+                    {
+                        returnSeg.append(middleSegement);
+                    }
+                    endSegment = segment.substring(
+                            endSpanIndex + endSpan.length(), segment.length());
+                    end = highlightSearchText(searchText, endSegment, 0);
+                    if (end == null)
+                    {
+                        returnSeg.append(endSegment);
+                    }
+                    else
+                    {
+                        returnSeg.append(end);
+                    }
+                }
+                else
+                {
+                    beginSegment = segment.substring(
+                            frontEndIndex + endSpan.length(), beginSpanIndex);
+                    begin = highlightSearchText(searchText, beginSegment, 0);
+                    if (begin == null)
+                    {
+                        returnSeg.append(beginSegment);
+                    }
+                    else
+                    {
+                        returnSeg.append(begin);
+                    }
+                    middleSegement = segment.substring(beginSpanIndex,
+                            endSpanIndex + endSpan.length());
+                    if (locale.equals("source"))
+                    {
+                        String middleStr = segment.substring(
+                                beginSpanIndex+beginSpan.length(), endSpanIndex);
+                        middle = highlightSearchText(searchText, middleStr, 0);
+                        if (middle != null)
+                        {
+                            returnSeg.append(middle);
+                        }
+                        else
+                        {
+                            returnSeg.append(middleSegement);
+                        }
+                    }
+                    else if (locale.equals("target"))
+                    {
+                        returnSeg.append(middleSegement);
+                    }
+                }
+                frontEndIndex = endSpanIndex;
+            }
 
-			return returnSeg.toString();
-		}
-		else
-		{
-			String returnStr = highlightSearchText(searchText, segment, 0);
-			if (returnStr != null)
-				return highlightSearchText(searchText, segment, 0);
-			return segment;
-		}
-	}
+            return returnSeg.toString();
+        }
+        else
+        {
+            String returnStr = highlightSearchText(searchText, segment, 0);
+            if (returnStr != null)
+                return highlightSearchText(searchText, segment, 0);
+            return segment;
+        }
+    }
 }

@@ -28,7 +28,12 @@ public interface UIConstants
      * Default in online editor.
      */
     public static final int UIMODE_EDITOR = 1;
+    
+    /**
+     * @deprecated
+     */
     public static final int UIMODE_SNIPPETS = 2;
+
     public static final int UIMODE_PREVIEW_EDITOR = 3;
     /**
      * Activity is "Review (Editable)" type.

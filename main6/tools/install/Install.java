@@ -133,7 +133,7 @@ public class Install extends installer.EventBroadcaster
     private static final String SERVER_HOST = "server_host";
 
     private static final String[] creationSqlFiles =
-    { "create_cap_mysql.sql", "create_snippet_tables_mysql.sql", "vendor_management_mysql.sql",
+    { "create_cap_mysql.sql", "vendor_management_mysql.sql",
             "create_cxe_mysql.sql", "insert_locales_mysql.sql", "insert_currency_codes_mysql.sql",
             "insert_template_formats_mysql.sql", "insert_known_formats_mysql.sql",
             "insert_system_parameters_mysql.sql", "insert_UImodifiable_system_parameters_mysql.sql",

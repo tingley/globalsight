@@ -355,6 +355,8 @@ public interface SystemConfigParamNames
     /**
      * Parameters for add/delete locale specific content
      */
+    // TODO: this is associated with "export source" and "snippet", need further
+    // research and clean...
     public static final String ADD_DELETE_ENABLED = "addDelete.enabled";
 
     /**

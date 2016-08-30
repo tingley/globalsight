@@ -42,7 +42,6 @@
    String rateUrl = LinkHelper.getWebActivityURL(request, "rate");
    String reportsUrl = LinkHelper.getWebActivityURL(request, "reports");   
    String serviceWareUrl = LinkHelper.getWebActivityURL(request,"swimport");
-   String snippetImportUrl = LinkHelper.getWebActivityURL(request, "snippetimport");
    String systemParametersUrl = LinkHelper.getWebActivityURL(request, "configuration");
    String templatesUrl = LinkHelper.getWebActivityURL(request, "templates");
    String terminologyUrl = LinkHelper.getWebActivityURL(request, "termbases");
@@ -158,13 +157,6 @@ arMenu2 = new Array(
     "<%= menuBundle.getString("lb_supportFiles") %>",
     "<%= glossariesUrl %>",
     0
-    
-    <% if(b_snippets) { %>
-    ,
-    "<%= menuBundle.getString("lb_snippet_import") %>",
-    "<%= snippetImportUrl %>",
-    0
-    <%}%>
 );
 
 // Data Sources Menu 

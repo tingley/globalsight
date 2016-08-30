@@ -20,7 +20,6 @@ import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,12 +27,8 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import com.globalsight.everest.page.ExtractedFile;
 import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.PageException;
-import com.globalsight.everest.page.PageTemplate;
-import com.globalsight.everest.page.SnippetPageTemplate;
-import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.PersistenceService;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -42,7 +37,6 @@ import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.pageexport.UpdateTuvStatePersistenceCommand;
-import com.globalsight.util.GlobalSightLocale;
 
 /**
  * This class represents an observer of events that affect Tuv. The callers
@@ -413,7 +407,8 @@ public class TuvEventObserverLocal implements TuvEventObserver
             if (updatedPage.getPrimaryFileType() == ExtractedSourceFile.EXTRACTED_FILE)
             {
                 // get all non deleted TUVs in the page
-                Collection<Tuv> tuvs = getNonDeletedTuvsOfTargetPage(updatedPage);
+                Collection<Tuv> tuvs = ServerProxy.getTuvManager().getTargetTuvsForStatistics(
+                        updatedPage);
 
                 // notify and update the state of the TUVs that are not deleted
                 long jobId = updatedPage.getSourcePage().getJobId();
@@ -424,91 +419,5 @@ public class TuvEventObserverLocal implements TuvEventObserver
         {
             throw new PageException(e);
         }
-    }
-
-    // get all the TUVs that are in a target page and have not been deleted
-    private Collection<Tuv> getNonDeletedTuvsOfTargetPage(TargetPage p_targetPage) throws Exception
-    {
-        Collection<Tuv> tuvs = getTuvsOfTargetPage(p_targetPage);
-
-        // if the page has deletable content, check to remove them from the
-        // collection
-        ExtractedSourceFile esf = (ExtractedSourceFile) p_targetPage.getSourcePage()
-                .getPrimaryFile();
-        if (esf.containGsTags())
-        {
-            HashSet tuIds = getNonDeletedTuIds(p_targetPage.getSourcePage(),
-                    p_targetPage.getGlobalSightLocale());
-            // if they are less - so some were deleted
-            if (tuIds.size() < tuvs.size())
-            {
-                boolean removedAll = false;
-
-                for (Iterator<Tuv> tuvi = tuvs.iterator(); tuvi.hasNext() && !removedAll;)
-                {
-                    Tuv t = (Tuv) tuvi.next();
-                    // if it can't find the TU the TUV is associated with - then
-                    // remove from the collection
-                    if (!tuIds.contains(t.getTuId()))
-                    {
-                        // remove the current one
-                        tuvi.remove();
-                        // the sizes are the same - so found and removed
-                        // all deleted TUVs
-                        if (tuIds.size() == tuvs.size())
-                        {
-                            removedAll = true;
-                        }
-                    }
-                }
-            }
-            // else none were deleted so just fall out and continue
-        }
-        return tuvs;
-    }
-
-    private Collection<Tuv> getTuvsOfTargetPage(TargetPage p_page) throws Exception
-    {
-        return ServerProxy.getTuvManager().getTargetTuvsForStatistics(p_page);
-    }
-
-    /**
-     * Return the list of TU ids that are part of the page and have not been
-     * deleted.
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private HashSet getNonDeletedTuIds(SourcePage p_page, GlobalSightLocale p_locale)
-            throws PageException
-    {
-        HashSet result = new HashSet();
-        try
-        {
-            // Just return Caller guarantees source page contains GS tags.
-            // if the page contains an extracted file
-            if (p_page.getPrimaryFileType() == ExtractedSourceFile.EXTRACTED_FILE
-                    && ((ExtractedSourceFile) p_page.getPrimaryFile()).containGsTags())
-            {
-                // get the Page Template
-                PageTemplate template = ((ExtractedFile) p_page.getPrimaryFile())
-                        .getPageTemplate(PageTemplate.TYPE_DETAIL);
-                template = new SnippetPageTemplate(template, p_locale.toString());
-
-                Collection parts = ServerProxy.getPageManager().getTemplatePartsForSourcePage(
-                        p_page.getIdAsLong(), template.getTypeAsString());
-                // ALWAYS set the template parts before getting the page data
-                template.setTemplateParts(new ArrayList(parts));
-                result = template.getInterpretedTuIds();
-            }
-        }
-        catch (Exception e)
-        {
-            String[] args =
-            { "Failed to get the snippet page template." };
-
-            CATEGORY.error(args[0], e);
-            throw new PageException(e);
-        }
-
-        return result;
     }
 }

@@ -1044,9 +1044,13 @@ function contextForSegment(obj, e)
           function(){editComment(ids[0], ids[1], ids[2])})
         ];
     }
-    popupoptions.push(new ContextItem("Segment details",
+
+    // show "Segment details" only in "List" view mode
+<%  if (i_viewMode == EditorConstants.VIEWMODE_DETAIL) { %>
+        popupoptions.push(new ContextItem("Segment details",
             function(){showDetails(ids[0], ids[1], ids[2])}));
-    
+<%  } %>
+
     ContextMenu.display(popupoptions, e);
 }
 
@@ -1054,10 +1058,15 @@ function contextForReadOnly(obj, e)
 {
     var ids = get3Ids(obj);
     var popupoptions = [
-        new ContextItem("<B>Add/edit comment</B>",
-               function(){editComment(ids[0], ids[1], ids[2])}),
-        new ContextItem("<B>Segment details</B>",
-        function(){showDetails(ids[0], ids[1], ids[2])})];
+                   new ContextItem("<B>Add/edit comment</B>",
+                   function(){editComment(ids[0], ids[1], ids[2])})
+               ];
+
+    // show "Segment details" only in "List" view mode
+<%  if (i_viewMode == EditorConstants.VIEWMODE_DETAIL) { %>
+       popupoptions.push(new ContextItem("Segment details",
+            function(){showDetails(ids[0], ids[1], ids[2])}));
+<%  } %>
 
 /*
     var popupoptions = [

@@ -22,10 +22,11 @@ import com.globalsight.util.GeneralExceptionConstants;
 /**
  * An exception handling object for OfflinePageManagement component.
  */
-public class OfflinePageDataGeneratorException
-    extends GeneralException
-    implements GeneralExceptionConstants
+public class OfflinePageDataGeneratorException extends GeneralException implements
+        GeneralExceptionConstants
 {
+    private static final long serialVersionUID = 1218217916279181315L;
+
     //message keys - for new GeneralException
 
     /** Message Key" message takes one arg: the unknown encoding */
@@ -50,9 +51,7 @@ public class OfflinePageDataGeneratorException
      */
     static public final String MSG_FAILED_TO_GET_SUBFLOW_ID =
         "FailedToGetSubId";
-    /** Message Key" message takes two args: the page id and the target locale */
-    static public final String MSG_FAILED_TO_GET_INTERPRETED_TUIDS =
-        "FailedToGetInterpretedTuIds";
+
     /** Message Key" message takes one arg: the segmetn id*/
     static public final String MSG_FAILED_TO_MAP_SEGID_TO_RES_DATA =
         "FailedToMapSegIdToRessourceData";

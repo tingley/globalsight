@@ -761,11 +761,6 @@ public class PageTemplate extends PersistentObject
         return sb.toString();
     }
 
-    public HashSet getInterpretedTuIds() throws PageException
-    {
-        return null;
-    }
-
     /**
      * <p>
      * Sets the source page object that this template belongs to.

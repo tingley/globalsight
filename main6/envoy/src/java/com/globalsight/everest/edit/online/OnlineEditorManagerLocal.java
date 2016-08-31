@@ -25,7 +25,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -220,7 +219,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         private PageTemplate m_targetTemplate = null;
         private ArrayList<TemplatePart> m_sourceTemplateParts = null;
         private ArrayList<TemplatePart> m_targetTemplateParts = null;
-        private HashSet m_interpretedTuIds = null;
         
         private List<Long> m_currentPageTuIDS = null;
         private List<Tu> m_tu_ICE = null;
@@ -247,7 +245,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             m_targetTemplate = null;
             m_sourceTemplateParts = null;
             m_targetTemplateParts = null;
-            m_interpretedTuIds = null;
             
             m_currentPageTuIDS = null;
             m_tu_ICE = null;
@@ -268,7 +265,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             m_matchTypes = null;
             m_targetTemplate = null;
             m_targetTemplateParts = null;
-            m_interpretedTuIds = null;
 
             m_currentPageTuIDS = null;
             m_tu_ICE = null;
@@ -520,16 +516,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         public void setTargetTemplateParts(ArrayList<TemplatePart> p_parts)
         {
             m_targetTemplateParts = p_parts;
-        }
-
-        public HashSet getInterpretedTuIds()
-        {
-            return m_interpretedTuIds;
-        }
-
-        public void setInterpretedTuIds(HashSet p_set)
-        {
-            m_interpretedTuIds = p_set;
         }
 
         public List<Long> getCurrentPageTuIDS()
@@ -2961,28 +2947,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     }
 
     /**
-     * Returns a set of TU ids that are part of the page, i.e. ones that have
-     * not been deleted using GSA delete tags. The caller must call this method
-     * only on pages that satisfy page.containsGsTags().
-     * 
-     * Called from Segment Editor. Offline mode uses its own copy of this code.
-     */
-    public HashSet getInterpretedTuIds(long p_srcPageId,
-            GlobalSightLocale p_locale) throws OnlineEditorException,
-            RemoteException
-    {
-        try
-        {
-            return getInterpretedTuIds_1(p_srcPageId, p_locale);
-        }
-        catch (GeneralException e)
-        {
-            throw new OnlineEditorException(
-                    OnlineEditorException.MSG_FAILED_TO_GET_TUIDS, null, e);
-        }
-    }
-
-    /**
      * Splits a range of merged segments at the "top" or "bottom". The split-off
      * segment is restored to its source. The remaining merged segments are
      * re-merged from their source to produce correct sub ids. Any existing
@@ -4947,7 +4911,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     {
         synchronized (m_pageCache.m_templateLock)
         {
-            m_pageCache.setInterpretedTuIds(null);
             m_pageCache.setTargetTemplateParts(null);
             m_pageCache.setSourceTemplateParts(null);
             m_pageCache.setTargetTemplate(null);
@@ -5319,63 +5282,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         }
 
         return result;
-    }
-
-    private HashSet getInterpretedTuIds_1(long p_srcPageId,
-            GlobalSightLocale p_locale) throws GeneralException,
-            RemoteException
-    {
-        HashSet result;
-
-        synchronized (m_pageCache.m_templateLock)
-        {
-            result = m_pageCache.getInterpretedTuIds();
-
-            if (result == null)
-            {
-                SourcePage srcPage = getSourcePage(p_srcPageId);
-
-                // Caller should check source page contains GS tags.
-                if (!containGsTags(srcPage))
-                {
-                    return null;
-                }
-
-                // Load the TUs into the Toplink cache to prevent
-                // called code from loading each TU individually.
-                getPageTus(srcPage);
-
-                // Get the Page Template - We should request our own
-                // private copy to prevent the source template cache
-                // from trashing, then load the template parts and run
-                // it once, then cache the resulting interpreted ids.
-                PageTemplate template = getPageTemplate(PageTemplate.TYPE_DETAIL, srcPage);
-
-                if (template.getTemplateParts() == null
-                        || template.getTemplateParts().size() == 0)
-                {
-                    ArrayList<TemplatePart> parts = getSourceTemplateParts(
-                            srcPage.getIdAsLong(), template.getTypeAsString());
-
-                    // for snippets, computes positions
-                    template.setTemplateParts(parts);
-                }
-
-                m_pageCache.setInterpretedTuIds(template.getInterpretedTuIds());
-
-                result = m_pageCache.getInterpretedTuIds();
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns true if the page contains GS tags and false if not.
-     */
-    private boolean containGsTags(SourcePage p_page)
-    {
-        return getExtractedSourceFile(p_page).containGsTags();
     }
 
     /**

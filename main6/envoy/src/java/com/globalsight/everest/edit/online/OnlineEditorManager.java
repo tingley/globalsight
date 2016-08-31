@@ -21,7 +21,6 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Vector;
 
@@ -191,14 +190,6 @@ public interface OnlineEditorManager extends UIConstants
      */
     public void createImageMap(Long p_trgPageId, long p_tuvId, long p_subId,
             String p_tempName, String p_realName) throws OnlineEditorException,
-            RemoteException;
-
-    /**
-     * Returns a set of TU ids that are part of the target page, i.e. ones that
-     * have not been deleted using GSA delete tags.
-     */
-    public HashSet getInterpretedTuIds(long p_srcPageId,
-            GlobalSightLocale p_locale) throws OnlineEditorException,
             RemoteException;
 
     /**

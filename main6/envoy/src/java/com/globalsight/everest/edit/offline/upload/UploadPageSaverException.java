@@ -22,12 +22,11 @@ import com.globalsight.util.GeneralExceptionConstants;
 /**
  * An exception handling object for OfflinePageManagement component.
  */
-public class UploadPageSaverException
-    extends GeneralException
-    implements GeneralExceptionConstants
+public class UploadPageSaverException extends GeneralException implements GeneralExceptionConstants
 {
-    // GENERAL upload errors
+    private static final long serialVersionUID = 6713801656432181279L;
 
+    // GENERAL upload errors
     /** takes one arg - the unknown encoding */
     static public final String MSG_UNKNOWN_ENCODING =
         "UnknownEncoding";
@@ -37,9 +36,7 @@ public class UploadPageSaverException
     /** takes two args - source tuv Id and target tuv Id */
     static public final String MSG_UNMATCHED_SUBS =
         "UnmatchedSubs";
-    /** takes two args - the page id and the target locale */
-    static public final String MSG_FAILED_TO_GET_INTERPRETED_TUIDS =
-        "FailedToGetInterpretedTuIds";
+
     /** takes no arguments */
     static public final String MSG_FAILED_ARGS_GET_REFPAGE =
         "FailedArgsGetReferencePage";

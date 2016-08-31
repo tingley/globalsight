@@ -185,6 +185,7 @@ public class CustomizeReportsMainHandler extends PageHandler
         String[] paramTargetLocales = p_request.getParameterValues("targetLocale");
 
         List<JobSearchParameters> jobRangeParam = new ArrayList<JobSearchParameters>();
+        ArrayList<Long> projectIdList = new ArrayList<Long>();
 
         List<String> stateList = new ArrayList<String>();
         if ((paramJobIds != null) && !("*".equals(paramJobIds[0])))
@@ -193,15 +194,16 @@ public class CustomizeReportsMainHandler extends PageHandler
             {
                 if ((paramProjectIds != null) && !("*".equals(paramProjectIds[0])))
                 {
+                    JobSearchParameters sp = new JobSearchParameters();
                     for (int j = 0; j < paramProjectIds.length; j++)
                     {
-                        JobSearchParameters sp = new JobSearchParameters();
-                        sp.setJobId(paramJobIds[i]);
-                        sp.setJobIdCondition(JobSearchParameters.EQUALS);
-                        sp.setProjectId(paramProjectIds[j]);
-                        stateList = disposeSp(p_request, paramStatus, sp);
-                        jobRangeParam.add(sp);
+                        projectIdList.add(Long.parseLong(paramProjectIds[j]));
                     }
+                    sp.setJobId(paramJobIds[i]);
+                    sp.setJobIdCondition(JobSearchParameters.EQUALS);
+                    sp.setProjectId(projectIdList);
+                    stateList = disposeSp(p_request, paramStatus, sp);
+                    jobRangeParam.add(sp);
                 }
                 else
                 {
@@ -217,23 +219,25 @@ public class CustomizeReportsMainHandler extends PageHandler
         {
             if ((paramProjectIds != null) && !("*".equals(paramProjectIds[0])))
             {
+                JobSearchParameters sp = new JobSearchParameters();
                 for (int i = 0; i < paramProjectIds.length; i++)
                 {
-                    JobSearchParameters sp = new JobSearchParameters();
-                    sp.setProjectId(paramProjectIds[i]);
-                    stateList = disposeSp(p_request, paramStatus, sp);
-                    jobRangeParam.add(sp);
+                    projectIdList.add(Long.parseLong(paramProjectIds[i]));
                 }
+                sp.setProjectId(projectIdList);
+                stateList = disposeSp(p_request, paramStatus, sp);
+                jobRangeParam.add(sp);
             }
             else
             {
                 JobSearchParameters sp = new JobSearchParameters();
                 for (Project project : projectList)
                 {
-                    sp.setProjectId(String.valueOf(project.getId()));
-                    stateList = disposeSp(p_request, paramStatus, sp);
-                    jobRangeParam.add(sp);
+                    projectIdList.add(project.getIdAsLong());
                 }
+                sp.setProjectId(projectIdList);
+                stateList = disposeSp(p_request, paramStatus, sp);
+                jobRangeParam.add(sp);
 
             }
         }

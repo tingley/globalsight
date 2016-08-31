@@ -242,7 +242,7 @@ public class WfStatePostThread implements Runnable
     {
         int num = wfStatePost.getRetryNumber();
         CloseableHttpClient httpClient = getHttpClient();
-        for (int i = 0; i < num; i++)
+        for (int i = 0; i < num + 1; i++)
         {
             try
             {

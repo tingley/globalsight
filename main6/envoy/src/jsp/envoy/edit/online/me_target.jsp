@@ -275,11 +275,6 @@ var segmentEditorHeight = "540";
 
 var showFinish = false;
 
-
-
-
-
-
 if (screen.availHeight > 600)
 {
     segmentEditorHeight = screen.availHeight - 60;
@@ -957,20 +952,28 @@ function contextForSegment(obj, e)
           function(){editComment(ids[0], ids[1], ids[2])})
         ];
     }
+
+    // show "Segment details" only in "List" view mode
+<%  if (i_viewMode == EditorConstants.VIEWMODE_DETAIL) { %>
     popupoptions.push(new ContextItem("Segment details",
             function(){showDetails(ids[0], ids[1], ids[2])}));
-    
+<%  } %>
+
     ContextMenu.display(popupoptions, e);
 }
 
 function contextForReadOnly(obj, e)
 {
-    var ids = get3Ids(obj);
-    var popupoptions = [
-        new ContextItem("<B>Segment details</B>",
-        function(){showDetails(ids[0], ids[1], ids[2])})];
+    // show "Segment details" only in "List" view mode
+<%  if (i_viewMode == EditorConstants.VIEWMODE_DETAIL) { %>
+        var ids = get3Ids(obj);
+        var popupoptions = [
+            new ContextItem("<B>Segment details</B>",
+            function(){showDetails(ids[0], ids[1], ids[2])})
+        ];
 
     ContextMenu.display(popupoptions, e);
+<%  } %>
 }
 
 function getSegmentIdFromIdAttr(idValue)

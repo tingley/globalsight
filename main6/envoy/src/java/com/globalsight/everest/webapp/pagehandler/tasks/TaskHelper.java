@@ -50,6 +50,7 @@ import com.globalsight.everest.qachecks.DITAQACheckerHelper;
 import com.globalsight.everest.qachecks.QACheckerHelper;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskException;
@@ -865,7 +866,7 @@ public class TaskHelper
                 Cookie cookie = (Cookie) cookies[i];
                 if (cookie.getName().equals(cookieName))
                 {
-                    String mruTaskStr = cookie.getValue();
+                    String mruTaskStr = ServletUtil.stripXss(cookie.getValue());
                     mruTaskStr = URLDecoder.decode(mruTaskStr);
                     StringTokenizer st = new StringTokenizer(mruTaskStr, "|");
                     while (st.hasMoreTokens())
@@ -926,7 +927,7 @@ public class TaskHelper
                 Cookie cookie = (Cookie) cookies[i];
                 if (cookie.getName().equals(cookieName))
                 {
-                    String mruTaskStr = cookie.getValue();
+                    String mruTaskStr = ServletUtil.stripXss(cookie.getValue());
                     mruTaskStr = URLDecoder.decode(mruTaskStr);
                     StringTokenizer st = new StringTokenizer(mruTaskStr, "|");
                     while (st.hasMoreTokens() && count < 3)

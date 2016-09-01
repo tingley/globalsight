@@ -121,5 +121,6 @@
 	<classpathentry kind="lib" path="main6/tools/j2eeVendor/jboss/wildfly-10.0.0.Final/server/modules/system/layers/base/org/jboss/logmanager/main/jboss-logmanager-2.0.3.Final.jar"/>
 	<classpathentry kind="lib" path="main6/tools/j2eeVendor/jboss/wildfly-10.0.0.Final/server/modules/system/layers/base/org/jboss/resteasy/resteasy-jaxrs/main/resteasy-jaxrs-3.0.14.Final.jar"/>
 	<classpathentry kind="lib" path="main6/tools/j2eeVendor/jboss/wildfly-10.0.0.Final/server/modules/system/layers/base/org/jboss/resteasy/resteasy-multipart-provider/main/resteasy-multipart-provider-3.0.14.Final.jar"/>
+	<classpathentry kind="lib" path="main6/tools/lib/common/jodd-3.7.jar" sourcepath="main6/tools/lib/sources/jodd-3.7-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

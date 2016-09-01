@@ -47,6 +47,7 @@ import com.globalsight.everest.securitymgr.SecurityManagerException;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.AppletDirectory;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.usermgr.LoggedUser;
 import com.globalsight.everest.usermgr.UserInfo;
@@ -634,7 +635,7 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
                     try
                     {
                         p_session.setAttribute(p_sessionConstant,
-                                URLDecoder.decode(cookie.getValue()));
+                                URLDecoder.decode(ServletUtil.stripXss(cookie.getValue())));
                     }
                     catch (Exception e)
                     {

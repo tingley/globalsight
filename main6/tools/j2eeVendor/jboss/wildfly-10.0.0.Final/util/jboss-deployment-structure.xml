@@ -14,7 +14,10 @@
 			<module name="org.apache.httpcomponents" export="true" />
 			<module name="org.apache.xalan" export="true" />
 			<module name="org.apache.xerces" export="true" />
-			<module name="org.codehaus.jackson.jackson-mapper-asl" export="true" />
+            <module name="org.codehaus.jackson.jackson-mapper-asl" export="true" />
+            <module name="org.codehaus.jackson.jackson-core-asl" export="true" />
+            <module name="org.codehaus.jackson.jackson-jaxrs" export="true" />
+            <module name="org.codehaus.jackson.jackson-xc" export="true" />
 			<module name="org.hibernate" export="true" />
 			<module name="org.hibernate.optional.c3p0" export="true" />
 			<module name="org.hibernate.optional.ehcache" export="true" />

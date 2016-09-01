@@ -40,6 +40,7 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.util.AppletDirectory;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.system.AmbassadorServer;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -248,6 +249,17 @@ public class ControlServlet extends HttpServlet
         WebPageDescriptor sourcePageDescriptor = null;
         HttpSession userSession = null;
 
+        // Vincent: Check if parameters contain invaild characters, 2016/08/16
+        PageHandler sourcePageHandler = null;
+        boolean isVaild = ServletUtil.checkAllValues(p_request);
+        if (!isVaild)
+        {
+            // parameters contain invaild characters
+            reportErrorPage(false, "Invaild characters are found in parameters or attributes",
+                    null, p_request, p_response, m_servletContext, userSession, sourcePageHandler);
+            return;
+        }
+
         String isApplet = p_request.getParameter(WebAppConstants.APPLET);
         if (isApplet == null)
         {
@@ -313,7 +325,7 @@ public class ControlServlet extends HttpServlet
                 sourcePageDescriptor = WebSiteDescription.instance().getPageDescriptor(ENTRY_PAGE);
 
                 // verify that there is no extra flow of control test
-                PageHandler sourcePageHandler = null;
+                sourcePageHandler = null;
                 try
                 {
                     sourcePageHandler = getPageHandlerInstance(sourcePageDescriptor);
@@ -414,7 +426,7 @@ public class ControlServlet extends HttpServlet
                         .getPageDescriptor(sourcePageName);
 
                 // verify that there is no extra flow of control test
-                PageHandler sourcePageHandler = null;
+                sourcePageHandler = null;
                 try
                 {
                     sourcePageHandler = getPageHandlerInstance(sourcePageDescriptor);

@@ -67,6 +67,7 @@ import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
@@ -2828,7 +2829,7 @@ public abstract class JobManagementHandler extends PageHandler
 
             String cookieName = JobSearchConstants.JOB_SEARCH_COOKIE
                     + userId.hashCode();
-            Cookie cookie = new Cookie(cookieName, jobSearch.toString());
+            Cookie cookie = new Cookie(cookieName, ServletUtil.stripXss(jobSearch.toString()));
             sessionMgr.setAttribute(cookieName, cookie);
         }
         catch (Exception e)

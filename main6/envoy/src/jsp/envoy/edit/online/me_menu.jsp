@@ -81,7 +81,6 @@ String lb_fileNavigation = bundle.getString("lb_fileNavigation");
 String lb_pageNavigation = bundle.getString("lb_pageNavigation");
 String lb_showSupportFiles = bundle.getString("lb_showSupportFiles");
 String lb_showTermbases = bundle.getString("lb_showTermbases");
-String lb_snippetEditor = bundle.getString("lb_snippet_editor");
 String lb_source = bundle.getString("lb_source");
 String lb_supportFiles = bundle.getString("lb_supportFiles");
 String lb_target = bundle.getString("lb_target");

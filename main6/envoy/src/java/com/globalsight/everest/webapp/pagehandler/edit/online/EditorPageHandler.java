@@ -59,7 +59,6 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.projecthandler.MachineTranslationProfile;
@@ -117,26 +116,19 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
      * time.
      */
     static public boolean s_pmCanEditTargetPages = false;
-    static public boolean s_pmCanEditSnippets = false;
-
     static
     {
         try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-
-            s_pmCanEditTargetPages = sc
-                    .getBooleanParameter("editalltargetpages.allowed");
-            s_pmCanEditSnippets = sc
-                    .getBooleanParameter("editallsnippets.allowed");
+            s_pmCanEditTargetPages = sc.getBooleanParameter("editalltargetpages.allowed");
         }
         catch (Throwable e)
         {
             if (CATEGORY.isDebugEnabled())
             {
-                CATEGORY.debug("Error when get 'editalltargetpages.allowed' and 'editallsnippets.allowed' configurations");
+                CATEGORY.debug("Error when get 'editalltargetpages.allowed' configuration.");
             }
-            // Do nothing if configuration is not available.
         }
     }
 
@@ -1424,17 +1416,6 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             p_state.setEditAllState(EDIT_DEFAULT);
         }
 
-        boolean b_canEditSnippets = false;
-        if (!b_readOnly)
-        {
-            // snippet editor permission check: everybody but
-            if (p_state.getCurrentPage().hasGsaTags()
-                    && perms.getPermissionFor(Permission.SNIPPET_EDIT))
-                b_canEditSnippets = true;
-        }
-
-        p_state.setAllowEditSnippets(b_canEditSnippets);
-
         // Indicate that main editor is in 'editor' mode -- see
         // dispatchJsp for switching to review mode.
         // Comments are turned ON by default in popup editor for a review
@@ -1537,9 +1518,6 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         {
             p_state.setReadOnly(true);
         }
-
-        // Mon Jan 31 18:56:04 2005 CvdL: PM can edit snippets too (12665)
-        p_state.setAllowEditSnippets(s_pmCanEditSnippets);
 
         // Indicate that main editor is in 'viewer' mode -- see
         // dispatchJsp for switching to review mode.

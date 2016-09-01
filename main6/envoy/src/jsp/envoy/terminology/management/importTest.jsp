@@ -67,7 +67,7 @@ sessionMgr.removeElement(WebAppConstants.TERMBASE_ERROR);
 <%if((percentage > -1) && (percentage < 100)) {%>
 <%=refreshMetaTag%>
 <%}%>
-<TITLE><%=bundle.getString("lb_snippet_testing_import")%></TITLE>
+<TITLE><%=bundle.getString("lb_testing_import")%></TITLE>
 <STYLE>
 #idProgressContainer { border: solid 1px <%=skin.getProperty("skin.list.borderColor")%>; z-index: 1; 
                  position: absolute; top: 150; left: 20; width: 400; }
@@ -173,7 +173,7 @@ function doRefresh()
 <DIV ID="contentLayer" 
     STYLE=" POSITION: ABSOLUTE; Z-INDEX: 8; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
 
-<SPAN CLASS="mainHeading" id="idHeading"><%=bundle.getString("lb_snippet_testing_import2")%></SPAN>
+<SPAN CLASS="mainHeading" id="idHeading"><%=bundle.getString("lb_testing_import2")%></SPAN>
 <BR>
 <SPAN CLASS="standardTextItalic" id="idPleaseWait">
 <%=bundle.getString("msg_please_wait_untill_test_import_finished")%>

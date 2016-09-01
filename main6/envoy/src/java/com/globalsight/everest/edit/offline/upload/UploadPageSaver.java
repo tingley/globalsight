@@ -63,8 +63,6 @@ import com.globalsight.everest.tuv.TuvImplVo;
 import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.tuv.TuvManagerLocal;
 import com.globalsight.everest.tuv.TuvState;
-import com.globalsight.everest.util.system.SystemConfigParamNames;
-import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.edit.online.AutoPropagateThread;
 import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
@@ -117,7 +115,6 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
     private GlobalSightLocale m_userLocale = null;
     private int m_placeholderFormatId = -1;
     private Collection m_excludedItemTypes = null;
-    private boolean m_addDeleteEnabled = false;
     private int m_uploadFileFormat = -1;
     private OfflinePageData m_uploadPage = null;
 
@@ -175,20 +172,6 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
      */
     public UploadPageSaver() throws UploadPageSaverException
     {
-        try
-        {
-            // Check if Add Delete is enabled
-            m_addDeleteEnabled = SystemConfiguration.getInstance()
-                    .getBooleanParameter(SystemConfigParamNames.ADD_DELETE_ENABLED);
-        }
-        catch (Exception ex)
-        {
-            UploadPageSaverException ex1 = new UploadPageSaverException(ex);
-
-            s_category.error(ex1.getMessage(), ex1);
-
-            throw ex1;
-        }
     }
 
     /**

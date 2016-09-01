@@ -904,57 +904,46 @@ public class JobResource extends RestResource
                 List<FileProfileImpl> fileProfileList = (List) ServerProxy
                         .getFileProfilePersistenceManager().getFileProfilesByExtension(tempExtensionList,
                                 Long.valueOf(company.getId()));
-                if (realFileProfiles.contains(fileProfileList))
+                for (FileProfile filePro : realFileProfiles)
                 {
-                    for (FileProfile filePro : fileProfileList)
+                    if (fileProfileList.contains(filePro))
                     {
-                        if (realFileProfiles.contains(filePro))
+                        if (file.getAbsolutePath().endsWith(".xml"))
                         {
-
-                            if (file.getAbsolutePath().endsWith(".xml"))
+                            saveFileAsUTF8(file);
+                        }
+                        // indicates this is an "XLZ" format file profile
+                        if (48 == filePro.getKnownFormatTypeId())
+                        {
+                            referenceFPId = filePro.getReferenceFP();
+                            referenceFP = fppm.readFileProfile(referenceFPId);
+                            zipDir = realUploadFileList.get(i).substring(0,
+                                    realUploadFileList.get(i).lastIndexOf("."));
+                            zipFiles = ZipIt.unpackZipPackage(realUploadFileList.get(i), zipDir);
+                            String relativePath = filename.substring(0, filename.lastIndexOf("."));
+                            String tmp = "";
+                            for (String f : zipFiles)
                             {
-                                saveFileAsUTF8(file);
-                            }
-
-                            // indicates this is an "XLZ" format file profile
-                            if (48 == filePro.getKnownFormatTypeId())
-                            {
-                                referenceFPId = filePro.getReferenceFP();
-                                referenceFP = fppm.readFileProfile(referenceFPId);
-                                zipDir = realUploadFileList.get(i).substring(0,
-                                        realUploadFileList.get(i).lastIndexOf("."));
-                                zipFiles = ZipIt.unpackZipPackage(realUploadFileList.get(i), zipDir);
-                                String relativePath = filename.substring(0, filename.lastIndexOf("."));
-                                String tmp = "";
-                                for (String f : zipFiles)
+                                if (XliffFileUtil.isXliffFile(f))
                                 {
-                                    if (XliffFileUtil.isXliffFile(f))
-                                    {
-                                        tmp = relativePath + File.separator + f;
-                                        changeFileListByXliff(tmp, vTargetLocale, referenceFP,
-                                                fileProfiles, files, afterTargetLocales);
-                                    }
+                                    tmp = relativePath + File.separator + f;
+                                    changeFileListByXliff(tmp, vTargetLocale, referenceFP,
+                                            fileProfiles, files, afterTargetLocales);
                                 }
                             }
-                            else if (39 == filePro.getKnownFormatTypeId())
-                            {
-                                changeFileListByXliff(filename, vTargetLocale, filePro, fileProfiles,
-                                        files, afterTargetLocales);
-                            }
-                            else
-                            {
-                                fileProfiles.add(filePro);
-                                files.add(file);
-                                afterTargetLocales.add(vTargetLocale);
-                            }
+                        }
+                        else if (39 == filePro.getKnownFormatTypeId())
+                        {
+                            changeFileListByXliff(filename, vTargetLocale, filePro, fileProfiles,
+                                    files, afterTargetLocales);
+                        }
+                        else
+                        {
+                            fileProfiles.add(filePro);
+                            files.add(file);
+                            afterTargetLocales.add(vTargetLocale);
                         }
                     }
-                }
-                else
-                {
-                    String message = fileExtension
-                            + " format file can not find the corresponding fileprofile id.";
-                    throw new RestWebServiceException(message);
                 }
             }
 

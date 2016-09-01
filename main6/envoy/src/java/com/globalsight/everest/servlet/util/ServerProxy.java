@@ -56,14 +56,12 @@ import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
 import com.globalsight.everest.nativefilestore.NativeFileManagerWLRemote;
 import com.globalsight.everest.page.PageEventObserverWLRemote;
 import com.globalsight.everest.page.PageManagerWLRemote;
-import com.globalsight.everest.page.TemplateManagerWLRemote;
 import com.globalsight.everest.page.pageexport.ExportEventObserverWLRemote;
 import com.globalsight.everest.projecthandler.ProjectEventObserverWLRemote;
 import com.globalsight.everest.projecthandler.ProjectHandlerWLRemote;
 import com.globalsight.everest.request.RequestHandlerWLRemote;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFileMgrWLRemote;
 import com.globalsight.everest.securitymgr.SecurityManagerWLRemote;
-import com.globalsight.everest.snippet.SnippetLibraryWLRemote;
 import com.globalsight.everest.taskmanager.TaskManagerWLRemote;
 import com.globalsight.everest.tm.TmManager;
 import com.globalsight.everest.tuv.TuvEventObserverWLRemote;
@@ -135,10 +133,8 @@ public class ServerProxy
     private static SecondaryTargetFileMgrWLRemote m_stfManager = null;
     private static SecurityManagerWLRemote m_securityManager = null;
     private static ServerRegistry SERVER_REGISTRY = null;
-    private static SnippetLibraryWLRemote m_snippetLibrary = null;
     private static SystemParameterPersistenceManager m_sysParamManager = null;
     private static TaskManagerWLRemote m_taskManager = null;
-    private static TemplateManagerWLRemote m_templateManager = null;
     private static TermLeverageManagerWLRemote m_termLeverageManager = null;
     private static TmManager m_tmManager = null;
     private static TuvEventObserverWLRemote m_tuvEventObserver = null;
@@ -397,47 +393,6 @@ public class ServerProxy
 
         return m_securityManager;
     }
-
-    public static SnippetLibraryWLRemote getSnippetLibrary()
-        throws GeneralException
-    {
-        if (m_snippetLibrary == null)
-        {
-            try
-            {
-                m_snippetLibrary = (SnippetLibraryWLRemote)
-                    SERVER_REGISTRY.lookup(
-                        SnippetLibraryWLRemote.SERVICE_NAME);
-            }
-            catch (NamingException ne)
-            {
-                throwException(ne);
-            }
-        }
-
-        return m_snippetLibrary;
-    }
-
-    public static TemplateManagerWLRemote getTemplateManager()
-        throws GeneralException
-    {
-        if (m_templateManager == null)
-        {
-            try
-            {
-               m_templateManager = (TemplateManagerWLRemote)
-                   SERVER_REGISTRY.lookup(
-                       TemplateManagerWLRemote.SERVICE_NAME);
-           }
-           catch (NamingException ne)
-           {
-               throwException(ne);
-           }
-       }
-
-       return m_templateManager;
-    }
-
 
     public static WorkflowServerWLRemote getWorkflowServer()
         throws GeneralException

@@ -36,9 +36,12 @@ public class ExtractedSourceFile
 
     private static final long serialVersionUID = 5943352396382269966L;
 
-    // this is set to true for files with GS tags in 
-    // them that allow adding a snippet or deleting content
-    // the default is false
+    /**
+     * This is set to true for files with GS tags in them that allow adding a
+     * snippet or deleting content. the default is false.
+     * 
+     * @deprecated -- it is false always in "source_page" table: CONTAINS_GS_TAG
+     */
     private boolean m_containGsTags = false;
 
     // the original encoding of the file when imported

@@ -59,8 +59,6 @@ server.classes=\
   com.globalsight.everest.edit.SynchronizationManagerLocal,\
   com.globalsight.everest.edit.online.OnlineEditorManagerWLRMIImpl,\
   com.globalsight.everest.edit.offline.OfflineEditManagerWLImpl,\
-  com.globalsight.everest.snippet.SnippetLibraryWLRMIImpl,\
-  com.globalsight.everest.page.TemplateManagerWLRMIImpl,\
   com.globalsight.everest.page.pageexport.ExportEventObserverWLRMIImpl,\
   com.globalsight.everest.nativefilestore.NativeFileManagerWLRMIImpl,\
   com.globalsight.everest.secondarytargetfile.SecondaryTargetFileMgrWLRMIImpl,\

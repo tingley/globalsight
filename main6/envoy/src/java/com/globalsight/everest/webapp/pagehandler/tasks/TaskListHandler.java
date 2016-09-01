@@ -74,6 +74,7 @@ import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskException;
@@ -1983,7 +1984,7 @@ public class TaskListHandler extends PageHandler
             {
                 String cookieName = JobSearchConstants.MINI_TASK_SEARCH_COOKIE
                         + userId.hashCode();
-                Cookie cookie = new Cookie(cookieName, taskSearch.toString());
+                Cookie cookie = new Cookie(cookieName, ServletUtil.stripXss(taskSearch.toString()));
                 sessionMgr.setAttribute(cookieName, cookie);
                 session.setAttribute(JobSearchConstants.LAST_TASK_SEARCH_TYPE,
                         JobSearchConstants.MINI_TASK_SEARCH_COOKIE);

@@ -526,31 +526,6 @@ public interface WebAppConstants
     public static final String TERMBASE_ERROR = "TERMBASE_ERROR";
 
     //
-    // Snippet Library and Add/Delete Constants
-    //
-    public static final String SNIPPET_LIBRARY = "snippetlibrary";
-
-    public static final String SNIPPET_ACTION_GETGENERICSNIPPET = "getgenericsnippet";
-    public static final String SNIPPET_ACTION_GETSNIPPET = "getsnippet";
-    public static final String SNIPPET_ACTION_GETSNIPPETS = "getsnippets";
-    public static final String SNIPPET_ACTION_GETPAGE = "getpage";
-
-    public static final String SNIPPET_ACTION_CREATESNIPPET = "createsnippet";
-    public static final String SNIPPET_ACTION_CREATESNIPPETGETSNIPPET = "createsnippetgetsnippet";
-    public static final String SNIPPET_ACTION_MODIFYSNIPPET = "modifysnippet";
-    public static final String SNIPPET_ACTION_MODIFYSNIPPETGETSNIPPET = "modifysnippetgetsnippet";
-    public static final String SNIPPET_ACTION_REMOVESNIPPET = "removesnippet";
-
-    public static final String SNIPPET_ACTION_ADDSNIPPETGETPAGE = "addsnippetgetpage";
-    public static final String SNIPPET_ACTION_MODIFYSNIPPETGETPAGE = "modifysnippetgetpage";
-    public static final String SNIPPET_ACTION_REMOVESNIPPETGETPAGE = "removesnippetgetpage";
-    public static final String SNIPPET_ACTION_DELETECONTENTGETPAGE = "deletecontentgetpage";
-    public static final String SNIPPET_ACTION_UNDELETECONTENTGETPAGE = "undeletecontentgetpage";
-
-    public static final String SNIPPET_ACTION_GETGENERICNAMES = "getgenericnames";
-    public static final String SNIPPET_ACTION_GETSNIPPETSBYLOCALE = "getsnippetsbylocale";
-
-    //
     // TM Management Constants
     //
     public static final String TM_ACTION_CANCEL_SEARCH = "cancelSearch";

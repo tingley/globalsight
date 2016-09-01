@@ -149,9 +149,6 @@ public class PageTemplate extends PersistentObject
         m_type = p_type;
     }
 
-    /**
-     * Copy constructor used for derived class SnippetPageTemplate.
-     */
     public PageTemplate(PageTemplate p_other)
     {
         // m_id is not maintained
@@ -762,16 +759,6 @@ public class PageTemplate extends PersistentObject
         }
         sb.append(".html");
         return sb.toString();
-    }
-
-    /**
-     * Gets the Set of valid (interpreted) Tu ids for a given GS-tagged source
-     * page. Overwritten in SnippetPageTemplate. Called by upload/download and
-     * the online editor.
-     */
-    public HashSet getInterpretedTuIds() throws PageException
-    {
-        return null;
     }
 
     /**

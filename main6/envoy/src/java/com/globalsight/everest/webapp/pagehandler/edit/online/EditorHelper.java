@@ -22,7 +22,6 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -436,8 +435,7 @@ public class EditorHelper implements EditorConstants
                                                 srcPage.getExternalPageId(), false,
                                                 workflow.getState(),
                                                 unextractedTargetPages.contains(nextTrgPage),
-                                                unextractedTargetPages
-                                                        .contains(previousTargetPage));
+                                                unextractedTargetPages.contains(previousTargetPage));
 
                                         pair.putTargetPage(trgLocale, trgPage.getIdAsLong());
                                         pagesHash.put(srcPage.getIdAsLong(), pair);
@@ -830,28 +828,6 @@ public class EditorHelper implements EditorConstants
         }
 
         return false;
-    }
-
-    /**
-     * Returns a list of TU ids in the page that have not been deleted by GSA
-     * delete tags.
-     */
-    static public HashSet getInterpretedTuIds(EditorState p_state, Long p_srcPageId,
-            GlobalSightLocale p_locale) throws EnvoyServletException
-    {
-        try
-        {
-            return p_state.getEditorManager().getInterpretedTuIds(p_srcPageId.longValue(),
-                    p_locale);
-        }
-        catch (GeneralException e)
-        {
-            throw new EnvoyServletException(e);
-        }
-        catch (RemoteException e)
-        {
-            throw new EnvoyServletException(EnvoyServletException.EX_REMOTE, e);
-        }
     }
 
     /**
@@ -1831,13 +1807,6 @@ public class EditorHelper implements EditorConstants
         SourcePage sourcePage = targetPage.getSourcePage();
         long jobId = p_state.getJobId();
 
-        HashSet includedTuIds = null;
-        if (p_state.hasGsaTags())
-        {
-            includedTuIds = EditorHelper.getInterpretedTuIds(p_state, p_state.getSourcePageId(),
-                    p_state.getTargetLocale());
-        }
-
         // Fri Mar 11 23:43:29 2005 Flag whether to include subs.
         // Subs are included in list and text view, but not in
         // preview view unless the user has set the option.
@@ -1912,13 +1881,6 @@ public class EditorHelper implements EditorConstants
                 Tuv srcTuv = EditorHelper.getTuv(currentTuId, p_state.getSourceLocale(), jobId);
                 currentTuvId = currentTuv.getId();
                 currentSubId = 0;
-
-                // Look for the next tuv if this one is not contained
-                // in the GS-tagged page.
-                if (includedTuIds != null && !includedTuIds.contains(currentTuIdLong))
-                {
-                    continue;
-                }
 
                 // Mon Sep 13 19:52:22 2004 Skip merged TUVs.
                 String mergeState = currentTuv.getMergeState();
@@ -1998,13 +1960,6 @@ public class EditorHelper implements EditorConstants
         long currentTuvId = p_state.getTuvId();
         long currentSubId = p_state.getSubId();
         Vector excludedTypes = p_state.getExcludedItems();
-        HashSet includedTuIds = null;
-
-        if (p_state.hasGsaTags())
-        {
-            includedTuIds = EditorHelper.getInterpretedTuIds(p_state, p_state.getSourcePageId(),
-                    p_state.getTargetLocale());
-        }
 
         // Fri Mar 11 23:43:29 2005 Flag whether to include subs.
         // Subs are included in list and text view, but not in
@@ -2087,13 +2042,6 @@ public class EditorHelper implements EditorConstants
                 Tuv srcTuv = EditorHelper.getTuv(currentTuId, p_state.getSourceLocale(), jobId);
                 currentTuvId = currentTuv.getId();
                 currentSubId = 0;
-
-                // Look for the next tuv if this one is not contained
-                // in the GS-tagged page.
-                if (includedTuIds != null && !includedTuIds.contains(currentTuIdLong))
-                {
-                    continue;
-                }
 
                 // Mon Sep 13 19:52:22 2004 Skip merged TUVs.
                 String mergeState = currentTuv.getMergeState();

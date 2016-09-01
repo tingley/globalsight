@@ -232,9 +232,6 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         // When coming from job page, page is read/write .
         p_state.setReadOnly(false);
 
-        // N/A Snippets can not be edited.
-        p_state.setAllowEditSnippets(false);
-
         // Indicate that source page editor is in 'edit' mode.
         p_state.setEditorMode();
     }

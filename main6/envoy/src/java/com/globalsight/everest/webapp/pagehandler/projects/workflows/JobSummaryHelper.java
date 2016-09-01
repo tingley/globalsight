@@ -61,6 +61,7 @@ import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
@@ -543,12 +544,14 @@ public class JobSummaryHelper
             }
         }
 
-        session.setAttribute(JobSearchConstants.MRU_JOBS, newCookie.toString());
-        String value = newCookie.toString();
+        String value = ServletUtil.stripXss(newCookie.toString());
+        session.setAttribute(JobSearchConstants.MRU_JOBS, value);
         value = URLEncoder.encode(value);
         try
         {
-            response.addCookie(new Cookie(cookieName, value));
+            Cookie cookie = new Cookie(cookieName, value);
+            cookie.setHttpOnly(true);
+            response.addCookie(cookie);
         }
         catch (Exception e)
         {
@@ -589,14 +592,15 @@ public class JobSummaryHelper
                     break;
                 }
             }
-            session.setAttribute(JobSearchConstants.MRU_JOBS,
-                    newCookie.toString());
+            String value = ServletUtil.stripXss(newCookie.toString());
+            session.setAttribute(JobSearchConstants.MRU_JOBS, value);
 
-            String value = newCookie.toString();
             value = URLEncoder.encode(value);
             try
             {
-                response.addCookie(new Cookie(cookieName, value));
+                Cookie cookie = new Cookie(cookieName, value);
+                cookie.setHttpOnly(true);
+                response.addCookie(cookie);
             }
             catch (Exception e)
             {

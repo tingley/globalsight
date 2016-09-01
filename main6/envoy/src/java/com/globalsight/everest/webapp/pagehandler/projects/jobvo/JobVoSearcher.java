@@ -44,6 +44,7 @@ import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
@@ -347,8 +348,9 @@ public abstract class JobVoSearcher implements WebAppConstants
 
             // status
             List<String> list = new ArrayList<String>();
-            String status = (String) request
-                    .getParameter(JobSearchConstants.STATUS_OPTIONS);
+            // Vincent 2016/09/01, If "sto" is not included in data, old codes
+            // throw NullPointerException
+            String status = ServletUtil.getValue(request, JobSearchConstants.STATUS_OPTIONS);
             if (status.equals(Job.ALLSTATUS))
             {
                 list.addAll(Job.ALLSTATUSLIST);

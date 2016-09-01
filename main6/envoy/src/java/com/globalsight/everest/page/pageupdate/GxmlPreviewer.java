@@ -25,7 +25,6 @@ import com.globalsight.diplomat.util.Logger;
 import com.globalsight.everest.edit.online.UIConstants;
 import com.globalsight.everest.page.PageTemplate;
 import com.globalsight.everest.page.RenderingOptions;
-import com.globalsight.everest.page.SnippetPageTemplate;
 import com.globalsight.everest.page.pageimport.TemplateGenerator;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tu;
@@ -84,13 +83,11 @@ public class GxmlPreviewer
     // Public Methods
     //
 
-    public String getGxmlPreview()
-        throws Exception
+    public String getGxmlPreview() throws Exception
     {
         int counter = s_counter++;
 
-        Logger.writeDebugFile("previewGxml-" +
-            String.valueOf(counter) + ".xml", m_gxml);
+        Logger.writeDebugFile("previewGxml-" + String.valueOf(counter) + ".xml", m_gxml);
 
         try
         {
@@ -109,12 +106,6 @@ public class GxmlPreviewer
             createTUs(root, m_locale, tus, tuvs);
 
             PageTemplate template = generateExportTemplate(root, tus);
-
-            // This preview only makes sense if there are snippets (:
-            if (containGsTags(root))
-            {
-                template = new SnippetPageTemplate(template, m_localeString);
-            }
 
             for (int i = 0, max = tuvs.size(); i < max; i++)
             {
@@ -459,17 +450,6 @@ public class GxmlPreviewer
         DiplomatAPI api = getDiplomatApi();
         // Do not keep GS tags.
         return api.merge(p_gxml, false);
-    }
-
-    /**
-     * Return true if the page (Gxml) contains at least one GS tag.
-     */
-    private boolean containGsTags(GxmlRootElement p_root)
-    {
-        int gsTag[] = { GxmlElement.GS};
-        List tagElements = p_root.getChildElements(gsTag);
-
-        return (tagElements.size() > 0);
     }
 
     private DiplomatAPI getDiplomatApi()

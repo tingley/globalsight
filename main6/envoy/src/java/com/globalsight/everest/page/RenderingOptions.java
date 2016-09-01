@@ -19,11 +19,7 @@ package com.globalsight.everest.page;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.edit.online.UIConstants;
 import com.globalsight.everest.permission.PermissionSet;
-import com.globalsight.everest.permission.Permission;
-import java.util.Vector;
-import java.util.Iterator;
 
 /**
  * Specifies the various options for rendering a page.
@@ -31,20 +27,12 @@ import java.util.Iterator;
  */
 public class RenderingOptions
 {
-    // private variables
+    private static final Logger s_logger = Logger.getLogger(RenderingOptions.class);
 
     // --- see com.globalsight.everest.edit.online.UIConstants for the various modes
     private int m_uiMode = 0;   //
     private int m_viewMode = 0; // Preview, Text, Detail,
     private int m_editMode = 0; // Read only or R/W
-
-
-    private boolean m_addSnippets = false;
-    private boolean m_editSnippets = false; //this is everything else but add
-
-    private static final Logger s_logger =
-        Logger.getLogger(
-            RenderingOptions.class);
 
     /**
      * Default constructor
@@ -66,30 +54,11 @@ public class RenderingOptions
      * Constructor that sets up the correct ui mode, view mode, edit mode
      * and sets up the other attributes according to the access group.
      */
-    public RenderingOptions(int p_uiMode, int p_viewMode, int p_editMode,
-                            PermissionSet p_permSet)
+    public RenderingOptions(int p_uiMode, int p_viewMode, int p_editMode, PermissionSet p_permSet)
     {
         m_uiMode = p_uiMode;
         m_viewMode = p_viewMode;
         m_editMode = p_editMode;
-
-        if (p_permSet !=null)
-        {
-            if (p_permSet.getPermissionFor(Permission.SNIPPET_ADD)==true)
-                m_addSnippets = true;
-            if (p_permSet.getPermissionFor(Permission.SNIPPET_EDIT)==true)
-                m_editSnippets = true;
-        }
-    }
-
-    public boolean canEditSnippets()
-    {
-        return m_editSnippets;
-    }
-
-    public boolean canAddSnippets()
-    {
-        return m_addSnippets;
     }
 
     public int getViewMode()

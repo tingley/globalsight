@@ -21,7 +21,6 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Vector;
 
@@ -178,13 +177,6 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
     {
         m_localReference.createImageMap(p_trgPageId, p_tuvId, p_subId,
                 p_tempName, p_realName);
-    }
-
-    public HashSet getInterpretedTuIds(long p_srcPageId,
-            GlobalSightLocale p_locale) throws OnlineEditorException,
-            RemoteException
-    {
-        return m_localReference.getInterpretedTuIds(p_srcPageId, p_locale);
     }
 
     public void invalidateCache() throws OnlineEditorException, RemoteException

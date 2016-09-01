@@ -37,6 +37,7 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.usermgr.UserManagerWLRemote;
 import com.globalsight.everest.util.netegrity.Netegrity;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -106,7 +107,7 @@ public class RetrieveUsernamesPassHandler extends PageHandler
             {
                 Cookie cookie = cookies[i];
                 if ("localelang".equals(cookie.getName()))
-                    cookieUiLocale = cookie.getValue();
+                    cookieUiLocale = ServletUtil.stripXss(cookie.getValue());
             }
         }
         if (supportedLocales != null && !Arrays.asList(supportedLocales).contains(cookieUiLocale))

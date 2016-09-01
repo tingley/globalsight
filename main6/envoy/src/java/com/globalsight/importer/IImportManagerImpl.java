@@ -69,20 +69,8 @@ public abstract class IImportManagerImpl
         m_options = createImportOptions();
     }
 
-    // For snippet import, session is irrelevant.
-    protected IImportManagerImpl(String p_filename, String p_options)
-        throws ImporterException
-    {
-        m_filename = p_filename;
-        m_options = createImportOptions(p_options);
-        m_options.setFileName(m_filename);
-
-        m_reader = createReader(m_options);
-    }
-
-    protected IImportManagerImpl(String p_filename, String p_options,
-        SessionInfo p_session)
-        throws ImporterException
+    protected IImportManagerImpl(String p_filename, String p_options, SessionInfo p_session)
+            throws ImporterException
     {
         m_session = p_session;
         m_filename = p_filename;

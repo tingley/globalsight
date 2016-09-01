@@ -39,6 +39,7 @@ import com.globalsight.everest.securitymgr.SecurityManagerException;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.AppletDirectory;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.usermgr.LoggedUser;
 import com.globalsight.everest.usermgr.UserInfo;
@@ -428,8 +429,11 @@ public class InContextReviewHelper implements WebAppConstants
                 {
                     try
                     {
+                        // Vincent Yan, 2016/09/01, Add invaild character
+                        // checking to ignore the attack codes
+                        // which are stored or changed in cookie setting
                         p_session.setAttribute(p_sessionConstant,
-                                URLDecoder.decode(cookie.getValue()));
+                                URLDecoder.decode(ServletUtil.stripXss(cookie.getValue())));
                     }
                     catch (Exception e)
                     {

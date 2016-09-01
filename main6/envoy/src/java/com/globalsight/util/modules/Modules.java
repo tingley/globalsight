@@ -51,7 +51,7 @@ public class Modules
 
     private static boolean s_ms_doc, s_ms_ppt, s_ms_xls = false;
 
-    private static boolean s_costing, s_reports, s_snippets = false;
+    private static boolean s_costing, s_reports = false;
 
     private static boolean s_l10nWebService, s_vmWebService = false;
 
@@ -85,8 +85,6 @@ public class Modules
                     .getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED);
             s_reports = sc
                     .getBooleanParameter(SystemConfigParamNames.REPORTS_ENABLED);
-            s_snippets = sc
-                    .getBooleanParameter(SystemConfigParamNames.ADD_DELETE_ENABLED);
             s_vendorMgmt = VendorManagementLocal.isInstalled();
             s_l10nWebService = Ambassador.isInstalled();
             s_vmWebService = s_vendorMgmt && s_l10nWebService;
@@ -213,16 +211,6 @@ public class Modules
     public static boolean isReportsInstalled()
     {
         return s_reports;
-    }
-
-    /**
-     * Returns true if Snippets (Add/Delete) is installed
-     * 
-     * @return true | false
-     */
-    public static boolean isSnippetsInstalled()
-    {
-        return s_snippets;
     }
 
     /**

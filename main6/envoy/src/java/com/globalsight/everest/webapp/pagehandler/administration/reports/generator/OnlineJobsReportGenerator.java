@@ -1328,11 +1328,6 @@ public class OnlineJobsReportGenerator implements ReportGenerator
                 cell_NoMatch.setCellStyle(temp_normalStyle);
                 p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
                 
-                Cell cell_mtMatch = getCell(theRow, col++);
-                cell_mtMatch.setCellValue(data.mtTotalWordCount);
-                cell_mtMatch.setCellStyle(temp_normalStyle);
-                p_sheets[MONTH_SHEET].setColumnWidth(col - 1, numwidth * 256);
-
                 Cell cell_TotalWordCount = getCell(theRow, col++);
                 cell_TotalWordCount.setCellValue(data.totalWordCount);
                 cell_TotalWordCount.setCellStyle(temp_normalStyle);
@@ -2387,12 +2382,12 @@ public class OnlineJobsReportGenerator implements ReportGenerator
             cell_H.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
             cell_H.setCellStyle(getSubTotalStyle(p_workbook));
             sumStartCol = getColumnName(c);
+            
+            Cell cell_MT = getCell(theRow, c++);
+            cell_MT.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
+            cell_MT.setCellStyle(getSubTotalStyle(p_workbook));
+            sumStartCol = getColumnName(c);
         }
-        
-        Cell cell_MT = getCell(theRow, c++);
-        cell_MT.setCellFormula("SUM(" + sumStartCol + "5:" + sumStartCol + lastRow + ")");
-        cell_MT.setCellStyle(getSubTotalStyle(p_workbook));
-        sumStartCol = getColumnName(c);
         
         if (m_data.useInContext)
         {

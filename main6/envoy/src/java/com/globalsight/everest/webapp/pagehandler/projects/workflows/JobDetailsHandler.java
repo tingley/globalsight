@@ -96,6 +96,7 @@ import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.statistics.StatisticsService;
 import com.globalsight.everest.taskmanager.Task;
@@ -2659,12 +2660,15 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
             }
         }
 
-        session.setAttribute(JobSearchConstants.MRU_JOBS, newCookie.toString());
-        String value = newCookie.toString();
+        String value = ServletUtil.stripXss(newCookie.toString());
+
+        session.setAttribute(JobSearchConstants.MRU_JOBS, value);
         value = URLEncoder.encode(value);
         try
         {
-            response.addCookie(new Cookie(cookieName, value));
+            Cookie cookie = new Cookie(cookieName, value);
+            cookie.setHttpOnly(true);
+            response.addCookie(cookie);
         }
         catch (Exception e)
         {
@@ -2686,7 +2690,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                 Cookie cookie = cookies[i];
                 if (cookie.getName().equals(cookieName))
                 {
-                    String mruJobStr = cookie.getValue();
+                    String mruJobStr = ServletUtil.stripXss(cookie.getValue());
                     mruJobStr = URLDecoder.decode(mruJobStr);
                     StringTokenizer st = new StringTokenizer(mruJobStr, "|");
                     while (st.hasMoreTokens())

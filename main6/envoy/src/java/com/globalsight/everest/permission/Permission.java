@@ -162,7 +162,6 @@ public class Permission
     static public final String SUPPORT_FILES_VIEW = "supportfiles.view";
     static public final String SUPPORT_FILES_REMOVE = "supportfiles.remove";
     static public final String SUPPORT_FILES_UPLOAD = "supportfiles.upload";
-    static public final String SNIPPET_IMPORT = "snippet.import";
     static public final String SYSTEM_PARAMS = "system.parameters";
     static public final String FILE_PROFILES_VIEW = "fileprofiles.view";
     static public final String FILE_PROFILES_REMOVE = "fileprofiles.remove";
@@ -187,8 +186,6 @@ public class Permission
     static public final String SGMLRULE_EDIT = "sgmlrule.edit";
     static public final String IMPORT = "import";
     static public final String SERVICEWARE_IMPORT = "serviceware.import";
-    static public final String SNIPPET_ADD = "snippet.add";
-    static public final String SNIPPET_EDIT = "snippet.edit";
     static public final String DATABASE_INTEGRATION = "database.integration";
     static public final String EXPORT_LOC_VIEW = "exportloc.view";
     static public final String EXPORT_LOC_REMOVE = "exportloc.remove";
@@ -303,7 +300,6 @@ public class Permission
     static public final String ACTIVITIES_COMMENTS_JOB = "activities.comments.jobComments";
     static public final String ACTIVITIES_SUMMARY_STATISTICS = "activities.summaryStatistics";
     static public final String ACTIVITIES_SECONDARYTARGETFILE = "activities.secondaryTargetFile";
-    static public final String ACTIVITIES_CROWDSIGHT = "activities.crowdsight";
     static public final String ACTIVITIES_TM_SEARCH = "activities.tm.search";
     static public final String ACTIVITIES_TB_SEARCH = "activities.tb.search";
     static public final String REPORTS_MAIN = "reports.main";
@@ -635,7 +631,6 @@ public class Permission
         added = addPermission(81, LOCPROFILES_DUP) || added;
         added = addPermission(82, LOCPROFILES_EDIT) || added;
         added = addPermission(83, LOCPROFILES_NEW) || added;
-        added = addPermission(84, SNIPPET_IMPORT) || added;
         added = addPermission(85, SYSTEM_PARAMS) || added;
         added = addPermission(86, SUPPORT_FILES_VIEW) || added;
         added = addPermission(87, SUPPORT_FILES_REMOVE) || added;
@@ -657,8 +652,6 @@ public class Permission
         added = addPermission(103, SGMLRULE_EDIT) || added;
         added = addPermission(104, IMPORT) || added;
         added = addPermission(105, SERVICEWARE_IMPORT) || added;
-        added = addPermission(106, SNIPPET_ADD) || added;
-        added = addPermission(107, SNIPPET_EDIT) || added;
         added = addPermission(116, DATABASE_INTEGRATION) || added;
         added = addPermission(117, EXPORT_LOC_VIEW) || added;
         added = addPermission(118, EXPORT_LOC_REMOVE) || added;
@@ -872,8 +865,6 @@ public class Permission
         added = addPermission(293, FILTER_CONFIGURATION_REMOVE_FILTERS) || added;
         added = addPermission(294, FILTER_CONFIGURATION_ADD_FILTER) || added;
         added = addPermission(295, FILTER_CONFIGURATION_EDIT_FILTER) || added;
-
-        // added = addPermission(ACTIVITIES_CROWDSIGHT) || added;
 
         // XML DTD
         added = addPermission(296, XMLDTD_VIEW) || added;

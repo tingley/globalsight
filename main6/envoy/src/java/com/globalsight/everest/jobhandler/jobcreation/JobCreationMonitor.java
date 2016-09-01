@@ -18,6 +18,7 @@ package com.globalsight.everest.jobhandler.jobcreation;
 
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -254,9 +255,8 @@ public class JobCreationMonitor
     {
         try
         {
-            // Filter duplicated updating to job state
-            String sql = "SELECT state FROM job WHERE id = " + job.getId();
-            String stateInDb = (String) HibernateUtil.getFirstWithSql(sql);
+            // Filter duplicated updating to same state
+            String stateInDb = getJobStateInDb(job.getId());
             if (state == null || state.equalsIgnoreCase(stateInDb))
             {
                 return;
@@ -280,6 +280,22 @@ public class JobCreationMonitor
                     JobCreationException.MSG_FAILED_TO_UPDATE_JOB_STATE, args,
                     e);
         }
+    }
+
+    /**
+     * Get the real time job state.
+     */
+    @SuppressWarnings("unchecked")
+    private static String getJobStateInDb(long jobId) throws Exception
+    {
+        String sql = "SELECT state FROM job WHERE id = " + jobId;
+        List<String> states = DbUtil.queryForSingleColumn(sql, null);
+        if (states != null && states.size() > 0)
+        {
+            return states.get(0);
+        }
+
+        return null;
     }
 
     /**

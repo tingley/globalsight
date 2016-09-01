@@ -947,25 +947,33 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
     private String getDisplayState(Workflow workflow, ResourceBundle bundle)
     {
         String displayState = bundle.getString(workflow.getState());
+        String tmUpdatingMsg = bundle.getString("lb_exported_tm_updating");
+        int populatingTmTrgPageNum = HibernateUtil.countWithSql(
+                getTmUpdatingTargetPageSql(workflow.getId()), null);
 
-        int populatingTmTrgPageNum = getTmUpdatingTargetPageCount(workflow.getId());
+        return getDisplayState2(workflow.getState(), displayState, tmUpdatingMsg,
+                populatingTmTrgPageNum);
+    }
+
+    private String getDisplayState2(String wfState, String displayState, String tmUpdatingMsg,
+            int populatingTmTrgPageNum)
+    {
         // There are target pages which are populating TM...
-        if (Workflow.EXPORTED.equals(workflow.getState()) && populatingTmTrgPageNum > 0)
+        if (Workflow.EXPORTED.equals(wfState) && populatingTmTrgPageNum > 0)
         {
-            displayState += " " + bundle.getString("lb_exported_tm_updating");
+            displayState += " " + tmUpdatingMsg;
         }
         return displayState;
     }
 
-    private int getTmUpdatingTargetPageCount(long wfId)
+    private String getTmUpdatingTargetPageSql(long wfId)
     {
         StringBuffer sql = new StringBuffer();
         sql.append("SELECT COUNT(*) FROM target_page");
         sql.append(" WHERE WORKFLOW_IFLOW_INSTANCE_ID = ").append(wfId);
         sql.append(" AND state = 'EXPORTED'");
         sql.append(" AND EXPORTED_SUB_STATE = ").append(TargetPage.EXPORTED_TM_UPDATING);
-
-        return HibernateUtil.countWithSql(sql.toString(), null);
+        return sql.toString();
     }
 
     private void setJobWorkflowDisplayEstimaedTimestamp(PermissionSet perms, Locale uiLocale,

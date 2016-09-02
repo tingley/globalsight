@@ -943,6 +943,7 @@ public class JobResource extends RestResource
                             files.add(file);
                             afterTargetLocales.add(vTargetLocale);
                         }
+                        break;
                     }
                 }
             }

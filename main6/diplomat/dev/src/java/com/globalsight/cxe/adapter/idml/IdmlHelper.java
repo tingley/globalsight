@@ -126,7 +126,6 @@ public class IdmlHelper
     /**
      * Just for junit test
      * 
-     * @deprecated
      */
     public IdmlHelper()
     {

@@ -6,7 +6,7 @@ This tells how to run all junit test cases in one run and generate report.
 
 #2. In "main6\tools\build" folder in command line, run "ant write-run-classpath".
 
-    This will generate "run.classpath.bat|run.classpath.sh" files which are from "build.properties" file "classpath".
+    This will generate "run.classpath.bat|run.classpath.sh" files which are from "build.properties" file "classpath" and "junit.classpath.properties".
 
 #3. Copy "user.build.properties.sample" file in same folder and rename it to "user.build.properties", change the "gs.home" to your real server path.
 

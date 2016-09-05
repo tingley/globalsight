@@ -67,11 +67,10 @@ public class XliffTuCreationTest
                         xliffpart, seg2, lg, p_tuList, p_sourceLocale, 1000);
         assertTrue(!flag);
         assertTrue(tu.getXliffTarget().trim().equals(""));
-        assertTrue(tu.getXliffTargetLanguage().equals("fr_fr"));
-        assertTrue(tu.getGenerateFrom().equals("worldserver"));
-        assertTrue(tu.getPassoloState().equals("ready"));
-        
-        
+        assertTrue("fr_fr".equals(tu.getXliffTargetLanguage()));
+        assertTrue("worldserver".equals(tu.getGenerateFrom()));
+        assertTrue("ready".equals(tu.getPassoloState()));
+
         xliffpart = "altSource";
         
         flag = tucreation.transProcess(p_request, 

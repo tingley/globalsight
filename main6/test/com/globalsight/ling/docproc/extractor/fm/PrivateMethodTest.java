@@ -32,9 +32,9 @@ public class PrivateMethodTest
     public void testReplaceSpecialCharactor() throws Exception
     {
         Method method = extractor.getClass().getDeclaredMethod(
-                "replaceSpecialCharactor", String.class);
+                "replaceSpecialCharactor", String.class, boolean.class);
         method.setAccessible(true);
-        Object resultObject = method.invoke(extractor, aString);
+        Object resultObject = method.invoke(extractor, aString, false);
         Assert.assertEquals(resultObject, aResultString);
     }
     

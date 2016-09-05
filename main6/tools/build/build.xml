@@ -3,6 +3,7 @@
 	<!-- optional user-specified properties, eg gs.home -->
 	<property file="user.build.properties" />
 	<loadproperties srcFile="build.properties" />
+	<loadproperties srcFile="junit.classpath.properties" />
 
 	<tstamp />
 
@@ -381,6 +382,8 @@
 	<property name="gs.home" value="gshome" />
 	<path id="runwithinstall.classpath">
 		<path refid="run.classpath" />
+		<!-- Junit required extra jars are from "junit.classpath.properties" file. -->
+		<pathelement path="${junit_classpath}" />
 		<pathelement location="${gs.home}/lib/classes" />
 	</path>
 

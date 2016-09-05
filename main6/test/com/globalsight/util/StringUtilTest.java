@@ -41,28 +41,28 @@ public class StringUtilTest
     public void testFormatPCT()
     {
         String result = StringUtil.formatPCT(new Float(0.0));
-        assertEquals("0.00%", result);
+        assertEquals("0%", result);
 
         result = StringUtil.formatPCT(new Float(100));
-        assertEquals("100.00%", result);
+        assertEquals("100%", result);
         
         result = StringUtil.formatPCT(new Float(100.00));
-        assertEquals("100.00%", result);
+        assertEquals("100%", result);
         
         result = StringUtil.formatPCT(new Float(-1));
-        assertEquals("-1.00%", result);
+        assertEquals("-1%", result);
         
         result = StringUtil.formatPCT(new Float(123.005f));
-        assertEquals("123.00%", result);
+        assertEquals("123%", result);
 
         result = StringUtil.formatPCT(new Float(123.015f));
-        assertEquals("123.01%", result);
+        assertEquals("123%", result);
         
         result = StringUtil.formatPCT(new Float(85.28f));
-        assertEquals("85.28%", result);
+        assertEquals("85%", result);
         
         result = StringUtil.formatPCT(new Float(85.20f));
-        assertEquals("85.20%", result);
+        assertEquals("85%", result);
     }
 
     @Test

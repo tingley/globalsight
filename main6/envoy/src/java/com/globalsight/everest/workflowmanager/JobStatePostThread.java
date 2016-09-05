@@ -17,6 +17,7 @@
 package com.globalsight.everest.workflowmanager;
 
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
@@ -58,6 +59,7 @@ public class JobStatePostThread extends Thread implements Runnable
     private Job job;
     private String previousState;
     private String currentState;
+    private static ConcurrentHashMap<String, String> jobStateInfo = new ConcurrentHashMap<String, String>();
 
     public JobStatePostThread(Job job, String previousState, String currentState)
     {
@@ -76,32 +78,41 @@ public class JobStatePostThread extends Thread implements Runnable
     private synchronized void jobStatePost(Job job, String previousState, String currentState)
     {
         long jobId = job.getJobId();
-        try
+        if (jobStateInfo.values().contains(currentState))
         {
-            s_logger.info("Begin to post job state transition info for job: " + jobId);
-            JSONObject jsonObj = new JSONObject();
-            jsonObj.put("jobId", jobId);
-            jsonObj.put("jobName", job.getJobName());
-            jsonObj.put("previousState", previousState);
-            jsonObj.put("currentState", currentState);
-            s_logger.info("job transition post info: " + jsonObj);
-
-            L10nProfile l10nProfile = job.getL10nProfile();
-            long wfStatePostId = l10nProfile.getWfStatePostId();
-            WorkflowStatePosts wfStatePost = ServerProxy.getProjectHandler()
-                    .getWfStatePostProfile(wfStatePostId);
-
-            doPost(wfStatePost, jsonObj);
+            return;
         }
-        catch (Exception e)
+        else
         {
-            s_logger.error("jobStatePost error:", e);
-        }
-        finally
-        {
-            shutdownHttpClient();
-            HibernateUtil.closeSession();
-            s_logger.info("End to post job state transition info for job: " + jobId);
+            try
+            {
+                s_logger.info("Begin to post job state transition info for job: " + jobId);
+                JSONObject jsonObj = new JSONObject();
+                jsonObj.put("jobId", jobId);
+                jsonObj.put("jobName", job.getJobName());
+                jsonObj.put("previousState", previousState);
+                jsonObj.put("currentState", currentState);
+                s_logger.info("job transition post info: " + jsonObj);
+                jobStateInfo.put(previousState, currentState);
+
+                System.out.println(jobStateInfo.keys().nextElement());
+                L10nProfile l10nProfile = job.getL10nProfile();
+                long wfStatePostId = l10nProfile.getWfStatePostId();
+                WorkflowStatePosts wfStatePost = ServerProxy.getProjectHandler()
+                        .getWfStatePostProfile(wfStatePostId);
+
+                doPost(wfStatePost, jsonObj);
+            }
+            catch (Exception e)
+            {
+                s_logger.error("jobStatePost error:", e);
+            }
+            finally
+            {
+                shutdownHttpClient();
+                HibernateUtil.closeSession();
+                s_logger.info("End to post job state transition info for job: " + jobId);
+            }
         }
     }
 

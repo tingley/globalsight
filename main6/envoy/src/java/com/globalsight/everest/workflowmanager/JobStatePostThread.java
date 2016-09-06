@@ -95,7 +95,6 @@ public class JobStatePostThread extends Thread implements Runnable
                 s_logger.info("job transition post info: " + jsonObj);
                 jobStateInfo.put(previousState, currentState);
 
-                System.out.println(jobStateInfo.keys().nextElement());
                 L10nProfile l10nProfile = job.getL10nProfile();
                 long wfStatePostId = l10nProfile.getWfStatePostId();
                 WorkflowStatePosts wfStatePost = ServerProxy.getProjectHandler()

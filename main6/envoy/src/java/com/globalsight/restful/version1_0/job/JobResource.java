@@ -50,6 +50,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -112,6 +113,8 @@ import com.globalsight.webservices.attribute.AttributeUtil;
 import com.globalsight.webservices.attribute.Attributes;
 import com.globalsight.webservices.attribute.JobAttributeVo;
 import com.globalsight.webservices.vo.JobFiles;
+
+import de.innosystec.unrar.rarfile.FileHeader;
 
 @Path("/1.0/companies/{companyID}/jobs")
 public class JobResource extends RestResource
@@ -870,7 +873,18 @@ public class JobResource extends RestResource
                 File zipFile = new File(zipFilename);
                 if (isSupportedZipFileFormat(zipFile) && isUnCompress(zipFile))
                 {
-                    addUploadFile(realUploadFileList,extensionList,zipFile);
+                    if (CreateJobUtil.isZipFile(zipFile))
+                    {
+                       addZipFile(realUploadFileList,extensionList,zipFile);
+                    }
+                    else if (CreateJobUtil.isRarFile(zipFile))
+                    {
+                        addRarFile(realUploadFileList,extensionList,zipFile);
+                    }
+                    else if (CreateJobUtil.is7zFile(zipFile))
+                    {
+                       addZip7zFile(realUploadFileList,extensionList,zipFile);
+                    }
                 }
             }
             Company company = ServerProxy.getJobHandler().getCompanyById(
@@ -886,7 +900,7 @@ public class JobResource extends RestResource
                 if (!fileProfileListOfCompany.contains(checkFp))
                 {
                     String message = "Current file profile id: " + id
-                            + " is not corresponds the upload files.";
+                            + " does not correspond with uploaded files.";
                     throw new RestWebServiceException(message);
                 }
                 realFileProfiles.add(checkFp);
@@ -1971,21 +1985,14 @@ public class JobResource extends RestResource
         {
             if (isZipFileCreateJob)
             {
+                String locales = "";
                 for (String tLocale : p_targetLocales.split(","))
                 {
-                    if (tLocale.trim().equals("*"))
-                    {
-                        targetLocales.add(" ");
-                        break;
-                    }
-                    else
-                    {
-                        String locales = tLocale.trim() + ",";
-                        if (locales != "" && locales.endsWith(","))
-                        {
-                            targetLocales.add(locales.substring(0, locales.lastIndexOf(",")));
-                        }
-                    }
+                    locales += tLocale.trim() + ",";
+                }
+                if (locales != "" && locales.endsWith(","))
+                {
+                    targetLocales.add(locales.substring(0, locales.lastIndexOf(",")));
                 }
             }
             else
@@ -2295,7 +2302,7 @@ public class JobResource extends RestResource
         return result;
     }
     
-    private void addUploadFile(List<String> realUploadFileList, List<String> extensionList,
+    private void addZipFile(List<String> realUploadFileList, List<String> extensionList,
             File zipFile) throws Exception
     {
         String zipFileFullPath = zipFile.getPath();
@@ -2310,13 +2317,72 @@ public class JobResource extends RestResource
             String zipEntryName = entry.getFileName();
             String fileExtension = zipEntryName.substring(zipEntryName.lastIndexOf(".") + 1);
             extensionList.add(fileExtension);
-            /*
-             * The unzipped files are in folders named by the zip file name
-             */
             String unzippedFileFullPath = zipFilePath
                     + zipFile.getName().substring(0, zipFile.getName().lastIndexOf(".")) + "_"
                     + CreateJobUtil.getFileExtension(zipFile) + File.separator + zipEntryName;
             realUploadFileList.add(unzippedFileFullPath);
         }
     }
+
+    private void addRarFile(List<String> realUploadFileList, List<String> extensionList,
+            File rarFile) throws Exception
+    {
+        String rarEntryName = null;
+        String rarFileFullPath = rarFile.getPath();
+        String rarFilePath = rarFileFullPath.substring(0,
+                rarFileFullPath.indexOf(rarFile.getName()));
+
+        List<FileHeader> entriesInRar = CreateJobUtil.getFilesInRarFile(rarFile);
+
+        StringBuffer ret = new StringBuffer("");
+        for (FileHeader header : entriesInRar)
+        {
+            if (ret.length() > 0)
+            {
+                ret.append(",");
+            }
+            if (header.isUnicode())
+            {
+                rarEntryName = header.getFileNameW();
+            }
+            else
+            {
+                rarEntryName = header.getFileNameString();
+            }
+            
+            String fileExtension = rarEntryName.substring(rarEntryName.lastIndexOf(".") + 1);
+            extensionList.add(fileExtension);
+            String unzippedFileFullPath = rarFilePath
+                    + rarFile.getName().substring(0, rarFile.getName().lastIndexOf(".")) + "_"
+                    + CreateJobUtil.getFileExtension(rarFile) + File.separator + rarEntryName;
+            realUploadFileList.add(unzippedFileFullPath);
+        }
+    }
+
+    private void addZip7zFile(List<String> realUploadFileList, List<String> extensionList,
+            File zip7zFile) throws Exception
+    {
+        String zip7zFileFullPath = zip7zFile.getPath();
+        String zip7zFilePath = zip7zFileFullPath.substring(0,
+                zip7zFileFullPath.indexOf(zip7zFile.getName()));
+
+        List<SevenZArchiveEntry> entriesInZip7z = CreateJobUtil.getFilesIn7zFile(zip7zFile);
+
+        StringBuffer ret = new StringBuffer("");
+        for (SevenZArchiveEntry item : entriesInZip7z)
+        {
+            if (ret.length() > 0)
+            {
+                ret.append(",");
+            }
+            String zip7zEntryName = item.getName();
+            String fileExtension = zip7zEntryName.substring(zip7zEntryName.lastIndexOf(".") + 1);
+            extensionList.add(fileExtension);
+            String unzippedFileFullPath = zip7zFilePath
+                    + zip7zFile.getName().substring(0, zip7zFile.getName().lastIndexOf(".")) + "_"
+                    + CreateJobUtil.getFileExtension(zip7zFile) + File.separator + zip7zEntryName;
+            realUploadFileList.add(unzippedFileFullPath);
+        }
+    }
+    
 }

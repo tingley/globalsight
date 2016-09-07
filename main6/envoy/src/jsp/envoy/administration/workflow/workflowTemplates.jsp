@@ -300,7 +300,7 @@ function filterSelectItems(e) {
 				%>
       </amb:column>
       <amb:column label="lb_description" sortBy="<%=WorkflowTemplateInfoComparator.DESCRIPTION%>" width="15%">
-          <%=(wft.getDescription() == null ? "" : wft.getDescription())%>
+          <%=(wft.getDescription() == null ? "" : EditUtil.encodeHtmlEntities(wft.getDescription()))%>
       </amb:column>
       <amb:column label="lb_source_locale" sortBy="<%=WorkflowTemplateInfoComparator.SOURCE_LOCALE%>" filter="srcLocale" filterValue="<%=srcLocaleFilter%>" width="15%">
           <%=wft.getSourceLocale().getDisplayName(uiLocale)%>

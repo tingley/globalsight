@@ -498,7 +498,7 @@ function searchTerms(){
                 <% } %>
             </amb:column>       
             <amb:column label="lb_description" sortBy="<%=TermbaseInfoComparator.DESC%>">
-                <%=tb.getDescription()%>
+                <%=EditUtil.encodeHtmlEntities(tb.getDescription())%>
             </amb:column>
             <% if (isSuperAdmin) { %>
             <amb:column label="lb_company_name" sortBy="<%=TermbaseInfoComparator.ASC_COMPANY%>" filter="tbCompanyFilter" filterValue="<%=tbCompanyFilter%>">

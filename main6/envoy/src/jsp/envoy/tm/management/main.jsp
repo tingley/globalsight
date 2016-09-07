@@ -488,7 +488,7 @@ function filterItems(e) {
       </amb:column>
       <amb:column label="lb_name" sortBy="<%=ProjectTMComparator.NAME%>" filter="tmNameFilter" filterValue="<%=tmNameFilter %>" width="10%">
 	    <%
-		tmName = tm.getName();
+		tmName = EditUtil.encodeHtmlEntities(tm.getName());
 		if (userPermissions.getPermissionFor(Permission.TM_EDIT) && !isSuperAdmin)
 		  out.print("<a href='javascript:void(0)' title='Edit translation memory' onclick='modifyTM(" + tm.getId() + ");'>" + tmName + "</a>");
 		else
@@ -496,13 +496,13 @@ function filterItems(e) {
 		%>
       </amb:column>
       <amb:column label="lb_description" sortBy="<%=ProjectTMComparator.DESC%>" width="40%">
-      <% out.print(tm.getDescription() == null ? "" : tm.getDescription()); %>
+      <% out.print(tm.getDescription() == null ? "" : EditUtil.encodeHtmlEntities(tm.getDescription())); %>
       </amb:column>
       <amb:column label="lb_domain" sortBy="<%=ProjectTMComparator.DOMAIN%>" width="10%">
-      <% out.print(tm.getDomain() == null ? "" : tm.getDomain()); %>
+      <% out.print(tm.getDomain() == null ? "" : EditUtil.encodeHtmlEntities(tm.getDomain())); %>
       </amb:column>
       <amb:column label="lb_organization" sortBy="<%=ProjectTMComparator.ORG%>" width="10%">
-      <% out.print(tm.getOrganization() == null ? "" : tm.getOrganization()); %>
+      <% out.print(tm.getOrganization() == null ? "" : EditUtil.encodeHtmlEntities(tm.getOrganization())); %>
       </amb:column>
       <% if (isSuperAdmin) { %>
       <amb:column label="lb_company_name" sortBy="<%=ProjectTMComparator.ASC_COMPANY%>" filter="tmCompanyFilter" filterValue="<%=tmCompanyFilter %>" width="10%">

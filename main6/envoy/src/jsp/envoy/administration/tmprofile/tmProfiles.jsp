@@ -251,7 +251,7 @@ function filterItems(e)
             %>
             </amb:column>
             <amb:column label="lb_description" sortBy="<%=TMProfileComparator.DESCRIPTION%>" width="14%">
-                <% out.print(tmProfile.getDescription() == null ? "" : tmProfile.getDescription()); %>
+                <% out.print(tmProfile.getDescription() == null ? "" : EditUtil.encodeHtmlEntities(tmProfile.getDescription())); %>
             </amb:column>
             <amb:column label="lb_srx" sortBy="<%=TMProfileComparator.SRX%>" width="11%">
                 <%

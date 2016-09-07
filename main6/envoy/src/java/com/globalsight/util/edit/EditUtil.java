@@ -89,6 +89,7 @@ public final class EditUtil
         h.put(new Character('\n'), "\\n");
         h.put(new Character('\r'), "\\r");
         h.put(new Character('\t'), "\\t");
+        h.put(new Character('/'), "\\/");
         return h;
     }
 

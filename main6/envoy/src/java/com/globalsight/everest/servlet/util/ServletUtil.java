@@ -23,13 +23,13 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
+
 import jodd.util.HtmlDecoder;
 import jodd.util.HtmlEncoder;
 import jodd.util.StringUtil;
 import jodd.util.URLCoder;
 import jodd.util.URLDecoder;
-
-import org.apache.log4j.Logger;
 
 /**
  * @author VincentYan
@@ -51,12 +51,44 @@ public class ServletUtil extends jodd.servlet.ServletUtil
      */
     public static String getValue(HttpServletRequest req, String name)
     {
-        return getValue(req, name, "");
+        return getValue(req, name, "", false);
+    }
+
+    /**
+     * Get encoded parameter value from request with specified name
+     * 
+     * @param req
+     *            Request
+     * @param name
+     *            Parameter name
+     * @return String Encoded parameter value
+     */
+    public static String encodedValue(HttpServletRequest req, String name)
+    {
+        return getValue(req, name, "", true);
+    }
+
+    /**
+     * Get encoded parameter value from request with specified name. If the
+     * value is null or empty, default value will be returned
+     * 
+     * @param req
+     *            Request
+     * @param name
+     *            Parameter name
+     * @param defaultValue
+     *            Default value of parameter
+     * @return String Encoded parameter value
+     */
+    public static String encodedValue(HttpServletRequest req, String name, String defaultValue)
+    {
+        return getValue(req, name, defaultValue, true);
     }
 
     /**
      * Get parameter value from request with specified name, if value is null or
-     * empty, return default value
+     * empty, return default value. If value contains special characters like
+     * '"",''', '<','>' etc, it will be encoed.
      * 
      * @param req
      *            Request
@@ -66,7 +98,8 @@ public class ServletUtil extends jodd.servlet.ServletUtil
      *            Default value if value is null or empty
      * @return String Parameter value
      */
-    public static String getValue(HttpServletRequest req, String name, String defaultValue)
+    public static String getValue(HttpServletRequest req, String name, String defaultValue,
+            boolean encode)
     {
         String result = defaultValue;
 
@@ -75,7 +108,7 @@ public class ServletUtil extends jodd.servlet.ServletUtil
 
         name = name.trim();
         result = (String) value(req, name);
-        result = stripXss(result);
+        result = stripXss(result, encode);
         if (StringUtil.isBlank(result) || "null".equalsIgnoreCase(result))
             return defaultValue;
 
@@ -97,7 +130,7 @@ public class ServletUtil extends jodd.servlet.ServletUtil
     public static int getIntValue(HttpServletRequest req, String name, int defaultValue)
     {
         int result = defaultValue;
-        String str = getValue(req, name, "-1");
+        String str = getValue(req, name, "-1", false);
         try
         {
             result = Integer.parseInt(str);
@@ -110,7 +143,7 @@ public class ServletUtil extends jodd.servlet.ServletUtil
         return result;
     }
 
-    public static String[] getValues(HttpServletRequest req, String name)
+    public static String[] getValues(HttpServletRequest req, String name, boolean encode)
     {
         if (StringUtil.isBlank(name))
             return null;
@@ -120,7 +153,7 @@ public class ServletUtil extends jodd.servlet.ServletUtil
         String[] result = new String[values.length];
         for (int i = 0, len = result.length; i < len; i++)
         {
-            result[i] = stripXss(values[i]);
+            result[i] = stripXss(values[i], encode);
         }
         return result;
     }
@@ -136,6 +169,8 @@ public class ServletUtil extends jodd.servlet.ServletUtil
     public static boolean checkAllValues(HttpServletRequest request)
     {
         String name, value;
+
+        // Check attributes of request
         Enumeration enumeration = request.getAttributeNames();
         while (enumeration.hasMoreElements())
         {
@@ -144,14 +179,25 @@ public class ServletUtil extends jodd.servlet.ServletUtil
             if (containXSS(value))
                 return false;
         }
-        enumeration = request.getParameterNames();
-        while (enumeration.hasMoreElements())
-        {
-            name = (String) enumeration.nextElement();
-            value = (String) request.getParameter(name);
-            if (containXSS(value))
-                return false;
-        }
+
+        // Check query string of request
+        value = decodeUrl(request.getQueryString());
+        if (containXSS(value))
+            return false;
+
+        // Vincent, Comment below codes because if parameter is post data via
+        // request, it maybe contains special characters. This may need to be
+        // handled in each page according with regular requirement.
+
+        // Check all parameters
+        // enumeration = request.getParameterNames();
+        // while (enumeration.hasMoreElements())
+        // {
+        // name = (String) enumeration.nextElement();
+        // value = encodedValue(request, name);
+        // if (containXSS(value))
+        // return false;
+        // }
 
         return true;
     }
@@ -189,10 +235,10 @@ public class ServletUtil extends jodd.servlet.ServletUtil
         // ret.add(new Object[]
         // { "<(\"[^\"]*\"|\'[^\']*\'|[^\'\">]).*>",
         // Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL });
-        ret.add(new Object[]
-        {
-                "(window\\.location|window\\.|\\.location|document\\.cookie|document\\.|alert\\(.*?\\)|window\\.open\\().*",
-                Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL });
+        // ret.add(new Object[]
+        // {
+        // "(window\\.location|window\\.|\\.location|document\\.cookie|document\\.|alert\\(.*?\\)|window\\.open\\().*",
+        // Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL });
         ret.add(new Object[]
         {
                 "<+\\s*.*\\s*(oncontrolselect|oncopy|oncut|ondataavailable|ondatasetchanged|ondatasetcomplete|ondblclick|ondeactivate|ondrag|ondragend|ondragenter|ondragleave|ondragover|ondragstart|ondrop|onerror=|onerroupdate|onfilterchange|onfinish|onfocus|onfocusin|onfocusout|onhelp|onkeydown|onkeypress|onkeyup|onlayoutcomplete|onload|onlosecapture|onmousedown|onmouseenter|onmouseleave|onmousemove|onmousout|onmouseover|onmouseup|onmousewheel|onmove|onmoveend|onmovestart|onabort|onactivate|onafterprint|onafterupdate|onbefore|onbeforeactivate|onbeforecopy|onbeforecut|onbeforedeactivate|onbeforeeditocus|onbeforepaste|onbeforeprint|onbeforeunload|onbeforeupdate|onblur|onbounce|oncellchange|onchange|onclick|oncontextmenu|onpaste|onpropertychange|onreadystatechange|onreset|onresize|onresizend|onresizestart|onrowenter|onrowexit|onrowsdelete|onrowsinserted|onscroll|onselect|onselectionchange|onselectstart|onstart|onstop|onsubmit|onunload)+\\s*=+",
@@ -249,7 +295,7 @@ public class ServletUtil extends jodd.servlet.ServletUtil
             }
 
             if (htmlEncoding)
-                value = HtmlEncoder.text(value);
+                value = encodeHtml(value);
         }
 
         return value;
@@ -282,21 +328,29 @@ public class ServletUtil extends jodd.servlet.ServletUtil
 
     public static String encodeHtml(String str)
     {
+        if (StringUtil.isBlank(str))
+            return "";
         return HtmlEncoder.text(str);
     }
 
     public static String decodeHtml(String str)
     {
+        if (StringUtil.isBlank(str))
+            return "";
         return HtmlDecoder.decode(str);
     }
 
     public static String encodeUrl(String str)
     {
+        if (StringUtil.isBlank(str))
+            return "";
         return URLCoder.encodeHttpUrl(str);
     }
 
     public static String decodeUrl(String str)
     {
+        if (StringUtil.isBlank(str))
+            return "";
         return URLDecoder.decode(str);
     }
 }

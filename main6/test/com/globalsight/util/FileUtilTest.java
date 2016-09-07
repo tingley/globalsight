@@ -150,6 +150,6 @@ public class FileUtilTest
         filename = getTestFile("testdata/test_w.resx").getAbsolutePath();
         assertTrue(FileUtil.isWindowsReturnMethod(filename));
         filename = getTestFile("testdata/test_u.resx").getAbsolutePath();
-        assertTrue(FileUtil.isWindowsReturnMethod(filename));
+        assertFalse(FileUtil.isWindowsReturnMethod(filename));
     }
 }

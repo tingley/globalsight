@@ -8,8 +8,6 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.rpc.ServiceException;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -25,8 +23,6 @@ import org.datacontract.schemas._2004._07.Microsoft_MT_Web_Service_V2.TranslateO
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.tempuri.SoapService;
-import org.tempuri.SoapServiceLocator;
 
 import com.microsofttranslator.api.V2.LanguageService;
 import com.microsofttranslator.api.V2.adm.AdmAccessToken;
@@ -36,8 +32,8 @@ public class TestMSMT
 
     private static final String uriAPI = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13";
 //    private static final String appId = "0E79EE1C580587CD7084B8E5CD763A907B18057E";
-    private static final String clientId = "belinda";
-    private static final String clientSecret = "3iMuuAWkw1hOcz6Mmx+nNQjxjPEp7UjZ3itjsq3ql0M=";
+    private static final String clientId = "wallywei";
+    private static final String clientSecret = "DyihDAU9kyZw2+lPB70d6lt7NpuFAY+iS9YwCG6pVhU=";
     private static final String category = "general";
     private static String accessToken;
 
@@ -59,17 +55,6 @@ public class TestMSMT
 
             post.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
             HttpResponse httpResponse = new DefaultHttpClient().execute(post);
-            String msMtUrl = "http://api.microsofttranslator.com/V2/Soap.svc";
-            SoapService soap = new SoapServiceLocator(msMtUrl);
-            try
-            {
-                service = soap.getBasicHttpBinding_LanguageService();
-            }
-            catch (ServiceException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
             if (httpResponse.getStatusLine().getStatusCode() == 200)
             {
                 String strResult = EntityUtils.toString(httpResponse

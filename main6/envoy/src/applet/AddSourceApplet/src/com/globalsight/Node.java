@@ -4,8 +4,6 @@ import java.io.File;
 
 import javax.swing.filechooser.FileSystemView;
 
-import com.globalsight.util.SortUtil;
-
 public class Node
 {
     private final Node parent;
@@ -48,8 +46,7 @@ public class Node
 
         File[] allChildren = p_fileSystemView.getFiles(self, true);
         // now sort the table based on the specifiec column index.
-//        java.util.Arrays.sort(allChildren, m_fileComparator);
-        SortUtil.sort(allChildren, m_fileComparator);
+        java.util.Arrays.sort(allChildren, m_fileComparator);
 
         int numDirs = 0;
         for (int i=0 ; i<allChildren.length ; ++i)
@@ -98,8 +95,7 @@ public class Node
         }
 
         File[] allChildren = self.listFiles();
-//        java.util.Arrays.sort(allChildren, m_fileComparator);
-        SortUtil.sort(allChildren, m_fileComparator);
+        java.util.Arrays.sort(allChildren, m_fileComparator);
         
         return allChildren;
     }

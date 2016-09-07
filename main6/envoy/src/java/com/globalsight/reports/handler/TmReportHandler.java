@@ -252,6 +252,7 @@ public class TmReportHandler extends BasicReportHandler
         }
         fieldnameList.add(ReportsPackage.getMessage(m_bundle, "no_match"));
         fieldnameList.add(ReportsPackage.getMessage(m_bundle, "repitition"));
+        fieldnameList.add(ReportsPackage.getMessage(m_bundle, "mt"));
         fieldnameList.add(ReportsPackage.getMessage(m_bundle,
                 "total_word_count"));
 
@@ -459,6 +460,9 @@ public class TmReportHandler extends BasicReportHandler
         String repet = this.commonBundle.getString("lb_repetition");
         m_select.append(" target_page.REPETITION_WORD_COUNT as \"")
                 .append(repet).append("\",");
+        String mt = this.commonBundle.getString("lb_tm_mt");
+        m_select.append("target_page.MT_TOTAL_WORD_COUNT as \"")
+                .append(mt).append("\",");
         // 11 | 12
         m_select.append(" target_page.TOTAL_WORD_COUNT as \"Total Word Count\" ");
 

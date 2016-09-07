@@ -68,7 +68,7 @@ import com.globalsight.ling.tm2.lucene.LuceneIndexWriter;
 import com.globalsight.ling.tm2.lucene.LuceneSearcher;
 import com.globalsight.ling.tm2.lucene.LuceneUtil;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.ling.tm2.population.UniqueSegmentRepositoryForCorpus;
+import com.globalsight.ling.tm2.population.GoldenTmUniqueSegmentRepository;
 import com.globalsight.ling.tm2.segmenttm.TMidTUid;
 import com.globalsight.ling.tm3.core.BaseTm;
 import com.globalsight.ling.tm3.core.DefaultManager;
@@ -1041,8 +1041,8 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             TM3Tm<GSTuvData> tm = getTM3Tm(pTm);
             tm.setConnection(connection);
 
-            UniqueSegmentRepositoryForCorpus usr = getUniqueRepository(
-                    pSourceLocale, pSegmentsToSave);
+            GoldenTmUniqueSegmentRepository usr = getUniqueRepository(pSourceLocale,
+                    pSegmentsToSave);
             if (LOGGER.isDebugEnabled())
             {
                 LOGGER.debug(pSegmentsToSave.size() + " TUs from TMX are merged into "
@@ -1462,14 +1462,14 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     // This code comes from the old implementation -- it is designed to
     // construct
     // the gnarly mapping of source data to TM segments.
-    private UniqueSegmentRepositoryForCorpus getUniqueRepository(
+    private GoldenTmUniqueSegmentRepository getUniqueRepository(
             GlobalSightLocale pSourceLocale,
             Collection<? extends BaseTmTu> pSegmentsToSave)
             throws LingManagerException
     {
         try
         {
-            UniqueSegmentRepositoryForCorpus jobDataToSave = new UniqueSegmentRepositoryForCorpus(
+            GoldenTmUniqueSegmentRepository jobDataToSave = new GoldenTmUniqueSegmentRepository(
                     pSourceLocale);
             for (BaseTmTu tu : pSegmentsToSave)
             {

@@ -218,8 +218,7 @@ public interface TmCoreManager
             throws RemoteException, LingManagerException;
 
     /**
-     * Remove all data for the specified TM, including corpus data and the TM
-     * itself.
+     * Remove all data for the specified TM, including the TM itself.
      * 
      * Interface extracted from com.globalsight.everest.tm.TmRemover. This
      * operation should be completed in the current thread. The InterruptMonitor
@@ -242,10 +241,10 @@ public interface TmCoreManager
             LingManagerException;
 
     /**
-     * Remove all data in a given locale from the specified TM, including corpus
-     * data. Interface extracted from com.globalsight.everest.tm.TmRemover. This
-     * operation should be completed in the current thread. The InterruptMonitor
-     * may be used to tell if the job should be cancelled.
+     * Remove all data in a given locale from the specified TM. Interface
+     * extracted from com.globalsight.everest.tm.TmRemover. This operation
+     * should be completed in the current thread. The InterruptMonitor may be
+     * used to tell if the job should be cancelled.
      * 
      * @param p_tm
      *            TM to remove data from

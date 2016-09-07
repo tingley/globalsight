@@ -46,9 +46,9 @@ import com.globalsight.ling.tm2.persistence.SegmentQueryResult;
 import com.globalsight.ling.tm2.persistence.SegmentTmPersistence;
 import com.globalsight.ling.tm2.persistence.SegmentTmRetriever;
 import com.globalsight.ling.tm2.persistence.TmSegmentSaver;
+import com.globalsight.ling.tm2.population.GoldenTmUniqueSegmentRepository;
 import com.globalsight.ling.tm2.population.SegmentsForSave;
 import com.globalsight.ling.tm2.population.UniqueSegmentRepository;
-import com.globalsight.ling.tm2.population.UniqueSegmentRepositoryForCorpus;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -110,9 +110,9 @@ public class SegmentTmPopulator
             return;
         }
 
-        // save segments to UniqueSegmentRepositoryForCorpus to remove
+        // save segments to GoldenTmUniqueSegmentRepository to remove
         // duplicates and maintain identical segments list
-        UniqueSegmentRepositoryForCorpus jobDataToSave = new UniqueSegmentRepositoryForCorpus(
+        GoldenTmUniqueSegmentRepository jobDataToSave = new GoldenTmUniqueSegmentRepository(
                 p_sourceLocale);
 
         for (BaseTmTu tu : p_segmentsToSave)
@@ -764,7 +764,7 @@ public class SegmentTmPopulator
                         // if the modify time of the segment in the
                         // Segment Tm is more recent, add the job tuv
                         // to SegmentsForSave object as a no-op tuv
-                        // for the purpose of building corpus Tm
+                        // for the purpose of building golden Tm
                         p_segmentsForSave.addTuvForNoOp(p_segmentTu.getId(),
                                 segmentTmTuv.getId(), jobTuv);
                     }

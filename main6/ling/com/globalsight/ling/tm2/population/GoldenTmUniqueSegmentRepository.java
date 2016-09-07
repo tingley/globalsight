@@ -16,45 +16,39 @@
  */
 package com.globalsight.ling.tm2.population;
 
-import com.globalsight.util.GlobalSightLocale;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTu;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
+import com.globalsight.util.GlobalSightLocale;
 
 
 /**
  * A repository of segments. This class is responsible for maintaining
- * uniqueness of source and target segment in this repository. This
- * class also maintains a list of identical segments to build a corpus
- * tm.
+ * uniqueness of source and target segment in this repository. This class also
+ * maintains a list of identical segments to store into golden TM.
  */
-
-public class UniqueSegmentRepositoryForCorpus
-    extends UniqueSegmentRepository
+public class GoldenTmUniqueSegmentRepository extends UniqueSegmentRepository
 {
     // a repository of Tuvs. This map maintains lists of identical segments.
     // key: BaseTmTuv
     // value: a list of identical BaseTmTuv in the page
     private Map<BaseTmTuv, List<BaseTmTuv>> m_identicalTuvs;
-    
+
     /**
      * Constructor.
      * @param p_sourceLocale source locale
      */
-    public UniqueSegmentRepositoryForCorpus(GlobalSightLocale p_sourceLocale)
+    public GoldenTmUniqueSegmentRepository(GlobalSightLocale p_sourceLocale)
     {
         super(p_sourceLocale);
         m_identicalTuvs = new HashMap<BaseTmTuv, List<BaseTmTuv>>();
     }
-
 
     /**
      * Add Tu (and Tuvs that are owned by the Tu). Only unique
@@ -63,6 +57,7 @@ public class UniqueSegmentRepositoryForCorpus
      *
      * @param p_tu Tu to be added
      */
+    @Override
     public void addTu(BaseTmTu p_tu)
     {
         // only translatable and root segments are maintained in the list
@@ -100,7 +95,7 @@ public class UniqueSegmentRepositoryForCorpus
     public String toDebugString()
     {
         StringBuffer sb = new StringBuffer();
-        sb.append("UniqueSegmentRepositoryForCorpus  {\n");
+        sb.append("GoldenTmUniqueSegmentRepository  {\n");
         
         for (Map.Entry<BaseTmTuv, List<BaseTmTuv>> e : m_identicalTuvs.entrySet())
         {

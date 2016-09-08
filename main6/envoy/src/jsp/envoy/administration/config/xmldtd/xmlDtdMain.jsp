@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.util.edit.EditUtil"%>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
@@ -256,7 +257,7 @@ function handleSelectAll() {
          width="400px">
           <%
             out.print(xmlDtd.getDescription() == null ? "" :
-                      xmlDtd.getDescription());
+                EditUtil.encodeHtmlEntities(xmlDtd.getDescription()));
           %>
         </amb:column>
         <%

@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.util.edit.EditUtil"%>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
@@ -256,7 +257,7 @@ function edit(segmentId){
         <amb:column label="lb_description" sortBy="<%=SegmentationRuleFileComparator.DESC%>"
          width="30%">
           <% out.print(segmentationRuleFile.getDescription() == null ? "" :
-             segmentationRuleFile.getDescription()); %>
+              EditUtil.encodeHtmlEntities(segmentationRuleFile.getDescription())); %>
         </amb:column>
       <!--   <% if (isSuperAdmin) { %> --> 
         <amb:column label="lb_company_name" sortBy="<%=SegmentationRuleFileComparator.ASC_COMPANY%>">

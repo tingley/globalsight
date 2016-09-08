@@ -316,7 +316,7 @@ function filterItems(e)
               <amb:permission name="<%=Permission.PROJECTS_EDIT%>" > </a> </amb:permission>
             </amb:column>
             <amb:column label="lb_description" sortBy="<%=ProjectComparator.DESCRIPTION%>" >
-              <%=proj.getDescription()%>
+              <%=EditUtil.encodeHtmlEntities(proj.getDescription())%>
             </amb:column>
             <amb:column label="lb_project_manager"
              sortBy="<%=ProjectComparator.PROJECTMANAGER%>" width="10%">

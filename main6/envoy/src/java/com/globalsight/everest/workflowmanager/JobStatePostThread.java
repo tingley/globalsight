@@ -59,7 +59,7 @@ public class JobStatePostThread extends Thread implements Runnable
     private Job job;
     private String previousState;
     private String currentState;
-    private static ConcurrentHashMap<String, String> jobStateInfo = new ConcurrentHashMap<String, String>();
+    private static ConcurrentHashMap<Long, String> jobStateInfo = new ConcurrentHashMap<Long, String>();
 
     public JobStatePostThread(Job job, String previousState, String currentState)
     {
@@ -72,13 +72,18 @@ public class JobStatePostThread extends Thread implements Runnable
     @Override
     public void run()
     {
+        if (!jobStateInfo.isEmpty() && !jobStateInfo.keys().nextElement().equals(job.getId()))
+        {
+            jobStateInfo = new ConcurrentHashMap<Long, String>();
+        }
         jobStatePost(job, previousState, currentState);
+        
     }
 
     private synchronized void jobStatePost(Job job, String previousState, String currentState)
     {
         long jobId = job.getJobId();
-        if (jobStateInfo.values().contains(currentState))
+        if (!jobStateInfo.isEmpty() && jobStateInfo.values().contains(currentState))
         {
             return;
         }
@@ -93,9 +98,8 @@ public class JobStatePostThread extends Thread implements Runnable
                 jsonObj.put("previousState", previousState);
                 jsonObj.put("currentState", currentState);
                 s_logger.info("job transition post info: " + jsonObj);
-                jobStateInfo.put(previousState, currentState);
+                jobStateInfo.put(jobId, currentState);
 
-                System.out.println(jobStateInfo.keys().nextElement());
                 L10nProfile l10nProfile = job.getL10nProfile();
                 long wfStatePostId = l10nProfile.getWfStatePostId();
                 WorkflowStatePosts wfStatePost = ServerProxy.getProjectHandler()
@@ -120,7 +124,7 @@ public class JobStatePostThread extends Thread implements Runnable
     {
         int num = wfStatePost.getRetryNumber();
         CloseableHttpClient httpClient = getHttpClient();
-        for (int i = 0; i < num; i++)
+        for (int i = 0; i < num + 1; i++)
         {
             try
             {

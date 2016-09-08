@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.util.edit.EditUtil"%>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page contentType="text/html; charset=UTF-8"
@@ -273,7 +274,7 @@ function download(){
                 </amb:column>
                 <amb:column label="lb_description" sortBy="<%=LocProfileComparator.DESC%>" width="20%">
                      <% out.print(locprofile.getDescription() == null ?
-                         "" : locprofile.getDescription()); %>
+                         "" : EditUtil.encodeHtmlEntities(locprofile.getDescription())); %>
                 </amb:column>
                 <% if (isSuperAdmin) { %>
                 <amb:column label="lb_company_name" sortBy="<%=LocProfileComparator.ASC_COMPANY%>" filter="L10nProfilesCompanyNameFilter" filterValue="<%=l10nProfilesCompanyNameFilter%>" width="8%">

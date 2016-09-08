@@ -33,6 +33,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.comment.Comment;
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.glossaries.GlossaryFile;
 import com.globalsight.everest.glossaries.GlossaryManager;
 import com.globalsight.everest.jobhandler.Job;
@@ -45,6 +46,7 @@ import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.glossaries.GlossaryState;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.DownloadOfflineFilesConfigHandler;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHelper;
@@ -85,7 +87,7 @@ public class DownloadPageHandler extends PageHandler
             ServletContext p_context) throws ServletException, IOException,
             EnvoyServletException
     {
-    	HttpSession httpSession = p_request.getSession();
+        HttpSession httpSession = p_request.getSession();
         String taskId = p_request.getParameter("taskId");
         if(taskId != null && !taskId.equals(""))
         {
@@ -215,7 +217,7 @@ public class DownloadPageHandler extends PageHandler
         // The glossary state information for this locale pair
         GlossaryState glossaryState = getGlossaryState(task);
         //GBS-4461: get job level support file
-        getJobSupportFile(task.getJobId(), glossaryState);
+        getJobSupportFile(session,task.getJobId(), glossaryState);
   
         session.setAttribute(OfflineConstants.DOWNLOAD_GLOSSARY_STATE,
                 glossaryState);
@@ -231,17 +233,30 @@ public class DownloadPageHandler extends PageHandler
         }
     }
     
-    private void getJobSupportFile(long jobId, GlossaryState glossaryState)
+    private void getJobSupportFile(HttpSession session, long jobId, GlossaryState glossaryState)
     {
         try
         {
+            SessionManager sessionMgr = (SessionManager) session
+                    .getAttribute(WebAppConstants.SESSION_MANAGER);
+            User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
+            
             ArrayList result = new ArrayList();
             Job job = ServerProxy.getJobHandler().getJobById(jobId);
             List jobComments = job.getJobComments();
             if (jobComments != null && jobComments.size() > 0)
             {
-                String parentPath = AmbFileStoragePathUtils.getCommentReferenceDir()
-                        + File.separator;
+                String parentPath = "";
+                if (UserUtil.isSuperLP(user.getUserId()))
+                {
+                    parentPath = AmbFileStoragePathUtils.getCommentReferenceDir(job.getCompanyId())
+                            + File.separator;
+                }
+                else
+                {
+                    parentPath = AmbFileStoragePathUtils.getCommentReferenceDir() + File.separator;
+                }
+                
                 for (int i = 0; i < jobComments.size(); i++)
                 {
                     Comment com = (Comment) jobComments.get(i);

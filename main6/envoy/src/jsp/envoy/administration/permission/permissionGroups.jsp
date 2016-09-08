@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.util.edit.EditUtil"%>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
@@ -235,8 +236,9 @@ function filterItems(e)
          <amb:permission name="<%=Permission.PERMGROUPS_EDIT%>" ></a></amb:permission>
       </amb:column>
       <amb:column label="lb_description" sortBy="<%=PermissionGroupComparator.DESC%>" width="60%">
-      <% out.print(permissionGroup.getDescription() == null ?
-       "" : permissionGroup.getDescription()); %>
+      <%
+      String desc = EditUtil.encodeHtmlEntities(permissionGroup.getDescription());
+      out.print(desc); %>
       </amb:column>
       <% if (isSuperAdmin) { %>
       <amb:column label="lb_company_name" sortBy="<%=PermissionGroupComparator.ASC_COMPANY%>"   filter="pCompanyFilter" filterValue="<%=pCompanyFilter%>" width="120">

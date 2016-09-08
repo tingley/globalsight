@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.util.edit.EditUtil"%>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
@@ -198,7 +199,7 @@ function modifyuser(name){
         <amb:column label="lb_description" sortBy="<%=XmlRuleFileComparator.DESC%>"
          width="22%">
           <% out.print(xmlRule.getDescription() == null ? "" :
-             xmlRule.getDescription()); %>
+              EditUtil.encodeHtmlEntities(xmlRule.getDescription())); %>
         </amb:column>
         <amb:column label="" sortBy=""  width="10%">
          &nbsp;

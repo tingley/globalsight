@@ -588,8 +588,7 @@ public class TmCoreManagerLocal implements TmCoreManager
     //
 
     /**
-     * Remove TM data. This will first perform common corpus cleaning code
-     * followed by calling segment tm-specific cleaning code.
+     * Remove TM data.
      */
     @Override
     public boolean removeTmData(Tm pTm, ProgressReporter pReporter,
@@ -619,8 +618,7 @@ public class TmCoreManagerLocal implements TmCoreManager
     }
 
     /**
-     * Remove TM data. This will first perform common corpus cleaning code
-     * followed by calling segment tm-specific cleaning code.
+     * Remove TM data.
      */
     @Override
     public boolean removeTmData(Tm pTm, GlobalSightLocale pLocale,
@@ -682,8 +680,8 @@ public class TmCoreManagerLocal implements TmCoreManager
     }
 
     /**
-     * Code refactored from BrowseCorpusMainHandler and Ambassador webservice
-     * implementation, then split up to handle mixed tm2/tm3 TMs.
+     * Code refactored from Ambassador webservice implementation, then split up
+     * to handle mixed tm2/tm3 TMs.
      */
     @Override
     public LeverageDataCenter leverageSegments(

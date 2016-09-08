@@ -95,6 +95,7 @@
     </management>
     <profile>
         <subsystem xmlns="urn:jboss:domain:logging:3.0">
+            <use-deployment-logging-config value="false"/>
             <console-handler name="CONSOLE">
                 <level name="INFO"/>
                 <formatter>

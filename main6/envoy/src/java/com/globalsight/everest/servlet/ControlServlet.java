@@ -255,7 +255,7 @@ public class ControlServlet extends HttpServlet
         if (!isVaild)
         {
             // parameters contain invaild characters
-            reportErrorPage(false, "Invaild characters are found in parameters or attributes",
+            reportErrorPage(false, "Invalid characters are found.",
                     null, p_request, p_response, m_servletContext, userSession, sourcePageHandler);
             return;
         }

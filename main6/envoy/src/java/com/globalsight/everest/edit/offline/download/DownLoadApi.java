@@ -61,6 +61,7 @@ import com.globalsight.everest.edit.offline.page.PageData;
 import com.globalsight.everest.edit.offline.page.TmxUtil;
 import com.globalsight.everest.edit.offline.rtf.RTFWriterAnsi;
 import com.globalsight.everest.edit.offline.ttx.TTXConstants;
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.glossaries.GlossaryFile;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
@@ -82,6 +83,7 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.FileListBuilder;
@@ -2450,18 +2452,27 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             String fname = "";
             Iterator it = m_downloadParams.getSupportFilesList().iterator();
             List<String> addedFile = new ArrayList<String>();
-
+            String path = "";
+            User user = m_downloadParams.getUser();
+            if (UserUtil.isSuperLP(user.getUserId()))
+            {
+                path = AmbFileStoragePathUtils.getCommentReferenceDir(companyId) + File.separator;
+            }
+            else
+            {
+                path = AmbFileStoragePathUtils.getCommentReferenceDir() + File.separator;
+            }
+            
             while (it.hasNext())
             {
                 GlossaryFile gf = (GlossaryFile) it.next();
                 File fromFile = null;
                 if (gf.getCommentId() != -1)
                 {
-                    String path = AmbFileStoragePathUtils.getCommentReferenceDir() + File.separator
-                            + gf.getCommentId() + File.separator
+                    String finalPath = path + gf.getCommentId() + File.separator
                             + WebAppConstants.COMMENT_REFERENCE_SUPPORT_FILE_ACCESS
                             + File.separator + gf.getFilename();
-                    fromFile = new File(path);
+                    fromFile = new File(finalPath);
                 }
                 else
                 {

@@ -57,6 +57,7 @@ import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.glossaries.GlossaryState;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileStateConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
@@ -1073,21 +1074,39 @@ public class SendDownloadFileHelper implements WebAppConstants
         DownloadPageHandler handler = new DownloadPageHandler();
         GlossaryState glossaryState = handler.getGlossaryState(task);
         result = glossaryState.getGlossaries();
-        getJobSupportFile(glossaryState, task.getJobId(), result);
+        getJobSupportFile(glossaryState, task, result);
 
         return result.size() > 0 ? result : null;
     }
 
-    private void getJobSupportFile(GlossaryState glossaryState, long jobId, List result)
+    private void getJobSupportFile(GlossaryState glossaryState, Task task, List result)
     {
         try
         {
-            Job job = ServerProxy.getJobHandler().getJobById(jobId);
+            Job job = ServerProxy.getJobHandler().getJobById(task.getJobId());
             List jobComments = job.getJobComments();
             if (jobComments != null && jobComments.size() > 0)
             {
-                String parentPath = AmbFileStoragePathUtils.getCommentReferenceDir()
-                        + File.separator;
+                String parentPath = "";
+                try
+                {
+                    User user = ServerProxy.getUserManager().getUserByName(task.getAcceptor());
+                    if (UserUtil.isSuperLP(user.getUserId()))
+                    {
+                        parentPath = AmbFileStoragePathUtils.getCommentReferenceDir(task
+                                .getCompanyId()) + File.separator;
+                    }
+                    else
+                    {
+                        parentPath = AmbFileStoragePathUtils.getCommentReferenceDir()
+                                + File.separator;
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+               
                 for (int i = 0; i < jobComments.size(); i++)
                 {
                     Comment com = (Comment) jobComments.get(i);
@@ -1108,7 +1127,6 @@ public class SendDownloadFileHelper implements WebAppConstants
                         }
                     }
                 }
-                glossaryState.getGlossaries().addAll(result);
             }
         }
         catch (Exception e)

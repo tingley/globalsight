@@ -1,6 +1,10 @@
 <jboss-deployment-structure>
 	<ear-subdeployments-isolated>false</ear-subdeployments-isolated>
 	<deployment>
+	    <!-- exclude the logging subsystem to disable deployment unit processors from running -->  
+        <exclude-subsystems>  
+            <subsystem name="logging" />
+        </exclude-subsystems>
 		<dependencies>
 		    <module name="com.mysql" export="true" />
 		    <module name="javax.mail.api" export="true" />
@@ -22,6 +26,7 @@
 			<module name="org.hibernate.optional.c3p0" export="true" />
 			<module name="org.hibernate.optional.ehcache" export="true" />
 			<module name="org.javassist" export="true" />
+			<module name="org.jboss.log4j.logmanager" export="true" />
 			<module name="org.jdom" export="true" />
 			<system export="true">
 				<paths>

@@ -376,13 +376,9 @@ public class RetrieveUsernamesPassHandler extends PageHandler
 
         String[] messageArguments = msgArgsBuffer.toString().split(",");
 
-        // Send mail to all possible users
-        for (User user : users)
-        {
-            result = sendEmail(user, messageArguments,
-                    MailerConstants.LOGIN_RETRIEVE_UESRNAME_SUBJECT,
-                    MailerConstants.LOGIN_RETRIEVE_UESRNAME_MESSAGE);
-        }
+        result = sendEmail(users.get(0), messageArguments,
+                MailerConstants.LOGIN_RETRIEVE_UESRNAME_SUBJECT,
+                MailerConstants.LOGIN_RETRIEVE_UESRNAME_MESSAGE);
 
         if (result)
         {

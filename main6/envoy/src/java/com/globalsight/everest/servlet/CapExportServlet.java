@@ -539,11 +539,10 @@ public class CapExportServlet extends HttpServlet
             // updating any states.
             // so only update the target page if it is marked in the
             // process of exporting
-            if (PageState.EXPORT_IN_PROGRESS.equals(tp.getPageState())
-                    && Workflow.EXPORTING.equals(tp.getWorkflowInstance().getState()))
+            if (PageState.EXPORT_IN_PROGRESS.equals(tp.getPageState()))
             {
                 // update target page state >> workflow state possibly >> job
-                // state possibly.
+                // state possibly; source page state
                 ServerProxy.getPageEventObserver().notifyExportSuccessEvent(tp);
 
                 // populate TM in separate thread

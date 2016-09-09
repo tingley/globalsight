@@ -887,12 +887,22 @@ public class JobResource extends RestResource
                     }
                 }
             }
+            
+            if (realUploadFileList.size() == 0)
+            {
+                String message = "No files need to upload, please check the correctness of filepath: "+filePaths;
+                throw new RestWebServiceException(message);
+            }
+            
             Company company = ServerProxy.getJobHandler().getCompanyById(
                     Long.parseLong(p_companyID));
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            List<FileProfileImpl> fileProfileListOfCompany = (List) ServerProxy
-                    .getFileProfilePersistenceManager().getFileProfilesByExtension(extensionList,
-                            Long.valueOf(company.getId()));
+            List<FileProfileImpl> fileProfileListOfCompany = new ArrayList<FileProfileImpl>();
+            if (extensionList != null && extensionList.size() > 0)
+            {
+                fileProfileListOfCompany = (List) ServerProxy.getFileProfilePersistenceManager()
+                        .getFileProfilesByExtension(extensionList, Long.valueOf(company.getId()));
+            }
+            
             for (String id : fileProfileIds)
             {
                 checkFp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(
@@ -934,7 +944,16 @@ public class JobResource extends RestResource
                             zipDir = realUploadFileList.get(i).substring(0,
                                     realUploadFileList.get(i).lastIndexOf("."));
                             zipFiles = ZipIt.unpackZipPackage(realUploadFileList.get(i), zipDir);
-                            String relativePath = filename.substring(0, filename.lastIndexOf("."));
+                            // String relativePath = filename.substring(0,filename.lastIndexOf("."));
+                            
+                            String relativePath = realUploadFileList
+                                    .get(i)
+                                    .substring(
+                                            (AmbFileStoragePathUtils.getCxeDocDirPath() + File.separator)
+                                                    .length(),
+                                            realUploadFileList.get(i).lastIndexOf("/"))
+                                    + File.separator
+                                    + filename.substring(0, filename.lastIndexOf("."));
                             String tmp = "";
                             for (String f : zipFiles)
                             {
@@ -948,7 +967,11 @@ public class JobResource extends RestResource
                         }
                         else if (39 == filePro.getKnownFormatTypeId())
                         {
-                            changeFileListByXliff(filename, vTargetLocale, filePro, fileProfiles,
+                            String tempFile = realUploadFileList.get(i)
+                                    .substring((AmbFileStoragePathUtils.getCxeDocDirPath() + File.separator).length(),
+                                            realUploadFileList.get(i).lastIndexOf("/"))
+                                    + File.separator+ filename;
+                            changeFileListByXliff(tempFile, vTargetLocale, filePro, fileProfiles,
                                     files, afterTargetLocales);
                         }
                         else

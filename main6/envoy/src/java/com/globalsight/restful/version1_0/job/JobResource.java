@@ -873,7 +873,9 @@ public class JobResource extends RestResource
             }
             validateParameters(job, p_filePaths, p_fileProfileIds, p_targetLocales, fileProfileIds,
                     filePaths, targetLocales, true);
-            
+            boolean is7zFile = false;
+            boolean isRarFile = false;
+            boolean isZipFile = false;
             fpId = (String) fileProfileIds.get(0);
             for (int i = 0; i < filePaths.size(); i++)
             {
@@ -962,14 +964,10 @@ public class JobResource extends RestResource
                             zipFiles = ZipIt.unpackZipPackage(realUploadFileList.get(i), zipDir);
                             // String relativePath = filename.substring(0,filename.lastIndexOf("."));
                             
-                            String relativePath = realUploadFileList
-                                    .get(i)
+                            String relativePath = zipDir
                                     .substring(
                                             (AmbFileStoragePathUtils.getCxeDocDirPath() + File.separator)
-                                                    .length(),
-                                            realUploadFileList.get(i).lastIndexOf("/"))
-                                    + File.separator
-                                    + filename.substring(0, filename.lastIndexOf("."));
+                                                    .length(), zipDir.length());
                             String tmp = "";
                             for (String f : zipFiles)
                             {

@@ -414,7 +414,8 @@ public class JobResource extends RestResource
 
             validateParameters(job, p_filePaths, p_fileProfileIds, p_targetLocales, fileProfileIds,
                     filePaths, targetLocales, false);
-
+            Company company = ServerProxy.getJobHandler().getCompanyById(
+                    Long.parseLong(p_companyID));
             fppm = ServerProxy.getFileProfilePersistenceManager();
             for (int i = 0; i < filePaths.size(); i++)
             {
@@ -427,7 +428,19 @@ public class JobResource extends RestResource
                 referenceFP = fppm.readFileProfile(referenceFPId);
 
                 filename = (String) filePaths.get(i);
+                String fileExtension = filename.substring(filename.lastIndexOf(".") + 1);
+                Vector<String> tempExtensionList = new Vector<String>();
+                tempExtensionList.add(fileExtension);
+                List<FileProfileImpl> fileProfileList = (List) ServerProxy
+                        .getFileProfilePersistenceManager().getFileProfilesByExtension(
+                                tempExtensionList, Long.valueOf(company.getId()));
                 filename = filename.replace('\\', File.separatorChar);
+                if (fileProfileList.size() > 0 && !fileProfileList.contains(fp))
+                {
+                    String message = "Current file profile id: " + fpId
+                            + " does not correspond with uploaded file: '" + filename + "'.";
+                    throw new RestWebServiceException(message);
+                }
                 String srcLocale = findSrcLocale(fpId);
                 filename = getRealPath(p_jobId, filename, srcLocale, isWSFlag);
                 realFilename = AmbFileStoragePathUtils.getCxeDocDir(job.getCompanyId())
@@ -887,12 +900,23 @@ public class JobResource extends RestResource
                     }
                 }
             }
+            
+            if (realUploadFileList.size() == 0)
+            {
+                String message = "Corresponding files were not found, please check the correctness of filePaths: "
+                        + filePaths;
+                throw new RestWebServiceException(message);
+            }
+            
             Company company = ServerProxy.getJobHandler().getCompanyById(
                     Long.parseLong(p_companyID));
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            List<FileProfileImpl> fileProfileListOfCompany = (List) ServerProxy
-                    .getFileProfilePersistenceManager().getFileProfilesByExtension(extensionList,
-                            Long.valueOf(company.getId()));
+            List<FileProfileImpl> fileProfileListOfCompany = new ArrayList<FileProfileImpl>();
+            if (extensionList != null && extensionList.size() > 0)
+            {
+                fileProfileListOfCompany = (List) ServerProxy.getFileProfilePersistenceManager()
+                        .getFileProfilesByExtension(extensionList, Long.valueOf(company.getId()));
+            }
+            
             for (String id : fileProfileIds)
             {
                 checkFp = ServerProxy.getFileProfilePersistenceManager().readFileProfile(
@@ -918,10 +942,12 @@ public class JobResource extends RestResource
                 List<FileProfileImpl> fileProfileList = (List) ServerProxy
                         .getFileProfilePersistenceManager().getFileProfilesByExtension(tempExtensionList,
                                 Long.valueOf(company.getId()));
+                boolean isRightFileProfile = false;
                 for (FileProfile filePro : realFileProfiles)
                 {
                     if (fileProfileList.contains(filePro))
                     {
+                        isRightFileProfile = true;
                         if (file.getAbsolutePath().endsWith(".xml"))
                         {
                             saveFileAsUTF8(file);
@@ -934,7 +960,16 @@ public class JobResource extends RestResource
                             zipDir = realUploadFileList.get(i).substring(0,
                                     realUploadFileList.get(i).lastIndexOf("."));
                             zipFiles = ZipIt.unpackZipPackage(realUploadFileList.get(i), zipDir);
-                            String relativePath = filename.substring(0, filename.lastIndexOf("."));
+                            // String relativePath = filename.substring(0,filename.lastIndexOf("."));
+                            
+                            String relativePath = realUploadFileList
+                                    .get(i)
+                                    .substring(
+                                            (AmbFileStoragePathUtils.getCxeDocDirPath() + File.separator)
+                                                    .length(),
+                                            realUploadFileList.get(i).lastIndexOf("/"))
+                                    + File.separator
+                                    + filename.substring(0, filename.lastIndexOf("."));
                             String tmp = "";
                             for (String f : zipFiles)
                             {
@@ -948,7 +983,10 @@ public class JobResource extends RestResource
                         }
                         else if (39 == filePro.getKnownFormatTypeId())
                         {
-                            changeFileListByXliff(filename, vTargetLocale, filePro, fileProfiles,
+                            String tempFile = realUploadFileList.get(i)
+                                    .substring((AmbFileStoragePathUtils.getCxeDocDirPath() + File.separator).length(),
+                                            realUploadFileList.get(i).length());
+                            changeFileListByXliff(tempFile, vTargetLocale, filePro, fileProfiles,
                                     files, afterTargetLocales);
                         }
                         else
@@ -959,6 +997,12 @@ public class JobResource extends RestResource
                         }
                         break;
                     }
+                }
+                if (!isRightFileProfile)
+                {
+                    String errMsg = fileExtension.toUpperCase()
+                            + " format file not found fileprofile.";
+                    throw new RestWebServiceException(errMsg);
                 }
             }
 

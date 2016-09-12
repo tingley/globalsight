@@ -64,6 +64,7 @@ import com.globalsight.mediasurface.CmsUserInfo;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.modules.Modules;
+import com.globalsight.webservices.AmbassadorUtil;
 
 import jodd.util.StringUtil;
 
@@ -147,7 +148,23 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
             // know why. Vincent at 09/12/2016
             // if (userPassword != null)
             // userPassword = EditUtil.utf8ToUnicode(userPassword);
-            userPassword = StringUtil.isBlank(userPassword) ? "" : userPassword;
+            if ("........".equals(userPassword))
+            {
+                // auto login
+                String cookieUsername = CookieUtil.getCookieValue(m_request, "autoLogin");
+                String[] data = StringUtil.split(cookieUsername, "|");
+                if (data != null && data.length > 1 && data[0].equals(userName))
+                {
+                    try
+                    {
+                        userPassword = AmbassadorUtil.getDecryptionString(data[1]);
+                    }
+                    catch (Exception e)
+                    {
+                        CATEGORY.error("Cannot get user password correctly.", e);
+                    }
+                }
+            }
         }
 
         // SSO user

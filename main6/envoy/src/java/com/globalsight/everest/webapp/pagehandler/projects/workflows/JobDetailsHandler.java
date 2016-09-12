@@ -95,8 +95,8 @@ import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.CookieUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.statistics.StatisticsService;
 import com.globalsight.everest.taskmanager.Task;
@@ -121,7 +121,6 @@ import com.globalsight.everest.workflowmanager.TaskJbpmUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowAdditionSender;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
-import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.scheduling.SchedulerConstants;
@@ -424,7 +423,13 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         // to cache p_response.addHeader("Cache-Control", "max-age=0");
 
         // Update the session with this most recently used job
-        updateMRUJob(p_request, session, job, p_response);
+        String cookieName = JobSearchConstants.MRU_JOBS_COOKIE
+                + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
+
+        CookieUtil.updateMRU(p_request, p_response, job.getId() + ":" + job.getJobName(),
+                cookieName, JobSearchConstants.MRU_JOBS);
+
+        p_response.addCookie(new Cookie("test", "test1111"));
 
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
 
@@ -2612,115 +2617,6 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         return jobId;
     }
 
-    /*
-     * Update the session with this most recently used job. It will become the
-     * first in the list and all the rest moved down. Also check that it wasn't
-     * already in the list. Don't allow more than 3 items in the list.
-     */
-    private void updateMRUJob(HttpServletRequest request, HttpSession session, Job job,
-            HttpServletResponse response)
-    {
-        String cookieName = JobSearchConstants.MRU_JOBS_COOKIE
-                + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
-        String jobName = job.getJobName();
-        String thisJob = job.getId() + ":" + jobName;
-        StringBuffer newCookie = new StringBuffer(thisJob);
-        int count = 1;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null)
-        {
-            for (int i = 0; i < cookies.length; i++)
-            {
-                Cookie cookie = cookies[i];
-                if (cookie.getName().equals(cookieName))
-                {
-                    String mruJobStr = cookie.getValue();
-                    try
-                    {
-                        mruJobStr = URLDecoder.decode(mruJobStr);
-                    }
-                    catch (Exception e)
-                    {
-                        continue;
-                    }
-
-                    StringTokenizer st = new StringTokenizer(mruJobStr, "|");
-                    while (st.hasMoreTokens() && count < 3)
-                    {
-                        String value = st.nextToken();
-                        if (!value.equals(thisJob))
-                        {
-                            newCookie.append("|");
-                            newCookie.append(value);
-                            count++;
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-
-        String value = ServletUtil.stripXss(newCookie.toString());
-
-        session.setAttribute(JobSearchConstants.MRU_JOBS, value);
-        value = URLEncoder.encode(value);
-        try
-        {
-            Cookie cookie = new Cookie(cookieName, value);
-            cookie.setHttpOnly(true);
-            response.addCookie(cookie);
-        }
-        catch (Exception e)
-        {
-            response.addCookie(new Cookie(cookieName, ""));
-        }
-    }
-
-    private void removeMRUjob(HttpServletRequest request, HttpSession session, String thisJob,
-            HttpServletResponse response)
-    {
-        String cookieName = JobSearchConstants.MRU_JOBS_COOKIE
-                + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
-        StringBuffer newCookie = new StringBuffer();
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null)
-        {
-            for (int i = 0; i < cookies.length; i++)
-            {
-                Cookie cookie = cookies[i];
-                if (cookie.getName().equals(cookieName))
-                {
-                    String mruJobStr = ServletUtil.stripXss(cookie.getValue());
-                    mruJobStr = URLDecoder.decode(mruJobStr);
-                    StringTokenizer st = new StringTokenizer(mruJobStr, "|");
-                    while (st.hasMoreTokens())
-                    {
-                        String value = st.nextToken();
-                        if (!value.equals(thisJob))
-                        {
-                            newCookie.append("|");
-                            newCookie.append(value);
-                        }
-                    }
-                    break;
-                }
-            }
-            session.setAttribute(JobSearchConstants.MRU_JOBS, newCookie.toString());
-
-            String value = newCookie.toString();
-            value = URLEncoder.encode(value);
-            try
-            {
-                response.addCookie(new Cookie(cookieName, value));
-            }
-            catch (Exception e)
-            {
-                CATEGORY.error("Failed to add cookie value: " + value, e);
-                response.addCookie(new Cookie(cookieName, ""));
-            }
-        }
-    }
-
     private void jobNotFound(HttpServletRequest p_request, HttpServletResponse p_response,
             ServletContext p_context, Job job)
             throws ServletException, IOException, EnvoyServletException
@@ -2738,7 +2634,10 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         {
             jobname = job.getJobName();
             // remove from MRU list
-            removeMRUjob(p_request, session, job.getId() + ":" + job.getJobName(), p_response);
+            String cookieName = JobSearchConstants.MRU_JOBS_COOKIE
+                    + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
+            CookieUtil.removeMRU(p_request, p_response, session,
+                    job.getId() + ":" + job.getJobName(), cookieName, JobSearchConstants.MRU_JOBS);
         }
         p_request.setAttribute("badresults", bundle.getString("lb_job") + " " + jobname + " "
                 + bundle.getString("msg_cannot_be_found"));

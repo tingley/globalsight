@@ -254,6 +254,8 @@ public class ControlServlet extends HttpServlet
         boolean isVaild = ServletUtil.checkAllValues(p_request);
         if (!isVaild)
         {
+            CATEGORY.error(
+                    "Invalid characters are found in URL. [" + p_request.getQueryString() + "]");
             // parameters contain invaild characters
             reportErrorPage(false, "Invalid characters are found.",
                     null, p_request, p_response, m_servletContext, userSession, sourcePageHandler);

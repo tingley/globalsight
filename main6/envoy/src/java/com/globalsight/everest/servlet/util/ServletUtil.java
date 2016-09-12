@@ -169,6 +169,7 @@ public class ServletUtil extends jodd.servlet.ServletUtil
     public static boolean checkAllValues(HttpServletRequest request)
     {
         String name, value;
+        boolean isValid = true;
 
         // Check attributes of request
         Enumeration enumeration = request.getAttributeNames();
@@ -177,13 +178,14 @@ public class ServletUtil extends jodd.servlet.ServletUtil
             name = (String) enumeration.nextElement();
             value = (String) request.getAttribute(name);
             if (containXSS(value))
-                return false;
+                isValid = false;
         }
 
         // Check query string of request
         value = decodeUrl(request.getQueryString());
+        logger.debug("Query string in URL -- " + value);
         if (containXSS(value))
-            return false;
+            isValid = false;
 
         // Vincent, Comment below codes because if parameter is post data via
         // request, it maybe contains special characters. This may need to be
@@ -199,7 +201,7 @@ public class ServletUtil extends jodd.servlet.ServletUtil
         // return false;
         // }
 
-        return true;
+        return isValid;
     }
 
     /**
@@ -296,6 +298,8 @@ public class ServletUtil extends jodd.servlet.ServletUtil
             if (htmlEncoding)
                 value = encodeHtml(value);
         }
+        else
+            value = "";
 
         return value;
 

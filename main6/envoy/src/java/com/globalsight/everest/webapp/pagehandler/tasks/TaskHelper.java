@@ -27,11 +27,9 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.naming.NamingException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -49,8 +47,8 @@ import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.qachecks.DITAQACheckerHelper;
 import com.globalsight.everest.qachecks.QACheckerHelper;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.CookieUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskException;
@@ -60,14 +58,14 @@ import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchCo
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.ling.common.Text;
-import com.globalsight.ling.common.URLDecoder;
-import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.ServerUtil;
 import com.globalsight.util.edit.EditUtil;
+
+import jodd.util.StringUtil;
 
 /**
  * TaskHelper is used for communicating with remote objects and performing task
@@ -837,131 +835,12 @@ public class TaskHelper
         String thisTask = displayLocale + ":" + task.getJobName() + ":"
                 + task.getId() + ":" + task.getState();
 
-        removeMRUtask(request, session, thisTask, response);
-    }
-
-    /**
-     * Removes a task from the most recently used list.
-     */
-    public static void removeMRUtask(HttpServletRequest request,
-            HttpSession session, String thisTask, HttpServletResponse response)
-    {
-        if (thisTask == null)
-        {
-            return;
-        }
-
         String cookieName = JobSearchConstants.MRU_TASKS_COOKIE
                 + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
-        StringBuffer newCookie = new StringBuffer();
-        Cookie[] cookies = (Cookie[]) request.getCookies();
-        if (cookies != null)
-        {
-            // don't need to match on state of task, so strip it off
-            int idx = thisTask.lastIndexOf(":");
-            String matchOn = thisTask.substring(0, idx);
-
-            for (int i = 0; i < cookies.length; i++)
-            {
-                Cookie cookie = (Cookie) cookies[i];
-                if (cookie.getName().equals(cookieName))
-                {
-                    String mruTaskStr = ServletUtil.stripXss(cookie.getValue());
-                    mruTaskStr = URLDecoder.decode(mruTaskStr);
-                    StringTokenizer st = new StringTokenizer(mruTaskStr, "|");
-                    while (st.hasMoreTokens())
-                    {
-                        String value = st.nextToken();
-                        if (!value.startsWith(matchOn))
-                        {
-                            newCookie.append("|");
-                            newCookie.append(value);
-                        }
-                    }
-                    break;
-                }
-            }
-
-            session.setAttribute(JobSearchConstants.MRU_TASKS,
-                    newCookie.toString());
-
-            String value = newCookie.toString();
-            value = URLEncoder.encode(value);
-            try
-            {
-                response.addCookie(new Cookie(cookieName, value));
-            }
-            catch (Exception e)
-            {
-                response.addCookie(new Cookie(cookieName, ""));
-            }
-        }
+        CookieUtil.removeMRU(request, response, session, thisTask, cookieName,
+                JobSearchConstants.MRU_TASKS);
     }
 
-    /**
-     * Update the session with this most recently used activity. It will become
-     * the first in the list and all the rest moved down. Also check that it
-     * wasn't already in the list. Only allow 3 in the list.
-     */
-    public static void updateMRUtask(HttpServletRequest request,
-            HttpSession session, Task task, HttpServletResponse response,
-            int taskState)
-    {
-        String cookieName = JobSearchConstants.MRU_TASKS_COOKIE
-                + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
-        String displayLocale = task.getSourceLocale().toString() + "->"
-                + task.getTargetLocale().toString();
-        String jobName = task.getJobName();
-        String thisTask = displayLocale + ":" + jobName + ":" + task.getId()
-                + ":" + taskState;
-        StringBuffer newCookie = new StringBuffer(thisTask);
-        int count = 1;
-        Cookie[] cookies = (Cookie[]) request.getCookies();
-        if (cookies != null)
-        {
-            // don't need to match on state of task, so strip it off
-            int idx = thisTask.lastIndexOf(":");
-            String matchOn = thisTask.substring(0, idx);
-            for (int i = 0; i < cookies.length; i++)
-            {
-                Cookie cookie = (Cookie) cookies[i];
-                if (cookie.getName().equals(cookieName))
-                {
-                    String mruTaskStr = ServletUtil.stripXss(cookie.getValue());
-                    mruTaskStr = URLDecoder.decode(mruTaskStr);
-                    StringTokenizer st = new StringTokenizer(mruTaskStr, "|");
-                    while (st.hasMoreTokens() && count < 3)
-                    {
-                        String value = st.nextToken();
-
-                        if (!value.startsWith(matchOn))
-                        {
-                            newCookie.append("|");
-                            newCookie.append(value);
-                            count++;
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-
-        String sessionValue = newCookie.toString();
-        session.setAttribute(JobSearchConstants.MRU_TASKS, sessionValue);
-
-        String value = newCookie.toString();
-        value = URLEncoder.encode(value);
-
-        try
-        {
-            response.addCookie(new Cookie(cookieName, value));
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Failed to add cookie value: " + value, e);
-            response.addCookie(new Cookie(cookieName, ""));
-        }
-    }
 
     /**
      * Save user account basic information into the session.
@@ -1160,4 +1039,38 @@ public class TaskHelper
             HibernateUtil.update(p_task);
         }
     }
+
+    /**
+     * Removes a task from the most recently used list.
+     */
+    public static void removeMRUtask(HttpServletRequest request, HttpSession session,
+            String thisTask, HttpServletResponse response)
+    {
+        if (StringUtil.isBlank(thisTask))
+            return;
+
+        String cookieName = JobSearchConstants.MRU_TASKS_COOKIE
+                + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
+        CookieUtil.removeMRU(request, response, session, thisTask, cookieName,
+                JobSearchConstants.MRU_TASKS);
+    }
+
+    /**
+     * Update the session with this most recently used activity. It will become
+     * the first in the list and all the rest moved down. Also check that it
+     * wasn't already in the list. Only allow 3 in the list.
+     */
+    public static void updateMRUtask(HttpServletRequest request, HttpSession session, Task task,
+            HttpServletResponse response, int taskState)
+    {
+        String cookieName = JobSearchConstants.MRU_TASKS_COOKIE
+                + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
+        String displayLocale = task.getSourceLocale().toString() + "->"
+                + task.getTargetLocale().toString();
+        String jobName = task.getJobName();
+        String thisTask = displayLocale + ":" + jobName + ":" + task.getId() + ":" + taskState;
+
+        CookieUtil.updateMRU(request, response, thisTask, cookieName, JobSearchConstants.MRU_TASKS);
+    }
+
 }

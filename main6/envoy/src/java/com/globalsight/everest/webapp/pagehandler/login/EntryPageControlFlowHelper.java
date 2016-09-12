@@ -46,6 +46,7 @@ import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.securitymgr.SecurityManagerException;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.AppletDirectory;
+import com.globalsight.everest.servlet.util.CookieUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -58,15 +59,13 @@ import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
-import com.globalsight.ling.common.URLDecoder;
-import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.log.ActivityLog;
 import com.globalsight.mediasurface.CmsUserInfo;
-import com.globalsight.util.Base64;
 import com.globalsight.util.GeneralException;
-import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.modules.Modules;
+
+import jodd.util.StringUtil;
 
 /**
  * EntryPageControlFlowHelper, A page flow helper which does the 'login
@@ -144,8 +143,11 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         {
             userPassword = m_request
                     .getParameter(WebAppConstants.PASSWORD_NAME_FIELD);
-            if (userPassword != null)
-                userPassword = EditUtil.utf8ToUnicode(userPassword);
+            // Below codes do nothing, just return the parameter value. I don't
+            // know why. Vincent at 09/12/2016
+            // if (userPassword != null)
+            // userPassword = EditUtil.utf8ToUnicode(userPassword);
+            userPassword = StringUtil.isBlank(userPassword) ? "" : userPassword;
         }
 
         // SSO user
@@ -277,20 +279,20 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
 
     private String getCookieValue(Cookie[] cookies, String name)
     {
-        if (cookies == null || name == null)
+        if (cookies == null || cookies.length == 0 || StringUtil.isBlank(name))
         {
-            return null;
+            return "";
         }
 
         for (Cookie cookie : cookies)
         {
-            if (name.equals(cookie.getName()))
+            if (cookie.getName().equals(name))
             {
-                return cookie.getValue();
+                return ServletUtil.stripXss(ServletUtil.decodeUrl(cookie.getValue()), true);
             }
         }
 
-        return null;
+        return "";
     }
 
     /**
@@ -405,10 +407,10 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         loadAdditionalUserInfo(session, p_userId);
 
         // set the most recently used job id's for this user in the session
-        loadJobIds(session, p_userId, JobSearchConstants.MRU_JOBS_COOKIE,
-                JobSearchConstants.MRU_JOBS);
-        loadJobIds(session, p_userId, JobSearchConstants.MRU_TASKS_COOKIE,
-                JobSearchConstants.MRU_TASKS);
+        CookieUtil.loadJobIds(session, p_userId, JobSearchConstants.MRU_JOBS_COOKIE,
+                JobSearchConstants.MRU_JOBS, m_request);
+        CookieUtil.loadJobIds(session, p_userId, JobSearchConstants.MRU_TASKS_COOKIE,
+                JobSearchConstants.MRU_TASKS, m_request);
 
         // Get user's login protocol and port and put these info into session
         int loginPort = m_request.getServerPort();
@@ -428,7 +430,7 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         session.setAttribute(LOGIN_SERVER, loginServer);
 
         // Adds auto login cookie.
-        addAutoLoginCookie(p_userId, p_password);
+        CookieUtil.addAutoLoginCookie(p_userId, p_password, m_response);
 
         // store current logged user info
         try
@@ -447,20 +449,6 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         LoginAttemptController.cleanFailedLoginAttempt(m_request);
 
         return WebAppConstants.LOGIN_PASS;
-    }
-
-    // Adds auto login cookie.
-    private void addAutoLoginCookie(String p_userId, String p_pass)
-    {
-        String cookieName = "autoLogin";
-        int expires = 60 * 60 * 24 * 14;
-        String userName = UserUtil.getUserNameById(p_userId);
-        String pass = Base64.encodeToString(p_pass);
-        pass = URLEncoder.encode(pass);
-        Cookie cookie = new Cookie(cookieName, userName + "|" + pass);
-        cookie.setMaxAge(expires);
-        cookie.setHttpOnly(true);
-        m_response.addCookie(cookie);
     }
 
     /**
@@ -612,41 +600,6 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         }
     }
 
-    /*
-     * Get the user's most recently used jobs and put in the session so the jobs
-     * menu can show them.
-     * 
-     * @param p_session the http session @param p_userId the user id @param
-     * p_cookieName the name of the cookie @param p_sessionConstant the session
-     * attribute name to store the info
-     */
-    private void loadJobIds(HttpSession p_session, String p_userId,
-            String p_cookieName, String p_sessionConstant)
-    {
-        Cookie[] cookies = (Cookie[]) m_request.getCookies();
-        if (cookies != null)
-        {
-            String cookieName = p_cookieName + p_userId.hashCode();
-            for (int i = 0; i < cookies.length; i++)
-            {
-                Cookie cookie = (Cookie) cookies[i];
-                if (cookie.getName().equals(cookieName))
-                {
-                    try
-                    {
-                        p_session.setAttribute(p_sessionConstant,
-                                URLDecoder.decode(ServletUtil.stripXss(cookie.getValue())));
-                    }
-                    catch (Exception e)
-                    {
-                        // do nothing
-                    }
-
-                    break;
-                }
-            }
-        }
-    }
 
     /*
      * Make sure the user's time zone is loaded and stored in the session. This

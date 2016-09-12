@@ -2635,7 +2635,7 @@ public abstract class JobManagementHandler extends PageHandler
             {
                 String cookieName = JobSearchConstants.MINI_JOB_SEARCH_COOKIE
                         + userId.hashCode();
-                Cookie cookie = new Cookie(cookieName, jobSearch.toString());
+                Cookie cookie = new Cookie(cookieName, ServletUtil.stripXss(jobSearch.toString()));
                 sessionMgr.setAttribute(cookieName, cookie);
                 return sp;
             }

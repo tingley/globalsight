@@ -179,8 +179,7 @@ public class TaskFilter
 
         try
         {
-            TaskHelper
-                    .removeMRUtask(p_request, httpSession, cookie, p_response);
+            TaskHelper.removeMRUtask(p_request, httpSession, cookie, p_response);
         }
         catch (Exception e)
         {

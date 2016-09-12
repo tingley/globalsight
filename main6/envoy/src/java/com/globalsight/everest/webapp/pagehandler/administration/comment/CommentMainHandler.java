@@ -53,6 +53,7 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.CookieUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
@@ -62,6 +63,7 @@ import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.util.comparator.TaskCommentInfoComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHelper;
@@ -230,7 +232,12 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                         MessageFormat.format(bundle.getString("msg_bad_task"), args));
                 // remove the task from the most recently used list
                 String menuName = (String) p_request.getParameter("cookie");
-                TaskHelper.removeMRUtask(p_request, session, menuName, p_response);
+
+                String cookieName = JobSearchConstants.MRU_TASKS_COOKIE
+                        + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
+                CookieUtil.removeMRU(p_request, p_response, session, menuName, cookieName,
+                        JobSearchConstants.MRU_TASKS);
+
                 // forward to the jsp page.
                 RequestDispatcher dispatcher = p_context
                         .getRequestDispatcher("/envoy/tasks/taskSearch.jsp");

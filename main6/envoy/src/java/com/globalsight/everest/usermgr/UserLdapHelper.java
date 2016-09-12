@@ -19,9 +19,7 @@ package com.globalsight.everest.usermgr;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
@@ -47,7 +45,6 @@ import com.globalsight.everest.foundation.EmailInformation;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.UserImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * UserLdapHelper, a LDAP Helper class that helps convert data for LDAP
@@ -719,7 +716,7 @@ public class UserLdapHelper extends LdapHelper
      * @param passwd
      * @return
      */
-    static String encyptMD5Password(String passwd)
+    public static String encyptMD5Password(String passwd)
     {
         try
         {
@@ -742,7 +739,7 @@ public class UserLdapHelper extends LdapHelper
      * @param passwd
      * @return
      */
-    static String encyptShaPassword(String passwd)
+    public static String encyptShaPassword(String passwd)
     {
         try
         {

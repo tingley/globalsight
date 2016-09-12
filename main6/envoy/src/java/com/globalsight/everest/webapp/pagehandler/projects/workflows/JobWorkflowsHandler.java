@@ -81,6 +81,7 @@ import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.CookieUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.statistics.StatisticsService;
@@ -499,7 +500,10 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             return;
         }
         // Update the session with this most recently used job
-        jobSummaryHelper.updateMRUJob(p_request, job, p_response);
+        String cookieName = JobSearchConstants.MRU_JOBS_COOKIE
+                + httpSession.getAttribute(WebAppConstants.USER_NAME).hashCode();
+        CookieUtil.updateMRU(p_request, p_response, job.getId() + ":" + job.getJobName(),
+                cookieName, JobSearchConstants.MRU_JOBS);
         super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 

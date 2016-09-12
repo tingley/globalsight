@@ -285,9 +285,9 @@ public class CreateJobUtil
         String zipFilePath = zipFileFullPath.substring(0,
                 zipFileFullPath.indexOf(zipFile.getName()));// path without file
                                                             // name
-        List fileHeaderList = file.getFileHeaders();
         try
         {
+            List fileHeaderList = file.getFileHeaders();
             for (int i = 0; i < fileHeaderList.size(); i++)
             {
                 net.lingala.zip4j.model.FileHeader fileHeader = (net.lingala.zip4j.model.FileHeader) fileHeaderList

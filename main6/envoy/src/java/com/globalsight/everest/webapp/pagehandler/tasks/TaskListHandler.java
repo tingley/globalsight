@@ -1824,8 +1824,7 @@ public class TaskListHandler extends PageHandler
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
         sessionMgr.removeElement(WebAppConstants.WORK_OBJECT);
         // update the MRU list with the changed state
-        TaskHelper.updateMRUtask(p_request, p_session, task, p_response,
-                Task.STATE_REJECTED);
+        TaskHelper.updateMRUtask(p_request, p_session, task, p_response, Task.STATE_REJECTED);
     }
 
     /* Convert the given string into an integer value; if null, or an error */

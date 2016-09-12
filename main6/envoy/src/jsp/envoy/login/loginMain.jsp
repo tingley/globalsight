@@ -154,9 +154,7 @@ if(autoLoginCookie != null && autoLoginCookie.trim().length() > 0)
     if(index > 0)
     {
     	userName = autoLoginCookie.substring(0, index);
-    	passWord = autoLoginCookie.substring(index+1);
-    	passWord = URLDecoder.decode(passWord);
-    	passWord = Base64.decodeToString(passWord);
+    	passWord = "........";
     }
 }
 

@@ -25,7 +25,6 @@ import java.util.ResourceBundle;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -36,8 +35,8 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.servlet.util.CookieUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.usermgr.UserManagerWLRemote;
 import com.globalsight.everest.util.netegrity.Netegrity;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -99,17 +98,7 @@ public class RetrieveUsernamesPassHandler extends PageHandler
         String defaultLocale = (String) p_request
                 .getAttribute(SystemConfigParamNames.DEFAULT_UI_LOCALE);
         // get last uilocale from cookie
-        String cookieUiLocale = "";
-        Cookie[] cookies = p_request.getCookies();
-        if (cookies != null)
-        {
-            for (int i = 0; i < cookies.length; i++)
-            {
-                Cookie cookie = cookies[i];
-                if ("localelang".equals(cookie.getName()))
-                    cookieUiLocale = ServletUtil.stripXss(cookie.getValue());
-            }
-        }
+        String cookieUiLocale = CookieUtil.getCookieValue(p_request, "localelang");
         if (supportedLocales != null && !Arrays.asList(supportedLocales).contains(cookieUiLocale))
             cookieUiLocale = defaultLocale;
         if (cookieUiLocale.equals(""))
@@ -376,13 +365,9 @@ public class RetrieveUsernamesPassHandler extends PageHandler
 
         String[] messageArguments = msgArgsBuffer.toString().split(",");
 
-        // Send mail to all possible users
-        for (User user : users)
-        {
-            result = sendEmail(user, messageArguments,
-                    MailerConstants.LOGIN_RETRIEVE_UESRNAME_SUBJECT,
-                    MailerConstants.LOGIN_RETRIEVE_UESRNAME_MESSAGE);
-        }
+        result = sendEmail(users.get(0), messageArguments,
+                MailerConstants.LOGIN_RETRIEVE_UESRNAME_SUBJECT,
+                MailerConstants.LOGIN_RETRIEVE_UESRNAME_MESSAGE);
 
         if (result)
         {

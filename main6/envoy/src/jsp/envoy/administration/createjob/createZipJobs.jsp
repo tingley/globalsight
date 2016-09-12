@@ -29,6 +29,8 @@
 <style type="text/css">
   .sourceFile{ position:absolute;height:21px;filter:alpha(opacity=0); opacity:0; width:86px;cursor:pointer;}
   .attachmentFile{ position:absolute;height:21px;filter:alpha(opacity=0); opacity:0; width:86px;cursor:pointer;}
+  .jobAttributeBox{position:relative;}
+  .jobAttributeBtn{position:absolute;left:0px; top:2px;}
 </style>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jQuery.md5.js"></script>
@@ -1047,10 +1049,12 @@ function isIE() { //ie?
 		                        <span id="uploadedFileNo" style="display:none">- <c:out value='${lb_uploaded}'/>: 0</span>
 		                        <span id="failedUpload" style="display:none">| <c:out value="${msg_failed}"/>: 0</span>
 		                    </td>
-		                    <td width="80px" align="center"><input id="cleanMap" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_clear_profile}'/>" title="<c:out value='${lb_create_job_clean_map_tip}'/>"></td>
-		                     <td width="80px" align="center">
-		                    	<div id="attributeButtonDIV" style="display:none">
-		                    	<input id="attributeButton" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_job_attributes}'/>" title="<c:out value='${lb_job_attributes}'/>">
+		                    <td width="80px" align="center" >
+		                    	<input id="cleanMap" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_clear_profile}'/>" title="<c:out value='${lb_create_job_clean_map_tip}'/>">
+		                    </td>
+		                    <td width="80px" align="center" class="jobAttributeBox">
+		                    	<div id="attributeButtonDIV" style="display:none" class="jobAttributeBtn">
+		                    		<input id="attributeButton" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_job_attributes}'/>" title="<c:out value='${lb_job_attributes}'/>">
 		                    	</div>
 		                    </td>
 		                </tr>

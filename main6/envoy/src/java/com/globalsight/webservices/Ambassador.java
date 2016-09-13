@@ -2183,6 +2183,13 @@ public class Ambassador extends AbstractWebService
             String srcLocale = findSrcLocale(fileProfileId);
             String path = getRealPath(jobId, filePath, srcLocale, true);
             writeFile(path, bytes, fp.getCompanyId());
+            
+            byte[] previewbytes = (byte[]) args.get("previewbytes");
+            if (previewbytes != null) {
+                String previewPath = filePath + ".p.zip";
+                path = getRealPath(jobId, previewPath, srcLocale, true);
+                writeFile(path, previewbytes, fp.getCompanyId());
+            }
         }
         catch (Exception e)
         {

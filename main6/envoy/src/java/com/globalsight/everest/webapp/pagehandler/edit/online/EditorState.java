@@ -34,6 +34,7 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
@@ -815,6 +816,29 @@ public class EditorState extends PersistentObject implements EditorConstants
     public Long getSourcePageId()
     {
         return m_currentPage.getSourcePageId();
+    }
+    
+    public File getSourcePreviewFile()
+    {
+        long sourcePageId = getSourcePageId();
+        SourcePage sp;
+        try
+        {
+            sp = ServerProxy.getPageManager().getSourcePage(sourcePageId);
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+       
+        File f = sp.getFile();
+        String previewPath = f.getAbsolutePath() + ".p.zip";
+        File previewFile = new File(previewPath);
+        
+        if (!previewFile.exists())
+            return null;
+        
+        return previewFile;
     }
 
     public String getSourcePageName()

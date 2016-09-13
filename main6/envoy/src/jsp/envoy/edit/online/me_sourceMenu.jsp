@@ -99,12 +99,15 @@ case EditorConstants.VIEWMODE_DETAIL:
     break;
 }
 
+long sourcePageId = state.getSourcePageId();
+SourcePage sp = ServerProxy.getPageManager().getSourcePage(sourcePageId);
+boolean hasZipPreviewFile = state.getSourcePreviewFile() != null;
+
 boolean isXMLPreview = false;
 if (pageFormat.equals(IFormatNames.FORMAT_XML))
 {
 	try {
-		long sourcePageId = state.getSourcePageId();
-		SourcePage sp = ServerProxy.getPageManager().getSourcePage(sourcePageId);
+		
 		long fpId = sp.getRequest().getJob().getFileProfile().getId();
 	   	
 		File xslFile = null;
@@ -271,6 +274,11 @@ function doOnload()
       <A id="idXMLPreview" CLASS="HREFBoldWhite" HREF="javascript:showXMLPreview()"
       onfocus="this.blur();"><%=lb_preview%></A> |
 <% } %>
+<% if (hasZipPreviewFile) { %>
+      <A id="idPreview" CLASS="HREFBoldWhite" HREF="javascript:showPreview()"
+      onfocus="this.blur();"><%=lb_preview%></A> |
+<% } %>
+
       <A id="idText" CLASS="HREFBoldWhite" HREF="javascript:showText();"
       onfocus="this.blur();"><%=lb_text%></A> |
       <A id="idList" CLASS="HREFBoldWhite" HREF="javascript:showList();"

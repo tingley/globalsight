@@ -446,6 +446,12 @@ public class JobResource extends RestResource
                 realFilename = AmbFileStoragePathUtils.getCxeDocDir(job.getCompanyId())
                         + File.separator + filename;
                 file = new File(realFilename);
+                if (!file.exists())
+                {
+                    String message = "Corresponding files were not found, please check the correctness of filePath: "
+                            + (String) filePaths.get(i);
+                    throw new RestWebServiceException(message);
+                }
                 if (file.getAbsolutePath().endsWith(".xml"))
                 {
                     saveFileAsUTF8(file);
@@ -873,9 +879,6 @@ public class JobResource extends RestResource
             }
             validateParameters(job, p_filePaths, p_fileProfileIds, p_targetLocales, fileProfileIds,
                     filePaths, targetLocales, true);
-            boolean is7zFile = false;
-            boolean isRarFile = false;
-            boolean isZipFile = false;
             fpId = (String) fileProfileIds.get(0);
             for (int i = 0; i < filePaths.size(); i++)
             {

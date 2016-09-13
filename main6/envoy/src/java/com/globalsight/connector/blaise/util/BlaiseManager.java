@@ -63,14 +63,25 @@ public class BlaiseManager
         return HibernateUtil.get(BlaiseConnector.class, blaiseConnectorId);
     }
 
-    public static BlaiseConnectorJob getBlaiseConnectorJobByJobId(long jobId)
+    @SuppressWarnings("unchecked")
+    public static List<BlaiseConnectorJob> getBlaiseConnectorJobByJobId(long jobId)
     {
     	String hql = "from BlaiseConnectorJob bcj where bcj.jobId = " + jobId;
-    	return (BlaiseConnectorJob) HibernateUtil.getFirst(hql);
+        return (List<BlaiseConnectorJob>) HibernateUtil.search(hql);
     }
 
-    public static Map<Long, List<Long>> getEntryId2JobIdsMap(
-			List<Long> entryIds, long blaiseConnectorId) throws Exception
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static BlaiseConnectorJob getBlaiseConnectorJobByJobIdEntryId(long jobId, long entryId)
+    {
+        String hql = "from BlaiseConnectorJob bcj where bcj.jobId = :jobId and bcj.blaiseEntryId = :blaiseEntryId";
+        Map map = new HashMap();
+        map.put("jobId", jobId);
+        map.put("blaiseEntryId", entryId);
+        return (BlaiseConnectorJob) HibernateUtil.getFirst(hql, map);
+    }
+
+    public static Map<Long, List<Long>> getEntryId2JobIdsMap(List<Long> entryIds,
+            long blaiseConnectorId) throws Exception
     {
 		Map<Long, List<Long>> entryId2JobIdsMap = new HashMap<Long, List<Long>>();
 		if (entryIds == null || entryIds.size() == 0)
@@ -93,25 +104,30 @@ public class BlaiseManager
 			ps = conn.prepareStatement(sql);
 			ps.setLong(1, blaiseConnectorId);
 			rs = ps.executeQuery();
-			while (rs.next())
-			{
-				long entryId = rs.getLong(1);
-				long jobId = rs.getLong(2);
-				List<Long> jobIds = entryId2JobIdsMap.get(entryId);
-				if (jobIds == null) {
-					jobIds = new ArrayList<Long>();
-				}
-				jobIds.add(jobId);
-				entryId2JobIdsMap.put(entryId, jobIds);
-			}
-		} catch (Exception e) {
-			logger.error(e);
-			throw e;
-		} finally {
-			DbUtil.silentClose(rs);
-			DbUtil.silentClose(ps);
-			DbUtil.silentReturnConnection(conn);
-		}
+            while (rs.next())
+            {
+                long entryId = rs.getLong(1);
+                long jobId = rs.getLong(2);
+                List<Long> jobIds = entryId2JobIdsMap.get(entryId);
+                if (jobIds == null)
+                {
+                    jobIds = new ArrayList<Long>();
+                }
+                jobIds.add(jobId);
+                entryId2JobIdsMap.put(entryId, jobIds);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            throw e;
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(conn);
+        }
 
 		return entryId2JobIdsMap;
     }

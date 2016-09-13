@@ -35,7 +35,12 @@ public class TranslationInboxEntryVo
 	// GlobalSight Job ID if job created
 	private List<Long> jobIds = null;
 
-    public TranslationInboxEntryVo(TranslationInboxEntry entry) throws Exception
+	// for junit test only
+	public TranslationInboxEntryVo()
+	{
+	}
+
+	public TranslationInboxEntryVo(TranslationInboxEntry entry) throws Exception
 	{
 		if (entry == null)
 		{
@@ -172,9 +177,35 @@ public class TranslationInboxEntryVo
 		this.jobIds = jobIds;
 	}
 
-	// Utility method
+	//
+	// Utility methods
+	//
+
 	public String getJobIdsForDisplay()
 	{
 		return BlaiseManager.listToString(jobIds);
+	}
+
+	public String getJobIdLinks()
+	{
+	    if (this.jobIds == null || this.jobIds.size() == 0)
+	        return "";
+
+	    StringBuffer links = new StringBuffer();
+        for (int i = 0; i < jobIds.size(); i++)
+	    {
+	        long jobId = jobIds.get(i);
+	        links.append("<a class='standardHREF' ");
+	        links.append("target='_blank' ");
+	        links.append("href='/globalsight/ControlServlet?linkName=jobDetails&pageName=DTLS&jobId=").append(jobId).append("'>");
+	        links.append(jobId);
+	        links.append("</a>");
+
+	        if (i < jobIds.size() - 1)
+	        {
+	            links.append(", ");
+	        }
+	    }
+	    return links.toString();
 	}
 }

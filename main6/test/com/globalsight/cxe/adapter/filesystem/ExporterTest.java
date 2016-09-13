@@ -5,12 +5,15 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
 import com.globalsight.everest.unittest.util.FileUtil;
 import com.globalsight.everest.util.system.MockEnvoySystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfiguration;
@@ -146,4 +149,29 @@ public class ExporterTest
         assertEquals("login.note=Note3\r\n\t:", result);
     }
 
+    @Test
+    public void testFindExpectedEntry()
+    {
+        String finalFileName = "C:/GlobalSight/_Docs/York/zh_CN/1234/2222/Blaise ID 355767 - 4 - 2017 Harley-Davidson Job Time Codes - Chinese (China) - zh_CN.xlf";
+        BlaiseConnectorJob bcj1 = new BlaiseConnectorJob();
+        bcj1.setJobId(1234);
+        bcj1.setBlaiseEntryId(1111);
+
+        BlaiseConnectorJob bcj2 = new BlaiseConnectorJob();
+        bcj2.setJobId(1234);
+        bcj2.setBlaiseEntryId(2222);
+
+        BlaiseConnectorJob bcj3 = new BlaiseConnectorJob();
+        bcj3.setJobId(1234);
+        bcj3.setBlaiseEntryId(3333);
+
+        List<BlaiseConnectorJob> blaiseJobEntries = new ArrayList<BlaiseConnectorJob>();
+        blaiseJobEntries.add(bcj1);
+        blaiseJobEntries.add(bcj2);
+        blaiseJobEntries.add(bcj3);
+
+        BlaiseConnectorJob result = (BlaiseConnectorJob) ClassUtil.testMethod(exporter,
+                "findExpectedEntry", finalFileName, blaiseJobEntries);
+        Assert.assertEquals(2222, result.getBlaiseEntryId());
+    }
 }

@@ -39,6 +39,7 @@ import org.apache.log4j.Logger;
 import com.cognitran.blaise.translation.api.ClientFactory;
 import com.cognitran.blaise.translation.api.TranslationAgencyClient;
 import com.cognitran.client.IncompatibleVersionException;
+import com.cognitran.core.model.util.Collections;
 import com.cognitran.translation.client.TranslationPageCommand;
 import com.cognitran.translation.client.workflow.TranslationInboxEntry;
 import com.cognitran.workflow.client.InboxEntry;
@@ -314,18 +315,19 @@ public class BlaiseHelper
 			client.uploadXliff(entryId, is);
             logger.info("Blaise file is uploaded successfully for entryId: " + entryId);
 
-            updateUploadXliffSuccess(jobId);
+            updateUploadXliffSuccess(jobId, entryId);
 		}
 		catch (Exception e)
 		{
-		    updateUploadXliffFail(jobId);
+		    updateUploadXliffFail(jobId, entryId);
 			logger.error("Error when uploadXliff for job:" + jobId, e);
 		}
 	}
 
-	private void updateUploadXliffSuccess(long jobId)
+	private void updateUploadXliffSuccess(long jobId, long blaiseEntryId)
 	{
-        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(jobId);
+        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobIdEntryId(jobId,
+                blaiseEntryId);
         if (bcj != null)
         {
             bcj.setUploadXliffState(BlaiseConnectorJob.SUCCEED);
@@ -333,9 +335,10 @@ public class BlaiseHelper
         }
 	}
 
-    private void updateUploadXliffFail(long jobId)
+    private void updateUploadXliffFail(long jobId, long blaiseEntryId)
     {
-        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(jobId);
+        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobIdEntryId(jobId,
+                blaiseEntryId);
         if (bcj != null)
         {
             bcj.setUploadXliffState(BlaiseConnectorJob.FAIL);
@@ -362,18 +365,19 @@ public class BlaiseHelper
 		    client.complete(id);
             logger.info("Blaise entry is completed successfully: " + id);
 
-            updateCompleteSuccess(jobId);
+            updateCompleteSuccess(jobId, id);
 		}
 		catch (Exception e)
 		{
-		    updateCompleteFail(jobId);
+		    updateCompleteFail(jobId, id);
 			logger.error("Failed to complete entry for job: " + jobId, e);
 		}
     }
 
-	private void updateCompleteSuccess(long jobId)
+	private void updateCompleteSuccess(long jobId, long blaiseEntryId)
 	{
-        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(jobId);
+        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobIdEntryId(jobId,
+                blaiseEntryId);
         if (bcj != null)
         {
             bcj.setCompleteState(BlaiseConnectorJob.SUCCEED);
@@ -381,9 +385,10 @@ public class BlaiseHelper
         }
 	}
 
-	private void updateCompleteFail(long jobId)
+	private void updateCompleteFail(long jobId, long blaiseEntryId)
 	{
-        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(jobId);
+        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobIdEntryId(jobId,
+                blaiseEntryId);
         if (bcj != null)
         {
             bcj.setCompleteState(BlaiseConnectorJob.FAIL);
@@ -627,6 +632,38 @@ public class BlaiseHelper
 		fileName = fileName.substring(0, fileName.lastIndexOf("."));
 		return fileName + "_XLF";
 	}
+
+    public static String getEntriesJobName(List<TranslationInboxEntryVo> entries)
+    {
+        List<Long> relatedObjectIds = new ArrayList<Long>();
+        for (TranslationInboxEntryVo entry : entries)
+        {
+            long blaiseId = entry.getRelatedObjectId();
+            if (relatedObjectIds.contains(blaiseId))
+                continue;
+
+            relatedObjectIds.add(blaiseId);
+        }
+        Collections.sort(relatedObjectIds);
+        StringBuilder ids = new StringBuilder();
+        for (Long id : relatedObjectIds)
+        {
+            if (ids.length() < 60)
+            {
+                ids.append(id).append(" ");
+            }
+        }
+
+        StringBuilder jobName = new StringBuilder();
+        jobName.append("Blaise IDs (");
+        jobName.append(ids.toString().trim()).append(")");
+        jobName.append(DASH);
+        jobName.append(fixLocale(entries.get(0).getEntry().getSourceLocale().getLocaleCode()));
+        jobName.append(DASH);
+        jobName.append(fixLocale(entries.get(0).getEntry().getTargetLocale().getLocaleCode()));
+
+        return handleFileName(jobName.toString());
+    }
 
 	private static String handleFileName(String fileName)
 	{

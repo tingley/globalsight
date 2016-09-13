@@ -803,7 +803,7 @@ $(document).ready(function ()
 		            </amb:column>
 
 		            <amb:column label="lb_job_id" filter="jobIdFilter" filterValue="<%=jobIdFilter%>" width="25%">
-			            <%=blaiseInboxEntry.getJobIdsForDisplay() == null ? "" : blaiseInboxEntry.getJobIdsForDisplay()%>
+			            <%=blaiseInboxEntry.getJobIdLinks()%>
 		            </amb:column>
 
 		        	</amb:table>
@@ -881,7 +881,9 @@ $(document).ready(function ()
                                         	<input id="cleanMap" type="button" class="standardBtn_mouseout" style="width:90px;" value="<c:out value='${lb_clear_profile}'/>" title="<c:out value='${lb_create_job_clean_map_tip}'/>">
                                         </td>
                                         <td colspan="2" style="border-top:1px solid #0C1476;" align="left" valign="middle">
-                                        	<input id="attributeButton" type="button" class="standardBtn_mouseout" style="width:90px;" value="<c:out value='${lb_job_attributes}'/>" title="<c:out value='${lb_job_attributes}'/>">
+                                        	<input id="attributeButton" type="button" class="standardBtn_mouseout" style="width:90px;" value="<c:out value='${lb_job_attributes}'/>" title="<c:out value='${lb_job_attributes}'/>">&nbsp;&nbsp;
+                                        	<input id="combineByLangs" name="combineByLangs" type="checkbox" style="vertical-align:middle;" checked />
+                                        	<span class="footertext" style="vertical-align:middle; padding-left: 0px"><c:out value='${lb_blaise_combine_by_languages}'/></span>
                                         </td>
 	                                </tr>
 	                            </table>

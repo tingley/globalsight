@@ -641,11 +641,12 @@ public class Exporter
         try
         {
             long jobId = wf.getJob().getJobId();
-            BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(jobId);
+            List<BlaiseConnectorJob> blaiseJobEntries =
+                    BlaiseManager.getBlaiseConnectorJobByJobId(jobId);
+            BlaiseConnectorJob bcj = findExpectedEntry(finalFileName, blaiseJobEntries);
             if (bcj != null)
             {
-                BlaiseConnector blc = BlaiseManager
-                        .getBlaiseConnectorById(bcj.getBlaiseConnectorId());
+                BlaiseConnector blc = BlaiseManager.getBlaiseConnectorById(bcj.getBlaiseConnectorId());
                 if (blc != null)
                 {
                     finalFileName = finalFileName.replace("/", "\\");
@@ -659,6 +660,29 @@ public class Exporter
         {
             logger.error(e);
         }
+    }
+
+    /**
+     * Find corresponding BlaiseConnectorJob object by jobId and Blaise entry ID for
+     * current file.
+     */
+    private BlaiseConnectorJob findExpectedEntry(String finalFileName,
+            List<BlaiseConnectorJob> blaiseJobEntries)
+    {
+        if (blaiseJobEntries != null && blaiseJobEntries.size() > 0)
+        {
+            finalFileName = finalFileName.replace("/", "\\");
+            for (BlaiseConnectorJob bcj : blaiseJobEntries)
+            {
+                String flagContent = "\\" + bcj.getJobId() + "\\" + bcj.getBlaiseEntryId() + "\\";
+                if (finalFileName.indexOf(flagContent) > -1)
+                {
+                    return bcj;
+                }
+            }
+        }
+
+        return null;
     }
 
     private void handleGitConnectorFiles(String finalFileName, Workflow wf, String sourceLocale)

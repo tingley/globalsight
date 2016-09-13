@@ -183,14 +183,15 @@ public class JobSummaryHelper
 
         if (job.isBlaiseJob())
         {
-            BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(job.getId());
-            if (bcj != null)
-            {
-                p_request.setAttribute("blaiseUploadXliffState", bcj.getUploadXliffState());
-                p_request.setAttribute("blaiseCompleteState", bcj.getCompleteState());
-            }
+            List<BlaiseConnectorJob> blaiseJobEntries = BlaiseManager
+                    .getBlaiseConnectorJobByJobId(job.getId());
+            p_request.setAttribute("blaiseUploadXliffState",
+                    decideBlaiseUploadState(blaiseJobEntries));
+            p_request.setAttribute("blaiseCompleteState",
+                    decideBlaiseCompleteState(blaiseJobEntries));
         }
-		// Edit Source page word counts and edit costs page needed
+
+        // Edit Source page word counts and edit costs page needed
 		sessionMgr.setAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET,
 				job.getJobName());
 	}
@@ -638,5 +639,109 @@ public class JobSummaryHelper
         boolean jobQuoteStatusView = perms.getPermissionFor(Permission.JOB_QUOTE_STATUS_VIEW);
         
         return jobCostingView || jobQuoteSend || jobQuotePonumberView || jobQuoteApprove || jobQuoteStatusView;
+    }
+
+    /**
+     * 1. One fail, all fail;
+     * 2. One null, all null;
+     * 3. All succeed, then succeed;
+     */
+    private String decideBlaiseUploadState(List<BlaiseConnectorJob> blaiseJobEntries)
+    {
+        if (blaiseJobEntries != null && blaiseJobEntries.size() > 0)
+        {
+            if (hasUploadFail(blaiseJobEntries))
+            {
+                return BlaiseConnectorJob.FAIL;
+            }
+            else if (hasUploadNullState(blaiseJobEntries))
+            {
+                return null;
+            }
+            else
+            {
+                return BlaiseConnectorJob.SUCCEED;
+            }
+        }
+
+        return null;
+    }
+
+    // One fail, all fail
+    private boolean hasUploadFail(List<BlaiseConnectorJob> blaiseJobEntries)
+    {
+        for (BlaiseConnectorJob bcj : blaiseJobEntries)
+        {
+            if (BlaiseConnectorJob.FAIL.equalsIgnoreCase(bcj.getUploadXliffState()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // One null, all null
+    private boolean hasUploadNullState(List<BlaiseConnectorJob> blaiseJobEntries)
+    {
+        for (BlaiseConnectorJob bcj : blaiseJobEntries)
+        {
+            if (bcj.getUploadXliffState() == null)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 1. One fail, all fail;
+     * 2. One null, all null;
+     * 3. All succeed, then succeed;
+     */
+    private String decideBlaiseCompleteState(List<BlaiseConnectorJob> blaiseJobEntries)
+    {
+        if (blaiseJobEntries != null && blaiseJobEntries.size() > 0)
+        {
+            if (hasCompleteFail(blaiseJobEntries))
+            {
+                return BlaiseConnectorJob.FAIL;
+            }
+            else if (hasCompleteNullState(blaiseJobEntries))
+            {
+                return null;
+            }
+            else
+            {
+                return BlaiseConnectorJob.SUCCEED;
+            }
+        }
+
+        return null;
+    }
+
+    // One fail, all fail
+    private boolean hasCompleteFail(List<BlaiseConnectorJob> blaiseJobEntries)
+    {
+        for (BlaiseConnectorJob bcj : blaiseJobEntries)
+        {
+            if (BlaiseConnectorJob.FAIL.equalsIgnoreCase(bcj.getCompleteState()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // One null, all null
+    private boolean hasCompleteNullState(List<BlaiseConnectorJob> blaiseJobEntries)
+    {
+        for (BlaiseConnectorJob bcj : blaiseJobEntries)
+        {
+            if (bcj.getCompleteState() == null)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

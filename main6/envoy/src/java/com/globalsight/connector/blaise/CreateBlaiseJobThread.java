@@ -53,8 +53,7 @@ import com.globalsight.webservices.attribute.AddJobAttributeThread;
 
 public class CreateBlaiseJobThread  extends Thread
 {
-	static private final Logger logger = Logger
-			.getLogger(CreateBlaiseJobThread.class);
+    static private final Logger logger = Logger.getLogger(CreateBlaiseJobThread.class);
 
     private User user;
     private String currentCompanyId;
@@ -64,14 +63,13 @@ public class CreateBlaiseJobThread  extends Thread
     private String attachFileName;
     private String uuid;
     List<JobAttribute> jobAttribtues = null;
-    private TranslationInboxEntryVo curEntry = null;
-    private FileProfile curFileProfile = null;
+    private List<TranslationInboxEntryVo> entries = new ArrayList<TranslationInboxEntryVo>();
+    private List<FileProfile> fileProfiles = new ArrayList<FileProfile>();
 
-	public CreateBlaiseJobThread(User user, String currentCompanyId,
-			BlaiseConnector conn, CreateBlaiseJobForm blaiseForm,
-			TranslationInboxEntryVo curEntry, FileProfile curFileProfile,
-			File attachFile, String attachFileName, String uuid,
-			List<JobAttribute> jobAttribtues)
+    public CreateBlaiseJobThread(User user, String currentCompanyId, BlaiseConnector conn,
+            CreateBlaiseJobForm blaiseForm, List<TranslationInboxEntryVo> entries,
+            List<FileProfile> fileProfiles, File attachFile, String attachFileName, String uuid,
+            List<JobAttribute> jobAttribtues)
     {
         super();
 
@@ -83,41 +81,45 @@ public class CreateBlaiseJobThread  extends Thread
         this.attachFileName = attachFileName;
         this.uuid = uuid;
         this.jobAttribtues = jobAttribtues;
-        this.curEntry = curEntry;
-        this.curFileProfile = curFileProfile;
+        this.entries = entries;
+        this.fileProfiles = fileProfiles;
     }
 
     private void createJob() throws Exception
     {
         try
         {
-            String jobName = BlaiseHelper.getEntryJobName(curEntry);
+            String jobName = null;
+            if (entries.size() == 1)
+            {
+                jobName = BlaiseHelper.getEntryJobName(entries.get(0));
+            }
+            else
+            {
+                jobName = BlaiseHelper.getEntriesJobName(entries);
+            }
             jobName = addJobNameSuffix(jobName);
+
             String comment = blaiseForm.getComment();
             String priority = blaiseForm.getPriority();
 
-            long l10Id = curFileProfile.getL10nProfileId();
-            BasicL10nProfile l10Profile = HibernateUtil.get(
-                    BasicL10nProfile.class, l10Id);
+            long l10Id = fileProfiles.get(0).getL10nProfileId();
+            BasicL10nProfile l10Profile = HibernateUtil.get(BasicL10nProfile.class, l10Id);
             String sourceLocaleName = l10Profile.getSourceLocale().getLocaleCode();
 
-            Locale trgLocale = curEntry.getTargetLocale();
+            Locale trgLocale = entries.get(0).getTargetLocale();
             String targetLocale = trgLocale.getLanguage() + "_" + trgLocale.getCountry();
             targetLocale = BlaiseHelper.fixLocale(targetLocale);
 
-			Job job = JobCreationMonitor.initializeJob(jobName, uuid,
-					user.getUserId(), l10Id, priority, Job.IN_QUEUE,
-					Job.JOB_TYPE_BLAISE);
+            Job job = JobCreationMonitor.initializeJob(jobName, uuid, user.getUserId(), l10Id,
+                    priority, Job.IN_QUEUE, Job.JOB_TYPE_BLAISE);
 
-            // init files and file profiles infomation
+            // Initialize files and file profiles information
             List<String> descList = new ArrayList<String>();
-			retrieveRealFileFromBlaiseServer(descList, job, curEntry,
-					sourceLocaleName);
+            retrieveRealFileFromBlaiseServer(descList, job, entries, sourceLocaleName);
 
-            List<FileProfile> fpList = new ArrayList<FileProfile>();
-            fpList.add(curFileProfile);
-			Map<String, long[]> filesToFpId = FileProfileUtil
-					.excuteScriptOfFileProfile(descList, fpList, job);
+            Map<String, long[]> filesToFpId = FileProfileUtil.excuteScriptOfFileProfile(descList,
+                    fileProfiles, job);
 
             Set<String> fileNames = filesToFpId.keySet();
             Integer pageCount = new Integer(fileNames.size());
@@ -138,9 +140,8 @@ public class CreateBlaiseJobThread  extends Thread
 
                 String key = jobName + fileName + ++count;
                 CxeProxy.setTargetLocales(key, targetLocale);
-                CxeProxy.importFromFileSystem(fileName,
-                        String.valueOf(job.getId()), jobName, fileProfileId,
-                        pageCount, count, 1, 1, Boolean.TRUE, Boolean.FALSE,
+                CxeProxy.importFromFileSystem(fileName, String.valueOf(job.getId()), jobName,
+                        fileProfileId, pageCount, count, 1, 1, Boolean.TRUE, Boolean.FALSE,
                         CxeProxy.IMPORT_TYPE_L10N, exitValue, priority);
             }
 
@@ -151,33 +152,35 @@ public class CreateBlaiseJobThread  extends Thread
             }
 
             // save job comment
-            if (!StringUtils.isEmpty(comment)
-                    || !StringUtils.isEmpty(attachFileName))
+            if (!StringUtils.isEmpty(comment) || !StringUtils.isEmpty(attachFileName))
             {
-                String dir = convertFilePath(AmbFileStoragePathUtils
-                        .getFileStorageDirPath(currentCompanyId))
-                        + File.separator
-                        + "GlobalSight"
-                        + File.separator
-                        + "CommentReference"
-                        + File.separator + "tmp" + File.separator + uuid;
-                File src = new File(dir + File.separator + attachFileName);
+                StringBuilder dir = new StringBuilder();
+                dir.append(convertFilePath(AmbFileStoragePathUtils
+                        .getFileStorageDirPath(currentCompanyId)));
+                dir.append(File.separator).append("GlobalSight");
+                dir.append(File.separator).append("CommentReference");
+                dir.append(File.separator).append("tmp");
+                dir.append(File.separator).append(uuid);
+                File src = new File(dir.toString() + File.separator + attachFileName);
                 if (attachFile != null)
                 {
                     FileUtil.copyFile(attachFile, src);
                 }
 
-                SaveCommentThread sct = new SaveCommentThread(jobName, comment,
-                		attachFileName, user.getUserId(), dir);
+                SaveCommentThread sct = new SaveCommentThread(jobName, comment, attachFileName,
+                        user.getUserId(), dir.toString());
                 sct.start();
             }
 
             // Record this
-            BlaiseConnectorJob bcj = new BlaiseConnectorJob();
-            bcj.setBlaiseConnectorId(this.connector.getId());
-            bcj.setBlaiseEntryId(this.curEntry.getId());
-            bcj.setJobId(job.getId());
-            HibernateUtil.saveOrUpdate(bcj);
+            for (TranslationInboxEntryVo entry : entries)
+            {
+                BlaiseConnectorJob bcj = new BlaiseConnectorJob();
+                bcj.setBlaiseConnectorId(this.connector.getId());
+                bcj.setBlaiseEntryId(entry.getId());
+                bcj.setJobId(job.getId());
+                HibernateUtil.saveOrUpdate(bcj);
+            }
         }
         catch (FileNotFoundException ex)
         {
@@ -194,34 +197,39 @@ public class CreateBlaiseJobThread  extends Thread
 	 * [entryId]\[entry file name]". A sample is "en_US\96\blaise entry id
 	 * 100\Blaise inbox entry - Markets - 1 - 32 - no_NO.xlf".
 	 */
-	private void retrieveRealFileFromBlaiseServer(List<String> descList,
-			Job job, TranslationInboxEntryVo curEntry, String sourceLocale)
+    private void retrieveRealFileFromBlaiseServer(List<String> descList, Job job,
+            List<TranslationInboxEntryVo> entries, String sourceLocale)
     {
-		StringBuffer filePath = new StringBuffer();
-		filePath.append(sourceLocale).append(File.separator)
-				.append(job.getId()).append(File.separator)
-				.append(curEntry.getId()).append(File.separator)
-				.append(BlaiseHelper.getEntryFileName(curEntry));
-		String externalPageId = filePath.toString();
-		descList.add(externalPageId);
-
-		File srcFile = new File(
-				AmbFileStoragePathUtils.getCxeDocDir(currentCompanyId)
-						+ File.separator + externalPageId);
-        if (!srcFile.exists())
+        for (TranslationInboxEntryVo curEntry : entries)
         {
-        	srcFile.getParentFile().mkdirs();
+            StringBuffer filePath = new StringBuffer();
+            filePath.append(sourceLocale);
+            filePath.append(File.separator);
+            filePath.append(job.getId());
+            filePath.append(File.separator);
+            filePath.append(curEntry.getId());
+            filePath.append(File.separator);
+            filePath.append(BlaiseHelper.getEntryFileName(curEntry));
+            String externalPageId = filePath.toString();
+            descList.add(externalPageId);
+
+            File srcFile = new File(AmbFileStoragePathUtils.getCxeDocDir(currentCompanyId)
+                    + File.separator + externalPageId);
+            if (!srcFile.exists())
+            {
+                srcFile.getParentFile().mkdirs();
+            }
+            BlaiseHelper helper = new BlaiseHelper(connector);
+            logger.info("Downloading Blaise file " + srcFile.getAbsolutePath());
+            helper.downloadXliff(curEntry, srcFile);
         }
-		BlaiseHelper helper = new BlaiseHelper(connector);
-		helper.downloadXliff(curEntry, srcFile);
     }
 
     private String convertFilePath(String path)
     {
         if (path != null)
         {
-            return path.replace("\\", File.separator).replace("/",
-                    File.separator);
+            return path.replace("\\", File.separator).replace("/", File.separator);
         }
         else
         {
@@ -238,11 +246,11 @@ public class CreateBlaiseJobThread  extends Thread
      * @param l10Profile
      * @throws ParseException
      */
-    private void saveAttributes(List<JobAttribute> jobAttributeList,
-            String currentCompanyId, Job job)
+    private void saveAttributes(List<JobAttribute> jobAttributeList, String currentCompanyId,
+            Job job)
     {
-        AddJobAttributeThread thread = new AddJobAttributeThread(
-                ((JobImpl) job).getUuid(), currentCompanyId);
+        AddJobAttributeThread thread = new AddJobAttributeThread(((JobImpl) job).getUuid(),
+                currentCompanyId);
         thread.setJobAttributes(jobAttributeList);
         thread.createJobAttributes();
     }
@@ -250,9 +258,10 @@ public class CreateBlaiseJobThread  extends Thread
     private String addJobNameSuffix(String jobName)
     {
         String randomStr = String.valueOf((new Random()).nextInt(999999999));
-		while (randomStr.length() < 9) {
-			randomStr = "0" + randomStr;
-		}
+        while (randomStr.length() < 9)
+        {
+            randomStr = "0" + randomStr;
+        }
         return jobName + "_" + randomStr;
     }
 

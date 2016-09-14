@@ -137,6 +137,7 @@ public class ServletUtil extends jodd.servlet.ServletUtil
         }
         catch (Exception e)
         {
+            result = defaultValue;
             logger.error("Cannot parse string " + str + " to integer.", e);
         }
 

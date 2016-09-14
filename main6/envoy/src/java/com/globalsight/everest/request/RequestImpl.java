@@ -33,8 +33,6 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.cxe.entity.fileprofile.FileProfile;
-import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
@@ -56,8 +54,7 @@ public class RequestImpl extends PersistentObject implements Request,
     private static final long serialVersionUID = -6730612010738702678L;
 
     // static class variables
-    private static Logger c_logger = Logger.getLogger(RequestImpl.class
-            .getName());
+    private static Logger c_logger = Logger.getLogger(RequestImpl.class.getName());
 
     // constants used for TOPLink queries - should match the values below
     public static final String ID = M_ID;
@@ -929,19 +926,6 @@ public class RequestImpl extends PersistentObject implements Request,
                     break;
                 }
             }
-        }
-    }
-    
-    public boolean isInactiveFpId(Long id)
-    {
-        FileProfile fp = HibernateUtil.get(FileProfileImpl.class, id, true);
-        if (fp != null)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
         }
     }
 

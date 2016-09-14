@@ -23,14 +23,12 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -50,7 +48,6 @@ import com.globalsight.everest.page.pageexport.ExportBatchEvent;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.page.pageexport.ExportEventObserverHelper;
 import com.globalsight.everest.page.pageexport.ExportParameters;
-import com.globalsight.everest.projecthandler.ProjectHandlerException;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFileState;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -552,16 +549,22 @@ public class CapExportServlet extends HttpServlet
             }
         }
 
-        sendEmail(tp, state);
+        sendWorkflowCompleteEmail(tp, state);
     }
 
-    private void sendEmail(TargetPage targetPage, String state)
-            throws ProjectHandlerException, RemoteException, GeneralException,
-            NamingException
+    // Send workflow complete mail
+    private void sendWorkflowCompleteEmail(TargetPage targetPage, String state)
     {
-        Job job = targetPage.getWorkflowInstance().getJob();
-        ServerProxy.getWorkflowServer().advanceWorkFlowNotification(
-                targetPage.getWorkflowInstance().getId() + job.getJobName(), state);
+        String wfState = targetPage.getWorkflowInstance().getState();
+        // Send mail only after workflow state has been changed to either of
+        // below two.
+        if (Workflow.EXPORTED.equalsIgnoreCase(wfState)
+                || Workflow.EXPORT_FAILED.equalsIgnoreCase(wfState))
+        {
+            Job job = targetPage.getWorkflowInstance().getJob();
+            String key = targetPage.getWorkflowInstance().getId() + job.getJobName();
+            ServerProxy.getWorkflowServer().advanceWorkFlowNotification(key, state);
+        }
     }
 
     // Let the export event observer set the state of the exported page to either

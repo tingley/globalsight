@@ -79,13 +79,6 @@ public interface Request
     public long getDataSourceId();
     
     /**
-     * Return true if fileprofile id is active and exsit.
-     * 
-     * @return boolean  
-     */
-    public boolean isInactiveFpId(Long id);
-
-    /**
      * Returns the Event Flow XML associated with this request. This information
      * is needed by CXE when the request is finished being localized and must be
      * exported to CXE.

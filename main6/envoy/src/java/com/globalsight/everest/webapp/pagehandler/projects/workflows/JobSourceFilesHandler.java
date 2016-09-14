@@ -42,6 +42,7 @@ import org.apache.log4j.Logger;
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
+import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
 import com.globalsight.cxe.persistence.databaseprofile.DatabaseProfilePersistenceManager;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
@@ -162,6 +163,9 @@ public class JobSourceFilesHandler extends PageHandler implements
             JobSourcePageDisplay jobSourcePageDisplay = new JobSourcePageDisplay(sourcePage);
             jobSourcePageDisplay.setPageUrl(getPageUrl(job, sourcePage));
             jobSourcePageDisplay.setDataSourceName(getDataSourceName(sourcePage));
+            long fpId = sourcePage.getRequest().getDataSourceId();
+            jobSourcePageDisplay.setActiveFileProfile(FileProfileUtil.isActiveFileProfile(fpId));
+            jobSourcePageDisplay.setUiFileProfileId(FileProfileUtil.getRealFileProfileId(fpId));
             jobSourcePageDisplay.setWordCountOverriden(sourcePage.isWordCountOverriden());
             jobSourcePageDisplay.setSourceLink(getSourceLink(sourcePage));
             if (sourcePage.getUnextractedFile() != null)

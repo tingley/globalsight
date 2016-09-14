@@ -265,7 +265,8 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
             else if (originalTarget.trim().isEmpty())
             {
                 // from max score alt trans target content
-                if (lm.getProjectTmIndex() == Leverager.XLIFF_PRIORITY)
+                if (lm.getProjectTmIndex() == Leverager.XLIFF_PRIORITY
+                        || lm.getProjectTmIndex() == Leverager.XLIFF_ALT_TRANS_PRIORITY)
                 {
                     return false;
                 }

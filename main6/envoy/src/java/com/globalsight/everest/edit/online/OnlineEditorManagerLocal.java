@@ -17,9 +17,6 @@
 package com.globalsight.everest.edit.online;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,8 +32,6 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
 
@@ -121,9 +116,6 @@ import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
-import com.globalsight.util.zip.ZipIt;
-
-import sun.misc.BASE64Encoder;
 
 /**
  * OnlineEditorManagerLocal implements the OnlineEditorManager server interface
@@ -830,51 +822,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         try
         {
             SourcePage srcPage = getSourcePage(p_srcPageId);
-            if (p_options.getViewMode() == VIEWMODE_PREVIEW)
+            File previewFile = new File(AmbFileStoragePathUtils.getCxeDocDirPath()  + "/" + srcPage.getExternalPageId() + ".preview.html");
+            if (p_options.getViewMode() == VIEWMODE_PREVIEW && previewFile.exists())
             {
-                
-                File previewFile = new File(AmbFileStoragePathUtils.getCxeDocDirPath()  + "/" + srcPage.getExternalPageId() + ".preview.html");
-                if (previewFile.exists()) 
-                {
-                    result = GxmlUtil.cleanUpDisplayHtml(FileUtil.readFile(previewFile, "UTF-8"));
-                    return result;
-                }
-                
-                //for aem
-                File previewZipFile = new File(AmbFileStoragePathUtils.getCxeDocDirPath()  + "/" + srcPage.getExternalPageId() + ".p.zip");
-                if (previewZipFile.exists()) 
-                {
-                    File file = new File(srcPage.getExternalPageId());
-                    String oname = file.getName();
-                    int n = oname.lastIndexOf(".");
-                    oname = oname.substring(0, n);
-                    n = oname.lastIndexOf(".");
-                    oname = oname.substring(n + 1);
-                    
-                    ArrayList<String> zipfs = ZipIt.unpackZipPackage(previewZipFile.getAbsolutePath());
-                    for (String f : zipfs) 
-                    {
-                        File zf = new File(f);
-                        String name = zf.getName();
-                        n = name.lastIndexOf(".");
-                        name = name.substring(0, n);
-                        
-                        if (name.equals(oname)) 
-                        {
-                            File r = new File(previewZipFile.getParent(), f);
-                            result = GxmlUtil.cleanUpDisplayHtml(FileUtil.readFile(r, "UTF-8"));
-                            try
-                            {
-                                result = replaceImg(r);
-                            }
-                            catch (Exception e)
-                            {
-                                CATEGORY.error(e);
-                            }
-                            return result;
-                        }
-                    }
-                }
+                result = GxmlUtil.cleanUpDisplayHtml(FileUtil.readFile(previewFile, "UTF-8"));
+                return result;
             }
             // Load the TUs into the Toplink cache to prevent called
             // code from loading each TU individually.
@@ -971,44 +923,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         }
 
         return result;
-    }
-    
-    private String replaceImg(File f) throws IOException
-    {
-        String root = f.getParentFile().getAbsolutePath();
-        String content = FileUtil.readFile(f, "utf-8");
-        Pattern p = Pattern.compile("<img [^>]*? src=\"([^\"]*)\"[^>]*?/>");
-        Matcher m = p.matcher(content);
-        Map<String, String> imgs = new HashMap<>();
-        
-        int start = 0;
-        while (m.find(start))
-        {
-            String s = m.group(1);
-            if (!imgs.containsKey(s))
-            {
-                File f2 = new File(root, s);
-                if(f2.exists())
-                {
-                    byte[] data = null;  
-                    InputStream in = new FileInputStream(f2);  
-                    data = new byte[in.available()];  
-                    in.read(data);  
-                    in.close();  
-                      
-                    BASE64Encoder encoder = new BASE64Encoder();  
-                    imgs.put(s, encoder.encode(data));
-                }
-            }
-           
-            start = m.end();
-        }
-        
-        for (String key : imgs.keySet()){
-            content = content.replace(key, "data:image/png;base64," + imgs.get(key));
-        }
-        
-        return content;
     }
 
     public String getTargetPageView(long p_trgPageId, EditorState p_state,
@@ -2228,7 +2142,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 {
                     tmName = match.getMtName();
                 }
-                else if (match.getTmIndex() == Leverager.XLIFF_PRIORITY)
+                else if (match.getTmIndex() == Leverager.XLIFF_PRIORITY
+                        || match.getTmIndex() == Leverager.XLIFF_ALT_TRANS_PRIORITY)
                 {
                     tmName = "xliff";
                 }

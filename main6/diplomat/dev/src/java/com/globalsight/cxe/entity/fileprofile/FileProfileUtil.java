@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.ProcessRunner;
@@ -210,5 +211,51 @@ public class FileProfileUtil
         }
 
         return xslFile;
+    }
+
+    public static boolean isActiveFileProfile(Long id)
+    {
+        FileProfileImpl fp = HibernateUtil.get(FileProfileImpl.class, id, false);
+        if (fp == null)
+            return false;
+
+        if (fp.getIsActive())
+            return true;
+
+        // XLZ reference file profile
+        if (fp.getKnownFormatTypeId() == 39 && fp.getName().endsWith("_RFP"))
+        {
+            String hql = " from FileProfileImpl fp where fp.referenceFP = " + id;
+            fp = (FileProfileImpl) HibernateUtil.getFirst(hql);
+            if (fp != null && fp.getIsActive())
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static long getRealFileProfileId(Long id)
+    {
+        FileProfileImpl fp = HibernateUtil.get(FileProfileImpl.class, id, false);
+        if (fp == null)
+            return id;
+
+        if (fp.getIsActive())
+            return id;
+
+        // If is XLZ reference file profile, return XLZ file profile ID instead.
+        if (fp.getKnownFormatTypeId() == 39 && fp.getName().endsWith("_RFP"))
+        {
+            String hql = " from FileProfileImpl fp where fp.referenceFP = " + id;
+            fp = (FileProfileImpl) HibernateUtil.getFirst(hql);
+            if (fp != null)
+            {
+                return fp.getId();                
+            }
+        }
+
+        return id;
     }
 }

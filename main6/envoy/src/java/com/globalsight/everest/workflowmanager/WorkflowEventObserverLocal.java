@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -307,27 +308,29 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
      */
     private void possibllyCompleteBlaiseEntry(JobImpl job)
     {
-        BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(job.getJobId());
-        try
+        List<BlaiseConnectorJob> blaiseJobEntries =
+                BlaiseManager.getBlaiseConnectorJobByJobId(job.getJobId());
+        if (blaiseJobEntries != null && blaiseJobEntries.size() > 0)
         {
-            if (bcj != null)
+            long blaiseConnectorId = blaiseJobEntries.get(0).getBlaiseConnectorId(); 
+            BlaiseConnector blc = BlaiseManager.getBlaiseConnectorById(blaiseConnectorId);
+            if (blc == null)
+                return;
+
+            BlaiseHelper helper = new BlaiseHelper(blc);
+
+            for (BlaiseConnectorJob bcj : blaiseJobEntries)
             {
-                BlaiseConnector blc = BlaiseManager
-                        .getBlaiseConnectorById(bcj.getBlaiseConnectorId());
-                if (blc != null)
+                try
                 {
-                    BlaiseHelper helper = new BlaiseHelper(blc);
-                    // If this entry has been completed, it will be removed from
-                    // Blaise inbox entries, this will throw "object with id xxx
-                    // not found" exception. Ignore this exception.
                     helper.complete(bcj.getBlaiseEntryId(), job.getId());
                 }
+                catch (Exception ignore)
+                {
+                    s_logger.warn("Error when possiblly complete entry: " + bcj.getBlaiseEntryId()
+                            + ", " + ignore.getMessage());
+                }
             }
-        }
-        catch (Exception ignore)
-        {
-            s_logger.warn("Error when possiblly complete entry: " + bcj.getBlaiseEntryId() + ", "
-                    + ignore.getMessage());
         }
     }
 

@@ -65,15 +65,15 @@
 	String searchTextUrl = searchText.getPageURL()
 			+ "&action=searchText" + "&jobId="
 			+ request.getAttribute("jobId");
-	Map<Long, String> targetLocaleMap = (Map<Long, String>) request
-			.getAttribute("targetLocaleMap");
+	Map<Long, String> targetLocaleMap = (Map<Long, String>) request.getAttribute("targetLocaleMap");
 
 	String thisFileSearchText = (String) request
 			.getAttribute(JobManagementHandler.PAGE_SEARCH_TEXT);
 	PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
-	boolean b_clickfplink=true;
-	if (!perms.getPermissionFor(Permission.FILE_PROFILES_EDIT)) {
-		b_clickfplink = false;
+	boolean hasEditFileProfilePerm = true;
+	if (!perms.getPermissionFor(Permission.FILE_PROFILES_EDIT))
+	{
+	    hasEditFileProfilePerm = false;
 	}
 	if (thisFileSearchText == null)
 	{
@@ -363,20 +363,20 @@ function editfileprofile(param)
 							</c:otherwise>
 						</c:choose>
 					</td>
-					<%if(b_clickfplink){%>
-					<c:if test="${item.getSourcePage().getRequest().isInactiveFpId(item.getSourcePage().getRequest().getDataSourceId()) == false}">
+
+					<%if(hasEditFileProfilePerm) {%>
+					<c:if test="${item.isActiveFileProfile == true}">
 					<td style="text-align:left">
-						<a href="javascript:;" onclick="editfileprofile(${item.getSourcePage().getRequest().getDataSourceId()})" title="Edit File Profile">
-						${item.dataSourceName}
-						</a>
+						<a href="javascript:;" onclick="editfileprofile(${item.uiFileProfileId})" title="Edit File Profile">${item.dataSourceName}</a>
 					</td>
 					</c:if>
-					<c:if test="${item.getSourcePage().getRequest().isInactiveFpId(item.getSourcePage().getRequest().getDataSourceId()) == true}">
+					<c:if test="${item.isActiveFileProfile == false}">
 					<td style="text-align:left">${item.dataSourceName}</td>
 					</c:if>
 					<%} else { %>
 					<td style="text-align:left">${item.dataSourceName}</td>
 					<%}%>
+
 					<td style="text-align:center">
 						<span <c:if test="${item.isWordCountOverriden}">style="font-style:oblique;font-weight:bold;"
 							      <c:set value="true" var="sourcePageWordCountOverriden" scope="page"></c:set>

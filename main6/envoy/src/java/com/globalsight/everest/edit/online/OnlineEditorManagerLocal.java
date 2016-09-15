@@ -2142,7 +2142,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 {
                     tmName = match.getMtName();
                 }
-                else if (match.getTmIndex() == Leverager.XLIFF_PRIORITY)
+                else if (match.getTmIndex() == Leverager.XLIFF_PRIORITY
+                        || match.getTmIndex() == Leverager.XLIFF_ALT_TRANS_PRIORITY)
                 {
                     tmName = "xliff";
                 }

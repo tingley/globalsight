@@ -79,7 +79,7 @@ public class UserManagerLocal implements UserManager
     private static final Logger CATEGORY = Logger
             .getLogger(UserManagerLocal.class.getName());
 
-    private DirContextPool dirContextPool; // LDAP connection pool
+    // private DirContextPool dirContextPool; // LDAP connection pool
 
     private UserManagerEventHandler m_eventHandler = null;
 
@@ -99,22 +99,22 @@ public class UserManagerLocal implements UserManager
         m_userMap = new Hashtable<String, String>(20);
 
         String errorMsgKey = UserManagerException.MSG_INIT_SERVER_ERROR;
-        try
-        {
-            dirContextPool = LdapHelper.getConnectionPool();
-        }
-        catch (NamingException le)
-        {
-            String[] errorMsgArg =
-            { "Couldn't connect to LDAP" };
-
-            CATEGORY.error(
-                    "UserManagerException is thrown from: "
-                            + "UserManagerLocal::UserManagerLocal(): "
-                            + errorMsgArg[0], le);
-
-            throw new UserManagerException(errorMsgKey, errorMsgArg, le);
-        }
+        // try
+        // {
+        // dirContextPool = LdapHelper.getConnectionPool();
+        // }
+        // catch (NamingException le)
+        // {
+        // String[] errorMsgArg =
+        // { "Couldn't connect to LDAP" };
+        //
+        // CATEGORY.error(
+        // "UserManagerException is thrown from: "
+        // + "UserManagerLocal::UserManagerLocal(): "
+        // + errorMsgArg[0], le);
+        //
+        // throw new UserManagerException(errorMsgKey, errorMsgArg, le);
+        // }
 
         m_eventHandler = new UserManagerEventHandler();
     }
@@ -2441,18 +2441,18 @@ public class UserManagerLocal implements UserManager
     /**
      * Returns an DirContext object to the connection pool.
      */
-    private void checkInConnection(DirContext dirContext)
-    {
-
-        try
-        {
-            dirContextPool.closeDirContext(dirContext);
-        }
-        catch (NamingException e)
-        {
-            e.printStackTrace();
-        }
-    }
+    // private void checkInConnection(DirContext dirContext)
+    // {
+    //
+    // try
+    // {
+    // dirContextPool.closeDirContext(dirContext);
+    // }
+    // catch (NamingException e)
+    // {
+    // e.printStackTrace();
+    // }
+    // }
 
     /**
      * Remove the calendar associated with the user based on the given username.

@@ -325,9 +325,7 @@ public class CookieUtil
         cookieValue = newValue.toString();
         
         session.setAttribute(attributeName, cookieValue);
-        // value = URLEncoder.encode(value);
         setCookie(response, cookieName, cookieValue);
-        setCookie(response, "test", "testvalue");
     }
 
     /**

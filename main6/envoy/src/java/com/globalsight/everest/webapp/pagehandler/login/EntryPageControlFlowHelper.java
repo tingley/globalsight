@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.LocaleUtils;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.Company;
@@ -121,8 +122,7 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
 
         // convert to unicode from utf-8
         // to pass on to LDAP for authentication
-        String userName = m_request
-                .getParameter(WebAppConstants.LOGIN_NAME_FIELD);
+        String userName = ServletUtil.getValue(m_request, WebAppConstants.LOGIN_NAME_FIELD);
         if (userName != null)
         {
             userName = EditUtil.utf8ToUnicode(userName).trim();
@@ -330,8 +330,6 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         }
 
         User user = null;
-        // Get the login locale and use it as the UI locale (put it in session)
-        String loginLocale = m_request.getParameter(WebAppConstants.UILOCALE);
 
         try
         {
@@ -402,13 +400,18 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         // set the UI locale (in the session, not a managed object)
         // If user default language is the same as the login language, use
         // use user default UI locale
+        // Get the login locale and use it as the UI locale (put it in session)
+        String loginLocale = ServletUtil.getValue(m_request, WebAppConstants.UILOCALE);
         Locale uiLocale = null;
-        if (loginLocale == null
-                || PageHandler
-                        .getUILocale(loginLocale)
-                        .getDisplayLanguage()
-                        .equals(PageHandler.getUILocale(
-                                user.getDefaultUILocale()).getDisplayLanguage()))
+        try
+        {
+            uiLocale = LocaleUtils.toLocale(loginLocale);
+        }
+        catch (IllegalArgumentException le)
+        {
+            CATEGORY.error("Invalid user UI locale parameter value. [" + loginLocale + "]", le);
+        }
+        if (uiLocale == null)
         {
             // If user default language is the same as the login language, use
             // use user default UI locale

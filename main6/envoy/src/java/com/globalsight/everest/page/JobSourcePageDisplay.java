@@ -8,6 +8,8 @@ public class JobSourcePageDisplay
     private boolean isWordCountOverriden;
     private String sourceLink;
     private boolean isImageFile;
+    private boolean isActiveFileProfile;
+    private long uiFileProfileId;
     
     public JobSourcePageDisplay(SourcePage sourcePage){
         this.sourcePage = sourcePage;
@@ -71,5 +73,25 @@ public class JobSourcePageDisplay
     public void setSourcePage(SourcePage sourcePage)
     {
         this.sourcePage = sourcePage;
+    }
+
+    public boolean getIsActiveFileProfile()
+    {
+        return isActiveFileProfile;
+    }
+
+    public void setActiveFileProfile(boolean isActiveFileProfile)
+    {
+        this.isActiveFileProfile = isActiveFileProfile;
+    }
+
+    public long getUiFileProfileId()
+    {
+        return uiFileProfileId;
+    }
+
+    public void setUiFileProfileId(long uiFileProfileId)
+    {
+        this.uiFileProfileId = uiFileProfileId;
     }
 }

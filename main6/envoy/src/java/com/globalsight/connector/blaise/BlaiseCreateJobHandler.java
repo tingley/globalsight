@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -111,6 +112,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
 
     private int totalSize = 0;
     private List<TranslationInboxEntryVo> currPageEntries = null;
+    // entry ID : TranslationInboxEntryVo
     private Map<Long, TranslationInboxEntryVo> currPageEntryMap = new HashMap<Long, TranslationInboxEntryVo>();
 
     private BlaiseInboxEntryFilter filter = null;
@@ -205,16 +207,19 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         {
             try
             {
-                BlaiseConnectorJob bcj = BlaiseManager.getBlaiseConnectorJobByJobId(Long
-                        .parseLong(jobId.trim()));
-                if (bcj != null)
+                List<BlaiseConnectorJob> blaiseJobs = BlaiseManager
+                        .getBlaiseConnectorJobByJobId(Long.parseLong(jobId.trim()));
+                if (blaiseJobs != null && blaiseJobs.size() > 0)
                 {
-                    entryIds.add(bcj.getBlaiseEntryId());
+                    for (BlaiseConnectorJob bcj : blaiseJobs)
+                    {
+                        entryIds.add(bcj.getBlaiseEntryId());
+                    }
                 }
             }
             catch (NumberFormatException e)
             {
-                
+
             }
         }
 
@@ -420,30 +425,31 @@ public class BlaiseCreateJobHandler extends PageActionHandler
 
         // Have to reset?
         resetParameters(request, blaiseForm);
-       
+
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
-		if (user == null) {
-			String userName = request.getParameter("userName");
-			if (userName != null && !"".equals(userName)) {
-				user = ServerProxy.getUserManager().getUserByName(userName);
-				sessionMgr.setAttribute(WebAppConstants.USER, user);
-			}
-		}
+        if (user == null)
+        {
+            String userName = request.getParameter("userName");
+            if (userName != null && !"".equals(userName))
+            {
+                user = ServerProxy.getUserManager().getUserByName(userName);
+                sessionMgr.setAttribute(WebAppConstants.USER, user);
+            }
+        }
 
         long blcId = Long.parseLong(blaiseForm.getBlaiseConnectorId());
         BlaiseConnector blc = BlaiseManager.getBlaiseConnectorById(blcId);
 
         File attachFile = null;
-        String jobCommentFilePathName = (String) sessionMgr
-                .getAttribute("uploadAttachment");
-		if (jobCommentFilePathName != null) {
-			attachFile = new File(jobCommentFilePathName);
-		}
+        String jobCommentFilePathName = (String) sessionMgr.getAttribute("uploadAttachment");
+        if (jobCommentFilePathName != null)
+        {
+            attachFile = new File(jobCommentFilePathName);
+        }
         sessionMgr.removeElement("uploadAttachment");
         String attachFileName = request.getParameter("attachment");
 
-        ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
         List<Long> entryIds = new ArrayList<Long>();
         List<FileProfile> fileProfileList = new ArrayList<FileProfile>();
         String[] ffs = blaiseForm.getFileMapFileProfile().split(",");
@@ -451,8 +457,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         {
             String[] f = ff.split("-");
             entryIds.add(Long.parseLong(f[0]));
-            fileProfileList.add(HibernateUtil.get(FileProfileImpl.class,
-                    Long.parseLong(f[1])));
+            fileProfileList.add(HibernateUtil.get(FileProfileImpl.class, Long.parseLong(f[1])));
         }
 
         // Claim all entries one by one.
@@ -467,42 +472,87 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         }
 
         long l10Id = fileProfileList.get(0).getL10nProfileId();
-        BasicL10nProfile l10Profile = HibernateUtil.get(
-                BasicL10nProfile.class, l10Id);
+        BasicL10nProfile l10Profile = HibernateUtil.get(BasicL10nProfile.class, l10Id);
 
         String publicUuid = (String) sessionMgr.getAttribute("uuid");
         sessionMgr.removeElement("uuid");
         File srcFolder = null;
         if (publicUuid != null)
         {
-			srcFolder = new File(AmbFileStoragePathUtils.getJobAttributeDir(),
-					publicUuid);
+            srcFolder = new File(AmbFileStoragePathUtils.getJobAttributeDir(), publicUuid);
         }
-		// Every entry creates one job with one workflow
-		for (int i = 0; i < entryIds.size(); i++)
-        {
-            TranslationInboxEntryVo curEntry = currPageEntryMap.get(entryIds.get(i));
-        	FileProfile curFileProfile = fileProfileList.get(i);
-            String uuid = JobImpl.createUuid();
-            if (srcFolder!= null && srcFolder.exists())
-            {
-                // Locate file attribute by uuid
-				File trgFolder = new File(
-						AmbFileStoragePathUtils.getJobAttributeDir(), uuid);
-                FileUtil.copyFolder(srcFolder, trgFolder);
-            }
 
-			List<JobAttribute> jobAttribtues = getJobAttributes(
-					blaiseForm.getAttributeString(), l10Profile);
-			CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user,
-					currentCompanyId, blc, blaiseForm, curEntry,
-					curFileProfile, attachFile, attachFileName, uuid,
-					jobAttribtues);
-            Thread t = new MultiCompanySupportedThread(runnable);
-            pool.execute(t);
+        ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
+        // Entries with same source and target locale will be in one job.
+        String combineByLangs = request.getParameter("combineByLangs");
+        if ("on".equalsIgnoreCase(combineByLangs))
+        {
+            // Group TranslationInboxEntryVo objects by source and target.
+            Map<String, List<Integer>> localeGroups = groupEntriesByLangs(entryIds);
+
+            Iterator<Entry<String, List<Integer>>> ite = localeGroups.entrySet().iterator();
+            while (ite.hasNext())
+            {
+                List<TranslationInboxEntryVo> entries = new ArrayList<TranslationInboxEntryVo>();
+                List<FileProfile> fileProfiles = new ArrayList<FileProfile>();
+
+                Map.Entry<String, List<Integer>> entry = ite.next();
+                for (Integer i : entry.getValue())
+                {
+                    entries.add(currPageEntryMap.get(entryIds.get(i)));
+                    fileProfiles.add(fileProfileList.get(i));
+                }
+
+                String uuid = JobImpl.createUuid();
+                if (srcFolder != null && srcFolder.exists())
+                {
+                    // Locate file attribute by UUID
+                    File trgFolder = new File(AmbFileStoragePathUtils.getJobAttributeDir(), uuid);
+                    FileUtil.copyFolder(srcFolder, trgFolder);
+                }
+
+                List<JobAttribute> jobAttribtues = getJobAttributes(
+                        blaiseForm.getAttributeString(), l10Profile);
+                CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user, currentCompanyId,
+                        blc, blaiseForm, entries, fileProfiles, attachFile, attachFileName, uuid,
+                        jobAttribtues);
+                Thread t = new MultiCompanySupportedThread(runnable);
+                pool.execute(t);
+            }
         }
-        pool.shutdown();
-        if (srcFolder != null && srcFolder.exists())
+        else
+        {
+            // Every entry creates one job with one workflow
+            for (int i = 0; i < entryIds.size(); i++)
+            {
+                TranslationInboxEntryVo curEntry = currPageEntryMap.get(entryIds.get(i));
+                List<TranslationInboxEntryVo> entries = new ArrayList<TranslationInboxEntryVo>();
+                entries.add(curEntry);
+
+                FileProfile curFileProfile = fileProfileList.get(i);
+                List<FileProfile> fileProfiles = new ArrayList<FileProfile>();
+                fileProfiles.add(curFileProfile);
+
+                String uuid = JobImpl.createUuid();
+                if (srcFolder != null && srcFolder.exists())
+                {
+                    // Locate file attribute by UUID
+                    File trgFolder = new File(AmbFileStoragePathUtils.getJobAttributeDir(), uuid);
+                    FileUtil.copyFolder(srcFolder, trgFolder);
+                }
+
+                List<JobAttribute> jobAttribtues = getJobAttributes(
+                        blaiseForm.getAttributeString(), l10Profile);
+                CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user, currentCompanyId,
+                        blc, blaiseForm, entries, fileProfiles, attachFile, attachFileName, uuid,
+                        jobAttribtues);
+                Thread t = new MultiCompanySupportedThread(runnable);
+                pool.execute(t);
+            }
+        }
+		pool.shutdown();
+
+		if (srcFolder != null && srcFolder.exists())
         {
         	FileUtil.deleteFile(srcFolder);
         }
@@ -1006,6 +1056,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         setLableToJsp(request, bundle, "msg_set_job_attributes");
         setLableToJsp(request, bundle, "msg_blaise_no_workflow");
         setLableToJsp(request, bundle, "lb_blaise_create_job_add_file_tip");
+        setLableToJsp(request, bundle, "lb_blaise_combine_by_languages");
     }
 
     private void setLableToJsp(HttpServletRequest request,
@@ -1121,6 +1172,46 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         }
 
         return jobAttributeList;
+    }
+
+    /**
+     * Group TranslationInboxEntryVo objects by source and target locales.
+     * Entries with same source and target locale will be in same job.
+     */
+    private Map<String, List<Integer>> groupEntriesByLangs(List<Long> entryIds)
+    {
+        Map<String, List<Integer>> localeGroups = new HashMap<String, List<Integer>>();
+        for (int i = 0; i < entryIds.size(); i++)
+        {
+            String key = getInboxEntryKey(currPageEntryMap.get(entryIds.get(i)));
+            List<Integer> entryIndexes = localeGroups.get(key);
+            if (entryIndexes == null)
+            {
+                entryIndexes = new ArrayList<Integer>();
+                localeGroups.put(key, entryIndexes);
+            }
+            entryIndexes.add(new Integer(i));
+        }
+
+        return localeGroups;
+    }
+
+    /**
+     * Create a key by source and target locale information.
+     * A sample is "en_US_zh_CN".
+     */
+    private String getInboxEntryKey(TranslationInboxEntryVo entry)
+    {
+        StringBuilder key = new StringBuilder();
+        key.append(entry.getSourceLocale().getLanguage());
+        key.append("_");
+        key.append(entry.getSourceLocale().getCountry());
+        key.append("_");
+        key.append(entry.getTargetLocale().getLanguage());
+        key.append("_");
+        key.append(entry.getTargetLocale().getCountry());
+
+        return key.toString();
     }
 
     private BlaiseHelper getBlaiseHelper(BlaiseConnector blc)

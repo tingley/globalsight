@@ -44,6 +44,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tm.searchreplace.TuvInfo;
@@ -101,7 +102,7 @@ public class JobControlReadyHandler extends JobManagementHandler
         HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request,
                 BASE_BEAN);
         p_request.setAttribute("searchType",
-                p_request.getParameter("searchType"));
+                ServletUtil.getValue(p_request, "searchType"));
 
         if (m_exportUrl == null)
         {

@@ -137,6 +137,7 @@ public class ServletUtil extends jodd.servlet.ServletUtil
         }
         catch (Exception e)
         {
+            result = defaultValue;
             logger.error("Cannot parse string " + str + " to integer.", e);
         }
 
@@ -169,6 +170,7 @@ public class ServletUtil extends jodd.servlet.ServletUtil
     public static boolean checkAllValues(HttpServletRequest request)
     {
         String name, value;
+        Object object = null;
         boolean isValid = true;
 
         // Check attributes of request
@@ -176,7 +178,12 @@ public class ServletUtil extends jodd.servlet.ServletUtil
         while (enumeration.hasMoreElements())
         {
             name = (String) enumeration.nextElement();
-            value = (String) request.getAttribute(name);
+            object = request.getAttribute(name);
+            if (object instanceof Integer)
+                value = ((Integer) object).toString();
+            else
+                value = object.toString();
+            logger.debug("name == " + name + ", object == " + value);
             if (containXSS(value))
                 isValid = false;
         }

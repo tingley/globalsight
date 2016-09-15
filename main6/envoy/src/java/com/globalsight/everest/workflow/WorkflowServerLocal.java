@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -102,7 +104,7 @@ public class WorkflowServerLocal implements WorkflowServer
 
     private Timestamp m_timestamp = new Timestamp();
 
-    private static Map completeWorkFlow = new HashMap();
+    private static ConcurrentMap<String, TaskEmailInfo> completeWorkflows = new ConcurrentHashMap<String, TaskEmailInfo>();
 
     // system wide parameter that determines whether the notification action is
     // active.
@@ -312,9 +314,8 @@ public class WorkflowServerLocal implements WorkflowServer
                 // if the p_arrowLabel is null
                 // that means it have none,yes ,all the workflow have finished.
                 p_emailInfo.setAssigneesName(p_assignee);
-                completeWorkFlow.put(workflowInstance.getId() + p_emailInfo.getJobName(),
+                completeWorkflows.put(workflowInstance.getId() + p_emailInfo.getJobName(),
                         p_emailInfo);
-
             }
             else
             {
@@ -387,20 +388,26 @@ public class WorkflowServerLocal implements WorkflowServer
         return new WorkflowInstanceInfo(p_wfClone.getId(), state, nextTaskInfos);
     }
 
+    /**
+     * Send workflow complete mail.
+     */
     public void advanceWorkFlowNotification(String key, String state)
     {
-        TaskEmailInfo p_emailInfo = (TaskEmailInfo) completeWorkFlow.remove(key);
+        TaskEmailInfo p_emailInfo = (TaskEmailInfo) completeWorkflows.remove(key);
         if (p_emailInfo == null)
         {
-
             return;
         }
+
         Object[] args =
-        { p_emailInfo.getJobName(), p_emailInfo.getAssigneesName(), capLoginUrl(),
+        {
+                p_emailInfo.getJobName(),
+                p_emailInfo.getAssigneesName(),
+                capLoginUrl(),
                 p_emailInfo.getPriorityAsString(),
                 WorkflowHelper.localePair(p_emailInfo.getSourceLocale(),
-                        p_emailInfo.getTargetLocale(), "en_US"),
-                state };
+                        p_emailInfo.getTargetLocale(), "en_US"), state };
+
         sendTaskActionEmailToUser(p_emailInfo.getAssigneesName(), p_emailInfo, null,
                 WorkflowMailerConstants.COMPLETED_WFL, args);
     }

@@ -706,6 +706,7 @@ $(document).ready(function ()
                     var priority = $("#priority").val();
                     var comment = $("#comment").val();
 					var attachment =  $("#attachment").val();
+					var combineByLangs = $("#combineByLangs").prop("checked");
 					
                     var createJobUrl = "<%=createBlaiseJobUrl%>" 
                     	+ "&blaiseConnectorId=" + blaiseConnectorId
@@ -714,6 +715,7 @@ $(document).ready(function ()
                     	+ "&userName=" + userName
                     	+ "&priority=" + priority
                     	+ "&comment=" + comment
+                    	+ "&combineByLangs=" + combineByLangs
                     	+ "&attachment=" + attachment;
 
                     $("#createJobForm").ajaxSubmit({

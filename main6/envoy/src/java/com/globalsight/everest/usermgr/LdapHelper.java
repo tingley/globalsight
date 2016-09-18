@@ -142,20 +142,29 @@ public class LdapHelper
         }
         catch (ConfigException ce)
         {
-            CATEGORY.error("A ConfigException was thrown when trying"
-                    + " to read LDAP properties from LdapHelper.", ce);
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.debug("A ConfigException was thrown when trying"
+                        + " to read LDAP properties from LdapHelper.", ce);
+            }
         }
         catch (NumberFormatException ne)
         {
-            CATEGORY.error("A NumberFormatException was thrown when trying"
-                    + " to read LDAP properties from LdapHelper.", ne);
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.debug("A NumberFormatException was thrown when trying"
+                        + " to read LDAP properties from LdapHelper.", ne);
+            }
         }
         catch (GeneralException ge)
         {
-            CATEGORY.error(
-                    "A general exception was thrown when trying"
-                            + " to read the system configuration file from LdapHelper.",
-                    ge);
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.debug(
+                        "A general exception was thrown when trying"
+                                + " to read the system configuration file from LdapHelper.",
+                        ge);
+            }
         }
 
         // Initialize the constants

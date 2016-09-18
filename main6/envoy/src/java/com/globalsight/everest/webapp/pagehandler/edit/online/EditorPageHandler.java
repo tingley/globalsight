@@ -943,7 +943,11 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         {
             if (layout.getSourceViewMode() == VIEWMODE_PREVIEW)
             {
-                layout.setSourceViewMode(DEFAULT_VIEWMODE_IF_NO_PREVIEW);
+            	// for GBS-4401, preview
+                if (p_state.getSourcePreviewFile() == null)
+                {
+                    layout.setSourceViewMode(DEFAULT_VIEWMODE_IF_NO_PREVIEW);
+                }
             }
 
             if (layout.getTargetViewMode() == VIEWMODE_PREVIEW)

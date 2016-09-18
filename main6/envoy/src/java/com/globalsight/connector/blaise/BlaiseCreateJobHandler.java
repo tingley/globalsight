@@ -485,7 +485,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
         // Entries with same source and target locale will be in one job.
         String combineByLangs = request.getParameter("combineByLangs");
-        if ("on".equalsIgnoreCase(combineByLangs))
+        if ("true".equalsIgnoreCase(combineByLangs))
         {
             // Group TranslationInboxEntryVo objects by source and target.
             Map<String, List<Integer>> localeGroups = groupEntriesByLangs(entryIds);

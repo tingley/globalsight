@@ -1508,7 +1508,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface, Ser
      */
     public void handlePageId(String s)
     {
-        m_pageId = s.trim();
+        m_pageId = StringUtil.replace(s.trim(), " ", "");
     }
 
     /**

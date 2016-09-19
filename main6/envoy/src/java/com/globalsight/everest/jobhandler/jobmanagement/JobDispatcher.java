@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -374,27 +375,50 @@ public class JobDispatcher
         }
     }
 
+    private static CopyOnWriteArrayList<Long> jobIdsCalWC = new CopyOnWriteArrayList<Long>();
+
     /**
      * Calculates target page and workflow related word counts for the job.
      */
     private void calculateWordCounts(Job job)
     {
-        JobCreationMonitor.updateJobState(job, Job.CALCULATING_WORD_COUNTS);
-        c_category.info("Calculating word counts for job " + job.getJobId());
-
-        Vector<String> jobExcludeTypes = job.getL10nProfile()
-                .getTranslationMemoryProfile().getJobExcludeTuTypes();
-        for (Workflow workflow : job.getWorkflows())
+        // Ideally only one chance for a job to run into this method, but actually
+        // it is not. To avoid concurrent invoking for same job which will
+        // result in deadlock, we add this as a temporary solution.
+        // Note that this allows multiple jobs to run into, and same job to run
+        // multiple times, but not allow same job to run multiple threads at
+        // same time.
+        synchronized (jobIdsCalWC)
         {
-            StatisticsService.calculateTargetPagesWordCount(workflow,
-                    jobExcludeTypes);
+            if (jobIdsCalWC.contains(job.getId()))
+            {
+                return;
+            }
+
+            jobIdsCalWC.add(job.getId());            
         }
 
-        StatisticsService.calculateWorkflowStatistics(
-                new ArrayList(job.getWorkflows()), jobExcludeTypes);
+        try
+        {
+            JobCreationMonitor.updateJobState(job, Job.CALCULATING_WORD_COUNTS);
+            c_category.info("Calculating word counts for job " + job.getJobId());
 
-        c_category.info("Done calculating word counts for job "
-                + job.getJobId());
+            Vector<String> jobExcludeTypes = job.getL10nProfile().getTranslationMemoryProfile()
+                    .getJobExcludeTuTypes();
+            for (Workflow workflow : job.getWorkflows())
+            {
+                StatisticsService.calculateTargetPagesWordCount(workflow, jobExcludeTypes);
+            }
+
+            StatisticsService.calculateWorkflowStatistics(new ArrayList(job.getWorkflows()),
+                    jobExcludeTypes);
+
+            c_category.info("Done calculating word counts for job " + job.getJobId());
+        }
+        finally
+        {
+            jobIdsCalWC.remove(job.getId());
+        }
     }
 
     private void toDispatch(Job job)

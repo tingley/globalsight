@@ -267,13 +267,9 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
             JobImpl jobClone = (JobImpl) p_wf.getJob();
             String previousState = jobClone.getState();
 
-            if (Job.EXPORTED.equals(p_wfState))
-            {
-                possibllyCompleteBlaiseEntry(jobClone);
-            }
-
             jobClone.setState(p_wfState);
             HibernateUtil.update(jobClone);
+
             long wfStatePostId = jobClone.getL10nProfile().getWfStatePostId();
             if (wfStatePostId != -1)
             {
@@ -287,7 +283,7 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
             // delete in-progress TM data for the job
             deleteInProgressTmData(jobClone);
 
-            if (p_wfState.equals(Job.EXPORTED))
+            if (Job.EXPORTED.equals(p_wfState))
             {
                 File diExportedDir = AmbFileStoragePathUtils
                         .getDesktopIconExportedDir(p_wf.getCompanyId());
@@ -296,6 +292,11 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
                 {
                     jobDir.mkdirs();
                 }
+            }
+
+            if (Job.EXPORTED.equals(p_wfState))
+            {
+                possibllyCompleteBlaiseEntry(jobClone);
             }
         }
     }

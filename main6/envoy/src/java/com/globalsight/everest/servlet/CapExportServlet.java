@@ -538,14 +538,14 @@ public class CapExportServlet extends HttpServlet
             // process of exporting
             if (PageState.EXPORT_IN_PROGRESS.equals(tp.getPageState()))
             {
-                // update target page state >> workflow state possibly >> job
-                // state possibly; source page state
-                ServerProxy.getPageEventObserver().notifyExportSuccessEvent(tp);
-
-                // populate TM in separate thread
+                // First, populate TM in separate thread for current page.
                 PopulatingTmThread thread = new PopulatingTmThread(tp.getId());
                 Thread t = new MultiCompanySupportedThread(thread);
                 t.start();
+
+                // update target page state >> workflow state possibly >> job
+                // state possibly; source page state
+                ServerProxy.getPageEventObserver().notifyExportSuccessEvent(tp);
             }
         }
 

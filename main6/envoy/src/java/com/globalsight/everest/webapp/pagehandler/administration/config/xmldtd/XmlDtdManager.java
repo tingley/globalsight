@@ -144,21 +144,6 @@ public class XmlDtdManager
         return (XmlDtdImpl) HibernateUtil.getFirst(hql, map);
     }
 
-    private static Set<User> getWorkflowManagers(SourcePage sourcePage)
-    {
-        Set<User> users = new HashSet<User>();
-        Set<TargetPage> targetPages = sourcePage.getTargetPages();
-        if (targetPages != null)
-        {
-            for (TargetPage page : targetPages)
-            {
-                users.addAll(getWorkflowManagers(page));
-            }
-        }
-
-        return users;
-    }
-
     private static Set<User> getWorkflowManagers(TargetPage targetPage)
     {
         List wfManagerIds = targetPage.getWorkflowInstance()
@@ -242,12 +227,13 @@ public class XmlDtdManager
             users.add(user);
         }
 
-        for (User user : users)
-        {
-            ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
-                    MailerConstants.DTD_VALIDATE_FAILED_SUBJECT,
-                    "dtdFailedMessage", companyIdStr);
-        }
+        // Disable this for 0001991: Failed exporting job if use dtd in file profile
+//        for (User user : users)
+//        {
+//            ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
+//                    MailerConstants.DTD_VALIDATE_FAILED_SUBJECT,
+//                    "dtdFailedMessage", companyIdStr);
+//        }
     }
 
     /**
@@ -291,12 +277,13 @@ public class XmlDtdManager
             users.add(user);
         }
 
-        for (User user : users)
-        {
-            ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
-                    MailerConstants.DTD_VALIDATE_FAILED_SUBJECT,
-                    "dtdFailedMessage", companyIdStr);
-        }
+        // Disable this for 0001991: Failed exporting job if use dtd in file profile
+//        for (User user : users)
+//        {
+//            ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
+//                    MailerConstants.DTD_VALIDATE_FAILED_SUBJECT,
+//                    "dtdFailedMessage", companyIdStr);
+//        }
     }
 
     /**
@@ -337,16 +324,13 @@ public class XmlDtdManager
 
                         if (xmlDtd.isSendEmail())
                         {
-                            getWorkflowManagers(sourcePage);
                             try
                             {
                                 sendEmail(sourcePage, IMPORT);
                             }
                             catch (Exception e1)
                             {
-                                logger.error(
-                                        "Failed to send DTD validation failure email",
-                                        e1);
+                                logger.error("Failed to send DTD validation failure email", e1);
                             }
                         }
                     }
@@ -437,9 +421,7 @@ public class XmlDtdManager
                         }
                         catch (Exception e1)
                         {
-                            logger.error(
-                                    "Failed to send DTD validation failure email",
-                                    e1);
+                            logger.error("Failed to send DTD validation failure email", e1);
                         }
                     }
                 }

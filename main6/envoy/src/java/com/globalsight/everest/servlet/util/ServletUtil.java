@@ -107,7 +107,7 @@ public class ServletUtil extends jodd.servlet.ServletUtil
             return defaultValue;
 
         name = name.trim();
-        result = (String) value(req, name);
+        result = req.getParameter(name);
         result = stripXss(result, encode);
         if (StringUtil.isBlank(result) || "null".equalsIgnoreCase(result))
             return defaultValue;

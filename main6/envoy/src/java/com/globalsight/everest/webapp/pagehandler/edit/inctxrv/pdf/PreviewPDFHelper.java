@@ -28,7 +28,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -100,10 +99,6 @@ import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.file.FileWaiter;
 import com.globalsight.util.system.ConfigException;
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.tool.xml.XMLWorkerFontProvider;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Rectangle;
@@ -125,14 +120,11 @@ public class PreviewPDFHelper implements PreviewPDFConstants
     private static final ExecutorService serviceForPPTX = Executors.newSingleThreadExecutor();
     private static final ExecutorService serviceForXLSX = Executors.newSingleThreadExecutor();
     private static final ExecutorService serviceForXML = Executors.newSingleThreadExecutor();
-    private static final ExecutorService serviceForHTML = Executors.newSingleThreadExecutor();
 
     private static final int BUFFERSIZE = 4096;
 
     private static final String[] PROPERTY_FILES = { "/properties/Logger.properties",
             "/properties/AdobeAdapter.properties" };
-
-    private static final String HTML_HEAD_PDF = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">";
 
     // Cancel Creating PDF Threads.
     public void cancelPDF(Set<Long> p_workflowIdSet, String p_userId)
@@ -249,12 +241,6 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         {
             task = new CreatePDFTask(p_page, p_userId, TYPE_XML, isTarget);
             future = serviceForXML.submit(task);
-            createPDFMap.put(key, future);
-        }
-        else if (externalPageId.endsWith(".html") || externalPageId.endsWith(".htm"))
-        {
-            task = new CreatePDFTask(p_page, p_userId, TYPE_HTML, isTarget);
-            future = serviceForHTML.submit(task);
             createPDFMap.put(key, future);
         }
     }
@@ -809,94 +795,6 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         }
         catch (InterruptedException e)
         {
-        }
-        catch (ConfigException ce)
-        {
-            LOGGER.error(
-                    "Please set the correct InDesign conversion dir for In Context Review Tool.");
-        }
-        catch (Exception e)
-        {
-            StringBuffer msg = new StringBuffer("Create PDF error for page:");
-            msg.append(trgPagePath).append(", by user:").append(p_userId);
-            LOGGER.error(msg.toString(), e);
-        }
-        finally
-        {
-            try
-            {
-                if (out != null)
-                {
-                    out.close();
-                }
-            }
-            catch (Exception ex)
-            {
-                // ignore;
-            }
-        }
-
-        return pdfFile;
-    }
-
-    File createPDF4HTML(Page p_page, String p_userId, boolean isTarget)
-    {
-        TargetPage tp = isTarget ? (TargetPage) p_page : null;
-        SourcePage sp = isTarget ? null : (SourcePage) p_page;
-        long spId = isTarget ? tp.getSourcePage().getId() : sp.getId();
-
-        String trgPagePath = getPagePath(p_page, isTarget);
-        long pageid = p_page.getId();
-        long companyId = isTarget ? tp.getCompanyId() : sp.getCompanyId();
-        String locale = p_page.getGlobalSightLocale().toString();
-        File pdfFile = getPreviewPdf(trgPagePath, companyId, null);
-        PreviewPDFBO params = determineConversionParameters(spId);
-        OutputStream out = null;
-
-        try
-        {
-            File tempDir = AmbFileStoragePathUtils.getTempFileDir();
-            Job job = isTarget ? tp.getWorkflowInstance().getJob()
-                    : ServerProxy.getJobHandler().getJobById(sp.getJobId());
-            SourcePage sourcepage = isTarget ? tp.getSourcePage() : sp;
-
-            File htmlFile = File.createTempFile("GS-html", ".html", tempDir);
-            String htmlFilePath = htmlFile.getAbsolutePath();
-            // write xml file
-            writeXMLFileToConvertDir(htmlFilePath, locale, pageid, params, p_userId, isTarget);
-
-            String htmlContent = FileUtil.readFile(htmlFile, "UTF-8");
-            // replace html head to standard HTML_HEAD_PDF
-            int htmlStartIndex = htmlContent.indexOf("<html");
-            if (htmlStartIndex != -1)
-            {
-                int htmlEndIndex = htmlContent.indexOf(">", htmlStartIndex + 1);
-
-                if (htmlEndIndex != -1)
-                {
-                    String newHtmlContent = HTML_HEAD_PDF + htmlContent.substring(htmlEndIndex + 1);
-
-                    newHtmlContent = newHtmlContent.replaceFirst(
-                            "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=UTF-8\">",
-                            "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=UTF-8\"></META>");
-
-                    FileUtil.writeFile(htmlFile, newHtmlContent, "UTF-8");
-                }
-            }
-
-            if (!pdfFile.getParentFile().exists())
-            {
-                pdfFile.getParentFile().mkdirs();
-            }
-
-            com.itextpdf.text.Document document = new com.itextpdf.text.Document();
-            com.itextpdf.text.pdf.PdfWriter writer = com.itextpdf.text.pdf.PdfWriter
-                    .getInstance(document, new FileOutputStream(pdfFile));
-            document.open();
-            com.itextpdf.tool.xml.XMLWorkerHelper.getInstance().parseXHtml(writer, document,
-                    new FileInputStream(htmlFilePath), Charset.forName("UTF-8"));
-            
-            document.close();
         }
         catch (ConfigException ce)
         {
@@ -1781,10 +1679,6 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             {
                 formatType = "xml";
             }
-            else if (displayNameLower.endsWith(".html") || displayNameLower.endsWith(".htm"))
-            {
-                formatType = "html";
-            }
         }
 
         formatType = formatType.trim();
@@ -1823,10 +1717,6 @@ public class PreviewPDFHelper implements PreviewPDFConstants
         else if ("xml".equals(formatType))
         {
             fileVersionType = TYPE_XML;
-        }
-        else if ("html".equals(formatType))
-        {
-            fileVersionType = TYPE_HTML;
         }
         else
         {
@@ -1871,14 +1761,6 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             fileType = FILETYPE_XML;
             fileSuffix = XML_SUFFIX;
             fileVersionType = TYPE_XML;
-            return new PreviewPDFBO(fileVersionType, fileType, fileSuffix, isTranslateMaster,
-                    isTranslateHiddenLayer, relSafeName, safeBaseFileName);
-        }
-        else if (displayNameLower.endsWith(".html") || displayNameLower.endsWith(".htm"))
-        {
-            fileType = FILETYPE_HTML;
-            fileSuffix = HTML_SUFFIX;
-            fileVersionType = TYPE_HTML;
             return new PreviewPDFBO(fileVersionType, fileType, fileSuffix, isTranslateMaster,
                     isTranslateHiddenLayer, relSafeName, safeBaseFileName);
         }
@@ -1999,28 +1881,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
     private String getKey(boolean isTarget, Page p_page, String p_userId)
     {
         return (isTarget ? "target_" : "source_") + p_page.getId() + "_" + p_userId;
-    }
-
-    class AsianFontProvider extends XMLWorkerFontProvider
-    {
-
-        public Font getFont(final String fontname, final String encoding, final boolean embedded,
-                final float size, final int style, final BaseColor color)
-        {
-            BaseFont bf = null;
-            try
-            {
-                bf = BaseFont.createFont( "STSong-Light", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-            Font font = new Font(bf, size, style, color);
-            font.setColor(color);
-            return font;
-        }
-    }
+    }    
 }
 
 

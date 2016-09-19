@@ -22,7 +22,6 @@ import java.util.concurrent.Callable;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.page.Page;
-import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
@@ -35,7 +34,6 @@ public class CreatePDFTask implements Callable<File>, PreviewPDFConstants
     private Page m_page;
     private String m_userId;
     private int m_fileVersionType;
-    private EditorState m_editState;
     private boolean m_isTarget = true;
 
     public CreatePDFTask(Page p_page, String p_userId, int p_fileVersionType,
@@ -64,12 +62,7 @@ public class CreatePDFTask implements Callable<File>, PreviewPDFConstants
                 case TYPE_XML:
                     pdfFile = helper.createPDF4XML(m_page, m_userId,
                             m_isTarget);
-                    break;
-                    
-                case TYPE_HTML:
-                    pdfFile = helper.createPDF4HTML(m_page, m_userId,
-                            m_isTarget);
-                    break;
+                    break;                    
                     
                 case TYPE_OFFICE_DOCX:
                 case TYPE_OFFICE_PPTX:
@@ -100,10 +93,4 @@ public class CreatePDFTask implements Callable<File>, PreviewPDFConstants
 
         return pdfFile;
     }
-
-    public void setEditState(EditorState p_state)
-    {
-        m_editState = p_state;
-    }
-
 }

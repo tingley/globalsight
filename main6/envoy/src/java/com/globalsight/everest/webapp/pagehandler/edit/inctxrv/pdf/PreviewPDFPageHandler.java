@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Random;
 import java.util.ResourceBundle;
 
 import javax.servlet.ServletContext;
@@ -31,9 +30,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.cxe.adapter.idml.IdmlConverter;
 import com.globalsight.cxe.engine.util.FileCopier;
-import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -49,7 +46,6 @@ import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState.PagePair;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.AmbFileStoragePathUtils;
-import com.lowagie.text.DocumentException;
 
 public class PreviewPDFPageHandler extends PageHandler implements
         PreviewPDFConstants
@@ -383,8 +379,7 @@ public class PreviewPDFPageHandler extends PageHandler implements
         {
             if (pageName.endsWith(".indd") || pageName.endsWith(".idml")
                     || pageName.endsWith(".docx") || pageName.endsWith(".pptx")
-                    || pageName.endsWith(".xlsx") || pageName.endsWith(".xml")
-                    || pageName.endsWith(".html") || pageName.endsWith(".htm"))
+                    || pageName.endsWith(".xlsx") || pageName.endsWith(".xml"))
             {
                 SourcePage sourcePage = ServerProxy.getPageManager()
                         .getSourcePage(pagep.getSourcePageId());
@@ -410,12 +405,6 @@ public class PreviewPDFPageHandler extends PageHandler implements
                 if ((pageName.endsWith(".docx") || pageName.endsWith(".pptx")
                         || pageName.endsWith(".xlsx"))
                         && PreviewPDFHelper.isOfficeEnabled(companyId))
-                {
-                    return true;
-                }
-                
-                if ((pageName.endsWith(".html") || pageName.endsWith(".htm"))
-                        && PreviewPDFHelper.isHTMLEnabled(companyId))
                 {
                     return true;
                 }

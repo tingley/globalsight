@@ -251,7 +251,7 @@ function renderHtml(item, se_able){
 	
 	var htmlcontent=getNodeByClass(item, se_able);
 	if(item.subArray){
-		temp.children('td').eq(1).html("<table width='100%' cellspacing='0' cellpadding='2'>"+htmlcontent.html()+"</table>");
+		temp.children('td').eq(1).html("<table width='100%' cellspacing='0' style='font-size:10pt;' cellpadding='2'>"+htmlcontent.html()+"</table>");
 	}else{
 		temp.children('td').eq(1).append(htmlcontent);
 	}

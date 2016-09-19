@@ -388,12 +388,16 @@ public class JobDispatcher
         // Note that this allows multiple jobs to run into, and same job to run
         // multiple times, but not allow same job to run multiple threads at
         // same time.
-        if (jobIdsCalWC.contains(job.getId()))
+        synchronized (jobIdsCalWC)
         {
-            return;
+            if (jobIdsCalWC.contains(job.getId()))
+            {
+                return;
+            }
+
+            jobIdsCalWC.add(job.getId());            
         }
 
-        jobIdsCalWC.add(job.getId());
         try
         {
             JobCreationMonitor.updateJobState(job, Job.CALCULATING_WORD_COUNTS);

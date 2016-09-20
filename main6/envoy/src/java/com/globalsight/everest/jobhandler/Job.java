@@ -231,7 +231,7 @@ public interface Job extends WorkObject
 
     public FileProfile getFileProfile();
 
-    public ArrayList getAllFileProfiles();
+    public ArrayList<FileProfile> getAllFileProfiles();
 
     public String getDataSourceName();
 

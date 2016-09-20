@@ -100,8 +100,6 @@ public class PopulatingTmThread implements Runnable
     private void populateTm(SourcePage p_sourcePage, GlobalSightLocale p_targetLocale)
             throws PageException
     {
-        logger.info("Populating Tm for the page " + p_sourcePage.getExternalPageId());
-
         try
         {
             L10nProfile l10nProfile = p_sourcePage.getRequest().getL10nProfile();
@@ -111,8 +109,6 @@ public class PopulatingTmThread implements Runnable
 
             LingServerProxy.getTmCoreManager().populatePageByLocale(p_sourcePage, leverageOptions,
                     p_targetLocale, p_sourcePage.getJobId());
-
-            logger.info("Populating Tm finished.");
         }
         catch (Exception e)
         {

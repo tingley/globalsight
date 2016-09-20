@@ -33,7 +33,6 @@ import com.globalsight.connector.blaise.util.BlaiseHelper;
 import com.globalsight.connector.blaise.util.BlaiseManager;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
-import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.util.page.TrashCompactorUtil;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.jobhandler.Job;
@@ -48,11 +47,6 @@ import com.globalsight.everest.projecthandler.WorkflowTypeConstants;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.inprogresstm.InProgressTmManager;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.terminology.ITermbase;
-import com.globalsight.terminology.ITermbaseManager;
-import com.globalsight.terminology.Termbase;
-import com.globalsight.terminology.TermbaseList;
-import com.globalsight.terminology.indexer.IIndexManager;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 public class WorkflowEventObserverLocal implements WorkflowEventObserver
@@ -212,14 +206,6 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
             WorkflowPersistenceAccessor.updateWorkflowState(p_workflow);
 
             possiblyUpdateJobForExport(wfClone, Workflow.EXPORTED);
-
-            // re-index the new added term-base entries
-            FileProfile fileProfile = wfClone.getJob().getFileProfile();
-            if (fileProfile.getTerminologyApproval() == 1)
-            {
-                String companyId = String.valueOf(fileProfile.getCompanyId());
-                doIndexForTermbase(wfClone, companyId);
-            }
 
             /*
              * for desktop icon download Ambassador.getDownloadableJobs(...)
@@ -492,30 +478,6 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
         {
             e.printStackTrace();
             throw new WorkflowManagerException(e);
-        }
-    }
-
-    /**
-     * Re-index the new added term-base entries if "Terminology Approval" option is "Yes".
-     */
-    private void doIndexForTermbase(WorkflowImpl wfClone, String companyId)
-    {
-        String termbaseName = wfClone.getJob().getL10nProfile().getProject().getTermbaseName();
-        Termbase tb = TermbaseList.get(companyId, termbaseName);
-
-        try
-        {
-            if (!tb.isIndexing())
-            {
-                ITermbaseManager s_manager = ServerProxy.getTermbaseManager();
-                ITermbase itb = s_manager.connect(termbaseName, wfClone.getJob().getL10nProfile()
-                        .getProject().getProjectManagerId(), "", companyId);
-                IIndexManager indexer = itb.getIndexer();
-                indexer.doIndex();
-            }
-        }
-        catch (Exception e)
-        {
         }
     }
 }

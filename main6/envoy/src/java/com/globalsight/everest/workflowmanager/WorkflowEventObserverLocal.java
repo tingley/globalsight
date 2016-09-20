@@ -383,8 +383,14 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
             }
 
             JobImpl jobClone = (JobImpl) p_workflow.getJob();
+            String previousState = jobClone.getState();
             p_workflow.setState(Workflow.EXPORT_FAILED);
             jobClone.setState(Workflow.EXPORT_FAILED);
+            long wfStatePostId = jobClone.getL10nProfile().getWfStatePostId();
+            if (wfStatePostId != -1)
+            {
+                new JobStatePostThread(jobClone, previousState, jobClone.getState()).start();
+            }
 
             if (workflowsHaveState(jobClone.getWorkflows(), Workflow.EXPORT_FAILED))
             {

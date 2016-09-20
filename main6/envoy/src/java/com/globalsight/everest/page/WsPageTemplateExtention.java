@@ -243,6 +243,10 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
                 }
 
             }
+            else if (lm.getProjectTmIndex() == Leverager.XLIFF_ALT_TRANS_PRIORITY)
+            {
+                return false;
+            }
             else if (!originalTarget.trim().isEmpty())
             {
                 // The original target content is not empty and not modified by
@@ -265,8 +269,7 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
             else if (originalTarget.trim().isEmpty())
             {
                 // from max score alt trans target content
-                if (lm.getProjectTmIndex() == Leverager.XLIFF_PRIORITY
-                        || lm.getProjectTmIndex() == Leverager.XLIFF_ALT_TRANS_PRIORITY)
+                if (lm.getProjectTmIndex() == Leverager.XLIFF_PRIORITY)
                 {
                     return false;
                 }

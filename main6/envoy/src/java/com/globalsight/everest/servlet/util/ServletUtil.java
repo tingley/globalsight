@@ -23,13 +23,13 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
-
 import jodd.util.HtmlDecoder;
 import jodd.util.HtmlEncoder;
 import jodd.util.StringUtil;
 import jodd.util.URLCoder;
 import jodd.util.URLDecoder;
+
+import org.apache.log4j.Logger;
 
 /**
  * @author VincentYan
@@ -169,7 +169,7 @@ public class ServletUtil extends jodd.servlet.ServletUtil
      */
     public static boolean checkAllValues(HttpServletRequest request)
     {
-        String name, value;
+        String name, value = "";
         Object object = null;
         boolean isValid = true;
 
@@ -179,10 +179,27 @@ public class ServletUtil extends jodd.servlet.ServletUtil
         {
             name = (String) enumeration.nextElement();
             object = request.getAttribute(name);
+            if (object == null)
+                continue;
+
             if (object instanceof Integer)
+            {
                 value = ((Integer) object).toString();
+            }
+            else if (object instanceof String)
+            {
+                value = (String) object;
+            }
+            else if (object instanceof String[])
+            {
+                String[] tmp = (String[]) object;
+                for (String string : tmp)
+                {
+                    value += string + ",";
+                }
+            }
             else
-                value = object.toString();
+                continue;
             logger.debug("name == " + name + ", object == " + value);
             if (containXSS(value))
                 isValid = false;

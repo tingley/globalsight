@@ -379,7 +379,8 @@ public class PreviewPDFPageHandler extends PageHandler implements
         {
             if (pageName.endsWith(".indd") || pageName.endsWith(".idml")
                     || pageName.endsWith(".docx") || pageName.endsWith(".pptx")
-                    || pageName.endsWith(".xlsx") || pageName.endsWith(".xml"))
+                    || pageName.endsWith(".xlsx") || pageName.endsWith(".xml")
+                    || pageName.endsWith(".html") || pageName.endsWith(".htm"))
             {
                 SourcePage sourcePage = ServerProxy.getPageManager()
                         .getSourcePage(pagep.getSourcePageId());
@@ -405,6 +406,12 @@ public class PreviewPDFPageHandler extends PageHandler implements
                 if ((pageName.endsWith(".docx") || pageName.endsWith(".pptx")
                         || pageName.endsWith(".xlsx"))
                         && PreviewPDFHelper.isOfficeEnabled(companyId))
+                {
+                    return true;
+                }
+                
+                if ((pageName.endsWith(".html") || pageName.endsWith(".htm"))
+                        && PreviewPDFHelper.isHTMLEnabled(companyId))
                 {
                     return true;
                 }

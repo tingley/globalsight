@@ -84,6 +84,10 @@ public class JobStatePostThread extends Thread implements Runnable
     @Override
     public void run()
     {
+        if (previousState.equals(currentState))
+        {
+            return;
+        }
         List<String> finishedStates = jobStateInfo.get(job.getId());
         if (finishedStates != null && finishedStates.contains(currentState)
                 && CARED_JOB_STATES.contains(currentState))

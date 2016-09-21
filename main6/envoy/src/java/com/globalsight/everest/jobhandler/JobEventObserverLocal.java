@@ -140,7 +140,7 @@ public class JobEventObserverLocal implements JobEventObserver
         long wfStatePostId = p_job.getL10nProfile().getWfStatePostId();
         if (wfStatePostId != -1)
         {
-            new JobStatePostThread(p_job, p_job.getState(), Job.EXPORTED);
+            new JobStatePostThread(p_job, previousState, p_job.getState());
         }
         deleteInProgressTmData(p_job);
         

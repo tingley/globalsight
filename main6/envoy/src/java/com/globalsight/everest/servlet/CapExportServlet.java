@@ -559,16 +559,9 @@ public class CapExportServlet extends HttpServlet
     // Send workflow complete mail
     private void sendWorkflowCompleteEmail(TargetPage targetPage, String state)
     {
-        String wfState = targetPage.getWorkflowInstance().getState();
-        // Send mail only after workflow state has been changed to either of
-        // below two.
-        if (Workflow.EXPORTED.equalsIgnoreCase(wfState)
-                || Workflow.EXPORT_FAILED.equalsIgnoreCase(wfState))
-        {
-            Job job = targetPage.getWorkflowInstance().getJob();
-            String key = targetPage.getWorkflowInstance().getId() + job.getJobName();
-            ServerProxy.getWorkflowServer().advanceWorkFlowNotification(key, state);
-        }
+        Job job = targetPage.getWorkflowInstance().getJob();
+        String key = targetPage.getWorkflowInstance().getId() + job.getJobName();
+        ServerProxy.getWorkflowServer().advanceWorkFlowNotification(key, state);
     }
 
     // Let the export event observer set the state of the exported page to either

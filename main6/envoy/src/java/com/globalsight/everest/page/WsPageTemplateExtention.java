@@ -202,37 +202,24 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
     {
         try
         {
-            SourcePage sp = ServerProxy.getPageManager().getSourcePage(
-                    lm.getSourcePageId());
+            SourcePage sp = ServerProxy.getPageManager().getSourcePage(lm.getSourcePageId());
             long jobId = sp.getJobId();
             Tuv sourceTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
                     lm.getOriginalSourceTuvId(), jobId);
-            Tuv targetTuv = sourceTuv.getTu(jobId).getTuv(
-                    lm.getTargetLocaleId(), jobId);
-            // boolean isWSXlf = false;
-            // if (TuImpl.FROM_WORLDSERVER.equalsIgnoreCase(sourceTuv.getTu(
-            // companyId).getGenerateFrom()))
-            // {
-            // isWSXlf = true;
-            // }
+            Tuv targetTuv = sourceTuv.getTu(jobId).getTuv(lm.getTargetLocaleId(), jobId);
 
             String targetContent = targetTuv.getGxml();
-            String originalTarget = sourceTuv.getTu(jobId)
-                    .getXliffTargetGxml().getTextValue();
+            String originalTarget = sourceTuv.getTu(jobId).getXliffTargetGxml().getTextValue();
 
             if (lm.getProjectTmIndex() == Leverager.MT_PRIORITY
-                    && lm.getScoreNum() == 100
-                    && (lm.getMatchedText().equals(targetContent)))
+                    && lm.getMatchedText().equals(targetContent))
             {
                 // For GBS-1864 (if work-flow is in progress, and
                 // source_content="repetition", MT translation
                 // will NOT be written into "target", so need add MT translation
                 // into "alt-trans".
-                String sourceContentAtt = sourceTuv.getTu(jobId)
-                        .getSourceContent();
-                if (wfFinished
-                        && Extractor.IWS_REPETITION
-                                .equalsIgnoreCase(sourceContentAtt))
+                String sourceContentAtt = sourceTuv.getTu(jobId).getSourceContent();
+                if (wfFinished && Extractor.IWS_REPETITION.equalsIgnoreCase(sourceContentAtt))
                 {
                     return true;
                 }
@@ -241,7 +228,6 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
                     // auto committed by MT and not modified by user
                     return false;
                 }
-
             }
             else if (lm.getProjectTmIndex() == Leverager.XLIFF_ALT_TRANS_PRIORITY)
             {
@@ -251,24 +237,21 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
             {
                 // The original target content is not empty and not modified by
                 // user
-                String transType = ((TuImpl) sourceTuv.getTu(jobId))
-                        .getXliffTranslationType();
+                String transType = ((TuImpl) sourceTuv.getTu(jobId)).getXliffTranslationType();
 
                 if (lm.getMatchedText().equals(targetContent))
                 {
                     return false;
                 }
-                else if ((transType != null && transType
-                        .equals("machine_translation_mt"))
-                        && targetTuv.getState().getValue() == TuvState.NOT_LOCALIZED
-                                .getValue())
+                else if ("machine_translation_mt".equals(transType)
+                        && targetTuv.getState().getValue() == TuvState.NOT_LOCALIZED.getValue())
                 {
                     return false;
                 }
             }
             else if (originalTarget.trim().isEmpty())
             {
-                // from max score alt trans target content
+                // TODO: this will never be run since 8.7
                 if (lm.getProjectTmIndex() == Leverager.XLIFF_PRIORITY)
                 {
                     return false;

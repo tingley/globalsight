@@ -87,7 +87,7 @@ public class ReportHelper
             hql.append(Long.parseLong(currentId));
         }
 
-        Iterator it = HibernateUtil.search(hql.toString()).iterator();
+        Iterator<?> it = HibernateUtil.searchIterator(hql.toString());
 
         while (it.hasNext())
         {

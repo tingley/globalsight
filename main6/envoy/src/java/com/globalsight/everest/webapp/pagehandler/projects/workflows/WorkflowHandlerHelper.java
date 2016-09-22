@@ -74,6 +74,7 @@ import com.globalsight.everest.workflow.WorkflowConfiguration;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
+import com.globalsight.everest.workflowmanager.JobStatePostThread;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -912,6 +913,8 @@ public class WorkflowHandlerHelper
      */
     public static void recreateJob(Long jobId) throws EnvoyServletException
     {
+        JobStatePostThread.jobStateInfo.remove(jobId);
+
         HashMap<String, Object> args = new HashMap<String, Object>();
         Vector<String> filePaths = new Vector<String>();
         Vector<String> fileProfileIds = new Vector<String>();
@@ -1062,10 +1065,15 @@ public class WorkflowHandlerHelper
                 // Clean back up files
                 cleanBackupFile(backupFiles.get(0));
 
+                String previousState = job.getState();
                 // update job state
                 job.setState(Job.IN_QUEUE);
                 HibernateUtil.saveOrUpdate(job);
-
+                long wfStatePostId = job.getL10nProfile().getWfStatePostId();
+                if (wfStatePostId != -1)
+                {
+                    new JobStatePostThread(job, previousState, job.getState()).start();
+                }
                 // Reuse the implementation in web service.
                 args.put("jobId", String.valueOf(job.getJobId()));
                 args.put("jobName", jobName);

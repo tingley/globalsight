@@ -58,6 +58,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.X
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.log.ActivityLog;
 import com.globalsight.util.GeneralException;
 
@@ -538,14 +539,17 @@ public class CapExportServlet extends HttpServlet
             // process of exporting
             if (PageState.EXPORT_IN_PROGRESS.equals(tp.getPageState()))
             {
-                // First, populate TM in separate thread for current page.
+                // step 1: required before step 2.
+                updateExportedSubState(TargetPage.EXPORTED_TM_UPDATING, tp.getId());
+
+                // step 2: update target page state >> workflow state possibly
+                // >> job state possibly; source page state
+                ServerProxy.getPageEventObserver().notifyExportSuccessEvent(tp);
+
+                // step 3: populate TM in separate thread for current page.
                 PopulatingTmThread thread = new PopulatingTmThread(tp.getId());
                 Thread t = new MultiCompanySupportedThread(thread);
                 t.start();
-
-                // update target page state >> workflow state possibly >> job
-                // state possibly; source page state
-                ServerProxy.getPageEventObserver().notifyExportSuccessEvent(tp);
             }
         }
 
@@ -555,16 +559,9 @@ public class CapExportServlet extends HttpServlet
     // Send workflow complete mail
     private void sendWorkflowCompleteEmail(TargetPage targetPage, String state)
     {
-        String wfState = targetPage.getWorkflowInstance().getState();
-        // Send mail only after workflow state has been changed to either of
-        // below two.
-        if (Workflow.EXPORTED.equalsIgnoreCase(wfState)
-                || Workflow.EXPORT_FAILED.equalsIgnoreCase(wfState))
-        {
-            Job job = targetPage.getWorkflowInstance().getJob();
-            String key = targetPage.getWorkflowInstance().getId() + job.getJobName();
-            ServerProxy.getWorkflowServer().advanceWorkFlowNotification(key, state);
-        }
+        Job job = targetPage.getWorkflowInstance().getJob();
+        String key = targetPage.getWorkflowInstance().getId() + job.getJobName();
+        ServerProxy.getWorkflowServer().advanceWorkFlowNotification(key, state);
     }
 
     // Let the export event observer set the state of the exported page to either
@@ -577,5 +574,19 @@ public class CapExportServlet extends HttpServlet
 
         ExportEventObserverHelper.notifyPageExportComplete(
             Long.parseLong(exportBatchId), p_pageId, p_request);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void updateExportedSubState(int exportedSubState, Long targetPageId)
+    {
+        String sql = "UPDATE target_page SET EXPORTED_SUB_STATE = ? WHERE ID = ?";
+
+        List<List> targetPages = new ArrayList<>();
+        List params = new ArrayList<>();
+        params.add(exportedSubState);
+        params.add(targetPageId);
+        targetPages.add(params);
+
+        DbUtil.batchUpdate(sql, targetPages);
     }
 }

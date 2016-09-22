@@ -28,11 +28,13 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.tm.exporter.TmxChecker;
+import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -50,16 +52,18 @@ import com.globalsight.ling.tm2.persistence.PageTmRetriever;
 import com.globalsight.ling.tm2.persistence.SegmentQueryResult;
 import com.globalsight.ling.tm2.persistence.SegmentTmPersistence;
 import com.globalsight.ling.tm2.persistence.TmSegmentSaver;
+import com.globalsight.terminology.ITermbase;
+import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseList;
 import com.globalsight.terminology.TermbaseManager;
+import com.globalsight.terminology.indexer.IIndexManager;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 
 /**
  * Responsible to populate Tm
  */
-
 public class TmPopulator
 {
     private static final Logger LOGGER = Logger.getLogger(TmPopulator.class);
@@ -147,28 +151,35 @@ public class TmPopulator
 
             // populate Page TM
             LOGGER.debug("Populating Page TM");
-            populatePageTm(pageJobData.getTusToSaveToPageTm(p_options), p_page,
-                    p_targetLocales);
+            populatePageTm(pageJobData.getTusToSaveToPageTm(p_options), p_page, p_targetLocales);
 
-            // populate into term-base if "Terminology Approval" is yes.
-			populateIntoTermbase(pageJobData, job, p_page, p_options, p_targetLocales);
+            Collection<PageTmTu> segmentsToSave = pageJobData.getTusToSaveToSegmentTm(p_options,
+                    p_targetLocales, p_page);
+            if (segmentsToSave != null && segmentsToSave.size() > 0)
+            {
+                // populate Segment TM
+                LOGGER.debug("Populating Segment TM");
+                Tm tm = ServerProxy.getProjectHandler().getProjectTMById(p_options.getSaveTmId(),
+                        true);
+                SegmentTmInfo segtmInfo = tm.getSegmentTmInfo();
+                segtmInfo.setJob(job);
+                segtmInfo.saveToSegmentTm(segmentsToSave, sourceLocale, tm, p_targetLocales,
+                        TmCoreManager.SYNC_MERGE, false);
 
-            // populate Segment TM
-            LOGGER.debug("Populating Segment TM");
-            Tm tm = ServerProxy.getProjectHandler().getProjectTMById(
-                    p_options.getSaveTmId(), true);
-            SegmentTmInfo segtmInfo = tm.getSegmentTmInfo();
-            segtmInfo.setJob(job);
-            segtmInfo.saveToSegmentTm(
-                    pageJobData.getTusToSaveToSegmentTm(p_options, p_targetLocales, p_page),
-                    sourceLocale, tm, p_targetLocales, TmCoreManager.SYNC_MERGE, false);
+                // populate current page data into term-base if "Terminology Approval" is yes.
+                populateIntoTermbase(segmentsToSave, job, p_page, p_options, p_targetLocales);
+
+                possiblyDoIndexForTermbase(p_page, p_targetLocales);
+            }
         }
         catch (LingManagerException le)
         {
+            LOGGER.error(le);
             throw le;
         }
         catch (Exception e)
         {
+            LOGGER.error(e);
             throw new LingManagerException(e);
         }
         finally
@@ -177,13 +188,19 @@ public class TmPopulator
         }
     }
 
-	private void populateIntoTermbase(PageJobData pageJobData, Job job,
+	private void populateIntoTermbase(Collection<PageTmTu> segmentsToSave, Job job,
 			SourcePage p_page, LeverageOptions p_options,
 			Set<GlobalSightLocale> p_targetLocales)
 	{
         try
         {
-            if (job.getFileProfile().getTerminologyApproval() == 1)
+            if (segmentsToSave == null || segmentsToSave.size() == 0)
+                return;
+
+            long fpId = p_page.getRequest().getFileProfileId();
+            FileProfile fp = ServerProxy.getFileProfilePersistenceManager().getFileProfileById(
+                    fpId, false);
+            if (fp.getTerminologyApproval() == 1)
             {
                 String termbaseName = p_page.getRequest().getL10nProfile().getProject()
                         .getTermbaseName();
@@ -191,9 +208,7 @@ public class TmPopulator
                 if (tb != null)
                 {
                     TermbaseManager tbm = new TermbaseManager();
-                    Collection p_segmentsToSave = pageJobData.getTusToSaveToSegmentTm(p_options,
-                            p_targetLocales, p_page);
-                    Iterator it = p_segmentsToSave.iterator();
+                    Iterator it = segmentsToSave.iterator();
                     while (it.hasNext())
                     {
                         // separate subflows out of the main text and save
@@ -209,6 +224,64 @@ public class TmPopulator
         catch (Exception e)
         {
             LOGGER.error("Terminology populating error: " + e.getMessage());
+        }
+    }
+
+	/**
+     * Re-index the new added term-base entries if "Terminology Approval" option is "Yes".
+     */
+    private void possiblyDoIndexForTermbase(SourcePage p_page,
+            Set<GlobalSightLocale> p_targetLocales)
+    {
+        // do termbase index when workflow is finished.
+        boolean isAllWorkflowExported = true;
+        Workflow wf = null;
+        for (GlobalSightLocale targetLocale : p_targetLocales)
+        {
+            wf = p_page.getTargetPageByLocaleId(targetLocale.getId()).getWorkflowInstance();
+            if (!Workflow.EXPORTED.equals(wf.getState()))
+            {
+                isAllWorkflowExported = false;
+                break;
+            }
+        }
+
+        if (!isAllWorkflowExported)
+            return;
+
+        try
+        {
+            // check if there is file profile "Terminology Approval" is "yes".
+            boolean needDoTbIndex = false;
+            List<FileProfile> allFps = p_page.getRequest().getJob().getAllFileProfiles();
+            for (FileProfile fp : allFps)
+            {
+                if (fp.getTerminologyApproval() == 1)
+                {
+                    needDoTbIndex = true;
+                    break;
+                }
+            }
+
+            if (needDoTbIndex)
+            {
+                String companyId = String.valueOf(p_page.getCompanyId());
+                String termbaseName = wf.getJob().getL10nProfile().getProject().getTermbaseName();
+                Termbase tb = TermbaseList.get(companyId, termbaseName);
+
+                if (!tb.isIndexing())
+                {
+                    ITermbaseManager s_manager = ServerProxy.getTermbaseManager();
+                    ITermbase itb = s_manager.connect(termbaseName, wf.getJob().getL10nProfile()
+                            .getProject().getProjectManagerId(), "", companyId);
+                    IIndexManager indexer = itb.getIndexer();
+                    indexer.doIndex();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("Error when try to do index for termbase.", e);
         }
     }
 

@@ -61,7 +61,7 @@ public class JobStatePostThread extends Thread implements Runnable
     private String previousState;
     private String currentState;
 
-    private static ConcurrentHashMap<Long, List<String>> jobStateInfo = new ConcurrentHashMap<Long, List<String>>();
+    public static ConcurrentHashMap<Long, List<String>> jobStateInfo = new ConcurrentHashMap<Long, List<String>>();
 
     // Avoid post multiple times for same state value.
     private static List<String> CARED_JOB_STATES = new ArrayList<String>();
@@ -84,6 +84,10 @@ public class JobStatePostThread extends Thread implements Runnable
     @Override
     public void run()
     {
+        if (previousState.equals(currentState))
+        {
+            return;
+        }
         List<String> finishedStates = jobStateInfo.get(job.getId());
         if (finishedStates != null && finishedStates.contains(currentState)
                 && CARED_JOB_STATES.contains(currentState))
@@ -97,7 +101,7 @@ public class JobStatePostThread extends Thread implements Runnable
         }
         finishedStates.add(currentState);
         jobStateInfo.put(job.getId(), finishedStates);
-
+       
         jobStatePost(job, previousState, currentState);
     }
 

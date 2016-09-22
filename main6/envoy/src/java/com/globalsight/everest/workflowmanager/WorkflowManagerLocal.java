@@ -404,6 +404,11 @@ public class WorkflowManagerLocal implements WorkflowManager
         String oldState = job.getState();
         job.setState(Job.CANCELLED);
         HibernateUtil.saveOrUpdate(job);
+        long wfStatePostId = job.getL10nProfile().getWfStatePostId();
+        if (wfStatePostId != -1)
+        {
+            new JobStatePostThread(job, oldState, job.getState()).start();
+        }
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("jobId", job.getId());

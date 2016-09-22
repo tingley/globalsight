@@ -134,10 +134,16 @@ public class JobEventObserverLocal implements JobEventObserver
     public void notifyJobExportFailedEvent(Job p_job) throws JobException,
             RemoteException
     {
+        String previousState = p_job.getState();
         p_job.setState(Job.EXPORT_FAIL);
         JobPersistenceAccessor.updateJobState(p_job);
-
+        long wfStatePostId = p_job.getL10nProfile().getWfStatePostId();
+        if (wfStatePostId != -1)
+        {
+            new JobStatePostThread(p_job, previousState, p_job.getState());
+        }
         deleteInProgressTmData(p_job);
+        
     }
 
     /**

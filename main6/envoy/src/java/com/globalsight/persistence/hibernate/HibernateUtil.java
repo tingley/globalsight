@@ -425,7 +425,6 @@ public class HibernateUtil
      * @return a persistent instance or null
      * @throws Exception
      */
-    @SuppressWarnings("unchecked")
     public static <T> T get(Class<T> clazz, Serializable id, boolean ignoreInActiveOb)
             throws HibernateException
     {
@@ -786,7 +785,6 @@ public class HibernateUtil
      * @return the persistent instance or proxy
      * @throws Exception
      */
-    @SuppressWarnings("unchecked")
     public static <T> T load(Class<T> clazz, Serializable id) throws Exception
     {
         T result = null;
@@ -1118,6 +1116,64 @@ public class HibernateUtil
         }
 
         return result;
+    }
+
+    public static Iterator<?> searchIterator(String hql) throws HibernateException
+    {
+        try
+        {
+            return searchIterator(hql, null);
+        }
+        catch (Exception e)
+        {
+            throw (HibernateException) e;
+        }
+    }
+
+    public static Iterator<?> searchIterator(String hql, Map<String, ?> map)
+            throws HibernateException
+    {
+        try
+        {
+            return searchIterator(hql, map, 0, 0);
+        }
+        catch (Exception e)
+        {
+            throw (HibernateException) e;
+        }
+    }
+
+    public static Iterator<?> searchIterator(String hql, Map<String, ?> map, int first, int max)
+    {
+        if (hql != null)
+        {
+            Session session = getSession();
+            Query query = session.createQuery(hql);
+
+            if (map != null)
+            {
+                Iterator<String> iterator = map.keySet().iterator();
+                while (iterator.hasNext())
+                {
+                    String key = iterator.next();
+                    query.setParameter(key, map.get(key));
+                }
+            }
+
+            if (first > 0)
+            {
+                query.setFirstResult(first);
+            }
+
+            if (max > 0)
+            {
+                query.setMaxResults(max);
+            }
+
+            return query.iterate(); //
+        }
+
+        return null;
     }
 
     public static List<?> search(String hql, Object param1) throws HibernateException

@@ -17,7 +17,6 @@
 package com.globalsight.cxe.util;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -28,7 +27,6 @@ import com.globalsight.cxe.adapter.documentum.DocumentumOperator;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
-import com.globalsight.cxe.adapter.serviceware.ServiceWareAdapter;
 import com.globalsight.cxe.adapter.vignette.VignetteAdapter;
 import com.globalsight.cxe.adaptermdb.BaseAdapterMDB;
 import com.globalsight.cxe.adaptermdb.EventTopicMap;
@@ -569,43 +567,6 @@ public class CxeProxy
     }
 
     /**
-     * Initiates an import of a knowledge object and associated Concepts from
-     * ServiceWare.
-     * 
-     * @param p_koId
-     *            knowledge object ID
-     * @param p_fpId
-     *            file profile id
-     * @param p_jobName
-     *            suggested job name
-     * @exception Exception
-     */
-    static public void importFromServiceWare(String p_koId, String p_fpId, String p_jobName)
-            throws Exception
-    {
-        CxeMessageType type = CxeMessageType
-                .getCxeMessageType(CxeMessageType.SERVICEWARE_FILE_SELECTED_EVENT);
-        CxeMessage cxeMessage = new CxeMessage(type);
-        HashMap params = new HashMap();
-
-        String companyId = getCompanyIdByFileProfileId(p_fpId);
-        params.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
-        params.put("KOID", p_koId);
-        params.put("JobName", p_jobName);
-        params.put("BatchId", p_jobName + new Date());
-        params.put("PageCount", new Integer(1));
-        params.put("PageNum", new Integer(1));
-        params.put("DocPageCount", new Integer(1));
-        params.put("DocPageNum", new Integer(1));
-        params.put("FileProfileId", p_fpId);
-        params.put("OverrideFileProfileAsUnextracted", Boolean.FALSE);
-        cxeMessage.setParameters(params);
-
-        // GBS-4400
-        FileImportUtil.importFileWithThread(cxeMessage);
-    }
-
-    /**
      * Initiates a Mediasurface import for one MS leaf item. The caller has
      * already figured out the batch information and should know what to pass
      * for batchId, pageNum, and pageCount.
@@ -686,16 +647,6 @@ public class CxeProxy
     static public boolean isVignetteAdapterInstalled()
     {
         return VignetteAdapter.isInstalled();
-    }
-
-    /**
-     * Returns true if the ServiceWare Adapter is installed
-     * 
-     * @return true | false
-     */
-    static public boolean isServiceWareAdapterInstalled()
-    {
-        return ServiceWareAdapter.isInstalled();
     }
 
     /**

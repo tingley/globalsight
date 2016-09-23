@@ -35,7 +35,6 @@ insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (25, 'priority
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (26, 'documentum.installKey', '%%documentum_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (27, 'enable.proxy.ssl', '%%server_ssl_enable%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (28, 'cxe.ntcsDir', '%%desktop_ntcs_dir%%', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (29, 'serviceware.installKey', '%%serviceware_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (30, 'jobCosting.enabled','%%costing%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (31, 'warningThresholds.enabled','%%system4_timer_useWarningThresholds%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (32, 'timer.threshold','%%system4_timer_threshold%%', '1');

@@ -39,8 +39,7 @@
    String myJobsUrl = LinkHelper.getWebActivityURL(request, "workflows");
    String projectsUrl = LinkHelper.getWebActivityURL(request, "projects");
    String rateUrl = LinkHelper.getWebActivityURL(request, "rate");
-   String reportsUrl = LinkHelper.getWebActivityURL(request, "reports");   
-   String serviceWareUrl = LinkHelper.getWebActivityURL(request,"swimport");
+   String reportsUrl = LinkHelper.getWebActivityURL(request, "reports");
    String systemParametersUrl = LinkHelper.getWebActivityURL(request, "configuration");
    String templatesUrl = LinkHelper.getWebActivityURL(request, "templates");
    String terminologyUrl = LinkHelper.getWebActivityURL(request, "termbases");
@@ -185,11 +184,13 @@ arMenu1 = new Array (
 
     "<%= menuBundle.getString("lb_import") %>",
     "<%= importUrl %>",
-    0<%if (b_serviceware) {%>
-     ,
-     "<%=menuBundle.getString("lb_serviceware_import") %>",
-     "<%=serviceWareUrl%>",
-    0<%}%><%if (b_database){%>
+    0,
+
+    "<%= menuBundle.getString("lb_export_locations") %>",
+    "<%= exportLocationsUrl %>",
+    0
+
+    <%if (b_database){%>
     ,
     "<%= menuBundle.getString("lb_db_connections2") %>",
     "<%= dbConnectionsUrl %>",
@@ -207,16 +208,13 @@ arMenu1 = new Array (
     "<%= dbPreviewRulesUrl %>",
     0
     <%}%>
+
     <%if (b_vignette){%>
     ,
     "<%= menuBundle.getString("lb_vignette_import") %>",
     "javascript: window.open('<%= vignetteUrl %>','vignetteWindow')",
-    0            
+    0 
     <%}%>
-    ,
-    "<%= menuBundle.getString("lb_export_locations") %>",
-    "<%= exportLocationsUrl %>",
-    0
 );
 
 // Guides

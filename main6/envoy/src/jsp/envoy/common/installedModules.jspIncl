@@ -9,7 +9,6 @@
     static boolean b_catalyst = Modules.isCatalystAdapterInstalled();
     static boolean b_vendorManagement = Modules.isVendorManagementInstalled();
     static boolean b_calendaring = Modules.isCalendaringInstalled();
-    static boolean b_serviceware = Modules.isServiceWareAdapterInstalled();
     static boolean b_documentum = Modules.isDocumentumAdapterInstalled();
     static boolean b_customerAccessGroup = Modules.isCustomerAccessGroupInstalled();
 %>

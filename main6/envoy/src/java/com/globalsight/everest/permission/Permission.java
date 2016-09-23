@@ -185,7 +185,6 @@ public class Permission
     static public final String SGMLRULE_REMOVE = "sgmlrule.remove";
     static public final String SGMLRULE_EDIT = "sgmlrule.edit";
     static public final String IMPORT = "import";
-    static public final String SERVICEWARE_IMPORT = "serviceware.import";
     static public final String DATABASE_INTEGRATION = "database.integration";
     static public final String EXPORT_LOC_VIEW = "exportloc.view";
     static public final String EXPORT_LOC_REMOVE = "exportloc.remove";
@@ -647,7 +646,6 @@ public class Permission
         added = addPermission(102, SGMLRULE_REMOVE) || added;
         added = addPermission(103, SGMLRULE_EDIT) || added;
         added = addPermission(104, IMPORT) || added;
-        added = addPermission(105, SERVICEWARE_IMPORT) || added;
         added = addPermission(116, DATABASE_INTEGRATION) || added;
         added = addPermission(117, EXPORT_LOC_VIEW) || added;
         added = addPermission(118, EXPORT_LOC_REMOVE) || added;

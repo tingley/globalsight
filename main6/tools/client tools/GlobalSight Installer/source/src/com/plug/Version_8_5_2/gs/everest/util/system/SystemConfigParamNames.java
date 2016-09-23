@@ -372,9 +372,6 @@ public interface SystemConfigParamNames
     /** Vignette Constants */
     public static final String VIGNETTE_INSTALL_KEY = "vignette.installKey";
 
-    /** ServiceWare Constants */
-    public static final String SERVICEWARE_INSTALL_KEY = "serviceware.installKey";
-
     /** Documentum Constants */
     public static final String DOCUMENTUM_INSTALL_KEY = "documentum.installKey";
 

@@ -121,9 +121,6 @@ public class CxeMessageType implements Serializable
     public static final int CATALYST_IMPORTED_EVENT = 515;
     public static final int CATALYST_LOCALIZED_EVENT = 516;
 
-    public static final int SERVICEWARE_FILE_SELECTED_EVENT = 517;
-    public static final int SERVICEWARE_EXPORT_EVENT = 518;
-
     public static final int DOCUMENTUM_FILE_SELECTED_EVENT = 521;
     public static final int DOCUMENTUM_EXPORT_EVENT = 522;
 
@@ -231,10 +228,6 @@ public class CxeMessageType implements Serializable
         //catalyst
         fillMaps(CATALYST_IMPORTED_EVENT, "CATALYST_IMPORTED_EVENT");
         fillMaps(CATALYST_LOCALIZED_EVENT, "CATALYST_LOCALIZED_EVENT");
-
-       //serviceware
-        fillMaps(SERVICEWARE_FILE_SELECTED_EVENT, "SERVICEWARE_FILE_SELECTED_EVENT");
-        fillMaps(SERVICEWARE_EXPORT_EVENT, "SERVICEWARE_EXPORT_EVENT");
 
        //documentum
         fillMaps(DOCUMENTUM_FILE_SELECTED_EVENT, "DOCUMENTUM_FILE_SELECTED_EVENT");

@@ -53,7 +53,6 @@ import com.globalsight.cxe.entity.filterconfiguration.MSOffice2010Filter;
 import com.globalsight.cxe.entity.filterconfiguration.OpenOfficeFilter;
 import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFile;
 import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileValidator;
-import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
@@ -65,7 +64,6 @@ import com.globalsight.cxe.util.fileImport.eventFlow.Source;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
-import com.globalsight.everest.aligner.AlignerExtractor;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -184,31 +182,14 @@ public class StandardExtractor
     MessageData extract() throws LingAdapterException
     {
         parseEventFlowXml();
-        String alignerExtractorName = (String) m_cxeMessage.getParameters()
-                .get("AlignerExtractor");
-        AlignerExtractor alignerExtractor = AlignerExtractor
-                .getAlignerExtractor(alignerExtractorName);
 
-        String fpId = (String) m_cxeMessage.getParameters()
-                .get("FileProfileId");
+        String fpId = (String) m_cxeMessage.getParameters().get("FileProfileId");
         if (fpId != null)
         {
-            fileProfile = HibernateUtil.get(FileProfileImpl.class,
-                    Long.valueOf(fpId), false);
+            fileProfile = HibernateUtil.get(FileProfileImpl.class, Long.valueOf(fpId), false);
         }
 
-        if (alignerExtractor == null)
-        {
-            m_logger.debug("aligner extractor is null - normal extraction");
-            queryRuleFile();
-        }
-        else
-        {
-            m_logger.debug("aligner extractor is not null - aligner extraction");
-            XmlRuleFile ruleFile = alignerExtractor.getXmlRule();
-            if (ruleFile != null)
-                m_ruleFile = ruleFile.getRuleText();
-        }
+        queryRuleFile();
 
         try
         {
@@ -401,9 +382,7 @@ public class StandardExtractor
 
         // Now we get segmentationRuleFile through FileProfileId parameter
         // and then get segmentation rule text
-
         SegmentationRuleFile srf = null;
-        // Not from aligner.
         if (fileProfile != null)
         {
             long lpId = fileProfile.getL10nProfileId();
@@ -670,8 +649,7 @@ public class StandardExtractor
             DocumentElement element = (DocumentElement) it.next();
             if (element instanceof TranslatableElement)
             {
-                ArrayList segments = ((TranslatableElement) element)
-                        .getSegments();
+                ArrayList segments = ((TranslatableElement) element).getSegments();
                 if (segments != null && segments.size() > 0)
                 {
                     for (int i = 0, max = segments.size(); i < max; i++)
@@ -680,7 +658,6 @@ public class StandardExtractor
                         // boolean needDecodeTwice = false;
                         diplomat.resetForChainFilter();
 
-                        // Not from aligner.
                         if (fp != null)
                         {
                             diplomat.setFileProfile(fp);
@@ -695,8 +672,7 @@ public class StandardExtractor
                         SegmentNode node = (SegmentNode) segments.get(i);
                         XmlEntities xe = new XmlEntities();
                         String temp = node.getSegment();
-                        boolean hasLtGt = temp.contains("&lt;")
-                                || temp.contains("&gt;");
+                        boolean hasLtGt = temp.contains("&lt;") || temp.contains("&gt;");
                         // protect "<" and ">" to ensure html filter will work
                         temp = temp.replace("&amp;lt;", "_leftAmpLt_");
                         temp = temp.replace("&amp;gt;", "_rightAmpGt_");
@@ -709,8 +685,7 @@ public class StandardExtractor
                         temp = temp.replace("_rightAmpGt_", "&amp;gt;");
                         temp = temp.replace("_leftAmpLt_", "&amp;lt;");
                         List<String> internalTexts = new ArrayList<String>();
-                        temp = InternalTextHelper.protectInternalTexts(temp,
-                                internalTexts);
+                        temp = InternalTextHelper.protectInternalTexts(temp, internalTexts);
                         String segmentValue = xe.decodeStringBasic(temp);
                         // decode TWICE to make sure secondary parser can work
                         // as expected
@@ -719,11 +694,10 @@ public class StandardExtractor
                             segmentValue = xe.decodeStringBasic(segmentValue);
                         }
 
-                        segmentValue = InternalTextHelper.restoreInternalTexts(
-                                segmentValue, internalTexts);
+                        segmentValue = InternalTextHelper.restoreInternalTexts(segmentValue,
+                                internalTexts);
 
-                        if (inputFormatName != null
-                                && inputFormatName.equals("html"))
+                        if (inputFormatName != null && inputFormatName.equals("html"))
                         {
                             segmentValue = checkHtmlTags(segmentValue);
                         }
@@ -732,8 +706,7 @@ public class StandardExtractor
 
                         if (m_logger.isDebugEnabled())
                         {
-                            m_logger.info("Before extracted string : "
-                                    + segmentValue);
+                            m_logger.info("Before extracted string : " + segmentValue);
                         }
                         // extract this segment
                         diplomat.setExtractor(null);
@@ -760,12 +733,10 @@ public class StandardExtractor
                         Iterator it2 = _output.documentElementIterator();
                         while (it2.hasNext())
                         {
-                            DocumentElement element2 = (DocumentElement) it2
-                                    .next();
+                            DocumentElement element2 = (DocumentElement) it2.next();
                             if (element2 instanceof SkeletonElement)
                             {
-                                String text = ((SkeletonElement) element2)
-                                        .getSkeleton();
+                                String text = ((SkeletonElement) element2).getSkeleton();
                                 // fixing for GBS-1043
                                 if (!hasLtGt)
                                 {
@@ -776,15 +747,13 @@ public class StandardExtractor
                             }
                             else if (element2 instanceof LocalizableElement)
                             {
-                                String text = ((LocalizableElement) element2)
-                                        .getChunk();
+                                String text = ((LocalizableElement) element2).getChunk();
                                 text = xe.encodeStringBasic(text);
                                 ((LocalizableElement) element2).setChunk(text);
                             }
                             else if (element2 instanceof TranslatableElement)
                             {
-                                List segs = ((TranslatableElement) element2)
-                                        .getSegments();
+                                List segs = ((TranslatableElement) element2).getSegments();
                                 String text;
                                 for (int j = 0; j < segs.size(); j++)
                                 {

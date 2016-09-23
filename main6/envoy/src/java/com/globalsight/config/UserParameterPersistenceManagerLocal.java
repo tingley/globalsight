@@ -652,15 +652,6 @@ public class UserParameterPersistenceManagerLocal implements
                     NOTIFY_SCHEDULING_FAILURE);
             createNotificationParameter(p_userId, p_existing, result,
                     NOTIFY_ACTIVITY_DEADLINE);
-            createNotificationParameter(p_userId, p_existing, result,
-                    NOTIFY_BATCH_ALIGNMENT_SUCCESS);
-            createNotificationParameter(p_userId, p_existing, result,
-                    NOTIFY_BATCH_ALIGNMENT_FAILURE);
-            createNotificationParameter(p_userId, p_existing, result,
-                    NOTIFY_ALIGNMENT_UPLOAD_SUCCESS);
-            createNotificationParameter(p_userId, p_existing, result,
-                    NOTIFY_ALIGNMENT_UPLOAD_FAILURE);
-
         }
 
         if (perms.getPermissionFor(Permission.ACCOUNT_NOTIFICATION_GENERAL))

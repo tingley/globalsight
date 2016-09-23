@@ -28,7 +28,6 @@ import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
 import com.globalsight.cxe.adapter.serviceware.ServiceWareAdapter;
 import com.globalsight.cxe.adapter.vignette.VignetteAdapter;
-import com.globalsight.everest.aligner.AlignerManagerLocal;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.vendormanagement.VendorManagementLocal;
@@ -61,8 +60,6 @@ public class Modules
 
     private static boolean s_catalyst = false;
 
-    private static boolean s_corpusAligner = false;
-
     private static boolean s_customerAccessGroup = false;
 
     // determines up front what modules are installed. Throws an
@@ -90,7 +87,6 @@ public class Modules
             s_vmWebService = s_vendorMgmt && s_l10nWebService;
             s_calendar = CalendarManagerLocal.isInstalled();
             s_catalyst = CatalystAdapter.isInstalled();
-            s_corpusAligner = AlignerManagerLocal.isInstalled();
             s_serviceware = ServiceWareAdapter.isInstalled();
             s_documentum = DocumentumAdapter.isInstalled();
             checkCustomerAccessGroup();
@@ -241,16 +237,6 @@ public class Modules
     public static boolean isCatalystAdapterInstalled()
     {
         return s_catalyst;
-    }
-
-    /**
-     * Returns true if the Corpus Aligner is installed
-     * 
-     * @return true | false
-     */
-    public static boolean isCorpusAlignerInstalled()
-    {
-        return s_corpusAligner;
     }
 
     /**

@@ -61,7 +61,6 @@ insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (52, 'cms.cont
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (53, 'vendorManagement.installKey', '%%vm_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (54, 'catalyst.installKey', '%%catalyst_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (55, 'quarkmac.installKey', 'false', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (56, 'corpusAligner.installKey', '%%corpus_aligner_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (57, 'editor.gxml.installKey', 'false', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (58, 'msoffice2003.dir', '%%msoffice2003_dir%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (59, 'adobe.cs3.dir', '%%adobe_cs3_dir%%', '1');

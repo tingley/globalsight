@@ -86,14 +86,6 @@ public class Plug_7_1_7_2 implements Plug
                 s = in.readLine();
             }
 
-            if (content.indexOf("RSSPersistenceManagerWLRMIImpl") < 0)
-            {
-                int i = content.indexOf("AlignerManagerWLRMIImpl");
-                String cxe = "  com.globalsight.everest.webapp.pagehandler.rss.RSSPersistenceManagerWLRMIImpl,\\" + FileUtil.lineSeparator;
-
-                content.insert(i + "AlignerManagerWLRMIImpl".length() + 3, cxe);
-            }
-
             FileWriter out = new FileWriter(file, false);
             out.write(content.toString());
             out.flush();

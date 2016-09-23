@@ -99,10 +99,6 @@ public interface UserParamNames
     public static final String NOTIFY_EXPORT_COMPLETION = "notifyExportCompletion";
     public static final String NOTIFY_SUCCESSFUL_UPLOAD = "notifySuccessfulUpload";
     public static final String NOTIFY_SAVING_SEGMENTS_FAILURE = "notifySavingSegmentsFailure";
-    public static final String NOTIFY_BATCH_ALIGNMENT_SUCCESS = "notifyBatchAlignmentSuccess";
-    public static final String NOTIFY_BATCH_ALIGNMENT_FAILURE = "notifyBatchAlignmentFailure";
-    public static final String NOTIFY_ALIGNMENT_UPLOAD_SUCCESS = "notifyAlignmentUploadSuccess";
-    public static final String NOTIFY_ALIGNMENT_UPLOAD_FAILURE = "notifyAlignmentUploadFailure";
 
     //
     // Editor Parameters

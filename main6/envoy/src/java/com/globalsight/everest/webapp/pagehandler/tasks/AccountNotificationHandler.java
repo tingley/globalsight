@@ -107,14 +107,6 @@ public class AccountNotificationHandler extends PageHandler
         s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_STF_CREATION_FAILURE);
         s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_SCHEDULING_FAILURE);
         s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_ACTIVITY_DEADLINE);
-        s_pmAndWfmNotifications
-                .add(UserParamNames.NOTIFY_BATCH_ALIGNMENT_SUCCESS);
-        s_pmAndWfmNotifications
-                .add(UserParamNames.NOTIFY_BATCH_ALIGNMENT_FAILURE);
-        s_pmAndWfmNotifications
-                .add(UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_SUCCESS);
-        s_pmAndWfmNotifications
-                .add(UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_FAILURE);
 
         // Adds parameter for notification pm overdue
         s_pmAndWfmNotifications.add(UserParamNames.NOTIFY_OVERDUE_PM);

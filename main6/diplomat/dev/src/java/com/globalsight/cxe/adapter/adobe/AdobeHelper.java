@@ -1304,7 +1304,6 @@ public class AdobeHelper
 
         if (p_l10nProfileId == null || p_l10nProfileId.equals("null"))
         {
-            // May be null for aligner import.
             return targetLocales;
         }
 

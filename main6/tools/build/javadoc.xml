@@ -93,7 +93,6 @@
                 com.globalsight.diplomat.util,
                 com.globalsight.diplomat.util.database,
                 com.globalsight.diplomat.util.previewUrlXml,
-                com.globalsight.everest.aligner,
                 com.globalsight.everest.comment,
                 com.globalsight.everest.company,
                 com.globalsight.everest.costing,
@@ -223,7 +222,6 @@
                 com.globalsight.everest.webapp.pagehandler.administration.users,
                 com.globalsight.everest.webapp.pagehandler.administration.vendors,
                 com.globalsight.everest.webapp.pagehandler.administration.workflow,
-                com.globalsight.everest.webapp.pagehandler.aligner,
                 com.globalsight.everest.webapp.pagehandler.edit,
                 com.globalsight.everest.webapp.pagehandler.edit.online,
                 com.globalsight.everest.webapp.pagehandler.edit.online2,
@@ -255,10 +253,6 @@
                 com.globalsight.exporter,
                 com.globalsight.importer,
                 com.globalsight.io,
-                com.globalsight.ling.aligner,
-                com.globalsight.ling.aligner.engine,
-                com.globalsight.ling.aligner.gxml,
-                com.globalsight.ling.aligner.io,
                 com.globalsight.ling.common,
                 com.globalsight.ling.docproc,
                 com.globalsight.ling.docproc.extractor.cfscript,
@@ -449,7 +443,6 @@
 			<group title="Inprogress TM" packages="com.globalsight.ling.inprogresstm:com.globalsight.ling.inprogresstm.*" />
 			<group title="Lucene Indexes" packages="com.globalsight.ling.lucene:com.globalsight.ling.lucene.locks:com.globalsight.ling.lucene.search" />
 			<group title="Lucene Linguistic Analyzers" packages="com.globalsight.ling.lucene.analysis:com.globalsight.ling.lucene.analysis.*" />
-			<group title="Aligner" packages="com.globalsight.ling.aligner:com.globalsight.ling.aligner.*:com.globalsight.everest.aligner" />
 			<group title="GAlign Client Application" packages="galign.*" />
 			<group title="SGML" packages="com.globalsight.ling.sgml:com.globalsight.ling.sgml.*" />
 			<group title="Linguistics" packages="com.globalsight.ling.common:com.globalsight.ling.docproc" />

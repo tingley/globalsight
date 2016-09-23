@@ -57,9 +57,6 @@
 		<copy todir="${serverclassesDest}/properties/tm">
 			<fileset dir="${lingSrc}/com/globalsight/ling/tm2/tm_properties" />
 		</copy>
-		<copy todir="${serverclassesDest}/properties/aligner">
-			<fileset dir="${lingSrc}/com/globalsight/ling/aligner/aligner_properties" />
-		</copy>
 		<copy todir="${serverclassesDest}">
 			<fileset dir="${lingSrc}" includes="com/globalsight/ling/lucene/analysis/**/*" excludes="**/*.java, **/*.jjj, **/*.class" />
 		</copy>

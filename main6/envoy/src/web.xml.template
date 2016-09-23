@@ -50,12 +50,6 @@
         <http-method>GET</http-method>
         <http-method>POST</http-method>
     </web-resource-collection>
-	<web-resource-collection>
-        <web-resource-name>tmcorpus</web-resource-name>
-        <url-pattern>/envoy/tm/corpus/*</url-pattern>
-        <http-method>GET</http-method>
-        <http-method>POST</http-method>
-    </web-resource-collection>
     <user-data-constraint>
         <transport-guarantee>NONE</transport-guarantee>
     </user-data-constraint>
@@ -650,15 +644,6 @@
   </servlet>
 
   <servlet>
-    <servlet-name>alignerPackages</servlet-name>
-    <servlet-class>com.globalsight.everest.servlet.SaveAsFileServlet</servlet-class>
-    <init-param>
-      <param-name>docHome</param-name>
-      <param-value>%%file_storage_dir_forwardslash%%/GlobalSight/AlignerPackages</param-value>
-    </init-param>
-  </servlet>
-
-  <servlet>
     <servlet-name>downloadresource</servlet-name>
     <servlet-class>com.globalsight.everest.servlet.SaveAsFileServlet</servlet-class>
     <init-param>
@@ -863,11 +848,6 @@
     <url-pattern>/exports/*</url-pattern>
   </servlet-mapping>
 
-  <servlet-mapping>
-    <servlet-name>alignerPackages</servlet-name>
-    <url-pattern>/alignerPackages/*</url-pattern>
-  </servlet-mapping>
-  
   <servlet-mapping>
     <servlet-name>downloadresource</servlet-name>
     <url-pattern>/downloadresource/*</url-pattern>

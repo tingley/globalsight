@@ -194,10 +194,6 @@ public class Permission
     static public final String EXPORT_LOC_NEW = "exportloc.new";
     static public final String VIGNETTE_IMPORT = "vignette.import";
     static public final String DOCUMENTUM_IMPORT = "documentum.import";
-    static public final String CORPUS_ALIGNER_VIEW = "corpusaligner.view";
-    static public final String CORPUS_ALIGNER_CREATE = "corpusaligner.create";
-    static public final String CORPUS_ALIGNER_DOWNLOAD = "corpusaligner.download";
-    static public final String CORPUS_ALIGNER_UPLOAD = "corpusaligner.upload";
     static public final String JOB_SCOPE_ALL = "jobscope.all";
     static public final String JOBS_VIEW = "jobs.view";
     static public final String JOBS_SEARCH_REPLACE = "jobs.searchreplace";
@@ -659,10 +655,6 @@ public class Permission
         added = addPermission(120, EXPORT_LOC_EDIT) || added;
         added = addPermission(121, EXPORT_LOC_NEW) || added;
         added = addPermission(122, VIGNETTE_IMPORT) || added;
-        added = addPermission(123, CORPUS_ALIGNER_VIEW) || added;
-        added = addPermission(124, CORPUS_ALIGNER_CREATE) || added;
-        added = addPermission(125, CORPUS_ALIGNER_DOWNLOAD) || added;
-        added = addPermission(126, CORPUS_ALIGNER_UPLOAD) || added;
         added = addPermission(127, JOB_SCOPE_ALL) || added;
         added = addPermission(128, JOBS_VIEW) || added;
         added = addPermission(129, JOBS_SEARCH_REPLACE) || added;

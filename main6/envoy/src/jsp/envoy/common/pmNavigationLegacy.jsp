@@ -19,7 +19,6 @@
    String activityTypesUrl = LinkHelper.getWebActivityURL(request, "activities");
    String archivedJobsUrl = LinkHelper.getWebActivityURL(request, "archive");
    String calendarsUrl = LinkHelper.getWebActivityURL(request, "calendars");
-   String corpusAlignerUrl = LinkHelper.getWebActivityURL(request, "aligner");
    String currencyUrl = LinkHelper.getWebActivityURL(request, "currency");
    String dbConnectionsUrl = LinkHelper.getWebActivityURL(request, "dbconnections");
    String dbImportSettingsUrl = LinkHelper.getWebActivityURL(request, "dbimportsettings");
@@ -218,12 +217,6 @@ arMenu1 = new Array (
     "<%= menuBundle.getString("lb_export_locations") %>",
     "<%= exportLocationsUrl %>",
     0
-    <%if (b_corpusAligner){%>
-    ,
-    "Corpus Aligner",
-    "<%= corpusAlignerUrl%>",
-    0
-    <%}%>
 );
 
 // Guides

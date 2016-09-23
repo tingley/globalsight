@@ -652,42 +652,7 @@ public interface WebAppConstants
 
     public static final String TM_ERROR = "TM_ERROR";
 
-    //
-    // Aligner Package Creation Constants
-    //
-    public static final String GAP_OPTIONS = "gapoptions";
-    public static final String GAP_FORMATTYPES = "gapformattypes";
-    public static final String GAP_RULES = "gaprules";
-    public static final String GAP_LOCALES = "gaplocales";
-    public static final String GAP_ENCODINGS = "gapencodings";
-    public static final String GAP_EXTENSIONS = "gapextensions";
-    public static final String GAP_PACKAGE = "gappackage";
-    public static final String GAP_PACKAGES = "gappackages";
-    public static final String GAP_PACKAGE_NAMES = "gappackagenames";
-    public static final String GAP_PACKAGEINFO = "gappackageinfo";
-    public static final String GAP_TMS = "gaptms";
-    public static final String GAP_FILELIST = "gapfilelist";
-    public static final String GAP_FOLDERSRC = "gapfoldersrc";
-    public static final String GAP_FOLDERTRG = "gapfoldertrg";
-    public static final String GAP_CURRENTFOLDERSRC = "gapcurrentfoldersrc";
-    public static final String GAP_CURRENTFOLDERTRG = "gapcurrentfoldertrg";
-
-    public static final String GAP_ACTION = "gapaction";
-    public static final String GAP_ACTION_NEWPACKAGE = "newpackage";
-    public static final String GAP_ACTION_SELECTFILES = "selectfiles";
-    public static final String GAP_ACTION_ALIGNOPTIONS = "alignoptions";
-    public static final String GAP_ACTION_CREATEPACKAGE = "createpackage";
-    public static final String GAP_ACTION_REMOVEPACKAGE = "removepackage";
-
-    public static final String GAP_ACTION_DOWNLOADPACKAGE = "downloadpackage";
-    public static final String GAP_ACTION_SHOWERRORS = "showerrors";
-
-    public static final String GAP_ACTION_UPLOADPACKAGE = "uploadpackage";
-
-    public static final String GAP_ERROR = "GAP_ERROR";
-
     // Scheduler Constants
-
     public static final String CRON_ERROR = "cronError";
 
     public static final String CRON_ACTION = "cronAction";

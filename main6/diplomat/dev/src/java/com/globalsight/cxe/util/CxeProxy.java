@@ -37,7 +37,6 @@ import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.util.fileImport.FileImportUtil;
-import com.globalsight.everest.aligner.AlignerExtractor;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
@@ -60,9 +59,6 @@ public class CxeProxy
 
     /** The normal localization import request. */
     static public final String IMPORT_TYPE_L10N = "l10n";
-
-    /** The aligner import request **/
-    static public final String IMPORT_TYPE_ALIGNER = "aligner";
 
     static private final Integer ONE = new Integer(1);
 
@@ -990,42 +986,6 @@ public class CxeProxy
         exportMsg.setMessageData(p_gxml);
 
         return exportMsg;
-    }
-
-    /**
-     * A special import for aligner/filesystem method. To invoke this method, we
-     * assume this method can get correct company id from the
-     * CompanyThreadLocal. That's to say, the invoker should have already set
-     * the correct company id in CompanyThreadLocal.
-     * 
-     * @param p_alignerExtractor
-     *            An object used to control the asynchronous alignment process
-     *            and wait for the results
-     */
-    static public void importFromFileSystemForAligner(AlignerExtractor p_alignerExtractor)
-            throws Exception
-    {
-        CxeMessageType type = CxeMessageType
-                .getCxeMessageType(CxeMessageType.FILE_SYSTEM_FILE_SELECTED_EVENT);
-        CxeMessage cxeMessage = new CxeMessage(type);
-        HashMap params = cxeMessage.getParameters();
-        CompanyWrapper.saveCurrentCompanyIdInMap(params, s_logger);
-        params.put("Filename", p_alignerExtractor.getFilename());
-        params.put("JobName", p_alignerExtractor.getName());
-        params.put("BatchId", p_alignerExtractor.getName());
-        params.put("PageCount", ONE);
-        params.put("PageNum", ONE);
-        params.put("DocPageCount", ONE);
-        params.put("DocPageNum", ONE);
-        params.put("IsAutomaticImport", Boolean.FALSE);
-        params.put("OverrideFileProfileAsUnextracted", Boolean.FALSE);
-
-        // put in special values for the aligner
-        params.put("AlignerExtractor", p_alignerExtractor.getName());
-        params.put(IMPORT_TYPE, IMPORT_TYPE_ALIGNER);
-
-        // GBS-4400
-        FileImportUtil.importFileWithThread(cxeMessage);
     }
 
     /**

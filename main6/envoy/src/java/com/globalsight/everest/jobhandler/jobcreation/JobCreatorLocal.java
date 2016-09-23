@@ -244,6 +244,9 @@ public class JobCreatorLocal implements JobCreator
                     CreatePdfThread t = new CreatePdfThread(job, c_logger);
                     t.start();
                 }
+                
+                // for aem 6.2 support due time.
+                JobInfoData.clearJobData(job.getId());
             }
         }
         catch (Exception e)

@@ -51,6 +51,7 @@ import com.globalsight.everest.jobhandler.JobEventObserver;
 import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
+import com.globalsight.everest.jobhandler.jobcreation.JobInfoData;
 import com.globalsight.everest.page.PageStateValidator;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
@@ -611,15 +612,26 @@ public class JobDispatcher
                         translateDuration = workflowDuration;
                     }
                 }
+                
+                //for AEM 6.2 support due time.
+                String dueTime = (String) JobInfoData.getJobData(jobClone.getId(), JobInfoData.DUE_TIME);
+                if (dueTime != null)
+                {
+                    wfClone.setEstimatedCompletionDate(new Date(Long.parseLong(dueTime)));
+                    wfClone.setEstimatedCompletionDateOverrided(true);
+                }
+                else
+                {
+                    wfClone.setEstimatedCompletionDate(ServerProxy
+                            .getEventScheduler().determineDate(
+                                    jobClone.getCreateDate(), defaultCalendar,
+                                    workflowDuration));
+                }
 
                 wfClone.setEstimatedTranslateCompletionDate(ServerProxy
                         .getEventScheduler().determineDate(
                                 jobClone.getCreateDate(), defaultCalendar,
                                 translateDuration));
-                wfClone.setEstimatedCompletionDate(ServerProxy
-                        .getEventScheduler().determineDate(
-                                jobClone.getCreateDate(), defaultCalendar,
-                                workflowDuration));
                 session.update(wfClone);
             }
             transaction.commit();

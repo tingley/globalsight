@@ -256,22 +256,6 @@ public abstract class AbstractTargetPagePersistence implements
                         unAppliedTus, appliedTuTuvMap);
             }
 
-            /****** For entire internal text segment(GBS-3279) ******/
-            unAppliedTus.removeAll(appliedTuTuvMap.keySet());
-            for (Iterator<Tu> it = unAppliedTus.iterator(); it.hasNext();)
-            {
-                TuImpl tu = (TuImpl) it.next();
-                Tuv sourceTuv = (Tuv) p_sourceTuvMap.get(tu);
-                if (GxmlUtil.isEntireInternalText(sourceTuv.getGxmlElement()))
-                {
-                    Tuv targetTuv = getTuvManager().cloneToTarget(sourceTuv,
-                            p_targetLocale);
-                    targetTuv.setState(TuvState.DO_NOT_TRANSLATE);
-                    tu.addTuv(targetTuv);
-                    appliedTuTuvMap.put(tu, targetTuv);
-                }
-            }
-
             /****** Priority 2 : Handle local TM matches ******/
             if (mtProfile == null || !mtProfile.isIgnoreTMMatch())
             {
@@ -279,6 +263,23 @@ public abstract class AbstractTargetPagePersistence implements
                 appliedTuTuvMap = applyLocalTmMatches(p_sourcePage, p_sourceTuvMap, sourceLocale,
                         p_targetLocale, p_termMatches, p_useLeveragedTerms, p_exactMatchedSegments,
                         unAppliedTus, appliedTuTuvMap);
+            }
+
+            /****** For entire internal text segment(GBS-3279) ******/
+            // If an entire internal text segment has TM exact match, it will
+            // NOT be "DO_NOT_TRANSLATE" state (GBS-4430).
+            unAppliedTus.removeAll(appliedTuTuvMap.keySet());
+            for (Iterator<Tu> it = unAppliedTus.iterator(); it.hasNext();)
+            {
+                TuImpl tu = (TuImpl) it.next();
+                Tuv sourceTuv = (Tuv) p_sourceTuvMap.get(tu);
+                if (GxmlUtil.isEntireInternalText(sourceTuv.getGxmlElement()))
+                {
+                    Tuv targetTuv = getTuvManager().cloneToTarget(sourceTuv, p_targetLocale);
+                    targetTuv.setState(TuvState.DO_NOT_TRANSLATE);
+                    tu.addTuv(targetTuv);
+                    appliedTuTuvMap.put(tu, targetTuv);
+                }
             }
 
             /****** Priority 3 : Handle MT hitting ******/

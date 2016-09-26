@@ -142,6 +142,13 @@ abstract class TuStorage<T extends TM3Data>
         {
             conn = DbUtil.getConnection();
             conn.setAutoCommit(false);
+
+            // Delete TUV extension as it will not delete cascade. 
+            SQLUtil.exec(conn, new StatementBuilder().append("DELETE FROM ")
+                    .append(storage.getTuvExtTableName()).append(" WHERE tuId IN ")
+                    .append(SQLUtil.longGroup(ids)));
+
+            // TUV will be deleted cascade
             SQLUtil.exec(conn, new StatementBuilder().append("DELETE FROM ")
                     .append(storage.getTuTableName()).append(" WHERE id IN ")
                     .append(SQLUtil.longGroup(ids)));
@@ -184,7 +191,6 @@ abstract class TuStorage<T extends TM3Data>
             sb.append(")");
         	SQLUtil.exec(conn, sb);
 
-        	// Events will cascade
             sb = new StatementBuilder("DELETE FROM ")
                     .append(storage.getTuvTableName())
                     .append(" WHERE id IN (?").addValue(tuvs.get(0).getId());

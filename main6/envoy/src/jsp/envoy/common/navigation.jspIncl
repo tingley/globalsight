@@ -137,7 +137,6 @@
    
    String fileProfilesUrl = LinkHelper.getWebActivityURL(request, "fileprofiles");
    String glossariesUrl = LinkHelper.getWebActivityURL(request, "glossaries");
-   String serviceWareUrl = LinkHelper.getWebActivityURL(request,"swimport");
    String locProfilesUrl = LinkHelper.getWebActivityURL(request, "locprofiles");
    String localePairsUrl = LinkHelper.getWebActivityURL(request, "locales");
    //String logoutUrl = LinkHelper.getWebActivityURL(request, "login");
@@ -449,12 +448,6 @@ tmp.mnemonic = 'd';
 
 <% if (userPerms.getPermissionFor(Permission.SEGMENTATIONRULE_VIEW)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_segmentation_rules")%>", "javascript:goToUrl('<%=segmentationRulesUrl%>');", ""));
-<% } %>
-
-<% if (b_serviceware) {%>
-<% if (userPerms.getPermissionFor(Permission.SERVICEWARE_IMPORT)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_serviceware_import")%>", "javascript:goToUrl('<%=serviceWareUrl%>');", ""));
-<% } %>
 <% } %>
 
 <%if (b_database){%>

@@ -29,8 +29,6 @@ import com.globalsight.cxe.adapter.BaseAdapter;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageData;
-import com.globalsight.cxe.util.CxeProxy;
-import com.globalsight.cxe.util.aligner.AlignerUtil;
 import com.globalsight.cxe.util.request.RequestHandlerActivatorUtil;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.diplomat.util.XmlUtil;
@@ -79,7 +77,8 @@ public class CapImporter
     /** CAP L10nRequest Type */
     private int m_requestType = Request.EXTRACTED_LOCALIZATION_REQUEST;
 
-    /** CXE Import Request Type -- l10n or aligner */
+    /** CXE Import Request Type -- l10n */
+    @SuppressWarnings("unused")
     private String m_cxeImportRequestType = null;
 
     // ////////////////////////////////////
@@ -151,24 +150,8 @@ public class CapImporter
             data.put(CxeToCapRequest.L10N_REQUEST_XML, l10nRequestXml);
             data.put(CxeToCapRequest.EXCEPTION, exception);
 
-            // See whether the CXE import type was l10n or aligner.
-            if (m_cxeImportRequestType.equals(CxeProxy.IMPORT_TYPE_ALIGNER))
-            {
-                m_logger.info("Sending message to JMS_ALIGNER_QUEUE for aligner.");
-
-                data.put("PageCount", m_pageCount);
-                data.put("PageNumber", m_pageNumber);
-                data.put("DocPageCount", m_docPageCount);
-                data.put("DocPageNumber", m_docPageNumber);
-                data.put("AlignerExtractor", m_cxeMessage.getParameters().get("AlignerExtractor"));
-                // GBS-4400
-                AlignerUtil.handleAlignerWithThread(data);
-            }
-            else
-            {
-                // GBS-4400
-                RequestHandlerActivatorUtil.handleRequestWithThread(data);
-            }
+            // GBS-4400
+            RequestHandlerActivatorUtil.handleRequestWithThread(data);
         }
         catch (Exception e)
         {
@@ -207,15 +190,6 @@ public class CapImporter
             data.put(CxeToCapRequest.EVENT_FLOW_XML, m_eventFlowXml);
             data.put(CxeToCapRequest.L10N_REQUEST_XML, l10nRequestXml);
             data.put(CxeToCapRequest.EXCEPTION, exception);
-
-            if (m_cxeImportRequestType.equals(CxeProxy.IMPORT_TYPE_ALIGNER))
-            {
-                data.put("PageCount", m_pageCount);
-                data.put("PageNumber", m_pageNumber);
-                data.put("DocPageCount", m_docPageCount);
-                data.put("DocPageNumber", m_docPageNumber);
-                data.put("AlignerExtractor", m_cxeMessage.getParameters().get("AlignerExtractor"));
-            }
 
             return data;
         }

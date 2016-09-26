@@ -105,12 +105,7 @@ public class SaveAsFileServlet extends HttpServlet
                 " is not accessible.");
             }
 
-            if(p_request.getServletPath().equals("/alignerPackages"))
-            {
-        	    docHome = 
-        		    AmbFileStoragePathUtils.getAlignerPackageDir().getAbsolutePath();
-            }
-            else if (p_request.getServletPath().equals("/downloadresource"))
+            if (p_request.getServletPath().equals("/downloadresource"))
             {
                 // do nothing
             }

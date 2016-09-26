@@ -71,10 +71,6 @@ public class AmbFileStoragePathUtils
 
     private static Map<String, File> goldTmIndexDirs = new HashMap<String, File>();
 
-    private static Map<String, File> alignerPackageDirs = new HashMap<String, File>();
-
-    private static Map<String, File> alignerTmpDirs = new HashMap<String, File>();
-
     private static Map<String, File> supportFileDirs = new HashMap<String, File>();
 
     private static Map<String, File> desktopIconDir = new HashMap<String, File>();
@@ -112,10 +108,6 @@ public class AmbFileStoragePathUtils
     public final static String TM_EXPORT_FILE_SUB_DIR = "GlobalSight/TmExport";
 
     public final static String GOLD_TM_INDEX_SUB_DIR = "GlobalSight/GoldTmIndex";
-
-    public final static String ALIGNER_PACKAGE_SUB_DIRECTORY = "GlobalSight/AlignerPackages";
-
-    public final static String ALIGNER_TMP_SUB_DIRECTORY = "_Aligner_";
 
     public final static String DTD_FILE_DIR = "GlobalSight/dtd";
 
@@ -593,34 +585,6 @@ public class AmbFileStoragePathUtils
         }
 
         return (File) goldTmIndexDirs.get(companyId);
-    }
-
-    public static File getAlignerPackageDir()
-    {
-        String companyId = CompanyThreadLocal.getInstance().getValue();
-        if (alignerPackageDirs.get(companyId) == null)
-        {
-            File alignerPackageDir = new File(getFileStorageDirPath(),
-                    ALIGNER_PACKAGE_SUB_DIRECTORY);
-            alignerPackageDir.mkdirs();
-            alignerPackageDirs.put(companyId, alignerPackageDir);
-        }
-
-        return (File) alignerPackageDirs.get(companyId);
-    }
-
-    public static File getAlignerTmpDir()
-    {
-        String companyId = CompanyThreadLocal.getInstance().getValue();
-        if (alignerTmpDirs.get(companyId) == null)
-        {
-            File alignerTmpDir = new File(getFileStorageDirPath(),
-                    ALIGNER_TMP_SUB_DIRECTORY);
-            alignerTmpDir.mkdirs();
-            alignerTmpDirs.put(companyId, alignerTmpDir);
-        }
-
-        return (File) alignerTmpDirs.get(companyId);
     }
 
     public static File getSupportFileDir()

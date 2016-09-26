@@ -64,7 +64,6 @@ server.classes=\
   com.globalsight.everest.secondarytargetfile.SecondaryTargetFileMgrWLRMIImpl,\
   com.globalsight.mediasurface.CmsUserManagerWLRMIImpl,\
   com.globalsight.everest.vendormanagement.VendorManagementWLRMIImpl,\
-  com.globalsight.everest.aligner.AlignerManagerWLRMIImpl,\
   com.globalsight.everest.webapp.pagehandler.rss.RSSPersistenceManagerWLRMIImpl,\
   com.globalsight.webservices.remoteaccess.RemoteAccessMangerWLRMIImpl,\
   

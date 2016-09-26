@@ -167,4 +167,12 @@ public class WebService4AEMImpl extends Ambassador implements WebService4AEM
 
         return "";
     }
+
+    @Override
+    public void createJobWithDueTime(String accessToken, String jobName, String comment,
+            String filePaths, String fileProfileIds, String targetLocales, String dueTime)
+            throws WebServiceException
+    {
+        createJob(accessToken, jobName, comment, filePaths, fileProfileIds, targetLocales, null, dueTime);
+    }
 }

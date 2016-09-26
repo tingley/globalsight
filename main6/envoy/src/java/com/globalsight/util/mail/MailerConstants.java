@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.globalsight.config.UserParamNames;
-import com.globalsight.everest.aligner.EmailNotification;
 import com.globalsight.everest.edit.offline.OfflineEditHelper;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
@@ -63,10 +62,8 @@ public class MailerConstants
     public static final String LOGIN_RESET_PASSWORD_SUBJECT = "subject_login_resetPassword";
     public static final String LOGIN_RETRIEVE_UESRNAME_SUBJECT = "subject_login_retrieveUsernames";
     public static final String JOB_IMPORT_SUCC_SUBJECT = "subject_job_import_succ";
-    public static final String SUBJECT_UPLOADALIGNMENTCOMPLETED = "subject_uploadAlignmentCompleted";
 
     // Email message keys
-    public static final String MESSAGE_UPLOADALIGNMENTCOMPLETED    = "message_customerUploadCompleted";
     public static final String CUSTOMER_UPLOAD_COMPLETED_MESSAGE 	= "message_customerUploadCompleted";
     public static final String DESKTOPICON_UPLOAD_COMPLETED_MESSAGE = "message_desktopiconUploadCompleted";
     public static final String LOGIN_RESET_PASSWORD_MESSAGE 		= "message_login_resetPassword";
@@ -101,11 +98,6 @@ public class MailerConstants
     static
     {
         // MailerConstants
-        s_userParaNamesSubject.put(UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_SUCCESS,
-                SUBJECT_UPLOADALIGNMENTCOMPLETED);
-        s_userParaNamesMessage.put(UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_SUCCESS,
-                MESSAGE_UPLOADALIGNMENTCOMPLETED);
-        
         s_userParaNamesSubject.put(UserParamNames.NOTIFY_INITIAL_IMPORT_FAILURE,
                 INITIAL_IMPORT_FAILED_SUBJECT);
         s_userParaNamesMessage.put(UserParamNames.NOTIFY_INITIAL_IMPORT_FAILURE,"importFailedMessage");
@@ -296,28 +288,6 @@ public class MailerConstants
         s_userParaNamesMessage.put(UserParamNames.NOTIFY_SAVING_SEGMENTS_FAILURE,
                 OfflineEditHelper.UPLOAD_FAIL_MESSAGE);
 
-        // EmailNotification
-        s_userParaNamesSubject.put(UserParamNames.NOTIFY_BATCH_ALIGNMENT_SUCCESS,
-                EmailNotification.BATCH_COMPLETE_SUBJECT);
-        s_userParaNamesMessage.put(UserParamNames.NOTIFY_BATCH_ALIGNMENT_SUCCESS,
-                EmailNotification.BATCH_COMPLETE_MESSAGE);
-        
-        s_userParaNamesSubject.put(UserParamNames.NOTIFY_BATCH_ALIGNMENT_FAILURE,
-                EmailNotification.BATCH_FAILED_SUBJECT);
-        s_userParaNamesMessage.put(UserParamNames.NOTIFY_BATCH_ALIGNMENT_FAILURE,
-                EmailNotification.BATCH_FAILED_MESSAGE);
-        
-        s_userParaNamesSubject.put(UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_SUCCESS,
-                EmailNotification.UPLOAD_COMPLETE_SUBJECT);
-        s_userParaNamesMessage.put(UserParamNames.NOTIFY_BATCH_ALIGNMENT_FAILURE,
-                EmailNotification.UPLOAD_COMPLETE_MESSAGE);
-        
-        s_userParaNamesSubject.put(UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_FAILURE,
-                EmailNotification.UPLOAD_FAILED_SUBJECT);
-        s_userParaNamesMessage.put(UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_FAILURE,
-                EmailNotification.UPLOAD_FAILED_MESSAGE);
-        
-
         //////////////////////////////////////////////////////////////////////
         //  ADMIN
         //////////////////////////////////////////////////////////////////////
@@ -507,20 +477,6 @@ public class MailerConstants
 		s_notificationMap.put(SchedulerConstants.NOTIFY_QUOTE_PERSON_SUBJECT,
 					UserParamNames.NOTIFY_QUOTE_PERSON);
         s_generalNotifications.add(SchedulerConstants.NOTIFY_QUOTE_PERSON_SUBJECT);
-
-        // aligner email subjects
-        s_notificationMap.put(EmailNotification.BATCH_COMPLETE_SUBJECT,
-            UserParamNames.NOTIFY_BATCH_ALIGNMENT_SUCCESS);
-        s_generalNotifications.add(EmailNotification.BATCH_COMPLETE_SUBJECT);
-        s_notificationMap.put(EmailNotification.BATCH_FAILED_SUBJECT,
-            UserParamNames.NOTIFY_BATCH_ALIGNMENT_FAILURE);
-        s_generalNotifications.add(EmailNotification.BATCH_FAILED_SUBJECT);
-        s_notificationMap.put(EmailNotification.UPLOAD_COMPLETE_SUBJECT,
-            UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_SUCCESS);
-        s_generalNotifications.add(EmailNotification.UPLOAD_COMPLETE_SUBJECT);
-        s_notificationMap.put(EmailNotification.UPLOAD_FAILED_SUBJECT,
-            UserParamNames.NOTIFY_ALIGNMENT_UPLOAD_FAILURE);
-        s_generalNotifications.add(EmailNotification.UPLOAD_FAILED_SUBJECT);
     }
 
     /**

@@ -478,6 +478,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
      * 
      * @param saver
      * @param mode
+     * @param indexTarget
      * @return TUs corresponding to the save requests made. Depending on data
      *         and save mode, these may not actually be new TUs (or even new
      *         TUVs).
@@ -494,53 +495,25 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             if (connection == null)
                 connection = DbUtil.getConnection();
             conn = connection;
-            // Lock the TM to avoid racing
-            // lockForWrite();
-            for (TM3Saver<T>.Tu tuData : saver.tus)
+
+            for (TM3Saver<T>.Tu tuToSave : saver.tus)
             {
-                Map<TM3Attribute, Object> inlineAttributes = getInlineAttributes(tuData.attrs);
-                Map<TM3Attribute, String> customAttributes = getCustomAttributes(tuData.attrs);
+                Map<TM3Attribute, Object> inlineAttributes = getInlineAttributes(tuToSave.attrs);
+                Map<TM3Attribute, String> customAttributes = getCustomAttributes(tuToSave.attrs);
                 // Always check duplicate in DB
-				TM3Tu<T> tu = findTuForSave(conn, tuData.srcTuv,
-						inlineAttributes, customAttributes);
-                if (tu == null)
+                TM3Tu<T> tuInDb = findTuForSave(conn, tuToSave.srcTuv, inlineAttributes,
+                        customAttributes);
+                if (tuInDb == null)
                 {
-                    tu = tuStorage.createTu(tuData.srcTuv.locale,
-                            tuData.srcTuv.content, tuData.attrs,
-                            tuData.srcTuv.getCreationUser(),
-                            tuData.srcTuv.getCreationDate(),
-                            tuData.srcTuv.getModifyUser(),
-                            tuData.srcTuv.getModifyDate(),
-                            tuData.srcTuv.getLastUsageDate(),
-                            tuData.srcTuv.getJobId(),
-                            tuData.srcTuv.getJobName(),
-                            tuData.srcTuv.getPreviousHash(),
-                            tuData.srcTuv.getNextHash(),
-                            tuData.srcTuv.getSid());
-                    for (TM3Saver<T>.Tuv tuvData : tuData.targets)
+                    TM3Tu<T> newTu = createNewTu(tuStorage, tuToSave.srcTuv, tuToSave.attrs);
+                    for (TM3Saver<T>.Tuv tuvData : tuToSave.targets)
                     {
-                        tu.addTargetTuv(tuvData.locale, tuvData.content,
-                                tuvData.getCreationUser(),
-                                tuvData.getCreationDate(),
-                                tuvData.getModifyUser(),
-                                tuvData.getModifyDate(),
-                                tuvData.getLastUsageDate(),
-                                tuvData.getJobId(),
-                                tuvData.getJobName(),
-                                tuvData.getPreviousHash(),
-                                tuvData.getNextHash(),
-                                tuvData.getSid());
+                        addTargetTuv(newTu, tuvData);
                     }
-                    tuStorage.saveTu(conn, tu);
-                    getStorageInfo().getFuzzyIndex().index(conn,
-                            tu.getSourceTuv());
-                    if (indexTarget)
-                    {
-                        for (TM3Tuv<T> tuv : tu.getTargetTuvs())
-                        {
-                            getStorageInfo().getFuzzyIndex().index(conn, tuv);
-                        }
-                    }
+
+                    tuStorage.saveTu(conn, newTu);
+                    saved.add(newTu);
+                    fuzzyIndexTuvs(conn, newTu, indexTarget);
                 }
                 else
                 {
@@ -550,227 +523,193 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                             break;
                         case OVERWRITE:
                             // Delete old TU, then create a new TU
-                            tuStorage.deleteTu(conn, tu);
-                            Tm3SegmentTmInfo.tusRemove
-                                    .add((TM3Tu<GSTuvData>) tu);
-                            TM3Tu<T> newTu = tuStorage.createTu(
-                                    tuData.srcTuv.locale,
-                                    tuData.srcTuv.content, tuData.attrs,
-                                    tuData.srcTuv.getCreationUser(),
-                                    tuData.srcTuv.getCreationDate(),
-                                    tuData.srcTuv.getModifyUser(),
-                                    tuData.srcTuv.getModifyDate(),
-                                    tuData.srcTuv.getLastUsageDate(),
-                                    tuData.srcTuv.getJobId(),
-                                    tuData.srcTuv.getJobName(),
-                                    tuData.srcTuv.getPreviousHash(),
-                                    tuData.srcTuv.getNextHash(),
-                                    tuData.srcTuv.getSid());
+                            tuStorage.deleteTu(conn, tuInDb);
+                            Tm3SegmentTmInfo.tusRemove.add((TM3Tu<GSTuvData>) tuInDb);
+
+                            TM3Tu<T> newTu = createNewTu(tuStorage, tuToSave.srcTuv, tuToSave.attrs);
+
                             Set<TM3Locale> overWritedLocales = new HashSet<TM3Locale>();
-                            for (TM3Saver<T>.Tuv tuvData : tuData.targets)
+                            for (TM3Saver<T>.Tuv tuvData : tuToSave.targets)
                             {
-                            	overWritedLocales.add(tuvData.locale);
-                                newTu.addTargetTuv(tuvData.locale,
-                                        tuvData.content,
-                                        tuvData.getCreationUser(),
-                                        tuvData.getCreationDate(),
-                                        tuvData.getModifyUser(),
-                                        tuvData.getModifyDate(),
-                                        tuvData.getLastUsageDate(),
-                                        tuvData.getJobId(),
-                                        tuvData.getJobName(),
-                                        tuvData.getPreviousHash(),
-                                        tuvData.getNextHash(),
-                                        tuvData.getSid());
+                                overWritedLocales.add(tuvData.locale);
+                                addTargetTuv(newTu, tuvData);
                             }
-                            for (TM3Tuv<T> oldTuv : tu.getTargetTuvs())
+                            for (TM3Tuv<T> oldTuv : tuInDb.getTargetTuvs())
                             {
-                            	if(!overWritedLocales.contains(oldTuv.getLocale()))
-                            	{
-                            		newTu.addTargetTuv(oldTuv.getLocale(),
-                            				oldTuv.getContent(),
-                            				oldTuv.getCreationUser(),
-                            				oldTuv.getCreationDate(),
-                            				oldTuv.getModifyUser(),
-                            				oldTuv.getModifyDate(),
-                            				oldTuv.getLastUsageDate(),
-                            				oldTuv.getJobId(),
-                            				oldTuv.getJobName(),
-                            				oldTuv.getPreviousHash(),
-                            				oldTuv.getNextHash(),
-                            				oldTuv.getSid());
-                            	}
-                            }
-                            tuStorage.saveTu(conn, newTu);
-                            getStorageInfo().getFuzzyIndex().index(conn,
-                                    newTu.getSourceTuv());
-                            if (indexTarget)
-                            {
-                                for (TM3Tuv<T> tuv : newTu.getTargetTuvs())
+                                if (!overWritedLocales.contains(oldTuv.getLocale()))
                                 {
-                                    getStorageInfo().getFuzzyIndex().index(
-                                            conn, tuv);
+                                    addTargetTuvAsNew(newTu, oldTuv);
                                 }
                             }
+
+                            tuStorage.saveTu(conn, newTu);
                             saved.add(newTu);
+                            fuzzyIndexTuvs(conn, newTu, indexTarget);
                             break;
                         case MERGE:
-                            // check if create new tu
-                            boolean createTu = false;
-                            if (!customAttributes.isEmpty())
+                            long tuId;
+                            // create new TU if the customAttributes are not
+                            // same
+                            if (needCreateNewTu(customAttributes, tuInDb))
                             {
-                                for (Map.Entry<TM3Attribute, String> e : customAttributes
-                                        .entrySet())
+                                TM3Tu<T> newtu = createNewTu(tuStorage, tuToSave.srcTuv,
+                                        tuToSave.attrs);
+                                for (TM3Saver<T>.Tuv tuvData : tuToSave.targets)
                                 {
-                                    TM3Attribute tm3a = e.getKey();
-                                    String v = e.getValue();
-
-                                    if (tu.getAttributes() != null
-                                            && !tu.getAttributes().isEmpty())
-                                    {
-                                        for (Map.Entry<TM3Attribute, Object> existe : tu
-                                                .getAttributes().entrySet())
-                                        {
-                                            TM3Attribute existstm3a = existe.getKey();
-                                            Object existsv = existe.getValue();
-                                            
-                                            if (existstm3a.getId() == tm3a.getId() && !v.equals(existsv))
-                                            {
-                                                createTu = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if (createTu)
-                                    {
-                                        break;
-                                    }
+                                    addTargetTuv(newtu, tuvData);
                                 }
-                            }
-                            
-                            //create new tu if the customAttributes are not same
-                            TM3Tu<T> newtu = null;
-                            if (createTu)
-                            {
-                                newtu = tuStorage.createTu(
-                                        tuData.srcTuv.locale,
-                                        tuData.srcTuv.content, tuData.attrs,
-                                        tuData.srcTuv.getCreationUser(),
-                                        tuData.srcTuv.getCreationDate(),
-                                        tuData.srcTuv.getModifyUser(),
-                                        tuData.srcTuv.getModifyDate(),
-                                        tuData.srcTuv.getLastUsageDate(),
-                                        tuData.srcTuv.getJobId(),
-                                        tuData.srcTuv.getJobName(),
-                                        tuData.srcTuv.getPreviousHash(),
-                                        tuData.srcTuv.getNextHash(),
-                                        tuData.srcTuv.getSid());
-                                for (TM3Saver<T>.Tuv tuvData : tuData.targets)
-                                {
-                                    newtu.addTargetTuv(tuvData.locale,
-                                            tuvData.content, 
-                                            tuvData.getCreationUser(),
-                                            tuvData.getCreationDate(),
-                                            tuvData.getModifyUser(),
-                                            tuvData.getModifyDate(),
-                                            tuvData.getLastUsageDate(),
-                                            tuvData.getJobId(),
-                                            tuvData.getJobName(),
-                                            tuvData.getPreviousHash(),
-                                            tuvData.getNextHash(),
-                                            tuvData.getSid());
-                                }
+
                                 tuStorage.saveTu(conn, newtu);
-                                getStorageInfo().getFuzzyIndex().index(conn,
-                                        newtu.getSourceTuv());
-                                if (indexTarget)
-                                {
-                                    for (TM3Tuv<T> tuv : newtu.getTargetTuvs())
-                                    {
-                                        getStorageInfo().getFuzzyIndex().index(
-                                                conn, tuv);
-                                    }
-                                }
                                 saved.add(newtu);
+                                fuzzyIndexTuvs(conn, newtu, indexTarget);
+                                tuId = newtu.getId();
                             }
                             else
                             {
-                                newtu = tu;
+                                tuId = tuInDb.getId();
                                 List<TM3Tuv<T>> addedTuvs = new ArrayList<TM3Tuv<T>>();
                                 List<TM3Tuv<T>> updatedTuvs = new ArrayList<TM3Tuv<T>>();
-                                for (TM3Saver<T>.Tuv tuvData : tuData.targets)
+                                for (TM3Saver<T>.Tuv tuvData : tuToSave.targets)
                                 {
-                                    TM3Tuv<T> newTuv = tu.addTargetTuv(
-                                            tuvData.locale, tuvData.content,
-                                            tuvData.getCreationUser(),
-                                            tuvData.getCreationDate(),
-                                            tuvData.getModifyUser(),
-                                            tuvData.getModifyDate(),
-                                            tuvData.getLastUsageDate(),
-                                            tuvData.getJobId(),
-                                            tuvData.getJobName(),
-                                            tuvData.getPreviousHash(),
-                                            tuvData.getNextHash(),
-                                            tuvData.getSid());
-                                    // Current TU has same TUV already(with same locale, content and hash values).
+                                    TM3Tuv<T> newTuv = addTargetTuv(tuInDb, tuvData);
+                                    // Current TU has same TUV already(with same
+                                    // locale, content and hash values).
                                     if (newTuv == null)
                                     {
-                                    	findUpdatedTuvs(updatedTuvs, tu, tuvData);
+                                        findUpdatedTuvs(updatedTuvs, tuInDb, tuvData);
                                     }
                                     else
                                     {
-                                    	addedTuvs.add(newTuv);
+                                        addedTuvs.add(newTuv);
                                     }
                                 }
-                                tuStorage.updateTuvs(conn, newtu, updatedTuvs);
-                                tuStorage.addTuvs(conn, tu, addedTuvs);
+
+                                tuStorage.updateTuvs(conn, tuInDb, updatedTuvs);
+                                tuStorage.addTuvs(conn, tuInDb, addedTuvs);
+                                saved.add(tuInDb);
+
                                 if (indexTarget)
                                 {
                                     for (TM3Tuv<T> tuv : addedTuvs)
                                     {
-                                        getStorageInfo().getFuzzyIndex().index(
-                                                conn, tuv);
+                                        getStorageInfo().getFuzzyIndex().index(conn, tuv);
                                     }
                                 }
                             }
-                            
+
                             // When merge, update exists attributes or add new
                             // attributes
                             if (!customAttributes.isEmpty())
                             {
-                                long tuId = newtu.getId();
                                 for (Map.Entry<TM3Attribute, String> e : customAttributes
                                         .entrySet())
                                 {
                                     TM3Attribute tm3a = e.getKey();
-                                    boolean exists = tuStorage
-                                            .doesCustomAttribtueExist(conn,
-                                                    tuId, tm3a.getId());
-
+                                    boolean exists = tuStorage.doesCustomAttribtueExist(conn, tuId,
+                                            tm3a.getId());
                                     if (exists)
                                     {
-                                        tuStorage.updateCustomAttribute(conn,
-                                                tuId, tm3a, e.getValue());
+                                        tuStorage.updateCustomAttribute(conn, tuId, tm3a,
+                                                e.getValue());
                                     }
                                     else
                                     {
-                                        tuStorage.saveCustomAttribute(conn,
-                                                tuId, tm3a, e.getValue());
+                                        tuStorage.saveCustomAttribute(conn, tuId, tm3a,
+                                                e.getValue());
                                     }
                                 }
                             }
                             break;
                     }
                 }
-                saved.add(tu);
             }
         }
         catch (Exception e)
         {
             throw new TM3Exception(e);
         }
+
         return saved;
+    }
+
+    /**
+     * Check if need to create new TU. If the customAttributes are not same, need create new TU.
+     */
+    private boolean needCreateNewTu(Map<TM3Attribute, String> customAttributes, TM3Tu<T> tu)
+    {
+        if (customAttributes.isEmpty())
+            return false;
+
+        boolean createTu = false;
+        for (Map.Entry<TM3Attribute, String> e : customAttributes.entrySet())
+        {
+            TM3Attribute tm3a = e.getKey();
+            String v = e.getValue();
+
+            if (tu.getAttributes() != null && !tu.getAttributes().isEmpty())
+            {
+                for (Map.Entry<TM3Attribute, Object> existe : tu.getAttributes().entrySet())
+                {
+                    TM3Attribute existstm3a = existe.getKey();
+                    Object existsv = existe.getValue();
+
+                    if (existstm3a.getId() == tm3a.getId() && !v.equals(existsv))
+                    {
+                        createTu = true;
+                        break;
+                    }
+                }
+            }
+
+            if (createTu)
+            {
+                break;
+            }
+        }
+        
+        return createTu;
+    }
+
+    private TM3Tu<T> createNewTu(TuStorage<T> tuStorage, TM3Saver<T>.Tuv srcTuv,
+            Map<TM3Attribute, Object> attributes)
+    {
+        return tuStorage.createTu(srcTuv.locale, srcTuv.content, attributes,
+                srcTuv.getCreationUser(), srcTuv.getCreationDate(), srcTuv.getModifyUser(),
+                srcTuv.getModifyDate(), srcTuv.getLastUsageDate(), srcTuv.getJobId(),
+                srcTuv.getJobName(), srcTuv.getPreviousHash(), srcTuv.getNextHash(),
+                srcTuv.getSid());
+    }
+
+    private TM3Tuv<T> addTargetTuv(TM3Tu<T> tu, TM3Saver<T>.Tuv tuv)
+    {
+        return tu.addTargetTuv(tuv.locale, tuv.content, tuv.getCreationUser(),
+                tuv.getCreationDate(), tuv.getModifyUser(), tuv.getModifyDate(),
+                tuv.getLastUsageDate(), tuv.getJobId(), tuv.getJobName(), tuv.getPreviousHash(),
+                tuv.getNextHash(), tuv.getSid());
+    }
+
+    private TM3Tuv<T> addTargetTuvAsNew(TM3Tu<T> tu, TM3Tuv<T> tuv)
+    {
+        return tu.addTargetTuv(tuv.getLocale(), tuv.getContent(), tuv.getCreationUser(),
+                tuv.getCreationDate(), tuv.getModifyUser(), tuv.getModifyDate(),
+                tuv.getLastUsageDate(), tuv.getJobId(), tuv.getJobName(), tuv.getPreviousHash(),
+                tuv.getNextHash(), tuv.getSid());
+    }
+
+    /**
+     * Create fuzzy index for TUVs in "tm3_index_shared_[companyId]_[tmId]" table. 
+     */
+    private void fuzzyIndexTuvs(Connection conn, TM3Tu<T> tu, boolean indexTarget)
+            throws SQLException
+    {
+        getStorageInfo().getFuzzyIndex().index(conn, tu.getSourceTuv());
+        if (indexTarget)
+        {
+            for (TM3Tuv<T> tuv : tu.getTargetTuvs())
+            {
+                getStorageInfo().getFuzzyIndex().index(conn, tuv);
+            }
+        }
     }
 
     /**
@@ -779,45 +718,49 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
 	private void findUpdatedTuvs(List<TM3Tuv<T>> updatedTuvs, TM3Tu<T> tu,
 			TM3Saver<T>.Tuv tuvData)
     {
-    	for (TM3Tuv<T> tuv : tu.getTargetTuvs())
-    	{
-			if (tu.isIdenticalTuv(tuv, tuvData.locale, tuvData.content,
-					tuvData.previousHash, tuvData.nextHash))
-    		{
-    			if (tuvData.lastUsageDate != null)
-    			{
-    				// update lastUsageDate only
-					if (tuv.getLastUsageDate() == null
+        for (TM3Tuv<T> tuv : tu.getTargetTuvs())
+        {
+            // TUV ID mustn't be null if it is from DB.
+            if (tuv.getId() == null)
+                continue;
+
+            if (tu.isIdenticalTuv(tuv, tuvData.locale, tuvData.content,
+                    tuvData.previousHash, tuvData.nextHash))
+            {
+                if (tuvData.lastUsageDate != null)
+                {
+                    // update lastUsageDate only
+                    if (tuv.getLastUsageDate() == null
 							|| tuvData.lastUsageDate.getTime() > tuv
 									.getLastUsageDate().getTime())
-    				{
-            			tuv.setLastUsageDate(tuvData.lastUsageDate);
-    				}
-    			}
-    			if (tuvData.previousHash != -1)
-    			{
-    				tuv.setPreviousHash(tuvData.previousHash);
-    			}
-    			if (tuvData.nextHash != -1)
-    			{
-    				tuv.setNextHash(tuvData.nextHash);
-    			}
-    			if (tuvData.jobId != -1)
-    			{
-    				tuv.setJobId(tuvData.jobId);
-    			}
-    			if (tuvData.jobName != null)
-    			{
-    				tuv.setJobName(tuvData.jobName);
-    			}
-    			if (tuvData.sid != null)
-    			{
-    				tuv.setSid(tuvData.sid);
-    			}
+                    {
+                        tuv.setLastUsageDate(tuvData.lastUsageDate);
+                    }
+                }
+                if (tuvData.previousHash != -1)
+                {
+                    tuv.setPreviousHash(tuvData.previousHash);
+                }
+                if (tuvData.nextHash != -1)
+                {
+                    tuv.setNextHash(tuvData.nextHash);
+                }
+                if (tuvData.jobId != -1)
+                {
+                    tuv.setJobId(tuvData.jobId);
+                }
+                if (tuvData.jobName != null)
+                {
+                    tuv.setJobName(tuvData.jobName);
+                }
+                if (tuvData.sid != null)
+                {
+                    tuv.setSid(tuvData.sid);
+                }
 
-    			updatedTuvs.add(tuv);
-    		}
-    	}
+                updatedTuvs.add(tuv);
+            }
+        }
     }
 
     /**
@@ -1187,8 +1130,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
 	{
 		if (!paramMap.isEmpty())
 		{
-			Map<TM3Attribute, Object> attrs = (Map<TM3Attribute, Object>) paramMap
-					.get("projectAttr");
+            Map<TM3Attribute, Object> attrs = (Map<TM3Attribute, Object>) paramMap
+                    .get("projectAttr");
 			if (attrs != null)
 			{
 				Map<TM3Attribute, Object> inlineAttrs = getInlineAttributes(attrs);

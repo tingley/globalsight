@@ -24,7 +24,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 
-import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
@@ -41,7 +40,6 @@ import com.globalsight.diplomat.util.Logger;
 import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
-import com.globalsight.everest.aligner.AlignerExtractor;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -91,7 +89,6 @@ public class Importer
     private org.apache.log4j.Logger m_logger = null;
     private String m_importRequestType = null;
     // private String m_cxeDocsDir = null;
-    public AlignerExtractor m_alignerExtractor = null;
     private String m_importInitiatorId = null;
     private String m_priority = null;
     private String jobUuid = "";
@@ -146,9 +143,6 @@ public class Importer
         Object targetLocales = params.get("TargetLocales");
         boolean overrideAsUnextracted = ((Boolean) params
                 .get("OverrideFileProfileAsUnextracted")).booleanValue();
-        String alignerExtractorName = (String) params.get("AlignerExtractor");
-        m_alignerExtractor = AlignerExtractor
-                .getAlignerExtractor(alignerExtractorName);
         String priority = (String) params.get("priority");
 
         String fullname = AmbFileStoragePathUtils.getCxeDocDirPath(companyId)
@@ -220,23 +214,7 @@ public class Importer
     public EventFlowXml makeEventFlowXmlObject(boolean p_isAutomaticImport)
             throws FileSystemAdapterException
     {
-        if (m_alignerExtractor == null)
-        {
-            getEventFlowXmlData();
-        }
-        else
-        {
-            // assume this is for aligner import
-            m_logger.info("Reading values for aligner import.");
-
-            KnownFormatType knf = m_alignerExtractor.getFormat();
-            m_formatType = knf.getFormatType();
-            m_preExtractEvent = knf.getPreExtractEvent();
-            m_preMergeEvent = knf.getPreMergeEvent();
-            m_codeset = m_alignerExtractor.getEncoding();
-            m_l10nProfileId = null;
-            m_locale = m_alignerExtractor.getLocale();
-        }
+        getEventFlowXmlData();
 
         // xml file is encoded as UTF-8.
         if ("xml".equalsIgnoreCase(m_formatType))
@@ -357,23 +335,7 @@ public class Importer
     public String makeEventFlowXml(boolean p_isAutomaticImport)
             throws FileSystemAdapterException
     {
-        if (m_alignerExtractor == null)
-        {
-            getEventFlowXmlData();
-        }
-        else
-        {
-            // assume this is for aligner import
-            m_logger.info("Reading values for aligner import.");
-
-            KnownFormatType knf = m_alignerExtractor.getFormat();
-            m_formatType = knf.getFormatType();
-            m_preExtractEvent = knf.getPreExtractEvent();
-            m_preMergeEvent = knf.getPreMergeEvent();
-            m_codeset = m_alignerExtractor.getEncoding();
-            m_l10nProfileId = null;
-            m_locale = m_alignerExtractor.getLocale();
-        }
+        getEventFlowXmlData();
 
         // xml file is encoded as UTF-8.
         if ("xml".equalsIgnoreCase(m_formatType))
@@ -381,7 +343,6 @@ public class Importer
             m_codeset = "UTF-8";
         }
 
-        String l10nProfileId = null;// Fenshid: this via is no use at all
         String eventFlowXml = null;
         StringBuffer b = new StringBuffer(XmlUtil.formattedEventFlowXmlDtd());
         b.append("<eventFlowXml>\n");

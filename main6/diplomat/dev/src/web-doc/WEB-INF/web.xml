@@ -577,19 +577,6 @@
     </servlet>
 
     <servlet>
-        <servlet-name>alignerPackages</servlet-name>
-        <servlet-class>
-            com.globalsight.everest.servlet.SaveAsFileServlet
-        </servlet-class>
-        <init-param>
-            <param-name>docHome</param-name>
-            <param-value>
-                C:/ambassador/filestore/GlobalSight/AlignerPackages
-            </param-value>
-        </init-param>
-    </servlet>
-
-    <servlet>
         <servlet-name>resources</servlet-name>
         <servlet-class>
             com.globalsight.everest.servlet.SaveAsFileServlet
@@ -857,11 +844,6 @@
     <servlet-mapping>
         <servlet-name>exports</servlet-name>
         <url-pattern>/exports/*</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>alignerPackages</servlet-name>
-        <url-pattern>/alignerPackages/*</url-pattern>
     </servlet-mapping>
 
     <!-- "/resources" allows URL access and servlet access to the same directory -->

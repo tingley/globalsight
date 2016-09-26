@@ -47,8 +47,6 @@ import com.globalsight.cxe.adaptermdb.pdf.PdfSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.pdf.PdfTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.quarkframe.QuarkFrameSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.quarkframe.QuarkFrameTargetAdapterMDB;
-import com.globalsight.cxe.adaptermdb.serviceware.ServiceWareSourceAdapterMDB;
-import com.globalsight.cxe.adaptermdb.serviceware.ServiceWareTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.vignette.VignetteSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.vignette.VignetteTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.windowspe.WindowsPESourceAdapterMDB;
@@ -143,11 +141,6 @@ public class EventTopicMap
         // catalyst
         m_classMap.put(CxeMessageType.CATALYST_IMPORTED_EVENT, new CatalystSourceAdapterMDB());
         m_classMap.put(CxeMessageType.CATALYST_LOCALIZED_EVENT, new CatalystTargetAdapterMDB());
-
-        // serviceware
-        m_classMap.put(CxeMessageType.SERVICEWARE_FILE_SELECTED_EVENT,
-                new ServiceWareSourceAdapterMDB());
-        m_classMap.put(CxeMessageType.SERVICEWARE_EXPORT_EVENT, new ServiceWareTargetAdapterMDB());
 
         // documentum
         m_classMap.put(CxeMessageType.DOCUMENTUM_FILE_SELECTED_EVENT,

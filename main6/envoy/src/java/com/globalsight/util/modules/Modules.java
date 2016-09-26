@@ -26,9 +26,7 @@ import com.globalsight.cxe.adapter.mediasurface.MediasurfaceAdapter;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
-import com.globalsight.cxe.adapter.serviceware.ServiceWareAdapter;
 import com.globalsight.cxe.adapter.vignette.VignetteAdapter;
-import com.globalsight.everest.aligner.AlignerManagerLocal;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.vendormanagement.VendorManagementLocal;
@@ -43,7 +41,7 @@ public class Modules
     private static Logger s_logger = Logger.getLogger(Modules.class);
 
     // Keeps track of whether certain modules are installed
-    private static boolean s_cms, s_db, s_vignette, s_serviceware = false;
+    private static boolean s_cms, s_db, s_vignette = false;
 
     private static boolean s_documentum = false;
 
@@ -60,8 +58,6 @@ public class Modules
     private static boolean s_calendar = false;
 
     private static boolean s_catalyst = false;
-
-    private static boolean s_corpusAligner = false;
 
     private static boolean s_customerAccessGroup = false;
 
@@ -90,8 +86,6 @@ public class Modules
             s_vmWebService = s_vendorMgmt && s_l10nWebService;
             s_calendar = CalendarManagerLocal.isInstalled();
             s_catalyst = CatalystAdapter.isInstalled();
-            s_corpusAligner = AlignerManagerLocal.isInstalled();
-            s_serviceware = ServiceWareAdapter.isInstalled();
             s_documentum = DocumentumAdapter.isInstalled();
             checkCustomerAccessGroup();
         }
@@ -241,26 +235,6 @@ public class Modules
     public static boolean isCatalystAdapterInstalled()
     {
         return s_catalyst;
-    }
-
-    /**
-     * Returns true if the Corpus Aligner is installed
-     * 
-     * @return true | false
-     */
-    public static boolean isCorpusAlignerInstalled()
-    {
-        return s_corpusAligner;
-    }
-
-    /**
-     * Returns true if the ServiceWare Adapter is installed
-     * 
-     * @return true | false
-     */
-    public static boolean isServiceWareAdapterInstalled()
-    {
-        return s_serviceware;
     }
 
     /**

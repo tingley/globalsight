@@ -372,9 +372,6 @@ public interface SystemConfigParamNames
     /** Vignette Constants */
     public static final String VIGNETTE_INSTALL_KEY = "vignette.installKey";
 
-    /** ServiceWare Constants */
-    public static final String SERVICEWARE_INSTALL_KEY = "serviceware.installKey";
-
     /** Documentum Constants */
     public static final String DOCUMENTUM_INSTALL_KEY = "documentum.installKey";
 
@@ -490,9 +487,6 @@ public interface SystemConfigParamNames
 
     /** Vendor Management install key ***/
     public static final String VENDOR_MANAGEMENT_INSTALL_KEY = "vendorManagement.installKey";
-
-    /** Corpus Aligner install key */
-    public static final String CORPUS_ALIGNER_INSTALL_KEY = "corpusAligner.installKey";
 
     // TM tokenizer
     public static final String TM_TOKENIZER = "tm.tokenizer";

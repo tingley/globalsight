@@ -84,7 +84,7 @@ public class Exporter
     // ////////////////////////////////////
 
     /**
-     * Actually performs the write-back to serviceware
+     * Actually performs the write-back to documentum.
      * 
      * @return New CxeMessage result
      */

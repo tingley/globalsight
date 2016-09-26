@@ -108,7 +108,9 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             + "  AND tuv.state != 'OUT_OF_DATE'"
             + "  ORDER BY lm.source_page_id, lm.original_source_tuv_id) AS t2"
             + "  WHERE t1.tu_id = t2.tuId"
-            + "  AND t1.locale_id = ?";
+            + "  AND t1.locale_id = ?"
+            + "  AND t1.state != 'OUT_OF_DATE'"
+            + "  ORDER BY t1.tu_id ASC;";
 
     private class RequestData
     {
@@ -556,7 +558,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             col++;
 
             Cell cell_D = getCell(curRow, col);
-            cell_D.setCellValue(this.get2DigitFormater().format(data.getPostEditDistance()));
+            cell_D.setCellValue(Double.valueOf(this.get2DigitFormater().format(
+                    data.getPostEditDistance())));
             cell_D.setCellStyle(getContentStyle(p_workBook));
             col++;
 
@@ -745,7 +748,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         }
         float averageEditDistance = ((float) totalLevDistance / (float) totalTargetLength * 100);
         Cell cell_H = getCell(curRow, col);
-        cell_H.setCellValue(this.get2DigitFormater().format(averageEditDistance));
+        cell_H.setCellValue(Double.valueOf(this.get2DigitFormater().format(averageEditDistance)));
         cell_H.setCellStyle(getContentStyle(workBook));
         col++;
 
@@ -952,7 +955,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
     /**
      * Calculate to return the average translation error rate.
      */
-    private String calculateTER(LinkedHashMap<String, ArrayList<String>> hypsegs,
+    private Double calculateTER(LinkedHashMap<String, ArrayList<String>> hypsegs,
             LinkedHashMap<String, ArrayList<String>> refsegs)
     {
         // in below args, only the "-N" is useful. The rest is fake parameters.
@@ -962,7 +965,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         { "-r", ref, "-h", hyp, "-o", "sum", "-n", "outputFileName", "-N" };
         boolean writeToFile = true;
         double totalTer = new TERtest().calculateTER(args, hypsegs, refsegs, writeToFile);
-        return this.get2DigitFormater().format(totalTer * 100);
+        return Double.valueOf(this.get2DigitFormater().format(totalTer * 100));
     }
 
     private void setAllCellStyleNull()

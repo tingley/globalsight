@@ -36,7 +36,6 @@ import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager
 import com.globalsight.cxe.persistence.previewurl.PreviewUrlPersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.segmentationrulefile.SegmentationRuleFilePersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.xmlrulefile.XmlRuleFilePersistenceManagerWLRemote;
-import com.globalsight.everest.aligner.AlignerManagerWLRemote;
 import com.globalsight.everest.comment.CommentManagerWLRemote;
 import com.globalsight.everest.costing.CostingEngineWLRemote;
 import com.globalsight.everest.edit.SynchronizationManager;
@@ -97,7 +96,6 @@ public class ServerProxy
 
     // lazy instantiation variables.
 
-    private static AlignerManagerWLRemote m_alignerManager = null;
     private static CalendarManagerWLRemote m_calendarManager = null;
     private static CmsUserManagerWLRemote m_cmsUserManager = null;
     private static CommentManagerWLRemote m_commentReferenceManager = null;
@@ -1114,27 +1112,6 @@ public class ServerProxy
         }
 
         return m_cmsUserManager;
-    }
-
-
-    public static AlignerManagerWLRemote getAlignerManager()
-        throws GeneralException
-    {
-        if (m_alignerManager == null)
-        {
-            try
-            {
-                m_alignerManager = (AlignerManagerWLRemote)
-                    SERVER_REGISTRY.lookup(
-                        AlignerManagerWLRemote.SERVICE_NAME);
-            }
-            catch (NamingException ne)
-            {
-                throwException(ne);
-            }
-        }
-
-        return m_alignerManager;
     }
 
     public static DocumentumPersistenceManagerWLRemote getDocumentumPersistenceManager()

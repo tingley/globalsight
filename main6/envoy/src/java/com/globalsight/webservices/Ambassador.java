@@ -134,6 +134,7 @@ import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.JobPersistenceAccessor;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
+import com.globalsight.everest.jobhandler.jobcreation.JobInfoData;
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.localemgr.LocaleManagerLocal;
 import com.globalsight.everest.page.SourcePage;
@@ -1243,6 +1244,46 @@ public class Ambassador extends AbstractWebService
 
         createJob(args);
     }
+    
+    /**
+     * To create a job
+     * 
+     * @param accessToken
+     * @param jobName
+     *            String Job name
+     * @param comment
+     *            String Job comment
+     * @param filePaths
+     *            String Path of files which are contained in job, split by "|"
+     * @param fileProfileIds
+     *            String ID of file profiles, split by "|"
+     * @param targetLocales
+     *            String Target locales which like to be translated, split by
+     *            "|"
+     * @param attributeXml
+     *            String Attributes used to create job
+     * @param dueTime
+     *            String Due time
+     * @throws WebServiceException
+     */
+    @SuppressWarnings(
+    { "unchecked", "rawtypes" })
+    public void createJob(String accessToken, String jobName, String comment, String filePaths,
+            String fileProfileIds, String targetLocales, String attributeXml, String dueTime)
+            throws WebServiceException
+    {
+        HashMap args = new HashMap();
+        args.put("accessToken", accessToken);
+        args.put("jobName", jobName);
+        args.put("comment", comment);
+        args.put("filePaths", filePaths);
+        args.put("fileProfileIds", fileProfileIds);
+        args.put("targetLocales", targetLocales);
+        args.put("attributes", attributeXml);
+        args.put(JobInfoData.DUE_TIME, dueTime);
+
+        createJob(args);
+    }
 
     /**
      * Creates a job.
@@ -1360,6 +1401,9 @@ public class Ambassador extends AbstractWebService
             }
             args.put("jobId", String.valueOf(job.getId()));
 
+            //For aem 6.2 support due time.
+            JobInfoData.addJobData(job.getId(), JobInfoData.DUE_TIME, args.get(JobInfoData.DUE_TIME));
+            
             createJobOnInitial(args);
         }
         catch (Exception e)
@@ -2184,6 +2228,7 @@ public class Ambassador extends AbstractWebService
             String path = getRealPath(jobId, filePath, srcLocale, true);
             writeFile(path, bytes, fp.getCompanyId());
             
+            // For GBS-4401 Plugin for AEM 6.2
             byte[] previewbytes = (byte[]) args.get("previewbytes");
             if (previewbytes != null) {
                 String previewPath = filePath + ".p.zip";

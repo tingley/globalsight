@@ -95,6 +95,20 @@ public interface WebService4AEM
     public void createJob(String accessToken, String jobName, String comment,
             String filePaths, String fileProfileIds, String targetLocales)
                     throws WebServiceException;
+    
+    /**
+     * For aem 6.2. Support due time.
+     * @param accessToken
+     * @param jobName
+     * @param comment
+     * @param filePaths
+     * @param fileProfileIds
+     * @param targetLocales
+     * @throws WebServiceException
+     */
+    public void createJobWithDueTime(String accessToken, String jobName, String comment,
+            String filePaths, String fileProfileIds, String targetLocales, String dueTime)
+                    throws WebServiceException;
 
     /**
      * check if some jobs is downloadable or delete them from backup file in

@@ -17,7 +17,6 @@
 package com.globalsight.cxe.util;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -28,7 +27,6 @@ import com.globalsight.cxe.adapter.documentum.DocumentumOperator;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
-import com.globalsight.cxe.adapter.serviceware.ServiceWareAdapter;
 import com.globalsight.cxe.adapter.vignette.VignetteAdapter;
 import com.globalsight.cxe.adaptermdb.BaseAdapterMDB;
 import com.globalsight.cxe.adaptermdb.EventTopicMap;
@@ -37,7 +35,6 @@ import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.util.fileImport.FileImportUtil;
-import com.globalsight.everest.aligner.AlignerExtractor;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
@@ -60,9 +57,6 @@ public class CxeProxy
 
     /** The normal localization import request. */
     static public final String IMPORT_TYPE_L10N = "l10n";
-
-    /** The aligner import request **/
-    static public final String IMPORT_TYPE_ALIGNER = "aligner";
 
     static private final Integer ONE = new Integer(1);
 
@@ -573,43 +567,6 @@ public class CxeProxy
     }
 
     /**
-     * Initiates an import of a knowledge object and associated Concepts from
-     * ServiceWare.
-     * 
-     * @param p_koId
-     *            knowledge object ID
-     * @param p_fpId
-     *            file profile id
-     * @param p_jobName
-     *            suggested job name
-     * @exception Exception
-     */
-    static public void importFromServiceWare(String p_koId, String p_fpId, String p_jobName)
-            throws Exception
-    {
-        CxeMessageType type = CxeMessageType
-                .getCxeMessageType(CxeMessageType.SERVICEWARE_FILE_SELECTED_EVENT);
-        CxeMessage cxeMessage = new CxeMessage(type);
-        HashMap params = new HashMap();
-
-        String companyId = getCompanyIdByFileProfileId(p_fpId);
-        params.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
-        params.put("KOID", p_koId);
-        params.put("JobName", p_jobName);
-        params.put("BatchId", p_jobName + new Date());
-        params.put("PageCount", new Integer(1));
-        params.put("PageNum", new Integer(1));
-        params.put("DocPageCount", new Integer(1));
-        params.put("DocPageNum", new Integer(1));
-        params.put("FileProfileId", p_fpId);
-        params.put("OverrideFileProfileAsUnextracted", Boolean.FALSE);
-        cxeMessage.setParameters(params);
-
-        // GBS-4400
-        FileImportUtil.importFileWithThread(cxeMessage);
-    }
-
-    /**
      * Initiates a Mediasurface import for one MS leaf item. The caller has
      * already figured out the batch information and should know what to pass
      * for batchId, pageNum, and pageCount.
@@ -690,16 +647,6 @@ public class CxeProxy
     static public boolean isVignetteAdapterInstalled()
     {
         return VignetteAdapter.isInstalled();
-    }
-
-    /**
-     * Returns true if the ServiceWare Adapter is installed
-     * 
-     * @return true | false
-     */
-    static public boolean isServiceWareAdapterInstalled()
-    {
-        return ServiceWareAdapter.isInstalled();
     }
 
     /**
@@ -990,42 +937,6 @@ public class CxeProxy
         exportMsg.setMessageData(p_gxml);
 
         return exportMsg;
-    }
-
-    /**
-     * A special import for aligner/filesystem method. To invoke this method, we
-     * assume this method can get correct company id from the
-     * CompanyThreadLocal. That's to say, the invoker should have already set
-     * the correct company id in CompanyThreadLocal.
-     * 
-     * @param p_alignerExtractor
-     *            An object used to control the asynchronous alignment process
-     *            and wait for the results
-     */
-    static public void importFromFileSystemForAligner(AlignerExtractor p_alignerExtractor)
-            throws Exception
-    {
-        CxeMessageType type = CxeMessageType
-                .getCxeMessageType(CxeMessageType.FILE_SYSTEM_FILE_SELECTED_EVENT);
-        CxeMessage cxeMessage = new CxeMessage(type);
-        HashMap params = cxeMessage.getParameters();
-        CompanyWrapper.saveCurrentCompanyIdInMap(params, s_logger);
-        params.put("Filename", p_alignerExtractor.getFilename());
-        params.put("JobName", p_alignerExtractor.getName());
-        params.put("BatchId", p_alignerExtractor.getName());
-        params.put("PageCount", ONE);
-        params.put("PageNum", ONE);
-        params.put("DocPageCount", ONE);
-        params.put("DocPageNum", ONE);
-        params.put("IsAutomaticImport", Boolean.FALSE);
-        params.put("OverrideFileProfileAsUnextracted", Boolean.FALSE);
-
-        // put in special values for the aligner
-        params.put("AlignerExtractor", p_alignerExtractor.getName());
-        params.put(IMPORT_TYPE, IMPORT_TYPE_ALIGNER);
-
-        // GBS-4400
-        FileImportUtil.importFileWithThread(cxeMessage);
     }
 
     /**

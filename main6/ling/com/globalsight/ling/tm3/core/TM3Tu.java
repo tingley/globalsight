@@ -242,9 +242,7 @@ public class TM3Tu<T extends TM3Data>
 	/**
 	 * Check if the target TUV is an identical TUV.
 	 * 
-	 * The identical target TUV should have:
-	 * 1: same content and locale
-	 * 2: same previous/next hash values or no hash values at all.
+	 * The identical target TUV should have same previous/next hash values.
 	 * 
 	 * @param trgTuv
 	 * @param locale
@@ -254,26 +252,16 @@ public class TM3Tu<T extends TM3Data>
 	 * @return boolean
 	 * 
 	 */
-	public boolean isIdenticalTuv(TM3Tuv<T> trgTuv, TM3Locale locale,
-			T content, long previousHash, long nextHash)
+    public boolean isIdenticalTuv(TM3Tuv<T> trgTuv, TM3Locale locale, T content, long previousHash,
+            long nextHash)
     {
-        if (trgTuv.getLocale().equals(locale)
-                && trgTuv.getContent().equals(content))
+        if (trgTuv.getLocale().equals(locale) && trgTuv.getContent().equals(content))
         {
-        	// TUV in DB has no hash values, can update it
-			boolean flag1 = trgTuv.getPreviousHash() == -1
-					|| trgTuv.getNextHash() == -1;
-        	// Or TUV in DB has same hash values, can update it
-			boolean flag2 = trgTuv.getPreviousHash() == previousHash
-					&& trgTuv.getNextHash() == nextHash;
-
-			if (flag1 || flag2)
-			{
-				return true;
-			}
+            // If TUV in DB has same hash values, can update it
+            return (trgTuv.getPreviousHash() == previousHash && trgTuv.getNextHash() == nextHash);
         }
 
-    	return false;
+        return false;
     }
 
     /**

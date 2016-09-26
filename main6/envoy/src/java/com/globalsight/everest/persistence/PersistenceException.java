@@ -22,9 +22,10 @@ import com.globalsight.util.GeneralException;
  * PersistenceException represents an exception that occurs during
  * execution of any functionality on the PersistenceService.
  */
-public class PersistenceException
-    extends GeneralException
+public class PersistenceException extends GeneralException
 {
+    private static final long serialVersionUID = -4452781197309176059L;
+
     //
     // PUBLIC CONSTANTS FOR MESSAGE NAMES
     //

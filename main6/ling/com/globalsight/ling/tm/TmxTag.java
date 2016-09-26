@@ -40,9 +40,7 @@ import org.jdom.Attribute;
  */
 public class TmxTag
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            SegmentTagsAligner.class.getName());
+    private static final Logger CATEGORY = Logger.getLogger(TmxTag.class.getName());
 
     private static final String DEFAULT_SAX_DRIVER_CLASS =
         "org.apache.xerces.parsers.SAXParser";

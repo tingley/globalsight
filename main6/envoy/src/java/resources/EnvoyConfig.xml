@@ -1647,11 +1647,6 @@
       </WebPage>
     </WebActivity>
   </WebModule>
-  <WebModule webModuleName="serviceware">
-    <WebActivity webActivityName="swimport" clearSession="false">
-      <WebPage pageName="SW1" isDefault="true" jspName="/envoy/serviceware/swimport.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.serviceware.ServiceWareMainHandler"></WebPage>
-    </WebActivity>
-  </WebModule>
   <WebModule webModuleName="newEditor">
      <WebActivity webActivityName="edit3">
       <WebPage pageName="NEWED1" isDefault="true" jspName="/envoy/edit/online3/main.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.edit.online3.EditorPageHandler">
@@ -2737,67 +2732,6 @@
       <WebPage pageName="TBSEARCH" isDefault="false" 
          jspName="/envoy/terminology/viewer/index.jsp" 
          pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.terminology.viewer.SearchPageHandler">
-      </WebPage>
-      
-    </WebActivity>
-  </WebModule>
-  <WebModule webModuleName="aligner">
-    <WebActivity webActivityName="aligner" clearSession="true">
-      <WebPage pageName="ALM" isDefault="true" 
-      jspName="/envoy/aligner/main.jsp"
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.aligner.AlignerPageHandler">
-        <PageLink linkName="createpackage" destinationPageName="ALC1"/>
-        <PageLink linkName="downloadpackage" destinationPageName="ALD1"/>
-        <PageLink linkName="uploadpackage" destinationPageName="ALU1"/>
-      </WebPage>
-      <WebPage pageName="ALC1" isDefault="false" 
-      jspName="/envoy/aligner/createPackage.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.aligner.AlignerPackagePageHandler">
-        <PageLink linkName="next" destinationPageName="ALC2"/>
-        <PageLink linkName="cancel" destinationPageName="ALM"/>
-      </WebPage>
-      <WebPage pageName="ALC2" isDefault="false" 
-      jspName="/envoy/aligner/createPackage2.jsp"
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.aligner.AlignerPackagePageHandler">
-        <PageLink linkName="self" destinationPageName="ALC2"/>
-        <PageLink linkName="previous" destinationPageName="ALC1"/>
-        <PageLink linkName="next" destinationPageName="ALC3"/>
-        <PageLink linkName="cancel" destinationPageName="ALM"/>
-      </WebPage>
-      <WebPage pageName="ALC3" isDefault="false" 
-      jspName="/envoy/aligner/createPackage3.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.aligner.AlignerPackagePageHandler">
-        <PageLink linkName="ok" destinationPageName="ALC4"/>
-        <PageLink linkName="previous" destinationPageName="ALC2"/>
-        <PageLink linkName="cancel" destinationPageName="ALM"/>
-      </WebPage>
-      <WebPage pageName="ALC4" isDefault="false" 
-      jspName="/envoy/aligner/createPackageProgress.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.aligner.AlignerPackagePageHandler">
-        <PageLink linkName="ok" destinationPageName="ALM"/>
-      </WebPage>
-      <WebPage pageName="ALD1" isDefault="false" 
-      jspName="/envoy/aligner/download.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.aligner.AlignerPackageDownloadPageHandler">
-        <PageLink linkName="showerrors" destinationPageName="ALD2"/>
-        <PageLink linkName="remove" destinationPageName="ALD1"/>
-        <PageLink linkName="ok" destinationPageName="ALM"/>
-      </WebPage>
-      <WebPage pageName="ALD2" isDefault="false" 
-      jspName="/envoy/aligner/packageErrors.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.aligner.AlignerPackageDownloadPageHandler">
-      </WebPage>
-      <WebPage pageName="ALU1" isDefault="false" 
-      jspName="/envoy/aligner/upload.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.aligner.AlignerPackageUploadPageHandler">
-        <PageLink linkName="next" destinationPageName="ALU2"/>
-        <PageLink linkName="cancel" destinationPageName="ALM"/>
-      </WebPage>
-      <WebPage pageName="ALU2" isDefault="false" 
-      jspName="/envoy/aligner/uploadProgress.jsp" 
-      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.aligner.AlignerPackageUploadPageHandler">
-        <PageLink linkName="ok" destinationPageName="ALM"/>
-        <PageLink linkName="upload" destinationPageName="ALU1"/>
       </WebPage>
     </WebActivity>
   </WebModule>

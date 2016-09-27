@@ -177,7 +177,8 @@
     		|| OfflineConstants.FORMAT_RTF_TRADOS_OPTIMIZED.equals(userFormat)
     		|| OfflineConstants.FORMAT_OMEGAT_NAME.equals(userFormat)
     		|| OfflineConstants.FORMAT_XLF_NAME_12.equals(userFormat)
-    		|| OfflineConstants.FORMAT_XLF_VALUE_20.equals(userFormat))
+    		|| OfflineConstants.FORMAT_XLF_VALUE_20.equals(userFormat)
+    		|| OfflineConstants.FORMAT_TTX_NAME.endsWith(userFormat))
     {
     	isCombinedFormat = true;
     }

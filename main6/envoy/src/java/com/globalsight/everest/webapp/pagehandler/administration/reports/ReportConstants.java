@@ -107,6 +107,10 @@ public interface ReportConstants
     public static final String PROJECT_LIST = "reportsProjectList";
     public static final String L10N_PROFILES = "l10nProfiles";
     public static final String SUB_DIR = "subDir";
+    
+    public static final String LOCALIZED = "Exact Match";
+    public static final String NOT_LOCALIZED = "Untranslated";
+    public static final String APPROVED = "Translated/Approved";
 
     // Excel parameter name
     public static final String CATEGORY_LIST = "categoryList";

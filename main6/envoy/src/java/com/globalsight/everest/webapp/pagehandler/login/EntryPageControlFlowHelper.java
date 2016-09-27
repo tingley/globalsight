@@ -347,7 +347,7 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         }
         catch (EnvoyServletException ese)
         {
-            return loginFailed(ese);
+            return loginFailed(null);
         }
 
         // Load the user parameters and store them in the session.

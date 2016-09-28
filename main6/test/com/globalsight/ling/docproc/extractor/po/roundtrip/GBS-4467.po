@@ -1,0 +1,37 @@
+# Translation of Development in German
+# This file is distributed under the same license as the Development package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2015-02-24 20:01:52+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: GlotPress/1.0-alpha-1000\n"
+"Project-Id-Version: Development\n"
+
+#. Label for disconnecting WordPress.com account. The %@ is a placeholder for
+#. the user's screen name.
+msgctxt "Signing out removes all of your sites associated with %@"
+msgid "Signing out removes all of your sites associated with %@"
+msgstr "Signing out removes all of your sites associated with %@"
+
+#. Title for stats section for Posts & Pages
+msgctxt "Posts & Pages"
+msgid "Posts & Pages"
+msgstr "Posts & Pages"
+
+#. Age between dates over one day.
+msgctxt "%d days"
+msgid "%d days"
+msgstr "%d days"
+
+#. Age between dates over one hour.
+msgctxt "%d hours"
+msgid "%d hours"
+msgstr "%d hours"
+
+#. Age between dates over one month.
+msgctxt "%d months"
+msgid "%d months"
+msgstr "%d months"

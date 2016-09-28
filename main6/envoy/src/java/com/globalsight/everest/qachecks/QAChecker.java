@@ -438,18 +438,8 @@ public class QAChecker
         Cell srcEqualTrgCell = getCell(p_currentRow, col);
         if (QARuleDefault.SOURCE_EQUAL_TO_TARGET.equals(p_desc))
         {
-            if (TuvState.APPROVED.equals(tuvState))
-            {
-                srcEqualTrgCell.setCellValue(ReportConstants.APPROVED);
-            }
-            else if (TuvState.NOT_LOCALIZED.equals(tuvState))
-            {
-                srcEqualTrgCell.setCellValue(ReportConstants.NOT_LOCALIZED);
-            }
-            else if (TuvState.LOCALIZED.equals(tuvState))
-            {
-                srcEqualTrgCell.setCellValue(ReportConstants.LOCALIZED);
-            }
+            String srcEqualToTrgStatus = getState(p_desc, tuvState);
+            srcEqualTrgCell.setCellValue(srcEqualToTrgStatus);
         }
         else
         {
@@ -468,6 +458,27 @@ public class QAChecker
         Cell commentsCell = getCell(p_currentRow, col);
         commentsCell.setCellValue("");
         commentsCell.setCellStyle(getUnlockedStyle(p_workbook));
+    }
+
+    private String getState(String p_desc, TuvState tuvState)
+    {
+        if (TuvState.APPROVED.equals(tuvState) || TuvState.LOCALIZED.equals(tuvState))
+        {
+            return ReportConstants.SOURCE_EQUAL_TARGET_TRANSLATED_OR_APPROVED;
+        }
+        else if (TuvState.NOT_LOCALIZED.equals(tuvState))
+        {
+            return ReportConstants.SOURCE_EQUAL_TARGET_UNTRANSLATED;
+        }
+        else if (TuvState.EXACT_MATCH_LOCALIZED.equals(tuvState))
+        {
+            return ReportConstants.SOURCE_EQUAL_TARGET_EXACT_MATCH;
+        }
+        else if (TuvState.DO_NOT_TRANSLATE.equals(tuvState))
+        {
+            return ReportConstants.SOURCE_EQUAL_TARGET_DO_NOT_TRANSLATE;
+        }
+        return "";
     }
 
     private void addFalsePositiveValidation(Sheet p_sheet, int p_lastRow)

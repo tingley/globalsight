@@ -114,6 +114,8 @@ public class POToken
     public static final String MSGSTR_PLURAL = "msgstr[";
     public static final String MSGID_EMPTY = "msgid \"\"";
     public static final String QuotationMark = "\"";
+    // GBS-4467
+    public static final String TRANSLATOR_NOTES = "#.";
 
     /**
      * <p>
@@ -132,8 +134,11 @@ public class POToken
 
     /**
      * Contructor.
-     * @param p_nType int - Token ID.
-     * @param p_sContent - Token content.
+     * 
+     * @param p_nType
+     *            int - Token ID.
+     * @param p_sContent
+     *            - Token content.
      */
     public POToken(int p_nType, String p_sContent)
     {

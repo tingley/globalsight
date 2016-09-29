@@ -1,0 +1,48 @@
+<bpt i="1" internal="yes"/>Label for disconnecting WordPress.com account. The %@ is a placeholder for<ept i="1"/>
+			---[<bpt i="1" internal="yes"/>Label for disconnecting WordPress.com account. The %@ is a placeholder for<ept i="1"/>]
+
+<bpt i="2" internal="yes"/>the user&apos;s screen name.<ept i="2"/>
+			---[<bpt i="2" internal="yes"/>the user&apos;s screen name.<ept i="2"/>]
+
+<bpt i="3" internal="yes"/>Signing out removes all of your sites associated with %@<ept i="3"/>
+			---[<bpt i="3" internal="yes"/>Signing out removes all of your sites associated with %@<ept i="3"/>]
+
+Signing out removes all of your sites associated with %@
+			---[Signing out removes all of your sites associated with %@]
+
+<bpt i="4" internal="yes"/>Title for stats section for Posts &amp; Pages<ept i="4"/>
+			---[<bpt i="4" internal="yes"/>Title for stats section for Posts &amp; Pages<ept i="4"/>]
+
+<bpt i="5" internal="yes"/>Posts &amp; Pages<ept i="5"/>
+			---[<bpt i="5" internal="yes"/>Posts &amp; Pages<ept i="5"/>]
+
+Posts &amp; Pages
+			---[Posts &amp; Pages]
+
+<bpt i="6" internal="yes"/>Age between dates over one day.<ept i="6"/>
+			---[<bpt i="6" internal="yes"/>Age between dates over one day.<ept i="6"/>]
+
+<bpt i="7" internal="yes"/>%d days<ept i="7"/>
+			---[<bpt i="7" internal="yes"/>%d days<ept i="7"/>]
+
+%d days
+			---[%d days]
+
+<bpt i="8" internal="yes"/>Age between dates over one hour.<ept i="8"/>
+			---[<bpt i="8" internal="yes"/>Age between dates over one hour.<ept i="8"/>]
+
+<bpt i="9" internal="yes"/>%d hours<ept i="9"/>
+			---[<bpt i="9" internal="yes"/>%d hours<ept i="9"/>]
+
+%d hours
+			---[%d hours]
+
+<bpt i="10" internal="yes"/>Age between dates over one month.<ept i="10"/>
+			---[<bpt i="10" internal="yes"/>Age between dates over one month.<ept i="10"/>]
+
+<bpt i="11" internal="yes"/>%d months<ept i="11"/>
+			---[<bpt i="11" internal="yes"/>%d months<ept i="11"/>]
+
+%d months
+			---[%d months]
+

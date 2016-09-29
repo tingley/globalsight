@@ -62,6 +62,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
+import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.comparator.QARuleComparator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGeneratorUtil;
@@ -235,6 +236,7 @@ public class QAChecker
             {
                 Tuv targetTuv = (Tuv) targetTuvs.get(i);
                 Tuv sourceTuv = (Tuv) sourceTuvs.get(i);
+                TuvState  tuvState = targetTuv.getState();
                 String sourceSegment = getCompactSegment(sourceTuv, jobId);
                 String displaySourceSegment = rtlSourceLocale ? EditUtil.toRtlString(sourceSegment)
                         : sourceSegment;
@@ -304,7 +306,7 @@ public class QAChecker
 
                     fillCells(p_workbook, currentRow, p_workflow, jobId, rtlSourceLocale,
                             rtlTargetLocale, sourcePage, sourceTuv, displaySourceSegment,
-                            displayTargetSegment, matches, rule.getDescription());
+                            displayTargetSegment, matches, rule.getDescription(), tuvState);
                     row++;
                     processed = true;
                 }
@@ -360,7 +362,7 @@ public class QAChecker
 
                     fillCells(p_workbook, currentRow, p_workflow, jobId, rtlSourceLocale,
                             rtlTargetLocale, sourcePage, sourceTuv, displaySourceSegment,
-                            displayTargetSegment, matches, ruleDefault.getDescription());
+                            displayTargetSegment, matches, ruleDefault.getDescription(), tuvState);
                     row++;
                     processed = true;
                 }
@@ -376,7 +378,7 @@ public class QAChecker
     private void fillCells(Workbook p_workbook, Row p_currentRow, Workflow p_workflow, long p_jobId,
             boolean p_rtlSourceLocale, boolean p_rtlTargetLocale, SourcePage p_sourcePage,
             Tuv p_sourceTuv, String p_sourceSegment, String p_targetSegment, StringBuilder matches,
-            String p_desc)
+            String p_desc, TuvState tuvState)
     {
         int col = 0;
 
@@ -431,6 +433,20 @@ public class QAChecker
         TMmatchCell.setCellValue(matches.toString());
         TMmatchCell.setCellStyle(contentStyle);
         col++;
+        
+        //Source equal to Target
+        Cell srcEqualTrgCell = getCell(p_currentRow, col);
+        if (QARuleDefault.SOURCE_EQUAL_TO_TARGET.equals(p_desc))
+        {
+            String srcEqualToTrgStatus = getState(p_desc, tuvState);
+            srcEqualTrgCell.setCellValue(srcEqualToTrgStatus);
+        }
+        else
+        {
+            srcEqualTrgCell.setCellValue("");
+        }
+        srcEqualTrgCell.setCellStyle(contentStyle);
+        col++;
 
         // False Positive
         Cell falsePositiveCell = getCell(p_currentRow, col);
@@ -442,6 +458,27 @@ public class QAChecker
         Cell commentsCell = getCell(p_currentRow, col);
         commentsCell.setCellValue("");
         commentsCell.setCellStyle(getUnlockedStyle(p_workbook));
+    }
+
+    private String getState(String p_desc, TuvState tuvState)
+    {
+        if (TuvState.APPROVED.equals(tuvState) || TuvState.LOCALIZED.equals(tuvState))
+        {
+            return ReportConstants.SOURCE_EQUAL_TARGET_TRANSLATED_OR_APPROVED;
+        }
+        else if (TuvState.NOT_LOCALIZED.equals(tuvState))
+        {
+            return ReportConstants.SOURCE_EQUAL_TARGET_UNTRANSLATED;
+        }
+        else if (TuvState.EXACT_MATCH_LOCALIZED.equals(tuvState))
+        {
+            return ReportConstants.SOURCE_EQUAL_TARGET_EXACT_MATCH;
+        }
+        else if (TuvState.DO_NOT_TRANSLATE.equals(tuvState))
+        {
+            return ReportConstants.SOURCE_EQUAL_TARGET_DO_NOT_TRANSLATE;
+        }
+        return "";
     }
 
     private void addFalsePositiveValidation(Sheet p_sheet, int p_lastRow)
@@ -566,6 +603,12 @@ public class QAChecker
         Cell TMmatchCell = getCell(segHeaderRow, col);
         TMmatchCell.setCellValue(m_bundle.getString("lb_tm_match_original"));
         TMmatchCell.setCellStyle(getHeaderStyle(p_workbook));
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+        
+        Cell srcEqualTrgCell = getCell(segHeaderRow, col);
+        srcEqualTrgCell.setCellValue(m_bundle.getString("lb_source_equal_target_status"));
+        srcEqualTrgCell.setCellStyle(getHeaderStyle(p_workbook));
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 

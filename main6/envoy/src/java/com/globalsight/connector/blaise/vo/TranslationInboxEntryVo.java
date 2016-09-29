@@ -162,6 +162,11 @@ public class TranslationInboxEntryVo
 		return this.entry.getSourceType();
 	}
 
+	public String getRelatedObjectClassName()
+	{
+	    return this.entry.getRelatedObjectClassName();
+	}
+
 	public String getCompanyName()
 	{
 		return this.entry.getCompanyName();
@@ -208,4 +213,9 @@ public class TranslationInboxEntryVo
 	    }
 	    return links.toString();
 	}
+
+    public String getType()
+    {
+        return BlaiseHelper.getTypeByRelatedObjectClassName(getRelatedObjectClassName());
+    }
 }

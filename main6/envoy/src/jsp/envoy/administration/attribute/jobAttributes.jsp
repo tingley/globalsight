@@ -221,8 +221,8 @@ $(document).ready(function(){
                     if (condition instanceof ListCondition)
                     {
                         Set<SelectOption> selectOptions = jobAtt.getOptionValues();
-                        String listLabel = EditUtil.encodeHtmlEntities(jobAtt.getListLabel());
-                        String listLabel2=listLabel.replaceAll("&lt;br&gt;",",");
+                        String listLabel = jobAtt.getListLabel();
+                        String listLabel2 = listLabel.replaceAll("<b>",",");
     					if (editable)
     					{
     					    ListCondition listCondition = (ListCondition)condition;

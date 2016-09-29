@@ -88,6 +88,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.NumberUtil;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 
@@ -128,17 +129,19 @@ public class BlaiseCreateJobHandler extends PageActionHandler
     }
 
     @ActionHandler(action = "filter", formClass = "com.globalsight.connector.blaise.form.BlaiseInboxEntryFilter")
-    public void filter(HttpServletRequest request,
-            HttpServletResponse response, Object form) throws Exception
+    public void filter(HttpServletRequest request, HttpServletResponse response, Object form)
+            throws Exception
     {
-    	filter = (BlaiseInboxEntryFilter) form;
+        filter = (BlaiseInboxEntryFilter) form;
 
-		SessionManager sessionMgr = getSessionManager(request);
-		sessionMgr.setAttribute("relatedObjectIdFilter", filter.getRelatedObjectIdFilter());
-		sessionMgr.setAttribute("sourceLocaleFilter", filter.getSourceLocaleFilter());
-		sessionMgr.setAttribute("targetLocaleFilter", filter.getTargetLocaleFilter());
-		sessionMgr.setAttribute("descriptionFilter", filter.getDescriptionFilter());
-		sessionMgr.setAttribute("jobIdFilter", filter.getJobIdFilter());
+        SessionManager sessionMgr = getSessionManager(request);
+        sessionMgr.setAttribute("relatedObjectIdFilter", filter.getRelatedObjectIdFilter());
+        sessionMgr.setAttribute("sourceLocaleFilter", filter.getSourceLocaleFilter());
+        sessionMgr.setAttribute("targetLocaleFilter", filter.getTargetLocaleFilter());
+        sessionMgr.setAttribute("descriptionFilter", filter.getDescriptionFilter());
+        sessionMgr.setAttribute("jobIdFilter", filter.getJobIdFilter());
+        sessionMgr.setAttribute("typeFilter", filter.getTypeFilter());
+        sessionMgr.setAttribute("parentId", filter.getParentId());
     }
 
     private void fetchEntries(HttpServletRequest request)
@@ -153,40 +156,53 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         boolean sortDesc = false;
         String sourceLocaleFilter = (String) sessionMgr.getAttribute("sourceLocaleFilter");
         String targetLocaleFilter = (String) sessionMgr.getAttribute("targetLocaleFilter");
+        String typeFilter = (String) sessionMgr.getAttribute("typeFilter");
         String descriptionFilter = (String) sessionMgr.getAttribute("descriptionFilter");
         String relatedObjectIdFilter = (String) sessionMgr.getAttribute("relatedObjectIdFilter");
         String jobIdFilter = (String) sessionMgr.getAttribute("jobIdFilter");
-        Set<Long> entryIds = getEntryIdsFromJobIdFilter(jobIdFilter);
+        String parentIdStr = (String) sessionMgr.getAttribute("parentId");
 
         // For getInboxEntryCount, it does not care page index, page size, sort by, sort asc/desc.
         TranslationPageCommand command = BlaiseHelper.initTranslationPageCommand(pageIndex,
                 pageSize, relatedObjectIdFilter, sourceLocaleFilter, targetLocaleFilter,
-                descriptionFilter, sortBy, sortDesc);
-        if (entryIds.size() > 0)
+                typeFilter, descriptionFilter, sortBy, sortDesc);
+        // If "parentId" is not empty: not care jobIdFilter as they can not work
+        // together (as an implementation limitation)
+        if (StringUtil.isNotEmpty(parentIdStr) && NumberUtil.isLong(parentIdStr.trim()))
         {
-            pageIndex = 1;
+            long parentId = Long.parseLong(parentIdStr.trim());
+            totalSize = helper.getReferenceCount(parentId, command);
+            pageIndex = possibllyFixPageIndex(totalSize, pageSize, pageIndex);
             command.setPageIndex(pageIndex);
             command.setSortDesc(isSortDesc(request, pageIndex, sortBy));
-            currPageEntries = helper.listInboxByIds(entryIds, command);
-            totalSize = currPageEntries.size();
+            currPageEntries = helper.listReferences(parentId, command);
+        }
+        // No "parentId" and no "jobIdFilter"
+        else if (StringUtil.isEmpty(jobIdFilter))
+        {
+            totalSize = helper.getInboxEntryCount(command);
+            pageIndex = possibllyFixPageIndex(totalSize, pageSize, pageIndex);
+            command.setPageIndex(pageIndex);
+            command.setSortDesc(isSortDesc(request, pageIndex, sortBy));
+            currPageEntries = helper.listInbox(command);
         }
         else
         {
-            if (StringUtil.isNotEmpty(jobIdFilter) && entryIds.size() == 0)
+            Set<Long> entryIdsInJobIdFilter = getEntryIdsFromJobIdFilter(jobIdFilter);
+            // Has "jobIdFilter", but no matched entry IDs.
+            if (entryIdsInJobIdFilter.size() == 0)
             {
                 totalSize = 0;
-                pageIndex = possibllyFixPageIndex(totalSize, pageSize, pageIndex);
-                command.setPageIndex(pageIndex);
-                command.setSortDesc(isSortDesc(request, pageIndex, sortBy));
                 currPageEntries = new ArrayList<TranslationInboxEntryVo>();
             }
+            // Has "jobIdFilter" and has matched entry IDs.
             else
             {
-                totalSize = helper.getInboxEntryCount(command);
-                pageIndex = possibllyFixPageIndex(totalSize, pageSize, pageIndex);
+                pageIndex = 1;
                 command.setPageIndex(pageIndex);
                 command.setSortDesc(isSortDesc(request, pageIndex, sortBy));
-                currPageEntries = helper.listInbox(command);
+                currPageEntries = helper.listInboxByIds(entryIdsInJobIdFilter, command);
+                totalSize = currPageEntries.size();
             }
         }
 
@@ -197,6 +213,9 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         }
     }
 
+    /**
+     * Get all entry IDs which have been associated with specified jobs.
+     */
     private Set<Long> getEntryIdsFromJobIdFilter(String jobIdFilter)
     {
         Set<Long> entryIds = new HashSet<Long>();
@@ -424,7 +443,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         SessionManager sessionMgr = this.getSessionManager(request);
 
         // Have to reset?
-        resetParameters(request, blaiseForm);
+//        resetParameters(request, blaiseForm);
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
@@ -485,7 +504,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
         // Entries with same source and target locale will be in one job.
         String combineByLangs = request.getParameter("combineByLangs");
-        if ("true".equalsIgnoreCase(combineByLangs))
+        if ("true".equalsIgnoreCase(combineByLangs) || "on".equalsIgnoreCase(combineByLangs))
         {
             // Group TranslationInboxEntryVo objects by source and target.
             Map<String, List<Integer>> localeGroups = groupEntriesByLangs(entryIds);
@@ -612,31 +631,31 @@ public class BlaiseCreateJobHandler extends PageActionHandler
 		dataForTable(request);
 	}
 
-	private void resetParameters(HttpServletRequest request, CreateBlaiseJobForm blaiseForm)
-	{
-        String blaiseConnectorId = request.getParameter("blaiseConnectorId");
-        if (StringUtil.isNotEmpty(blaiseConnectorId))
-        {
-            blaiseForm.setBlaiseConnectorId(blaiseConnectorId);
-        }
-        String attributeString = request.getParameter("attributeString");
-        if (StringUtil.isNotEmpty(attributeString))
-        {
-            blaiseForm.setAttributeString(attributeString);
-        }
-        String fileMapFileProfile = request.getParameter("fileMapFileProfile");
-        if (StringUtil.isNotEmpty(fileMapFileProfile))
-        {
-            blaiseForm.setFileMapFileProfile(fileMapFileProfile);
-        }
-        String priority = request.getParameter("priority");
-        if (StringUtil.isNotEmpty(priority))
-        {
-            blaiseForm.setPriority(priority);
-        }
-        String comment = request.getParameter("comment");
-        blaiseForm.setComment(comment);
-	}
+//	private void resetParameters(HttpServletRequest request, CreateBlaiseJobForm blaiseForm)
+//	{
+//        String blaiseConnectorId = request.getParameter("blaiseConnectorId");
+//        if (StringUtil.isNotEmpty(blaiseConnectorId))
+//        {
+//            blaiseForm.setBlaiseConnectorId(blaiseConnectorId);
+//        }
+//        String attributeString = request.getParameter("attributeString");
+//        if (StringUtil.isNotEmpty(attributeString))
+//        {
+//            blaiseForm.setAttributeString(attributeString);
+//        }
+//        String fileMapFileProfile = request.getParameter("fileMapFileProfile");
+//        if (StringUtil.isNotEmpty(fileMapFileProfile))
+//        {
+//            blaiseForm.setFileMapFileProfile(fileMapFileProfile);
+//        }
+//        String priority = request.getParameter("priority");
+//        if (StringUtil.isNotEmpty(priority))
+//        {
+//            blaiseForm.setPriority(priority);
+//        }
+//        String comment = request.getParameter("comment");
+//        blaiseForm.setComment(comment);
+//	}
 
 	private void setEntryInfo(HttpServletRequest request)
 			throws LocaleManagerException, RemoteException, GeneralException
@@ -668,6 +687,9 @@ public class BlaiseCreateJobHandler extends PageActionHandler
     {
         getSessionManager(request).setAttribute("allBlaiseLocales",
                 BlaiseHelper.blaiseSupportedLocales);
+
+        getSessionManager(request).setAttribute("type2RelatedObjectClassName",
+                BlaiseHelper.type2RelatedObjectClassName);
     }
 
 	private String getXlfFileProfileOptions(HttpServletRequest request)
@@ -1057,6 +1079,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         setLableToJsp(request, bundle, "msg_blaise_no_workflow");
         setLableToJsp(request, bundle, "lb_blaise_create_job_add_file_tip");
         setLableToJsp(request, bundle, "lb_blaise_combine_by_languages");
+        setLableToJsp(request, bundle, "msg_blaise_invalid_parent_id");
     }
 
     private void setLableToJsp(HttpServletRequest request,
@@ -1146,7 +1169,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
                         }
                         else if (condition instanceof ListCondition)
                         {
-                            String[] options = attributeValue.split("#@#");
+                            String[] options = attributeValue.split("@@@");
                             List<String> optionValues = Arrays.asList(options);
                             jobAttribute.setValue(optionValues, false);
                         }

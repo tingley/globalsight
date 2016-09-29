@@ -14,6 +14,7 @@
             com.globalsight.connector.blaise.vo.TranslationInboxEntryVo,
             com.globalsight.everest.util.comparator.BlaiseInboxEntryComparator,
             java.text.SimpleDateFormat,
+            java.util.Map.Entry,
             java.util.*"
     session="true"
 %>
@@ -39,9 +40,14 @@
     String fps = (String) request.getAttribute("fps");
 
     BlaiseConnector blc = (BlaiseConnector) sessionMgr.getAttribute("blaiseConnector");
-    HashMap<Long, String> id2FileNameMap = (HashMap<Long, String>) sessionMgr.getAttribute("id2FileNameMap");
-    HashMap<Long, String> id2LocaleMap = (HashMap<Long, String>) sessionMgr.getAttribute("id2LocaleMap");
-    List<java.util.Locale> allBlaiseLocales = (List<java.util.Locale>) sessionMgr.getAttribute("allBlaiseLocales");
+    HashMap<Long, String> id2FileNameMap =
+            (HashMap<Long, String>) sessionMgr.getAttribute("id2FileNameMap");
+    HashMap<Long, String> id2LocaleMap =
+            (HashMap<Long, String>) sessionMgr.getAttribute("id2LocaleMap");
+    List<java.util.Locale> allBlaiseLocales =
+            (List<java.util.Locale>) sessionMgr.getAttribute("allBlaiseLocales");
+    SortedMap<String, String> type2RelatedObjectClassName = 
+            (SortedMap<String, String>) sessionMgr.getAttribute("type2RelatedObjectClassName");
 
     // URLs
 	String filterURL = self.getPageURL() + "&action=filter";
@@ -53,15 +59,19 @@
 
     // Filters
     String relatedObjectIdFilter = (String) sessionMgr.getAttribute("relatedObjectIdFilter");
-    relatedObjectIdFilter = relatedObjectIdFilter == null ? "" : relatedObjectIdFilter;
+    relatedObjectIdFilter = relatedObjectIdFilter == null ? "" : relatedObjectIdFilter.trim();
 	String sourceLocaleFilter = (String) sessionMgr.getAttribute("sourceLocaleFilter");
 	sourceLocaleFilter = sourceLocaleFilter == null ? "" : sourceLocaleFilter;
 	String targetLocaleFilter = (String) sessionMgr.getAttribute("targetLocaleFilter");
 	targetLocaleFilter = targetLocaleFilter == null ? "" : targetLocaleFilter;
 	String descriptionFilter = (String) sessionMgr.getAttribute("descriptionFilter");
-	descriptionFilter = descriptionFilter == null ? "" : descriptionFilter;
+	descriptionFilter = descriptionFilter == null ? "" : descriptionFilter.trim();
 	String jobIdFilter = (String) sessionMgr.getAttribute("jobIdFilter");
-	jobIdFilter = jobIdFilter == null ? "" : jobIdFilter;
+	jobIdFilter = jobIdFilter == null ? "" : jobIdFilter.trim();
+	String typeFilter = (String) sessionMgr.getAttribute("typeFilter");
+	typeFilter = typeFilter == null ? "" : typeFilter;
+	String parentId = (String) sessionMgr.getAttribute("parentId");
+	parentId = parentId == null ? "" : parentId.trim();
 
     Integer creatingJobsNum = (Integer)request.getAttribute("creatingJobsNum");
     if (creatingJobsNum == null)
@@ -147,6 +157,19 @@ for (java.util.Locale locale : allBlaiseLocales)
     selected = lCode.equalsIgnoreCase(targetLocaleFilter) ? "SELECTED" : "";
 %>
 	trgLocaleOptions += "<option value='<%=lCode%>' <%=selected%>>" + "<%=displayName%>" + "</option>";
+<%
+}
+%>
+
+var typeFilterOptions = "<option>Choose...</option>";
+<%
+String type = null;
+for (Entry<String, String> entry : type2RelatedObjectClassName.entrySet())
+{
+    type = entry.getKey();
+    selected = type.equalsIgnoreCase(typeFilter) ? "SELECTED" : "";
+%>
+    typeFilterOptions += "<option value='<%=type%>' <%=selected%>>" + "<%=type%>" + "</option>";
 <%
 }
 %>
@@ -375,7 +398,14 @@ function filterItems(e)
     var keyCode = e.which ? e.which : e.keyCode;
     if (keyCode == 13 && checkFilters())
     {
-    	blaiseEntriesForm.action = "<%=filterURL%>";
+    	// As "parentId" and "jobIdFilter" cannot work together, ignore parentId here.
+		var parentId = ATrim($("#parentId").val());
+		var jobIdFilter = ATrim($("#jobIdFilter").val());
+		if (jobIdFilter != "") {
+			$("#parentId").val("");
+		}
+
+		blaiseEntriesForm.action = "<%=filterURL%>";
     	blaiseEntriesForm.submit();
     }
 }
@@ -387,10 +417,18 @@ function filterSelectItems(e)
 
 function checkFilters()
 {
-	var tmp = "";
+	var tmp = ATrim($("#parentId").val());
+	if (tmp != "" && !isAllDigits(tmp))
+	{
+		alert("<c:out value='${msg_blaise_invalid_parent_id}'/>");
+		$("#parentId").focus();
+		return false;
+	}
+
 	tmp = ATrim($("#relatedObjectIdFilter").val());
 	if (tmp != "" && !isAllDigits(tmp)) {
 		alert("Invalid Blaise ID, only integer number is allowed.");
+		$("#relatedObjectIdFilter").focus();
 		return false;
 	}
 
@@ -401,6 +439,7 @@ function checkFilters()
     	id = ATrim(ids[i]);
     	if (id != "" && !isAllDigits(id)) {
     		alert("Invalid job ID, only integer number is allowed.");
+    		$("#jobIdFilter").focus();
     		return false;
     	}
 	}
@@ -531,6 +570,7 @@ $(document).ready(function ()
 
 	$("#sourceLocaleFilter").html(srcLocaleOptions);
 	$("#targetLocaleFilter").html(trgLocaleOptions);
+	$("#typeFilter").html(typeFilterOptions);
 
 // action of job name text
 //    $("#jobName").focus(function() {
@@ -544,6 +584,22 @@ $(document).ready(function ()
 //            $("#jobName").css("color","#cccccc");
 //        }
 //    });
+
+    $("#queryByParentIdBtn").click(function() {
+    	if (checkFilters())
+		{
+        	// As "parentId" and "jobIdFilter" cannot work together,
+        	// ignore "jobIdFilter" when click parent ID "search".
+    		var parentId = ATrim($("#parentId").val());
+    		var jobIdFilter = ATrim($("#jobIdFilter").val());
+			if (parentId != "") {
+				$("#jobIdFilter").val("");
+			}
+
+			blaiseEntriesForm.action = "<%=filterURL%>";
+        	blaiseEntriesForm.submit();
+   		}
+    });
 
     // action of textarea (job comment area)
     $("textarea").focus(function() {
@@ -701,22 +757,26 @@ $(document).ready(function ()
 
                     var blaiseConnectorId = $("#blaiseConnectorId").val();
                     var attributeString = $("#attributeString").val();
+                    if (attributeString != null) {
+                    	// Replace all "#@#" to "@@@" to avoid URL issue.
+                        attributeString = attributeString.replace(/#@#/g, '@@@');
+                    }
                     var fileMapFileProfile = $("#fileMapFileProfile").val();
                     var userName = $("#userName").val();
                     var priority = $("#priority").val();
                     var comment = $("#comment").val();
 					var attachment =  $("#attachment").val();
 					var combineByLangs = $("#combineByLangs").prop("checked");
-					
+
                     var createJobUrl = "<%=createBlaiseJobUrl%>" 
                     	+ "&blaiseConnectorId=" + blaiseConnectorId
-                    	+ "&attributeString=" + attributeString
                     	+ "&fileMapFileProfile=" + fileMapFileProfile
                     	+ "&userName=" + userName
                     	+ "&priority=" + priority
                     	+ "&comment=" + comment
                     	+ "&combineByLangs=" + combineByLangs
-                    	+ "&attachment=" + attachment;
+                    	+ "&attachment=" + attachment
+                    	+ "&attributeString=" + attributeString;
 
                     $("#createJobForm").ajaxSubmit({
                			type: 'post',
@@ -757,6 +817,11 @@ $(document).ready(function ()
     <div id="blaiseEntryListDiv">
 	<form name="blaiseEntriesForm" id="blaiseEntriesForm" method="post">
 		<input type="hidden" name="blcId" value="<%=blc.getId()%>" />
+
+		<label class="standardText"><%=bundle.getString("lb_blaise_parent_id")%>: </label>
+		<input type="text" id="parentId" name="parentId" value="<%=parentId%>" class="standardText" size="15"/>
+		<input type="button" id="queryByParentIdBtn" name="queryByParentIdBtn" value="<%=bundle.getString("lb_search")%>" />
+
 		<table cellpadding=0 cellspacing=0 border=0 class="standardText" width="100%" style="min-width:1024px;" >
 		    <tr valign="top">
 		        <td align="right">
@@ -788,7 +853,11 @@ $(document).ready(function ()
 		                <%=blaiseInboxEntry.getDisplayTargetLocale() == null ? "" : blaiseInboxEntry.getDisplayTargetLocale()%>
 		            </amb:column>
 
-		            <amb:column label="lb_description" sortBy="<%=BlaiseInboxEntryComparator.DESCRIPTION%>" filter="descriptionFilter" filterValue="<%=descriptionFilter%>" width="10%">
+		            <amb:column label="lb_filter_Type" filterSelect="typeFilter" filterValue="<%=typeFilter%>" width="10%">
+		                <%=blaiseInboxEntry.getType() == null ? "" : blaiseInboxEntry.getType()%>
+		            </amb:column>
+
+		            <amb:column label="lb_description" sortBy="<%=BlaiseInboxEntryComparator.DESCRIPTION%>" filter="descriptionFilter" filterValue="<%=descriptionFilter%>" width="15%">
 		                <%=blaiseInboxEntry.getDescription() == null ? "" : blaiseInboxEntry.getDescription()%>
 		            </amb:column>
 
@@ -804,7 +873,7 @@ $(document).ready(function ()
 		                <%=dateFormat.format(blaiseInboxEntry.getDueDate())%>
 		            </amb:column>
 
-		            <amb:column label="lb_job_id" filter="jobIdFilter" filterValue="<%=jobIdFilter%>" width="25%">
+		            <amb:column label="lb_job_id" filter="jobIdFilter" filterValue="<%=jobIdFilter%>" width="10%">
 			            <%=blaiseInboxEntry.getJobIdLinks()%>
 		            </amb:column>
 
@@ -812,7 +881,7 @@ $(document).ready(function ()
 	        	</td>
 		    </tr>
 		    <tr style="padding-top: 5px;">
-		    	<td><amb:tableNav  bean="blaiseEntryList" key="blaiseEntryKey" pageUrl="self" scope="25,50,100" showTotalCount="false"/></td>
+		    	<td><amb:tableNav  bean="blaiseEntryList" key="blaiseEntryKey" pageUrl="self" scope="25,50,100,200,500" showTotalCount="false"/></td>
 		    </tr>
 		    <tr>
 		        <td style="padding-top:5px" align="left">
@@ -840,7 +909,7 @@ $(document).ready(function ()
 
     <!-- Start of Create Job Section -->
     <div id="createJobDiv" style="margin-left:0px; margin-top:0px; display:none;" class="standardText">
-        <form name="createJobForm" id="createJobForm" method="post" action="" enctype="multipart/form-data">
+        <form name="createJobForm" id="createJobForm" method="post" action="" enctype="multipart/form-data" target="none_iframe">
             <input type="hidden" id="attributeString" name="attributeString" value="" />
             <input type="hidden" id="fileMapFileProfile" name="fileMapFileProfile" value="" />
             <input type="hidden" id="userName" name="userName" value="<%=userName%>" />

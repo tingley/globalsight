@@ -39,8 +39,8 @@ public class BlaiseInboxEntryComparator extends StringComparator
 	public static final int WORKFLOW_OBJECT_ID = 11;
 	public static final int WORKFLOW_ID = 12;
 	public static final int ENTRY_ID = 13;
-
-	public static final int JOB_ID = 14;
+    public static final int JOB_ID = 14;//
+	public static final int TYPE = 15;
 
 	public BlaiseInboxEntryComparator(Locale p_locale)
     {
@@ -122,6 +122,11 @@ public class BlaiseInboxEntryComparator extends StringComparator
         	bValue = b.getJobIdsForDisplay();
         	rv = this.compareStrings(aValue, bValue);
         	break;
+        case TYPE:
+            aValue = a.getType();
+            bValue = b.getType();
+            rv = this.compareStrings(aValue, bValue);
+            break;
         }
         return rv;
 	}

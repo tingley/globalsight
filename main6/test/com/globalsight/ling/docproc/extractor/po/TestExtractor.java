@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.ling.docproc.extractor.po;
 
 import static org.junit.Assert.fail;
@@ -23,11 +39,11 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.DiplomatAPI;
-import com.globalsight.ling.docproc.DocumentElement;
-import com.globalsight.ling.docproc.LocalizableElement;
 import com.globalsight.ling.docproc.DiplomatSegmenter;
 import com.globalsight.ling.docproc.DiplomatWriter;
+import com.globalsight.ling.docproc.DocumentElement;
 import com.globalsight.ling.docproc.EFInputData;
+import com.globalsight.ling.docproc.LocalizableElement;
 import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.Segmentable;
@@ -42,7 +58,7 @@ public class TestExtractor extends BaseExtractorTestClass
     public static final String extension = "po";
     public final String UTF8 = "UTF-8";
     public String filterName = "Filter_";
-    
+
     public String sourceRoot = null;
     public String answerRoot = null;
     public String roundtripRoot = null;
@@ -53,18 +69,20 @@ public class TestExtractor extends BaseExtractorTestClass
      * The file list which need create answer/roundtrip files.
      */
     public List<String> newFileList = new ArrayList<String>();
-    
+
     public String lineSep = System.getProperty("line.separator");
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings(
+    { "unchecked" })
     @Before
     public void setUp()
     {
         // Sets some value for initial word count
         CompanyThreadLocal.getInstance().setIdValue(CompanyWrapper.SUPER_COMPANY_ID);
-        SystemConfiguration dpsc = SystemConfiguration.getInstance("/properties/Wordcounter.properties");
+        SystemConfiguration dpsc = SystemConfiguration
+                .getInstance("/properties/Wordcounter.properties");
         HashMap map = new HashMap();
-        map.put("PROPERTIES/WORDCOUNTER.PROPERTIES", dpsc);        
+        map.put("PROPERTIES/WORDCOUNTER.PROPERTIES", dpsc);
         SystemConfiguration.setDebugMap(map);
 
         initExtractor();
@@ -73,10 +91,11 @@ public class TestExtractor extends BaseExtractorTestClass
         answerRoot = getResourcePath(TestExtractor.class, "answers");
         roundtripRoot = getResourcePath(TestExtractor.class, "roundtrip");
 
-        // Adds file name which need create answer/roundtrip files.    
+        // Adds file name which need create answer/roundtrip files.
         // newFileList.add("sample.po");
         // newFileList.add("sample_FR.po");
         // newFileList.add("sample_DE.po");
+        // newFileList.add("GBS-4467.po");
     }
 
     /**
@@ -99,33 +118,28 @@ public class TestExtractor extends BaseExtractorTestClass
                 String answerContent = getTranslatableTextContent(output);
 
                 String fileName = sourceFile.getName();
-                String answerFileName = fileName.substring(0, fileName.lastIndexOf("."))
-                        + ".txt";
-                File answerFile = new File(answerRoot + File.separator
-                        + answerFileName);
-                File tmpFile = new File(answerRoot + File.separator
-                        + answerFileName + ".tmp");
-                
+                String answerFileName = fileName.substring(0, fileName.lastIndexOf(".")) + ".txt";
+                File answerFile = new File(answerRoot + File.separator + answerFileName);
+                File tmpFile = new File(answerRoot + File.separator + answerFileName + ".tmp");
+
                 // Generate Answer files
-                if (newFileList != null
-                        && newFileList.contains(sourceFile.getName()))
+                if (newFileList != null && newFileList.contains(sourceFile.getName()))
                 {
                     generateFile(answerFile, answerContent, UTF8);
                 }
-                
+
                 if (!answerFile.exists())
                 {
                     fail("The file compared to :" + answerFile.getName() + " doesn't exist");
                 }
-                
+
                 // Generate files for compare
                 generateFile(tmpFile, answerContent, UTF8);
                 if (fileCompareNoCareEndLining(tmpFile, answerFile))
                 {
                     tmpFile.delete();
                     // generate target file
-                    File rountTipFile = new File(roundtripRoot + File.separator
-                            + fileName);
+                    File rountTipFile = new File(roundtripRoot + File.separator + fileName);
                     delTranslabaleSource(output);
                     String gxml = DiplomatWriter.WriteXML(output);
                     byte[] mergeResult = getTargetFileContent(gxml, UTF8);
@@ -144,7 +158,7 @@ public class TestExtractor extends BaseExtractorTestClass
             }
         }
     }
-    
+
     /**
      * Test the extractor and the filter.
      */
@@ -166,40 +180,35 @@ public class TestExtractor extends BaseExtractorTestClass
                 // Read source files
                 File sourceFile = sourceFiles[i];
                 // extract source file
-                Output output = doExtractWithFilter(sourceFile, extractor, UTF8, 
-                       fp, fpId, secondFilterId, secondFilterTableName);
-                                          
+                Output output = doExtractWithFilter(sourceFile, extractor, UTF8, fp, fpId,
+                        secondFilterId, secondFilterTableName);
+
                 // get translatable text content
                 answerContent = getTranslatableTextContent(output);
 
                 String fileName = filterName + sourceFile.getName();
-                String answerFileName = fileName.substring(0, fileName.lastIndexOf("."))
-                        + ".txt";
-                File answerFile = new File(answerRoot + File.separator
-                        + answerFileName);
-                File tmpFile = new File(answerRoot + File.separator
-                        + answerFileName + ".tmp");
-                
+                String answerFileName = fileName.substring(0, fileName.lastIndexOf(".")) + ".txt";
+                File answerFile = new File(answerRoot + File.separator + answerFileName);
+                File tmpFile = new File(answerRoot + File.separator + answerFileName + ".tmp");
+
                 // Generate Answer files
-                if (newFileList != null
-                        && newFileList.contains(sourceFile.getName()))
+                if (newFileList != null && newFileList.contains(sourceFile.getName()))
                 {
                     generateFile(answerFile, answerContent, UTF8);
                 }
-                
+
                 if (!answerFile.exists())
                 {
                     fail("The file compared to :" + answerFile.getName() + " doesn't exist");
                 }
-                
+
                 // Generate files for compare
                 generateFile(tmpFile, answerContent, UTF8);
                 if (fileCompareNoCareEndLining(tmpFile, answerFile))
                 {
                     tmpFile.delete();
                     // generate target file
-                    File rountTipFile = new File(roundtripRoot + File.separator
-                            + fileName);
+                    File rountTipFile = new File(roundtripRoot + File.separator + fileName);
                     delTranslabaleSource(output);
                     String gxml = DiplomatWriter.WriteXML(output);
                     byte[] mergeResult = getTargetFileContent(gxml, UTF8);
@@ -217,12 +226,11 @@ public class TestExtractor extends BaseExtractorTestClass
                 fail(e.getMessage());
             }
         }
-        
-        HTMLFilterTestHelper.delHtmlFilterByID(hFilter);          
+
+        HTMLFilterTestHelper.delHtmlFilterByID(hFilter);
     }
 
-    public String getFileContent(File file, AbstractExtractor extractor,
-            String encoding)
+    public String getFileContent(File file, AbstractExtractor extractor, String encoding)
     {
         Output output = new Output();
         EFInputData input = new EFInputData();
@@ -233,16 +241,16 @@ public class TestExtractor extends BaseExtractorTestClass
         extractor.loadRules();
         extractor.extract();
         String gxml = DiplomatWriter.WriteXML(output);
-        
+
         return gxml;
     }
-    
+
     public AbstractExtractor initExtractor()
     {
         extractor = new Extractor();
         return extractor;
     }
-    
+
     // Deletes the source translatable elements, for roundtrip.
     public void delTranslabaleSource(Output p_output)
     {
@@ -269,16 +277,17 @@ public class TestExtractor extends BaseExtractorTestClass
             }
         }
     }
-    
+
     @Override
     public String getTranslatableTextContent(Output p_output)
     {
-        if (p_output == null) {
+        if (p_output == null)
+        {
             return null;
         }
 
         StringBuffer resultContent = new StringBuffer();
-        
+
         Iterator<?> eleIter = p_output.documentElementIterator();
         while (eleIter.hasNext())
         {
@@ -286,7 +295,7 @@ public class TestExtractor extends BaseExtractorTestClass
             if (de instanceof TranslatableElement)
             {
                 String elemValue = de.getText();
-                String elemType = ((Segmentable)de).getXliffPartByName();
+                String elemType = ((Segmentable) de).getXliffPartByName();
 
                 if ("source".equalsIgnoreCase(elemType))
                 {
@@ -329,9 +338,9 @@ public class TestExtractor extends BaseExtractorTestClass
         return resultContent.toString();
     }
 
-    public Output doExtractWithFilter(File p_file, AbstractExtractor extractor,
-            String p_encoding, FileProfileImpl p_fp, String p_fpId, 
-            long p_secondFilterId, String p_secondFilterTableName) throws Exception
+    public Output doExtractWithFilter(File p_file, AbstractExtractor extractor, String p_encoding,
+            FileProfileImpl p_fp, String p_fpId, long p_secondFilterId,
+            String p_secondFilterTableName) throws Exception
     {
         Output output = new Output();
         EFInputData input = new EFInputData();
@@ -341,10 +350,10 @@ public class TestExtractor extends BaseExtractorTestClass
         extractor.init(input, output);
         extractor.loadRules();
         extractor.extract();
-        
+
         DiplomatSegmenter seg = new DiplomatSegmenter();
-        seg.segmentXliff(output);                   
-        
+        seg.segmentXliff(output);
+
         // Do Secondary Filter
         StandardExtractor se = StandardExtractorTestHelper.getInstance(null, null);
         DiplomatAPI diplomat = new DiplomatAPI();
@@ -352,23 +361,23 @@ public class TestExtractor extends BaseExtractorTestClass
         diplomat.setSegmentationRuleText("default");
         Iterator<?> it = output.documentElementIterator();
         output.clearDocumentElements();
-        
+
         try
         {
-            ClassUtil.testMethod(se, "doSecondFilterForPO", output, it, diplomat, 
-                      p_fp, p_fpId, p_secondFilterId, p_secondFilterTableName);
+            ClassUtil.testMethod(se, "doSecondFilterForPO", output, it, diplomat, p_fp, p_fpId,
+                    p_secondFilterId, p_secondFilterTableName);
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
-        
+
         return output;
     }
-    
+
     @Override
-    public Output doExtract(File p_file, AbstractExtractor extractor,
-            String p_encoding) throws Exception
+    public Output doExtract(File p_file, AbstractExtractor extractor, String p_encoding)
+            throws Exception
     {
         Output output = new Output();
         EFInputData input = new EFInputData();
@@ -378,10 +387,10 @@ public class TestExtractor extends BaseExtractorTestClass
         extractor.init(input, output);
         extractor.loadRules();
         extractor.extract();
-        
+
         DiplomatSegmenter seg = new DiplomatSegmenter();
-        seg.segmentXliff(output);     
-        
+        seg.segmentXliff(output);
+
         return output;
     }
 

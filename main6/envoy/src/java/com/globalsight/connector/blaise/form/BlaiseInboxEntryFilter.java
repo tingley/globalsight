@@ -26,8 +26,13 @@ public class BlaiseInboxEntryFilter
     private String relatedObjectIdFilter = null;
 	private String sourceLocaleFilter = null;
     private String targetLocaleFilter = null;
+    private String typeFilter = null;
     private String descriptionFilter = null;
     private String jobIdFilter = null;
+
+    // The parent Id is the Blaise ID of a Composite Publication.
+    // Standalone Publications are not supported. 
+    private String parentId = null;
 
     public List<TranslationInboxEntryVo> filter(List<TranslationInboxEntryVo> entries)
     {
@@ -46,6 +51,11 @@ public class BlaiseInboxEntryFilter
             }
 
             if (!like(targetLocaleFilter, entry.getDisplayTargetLocale()))
+            {
+                continue;
+            }
+
+            if (!like(typeFilter, entry.getType()))
             {
                 continue;
             }
@@ -114,6 +124,16 @@ public class BlaiseInboxEntryFilter
 		this.targetLocaleFilter = targetLocaleFilter;
 	}
 
+	public String getTypeFilter()
+	{
+	    return typeFilter;
+	}
+
+	public void setTypeFilter(String typeFilter)
+	{
+	    this.typeFilter = typeFilter;
+	}
+
 	public String getDescriptionFilter()
 	{
 		return descriptionFilter;
@@ -133,4 +153,14 @@ public class BlaiseInboxEntryFilter
 	{
 		this.jobIdFilter = jobIdFilter;
 	}
+
+    public String getParentId()
+    {
+        return parentId;
+    }
+
+    public void setParentId(String parentId)
+    {
+        this.parentId = parentId;
+    }
 }

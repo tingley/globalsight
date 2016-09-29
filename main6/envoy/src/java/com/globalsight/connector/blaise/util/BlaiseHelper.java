@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.log4j.Logger;
@@ -62,8 +64,13 @@ public class BlaiseHelper
     private static final String DASH = " - ";
     private static List<String> specialChars = new ArrayList<String>();
 
+    private static final String HARLEY = "Harley";
+
     public static final List<java.util.Locale> blaiseSupportedLocales = new ArrayList<java.util.Locale>();
     public static final HashMap<String, com.cognitran.core.model.i18n.Locale> blaiseSupportedLocalesMap = new HashMap<String, com.cognitran.core.model.i18n.Locale>();
+
+    public static final SortedMap<String, String> relatedObjectClassName2Type = new TreeMap<String, String>();
+    public static final SortedMap<String, String> type2RelatedObjectClassName = new TreeMap<String, String>();
 
     static
     {
@@ -76,6 +83,28 @@ public class BlaiseHelper
             String key = javaLocale.getLanguage() + "_" + javaLocale.getCountry();
             blaiseSupportedLocalesMap.put(key.toLowerCase(), blaiseLocale);
         }
+
+        relatedObjectClassName2Type.put("com.cognitran.publication.model.media.Graphic", "Graphic");
+        relatedObjectClassName2Type.put(
+                "com.cognitran.publication.model.standalone.StandalonePublication", "Standalone");
+        relatedObjectClassName2Type.put("com.cognitran.publication.model.composite.Procedure",
+                "Procedure");
+        relatedObjectClassName2Type.put(
+                "com.cognitran.publication.model.controlled.ControlledContent",
+                "Controlled content");
+        relatedObjectClassName2Type.put(
+                "com.cognitran.translation.model.TranslatableObjectsDocument",
+                "Translatable object");
+
+        type2RelatedObjectClassName.put("Graphic", "com.cognitran.publication.model.media.Graphic");
+        type2RelatedObjectClassName.put("Standalone",
+                "com.cognitran.publication.model.standalone.StandalonePublication");
+        type2RelatedObjectClassName.put("Procedure",
+                "com.cognitran.publication.model.composite.Procedure");
+        type2RelatedObjectClassName.put("Controlled content",
+                "com.cognitran.publication.model.controlled.ControlledContent");
+        type2RelatedObjectClassName.put("Translatable object",
+                "com.cognitran.translation.model.TranslatableObjectsDocument");
     }
 
     public BlaiseHelper(BlaiseConnector blc)
@@ -213,7 +242,65 @@ public class BlaiseHelper
         return results;
     }
 
-	/**
+    public int getReferenceCount(long parentId, TranslationPageCommand command)
+    {
+        int number = 0;
+        try
+        {
+            TranslationAgencyClient client = getTranslationClient();
+            if (client == null)
+            {
+                logger.error("TranslationAgencyClient is null.");
+                return 0;
+            }
+
+            number = client.getReferenceCount(parentId, command);
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when getReferenceCount(parentId, TranslationPageCommand):", e);
+        }
+
+        return number;
+    }
+
+    public List<TranslationInboxEntryVo> listReferences(long parentId,
+            TranslationPageCommand command)
+    {
+        List<TranslationInboxEntryVo> results = new ArrayList<TranslationInboxEntryVo>();
+        try
+        {
+            TranslationAgencyClient client = getTranslationClient();
+            if (client == null)
+            {
+                logger.error("TranslationAgencyClient is null.");
+                return results;
+            }
+
+            List<InboxEntry> inboxEntries = client.listReferences(parentId, command);
+            for (InboxEntry entry : inboxEntries)
+            {
+                try
+                {
+                    TranslationInboxEntryVo vo = new TranslationInboxEntryVo(
+                            (TranslationInboxEntry) entry);
+                    results.add(vo);
+                }
+                catch (Exception ignore)
+                {
+                    // ignore this entry if it has no required target locale
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when invoke listReferences(parentId, TranslationPageCommand): ", e);
+        }
+
+        return results;
+    }
+
+    /**
 	 * Claim Blaise inbox entries. If it has been claimed, Blaise API will throw
 	 * exception/warning.
 	 * 
@@ -402,7 +489,7 @@ public class BlaiseHelper
         ids.add(id);
 
         TranslationPageCommand command = initTranslationPageCommand(1, 100, null, null, null, null,
-                0, false);
+                null, 0, false);
         List<TranslationInboxEntryVo> entries = listInboxByIds(ids, command);
         if (entries == null || entries.size() == 0)
         {
@@ -421,6 +508,7 @@ public class BlaiseHelper
      * @param relatedObjectIdFilter
      * @param sourceLocaleFilter
      * @param targetLocaleFilter
+     * @param typeFilter
      * @param desFilter
      * @param sortBy
      * @param sortDesc
@@ -429,7 +517,7 @@ public class BlaiseHelper
      */
     public static TranslationPageCommand initTranslationPageCommand(int pageIndex, int pageSize,
             String relatedObjectIdFilter, String sourceLocaleFilter, String targetLocaleFilter,
-            String desFilter, int sortBy, boolean sortDesc)
+            String typeFilter, String desFilter, int sortBy, boolean sortDesc)
     {
         TranslationPageCommand command = new TranslationPageCommand();
 
@@ -437,7 +525,7 @@ public class BlaiseHelper
         command.setPageSize(pageSize);
 
         setFilters(command, relatedObjectIdFilter, sourceLocaleFilter, targetLocaleFilter,
-                desFilter);
+                typeFilter, desFilter);
 
         setSortBy(command, sortBy);
 
@@ -451,7 +539,8 @@ public class BlaiseHelper
 
     // Set filters
     private static void setFilters(TranslationPageCommand command, String relatedObjectIdFilter,
-            String sourceLocaleFilter, String targetLocaleFilter, String desFilter)
+            String sourceLocaleFilter, String targetLocaleFilter, String typeFilter,
+            String desFilter)
     {
         // Blaise ID
         if (StringUtil.isNotEmpty(relatedObjectIdFilter))
@@ -487,6 +576,12 @@ public class BlaiseHelper
             {
                 command.setTargetLocaleFilter(locale);
             }
+        }
+
+        // Type
+        if (StringUtil.isNotEmpty(typeFilter))
+        {
+            command.setObjectClassnameFilter(type2RelatedObjectClassName.get(typeFilter));
         }
 
         // Description
@@ -611,7 +706,7 @@ public class BlaiseHelper
 			des = des.trim();
 			if (des.length() > 55)
 			{
-				des = des.substring(0, 50);
+				des = des.substring(0, 55);
 			}
 		}
 
@@ -623,7 +718,31 @@ public class BlaiseHelper
 				.append(".xlf").toString();
 		String fileNameStr = fileName.toString();
 
-		return handleFileName(fileNameStr);
+		return handleSpecialChars(fileNameStr);
+	}
+
+    /**
+     * A typical Harley job name is
+     * "Harley_[Falcon Target Value]_[target locale]_[plus a random number]".
+     * 
+     * @param entry
+     *            -- TranslationInboxEntryVo
+     * @param falconTargetValue
+     *            -- value of job attribute "Falcon Target Value".
+     * @return String -- job name
+     * 
+     */
+	public static String getHarlyJobName(TranslationInboxEntryVo entry, String falconTargetValue)
+	{
+        String targetLocale = entry.getEntry().getTargetLocale().getLocaleCode();
+        targetLocale = BlaiseHelper.fixLocale(targetLocale);
+        if (falconTargetValue != null && falconTargetValue.length() > 55)
+        {
+            falconTargetValue = falconTargetValue.substring(0, 55);
+        }
+        String jobName = HARLEY + "_" + falconTargetValue + "_" + targetLocale;
+
+        return handleSpecialChars(jobName);
 	}
 
 	public static String getEntryJobName(TranslationInboxEntryVo entry)
@@ -648,7 +767,7 @@ public class BlaiseHelper
         StringBuilder ids = new StringBuilder();
         for (Long id : relatedObjectIds)
         {
-            if (ids.length() < 60)
+            if (ids.length() < 50)
             {
                 ids.append(id).append(" ");
             }
@@ -662,10 +781,10 @@ public class BlaiseHelper
         jobName.append(DASH);
         jobName.append(fixLocale(entries.get(0).getEntry().getTargetLocale().getLocaleCode()));
 
-        return handleFileName(jobName.toString());
+        return handleSpecialChars(jobName.toString());
     }
 
-	private static String handleFileName(String fileName)
+	private static String handleSpecialChars(String fileName)
 	{
 		initSpecialChars();
 
@@ -737,5 +856,18 @@ public class BlaiseHelper
         }
 
         return buffer.toString();
+    }
+
+    public static String getTypeByRelatedObjectClassName(String relatedObjectClassName)
+    {
+        if (relatedObjectClassName == null || relatedObjectClassName.trim().length() == 0)
+            return null;
+ 
+        String type = relatedObjectClassName2Type.get(relatedObjectClassName);
+        // Just in case
+        if (StringUtil.isEmpty(type))
+            type = "Unkown";
+
+        return type;
     }
 }

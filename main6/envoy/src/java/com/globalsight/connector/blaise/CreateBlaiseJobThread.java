@@ -35,6 +35,7 @@ import com.globalsight.connector.blaise.util.BlaiseHelper;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
+import com.globalsight.cxe.entity.customAttribute.AttributeClone;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
@@ -54,6 +55,8 @@ import com.globalsight.webservices.attribute.AddJobAttributeThread;
 public class CreateBlaiseJobThread  extends Thread
 {
     static private final Logger logger = Logger.getLogger(CreateBlaiseJobThread.class);
+
+    private static final String FALCON_TARGET_VALUE = "Falcon Target Value";
 
     private User user;
     private String currentCompanyId;
@@ -90,7 +93,12 @@ public class CreateBlaiseJobThread  extends Thread
         try
         {
             String jobName = null;
-            if (entries.size() == 1)
+            String falconTargetValue = getFalconTargetValue();
+            if (falconTargetValue != null)
+            {
+                jobName = BlaiseHelper.getHarlyJobName(entries.get(0), falconTargetValue);
+            }
+            else if (entries.size() == 1)
             {
                 jobName = BlaiseHelper.getEntryJobName(entries.get(0));
             }
@@ -265,7 +273,53 @@ public class CreateBlaiseJobThread  extends Thread
         return jobName + "_" + randomStr;
     }
 
-	@Override
+    /**
+     * Get the value of job attribute "Falcon Target Value" if it has.
+     */
+    private String getFalconTargetValue()
+    {
+        String falconTargetValue = null;
+        if (jobAttribtues != null && jobAttribtues.size() != 0)
+        {
+            String displayName = null;
+            String internalName = null;
+            String type = null;
+            for (JobAttribute attr : jobAttribtues)
+            {
+                displayName = attr.getAttribute().getDisplayName();
+                internalName = attr.getAttribute().getName();
+                if (FALCON_TARGET_VALUE.equalsIgnoreCase(displayName)
+                        || FALCON_TARGET_VALUE.equalsIgnoreCase(internalName))
+                {
+                    type = attr.getAttribute().getType();
+                    // If "Falcon Target Value" attribute is "text" type...
+                    if (AttributeClone.TYPE_TEXT.equalsIgnoreCase(type))
+                    {
+                        falconTargetValue = (String) attr.getValue();
+                        break;
+                    }
+                    // If "Falcon Target Value" attribute is "choicelist" type...
+                    else if (AttributeClone.TYPE_CHOICE_LIST.equalsIgnoreCase(type))
+                    {
+                        @SuppressWarnings("unchecked")
+                        List<String> choiceValue = (List<String>) attr.getValue();
+                        if (choiceValue != null && choiceValue.size() > 0)
+                        {
+                            falconTargetValue = choiceValue.get(0);//pick up the first only
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (falconTargetValue != null && falconTargetValue.trim().length() == 0)
+            falconTargetValue = null;
+
+        return falconTargetValue;
+    }
+
+    @Override
     public void run()
     {
         try

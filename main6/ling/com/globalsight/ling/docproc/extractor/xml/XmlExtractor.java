@@ -47,8 +47,10 @@ import com.globalsight.cxe.adapter.openoffice.StringIndex;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
+import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.InternalText;
 import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
+import com.globalsight.cxe.entity.filterconfiguration.JsonFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConstants;
 import com.globalsight.ling.common.HtmlEntities;
@@ -187,6 +189,7 @@ public class XmlExtractor extends AbstractExtractor
     private String m_cdataPostFormat = null;
     private boolean m_isElementPost = false;
     private boolean m_isElementPostToHtml = false;
+    private boolean m_isCdataPostToHtml = false;
     private boolean m_isOriginalXmlNode = false;
     private List<String> m_originalXmlNode = new ArrayList<String>();
     private boolean m_isCdataPost = false;
@@ -304,7 +307,9 @@ public class XmlExtractor extends AbstractExtractor
                     ? (IFormatNames.FORMAT_HTML.equals(m_elementPostFormat)) : false;
             m_cdataPostFormat = m_xmlFilterHelper.getCdataPostFormat();
             m_isCdataPost = m_xmlFilterHelper.isCdataPostFilter();
-
+            m_isCdataPostToHtml =  m_isCdataPost
+                    ? (IFormatNames.FORMAT_HTML.equals(m_cdataPostFormat)) : false;
+                    
             String mainFormat = getMainFormat();
             // get rule map for the document
             m_ruleMap = m_rules.buildRulesWithFilter(document, m_xmlFilterHelper.getXmlFilterTags(),
@@ -2163,7 +2168,42 @@ public class XmlExtractor extends AbstractExtractor
             try
             {
                 String replaced = preReplaceForAll(isCdata);
-                Output output = switchExtractor(replaced, otherFormat, otherFilter);
+                String htmlFilterFormat = null;
+                Filter htmlFilterInJson = null;
+                boolean isJsonStr = false;
+                if (!m_isCdataPostToHtml || !m_isElementPostToHtml)
+                {
+                    isJsonStr = checkTranslateSegementIsJson(replaced);
+                    if (!isJsonStr)
+                    {
+                        JsonFilter json = (JsonFilter) otherFilter;
+                        long elemPostFilterId = json.getElementPostFilterId();
+                        String elemPostFilterName = json.getElementPostFilterTableName();
+                        htmlFilterFormat = m_xmlFilterHelper.getFormatForFilter(elemPostFilterName);
+                        htmlFilterInJson = FilterHelper.getFilter(elemPostFilterName,
+                                elemPostFilterId);
+                    }
+                }
+
+                Output output = null;
+                if (!isJsonStr && (!m_isCdataPostToHtml || !m_isElementPostToHtml))
+                {
+                    if (htmlFilterFormat != null && htmlFilterInJson != null)
+                    {
+                        output = switchExtractor(replaced, htmlFilterFormat, htmlFilterInJson);
+                    }
+                    else
+                    {
+                        output = new Output();
+                        HtmlEntities entities = new HtmlEntities();
+                        replaced = entities.decodeStringBasic(entities.decodeStringBasic(replaced));
+                        output.addTranslatable(replaced);
+                    }
+                }
+                else
+                {
+                    output = switchExtractor(replaced, otherFormat, otherFilter);
+                }
                 Iterator it = output.documentElementIterator();
                 while (it.hasNext())
                 {
@@ -2212,7 +2252,7 @@ public class XmlExtractor extends AbstractExtractor
                     }
                 }
             }
-            catch (ExtractorException ex)
+            catch (Exception ex)
             {
                 CATEGORY.error("Output other format with error: ", ex);
                 outputTranslatable(m_xmlEncoder.encodeStringBasic(m_switchExtractionBuffer), false);
@@ -2227,6 +2267,44 @@ public class XmlExtractor extends AbstractExtractor
         // m_otherFormat = null;
     }
 
+    private boolean checkTranslateSegementIsJson(String replaced)
+    {
+        String REGEX_COLON = ":[\\s|\\t|\\r|\\n]*\"";
+        String REGEX_BRACKETS = ":[\\s|\\t|\\r|\\n]*\\[[\\s|\\t|\\r|\\n]*\"";
+        Pattern colonP = Pattern.compile(REGEX_COLON);
+        Pattern bracketsP = Pattern.compile(REGEX_BRACKETS);
+        boolean containColon = false;
+        boolean isJsonStr = false;
+        StringBuffer colonBuffer = new StringBuffer();
+        if (replaced.contains(":"))
+        {
+            char[] charArr = replaced.toCharArray();
+            for (int i = 0; i < charArr.length; i++)
+            {
+                char chr = charArr[i];
+                if (chr == ':')
+                    containColon = true;
+
+                if (containColon)
+                {
+                    colonBuffer.append(chr);
+                    if (colonP.matcher(colonBuffer.toString()).find())
+                    {
+                        isJsonStr = true;
+                        break;
+                    }
+                    else if (bracketsP.matcher(colonBuffer.toString()).find())
+                    {
+                        isJsonStr = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return isJsonStr;
+    }
+    
     private String fixOriginalXmlNode(String segment, List<String> originalXmlNode,
             boolean doubleEntity)
     {

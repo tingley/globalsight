@@ -107,7 +107,7 @@ JsonFilter.prototype.generateDiv = function(topFilterId, color) {
 }
 
 JsonFilter.prototype.generateElementPostFilter = function(filter) {
-	var str = new StringBuffer("<select id='elementPostFilter' class='xml_filter_select' style='width:100%'>");
+	var str = new StringBuffer("<select id='jsonElementPostFilter' class='xml_filter_select' style='width:100%'>");
 	str.append("<option value=''"+ ((filter && filter.elementPostFilter == "-1") ? " selected" : "")
 			+ ">" + jsChoose + "</option>");
 
@@ -183,7 +183,7 @@ function saveJson() {
 	var indexBase = baseFilterSelect.selectedIndex;
 	var baseFilterId = baseFilterSelect.options[indexBase].value;
 
-	var elementPostFilters = document.getElementById("elementPostFilter");
+	var elementPostFilters = document.getElementById("jsonElementPostFilter");
 	var indexElement = elementPostFilters.selectedIndex;
 	var elementPostFilters = elementPostFilters.options[indexElement].value;
 
@@ -191,6 +191,7 @@ function saveJson() {
 	ch = elementPostFilters.split("-"); 
 	var elementPostFilterId = ch[0];
 	var elementPostFilterTableName = ch[1];
+	alert(elementPostFilterId+"=="+elementPostFilterTableName);
 	
 	var obj = {
 		isNew : isNew,

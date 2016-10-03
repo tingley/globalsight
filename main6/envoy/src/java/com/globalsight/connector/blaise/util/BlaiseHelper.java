@@ -48,6 +48,8 @@ import com.cognitran.workflow.client.InboxEntry;
 import com.globalsight.connector.blaise.vo.TranslationInboxEntryVo;
 import com.globalsight.cxe.entity.blaise.BlaiseConnector;
 import com.globalsight.cxe.entity.blaise.BlaiseConnectorJob;
+import com.globalsight.cxe.entity.customAttribute.AttributeClone;
+import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.everest.util.comparator.BlaiseInboxEntryComparator;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -65,6 +67,7 @@ public class BlaiseHelper
     private static List<String> specialChars = new ArrayList<String>();
 
     private static final String HARLEY = "Harley";
+    private static final String FALCON_TARGET_VALUE = "Falcon Target Value";
 
     public static final List<java.util.Locale> blaiseSupportedLocales = new ArrayList<java.util.Locale>();
     public static final HashMap<String, com.cognitran.core.model.i18n.Locale> blaiseSupportedLocalesMap = new HashMap<String, com.cognitran.core.model.i18n.Locale>();
@@ -784,21 +787,25 @@ public class BlaiseHelper
         return handleSpecialChars(jobName.toString());
     }
 
-	private static String handleSpecialChars(String fileName)
+	private static String handleSpecialChars(String str)
 	{
 		initSpecialChars();
 
 		for (String specialChar : specialChars)
 		{
-			fileName = fileName.replace(specialChar, " ");
+			str = str.replace(specialChar, " ");
 		}
 
 		// Replace all continuous space to single space
-		while (fileName.indexOf("  ") > -1)
+		while (str.indexOf("  ") > -1)
 		{
-			fileName = fileName.replace("  ", " ");
+			str = str.replace("  ", " ");
 		}
-		return fileName;
+
+        if (str != null)
+            str = str.trim();
+
+        return str;
 	}
 
 	private synchronized static void initSpecialChars()
@@ -869,5 +876,53 @@ public class BlaiseHelper
             type = "Unkown";
 
         return type;
+    }
+
+    /**
+     * Get the value of job attribute "Falcon Target Value" if it has.
+     */
+    public static String findFalconTargetValue(List<JobAttribute> jobAttribtues)
+    {
+        String falconTargetValue = null;
+        if (jobAttribtues != null && jobAttribtues.size() != 0)
+        {
+            String displayName = null;
+            String internalName = null;
+            String type = null;
+            for (JobAttribute attr : jobAttribtues)
+            {
+                displayName = attr.getAttribute().getDisplayName();
+                internalName = attr.getAttribute().getName();
+                if (FALCON_TARGET_VALUE.equalsIgnoreCase(displayName)
+                        || FALCON_TARGET_VALUE.equalsIgnoreCase(internalName))
+                {
+                    type = attr.getAttribute().getType();
+                    // If "Falcon Target Value" attribute is "text" type...
+                    if (AttributeClone.TYPE_TEXT.equalsIgnoreCase(type))
+                    {
+                        falconTargetValue = (String) attr.getValue();
+                        break;
+                    }
+                    // If "Falcon Target Value" attribute is "choicelist"
+                    // type...
+                    else if (AttributeClone.TYPE_CHOICE_LIST.equalsIgnoreCase(type))
+                    {
+                        @SuppressWarnings("unchecked")
+                        List<String> choiceValue = (List<String>) attr.getValue();
+                        if (choiceValue != null && choiceValue.size() > 0)
+                        {
+                            // pick up the first only
+                            falconTargetValue = choiceValue.get(0);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (falconTargetValue != null && falconTargetValue.trim().length() == 0)
+            falconTargetValue = null;
+
+        return falconTargetValue;
     }
 }

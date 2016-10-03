@@ -443,7 +443,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         SessionManager sessionMgr = this.getSessionManager(request);
 
         // Have to reset?
-//        resetParameters(request, blaiseForm);
+        resetParameters(request, blaiseForm);
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
@@ -631,31 +631,31 @@ public class BlaiseCreateJobHandler extends PageActionHandler
 		dataForTable(request);
 	}
 
-//	private void resetParameters(HttpServletRequest request, CreateBlaiseJobForm blaiseForm)
-//	{
-//        String blaiseConnectorId = request.getParameter("blaiseConnectorId");
-//        if (StringUtil.isNotEmpty(blaiseConnectorId))
-//        {
-//            blaiseForm.setBlaiseConnectorId(blaiseConnectorId);
-//        }
-//        String attributeString = request.getParameter("attributeString");
-//        if (StringUtil.isNotEmpty(attributeString))
-//        {
-//            blaiseForm.setAttributeString(attributeString);
-//        }
-//        String fileMapFileProfile = request.getParameter("fileMapFileProfile");
-//        if (StringUtil.isNotEmpty(fileMapFileProfile))
-//        {
-//            blaiseForm.setFileMapFileProfile(fileMapFileProfile);
-//        }
-//        String priority = request.getParameter("priority");
-//        if (StringUtil.isNotEmpty(priority))
-//        {
-//            blaiseForm.setPriority(priority);
-//        }
-//        String comment = request.getParameter("comment");
-//        blaiseForm.setComment(comment);
-//	}
+	private void resetParameters(HttpServletRequest request, CreateBlaiseJobForm blaiseForm)
+	{
+        String blaiseConnectorId = request.getParameter("blaiseConnectorId");
+        if (StringUtil.isNotEmpty(blaiseConnectorId))
+        {
+            blaiseForm.setBlaiseConnectorId(blaiseConnectorId);
+        }
+        String attributeString = request.getParameter("attributeString");
+        if (StringUtil.isNotEmpty(attributeString))
+        {
+            blaiseForm.setAttributeString(attributeString);
+        }
+        String fileMapFileProfile = request.getParameter("fileMapFileProfile");
+        if (StringUtil.isNotEmpty(fileMapFileProfile))
+        {
+            blaiseForm.setFileMapFileProfile(fileMapFileProfile);
+        }
+        String priority = request.getParameter("priority");
+        if (StringUtil.isNotEmpty(priority))
+        {
+            blaiseForm.setPriority(priority);
+        }
+        String comment = request.getParameter("comment");
+        blaiseForm.setComment(comment);
+	}
 
 	private void setEntryInfo(HttpServletRequest request)
 			throws LocaleManagerException, RemoteException, GeneralException

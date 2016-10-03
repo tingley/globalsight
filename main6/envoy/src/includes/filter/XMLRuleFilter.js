@@ -68,7 +68,7 @@ function XMLRuleFilter()
 	this.editItemPostFilterId = -1;
 	this.editItemPostFilterTableName = "";
 	this.editItemTranslatable = true;
-	this.availablePostFilters = ["html_filter", "java_script_filter"];
+	this.availablePostFilters = ["html_filter", "filter_json","java_script_filter"];
 }
 
 XMLRuleFilter.prototype.setFilter = function (filter)
@@ -777,7 +777,7 @@ XMLRuleFilter.prototype.generateEmptyTagFormat = function (filter)
 XMLRuleFilter.prototype.generateElementPostFilter = function (filter)
 {
 	var str = new StringBuffer("<select id='elementPostFilter' class='xml_filter_select'>");
-	str.append("<option value='-1'" + ((filter && filter.elementPostFilter == "-1") ? " selected" : "") + ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>");
+	str.append("<option value='-1'" + ((filter && filter.elementPostFilter == "-1") ? " selected" : "") + ">Choose&nbsp;&nbsp;&nbsp;</option>");
 	
 	str.append(xmlFilter.generateAvailableFilterOptions(filter, "elementPostFilterId", "elementPostFilter"));
 	str.append("</select>");
@@ -787,7 +787,7 @@ XMLRuleFilter.prototype.generateElementPostFilter = function (filter)
 XMLRuleFilter.prototype.generateCdataPostFilter = function (filter)
 {
 	var str = new StringBuffer("<select id='cdataPostFilter' class='xml_filter_select'>");
-	str.append("<option value='-1'" + ((filter && filter.elementPostFilter == "-1") ? " selected" : "") + ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>");
+	str.append("<option value='-1'" + ((filter && filter.elementPostFilter == "-1") ? " selected" : "") + ">Choose&nbsp;&nbsp;&nbsp;</option>");
 	
 	str.append(xmlFilter.generateAvailableFilterOptions(filter, "cdataPostFilterId", "cdataPostFilter"));
 	str.append("</select>");

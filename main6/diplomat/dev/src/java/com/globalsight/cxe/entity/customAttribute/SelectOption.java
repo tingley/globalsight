@@ -17,9 +17,6 @@
 
 package com.globalsight.cxe.entity.customAttribute;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.globalsight.everest.persistence.PersistentObject;
 
 public class SelectOption extends PersistentObject

@@ -130,7 +130,7 @@ public class WebServicesLog
 				.getLogger(AxisRequestHandler.class);
 
 		@SuppressWarnings("rawtypes")
-		public synchronized void invoke(MessageContext ctx) throws AxisFault
+		public void invoke(MessageContext ctx) throws AxisFault
 		{
             // Cribbed from org.apache.axis.providers.java.RPCProvider, but I
             // didn't copy the full logic, so swallow the error if it fails.

@@ -833,7 +833,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             if (p_options.getViewMode() == VIEWMODE_PREVIEW)
             {
                 
-                File previewFile = new File(AmbFileStoragePathUtils.getCxeDocDirPath()  + "/" + srcPage.getExternalPageId() + ".preview.html");
+                File previewFile = new File(AmbFileStoragePathUtils.getCxeDocDirPath(srcPage.getCompanyId())  + "/" + srcPage.getExternalPageId() + ".preview.html");
                 if (previewFile.exists()) 
                 {
                     result = GxmlUtil.cleanUpDisplayHtml(FileUtil.readFile(previewFile, "UTF-8"));
@@ -841,7 +841,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 }
                 
                 //for aem
-                File previewZipFile = new File(AmbFileStoragePathUtils.getCxeDocDirPath()  + "/" + srcPage.getExternalPageId() + ".p.zip");
+                File previewZipFile = new File(AmbFileStoragePathUtils.getCxeDocDirPath(srcPage.getCompanyId())  + "/" + srcPage.getExternalPageId() + ".p.zip");
                 if (previewZipFile.exists()) 
                 {
                     File file = new File(srcPage.getExternalPageId());

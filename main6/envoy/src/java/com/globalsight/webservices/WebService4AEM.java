@@ -414,4 +414,7 @@ public interface WebService4AEM
     
     public String getJobNameById(String p_accessToken, long jobId)
             throws WebServiceException;
+    
+    public String getLastestFileProfileId(String accessToken, String id) 
+            throws WebServiceException;
 }

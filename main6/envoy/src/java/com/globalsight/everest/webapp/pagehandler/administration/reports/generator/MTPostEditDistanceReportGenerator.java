@@ -135,6 +135,12 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         List<Long> jobIds = new ArrayList<Long>();
     };
 
+    // for junit test only
+    public MTPostEditDistanceReportGenerator()
+    {
+        
+    }
+
     public MTPostEditDistanceReportGenerator(HttpServletRequest p_request,
             HttpServletResponse p_response) throws LocaleManagerException,
             RemoteException, GeneralException

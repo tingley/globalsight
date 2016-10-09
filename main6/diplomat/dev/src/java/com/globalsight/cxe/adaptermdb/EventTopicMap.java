@@ -47,8 +47,6 @@ import com.globalsight.cxe.adaptermdb.pdf.PdfSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.pdf.PdfTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.quarkframe.QuarkFrameSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.quarkframe.QuarkFrameTargetAdapterMDB;
-import com.globalsight.cxe.adaptermdb.vignette.VignetteSourceAdapterMDB;
-import com.globalsight.cxe.adaptermdb.vignette.VignetteTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.windowspe.WindowsPESourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.windowspe.WindowsPETargetAdapterMDB;
 import com.globalsight.cxe.message.CxeMessageType;
@@ -120,10 +118,6 @@ public class EventTopicMap
         m_classMap.put(CxeMessageType.FRAME_LOCALIZED_EVENT, new QuarkFrameTargetAdapterMDB());
         m_classMap.put(CxeMessageType.COPYFLOW_IMPORTED_EVENT, new CopyFlowSourceAdapterMDB());
         m_classMap.put(CxeMessageType.COPYFLOW_LOCALIZED_EVENT, new CopyFlowTargetAdapterMDB());
-
-        // vignette
-        m_classMap.put(CxeMessageType.VIGNETTE_FILE_SELECTED_EVENT, new VignetteSourceAdapterMDB());
-        m_classMap.put(CxeMessageType.VIGNETTE_EXPORT_EVENT, new VignetteTargetAdapterMDB());
 
         // database
         m_classMap.put(CxeMessageType.DATABASE_EXPORT_EVENT, new DatabaseTargetAdapterMDB());

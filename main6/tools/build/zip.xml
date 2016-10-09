@@ -33,7 +33,6 @@
 
 			<zipfileset dir="../../envoy/src/java" prefix="${product}/install/data/key" includes="GS_key.pers" />
 
-			<zipfileset dir="${serverclassesDest}/com/globalsight/vignette" prefix="${product}/install/data/vignette/classes/com/globalsight/vignette" includes="*.class" />
 			<!-- Include any patch release notes and scripts -->
 			<zipfileset dir="../../tools/install/data/ERs" prefix="${product}/install/data/ERs" />
 			<zipfileset dir="../../tools/install/data" prefix="${product}/install/data" includes="value.mf"/>

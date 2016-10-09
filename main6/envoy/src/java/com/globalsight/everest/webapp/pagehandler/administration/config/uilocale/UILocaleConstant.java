@@ -74,7 +74,7 @@ public class UILocaleConstant
             "SystemStartupException", "TaskException",
             "TermbaseException", "TmManagerException",
             "UploadPageSaverException", "UserManagerException",
-            "VendorException", "VignetteAdapterMsg", "WindowsPEAdapterMsg",
+            "VendorException", "WindowsPEAdapterMsg",
             "WorkflowException", "WorkflowManagerException",
             "EmailMessageResource" };
 

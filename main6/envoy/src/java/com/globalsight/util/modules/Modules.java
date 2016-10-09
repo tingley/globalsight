@@ -26,7 +26,6 @@ import com.globalsight.cxe.adapter.mediasurface.MediasurfaceAdapter;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
-import com.globalsight.cxe.adapter.vignette.VignetteAdapter;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.vendormanagement.VendorManagementLocal;
@@ -41,7 +40,7 @@ public class Modules
     private static Logger s_logger = Logger.getLogger(Modules.class);
 
     // Keeps track of whether certain modules are installed
-    private static boolean s_cms, s_db, s_vignette = false;
+    private static boolean s_cms, s_db = false;
 
     private static boolean s_documentum = false;
 
@@ -70,7 +69,6 @@ public class Modules
             SystemConfiguration sc = SystemConfiguration.getInstance();
             s_cms = MediasurfaceAdapter.isInstalled();
             s_db = DatabaseAdapter.isInstalled();
-            s_vignette = VignetteAdapter.isInstalled();
             s_pdf = PdfAdapter.isInstalled();
             s_quark = QuarkFrameAdapter.isQuarkInstalled();
             s_frame = QuarkFrameAdapter.isFrameInstalled();
@@ -115,16 +113,6 @@ public class Modules
     public static boolean isDatabaseAdapterInstalled()
     {
         return s_db;
-    }
-
-    /**
-     * Returns true if the Pdf Adapter is installed
-     * 
-     * @return true | false
-     */
-    public static boolean isVignetteAdapterInstalled()
-    {
-        return VignetteAdapter.isInstalled();
     }
 
     /**

@@ -283,9 +283,6 @@
      <permission id="<%=Permission.EXPORT_LOC_EDIT%>"/>
      <permission id="<%=Permission.EXPORT_LOC_NEW%>"/>
   </permission>
-<% if (b_vignette) { %>
-     <permission id="<%=Permission.VIGNETTE_IMPORT%>"/>
-<% } %>
 <% if (b_database) { %>
   <permission id="<%=Permission.DATABASE_INTEGRATION%>"/>
 <% } %>

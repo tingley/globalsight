@@ -109,9 +109,6 @@ public class CxeMessageType implements Serializable
     public static final int CAP_IMPORT_ERROR_EVENT = 505;
     public static final int STF_CREATION_EVENT = 506;
 
-    public static final int VIGNETTE_FILE_SELECTED_EVENT = 509;
-    public static final int VIGNETTE_EXPORT_EVENT = 510;
-
     public static final int DATABASE_EXPORT_EVENT = 511;
     public static final int DYNAMIC_PREVIEW_EVENT = 512;
 
@@ -210,10 +207,6 @@ public class CxeMessageType implements Serializable
         //rtf
         fillMaps(RTF_IMPORTED_EVENT,"RTF_IMPORTED_EVENT");
         fillMaps(RTF_LOCALIZED_EVENT,"RTF_LOCALIZED_EVENT");
-
-        //vignette
-        fillMaps(VIGNETTE_FILE_SELECTED_EVENT,"VIGNETTE_FILE_SELECTED_EVENT");
-        fillMaps(VIGNETTE_EXPORT_EVENT,"VIGNETTE_EXPORT_EVENT");
 
         //database
         fillMaps(DATABASE_EXPORT_EVENT, "DATABASE_EXPORT_EVENT");
@@ -359,8 +352,6 @@ public class CxeMessageType implements Serializable
         {
             if (p_oldEventName.indexOf("Database") > 0)
                 newEventValue= DATABASE_EXPORT_EVENT;
-            else if (p_oldEventName.indexOf("Vignette") > 0)
-                newEventValue = VIGNETTE_EXPORT_EVENT;
             else
                 newEventValue = FILE_SYSTEM_EXPORT_EVENT;
         }

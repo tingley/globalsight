@@ -2,7 +2,6 @@
 %><%!
     /* This just records whether all the different modules are installed */
     static boolean b_database = Modules.isDatabaseAdapterInstalled();
-    static boolean b_vignette = Modules.isVignetteAdapterInstalled();
     static boolean b_cms = Modules.isCmsAdapterInstalled();
     static boolean b_costing = Modules.isCostingInstalled();
     static boolean b_reports = Modules.isReportsInstalled();

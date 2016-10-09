@@ -40,7 +40,6 @@
                 com.globalsight.cxe.adapter.msoffice,
                 com.globalsight.cxe.adapter.pdf,
                 com.globalsight.cxe.adapter.quarkframe,
-                com.globalsight.cxe.adapter.vignette,
                 com.globalsight.cxe.adaptermdb,
                 com.globalsight.cxe.adaptermdb.adobe,
                 com.globalsight.cxe.adaptermdb.cap,
@@ -54,7 +53,6 @@
                 com.globalsight.cxe.adaptermdb.msoffice,
                 com.globalsight.cxe.adaptermdb.pdf,
                 com.globalsight.cxe.adaptermdb.quarkframe,
-                com.globalsight.cxe.adaptermdb.vignette,
                 com.globalsight.cxe.engine.eventflow,
                 com.globalsight.cxe.engine.util,
                 com.globalsight.cxe.entity.databasecolumn,
@@ -79,7 +77,6 @@
                 com.globalsight.cxe.persistence.previewurl,
                 com.globalsight.cxe.persistence.segmentationrulefile,
                 com.globalsight.cxe.persistence.xmlrulefile,
-                com.globalsight.cxe.servlet.cms.vignette,
                 com.globalsight.cxe.servlet.imagereplace,
                 com.globalsight.cxe.util,
                 com.globalsight.diplomat.adapter,
@@ -396,7 +393,6 @@
                 com.globalsight.util.resourcebundle,
                 com.globalsight.util.system,
                 com.globalsight.util.zip,
-                com.globalsight.vignette,
                 com.globalsight.webservices,
                 com.globalsight.webservices.vendormanagement,
 	            galign,
@@ -429,7 +425,7 @@
 			<group title="CAP Web Services" packages="com.globalsight.webservices:com.globalsight.webservices.*" />
 			<group title="CAP MT Interface" packages="com.globalsight.machineTranslation" />
 			<group title="CAP MediaSurface Integration" packages="com.globalsight.mediasurface" />
-			<group title="CXE" packages="com.globalsight.cxe.*:com.globalsight.diplomat.*:com.globalsight.vignette:com.globalsight.vignette.*" />
+			<group title="CXE" packages="com.globalsight.cxe.*:com.globalsight.diplomat.*" />
 			<group title="Utilities" packages="com.globalsight.terminology.util:com.globalsight.everest.tm.util:com.globalsight.everest.tm.util.*:com.globalsight.ling.util:com.globalsight.ling.util.*" />
 			<group title="Reports" packages="com.globalsight.reports:com.globalsight.reports.*" />
 			<group title="Online Applet (TW Online+Offline)" packages="com.globalsight.ling.tw:com.globalsight.ling.tw.offline:com.globalsight.ling.tw.offline.*:com.globalsight.ling.tw.online:com.globalsight.ling.tw.online.*" />

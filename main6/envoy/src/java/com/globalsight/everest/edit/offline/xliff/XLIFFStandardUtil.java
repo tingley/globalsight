@@ -38,6 +38,8 @@ public class XLIFFStandardUtil
     static final String att_posOpen = " pos=\"open\"";
 
     static final String att_ctype = " ctype=\"";
+    
+    static final String att_ctype_x = " ctype=\"x-";
 
     static final String att_type = " type=\"";
 
@@ -83,7 +85,7 @@ public class XLIFFStandardUtil
 
         // bpt
         segment = replaceAtts(segment, bpt_start, bpt_end, true, att_i, att_id, att_type,
-                att_ctype, att_x, att_xid);
+                att_ctype_x, att_x, att_xid);
 
         // ept
         segment = replaceAtts(segment, ept_start, ept_end, true, att_i, att_id);
@@ -92,12 +94,12 @@ public class XLIFFStandardUtil
         segment = addAtts(segment, it_start, it_end, att_x, att_id, p_osd.getDisplaySegmentID());
 
         segment = replaceAtts(segment, it_start, it_end, true, att_posBegin, att_posOpen,
-                att_posEnd, att_posClose, att_type, att_ctype, att_x, att_xid);
+                att_posEnd, att_posClose, att_type, att_ctype_x, att_x, att_xid);
 
         // ph : add "id" by "x" first, then replace "x" to "xid" etc.
         segment = addAtts(segment, ph_start, ph_end, att_x, att_id, p_osd.getDisplaySegmentID());
 
-        segment = replaceAtts(segment, ph_start, ph_end, true, att_type, att_ctype, att_x, att_xid);
+        segment = replaceAtts(segment, ph_start, ph_end, true, att_type, att_ctype_x, att_x, att_xid);
 
         return segment;
     }
@@ -116,7 +118,7 @@ public class XLIFFStandardUtil
 
         // bpt
         segment = replaceAtts(segment, bpt_start, bpt_end, false, att_x,
-                att_xid, att_i, att_rid, att_i, att_id, att_type, att_ctype);
+                att_xid, att_i, att_rid, att_i, att_id, att_type, att_ctype_x);
 
         // ept
         segment = replaceAtts(segment, ept_start, ept_end, false, att_i,
@@ -125,13 +127,13 @@ public class XLIFFStandardUtil
         // it
         segment = removeAtts(segment, it_start, it_end, att_id);
         segment = replaceAtts(segment, it_start, it_end, false, att_posBegin,
-                att_posOpen, att_posEnd, att_posClose, att_type, att_ctype,
+                att_posOpen, att_posEnd, att_posClose, att_type, att_ctype_x,
                 att_x, att_xid);
 
         // ph
         segment = removeAtts(segment, ph_start, ph_end, att_id);
         segment = replaceAtts(segment, ph_start, ph_end, false, att_type,
-                att_ctype, att_x, att_xid);
+                att_ctype_x, att_x, att_xid);
 
         return segment;
     }

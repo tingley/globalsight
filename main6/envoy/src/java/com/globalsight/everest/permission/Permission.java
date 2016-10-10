@@ -191,7 +191,6 @@ public class Permission
     static public final String EXPORT_LOC_DEFAULT = "exportloc.default";
     static public final String EXPORT_LOC_EDIT = "exportloc.edit";
     static public final String EXPORT_LOC_NEW = "exportloc.new";
-    static public final String VIGNETTE_IMPORT = "vignette.import";
     static public final String DOCUMENTUM_IMPORT = "documentum.import";
     static public final String JOB_SCOPE_ALL = "jobscope.all";
     static public final String JOBS_VIEW = "jobs.view";
@@ -652,7 +651,6 @@ public class Permission
         added = addPermission(119, EXPORT_LOC_DEFAULT) || added;
         added = addPermission(120, EXPORT_LOC_EDIT) || added;
         added = addPermission(121, EXPORT_LOC_NEW) || added;
-        added = addPermission(122, VIGNETTE_IMPORT) || added;
         added = addPermission(127, JOB_SCOPE_ALL) || added;
         added = addPermission(128, JOBS_VIEW) || added;
         added = addPermission(129, JOBS_SEARCH_REPLACE) || added;

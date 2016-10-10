@@ -1259,41 +1259,20 @@ public class JobCreatorLocal implements JobCreator
         return notifyFailure;
     }
 
-    private boolean importByDataSourceType(EventFlowXml ex,
-            Job p_job) throws Exception
+    private boolean importByDataSourceType(EventFlowXml ex, Job p_job) throws Exception
     {
         boolean isInvalidDataSource = false;
         String jobName = p_job.getJobName();
         String batchId = jobName + System.currentTimeMillis();
         String dataSourceType = ex.getSource().getDataSourceType();
-        if (DataSourceType.VIGNETTE.equals(dataSourceType))
-        {
-            Category c = ex.getCategory().get(0);
-            CxeProxy.importFromVignette(
-                    jobName,
-                    ex.getBatchInfo().getBatchId(),
-                    1,
-                    1,
-                    1,
-                    1,
-                    c.getValue("ObjectId"),
-                    c.getValue("Path"),
-                    ex.getSource().getDataSourceId(),
-                    c.getValue("SourceProjectMid") + "|" + c.getValue("TargetProjectMid"),
-                    c.getValue("ReturnStatus"),
-                    c.getValue("VersionFlag"),
-                    Boolean.TRUE, CxeProxy.IMPORT_TYPE_L10N);
-        }
-        else if (dataSourceType != null
-                && dataSourceType.startsWith(DataSourceType.FILE_SYSTEM))
+        if (dataSourceType != null && dataSourceType.startsWith(DataSourceType.FILE_SYSTEM))
         {
             boolean isAutoImport = dataSourceType.indexOf("AutoImport") > 0;
-            String fileName =  ex.getSource().getValue("Filename");
+            String fileName = ex.getSource().getValue("Filename");
             String initiatorId = ex.getSource().getValue("importInitiator");
-            CxeProxy.importFromFileSystem(fileName, jobName, null, batchId,
-                    ex.getSource().getDataSourceId(), new Integer(1),
-                    new Integer(1), new Integer(1), new Integer(1),
-                    new Boolean(isAutoImport), Boolean.TRUE,
+            CxeProxy.importFromFileSystem(fileName, jobName, null, batchId, ex.getSource()
+                    .getDataSourceId(), new Integer(1), new Integer(1), new Integer(1),
+                    new Integer(1), new Boolean(isAutoImport), Boolean.TRUE,
                     CxeProxy.IMPORT_TYPE_L10N, initiatorId, new Integer(0));
         }
         else

@@ -39,7 +39,6 @@ insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (30, 'jobCosti
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (31, 'warningThresholds.enabled','%%system4_timer_useWarningThresholds%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (32, 'timer.threshold','%%system4_timer_threshold%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (33, 'reports.enabled','%%reports_enabled%%', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (34, 'vignette.installKey', '%%vignette_adapters%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (35, 'addDelete.enabled','%%addDelete%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (36, 'export.overrideCjkFontFace', 'true', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (37, 'cms.ui.host', '%%cms_ui_host%%', '1');

@@ -395,15 +395,7 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.EXPORT_LOC_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=exportLocationsUrl%>"><%=bundle.getString("lb_export_locations")%></A><BR>
         </amb:permission>
-        <%
-            if (b_vignette) {
-        %>
-        <amb:permission name="<%=Permission.VIGNETTE_IMPORT%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=vignetteUrl%>" target="vignetteWindow"><%=bundle.getString("lb_vignette_import")%></A><BR>
-        </amb:permission>
-        <%
-            }
-        %>
+
         <amb:permission name="<%=Permission.CVS_OPERATE%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=cvsJobUrl%>"><%=bundle.getString("lb_cvs_job")%></A><BR>
         </amb:permission>

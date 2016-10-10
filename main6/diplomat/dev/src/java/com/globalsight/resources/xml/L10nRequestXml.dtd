@@ -1,6 +1,6 @@
 <!--  l10nRequestXml.dtd describes request to localize data to CAP. -->
 <!ELEMENT l10nRequestXml (externalPageId, importInitiatorId, originalCharacterEncoding, l10nProfileId, baseHref?, batchInfo)>
-<!-- dataSourceType is like FileSystem, Database, Vignette, etc. -->
+<!-- dataSourceType is like FileSystem, Database, etc. -->
 <!-- dataSourceId is the ID of the file profile, database source profile, etc.  -->
 <!ATTLIST l10nRequestXml
 dataSourceType CDATA #REQUIRED

@@ -7,7 +7,6 @@
             com.globalsight.everest.webapp.WebAppConstants,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.webapp.webnavigation.LinkHelper,
-            com.globalsight.vignette.VignetteProperties,     
             java.util.ResourceBundle"
     session="true"
 %>
@@ -63,18 +62,7 @@
            "=" + Task.STATE_COMPLETED;
    String tasksRejectedUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
            "=" + Task.STATE_REJECTED;
-   
-   //this URL is not served by the ControlServlet. It is an external link
-   String vignetteUrl = "";
-   try 
-   {
-      VignetteProperties vp = VignetteProperties.getInstance();
-      vignetteUrl = vp.uiURL;
-   }
-   catch (Exception e) {}
 %>
-
-
 
 <DIV ID="navigation" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 10; TOP: 68px; LEFT: 0px;">
 
@@ -207,13 +195,6 @@ arMenu1 = new Array (
     "<%= menuBundle.getString("lb_db_preview") %>",
     "<%= dbPreviewRulesUrl %>",
     0
-    <%}%>
-
-    <%if (b_vignette){%>
-    ,
-    "<%= menuBundle.getString("lb_vignette_import") %>",
-    "javascript: window.open('<%= vignetteUrl %>','vignetteWindow')",
-    0 
     <%}%>
 );
 

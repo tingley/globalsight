@@ -399,15 +399,6 @@
   </servlet>
 
   <servlet>
-    <servlet-name>VignetteImportServlet</servlet-name>
-    <servlet-class>com.globalsight.cxe.servlet.cms.vignette.VignetteImportServlet</servlet-class>
-    <init-param>
-      <param-name>wl-dispatch-policy</param-name>
-      <param-value>ServletExecuteQueue</param-value>
-    </init-param>
-  </servlet>
-
-  <servlet>
     <servlet-name>classes</servlet-name>
     <servlet-class>com.globalsight.everest.servlet.ClasspathServlet</servlet-class>
   </servlet>
@@ -741,11 +732,6 @@
   <servlet-mapping>
     <servlet-name>ShowUrlServlet</servlet-name>
     <url-pattern>/ShowUrlServlet/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>VignetteImportServlet</servlet-name>
-    <url-pattern>/VignetteImportServlet/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

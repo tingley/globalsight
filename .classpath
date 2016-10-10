@@ -73,7 +73,6 @@
 	<classpathentry kind="lib" path="main6/tools/lib/common/stax-api-1.0.1.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/unoil-3.1.0.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/uploadbean.jar"/>
-	<classpathentry kind="lib" path="main6/tools/lib/common/vignette_api.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/ws-commons-util-1.0.2.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/xml-apis-1.3.04.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/xml-apis-ext-1.3.04.jar"/>

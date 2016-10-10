@@ -191,7 +191,6 @@ function saveJson() {
 	ch = elementPostFilters.split("-"); 
 	var elementPostFilterId = ch[0];
 	var elementPostFilterTableName = ch[1];
-	alert(elementPostFilterId+"=="+elementPostFilterTableName);
 	
 	var obj = {
 		isNew : isNew,

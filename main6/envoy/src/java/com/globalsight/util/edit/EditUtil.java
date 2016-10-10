@@ -79,7 +79,7 @@ public final class EditUtil
     private static Map mapCharToEscape()
     {
         // If you add an entry, increase the initial capacity
-        Map h = new HashMap(10);
+        Map h = new HashMap(9);
         h.put(new Character('\\'), "\\\\");
         h.put(new Character('"'), "\\\"");
         h.put(new Character('\''), "\\'");
@@ -89,7 +89,7 @@ public final class EditUtil
         h.put(new Character('\n'), "\\n");
         h.put(new Character('\r'), "\\r");
         h.put(new Character('\t'), "\\t");
-        h.put(new Character('/'), "\\/");
+        //h.put(new Character('/'), "\\/");
         return h;
     }
 

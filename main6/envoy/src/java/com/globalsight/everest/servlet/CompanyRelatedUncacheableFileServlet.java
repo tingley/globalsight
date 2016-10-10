@@ -46,8 +46,8 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportC
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.StringUtil;
 import com.sun.jndi.toolkit.url.UrlUtil;
-import com.vignette.common.client.util.StringUtil;
 
 /**
  * The UncacheableFileServlet can be used get files so they are not cached.
@@ -151,10 +151,8 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
                         + ReportConstants.REPORT_QA_CHECKS_REPORT))
                 {
                     String temp = pathInfo;
-                    temp = StringUtil
-                            .replace(temp, "/"
-                                    + ReportConstants.REPORT_QA_CHECKS_REPORT
-                                    + "/", "");
+                    temp = StringUtil.replace(temp, "/" + ReportConstants.REPORT_QA_CHECKS_REPORT
+                            + "/", "");
                     String jobId = temp.substring(0, temp.indexOf("/"));
                     Job job = ServerProxy.getJobHandler().getJobById(
                             Long.parseLong(jobId));

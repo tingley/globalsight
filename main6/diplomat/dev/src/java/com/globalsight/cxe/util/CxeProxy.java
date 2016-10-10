@@ -27,7 +27,6 @@ import com.globalsight.cxe.adapter.documentum.DocumentumOperator;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
-import com.globalsight.cxe.adapter.vignette.VignetteAdapter;
 import com.globalsight.cxe.adaptermdb.BaseAdapterMDB;
 import com.globalsight.cxe.adaptermdb.EventTopicMap;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
@@ -515,58 +514,6 @@ public class CxeProxy
     }
 
     /**
-     * Initiates a vignette import.
-     * 
-     * @exception Exception
-     */
-    static public void importFromVignette(String p_jobName, String p_batchId, int p_pageNum,
-            int p_pageCount, int p_docPageNum, int p_docPageCount, String p_srcMid, String p_path,
-            String p_fileProfileId, String p_targetProjectMid, String p_returnStatus,
-            String p_versionFlag, String p_importRequestType) throws Exception
-    {
-        importFromVignette(p_jobName, p_batchId, p_pageNum, p_pageCount, p_docPageNum,
-                p_docPageCount, p_srcMid, p_path, p_fileProfileId, p_targetProjectMid,
-                p_returnStatus, p_versionFlag, Boolean.FALSE, p_importRequestType);
-    }
-
-    /**
-     * Initiates a vignette import.
-     * 
-     * @exception Exception
-     */
-    static public void importFromVignette(String p_jobName, String p_batchId, int p_pageNum,
-            int p_pageCount, int p_docPageNum, int p_docPageCount, String p_srcMid, String p_path,
-            String p_fileProfileId, String p_targetProjectMid, String p_returnStatus,
-            String p_versionFlag, Boolean p_overrideFileProfileAsUnextracted,
-            String p_importRequestType) throws Exception
-    {
-        CxeMessageType type = CxeMessageType
-                .getCxeMessageType(CxeMessageType.VIGNETTE_FILE_SELECTED_EVENT);
-        CxeMessage cxeMessage = new CxeMessage(type);
-        HashMap params = new HashMap();
-        String companyId = getCompanyIdByFileProfileId(p_fileProfileId);
-        params.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
-        params.put("ObjectId", p_srcMid);
-        params.put("Path", p_path);
-        params.put("FileProfileId", p_fileProfileId);
-        params.put("JobName", p_jobName);
-        params.put("BatchId", p_batchId);
-        params.put("PageCount", new Integer(p_pageCount));
-        params.put("PageNum", new Integer(p_pageNum));
-        params.put("DocPageCount", new Integer(p_docPageCount));
-        params.put("DocPageNum", new Integer(p_docPageNum));
-        params.put("TargetProjectMid", p_targetProjectMid);
-        params.put("ReturnStatus", p_returnStatus);
-        params.put("VersionFlag", p_versionFlag);
-        params.put("OverrideFileProfileAsUnextracted", p_overrideFileProfileAsUnextracted);
-        params.put(IMPORT_TYPE, p_importRequestType);
-        cxeMessage.setParameters(params);
-
-        // GBS-4400
-        FileImportUtil.importFileWithThread(cxeMessage);
-    }
-
-    /**
      * Initiates a Mediasurface import for one MS leaf item. The caller has
      * already figured out the batch information and should know what to pass
      * for batchId, pageNum, and pageCount.
@@ -637,16 +584,6 @@ public class CxeProxy
     static public boolean isPdfAdapterInstalled()
     {
         return PdfAdapter.isInstalled();
-    }
-
-    /**
-     * Returns true if the Pdf Adapter is installed
-     * 
-     * @return true | false
-     */
-    static public boolean isVignetteAdapterInstalled()
-    {
-        return VignetteAdapter.isInstalled();
     }
 
     /**

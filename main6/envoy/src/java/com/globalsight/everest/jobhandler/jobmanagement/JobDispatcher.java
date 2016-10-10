@@ -615,7 +615,7 @@ public class JobDispatcher
                 
                 //for AEM 6.2 support due time.
                 String dueTime = (String) JobInfoData.getJobData(jobClone.getId(), JobInfoData.DUE_TIME);
-                if (dueTime != null)
+                if (dueTime != null && dueTime.trim().length() > 0)
                 {
                     wfClone.setEstimatedCompletionDate(new Date(Long.parseLong(dueTime)));
                     wfClone.setEstimatedCompletionDateOverrided(true);

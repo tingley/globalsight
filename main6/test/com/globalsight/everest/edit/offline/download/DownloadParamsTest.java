@@ -7,6 +7,8 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
+
 public class DownloadParamsTest
 {
     private ArrayList<Long> m_PTF_Ids = new ArrayList<Long>();
@@ -116,4 +118,13 @@ public class DownloadParamsTest
         Assert.assertTrue(uniqueNames.size() == 0);
     }
 
+    @Test
+    public void testSetNeedCombined()
+    {
+        DownloadParams params = new DownloadParams();
+        params.setFileFormatId(AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF);
+        params.setNeedCombined(true);
+        boolean result = params.isNeedCombined();
+        Assert.assertTrue(result);
+    }
 }

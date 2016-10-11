@@ -492,8 +492,8 @@ CREATE TABLE RATE
 
 --  COTI API tables
 --
-DROP TABLE IF EXISTS coti_package CASCADE;
-CREATE TABLE `coti_package` (
+DROP TABLE IF EXISTS connector_coti_package CASCADE;
+CREATE TABLE `connector_coti_package` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
   `FILE_NAME` varchar(200) DEFAULT NULL,
   `COTI_PROJECT_NAME` varchar(200) DEFAULT NULL,
@@ -503,8 +503,8 @@ CREATE TABLE `coti_package` (
   PRIMARY KEY (`ID`)
 ) AUTO_INCREMENT=1000;
 
-DROP TABLE IF EXISTS coti_project CASCADE;
-CREATE TABLE `coti_project` (
+DROP TABLE IF EXISTS connector_coti_project CASCADE;
+CREATE TABLE `connector_coti_project` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
   `COTI_PROJECT_ID` varchar(100) DEFAULT NULL,
   `COTI_PROJECT_NAME` varchar(200) DEFAULT NULL,
@@ -517,8 +517,8 @@ CREATE TABLE `coti_project` (
   PRIMARY KEY (`ID`)
 ) AUTO_INCREMENT=1000;
 
-DROP TABLE IF EXISTS coti_document CASCADE;
-CREATE TABLE `coti_document` (
+DROP TABLE IF EXISTS connector_coti_document CASCADE;
+CREATE TABLE `connector_coti_document` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
   `PROJECT_ID` bigint(20) NOT NULL,
   `IS_TRANSLATION` char(1) NOT NULL DEFAULT 'Y',

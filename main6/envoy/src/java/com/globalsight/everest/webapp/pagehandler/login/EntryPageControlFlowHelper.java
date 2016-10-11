@@ -30,6 +30,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import jodd.util.StringUtil;
+
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.log4j.Logger;
 
@@ -61,13 +63,9 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.log.ActivityLog;
-import com.globalsight.mediasurface.CmsUserInfo;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.edit.EditUtil;
-import com.globalsight.util.modules.Modules;
 import com.globalsight.webservices.AmbassadorUtil;
-
-import jodd.util.StringUtil;
 
 /**
  * EntryPageControlFlowHelper, A page flow helper which does the 'login
@@ -640,27 +638,6 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         catch (Exception e)
         {
             // no time zone was loaded
-        }
-
-        // now load the CMS user info (if CMS is installed)
-        try
-        {
-            if (Modules.isCmsAdapterInstalled())
-            {
-                CmsUserInfo cmsUserInfo = ServerProxy.getCmsUserManager()
-                        .findCmsUserInfo(p_userId);
-
-                // can be null and should be set from account info UI
-                if (cmsUserInfo != null)
-                {
-                    p_session.setAttribute(WebAppConstants.CMS_USER_INFO,
-                            cmsUserInfo);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            // do nothing (no cms user info was found)
         }
     }
 }

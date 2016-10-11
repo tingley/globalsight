@@ -110,10 +110,6 @@
         userPerms.getPermissionFor(Permission.VENDORS_CUSTOMFORM))
         hasVendorMenu = true;
 
-    boolean hasContentManagerMenu = false;
-    if (userPerms.getPermissionFor(Permission.CONTENT_MANAGER))
-        hasContentManagerMenu = true;
-
    //URL of the menu items
    String homeURL = LinkHelper.getSystemHomeURL(request);
    String companyUrl = LinkHelper.getWebActivityURL(request, "companies");
@@ -578,10 +574,6 @@ menuBar.add(docButton);
 var helpButton = new WebFXMenuItem("<%=mainMenuBundle.getString("lb_help")%>", "javascript:helpSwitch();", "");
 menuBar.add(helpButton);
 </script>
-
-<% if (hasContentManagerMenu) { %>
-<%@ include file="/envoy/common/cmsMenuOptions.jspIncl" %>
-<% } %>
 
 <DIV ID="navigation" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 1000; TOP: 68px; LEFT: 0px; width:100%;">
 

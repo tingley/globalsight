@@ -74,7 +74,6 @@ public class InstallUtil
     public final static Integer EMAIL_SETTINGS = new Integer(5);
     public final static Integer OPTIONAL_PACKAGES = new Integer(6);
     public final static Integer SPELL_CHECK_SETTINGS = new Integer(7);
-    public final static Integer OPTIONAL_CMS_SETTINGS = new Integer(8);
     public final static Integer INSTALL_OPTIONS = new Integer(9);
 
     public static List<List<InputOption>> PAGE_DETAIL;

@@ -22,7 +22,6 @@ import com.globalsight.calendar.CalendarManagerLocal;
 import com.globalsight.cxe.adapter.catalyst.CatalystAdapter;
 import com.globalsight.cxe.adapter.database.DatabaseAdapter;
 import com.globalsight.cxe.adapter.documentum.DocumentumAdapter;
-import com.globalsight.cxe.adapter.mediasurface.MediasurfaceAdapter;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
@@ -40,7 +39,7 @@ public class Modules
     private static Logger s_logger = Logger.getLogger(Modules.class);
 
     // Keeps track of whether certain modules are installed
-    private static boolean s_cms, s_db = false;
+    private static boolean s_db = false;
 
     private static boolean s_documentum = false;
 
@@ -67,7 +66,6 @@ public class Modules
         try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-            s_cms = MediasurfaceAdapter.isInstalled();
             s_db = DatabaseAdapter.isInstalled();
             s_pdf = PdfAdapter.isInstalled();
             s_quark = QuarkFrameAdapter.isQuarkInstalled();
@@ -93,16 +91,6 @@ public class Modules
             s_logger.error(msg, e);
             throw new IllegalStateException(msg);
         }
-    }
-
-    /**
-     * Returns true if the CMS Adapter is installed
-     * 
-     * @return true | false
-     */
-    public static boolean isCmsAdapterInstalled()
-    {
-        return s_cms;
     }
 
     /**

@@ -16,20 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.config.UserParameter;
-import com.globalsight.config.UserParamNames;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.mediasurface.CmsUserInfo;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.modules.Modules;
-
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,13 +24,21 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
 
-public class AccountOptionsHelper
-    implements UserParamNames, WebAppConstants
+import com.globalsight.config.UserParamNames;
+import com.globalsight.config.UserParameter;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
+import com.globalsight.util.GeneralException;
+
+public class AccountOptionsHelper implements UserParamNames, WebAppConstants
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            AccountOptionsHandler.class);
+    private static final Logger CATEGORY = Logger.getLogger(AccountOptionsHandler.class);
 
     /**
      * Persists the user's options.
@@ -58,7 +52,6 @@ public class AccountOptionsHelper
 
         try
         {
-            updateCmsOptions(session, optionsHash);
             setParameters(session, optionsHash);
             setNotificationOptions(session, optionsHash);
         }
@@ -197,51 +190,5 @@ public class AccountOptionsHelper
         {
             throw new EnvoyServletException(ge);
         }
-    }
-
-    /*
-     * Update the CMS options if both the username and password were
-     * entered by the user.  This method will create the CmsUserInfo
-     * if the user did not have one.  Otherwise, it'll be updated.
-     */
-    private static void updateCmsOptions(HttpSession p_session,
-                                         HashMap p_optionsHash)
-        throws Exception
-    {
-        if (!Modules.isCmsAdapterInstalled())
-        {
-            return;
-        }
-
-        String cmsUserId = (String)p_optionsHash.get(CMS_USER_NAME);
-        String cmsPassword = (String)p_optionsHash.get(CMS_PASSWORD);
-        if (cmsUserId == null || cmsUserId.length() == 0 ||
-            cmsPassword == null || cmsPassword.length() == 0)
-        {
-            return;
-        }
-
-        CmsUserInfo cmsUserInfo = (CmsUserInfo)p_session.getAttribute(
-            WebAppConstants.CMS_USER_INFO);
-
-        if (cmsUserInfo == null)
-        {
-            cmsUserInfo = ServerProxy.getCmsUserManager().
-                createCmsUserInfo(new CmsUserInfo(
-                    (String)p_session.getAttribute(
-                        WebAppConstants.USER_NAME),
-                    cmsUserId, cmsPassword));
-        }
-        else
-        {
-            cmsUserInfo.setCmsUserId(cmsUserId);
-            cmsUserInfo.setCmsPassword(cmsPassword);
-            cmsUserInfo = ServerProxy.getCmsUserManager().
-                modifyCmsUserInfo(cmsUserInfo);
-        }
-
-        // now put it in the session
-        p_session.setAttribute(WebAppConstants.CMS_USER_INFO,
-                               cmsUserInfo);
     }
 }

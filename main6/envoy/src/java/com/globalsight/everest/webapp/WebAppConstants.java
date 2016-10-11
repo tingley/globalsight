@@ -277,9 +277,6 @@ public interface WebAppConstants
     public static final String ADDED_NOTIFICATION_OPTIONS = "addedNotificationOptions";
     public static final String AVAILABLE_NOTIFICATION_OPTIONS = "availableNotificationOptions";
 
-    public static final String CMS_USER_INFO = "cmsUserInfoObject";
-    public static final String CMS_USER_NAME = "cmsUsername";
-    public static final String CMS_PASSWORD = "cmsPassword";
     public static final String USER_TIME_ZONE = "userTimeZone";
     public static final String UILOCALE = "uiLocale";
     public static final String LOCALIZATION_PARTICIPANT = "LocalizationParticipant";

@@ -1096,7 +1096,7 @@ public class JobHandlerLocal implements JobHandler
                         + "32|86|87|88|128|130|132|133|134|135|136|137|138|140|141|142|"
                         + "143|144|145|146|147|148|149|150|151|152|153|154|155|156|157|"
                         + "158|159|160|161|162|163|164|165|166|167|169|170|171|172|173|"
-                        + "187|192|198|199|");
+                        + "192|198|199|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1104,7 +1104,7 @@ public class JobHandlerLocal implements JobHandler
         permGroup.setName("LocaleManager");
         permGroup.setDescription("Default Locale Manager Group");
         permGroup
-                .setPermissionSet("|163|164|166|167|168|169|170|171|172|173|187|199|");
+                .setPermissionSet("|163|164|166|167|168|169|170|171|172|173|199|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 

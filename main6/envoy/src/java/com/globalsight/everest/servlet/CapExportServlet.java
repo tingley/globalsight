@@ -24,7 +24,6 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,15 +43,12 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.page.pageexport.ExportBatchEvent;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.page.pageexport.ExportEventObserverHelper;
-import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFileState;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.PopulatingTmThread;
-import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
@@ -196,18 +192,9 @@ public class CapExportServlet extends HttpServlet
             // if request is export for preview
             if (ExportConstants.PREVIEW.equals(requestType))
             {
-                if (ExportConstants.MEDIASURFACE.equals(dataSourceType))
-                {
-                    c_logger.debug("CapExportServlet.doPost(), PREVIEW_REQUEST, calling exportForDynamicPreview()");
-                    exportForDynamicPreview(p_request, p_response,
-                                            Long.valueOf(messageId));
-                }
-                else
-                {
-                    c_logger.debug("CapExportServlet.doPost(), PREVIEW_REQUEST, calling exportForPreview()");
-                    //this may be used only for db preview??
-                    exportForPreview(p_request, p_response, messageId);
-                }
+                c_logger.debug("CapExportServlet.doPost(), PREVIEW_REQUEST, calling exportForPreview()");
+                // this may be used only for db preview??
+                exportForPreview(p_request, p_response, messageId);
             }
             else if (EXPORT_STATUS.equals(requestType))
             {
@@ -303,85 +290,8 @@ public class CapExportServlet extends HttpServlet
         }
     }
 
-    private void exportForDynamicPreview(HttpServletRequest p_request,
-        HttpServletResponse p_response, Long p_pageId)
-        throws ServletException
-    {
-        try
-        {
-            TargetPage targetPage = ServerProxy.getPageManager().getTargetPage(
-                p_pageId.longValue());
-
-            Workflow wf = targetPage.getWorkflowInstance();
-            // TODO: empty list?
-            List<Long> ids = new ArrayList<Long>();
-            boolean isTargetPage = true;
-
-            // Register export event
-            String exportType = 
-                wf.getState().equals(Workflow.LOCALIZED) ? 
-                    ExportBatchEvent.FINAL_PRIMARY : 
-                            ExportBatchEvent.INTERIM_PRIMARY;
-            long exportBatchId = 
-                ExportEventObserverHelper.notifyBeginExportTargetPage(
-                    wf.getJob(), ExportEventObserverHelper.getUser(p_request),
-                    p_pageId.longValue(), wf.getIdAsLong(), null, exportType);
-             
-            ServerProxy.getPageManager().exportPage(
-                    new ExportParameters(targetPage), ids, isTargetPage,
-                    exportBatchId);
-
-            Collection<Tuv> tuvCollect = ServerProxy.getTuvManager().
-                getTargetTuvsForStatistics(targetPage);
-            List<Long> tuvIds = new ArrayList<Long>();
-            for (Tuv tuv : tuvCollect)
-            {
-                tuvIds.add(tuv.getIdAsLong());
-            }
-
-            String uiLocale = p_request.getParameter(ExportConstants.UI_LOCALE);
-            String line = ServerProxy.getPageManager().exportForPreview(
-                    p_pageId.longValue(), tuvIds, uiLocale);
-
-            p_response.setContentType("text/html");
-            PrintWriter out = p_response.getWriter();
-
-            URL url = new URL(s_cxeServletUrl);
-
-            URLConnection conn = url.openConnection();
-            conn.setDoOutput(true);
-            OutputStreamWriter wr = new OutputStreamWriter(
-                conn.getOutputStream());
-
-            wr.write(line);
-            wr.flush();
-            wr.close();
-
-            // CXE's response...
-            BufferedReader rd = new BufferedReader(
-                new InputStreamReader(conn.getInputStream()));
-
-            // CXE will only send a valid xml text for display...
-            // (will go to proxy servlet.)
-            while ((line = rd.readLine()) != null)
-            {
-                out.println(line);
-            }
-
-            rd.close();
-            out.close();
-        }
-        catch (Exception e)
-        {
-            c_logger.error("Dynamic Preview Failed",e);
-            throw new ServletException(e);
-        }
-    }
-
-
     // return the URL to CXE's export servlet...
-    private String getCxeServletUrl()
-        throws ServletException
+    private String getCxeServletUrl() throws ServletException
     {
         StringBuffer sb = new StringBuffer();
 

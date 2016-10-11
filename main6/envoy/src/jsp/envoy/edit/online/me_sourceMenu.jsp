@@ -214,22 +214,6 @@ function showXMLPreview()
   highlight(idXMLPreview);
 }
 
-// dead codes ?
-function exportForPreview()
-{
-      var url = "/globalsight/CapExportServlet?" +
-      "CxeRequestType=<%=ExportConstants.PREVIEW%>" +
-      "&MessageId=<%=pageId%>" +
-      "&UiLocale=<%=uiLocale%>" +
-      "&DataSourceType=<%=dataSource%>";
-      var config = "config='height=" + 800 + ",width=" + 800 +
-                   ",toolbar=no,menubar=no," +
-                   "scrollbars=yes,resizable=yes,location=no,directories=no,status=yes'";
-      preview_window = window.open(url,'',config);
-      preview_window.screenX = 0;
-      preview_window.screenY = 0;
-}
-
 function doOnload()
 {
     highlight(document.getElementById("<%=str_currentViewId%>"));
@@ -266,10 +250,7 @@ function doOnload()
      <A CLASS="HREFBoldWhite" HREF="javascript:warnPreviewNoInstalled('<%=msgPreviewNotInstalled%>')"
       onfocus="this.blur();"><%=lb_preview%></A> |
 <% } %>
-<% if (hasDynamicPreview) { %>
-      <A id="idDynPreview" CLASS="HREFBoldWhite" HREF="javascript:exportForPreview();"
-      onfocus="this.blur();"><%=lb_dynamic_preview%></A> |
-<% } %>
+
 <% if (isXMLPreview) { %>
       <A id="idXMLPreview" CLASS="HREFBoldWhite" HREF="javascript:showXMLPreview()"
       onfocus="this.blur();"><%=lb_preview%></A> |

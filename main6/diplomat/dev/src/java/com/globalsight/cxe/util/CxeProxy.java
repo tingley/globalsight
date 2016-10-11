@@ -514,49 +514,6 @@ public class CxeProxy
     }
 
     /**
-     * Initiates a Mediasurface import for one MS leaf item. The caller has
-     * already figured out the batch information and should know what to pass
-     * for batchId, pageNum, and pageCount.
-     * 
-     * @exception Exception
-     */
-    static public void importFromMediasurface(int p_mediasurfaceItemKey,
-            String p_mediasurfaceContentServerUrl, String p_mediasurfaceContentServerName,
-            String p_mediasurfaceContentServerPort, String p_mediasurfaceUser,
-            String p_mediasurfacePassword, String p_jobName, String p_batchId, int p_pageNum,
-            int p_pageCount, int p_docPageNum, int p_docPageCount, String p_fileProfileId,
-            boolean p_overrideFileProfileAsUnextracted, String p_importRequestType) throws Exception
-    {
-        CxeMessageType type = CxeMessageType
-                .getCxeMessageType(CxeMessageType.MEDIASURFACE_FILE_SELECTED_EVENT);
-        CxeMessage cxeMessage = new CxeMessage(type);
-        HashMap params = new HashMap();
-
-        String companyId = getCompanyIdByFileProfileId(p_fileProfileId);
-        params.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
-        params.put("MediasurfaceItemKey", new Integer(p_mediasurfaceItemKey));
-        params.put("MediasurfaceContentServerUrl", p_mediasurfaceContentServerUrl);
-        params.put("MediasurfaceContentServerName", p_mediasurfaceContentServerName);
-        params.put("MediasurfaceContentServerPort", p_mediasurfaceContentServerPort);
-        params.put("MediasurfaceUser", p_mediasurfaceUser);
-        params.put("MediasurfacePassword", p_mediasurfacePassword);
-        params.put("JobName", p_jobName);
-        params.put("BatchId", p_batchId);
-        params.put("PageCount", new Integer(p_pageCount));
-        params.put("PageNum", new Integer(p_pageNum));
-        params.put("DocPageCount", new Integer(p_docPageCount));
-        params.put("DocPageNum", new Integer(p_docPageNum));
-        params.put("FileProfileId", p_fileProfileId);
-        params.put("OverrideFileProfileAsUnextracted",
-                new Boolean(p_overrideFileProfileAsUnextracted));
-        params.put(IMPORT_TYPE, p_importRequestType);
-        cxeMessage.setParameters(params);
-
-        // GBS-4400
-        FileImportUtil.importFileWithThread(cxeMessage);
-    }
-
-    /**
      * Returns true if the MS Office Adapter is installed
      * 
      * @return true | false

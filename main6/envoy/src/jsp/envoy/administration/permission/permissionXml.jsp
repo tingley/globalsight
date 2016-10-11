@@ -532,9 +532,4 @@
   <permission id="<%=Permission.VENDORS_CUSTOMFORM%>"/>
 </category>
 <% } %>
-<% if (b_cms) { %>
-<category id="lb_cms">
-  <permission id="<%=Permission.CONTENT_MANAGER%>"/>
-</category>
-<% } %>
 </permissionXml>

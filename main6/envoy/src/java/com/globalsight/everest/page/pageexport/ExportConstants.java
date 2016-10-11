@@ -68,12 +68,6 @@ public class ExportConstants
     public static final String DATA_SOURCE_TYPE = "DataSourceType";
 
     /**
-     * Constant used for identifying a Data source type for Mediasurface
-     */
-    public static final String MEDIASURFACE = "mediasurface";
-
-
-    /**
      * Constant used for identifying an EventFlowXML parameter.
      */
     public static final String EVENT_FLOW_XML = "EventFlowXML";

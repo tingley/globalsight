@@ -751,7 +751,7 @@ function addQualityTo()
 
         <tr valign="top">
     		<td colspan=3>
-    			<br/><div class="standardText"><c:out value="${helpMsg}"/>:</div>
+    			<br/><div class="standardText"><c:out value="${helpMsg}" escapeXml="false"/>:</div>
       			<table border="0" class="standardText" cellpadding="2">
       			<tr>
       				<td>
@@ -815,7 +815,7 @@ function addQualityTo()
   		
   		<tr valign="top">
     		<td colspan=3>
-    			<br/><div class="standardText"><c:out value="${scorecardHelpMsg}"/>:</div>
+    			<br/><div class="standardText"><c:out value="${scorecardHelpMsg}" escapeXml="false"/>:</div>
       			<table border="0" class="standardText" cellpadding="2">
       			<tr>
       				<td>
@@ -878,7 +878,7 @@ function addQualityTo()
   		</tr>
   		<tr valign="top">
     		<td colspan=3>
-    			<br/><div class="standardText"><c:out value="${qualityHelpMsg}"/>:</div>
+    			<br/><div class="standardText"><c:out value="${qualityHelpMsg}" escapeXml="false"/>:</div>
       			<table border="0" class="standardText" cellpadding="2">
       			<tr>
       				<td>
@@ -941,7 +941,7 @@ function addQualityTo()
   		</tr>
   		<tr valign="top">
     		<td colspan=3>
-    			<br/><div class="standardText"><c:out value="${marketHelpMsg}"/>:</div>
+    			<br/><div class="standardText"><c:out value="${marketHelpMsg}" escapeXml="false"/>:</div>
       			<table border="0" class="standardText" cellpadding="2">
       			<tr>
       				<td>
@@ -1004,7 +1004,7 @@ function addQualityTo()
   		</tr>
         <tr valign="top">
             <td colspan=3>
-                <br/><div class="standardText"><c:out value="${fluencyHelpMsg}"/>:</div>
+                <br/><div class="standardText"><c:out value="${fluencyHelpMsg}" escapeXml="false"/>:</div>
                 <table border="0" class="standardText" cellpadding="2">
                 <tr>
                     <td>
@@ -1067,7 +1067,7 @@ function addQualityTo()
         </tr>
         <tr valign="top">
             <td colspan=3>
-                <br/><div class="standardText"><c:out value="${adequacyHelpMsg}"/>:</div>
+                <br/><div class="standardText"><c:out value="${adequacyHelpMsg}" escapeXml="false"/>:</div>
                 <table border="0" class="standardText" cellpadding="2">
                 <tr>
                     <td>
@@ -1130,7 +1130,7 @@ function addQualityTo()
         </tr>
         <tr valign="top">
             <td colspan=3>
-                <br/><div class="standardText"><c:out value="${severityHelpMsg}"/>:</div>
+                <br/><div class="standardText"><c:out value="${severityHelpMsg}" escapeXml="false"/>:</div>
                 <table border="0" class="standardText" cellpadding="2">
                 <tr>
                     <td>
@@ -1193,7 +1193,7 @@ function addQualityTo()
         </tr>
         <tr valign="top">
             <td colspan=3>
-                <br/><div class="standardText"><c:out value="${severityHelpMsg}"/>:</div>
+                <br/><div class="standardText"><c:out value="${severityHelpMsg}" escapeXml="false" />:</div>
                 <table border="0" class="standardText" cellpadding="2">
                 <tr>
                     <td>Fluency:

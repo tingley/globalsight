@@ -47,7 +47,6 @@ String pageFormat = state.getPageFormat();
 boolean hasPreview = EditUtil.hasPreviewMode(pageFormat);
 boolean isOOO = pageFormat.startsWith("openoffice");
 boolean isOfficeXml = pageFormat.equals(IFormatNames.FORMAT_OFFICE_XML);
-boolean hasDynamicPreview = false;
 boolean hasPDFPreview = EditUtil.hasPDFPreviewMode(state);
 Object vpdfobj = sessionMgr.getAttribute("src_view_pdf");
 boolean viewPdf = vpdfobj == null ? false : true;

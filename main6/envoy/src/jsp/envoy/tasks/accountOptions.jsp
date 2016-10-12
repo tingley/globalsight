@@ -115,10 +115,6 @@ String viewmode = (String)request.getAttribute(UserParamNames.EDITOR_VIEWMODE);
 String tmThreshold = (String)request.getAttribute(UserParamNames.TM_MATCHING_THRESHOLD);
 String tbThreshold = (String)request.getAttribute(UserParamNames.TB_MATCHING_THRESHOLD);
 
-// CMS option values
-String _cmsUsername = (String)request.getAttribute(WebAppConstants.CMS_USER_NAME);;
-String _cmsPassword = (String)request.getAttribute(WebAppConstants.CMS_PASSWORD);;
-
 String errorMsg = (String)request.getAttribute(WebAppConstants.USER_PARAMS_ERROR);
 
 boolean b_enableNewEditor = false;
@@ -421,34 +417,6 @@ function init()
     </TD>
   </TR>
 </TABLE>
-
-<%-- CMS Options --%>
-<% if (Modules.isCmsAdapterInstalled()) {%>
-<amb:permission name="<%=Permission.CONTENT_MANAGER%>" >
-<P class="header2">&nbsp;<%=bundle.getString("lb_cms_options")%></P>
-<TABLE>
-  <TR>
-    <TD><SPAN class="standardText"><%=bundle.getString("lb_cms_username")%>:</SPAN></TD>
-    <TD><INPUT type="text" size="30" name="<%= WebAppConstants.CMS_USER_NAME %>" <%
-      if (_cmsUsername != null)
-      {
-         %>value="<%=_cmsUsername%>"<%
-      }
-      %>></TD>
-  </TR>
-  <TR>
-    <TD><SPAN class="standardText"><%=bundle.getString("lb_cms_password")%>:</SPAN></TD>
-    <TD><INPUT type="password" size="30" name="<%= WebAppConstants.CMS_PASSWORD %>" <%
-      if (_cmsUsername != null)
-      {
-         %>value="<%=_cmsPassword%>"<%
-      }
-      %>></TD>      
-  </TR> 
-  
-</TABLE>
-</amb:permission>
-<% }%>
 
 <% if (b_enableNewEditor) { %>
 <amb:permission name="<%=Permission.ACTIVITIES_FILES_EDIT%>" >

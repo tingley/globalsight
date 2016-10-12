@@ -7,10 +7,22 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
+
 public class DownloadParamsTest
 {
     private ArrayList<Long> m_PTF_Ids = new ArrayList<Long>();
     private ArrayList<String> m_PTF_Names = new ArrayList<String>();
+    private static ArrayList<Integer> allFormatIds = new ArrayList<Integer>();
+    static
+    {
+        allFormatIds.add(AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF);
+        allFormatIds.add(AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED);
+        allFormatIds.add(AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT);
+        allFormatIds.add(AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF);
+        allFormatIds.add(AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF20);
+        allFormatIds.add(AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX);
+    }
 
     @Test
     public void testGenerateUniqueFileName01()
@@ -116,4 +128,39 @@ public class DownloadParamsTest
         Assert.assertTrue(uniqueNames.size() == 0);
     }
 
+    @Test
+    public void testSetNeedCombined1()
+    {
+        DownloadParams params = new DownloadParams();
+        for (Integer formatId : allFormatIds)
+        {
+            params.setFileFormatId(formatId);
+            params.setNeedCombined(true);
+            boolean result = params.isNeedCombined();
+            Assert.assertTrue(result);
+        }
+    }
+    
+    @Test
+    public void testSetNeedCombined2()
+    {
+        DownloadParams params = new DownloadParams();
+        params.setFileFormatId(AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_RTF);
+        params.setNeedCombined(true);
+        boolean result = params.isNeedCombined();
+        Assert.assertFalse(result);
+    }
+    
+    @Test
+    public void testSetNeedCombined3()
+    {
+        DownloadParams params = new DownloadParams();
+        for (Integer formatId : allFormatIds)
+        {
+            params.setFileFormatId(formatId);
+            params.setNeedCombined(false);
+            boolean result = params.isNeedCombined();
+            Assert.assertFalse(result);
+        }
+    }
 }

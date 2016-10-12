@@ -35,8 +35,6 @@ import com.globalsight.cxe.adaptermdb.idml.IdmlSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.idml.IdmlTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.ling.ExtractorMDB;
 import com.globalsight.cxe.adaptermdb.ling.MergerMDB;
-import com.globalsight.cxe.adaptermdb.mediasurface.MediasurfaceSourceAdapterMDB;
-import com.globalsight.cxe.adaptermdb.mediasurface.MediasurfaceTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.msoffice.MsOfficeSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.msoffice.MsOfficeTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.openoffice.OpenOfficeSourceAdapterMDB;
@@ -125,12 +123,6 @@ public class EventTopicMap
         // dynamic preview
         // m_classMap.put(CxeMessageType.DYNAMIC_PREVIEW_EVENT,
         // FOR_DYNAMIC_PREVIEW);
-
-        // mediasurface
-        m_classMap.put(CxeMessageType.MEDIASURFACE_FILE_SELECTED_EVENT,
-                new MediasurfaceSourceAdapterMDB());
-        m_classMap.put(CxeMessageType.MEDIASURFACE_EXPORT_EVENT,
-                new MediasurfaceTargetAdapterMDB());
 
         // catalyst
         m_classMap.put(CxeMessageType.CATALYST_IMPORTED_EVENT, new CatalystSourceAdapterMDB());

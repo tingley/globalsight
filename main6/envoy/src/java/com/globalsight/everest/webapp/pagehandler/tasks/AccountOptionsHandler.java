@@ -16,18 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.config.UserParamNames;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.edit.EditHelper;
-import com.globalsight.mediasurface.CmsUserInfo;
-import com.globalsight.util.GeneralException;
-
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -36,6 +24,17 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+
+import com.globalsight.config.UserParamNames;
+import com.globalsight.everest.edit.EditHelper;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.util.GeneralException;
 
 
 public class AccountOptionsHandler
@@ -201,29 +200,11 @@ public class AccountOptionsHandler
         p_request.setAttribute(EDITOR_SHOW_CLOSEALLCOMMENT,
                 PageHandler.getUserParameter(
                     p_session, EDITOR_SHOW_CLOSEALLCOMMENT).getValue());
-
-        loadCmsUserInfo(p_session, p_request);
     }
 
-    /*
-     * Get the CMS user info (if any).  This is optional info and will
-     * only be used when our CMS is installed.
-     */
-    private void loadCmsUserInfo(HttpSession p_session, 
-                                 HttpServletRequest p_request)
-    {
-        CmsUserInfo cmsUserInfo = (CmsUserInfo)p_session.
-            getAttribute(CMS_USER_INFO);        
-        if (cmsUserInfo != null)
-        {
-            p_request.setAttribute(CMS_USER_NAME, cmsUserInfo.getCmsUserId());
-            p_request.setAttribute(CMS_PASSWORD, cmsUserInfo.getCmsPassword());
-        }
-    }
-
-    private void saveOptions(HttpSession p_session,
-        HttpServletRequest p_request)
-        throws EnvoyServletException
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void saveOptions(HttpSession p_session, HttpServletRequest p_request)
+            throws EnvoyServletException
     {
         SessionManager sessionMgr =
             (SessionManager)p_session.getAttribute(SESSION_MANAGER);
@@ -234,8 +215,6 @@ public class AccountOptionsHandler
             sessionMgr.setAttribute("optionsHash", optionsHash);
         }
 
-        saveCmsOptions(optionsHash, p_request);
-        
         optionsHash.put(PAGENAME_DISPLAY,
             p_request.getParameter(PAGENAME_DISPLAY));
         optionsHash.put(EDITOR_SELECTION,
@@ -287,26 +266,5 @@ public class AccountOptionsHandler
 		    			.getUserParameter(p_session, downloadOption).getValue());
 		    }
 		}
-    }
-
-    /*
-     * Store the optional CMS info in the HashMap.
-     */
-    private void saveCmsOptions(HashMap p_optionsHash, 
-                                HttpServletRequest p_request)
-    {
-        String cmsUsername = (String)p_request.getParameter(CMS_USER_NAME);
-        String cmsPassword = (String)p_request.getParameter(CMS_PASSWORD);
-        if (cmsUsername != null && cmsUsername.length() > 0)
-        {
-            p_optionsHash.put(CMS_USER_NAME,
-                              cmsUsername);
-        }
-
-        if (cmsPassword != null && cmsPassword.length() > 0)
-        {
-            p_optionsHash.put(CMS_PASSWORD,
-                              cmsPassword);
-        }        
     }
 }

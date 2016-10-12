@@ -229,6 +229,21 @@
       </WebPage>
     </WebActivity>
   </WebModule>
+  <WebModule webModuleName="categories">
+    <WebActivity webActivityName="categories">
+      <WebPage pageName="CG1" isDefault="true" jspName="/envoy/administration/category/categoryMain.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.category.CategoryMainHandler">
+        <PageLink linkName="new1" destinationPageName="CG2"></PageLink>
+        <PageLink linkName="modify" destinationPageName="CG2"></PageLink>
+        <PageLink linkName="remove" destinationPageName="CG1"></PageLink>
+        <PageLink linkName="self" destinationPageName="CG1"></PageLink>
+      </WebPage>
+      <WebPage pageName="CG2" isDefault="false" jspName="/envoy/administration/category/categoryBasic.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.category.CategoryBasicHandler">
+        <PageLink linkName="cancel" destinationPageName="CG1"></PageLink>
+        <PageLink linkName="save" destinationPageName="CG1"></PageLink>
+        <PageLink linkName="self" destinationPageName="CG2"></PageLink>
+      </WebPage>
+    </WebActivity>
+  </WebModule>
   
   <WebModule webModuleName="projects">
     <WebActivity webActivityName="projects">

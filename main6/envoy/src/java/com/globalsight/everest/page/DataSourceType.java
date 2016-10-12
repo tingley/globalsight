@@ -50,10 +50,4 @@ public interface DataSourceType
      * Constant used for identifying a "Documentum CMS" data source type
      */
     public final static String DOCUMENTUM = "documentum";
-
-    /**
-     * Constant used for identifying a "Mediasurface CMS" data source type.
-     */
-    public final static String MEDIASURFACE = "mediasurface";
-
 }

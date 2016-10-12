@@ -46,7 +46,7 @@ public class UILocaleConstant
     public static final String[] PROPERTIES_FILE_NAMES_EARLIB = {
             "AdapterCommonMsg", "AdobeApplicationAdapterMsg",
             "AmbassadorDwUpException", "CalendarManagerException",
-            "CapAdapterMsg", "CatalystAdapterMsg", "CmsUserManagerException",
+            "CapAdapterMsg", "CatalystAdapterMsg", 
             "CommentException", "CopyFlowAdapterMsg", "CostingException",
             "DatabaseAdapterMsg", "DBConnectionPersistenceManager",
             "DependencyCheckException", "DesktopApplicationAdapterMsg",
@@ -59,8 +59,7 @@ public class UILocaleConstant
             "GlossaryException", "GxmlException", "ImporterException",
             "InddAdapterMsg", "JobCreationException", "JobException",
             "LingAdapterMsg", "LingManagerException", "LocaleManagerException",
-            "LocaleResource", "MailerException", "MediasurfaceAdapterMsg",
-            "MicrosoftApplicationAdapterMsg",
+            "LocaleResource", "MailerException", "MicrosoftApplicationAdapterMsg",
             "MultipartFormDataReaderException", "NativeFileManagerException",
             "OfflineEditorManagerException",
             "OfflinePageDataGeneratorException", "OnlineEditorException",

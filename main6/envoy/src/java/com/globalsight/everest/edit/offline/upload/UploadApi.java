@@ -1504,7 +1504,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                             if (comment != null && !comment.equals(""))
                             {
                                 commentManager.replyToIssue(issue.getId(), issue.getTitle(),
-                                        issue.getPriority(), commentStatus, failureType.trim(),
+                                        issue.getPriority(), commentStatus, failureType.trim(), issue.getSeverity(), 
                                         p_user.getUserId(), comment);
                             }
                             else

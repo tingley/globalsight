@@ -41,9 +41,6 @@ insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (32, 'timer.th
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (33, 'reports.enabled','%%reports_enabled%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (35, 'addDelete.enabled','%%addDelete%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (36, 'export.overrideCjkFontFace', 'true', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (37, 'cms.ui.host', '%%cms_ui_host%%', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (38, 'cms.ui.port', '%%cms_ui_port%%', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (39, 'cms.installKey', '%%cms_adapters%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (40, 'login.concurrentDuplicate.allowed', '%%current_dup_login%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (41, 'pdf.installKey', 'false', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (42, 'pdf.dir', '', '1');
@@ -53,9 +50,6 @@ insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (45, 'calendar
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (47, 'websvc.installKey', '%%websvc_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (48, 'editor.installKey', '%%editor_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (49, 'terminology.features.installKey', '0', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (50, 'cms.contentServerUrl', '%%cms_content_server_url%%', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (51, 'cms.contentServerName', '%%cms_content_server_name%%', '1');
-insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (52, 'cms.contentServerPort', '%%cms_content_server_port%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (53, 'vendorManagement.installKey', '%%vm_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (54, 'catalyst.installKey', '%%catalyst_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (55, 'quarkmac.installKey', 'false', '1');

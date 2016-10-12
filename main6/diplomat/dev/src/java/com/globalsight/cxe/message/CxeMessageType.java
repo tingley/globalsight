@@ -112,9 +112,6 @@ public class CxeMessageType implements Serializable
     public static final int DATABASE_EXPORT_EVENT = 511;
     public static final int DYNAMIC_PREVIEW_EVENT = 512;
 
-    public static final int MEDIASURFACE_FILE_SELECTED_EVENT = 513;
-    public static final int MEDIASURFACE_EXPORT_EVENT = 514;
-
     public static final int CATALYST_IMPORTED_EVENT = 515;
     public static final int CATALYST_LOCALIZED_EVENT = 516;
 
@@ -213,10 +210,6 @@ public class CxeMessageType implements Serializable
         fillMaps(PRSXML_LOCALIZED_EVENT, "PRSXML_LOCALIZED_EVENT");
         fillMaps(PRSXML_IMPORTED_EVENT, "PRSXML_IMPORTED_EVENT");
         fillMaps(DYNAMIC_PREVIEW_EVENT, "DYNAMIC_PREVIEW_EVENT");
-
-        //mediasurface
-        fillMaps(MEDIASURFACE_FILE_SELECTED_EVENT, "MEDIASURFACE_FILE_SELECTED_EVENT");
-        fillMaps(MEDIASURFACE_EXPORT_EVENT, "MEDIASURFACE_EXPORT_EVENT");
 
         //catalyst
         fillMaps(CATALYST_IMPORTED_EVENT, "CATALYST_IMPORTED_EVENT");

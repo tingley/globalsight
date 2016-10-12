@@ -63,6 +63,9 @@ public class Company extends PersistentObject
     private boolean m_enableDitaChecks = false;
     private boolean m_enableWorkflowStatePosts = false;
 
+    private String defaultFluency = "";
+    private String defaultAdequacy = "";
+
     // ////////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
     // ////////////////////////////////////////////////////////////////////////////////
@@ -360,5 +363,25 @@ public class Company extends PersistentObject
     public void setEnableWorkflowStatePosts(boolean p_enableWorkflowStatePosts)
     {
         this.m_enableWorkflowStatePosts = p_enableWorkflowStatePosts;
+    }
+
+    public String getDefaultFluency()
+    {
+        return defaultFluency;
+    }
+
+    public void setDefaultFluency(String defaultFluency)
+    {
+        this.defaultFluency = defaultFluency;
+    }
+
+    public String getDefaultAdequacy()
+    {
+        return defaultAdequacy;
+    }
+
+    public void setDefaultAdequacy(String defaultAdequacy)
+    {
+        this.defaultAdequacy = defaultAdequacy;
     }
 }

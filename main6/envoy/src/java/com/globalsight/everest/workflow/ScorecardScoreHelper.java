@@ -23,6 +23,7 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -69,8 +70,8 @@ public class ScorecardScoreHelper {
 	
 	public static List<String> getScorecardCategories(long companyId)
     {
-    	List<String> scorecardCategories = CompanyWrapper
-			.getCompanyScorecardCategoryList(String.valueOf(companyId));
+        List<String> scorecardCategories = CompanyWrapper.getCompanyCategoryNames(
+                String.valueOf(companyId), CategoryType.ScoreCard, true);
     	return scorecardCategories;
     }
 }

@@ -36,7 +36,6 @@
                 com.globalsight.cxe.adapter.filesystem,
                 com.globalsight.cxe.adapter.filesystem.autoImport,
                 com.globalsight.cxe.adapter.ling,
-                com.globalsight.cxe.adapter.mediasurface,
                 com.globalsight.cxe.adapter.msoffice,
                 com.globalsight.cxe.adapter.pdf,
                 com.globalsight.cxe.adapter.quarkframe,
@@ -49,7 +48,6 @@
                 com.globalsight.cxe.adaptermdb.documentum,
                 com.globalsight.cxe.adaptermdb.filesystem,
                 com.globalsight.cxe.adaptermdb.ling,
-                com.globalsight.cxe.adaptermdb.mediasurface,
                 com.globalsight.cxe.adaptermdb.msoffice,
                 com.globalsight.cxe.adaptermdb.pdf,
                 com.globalsight.cxe.adaptermdb.quarkframe,
@@ -337,7 +335,6 @@
                 com.globalsight.machineTranslation.freetranslation,
                 com.globalsight.machineTranslation.google,
                 com.globalsight.machineTranslation.systran,
-                com.globalsight.mediasurface,
                 com.globalsight.naming,
                 com.globalsight.persistence,
                 com.globalsight.persistence.calendar,
@@ -347,7 +344,6 @@
                 com.globalsight.persistence.hibernate,
                 com.globalsight.persistence.hibernate.entity,
                 com.globalsight.persistence.jobcreation,
-                com.globalsight.persistence.mediasurface,
                 com.globalsight.persistence.pageexport,
                 com.globalsight.persistence.pageimport,
                 com.globalsight.persistence.pageimport.delayedimport,
@@ -424,7 +420,6 @@
 			<group title="CAP Import and Export Framework" packages="com.globalsight.exporter:com.globalsight.importer" />
 			<group title="CAP Web Services" packages="com.globalsight.webservices:com.globalsight.webservices.*" />
 			<group title="CAP MT Interface" packages="com.globalsight.machineTranslation" />
-			<group title="CAP MediaSurface Integration" packages="com.globalsight.mediasurface" />
 			<group title="CXE" packages="com.globalsight.cxe.*:com.globalsight.diplomat.*" />
 			<group title="Utilities" packages="com.globalsight.terminology.util:com.globalsight.everest.tm.util:com.globalsight.everest.tm.util.*:com.globalsight.ling.util:com.globalsight.ling.util.*" />
 			<group title="Reports" packages="com.globalsight.reports:com.globalsight.reports.*" />

@@ -40,6 +40,32 @@ public class ServletUtil extends jodd.servlet.ServletUtil
     public static Logger logger = Logger.getLogger(ServletUtil.class);
     private static List<Pattern> patterns = null;
 
+    public static String get(HttpServletRequest req, String name)
+    {
+        return get(req, name, "", false);
+    }
+
+    public static String get(HttpServletRequest req, String name, String defaultValue)
+    {
+        return get(req, name, defaultValue, false);
+    }
+
+    public static String get(HttpServletRequest req, String name, String defaultValue,
+            boolean encoding)
+    {
+        String result = StringUtil.isBlank(defaultValue) ? "" : defaultValue;
+        if (StringUtil.isNotBlank(name))
+        {
+            String tmp = req.getParameter(name);
+            if (StringUtil.isNotBlank(tmp))
+            {
+                result = encoding ? encodeHtml(tmp) : tmp;
+            }
+        }
+
+        return result;
+    }
+
     /**
      * Get parameter value from request with specified name
      * 

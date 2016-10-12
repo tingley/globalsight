@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.company;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -33,6 +32,9 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.category.CategoryType;
+import com.globalsight.everest.category.CommonCategory;
+import com.globalsight.everest.category.DefaultCategory;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.permission.Permission;
@@ -79,23 +81,30 @@ public class CompanyBasicHandler extends PageHandler implements
         PermissionSet userPerms = (PermissionSet) session
                 .getAttribute(WebAppConstants.PERMISSIONS);
         ResourceBundle bundle = PageHandler.getBundle(session);
-        String[] keyArray = new String[]
-        { "lb_conflicts_glossary_guide", "lb_formatting_error",
-                "lb_mistranslated", "lb_omission_of_text",
-                "lb_spelling_grammar_punctuation_error" };
-        String[] scorecardKeyArray = new String[]
-        {"lb_spelling_grammar", "lb_consistency",
-                "lb_style", "lb_terminology",};
-        String[] qualityKeyArray = new String[]{"lb_good","lb_acceptable","lb_poor"};
-        String[] marketKeyArray = new String[]{"lb_suitable_fluent", "lb_literal_at_times","lb_unsuitable"};
-        List<String> tmpkeyList = Arrays.asList(keyArray);
-        List<String> tempScorecardKeyList = Arrays.asList(scorecardKeyArray);
-        List<String> tmpQualityKeyList = Arrays.asList(qualityKeyArray);
-        List<String> tmpMarketKeyList = Arrays.asList(marketKeyArray);
-        List<String> keyList = new ArrayList<String>(tmpkeyList);
-        List<String> sorcecardKeyList  = new ArrayList<String>(tempScorecardKeyList);
-        List<String> qualityKeyList = new ArrayList<String>(tmpQualityKeyList);
-        List<String> marketKeyList  = new ArrayList<String>(tmpMarketKeyList);
+        DefaultCategory dc = (DefaultCategory) session.getAttribute("defaultCategories");
+        if (dc == null)
+        {
+            // init default categories
+            dc = new DefaultCategory(bundle);
+            dc.init();
+            session.setAttribute("defaultCategories", dc);
+        }
+
+        p_request.setAttribute("defaultSegmentCommentCategories",
+                dc.getDefaultCategoriesAsString(CategoryType.SegmentComment));
+        p_request.setAttribute("defaultScorecardCategories",
+                dc.getDefaultCategoriesAsString(CategoryType.ScoreCard));
+        p_request.setAttribute("defaultMarketCategories",
+                dc.getDefaultCategoriesAsString(CategoryType.Market));
+        p_request.setAttribute("defaultQualityCategories",
+                dc.getDefaultCategoriesAsString(CategoryType.Quality));
+        p_request.setAttribute("defaultFluencyCategories",
+                dc.getDefaultCategoriesAsString(CategoryType.Fluency));
+        p_request.setAttribute("defaultAdequacyCategories",
+                dc.getDefaultCategoriesAsString(CategoryType.Adequacy));
+        p_request.setAttribute("defaultSeverityCategories",
+                dc.getDefaultCategoriesAsString(CategoryType.Severity));
+
         try
         {
             if (action.equals(CompanyConstants.CREATE))
@@ -116,15 +125,14 @@ public class CompanyBasicHandler extends PageHandler implements
                 }
                 setDateForNewCompany(p_request);
                 
-                // init the "to" select table, add default value to it
-                List<Select> toList = initSelectList(keyList, bundle);
-                List<Select> scorecardToList = initSelectList(sorcecardKeyList, bundle);
-                List<Select> qualityToList = initSelectList(qualityKeyList, bundle);
-                List<Select> marketToList = initSelectList(marketKeyList, bundle);
-                p_request.setAttribute("toList", toList);
-                p_request.setAttribute("scorecardToList", scorecardToList);
-                p_request.setAttribute("qualityToList", qualityToList);
-                p_request.setAttribute("marketToList", marketToList);
+                p_request.setAttribute("segmentCommentCategories",
+                        dc.getAvailableSegmentCommentCategories());
+                p_request.setAttribute("scorecardCategories", dc.getAvailableScorecardCategories());
+                p_request.setAttribute("qualityCategories", dc.getAvailableQualityCategories());
+                p_request.setAttribute("marketCategories", dc.getAvailableMarketCategories());
+                p_request.setAttribute("fluencyCategories", dc.getAvailableFluencyCategories());
+                p_request.setAttribute("adequacyCategories", dc.getAvailableAdequacyCategories());
+                p_request.setAttribute("severityCategories", dc.getAvailableSeverityCategories());
                 
                 p_request.setAttribute("incontext_review_key_indd", "false");
                 p_request.setAttribute("incontext_review_key_office", "false");
@@ -155,41 +163,66 @@ public class CompanyBasicHandler extends PageHandler implements
                             .getCompanyById(Long.parseLong(companyID));
                     sessionMgr.setAttribute(CompanyConstants.COMPANY, company);
                     
-                    List<String> containedCategories = CompanyWrapper
-                            .getCompanyCategoryList(companyID);
-                    List<String> containedScorecardCategories = CompanyWrapper
-                    		.getCompanyScorecardCategoryList(companyID);
-                    List<String> containedQualityCategories = CompanyWrapper.getCompanyQualityCategoryList(companyID);
-                    List<String> containedMarketCategories = CompanyWrapper.getCompanyMarketCategoryList(companyID);
-                    List<Select> toList = initSelectList(containedCategories, bundle);
-                    List<Select> scorecardToList = initSelectList(containedScorecardCategories, bundle);
-                    List<Select> qualityToList = initSelectList(containedQualityCategories, bundle);
-                    List<Select> marketToList = initSelectList(containedMarketCategories, bundle);
-                    
-                    p_request.setAttribute("toList", toList);
-                    p_request.setAttribute("scorecardToList", scorecardToList);
-                    p_request.setAttribute("qualityToList", qualityToList);
-                    p_request.setAttribute("marketToList", marketToList);
+                    p_request.setAttribute(
+                            "allSegmentCommentCategories",
+                            showCategories(bundle, CompanyWrapper
+                            .getCompanyCategories(companyID, CategoryType.SegmentComment, false,
+ false)));
+                    p_request.setAttribute(
+                            "segmentCommentCategories",
+                            showCategories(bundle, CompanyWrapper
+                            .getCompanyCategories(companyID, CategoryType.SegmentComment, true,
+ false)));
+                    p_request.setAttribute(
+                            "allScorecardCategories",
+                            showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,
+                                    CategoryType.ScoreCard, false, false)));
+                    p_request.setAttribute(
+                            "scorecardCategories",
+                            showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,
+                                    CategoryType.ScoreCard, true, false)));
+                    p_request.setAttribute(
+                            "allQualityCategories",
+                            showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,
+                                    CategoryType.Quality, false, false)));
+                    p_request.setAttribute(
+                            "qualityCategories",
+                            showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,
+                                    CategoryType.Quality, true, false)));
+                    p_request.setAttribute(
+                            "allMarketCategories",
+                            showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,
+                                    CategoryType.Market, false, false)));
+                    p_request.setAttribute(
+                            "marketCategories",
+                            showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,
+                                    CategoryType.Market, true, false)));
+                    p_request.setAttribute(
+                            "allFluencyCategories",
+                            showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,
+                                    CategoryType.Fluency, false, false)));
+                    p_request.setAttribute(
+                            "fluencyCategories",
+                            showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,
+                                    CategoryType.Fluency, true, false)));
+                    p_request.setAttribute(
+                            "allAdequacyCategories",
+                            showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,
+                                    CategoryType.Adequacy, false, false)));
+                    p_request.setAttribute(
+                            "adequacyCategories",
+                            showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,
+                                    CategoryType.Adequacy, true, false)));
+                    p_request.setAttribute(
+                            "allSeverityCategories",
+                            showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,
+                                    CategoryType.Severity, false, false)));
+                    p_request.setAttribute(
+                            "severityCategories",
+                            showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,
+                                    CategoryType.Severity, true, false)));
                     
                     p_request.setAttribute("action", "edit");
-                    
-                    List<String> availableCategories = CompanyWrapper
-                            .getCompanyCategoryAvailList(companyID);
-                    List<String> availableScorecardCategories = CompanyWrapper
-                            .getCompanyScorecardCategoryAvailList(companyID);
-                    List<String> availableQualityCategories = CompanyWrapper
-                            .getCompanyQualityCategoryAvailList(companyID);
-                    List<String> availableMarketCategories = CompanyWrapper
-                            .getCompanyMarketCategoryAvailList(companyID);
-                    // init the "from" select table, add default value to it
-                    List<Select> fromList = initSelectList(availableCategories, bundle);
-                    List<Select> scorecardFromList = initSelectList(availableScorecardCategories, bundle);
-                    List<Select> qualityFromList = initSelectList(availableQualityCategories, bundle);
-                    List<Select> marketFromList = initSelectList(availableMarketCategories, bundle);
-                    p_request.setAttribute("fromList", fromList);
-                    p_request.setAttribute("scorecardFromList", scorecardFromList);
-                    p_request.setAttribute("qualityFromList", qualityFromList);
-                    p_request.setAttribute("marketFromList", marketFromList);
                     
                     p_request.setAttribute("incontext_review_key_indd", getInCtxRvEnableIndd(companyID));
                     p_request.setAttribute("incontext_review_key_office", getInCtxRvEnableOffice(companyID));
@@ -219,6 +252,34 @@ public class CompanyBasicHandler extends PageHandler implements
         }
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
+    }
+
+    private List<CommonCategory> showCategories(ResourceBundle bundle, List<CommonCategory> data)
+    {
+        List<CommonCategory> categories = new ArrayList<CommonCategory>();
+        CommonCategory category = null;
+        String showName = "";
+        for (CommonCategory commonCategory : data)
+        {
+            category = new CommonCategory();
+            category.setName(commonCategory.getName());
+            category.setId(commonCategory.getId());
+            category.setCompanyId(commonCategory.getCompanyId());
+            category.setIsActive(commonCategory.isActive());
+            category.setIsAvailable(commonCategory.isAvailable());
+            try
+            {
+                showName = bundle.getString(category.getName());
+                category.setMemo(showName);
+            }
+            catch (Exception e)
+            {
+                category.setMemo(category.getName());
+            }
+
+            categories.add(category);
+        }
+        return categories;
     }
 
     /**
@@ -360,6 +421,12 @@ public class CompanyBasicHandler extends PageHandler implements
         p_request.setAttribute("scorecardHelpMsg", scorecardHelpMsg);
         p_request.setAttribute("qualityHelpMsg", qualityHelpMsg);
         p_request.setAttribute("marketHelpMsg", marketHelpMsg);
+        p_request.setAttribute("fluencyHelpMsg",
+                bundle.getString("helper_text_dqf_fluency_category"));
+        p_request.setAttribute("adequacyHelpMsg",
+                bundle.getString("helper_text_dqf_adequacy_category"));
+        p_request.setAttribute("severityHelpMsg",
+                bundle.getString("helper_text_dqf_severity_category"));
         p_request.setAttribute("label", label_new_category);
         p_request.setAttribute("labelForLeftTable", labelForLeftTable);
         p_request.setAttribute("labelForRightTable", labelForRightTable);

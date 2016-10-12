@@ -438,7 +438,7 @@ public class QAChecker
         Cell srcEqualTrgCell = getCell(p_currentRow, col);
         if (QARuleDefault.SOURCE_EQUAL_TO_TARGET.equals(p_desc))
         {
-            String srcEqualToTrgStatus = getState(p_desc, tuvState);
+            String srcEqualToTrgStatus = getState(tuvState.getName());
             srcEqualTrgCell.setCellValue(srcEqualToTrgStatus);
         }
         else
@@ -460,21 +460,21 @@ public class QAChecker
         commentsCell.setCellStyle(getUnlockedStyle(p_workbook));
     }
 
-    private String getState(String p_desc, TuvState tuvState)
+    private String getState(String tuvState)
     {
-        if (TuvState.APPROVED.equals(tuvState) || TuvState.LOCALIZED.equals(tuvState))
+        if (TuvState.APPROVED.getName().equals(tuvState) || TuvState.LOCALIZED.getName().equals(tuvState))
         {
             return ReportConstants.SOURCE_EQUAL_TARGET_TRANSLATED_OR_APPROVED;
         }
-        else if (TuvState.NOT_LOCALIZED.equals(tuvState))
+        else if (TuvState.NOT_LOCALIZED.getName().equals(tuvState))
         {
             return ReportConstants.SOURCE_EQUAL_TARGET_UNTRANSLATED;
         }
-        else if (TuvState.EXACT_MATCH_LOCALIZED.equals(tuvState))
+        else if (TuvState.EXACT_MATCH_LOCALIZED.getName().equals(tuvState))
         {
             return ReportConstants.SOURCE_EQUAL_TARGET_EXACT_MATCH;
         }
-        else if (TuvState.DO_NOT_TRANSLATE.equals(tuvState))
+        else if (TuvState.DO_NOT_TRANSLATE.getName().equals(tuvState))
         {
             return ReportConstants.SOURCE_EQUAL_TARGET_DO_NOT_TRANSLATE;
         }

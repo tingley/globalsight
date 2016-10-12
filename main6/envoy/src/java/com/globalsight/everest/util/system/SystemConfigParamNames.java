@@ -374,14 +374,6 @@ public interface SystemConfigParamNames
     /** Documentum Constants */
     public static final String DOCUMENTUM_INSTALL_KEY = "documentum.installKey";
 
-    /** CMS (Mediasurface) Constants */
-    public static final String CMS_INSTALL_KEY = "cms.installKey";
-    public static final String CMS_UI_HOST = "cms.ui.host";
-    public static final String CMS_UI_PORT = "cms.ui.port";
-    public static final String CMS_CONTENT_SERVER_URL = "cms.contentServerUrl";
-    public static final String CMS_CONTENT_SERVER_NAME = "cms.contentServerName";
-    public static final String CMS_CONTENT_SERVER_PORT = "cms.contentServerPort";
-
     /** Analyze script */
     public static final String ANALYZE_SCRIPT_RUN = "analyze_script.run";
     public static final String ANALYZE_SCRIPT_INTERVAL = "analyze_script.interval";

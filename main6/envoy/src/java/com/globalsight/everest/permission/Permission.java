@@ -309,7 +309,6 @@ public class Permission
     static public final String VENDORS_RATING_VIEW = "vendors.rating.view";
     static public final String VENDORS_RATING_EDIT = "vendors.rating.edit";
     static public final String VENDORS_RATING_REMOVE = "vendors.rating.remove";
-    static public final String CONTENT_MANAGER = "contentmanager";
     static public final String CUSTOMER_UPLOAD = "customer.upload";
     static public final String CUSTOMER_UPLOAD_VIA_WEBSERVICE = "customer.upload.via.webservice";
     static public final String GET_ALL_PROJECTS = "projects.getall";
@@ -511,7 +510,7 @@ public class Permission
     { ACTIVITIES_VIEW, ACTIVITIES_ACCEPT, ACTIVITIES_REJECT_BEFORE_ACCEPTING,
             ACTIVITIES_REJECT_AFTER_ACCEPTING, ACTIVITIES_WORKOFFLINE, ACTIVITIES_SEARCHREPLACE,
             ACTIVITIES_FILES_VIEW, ACTIVITIES_FILES_EDIT, ACTIVITIES_COMMENTS_VIEW,
-            ACTIVITIES_COMMENTS_EDIT, CONTENT_MANAGER, ACCOUNT_NOTIFICATION_GENERAL,
+            ACTIVITIES_COMMENTS_EDIT, ACCOUNT_NOTIFICATION_GENERAL,
             ACTIVITIES_EXPORT, ACTIVITIES_EXPORT_INPROGRESS, ACTIVITIES_DOWNLOAD,
             ACTIVITIES_ACCEPT_ALL, ACTIVITIES_DOWNLOAD_ALL, ACTIVITIES_UPLOAD_SUPPORT_FILES,
             ACTIVITIES_DETAIL_STATISTICS, ACTIVITIES_SUMMARY_STATISTICS, SOURCE_PAGE_EDIT,
@@ -709,7 +708,6 @@ public class Permission
         added = addPermission(184, VENDORS_RATING_VIEW) || added;
         added = addPermission(185, VENDORS_RATING_EDIT) || added;
         added = addPermission(186, VENDORS_RATING_REMOVE) || added;
-        added = addPermission(187, CONTENT_MANAGER) || added;
         added = addPermission(188, CUSTOMER_UPLOAD) || added;
         added = addPermission(189, DOCUMENTUM_IMPORT) || added;
         added = addPermission(190, GET_ALL_PROJECTS) || added;

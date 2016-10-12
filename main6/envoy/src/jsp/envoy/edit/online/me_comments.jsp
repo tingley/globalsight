@@ -465,7 +465,7 @@ function sortComments(arg)
   document.location = url;
 }
 
-function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, status, category, share, overwrite)
+function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, status, category, severity, share, overwrite)
 {
 	var o_form = document.CommentForm;
 
@@ -478,6 +478,7 @@ function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, stat
     o_form.cmtPriority.value = priority;
     o_form.cmtStatus.value = status;
     o_form.cmtCategory.value = category;
+    o_form.cmtSeverity.value = severity;
     o_form.cmtShare.value = share;
     o_form.cmtOverwrite.value = overwrite;
 var main=parent.parent.parent.parent;
@@ -698,6 +699,7 @@ $(document).ready(function(){
 <input type="hidden" name="cmtPriority" value="">
 <input type="hidden" name="cmtStatus"   value="">
 <input type="hidden" name="cmtCategory" value="">
+<input type="hidden" name="cmtSeverity" value="">
 <input type="hidden" name="cmtShare"   value="">
 <input type="hidden" name="cmtOverwrite"   value="">
 </FORM>

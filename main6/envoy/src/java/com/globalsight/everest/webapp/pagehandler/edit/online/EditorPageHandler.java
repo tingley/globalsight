@@ -1571,13 +1571,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         }
         if (!EditUtil.hasPreviewMode(p_state.getPageFormat()))
         {
-            if (layout.getSourceViewMode() == VIEWMODE_PREVIEW )
+            if (layout.getSourceViewMode() == VIEWMODE_PREVIEW)
             {
-                // for GBS-4401, preview
-                if (p_state.getSourcePreviewFile() == null)
-                {
-                    layout.setSourceViewMode(DEFAULT_VIEWMODE_IF_NO_PREVIEW);
-                }
+                layout.setSourceViewMode(DEFAULT_VIEWMODE_IF_NO_PREVIEW);
             }
 
             if (layout.getTargetViewMode() == VIEWMODE_PREVIEW)
@@ -1893,6 +1889,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         String priority = p_request.getParameter("cmtPriority");
         String status = p_request.getParameter("cmtStatus");
         String category = p_request.getParameter("cmtCategory");
+        String severity = p_request.getParameter("cmtSeverity");
 
         title = EditUtil.utf8ToUnicode(title);
         comment = EditUtil.utf8ToUnicode(comment);
@@ -1916,7 +1913,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         if (action.equals("create"))
         {
             EditorHelper.createComment(p_state, p_view, title, comment,
-                    priority, status, category, p_user.getUserId(), share,
+                    priority, status, category, severity, p_user.getUserId(), share,
                     overwrite);
 
             // Recompute target page view (new icon)
@@ -1926,13 +1923,13 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         else if (action.equals("edit"))
         {
             EditorHelper.editComment(p_state, p_view, title, comment, priority,
-                    status, category, p_user.getUserId(), share, overwrite);
+                    status, category, severity, p_user.getUserId(), share, overwrite);
             update = true;
         }
         else if (action.equals("add"))
         {
             EditorHelper.addComment(p_state, p_view, title, comment, priority,
-                    status, category, p_user.getUserId(), share, overwrite);
+                    status, category, severity, p_user.getUserId(), share, overwrite);
             update = true;
         }
         else if (action.equals("closeAllComments"))

@@ -3025,7 +3025,7 @@ CREATE TABLE categories (
     memo VARCHAR(200) DEFAULT NULL,
     TYPE INT DEFAULT 0,
     company_id  BIGINT(20) NOT NULL,
-    is_avaliable CHAR(1) NOT NULL DEFAULT 'Y',
+    is_available CHAR(1) NOT NULL DEFAULT 'Y',
     is_active CHAR(1) NOT NULL DEFAULT 'Y',
     PRIMARY KEY (id)
 ) ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

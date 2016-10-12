@@ -559,6 +559,42 @@ public class ExportFilterHelper
                                             + bfm.getBaseFilterId());
                                 }
                             }
+                            else if (postFilterTableName
+                                    .equalsIgnoreCase(FilterConstants.JSON_TABLENAME))
+                            {
+                                JsonFilter jsonFilter = (JsonFilter) selectFilterDataFromDataBase(
+                                        postFilterTableName, Long.parseLong(postFilterTableID),
+                                        companyId);
+                                BaseFilterMapping jsoBFM = checkInternalFilterIsUsedByFilter(
+                                        postFilterTableName, Long.parseLong(postFilterTableID));
+
+                                if (jsoBFM != null)
+                                {
+                                    filterSet.add("base_filter_mapping" + "." + jsoBFM.getId());
+                                    filterSet.add(FilterConstants.BASE_TABLENAME + "."
+                                            + jsoBFM.getBaseFilterId());
+                                }
+                                
+                                if (jsonFilter.getElementPostFilterTableName() != null
+                                        && !"".equals(jsonFilter.getElementPostFilterTableName()))
+                                {
+                                    filterSet.add(jsonFilter.getElementPostFilterTableName() + "."
+                                            + jsonFilter.getElementPostFilterId());
+
+                                    // Judge whether the html_filter
+                                    // reference base_filter
+                                    BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
+                                            jsonFilter.getElementPostFilterTableName(),
+                                            jsonFilter.getElementPostFilterId());
+
+                                    if (bfm != null)
+                                    {
+                                        filterSet.add("base_filter_mapping" + "." + bfm.getId());
+                                        filterSet.add(FilterConstants.BASE_TABLENAME + "."
+                                                + bfm.getBaseFilterId());
+                                    }
+                                }
+                            }
                         }
 
                         String cdataPostFilterTableName = xmlFilterConfigParser
@@ -585,7 +621,43 @@ public class ExportFilterHelper
                                             + bfm.getBaseFilterId());
                                 }
                             }
+                            else if (cdataPostFilterTableName
+                                    .equalsIgnoreCase(FilterConstants.JSON_TABLENAME))
+                            {
+                                JsonFilter jsonFilter = (JsonFilter) selectFilterDataFromDataBase(
+                                        cdataPostFilterTableName,
+                                        Long.parseLong(cdataPostFilterId), companyId);
+                                BaseFilterMapping jsonBFM = checkInternalFilterIsUsedByFilter(
+                                        cdataPostFilterTableName, Long.parseLong(cdataPostFilterId));
+                                if (jsonBFM != null)
+                                {
+                                    filterSet.add("base_filter_mapping" + "." + jsonBFM.getId());
+                                    filterSet.add(FilterConstants.BASE_TABLENAME + "."
+                                            + jsonBFM.getBaseFilterId());
+                                }
+
+                                if (jsonFilter.getElementPostFilterTableName() != null
+                                        && !"".equals(jsonFilter.getElementPostFilterTableName()))
+                                {
+                                    filterSet.add(jsonFilter.getElementPostFilterTableName() + "."
+                                            + jsonFilter.getElementPostFilterId());
+
+                                    // Judge whether the html_filter
+                                    // reference base_filter
+                                    BaseFilterMapping bfm = checkInternalFilterIsUsedByFilter(
+                                            jsonFilter.getElementPostFilterTableName(),
+                                            jsonFilter.getElementPostFilterId());
+
+                                    if (bfm != null)
+                                    {
+                                        filterSet.add("base_filter_mapping" + "." + bfm.getId());
+                                        filterSet.add(FilterConstants.BASE_TABLENAME + "."
+                                                + bfm.getBaseFilterId());
+                                    }
+                                }
+                            }
                         }
+
                         List<String> list = xmlFilterConfigParser.getPostFilterIdAndName();
                         if (list != null && list.size() > 0)
                         {

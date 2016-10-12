@@ -19318,6 +19318,24 @@ public class Ambassador extends AbstractWebService
             }
         }
     }
+    
+    private Long getLastestFileProfileIdAsLong(Long id)
+    {
+        FileProfileImpl fp = HibernateUtil.get(FileProfileImpl.class, id, false);
+        if (fp == null)
+            return null;
+        
+        Long nId = fp.getNewId();
+        if (nId == null)
+            return id;
+        
+        Long nId2 = getLastestFileProfileIdAsLong(nId);
+        
+        if (nId2 != null)
+            return nId2;
+        
+        return nId;
+    }
 
     // For GBS-4401 Plugin for AEM 6.2
     public String getLastestFileProfileId(String accessToken, String id) throws WebServiceException
@@ -19327,13 +19345,8 @@ public class Ambassador extends AbstractWebService
         if (id == null)
             return id;
         
-        FileProfileImpl fp = HibernateUtil.get(FileProfileImpl.class, Long.parseLong(id), false);
-        if (fp == null)
-            return null;
-        
-        Long nId = fp.getNewId();
-        if (nId == null)
-            return id;
+        Long nId = getLastestFileProfileIdAsLong(Long.parseLong(id));
+       
         
         return nId.toString();
     }

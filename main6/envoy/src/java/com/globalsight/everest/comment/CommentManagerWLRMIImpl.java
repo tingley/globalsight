@@ -120,11 +120,11 @@ public class CommentManagerWLRMIImpl extends RemoteServer implements
      */
     public Issue addIssue(int p_levelObjectType, long p_levelObjectId,
             String p_title, String p_priority, String p_status,
-            String p_category, String p_creatorUserId, String p_comment,
+            String p_category, String severity, String p_creatorUserId, String p_comment,
             String p_logicalKey) throws RemoteException, CommentException
     {
         return m_localInstance.addIssue(p_levelObjectType, p_levelObjectId,
-                p_title, p_priority, p_status, p_category, p_creatorUserId,
+                p_title, p_priority, p_status, p_category, severity, p_creatorUserId,
                 p_comment, p_logicalKey);
     }
 
@@ -132,15 +132,14 @@ public class CommentManagerWLRMIImpl extends RemoteServer implements
      * @see CommentManager.addIssue(int, long, String, String, String, String,
      *      String, String, String)
      */
-    public Issue addIssue(int p_levelObjectType, long p_levelObjectId,
-            String p_title, String p_priority, String p_status,
-            String p_category, String p_creatorUserId, String p_comment,
-            String p_logicalKey, boolean share, boolean overwrite)
-            throws RemoteException, CommentException
+    public Issue addIssue(int p_levelObjectType, long p_levelObjectId, String p_title,
+            String p_priority, String p_status, String p_category, String severity,
+            String p_creatorUserId, String p_comment, String p_logicalKey, boolean share,
+            boolean overwrite) throws RemoteException, CommentException
     {
-        return m_localInstance.addIssue(p_levelObjectType, p_levelObjectId,
-                p_title, p_priority, p_status, p_category, p_creatorUserId,
-                p_comment, p_logicalKey, share, overwrite);
+        return m_localInstance.addIssue(p_levelObjectType, p_levelObjectId, p_title, p_priority,
+                p_status, p_category, severity, p_creatorUserId, p_comment, p_logicalKey, share,
+                overwrite);
     }
 
     /**
@@ -148,22 +147,22 @@ public class CommentManagerWLRMIImpl extends RemoteServer implements
      *      String, String)
      */
     public Issue replyToIssue(long p_issueId, String p_title,
-            String p_priority, String p_status, String p_category,
+            String p_priority, String p_status, String p_category, String severity,
             String p_reportedBy, String p_comment) throws RemoteException,
             CommentException
     {
         return m_localInstance.replyToIssue(p_issueId, p_title, p_priority,
-                p_status, p_category, p_reportedBy, p_comment);
+                p_status, p_category, severity, p_reportedBy, p_comment);
     }
 
     public Issue replyToIssue(long p_issueId, String p_title,
-            String p_priority, String p_status, String p_category,
+            String p_priority, String p_status, String p_category, String severity,
             String p_reportedBy, String p_comment, boolean share,
             boolean overwrite) throws RemoteException, CommentException
     {
         return m_localInstance
                 .replyToIssue(p_issueId, p_title, p_priority, p_status,
-                        p_category, p_reportedBy, p_comment, share, overwrite);
+                        p_category, severity, p_reportedBy, p_comment, share, overwrite);
     }
 
     /**
@@ -171,21 +170,21 @@ public class CommentManagerWLRMIImpl extends RemoteServer implements
      *      String, String)
      */
     public Issue editIssue(long p_issueId, String p_title, String p_priority,
-            String p_status, String p_category, String p_reportedBy,
+            String p_status, String p_category, String severity, String p_reportedBy,
             String p_comment) throws RemoteException, CommentException
     {
         return m_localInstance.editIssue(p_issueId, p_title, p_priority,
-                p_status, p_category, p_reportedBy, p_comment);
+                p_status, p_category, severity, p_reportedBy, p_comment);
     }
 
     public Issue editIssue(long p_issueId, String p_title, String p_priority,
-            String p_status, String p_category, String p_reportedBy,
+            String p_status, String p_category, String severity, String p_reportedBy,
             String p_comment, boolean share, boolean overwrite)
             throws RemoteException, CommentException
     {
         return m_localInstance
                 .editIssue(p_issueId, p_title, p_priority, p_status,
-                        p_category, p_reportedBy, p_comment, share, overwrite);
+                        p_category, severity, p_reportedBy, p_comment, share, overwrite);
     }
 
     /**

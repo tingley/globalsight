@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.everest.category.CommonCategory"
+        table="Categories">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="name" length="200"
+            column="name" type="string" not-null="true"
+            unique="false" />
+        <property name="memo" length="200"
+            column="memo" type="string" not-null="false"
+            unique="false" />
+        <property name="type" 
+            column="type" type="int" not-null="true"/>
+        <property name="companyId" 
+            column="COMPANY_ID" type="long" not-null="true"/>
+       <property name="isAvailable" column="IS_Available" type="yes_no"
+            not-null="true" unique="false" />
+       <property name="isActive" column="IS_ACTIVE" type="yes_no"
+            not-null="true" unique="false" />
+    </class>
+</hibernate-mapping>

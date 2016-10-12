@@ -618,6 +618,8 @@ public class JobHandlerLocal implements JobHandler
                 c.setEnableDitaChecks(p_company.getEnableDitaChecks());
                 c.setEnableWorkflowStatePosts(p_company
                         .getEnableWorkflowStatePosts());
+                c.setDefaultFluency(p_company.getDefaultFluency());
+                c.setDefaultAdequacy(p_company.getDefaultAdequacy());
                 HibernateUtil.update(c);
 
                 if (p_company.getTmVersion().getValue() == 3)

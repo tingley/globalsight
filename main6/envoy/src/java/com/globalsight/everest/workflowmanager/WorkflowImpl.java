@@ -195,6 +195,9 @@ public class WorkflowImpl extends PersistentObject implements Workflow, WorkObje
     private int mtThreshold = 0;
     private String mtProfileName = null;
     private String scorecardComment;
+    private String dqfComment;
+    private String fluencyScore;
+    private String adequacyScore;
     private int scorecardShowType = -1;// -1:Not Showing,0:Optional,1:Required
     private boolean isSinceVersion87 = true;
 
@@ -216,6 +219,27 @@ public class WorkflowImpl extends PersistentObject implements Workflow, WorkObje
     public void setCompanyId(long p_companyId)
     {
         this.m_companyId = p_companyId;
+    }
+
+
+    public String getFluencyScore()
+    {
+        return fluencyScore;
+    }
+
+    public void setFluencyScore(String fluencyScore)
+    {
+        this.fluencyScore = fluencyScore;
+    }
+
+    public String getAdequacyScore()
+    {
+        return adequacyScore;
+    }
+
+    public void setAdequacyScore(String adequacyScore)
+    {
+        this.adequacyScore = adequacyScore;
     }
 
     private String m_workflowType = TYPE_TRANSLATION;
@@ -1642,6 +1666,16 @@ public class WorkflowImpl extends PersistentObject implements Workflow, WorkObje
     public String getScorecardComment()
     {
         return this.scorecardComment;
+    }
+
+    public String getDQFComment()
+    {
+        return dqfComment;
+    }
+
+    public void setDQFComment(String dqfComment)
+    {
+        this.dqfComment = dqfComment;
     }
 
     public void setScorecardShowType(int scorecardShowType)

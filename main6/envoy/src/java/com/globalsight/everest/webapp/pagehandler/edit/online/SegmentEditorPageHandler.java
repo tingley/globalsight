@@ -207,7 +207,7 @@ public class SegmentEditorPageHandler extends PageHandler implements
                 String status = "closed";
                 String category = issue.getCategory();
                 EditorHelper.editComment(p_state, commentView, title, comment,
-                        priority, status, category, p_userName);
+                        priority, status, category, issue.getSeverity(), p_userName);
             }
         }
         catch (Exception e)

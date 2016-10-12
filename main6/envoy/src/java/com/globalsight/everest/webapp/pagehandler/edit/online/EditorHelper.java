@@ -1358,13 +1358,13 @@ public class EditorHelper implements EditorConstants
     }
 
     static public void createComment(EditorState p_state, CommentView p_view, String p_title,
-            String p_comment, String p_priority, String p_status, String p_category, String p_user,
+            String p_comment, String p_priority, String p_status, String p_category, String severity, String p_user,
             boolean share, boolean overwrite) throws EnvoyServletException
     {
         try
         {
             p_state.getEditorManager().createComment(p_view.getTuId(), p_view.getTuvId(),
-                    p_view.getSubId(), p_title, p_comment, p_priority, p_status, p_category, p_user,
+                    p_view.getSubId(), p_title, p_comment, p_priority, p_status, p_category, severity, p_user,
                     share, overwrite);
         }
         catch (GeneralException e)
@@ -1378,13 +1378,13 @@ public class EditorHelper implements EditorConstants
     }
 
     static public void createComment(EditorState p_state, CommentView p_view, String p_title,
-            String p_comment, String p_priority, String p_status, String p_category, String p_user)
+            String p_comment, String p_priority, String p_status, String p_category, String severity, String p_user)
             throws EnvoyServletException
     {
         try
         {
             p_state.getEditorManager().createComment(p_view.getTuId(), p_view.getTuvId(),
-                    p_view.getSubId(), p_title, p_comment, p_priority, p_status, p_category,
+                    p_view.getSubId(), p_title, p_comment, p_priority, p_status, p_category, severity,
                     p_user);
         }
         catch (GeneralException e)
@@ -1398,13 +1398,13 @@ public class EditorHelper implements EditorConstants
     }
 
     static public void editComment(EditorState p_state, CommentView p_view, String p_title,
-            String p_comment, String p_priority, String p_status, String p_category, String p_user,
+            String p_comment, String p_priority, String p_status, String p_category, String severity, String p_user,
             boolean share, boolean overwrite) throws EnvoyServletException
     {
         try
         {
             p_state.getEditorManager().editComment(p_view, p_title, p_comment, p_priority, p_status,
-                    p_category, p_user, share, overwrite);
+                    p_category, severity, p_user, share, overwrite);
         }
         catch (GeneralException e)
         {
@@ -1417,13 +1417,13 @@ public class EditorHelper implements EditorConstants
     }
 
     static public void editComment(EditorState p_state, CommentView p_view, String p_title,
-            String p_comment, String p_priority, String p_status, String p_category, String p_user)
+            String p_comment, String p_priority, String p_status, String p_category, String severity, String p_user)
             throws EnvoyServletException
     {
         try
         {
             p_state.getEditorManager().editComment(p_view, p_title, p_comment, p_priority, p_status,
-                    p_category, p_user);
+                    p_category, severity, p_user);
         }
         catch (GeneralException e)
         {
@@ -1436,13 +1436,13 @@ public class EditorHelper implements EditorConstants
     }
 
     static public void addComment(EditorState p_state, CommentView p_view, String p_title,
-            String p_comment, String p_priority, String p_status, String p_category, String p_user)
+            String p_comment, String p_priority, String p_status, String p_category, String severity, String p_user)
             throws EnvoyServletException
     {
         try
         {
             p_state.getEditorManager().addComment(p_view, p_title, p_comment, p_priority, p_status,
-                    p_category, p_user);
+                    p_category, severity, p_user);
         }
         catch (GeneralException e)
         {
@@ -1455,13 +1455,13 @@ public class EditorHelper implements EditorConstants
     }
 
     static public void addComment(EditorState p_state, CommentView p_view, String p_title,
-            String p_comment, String p_priority, String p_status, String p_category, String p_user,
+            String p_comment, String p_priority, String p_status, String p_category, String severity, String p_user,
             boolean share, boolean overwrite) throws EnvoyServletException
     {
         try
         {
             p_state.getEditorManager().addComment(p_view, p_title, p_comment, p_priority, p_status,
-                    p_category, p_user, share, overwrite);
+                    p_category, severity, p_user, share, overwrite);
         }
         catch (GeneralException e)
         {

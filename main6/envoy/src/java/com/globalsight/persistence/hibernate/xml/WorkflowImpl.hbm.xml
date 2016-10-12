@@ -103,6 +103,12 @@
 			type="int" not-null="false" />
         <property name="isSinceVersion87" column="IS_SINCE_8_7" type="yes_no"
             not-null="true" unique="false" />
+        <property name="DQFComment" column="DQFComment"
+            type="string" not-null="false" />
+        <property name="fluencyScore" column="FluencyScore"
+            type="string" not-null="false" />
+        <property name="adequacyScore" column="AdequacyScore"
+            type="string" not-null="false" />
 
 		<many-to-one name="targetLocale" column="TARGET_LOCALE_ID"
 			class="com.globalsight.util.GlobalSightLocale" not-null="true" />

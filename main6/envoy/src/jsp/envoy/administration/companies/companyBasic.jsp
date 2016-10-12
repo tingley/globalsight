@@ -24,7 +24,6 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
-    Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
     SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
 
     // UI fields
@@ -85,6 +84,9 @@
     boolean isHTMLEnabled = PreviewPDFHelper.isHTMLEnabled();
     boolean showInContextReivew = (isInDesignEnabled ||  isOfficeEnabled || isXMLEnabled || isHTMLEnabled);
     
+    String defaultCompanyFluency = "";
+    String defaultCompanyAdequacy = "";
+    
     if (company != null)
     {
         companyName = company.getName();
@@ -136,6 +138,9 @@
         if(company.getEnableWorkflowStatePosts()){
             enableWorkflowStatePosts = "checked";
         }
+        
+        defaultCompanyFluency = company.getDefaultFluency();
+        defaultCompanyAdequacy = company.getDefaultAdequacy();
     }
 %>
 <html>
@@ -144,7 +149,6 @@
 <script SRC="/globalsight/includes/utilityScripts.js"></script>
 <script SRC="/globalsight/includes/setStyleSheet.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
-<%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <script>
 var needWarning = true;
@@ -162,52 +166,12 @@ function submitForm(formAction)
     {
     	if (confirmForm() && confirmTime())
 		{
-    		var tbox = document.getElementById("to");
-    		var stbox = document.getElementById("scorecardTo");
-    		var qtbox = document.getElementById("qualityTo");
-    		var mtbox = document.getElementById("marketTo");
-    		var fbox = document.getElementById("from");
-    		var sfbox = document.getElementById("scorecardFrom");
-    		var qfbox = document.getElementById("qualityFrom");
-    		var mfbox = document.getElementById("marketFrom");
-    		if (tbox.options.length == 0 
-    	    		|| stbox.options.length == 0 || qtbox.options.length == 0 || mtbox.options.length == 0)
-    		{
-    			alert("<c:out value='${alert}'/>");
-    			return false;
-    		}
-    		for(var i=0;i<tbox.options.length;i++)
-    		{
-    			tbox.options[i].selected=true;
-    		}
-    		for(var i=0;i<stbox.options.length;i++)
-    		{
-    			stbox.options[i].selected=true;
-    		}
-    		for(var i=0;i<qtbox.options.length;i++)
-    		{
-    			qtbox.options[i].selected=true;
-    		}
-    		for(var i=0;i<mtbox.options.length;i++)
-    		{
-    			mtbox.options[i].selected=true;
-    		}
-    		for(var i=0;i<fbox.options.length;i++)
-    		{
-    			fbox.options[i].selected=true;
-    		}
-    		for(var i=0;i<sfbox.options.length;i++)
-    		{
-    			sfbox.options[i].selected=true;
-    		}
-    		for(var i=0;i<qfbox.options.length;i++)
-    		{
-    			qfbox.options[i].selected=true;
-    		}
-    		for(var i=0;i<mfbox.options.length;i++)
-    		{
-    			mfbox.options[i].selected=true;
-    		}
+            $("select[id$='From'] option").each(function() {
+                $(this).attr("selected", true);
+            });
+            $("select[id$='To'] option").each(function() {
+                $(this).attr("selected", true);
+            });
             
         	companyForm.action = "<%=saveURL%>";
             companyForm.submit();
@@ -367,84 +331,6 @@ function doOnload()
     {
     	onEnableSSO(eval("<%=isSsoChecked%>"));
     }
-}
-
-function move(f,t) {
-	var fbox = document.getElementById(f);
-	var tbox = document.getElementById(t);
-	for(var i=0; i<fbox.options.length; i++) {
-		if(fbox.options[i].selected && fbox.options[i].value != "") {
-			var no = new Option();
-			no.value = fbox.options[i].value;
-			no.text = fbox.options[i].text;
-			no.title = fbox.options[i].title;
-			tbox.options[tbox.options.length] = no;
-			fbox.options[i].value = "";
-			fbox.options[i].text = "";
-			fbox.options[i].title = "";
-   		}
-	}
-	BumpUp(fbox);
-	SortD(tbox);
-}
-
-function BumpUp(box)  {
-	for(var i=0; i<box.options.length; i++) {
-		if(box.options[i].value == "")  {
-			for(var j=i; j<box.options.length-1; j++)  {
-				box.options[j].value = box.options[j+1].value;
-				box.options[j].text = box.options[j+1].text;
-				box.options[j].title = box.options[j+1].title;
-			}
-			var ln = i;
-			break;
-		}
-	}
-	if(ln < box.options.length)  {
-		box.options.length -= 1;
-		BumpUp(box);
-   	}
-}
-
-function SortD(box){
-	var temp_opts = new Array();
-	var temp = new Object();
-	for(var i=0; i<box.options.length; i++){
-		temp_opts[i] = box.options[i];
-	}
-
-	for(var x=0; x<temp_opts.length-1; x++){
-		for(var y=(x+1); y<temp_opts.length; y++){
-			if(temp_opts[x].text.toLowerCase() > temp_opts[y].text.toLowerCase()){
-				temp = temp_opts[x].text;
-				temp_opts[x].text = temp_opts[y].text;
-	      		temp_opts[y].text = temp;
-	      		
-	      		temp = temp_opts[x].value;
-	      		temp_opts[x].value = temp_opts[y].value;
-	      		temp_opts[y].value = temp;
-
-	      		temp = temp_opts[x].title;
-	      		temp_opts[x].title = temp_opts[y].title;
-	      		temp_opts[y].title = temp;
-	      	}
-	   	}
-	}
-
-	for(var j=0; j<box.options.length; j++){
-		box.options[j].value = temp_opts[j].value;
-		box.options[j].text = temp_opts[j].text;
-		box.options[j].title = temp_opts[j].title;
-	}
-}
-
-function isLetterAndNumber(str){
-	var reg = new RegExp("^[A-Za-z0-9 _,.-]+$");
-	return (reg.test(str));
-}
-
-function isChinese(str){
-	return str.match(/[\u4e00-\u9fa5]/g);
 }
 
 function addTo()
@@ -878,9 +764,9 @@ function addQualityTo()
       			</tr>
         		<tr>
         			<td>
-        				<select id="from" name="from" multiple class="standardText" size="10" style="width:250">
-        				<c:forEach var="op" items="${fromList}">
-	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+        				<select id="segmentCommentFrom" name="segmentCommentFrom" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${allSegmentCommentCategories}">
+	      					<option title="${op.name}" value="${op.name}">${op.name}</option>
 	    				</c:forEach>
         				</select>
         			</td>
@@ -889,22 +775,22 @@ function addQualityTo()
 						<tr>
 		              	<td>
 		                	<input type="button" name="addButton" value=" >> "
-		                    onclick="move('from','to')"><br>
+		                    onclick="move('segmentCommentFrom','segmentCommentTo')"><br>
 		              	</td>
 		            	</tr>
 		            	<tr><td>&nbsp;</td></tr>
 		            	<tr>
 		                	<td>
 		                	<input type="button" name="removedButton" value=" << "
-		                    onclick="move('to','from')">
+		                    onclick="move('segmentCommentTo','segmentCommentFrom')">
 							</td>
 						</tr>
 						</table>
         			</td>
         			<td>
-        				<select id="to" name="to" multiple class="standardText" size="10" style="width:250">
-        				<c:forEach var="op" items="${toList}">
-	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+        				<select id="segmentCommentTo" name="segmentCommentTo" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${segmentCommentCategories}">
+	      					<option title="${op.name}" value="${op.name}">${op.name}</option>
 	    				</c:forEach>
         				</select>
         			</td>
@@ -916,11 +802,11 @@ function addQualityTo()
 	        			<span><c:out value="${label}"/></span> :
         			</td>
         			<td>
-        				<input id="newCategory" size="40" maxlength="100">
+        				<input id="segmentCommentCategory" size="40" maxlength="100">
         				<input style="display:none">
         			</td>
         			<td>
-        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addTo()">
+        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('segmentComment')">
         			</td>
         		</tr>
       			</table>
@@ -943,8 +829,8 @@ function addQualityTo()
         		<tr>
         			<td>
         				<select id="scorecardFrom" name="scorecardFrom" multiple class="standardText" size="10" style="width:250">
-        				<c:forEach var="op" items="${scorecardFromList}">
-	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+        				<c:forEach var="op" items="${allScorecardCategories}">
+	      					<option title="${op.name}" value="${op.name}">${op.name}</option>
 	    				</c:forEach>
         				</select>
         			</td>
@@ -967,8 +853,8 @@ function addQualityTo()
         			</td>
         			<td>
         				<select id="scorecardTo" name="scorecardTo" multiple class="standardText" size="10" style="width:250">
-        				<c:forEach var="op" items="${scorecardToList}">
-	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+        				<c:forEach var="op" items="${scorecardCategories}">
+	      					<option title="${op.name}" value="${op.name}">${op.name}</option>
 	    				</c:forEach>
         				</select>
         			</td>
@@ -980,11 +866,11 @@ function addQualityTo()
 	        			<span><c:out value="${label}"/></span> :
         			</td>
         			<td>
-        				<input id="newScorecardCategory" size="40" maxlength="100">
+        				<input id="scorecardCategory" size="40" maxlength="100">
         				<input style="display:none">
         			</td>
         			<td>
-        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addScorecardTo()">
+        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('scorecard')">
         			</td>
         		</tr>
       			</table>
@@ -1006,8 +892,8 @@ function addQualityTo()
         		<tr>
         			<td>
         				<select id="qualityFrom" name="qualityFrom" multiple class="standardText" size="10" style="width:250">
-        				<c:forEach var="op" items="${qualityFromList}">
-	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+        				<c:forEach var="op" items="${allQualityCategories}">
+	      					<option title="${op.name}" value="${op.name}">${op.name}</option>
 	    				</c:forEach>
         				</select>
         			</td>
@@ -1030,8 +916,8 @@ function addQualityTo()
         			</td>
         			<td>
         				<select id="qualityTo" name="qualityTo" multiple class="standardText" size="10" style="width:250">
-        				<c:forEach var="op" items="${qualityToList}">
-	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+        				<c:forEach var="op" items="${qualityCategories}">
+	      					<option title="${op.name}" value="${op.name}">${op.name}</option>
 	    				</c:forEach>
         				</select>
         			</td>
@@ -1043,11 +929,11 @@ function addQualityTo()
 	        			<span><c:out value="${label}"/></span> :
         			</td>
         			<td>
-        				<input id="newQualityCategory" size="40" maxlength="100">
+        				<input id="qualityCategory" size="40" maxlength="100">
         				<input style="display:none">
         			</td>
         			<td>
-        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addQualityTo()">
+        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('quality')">
         			</td>
         		</tr>
       			</table>
@@ -1069,8 +955,8 @@ function addQualityTo()
         		<tr>
         			<td>
         				<select id="marketFrom" name="marketFrom" multiple class="standardText" size="10" style="width:250">
-        				<c:forEach var="op" items="${marketFromList}">
-	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+        				<c:forEach var="op" items="${allMarketCategories}">
+	      					<option title="${op.name}" value="${op.name}">${op.name}</option>
 	    				</c:forEach>
         				</select>
         			</td>
@@ -1093,8 +979,8 @@ function addQualityTo()
         			</td>
         			<td>
         				<select id="marketTo" name="marketTo" multiple class="standardText" size="10" style="width:250">
-        				<c:forEach var="op" items="${marketToList}">
-	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+        				<c:forEach var="op" items="${marketCategories}">
+	      					<option title="${op.name}" value="${op.name}">${op.name}</option>
 	    				</c:forEach>
         				</select>
         			</td>
@@ -1106,16 +992,225 @@ function addQualityTo()
 	        			<span><c:out value="${label}"/></span> :
         			</td>
         			<td>
-        				<input id="newMarketCategory" size="40" maxlength="100">
+        				<input id="marketCategory" size="40" maxlength="100">
         				<input style="display:none">
         			</td>
         			<td>
-        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addMarketTo()">
+        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('market')">
         			</td>
         		</tr>
       			</table>
     		</td>
   		</tr>
+        <tr valign="top">
+            <td colspan=3>
+                <br/><div class="standardText"><c:out value="${fluencyHelpMsg}"/>:</div>
+                <table border="0" class="standardText" cellpadding="2">
+                <tr>
+                    <td>
+                        <span><c:out value="${labelForLeftTable}"/>
+                    </td>
+                    <td>&nbsp;</td>
+                    <td>
+                        <span><c:out value="${labelForRightTable}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <select id="fluencyFrom" name="fluencyFrom" multiple class="standardText" size="10" style="width:250">
+                        <c:forEach var="op" items="${allFluencyCategories}">
+	      					<option title="${op.name}" value="${op.name}">${op.name}</option>
+                        </c:forEach>
+                        </select>
+                    </td>
+                    <td>
+                        <table>
+                        <tr>
+                        <td>
+                            <input type="button" name="addButton" value=" >> "
+                            onclick="move('fluencyFrom','fluencyTo')"><br>
+                        </td>
+                        </tr>
+                        <tr><td>&nbsp;</td></tr>
+                        <tr>
+                            <td>
+                            <input type="button" name="removedButton" value=" << "
+                            onclick="move('fluencyTo','fluencyFrom')">
+                            </td>
+                        </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <select id="fluencyTo" name="fluencyTo" multiple class="standardText" size="10" style="width:250">
+                        <c:forEach var="op" items="${fluencyCategories}">
+	      					<option title="${op.name}" value="${op.name}">${op.name}</option>
+                        </c:forEach>
+                        </select>
+                    </td>
+                </tr>
+                </table>
+                <table border="0" class="standardText" cellpadding="2">
+                <tr>
+                    <td>
+                        <span><c:out value="${label}"/></span> :
+                    </td>
+                    <td>
+                        <input id="fluencyCategory" size="40" maxlength="100">
+                        <input style="display:none">
+                    </td>
+                    <td>
+                        <input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('fluency')">
+                    </td>
+                </tr>
+                </table>
+            </td>
+        </tr>
+        <tr valign="top">
+            <td colspan=3>
+                <br/><div class="standardText"><c:out value="${adequacyHelpMsg}"/>:</div>
+                <table border="0" class="standardText" cellpadding="2">
+                <tr>
+                    <td>
+                        <span><c:out value="${labelForLeftTable}"/>
+                    </td>
+                    <td>&nbsp;</td>
+                    <td>
+                        <span><c:out value="${labelForRightTable}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <select id="adequacyFrom" name="adequacyFrom" multiple class="standardText" size="10" style="width:250">
+                        <c:forEach var="op" items="${allAdequacyCategories}">
+	      					<option title="${op.name}" value="${op.name}">${op.name}</option>
+                        </c:forEach>
+                        </select>
+                    </td>
+                    <td>
+                        <table>
+                        <tr>
+                        <td>
+                            <input type="button" name="addButton" value=" >> "
+                            onclick="move('adequacyFrom','adequacyTo')"><br>
+                        </td>
+                        </tr>
+                        <tr><td>&nbsp;</td></tr>
+                        <tr>
+                            <td>
+                            <input type="button" name="removedButton" value=" << "
+                            onclick="move('adequacyTo','adequacyFrom')">
+                            </td>
+                        </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <select id="adequacyTo" name="adequacyTo" multiple class="standardText" size="10" style="width:250">
+                        <c:forEach var="op" items="${adequacyCategories}">
+	      					<option title="${op.name}" value="${op.name}">${op.name}</option>
+                        </c:forEach>
+                        </select>
+                    </td>
+                </tr>
+                </table>
+                <table border="0" class="standardText" cellpadding="2">
+                <tr>
+                    <td>
+                        <span><c:out value="${label}"/></span> :
+                    </td>
+                    <td>
+                        <input id="adequacyCategory" size="40" maxlength="100">
+                        <input style="display:none">
+                    </td>
+                    <td>
+                        <input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('adequacy')">
+                    </td>
+                </tr>
+                </table>
+            </td>
+        </tr>
+        <tr valign="top">
+            <td colspan=3>
+                <br/><div class="standardText"><c:out value="${severityHelpMsg}"/>:</div>
+                <table border="0" class="standardText" cellpadding="2">
+                <tr>
+                    <td>
+                        <span><c:out value="${labelForLeftTable}"/>
+                    </td>
+                    <td>&nbsp;</td>
+                    <td>
+                        <span><c:out value="${labelForRightTable}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <select id="severityFrom" name="severityFrom" multiple class="standardText" size="10" style="width:250">
+                        <c:forEach var="op" items="${allSeverityCategories}">
+                            <option title="${op.name}" value="${op.name}">${op.name}</option>
+                        </c:forEach>
+                        </select>
+                    </td>
+                    <td>
+                        <table>
+                        <tr>
+                        <td>
+                            <input type="button" name="addButton" value=" >> "
+                            onclick="move('severityFrom','severityTo')"><br>
+                        </td>
+                        </tr>
+                        <tr><td>&nbsp;</td></tr>
+                        <tr>
+                            <td>
+                            <input type="button" name="removedButton" value=" << "
+                            onclick="move('severityTo','severityFrom')">
+                            </td>
+                        </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <select id="severityTo" name="severityTo" multiple class="standardText" size="10" style="width:250">
+                        <c:forEach var="op" items="${severityCategories}">
+                            <option title="${op.name}" value="${op.name}">${op.name}</option>
+                        </c:forEach>
+                        </select>
+                    </td>
+                </tr>
+                </table>
+                <table border="0" class="standardText" cellpadding="2">
+                <tr>
+                    <td>
+                        <span><c:out value="${label}"/></span> :
+                    </td>
+                    <td>
+                        <input id="severityCategory" size="40" maxlength="100">
+                        <input style="display:none">
+                    </td>
+                    <td>
+                        <input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('severity')">
+                    </td>
+                </tr>
+                </table>
+            </td>
+        </tr>
+        <tr valign="top">
+            <td colspan=3>
+                <br/><div class="standardText"><c:out value="${severityHelpMsg}"/>:</div>
+                <table border="0" class="standardText" cellpadding="2">
+                <tr>
+                    <td>Fluency:
+                        <select id="defaultFluency" name="defaultFluency" class="standardText">
+                        </select>
+                    </td>
+                    <td>
+                        &nbsp;
+                    </td>
+                    <td>Adequacy:
+                        <select id="defaultAdequacy" name="defaultAdequacy" class="standardText">
+                        </select>
+                    </td>
+                </tr>
+                </table>
+            </td>
+        </tr>
         
         <tr><td colspan="3">&nbsp;</td></tr>
         <tr>
@@ -1133,4 +1228,107 @@ function addQualityTo()
 </form>
 </div>
 </body>
+<script SRC="/globalsight/jquery/jquery-1.11.3.min.js"></script>
+<script>
+$().ready(function() {
+    //init define default fluency and acequacy values
+    $("#fluencyTo option").clone().appendTo($("#defaultFluency"));
+    $("#adequacyTo option").clone().appendTo($("#defaultAdequacy"));
+    
+    initDefaultDQF();
+});
+
+function initDefaultDQF() {
+    $("#defaultFluency").val("<%=defaultCompanyFluency%>");
+    $("#defaultAdequacy").val("<%=defaultCompanyAdequacy%>");
+}
+
+//Move option from f to t
+function move(f,t) {
+	var $from = $("#" + f + " option:selected");
+	var $to = $("#" + t);
+	if ($from.length>0) {
+		$from.each(function() {
+			$to.append("<option value='" + $(this).val() + "'>" + $(this).text()+"</option>");
+			$(this).remove();
+		});
+	}
+    if (f.startsWith("fluency")) {
+        $("#defaultFluency").empty().append($("#fluencyTo option").clone());
+        initDefaultDQF();
+    } else if (f.startsWith("adequacy")) {
+        $("#defaultAdequacy").empty().append($("#adequacyTo option").clone());
+        initDefaultDQF();
+    }
+}
+
+//Sort options
+function SortD(box){
+	var $box = $("#" + box);
+    $box.find("option").sort(function(a,b) {
+        var aText = $(a).text().toUpperCase();
+        var bText = $(b).text().toUpperCase();
+        if (aText>bText) return 1;
+        if (aText<bText) return -1;
+        return 0;
+    }).appendTo($box);
+}
+
+function isLetterAndNumber(str){
+	var reg = new RegExp("^[A-Za-z0-9 _,.-]+$");
+	return (reg.test(str));
+}
+
+function isChinese(str){
+	return str.match(/[\u4e00-\u9fa5]/g);
+}
+
+//Add new category
+function addCategory(key) {
+	var newCategoryName = $("#" + key + "Category").val().trim();
+	if (newCategoryName == "") {
+        alert("<%=bundle.getString("msg_company_category_invalid") %>");
+        return;
+	}
+    if (!isLetterAndNumber(newCategoryName) && !isChinese(newCategoryName))
+    {
+        alert("<c:out value='${alert_illegal}' escapeXml='false'/>");
+        return false;
+    }
+    if (!checkNewCategory(key, newCategoryName)) {
+        var tmp = "<option value='" + newCategoryName + "'>" + newCategoryName + "</option>";
+        var keyElement = key + "To";
+        var $to = $("#" + keyElement);
+        $to.append(tmp);
+        
+        //Change default setting values for fluency and adequacy fields
+        if (key == "fluency") {
+            $("#defaultFluency").empty().append($("#fluencyTo option").clone());
+            initDefaultDQF();
+        } else if (key == "adequacy") {
+            $("#defaultAdequacy").empty().append($("#adequacyTo option").clone());
+            initDefaultDQF();
+        }
+        //SortD(keyElement);
+    } else {
+    	alert("There is existing category with the name already. Please using another name.");
+    	return;
+    }
+}
+
+function checkNewCategory(key, name) {
+	var tmp = "";
+    var exist = false;
+    
+    $("select[id^='" + key + "'] option").each(function() {
+        if ($(this).val().toUpperCase() == name.toUpperCase()) {
+            exist = true;
+            return false;
+        }
+    });
+    
+    return exist;
+}
+</script>
+
 </html>

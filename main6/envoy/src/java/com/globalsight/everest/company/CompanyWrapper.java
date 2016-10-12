@@ -16,21 +16,29 @@
  */
 package com.globalsight.everest.company;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import jodd.util.StringBand;
+
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.category.CategoryHelper;
+import com.globalsight.everest.category.CategoryType;
+import com.globalsight.everest.category.CommonCategory;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.StringUtil;
 
 /**
  * This class only represent a wrapper object for the company names defined in
@@ -320,16 +328,15 @@ public class CompanyWrapper
 
     public static List<String> getCompanyCategoryList(String companyId)
     {
-        String hql = "select c.category from Category as c where c.isActive = 'Y' and c.companyId = "
-                + companyId;
+//        String hql = "select c.category from Category as c where c.isActive = 'Y' and c.companyId = "
+//                + companyId;
+        String hql = "select name from CommonCategory where isActive='Y' and isAvailable='Y' and type="
+                + CategoryType.SegmentComment.getValue() + " and companyId=" + companyId;
         List<String> categoryList = (List<String>) HibernateUtil.search(hql);
 
         if (categoryList == null || categoryList.size() == 0)
         {
-            String[] keyArray = new String[]
-            { "lb_conflicts_glossary_guide", "lb_formatting_error",
-                    "lb_mistranslated", "lb_omission_of_text",
-                    "lb_spelling_grammar_punctuation_error" };
+            String[] keyArray = CategoryHelper.SEGMENT_COMMENT;
             categoryList = Arrays.asList(keyArray);
         }
 
@@ -338,16 +345,16 @@ public class CompanyWrapper
 
     public static List<String> getCompanyScorecardCategoryList(String companyId)
     {
-        String hql = "select s.scorecardCategory from ScorecardCategory as s where s.isActive = 'Y' and s.companyId = "
-                + companyId;
+//        String hql = "select s.scorecardCategory from ScorecardCategory as s where s.isActive = 'Y' and s.companyId = "
+//                + companyId;
+        String hql = "select name from CommonCategory where isActive='Y' and isAvailable='Y' and type="
+                + CategoryType.ScoreCard.getValue() + " and companyId=" + companyId;
         List<String> scorecardCategoryList = (List<String>) HibernateUtil
                 .search(hql);
 
         if (scorecardCategoryList == null || scorecardCategoryList.size() == 0)
         {
-            String[] keyArray = new String[]
-            { "lb_spelling_grammar", "lb_consistency", "lb_style",
-                    "lb_terminology", };
+            String[] keyArray = CategoryHelper.SCORECARD;
             scorecardCategoryList = Arrays.asList(keyArray);
         }
 
@@ -356,12 +363,13 @@ public class CompanyWrapper
 
     public static List<String> getCompanyQualityCategoryList(String companyId)
     {
-        String hql = "select q.categoryName from PostReviewCategory as q where q.isActive = 'Y' and q.categoryType ='Q' and q.companyId = "+companyId;
+//        String hql = "select q.categoryName from PostReviewCategory as q where q.isActive = 'Y' and q.categoryType ='Q' and q.companyId = "+companyId;
+        String hql = "select name from CommonCategory where isActive='Y' and isAvailable='Y' and type="
+                + CategoryType.Quality.getValue() + " and companyId=" + companyId;
         List<String> qualityCategoryList = (List<String>)HibernateUtil.search(hql);
         if (qualityCategoryList == null || qualityCategoryList.size() == 0)
         {
-            String[] keyArray = new String[]
-            { "lb_good", "lb_acceptable", "lb_poor",};
+            String[] keyArray = CategoryHelper.QAULITY;
             qualityCategoryList = Arrays.asList(keyArray);
         }
         return qualityCategoryList;
@@ -369,12 +377,14 @@ public class CompanyWrapper
 
     public static List<String> getCompanyMarketCategoryList(String companyId)
     {
-        String hql = "select q.categoryName from PostReviewCategory as q where q.isActive = 'Y' and q.categoryType ='M' and q.companyId = "+companyId;
+        //String hql = "select q.categoryName from PostReviewCategory as q where q.isActive = 'Y' and q.categoryType ='M' and q.companyId = "+companyId;
+        String hql = "select name from CommonCategory where isActive='Y' and isAvailable='Y' and type="
+                + CategoryType.Market.getValue() + " and companyId=" + companyId;
+
         List<String> marketCategoryList = (List<String>)HibernateUtil.search(hql);
         if (marketCategoryList == null || marketCategoryList.size() == 0)
         {
-            String[] keyArray = new String[]
-            { "lb_suitable_fluent", "lb_literal_at_times", "lb_unsuitable",};
+            String[] keyArray = CategoryHelper.MARKET;
             marketCategoryList = Arrays.asList(keyArray);
         }
         return marketCategoryList;
@@ -382,8 +392,10 @@ public class CompanyWrapper
     
     public static List<String> getCompanyCategoryAvailList(String companyId)
     {
-        String hql = "select c.category from Category as c where c.isActive = 'N' and c.companyId = "
-                + companyId;
+//        String hql = "select c.category from Category as c where c.isActive = 'N' and c.companyId = "
+//                + companyId;
+        String hql = "select name from CommonCategory where isActive='Y' and isAvailable='N' and type="
+                + CategoryType.SegmentComment.getValue() + " and companyId=" + companyId;
         List<String> availableCategoryList = (List<String>) HibernateUtil.search(hql);
         
         return availableCategoryList;
@@ -391,8 +403,10 @@ public class CompanyWrapper
     
     public static List<String> getCompanyScorecardCategoryAvailList(String companyId)
     {
-        String hql = "select s.scorecardCategory from ScorecardCategory as s where s.isActive = 'N' and s.companyId = "
-                + companyId;
+//        String hql = "select s.scorecardCategory from ScorecardCategory as s where s.isActive = 'N' and s.companyId = "
+//                + companyId;
+        String hql = "select name from CommonCategory where isActive='Y' and isAvailable='N' and type="
+                + CategoryType.ScoreCard.getValue() + " and companyId=" + companyId;
         List<String> availableScorecardCategoryList = (List<String>) HibernateUtil
                 .search(hql);
         
@@ -402,16 +416,77 @@ public class CompanyWrapper
     
     public static List<String> getCompanyQualityCategoryAvailList(String companyId)
     {
-        String hql = "select q.categoryName from PostReviewCategory as q where q.isActive = 'N' and q.categoryType ='Q' and q.companyId = "+companyId;
+        //String hql = "select q.categoryName from PostReviewCategory as q where q.isActive = 'N' and q.categoryType ='Q' and q.companyId = "+companyId;
+        String hql = "select name from CommonCategory where isActive='Y' and isAvailable='N' and type="
+                + CategoryType.Quality.getValue() + " and companyId=" + companyId;
+
         List<String> availableQualityCategoryList = (List<String>)HibernateUtil.search(hql);
         return availableQualityCategoryList;
     }
     
     public static List<String> getCompanyMarketCategoryAvailList(String companyId)
     {
-        String hql = "select q.categoryName from PostReviewCategory as q where q.isActive = 'N' and q.categoryType ='M' and q.companyId = "+companyId;
+        //String hql = "select q.categoryName from PostReviewCategory as q where q.isActive = 'N' and q.categoryType ='M' and q.companyId = "+companyId;
+        String hql = "select name from CommonCategory where isActive='Y' and isAvailable='N' and type="
+                + CategoryType.Market.getValue() + " and companyId=" + companyId;
+
         List<String> availableMarketCategoryList = (List<String>)HibernateUtil.search(hql);
         return availableMarketCategoryList;
     }
 
+    public static List<CommonCategory> getCompanyCategories(String companyId, CategoryType type,
+            boolean isAvaliable, boolean isAll)
+    {
+        StringBand hql = new StringBand(256);
+        hql.append("from CommonCategory where companyId = ").append(companyId);
+        hql.append(" and isActive='Y'");
+        hql.append(" and type=").append(type.getValue());
+        if (!isAll)
+            hql.append(" and isAvailable='").append(isAvaliable ? "Y" : "N").append("'");
+
+        return (List<CommonCategory>) HibernateUtil.search(hql.toString());
+    }
+
+    public static List<String> getCompanyCategoryNames(String companyId, CategoryType type,
+            boolean isAvailable)
+    {
+        List<CommonCategory> categories = getCompanyCategories(companyId, type, isAvailable, false);
+        List<String> names = new ArrayList<String>();
+        if (categories != null && categories.size() > 0)
+        {
+            for (CommonCategory commonCategory : categories)
+            {
+                names.add(commonCategory.getName());
+            }
+        }
+        return names;
+    }
+
+    public static List<String> getCompanyCategoryNames(ResourceBundle bundle, String companyId,
+            CategoryType type, boolean isAvailable)
+    {
+        List<String> names = new ArrayList<String>();
+        if (StringUtil.isEmpty(companyId))
+            return names;
+        List<String> allNames = getCompanyCategoryNames(companyId, type, isAvailable);
+        if (allNames != null && allNames.size() > 0 && bundle != null)
+        {
+            // handle name if it uses locale resource
+            String tmp = null;
+            for (String s : allNames)
+            {
+                try
+                {
+                    tmp = bundle.getString(s);
+                    names.add(tmp);
+                }
+                catch (Exception e)
+                {
+                    // non-locale resource
+                    names.add(s);
+                }
+            }
+        }
+        return names;
+    }
 }

@@ -345,6 +345,7 @@ function doOk()
     priority = getSelectedValue(document.getElementById("idPriority"));
     status = getSelectedValue(document.getElementById("idStatus"));
     category = getSelectedValue(document.getElementById("idCategory"));
+    severity = getSelectedValue(document.getElementById("idSeverity"));
 
     var rootWindow =  window.opener.parent.parent.parent.frames["review"];
     if (rootWindow)
@@ -355,8 +356,8 @@ function doOk()
     var overwrite = document.getElementById("overwrite").checked;
    // var main=rootWindow.parent.parent.parent.parent;
    	//main.localData=null;
-	try {rootWindow.SaveComment2(g_tuId, g_tuvId, g_subId, action, title, comment, priority, status, category, share, overwrite);
- } catch (ex) {  window.opener.SaveComment2(g_tuId, g_tuvId, g_subId,  action, title, comment, priority, status, category, share, overwrite);
+	try {rootWindow.SaveComment2(g_tuId, g_tuvId, g_subId, action, title, comment, priority, status, category,severity, share, overwrite);
+ } catch (ex) {  window.opener.SaveComment2(g_tuId, g_tuvId, g_subId,  action, title, comment, priority, status, category, severity, share, overwrite);
  }
 
     //rootWindow.SaveComment2(g_tuId, g_tuvId, g_subId,
@@ -554,12 +555,22 @@ function doOnLoad()
 	  <td  colspan="3" >
 	  <span class="label"><%=bundle.getString("lb_category") %>:</span>
 	    <select id="idCategory" name="idCategory" onchange="setDirty()" style="width:300">
-			<c:forEach var="op" items="${toList}">
-				<option title="${op.value}" value="${op.key}">${op.value}</option>
+			<c:forEach var="op" items="${segmentCommentCategories}">
+				<option title="${op}" value="${op}">${op}</option>
 			</c:forEach>
 	    </select>
 	  </td>
 	</tr>
+    <tr class="row1">        
+      <td  colspan="3" >
+      <span class="label"><%=bundle.getString("lb_dqf_severity") %>:</span>
+        <select id="idSeverity" name="idSeverity" onchange="setDirty()" style="width:300">
+            <c:forEach var="op" items="${severityCategories}">
+                <option title="${op}" value="${op}">${op}</option>
+            </c:forEach>
+        </select>
+      </td>
+    </tr>
 	<tr>		 
 	  <td  colspan="2" >
 	     <span class="label"><%=bundle.getString("lb_shareOtherLocales")%> :</span>

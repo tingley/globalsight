@@ -1422,14 +1422,12 @@ public class TaskListHandler extends PageHandler
                         {
                             WorkflowImpl workflowImpl = (WorkflowImpl) task
                                     .getWorkflow();
-                            if (workflowImpl.getScorecardShowType() == 1
-                                    && StringUtil.isEmpty(workflowImpl
-                                            .getScorecardComment()))
+                            if ((workflowImpl.getScorecardShowType() == 1 || workflowImpl
+                                    .getScorecardShowType() == 3)
+                                    && StringUtil.isEmpty(workflowImpl.getScorecardComment()))
                             {
-                                isNeedScoreTaskId.append("[JobID:")
-                                        .append(task.getJobId())
-                                        .append(",JobName:")
-                                        .append(task.getJobName()).append("],");
+                                isNeedScoreTaskId.append("[JobID:").append(task.getJobId())
+                                        .append(",JobName:").append(task.getJobName()).append("],");
                                 continue;
                             }
                         }

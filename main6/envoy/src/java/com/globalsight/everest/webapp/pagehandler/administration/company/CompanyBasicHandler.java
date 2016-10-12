@@ -427,6 +427,8 @@ public class CompanyBasicHandler extends PageHandler implements
                 bundle.getString("helper_text_dqf_adequacy_category"));
         p_request.setAttribute("severityHelpMsg",
                 bundle.getString("helper_text_dqf_severity_category"));
+        p_request.setAttribute("defaultSettingHelpMsg",
+                bundle.getString("helper_text_dqf_define_default"));
         p_request.setAttribute("label", label_new_category);
         p_request.setAttribute("labelForLeftTable", labelForLeftTable);
         p_request.setAttribute("labelForRightTable", labelForRightTable);

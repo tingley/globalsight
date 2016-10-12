@@ -1193,7 +1193,7 @@ function addQualityTo()
         </tr>
         <tr valign="top">
             <td colspan=3>
-                <br/><div class="standardText"><c:out value="${severityHelpMsg}" escapeXml="false" />:</div>
+                <br/><div class="standardText"><c:out value="${defaultSettingHelpMsg}" escapeXml="false" />:</div>
                 <table border="0" class="standardText" cellpadding="2">
                 <tr>
                     <td>Fluency:

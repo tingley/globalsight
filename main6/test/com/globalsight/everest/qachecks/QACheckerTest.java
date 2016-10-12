@@ -1,6 +1,7 @@
 package com.globalsight.everest.qachecks;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -26,13 +27,58 @@ public class QACheckerTest
     }
     
     @Test
-    public void testGetState() throws Exception
+    public void testGetState1() throws Exception
+    {
+        ArrayList<String> tuvStateNames = new ArrayList<String>();
+        tuvStateNames.add(TuvState.APPROVED.getName());
+        tuvStateNames.add(TuvState.LOCALIZED.getName());
+        Method method = checker.getClass().getDeclaredMethod("getState", String.class);
+        method.setAccessible(true);
+        for (String tuvStateName : tuvStateNames)
+        {
+            Object resultObject = method.invoke(checker, tuvStateName);
+            String expected = ReportConstants.SOURCE_EQUAL_TARGET_TRANSLATED_OR_APPROVED;
+            Assert.assertEquals(expected, resultObject);
+        }
+    }
+    
+    @Test
+    public void testGetState2() throws Exception
     {
         Method method = checker.getClass().getDeclaredMethod("getState", String.class);
         method.setAccessible(true);
-        Object resultObject = method.invoke(checker, TuvState.APPROVED.getName());
-        String expected = ReportConstants.SOURCE_EQUAL_TARGET_TRANSLATED_OR_APPROVED;
+        Object resultObject = method.invoke(checker, TuvState.NOT_LOCALIZED.getName());
+        String expected = ReportConstants.SOURCE_EQUAL_TARGET_UNTRANSLATED;
         Assert.assertEquals(expected, resultObject);
     }
     
+    @Test
+    public void testGetState3() throws Exception
+    {
+        Method method = checker.getClass().getDeclaredMethod("getState", String.class);
+        method.setAccessible(true);
+        Object resultObject = method.invoke(checker, TuvState.EXACT_MATCH_LOCALIZED.getName());
+        String expected = ReportConstants.SOURCE_EQUAL_TARGET_EXACT_MATCH;
+        Assert.assertEquals(expected, resultObject);
+    }
+    
+    @Test
+    public void testGetState4() throws Exception
+    {
+        Method method = checker.getClass().getDeclaredMethod("getState", String.class);
+        method.setAccessible(true);
+        Object resultObject = method.invoke(checker, TuvState.DO_NOT_TRANSLATE.getName());
+        String expected = ReportConstants.SOURCE_EQUAL_TARGET_DO_NOT_TRANSLATE;
+        Assert.assertEquals(expected, resultObject);
+    }
+    
+    @Test
+    public void testGetState5() throws Exception
+    {
+        Method method = checker.getClass().getDeclaredMethod("getState", String.class);
+        method.setAccessible(true);
+        Object resultObject = method.invoke(checker, TuvState.OUT_OF_DATE.getName());
+        String expected = "";
+        Assert.assertEquals(expected, resultObject);
+    }
 }

@@ -48,9 +48,9 @@ namespace GlobalSight.AdobeConverter
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(156, 185);
+            this.button1.Location = new System.Drawing.Point(156, 171);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(67, 27);
+            this.button1.Size = new System.Drawing.Size(67, 25);
             this.button1.TabIndex = 4;
             this.button1.Text = "Start";
             this.button1.UseVisualStyleBackColor = true;
@@ -58,9 +58,9 @@ namespace GlobalSight.AdobeConverter
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(276, 185);
+            this.button2.Location = new System.Drawing.Point(276, 171);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(67, 27);
+            this.button2.Size = new System.Drawing.Size(67, 25);
             this.button2.TabIndex = 5;
             this.button2.Text = "Stop";
             this.button2.UseVisualStyleBackColor = true;
@@ -75,16 +75,16 @@ namespace GlobalSight.AdobeConverter
             // 
             // textBox_dir_indesign
             // 
-            this.textBox_dir_indesign.Location = new System.Drawing.Point(143, 93);
+            this.textBox_dir_indesign.Location = new System.Drawing.Point(143, 86);
             this.textBox_dir_indesign.Name = "textBox_dir_indesign";
-            this.textBox_dir_indesign.Size = new System.Drawing.Size(200, 20);
+            this.textBox_dir_indesign.Size = new System.Drawing.Size(200, 21);
             this.textBox_dir_indesign.TabIndex = 6;
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(349, 93);
+            this.button3.Location = new System.Drawing.Point(349, 86);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(58, 23);
+            this.button3.Size = new System.Drawing.Size(58, 21);
             this.button3.TabIndex = 8;
             this.button3.Text = "Browse...";
             this.button3.UseVisualStyleBackColor = true;
@@ -94,7 +94,7 @@ namespace GlobalSight.AdobeConverter
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(59, 27);
+            this.label1.Location = new System.Drawing.Point(59, 25);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(295, 20);
             this.label1.TabIndex = 10;
@@ -111,9 +111,9 @@ namespace GlobalSight.AdobeConverter
             // cbAutoStart
             // 
             this.cbAutoStart.AutoSize = true;
-            this.cbAutoStart.Location = new System.Drawing.Point(32, 191);
+            this.cbAutoStart.Location = new System.Drawing.Point(32, 176);
             this.cbAutoStart.Name = "cbAutoStart";
-            this.cbAutoStart.Size = new System.Drawing.Size(73, 17);
+            this.cbAutoStart.Size = new System.Drawing.Size(84, 16);
             this.cbAutoStart.TabIndex = 12;
             this.cbAutoStart.Text = "Auto Start";
             this.cbAutoStart.UseVisualStyleBackColor = true;
@@ -122,9 +122,9 @@ namespace GlobalSight.AdobeConverter
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 96);
+            this.label2.Location = new System.Drawing.Point(12, 89);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(108, 13);
+            this.label2.Size = new System.Drawing.Size(131, 12);
             this.label2.TabIndex = 13;
             this.label2.Text = "Conversion Directory:";
             // 
@@ -133,7 +133,7 @@ namespace GlobalSight.AdobeConverter
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1,
             this.toolStripStatusLabel2});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 239);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 219);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(430, 22);
             this.statusStrip1.TabIndex = 15;
@@ -141,7 +141,7 @@ namespace GlobalSight.AdobeConverter
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(42, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(46, 17);
             this.toolStripStatusLabel1.Text = "Status:";
             // 
             // toolStripStatusLabel2
@@ -151,9 +151,9 @@ namespace GlobalSight.AdobeConverter
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(430, 261);
+            this.ClientSize = new System.Drawing.Size(430, 241);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.cbAutoStart);
@@ -166,9 +166,9 @@ namespace GlobalSight.AdobeConverter
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.ShowInTaskbar = false;
-            this.Text = "Adobe InDesign CC 2015 Converter - Version: 8.6.4";
-            this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
+            this.Text = "Adobe InDesign CC 2015 Converter - Version: 8.7.2";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
+            this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);

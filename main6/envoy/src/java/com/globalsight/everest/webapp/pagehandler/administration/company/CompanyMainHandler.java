@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +47,9 @@ import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl;
 import com.globalsight.cxe.persistence.segmentationrulefile.SegmentationRuleFileEntityException;
 import com.globalsight.cxe.util.company.CreateCompanyUtil;
+import com.globalsight.everest.category.CategoryHelper;
+import com.globalsight.everest.category.CategoryType;
+import com.globalsight.everest.category.CommonCategory;
 import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.PostReviewCategory;
@@ -57,6 +61,7 @@ import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.CompanyComparator;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -212,41 +217,7 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         {
             long companyId = company.getId();
 
-            String[] categoriesFrom = p_request.getParameterValues("from");
-            if (categoriesFrom != null && categoriesFrom.length > 0)
-            {
-                createCategory(categoriesFrom, companyId, false);
-            }
-
-            String[] categoriesTo = p_request.getParameterValues("to");
-            createCategory(categoriesTo, companyId, true);
-
-            String[] scorecardCategoriesFrom = p_request.getParameterValues("scorecardFrom");
-            if (scorecardCategoriesFrom != null && scorecardCategoriesFrom.length > 0)
-            {
-                createScorecardCategory(scorecardCategoriesFrom, companyId, false);
-            }
-
-            String[] scorecardCategoriesTo = p_request.getParameterValues("scorecardTo");
-            createScorecardCategory(scorecardCategoriesTo, companyId, true);
-
-            String[] qualityCategoriesFrom = p_request.getParameterValues("qualityFrom");
-            if (qualityCategoriesFrom != null && qualityCategoriesFrom.length > 0)
-            {
-                createQualityCategory(qualityCategoriesFrom, companyId, false);
-            }
-
-            String[] qualityCategoriesTo = p_request.getParameterValues("qualityTo");
-            createQualityCategory(qualityCategoriesTo, companyId, true);
-
-            String[] marketCategoriesFrom = p_request.getParameterValues("marketFrom");
-            if (marketCategoriesFrom != null && marketCategoriesFrom.length > 0)
-            {
-                createMarketCategory(marketCategoriesFrom, companyId, false);
-            }
-
-            String[] marketCategoriesTo = p_request.getParameterValues("marketTo");
-            createMarketCategory(marketCategoriesTo, companyId, true);
+            processCategories(p_request, companyId);
 
             initialFilterConfigurations(companyId);
             initialHTMLFilter(companyId);
@@ -270,6 +241,92 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
             // GBS-4400
             CreateCompanyUtil.createCompanyWithThread(data);
         }
+    }
+
+    private void processCategories(HttpServletRequest p_request, long companyId)
+    {
+        String[] tmp = null;
+
+        ArrayList<CommonCategory> allCommonCategories = new ArrayList<CommonCategory>();
+        ArrayList<CommonCategory> commonCategories = null;
+
+        tmp = p_request.getParameterValues("segmentCommentFrom");
+        if ((commonCategories = createCategoryList(tmp, CategoryType.SegmentComment, false,
+                companyId)) != null)
+            allCommonCategories.addAll(commonCategories);
+        tmp = p_request.getParameterValues("segmentCommentTo");
+        if ((commonCategories = createCategoryList(tmp, CategoryType.SegmentComment, true,
+                companyId)) != null)
+            allCommonCategories.addAll(commonCategories);
+
+        // Vincent Yan, 2016/09/30, Change to store categories into one
+        // table categories
+        tmp = p_request.getParameterValues("scorecardFrom");
+        if ((commonCategories = createCategoryList(tmp, CategoryType.ScoreCard, false, companyId)) != null)
+            allCommonCategories.addAll(commonCategories);
+        tmp = p_request.getParameterValues("scorecardTo");
+        if ((commonCategories = createCategoryList(tmp, CategoryType.ScoreCard, true, companyId)) != null)
+            allCommonCategories.addAll(commonCategories);
+
+        tmp = p_request.getParameterValues("qualityFrom");
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Quality, false, companyId)) != null)
+            allCommonCategories.addAll(commonCategories);
+        tmp = p_request.getParameterValues("qualityTo");
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Quality, true, companyId)) != null)
+            allCommonCategories.addAll(commonCategories);
+
+        tmp = p_request.getParameterValues("marketFrom");
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Market, false, companyId)) != null)
+            allCommonCategories.addAll(commonCategories);
+        tmp = p_request.getParameterValues("marketTo");
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Market, true, companyId)) != null)
+            allCommonCategories.addAll(commonCategories);
+
+        tmp = p_request.getParameterValues("fluencyFrom");
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Fluency, false, companyId)) != null)
+            allCommonCategories.addAll(commonCategories);
+        tmp = p_request.getParameterValues("fluencyTo");
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Fluency, true, companyId)) != null)
+            allCommonCategories.addAll(commonCategories);
+
+        tmp = p_request.getParameterValues("adequacyFrom");
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Adequacy, false, companyId)) != null)
+            allCommonCategories.addAll(commonCategories);
+        tmp = p_request.getParameterValues("adequacyTo");
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Adequacy, true, companyId)) != null)
+            allCommonCategories.addAll(commonCategories);
+
+        tmp = p_request.getParameterValues("severityFrom");
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Severity, false, companyId)) != null)
+            allCommonCategories.addAll(commonCategories);
+        tmp = p_request.getParameterValues("severityTo");
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Severity, true, companyId)) != null)
+            allCommonCategories.addAll(commonCategories);
+
+        CategoryHelper.addCategories(allCommonCategories);
+    }
+
+    private ArrayList<com.globalsight.everest.category.CommonCategory> createCategoryList(String[] names,
+            CategoryType type, boolean isValiable, long companyId)
+    {
+        ArrayList<com.globalsight.everest.category.CommonCategory> categories = null;
+        if (names != null && names.length > 0)
+        {
+            categories = new ArrayList<com.globalsight.everest.category.CommonCategory>();
+            com.globalsight.everest.category.CommonCategory category = null;
+            for (String name : names)
+            {
+                if (StringUtil.isEmpty(name))
+                    continue;
+                category = new com.globalsight.everest.category.CommonCategory();
+                category.setName(name.trim());
+                category.setCompanyId(companyId);
+                category.setType(type.getValue());
+                category.setIsAvailable(isValiable);
+                categories.add(category);
+            }
+        }
+        return categories;
     }
 
     /**
@@ -298,39 +355,11 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         Company company = (Company) sessionMgr.getAttribute(CompanyConstants.COMPANY);
         modifyCompany(company, p_request);
         ServerProxy.getJobHandler().modifyCompany(company);
-        String[] categoriesFrom = p_request.getParameterValues("from");
-        String[] categoriesTo = p_request.getParameterValues("to");
-        String[] scorecardCategoriesFrom = p_request.getParameterValues("scorecardFrom");
-        String[] scorecardCategoriesTo = p_request.getParameterValues("scorecardTo");
 
-        String[] qualityCategoriesFrom = p_request.getParameterValues("qualityFrom");
-        String[] qualityCategoriesTo = p_request.getParameterValues("qualityTo");
-        String[] marketCategoriesFrom = p_request.getParameterValues("marketFrom");
-        String[] marketCategoriesTo = p_request.getParameterValues("marketTo");
-        // delete categories first
-        deleteCategory(company.getId());
-        if (categoriesFrom != null && categoriesFrom.length > 0)
-        {
-            createCategory(categoriesFrom, company.getId(), false);
-        }
-        createCategory(categoriesTo, company.getId(), true);
-        deleteScorecardCategory(company.getId());
-        if (scorecardCategoriesFrom != null && scorecardCategoriesFrom.length > 0)
-        {
-            createScorecardCategory(scorecardCategoriesFrom, company.getId(), false);
-        }
-        createScorecardCategory(scorecardCategoriesTo, company.getId(), true);
-        deleteQualityAndMarketCategory(company.getId());
-        if (qualityCategoriesFrom != null && qualityCategoriesFrom.length > 0)
-        {
-            createQualityCategory(qualityCategoriesFrom, company.getId(), false);
-        }
-        createQualityCategory(qualityCategoriesTo, company.getId(), true);
-        if (marketCategoriesFrom != null && marketCategoriesFrom.length > 0)
-        {
-            createMarketCategory(marketCategoriesFrom, company.getId(), false);
-        }
-        createMarketCategory(marketCategoriesTo, company.getId(), true);
+        long companyId = company.getId();
+        CategoryHelper.removeCategoryByCompany(companyId);
+        processCategories(p_request, companyId);
+
         clearSessionExceptTableInfo(session, CompanyConstants.COMPANY_KEY);
     }
 
@@ -945,6 +974,9 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         }
 
         setInContextReview(p_request, company);
+
+        company.setDefaultFluency(ServletUtil.get(p_request, "defaultFluency"));
+        company.setDefaultAdequacy(ServletUtil.get(p_request, "defaultAdequacy"));
     }
 
     private void setInContextReview(HttpServletRequest p_request, Company company)
@@ -1096,6 +1128,9 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         {
             company.setEnableWorkflowStatePosts(true);
         }
+
+        company.setDefaultFluency(ServletUtil.get(p_request, "defaultFluency"));
+        company.setDefaultAdequacy(ServletUtil.get(p_request, "defaultAdequacy"));
 
         return company;
     }

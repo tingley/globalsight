@@ -45,6 +45,7 @@
 			type="yes_no" not-null="false" unique="false" />
 		<property name="enableWorkflowStatePosts" column="ENABLE_WORKFLOW_STATE_POSTS"
 			type="yes_no" not-null="false" unique="false" />
-			
+		<property name="defaultFluency" column="DEFAULT_FLUENCY" type="string" length="200" not-null="false" />
+        <property name="defaultAdequacy" column="DEFAULT_ADEQUACY" type="string" length="200" not-null="false" />
 	</class>
 </hibernate-mapping>

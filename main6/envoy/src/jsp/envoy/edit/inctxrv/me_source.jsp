@@ -392,7 +392,7 @@ function SaveSegment(tuId, tuvId, subId, segment, ptagFormat)
     parent.parent.target.content.Refresh();
 }
 
-function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, status, category, share, overwrite)
+function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, status, category, severity, share, overwrite)
 {
 	var o_form = document.CommentForm;
 
@@ -405,6 +405,7 @@ function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, stat
     o_form.cmtPriority.value = priority;
     o_form.cmtStatus.value = status;
     o_form.cmtCategory.value = category;
+    o_form.cmtSeverity.value = severity;
     o_form.cmtShare.value = share;
     o_form.cmtOverwrite.value = overwrite;
     main.localData=null;
@@ -768,6 +769,7 @@ function update_tr(id)
 <input type="hidden" name="cmtPriority" value="">
 <input type="hidden" name="cmtStatus"   value="">
 <input type="hidden" name="cmtCategory"   value="">
+<input type="hidden" name="cmtSeverity"   value="">
 <input type="hidden" name="cmtShare"   value="">
 <input type="hidden" name="cmtOverwrite"   value="">
 </FORM>

@@ -623,6 +623,11 @@ public class DownloadParams implements Serializable
     {
         return m_fileFormat;
     }
+    
+    public void setFileFormatId(int p_fileFormat)
+    {
+        m_fileFormat = p_fileFormat;
+    }
 
     /**
      * Get the downloadEditAll state.

@@ -198,14 +198,13 @@ public interface CommentManager
      */
     public Issue addIssue(int p_levelObjectType, long p_levelObjectId,
             String p_title, String p_priority, String p_status,
-            String p_category, String p_creatorUserId, String p_comment,
+            String p_category, String severity, String p_creatorUserId, String p_comment,
             String p_logicalKey) throws RemoteException, CommentException;
 
-    public Issue addIssue(int p_levelObjectType, long p_levelObjectId,
-            String p_title, String p_priority, String p_status,
-            String p_category, String p_creatorUserId, String p_comment,
-            String p_logicalKey, boolean share, boolean overwrite)
-            throws RemoteException, CommentException;
+    public Issue addIssue(int p_levelObjectType, long p_levelObjectId, String p_title,
+            String p_priority, String p_status, String p_category, String severity,
+            String p_creatorUserId, String p_comment, String p_logicalKey, boolean share,
+            boolean overwrite) throws RemoteException, CommentException;
 
     /**
      * Reply and add a comment to an existing issue. The status, title and
@@ -236,12 +235,12 @@ public interface CommentManager
      *            since it is a reply to a previous comment.
      */
     public Issue replyToIssue(long p_issueId, String p_title,
-            String p_priority, String p_status, String p_category,
+            String p_priority, String p_status, String p_category, String severity,
             String p_reportedBy, String p_comment) throws RemoteException,
             CommentException;
 
     public Issue replyToIssue(long p_issueId, String p_title,
-            String p_priority, String p_status, String p_category,
+            String p_priority, String p_status, String p_category, String severity,
             String p_reportedBy, String p_comment, boolean share,
             boolean overwrite) throws RemoteException, CommentException;
 
@@ -275,11 +274,11 @@ public interface CommentManager
      *            text from the latest IssueHistory should be removed.
      */
     public Issue editIssue(long p_issueId, String p_title, String p_priority,
-            String p_status, String p_category, String p_reportedBy,
+            String p_status, String p_category, String severity, String p_reportedBy,
             String p_comment) throws RemoteException, CommentException;
 
     public Issue editIssue(long p_issueId, String p_title, String p_priority,
-            String p_status, String p_category, String p_reportedBy,
+            String p_status, String p_category, String severity, String p_reportedBy,
             String p_comment, boolean share, boolean overwrite)
             throws RemoteException, CommentException;
 

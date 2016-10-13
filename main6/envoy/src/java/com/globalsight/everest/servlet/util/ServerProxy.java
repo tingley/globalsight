@@ -74,7 +74,6 @@ import com.globalsight.everest.webapp.pagehandler.rss.RSSPersistenceManagerWLRem
 import com.globalsight.everest.workflow.WorkflowServerWLRemote;
 import com.globalsight.everest.workflowmanager.WorkflowEventObserverWLRemote;
 import com.globalsight.everest.workflowmanager.WorkflowManagerWLRemote;
-import com.globalsight.mediasurface.CmsUserManagerWLRemote;
 import com.globalsight.scheduling.EventSchedulerWLRemote;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.scheduler.ITermbaseScheduler;
@@ -90,14 +89,11 @@ import com.globalsight.webservices.remoteaccess.RemoteAccessManagerWLRemote;
  */
 public class ServerProxy
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            ServerProxy.class.getName());
+    private static final Logger CATEGORY = Logger.getLogger(ServerProxy.class.getName());
 
     // lazy instantiation variables.
 
     private static CalendarManagerWLRemote m_calendarManager = null;
-    private static CmsUserManagerWLRemote m_cmsUserManager = null;
     private static CommentManagerWLRemote m_commentReferenceManager = null;
     private static CostingEngineWLRemote m_costingEngine = null;
     private static DBConnectionPersistenceManagerWLRemote m_dbconnectionManager = null;
@@ -1092,26 +1088,6 @@ public class ServerProxy
         }
 
         return m_calendarManager;
-    }
-
-    public static CmsUserManagerWLRemote getCmsUserManager()
-        throws GeneralException
-    {
-        if (m_cmsUserManager == null)
-        {
-            try
-            {
-                m_cmsUserManager = (CmsUserManagerWLRemote)
-                    SERVER_REGISTRY.lookup(
-                        CmsUserManagerWLRemote.SERVICE_NAME);
-            }
-            catch (NamingException ne)
-            {
-                throwException(ne);
-            }
-        }
-
-        return m_cmsUserManager;
     }
 
     public static DocumentumPersistenceManagerWLRemote getDocumentumPersistenceManager()

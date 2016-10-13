@@ -262,7 +262,6 @@ function initPermissions()
             }
             if (permForm.elements[m].value == "cat.lb_my_activities"
                         ||permForm.elements[m].value == "cat.lb_setup"
-                        || permForm.elements[m].value == "cat.lb_cms"
                         || permForm.elements[m].value == "cat.lb_notification_options")
                     permForm.elements[m].disabled = false;
         }

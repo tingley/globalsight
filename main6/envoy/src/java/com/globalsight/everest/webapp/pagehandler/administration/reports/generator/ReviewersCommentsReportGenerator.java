@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -47,6 +48,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
+import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
 import com.globalsight.everest.comment.IssueImpl;
@@ -73,6 +75,8 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportH
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
+import com.globalsight.everest.workflow.ScorecardScore;
+import com.globalsight.everest.workflow.ScorecardScoreHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tw.PseudoConstants;
@@ -101,6 +105,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
     static private final Logger logger = Logger.getLogger(ReviewersCommentsReportGenerator.class);
 
     private static final String CATEGORY_FAILURE_DROP_DOWN_LIST = "categoryFailureDropDownList";
+    private static final String CATEGORY_SEVERITY_LIST = "categorySeverityList";
 
     private CellStyle contentStyle = null;
     private CellStyle rtlContentStyle = null;
@@ -118,18 +123,28 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
 
     public static final int LANGUAGE_HEADER_ROW = 3;
     public static final int LANGUAGE_INFO_ROW = 4;
-    public static final int SEGMENT_HEADER_ROW = 6;
-    public static final int SEGMENT_START_ROW = 7;
+    public static int SEGMENT_HEADER_ROW = 6;
+    public static int SEGMENT_START_ROW = 7;
     // "E" column, index 4
     public static final int CATEGORY_FAILURE_COLUMN = 4;
     // "F" column, index 5
     public static final int COMMENT_STATUS_COLUMN = 5;
+    
+    public static final int SEVERITY_COLUMN = 6;
 
     private Locale m_uiLocale = Locale.US;
     String m_userId;
     private ResourceBundle m_bundle;
     private String m_dateFormat;
     private boolean cancel = false;
+    
+    private boolean isDQFEnabled = false;
+    private boolean isScorecradEnabled = false;
+    private int needToAdjust = 0;
+    private String fluencyScore = "";
+    private String adequacyScore = "";
+    private List<ScorecardScore> scores = null;
+    private List<String> scorecardCategories = null;
 
     public ReviewersCommentsReportGenerator(String p_cureentCompanyName)
     {
@@ -315,6 +330,13 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
         List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(p_job);
         for (GlobalSightLocale trgLocale : p_targetLocales)
         {
+            needToAdjust = 0;
+            fluencyScore = "";
+            adequacyScore = "";
+            scores = null;
+            isDQFEnabled = false;
+            isScorecradEnabled = false;
+            
             if (!jobTL.contains(trgLocale))
                 continue;
 
@@ -334,6 +356,9 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             // Add Locale Pair Header
             addLanguageHeader(p_workbook, sheet);
 
+            // Add DQF and Scorecard info
+            addDQFHeader(p_workbook, sheet);
+            
             // Add Segment Header
             addSegmentHeader(p_workbook, sheet);
 
@@ -341,6 +366,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             if (!categoryFailureDropDownAdded)
             {
                 createCategoryFailureNameArea(p_workbook);
+                createSeverityNameArea(p_workbook);
                 categoryFailureDropDownAdded = true;
             }
 
@@ -350,7 +376,68 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
 
             // Insert Segment Data
-            writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, SEGMENT_START_ROW);
+            writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, SEGMENT_START_ROW + needToAdjust);
+        }
+    }
+    
+    private void addDQFHeader(Workbook workbook, Sheet sheet) throws Exception {
+        int col = 0;
+        int row = LANGUAGE_HEADER_ROW;
+        Row rowLine = null;
+        Cell cell = null;
+        
+        if (isDQFEnabled) {
+            // DQF enabled
+            needToAdjust += 3;
+            row = LANGUAGE_HEADER_ROW + needToAdjust;
+            rowLine = getRow(sheet, row);
+            cell = getCell(rowLine, col);
+            cell.setCellValue(m_bundle.getString("lb_dqf_fluency_only"));
+            cell.setCellStyle(getHeaderStyle(workbook));
+            
+            cell = getCell(rowLine, 1);
+            cell.setCellValue(fluencyScore);
+           
+            row++;
+
+            rowLine = getRow(sheet, row);
+            cell = getCell(rowLine, col);
+            cell.setCellValue(m_bundle.getString("lb_dqf_adequacy_only"));
+            cell.setCellStyle(getHeaderStyle(workbook));
+            cell = getCell(rowLine, 1);
+            cell.setCellValue(adequacyScore);
+        }
+        if (isScorecradEnabled) {
+            // Scorecard enabled
+            needToAdjust += 3;
+            row = LANGUAGE_HEADER_ROW + needToAdjust;
+            rowLine = getRow(sheet, row);
+            cell = getCell(rowLine, col);
+            cell.setCellValue(m_bundle.getString("lb_scorecard"));
+            cell.setCellStyle(getHeaderStyle(workbook));
+            row++;
+            Hashtable<String, Integer> elements = new Hashtable<String, Integer>();
+            if (scorecardCategories != null && scorecardCategories.size()>0) {
+                for (String scorecard : scorecardCategories) {
+                    rowLine = getRow(sheet, row);
+                    cell = getCell(rowLine, col);
+                    cell.setCellValue(scorecard);
+                    
+                    elements.put(scorecard, Integer.valueOf(row));
+                    row++;
+                }
+                needToAdjust += scorecardCategories.size();
+            }
+            String key = "";
+            Integer rowValue = 0;
+            for (ScorecardScore score : scores)
+            {
+                key = score.getScorecardCategory();
+                rowValue = elements.get(key);
+                rowLine = getRow(sheet, rowValue);
+                cell = getCell(rowLine, 1);
+                cell.setCellValue(score.getScore());
+            }
         }
     }
 
@@ -406,6 +493,17 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                                 + task.getId();
                     }
                 }
+                int scoreShowType = wf.getScorecardShowType();
+                if (scoreShowType > -1 && scoreShowType < 4) {
+                    isScorecradEnabled = true;
+                    scorecardCategories = ScorecardScoreHelper.getScorecardCategories(wf.getCompanyId());
+                    scores = ScorecardScoreHelper.getScoreByWrkflowId(wf.getId());
+                }
+                if (scoreShowType > 1) {
+                    isDQFEnabled = true;
+                    fluencyScore = wf.getFluencyScore();
+                    adequacyScore = wf.getAdequacyScore();
+                }
             }
         }
 
@@ -453,7 +551,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
     private void addSegmentHeader(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
         int col = 0;
-        int row = SEGMENT_HEADER_ROW;
+        int row = SEGMENT_HEADER_ROW + needToAdjust;
         Row segHeaderRow = getRow(p_sheet, row);
         CellStyle headerStyle = getHeaderStyle(p_workBook);
 
@@ -490,6 +588,12 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
         Cell cell_F = getCell(segHeaderRow, col);
         cell_F.setCellValue(m_bundle.getString("lb_comment_status"));
         cell_F.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 15 * 256);
+        col++;
+
+        Cell cell_N = getCell(segHeaderRow, col);
+        cell_N.setCellValue(m_bundle.getString("lb_dqf_severity"));
+        cell_N.setCellStyle(headerStyle);
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
@@ -661,11 +765,13 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                     String lastComment = "";
                     String failure = "";
                     String commentStatus = "";
+                    String severity = "";
                     Issue issue = issuesMap.get(targetTuv.getId());
                     if (issue != null)
                     {
                         issueHistories = issue.getHistory();
                         failure = issue.getCategory();
+                        severity = issue.getSeverity();
                         commentStatus = issue.getStatus();
                     }
                     if (issueHistories != null && issueHistories.size() > 0)
@@ -748,6 +854,12 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                     cell_F.setCellStyle(unlockedStyle);
                     col++;
 
+                    // Severity
+                    Cell cell_N = getCell(currentRow, col);
+                    cell_N.setCellValue(severity);
+                    cell_N.setCellStyle(unlockedStyle);
+                    col++;
+
                     // TM match
                     Cell cell_G = getCell(currentRow, col);
                     cell_G.setCellValue(matches.toString());
@@ -805,12 +917,15 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                 }
             }
 
+            int baseRowIndex = SEGMENT_START_ROW + needToAdjust;
             // Add category failure drop down list here.
-            addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row, CATEGORY_FAILURE_COLUMN,
+            addCategoryFailureValidation(p_sheet, baseRowIndex, p_row, CATEGORY_FAILURE_COLUMN,
                     CATEGORY_FAILURE_COLUMN);
 
-            addCommentStatusValidation(p_sheet, SEGMENT_START_ROW, p_row, COMMENT_STATUS_COLUMN,
+            addCommentStatusValidation(p_sheet, baseRowIndex, p_row, COMMENT_STATUS_COLUMN,
                     COMMENT_STATUS_COLUMN);
+            
+            addSeverityCategoryList(p_sheet, baseRowIndex, p_row, SEVERITY_COLUMN, SEVERITY_COLUMN);
         }
 
         return p_row;
@@ -1072,15 +1187,16 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             List<String> categories = getFailureCategoriesList();
             // Set the categories in "AA" column, starts with row 8.
             int col = 26;
+            int baseRowIndex = SEGMENT_START_ROW + needToAdjust;
             for (int i = 0; i < categories.size(); i++)
             {
-                Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
+                Row row = getRow(firstSheet, baseRowIndex + i);
                 Cell cell = getCell(row, col);
                 cell.setCellValue(categories.get(i));
             }
 
-            String formula = firstSheet.getSheetName() + "!$AA$" + (SEGMENT_START_ROW + 1) + ":$AA$"
-                    + (SEGMENT_START_ROW + categories.size());
+            String formula = firstSheet.getSheetName() + "!$AA$" + (baseRowIndex + 1) + ":$AA$"
+                    + (baseRowIndex + categories.size());
             Name name = p_workbook.createName();
             name.setRefersToFormula(formula);
             name.setNameName(CATEGORY_FAILURE_DROP_DOWN_LIST);
@@ -1094,6 +1210,38 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
         }
     }
 
+    private void createSeverityNameArea(Workbook p_workbook)
+    {
+        try
+        {
+            Sheet firstSheet = getSheet(p_workbook, 0);
+            String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+            List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId, CategoryType.Severity, true);
+            // Set the categories in "AC" column, starts with row 8.
+            int col = 28;
+            int baseRowIndex = SEGMENT_START_ROW + needToAdjust;
+            for (int i = 0; i < categories.size(); i++)
+            {
+                Row row = getRow(firstSheet, baseRowIndex + i);
+                Cell cell = getCell(row, col);
+                cell.setCellValue(categories.get(i));
+            }
+
+            String formula = firstSheet.getSheetName() + "!$AC$" + (baseRowIndex + 1) + ":$AC$"
+                    + (baseRowIndex + categories.size());
+            Name name = p_workbook.createName();
+            name.setRefersToFormula(formula);
+            name.setNameName(CATEGORY_SEVERITY_LIST);
+
+            // Hide "AC" column
+            firstSheet.setColumnHidden(28, true);
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when create hidden area for category failures.", e);
+        }
+    }
+    
     private List<String> getFailureCategoriesList()
     {
         List<String> result = new ArrayList<String>();
@@ -1125,6 +1273,21 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
         DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
         DataValidationConstraint dvConstraint = dvHelper
                 .createFormulaListConstraint(CATEGORY_FAILURE_DROP_DOWN_LIST);
+        CellRangeAddressList addressList = new CellRangeAddressList(startRow, lastRow, startColumn,
+                lastColumn);
+        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
+        validation.setSuppressDropDownArrow(true);
+        validation.setShowErrorBox(true);
+        p_sheet.addValidationData(validation);
+    }
+
+    private void addSeverityCategoryList(Sheet p_sheet, int startRow, int lastRow,
+            int startColumn, int lastColumn)
+    {
+        // Add category failure drop down list here.
+        DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
+        DataValidationConstraint dvConstraint = dvHelper
+                .createFormulaListConstraint(CATEGORY_SEVERITY_LIST);
         CellRangeAddressList addressList = new CellRangeAddressList(startRow, lastRow, startColumn,
                 lastColumn);
         DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);

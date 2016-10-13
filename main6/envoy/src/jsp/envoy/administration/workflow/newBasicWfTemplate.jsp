@@ -734,11 +734,15 @@ function updateWFMS(projObj)
             </TR>
             <TR>
 			<TD>
-                <%=bundle.getString("lb_project_scorecard_show_type")%><SPAN CLASS="asterisk">*</SPAN>:<BR>
+                <%=bundle.getString("lb_workflow_scorecard_show_type")%><SPAN CLASS="asterisk">*</SPAN>:<BR>
                 <select id="scorecardShowType" name="scorecardShowType">
-		        	<option value="-1" <% if(scorecardShowType == -1){%> selected <%}%>><%=bundle.getString("lb_Project_scorecard_not_showing")%></option>
-		        	<option value="0" <% if(scorecardShowType == 0){%> selected <%}%>><%=bundle.getString("lb_Project_scorecard_optional")%></option>
-		        	<option value="1" <% if(scorecardShowType == 1){%> selected <%}%>><%=bundle.getString("lb_Project_scorecard_required")%></option>	
+		        	<option value="-1" <% if(scorecardShowType == -1){%> selected <%}%>><%=bundle.getString("lb_workflow_scorecard_not_showing")%></option>
+		        	<option value="0" <% if(scorecardShowType == 0){%> selected <%}%>><%=bundle.getString("lb_workflow_scorecard_optional")%></option>
+		        	<option value="1" <% if(scorecardShowType == 1){%> selected <%}%>><%=bundle.getString("lb_workflow_scorecard_required")%></option>	
+                    <option value="2" <% if(scorecardShowType == 2){%> selected <%}%>><%=bundle.getString("lb_workflow_dqf_scorecard_optional")%></option>
+                    <option value="3" <% if(scorecardShowType == 3){%> selected <%}%>><%=bundle.getString("lb_workflow_dqf_scorecard_required")%></option>   
+                    <option value="4" <% if(scorecardShowType == 4){%> selected <%}%>><%=bundle.getString("lb_workflow_dqf_optional")%></option>
+                    <option value="5" <% if(scorecardShowType == 5){%> selected <%}%>><%=bundle.getString("lb_workflow_dqf_required")%></option>   
 	        	</select>
             </TD>
             </TR>

@@ -8,7 +8,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/BasicL10nProfile.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CalendarWorkingDay.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CalendarWorkingHour.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/CmsUserInfo.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CodeSetImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CommentImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CommunicationInfo.hbm.xml" />
@@ -17,6 +16,7 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/PostReviewCategory.hbm.xml"/>
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ScorecardScore.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Category.hbm.xml" />
+        <mapping resource="com/globalsight/persistence/hibernate/xml/CommonCategory.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/FMFilter.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Cost.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CostByWordCount.hbm.xml" />

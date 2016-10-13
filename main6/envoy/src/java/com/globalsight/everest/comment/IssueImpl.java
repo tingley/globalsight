@@ -48,6 +48,8 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
     // @see Issue for valid category
     private String m_category = CATEGORY_TYPE01;
 
+    private String severity = "";
+
     // the list of any comment text that has been added to the issue.
     // list of IssueHistoryImpl objects
     private List m_issueHistory = new ArrayList();
@@ -86,12 +88,22 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
     {
     }
 
+    public String getSeverity()
+    {
+        return severity;
+    }
+
+    public void setSeverity(String severity)
+    {
+        this.severity = severity;
+    }
+
     /**
      * Construct a IssueImpl with priority and status and category
      */
-    public IssueImpl(int p_levelObjectType, long p_levelObjectId,
-            String p_title, String p_priority, String p_status,
-            String p_category, String p_creatorId, String p_commentText)
+    public IssueImpl(int p_levelObjectType, long p_levelObjectId, String p_title,
+            String p_priority, String p_status, String p_category, String severity,
+            String p_creatorId, String p_commentText)
     {
         super(Calendar.getInstance().getTime(), p_creatorId, p_title, null);
         m_levelObjectType = p_levelObjectType;
@@ -100,6 +112,7 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
         setPriority(p_priority);
         setStatus(p_status);
         setCategory(p_category);
+        setSeverity(severity);
         addHistory(p_creatorId, p_commentText);
     }
 
@@ -107,13 +120,12 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
      * Construct a IssueImpl with priority and status and category and a logical
      * key
      */
-    public IssueImpl(int p_levelObjectType, long p_levelObjectId,
-            String p_title, String p_priority, String p_status,
-            String p_category, String p_creatorId, String p_commentText,
-            String p_logicalKey)
+    public IssueImpl(int p_levelObjectType, long p_levelObjectId, String p_title,
+            String p_priority, String p_status, String p_category, String severity,
+            String p_creatorId, String p_commentText, String p_logicalKey)
     {
-        this(p_levelObjectType, p_levelObjectId, p_title, p_priority, p_status,
-                p_category, p_creatorId, p_commentText);
+        this(p_levelObjectType, p_levelObjectId, p_title, p_priority, p_status, p_category,
+                severity, p_creatorId, p_commentText);
         setLogicalKey(p_logicalKey);
         if (p_logicalKey != null && p_logicalKey.indexOf("_") > -1)
         {

@@ -118,6 +118,8 @@ public class XLIFFStandardUtil
 
         // bpt
         segment = replaceAtts(segment, bpt_start, bpt_end, false, att_x,
+                att_xid, att_i, att_rid, att_i, att_id, att_type, att_ctype_x);
+        segment = replaceAtts(segment, bpt_start, bpt_end, false, att_x,
                 att_xid, att_i, att_rid, att_i, att_id, att_type, att_ctype);
 
         // ept
@@ -127,11 +129,16 @@ public class XLIFFStandardUtil
         // it
         segment = removeAtts(segment, it_start, it_end, att_id);
         segment = replaceAtts(segment, it_start, it_end, false, att_posBegin,
+                att_posOpen, att_posEnd, att_posClose, att_type, att_ctype_x,
+                att_x, att_xid);
+        segment = replaceAtts(segment, it_start, it_end, false, att_posBegin,
                 att_posOpen, att_posEnd, att_posClose, att_type, att_ctype,
                 att_x, att_xid);
 
         // ph
         segment = removeAtts(segment, ph_start, ph_end, att_id);
+        segment = replaceAtts(segment, ph_start, ph_end, false, att_type,
+                att_ctype_x, att_x, att_xid);
         segment = replaceAtts(segment, ph_start, ph_end, false, att_type,
                 att_ctype, att_x, att_xid);
 

@@ -55,9 +55,11 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
+import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.CostCalculator;
@@ -84,6 +86,7 @@ import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.WorkflowTypeConstants;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskImpl;
@@ -343,10 +346,24 @@ public class TaskDetailHandler extends PageHandler
                     bundle);
             List<Select> scorecardCategories = ScorecardScoreHelper.initSelectList(companyId,
                     bundle);
-            String scorecardComment = ((WorkflowImpl) task.getWorkflow()).getScorecardComment();
+            WorkflowImpl wf = (WorkflowImpl) task.getWorkflow();
+            String scorecardComment = wf.getScorecardComment();
+            String dqfComment = wf.getDQFComment();
+            String fluencyScore = wf.getFluencyScore();
+            String adequacyScore = wf.getAdequacyScore();
+
             sessionMgr.setAttribute("scorecardCategories", scorecardCategories);
             sessionMgr.setAttribute("scorecard", scorecardMap);
             sessionMgr.setAttribute("isScored", isScored);
+            sessionMgr.setAttribute("fluencyCategories", CompanyWrapper.getCompanyCategoryNames(
+                    String.valueOf(companyId), CategoryType.Fluency, true));
+            sessionMgr.setAttribute("adequacyCategories", CompanyWrapper.getCompanyCategoryNames(
+                    String.valueOf(companyId), CategoryType.Adequacy, true));
+            if (StringUtil.isEmpty(dqfComment))
+                dqfComment = "";
+            sessionMgr.setAttribute("dqfComment", dqfComment);
+            sessionMgr.setAttribute("fluencyScore", fluencyScore);
+            sessionMgr.setAttribute("adequacyScore", adequacyScore);
             if (StringUtil.isEmpty(scorecardComment))
                 scorecardComment = "";
             sessionMgr.setAttribute("scorecardComment", scorecardComment);
@@ -376,6 +393,9 @@ public class TaskDetailHandler extends PageHandler
             long jobId = task.getJobId();
             String userId = (String) httpSession.getAttribute(WebAppConstants.USER_NAME);
             String scorecardComment = p_request.getParameter("scoreComment");
+            String dqfComment = ServletUtil.get(p_request, "dqfComment");
+            String fluencyScore = ServletUtil.get(p_request, "fluencyScore");
+            String adequacyScore = ServletUtil.get(p_request, "adequacyScore");
 
             Session session = HibernateUtil.getSession();
             Transaction tx = session.beginTransaction();
@@ -396,6 +416,9 @@ public class TaskDetailHandler extends PageHandler
 
                 WorkflowImpl workflowImpl = (WorkflowImpl) task.getWorkflow();
                 workflowImpl.setScorecardComment(scorecardComment);
+                workflowImpl.setFluencyScore(fluencyScore);
+                workflowImpl.setAdequacyScore(adequacyScore);
+                workflowImpl.setDQFComment(dqfComment);
                 HibernateUtil.save(workflowImpl);
                 tx.commit();
             }
@@ -411,6 +434,9 @@ public class TaskDetailHandler extends PageHandler
             sessionMgr.setAttribute("scorecard", scorecardMap);
             sessionMgr.setAttribute("isScored", isScored);
             sessionMgr.setAttribute("scorecardComment", scorecardComment);
+            sessionMgr.setAttribute("dqfComment", dqfComment);
+            sessionMgr.setAttribute("fluencyScore", fluencyScore);
+            sessionMgr.setAttribute("adequacyScore", adequacyScore);
         }
         else if ("leverageMT".equals(action))
         {

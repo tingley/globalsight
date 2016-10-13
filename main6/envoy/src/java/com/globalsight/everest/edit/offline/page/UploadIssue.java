@@ -60,7 +60,9 @@ public class UploadIssue implements Issue, Serializable
     // their display ID instead of [TUID,SUBID]. To match uploaded
     // issues with uploaded segments, we need to use the display ID.
     private String m_displayId;
-
+    
+    private String severity;
+    
     /** Constructor. */
     public UploadIssue(String p_displayId, long p_tuId, long p_subId,
         String p_title, String p_status, String p_category,
@@ -269,5 +271,15 @@ public class UploadIssue implements Issue, Serializable
     public void setShare(boolean share)
     {
         
+    }
+    
+    public String getSeverity()
+    {
+        return severity;
+    }
+
+    public void setSeverity(String severity)
+    {
+        this.severity = severity;
     }
 }

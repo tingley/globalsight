@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.online.CommentView;
@@ -161,10 +162,16 @@ public class CommentEditorPageHandler extends PageHandler implements
                     .getSourcePage(state.getSourcePageId()).getCompanyId());
         }
 
-        List<String> categoryStringList = CompanyWrapper
-                .getCompanyCategoryList(currentCompanyId);
-        List<Select> categoryList = initCategory(p_request, categoryStringList);
-        p_request.setAttribute("toList", categoryList);
+        ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
+        List<String> segmentCommentCategories = CompanyWrapper.getCompanyCategoryNames(bundle,
+                currentCompanyId, CategoryType.SegmentComment, true);
+        // List<Select> categoryList = initCategory(p_request,
+        // categoryStringList);
+        p_request.setAttribute("segmentCommentCategories", segmentCommentCategories);
+
+        List<String> severityCategories = CompanyWrapper.getCompanyCategoryNames(bundle,
+                currentCompanyId, CategoryType.Severity, true);
+        p_request.setAttribute("severityCategories", severityCategories);
 
         if (CATEGORY.isDebugEnabled())
         {

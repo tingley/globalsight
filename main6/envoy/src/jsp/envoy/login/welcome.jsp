@@ -178,8 +178,7 @@ function openWizardWindow(url)
             colspanCounter++;
         if (hasDataSourceMenu)
             colspanCounter++;
-        if (hasMyJobsMenu || hasMyActivitiesMenu || hasReportsMenu
-                || hasContentManagerMenu || hasVendorMenu)
+        if (hasMyJobsMenu || hasMyActivitiesMenu || hasReportsMenu || hasVendorMenu)
             colspanCounter++;
       %>
       <TD<%if (colspanCounter > 1) {%> colspan="<%=colspanCounter%>"<%}%>>
@@ -207,8 +206,7 @@ function openWizardWindow(url)
         }
     %>
     <%
-        if (hasMyJobsMenu || hasMyActivitiesMenu || hasReportsMenu
-                || hasContentManagerMenu || hasVendorMenu) {
+        if (hasMyJobsMenu || hasMyActivitiesMenu || hasReportsMenu || hasVendorMenu) {
     %>
       <TD<%if (colspanCounter > 1) {%> style="border:solid #ccc;border-width:0 0 0 1px;padding-left: 10px"<%}%>><%=bundle.getString("lb_common")%></TD>
     <%
@@ -419,8 +417,7 @@ function openWizardWindow(url)
         }
     %>
     <%
-        if (hasMyJobsMenu || hasMyActivitiesMenu || hasReportsMenu
-                || hasContentManagerMenu || hasVendorMenu||hasTMTBSearchMenu) {
+        if (hasMyJobsMenu || hasMyActivitiesMenu || hasReportsMenu || hasVendorMenu||hasTMTBSearchMenu) {
     %>
       <TD width="33%"<%if (colspanCounter > 1) {%> style="border:solid #ccc;border-width:0 0 0 1px;padding-left: 10px"<%}%>>
         <amb:permission name="<%=Permission.JOBS_VIEW%>" >
@@ -452,15 +449,6 @@ function openWizardWindow(url)
         <%
             }
         %>
-        <%
-            }
-        %>
-        <%
-            if (b_cms) {
-        %>
-        <amb:permission name="<%=Permission.CONTENT_MANAGER%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="#" ONCLICK="javascript:openCms()"><%=bundle.getString("lb_cms")%></A><BR>
-        </amb:permission>
         <%
             }
         %>

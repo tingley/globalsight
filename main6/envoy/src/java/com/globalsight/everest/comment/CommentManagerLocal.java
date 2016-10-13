@@ -510,34 +510,31 @@ public class CommentManagerLocal implements CommentManager
      * @see CommentManager.addIssue(int, long, String, String, String, String,
      *      String, String, String)
      */
-    public Issue addIssue(int p_levelObjectType, long p_levelObjectId,
-            String p_title, String p_priority, String p_status,
-            String p_category, String p_creatorUserId, String p_comment,
-            String p_logicalKey) throws RemoteException, CommentException
+    public Issue addIssue(int p_levelObjectType, long p_levelObjectId, String p_title,
+            String p_priority, String p_status, String p_category, String severity,
+            String p_creatorUserId, String p_comment, String p_logicalKey) throws RemoteException,
+            CommentException
     {
-        return addIssue(p_levelObjectType, p_levelObjectId, p_title,
-                p_priority, p_status, p_category, p_creatorUserId, p_comment,
-                p_logicalKey, false, false);
+        return addIssue(p_levelObjectType, p_levelObjectId, p_title, p_priority, p_status,
+                p_category, severity, p_creatorUserId, p_comment, p_logicalKey, false, false);
     }
 
     /**
      * @see CommentManager.addIssue(int, long, String, String, String, String,
      *      String, String, String)
      */
-    public Issue addIssue(int p_levelObjectType, long p_levelObjectId,
-            String p_title, String p_priority, String p_status,
-            String p_category, String p_creatorUserId, String p_comment,
-            String p_logicalKey, boolean share, boolean overwrite)
-            throws RemoteException, CommentException
+    public Issue addIssue(int p_levelObjectType, long p_levelObjectId, String p_title,
+            String p_priority, String p_status, String p_category, String severity,
+            String p_creatorUserId, String p_comment, String p_logicalKey, boolean share,
+            boolean overwrite) throws RemoteException, CommentException
     {
         Issue issue = null;
 
         try
         {
             // create the new comment and clone
-            issue = new IssueImpl(p_levelObjectType, p_levelObjectId, p_title,
-                    p_priority, p_status, p_category, p_creatorUserId,
-                    p_comment, p_logicalKey);
+            issue = new IssueImpl(p_levelObjectType, p_levelObjectId, p_title, p_priority,
+                    p_status, p_category, severity, p_creatorUserId, p_comment, p_logicalKey);
             issue.setShare(share);
             issue.setOverwrite(overwrite);
 
@@ -547,10 +544,9 @@ public class CommentManagerLocal implements CommentManager
         {
             CATEGORY.error("Failed to add a new issue.", ex);
             String[] args =
-            { IssueImpl.getLevelTypeAsString(p_levelObjectType),
-                    String.valueOf(p_levelObjectId), p_creatorUserId };
-            throw new CommentException(
-                    CommentException.MSG_FAILED_TO_ADD_ISSUE, args, ex);
+            { IssueImpl.getLevelTypeAsString(p_levelObjectType), String.valueOf(p_levelObjectId),
+                    p_creatorUserId };
+            throw new CommentException(CommentException.MSG_FAILED_TO_ADD_ISSUE, args, ex);
         }
 
         return issue;
@@ -561,12 +557,12 @@ public class CommentManagerLocal implements CommentManager
      *      String, String)
      */
     public Issue replyToIssue(long p_issueId, String p_title,
-            String p_priority, String p_status, String p_category,
+            String p_priority, String p_status, String p_category, String severity,
             String p_reportedBy, String p_comment) throws RemoteException,
             CommentException
     {
         return replyToIssue(p_issueId, p_title, p_priority, p_status,
-                p_category, p_reportedBy, p_comment, false, false);
+                p_category, severity, p_reportedBy, p_comment, false, false);
     }
 
     /**
@@ -574,7 +570,7 @@ public class CommentManagerLocal implements CommentManager
      *      String, String)
      */
     public Issue replyToIssue(long p_issueId, String p_title,
-            String p_priority, String p_status, String p_category,
+            String p_priority, String p_status, String p_category, String severity,
             String p_reportedBy, String p_comment, boolean share,
             boolean overwrite) throws RemoteException, CommentException
     {
@@ -588,6 +584,7 @@ public class CommentManagerLocal implements CommentManager
             issue.setPriority(p_priority);
             issue.setStatus(p_status);
             issue.setCategory(p_category);
+            issue.setSeverity(severity);
             issue.setOverwrite(overwrite);
             issue.setShare(share);
 
@@ -617,16 +614,16 @@ public class CommentManagerLocal implements CommentManager
      *      String, String)
      */
     public Issue editIssue(long p_issueId, String p_title, String p_priority,
-            String p_status, String p_category, String p_reportedBy,
+            String p_status, String p_category, String severity, String p_reportedBy,
             String p_comment) throws RemoteException, CommentException
     {
 
-        return editIssue(p_issueId, p_title, p_priority, p_status, p_category,
+        return editIssue(p_issueId, p_title, p_priority, p_status, p_category, severity,
                 p_reportedBy, p_comment, false, false);
     }
 
     public Issue editIssue(long p_issueId, String p_title, String p_priority,
-            String p_status, String p_category, String p_reportedBy,
+            String p_status, String p_category, String severity, String p_reportedBy,
             String p_comment, boolean share, boolean overwrite)
             throws RemoteException, CommentException
     {
@@ -646,6 +643,7 @@ public class CommentManagerLocal implements CommentManager
             issue.setPriority(p_priority);
             issue.setStatus(p_status);
             issue.setCategory(p_category);
+            issue.setSeverity(severity);
             issue.setOverwrite(overwrite);
             issue.setShare(share);
 

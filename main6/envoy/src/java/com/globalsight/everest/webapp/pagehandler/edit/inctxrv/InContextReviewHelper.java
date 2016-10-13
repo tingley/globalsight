@@ -50,11 +50,9 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.login.EntryPageControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.log.ActivityLog;
-import com.globalsight.mediasurface.CmsUserInfo;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
-import com.globalsight.util.modules.Modules;
 import com.globalsight.webservices.AmbassadorUtil;
 
 /**
@@ -379,27 +377,6 @@ public class InContextReviewHelper implements WebAppConstants
         catch (Exception e)
         {
             // no time zone was loaded
-        }
-
-        // now load the CMS user info (if CMS is installed)
-        try
-        {
-            if (Modules.isCmsAdapterInstalled())
-            {
-                CmsUserInfo cmsUserInfo = ServerProxy.getCmsUserManager()
-                        .findCmsUserInfo(p_userId);
-
-                // can be null and should be set from account info UI
-                if (cmsUserInfo != null)
-                {
-                    p_session.setAttribute(WebAppConstants.CMS_USER_INFO,
-                            cmsUserInfo);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            // do nothing (no cms user info was found)
         }
     }
 

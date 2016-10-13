@@ -652,7 +652,9 @@ public class Ambassador4Falcon extends JsonTypeWebService
             ProjectImpl project = (ProjectImpl) dbTask.getWorkflow().getJob().getProject();
             WorkflowImpl workflowImpl = (WorkflowImpl) dbTask.getWorkflow();
             boolean isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
-            boolean isRequriedScore = workflowImpl.getScorecardShowType() == 1 ? true : false;
+            int scoreShowType = workflowImpl.getScorecardShowType();
+            boolean isRequriedScore = (scoreShowType == 1 || scoreShowType == 3) ? true : false;
+            boolean isRequiredDQF = (scoreShowType == 3 || scoreShowType == 5) ? true : false;
             boolean isReviewOnly = dbTask.isReviewOnly();
             if (isCheckUnTranslatedSegments && !isReviewOnly)
             {
@@ -669,6 +671,14 @@ public class Ambassador4Falcon extends JsonTypeWebService
                 {
                     rtnStr = "The task is not scored and can not be completed.";
                     return makeErrorJson(COMPLETE_TASK, rtnStr);
+                }
+            }
+            if (isRequiredDQF && isReviewOnly)
+            {
+                if (StringUtil.isEmpty(workflowImpl.getDQFComment()))
+                {
+                    rtnStr = "The task is not DQF and can not be completed.";
+                    return rtnStr;
                 }
             }
 

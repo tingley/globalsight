@@ -1195,8 +1195,58 @@ function doOnload()
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
 <%@ include file="/envoy/tasks/includeTaskSummaryTabs.jspIncl" %>
 <!-- Lower table -->
-<SPAN CLASS="standardText"><p>Translation Scorecard, 1 is poor and 5 is excellent.</p></SPAN>
 <form METHOD="post" name="scorecardForm" action="<%=saveScorecardUrl%>">
+<SPAN CLASS="standardText"><p>Dynamic Quality Framework(DQF) Evaluation</p></SPAN>
+<TABLE CLASS="standardText" CELLSPACING="0" CELLPADDING="2" style="border:solid 1px slategray;">
+<TR CLASS="tableHeadingBasic">
+    <TD style="padding-top: 8px; padding-bottom: 8px;text-align:center">DQF Category</TD>
+    <TD style="width:90px;text-align:center;">Score</TD>
+</TR>
+<%
+List<String> fluencyCategories = (List<String>) sessionMgr.getAttribute("fluencyCategories");
+List<String> adequacyCategories = (List<String>)sessionMgr.getAttribute("adequacyCategories");
+String fluencyScore = (String)sessionMgr.getAttribute("fluencyScore");
+if (StringUtil.isEmpty(fluencyScore)) fluencyScore = "";
+String adequacyScore = (String)sessionMgr.getAttribute("adequacyScore");
+if (StringUtil.isEmpty(adequacyScore)) adequacyScore = "";
+String dqfComment = (String)sessionMgr.getAttribute("dqfComment");
+if (StringUtil.isEmpty(dqfComment)) dqfComment = "";
+%>
+<tr bgcolor="#FFF" class="standardText">
+    <td>
+        <b>Fluency</b><br>
+        How well is the translation formed and the language natural/intuitive to a native speaker?
+    </td>
+    <td>
+        <% for (String s : fluencyCategories) { %>
+        <input type="radio" id="fluencyScore" name="fluencyScore" value="<%=s %>" <%=s.equals(fluencyScore) ? "checked" : "" %>><%=s %></input>
+        <% } %>
+    </td>
+</tr>
+<tr bgcolor="#EEE" class="standardText">
+    <td>
+        <b>Adequacy</b><br>
+        How much of the source text meaning is expressed in the target translation?
+    </td>
+    <td>
+        <% for (String s : adequacyCategories) { %>
+        <input type="radio" id="adequacyScore" name="adequacyScore" value="<%=s %>" <%=s.equals(adequacyScore) ? "checked" : "" %>><%=s %></input>
+        <% } %>
+    </td>
+</tr>
+<tr bgcolor="#FFFFFF" class="standardText">
+    <td>
+        Comment
+    </td>
+    <td>
+        <textarea name="dqfComment" id="dqfComment" maxlength="495" cols="40" style="resize: none;height:80px">
+            <%=dqfComment %>
+        </textarea>
+    </td>
+</tr>
+</table>
+<br>
+<SPAN CLASS="standardText"><p>Translation Scorecard, 1 is poor and 5 is excellent.</p></SPAN>
 <TABLE CLASS="standardText" CELLSPACING="0" CELLPADDING="2" style="border:solid 1px slategray;">
 <TR CLASS="tableHeadingBasic">
     <TD style="padding-top: 8px; padding-bottom: 8px;text-align:center">Scorecard Category</TD>
@@ -1298,6 +1348,7 @@ function translatedText()
 
 function submitForm()
 {
+    /**
 	var allChecked = true;
 	var i= 0;
 	$(':input:radio').each(function(){
@@ -1311,6 +1362,7 @@ function submitForm()
 		alert('Please socre all the options.');
 		return;
 	}
+    */
 
 	if($("#scoreComment").val().trim() == '')
 	{

@@ -45,6 +45,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import sun.misc.BASE64Encoder;
+
 import com.globalsight.cxe.adapter.adobe.InddTuMapping;
 import com.globalsight.cxe.adapter.adobe.InddTuMappingHelper;
 import com.globalsight.everest.comment.CommentManager;
@@ -122,8 +124,6 @@ import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.zip.ZipIt;
-
-import sun.misc.BASE64Encoder;
 
 /**
  * OnlineEditorManagerLocal implements the OnlineEditorManager server interface
@@ -2617,43 +2617,40 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return result;
     }
 
-    public void createComment(long p_tuId, long p_tuvId, long p_subId,
-            String p_title, String p_comment, String p_priority,
-            String p_status, String p_category, String p_user, boolean share,
-            boolean overwrite) throws OnlineEditorException, RemoteException
+    public void createComment(long p_tuId, long p_tuvId, long p_subId, String p_title,
+            String p_comment, String p_priority, String p_status, String p_category, String severity, String p_user,
+            boolean share, boolean overwrite) throws OnlineEditorException,
+            RemoteException
     {
         try
         {
-            Issue issue = m_commentManager.addIssue(Issue.TYPE_SEGMENT,
-                    p_tuvId, p_title, p_priority, p_status, p_category, p_user,
-                    p_comment, CommentHelper.makeLogicalKey(
-                            getCurrentTargetPage().getId(), p_tuId, p_tuvId,
-                            p_subId), share, overwrite);
+            Issue issue = m_commentManager.addIssue(Issue.TYPE_SEGMENT, p_tuvId, p_title,
+                    p_priority, p_status, p_category, severity, p_user, p_comment, CommentHelper
+                            .makeLogicalKey(getCurrentTargetPage().getId(), p_tuId, p_tuvId,
+                                    p_subId), share, overwrite);
 
             m_pageCache.addComment(issue);
         }
         catch (Exception ex)
         {
             String[] args =
-            { String.valueOf(getCurrentTargetPage().getId()),
-                    String.valueOf(p_tuId), String.valueOf(p_tuvId),
-                    String.valueOf(p_subId), ex.getMessage() };
+            { String.valueOf(getCurrentTargetPage().getId()), String.valueOf(p_tuId),
+                    String.valueOf(p_tuvId), String.valueOf(p_subId), ex.getMessage() };
 
-            throw new OnlineEditorException(
-                    OnlineEditorException.MSG_FAILED_TO_CREATE_COMMENT, args,
-                    ex);
+            throw new OnlineEditorException(OnlineEditorException.MSG_FAILED_TO_CREATE_COMMENT,
+                    args, ex);
         }
     }
 
     public void createComment(long p_tuId, long p_tuvId, long p_subId,
             String p_title, String p_comment, String p_priority,
-            String p_status, String p_category, String p_user)
+            String p_status, String p_category, String severity, String p_user)
             throws OnlineEditorException, RemoteException
     {
         try
         {
             Issue issue = m_commentManager.addIssue(Issue.TYPE_SEGMENT,
-                    p_tuvId, p_title, p_priority, p_status, p_category, p_user,
+                    p_tuvId, p_title, p_priority, p_status, p_category, severity, p_user,
                     p_comment, CommentHelper.makeLogicalKey(
                             getCurrentTargetPage().getId(), p_tuId, p_tuvId,
                             p_subId));
@@ -2675,7 +2672,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
     public void editComment(CommentView p_view, String p_title,
             String p_comment, String p_priority, String p_status,
-            String p_category, String p_user, boolean share, boolean overwrite)
+            String p_category, String severity, String p_user, boolean share, boolean overwrite)
             throws OnlineEditorException, RemoteException
     {
         try
@@ -2683,7 +2680,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             Issue issue = p_view.getComment();
 
             issue = m_commentManager.editIssue(issue.getId(), p_title,
-                    p_priority, p_status, p_category, p_user, p_comment, share,
+                    p_priority, p_status, p_category, severity, p_user, p_comment, share,
                     overwrite);
 
             m_pageCache.updateComment(issue);
@@ -2704,7 +2701,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
     public void editComment(CommentView p_view, String p_title,
             String p_comment, String p_priority, String p_status,
-            String p_category, String p_user) throws OnlineEditorException,
+            String p_category, String severity, String p_user) throws OnlineEditorException,
             RemoteException
     {
         try
@@ -2712,7 +2709,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             Issue issue = p_view.getComment();
 
             issue = m_commentManager.editIssue(issue.getId(), p_title,
-                    p_priority, p_status, p_category, p_user, p_comment);
+                    p_priority, p_status, p_category, severity, p_user, p_comment);
 
             m_pageCache.updateComment(issue);
         }
@@ -2732,7 +2729,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
     public void addComment(CommentView p_view, String p_title,
             String p_comment, String p_priority, String p_status,
-            String p_category, String p_user) throws OnlineEditorException,
+            String p_category, String severity, String p_user) throws OnlineEditorException,
             RemoteException
     {
         try
@@ -2740,7 +2737,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             Issue issue = p_view.getComment();
 
             issue = m_commentManager.replyToIssue(issue.getId(), p_title,
-                    p_priority, p_status, p_category, p_user, p_comment);
+                    p_priority, p_status, p_category, severity, p_user, p_comment);
 
             m_pageCache.updateComment(issue);
         }
@@ -2760,7 +2757,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
     public void addComment(CommentView p_view, String p_title,
             String p_comment, String p_priority, String p_status,
-            String p_category, String p_user, boolean share, boolean overwrite)
+            String p_category, String severity, String p_user, boolean share, boolean overwrite)
             throws OnlineEditorException, RemoteException
     {
         try
@@ -2768,7 +2765,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             Issue issue = p_view.getComment();
 
             issue = m_commentManager.replyToIssue(issue.getId(), p_title,
-                    p_priority, p_status, p_category, p_user, p_comment, share,
+                    p_priority, p_status, p_category, severity, p_user, p_comment, share,
                     overwrite);
 
             m_pageCache.updateComment(issue);
@@ -2798,7 +2795,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 IssueHistory history = (IssueHistory) issue.getHistory().get(0);
                 m_commentManager.editIssue(issue.getId(), issue.getTitle(),
                         issue.getPriority(), Issue.STATUS_CLOSED,
-                        issue.getCategory(), p_user, history.getComment());
+                        issue.getCategory(), issue.getSeverity(), p_user, history.getComment());
             }
         }
         catch (Exception ex)

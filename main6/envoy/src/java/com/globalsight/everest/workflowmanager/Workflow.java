@@ -660,4 +660,16 @@ public interface Workflow extends WorkObject
     public boolean getIsSinceVersion87();
 
     public void setIsSinceVersion87(boolean isSinceVersion87);
+    
+    public String getFluencyScore();
+    
+    public void setFluencyScore(String fluency);
+    
+    public String getAdequacyScore();
+    
+    public void setAdequacyScore(String adequacy);
+    
+    public String getDQFComment();
+    
+    public void setDQFComment(String dqfComment);
 }

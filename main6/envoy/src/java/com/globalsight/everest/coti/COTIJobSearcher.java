@@ -64,7 +64,7 @@ public abstract class COTIJobSearcher implements WebAppConstants
     {
         StringBuffer sb = new StringBuffer();
         sb.append("FROM ");
-        sb.append(" coti_project j LEFT OUTER JOIN coti_package p ON j.PACKAGE_ID = p.ID ");
+        sb.append(" connector_coti_project j LEFT OUTER JOIN connector_coti_package p ON j.PACKAGE_ID = p.ID ");
         return sb.toString();
     }
 

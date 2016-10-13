@@ -918,7 +918,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                 CommentManager mgr = ServerProxy.getCommentManager();
 
                 mgr.addIssue(issue.getLevelObjectType(), issue.getTuvId(), issue.getTitle(),
-                        issue.getPriority(), issue.getStatus(), issue.getCategory(), p_user,
+                        issue.getPriority(), issue.getStatus(), issue.getCategory(), issue.getSeverity(), p_user,
                         issue.getComment(), logicalKey);
             }
             catch (Exception ex)
@@ -952,7 +952,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             {
                 CommentManager mgr = ServerProxy.getCommentManager();
                 mgr.replyToIssue(oldIssueId.longValue(), issue.getTitle(), issue.getPriority(),
-                        issue.getStatus(), issue.getCategory(), p_user, issue.getComment());
+                        issue.getStatus(), issue.getCategory(), issue.getSeverity(), p_user, issue.getComment());
             }
             catch (Exception ex)
             {

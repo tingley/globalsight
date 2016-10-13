@@ -228,32 +228,32 @@ public interface OnlineEditorManager extends UIConstants
 
     public void createComment(long p_tuId, long p_tuvId, long p_subId,
             String p_title, String p_comment, String p_priority,
-            String p_status, String p_category, String p_user, boolean sharem,
+            String p_status, String p_category, String severity, String p_user, boolean sharem,
             boolean overwrite) throws OnlineEditorException, RemoteException;
 
     public void createComment(long p_tuId, long p_tuvId, long p_subId,
             String p_title, String p_comment, String p_priority,
-            String p_status, String p_category, String p_user)
+            String p_status, String p_category, String severity, String p_user)
             throws OnlineEditorException, RemoteException;
 
     public void editComment(CommentView p_view, String p_title,
             String p_comment, String p_priority, String p_status,
-            String p_category, String p_user, boolean sharem, boolean overwrite)
+            String p_category, String severity, String p_user, boolean sharem, boolean overwrite)
             throws OnlineEditorException, RemoteException;
 
     public void editComment(CommentView p_view, String p_title,
             String p_comment, String p_priority, String p_status,
-            String p_category, String p_user) throws OnlineEditorException,
+            String p_category, String severity, String p_user) throws OnlineEditorException,
             RemoteException;
 
     public void addComment(CommentView p_view, String p_title,
             String p_comment, String p_priority, String p_status,
-            String p_category, String p_user) throws OnlineEditorException,
+            String p_category, String severity, String p_user) throws OnlineEditorException,
             RemoteException;
 
     public void addComment(CommentView p_view, String p_title,
             String p_comment, String p_priority, String p_status,
-            String p_category, String p_user, boolean sharem, boolean overwrite)
+            String p_category, String severity, String p_user, boolean sharem, boolean overwrite)
             throws OnlineEditorException, RemoteException;
 
     public void closeAllComment(ArrayList p_issueList, String p_user)

@@ -218,47 +218,47 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
 
     public void createComment(long p_tuId, long p_tuvId, long p_subId,
             String p_title, String p_comment, String p_priority,
-            String p_status, String p_category, String p_user)
+            String p_status, String p_category, String severity, String p_user)
             throws OnlineEditorException, RemoteException
     {
         m_localReference.createComment(p_tuId, p_tuvId, p_subId, p_title,
-                p_comment, p_priority, p_status, p_category, p_user);
+                p_comment, p_priority, p_status, p_category, severity, p_user);
     }
 
     public void editComment(CommentView p_view, String p_title,
             String p_comment, String p_priority, String p_status,
-            String p_category, String p_user) throws OnlineEditorException,
+            String p_category, String severity, String p_user) throws OnlineEditorException,
             RemoteException
     {
         m_localReference.editComment(p_view, p_title, p_comment, p_priority,
-                p_status, p_category, p_user);
+                p_status, p_category, severity, p_user);
     }
 
     public void editComment(CommentView p_view, String p_title,
             String p_comment, String p_priority, String p_status,
-            String p_category, String p_user, boolean share, boolean overwrite)
+            String p_category, String severity, String p_user, boolean share, boolean overwrite)
             throws OnlineEditorException, RemoteException
     {
         m_localReference.editComment(p_view, p_title, p_comment, p_priority,
-                p_status, p_category, p_user, share, overwrite);
+                p_status, p_category, severity, p_user, share, overwrite);
     }
 
     public void addComment(CommentView p_view, String p_title,
             String p_comment, String p_priority, String p_status,
-            String p_category, String p_user) throws OnlineEditorException,
+            String p_category, String severity, String p_user) throws OnlineEditorException,
             RemoteException
     {
         m_localReference.addComment(p_view, p_title, p_comment, p_priority,
-                p_status, p_category, p_user);
+                p_status, p_category, severity, p_user);
     }
 
     public void addComment(CommentView p_view, String p_title,
             String p_comment, String p_priority, String p_status,
-            String p_category, String p_user, boolean share, boolean overwrite)
+            String p_category, String severity, String p_user, boolean share, boolean overwrite)
             throws OnlineEditorException, RemoteException
     {
         m_localReference.addComment(p_view, p_title, p_comment, p_priority,
-                p_status, p_category, p_user, share, overwrite);
+                p_status, p_category, severity, p_user, share, overwrite);
     }
 
     public void closeAllComment(ArrayList p_issueList, String p_user)
@@ -269,11 +269,11 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
 
     public void createComment(long p_tuId, long p_tuvId, long p_subId,
             String p_title, String p_comment, String p_priority,
-            String p_status, String p_category, String p_user, boolean share,
+            String p_status, String p_category, String severity, String p_user, boolean share,
             boolean overwrite) throws OnlineEditorException, RemoteException
     {
         m_localReference.createComment(p_tuId, p_tuvId, p_subId, p_title,
-                p_comment, p_priority, p_status, p_category, p_user, share,
+                p_comment, p_priority, p_status, p_category, severity, p_user, share,
                 overwrite);
     }
 

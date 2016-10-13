@@ -34,6 +34,9 @@
         <property name="category" length="100" column="CATEGORY"
             type="string" not-null="true" unique="false" />
 
+        <property name="severity" column="SEVERITY"
+            type="string" not-null="true" unique="false" />
+
         <property name="levelObjectTypeAsString" length="1"
             column="ISSUE_OBJECT_TYPE" type="string" not-null="true"
             unique="false" />

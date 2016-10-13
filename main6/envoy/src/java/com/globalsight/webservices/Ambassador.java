@@ -5710,7 +5710,9 @@ public class Ambassador extends AbstractWebService
             ProjectImpl project = (ProjectImpl) dbTask.getWorkflow().getJob().getProject();
             WorkflowImpl workflowImpl = (WorkflowImpl) dbTask.getWorkflow();
             boolean isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
-            boolean isRequriedScore = workflowImpl.getScorecardShowType() == 1 ? true : false;
+            int scoreShowType = workflowImpl.getScorecardShowType();
+            boolean isRequriedScore = (scoreShowType == 1 || scoreShowType == 3) ? true : false;
+            boolean isRequiredDQF = (scoreShowType == 3 || scoreShowType == 5) ? true : false;
             boolean isReviewOnly = dbTask.isReviewOnly();
             if (isCheckUnTranslatedSegments && !isReviewOnly)
             {
@@ -5726,6 +5728,14 @@ public class Ambassador extends AbstractWebService
                 if (StringUtil.isEmpty(workflowImpl.getScorecardComment()))
                 {
                     rtnStr = "The task is not scored and can not be completed.";
+                    return rtnStr;
+                }
+            }
+            if (isRequiredDQF && isReviewOnly)
+            {
+                if (StringUtil.isEmpty(workflowImpl.getDQFComment()))
+                {
+                    rtnStr = "The task is not DQF and can not be completed.";
                     return rtnStr;
                 }
             }
@@ -19318,6 +19328,24 @@ public class Ambassador extends AbstractWebService
             }
         }
     }
+    
+    private Long getLastestFileProfileIdAsLong(Long id)
+    {
+        FileProfileImpl fp = HibernateUtil.get(FileProfileImpl.class, id, false);
+        if (fp == null)
+            return null;
+        
+        Long nId = fp.getNewId();
+        if (nId == null)
+            return id;
+        
+        Long nId2 = getLastestFileProfileIdAsLong(nId);
+        
+        if (nId2 != null)
+            return nId2;
+        
+        return nId;
+    }
 
     // For GBS-4401 Plugin for AEM 6.2
     public String getLastestFileProfileId(String accessToken, String id) throws WebServiceException
@@ -19327,13 +19355,8 @@ public class Ambassador extends AbstractWebService
         if (id == null)
             return id;
         
-        FileProfileImpl fp = HibernateUtil.get(FileProfileImpl.class, Long.parseLong(id), false);
-        if (fp == null)
-            return null;
-        
-        Long nId = fp.getNewId();
-        if (nId == null)
-            return id;
+        Long nId = getLastestFileProfileIdAsLong(Long.parseLong(id));
+       
         
         return nId.toString();
     }

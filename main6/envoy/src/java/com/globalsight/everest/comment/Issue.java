@@ -68,6 +68,8 @@ public interface Issue extends Comment
     // with
     final static int TYPE_SEGMENT = 4;
 
+    String getSeverity();
+    void setSeverity(String severity);
     /**
      * 
      * Gets the category of the issue.

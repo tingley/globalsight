@@ -50,7 +50,6 @@ String pageFormat = state.getPageFormat();
 boolean hasPreview = EditUtil.hasPreviewMode(pageFormat);
 boolean isOOO = pageFormat.startsWith("openoffice");
 boolean isOfficeXml = pageFormat.equals(IFormatNames.FORMAT_OFFICE_XML);
-boolean hasDynamicPreview = false;
 boolean hasPDFPreview = EditUtil.hasPDFPreviewMode(state);
 long pageId = state.getTargetPageId().longValue();
 Object vpdfobj = sessionMgr.getAttribute("tgt_view_pdf");
@@ -80,12 +79,6 @@ String pageName = pageInfo.getPageName();
 String pageNamePath = pageName.replaceAll("\\\\","/");
 pageNamePath = EditUtil.toJavascript(pageNamePath);
 String dataSource = pageInfo.getDataSourceType();
-
-if (dataSource.equals(ExportConstants.MEDIASURFACE))
-{
-    //all MEDIASURFACE content can be dynamically previewed
-    hasDynamicPreview = true;
-}
 
 // LABELS
 String lb_targetLocale  = bundle.getString("lb_target_locale");
@@ -362,20 +355,6 @@ function showXMLPreview()
   highlight(idXMLPreview);
 }
 
-function exportForDynamicPreview()
-{
-      var url = "/globalsight/CapExportServlet?CxeRequestType=<%=ExportConstants.PREVIEW%>" +
-      "&MessageId=<%=pageId%>" +
-      "&UiLocale=<%=uiLocale%>" +
-      "&DataSourceType=<%=dataSource%>";
-      var config = "config='height=800,width=,toolbar=no,menubar=no," +
-        "scrollbars=yes,resizable=yes,location=no,directories=no,status=yes'";
-
-      preview_window = window.open(url,'',config);
-      preview_window.screenX = 0;
-      preview_window.screenY = 0;
-}
-
 function switchTargetLocale(p_locale)
 {
     if (g_isReviewMode)
@@ -439,11 +418,7 @@ function doOnload()
      <A CLASS="HREFBoldWhite" HREF="javascript:warnPreviewNoInstalled('<%=msgPreviewNotInstalled%>')"
       onfocus="this.blur();"><%=lb_preview%></A> |
 <% } %>
-<% if (hasDynamicPreview) { %>
-      <A id="idDynPreview" CLASS="HREFBoldWhite" HREF="#"
-      onclick="exportForDynamicPreview(); return false;"
-      onfocus="this.blur();"><%=lb_dynamic_preview%></A> |
-<% } %>
+
 <% if (isXMLPreview) { %>
       <A id="idXMLPreview" CLASS="HREFBoldWhite" HREF="javascript:showXMLPreview()"
       onfocus="this.blur();"><%=lb_preview%></A> |

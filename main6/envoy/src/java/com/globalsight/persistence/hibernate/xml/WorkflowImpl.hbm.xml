@@ -103,11 +103,11 @@
 			type="int" not-null="false" />
         <property name="isSinceVersion87" column="IS_SINCE_8_7" type="yes_no"
             not-null="true" unique="false" />
-        <property name="DQFComment" column="DQFComment"
+        <property name="DQFComment" column="DQF_COMMENT"
             type="string" not-null="false" />
-        <property name="fluencyScore" column="FluencyScore"
+        <property name="fluencyScore" column="FLUENCY_SCORE"
             type="string" not-null="false" />
-        <property name="adequacyScore" column="AdequacyScore"
+        <property name="adequacyScore" column="ADEQUACY_SCORE"
             type="string" not-null="false" />
 
 		<many-to-one name="targetLocale" column="TARGET_LOCALE_ID"

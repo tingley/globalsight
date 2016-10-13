@@ -63,18 +63,6 @@ public class UploadIssue implements Issue, Serializable
     
     private String severity;
     
-    
-
-    public String getSeverity()
-    {
-        return severity;
-    }
-
-    public void setSeverity(String severity)
-    {
-        this.severity = severity;
-    }
-
     /** Constructor. */
     public UploadIssue(String p_displayId, long p_tuId, long p_subId,
         String p_title, String p_status, String p_category,
@@ -283,5 +271,15 @@ public class UploadIssue implements Issue, Serializable
     public void setShare(boolean share)
     {
         
+    }
+    
+    public String getSeverity()
+    {
+        return severity;
+    }
+
+    public void setSeverity(String severity)
+    {
+        this.severity = severity;
     }
 }

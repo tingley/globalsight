@@ -101,9 +101,8 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
     /**
      * Construct a IssueImpl with priority and status and category
      */
-    public IssueImpl(int p_levelObjectType, long p_levelObjectId,
-            String p_title, String p_priority, String p_status,
- String p_category, String severity,
+    public IssueImpl(int p_levelObjectType, long p_levelObjectId, String p_title,
+            String p_priority, String p_status, String p_category, String severity,
             String p_creatorId, String p_commentText)
     {
         super(Calendar.getInstance().getTime(), p_creatorId, p_title, null);
@@ -121,11 +120,9 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
      * Construct a IssueImpl with priority and status and category and a logical
      * key
      */
-    public IssueImpl(int p_levelObjectType, long p_levelObjectId,
-            String p_title, String p_priority, String p_status,
- String p_category, String severity,
-            String p_creatorId, String p_commentText,
-            String p_logicalKey)
+    public IssueImpl(int p_levelObjectType, long p_levelObjectId, String p_title,
+            String p_priority, String p_status, String p_category, String severity,
+            String p_creatorId, String p_commentText, String p_logicalKey)
     {
         this(p_levelObjectType, p_levelObjectId, p_title, p_priority, p_status, p_category,
                 severity, p_creatorId, p_commentText);

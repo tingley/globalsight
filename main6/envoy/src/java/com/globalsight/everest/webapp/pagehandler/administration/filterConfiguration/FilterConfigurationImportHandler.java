@@ -610,6 +610,14 @@ public class FilterConfigurationImportHandler extends PageHandler
                     this.cachePercentage(i, size);
                     Thread.sleep(100);
                 }
+                // store "json_filter" data to database
+                if (dataMap.containsKey("json_filter"))
+                {
+                    i++;
+                    storeJsonFilterData(dataMap);
+                    this.cachePercentage(i, size);
+                    Thread.sleep(100);
+                }
                 // store "xml_rule" data to database
                 if (dataMap.containsKey("xml_rule"))
                 {
@@ -631,14 +639,6 @@ public class FilterConfigurationImportHandler extends PageHandler
                 {
                     i++;
                     storeJavaPropertiesFilterData(dataMap);
-                    this.cachePercentage(i, size);
-                    Thread.sleep(100);
-                }
-                // store "json_filter" data to database
-                if (dataMap.containsKey("json_filter"))
-                {
-                    i++;
-                    storeJsonFilterData(dataMap);
                     this.cachePercentage(i, size);
                     Thread.sleep(100);
                 }
@@ -989,6 +989,14 @@ public class FilterConfigurationImportHandler extends PageHandler
                                         .get(Long.parseLong(postFilterTableID))));
                         xmlRuleFilter.setConfigXml(newconfigXmlStr);
                     }
+                    else if (postFilterTableName.equalsIgnoreCase("filter_json")
+                            && jsonFilterIdMap.containsKey(Long.parseLong(postFilterTableID)))
+                    {
+                        String newconfigXmlStr = xmlFilterConfigParser.getNewConfigXmlStr(
+                                "elementPostFilterId", String.valueOf(jsonFilterIdMap.get(Long
+                                        .parseLong(postFilterTableID))));
+                        xmlRuleFilter.setConfigXml(newconfigXmlStr);
+                    }
 
                     // cdataPostFilter
                     String cdataPostFilterID = xmlFilterConfigParser.getCdataPostFilterId();
@@ -1009,6 +1017,14 @@ public class FilterConfigurationImportHandler extends PageHandler
                     {
                         String newconfigXmlStr = xmlFilterConfigParser.getNewConfigXmlStr(
                                 "cdataPostFilterId", String.valueOf(javaScriptFilterIdMap.get(Long
+                                        .parseLong(cdataPostFilterID))));
+                        xmlRuleFilter.setConfigXml(newconfigXmlStr);
+                    }
+                    else if (cdataPostFilterTableName.equalsIgnoreCase("filter_json")
+                            && jsonFilterIdMap.containsKey(Long.parseLong(cdataPostFilterID)))
+                    {
+                        String newconfigXmlStr = xmlFilterConfigParser.getNewConfigXmlStr(
+                                "cdataPostFilterId", String.valueOf(jsonFilterIdMap.get(Long
                                         .parseLong(cdataPostFilterID))));
                         xmlRuleFilter.setConfigXml(newconfigXmlStr);
                     }

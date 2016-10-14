@@ -45,8 +45,7 @@ import com.globalsight.util.edit.GxmlUtil;
 
 class OrderedMatchSegments
 {
-    private static Logger c_logger = Logger
-            .getLogger(OrderedMatchSegments.class.getName());
+    private static Logger c_logger = Logger.getLogger(OrderedMatchSegments.class.getName());
 
     // repository of leverage matches.
     // key: target locale (GlobalSightLocale)
@@ -67,11 +66,9 @@ class OrderedMatchSegments
      * @param p_leverageOptions
      *            LeverageOptions
      */
-    void populate(Collection p_leveragedTus, LeverageOptions p_leverageOptions,
-            long p_jobId)
+    void populate(Collection p_leveragedTus, LeverageOptions p_leverageOptions, long p_jobId)
     {
-        LeveragingLocales leveragingLocales = p_leverageOptions
-                .getLeveragingLocales();
+        LeveragingLocales leveragingLocales = p_leverageOptions.getLeveragingLocales();
 
         // build m_localeMatchMap
         buildLocaleMatchMap(leveragingLocales);
@@ -90,7 +87,7 @@ class OrderedMatchSegments
 
         if (c_logger.isDebugEnabled())
         {
-            c_logger.debug("\nOrderedMatchSegments:\n" + toDebugString());            
+            c_logger.debug("\nOrderedMatchSegments:\n" + toDebugString());
         }
     }
 
@@ -195,8 +192,8 @@ class OrderedMatchSegments
      *            number of matches to be returned
      * @return Iterator
      */
-    public Iterator matchIterator(GlobalSightLocale p_targetLocale,
-            int p_numReturned, int p_threshold)
+    public Iterator matchIterator(GlobalSightLocale p_targetLocale, int p_numReturned,
+            int p_threshold)
     {
         return new MatchIterator(p_targetLocale, p_numReturned, p_threshold);
     }
@@ -204,8 +201,7 @@ class OrderedMatchSegments
     // build m_localeMatchMap
     private void buildLocaleMatchMap(LeveragingLocales p_leveragingLocales)
     {
-        Iterator itTargetLocales = p_leveragingLocales.getAllTargetLocales()
-                .iterator();
+        Iterator itTargetLocales = p_leveragingLocales.getAllTargetLocales().iterator();
         while (itTargetLocales.hasNext())
         {
             m_localeMatchMap.put(itTargetLocales.next(), new ArrayList());
@@ -213,24 +209,22 @@ class OrderedMatchSegments
     }
 
     // align matches to cross locale map
-    private void alignMatchesForCrossLocales(
-            LeveragingLocales p_leveragingLocales, Collection p_leveragedTus)
+    private void alignMatchesForCrossLocales(LeveragingLocales p_leveragingLocales,
+            Collection p_leveragedTus)
     {
         // walk through each target locale
         Iterator itTargetLocale = m_localeMatchMap.keySet().iterator();
         while (itTargetLocale.hasNext())
         {
-            GlobalSightLocale targetLocale = (GlobalSightLocale) itTargetLocale
-                    .next();
+            GlobalSightLocale targetLocale = (GlobalSightLocale) itTargetLocale.next();
             List leveragedTuvList = (List) m_localeMatchMap.get(targetLocale);
 
             // walk through each leveraging locale in a target locale
-            Iterator itLeveragingLocale = p_leveragingLocales
-                    .getLeveragingLocales(targetLocale).iterator();
+            Iterator itLeveragingLocale = p_leveragingLocales.getLeveragingLocales(targetLocale)
+                    .iterator();
             while (itLeveragingLocale.hasNext())
             {
-                GlobalSightLocale leveragingLocale = (GlobalSightLocale) itLeveragingLocale
-                        .next();
+                GlobalSightLocale leveragingLocale = (GlobalSightLocale) itLeveragingLocale.next();
 
                 // walk through each Tu in the Collection and put Tuvs
                 // in a leveraging locale to m_localeMatchMap in place
@@ -239,8 +233,24 @@ class OrderedMatchSegments
                 while (itLeveragedTu.hasNext())
                 {
                     LeveragedTu leverageTu = (LeveragedTu) itLeveragedTu.next();
-                    Collection tuvList = leverageTu
-                            .getTuvList(leveragingLocale);
+                    // GBS-3990
+                    Collection<BaseTmTuv> tuvList = new ArrayList<BaseTmTuv>();
+                    if (leveragingLocale == null)
+                    {
+                        GlobalSightLocale sourceLocale = leverageTu.getSourceLocale();
+                        Set<GlobalSightLocale> allLocales = leverageTu.getAllTuvLocales();
+                        for (GlobalSightLocale locale : allLocales)
+                        {
+                            if (!locale.equals(sourceLocale))
+                            {
+                                tuvList.addAll(leverageTu.getTuvList(locale));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        tuvList = leverageTu.getTuvList(leveragingLocale);
+                    }
                     if (tuvList != null)
                     {
                         // clone Tuvs and add them to the list
@@ -255,89 +265,30 @@ class OrderedMatchSegments
             }
         }
     }
-    
-    /**
-     * Gets duplicate tuvs in leveragedTuvList.
-     * 
-     * @param leveragedTuvList
-     * @return
-     */
-    private List<LeveragedTuv> getDuplicateTuv(
-            List<LeveragedTuv> leveragedTuvList)
-    {
-        List<LeveragedTuv> removedTuv = new ArrayList<LeveragedTuv>();
-        
-        for (int i = 0; i < leveragedTuvList.size() - 1; i++)
-        {
-             LeveragedTuv tuv1 = (LeveragedTuv) leveragedTuvList.get(i);
-             String sText1 = getSegmentText(tuv1.getSourceTuv().getSegment());
-             String tText1 = getSegmentText(tuv1.getSegment());
-             
-             for (int j = i + 1; j < leveragedTuvList.size(); j++)
-             {
-                 LeveragedTuv tuv2 = (LeveragedTuv) leveragedTuvList.get(j);
-                 
-                 String sText2 = getSegmentText(tuv2.getSourceTuv().getSegment());
-                 String tText2 = getSegmentText(tuv2.getSegment());
-                 
-				if (sText1.equals(sText2) && tText1.equals(tText2)
-						&& tuv1.getPreviousHash() == tuv2.getPreviousHash()
-						&& tuv1.getNextHash() == tuv1.getNextHash())
-                 {
-                     removedTuv.add(tuv2);
-                 }
-             }
-        }
-        
-        return removedTuv;
-    }
-    
-    /**
-     * Can not use leveragedTuvList.removeAll(removedTuv). The equals method has
-     * been rewrited.
-     * 
-     * @param leveragedTuvList
-     * @param removedTuv
-     */
-    private void removeAll(List<LeveragedTuv> leveragedTuvList,
-            List<LeveragedTuv> removedTuv)
-    {
-        for (LeveragedTuv aa : removedTuv)
-        {
-            for (int i = 0; i < leveragedTuvList.size(); i++)
-            {
-                LeveragedTuv aa2 = leveragedTuvList.get(i);
-                if (aa2.getId() == aa.getId()
-                        && aa2.getScore() == aa.getScore())
-                {
-                    leveragedTuvList.remove(i);
-                    break;
-                }
-            }
-        }
-    }
 
     /**
      * Removes duplicates
-     * @param p_leverageOptions
-     * @param companyId
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void removeDuplicates(LeverageOptions p_leverageOptions,
-            long p_jobId)
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
+    private void removeDuplicates(LeverageOptions p_leverageOptions, long p_jobId)
     {
         Iterator itLocale = m_localeMatchMap.keySet().iterator();
         while (itLocale.hasNext())
         {
-            GlobalSightLocale targetLocale = (GlobalSightLocale) itLocale
-                    .next();
-            List<LeveragedTuv> leveragedTuvList = (List) m_localeMatchMap
-                    .get(targetLocale);
-            SortUtil.sort(leveragedTuvList, new AssignOrderComparator(
-                    targetLocale, p_leverageOptions, p_jobId));
-
-            List<LeveragedTuv> removedTuv = getDuplicateTuv(leveragedTuvList);
-            removeAll(leveragedTuvList, removedTuv);
+            GlobalSightLocale targetLocale = (GlobalSightLocale) itLocale.next();
+            List<LeveragedTuv> leveragedTuvList = (List) m_localeMatchMap.get(targetLocale);
+            Map<Long, LeveragedTuv> uniqueLeveragedTuvMap = new HashMap<Long, LeveragedTuv>();
+            for (LeveragedTuv tuv : leveragedTuvList)
+            {
+                if (!uniqueLeveragedTuvMap.containsKey(tuv.getId()))
+                {
+                    uniqueLeveragedTuvMap.put(tuv.getId(), tuv);
+                }
+            }
+            // refresh the list with duplicates removed
+            leveragedTuvList.clear();
+            leveragedTuvList.addAll(uniqueLeveragedTuvMap.values());
         }
     }
 
@@ -361,14 +312,12 @@ class OrderedMatchSegments
     }
 
     // apply leverage options for multiple translations
-    private void applyMultiTransOption(LeverageOptions p_leverageOptions,
-            long p_jobId)
+    private void applyMultiTransOption(LeverageOptions p_leverageOptions, long p_jobId)
     {
         Iterator itLocale = m_localeMatchMap.keySet().iterator();
         while (itLocale.hasNext())
         {
-            GlobalSightLocale targetLocale = (GlobalSightLocale) itLocale
-                    .next();
+            GlobalSightLocale targetLocale = (GlobalSightLocale) itLocale.next();
             List leveragedTuvList = (List) m_localeMatchMap.get(targetLocale);
 
             // If the number of matches is only 1, no need to apply
@@ -390,20 +339,18 @@ class OrderedMatchSegments
             // of their locales are target locale or both are not. If
             // the above condition is satisfied, there are multiple
             // translation.
-            if ((firstState.equals(MatchState.PAGE_TM_EXACT_MATCH) || firstState
-                    .equals(MatchState.SEGMENT_TM_EXACT_MATCH))
-                    && (secondState.equals(MatchState.PAGE_TM_EXACT_MATCH) || secondState
-                            .equals(MatchState.SEGMENT_TM_EXACT_MATCH))
-                    && (!(firstLocale.equals(targetLocale) ^ secondLocale
-                            .equals(targetLocale))))
+            if ((firstState.equals(MatchState.PAGE_TM_EXACT_MATCH)
+                    || firstState.equals(MatchState.SEGMENT_TM_EXACT_MATCH))
+                    && (secondState.equals(MatchState.PAGE_TM_EXACT_MATCH)
+                            || secondState.equals(MatchState.SEGMENT_TM_EXACT_MATCH))
+                    && (!(firstLocale.equals(targetLocale) ^ secondLocale.equals(targetLocale))))
             {
-            	if (LeverageUtil.getSidCompareRusult(firstTuv, p_jobId) == 1 
-            			&& LeverageUtil.getSidCompareRusult(secondTuv, p_jobId) < 1)
-            	{
-            		continue;
-            	}
-                assignMultiTransStateAndScore(leveragedTuvList,
-                        p_leverageOptions);
+                if (LeverageUtil.getSidCompareRusult(firstTuv, p_jobId) == 1
+                        && LeverageUtil.getSidCompareRusult(secondTuv, p_jobId) < 1)
+                {
+                    continue;
+                }
+                assignMultiTransStateAndScore(leveragedTuvList, p_leverageOptions);
             }
         }
     }
@@ -472,8 +419,7 @@ class OrderedMatchSegments
     }
 
     // Demote the score of a Tuv according to the options the user chose.
-    private void demoteExact(LeveragedTuv p_tuv,
-            LeverageOptions p_leverageOptions)
+    private void demoteExact(LeveragedTuv p_tuv, LeverageOptions p_leverageOptions)
     {
         MatchState state = p_tuv.getMatchState();
         int penalty = 0;
@@ -482,8 +428,7 @@ class OrderedMatchSegments
         {
             if (((LeveragedTu) p_tuv.getTu()).getMatchTableType() == LeveragedTu.PAGE_TM)
             {
-                penalty = p_leverageOptions
-                        .getTypeDifferencePenaltyForReimport();
+                penalty = p_leverageOptions.getTypeDifferencePenaltyForReimport();
             }
             else
             {
@@ -512,17 +457,15 @@ class OrderedMatchSegments
         Iterator itLocale = m_localeMatchMap.keySet().iterator();
         while (itLocale.hasNext())
         {
-            GlobalSightLocale targetLocale = (GlobalSightLocale) itLocale
-                    .next();
+            GlobalSightLocale targetLocale = (GlobalSightLocale) itLocale.next();
             List leveragedTuvList = (List) m_localeMatchMap.get(targetLocale);
 
-            SortUtil.sort(leveragedTuvList, new AssignOrderComparator(
-                    targetLocale, options, p_jobId));
+            SortUtil.sort(leveragedTuvList,
+                    new AssignOrderComparator(targetLocale, options, p_jobId));
 
             for (int i = 0; i < leveragedTuvList.size(); i++)
             {
-                LeveragedTuv leveragedTuv = (LeveragedTuv) leveragedTuvList
-                        .get(i);
+                LeveragedTuv leveragedTuv = (LeveragedTuv) leveragedTuvList.get(i);
                 leveragedTuv.setOrder(i + 1);
             }
         }
@@ -544,8 +487,7 @@ class OrderedMatchSegments
         private int m_maxNum;
         private int m_threshold;
 
-        private MatchIterator(GlobalSightLocale p_targetLocale,
-                int p_numReturned, int p_threshold)
+        private MatchIterator(GlobalSightLocale p_targetLocale, int p_numReturned, int p_threshold)
         {
             m_matchList = (List) m_localeMatchMap.get(p_targetLocale);
             m_currentId = 0;
@@ -557,11 +499,9 @@ class OrderedMatchSegments
         {
             boolean hasNext = false;
 
-            if (m_matchList != null
-                    && m_matchList.size() > m_currentId
-                    && m_currentId < m_maxNum
-                    && m_threshold <= ((LeveragedTuv) m_matchList
-                            .get(m_currentId)).getScore())
+            if (m_matchList != null && m_matchList.size() > m_currentId
+                    && (m_maxNum == -1 ? true : m_currentId < m_maxNum)
+                    && m_threshold <= ((LeveragedTuv) m_matchList.get(m_currentId)).getScore())
             {
                 hasNext = true;
             }
@@ -596,8 +536,8 @@ class OrderedMatchSegments
         LeverageOptions options;
         long jobId = -1;
 
-        LeveragedTuvComparator(GlobalSightLocale p_targetLocale,
-                LeverageOptions options, long jobId)
+        LeveragedTuvComparator(GlobalSightLocale p_targetLocale, LeverageOptions options,
+                long jobId)
         {
             m_targetLocale = p_targetLocale;
             this.options = options;
@@ -627,19 +567,19 @@ class OrderedMatchSegments
 
             return cmp1 - cmp2;
         }
-        
+
         int compareTm(LeveragedTuv tuv1, LeveragedTuv tuv2)
         {
-        	if (!options.isTmProcedence())
+            if (!options.isTmProcedence())
             {
-        		return 0;
+                return 0;
             }
-        	
+
             long tmId1 = tuv1.getTu().getTmId();
             long tmId2 = tuv2.getTu().getTmId();
             int projectTmIndex1 = Leverager.getProjectTmIndex(options, tmId1);
             int projectTmIndex2 = Leverager.getProjectTmIndex(options, tmId2);
-            
+
             return projectTmIndex1 - projectTmIndex2;
         }
 
@@ -676,8 +616,7 @@ class OrderedMatchSegments
 
     private class AssignOrderComparator extends LeveragedTuvComparator
     {
-        AssignOrderComparator(GlobalSightLocale p_targetLocale,
-                LeverageOptions options, long jobId)
+        AssignOrderComparator(GlobalSightLocale p_targetLocale, LeverageOptions options, long jobId)
         {
             super(p_targetLocale, options, jobId);
         }
@@ -695,6 +634,13 @@ class OrderedMatchSegments
             int projectTmIndex1 = Leverager.getProjectTmIndex(options, tmId1);
             int projectTmIndex2 = Leverager.getProjectTmIndex(options, tmId2);
             int result = 0;
+
+            result = projectTmIndex1 - projectTmIndex2;
+            if (result != 0)
+            {
+                return result;
+            }
+
             result = (int) (score2 - score1);
             if (result != 0)
             {
@@ -726,12 +672,6 @@ class OrderedMatchSegments
                 {
                     return result;
                 }
-            }
-
-            result = projectTmIndex1 - projectTmIndex2;
-            if (result != 0)
-            {
-            	return result;
             }
 
             // Ok, same score. Compare match state.

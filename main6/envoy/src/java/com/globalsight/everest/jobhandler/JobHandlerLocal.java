@@ -118,8 +118,7 @@ public class JobHandlerLocal implements JobHandler
     //
     // PRIVATE STATIC VARIABLES
     //
-    private static Logger c_category = Logger.getLogger(JobHandlerLocal.class
-            .getName());
+    private static Logger c_category = Logger.getLogger(JobHandlerLocal.class.getName());
 
     private static final String MANAGER_ID_ARG = "managerId";
 
@@ -168,8 +167,7 @@ public class JobHandlerLocal implements JobHandler
      * are in. Not allowed from the GUI, but done from the Server side in
      * certain circumstances.
      */
-    public void cancelJob(Job p_job, boolean p_reimport)
-            throws RemoteException, JobException
+    public void cancelJob(Job p_job, boolean p_reimport) throws RemoteException, JobException
     {
         JobDispatchEngine jobDispatchEngine = getJobDispatchEngine();
         jobDispatchEngine.cancelJob(p_job, p_reimport);
@@ -187,12 +185,11 @@ public class JobHandlerLocal implements JobHandler
     /**
      * @see JobHandler.cancelJob(String, Job, String)
      */
-    public void cancelJob(String p_idOfUserRequestingCancel, Job p_job,
-            String p_state) throws RemoteException, JobException
+    public void cancelJob(String p_idOfUserRequestingCancel, Job p_job, String p_state)
+            throws RemoteException, JobException
     {
         JobDispatchEngine jobDispatchEngine = getJobDispatchEngine();
-        jobDispatchEngine.cancelJob(p_idOfUserRequestingCancel, p_job, p_state,
-                false);
+        jobDispatchEngine.cancelJob(p_idOfUserRequestingCancel, p_job, p_state, false);
     }
 
     /**
@@ -213,8 +210,8 @@ public class JobHandlerLocal implements JobHandler
     /*
      * @see JobHandler.cancelImportErrorPage(String, Job)
      */
-    public void cancelImportErrorPages(String p_idOfUserRequestingCancel,
-            Job p_job) throws RemoteException, JobException
+    public void cancelImportErrorPages(String p_idOfUserRequestingCancel, Job p_job)
+            throws RemoteException, JobException
     {
         String jobState = p_job.getState();
         // if job is in an error state
@@ -234,8 +231,7 @@ public class JobHandlerLocal implements JobHandler
                 {
                     ServerProxy.getJobEventObserver();
                     // remove request in database
-                    int numOfRemovedRequests = removeErrorRequests(p_job
-                            .getId());
+                    int numOfRemovedRequests = removeErrorRequests(p_job.getId());
 
                     // Refresh the job through toplink to reload the
                     // in-memory requestlist, which has not been updated
@@ -247,8 +243,8 @@ public class JobHandlerLocal implements JobHandler
                     // and update the number of pages since some were removed.
                     // Update in the cache and DB.
                     int numOfPages = job.getPageCount() - numOfRemovedRequests;
-                    job = JobPersistenceAccessor.updatePageCountAndState(job,
-                            Job.PENDING, numOfPages);
+                    job = JobPersistenceAccessor.updatePageCountAndState(job, Job.PENDING,
+                            numOfPages);
                     Collection<Request> requests = job.getRequestList();
                     Request req = null;
 
@@ -274,8 +270,7 @@ public class JobHandlerLocal implements JobHandler
                 }
                 catch (Exception e)
                 {
-                    c_category.error("Failure when modifying failed job "
-                            + p_job.getId()
+                    c_category.error("Failure when modifying failed job " + p_job.getId()
                             + " and moving to pending/dispatch.", e);
                     String args[] = new String[1];
                     args[0] = Long.toString(p_job.getId());
@@ -297,16 +292,15 @@ public class JobHandlerLocal implements JobHandler
         {
             String[] args = new String[1];
             args[0] = Long.toString(p_job.getId());
-            throw new JobException(JobException.MSG_FAILED_TO_ARCHIVE_JOB,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_ARCHIVE_JOB, args, e);
         }
     }
 
     /**
      * @see JobHandler.getActivity(String, String)
      */
-    public Activity getActivityByCompanyId(String p_activityName,
-            String p_companyId) throws RemoteException, JobException
+    public Activity getActivityByCompanyId(String p_activityName, String p_companyId)
+            throws RemoteException, JobException
     {
         Activity result = null;
         try
@@ -326,8 +320,7 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::getActivity", e);
             String[] args = new String[1];
             args[0] = p_activityName;
-            throw new JobException(JobException.MSG_FAILED_TO_GET_ACTIVITY,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_ACTIVITY, args, e);
         }
         return result;
     }
@@ -335,8 +328,7 @@ public class JobHandlerLocal implements JobHandler
     /**
      * @see JobHandler.getActivity(String)
      */
-    public Activity getActivity(String p_activityName) throws RemoteException,
-            JobException
+    public Activity getActivity(String p_activityName) throws RemoteException, JobException
     {
         Activity result = null;
         try
@@ -364,8 +356,7 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::getActivity", e);
             String[] args = new String[1];
             args[0] = p_activityName;
-            throw new JobException(JobException.MSG_FAILED_TO_GET_ACTIVITY,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_ACTIVITY, args, e);
         }
         return result;
     }
@@ -402,15 +393,13 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::getActivity", e);
             String[] args = new String[1];
             args[0] = p_activityName;
-            throw new JobException(JobException.MSG_FAILED_TO_GET_ACTIVITY,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_ACTIVITY, args, e);
         }
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<Activity> getAllDtpActivities() throws RemoteException,
-            JobException
+    public Collection<Activity> getAllDtpActivities() throws RemoteException, JobException
     {
         try
         {
@@ -430,14 +419,12 @@ public class JobHandlerLocal implements JobHandler
         catch (Exception e)
         {
             c_category.error("JobHandlerLocal::getAllDtpActivities", e);
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_GET_ALL_DTP_ACTIVITIES, null, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_ALL_DTP_ACTIVITIES, null, e);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<Activity> getAllTransActivities() throws RemoteException,
-            JobException
+    public Collection<Activity> getAllTransActivities() throws RemoteException, JobException
     {
         try
         {
@@ -457,9 +444,7 @@ public class JobHandlerLocal implements JobHandler
         catch (Exception e)
         {
             c_category.error("JobHandlerLocal::getAllTransActivities", e);
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_GET_ALL_TRANS_ACTIVITIES, null,
-                    e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_ALL_TRANS_ACTIVITIES, null, e);
         }
     }
 
@@ -472,8 +457,7 @@ public class JobHandlerLocal implements JobHandler
      *             Component related exception.
      */
     @SuppressWarnings("unchecked")
-    public Collection<Activity> getAllActivities() throws RemoteException,
-            JobException
+    public Collection<Activity> getAllActivities() throws RemoteException, JobException
     {
         try
         {
@@ -493,8 +477,7 @@ public class JobHandlerLocal implements JobHandler
         catch (Exception e)
         {
             c_category.error("JobHandlerLocal::getAllActivities", e);
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_GET_ALL_ACTIVITIES, null, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_ALL_ACTIVITIES, null, e);
         }
     }
 
@@ -521,14 +504,12 @@ public class JobHandlerLocal implements JobHandler
         catch (Exception e)
         {
             c_category.error("JobHandlerLocal::getAllActivities", e);
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_GET_ALL_ACTIVITIES, null, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_ALL_ACTIVITIES, null, e);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<Company> getAllCompanies() throws RemoteException,
-            JobException
+    public Collection<Company> getAllCompanies() throws RemoteException, JobException
     {
         try
         {
@@ -538,13 +519,11 @@ public class JobHandlerLocal implements JobHandler
         catch (Exception e)
         {
             c_category.error("JobHandlerLocal::getAllCompanies", e);
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_GET_ALL_COMPANIES, null, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_ALL_COMPANIES, null, e);
         }
     }
 
-    public Company getCompany(String p_companyName) throws RemoteException,
-            JobException
+    public Company getCompany(String p_companyName) throws RemoteException, JobException
     {
         Company result = null;
         try
@@ -564,21 +543,18 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::getCompany", e);
             String[] args = new String[1];
             args[0] = p_companyName;
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_GET_COMPANY_BY_NAME, args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_COMPANY_BY_NAME, args, e);
         }
         return result;
     }
 
-    public Company getCompanyById(long p_companyId) throws RemoteException,
-            JobException
+    public Company getCompanyById(long p_companyId) throws RemoteException, JobException
     {
         Company result = null;
         try
         {
             String hql = "from Company c where c.isActive = 'Y' and c.id = ?";
-            Iterator<?> it = HibernateUtil.search(hql, new Long(p_companyId))
-                    .iterator();
+            Iterator<?> it = HibernateUtil.search(hql, new Long(p_companyId)).iterator();
             if (it.hasNext())
             {
                 result = (Company) it.next();
@@ -589,19 +565,16 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::getCompany", e);
             String[] args = new String[1];
             args[0] = Long.toString(p_companyId);
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_GET_COMPANY_BY_ID, args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_COMPANY_BY_ID, args, e);
         }
         return result;
     }
 
-    public void modifyCompany(Company p_company) throws RemoteException,
-            JobException
+    public void modifyCompany(Company p_company) throws RemoteException, JobException
     {
         try
         {
-            Company c = (Company) HibernateUtil.get(Company.class,
-                    p_company.getIdAsLong());
+            Company c = (Company) HibernateUtil.get(Company.class, p_company.getIdAsLong());
             if (c != null)
             {
                 c.setDescription(p_company.getDescription());
@@ -616,8 +589,8 @@ public class JobHandlerLocal implements JobHandler
                 c.setTmVersion(p_company.getTmVersion());
                 c.setBigDataStoreLevel(p_company.getBigDataStoreLevel());
                 c.setEnableDitaChecks(p_company.getEnableDitaChecks());
-                c.setEnableWorkflowStatePosts(p_company
-                        .getEnableWorkflowStatePosts());
+                c.setEnableWorkflowStatePosts(p_company.getEnableWorkflowStatePosts());
+                c.setEnableBlankTmSearch(p_company.getEnableBlankTmSearch());
                 c.setDefaultFluency(p_company.getDefaultFluency());
                 c.setDefaultAdequacy(p_company.getDefaultAdequacy());
                 HibernateUtil.update(c);
@@ -643,13 +616,11 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::modifyCompany", pe);
             String args[] = new String[1];
             args[0] = p_company.getCompanyName();
-            throw new JobException(JobException.MSG_FAILED_TO_MODIFY_COMPANY,
-                    args, pe);
+            throw new JobException(JobException.MSG_FAILED_TO_MODIFY_COMPANY, args, pe);
         }
     }
 
-    public void removeCompany(Company p_company) throws RemoteException,
-            JobException
+    public void removeCompany(Company p_company) throws RemoteException, JobException
     {
         try
         {
@@ -675,8 +646,7 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::removeCompany", e);
             String args[] = new String[1];
             args[0] = p_company.getCompanyName();
-            throw new JobException(JobException.MSG_FAILED_TO_REMOVE_COMPANY,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_REMOVE_COMPANY, args, e);
         }
     }
 
@@ -732,13 +702,11 @@ public class JobHandlerLocal implements JobHandler
         {
             String[] arg = new String[1];
             arg[0] = category.getCategory();
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_CREATE_COMPANY_CATEGORY, arg, e);
+            throw new JobException(JobException.MSG_FAILED_TO_CREATE_COMPANY_CATEGORY, arg, e);
         }
     }
 
-    public void createScorecardCategory(ScorecardCategory scorecardCategory)
-            throws JobException
+    public void createScorecardCategory(ScorecardCategory scorecardCategory) throws JobException
     {
         try
         {
@@ -748,13 +716,11 @@ public class JobHandlerLocal implements JobHandler
         {
             String[] arg = new String[1];
             arg[0] = scorecardCategory.getScorecardCategory();
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_CREATE_COMPANY_CATEGORY, arg, e);
+            throw new JobException(JobException.MSG_FAILED_TO_CREATE_COMPANY_CATEGORY, arg, e);
         }
     }
-    
-    public void createPostReviewCategory(
-            PostReviewCategory postReviewCategory) throws JobException
+
+    public void createPostReviewCategory(PostReviewCategory postReviewCategory) throws JobException
     {
         try
         {
@@ -764,8 +730,7 @@ public class JobHandlerLocal implements JobHandler
         {
             String[] arg = new String[1];
             arg[0] = postReviewCategory.getCategoryName();
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_CREATE_COMPANY_CATEGORY, arg, e);
+            throw new JobException(JobException.MSG_FAILED_TO_CREATE_COMPANY_CATEGORY, arg, e);
         }
     }
 
@@ -792,8 +757,7 @@ public class JobHandlerLocal implements JobHandler
             Map<String, String> map = new HashMap<String, String>();
             map.put("name", p_company.getName().toLowerCase());
             List<String> result = session.createQuery(hql)
-                    .setString("name", p_company.getName().toLowerCase())
-                    .list();
+                    .setString("name", p_company.getName().toLowerCase()).list();
 
             if (result.size() == 0)
             {
@@ -805,8 +769,8 @@ public class JobHandlerLocal implements JobHandler
 
                 // Insert default termbase
                 String definitionXml = "<definition><name>Sample</name><description>Sample Termbase</description><languages><language><name>English</name><locale>en</locale><hasterms>true</hasterms></language><language><name>French</name><locale>fr</locale><hasterms>true</hasterms></language><language><name>Spanish</name><locale>es</locale><hasterms>true</hasterms></language><language><name>German</name><locale>de</locale><hasterms>true</hasterms></language></languages><fields></fields></definition>";
-                tb = (ITermbase) ServerProxy.getTermbaseManager().create(
-                        p_userId, "", definitionXml, companyId);
+                tb = (ITermbase) ServerProxy.getTermbaseManager().create(p_userId, "",
+                        definitionXml, companyId);
 
                 // Insert system parameters
                 createDefSystemParamters(companyId, session);
@@ -829,8 +793,7 @@ public class JobHandlerLocal implements JobHandler
                 transaction.commit();
 
                 // Copy properties files
-                SystemConfiguration.copyPropertiesToCompany(company
-                        .getCompanyName());
+                SystemConfiguration.copyPropertiesToCompany(company.getCompanyName());
 
                 // Must set dirty after the transaction committed
                 ServerProxy.getSystemParameterPersistenceManager().setDirty();
@@ -855,8 +818,7 @@ public class JobHandlerLocal implements JobHandler
             {
                 String errorArgs[] =
                 { p_company.getCompanyName() };
-                throw new JobException(JobException.MSG_COMPANY_ALREADY_EXISTS,
-                        errorArgs, null);
+                throw new JobException(JobException.MSG_COMPANY_ALREADY_EXISTS, errorArgs, null);
             }
         }
         catch (JobException je)
@@ -880,8 +842,7 @@ public class JobHandlerLocal implements JobHandler
             {
                 try
                 {
-                    ServerProxy.getTermbaseManager().delete(tb.getName(),
-                            p_userId, "");
+                    ServerProxy.getTermbaseManager().delete(tb.getName(), p_userId, "");
                 }
                 catch (GeneralException e1)
                 {
@@ -896,8 +857,7 @@ public class JobHandlerLocal implements JobHandler
             String args[] = new String[1];
             args[0] = (p_company == null ? "" : p_company.getCompanyName());
             c_category.error("JobHandlerLocal::createCompany", e);
-            throw new JobException(JobException.MSG_FAILED_TO_CREATE_COMPANY,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_CREATE_COMPANY, args, e);
         }
 
         return p_company;
@@ -911,30 +871,26 @@ public class JobHandlerLocal implements JobHandler
      * @throws ExportLocationEntityException
      */
     private String createExportLocation(Company p_company, Session session)
-            throws ExportLocationEntityException, RemoteException,
-            GeneralException, NamingException
+            throws ExportLocationEntityException, RemoteException, GeneralException, NamingException
     {
 
         // create an export location
         Long id = new Long(CompanyWrapper.SUPER_COMPANY_ID);
-        ExportLocation adminEl = (ExportLocation) session.get(
-                ExportLocationImpl.class, id);
+        ExportLocation adminEl = (ExportLocation) session.get(ExportLocationImpl.class, id);
 
         ExportLocation el = new ExportLocationImpl();
         el.setName(adminEl.getName());
         el.setDescription(adminEl.getDescription());
-        String location = adminEl.getLocation() + "/"
-                + p_company.getCompanyName();
+        String location = adminEl.getLocation() + "/" + p_company.getCompanyName();
         el.setLocation(location);
         el.setCompanyId(p_company.getId());
         session.save(el);
 
         // create the default location of SystemParameter
         SystemParameter sp = ServerProxy.getSystemParameterPersistenceManager()
-                .getAdminSystemParameter(
-                        SystemConfigParamNames.DEFAULT_EXPORT_LOCATION);
-        SystemParameter newSp = new SystemParameterImpl(sp.getName(),
-                Long.toString(el.getId()), p_company.getId());
+                .getAdminSystemParameter(SystemConfigParamNames.DEFAULT_EXPORT_LOCATION);
+        SystemParameter newSp = new SystemParameterImpl(sp.getName(), Long.toString(el.getId()),
+                p_company.getId());
         session.save(newSp);
         return location;
     }
@@ -951,8 +907,7 @@ public class JobHandlerLocal implements JobHandler
                 .getSystemParameterPersistenceManager();
         String companyName = CompanyWrapper.getCompanyNameById(p_companyId);
         String[] sysParamsNames = ConfigMainHandler.getParams();
-        String[] sysParamsNamesSuff = ConfigMainHandler
-                .getCompanySuffixedParams();
+        String[] sysParamsNamesSuff = ConfigMainHandler.getCompanySuffixedParams();
         List<String> ignoredSysParams = ConfigMainHandler.getIgnoredSysParams();
 
         // Copy super system params
@@ -965,8 +920,7 @@ public class JobHandlerLocal implements JobHandler
             {
                 continue;
             }
-            String spValue = spManager.getAdminSystemParameter(spName)
-                    .getValue();
+            String spValue = spManager.getAdminSystemParameter(spName).getValue();
             SystemParameter sp = new SystemParameterImpl(spName, spValue,
                     Long.parseLong(p_companyId));
             session.save(sp);
@@ -975,8 +929,7 @@ public class JobHandlerLocal implements JobHandler
         // Add system params like %superParam%\companyName
         for (int i = 0; i < sysParamsNamesSuff.length; i++)
         {
-            String value = spManager.getAdminSystemParameter(
-                    sysParamsNamesSuff[i]).getValue();
+            String value = spManager.getAdminSystemParameter(sysParamsNamesSuff[i]).getValue();
             SystemParameter sp = new SystemParameterImpl(sysParamsNamesSuff[i],
                     value + "/" + companyName, Long.parseLong(p_companyId));
             session.save(sp);
@@ -989,43 +942,37 @@ public class JobHandlerLocal implements JobHandler
     {
         // get the pivot currency
         SystemConfiguration sc = SystemConfiguration.getInstance();
-        String pivotCurCode = sc
-                .getStringParameter(SystemConfigParamNames.PIVOT_CURRENCY);
+        String pivotCurCode = sc.getStringParameter(SystemConfigParamNames.PIVOT_CURRENCY);
 
         String hql = "from IsoCurrency i where i.code = :code";
-        List<IsoCurrency> result = session.createQuery(hql)
-                .setString("code", pivotCurCode).list();
+        List<IsoCurrency> result = session.createQuery(hql).setString("code", pivotCurCode).list();
 
-        Currency pivot = new Currency((IsoCurrency) result.get(0), 1,
-                Long.parseLong(p_companyId));
+        Currency pivot = new Currency((IsoCurrency) result.get(0), 1, Long.parseLong(p_companyId));
         session.save(pivot);
 
         Currency.addPivotCurdrency(pivot);
     }
 
-    private void createDefaultCalendar(String p_companyId, String userId,
-            Session session) throws PersistenceException, Exception
+    private void createDefaultCalendar(String p_companyId, String userId, Session session)
+            throws PersistenceException, Exception
     {
         FluxCalendar defCal = null;
 
         // Init base info
-        FluxCalendar baseCal = (FluxCalendar) session.get(FluxCalendar.class,
-                new Long(1));
-        defCal = new FluxCalendar("Base Calendar", baseCal.getTimeZoneId(),
-                true, 8);
+        FluxCalendar baseCal = (FluxCalendar) session.get(FluxCalendar.class, new Long(1));
+        defCal = new FluxCalendar("Base Calendar", baseCal.getTimeZoneId(), true, 8);
         // defCal.setLastUpdatedBy(userId);
         // defCal.setLastUpdatedTime(new Date());
         defCal.setCompanyId(Long.parseLong(p_companyId));
 
         // Set holidaies
-        Holiday christmas = new Holiday("Christmas Day", null, 25, 0, 0, true,
-                11, null, p_companyId);
+        Holiday christmas = new Holiday("Christmas Day", null, 25, 0, 0, true, 11, null,
+                p_companyId);
         christmas.setTimeExpression("0 0 0 0 25 11");
         session.save(christmas);
         defCal.addHoliday(christmas);
 
-        Holiday newYear = new Holiday("New Year's Day", null, 1, 0, 0, true, 0,
-                null, p_companyId);
+        Holiday newYear = new Holiday("New Year's Day", null, 1, 0, 0, true, 0, null, p_companyId);
         newYear.setTimeExpression("0 0 0 0 1 0");
         session.save(newYear);
         defCal.addHoliday(newYear);
@@ -1066,8 +1013,8 @@ public class JobHandlerLocal implements JobHandler
         permGroup = new PermissionGroupImpl();
         permGroup.setName("Administrator");
         permGroup.setDescription("Default Administrator Group");
-        permGroup
-                .setPermissionSet("|3|4|5|6|7|8|9|13|14|17|18|19|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|"
+        permGroup.setPermissionSet(
+                "|3|4|5|6|7|8|9|13|14|17|18|19|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|"
                         + "51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|70|71|72|73|74|75|76|77|78|79|80|82|83|86|87|88|89|90|91|92|93|94|95|96|97|98|99|100|"
                         + "101|102|103|104|117|118|119|120|121|127|128|130|131|132|133|134|135|136|137|138|139|140|142|143|144|145|146|147|148|149|150|"
                         + "151|152|154|155|156|157|158|159|160|162|163|164|165|166|167|168|170|171|172|173|174|188|190|191|192|193|194|195|196|197|200|"
@@ -1113,10 +1060,9 @@ public class JobHandlerLocal implements JobHandler
         permGroup = new PermissionGroupImpl();
         permGroup.setName("LocalizationParticipant");
         permGroup.setDescription("Default Localization Participant Group");
-        permGroup
-                .setPermissionSet("|163|164|165|166|167|168|169|170|171|172|173|174|195|199|200|"
-                        + "201|225|226|245|246|253|254|261|273|283|285|291|"
-                        + "324|325|326|327|361|362|363|364|370|373|374|386|");
+        permGroup.setPermissionSet("|163|164|165|166|167|168|169|170|171|172|173|174|195|199|200|"
+                + "201|225|226|245|246|253|254|261|273|283|285|291|"
+                + "324|325|326|327|361|362|363|364|370|373|374|386|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1125,24 +1071,21 @@ public class JobHandlerLocal implements JobHandler
         permGroup.setDescription("Default Customer Group");
         permGroup.setPermissionSet("|14|37|38|40|128|130|131|132|133|134|135|"
                 + "136|137|138|139|140|142|143|144|145|146|147|148|"
-                + "149|150|151|154|155|156|157|158|159|160|162|"
-                + "174|188|192|193|199|205|368|");
+                + "149|150|151|154|155|156|157|158|159|160|162|" + "174|188|192|193|199|205|368|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
         permGroup.setName("VendorAdmin");
         permGroup.setDescription("Default VendorAdmin Group");
-        permGroup
-                .setPermissionSet("|37|38|39|40|41|177|178|179|180|181|182|183|184|185|186|");
+        permGroup.setPermissionSet("|37|38|39|40|41|177|178|179|180|181|182|183|184|185|186|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
         permGroup.setName("VendorManager");
         permGroup.setDescription("Default VendorManager Group");
-        permGroup
-                .setPermissionSet("|37|38|39|40|41|177|178|179|180|181|183|184|185|186|");
+        permGroup.setPermissionSet("|37|38|39|40|41|177|178|179|180|181|183|184|185|186|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1156,16 +1099,16 @@ public class JobHandlerLocal implements JobHandler
         permGroup = new PermissionGroupImpl();
         permGroup.setName("EngineerDtp");
         permGroup.setDescription("Default Engineer DTP Group");
-        permGroup
-                .setPermissionSet("|163|164|167|168|169|170|171|172|173|174|195|199|225|226|253|254|261|273|283|285|291|324|325|326|327|361|362|364|370|373|374|386|");
+        permGroup.setPermissionSet(
+                "|163|164|167|168|169|170|171|172|173|174|195|199|225|226|253|254|261|273|283|285|291|324|325|326|327|361|362|364|370|373|374|386|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
         permGroup = new PermissionGroupImpl();
         permGroup.setName("Reviewer");
         permGroup.setDescription("Default Reviewer Group");
-        permGroup
-                .setPermissionSet("|163|164|167|168|169|170|171|172|173|174|195|199|225|226|253|254|258|261|273|283|285|291|324|325|326|327|361|362|364|370|373|374|386|");
+        permGroup.setPermissionSet(
+                "|163|164|167|168|169|170|171|172|173|174|195|199|225|226|253|254|258|261|273|283|285|291|324|325|326|327|361|362|364|370|373|374|386|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1211,8 +1154,7 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::jobById", e);
             String[] args = new String[1];
             args[0] = new Long(p_jobId).toString();
-            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_ID,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_ID, args, e);
         }
 
         return result;
@@ -1264,8 +1206,7 @@ public class JobHandlerLocal implements JobHandler
      * @throws java.rmi.RemoteException
      *             Network related exception.
      */
-    public Collection<JobImpl> getJobsByState(String p_state)
-            throws RemoteException, JobException
+    public Collection<JobImpl> getJobsByState(String p_state) throws RemoteException, JobException
     {
         return getJobsByStateList(argList(p_state));
     }
@@ -1279,8 +1220,7 @@ public class JobHandlerLocal implements JobHandler
      * @throws java.rmi.RemoteException
      *             Network related exception.
      */
-    public Collection<JobImpl> getJobsByRate(String p_rateId)
-            throws RemoteException, JobException
+    public Collection<JobImpl> getJobsByRate(String p_rateId) throws RemoteException, JobException
     {
         Collection<JobImpl> results = null;
         m_myJobsDaysRetrieved = getMyJobsDaysRetrieved();
@@ -1295,8 +1235,7 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::jobByStateList", e);
             String[] args = new String[1];
             args[0] = p_rateId;
-            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE, args, e);
         }
 
         return results;
@@ -1329,8 +1268,7 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::jobByStateList", e);
             String[] args = new String[1];
             args[0] = p_listOfStates.toString();
-            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE, args, e);
         }
 
         return results;
@@ -1339,9 +1277,8 @@ public class JobHandlerLocal implements JobHandler
     /**
      * @see JobHandler.getJobsByStateList(Vector, boolean)
      */
-    public Collection<JobImpl> getJobsByStateList(
-            Vector<String> p_listOfStates, boolean p_queryLimitByDate)
-            throws RemoteException, JobException
+    public Collection<JobImpl> getJobsByStateList(Vector<String> p_listOfStates,
+            boolean p_queryLimitByDate) throws RemoteException, JobException
     {
         m_myJobsDaysRetrieved = getMyJobsDaysRetrieved();
         if (!p_queryLimitByDate || m_myJobsDaysRetrieved <= 0)
@@ -1351,19 +1288,16 @@ public class JobHandlerLocal implements JobHandler
 
         try
         {
-            String sql = jobsByStateListQuery(p_listOfStates,
-                    p_queryLimitByDate);
+            String sql = jobsByStateListQuery(p_listOfStates, p_queryLimitByDate);
 
-            return HibernateUtil.searchWithSql(JobImpl.class, sql,
-                    getQueryDate().getDate());
+            return HibernateUtil.searchWithSql(JobImpl.class, sql, getQueryDate().getDate());
         }
         catch (Exception e)
         {
             c_category.error("JobHandlerLocal::jobByStateList", e);
             String[] args = new String[1];
             args[0] = p_listOfStates.toString();
-            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE, args, e);
         }
     }
 
@@ -1371,14 +1305,13 @@ public class JobHandlerLocal implements JobHandler
             Vector<String> p_listOfStates) throws RemoteException, JobException
     {
         Collection<JobImpl> results = null;
-        m_size = SystemConfiguration.getInstance().getIntParameter(
-                SystemConfigParamNames.RECORDS_PER_PAGE_JOBS);
+        m_size = SystemConfiguration.getInstance()
+                .getIntParameter(SystemConfigParamNames.RECORDS_PER_PAGE_JOBS);
         m_myJobsDaysRetrieved = getMyJobsDaysRetrieved();
 
         try
         {
-            JobResultSetCursor jrsc = (JobResultSetCursor) m_jobCursorList
-                    .get(p_httpSessionId);
+            JobResultSetCursor jrsc = (JobResultSetCursor) m_jobCursorList.get(p_httpSessionId);
             if (jrsc == null)
             {
                 String sql = jobsByStateListQuery(p_listOfStates);
@@ -1406,15 +1339,13 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::jobByStateList", e);
             String[] args = new String[1];
             args[0] = p_listOfStates.toString();
-            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE, args, e);
         }
         return results;
     }
 
     @SuppressWarnings("unchecked")
-    public Collection getJobsByManagerId(String p_managerId)
-            throws RemoteException, JobException
+    public Collection getJobsByManagerId(String p_managerId) throws RemoteException, JobException
     {
         try
         {
@@ -1429,21 +1360,19 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::jobsByManagerId", e);
             String[] args = new String[1];
             args[0] = p_managerId;
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_GET_JOB_BY_STATE_AND_PROJECT_MANAGER,
+            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE_AND_PROJECT_MANAGER,
                     args, e);
         }
     }
 
-    public Collection<JobImpl> getJobsByManagerIdAndState(String p_managerId,
-            String p_state) throws RemoteException, JobException
+    public Collection<JobImpl> getJobsByManagerIdAndState(String p_managerId, String p_state)
+            throws RemoteException, JobException
     {
         return getJobsByManagerIdAndStateList(p_managerId, argList(p_state));
     }
 
-    public Collection<JobImpl> getJobsByManagerIdAndStateList(
-            String p_managerId, Vector<String> p_listOfStates)
-            throws RemoteException, JobException
+    public Collection<JobImpl> getJobsByManagerIdAndStateList(String p_managerId,
+            Vector<String> p_listOfStates) throws RemoteException, JobException
     {
         Collection<JobImpl> results = null;
 
@@ -1468,8 +1397,7 @@ public class JobHandlerLocal implements JobHandler
             String[] args = new String[2];
             args[0] = p_managerId;
             args[1] = p_listOfStates.toString();
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_GET_JOB_BY_STATE_AND_PROJECT_MANAGER,
+            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE_AND_PROJECT_MANAGER,
                     args, e);
         }
 
@@ -1508,8 +1436,8 @@ public class JobHandlerLocal implements JobHandler
      * @exception JobException
      *                Component related exception.
      */
-    public Collection getJobsByWfManagerIdAndStateList(String p_wfManagerId,
-            Vector p_listOfStates) throws RemoteException, JobException
+    public Collection getJobsByWfManagerIdAndStateList(String p_wfManagerId, Vector p_listOfStates)
+            throws RemoteException, JobException
     {
         Collection results = null;
 
@@ -1528,13 +1456,11 @@ public class JobHandlerLocal implements JobHandler
         }
         catch (Exception e)
         {
-            c_category.error("JobHandlerLocal::jobsByWfManagerIdAndStateList",
-                    e);
+            c_category.error("JobHandlerLocal::jobsByWfManagerIdAndStateList", e);
             String[] args = new String[2];
             args[0] = p_wfManagerId;
             args[1] = p_listOfStates.toString();
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_GET_JOB_BY_STATE_AND_PROJECT_MANAGER,
+            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE_AND_PROJECT_MANAGER,
                     args, e);
         }
 
@@ -1550,8 +1476,7 @@ public class JobHandlerLocal implements JobHandler
         return getJobsByManagerIdAndState(p_userId, p_state);
     }
 
-    public L10nProfile getL10nProfileByJobId(long p_jobId)
-            throws RemoteException, JobException
+    public L10nProfile getL10nProfileByJobId(long p_jobId) throws RemoteException, JobException
     {
         L10nProfile l10nProfile = null;
 
@@ -1566,8 +1491,7 @@ public class JobHandlerLocal implements JobHandler
             Map map = new HashMap();
             map.put("jobId", new Long(p_jobId));
 
-            Iterator it = HibernateUtil.searchWithSql(sql, map,
-                    BasicL10nProfile.class).iterator();
+            Iterator it = HibernateUtil.searchWithSql(sql, map, BasicL10nProfile.class).iterator();
             if (it.hasNext())
                 l10nProfile = (L10nProfile) it.next();
 
@@ -1582,8 +1506,7 @@ public class JobHandlerLocal implements JobHandler
         return l10nProfile;
     }
 
-    public Collection getSourcePageByJobId(long p_jobId)
-            throws RemoteException, JobException
+    public Collection getSourcePageByJobId(long p_jobId) throws RemoteException, JobException
     {
         ArrayList sourcePages = null;
         try
@@ -1591,16 +1514,14 @@ public class JobHandlerLocal implements JobHandler
             String sql = SourcePageDescriptorModifier.SOURCE_PAGE_BY_JOB_ID;
             Map map = new HashMap();
             map.put("jobId", new Long(p_jobId));
-            sourcePages = new ArrayList(HibernateUtil.searchWithSql(sql, map,
-                    SourcePage.class));
+            sourcePages = new ArrayList(HibernateUtil.searchWithSql(sql, map, SourcePage.class));
 
             // this does sort the pages according to page name by the US
             // locale sorting order.
             // If we ever need to support user locale specific sorting for this
             // later,
             // that can be added in the UI if the user's lang is not english
-            Comparator comparator = new PageComparator(
-                    PageComparator.EXTERNAL_PAGE_ID, Locale.US);
+            Comparator comparator = new PageComparator(PageComparator.EXTERNAL_PAGE_ID, Locale.US);
             SortUtil.sort(sourcePages, comparator);
 
         }
@@ -1616,8 +1537,8 @@ public class JobHandlerLocal implements JobHandler
     /**
      * @see JobHandler.getSourcePageByTypeAndJobId(int, long)
      */
-    public Collection getSourcePagesByTypeAndJobId(int p_primaryFileType,
-            long p_jobId) throws RemoteException, JobException
+    public Collection getSourcePagesByTypeAndJobId(int p_primaryFileType, long p_jobId)
+            throws RemoteException, JobException
     {
         // must call a query to get these rather than just get from the object.
         // some of the relationships between the objects have been broken
@@ -1640,14 +1561,12 @@ public class JobHandlerLocal implements JobHandler
                     break;
             }
 
-            sourcePages = new ArrayList(HibernateUtil.searchWithSql(sql, map,
-                    SourcePage.class));
+            sourcePages = new ArrayList(HibernateUtil.searchWithSql(sql, map, SourcePage.class));
         }
         catch (Exception e)
         {
-            c_category.error("Failed to get the source pages of type "
-                    + p_primaryFileType + " that are associated with job "
-                    + p_jobId);
+            c_category.error("Failed to get the source pages of type " + p_primaryFileType
+                    + " that are associated with job " + p_jobId);
             throw new JobException(e);
         }
 
@@ -1656,8 +1575,7 @@ public class JobHandlerLocal implements JobHandler
         // If we ever need to support user locale specific sorting for this
         // later,
         // that can be added in the UI if the user's lang is not english
-        Comparator comparator = new PageComparator(
-                PageComparator.EXTERNAL_PAGE_ID, Locale.US);
+        Comparator comparator = new PageComparator(PageComparator.EXTERNAL_PAGE_ID, Locale.US);
         SortUtil.sort(sourcePages, comparator);
 
         return sourcePages;
@@ -1666,8 +1584,7 @@ public class JobHandlerLocal implements JobHandler
     /**
      * Return all the requests associated with the specified job.
      */
-    public Collection getRequestListByJobId(long p_jobId)
-            throws RemoteException, JobException
+    public Collection getRequestListByJobId(long p_jobId) throws RemoteException, JobException
     {
         Collection requestList = null;
         try
@@ -1675,8 +1592,7 @@ public class JobHandlerLocal implements JobHandler
             String sql = RequestDescriptorModifier.REQUEST_LIST_BY_JOB_ID;
             Map map = new HashMap();
             map.put("jobId", new Long(p_jobId));
-            requestList = new ArrayList(HibernateUtil.searchWithSql(sql, map,
-                    RequestImpl.class));
+            requestList = new ArrayList(HibernateUtil.searchWithSql(sql, map, RequestImpl.class));
         }
         catch (Exception e)
         {
@@ -1696,8 +1612,7 @@ public class JobHandlerLocal implements JobHandler
      * @return Either the job that contains that source page or NULL if a job
      *         doesn't contain that page.
      */
-    public Job findJobOfPage(long p_sourcePageId) throws RemoteException,
-            JobException
+    public Job findJobOfPage(long p_sourcePageId) throws RemoteException, JobException
     {
         Job result = null;
 
@@ -1706,8 +1621,7 @@ public class JobHandlerLocal implements JobHandler
             String sql = "select r.job from RequestImpl r where r.sourcePageId = :sId";
             Map map = new HashMap();
             map.put("sId", new Long(p_sourcePageId));
-            Iterator iJobs = HibernateUtil.searchWithSql(sql, map,
-                    RequestImpl.class).iterator();
+            Iterator iJobs = HibernateUtil.searchWithSql(sql, map, RequestImpl.class).iterator();
 
             // if there is one return it
             if (iJobs.hasNext())
@@ -1720,9 +1634,7 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::findJobOfPage ", e);
             String[] args =
             { Long.toString(p_sourcePageId) };
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_GET_JOB_BY_SOURCE_PAGE_ID, args,
-                    e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_SOURCE_PAGE_ID, args, e);
         }
 
         return result;
@@ -1731,8 +1643,7 @@ public class JobHandlerLocal implements JobHandler
     /**
      * @see JobHandler.updatePageCount(Job, int)
      */
-    public Job updatePageCount(Job p_job, int p_pageCount)
-            throws RemoteException, JobException
+    public Job updatePageCount(Job p_job, int p_pageCount) throws RemoteException, JobException
     {
         return JobPersistenceAccessor.updatePageCount(p_job, p_pageCount);
     }
@@ -1740,8 +1651,7 @@ public class JobHandlerLocal implements JobHandler
     /**
      * @see JobHandler.updateQuoteDate(Job, String)
      */
-    public void updateQuoteDate(Job p_job, String p_quoteDate)
-            throws RemoteException, JobException
+    public void updateQuoteDate(Job p_job, String p_quoteDate) throws RemoteException, JobException
     {
         JobPersistenceAccessor.updateQuoteDate(p_job, p_quoteDate);
     }
@@ -1757,8 +1667,7 @@ public class JobHandlerLocal implements JobHandler
     public void updateQuoteApprovedDate(Job p_job, String p_quoteApprovedDate)
             throws RemoteException, JobException
     {
-        JobPersistenceAccessor.updateQuoteApprovedDate(p_job,
-                p_quoteApprovedDate);
+        JobPersistenceAccessor.updateQuoteApprovedDate(p_job, p_quoteApprovedDate);
 
     }
 
@@ -1780,8 +1689,7 @@ public class JobHandlerLocal implements JobHandler
     /**
      * @see JobHandler.updateAuthoriserUser(Job, User)
      */
-    public void updateAuthoriserUser(Job p_job, User user)
-            throws RemoteException, JobException
+    public void updateAuthoriserUser(Job p_job, User user) throws RemoteException, JobException
     {
         JobPersistenceAccessor.updateAuthoriserUser(p_job, user);
     }
@@ -1789,8 +1697,7 @@ public class JobHandlerLocal implements JobHandler
     /**
      * @see JobHandler.overrideWordCount(Job, int)
      */
-    public Job overrideWordCount(Job p_job, int p_wordCount)
-            throws RemoteException, JobException
+    public Job overrideWordCount(Job p_job, int p_wordCount) throws RemoteException, JobException
     {
         return JobPersistenceAccessor.overrideWordCount(p_job, p_wordCount);
     }
@@ -1798,8 +1705,7 @@ public class JobHandlerLocal implements JobHandler
     /**
      * @see JobHandler.clearOverridenWordCount(Job)
      */
-    public Job clearOverridenWordCount(Job p_job) throws RemoteException,
-            JobException
+    public Job clearOverridenWordCount(Job p_job) throws RemoteException, JobException
     {
         return JobPersistenceAccessor.clearOverridenWordCount(p_job);
     }
@@ -1818,8 +1724,7 @@ public class JobHandlerLocal implements JobHandler
      */
     @SuppressWarnings(
     { "unchecked", "rawtypes" })
-    public Activity createActivity(Activity p_activity) throws RemoteException,
-            JobException
+    public Activity createActivity(Activity p_activity) throws RemoteException, JobException
     {
         try
         {
@@ -1850,9 +1755,7 @@ public class JobHandlerLocal implements JobHandler
             {
                 String errorArgs[] =
                 { p_activity.getActivityName() };
-                throw new JobException(
-                        JobException.MSG_ACTIVITY_ALREADY_EXISTS, errorArgs,
-                        null);
+                throw new JobException(JobException.MSG_ACTIVITY_ALREADY_EXISTS, errorArgs, null);
             }
         }
         catch (JobException je)
@@ -1867,8 +1770,7 @@ public class JobHandlerLocal implements JobHandler
             String args[] = new String[1];
             args[0] = p_activity.getActivityName();
             c_category.error("JobHandlerLocal::createActivity", e);
-            throw new JobException(JobException.MSG_FAILED_TO_CREATE_ACTIVITY,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_CREATE_ACTIVITY, args, e);
         }
 
         return p_activity;
@@ -1885,13 +1787,11 @@ public class JobHandlerLocal implements JobHandler
      * @throws JobException
      *             Component related exception.
      */
-    public void modifyActivity(Activity p_activity) throws RemoteException,
-            JobException
+    public void modifyActivity(Activity p_activity) throws RemoteException, JobException
     {
         try
         {
-            Activity clone = (Activity) HibernateUtil.get(Activity.class,
-                    p_activity.getId());
+            Activity clone = (Activity) HibernateUtil.get(Activity.class, p_activity.getId());
             clone.setDescription(p_activity.getDescription());
             clone.setType(p_activity.getType());
             clone.setIsEditable(p_activity.getIsEditable());
@@ -1910,8 +1810,7 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::modifyActivity", pe);
             String args[] = new String[1];
             args[0] = p_activity.getActivityName();
-            throw new JobException(JobException.MSG_FAILED_TO_MODIFY_ACTIVITY,
-                    args, pe);
+            throw new JobException(JobException.MSG_FAILED_TO_MODIFY_ACTIVITY, args, pe);
         }
     }
 
@@ -1926,8 +1825,7 @@ public class JobHandlerLocal implements JobHandler
      * @throws JobException
      *             Component related exception.
      */
-    public void removeActivity(Activity p_activity) throws RemoteException,
-            JobException
+    public void removeActivity(Activity p_activity) throws RemoteException, JobException
     {
         try
         {
@@ -1939,8 +1837,7 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::removeActivity", e);
             String args[] = new String[1];
             args[0] = p_activity.getActivityName();
-            throw new JobException(JobException.MSG_FAILED_TO_REMOVE_ACTIVITY,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_REMOVE_ACTIVITY, args, e);
         }
     }
 
@@ -1957,8 +1854,7 @@ public class JobHandlerLocal implements JobHandler
         catch (Exception e)
         {
             c_category.error("Unable to retrieve Job Dispatching Engine", e);
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_FIND_DISPATCH_ENGINE, null, e);
+            throw new JobException(JobException.MSG_FAILED_TO_FIND_DISPATCH_ENGINE, null, e);
         }
     }
 
@@ -1994,8 +1890,8 @@ public class JobHandlerLocal implements JobHandler
                 return 0;
             }
             // Delete the error requests and their source pages.
-            RemoveRequestFromJobCommand cmd2 = new RemoveRequestFromJobCommand(
-                    p_jobId, errorRequests);
+            RemoveRequestFromJobCommand cmd2 = new RemoveRequestFromJobCommand(p_jobId,
+                    errorRequests);
 
             conn = getPersistence().getConnection();
             conn.setAutoCommit(false);
@@ -2014,13 +1910,11 @@ public class JobHandlerLocal implements JobHandler
             {
             }
 
-            c_category.error(
-                    "Couldn't remove the requests and source pages from job "
-                            + p_jobId, e);
+            c_category.error("Couldn't remove the requests and source pages from job " + p_jobId,
+                    e);
             String[] args =
             { Long.toString(p_jobId) };
-            throw new JobException(
-                    JobException.MSG_FAILED_TO_REMOVE_ERROR_REQUEST, args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_REMOVE_ERROR_REQUEST, args, e);
         }
         finally
         {
@@ -2036,13 +1930,11 @@ public class JobHandlerLocal implements JobHandler
     }
 
     /* Create all the roles associated with the given activity. */
-    private void createRolesForActivity(Activity p_activity)
-            throws JobException
+    private void createRolesForActivity(Activity p_activity) throws JobException
     {
         try
         {
-            Iterator it = getLocaleManager().getSourceTargetLocalePairs()
-                    .iterator();
+            Iterator it = getLocaleManager().getSourceTargetLocalePairs().iterator();
             while (it.hasNext())
             {
                 LocalePair lp = (LocalePair) it.next();
@@ -2052,20 +1944,17 @@ public class JobHandlerLocal implements JobHandler
         }
         catch (Exception e)
         {
-            throwRoleException(
-                    JobException.MSG_FAILED_TO_CREATE_ROLE_FOR_ACTIVITY,
+            throwRoleException(JobException.MSG_FAILED_TO_CREATE_ROLE_FOR_ACTIVITY,
                     p_activity.getActivityName(), e);
         }
     }
 
     /* Remove all the roles associated with the given activity. */
-    private void removeRolesForActivity(Activity p_activity)
-            throws JobException
+    private void removeRolesForActivity(Activity p_activity) throws JobException
     {
         try
         {
-            Iterator it = getLocaleManager().getSourceTargetLocalePairs()
-                    .iterator();
+            Iterator it = getLocaleManager().getSourceTargetLocalePairs().iterator();
             while (it.hasNext())
             {
                 LocalePair lp = (LocalePair) it.next();
@@ -2075,8 +1964,7 @@ public class JobHandlerLocal implements JobHandler
         }
         catch (Exception e)
         {
-            throwRoleException(
-                    JobException.MSG_FAILED_TO_REMOVE_ROLE_FOR_ACTIVITY,
+            throwRoleException(JobException.MSG_FAILED_TO_REMOVE_ROLE_FOR_ACTIVITY,
                     p_activity.getActivityName(), e);
         }
     }
@@ -2093,8 +1981,8 @@ public class JobHandlerLocal implements JobHandler
     }
 
     /* Throw a JobException based on the given arguments. */
-    private void throwRoleException(String p_msg, String p_activityName,
-            Exception p_ex) throws JobException
+    private void throwRoleException(String p_msg, String p_activityName, Exception p_ex)
+            throws JobException
     {
         c_category.error(p_msg, p_ex);
         String args[] = new String[1];
@@ -2122,8 +2010,8 @@ public class JobHandlerLocal implements JobHandler
     {
         Role curRole = null;
         // remove all the container roles
-        Collection cRoles = getUserManager().getContainerRoles(
-                p_activity.getName(), p_source.toString(), p_target.toString());
+        Collection cRoles = getUserManager().getContainerRoles(p_activity.getName(),
+                p_source.toString(), p_target.toString());
 
         if (cRoles != null && cRoles.size() > 0)
         {
@@ -2143,8 +2031,8 @@ public class JobHandlerLocal implements JobHandler
         }
 
         // remove all the user roles
-        Collection uRoles = getUserManager().getUserRoles(p_activity.getName(),
-                p_source.toString(), p_target.toString());
+        Collection uRoles = getUserManager().getUserRoles(p_activity.getName(), p_source.toString(),
+                p_target.toString());
 
         if (uRoles != null && uRoles.size() > 0)
         {
@@ -2170,8 +2058,7 @@ public class JobHandlerLocal implements JobHandler
             catch (Exception e)
             {
                 c_category.error("Unable to retrieve Workflow Manager", e);
-                throw new JobException(
-                        JobException.MSG_WORKFLOWMANAGER_FAILURE, null, e);
+                throw new JobException(JobException.MSG_WORKFLOWMANAGER_FAILURE, null, e);
             }
         }
 
@@ -2209,8 +2096,7 @@ public class JobHandlerLocal implements JobHandler
             catch (Exception e)
             {
                 c_category.error("Unable to retrieve Locale Manager", e);
-                throw new JobException(
-                        JobException.MSG_WORKFLOWMANAGER_FAILURE, null, e);
+                throw new JobException(JobException.MSG_WORKFLOWMANAGER_FAILURE, null, e);
             }
         }
 
@@ -2229,8 +2115,7 @@ public class JobHandlerLocal implements JobHandler
             catch (Exception e)
             {
                 c_category.error("Unable to retrieve User Manager", e);
-                throw new JobException(
-                        JobException.MSG_WORKFLOWMANAGER_FAILURE, null, e);
+                throw new JobException(JobException.MSG_WORKFLOWMANAGER_FAILURE, null, e);
             }
         }
 
@@ -2249,8 +2134,7 @@ public class JobHandlerLocal implements JobHandler
             catch (Exception e)
             {
                 c_category.error("Unable to retrieve Costing Engine", e);
-                throw new JobException(JobException.MSG_COSTING_ENGINE_FAILURE,
-                        null, e);
+                throw new JobException(JobException.MSG_COSTING_ENGINE_FAILURE, null, e);
             }
         }
         return m_costing;
@@ -2287,8 +2171,7 @@ public class JobHandlerLocal implements JobHandler
         return jobsByStateListQuery(p_listOfStates, false);
     }
 
-    private String jobsByStateListQuery(Vector p_listOfStates,
-            boolean p_queryLimitByDate)
+    private String jobsByStateListQuery(Vector p_listOfStates, boolean p_queryLimitByDate)
     {
 
         StringBuffer sb = new StringBuffer();
@@ -2355,8 +2238,7 @@ public class JobHandlerLocal implements JobHandler
         return sb.toString();
     }
 
-    private void addStateClause(StringBuffer p_sb, Vector p_listOfStates,
-            String p_tableName)
+    private void addStateClause(StringBuffer p_sb, Vector p_listOfStates, String p_tableName)
     {
         p_sb.append(p_tableName);
         p_sb.append(".STATE in (");
@@ -2394,14 +2276,13 @@ public class JobHandlerLocal implements JobHandler
         addStateClause(sb, p_listOfStates, "wf");
         if (p_listOfStates.contains(Job.DTPINPROGRESS))
         {
-            sb.append(" OR (wf.STATE = '").append(Workflow.DISPATCHED)
-                    .append("'").append(" and wf.TYPE = '")
-                    .append(WorkflowTypeConstants.TYPE_DTP).append("'))");
+            sb.append(" OR (wf.STATE = '").append(Workflow.DISPATCHED).append("'")
+                    .append(" and wf.TYPE = '").append(WorkflowTypeConstants.TYPE_DTP)
+                    .append("'))");
         }
         else
         {
-            sb.append(" AND wf.TYPE <> '")
-                    .append(WorkflowTypeConstants.TYPE_DTP).append("')");
+            sb.append(" AND wf.TYPE <> '").append(WorkflowTypeConstants.TYPE_DTP).append("')");
         }
         sb.append(" AND wf.JOB_ID = j.ID");
         sb.append(" AND r.JOB_ID = j.ID");
@@ -2442,14 +2323,13 @@ public class JobHandlerLocal implements JobHandler
         addStateClause(sb, p_listOfStates, "wf");
         if (p_listOfStates.contains(Job.DTPINPROGRESS))
         {
-            sb.append(" OR (wf.STATE = '").append(Workflow.DISPATCHED)
-                    .append("'").append(" and wf.TYPE = '")
-                    .append(WorkflowTypeConstants.TYPE_DTP).append("'))");
+            sb.append(" OR (wf.STATE = '").append(Workflow.DISPATCHED).append("'")
+                    .append(" and wf.TYPE = '").append(WorkflowTypeConstants.TYPE_DTP)
+                    .append("'))");
         }
         else
         {
-            sb.append(" AND wf.TYPE <> '")
-                    .append(WorkflowTypeConstants.TYPE_DTP).append("')");
+            sb.append(" AND wf.TYPE <> '").append(WorkflowTypeConstants.TYPE_DTP).append("')");
         }
         // Don't query the cancelled workflows
         if (!p_listOfStates.contains(Workflow.CANCELLED))
@@ -2502,8 +2382,7 @@ public class JobHandlerLocal implements JobHandler
      * @throws RemoteException
      * @throws JobException
      */
-    public Job getJobByJobName(String p_jobName) throws RemoteException,
-            JobException
+    public Job getJobByJobName(String p_jobName) throws RemoteException, JobException
     {
         Job result = null;
 
@@ -2546,8 +2425,7 @@ public class JobHandlerLocal implements JobHandler
         {
             m_myJobsDaysRetrieved = getMyJobsDaysRetrieved();
 
-            String sql = getJobsByUserAndStateListQuery(p_userId,
-                    p_listOfStates);
+            String sql = getJobsByUserAndStateListQuery(p_userId, p_listOfStates);
             Map<String, Object> map = new HashMap<String, Object>();
             if (m_myJobsDaysRetrieved > 0)
             {
@@ -2560,15 +2438,13 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::jobByUserStateList", e);
             String[] args = new String[1];
             args[0] = p_listOfStates.toString();
-            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE, args, e);
         }
 
         return results;
     }
 
-    private String getJobsByUserAndStateListQuery(String userId,
-            Vector p_listOfStates)
+    private String getJobsByUserAndStateListQuery(String userId, Vector p_listOfStates)
     {
         StringBuffer sb = new StringBuffer();
 
@@ -2578,14 +2454,13 @@ public class JobHandlerLocal implements JobHandler
         addStateClause(sb, p_listOfStates, "j");
         if (p_listOfStates.contains(Job.DTPINPROGRESS))
         {
-            sb.append(" OR (wf.STATE = '").append(Workflow.DISPATCHED)
-                    .append("'").append(" and wf.TYPE = '")
-                    .append(WorkflowTypeConstants.TYPE_DTP).append("'))");
+            sb.append(" OR (wf.STATE = '").append(Workflow.DISPATCHED).append("'")
+                    .append(" and wf.TYPE = '").append(WorkflowTypeConstants.TYPE_DTP)
+                    .append("'))");
         }
         else
         {
-            sb.append(" AND wf.TYPE <> '")
-                    .append(WorkflowTypeConstants.TYPE_DTP).append("')");
+            sb.append(" AND wf.TYPE <> '").append(WorkflowTypeConstants.TYPE_DTP).append("')");
         }
         sb.append(" AND wf.JOB_ID = j.ID");
         sb.append(" AND r.JOB_ID = j.ID");
@@ -2652,10 +2527,9 @@ public class JobHandlerLocal implements JobHandler
         return result;
     }
 
-	public String[] getJobIdsByCompany(String p_companyId, int p_offset,
-			int p_count, boolean p_isDescOrder, String currentUserId)
-			throws RemoteException, JobException
-	{
+    public String[] getJobIdsByCompany(String p_companyId, int p_offset, int p_count,
+            boolean p_isDescOrder, String currentUserId) throws RemoteException, JobException
+    {
         if (StringUtil.isEmpty(p_companyId))
             return null;
         if (p_offset < 1)
@@ -2669,7 +2543,7 @@ public class JobHandlerLocal implements JobHandler
         {
             StringBuilder sb = new StringBuilder();
             sb.append("SELECT DISTINCT j.* FROM Job j ");
-            //GBS-3987:fetchJobsPerCompany does not work correctly
+            // GBS-3987:fetchJobsPerCompany does not work correctly
             sb.append("  left outer join REQUEST r on j.ID = r.JOB_ID ");
             sb.append("  left outer join L10N_PROFILE l on j.L10N_PROFILE_ID = l.ID ");
             sb.append("  left outer join PROJECT p on l.PROJECT_ID = p.PROJECT_SEQ ");
@@ -2681,11 +2555,11 @@ public class JobHandlerLocal implements JobHandler
                 sb.append(" AND j.COMPANY_ID = ");
                 sb.append(Long.parseLong(p_companyId));
             }
-			// GBS-3987:fetchJobsPerCompany does not work correctly
-			if (currentUserId != null)
-			{
-				userExpression(currentUserId, sb);
-			}
+            // GBS-3987:fetchJobsPerCompany does not work correctly
+            if (currentUserId != null)
+            {
+                userExpression(currentUserId, sb);
+            }
             sb.append(" ORDER BY j.ID");
             if (p_isDescOrder)
                 sb.append(" DESC");
@@ -2716,10 +2590,9 @@ public class JobHandlerLocal implements JobHandler
         }
     }
 
-	public String[] getJobIdsByState(String p_companyId, String p_state,
-			int p_offset, int p_count, boolean p_isDescOrder,
-			String currentUserId) throws RemoteException, JobException
-	{
+    public String[] getJobIdsByState(String p_companyId, String p_state, int p_offset, int p_count,
+            boolean p_isDescOrder, String currentUserId) throws RemoteException, JobException
+    {
         if (StringUtil.isEmpty(p_companyId))
             return null;
         if (p_offset < 1)
@@ -2741,20 +2614,19 @@ public class JobHandlerLocal implements JobHandler
             sb.append(" WHERE 1=1 ");
             if (!StringUtil.isEmpty(p_state))
             {
-                sb.append(" AND j.STATE IN ('").append(p_state.toUpperCase())
-                        .append("')");
+                sb.append(" AND j.STATE IN ('").append(p_state.toUpperCase()).append("')");
             }
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(p_companyId))
             {
                 sb.append(" AND j.COMPANY_ID = ");
                 sb.append(Long.parseLong(p_companyId));
             }
-        	// GBS-3987:fetchJobsPerCompany does not work correctly
-			if (currentUserId != null)
-			{
-				userExpression(currentUserId, sb);
-			}
-			
+            // GBS-3987:fetchJobsPerCompany does not work correctly
+            if (currentUserId != null)
+            {
+                userExpression(currentUserId, sb);
+            }
+
             sb.append(" ORDER BY j.ID");
             if (p_isDescOrder)
                 sb.append(" DESC");
@@ -2785,11 +2657,10 @@ public class JobHandlerLocal implements JobHandler
         }
     }
 
-	public String[] getJobIdsByCreator(long p_companyId,
-			String p_creatorUserId, int p_offset, int p_count,
-			boolean p_isDescOrder, String currentUserId)
-			throws RemoteException, JobException
-	{
+    public String[] getJobIdsByCreator(long p_companyId, String p_creatorUserId, int p_offset,
+            int p_count, boolean p_isDescOrder, String currentUserId)
+            throws RemoteException, JobException
+    {
         if (p_offset < 1)
             p_offset = 0;
         p_count = p_count <= 0 ? 1 : p_count;
@@ -2801,7 +2672,7 @@ public class JobHandlerLocal implements JobHandler
         {
             StringBuilder sb = new StringBuilder();
             sb.append("SELECT DISTINCT j.* FROM Job j ");
-            //GBS-3987:fetchJobsPerCompany does not work correctly
+            // GBS-3987:fetchJobsPerCompany does not work correctly
             sb.append("  left outer join REQUEST r on j.ID = r.JOB_ID ");
             sb.append("  left outer join L10N_PROFILE l on j.L10N_PROFILE_ID = l.ID ");
             sb.append("  left outer join PROJECT p on l.PROJECT_ID = p.PROJECT_SEQ ");
@@ -2817,12 +2688,12 @@ public class JobHandlerLocal implements JobHandler
                 sb.append(" AND j.COMPANY_ID = ");
                 sb.append(p_companyId);
             }
-            //GBS-3987:fetchJobsPerCompany does not work correctly
-			if (currentUserId != null)
-			{
-				userExpression(currentUserId, sb);
-			}
-            
+            // GBS-3987:fetchJobsPerCompany does not work correctly
+            if (currentUserId != null)
+            {
+                userExpression(currentUserId, sb);
+            }
+
             sb.append(" ORDER BY j.ID");
             if (p_isDescOrder)
                 sb.append(" DESC");
@@ -2833,7 +2704,7 @@ public class JobHandlerLocal implements JobHandler
 
             if (c_category.isDebugEnabled())
             {
-                c_category.debug("The query is " + sb.toString());                
+                c_category.debug("The query is " + sb.toString());
             }
 
             results = HibernateUtil.searchWithSql(JobImpl.class, sb.toString());
@@ -2857,7 +2728,7 @@ public class JobHandlerLocal implements JobHandler
         }
     }
 
-    private void userExpression(String currentUserId,StringBuilder sb)
+    private void userExpression(String currentUserId, StringBuilder sb)
     {
         PermissionSet perms = new PermissionSet();
         JobVoSearchCriteria vo = new JobVoSearchCriteria();
@@ -2867,7 +2738,7 @@ public class JobHandlerLocal implements JobHandler
         }
         catch (Exception e)
         {
-        	c_category.error("Failed to get permissions for user " + currentUserId, e);
+            c_category.error("Failed to get permissions for user " + currentUserId, e);
         }
 
         if (perms.getPermissionFor(Permission.JOB_SCOPE_ALL))
@@ -2878,7 +2749,7 @@ public class JobHandlerLocal implements JobHandler
         {
             if (perms.getPermissionFor(Permission.PROJECTS_MANAGE))
             {
-            	sb.append(" and ( p.MANAGER_USER_ID ='").append(currentUserId).append("'");
+                sb.append(" and ( p.MANAGER_USER_ID ='").append(currentUserId).append("'");
                 if (perms.getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
                 {
                     sb.append(" or wo.OWNER_ID = '").append(currentUserId).append("'");
@@ -2895,7 +2766,7 @@ public class JobHandlerLocal implements JobHandler
             {
                 if (perms.getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
                 {
-                	sb.append(" and ( wo.OWNER_ID = '").append(currentUserId).append("'");
+                    sb.append(" and ( wo.OWNER_ID = '").append(currentUserId).append("'");
                     if (perms.getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS))
                     {
                         List allProjectsIds = vo.getMyProjects(currentUserId);
@@ -2921,7 +2792,7 @@ public class JobHandlerLocal implements JobHandler
             }
         }
     }
-    
+
     public HashMap<String, Integer> getCountsByJobState(String p_companyId)
             throws RemoteException, JobException
     {
@@ -2994,8 +2865,7 @@ public class JobHandlerLocal implements JobHandler
         return getJobsByStateList(argList(p_state), userId);
     }
 
-    private Collection<JobImpl> getJobsByStateList(
-            Vector<String> p_listOfStates, String userId)
+    private Collection<JobImpl> getJobsByStateList(Vector<String> p_listOfStates, String userId)
     {
         Collection<JobImpl> results = null;
 
@@ -3010,21 +2880,19 @@ public class JobHandlerLocal implements JobHandler
             c_category.error("JobHandlerLocal::jobByStateList", e);
             String[] args = new String[1];
             args[0] = p_listOfStates.toString();
-            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE,
-                    args, e);
+            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE, args, e);
         }
 
         return results;
     }
 
-    private String jobsByStateListQuery(Vector<String> p_listOfStates,
-            String userId)
+    private String jobsByStateListQuery(Vector<String> p_listOfStates, String userId)
     {
         return jobsByStateListQuery(p_listOfStates, userId, false);
     }
 
-    private String jobsByStateListQuery(Vector<String> p_listOfStates,
-            String userId, boolean p_queryLimitByDate)
+    private String jobsByStateListQuery(Vector<String> p_listOfStates, String userId,
+            boolean p_queryLimitByDate)
     {
         StringBuffer sb = new StringBuffer();
 

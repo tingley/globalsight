@@ -36,6 +36,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.LockOptions;
 import org.hibernate.Session;
 
+import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.integration.GSTuvData;
 import com.globalsight.ling.tm3.integration.segmenttm.TM3Util;
@@ -61,7 +62,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     private TM3Manager manager;
     private TM3DataFactory<T> factory;
     private Connection connection = null;
-    
+
     private boolean locked = false;
 
     // Transient
@@ -237,50 +238,60 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     }
 
     @Override
-    public TM3LeverageResults<T> findMatches(T matchKey,
-            TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> attributes, TM3MatchType matchType,
-            boolean lookupTarget) throws TM3Exception
+    public TM3LeverageResults<T> findMatches(T matchKey, TM3Locale sourceLocale,
+            Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> attributes,
+            TM3MatchType matchType, boolean lookupTarget) throws TM3Exception
     {
-        return findMatches(matchKey, sourceLocale, targetLocales, attributes,
-                matchType, lookupTarget, Integer.MAX_VALUE, 0);
+        return findMatches(matchKey, sourceLocale, targetLocales, attributes, matchType,
+                lookupTarget, Integer.MAX_VALUE, 0);
     }
 
     @Override
-    public TM3LeverageResults<T> findMatches(T matchKey,
-            TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> attributes, TM3MatchType matchType,
-            boolean lookupTarget, int maxResults, int threshold)
+    public TM3LeverageResults<T> findMatches(T matchKey, TM3Locale sourceLocale,
+            Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> attributes,
+            TM3MatchType matchType, boolean lookupTarget, int maxResults, int threshold)
             throws TM3Exception
     {
         List<Long> tm3TmIds = new ArrayList<Long>();
         tm3TmIds.add(getStorageInfo().getId());
 
-        return findMatches(matchKey, sourceLocale, targetLocales, attributes,
-                matchType, lookupTarget, maxResults, threshold, tm3TmIds);
+        return findMatches(matchKey, sourceLocale, targetLocales, attributes, matchType,
+                lookupTarget, maxResults, threshold, tm3TmIds);
     }
 
     @Override
-    public TM3LeverageResults<T> findMatches(T matchKey,
-            TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> attributes, TM3MatchType matchType,
-            boolean lookupTarget, int maxResults, int threshold,
+    public TM3LeverageResults<T> findMatches(T matchKey, TM3Locale sourceLocale,
+            Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> attributes,
+            TM3MatchType matchType, boolean lookupTarget, int maxResults, int threshold,
             List<Long> tm3TmIds) throws TM3Exception
+    {
+        return findMatches(matchKey, sourceLocale, targetLocales, attributes, matchType,
+                lookupTarget, maxResults, threshold, tm3TmIds, null);
+    }
+
+    @Override
+    public TM3LeverageResults<T> findMatches(T matchKey, TM3Locale sourceLocale,
+            Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> attributes,
+            TM3MatchType matchType, boolean lookupTarget, int maxResults, int threshold,
+            List<Long> tm3TmIds, LeverageOptions leverageOptions) throws TM3Exception
     {
         if (LOGGER.isDebugEnabled())
         {
-            LOGGER.debug("findMatches: key=" + matchKey + ", srcLoc="
-                    + sourceLocale + ", type=" + matchType + ", max="
-                    + maxResults + ", threhold=" + threshold);
+            LOGGER.debug("findMatches: key=" + matchKey + ", srcLoc=" + sourceLocale + ", type="
+                    + matchType + ", max=" + maxResults + ", threhold=" + threshold);
         }
         if (attributes == null)
         {
             attributes = TM3Attributes.NONE;
         }
-        TM3LeverageResults<T> results = new TM3LeverageResults<T>(matchKey,
-                attributes);
+        TM3LeverageResults<T> results = new TM3LeverageResults<T>(matchKey, attributes);
         Map<TM3Attribute, Object> inlineAttributes = getInlineAttributes(attributes);
         Map<TM3Attribute, String> customAttributes = getCustomAttributes(attributes);
+        // GBS-3990, blank search from tm search page does not need to search
+        // fuzzy matches as the exact matches should already include all the
+        // expected results
+        boolean ignoreFuzzyMatches = leverageOptions.isFromTMSearchPage()
+                && isBlankFromTmSearch(matchKey);
         int count = 0;
         Connection conn = null;
         try
@@ -289,36 +300,38 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             switch (matchType)
             {
                 case EXACT:
-                    getExactMatches(conn, results, matchKey, sourceLocale,
-                            targetLocales, inlineAttributes, customAttributes,
-                            maxResults, lookupTarget, tm3TmIds);
+                    getExactMatches(conn, results, matchKey, sourceLocale, targetLocales,
+                            inlineAttributes, customAttributes, maxResults, lookupTarget, tm3TmIds,
+                            leverageOptions);
                     break;
                 case ALL:
-                    count = getExactMatches(conn, results, matchKey,
-                            sourceLocale, targetLocales, inlineAttributes,
-                            customAttributes, maxResults, lookupTarget,
-                            tm3TmIds);
-            		int max = determineMaxResults(maxResults, tm3TmIds.size(),
-            				targetLocales.size());
-                    if (count < max)
+                    count = getExactMatches(conn, results, matchKey, sourceLocale, targetLocales,
+                            inlineAttributes, customAttributes, maxResults, lookupTarget, tm3TmIds,
+                            leverageOptions);
+                    if (!ignoreFuzzyMatches)
                     {
-                        getFuzzyMatches(conn, results, matchKey, sourceLocale,
-                                targetLocales, inlineAttributes,
-                                customAttributes, maxResults, threshold,
-                                lookupTarget, tm3TmIds);
+                        int max = determineMaxResults(maxResults, tm3TmIds.size(),
+                                targetLocales.size());
+                        if (count < max)
+                        {
+                            getFuzzyMatches(conn, results, matchKey, sourceLocale, targetLocales,
+                                    inlineAttributes, customAttributes, maxResults, threshold,
+                                    lookupTarget, tm3TmIds);
+                        }
                     }
                     break;
                 case FALLBACK:
-                    count = getExactMatches(conn, results, matchKey,
-                            sourceLocale, targetLocales, inlineAttributes,
-                            customAttributes, maxResults, lookupTarget,
-                            tm3TmIds);
-                    if (count == 0)
+                    count = getExactMatches(conn, results, matchKey, sourceLocale, targetLocales,
+                            inlineAttributes, customAttributes, maxResults, lookupTarget, tm3TmIds,
+                            leverageOptions);
+                    if (!ignoreFuzzyMatches)
                     {
-                        getFuzzyMatches(conn, results, matchKey, sourceLocale,
-                                targetLocales, inlineAttributes,
-                                customAttributes, maxResults, threshold,
-                                lookupTarget, tm3TmIds);
+                        if (count == 0)
+                        {
+                            getFuzzyMatches(conn, results, matchKey, sourceLocale, targetLocales,
+                                    inlineAttributes, customAttributes, maxResults, threshold,
+                                    lookupTarget, tm3TmIds);
+                        }
                     }
                     break;
             }
@@ -334,27 +347,25 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return results;
     }
 
-    private int getExactMatches(Connection conn,
-            TM3LeverageResults<T> results, T matchKey, TM3Locale sourceLocale,
-            Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> inlineAttributes,
-            Map<TM3Attribute, String> customAttributes, int maxResults,
-            boolean lookupTarget, List<Long> tm3TmIds) throws SQLException
+    private int getExactMatches(Connection conn, TM3LeverageResults<T> results, T matchKey,
+            TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
+            Map<TM3Attribute, Object> inlineAttributes, Map<TM3Attribute, String> customAttributes,
+            int maxResults, boolean lookupTarget, List<Long> tm3TmIds,
+            LeverageOptions leverageOptions) throws SQLException
     {
         int count = 0;
         long start = System.currentTimeMillis();
-        List<TM3Tuv<T>> exactTuv = getStorageInfo().getTuStorage()
-                .getExactMatches(conn, matchKey, sourceLocale, targetLocales,
-                        inlineAttributes, customAttributes, lookupTarget,
-                        false, tm3TmIds);
+        List<TM3Tuv<T>> exactTuv = getStorageInfo().getTuStorage().getExactMatches(conn, matchKey,
+                sourceLocale, targetLocales, inlineAttributes, customAttributes, lookupTarget,
+                false, tm3TmIds, leverageOptions);
         for (TM3Tuv<T> exactMatch : exactTuv)
         {
             count++;
             results.addExactMatch(exactMatch.getTu(), exactMatch);
             if (LOGGER.isDebugEnabled())
             {
-                LOGGER.debug("Exact match: TU " + exactMatch.getTu().getId()
-                        + " TUV " + exactMatch.getId() + "; " + exactMatch);
+                LOGGER.debug("Exact match: TU " + exactMatch.getTu().getId() + " TUV "
+                        + exactMatch.getId() + "; " + exactMatch);
             }
         }
         if (LOGGER.isDebugEnabled())
@@ -365,26 +376,23 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return count;
     }
 
-    private void getFuzzyMatches(Connection conn,
-            TM3LeverageResults<T> results, T matchKey, TM3Locale sourceLocale,
-            Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> inlineAttributes,
-            Map<TM3Attribute, String> customAttributes, int maxResults,
-            int threshold, boolean lookupTarget, List<Long> tm3TmIds)
+    private void getFuzzyMatches(Connection conn, TM3LeverageResults<T> results, T matchKey,
+            TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
+            Map<TM3Attribute, Object> inlineAttributes, Map<TM3Attribute, String> customAttributes,
+            int maxResults, int threshold, boolean lookupTarget, List<Long> tm3TmIds)
             throws SQLException
     {
         long start = System.currentTimeMillis();
         if (maxResults < 0)
         {
-            throw new IllegalArgumentException("Invalid maxResults: "
-                    + maxResults);
+            throw new IllegalArgumentException("Invalid maxResults: " + maxResults);
         }
         List<FuzzyCandidate<T>> candidates = new ArrayList<FuzzyCandidate<T>>();
         for (Long tm3TmId : tm3TmIds)
         {
-            candidates.addAll(getStorageInfo().getFuzzyIndex().lookup(matchKey,
-                    sourceLocale, targetLocales, inlineAttributes,
-                    customAttributes, maxResults, lookupTarget, tm3TmId));
+            candidates.addAll(
+                    getStorageInfo().getFuzzyIndex().lookup(matchKey, sourceLocale, targetLocales,
+                            inlineAttributes, customAttributes, maxResults, lookupTarget, tm3TmId));
         }
 
         SortedSet<FuzzyCandidate<T>> sorted = new TreeSet<FuzzyCandidate<T>>(
@@ -393,8 +401,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         // Score and sort all the results, then select best maxResults
         for (FuzzyCandidate<T> candidate : candidates)
         {
-            float score = getDataFactory().getFuzzyMatchScorer().score(
-                    matchKey, candidate.getContent(), sourceLocale);
+            float score = getDataFactory().getFuzzyMatchScorer().score(matchKey,
+                    candidate.getContent(), sourceLocale);
             // Fix any errant scoring
             if (score < 0)
                 score = 0;
@@ -423,9 +431,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             exactTuvIds.add(match.getTuv().getId());
         }
 
-		int max = determineMaxResults(maxResults, tm3TmIds.size(),
-				targetLocales.size());
-		int fuzzyMax = max - results.getMatches().size();
+        int max = determineMaxResults(maxResults, tm3TmIds.size(), targetLocales.size());
+        int fuzzyMax = max - results.getMatches().size();
         Iterator<FuzzyCandidate<T>> it = sorted.iterator();
         while (candidates.size() < fuzzyMax && it.hasNext())
         {
@@ -440,34 +447,47 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             }
         }
 
-        getStorageInfo().getTuStorage()
-                .loadLeverageMatches(candidates, results);
+        getStorageInfo().getTuStorage().loadLeverageMatches(candidates, results);
         if (LOGGER.isDebugEnabled())
         {
-            LOGGER.debug("Fuzzy match lookup found "
-                    + results.getMatches().size() + " results in "
+            LOGGER.debug("Fuzzy match lookup found " + results.getMatches().size() + " results in "
                     + (System.currentTimeMillis() - start) + "ms");
         }
     }
 
-	private int determineMaxResults(int maxResults, int tmSize,
-			int targetLocaleSize)
+    /**
+     * Checks if the search text is blank or not from tm search page.
+     * 
+     * @since GBS-3990
+     */
+    private boolean isBlankFromTmSearch(T key)
+    {
+        String segment = key.getSerializedForm();
+        String searchText = segment.replace("<segment>", "").replace("</segment>", "");
+        if ("".equals(searchText) || "*".equals(searchText))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private int determineMaxResults(int maxResults, int tmSize, int targetLocaleSize)
     {
         if (maxResults < Integer.MAX_VALUE)
         {
-        	int maxHits = maxResults;
+            int maxHits = maxResults;
             int max1 = maxHits * (tmSize <= 3 ? 3 : tmSize);
             int max2 = maxHits * targetLocaleSize;
             return Math.max(max1, max2);
         }
         else
         {
-        	// maxResults = Integer.MAX_VALUE, want all
-            return maxResults;        	
+            // maxResults = Integer.MAX_VALUE, want all
+            return maxResults;
         }
     }
 
-	@Override
+    @Override
     public TM3Saver<T> createSaver()
     {
         return new BaseSaver<T>(this);
@@ -526,7 +546,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                             tuStorage.deleteTu(conn, tuInDb);
                             Tm3SegmentTmInfo.tusRemove.add((TM3Tu<GSTuvData>) tuInDb);
 
-                            TM3Tu<T> newTu = createNewTu(tuStorage, tuToSave.srcTuv, tuToSave.attrs);
+                            TM3Tu<T> newTu = createNewTu(tuStorage, tuToSave.srcTuv,
+                                    tuToSave.attrs);
 
                             Set<TM3Locale> overWritedLocales = new HashSet<TM3Locale>();
                             for (TM3Saver<T>.Tuv tuvData : tuToSave.targets)
@@ -633,7 +654,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     }
 
     /**
-     * Check if need to create new TU. If the customAttributes are not same, need create new TU.
+     * Check if need to create new TU. If the customAttributes are not same,
+     * need create new TU.
      */
     private boolean needCreateNewTu(Map<TM3Attribute, String> customAttributes, TM3Tu<T> tu)
     {
@@ -666,7 +688,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                 break;
             }
         }
-        
+
         return createTu;
     }
 
@@ -697,7 +719,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     }
 
     /**
-     * Create fuzzy index for TUVs in "tm3_index_shared_[companyId]_[tmId]" table. 
+     * Create fuzzy index for TUVs in "tm3_index_shared_[companyId]_[tmId]"
+     * table.
      */
     private void fuzzyIndexTuvs(Connection conn, TM3Tu<T> tu, boolean indexTarget)
             throws SQLException
@@ -715,8 +738,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     /**
      * Decide TUVs that should be updated.
      */
-	private void findUpdatedTuvs(List<TM3Tuv<T>> updatedTuvs, TM3Tu<T> tu,
-			TM3Saver<T>.Tuv tuvData)
+    private void findUpdatedTuvs(List<TM3Tuv<T>> updatedTuvs, TM3Tu<T> tu, TM3Saver<T>.Tuv tuvData)
     {
         for (TM3Tuv<T> tuv : tu.getTargetTuvs())
         {
@@ -724,15 +746,14 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             if (tuv.getId() == null)
                 continue;
 
-            if (tu.isIdenticalTuv(tuv, tuvData.locale, tuvData.content,
-                    tuvData.previousHash, tuvData.nextHash))
+            if (tu.isIdenticalTuv(tuv, tuvData.locale, tuvData.content, tuvData.previousHash,
+                    tuvData.nextHash))
             {
                 if (tuvData.lastUsageDate != null)
                 {
                     // update lastUsageDate only
                     if (tuv.getLastUsageDate() == null
-							|| tuvData.lastUsageDate.getTime() > tuv
-									.getLastUsageDate().getTime())
+                            || tuvData.lastUsageDate.getTime() > tuv.getLastUsageDate().getTime())
                     {
                         tuv.setLastUsageDate(tuvData.lastUsageDate);
                     }
@@ -770,15 +791,13 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
      * direction.) So an extra filtering step is required to check the upper
      * bound. The easiest way to do this is just compared the attribute counts.
      */
-	private TM3Tu<T> findTuForSave(Connection conn, TM3Saver<T>.Tuv sourceTuv,
-			Map<TM3Attribute, Object> inlineAttributes,
-			Map<TM3Attribute, String> customAttributes) throws SQLException
+    private TM3Tu<T> findTuForSave(Connection conn, TM3Saver<T>.Tuv sourceTuv,
+            Map<TM3Attribute, Object> inlineAttributes, Map<TM3Attribute, String> customAttributes)
+            throws SQLException
     {
-		List<TM3Tuv<T>> tuvs = getStorageInfo().getTuStorage()
-				.getExactMatchesForSave(conn, sourceTuv.content,
-						sourceTuv.locale, null, inlineAttributes,
-						customAttributes, false, true,
-						sourceTuv.getPreviousHash(), sourceTuv.getNextHash());
+        List<TM3Tuv<T>> tuvs = getStorageInfo().getTuStorage().getExactMatchesForSave(conn,
+                sourceTuv.content, sourceTuv.locale, null, inlineAttributes, customAttributes,
+                false, true, sourceTuv.getPreviousHash(), sourceTuv.getNextHash());
         List<TM3Tuv<T>> filtered = new ArrayList<TM3Tuv<T>>();
         int desiredAttrCount = requiredCount(inlineAttributes.keySet())
                 + requiredCount(customAttributes.keySet());
@@ -815,14 +834,14 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                             break;
                         }
                     }
-                    
+
                     if (addme)
                     {
                         results.add(tuv);
                     }
                 }
             }
-            
+
             if (results.size() == 0)
             {
                 results = filtered;
@@ -841,13 +860,11 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                 }
                 else
                 {
-                    if (atts.entrySet()
-                            .containsAll(customAttributes.entrySet()))
+                    if (atts.entrySet().containsAll(customAttributes.entrySet()))
                     {
                         resultsSameAtt.add(tuv);
                     }
-                    else if (atts.keySet().containsAll(
-                            customAttributes.keySet()))
+                    else if (atts.keySet().containsAll(customAttributes.keySet()))
                     {
                         continue;
                     }
@@ -855,13 +872,11 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                     {
                         boolean addme = true;
                         boolean addtoSame = false;
-                        for (Map.Entry<TM3Attribute, String> ccatt : customAttributes
-                                .entrySet())
+                        for (Map.Entry<TM3Attribute, String> ccatt : customAttributes.entrySet())
                         {
                             if (atts.containsKey(ccatt.getKey()))
                             {
-                                if (!atts.get(ccatt.getKey()).equals(
-                                        ccatt.getValue()))
+                                if (!atts.get(ccatt.getKey()).equals(ccatt.getValue()))
                                 {
                                     addme = false;
                                     break;
@@ -884,7 +899,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                     }
                 }
             }
-            
+
             if (results.size() == 0)
             {
                 results = filtered;
@@ -894,7 +909,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                 results = resultsSameAtt;
             }
         }
-
 
         return results.size() == 0 ? null : results.get(0).getTu();
     }
@@ -951,12 +965,12 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         // to be safe...
         for (TM3Tuv<T> tuv : tu.getAllTuv())
         {
-        	TM3Attribute sidAttr = TM3Util.getAttr((TM3Tm<GSTuvData>) this, SID);
-        	Object sid = tu.getAttribute(sidAttr);
-        	if (sid != null)
-        	{
-            	tuv.setSid((String) sid);
-        	}
+            TM3Attribute sidAttr = TM3Util.getAttr((TM3Tm<GSTuvData>) this, SID);
+            Object sid = tu.getAttribute(sidAttr);
+            if (sid != null)
+            {
+                tuv.setSid((String) sid);
+            }
         }
         TuStorage<T> storage = getStorageInfo().getTuStorage();
         Connection conn = null;
@@ -980,15 +994,14 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             boolean sidNeedUpdate = false;
             if (!tuInDb.getAttributes().equals(tu.getAttributes()))
             {
-                storage.updateAttributes(conn, tu,
-                        getInlineAttributes(tu.getAttributes()),
+                storage.updateAttributes(conn, tu, getInlineAttributes(tu.getAttributes()),
                         getCustomAttributes(tu.getAttributes()));
                 sidNeedUpdate = true;
             }
             TM3Tuv<T> srcTuv = tu.getSourceTuv();
-			if (!tuInDb.getSourceTuv().getContent().equals(srcTuv.getContent())
-					|| (srcTuv.getSid() != null && !srcTuv.getSid().equals(
-							tuInDb.getSourceTuv().getSid())))
+            if (!tuInDb.getSourceTuv().getContent().equals(srcTuv.getContent())
+                    || (srcTuv.getSid() != null
+                            && !srcTuv.getSid().equals(tuInDb.getSourceTuv().getSid())))
             {
                 modified.add(srcTuv);
             }
@@ -1011,8 +1024,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                 {
                     added.add(tuv);
                 }
-                else if (!oldTuv.getSerializedForm().equals(
-                        tuv.getSerializedForm()) || sidNeedUpdate)
+                else if (!oldTuv.getSerializedForm().equals(tuv.getSerializedForm())
+                        || sidNeedUpdate)
                 {
                     modified.add(tuv);
                 }
@@ -1022,25 +1035,25 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             storage.updateTuvs(conn, tu, modified);
             // delete old fingerprints from updated tuv even without
             // indexTarget, because it might have been indexed in the past
-			for (TM3Tuv<T> tuv : modified)
-			{
-				getStorageInfo().getFuzzyIndex().deleteFingerprints(conn, tuv);
+            for (TM3Tuv<T> tuv : modified)
+            {
+                getStorageInfo().getFuzzyIndex().deleteFingerprints(conn, tuv);
             }
 
             for (TM3Tuv<T> tuv : added)
             {
-            	if (tuv.getId() == srcTuv.getId() || indexTarget)
-            	{
-            		getStorageInfo().getFuzzyIndex().index(conn, tuv);
-            	}
+                if (tuv.getId() == srcTuv.getId() || indexTarget)
+                {
+                    getStorageInfo().getFuzzyIndex().index(conn, tuv);
+                }
             }
 
             for (TM3Tuv<T> tuv : modified)
             {
-            	if (tuv.getId() == srcTuv.getId() || indexTarget)
-            	{
-            		getStorageInfo().getFuzzyIndex().index(conn, tuv);
-            	}
+                if (tuv.getId() == srcTuv.getId() || indexTarget)
+                {
+                    getStorageInfo().getFuzzyIndex().index(conn, tuv);
+                }
             }
 
             return tu;
@@ -1125,24 +1138,24 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return new AllTusDataHandle<T>(this, start, end);
     }
 
-	@Override
-	public TM3Handle<T> getAllDataByParamMap(Map<String, Object> paramMap)
-	{
-		if (!paramMap.isEmpty())
-		{
+    @Override
+    public TM3Handle<T> getAllDataByParamMap(Map<String, Object> paramMap)
+    {
+        if (!paramMap.isEmpty())
+        {
             Map<TM3Attribute, Object> attrs = (Map<TM3Attribute, Object>) paramMap
                     .get("projectAttr");
-			if (attrs != null)
-			{
-				Map<TM3Attribute, Object> inlineAttrs = getInlineAttributes(attrs);
-				Map<TM3Attribute, String> customAttrs = getCustomAttributes(attrs);
-				paramMap.remove("projectAttr");
-				paramMap.put("inlineAttrs", inlineAttrs);
-				paramMap.put("customAttrs", customAttrs);
-			}
-		}
-		return new AllTusDataHandle<T>(this, paramMap);
-	}
+            if (attrs != null)
+            {
+                Map<TM3Attribute, Object> inlineAttrs = getInlineAttributes(attrs);
+                Map<TM3Attribute, String> customAttrs = getCustomAttributes(attrs);
+                paramMap.remove("projectAttr");
+                paramMap.put("inlineAttrs", inlineAttrs);
+                paramMap.put("customAttrs", customAttrs);
+            }
+        }
+        return new AllTusDataHandle<T>(this, paramMap);
+    }
 
     @Override
     public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end)
@@ -1158,8 +1171,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     }
 
     @Override
-    public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs,
-            Date start, Date end)
+    public TM3Handle<T> getDataByAttributes(Map<TM3Attribute, Object> attrs, Date start, Date end)
     {
         checkDateRange(start, end);
         return new AttributeDataHandle<T>(this, getInlineAttributes(attrs),
@@ -1193,8 +1205,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     }
 
     @Override
-    public List<Object> getAllAttributeValues(TM3Attribute attr)
-            throws TM3Exception
+    public List<Object> getAllAttributeValues(TM3Attribute attr) throws TM3Exception
     {
         try
         {
@@ -1216,8 +1227,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         {
             if (end.before(start))
             {
-                throw new IllegalArgumentException("Invalid date range: end "
-                        + end + " comes before start " + start);
+                throw new IllegalArgumentException(
+                        "Invalid date range: end " + end + " comes before start " + start);
             }
             return;
         }
@@ -1229,16 +1240,15 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         if (!locked)
         {
             getSession().buildLockRequest(LockOptions.UPGRADE).lock(this);
-            //getSession().lock(this, LockMode.UPGRADE);
-            
+            // getSession().lock(this, LockMode.UPGRADE);
+
             locked = true;
         }
     }
 
     // TODO: on save, check that all required attrs are present
     // TODO: make an unchecked version that doesn't call checkValue
-    public static Map<TM3Attribute, Object> getInlineAttributes(
-            Map<TM3Attribute, Object> attrs)
+    public static Map<TM3Attribute, Object> getInlineAttributes(Map<TM3Attribute, Object> attrs)
     {
         Map<TM3Attribute, Object> r = new HashMap<TM3Attribute, Object>();
         for (Map.Entry<TM3Attribute, Object> e : attrs.entrySet())
@@ -1253,8 +1263,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return r;
     }
 
-    public static Map<TM3Attribute, String> getCustomAttributes(
-            Map<TM3Attribute, Object> attrs)
+    public static Map<TM3Attribute, String> getCustomAttributes(Map<TM3Attribute, Object> attrs)
     {
         Map<TM3Attribute, String> r = new HashMap<TM3Attribute, String>();
         for (Map.Entry<TM3Attribute, Object> e : attrs.entrySet())

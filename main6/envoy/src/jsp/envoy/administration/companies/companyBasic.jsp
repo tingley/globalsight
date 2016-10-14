@@ -67,6 +67,7 @@
     String qaChecks = "";
     String enableDitaChecksChecked = "";
     String enableWorkflowStatePosts = "";
+    String enableBlankTmSearch = "";
     
     String inCtxRvKeyIndd = (String) request.getAttribute("incontext_review_key_indd");
     String inCtxRvKeyOffice = (String) request.getAttribute("incontext_review_key_office");
@@ -137,6 +138,10 @@
         
         if(company.getEnableWorkflowStatePosts()){
             enableWorkflowStatePosts = "checked";
+        }
+        
+        if(company.getEnableBlankTmSearch()){
+            enableBlankTmSearch = "checked";
         }
         
         defaultCompanyFluency = company.getDefaultFluency();
@@ -712,6 +717,13 @@ function addQualityTo()
         <td valign="top"><%=bundle.getString("lb_enable_workflow_state_posts") %>:</td>
         <td>
         	<input class="standardText" type="checkbox" name="<%=CompanyConstants.ENABLE_WORKFLOW_STATE_POSTS%>" <%=enableWorkflowStatePosts%>/>
+        </td>
+        </tr>
+        
+        <tr>
+        <td valign="top"><%=bundle.getString("lb_company_enable_blank_tm_search") %>:</td>
+        <td>
+        	<input class="standardText" type="checkbox" name="<%=CompanyConstants.ENABLE_BLANK_TM_SEARCH%>" <%=enableBlankTmSearch%>/>
         </td>
         </tr>
         

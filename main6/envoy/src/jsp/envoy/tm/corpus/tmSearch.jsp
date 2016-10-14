@@ -240,12 +240,62 @@ function loadPage(page)
 function resultDisplay(page)
 {
 	allEntriesAllPages = false;
+	var sourceLocale = $("#sourceLocale").val();
+	var targetLocale = $("#targetLocale").val();
 	
 	var buf = new Array();
 	buf.push('<table id="rData" cellspacing="0" cellpadding="3" class="standardTextNew" width="100%"  style="border: 1px solid #0C1476;background:#FFFFFF;">');
+	if (maxReturns)
+    {
+		buf.push("<tr><span class='warningText'>" + maxReturnsWarning + "</span></tr>");
+    }
 	if(searchType=="matchSearch")
 	{
-	  buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476"><input type="checkbox" id="checkAllEntries"></input></th><th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_percentage} (%)</th><th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+sourceLocaleText+'</th><th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+targetLocaleText+'</th><th width="14%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_sid}</th><th width="12%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>'); 
+		if (sourceLocale == -1 && targetLocale != -1)
+		{
+			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
+			    + '<input type="checkbox" id="checkAllEntries"></input></th>'
+			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_percentage} (%)</th>'
+			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_source_locale}</th>'
+			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_tm_search_source_content}</th>'
+			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+targetLocaleText+'</th>'
+			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_sid}</th>'
+			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
+		}
+		else if (targetLocale == -1 && sourceLocale != -1)
+		{
+			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
+			    + '<input type="checkbox" id="checkAllEntries"></input></th>'
+			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_percentage} (%)</th>'
+			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+sourceLocaleText+'</th>'
+			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_tm_search_target_content}</th>'
+			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_target_locale}</th>'
+			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_sid}</th>'
+			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
+		}
+		else if (sourceLocale == -1 && targetLocale == -1)
+		{
+			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
+			    + '<input type="checkbox" id="checkAllEntries"></input></th>'
+			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_percentage} (%)</th>'
+			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_source_locale}</th>'
+			    + '<th width="28%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_tm_search_source_content}</th>'
+			    + '<th width="28%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_tm_search_target_content}</th>'
+			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_target_locale}</th>'
+			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_sid}</th>'
+			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
+		}
+		else
+		{
+			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
+			    + '<input type="checkbox" id="checkAllEntries"></input></th>'
+			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_percentage} (%)</th>'
+			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+sourceLocaleText+'</th>'
+			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+targetLocaleText+'</th>'
+			    + '<th width="14%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_sid}</th>'
+			    + '<th width="12%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
+		}
+		
 	  for(var i=0;i<result.length;i++)
 	  {
 		 var obj = result[i];
@@ -254,6 +304,10 @@ function resultDisplay(page)
 	     buf.push("<tr style='background:#DEE3ED;'>");
 	     buf.push("<td style='border: #FFFFFF 1px solid;'><input name='entries' type='checkbox' value='"+i+"'></input></td>");
 	     buf.push("<td style='border: #FFFFFF 1px solid;' align='left'>"+score.substring(0,score.indexOf("%"))+"</td>");
+	     if (sourceLocale == -1)
+	     {
+	    	 buf.push("<td style='border: #FFFFFF 1px solid;'>"+obj.sourceLocale+"</td>");
+	     }
 	     if(hasEditEntriesPerm)
 	     {
 	    	 buf.push("<td style='border: #FFFFFF 1px solid;' dir='"+obj.source.dir+"'><a href=\"javascript:editEntry('"+obj.tmId+"','"+ obj.tuId+"','"+obj.sourceLocale+"','"+obj.sourceTuvId+"','"+obj.targetLocale+"','"+obj.targetTuvId+"');\" class='link'>"+obj.source.content+"</a></td>");
@@ -261,9 +315,12 @@ function resultDisplay(page)
 	     else
 	     {
 	    	 buf.push("<td style='border: #FFFFFF 1px solid;' dir='"+obj.source.dir+"'>"+obj.source.content+"</td>");
-	     } 
-	     
-	     buf.push("<td style='border: #FFFFFF 1px solid;' dir='"+obj.target.dir+"'>"+obj.target.content+"</td>");
+	     }
+    	 buf.push("<td style='border: #FFFFFF 1px solid;' dir='"+obj.target.dir+"'>"+obj.target.content+"</td>");
+    	 if (targetLocale == -1)
+	     {
+	    	 buf.push("<td style='border: #FFFFFF 1px solid;'>"+obj.targetLocale+"</td>");
+	     }
 	     buf.push("<td style='border: #FFFFFF 1px solid;'>"+obj.sid+"</td>");
 	     buf.push("<td style='border: #FFFFFF 1px solid;'>"+obj.tm+"</td>");
 	     buf.push("</tr>");
@@ -271,12 +328,56 @@ function resultDisplay(page)
 	}
 	else
 	{
-	  buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476"><input type="checkbox" id="checkAllEntries"></input></th><th width="37%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">'+sourceLocaleText+'</th><th width="37%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">'+targetLocaleText+'</th><th width="14%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_sid}</th><th width="12%" align="left" style="border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
+		if (sourceLocale == -1 && targetLocale != -1)
+		{
+			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
+			    + '<input type="checkbox" id="checkAllEntries"></input></th>'
+			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_source_locale}</th>'
+			    + '<th width="36%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_source_content}</th>'
+				+ '<th width="36%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">'+targetLocaleText+'</th>'
+			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_sid}</th>'
+			    + '<th width="10%" align="left" style="border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
+		}
+		else if (targetLocale == -1 && sourceLocale != -1)
+		{
+			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
+			    + '<input type="checkbox" id="checkAllEntries"></input></th>'
+			    + '<th width="36%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">'+sourceLocaleText+'</th>'
+				+ '<th width="36%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_target_content}</th>'
+				+ '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_target_locale}</th>'
+			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_sid}</th>'
+			    + '<th width="10%" align="left" style="border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
+		}
+		else if (sourceLocale == -1 && targetLocale == -1)
+		{
+			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
+			    + '<input type="checkbox" id="checkAllEntries"></input></th>'
+			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_source_locale}</th>'
+			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_source_content}</th>'
+				+ '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_target_content}</th>'
+				+ '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_target_locale}</th>'
+			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_sid}</th>'
+			    + '<th width="10%" align="left" style="border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
+		}
+		else
+		{
+			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
+				    + '<input type="checkbox" id="checkAllEntries"></input></th>'
+				    + '<th width="37%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">'+sourceLocaleText+'</th>'
+				    + '<th width="37%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">'+targetLocaleText+'</th>'
+				    + '<th width="14%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_sid}</th>'
+				    + '<th width="12%" align="left" style="border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
+		}
+		
 	  for(var i=0;i<result.length;i++)
 	  {
 		 var obj = result[i];
 	     buf.push("<tr style='background:#DEE3ED;'>");
 	     buf.push("<td style='border: #FFFFFF 1px solid;'><input id='11' name='entries' type='checkbox' value='"+i+"'></input></td>");
+	     if (sourceLocale == -1)
+	     {
+	    	 buf.push("<td style='border: #FFFFFF 1px solid;'>"+obj.sourceLocale+"</td>");
+	     }
 	     if(hasEditEntriesPerm)
 	     {
 	    	 buf.push("<td style='border: #FFFFFF 1px solid;' dir='"+obj.source.dir+"'><a href=\"javascript:editEntry('"+obj.tmId+"','"+ obj.tuId+"','"+obj.sourceLocale+"','"+obj.sourceTuvId+"','"+obj.targetLocale+"','"+obj.targetTuvId+"');\" class='link'>"+obj.source.content+"</a></td>");
@@ -286,6 +387,10 @@ function resultDisplay(page)
 	    	 buf.push("<td style='border: #FFFFFF 1px solid;' dir='"+obj.source.dir+"'>"+obj.source.content+"</td>");
 	     } 
 		 buf.push("<td style='border: #FFFFFF 1px solid;' dir='"+obj.target.dir+"'>"+obj.target.content+"</td>");
+		 if (targetLocale == -1)
+	     {
+	    	 buf.push("<td style='border: #FFFFFF 1px solid;'>"+obj.targetLocale+"</td>");
+	     }
 		 buf.push("<td style='border: #FFFFFF 1px solid;'>"+obj.sid+"</td>");
 		 buf.push("<td style='border: #FFFFFF 1px solid;'>"+obj.tm+"</td>");
 		 buf.push("</tr>");
@@ -1087,31 +1192,69 @@ $(document).ready(function(){
    				}
    		     }
     		 sids = $("#sids").val();
-    		 if(searchText=="" && sids=="" )
-	    	 {
-	    		 alert("${msg_tm_search_search_text_and_sid}");
-	    		 return;
-	         }
-	    	 else if(searchText=="*")
-	    	 {
-	    		 alert("${msg_tm_search_text_invalid}");
-	    		 return;
-	    	 }
-	    	 else if(searchText=="\"*\"")
-	    	 {
-	    		 alert("${msg_tm_search_text_invalid2}");
-	    		 return;
-	    	 }
+    		 createUser = $("#createUser").val();
+    		 attributeName = $("#attributeName").val();
+    		 attributeValue = $("#attributeValue").val();
+    		 modifyUser = $("#modifyUser").val();
+    		 jobIds = $("#jobIds").val();
+    		 createStartDate = $("#csf").val();
+    		 createEndDate = $("#cef").val();
+    		 modifyStartDate = $("#msf").val();
+    		 modifyEndDate = $("#mef").val();
+    		 lastUsageStartDate = $("#lusf").val();
+    		 lastUsageEndDate = $("#luef").val();
+    		 // GBS-3990
+    		 if (searchText == "" || searchText == "*")
+    		 {
+    			 if (!${enableBlankTmSearch})
+    			 {
+    				 alert("${msg_tm_search_enable_blank_tm_search_in_company}");
+    	    		 return false;
+    			 }
+    			 if(sourceLocale == -1 && targetLocale == -1 
+    					 && sids == "" && tuIds == "" && attributeName == "" && attributeValue == "" 
+    					 && createUser == "" && modifyUser == "" && jobIds == ""
+    					 && createStartDate == "" && createEndDate == "" 
+    					 && modifyStartDate == "" && modifyEndDate == "" 
+    					 && lastUsageStartDate == "" && lastUsageEndDate == "")
+    	    	 {
+    	    		 alert("${msg_tm_search_more_fields_required}");
+    	    		 return false;
+    	         }
+    			 if(searchType == "fullTextSearch")
+    	    	 {
+    	    		 if(tms != "")
+    	    	     {
+    	    			 var tmpTms = tms.substring(0, tms.length - 1);
+    	    			 if(tmpTms.indexOf(",") != -1)
+    	    			 {
+    	    				 alert("${msg_tm_search_tms_one_tm_limit}");
+        	    			 return false;
+    	    			 }
+    	    	     }
+    	    	 }
+    		 }
+    		 else
+    		 {
+    			 if(sourceLocale==-1)
+    	         {
+    	    		 alert("${msg_tm_search_source}");
+    	    		 return;
+    	         }
+    	    	 if(targetLocale==-1)
+    	    	 {
+    	    		 alert("${msg_tm_search_target}");
+    	    		 return;
+    	    	 }
+    		 }
     		 
     		 isRegex = document.getElementById("isRegex").checked;
-    		 createUser = $("#createUser").val();
     		 if(hasSomeSpecialChars(createUser))
-    		 {
+        	 {
     			 alert("<%=EditUtil.toJavascript(bundle.getString("lb_export_create_user"))%> " +
-   		              "<%=EditUtil.toJavascript(bundle
-   									.getString("msg_invalid_entry3"))%>");
-    		 }
-    		 modifyUser = $("#modifyUser").val();
+          		          "<%=EditUtil.toJavascript(bundle.getString("msg_invalid_entry3"))%>");
+           	     return false;
+        	 }
     		 if(hasSomeSpecialChars(modifyUser))
     		 {
     			 alert("<%=EditUtil.toJavascript(bundle.getString("lb_modify"))%> " +
@@ -1120,7 +1263,6 @@ $(document).ready(function(){
    									.getString("msg_invalid_entry3"))%>");
     		     return false; 
     		 }
-    		 attributeName = $("#attributeName").val();
     		 if(hasHtmlSpecialChars(attributeName))
     		 {
     			 alert("<%=EditUtil.toJavascript(bundle.getString("lb_attributename"))%> " +
@@ -1128,9 +1270,7 @@ $(document).ready(function(){
     									.getString("msg_html_special_char"))%>");
     			 return false;
     		 }
-    		 attributeValue = $("#attributeValue").val();
     		 
-    		 jobIds = $("#jobIds").val();
     		 if(checkSomeSpecialChar(jobIds))
     		 {
     			 alert("<%=EditUtil.toJavascript(bundle.getString("lb_job_id"))%> " +
@@ -1155,9 +1295,7 @@ $(document).ready(function(){
     		 }
     		 
     		 createStartDateOption = $("#createStartDateOption").val();
-    		 createStartDate = $("#csf").val();
     		 createEndDateOption = $("#createEndDateOption").val();
-    		 createEndDate = $("#cef").val();
     		 if(createStartDateOption == "gt" && createEndDateOption == "lt"){
     			if(createStartDate == createEndDate){
     				alert("${lb_tm_check_date_greater_less}");
@@ -1178,9 +1316,7 @@ $(document).ready(function(){
      		}
     		 
     		 modifyStartDateOption = $("#modifyStartDateOption").val();
-    		 modifyStartDate = $("#msf").val();
     		 modifyEndDateOption = $("#modifyEndDateOption").val();
-    		 modifyEndDate = $("#mef").val();
     		 if(modifyStartDateOption == "gt" && modifyEndDateOption == "lt"){
     			if(modifyStartDate == modifyEndDate){
     				alert("${lb_tm_check_date_greater_less}");
@@ -1201,9 +1337,7 @@ $(document).ready(function(){
      		}
     		 
        	     lastUsageStartDateOption = $("#lastUsageStartDateOption").val();
-    		 lastUsageStartDate = $("#lusf").val();
     		 lastUsageEndDateOption = $("#lastUsageEndDateOption").val();
-    		 lastUsageEndDate = $("#luef").val();
     		 if(lastUsageStartDateOption == "gt" && lastUsageEndDateOption == "lt"){
     			if(lastUsageStartDate == lastUsageEndDate){
     				alert("${lb_tm_check_date_greater_less}");
@@ -1242,20 +1376,19 @@ $(document).ready(function(){
 	    		 alert("${msg_tm_search_text_invalid2}");
 	    		 return;
 	    	 }
+	    	 
+	    	 if(sourceLocale==-1)
+	         {
+	    		 alert("${msg_tm_search_source}");
+	    		 return;
+	         }
+	    	 if(targetLocale==-1)
+	    	 {
+	    		 alert("${msg_tm_search_target}");
+	    		 return;
+	    	 }
     	 }
     		 
-    	 if(sourceLocale==-1)
-         {
-    		 alert("${msg_tm_search_source}");
-    		 return;
-         }
-    	 if(targetLocale==-1)
-    	 {
-    		 alert("${msg_tm_search_target}");
-    		 return;
-    	 }
-    	 
-    	 
     	 if(searchType=="matchSearch")
     	 {
     		 if(tmps=="-1")
@@ -1368,6 +1501,8 @@ $(document).ready(function(){
 			   }
 			   $("#loading").html("");
 			   result = json.result;
+			   maxReturns = json.maxReturns;
+			   maxReturnsWarning = json.maxReturnsWarning;
 			   resultDisplay(1);
 			 } 
 			 else 

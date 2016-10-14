@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm3.integration.GSTuvData;
 
 /**
@@ -61,10 +62,9 @@ public class MockTM3Tm implements TM3Tm<GSTuvData>
     }
 
     @Override
-    public TM3LeverageResults<GSTuvData> findMatches(GSTuvData matchKey,
-            TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> attributes, TM3MatchType matchType,
-            boolean lookupTarget, int maxResults, int threshold)
+    public TM3LeverageResults<GSTuvData> findMatches(GSTuvData matchKey, TM3Locale sourceLocale,
+            Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> attributes,
+            TM3MatchType matchType, boolean lookupTarget, int maxResults, int threshold)
             throws TM3Exception
     {
         // TODO Auto-generated method stub
@@ -72,18 +72,16 @@ public class MockTM3Tm implements TM3Tm<GSTuvData>
     }
 
     @Override
-    public TM3LeverageResults<GSTuvData> findMatches(GSTuvData matchKey,
-            TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> attributes, TM3MatchType matchType,
-            boolean lookupTarget) throws TM3Exception
+    public TM3LeverageResults<GSTuvData> findMatches(GSTuvData matchKey, TM3Locale sourceLocale,
+            Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> attributes,
+            TM3MatchType matchType, boolean lookupTarget) throws TM3Exception
     {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public List<Object> getAllAttributeValues(TM3Attribute attr)
-            throws TM3Exception
+    public List<Object> getAllAttributeValues(TM3Attribute attr) throws TM3Exception
     {
         // TODO Auto-generated method stub
         return null;
@@ -109,8 +107,8 @@ public class MockTM3Tm implements TM3Tm<GSTuvData>
     }
 
     @Override
-    public TM3Handle<GSTuvData> getDataByAttributes(
-            Map<TM3Attribute, Object> attrs, Date start, Date end)
+    public TM3Handle<GSTuvData> getDataByAttributes(Map<TM3Attribute, Object> attrs, Date start,
+            Date end)
     {
         // TODO Auto-generated method stub
         return null;
@@ -166,8 +164,7 @@ public class MockTM3Tm implements TM3Tm<GSTuvData>
     }
 
     @Override
-    public TM3Tu<GSTuvData> modifyTu(TM3Tu<GSTuvData> tu, boolean indexTarget)
-            throws TM3Exception
+    public TM3Tu<GSTuvData> modifyTu(TM3Tu<GSTuvData> tu, boolean indexTarget) throws TM3Exception
     {
         // TODO Auto-generated method stub
         return null;
@@ -210,8 +207,9 @@ public class MockTM3Tm implements TM3Tm<GSTuvData>
 
     @Override
     public TM3LeverageResults<GSTuvData> findMatches(GSTuvData matchKey, TM3Locale sourceLocale,
-            Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> attributes, TM3MatchType matchType,
-            boolean lookupTarget, int maxResults, int threshold, List<Long> tm3TmIds) throws TM3Exception
+            Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> attributes,
+            TM3MatchType matchType, boolean lookupTarget, int maxResults, int threshold,
+            List<Long> tm3TmIds) throws TM3Exception
     {
         // TODO Auto-generated method stub
         return null;
@@ -242,7 +240,17 @@ public class MockTM3Tm implements TM3Tm<GSTuvData>
     public void recreateFuzzyIndex(List<TM3Tuv<GSTuvData>> tuvs)
     {
         // TODO Auto-generated method stub
-        
+
+    }
+
+    @Override
+    public TM3LeverageResults<GSTuvData> findMatches(GSTuvData matchKey, TM3Locale sourceLocale,
+            Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> attributes,
+            TM3MatchType matchType, boolean lookupTarget, int maxResults, int threshold,
+            List<Long> tm3TmIds, LeverageOptions leverageOptions) throws TM3Exception
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

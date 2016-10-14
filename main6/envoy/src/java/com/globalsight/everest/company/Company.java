@@ -62,6 +62,8 @@ public class Company extends PersistentObject
 
     private boolean m_enableDitaChecks = false;
     private boolean m_enableWorkflowStatePosts = false;
+    // GBS-3990
+    private boolean m_enableBlankTmSearch = false;
 
     private String defaultFluency = "";
     private String defaultAdequacy = "";
@@ -81,8 +83,7 @@ public class Company extends PersistentObject
     public Company(String p_companyName)
     {
         super();
-        setName(p_companyName.length() > 30 ? p_companyName.substring(0, 30)
-                : p_companyName);
+        setName(p_companyName.length() > 30 ? p_companyName.substring(0, 30) : p_companyName);
     }
 
     /**
@@ -96,8 +97,7 @@ public class Company extends PersistentObject
     public Company(String p_companyName, String p_companyDescription)
     {
         super();
-        setName(p_companyName.length() > 30 ? p_companyName.substring(0, 30)
-                : p_companyName);
+        setName(p_companyName.length() > 30 ? p_companyName.substring(0, 30) : p_companyName);
         m_description = p_companyDescription;
     }
 
@@ -354,15 +354,25 @@ public class Company extends PersistentObject
     {
         this.m_enableDitaChecks = p_enableDitaChecks;
     }
-    
+
     public boolean getEnableWorkflowStatePosts()
     {
         return m_enableWorkflowStatePosts;
     }
-    
+
     public void setEnableWorkflowStatePosts(boolean p_enableWorkflowStatePosts)
     {
         this.m_enableWorkflowStatePosts = p_enableWorkflowStatePosts;
+    }
+
+    public boolean getEnableBlankTmSearch()
+    {
+        return m_enableBlankTmSearch;
+    }
+
+    public void setEnableBlankTmSearch(boolean p_enableBlankTmSearch)
+    {
+        this.m_enableBlankTmSearch = p_enableBlankTmSearch;
     }
 
     public String getDefaultFluency()

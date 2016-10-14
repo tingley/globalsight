@@ -54,6 +54,8 @@ public class LeverageOptions
     private List<ProjectTM> m_remoteTms;
 
     private boolean fromTMSearchPage = false;
+    // GBS-3990
+    private Map<String, Object> paramMap = new HashMap<String, Object>();
 
     // constructor
     public LeverageOptions(TranslationMemoryProfile p_tmProfile,
@@ -72,27 +74,27 @@ public class LeverageOptions
     {
         return m_tmProfile.isSaveUnLocSegToProjectTM();
     }
-    
+
     public boolean saveWhollyInternalTextSegmentTm()
     {
         return m_tmProfile.isSaveWhollyInternalTextToProjectTM();
     }
-    
+
     public boolean saveLocalizedInSegmentTM()
     {
-    	return m_tmProfile.isSaveLocSegToProjectTM();
+        return m_tmProfile.isSaveLocSegToProjectTM();
     }
-    
+
     public boolean savesApprovedInSegmentTm()
     {
         return m_tmProfile.isSaveApprovedSegToProjectTM();
     }
-    
+
     public boolean savesExactMatchInSegmentTm()
     {
         return m_tmProfile.isSaveExactMatchSegToProjectTM();
     }
-    
+
     public boolean saveMTedSegToProjectTM()
     {
         return m_tmProfile.isSaveMTedSegToProjectTM();
@@ -156,8 +158,7 @@ public class LeverageOptions
     public Map<Long, Integer> getTmIndexsToLeverageFrom()
     {
         Map<Long, Integer> tmIndexs = new HashMap<Long, Integer>();
-        Collection<LeverageProjectTM> tms = m_tmProfile
-                .getProjectTMsToLeverageFrom();
+        Collection<LeverageProjectTM> tms = m_tmProfile.getProjectTMsToLeverageFrom();
 
         Iterator<LeverageProjectTM> itTms = tms.iterator();
         while (itTms.hasNext())
@@ -171,8 +172,7 @@ public class LeverageOptions
     public Map<Integer, Long> getTmIdIndexMap()
     {
         Map<Integer, Long> tmIndexs = new HashMap<Integer, Long>();
-        Collection<LeverageProjectTM> tms = m_tmProfile
-                .getProjectTMsToLeverageFrom();
+        Collection<LeverageProjectTM> tms = m_tmProfile.getProjectTMsToLeverageFrom();
 
         Iterator<LeverageProjectTM> itTms = tms.iterator();
         while (itTms.hasNext())
@@ -187,8 +187,7 @@ public class LeverageOptions
     public Vector<Long> getOrderTmIds()
     {
         Vector<Long> orderTmIds = null;
-        Vector<LeverageProjectTM> tms = m_tmProfile
-                .getProjectTMsToLeverageFrom();
+        Vector<LeverageProjectTM> tms = m_tmProfile.getProjectTMsToLeverageFrom();
         List<LeverageProjectTM> tmList = new ArrayList<LeverageProjectTM>(tms);
         SortUtil.sort(tmList, new TmComparator());
         orderTmIds = new Vector<Long>(tmList.size());
@@ -272,7 +271,7 @@ public class LeverageOptions
 
     public int getMultipleExactMatcheMode()
     {
-    	return m_tmProfile.getMultipleExactMatcheMode();
+        return m_tmProfile.getMultipleExactMatcheMode();
     }
 
     public int getMultiTransPenalty()
@@ -309,7 +308,7 @@ public class LeverageOptions
     {
         return m_tmProfile.getDynLevFromReferenceTm();
     }
-    
+
     public boolean dynamicLeveragesStopSearch()
     {
         return m_tmProfile.getDynLevStopSearch();
@@ -437,6 +436,16 @@ public class LeverageOptions
     public void setFromTMSearchPage(boolean fromTMSearchPage)
     {
         this.fromTMSearchPage = fromTMSearchPage;
+    }
+
+    public Map<String, Object> getParamMap()
+    {
+        return paramMap;
+    }
+
+    public void setParamMap(Map<String, Object> paramMap)
+    {
+        this.paramMap = paramMap;
     }
 
     public boolean getUniqueFromMultipleTranslation()

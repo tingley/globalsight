@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
@@ -45,6 +47,8 @@ import java.util.regex.Pattern;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -70,6 +74,7 @@ import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.util.comparator.ProjectTMComparator;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.localepairs.LocalePairConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileHandlerHelper;
@@ -100,6 +105,7 @@ import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.JsonUtil;
+import com.globalsight.util.PropertiesFactory;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -109,20 +115,38 @@ import com.globalsight.util.gxml.GxmlException;
 import com.globalsight.util.gxml.GxmlFragmentReader;
 import com.globalsight.util.gxml.GxmlFragmentReaderPool;
 
-
-
 public class TMSearchBroswerHandlerHelper
 {
-	private static final String DATE_EQUALS = "eq";
-	private static final String DATE_NOT_EQUALS = "neq";
-	private static final String DATE_GREATER_THAN = "gt";
-	private static final String DATE_LESS_THAN = "lt";
-	private static final String DATE_GREATER_THAN_OR_EQUALS = "gteq";
-	private static final String DATE_LESS_THAN_OR_EQUALS = "lteq";
-	private static final SimpleDateFormat format = new SimpleDateFormat(
-			"yyyy-MM-dd");
-	private static final SimpleDateFormat sdf = new SimpleDateFormat(
-			"MM/dd/yyyy");
+    private static final Logger logger = Logger.getLogger(TMSearchBroswerHandlerHelper.class);
+
+    private static final String DATE_EQUALS = "eq";
+    private static final String DATE_NOT_EQUALS = "neq";
+    private static final String DATE_GREATER_THAN = "gt";
+    private static final String DATE_LESS_THAN = "lt";
+    private static final String DATE_GREATER_THAN_OR_EQUALS = "gteq";
+    private static final String DATE_LESS_THAN_OR_EQUALS = "lteq";
+    private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+    // GBS-3990 limit to configured max returns
+    private static int MAX_RETURNS = 300;
+    private static final String PROP_MAX_RETURNS = "max_returns";
+
+    static
+    {
+        try
+        {
+            Properties p = (new PropertiesFactory())
+                    .getProperties("/properties/tmSearch.properties");
+            MAX_RETURNS = Integer.parseInt(p.getProperty(PROP_MAX_RETURNS));
+        }
+        catch (Exception e)
+        {
+            logger.warn(
+                    "Could not read property from /properties/tmSearch.properties. Using default "
+                            + MAX_RETURNS);
+        }
+    }
+
     /**
      * Set permission for user
      * 
@@ -132,18 +156,12 @@ public class TMSearchBroswerHandlerHelper
     public static void setPermission(HttpServletRequest request)
     {
         HttpSession session = request.getSession();
-        PermissionSet userPerms = (PermissionSet) session
-                .getAttribute(WebAppConstants.PERMISSIONS);
-        boolean hasAddEntriesPerm = userPerms
-                .getPermissionFor(Permission.TM_ADD_ENTRY);
-        boolean hasDeleteEntriesPerm = userPerms
-                .getPermissionFor(Permission.TM_DELETE_ENTRY);
-        boolean hasEditEntriesPerm = userPerms
-                .getPermissionFor(Permission.TM_EDIT_ENTRY);
-        boolean hasAdvancedSearchPerm = userPerms
-                .getPermissionFor(Permission.TM_SEARCH_ADVANCED);
-        boolean hasTermSearchPermission = userPerms
-                .getPermissionFor(Permission.TERMINOLOGY_SEARCH)
+        PermissionSet userPerms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+        boolean hasAddEntriesPerm = userPerms.getPermissionFor(Permission.TM_ADD_ENTRY);
+        boolean hasDeleteEntriesPerm = userPerms.getPermissionFor(Permission.TM_DELETE_ENTRY);
+        boolean hasEditEntriesPerm = userPerms.getPermissionFor(Permission.TM_EDIT_ENTRY);
+        boolean hasAdvancedSearchPerm = userPerms.getPermissionFor(Permission.TM_SEARCH_ADVANCED);
+        boolean hasTermSearchPermission = userPerms.getPermissionFor(Permission.TERMINOLOGY_SEARCH)
                 || userPerms.getPermissionFor(Permission.ACTIVITIES_TB_SEARCH);
         request.setAttribute("hasAddEntriesPerm", hasAddEntriesPerm);
         request.setAttribute("hasDeleteEntriesPerm", hasDeleteEntriesPerm);
@@ -159,8 +177,7 @@ public class TMSearchBroswerHandlerHelper
      * @param request
      * @param bundle
      */
-    public static void setLable(HttpServletRequest request,
-            ResourceBundle bundle)
+    public static void setLable(HttpServletRequest request, ResourceBundle bundle)
     {
         setLableToJsp(request, bundle, "lb_tm_search");
         setLableToJsp(request, bundle, "lb_tm_search2");
@@ -183,6 +200,10 @@ public class TMSearchBroswerHandlerHelper
         setLableToJsp(request, bundle, "lb_target");
         setLableToJsp(request, bundle, "lb_tm_name");
         setLableToJsp(request, bundle, "lb_percentage");
+        setLableToJsp(request, bundle, "lb_tm_search_source_content");
+        setLableToJsp(request, bundle, "lb_tm_search_source_locale");
+        setLableToJsp(request, bundle, "lb_tm_search_target_content");
+        setLableToJsp(request, bundle, "lb_tm_search_target_locale");
         setLableToJsp(request, bundle, "lb_tm_search_type");
         setLableToJsp(request, bundle, "lb_tm2");
         setLableToJsp(request, bundle, "lb_tm_search_result");
@@ -198,6 +219,8 @@ public class TMSearchBroswerHandlerHelper
         setLableToJsp(request, bundle, "msg_tm_search_target");
         setLableToJsp(request, bundle, "msg_tm_search_tm_profile");
         setLableToJsp(request, bundle, "msg_tm_search_tms");
+        setLableToJsp(request, bundle, "msg_tm_search_tms_one_tm_limit");
+        setLableToJsp(request, bundle, "msg_tm_search_enable_blank_tm_search_in_company");
 
         setLableToJsp(request, bundle, "lb_tm_search_hint");
         setLableToJsp(request, bundle, "lb_tm_search_hint2");
@@ -209,12 +232,12 @@ public class TMSearchBroswerHandlerHelper
         setLableToJsp(request, bundle, "lb_terminology_search_entries");
         setLableToJsp(request, bundle, "msg_tm_search_text_invalid");
         setLableToJsp(request, bundle, "msg_tm_search_text_invalid2");
-        setLableToJsp(request, bundle, "msg_tm_search_search_text_and_sid");
+        setLableToJsp(request, bundle, "msg_tm_search_more_fields_required");
         setLableToJsp(request, bundle, "msg_tm_search_with_replace_text");
         setLableToJsp(request, bundle, "msg_tm_search_no_entry_selected");
         setLableToJsp(request, bundle, "msg_tm_search_confirm_deleted");
         setLableToJsp(request, bundle, "msg_tm_search_confirm_replaced");
-        
+
         setLableToJsp(request, bundle, "lb_search_by");
         setLableToJsp(request, bundle, "lb_report_startDate");
         setLableToJsp(request, bundle, "lb_report_endDate");
@@ -251,10 +274,8 @@ public class TMSearchBroswerHandlerHelper
     {
         LocaleManagerWLRemote localeMgr = ServerProxy.getLocaleManager();
         Vector sources = localeMgr.getAvailableLocales();
-        SortUtil.sort(sources,
-                new GlobalSightLocaleComparator(Locale.getDefault()));
-        request.setAttribute(LocalePairConstants.LOCALES,
-                JsonUtil.toJson(sources));
+        SortUtil.sort(sources, new GlobalSightLocaleComparator(Locale.getDefault()));
+        request.setAttribute(LocalePairConstants.LOCALES, JsonUtil.toJson(sources));
     }
 
     /**
@@ -263,8 +284,7 @@ public class TMSearchBroswerHandlerHelper
      * @param request
      * @param bundle
      */
-    private static void setLableToJsp(HttpServletRequest request,
-            ResourceBundle bundle, String msg)
+    private static void setLableToJsp(HttpServletRequest request, ResourceBundle bundle, String msg)
     {
         String label = bundle.getString(msg);
         request.setAttribute(msg, label);
@@ -278,10 +298,8 @@ public class TMSearchBroswerHandlerHelper
         List<String> companies = null;
         ArrayList<ProjectTM> tmList = new ArrayList<ProjectTM>();
         String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
-        Company curremtCompany = CompanyWrapper
-                .getCompanyById(currentCompanyId);
-        boolean enableTMAccessControl = curremtCompany
-                .getEnableTMAccessControl();
+        Company curremtCompany = CompanyWrapper.getCompanyById(currentCompanyId);
+        boolean enableTMAccessControl = curremtCompany.getEnableTMAccessControl();
         boolean isSuperPM = UserUtil.isSuperPM(userId);
         boolean isAdmin = UserUtil.isInPermissionGroup(userId, "Administrator");
         boolean isSuperLP = UserUtil.isSuperLP(userId);
@@ -310,8 +328,7 @@ public class TMSearchBroswerHandlerHelper
                 List projectList = null;
                 try
                 {
-                    projectList = ServerProxy.getProjectHandler()
-                            .getProjectsByUser(userId);
+                    projectList = ServerProxy.getProjectHandler().getProjectsByUser(userId);
                 }
                 catch (Exception e)
                 {
@@ -325,8 +342,7 @@ public class TMSearchBroswerHandlerHelper
                 for (Iterator it = projectList.iterator(); it.hasNext();)
                 {
                     Project pj = (Project) it.next();
-                    String companyName = CompanyWrapper.getCompanyNameById(pj
-                            .getCompanyId());
+                    String companyName = CompanyWrapper.getCompanyNameById(pj.getCompanyId());
                     if (!companies.contains(companyName))
                     {
                         companies.add(companyName);
@@ -359,8 +375,8 @@ public class TMSearchBroswerHandlerHelper
                     ProjectTM tm = null;
                     try
                     {
-                        tm = ServerProxy.getProjectHandler().getProjectTMById(
-                                ((BigInteger) it.next()).longValue(), false);
+                        tm = ServerProxy.getProjectHandler()
+                                .getProjectTMById(((BigInteger) it.next()).longValue(), false);
                     }
                     catch (Exception e)
                     {
@@ -368,8 +384,7 @@ public class TMSearchBroswerHandlerHelper
                     }
                     if (isSuperPM)
                     {
-                        if (String.valueOf(tm.getCompanyId()).equals(
-                                currentCompanyId))
+                        if (String.valueOf(tm.getCompanyId()).equals(currentCompanyId))
                         {
                             tmList.add(tm);
                         }
@@ -398,8 +413,7 @@ public class TMSearchBroswerHandlerHelper
             HashMap<String, Object> map = new HashMap<String, Object>();
             map.put("id", tm.getId());
             map.put("name", tm.getName());
-            map.put("company",
-                    CompanyWrapper.getCompanyNameById(tm.getCompanyId()));
+            map.put("company", CompanyWrapper.getCompanyNameById(tm.getCompanyId()));
             list.add(map);
         }
         request.setAttribute("companiesForTM", JsonUtil.toJson(companies));
@@ -416,8 +430,7 @@ public class TMSearchBroswerHandlerHelper
      * @throws GeneralException
      * @throws ProjectHandlerException
      */
-    public static void setTMProfiles(HttpServletRequest request, String userId)
-            throws Exception
+    public static void setTMProfiles(HttpServletRequest request, String userId) throws Exception
     {
         String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
 
@@ -433,8 +446,7 @@ public class TMSearchBroswerHandlerHelper
                 List projectList = null;
                 try
                 {
-                    projectList = ServerProxy.getProjectHandler()
-                            .getProjectsByUser(userId);
+                    projectList = ServerProxy.getProjectHandler().getProjectsByUser(userId);
                 }
                 catch (Exception e)
                 {
@@ -445,8 +457,7 @@ public class TMSearchBroswerHandlerHelper
                     for (Iterator it = projectList.iterator(); it.hasNext();)
                     {
                         Project pj = (Project) it.next();
-                        String companyName = CompanyWrapper
-                                .getCompanyNameById(pj.getCompanyId());
+                        String companyName = CompanyWrapper.getCompanyNameById(pj.getCompanyId());
                         if (!companies.contains(companyName))
                         {
                             companies.add(companyName);
@@ -457,32 +468,27 @@ public class TMSearchBroswerHandlerHelper
             request.setAttribute("companiesForTMP", JsonUtil.toJson(companies));
         }
         List<TranslationMemoryProfile> tmProfiles = null;
-        tmProfiles = new ArrayList(ServerProxy.getProjectHandler()
-                .getAllTMProfiles());
+        tmProfiles = new ArrayList(ServerProxy.getProjectHandler().getAllTMProfiles());
         List<TMProfileVO> list = new ArrayList<TMProfileVO>();
 
         if (companyFilter)
         {
             // For super user
-            for (Iterator<TranslationMemoryProfile> it = tmProfiles.iterator(); it
-                    .hasNext();)
+            for (Iterator<TranslationMemoryProfile> it = tmProfiles.iterator(); it.hasNext();)
             {
                 TranslationMemoryProfile tmp = it.next();
                 String companyId = null;
                 try
                 {
-                    companyId = String.valueOf(ServerProxy
-                            .getProjectHandler()
-                            .getProjectTMById(tmp.getProjectTmIdForSave(),
-                                    false).getCompanyId());
+                    companyId = String.valueOf(ServerProxy.getProjectHandler()
+                            .getProjectTMById(tmp.getProjectTmIdForSave(), false).getCompanyId());
                 }
                 catch (Exception e)
                 {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                String companyName = CompanyWrapper
-                        .getCompanyNameById(companyId);
+                String companyName = CompanyWrapper.getCompanyNameById(companyId);
                 if (companies.contains(companyName))
                 {
                     TMProfileVO tmpVO = new TMProfileVO();
@@ -494,8 +500,7 @@ public class TMSearchBroswerHandlerHelper
         }
         else
         {
-            for (Iterator<TranslationMemoryProfile> it = tmProfiles.iterator(); it
-                    .hasNext();)
+            for (Iterator<TranslationMemoryProfile> it = tmProfiles.iterator(); it.hasNext();)
             {
                 TranslationMemoryProfile tmp = it.next();
                 TMProfileVO tmpVO = new TMProfileVO();
@@ -518,9 +523,8 @@ public class TMSearchBroswerHandlerHelper
      * @throws NumberFormatException
      * @throws LocaleManagerException
      */
-    private static List<String> getLeverageLocales(Locale uiLocale,
-            String localeId) throws LocaleManagerException,
-            NumberFormatException, RemoteException, GeneralException
+    private static List<String> getLeverageLocales(Locale uiLocale, String localeId)
+            throws LocaleManagerException, NumberFormatException, RemoteException, GeneralException
     {
         GlobalSightLocale trgLocale = ServerProxy.getLocaleManager()
                 .getLocaleById(Long.parseLong(localeId));
@@ -531,8 +535,7 @@ public class TMSearchBroswerHandlerHelper
         // add matching cross-locales based on lang code
         for (int j = 0; j < supportedLocales.size(); j++)
         {
-            String lang = ((GlobalSightLocale) supportedLocales.elementAt(j))
-                    .getLanguageCode();
+            String lang = ((GlobalSightLocale) supportedLocales.elementAt(j)).getLanguageCode();
             if (newTargetLangCode.equals(lang))
             {
                 // check special exclusionary cases
@@ -554,8 +557,7 @@ public class TMSearchBroswerHandlerHelper
      * @param leverageLocale
      * @return
      */
-    private static boolean validLeverageLocale(
-            GlobalSightLocale defaultTargetLocale,
+    private static boolean validLeverageLocale(GlobalSightLocale defaultTargetLocale,
             GlobalSightLocale leverageLocale)
     {
         boolean result = true;
@@ -579,34 +581,25 @@ public class TMSearchBroswerHandlerHelper
 
     /**
      * Exact/Fuzzy match search
-     * 
-     * @param p_request
-     * @param p_response
-     * @param session
-     * @throws Exception
      */
-    public static String searchExact(HttpServletRequest request,
-            String queryText, String sourceLocaleId, String targetLocaleId,
-            String tmpId, Locale uiLocale, String maxEntriesPerPageStr,
-            String searchIn, String replaceText) throws Exception
+    public static String searchExact(HttpServletRequest request, String queryText,
+            String sourceLocaleId, String targetLocaleId, String tmpId, Locale uiLocale,
+            String maxEntriesPerPageStr, String searchIn, String replaceText) throws Exception
     {
         boolean searchInSource = "source".equals(searchIn);
-        boolean advancedSearch = "true".equals((String) request
-                .getParameter("advancedSearch"));
+        boolean advancedSearch = "true".equals((String) request.getParameter("advancedSearch"));
 
-        HashMap filterMap = getFilterMap(request,advancedSearch);
+        Map<String, Object> filterMap = getFilterMap(request, advancedSearch);
         String attributeName = null;
-		String attributeValue = null;
-		if (advancedSearch)
-		{
-			attributeName = (String) request.getParameter("attributeName");
-			attributeValue = (String) request.getParameter("attributeValue");
-		}
+        String attributeValue = null;
+        if (advancedSearch)
+        {
+            attributeName = (String) request.getParameter("attributeName");
+            attributeValue = (String) request.getParameter("attributeValue");
+        }
         LocaleManager lm = ServerProxy.getLocaleManager();
-        GlobalSightLocale sourceGSL = lm.getLocaleById(Long
-                .parseLong(sourceLocaleId));
-        GlobalSightLocale targetGSL = lm.getLocaleById(Long
-                .parseLong(targetLocaleId));
+        GlobalSightLocale sourceGSL = lm.getLocaleById(Long.parseLong(sourceLocaleId));
+        GlobalSightLocale targetGSL = lm.getLocaleById(Long.parseLong(targetLocaleId));
 
         // Prepare target locale according to leverage from
         List<GlobalSightLocale> searchTrgLocales = new ArrayList<GlobalSightLocale>();
@@ -615,9 +608,8 @@ public class TMSearchBroswerHandlerHelper
 
         Set<GlobalSightLocale> set = new HashSet<GlobalSightLocale>();
         set.add(searchInSource ? targetGSL : sourceGSL);
-        
-        searchLevLocales.setLeveragingLocale(searchInSource ? targetGSL
-                : sourceGSL, set);
+
+        searchLevLocales.setLeveragingLocale(searchInSource ? targetGSL : sourceGSL, set);
 
         Long tmProfileId = Long.parseLong(tmpId);
         TranslationMemoryProfile tmp = ServerProxy.getProjectHandler()
@@ -625,33 +617,33 @@ public class TMSearchBroswerHandlerHelper
         LeverageOptions levOptions = new LeverageOptions(tmp, searchLevLocales);
         // fix for GBS-2448, user could search target locale in TM Search Page
         levOptions.setFromTMSearchPage(true);
+        // GBS-3990
+        levOptions.setParamMap(filterMap);
 
-        String segment = "<segment>" + EditUtil.encodeHtmlEntities(queryText)
-                + "</segment>";
+        String segment = "<segment>" + EditUtil.encodeHtmlEntities(queryText) + "</segment>";
         PageTmTu tu = new PageTmTu(-1, -1, "plaintext", "text", true);
-		GlobalSightLocale searchFromLocale = searchInSource ? sourceGSL : targetGSL;
+        GlobalSightLocale searchFromLocale = searchInSource ? sourceGSL : targetGSL;
         PageTmTuv tuv = new PageTmTuv(-1, segment, searchFromLocale);
         tuv.setTu(tu);
         tuv.setExactMatchKey();
         tu.addTuv(tuv);
         // Do leverage
-        LeverageDataCenter leverageDataCenter = LingServerProxy
-                .getTmCoreManager().leverageSegments(
-                        Collections.singletonList(tuv), searchFromLocale,
-                        searchTrgLocales, levOptions);
-        Iterator<LeverageMatches> itLeverageMatches = leverageDataCenter
-                .leverageResultIterator();
+        LeverageDataCenter leverageDataCenter = LingServerProxy.getTmCoreManager().leverageSegments(
+                Collections.singletonList(tuv), searchFromLocale, searchTrgLocales, levOptions);
+        Iterator<LeverageMatches> itLeverageMatches = leverageDataCenter.leverageResultIterator();
         List<Map<String, Object>> leverageResult = new ArrayList<Map<String, Object>>();
         Set<Long> attributeFilterTuIds = new HashSet<Long>();
         boolean attributeFilter = false;
-        if(advancedSearch && StringUtil.isNotEmpty(attributeName) && StringUtil.isNotEmpty(attributeValue))
+        if (advancedSearch && StringUtil.isNotEmpty(attributeName)
+                && StringUtil.isNotEmpty(attributeValue))
         {
-        	attributeFilter = true;
-        	attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(itLeverageMatches), attributeName, attributeValue);
+            attributeFilter = true;
+            attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(itLeverageMatches),
+                    attributeName, attributeValue);
         }
+        boolean isMaxed = false;
         long jobId = -1; // -1 is fine here
-        Set<String> jobIdSet = (Set<String>) filterMap.get("jobIds");
-        while (itLeverageMatches.hasNext())
+        WHILE_TOP: while (itLeverageMatches.hasNext())
         {
             LeverageMatches levMatches = itLeverageMatches.next();
 
@@ -659,51 +651,33 @@ public class TMSearchBroswerHandlerHelper
             Iterator itLocales = levMatches.targetLocaleIterator(jobId);
             while (itLocales.hasNext())
             {
-                GlobalSightLocale tLocale = (GlobalSightLocale) itLocales
-                        .next();
+                GlobalSightLocale tLocale = (GlobalSightLocale) itLocales.next();
 
                 // walk through all matches in the locale
                 Iterator itMatch = levMatches.matchIterator(tLocale, jobId);
                 while (itMatch.hasNext())
                 {
                     LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();
-                    if(attributeFilter)
+                    if (attributeFilter)
                     {
-                    	if(attributeFilterTuIds.size() == 0 || 
-                    			!attributeFilterTuIds.contains(matchedTuv.getTu().getId()))
-                    	{
-                    		continue;
-                    	}
+                        if (attributeFilterTuIds.size() == 0
+                                || !attributeFilterTuIds.contains(matchedTuv.getTu().getId()))
+                        {
+                            continue;
+                        }
                     }
-                    
-                  //0001181: TM Search: Job ID search is incorrect
-					if (jobIdSet != null && jobIdSet.size() > 0)
-					{
-						if (!jobIdSet.contains(String.valueOf(matchedTuv
-								.getJobId())))
-						{
-							continue;
-						}
-					}
-                    
-            		if (advancedSearch && !searchInSource)
-    				{
-    					if (!searchFilter(filterMap, matchedTuv))
-    						continue;
-    				}
-                    long score = new Float(matchedTuv.getScore()).longValue();
-                    if (score < tmp.getFuzzyMatchThreshold())
-                    {
-                        // if match score less than thres hold, do not display
-                        continue;
-                    }
-
                     BaseTmTuv sourceTuv = matchedTuv.getSourceTuv();
-               		if (advancedSearch && searchInSource)
-    				{
-    					if (!searchFilter(filterMap, sourceTuv))
-    						continue;
-    				}
+                    if (advancedSearch)
+                    {
+                        if (!searchFilterBySid(filterMap, searchInSource ? sourceTuv : matchedTuv))
+                            continue;
+                    }
+                    if (leverageResult.size() == MAX_RETURNS)
+                    {
+                        isMaxed = true;
+                        break WHILE_TOP;
+                    }
+                    long score = new Float(matchedTuv.getScore()).longValue();
                     String scoreStr = StringUtil.formatPCT(score);
                     long tuId = matchedTuv.getTu().getId();
                     long tmId = matchedTuv.getTu().getTmId();
@@ -712,14 +686,13 @@ public class TMSearchBroswerHandlerHelper
                     String sourceLocale;
                     String targetLocale;
                     String sid;
-                    String tmName = ServerProxy.getProjectHandler()
-                            .getProjectTMById(tmId, false).getName();
+                    String tmName = ServerProxy.getProjectHandler().getProjectTMById(tmId, false)
+                            .getName();
 
                     Map<String, String> formattedSource;
                     Map<String, String> formattedTarget;
                     if (searchInSource)
                     {
-                        // search in source
                         sourceTuvId = sourceTuv.getId();
                         sourceLocale = sourceTuv.getLocale().toString();
                         targetTuvId = matchedTuv.getId();
@@ -731,14 +704,11 @@ public class TMSearchBroswerHandlerHelper
                         }
                         formattedSource = getFormattedSegment(
                                 EditUtil.encodeHtmlEntities(queryText),
-                                EditUtil.encodeHtmlEntities(replaceText),
-                                sourceTuv);
-                        formattedTarget = getFormattedSegment(null, null,
-                                matchedTuv);
+                                EditUtil.encodeHtmlEntities(replaceText), sourceTuv);
+                        formattedTarget = getFormattedSegment(null, null, matchedTuv);
                     }
                     else
                     {
-                        // search in target
                         sourceTuvId = matchedTuv.getId();
                         sourceLocale = matchedTuv.getLocale().toString();
                         targetTuvId = sourceTuv.getId();
@@ -748,12 +718,10 @@ public class TMSearchBroswerHandlerHelper
                         {
                             sid = "N/A";
                         }
-                        formattedSource = getFormattedSegment(null, null,
-                                matchedTuv);
+                        formattedSource = getFormattedSegment(null, null, matchedTuv);
                         formattedTarget = getFormattedSegment(
                                 EditUtil.encodeHtmlEntities(queryText),
-                                EditUtil.encodeHtmlEntities(replaceText),
-                                sourceTuv);
+                                EditUtil.encodeHtmlEntities(replaceText), sourceTuv);
                     }
 
                     Map<String, Object> matchMap = new HashMap<String, Object>();
@@ -780,40 +748,44 @@ public class TMSearchBroswerHandlerHelper
         sessionMgr.setAttribute("searchResult", leverageResult);
         // Get the displayed result according records number and the max number
         // per pages
-        Map<String, Object> temp = getDisplayResult(leverageResult, 1,
-                maxEntriesPerPageStr);
+        Map<String, Object> temp = getDisplayResult(leverageResult, 1, maxEntriesPerPageStr);
+        // GBS-3990, warn user of max returns
+        if (isMaxed)
+        {
+            temp.put("maxReturns", MAX_RETURNS);
+            ResourceBundle bundle = PageHandler.getBundle(session);
+            String label = MessageFormat.format(bundle.getString("lb_tm_search_max_returns"),
+                    MAX_RETURNS);
+            temp.put("maxReturnsWarning", label);
+        }
         String jsonStr = getJsonStr(JsonUtil.toJson(temp));
         return jsonStr;
     }
-	
+
     /**
      * Full text search
      * 
      * @return
      * @throws Exception
      */
-    public static String searchFullText(HttpServletRequest request,
-            String searchText, String sourceLocaleId, String targetLocaleId,
-            String tms, Locale uiLocale, String maxEntriesPerPageStr,
-            String searchIn, String replaceText) throws Exception
+    public static String searchFullText(HttpServletRequest request, String searchText,
+            String sourceLocaleId, String targetLocaleId, String tms, Locale uiLocale,
+            String maxEntriesPerPageStr, String searchIn, String replaceText) throws Exception
     {
         boolean searchInSource = "source".equals(searchIn);
-        boolean advancedSearch = "true".equals((String) request
-                .getParameter("advancedSearch"));
-        HashMap filterMap = getFilterMap(request,advancedSearch);
+        boolean advancedSearch = "true".equals((String) request.getParameter("advancedSearch"));
+        Map<String, Object> filterMap = getFilterMap(request, advancedSearch);
         String attributeName = null;
-		String attributeValue = null;
-		if (advancedSearch)
-		{
-			attributeName = (String) request.getParameter("attributeName");
-			attributeValue = (String) request.getParameter("attributeValue");
-		}
-		
+        String attributeValue = null;
+        if (advancedSearch)
+        {
+            attributeName = (String) request.getParameter("attributeName");
+            attributeValue = (String) request.getParameter("attributeValue");
+        }
+
         LocaleManager lm = ServerProxy.getLocaleManager();
-        GlobalSightLocale sourceGSL = lm.getLocaleById(Long
-                .parseLong(sourceLocaleId));
-        GlobalSightLocale targetGSL = lm.getLocaleById(Long
-                .parseLong(targetLocaleId));
+        GlobalSightLocale sourceGSL = lm.getLocaleById(Long.parseLong(sourceLocaleId));
+        GlobalSightLocale targetGSL = lm.getLocaleById(Long.parseLong(targetLocaleId));
 
         // get all selected TMS
         ArrayList<Tm> tmList = new ArrayList<Tm>();
@@ -821,29 +793,29 @@ public class TMSearchBroswerHandlerHelper
         for (String tm : tmsArray)
         {
             long tmId = Long.parseLong(tm);
-            tmList.add(ServerProxy.getProjectHandler().getProjectTMById(tmId,
-                    false));
+            tmList.add(ServerProxy.getProjectHandler().getProjectTMById(tmId, false));
         }
 
         // do search
         TmCoreManager mgr = LingServerProxy.getTmCoreManager();
         List<TMidTUid> queryResult = mgr.tmConcordanceQuery(tmList, searchText,
-                searchInSource ? sourceGSL : targetGSL,
-                searchInSource ? targetGSL : sourceGSL, null);
+                searchInSource ? sourceGSL : targetGSL, searchInSource ? targetGSL : sourceGSL,
+                null);
         // Get all TUS by queryResult, then get all needed properties
-        List<SegmentTmTu> tus = LingServerProxy.getTmCoreManager()
-                .getSegmentsById(queryResult);
+        List<SegmentTmTu> tus = LingServerProxy.getTmCoreManager().getSegmentsById(queryResult);
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         String findText = EditUtil.encodeHtmlEntities(searchText);
         replaceText = EditUtil.encodeHtmlEntities(replaceText);
         Set<Long> attributeFilterTuIds = new HashSet<Long>();
         boolean attributeFilter = false;
-        if(advancedSearch && StringUtil.isNotEmpty(attributeName) && StringUtil.isNotEmpty(attributeValue))
+        if (advancedSearch && StringUtil.isNotEmpty(attributeName)
+                && StringUtil.isNotEmpty(attributeValue))
         {
-        	attributeFilter = true;
-        	attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(tus), attributeName, attributeValue);
+            attributeFilter = true;
+            attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(tus), attributeName,
+                    attributeValue);
         }
-        Set<String> jobIdSet = (Set<String>) filterMap.get("jobIds");
+        String jobIds = (String) filterMap.get("jobIds");
         for (int i = 0, max = tus.size(); i < max; i++)
         {
             try
@@ -854,43 +826,42 @@ public class TMSearchBroswerHandlerHelper
                     continue;
                 }
                 long tuId = tu.getId();
-                if(attributeFilter)
+                if (attributeFilter)
                 {
-                	if( attributeFilterTuIds.size() ==0 || !attributeFilterTuIds.contains(tuId))
-                	{
-                		continue;
-                	}
+                    if (attributeFilterTuIds.size() == 0 || !attributeFilterTuIds.contains(tuId))
+                    {
+                        continue;
+                    }
                 }
                 BaseTmTuv srcTuv = tu.getFirstTuv(sourceGSL);
-				if (advancedSearch && searchInSource)
-				{
-					if (!searchFilter(filterMap, srcTuv))
-						continue;
-				}
+                if (advancedSearch && searchInSource)
+                {
+                    if (!searchFilter(filterMap, srcTuv))
+                        continue;
+                }
                 String gxml = GxmlUtil.stripRootTag(srcTuv.getSegment());
 
                 BaseTmTuv trgTuv;
                 Collection targetTuvs = tu.getTuvList(targetGSL);
-                
+
                 for (Iterator it = targetTuvs.iterator(); it.hasNext();)
                 {
                     Map<String, Object> map = new HashMap<String, Object>();
                     trgTuv = (BaseTmTuv) it.next();
-					if (advancedSearch && !searchInSource)
-					{
-						if (!searchFilter(filterMap, trgTuv))
-							continue;
-					}
-					//0001181: TM Search: Job ID search is incorrect
-					if (jobIdSet != null && jobIdSet.size() > 0)
-					{
-						if (!jobIdSet
-								.contains(String.valueOf(trgTuv.getJobId())))
-						{
-							continue;
-						}
-					}
-					
+                    if (advancedSearch && !searchInSource)
+                    {
+                        if (!searchFilter(filterMap, trgTuv))
+                            continue;
+                    }
+                    // 0001181: TM Search: Job ID search is incorrect
+                    if (StringUtil.isNotEmpty(jobIds))
+                    {
+                        if (!jobIds.contains(String.valueOf(trgTuv.getJobId())))
+                        {
+                            continue;
+                        }
+                    }
+
                     String sid = trgTuv.getSid();
                     long tuvId = trgTuv.getId();
                     if (null == sid)
@@ -905,8 +876,8 @@ public class TMSearchBroswerHandlerHelper
                             searchInSource ? null : findText, replaceText, trgTuv);
                     String targetLocale = trgTuv.getLocale().toString();
                     long tmId = trgTuv.getTu().getTmId();
-                    String tmName = ServerProxy.getProjectHandler()
-                            .getProjectTMById(tmId, false).getName();
+                    String tmName = ServerProxy.getProjectHandler().getProjectTMById(tmId, false)
+                            .getName();
                     map.put("sid", sid);
                     map.put("originSource", gxml);
                     map.put("source", formattedSource);
@@ -919,7 +890,7 @@ public class TMSearchBroswerHandlerHelper
                     map.put("sourceLocale", srcTuv.getLocale().toString());
                     map.put("targetLocale", targetLocale);
                     result.add(map);
-                }                
+                }
             }
             catch (Exception e)
             {
@@ -953,92 +924,73 @@ public class TMSearchBroswerHandlerHelper
 
         // Get the displayed result according records number and the max number
         // per pages
-        Map<String, Object> temp = getDisplayResult(resultNew, 1,
-                maxEntriesPerPageStr);
+        Map<String, Object> temp = getDisplayResult(resultNew, 1, maxEntriesPerPageStr);
         String jsonStr = getJsonStr(JsonUtil.toJson(temp));
         return jsonStr;
     }
-    
-    public static String searchFullTextBySid(HttpServletRequest request,
-            String searchText, String sourceLocaleId, String targetLocaleId,
-            String tms, Locale uiLocale, String maxEntriesPerPageStr,
-            String searchIn, String replaceText) throws Exception
+
+    public static String searchFullTextBySql(HttpServletRequest request, String searchText,
+            String sourceLocaleId, String targetLocaleId, String tms, Locale uiLocale,
+            String maxEntriesPerPageStr, String searchIn, String replaceText) throws Exception
     {
-		boolean searchInSource = "source".equals(searchIn);
-		boolean advancedSearch = "true".equals((String) request
-				.getParameter("advancedSearch"));
-		HashMap filterMap = getFilterMap(request, advancedSearch);
-		LocaleManager lm = ServerProxy.getLocaleManager();
-		GlobalSightLocale sourceGSL = lm.getLocaleById(Long
-				.parseLong(sourceLocaleId));
-		GlobalSightLocale targetGSL = lm.getLocaleById(Long
-				.parseLong(targetLocaleId));
-		if (searchInSource)
-		{
-			filterMap.put("localeIds", sourceGSL.getId());
-		}
-		else
-		{
-			filterMap.put("localeIds", targetGSL.getId());
-		}
+        boolean searchInSource = "source".equals(searchIn);
+        boolean advancedSearch = "true".equals((String) request.getParameter("advancedSearch"));
+        Map<String, Object> filterMap = getFilterMap(request, advancedSearch);
+        LocaleManager lm = ServerProxy.getLocaleManager();
+        GlobalSightLocale sourceGSL = null;
+        GlobalSightLocale targetGSL = null;
+        if (!"-1".equals(sourceLocaleId))
+        {
+            sourceGSL = lm.getLocaleById(Long.parseLong(sourceLocaleId));
+        }
+        if (!"-1".equals(targetLocaleId))
+        {
+            targetGSL = lm.getLocaleById(Long.parseLong(targetLocaleId));
+        }
+        if (searchInSource)
+        {
+            if (sourceGSL != null)
+            {
+                filterMap.put("localeId", String.valueOf(sourceGSL.getId()));
+            }
+        }
+        else
+        {
+            if (targetGSL != null)
+            {
+                filterMap.put("localeId", String.valueOf(targetGSL.getId()));
+            }
+        }
 
-		String attributeName = null;
-		String attributeValue = null;
-		if (advancedSearch)
-		{
-			attributeName = (String) request.getParameter("attributeName");
-			attributeValue = (String) request.getParameter("attributeValue");
-		}
-		
-		// get all selected TMS
-		Connection conn = DbUtil.getConnection();
-         String[] tmsArray = tms.split(",");
-         List<TMidTUid> queryResult = new ArrayList<TMidTUid>();
-		for (String tm : tmsArray)
-		{
-			StatementBuilder sb = new StatementBuilder();
-			long tmId = Long.parseLong(tm);
-			ProjectTM projectTM = ServerProxy.getProjectHandler()
-					.getProjectTMById(tmId, false);
-			// tm3
-			if (projectTM.getTm3Id() != null)
-			{
-				BaseTm baseTM = TM3Util.getBaseTm(projectTM.getTm3Id());
-				getTm3SqlByParamMap(sb, filterMap, baseTM, projectTM.getTm3Id());
-				List<TMidTUid> tuId = getIdList(conn, sb, tmId);
-				if (tuId != null && tuId.size() > 0)
-				{
-					queryResult.addAll(tuId);
-				}
-			}
-			// tm2
-			else
-			{
-				getTm2SqlByParamMap(sb, filterMap, tmId);
-				List<TMidTUid> tuId = getIdList(conn, sb, tmId);
-				if (tuId != null && tuId.size() > 0)
-				{
-					queryResult.addAll(tuId);
-				}
-			}
-		}
-         
-		// Get all TUS by queryResult, then get all needed properties
-        List<SegmentTmTu> tus = LingServerProxy.getTmCoreManager()
-                .getSegmentsById(queryResult);
+        String attributeName = null;
+        String attributeValue = null;
+        if (advancedSearch)
+        {
+            attributeName = (String) request.getParameter("attributeName");
+            attributeValue = (String) request.getParameter("attributeValue");
+        }
+
+        // get all selected TMS
+        List<TMidTUid> queryResult = new ArrayList<TMidTUid>(MAX_RETURNS);
+        setQueryResult(queryResult, tms, filterMap);
+
+        // Get all TUS by queryResult, then get all needed properties
+        List<SegmentTmTu> tus = LingServerProxy.getTmCoreManager().getSegmentsById(queryResult);
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         String findText = EditUtil.encodeHtmlEntities(searchText);
         replaceText = EditUtil.encodeHtmlEntities(replaceText);
         Set<Long> attributeFilterTuIds = new HashSet<Long>();
         boolean attributeFilter = false;
-        if(advancedSearch && StringUtil.isNotEmpty(attributeName) && StringUtil.isNotEmpty(attributeValue))
+        if (advancedSearch && StringUtil.isNotEmpty(attributeName)
+                && StringUtil.isNotEmpty(attributeValue))
         {
-        	attributeFilter = true;
-        	attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(tus), attributeName, attributeValue);
+            attributeFilter = true;
+            attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(tus), attributeName,
+                    attributeValue);
         }
-        
-        Set<String> jobIdSet = (Set<String>) filterMap.get("jobIds");
-        for (int i = 0, max = tus.size(); i < max; i++)
+
+        boolean isMaxed = false;
+        FOR_TOP: for (int i = 0, max = tus.size(); i < max; i++)
         {
             try
             {
@@ -1048,43 +1000,58 @@ public class TMSearchBroswerHandlerHelper
                     continue;
                 }
                 long tuId = tu.getId();
-                if(attributeFilter)
+                if (attributeFilter)
                 {
-                	if( attributeFilterTuIds.size() ==0 || !attributeFilterTuIds.contains(tuId))
-                	{
-                		continue;
-                	}
+                    if (attributeFilterTuIds.size() == 0 || !attributeFilterTuIds.contains(tuId))
+                    {
+                        continue;
+                    }
                 }
-                BaseTmTuv srcTuv = tu.getFirstTuv(sourceGSL);
-				if (advancedSearch && searchInSource)
-				{
-					if (!searchFilterBySid(filterMap, srcTuv))
-						continue;
-				}
+                BaseTmTuv srcTuv = null;
+                if (sourceGSL == null)
+                {
+                    srcTuv = tu.getSourceTuv();
+                }
+                else
+                {
+                    srcTuv = tu.getFirstTuv(sourceGSL);
+                }
+                if (advancedSearch && searchInSource)
+                {
+                    if (!searchFilterBySid(filterMap, srcTuv))
+                        continue;
+                }
                 String gxml = GxmlUtil.stripRootTag(srcTuv.getSegment());
 
                 BaseTmTuv trgTuv;
-                Collection targetTuvs = tu.getTuvList(targetGSL);
-                
+                Collection targetTuvs = null;
+                if (targetGSL == null)
+                {
+                    targetTuvs = tu.getTuvs();
+                }
+                else
+                {
+                    targetTuvs = tu.getTuvList(targetGSL);
+                }
                 for (Iterator it = targetTuvs.iterator(); it.hasNext();)
                 {
-                    Map<String, Object> map = new HashMap<String, Object>();
                     trgTuv = (BaseTmTuv) it.next();
-					if (advancedSearch && !searchInSource)
-					{
-						if (!searchFilterBySid(filterMap, trgTuv))
-							continue;
-					}
-					//0001181: TM Search: Job ID search is incorrect
-					if (jobIdSet != null && jobIdSet.size() > 0)
-					{
-						if (!jobIdSet
-								.contains(String.valueOf(trgTuv.getJobId())))
-						{
-							continue;
-						}
-					}
-					
+                    if (trgTuv.getLocale().equals(srcTuv.getLocale()))
+                    {
+                        continue;
+                    }
+                    if (result.size() == MAX_RETURNS)
+                    {
+                        isMaxed = true;
+                        break FOR_TOP;
+                    }
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    if (advancedSearch && !searchInSource)
+                    {
+                        if (!searchFilterBySid(filterMap, trgTuv))
+                            continue;
+                    }
+
                     String sid = trgTuv.getSid();
                     long tuvId = trgTuv.getId();
                     if (null == sid)
@@ -1099,8 +1066,8 @@ public class TMSearchBroswerHandlerHelper
                             searchInSource ? null : findText, replaceText, trgTuv);
                     String targetLocale = trgTuv.getLocale().toString();
                     long tmId = trgTuv.getTu().getTmId();
-                    String tmName = ServerProxy.getProjectHandler()
-                            .getProjectTMById(tmId, false).getName();
+                    String tmName = ServerProxy.getProjectHandler().getProjectTMById(tmId, false)
+                            .getName();
                     map.put("sid", sid);
                     map.put("originSource", gxml);
                     map.put("source", formattedSource);
@@ -1113,7 +1080,7 @@ public class TMSearchBroswerHandlerHelper
                     map.put("sourceLocale", srcTuv.getLocale().toString());
                     map.put("targetLocale", targetLocale);
                     result.add(map);
-                }                
+                }
             }
             catch (Exception e)
             {
@@ -1147,478 +1114,547 @@ public class TMSearchBroswerHandlerHelper
 
         // Get the displayed result according records number and the max number
         // per pages
-        Map<String, Object> temp = getDisplayResult(resultNew, 1,
-                maxEntriesPerPageStr);
+        Map<String, Object> temp = getDisplayResult(resultNew, 1, maxEntriesPerPageStr);
+        // GBS-3990, warn user of max returns
+        if (isMaxed)
+        {
+            temp.put("maxReturns", MAX_RETURNS);
+            ResourceBundle bundle = PageHandler.getBundle(session);
+            String label = MessageFormat.format(bundle.getString("lb_tm_search_max_returns"),
+                    MAX_RETURNS);
+            temp.put("maxReturnsWarning", label);
+        }
         String jsonStr = getJsonStr(JsonUtil.toJson(temp));
         return jsonStr;
     }
 
-	private static String getJsonStr(String jsonStr)
-	{
-		char[] crArr = jsonStr.toCharArray();
-		StringBuffer bufer = new StringBuffer();
-		char cr;
-		for (int i = 0; i < crArr.length; i++)
-		{
-			cr = crArr[i];
-			bufer.append(cr);
-			if (cr == '\\')
-			{
-				if (i < crArr.length - 1 && i > 0)
-				{
-					if (crArr[i + 1] == 'n' && crArr[i - 1] != '\\')
-					{
-						bufer.append(crArr[i + 1]).append("<br>");
-						i++;
-					}
-				}
-			}
-		}
-		return bufer.toString();
-	}
-    
-	private static void getTm2SqlByParamMap(StatementBuilder sb,
-			HashMap paramMap,long tmId)
-	{
-		sb.append("SELECT DISTINCT tuv.TU_ID AS tuId FROM ")
-				.append(" PROJECT_TM_TU_T AS tu, ")
-				.append(" PROJECT_TM_TUV_T AS tuv").append(" WHERE 1=1 ")
-				.append(" AND tu.TM_ID = ?").addValue(tmId)
-				.append(" AND tu.id = tuv.TU_ID ");
-		sb.append(" AND tuv.sid is not null ");
-		getParameterSql(sb, paramMap, "TM2");
-	}
-	
-	private static void getTm3SqlByParamMap(StatementBuilder sb,
-			HashMap paramMap, BaseTm baseTM, long tm3Id)
-	{
-		sb.append("SELECT DISTINCT tuv.tuId AS tuId FROM ")
-				.append(baseTM.getTuvTableName()).append(" as tuv, ")
-				.append(baseTM.getTuvExtTableName()).append(" AS ext,")
-				.append(baseTM.getTuTableName()).append(" as tu ")
-				.append(" WHERE 1 = 1").append(" AND tuv.id = ext.tuvId ")
-				.append(" AND tu.id = ext.tuId ").append(" AND tuv.tmId = ?")
-				.addValue(tm3Id);
-		getParameterSql(sb, paramMap, "TM3");
-		sb.append(" AND ext.sid IS NOT NULL ");
-	}
-    
-    private static void getParameterSql(StatementBuilder sb,
-    		HashMap paramMap,String tmType)
-	{
-		if (paramMap != null)
-		{
-			String createStartDateOption = (String) paramMap.get("createStartDateOption");
-			String createEndDateOption = (String) paramMap.get("createEndDateOption");
-			Date createStartDate = (Date) paramMap.get("createStartDate");
-			Date createEndDate = (Date) paramMap.get("createEndDate");
+    /**
+     * Gets and sets query result using jdbc to search from database.
+     */
+    private static void setQueryResult(List<TMidTUid> queryResult, String tms,
+            Map<String, Object> filterMap) throws Exception
+    {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            // since GBS-3990, only one tm is allowed to be selected
+            String[] tmsArray = tms.split(",");
+            for (String tm : tmsArray)
+            {
+                StatementBuilder sb = new StatementBuilder();
+                long tmId = Long.parseLong(tm);
+                ProjectTM projectTM = ServerProxy.getProjectHandler().getProjectTMById(tmId, false);
+                // tm3
+                if (projectTM.getTm3Id() != null)
+                {
+                    BaseTm baseTM = TM3Util.getBaseTm(projectTM.getTm3Id());
+                    getTm3SqlByParamMap(sb, filterMap, baseTM, projectTM.getTm3Id());
+                    List<TMidTUid> tuId = getIdList(conn, sb, tmId);
+                    if (tuId != null && tuId.size() > 0)
+                    {
+                        queryResult.addAll(tuId);
+                    }
+                }
+                // tm2
+                else
+                {
+                    getTm2SqlByParamMap(sb, filterMap, tmId);
+                    List<TMidTUid> tuId = getIdList(conn, sb, tmId);
+                    if (tuId != null && tuId.size() > 0)
+                    {
+                        queryResult.addAll(tuId);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
+    }
 
-			String modifyStartDateOption = (String) paramMap.get("modifyStartDateOption");
-			String modifyEndDateOption = (String) paramMap.get("modifyEndDateOption");
-			Date modifyStartDate = (Date) paramMap.get("modifyStartDate");
-			Date modifyEndDate = (Date) paramMap.get("modifyEndDate");
-			
-			String lastUsageStartDateOption = (String) paramMap.get("lastUsageStartDateOption");
-			String lastUsageEndDateOption = (String) paramMap.get("lastUsageEndDateOption");
-			Date lastUsageStartDate = (Date) paramMap.get("lastUsageStartDate");
-			Date lastUsageEndDate = (Date) paramMap.get("lastUsageEndDate");
-			
-			String createUser = (String) paramMap.get("createUser");
-			String modifyUser = (String) paramMap.get("modifyUser");
-			long localeId = (Long) paramMap.get("localeIds");
-//			String jobIds = (String) paramMap.get("jobIds");
-			//create date
-			if (createStartDate != null)
-			{
-				if (createStartDateOption.equals(DATE_EQUALS))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND tuv.creationDate >= ? ").addValue(parseStartDate(createStartDate));
-						sb.append(" AND tuv.creationDate <= ? ").addValue(parseEndDate(createStartDate));
-					}
-					else if (tmType.equalsIgnoreCase("TM2"))
-					{
-						sb.append(" AND tuv.CREATION_DATE >= ? ").addValue(parseStartDate(createStartDate));
-						sb.append(" AND tuv.CREATION_DATE <= ? ").addValue(parseEndDate(createStartDate));
-					}
-				}
-				else if (createStartDateOption.equals(DATE_NOT_EQUALS))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND tuv.creationDate < ? ").addValue(parseStartDate(createStartDate));
-						sb.append(" AND tuv.creationDate > ? ").addValue(parseEndDate(createStartDate));
-					}
-					else if (tmType.equalsIgnoreCase("TM2"))
-					{
-						sb.append(" AND tuv.CREATION_DATE < ? ").addValue(parseStartDate(createStartDate));
-						sb.append(" AND tuv.CREATION_DATE > ? ").addValue(parseEndDate(createStartDate));
-					}
-				}
-				else if (createStartDateOption.equals(DATE_GREATER_THAN))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND tuv.creationDate > ? ").addValue(parseStartDate(createStartDate));
-					}
-					else if (tmType.equalsIgnoreCase("TM2"))
-					{
-						sb.append(" AND tuv.CREATION_DATE > ? ").addValue(parseStartDate(createStartDate));
-					}
-				}
+    private static String getJsonStr(String jsonStr)
+    {
+        char[] crArr = jsonStr.toCharArray();
+        StringBuffer bufer = new StringBuffer();
+        char cr;
+        for (int i = 0; i < crArr.length; i++)
+        {
+            cr = crArr[i];
+            bufer.append(cr);
+            if (cr == '\\')
+            {
+                if (i < crArr.length - 1 && i > 0)
+                {
+                    if (crArr[i + 1] == 'n' && crArr[i - 1] != '\\')
+                    {
+                        bufer.append(crArr[i + 1]).append("<br>");
+                        i++;
+                    }
+                }
+            }
+        }
+        return bufer.toString();
+    }
 
-				else if (createStartDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND tuv.creationDate >= ? ").addValue(parseStartDate(createStartDate));
-					}
-					else if (tmType.equalsIgnoreCase("TM2"))
-					{
-						sb.append(" AND tuv.CREATION_DATE >= ?").addValue(parseStartDate(createStartDate));
-					}
-				}
-			}
-			
-			if (createEndDate != null)
-			{
-				if (createEndDateOption.equals(DATE_LESS_THAN))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND tuv.creationDate < ? ").addValue(parseEndDate(createEndDate));
-					}
-					else if (tmType.equalsIgnoreCase("TM2"))
-					{
-						sb.append(" AND tuv.CREATION_DATE < ?").addValue(parseEndDate(createEndDate));
-					}
-				}
-				else if (createEndDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND tuv.creationDate <= ? ").addValue(parseEndDate(createEndDate));
-					}
-					else if (tmType.equalsIgnoreCase("TM2"))
-					{
-						sb.append(" AND tuv.CREATION_DATE <= ?").addValue(parseEndDate(createEndDate));
-					}
-				}
-			}
-			
-			// modify date
-			if (modifyStartDate != null)
-			{
-				if (modifyStartDateOption.equals(DATE_EQUALS))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND tuv.modifyDate >= ? ").addValue(parseStartDate(modifyStartDate));
-						sb.append(" AND tuv.modifyDate <= ? ").addValue(parseEndDate(modifyStartDate));
-					}
-					else if (tmType.equalsIgnoreCase("TM2"))
-					{
-						sb.append(" AND tuv.MODIFY_DATE >= ? ").addValue(parseStartDate(modifyStartDate));
-						sb.append(" AND tuv.MODIFY_DATE <= ? ").addValue(parseEndDate(modifyStartDate));
-					}
-				}
-				else if (modifyStartDateOption.equals(DATE_NOT_EQUALS))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND tuv.modifyDate < ? ").addValue(parseStartDate(modifyStartDate));
-						sb.append(" AND tuv.modifyDate > ? ").addValue(parseEndDate(modifyStartDate));
-					}
-					else if (tmType.equalsIgnoreCase("TM2"))
-					{
-						sb.append(" AND tuv.MODIFY_DATE < ? ").addValue(parseStartDate(modifyStartDate));
-						sb.append(" AND tuv.MODIFY_DATE > ? ").addValue(parseEndDate(modifyStartDate));
-					}
-				}
-				else if (modifyStartDateOption.equals(DATE_GREATER_THAN))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND tuv.modifyDate > ? ").addValue(parseStartDate(modifyStartDate));
-					}
-					else if (tmType.equalsIgnoreCase("TM2"))
-					{
-						sb.append(" AND tuv.MODIFY_DATE > ?").addValue(parseStartDate(modifyStartDate));
-					}
-				}
-				else if (modifyStartDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND tuv.modifyDate >= ? ").addValue(parseStartDate(modifyStartDate));
-					}
-					else if (tmType.equalsIgnoreCase("TM2"))
-					{
-						sb.append(" AND tuv.MODIFY_DATE >= ?").addValue(parseStartDate(modifyStartDate));
-					}
-				}
-			}
-			
-			if (modifyEndDate != null)
-			{
-				if (modifyEndDateOption.equals(DATE_LESS_THAN))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND tuv.modifyDate < ? ").addValue(parseEndDate(modifyEndDate));
-					}
-					else if (tmType.equalsIgnoreCase("TM2"))
-					{
-						sb.append(" AND tuv.MODIFY_DATE < ?").addValue(parseEndDate(modifyEndDate));
-					}
-				}
-				else if (modifyEndDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND tuv.modifyDate <= ? ").addValue(parseEndDate(modifyEndDate));
-					}
-					else if (tmType.equalsIgnoreCase("TM2"))
-					{
-						sb.append(" AND tuv.MODIFY_DATE <= ?").addValue(parseEndDate(modifyEndDate));
-					}
-				}
-			}
-			
-			// last usage date
-			if (lastUsageStartDate != null)
-			{
-				if (lastUsageStartDateOption.equals(DATE_EQUALS))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND ext.lastUsageDate >= ? ").addValue(
-								parseStartDate(lastUsageStartDate));
-						sb.append(" AND ext.lastUsageDate <= ? ").addValue(
-								parseEndDate(lastUsageStartDate));
-					}
-				}
-				else if (lastUsageStartDateOption.equals(DATE_NOT_EQUALS))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND ext.lastUsageDate < ? ").addValue(
-								parseStartDate(lastUsageStartDate));
-						sb.append(" AND ext.lastUsageDate > ? ").addValue(
-								parseEndDate(lastUsageStartDate));
-					}
-				}
-				else if (lastUsageStartDateOption.equals(DATE_GREATER_THAN))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND ext.lastUsageDate > ? ").addValue(
-								parseStartDate(lastUsageStartDate));
-					}
-				}
-				else if (lastUsageStartDateOption
-						.equals(DATE_GREATER_THAN_OR_EQUALS))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND ext.lastUsageDate >= ? ").addValue(
-								parseStartDate(lastUsageStartDate));
-					}
-				}
-			}
+    private static void getTm2SqlByParamMap(StatementBuilder sb, Map<String, Object> paramMap,
+            long tmId)
+    {
+        sb.append("SELECT DISTINCT tuv.TU_ID AS tuId FROM ").append(" PROJECT_TM_TU_T AS tu, ")
+                .append(" PROJECT_TM_TUV_T AS tuv").append(" WHERE 1=1 ")
+                .append(" AND tu.TM_ID = ?").addValue(tmId).append(" AND tu.id = tuv.TU_ID ");
+        sb.append(" AND tuv.sid is not null ");
+        getParameterSql(sb, paramMap, "TM2");
+    }
 
-			if (lastUsageEndDate != null)
-			{
-				if (lastUsageEndDateOption.equals(DATE_LESS_THAN))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND ext.lastUsageDate < ? ").addValue(
-								parseEndDate(lastUsageEndDate));
-					}
-				}
-				else if (lastUsageEndDateOption
-						.equals(DATE_LESS_THAN_OR_EQUALS))
-				{
-					if (tmType.equalsIgnoreCase("TM3"))
-					{
-						sb.append(" AND ext.lastUsageDate <= ? ").addValue(
-								parseEndDate(lastUsageEndDate));
-					}
-				}
-			}
-						
-			//create user
-			if (StringUtil.isNotEmpty(createUser))
-			{
-				if (tmType.equalsIgnoreCase("TM3"))
-				{
-					sb.append(" AND tuv.creationUser = ? ").addValues(createUser);
-				}
-				else if (tmType.equalsIgnoreCase("TM2"))
-				{
-					sb.append(" AND tuv.CREATION_USER = ? ").addValues(createUser);
-				}
-			}
-			//modify user
-			if (StringUtil.isNotEmpty(modifyUser))
-			{
-				if (tmType.equalsIgnoreCase("TM3"))
-				{
-					sb.append(" AND tuv.modifyUser = ? ").addValues(modifyUser);
-				}
-				else if (tmType.equalsIgnoreCase("TM2"))
-				{
-					sb.append(" AND tuv.MODIFY_USER = ? ")
-							.addValues(modifyUser);
-				}
-			}
-			
-			if (StringUtil.isNotEmpty(String.valueOf(localeId)))
-			{
-				if (tmType.equalsIgnoreCase("TM3"))
-				{
-					sb.append(" AND tuv.localeId = ? ").addValue(localeId);
-				}
-				else if (tmType.equalsIgnoreCase("TM2"))
-				{
-					sb.append(" AND tuv.LOCALE_ID = ? ").addValue(localeId);
-				}
-			}
-			
-//			if (StringUtil.isNotEmpty(jobIds))
-//			{
-//				if (tmType.equalsIgnoreCase("TM3"))
-//				{
-//					sb.append(" AND ext.jobId in (").append(jobIds).append(")");
-//				}
-//			}
-		}
-	}
+    private static void getTm3SqlByParamMap(StatementBuilder sb, Map<String, Object> paramMap,
+            BaseTm baseTM, long tm3Id)
+    {
+        sb.append("SELECT DISTINCT tuv.tuId AS tuId FROM ").append(baseTM.getTuvTableName())
+                .append(" as tuv, ").append(baseTM.getTuvExtTableName()).append(" AS ext,")
+                .append(baseTM.getTuTableName()).append(" as tu ").append(" WHERE 1 = 1")
+                .append(" AND tuv.id = ext.tuvId ").append(" AND tu.id = ext.tuId ")
+                .append(" AND tuv.tmId = ?").addValue(tm3Id);
+        getParameterSql(sb, paramMap, "TM3");
+    }
 
-	private static String parseStartDate(Date start)
-	{
-		String startDate = format.format(start);
-		if (StringUtil.isNotEmpty(startDate))
-			return startDate + " 00:00:00";
-		else return null;
-	}
+    private static void getParameterSql(StatementBuilder sb, Map<String, Object> paramMap,
+            String tmType)
+    {
+        if (paramMap != null)
+        {
+            String createStartDateOption = (String) paramMap.get("createStartDateOption");
+            String createEndDateOption = (String) paramMap.get("createEndDateOption");
+            Date createStartDate = (Date) paramMap.get("createStartDate");
+            Date createEndDate = (Date) paramMap.get("createEndDate");
 
-	private static String parseEndDate(Date end)
-	{
-		String endDate = format.format(end);
-		if (StringUtil.isNotEmpty(endDate))
-			return endDate + " 23:59:59";
-		else return null;
-	}
-    
-	private static List<TMidTUid> getIdList(Connection conn, StatementBuilder sb,
-			long tmId) throws SQLException
-	{
-		List<TMidTUid> idList = new ArrayList<TMidTUid>();
-		PreparedStatement ps = sb.toPreparedStatement(conn);
-		ResultSet rs = ps.executeQuery();
-		while (rs.next())
-		{
-			TMidTUid tt = new TMidTUid(tmId, rs.getLong(1));
-			if (!idList.contains(tt))
-			{
-				idList.add(tt);
-			}
-		}
-		ps.close();
-		return idList;
-	}
-	
-    private static HashMap getFilterMap(HttpServletRequest request,
-			boolean advancedSearch)
-	{
-		HashMap filterMap = new HashMap();
-		String createStartDateOption = null;
-		Date createStartDate = null;
-		String createEndDateOption = null;
-		Date createEndDate = null;
-		String modifyStartDateOption = null;
-		Date modifyStartDate = null;
-		String modifyEndDateOption = null;
-		Date modifyEndDate = null;
-		String lastUsageStartDateOption = null;
-		Date lastUsageStartDate = null;
-		String lastUsageEndDateOption = null;
-		Date lastUsageEndDate = null;
-		String tuIds = null;
-		String sids = null;
-		String isRegex = null;
-		String createUser = null;
-		String modifyUser = null;
-		Set<String> jobIdSet = null;
-		
-		if (advancedSearch)
-		{
-			createStartDateOption = (String) request.getParameter("createStartDateOption");
-			createStartDate = parseDate((String) request.getParameter("createStartDate"));
-			createEndDateOption = (String) request.getParameter("createEndDateOption");
-			createEndDate = parseDate((String) request.getParameter("createEndDate"));
+            String modifyStartDateOption = (String) paramMap.get("modifyStartDateOption");
+            String modifyEndDateOption = (String) paramMap.get("modifyEndDateOption");
+            Date modifyStartDate = (Date) paramMap.get("modifyStartDate");
+            Date modifyEndDate = (Date) paramMap.get("modifyEndDate");
 
-			modifyStartDateOption = (String) request.getParameter("modifyStartDateOption");
-			modifyStartDate = parseDate((String) request.getParameter("modifyStartDate"));
-			modifyEndDateOption = (String) request.getParameter("modifyEndDateOption");
-			modifyEndDate = parseDate((String) request.getParameter("modifyEndDate"));
+            String lastUsageStartDateOption = (String) paramMap.get("lastUsageStartDateOption");
+            String lastUsageEndDateOption = (String) paramMap.get("lastUsageEndDateOption");
+            Date lastUsageStartDate = (Date) paramMap.get("lastUsageStartDate");
+            Date lastUsageEndDate = (Date) paramMap.get("lastUsageEndDate");
 
-			lastUsageStartDateOption = (String) request.getParameter("lastUsageStartDateOption");
-			lastUsageStartDate = parseDate((String) request.getParameter("lastUsageStartDate"));
-			lastUsageEndDateOption = (String) request.getParameter("lastUsageEndDateOption");
-			lastUsageEndDate = parseDate((String) request.getParameter("lastUsageEndDate"));
-			
-			tuIds = (String) request.getParameter("tuIds");
-			sids = (String) request.getParameter("sids");
-			isRegex = (String) request.getParameter("isRegex");
-			createUser = (String) request.getParameter("createUser");
-			modifyUser = (String) request.getParameter("modifyUser");
-			String jobIds = (String)request.getParameter("jobIds");
-			if (StringUtil.isNotEmpty(jobIds))
-			{
-				jobIdSet = new HashSet<String>();
-				for (String jobId : jobIds.split(","))
-				{
-					jobIdSet.add(jobId);
-				}
-			}
-			
-			filterMap.put("createStartDateOption", createStartDateOption);
-			filterMap.put("createStartDate", createStartDate);
-			filterMap.put("createEndDateOption", createEndDateOption);
-			filterMap.put("createEndDate", createEndDate);
-			filterMap.put("modifyStartDateOption", modifyStartDateOption);
-			filterMap.put("modifyStartDate", modifyStartDate);
-			filterMap.put("modifyEndDateOption", modifyEndDateOption);
-			filterMap.put("modifyEndDate", modifyEndDate);
-			filterMap.put("lastUsageStartDateOption", lastUsageStartDateOption);
-			filterMap.put("lastUsageStartDate", lastUsageStartDate);
-			filterMap.put("lastUsageEndDateOption", lastUsageEndDateOption);
-			filterMap.put("lastUsageEndDate", lastUsageEndDate);
-			filterMap.put("tuIds", tuIds);
-			filterMap.put("sids", sids);
-			filterMap.put("isRegex", isRegex);
-			filterMap.put("createUser", createUser);
-			filterMap.put("modifyUser", modifyUser);
-			filterMap.put("jobIds", jobIdSet);
-		}
-		return filterMap;
-	}
-    
+            String createUser = (String) paramMap.get("createUser");
+            String modifyUser = (String) paramMap.get("modifyUser");
+            String localeId = (String) paramMap.get("localeId");
+            String jobIds = (String) paramMap.get("jobIds");
+            // create date
+            if (createStartDate != null)
+            {
+                if (createStartDateOption.equals(DATE_EQUALS))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND tuv.creationDate >= ? ")
+                                .addValue(parseStartDate(createStartDate));
+                        sb.append(" AND tuv.creationDate <= ? ")
+                                .addValue(parseEndDate(createStartDate));
+                    }
+                    else if (tmType.equalsIgnoreCase("TM2"))
+                    {
+                        sb.append(" AND tuv.CREATION_DATE >= ? ")
+                                .addValue(parseStartDate(createStartDate));
+                        sb.append(" AND tuv.CREATION_DATE <= ? ")
+                                .addValue(parseEndDate(createStartDate));
+                    }
+                }
+                else if (createStartDateOption.equals(DATE_NOT_EQUALS))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND tuv.creationDate < ? ")
+                                .addValue(parseStartDate(createStartDate));
+                        sb.append(" AND tuv.creationDate > ? ")
+                                .addValue(parseEndDate(createStartDate));
+                    }
+                    else if (tmType.equalsIgnoreCase("TM2"))
+                    {
+                        sb.append(" AND tuv.CREATION_DATE < ? ")
+                                .addValue(parseStartDate(createStartDate));
+                        sb.append(" AND tuv.CREATION_DATE > ? ")
+                                .addValue(parseEndDate(createStartDate));
+                    }
+                }
+                else if (createStartDateOption.equals(DATE_GREATER_THAN))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND tuv.creationDate > ? ")
+                                .addValue(parseStartDate(createStartDate));
+                    }
+                    else if (tmType.equalsIgnoreCase("TM2"))
+                    {
+                        sb.append(" AND tuv.CREATION_DATE > ? ")
+                                .addValue(parseStartDate(createStartDate));
+                    }
+                }
+
+                else if (createStartDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND tuv.creationDate >= ? ")
+                                .addValue(parseStartDate(createStartDate));
+                    }
+                    else if (tmType.equalsIgnoreCase("TM2"))
+                    {
+                        sb.append(" AND tuv.CREATION_DATE >= ?")
+                                .addValue(parseStartDate(createStartDate));
+                    }
+                }
+            }
+
+            if (createEndDate != null)
+            {
+                if (createEndDateOption.equals(DATE_LESS_THAN))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND tuv.creationDate < ? ")
+                                .addValue(parseEndDate(createEndDate));
+                    }
+                    else if (tmType.equalsIgnoreCase("TM2"))
+                    {
+                        sb.append(" AND tuv.CREATION_DATE < ?")
+                                .addValue(parseEndDate(createEndDate));
+                    }
+                }
+                else if (createEndDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND tuv.creationDate <= ? ")
+                                .addValue(parseEndDate(createEndDate));
+                    }
+                    else if (tmType.equalsIgnoreCase("TM2"))
+                    {
+                        sb.append(" AND tuv.CREATION_DATE <= ?")
+                                .addValue(parseEndDate(createEndDate));
+                    }
+                }
+            }
+
+            // modify date
+            if (modifyStartDate != null)
+            {
+                if (modifyStartDateOption.equals(DATE_EQUALS))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND tuv.modifyDate >= ? ")
+                                .addValue(parseStartDate(modifyStartDate));
+                        sb.append(" AND tuv.modifyDate <= ? ")
+                                .addValue(parseEndDate(modifyStartDate));
+                    }
+                    else if (tmType.equalsIgnoreCase("TM2"))
+                    {
+                        sb.append(" AND tuv.MODIFY_DATE >= ? ")
+                                .addValue(parseStartDate(modifyStartDate));
+                        sb.append(" AND tuv.MODIFY_DATE <= ? ")
+                                .addValue(parseEndDate(modifyStartDate));
+                    }
+                }
+                else if (modifyStartDateOption.equals(DATE_NOT_EQUALS))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND tuv.modifyDate < ? ")
+                                .addValue(parseStartDate(modifyStartDate));
+                        sb.append(" AND tuv.modifyDate > ? ")
+                                .addValue(parseEndDate(modifyStartDate));
+                    }
+                    else if (tmType.equalsIgnoreCase("TM2"))
+                    {
+                        sb.append(" AND tuv.MODIFY_DATE < ? ")
+                                .addValue(parseStartDate(modifyStartDate));
+                        sb.append(" AND tuv.MODIFY_DATE > ? ")
+                                .addValue(parseEndDate(modifyStartDate));
+                    }
+                }
+                else if (modifyStartDateOption.equals(DATE_GREATER_THAN))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND tuv.modifyDate > ? ")
+                                .addValue(parseStartDate(modifyStartDate));
+                    }
+                    else if (tmType.equalsIgnoreCase("TM2"))
+                    {
+                        sb.append(" AND tuv.MODIFY_DATE > ?")
+                                .addValue(parseStartDate(modifyStartDate));
+                    }
+                }
+                else if (modifyStartDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND tuv.modifyDate >= ? ")
+                                .addValue(parseStartDate(modifyStartDate));
+                    }
+                    else if (tmType.equalsIgnoreCase("TM2"))
+                    {
+                        sb.append(" AND tuv.MODIFY_DATE >= ?")
+                                .addValue(parseStartDate(modifyStartDate));
+                    }
+                }
+            }
+
+            if (modifyEndDate != null)
+            {
+                if (modifyEndDateOption.equals(DATE_LESS_THAN))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND tuv.modifyDate < ? ").addValue(parseEndDate(modifyEndDate));
+                    }
+                    else if (tmType.equalsIgnoreCase("TM2"))
+                    {
+                        sb.append(" AND tuv.MODIFY_DATE < ?").addValue(parseEndDate(modifyEndDate));
+                    }
+                }
+                else if (modifyEndDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND tuv.modifyDate <= ? ")
+                                .addValue(parseEndDate(modifyEndDate));
+                    }
+                    else if (tmType.equalsIgnoreCase("TM2"))
+                    {
+                        sb.append(" AND tuv.MODIFY_DATE <= ?")
+                                .addValue(parseEndDate(modifyEndDate));
+                    }
+                }
+            }
+
+            // last usage date
+            if (lastUsageStartDate != null)
+            {
+                if (lastUsageStartDateOption.equals(DATE_EQUALS))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND ext.lastUsageDate >= ? ")
+                                .addValue(parseStartDate(lastUsageStartDate));
+                        sb.append(" AND ext.lastUsageDate <= ? ")
+                                .addValue(parseEndDate(lastUsageStartDate));
+                    }
+                }
+                else if (lastUsageStartDateOption.equals(DATE_NOT_EQUALS))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND ext.lastUsageDate < ? ")
+                                .addValue(parseStartDate(lastUsageStartDate));
+                        sb.append(" AND ext.lastUsageDate > ? ")
+                                .addValue(parseEndDate(lastUsageStartDate));
+                    }
+                }
+                else if (lastUsageStartDateOption.equals(DATE_GREATER_THAN))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND ext.lastUsageDate > ? ")
+                                .addValue(parseStartDate(lastUsageStartDate));
+                    }
+                }
+                else if (lastUsageStartDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND ext.lastUsageDate >= ? ")
+                                .addValue(parseStartDate(lastUsageStartDate));
+                    }
+                }
+            }
+
+            if (lastUsageEndDate != null)
+            {
+                if (lastUsageEndDateOption.equals(DATE_LESS_THAN))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND ext.lastUsageDate < ? ")
+                                .addValue(parseEndDate(lastUsageEndDate));
+                    }
+                }
+                else if (lastUsageEndDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
+                {
+                    if (tmType.equalsIgnoreCase("TM3"))
+                    {
+                        sb.append(" AND ext.lastUsageDate <= ? ")
+                                .addValue(parseEndDate(lastUsageEndDate));
+                    }
+                }
+            }
+
+            // create user
+            if (StringUtil.isNotEmpty(createUser))
+            {
+                if (tmType.equalsIgnoreCase("TM3"))
+                {
+                    sb.append(" AND tuv.creationUser = ? ").addValues(createUser);
+                }
+                else if (tmType.equalsIgnoreCase("TM2"))
+                {
+                    sb.append(" AND tuv.CREATION_USER = ? ").addValues(createUser);
+                }
+            }
+            // modify user
+            if (StringUtil.isNotEmpty(modifyUser))
+            {
+                if (tmType.equalsIgnoreCase("TM3"))
+                {
+                    sb.append(" AND tuv.modifyUser = ? ").addValues(modifyUser);
+                }
+                else if (tmType.equalsIgnoreCase("TM2"))
+                {
+                    sb.append(" AND tuv.MODIFY_USER = ? ").addValues(modifyUser);
+                }
+            }
+
+            if (StringUtil.isNotEmpty(localeId))
+            {
+                if (tmType.equalsIgnoreCase("TM3"))
+                {
+                    sb.append(" AND tuv.localeId = ? ").addValue(localeId);
+                }
+                else if (tmType.equalsIgnoreCase("TM2"))
+                {
+                    sb.append(" AND tuv.LOCALE_ID = ? ").addValue(localeId);
+                }
+            }
+
+            if (StringUtil.isNotEmpty(jobIds))
+            {
+                if (tmType.equalsIgnoreCase("TM3"))
+                {
+                    sb.append(" AND ext.jobId in (").append(jobIds).append(")");
+                }
+            }
+        }
+    }
+
+    private static String parseStartDate(Date start)
+    {
+        String startDate = format.format(start);
+        if (StringUtil.isNotEmpty(startDate))
+            return startDate + " 00:00:00";
+        else
+            return null;
+    }
+
+    private static String parseEndDate(Date end)
+    {
+        String endDate = format.format(end);
+        if (StringUtil.isNotEmpty(endDate))
+            return endDate + " 23:59:59";
+        else
+            return null;
+    }
+
+    private static List<TMidTUid> getIdList(Connection conn, StatementBuilder sb, long tmId)
+            throws SQLException
+    {
+        List<TMidTUid> idList = new ArrayList<TMidTUid>();
+        PreparedStatement ps = sb.toPreparedStatement(conn);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next())
+        {
+            TMidTUid tt = new TMidTUid(tmId, rs.getLong(1));
+            if (!idList.contains(tt))
+            {
+                idList.add(tt);
+            }
+        }
+        ps.close();
+        return idList;
+    }
+
+    private static Map<String, Object> getFilterMap(HttpServletRequest request,
+            boolean advancedSearch)
+    {
+        Map<String, Object> filterMap = new HashMap<String, Object>();
+        String createStartDateOption = null;
+        Date createStartDate = null;
+        String createEndDateOption = null;
+        Date createEndDate = null;
+        String modifyStartDateOption = null;
+        Date modifyStartDate = null;
+        String modifyEndDateOption = null;
+        Date modifyEndDate = null;
+        String lastUsageStartDateOption = null;
+        Date lastUsageStartDate = null;
+        String lastUsageEndDateOption = null;
+        Date lastUsageEndDate = null;
+        String tuIds = null;
+        String sids = null;
+        String isRegex = null;
+        String createUser = null;
+        String modifyUser = null;
+        String jobIds = null;
+
+        if (advancedSearch)
+        {
+            createStartDateOption = (String) request.getParameter("createStartDateOption");
+            createStartDate = parseDate((String) request.getParameter("createStartDate"));
+            createEndDateOption = (String) request.getParameter("createEndDateOption");
+            createEndDate = parseDate((String) request.getParameter("createEndDate"));
+
+            modifyStartDateOption = (String) request.getParameter("modifyStartDateOption");
+            modifyStartDate = parseDate((String) request.getParameter("modifyStartDate"));
+            modifyEndDateOption = (String) request.getParameter("modifyEndDateOption");
+            modifyEndDate = parseDate((String) request.getParameter("modifyEndDate"));
+
+            lastUsageStartDateOption = (String) request.getParameter("lastUsageStartDateOption");
+            lastUsageStartDate = parseDate((String) request.getParameter("lastUsageStartDate"));
+            lastUsageEndDateOption = (String) request.getParameter("lastUsageEndDateOption");
+            lastUsageEndDate = parseDate((String) request.getParameter("lastUsageEndDate"));
+
+            tuIds = (String) request.getParameter("tuIds");
+            sids = (String) request.getParameter("sids");
+            isRegex = (String) request.getParameter("isRegex");
+            createUser = (String) request.getParameter("createUser");
+            modifyUser = (String) request.getParameter("modifyUser");
+            jobIds = (String) request.getParameter("jobIds");
+
+            filterMap.put("createStartDateOption", createStartDateOption);
+            filterMap.put("createStartDate", createStartDate);
+            filterMap.put("createEndDateOption", createEndDateOption);
+            filterMap.put("createEndDate", createEndDate);
+            filterMap.put("modifyStartDateOption", modifyStartDateOption);
+            filterMap.put("modifyStartDate", modifyStartDate);
+            filterMap.put("modifyEndDateOption", modifyEndDateOption);
+            filterMap.put("modifyEndDate", modifyEndDate);
+            filterMap.put("lastUsageStartDateOption", lastUsageStartDateOption);
+            filterMap.put("lastUsageStartDate", lastUsageStartDate);
+            filterMap.put("lastUsageEndDateOption", lastUsageEndDateOption);
+            filterMap.put("lastUsageEndDate", lastUsageEndDate);
+            filterMap.put("tuIds", tuIds);
+            filterMap.put("sids", sids);
+            filterMap.put("isRegex", isRegex);
+            filterMap.put("createUser", createUser);
+            filterMap.put("modifyUser", modifyUser);
+            filterMap.put("jobIds", jobIds);
+        }
+        return filterMap;
+    }
+
     private static String getTuIds(Iterator<LeverageMatches> itLeverageMatches)
     {
-    	String ids = "";
-		while (itLeverageMatches.hasNext())
+        String ids = "";
+        while (itLeverageMatches.hasNext())
         {
             LeverageMatches levMatches = itLeverageMatches.next();
             Iterator itLocales = levMatches.targetLocaleIterator(-1);
             while (itLocales.hasNext())
             {
-                GlobalSightLocale tLocale = (GlobalSightLocale) itLocales
-                        .next();
+                GlobalSightLocale tLocale = (GlobalSightLocale) itLocales.next();
                 Iterator itMatch = levMatches.matchIterator(tLocale, -1);
                 while (itMatch.hasNext())
                 {
@@ -1627,52 +1663,57 @@ public class TMSearchBroswerHandlerHelper
                 }
             }
         }
-		if(ids.length() > 0)
-		{
-			ids = ids.substring(0, ids.length() -1);
-		}
-    	return ids;
+        if (ids.length() > 0)
+        {
+            ids = ids.substring(0, ids.length() - 1);
+        }
+        return ids;
     }
-    
+
     private static String getTuIds(List<SegmentTmTu> tus)
     {
-    	String ids = "";
-    	for(SegmentTmTu tu: tus)
-		{
-			if(tu != null)
-			{
-				ids+= tu.getId() + ",";
-			}
-		}
-    	if(ids.length() > 0)
-		{
-			ids = ids.substring(0, ids.length() -1);
-		}
-    	return ids;
+        String ids = "";
+        for (SegmentTmTu tu : tus)
+        {
+            if (tu != null)
+            {
+                ids += tu.getId() + ",";
+            }
+        }
+        if (ids.length() > 0)
+        {
+            ids = ids.substring(0, ids.length() - 1);
+        }
+        return ids;
     }
-    
-    private static Set<Long> getAttributeFilterTuIds(String ids,
-    		String attributeName, String attributeValue)
+
+    private static Set<Long> getAttributeFilterTuIds(String ids, String attributeName,
+            String attributeValue)
     {
-    	Connection conn = null;
-    	Set<Long> attributeFilterTuIds = new HashSet<Long>();
-    	try
-    	{
-    		conn = DbUtil.getConnection();
-    		StatementBuilder sbTm3 = new StatementBuilder();
-    		StatementBuilder sbTm2 = new StatementBuilder();
-    		if(ids.length() > 0)
-    		{
-    			sbTm3.append(" SELECT DISTINCT tuId from tm3_attr_val_shared_").append(CompanyThreadLocal.getInstance().getValue())
-    					.append(" as value, tm3_attr as attr where attr.name = '").append(attributeName).append("' and value.value = '")
-    					.append(attributeValue).append("' and value.attrId = attr.id and tuId in (").append(ids).append(")");
-    			attributeFilterTuIds.addAll(SQLUtil.execIdsQuery(conn, sbTm3));
-    			
-    			sbTm2.append("select DISTINCT tu_id  from  project_tm_tu_t_prop as prop where prop.prop_value = '").append(attributeValue)
-    						.append("' and prop.prop_type = 'Att::").append(attributeName).append("'");
-    			attributeFilterTuIds.addAll(SQLUtil.execIdsQuery(conn, sbTm2));
-    		}
-    	}
+        Connection conn = null;
+        Set<Long> attributeFilterTuIds = new HashSet<Long>();
+        try
+        {
+            conn = DbUtil.getConnection();
+            StatementBuilder sbTm3 = new StatementBuilder();
+            StatementBuilder sbTm2 = new StatementBuilder();
+            if (ids.length() > 0)
+            {
+                sbTm3.append(" SELECT DISTINCT tuId from tm3_attr_val_shared_")
+                        .append(CompanyThreadLocal.getInstance().getValue())
+                        .append(" as value, tm3_attr as attr where attr.name = '")
+                        .append(attributeName).append("' and value.value = '")
+                        .append(attributeValue).append("' and value.attrId = attr.id and tuId in (")
+                        .append(ids).append(")");
+                attributeFilterTuIds.addAll(SQLUtil.execIdsQuery(conn, sbTm3));
+
+                sbTm2.append(
+                        "select DISTINCT tu_id  from  project_tm_tu_t_prop as prop where prop.prop_value = '")
+                        .append(attributeValue).append("' and prop.prop_type = 'Att::")
+                        .append(attributeName).append("'");
+                attributeFilterTuIds.addAll(SQLUtil.execIdsQuery(conn, sbTm2));
+            }
+        }
         catch (Exception e)
         {
             e.printStackTrace();
@@ -1681,233 +1722,232 @@ public class TMSearchBroswerHandlerHelper
         {
             DbUtil.silentReturnConnection(conn);
         }
-    	
-    	return attributeFilterTuIds;
+
+        return attributeFilterTuIds;
     }
- 
-    private static boolean searchFilter(HashMap filterMap, BaseTmTuv tuv) 
+
+    private static boolean searchFilter(Map<String, Object> filterMap, BaseTmTuv tuv)
     {
-    	String createStartDateOption = (String) filterMap.get("createStartDateOption");
-		Date createStartDate = (Date) filterMap.get("createStartDate");
-		String createEndDateOption = (String) filterMap.get("createEndDateOption");
-		Date createEndDate = (Date) filterMap.get("createEndDate");
-		String modifyStartDateOption = (String) filterMap.get("modifyStartDateOption");
-		Date modifyStartDate = (Date) filterMap.get("modifyStartDate");
-		String modifyEndDateOption =(String)  filterMap.get("modifyEndDateOption");
-		Date modifyEndDate = (Date) filterMap.get("modifyEndDate");
-		String lastUsageStartDateOption = (String) filterMap.get("lastUsageStartDateOption");
-		Date lastUsageStartDate = (Date) filterMap.get("lastUsageStartDate");
-		String lastUsageEndDateOption =(String)  filterMap.get("lastUsageEndDateOption");
-		Date lastUsageEndDate = (Date) filterMap.get("lastUsageEndDate");
-		String tuIds = (String) filterMap.get("tuIds");
-		String sids = (String) filterMap.get("sids");
-		String isRegex = (String) filterMap.get("isRegex");
-		String createUser = (String) filterMap.get("createUser");
-		String modifyUser = (String) filterMap.get("modifyUser");
-//    	String jobIds = (String) filterMap.get("jobIds");
+        String createStartDateOption = (String) filterMap.get("createStartDateOption");
+        Date createStartDate = (Date) filterMap.get("createStartDate");
+        String createEndDateOption = (String) filterMap.get("createEndDateOption");
+        Date createEndDate = (Date) filterMap.get("createEndDate");
+        String modifyStartDateOption = (String) filterMap.get("modifyStartDateOption");
+        Date modifyStartDate = (Date) filterMap.get("modifyStartDate");
+        String modifyEndDateOption = (String) filterMap.get("modifyEndDateOption");
+        Date modifyEndDate = (Date) filterMap.get("modifyEndDate");
+        String lastUsageStartDateOption = (String) filterMap.get("lastUsageStartDateOption");
+        Date lastUsageStartDate = (Date) filterMap.get("lastUsageStartDate");
+        String lastUsageEndDateOption = (String) filterMap.get("lastUsageEndDateOption");
+        Date lastUsageEndDate = (Date) filterMap.get("lastUsageEndDate");
+        String tuIds = (String) filterMap.get("tuIds");
+        String sids = (String) filterMap.get("sids");
+        String isRegex = (String) filterMap.get("isRegex");
+        String createUser = (String) filterMap.get("createUser");
+        String modifyUser = (String) filterMap.get("modifyUser");
+        // String jobIds = (String) filterMap.get("jobIds");
 
-        boolean checkCreateDate = searchByDate("create", createStartDateOption,
-                createEndDateOption, createStartDate, createEndDate, tuv);
-    	if(!checkCreateDate)
-    	{
-    		return false;
-    	}
+        boolean checkCreateDate = searchByDate("create", createStartDateOption, createEndDateOption,
+                createStartDate, createEndDate, tuv);
+        if (!checkCreateDate)
+        {
+            return false;
+        }
 
-    	boolean checkModifyDate = searchByDate("modify", modifyStartDateOption, 
-    			modifyEndDateOption, modifyStartDate, modifyEndDate, tuv);
-    	if(!checkModifyDate)
-    	{
-    		return false;
-    	}
-    	
-      	boolean checkLastUsageDate = searchByDate("lastUsage", lastUsageStartDateOption, 
-      			lastUsageEndDateOption, lastUsageStartDate, lastUsageEndDate, tuv);
-    	if(!checkLastUsageDate)
-    	{
-    		return false;
-    	}
+        boolean checkModifyDate = searchByDate("modify", modifyStartDateOption, modifyEndDateOption,
+                modifyStartDate, modifyEndDate, tuv);
+        if (!checkModifyDate)
+        {
+            return false;
+        }
 
-    	if(StringUtil.isNotEmpty(tuIds))
-    	{
-    		boolean tuidMatch = false;
-    		if(tuIds.indexOf(",") > 0)
-    		{
-    			String[] temp = tuIds.split(",");
-    			for(String tuid: temp)
-    			{
-    				if(tuid.indexOf("-") > 0)
-    				{
-    					String[] temp2 = tuid.split("-");
-    					Long minTuid = Long.parseLong(temp2[0]);
-    					Long maxTuid = Long.parseLong(temp2[1]);
-    					Long tuId = tuv.getTu().getId();
-    					if(tuId >= minTuid && tuId <= maxTuid)
-    					{
-    						tuidMatch = true;
-    						break;
-    					}
-    				}
-    				else if(tuv.getTu().getId() == Long.parseLong(tuid))
-    				{
-    					tuidMatch = true;
-    					break;
-    				}
-    			}
-    		}
-    		else if(tuIds.indexOf("-") > 0)
-    		{
-    			String[] temp = tuIds.split("-");
-    			Long minTuid = Long.parseLong(temp[0]);
-    			Long maxTuid = Long.parseLong(temp[1]);
-    			Long tuId = tuv.getTu().getId();
-    			if(tuId >= minTuid && tuId <= maxTuid)
-    			{
-    				tuidMatch = true;
-    			}
-    		}
-    		else if(tuv.getTu().getId() == Long.parseLong(tuIds))
-    		{
-    			tuidMatch = true;
-    		}
-    		
-    		if(!tuidMatch)
-    		{
-    			return false;
-    		}
-    	}
-    	
-    	if(StringUtil.isNotEmpty(sids))
-    	{
-    		if(isRegex.equals("true"))
-    		{
-    			 Pattern p = Pattern.compile(sids);
-    			 Matcher m = p.matcher(tuv.getSid());
-    			 if(!m.matches())
-    			 {
-    				 return false;
-    			 }
-    		}
-    		else
-    		{
-    			if(!sids.equals(tuv.getSid()))
-    			{
-    				return false;
-    			}
-    		}
-    	}
-    	
-    	if(StringUtil.isNotEmpty(createUser))
-    	{
-    		if(!createUser.equals(tuv.getCreationUser()))
-    		{
-    			return false;
-    		}
-    	}
-    	
-    	if(StringUtil.isNotEmpty(modifyUser))
-    	{
-    		if(!modifyUser.equals(tuv.getModifyUser()))
-    	    {
-    	    		return false;
-    	    }
-    	}
-    	
-//		if (StringUtil.isNotEmpty(jobIds))
-//		{
-//			if (!jobIds.contains(String.valueOf(tuv.getJobId())))
-//			{
-//				return false;
-//			}
-//		}
-    	
-    	return true;
+        boolean checkLastUsageDate = searchByDate("lastUsage", lastUsageStartDateOption,
+                lastUsageEndDateOption, lastUsageStartDate, lastUsageEndDate, tuv);
+        if (!checkLastUsageDate)
+        {
+            return false;
+        }
+
+        if (StringUtil.isNotEmpty(tuIds))
+        {
+            boolean tuidMatch = false;
+            if (tuIds.indexOf(",") > 0)
+            {
+                String[] temp = tuIds.split(",");
+                for (String tuid : temp)
+                {
+                    if (tuid.indexOf("-") > 0)
+                    {
+                        String[] temp2 = tuid.split("-");
+                        Long minTuid = Long.parseLong(temp2[0]);
+                        Long maxTuid = Long.parseLong(temp2[1]);
+                        Long tuId = tuv.getTu().getId();
+                        if (tuId >= minTuid && tuId <= maxTuid)
+                        {
+                            tuidMatch = true;
+                            break;
+                        }
+                    }
+                    else if (tuv.getTu().getId() == Long.parseLong(tuid))
+                    {
+                        tuidMatch = true;
+                        break;
+                    }
+                }
+            }
+            else if (tuIds.indexOf("-") > 0)
+            {
+                String[] temp = tuIds.split("-");
+                Long minTuid = Long.parseLong(temp[0]);
+                Long maxTuid = Long.parseLong(temp[1]);
+                Long tuId = tuv.getTu().getId();
+                if (tuId >= minTuid && tuId <= maxTuid)
+                {
+                    tuidMatch = true;
+                }
+            }
+            else if (tuv.getTu().getId() == Long.parseLong(tuIds))
+            {
+                tuidMatch = true;
+            }
+
+            if (!tuidMatch)
+            {
+                return false;
+            }
+        }
+
+        if (StringUtil.isNotEmpty(sids))
+        {
+            if (isRegex.equals("true"))
+            {
+                Pattern p = Pattern.compile(sids);
+                Matcher m = p.matcher(tuv.getSid());
+                if (!m.matches())
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (!sids.equals(tuv.getSid()))
+                {
+                    return false;
+                }
+            }
+        }
+
+        if (StringUtil.isNotEmpty(createUser))
+        {
+            if (!createUser.equals(tuv.getCreationUser()))
+            {
+                return false;
+            }
+        }
+
+        if (StringUtil.isNotEmpty(modifyUser))
+        {
+            if (!modifyUser.equals(tuv.getModifyUser()))
+            {
+                return false;
+            }
+        }
+
+        // if (StringUtil.isNotEmpty(jobIds))
+        // {
+        // if (!jobIds.contains(String.valueOf(tuv.getJobId())))
+        // {
+        // return false;
+        // }
+        // }
+
+        return true;
     }
 
-    private static boolean searchFilterBySid(HashMap filterMap, BaseTmTuv tuv)
-	{
-		String tuIds = (String) filterMap.get("tuIds");
-		String sids = (String) filterMap.get("sids");
-		String isRegex = (String) filterMap.get("isRegex");
+    private static boolean searchFilterBySid(Map<String, Object> filterMap, BaseTmTuv tuv)
+    {
+        String tuIds = (String) filterMap.get("tuIds");
+        String sids = (String) filterMap.get("sids");
+        String isRegex = (String) filterMap.get("isRegex");
 
-		if (StringUtil.isNotEmpty(tuIds))
-		{
-			boolean tuidMatch = false;
-			if (tuIds.indexOf(",") > 0)
-			{
-				String[] temp = tuIds.split(",");
-				for (String tuid : temp)
-				{
-					if (tuid.indexOf("-") > 0)
-					{
-						String[] temp2 = tuid.split("-");
-						Long minTuid = Long.parseLong(temp2[0]);
-						Long maxTuid = Long.parseLong(temp2[1]);
-						Long tuId = tuv.getTu().getId();
-						if (tuId >= minTuid && tuId <= maxTuid)
-						{
-							tuidMatch = true;
-							break;
-						}
-					}
-					else if (tuv.getTu().getId() == Long.parseLong(tuid))
-					{
-						tuidMatch = true;
-						break;
-					}
-				}
-			}
-			else if (tuIds.indexOf("-") > 0)
-			{
-				String[] temp = tuIds.split("-");
-				Long minTuid = Long.parseLong(temp[0]);
-				Long maxTuid = Long.parseLong(temp[1]);
-				Long tuId = tuv.getTu().getId();
-				if (tuId >= minTuid && tuId <= maxTuid)
-				{
-					tuidMatch = true;
-				}
-			}
-			else if (tuv.getTu().getId() == Long.parseLong(tuIds))
-			{
-				tuidMatch = true;
-			}
+        if (StringUtil.isNotEmpty(tuIds))
+        {
+            boolean tuidMatch = false;
+            if (tuIds.indexOf(",") > 0)
+            {
+                String[] temp = tuIds.split(",");
+                for (String tuid : temp)
+                {
+                    if (tuid.indexOf("-") > 0)
+                    {
+                        String[] temp2 = tuid.split("-");
+                        Long minTuid = Long.parseLong(temp2[0]);
+                        Long maxTuid = Long.parseLong(temp2[1]);
+                        Long tuId = tuv.getTu().getId();
+                        if (tuId >= minTuid && tuId <= maxTuid)
+                        {
+                            tuidMatch = true;
+                            break;
+                        }
+                    }
+                    else if (tuv.getTu().getId() == Long.parseLong(tuid))
+                    {
+                        tuidMatch = true;
+                        break;
+                    }
+                }
+            }
+            else if (tuIds.indexOf("-") > 0)
+            {
+                String[] temp = tuIds.split("-");
+                Long minTuid = Long.parseLong(temp[0]);
+                Long maxTuid = Long.parseLong(temp[1]);
+                Long tuId = tuv.getTu().getId();
+                if (tuId >= minTuid && tuId <= maxTuid)
+                {
+                    tuidMatch = true;
+                }
+            }
+            else if (tuv.getTu().getId() == Long.parseLong(tuIds))
+            {
+                tuidMatch = true;
+            }
 
-			if (!tuidMatch)
-			{
-				return false;
-			}
-		}
+            if (!tuidMatch)
+            {
+                return false;
+            }
+        }
 
-		if (StringUtil.isNotEmpty(sids))
-		{
-			if (isRegex.equals("true"))
-			{
-				Pattern p = Pattern.compile(sids);
-				Matcher m = p.matcher(tuv.getSid());
-				if (!m.matches())
-				{
-					return false;
-				}
-			}
-			else
-			{
-				if (!sids.equals(tuv.getSid()))
-				{
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-    
-	private static boolean searchByDate(String searchByDataType,
-			String startDateOption, String endDateOption, Date startDate,
-			Date endDate, BaseTmTuv tuv) 
-	{
-		if (startDate == null && endDate == null)
-			return true;
+        if (StringUtil.isNotEmpty(sids))
+        {
+            if (isRegex.equals("true"))
+            {
+                Pattern p = Pattern.compile(sids);
+                Matcher m = p.matcher(tuv.getSid());
+                if (!m.matches())
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (!sids.equals(tuv.getSid()))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
-		Date date = null;
+    private static boolean searchByDate(String searchByDataType, String startDateOption,
+            String endDateOption, Date startDate, Date endDate, BaseTmTuv tuv)
+    {
+        if (startDate == null && endDate == null)
+            return true;
+
+        Date date = null;
         try
         {
             if (StringUtil.isNotEmpty(searchByDataType))
@@ -1940,7 +1980,7 @@ public class TMSearchBroswerHandlerHelper
             e.printStackTrace();
         }
 
-		if (date != null)
+        if (date != null)
         {
             if (startDate != null && endDate == null)
             {
@@ -2032,24 +2072,24 @@ public class TMSearchBroswerHandlerHelper
                 }
             }
         }
-		return false;
-	}
-	
-	private static Date parseDate(String dateStr)
-	{
-		if (StringUtil.isNotEmpty(dateStr))
-		{
-			try
-			{
-				return sdf.parse(dateStr);
-			}
-			catch (ParseException e)
-			{
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
+        return false;
+    }
+
+    private static Date parseDate(String dateStr)
+    {
+        if (StringUtil.isNotEmpty(dateStr))
+        {
+            try
+            {
+                return sdf.parse(dateStr);
+            }
+            catch (ParseException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
 
     /**
      * Refresh page
@@ -2070,12 +2110,11 @@ public class TMSearchBroswerHandlerHelper
         }
         // get the display records according current page and search result
         String page = (String) request.getParameter("page");
-        int maxEntriesPerPage = Integer.parseInt((String) request
-                .getParameter("maxEntriesPerPage"));
+        int maxEntriesPerPage = Integer
+                .parseInt((String) request.getParameter("maxEntriesPerPage"));
         List<Object> list = new ArrayList<Object>();
         int i = (Integer.parseInt(page) - 1) * maxEntriesPerPage;
-        int max = i + maxEntriesPerPage - 1 < result.size() ? i
-                + maxEntriesPerPage : result.size();
+        int max = i + maxEntriesPerPage - 1 < result.size() ? i + maxEntriesPerPage : result.size();
         for (; i < max; i++)
         {
             list.add(result.get(i));
@@ -2088,8 +2127,7 @@ public class TMSearchBroswerHandlerHelper
      * Delete Entries
      * 
      */
-    public static String deleteEntries(HttpServletRequest request)
-            throws Exception
+    public static String deleteEntries(HttpServletRequest request) throws Exception
     {
         // get the search result from session
         HttpSession httpSession = request.getSession();
@@ -2097,8 +2135,7 @@ public class TMSearchBroswerHandlerHelper
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
         List<Map<String, Object>> result = (List<Map<String, Object>>) sessionMgr
                 .getAttribute("searchResult");
-        String maxEntriesPerPageStr = (String) request
-                .getParameter("maxEntriesPerPage");
+        String maxEntriesPerPageStr = (String) request.getParameter("maxEntriesPerPage");
         int maxEntriesPerPage;
         if ("All".equals(maxEntriesPerPageStr))
         {
@@ -2109,8 +2146,8 @@ public class TMSearchBroswerHandlerHelper
             maxEntriesPerPage = Integer.parseInt(maxEntriesPerPageStr);
         }
         // Get the deleted index of search results
-        List<Integer> deletedEntries = getSelectedEntries(request,
-                result.size(), maxEntriesPerPage);
+        List<Integer> deletedEntries = getSelectedEntries(request, result.size(),
+                maxEntriesPerPage);
 
         // clear up all result, tuMap(tmId, tus), tuTuvMap(tmId+tuId, tuvs)
         Map<Long, List<Long>> tuMap = new HashMap<Long, List<Long>>();
@@ -2163,16 +2200,14 @@ public class TMSearchBroswerHandlerHelper
                 List<Long> tuIds = entry.getValue();
                 Tm tm = ph.getProjectTMById(tmId, false);
                 // get all TUS in current TM
-                List<SegmentTmTu> tus = tm.getSegmentTmInfo().getSegmentsById(
-                        tm, tuIds);
+                List<SegmentTmTu> tus = tm.getSegmentTmInfo().getSegmentsById(tm, tuIds);
                 for (SegmentTmTu tu : tus)
                 {
                     long tuId = tu.getId();
                     String tmtu = String.valueOf(tmId) + String.valueOf(tuId);
                     List<Long> tuvIdList = tuTuvMap.get(tmtu);
                     Collection targetTuvs = tu.getTuvList(targetLocale);
-                    for (Iterator itTuvs = targetTuvs.iterator(); itTuvs
-                            .hasNext();)
+                    for (Iterator itTuvs = targetTuvs.iterator(); itTuvs.hasNext();)
                     {
                         SegmentTmTuv trgTuv = (SegmentTmTuv) itTuvs.next();
                         if (tuvIdList.contains(trgTuv.getId()))
@@ -2207,8 +2242,7 @@ public class TMSearchBroswerHandlerHelper
         }
         sessionMgr.setAttribute("searchResult", newResult);
 
-        Map<String, Object> temp = getDisplayResult(newResult, 1,
-                maxEntriesPerPageStr);
+        Map<String, Object> temp = getDisplayResult(newResult, 1, maxEntriesPerPageStr);
         return JsonUtil.toJson(temp);
     }
 
@@ -2219,8 +2253,7 @@ public class TMSearchBroswerHandlerHelper
      * @param maxEntriesPerPage
      * @return
      */
-    private static Map<String, Object> getDisplayResult(
-            List<Map<String, Object>> result, int page,
+    private static Map<String, Object> getDisplayResult(List<Map<String, Object>> result, int page,
             String maxEntriesPerPageStr)
     {
         int maxEntriesPerPage;
@@ -2234,8 +2267,7 @@ public class TMSearchBroswerHandlerHelper
         }
         List<Object> list = new ArrayList<Object>();
         int i = (page - 1) * maxEntriesPerPage;
-        int max = i + maxEntriesPerPage - 1 < result.size() ? i
-                + maxEntriesPerPage : result.size();
+        int max = i + maxEntriesPerPage - 1 < result.size() ? i + maxEntriesPerPage : result.size();
 
         for (; i < max; i++)
         {
@@ -2251,8 +2283,7 @@ public class TMSearchBroswerHandlerHelper
      * Apply Replaced
      * 
      */
-    public static String applyReplaced(HttpServletRequest request, String userId)
-            throws Exception
+    public static String applyReplaced(HttpServletRequest request, String userId) throws Exception
     {
         HttpSession httpSession = request.getSession();
         SessionManager sessionMgr = (SessionManager) httpSession
@@ -2260,8 +2291,7 @@ public class TMSearchBroswerHandlerHelper
         List<Map<String, Object>> result = (List<Map<String, Object>>) sessionMgr
                 .getAttribute("searchResult");
 
-        String maxEntriesPerPageStr = (String) request
-                .getParameter("maxEntriesPerPage");
+        String maxEntriesPerPageStr = (String) request.getParameter("maxEntriesPerPage");
         int maxEntriesPerPage;
         if ("All".equals(maxEntriesPerPageStr))
         {
@@ -2278,8 +2308,8 @@ public class TMSearchBroswerHandlerHelper
         String replaceText = (String) request.getParameter("replaceText");
 
         // Get selected index of entries
-        List<Integer> deletedEntries = getSelectedEntries(request,
-                result.size(), maxEntriesPerPage);
+        List<Integer> deletedEntries = getSelectedEntries(request, result.size(),
+                maxEntriesPerPage);
 
         // clear up all result, tuMap(tmId, tus), tuTuvMap(tmId+tuId, tuvs)
         Map<Long, List<Long>> tuMap = new HashMap<Long, List<Long>>();
@@ -2287,8 +2317,7 @@ public class TMSearchBroswerHandlerHelper
         String localeStr = null;
         for (int entryIndex : deletedEntries)
         {
-            Map<String, Object> map = (Map<String, Object>) result
-                    .get(entryIndex);
+            Map<String, Object> map = (Map<String, Object>) result.get(entryIndex);
             long tuId = (Long) map.get("tuId");
             long tmId = (Long) map.get("tmId");
             long tuvId;
@@ -2330,8 +2359,7 @@ public class TMSearchBroswerHandlerHelper
         // Get all TUVS from DB, and alter segment, modify user, modify date,
         // then save
         Map<Tm, List<SegmentTmTuv>> tmTuvs = new HashMap<Tm, List<SegmentTmTuv>>();
-        GlobalSightLocale locale = ServerProxy.getLocaleManager()
-                .getLocaleByString(localeStr);
+        GlobalSightLocale locale = ServerProxy.getLocaleManager().getLocaleByString(localeStr);
         ProjectHandler ph = ServerProxy.getProjectHandler();
         int replacedNum = 0;
         try
@@ -2347,8 +2375,7 @@ public class TMSearchBroswerHandlerHelper
                 List<Long> tuIds = entry.getValue();
                 Tm tm = ph.getProjectTMById(tmId, false);
                 // get all TUS in current TM
-                List<SegmentTmTu> tus = tm.getSegmentTmInfo().getSegmentsById(
-                        tm, tuIds);
+                List<SegmentTmTu> tus = tm.getSegmentTmInfo().getSegmentsById(tm, tuIds);
                 for (SegmentTmTu tu : tus)
                 {
                     long tuId = tu.getId();
@@ -2362,15 +2389,12 @@ public class TMSearchBroswerHandlerHelper
                         {
                             String segment = tuv.getSegment();
                             GxmlElement gxmlElement = getGxmlElement(segment);
-                            boolean replaced = substringReplacer
-                                    .replace(gxmlElement);
+                            boolean replaced = substringReplacer.replace(gxmlElement);
                             if (replaced)
                             {
                                 tuv.setSegment(gxmlElement.toGxml());
-                                String exactMatchFormat = tuv
-                                        .getExactMatchFormat();
-                                tuv.setExactMatchKey(GlobalSightCrc
-                                        .calculate(exactMatchFormat));
+                                String exactMatchFormat = tuv.getExactMatchFormat();
+                                tuv.setExactMatchKey(GlobalSightCrc.calculate(exactMatchFormat));
                                 tuv.setModifyUser(userId);
                                 tuvList.add(tuv);
                             }
@@ -2406,16 +2430,13 @@ public class TMSearchBroswerHandlerHelper
      * @param maxEntriesPerPage
      * @return
      */
-    private static List<Integer> getSelectedEntries(HttpServletRequest request,
-            int resultLength, int maxEntriesPerPage)
+    private static List<Integer> getSelectedEntries(HttpServletRequest request, int resultLength,
+            int maxEntriesPerPage)
     {
-        int currentPage = Integer.parseInt((String) request
-                .getParameter("currentPage"));
+        int currentPage = Integer.parseInt((String) request.getParameter("currentPage"));
         String entriesStr = (String) request.getParameter("entries");
-        String selectAllEntriesAllPages = (String) request
-                .getParameter("allEntriesAllPages");
-        boolean deleteAllEntriesAllPages = "true"
-                .equals(selectAllEntriesAllPages);
+        String selectAllEntriesAllPages = (String) request.getParameter("allEntriesAllPages");
+        boolean deleteAllEntriesAllPages = "true".equals(selectAllEntriesAllPages);
 
         List<Integer> selectedEntries = new ArrayList<Integer>();
         if (deleteAllEntriesAllPages)
@@ -2449,26 +2470,24 @@ public class TMSearchBroswerHandlerHelper
      *            a TUV
      * @return String of HTML
      */
-    private static Map<String, String> getFormattedSegment(String findText,
-            String replaceText, BaseTmTuv tuv) throws Exception
+    private static Map<String, String> getFormattedSegment(String findText, String replaceText,
+            BaseTmTuv tuv) throws Exception
     {
         Map<String, String> segment = new HashMap<String, String>();
         String gxml = GxmlUtil.stripRootTag(tuv.getSegment());
-        String rawPtagStr = makePtagString(gxml,
-                PseudoConstants.PSEUDO_COMPACT, tuv.getTu().getFormat());
+        String rawPtagStr = makePtagString(gxml, PseudoConstants.PSEUDO_COMPACT,
+                tuv.getTu().getFormat());
 
         if (EditUtil.isRTLLocale(tuv.getLocale()))
         {
-            segment.put("dir", Text.containsBidiChar(rawPtagStr) ? "RTL"
-                    : "LTR");
+            segment.put("dir", Text.containsBidiChar(rawPtagStr) ? "RTL" : "LTR");
         }
         else
         {
             segment.put("dir", "LTR");
         }
         PtagStringFormatter format = new PtagStringFormatter();
-        String temp = format.htmlLtrPtags(
-                EditUtil.encodeHtmlEntities(rawPtagStr), findText, false,
+        String temp = format.htmlLtrPtags(EditUtil.encodeHtmlEntities(rawPtagStr), findText, false,
                 tuv.getLocale());
 
         // Highlight
@@ -2476,24 +2495,20 @@ public class TMSearchBroswerHandlerHelper
         {
             String findTextLower = findText.toLowerCase();
             String tempLower = temp.toLowerCase();
-            String matchFontLower = "<font color=\"blue\"><b>" + findTextLower
-                    + "</b></font>";
+            String matchFontLower = "<font color=\"blue\"><b>" + findTextLower + "</b></font>";
             int findTextStart = matchFontLower.indexOf(findTextLower);
             int findTextEnd = findTextStart + findTextLower.length();
             int i = tempLower.indexOf(matchFontLower);
             if (i >= 0)
             {
-                String matchFont = temp.substring(i,
-                        i + matchFontLower.length());
-                String matchStr = temp.substring(i + findTextStart, i
-                        + findTextEnd);
+                String matchFont = temp.substring(i, i + matchFontLower.length());
+                String matchStr = temp.substring(i + findTextStart, i + findTextEnd);
                 if (replaceText != null)
                 {
                     String newStr = "<span style=\"color:blue;background-color:#C0C0C0;\"><b>"
-                            + matchStr
-                            + "</b></span>"
-                            + "<span style=\"color:blue;background-color:#C2F70E;\">"
-                            + replaceText + "</span>";
+                            + matchStr + "</b></span>"
+                            + "<span style=\"color:blue;background-color:#C2F70E;\">" + replaceText
+                            + "</span>";
                     temp = temp.replace(matchFont, newStr);
                 }
                 else
@@ -2518,8 +2533,8 @@ public class TMSearchBroswerHandlerHelper
      * @return
      * @throws Exception
      */
-    private static String makePtagString(String gxml, int pTagDisplayMode,
-            String dataType) throws Exception
+    private static String makePtagString(String gxml, int pTagDisplayMode, String dataType)
+            throws Exception
     {
         PseudoData pTagData = null;
 
@@ -2533,13 +2548,11 @@ public class TMSearchBroswerHandlerHelper
         return pTagData.getPTagSourceString();
     }
 
-    private static GxmlElement getGxmlElement(String p_segment)
-            throws GxmlException
+    private static GxmlElement getGxmlElement(String p_segment) throws GxmlException
     {
         GxmlElement result = null;
 
-        GxmlFragmentReader reader = GxmlFragmentReaderPool.instance()
-                .getGxmlFragmentReader();
+        GxmlFragmentReader reader = GxmlFragmentReaderPool.instance().getGxmlFragmentReader();
 
         try
         {

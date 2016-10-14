@@ -262,52 +262,64 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         // Vincent Yan, 2016/09/30, Change to store categories into one
         // table categories
         tmp = p_request.getParameterValues("scorecardFrom");
-        if ((commonCategories = createCategoryList(tmp, CategoryType.ScoreCard, false, companyId)) != null)
+        if ((commonCategories = createCategoryList(tmp, CategoryType.ScoreCard, false,
+                companyId)) != null)
             allCommonCategories.addAll(commonCategories);
         tmp = p_request.getParameterValues("scorecardTo");
-        if ((commonCategories = createCategoryList(tmp, CategoryType.ScoreCard, true, companyId)) != null)
+        if ((commonCategories = createCategoryList(tmp, CategoryType.ScoreCard, true,
+                companyId)) != null)
             allCommonCategories.addAll(commonCategories);
 
         tmp = p_request.getParameterValues("qualityFrom");
-        if ((commonCategories = createCategoryList(tmp, CategoryType.Quality, false, companyId)) != null)
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Quality, false,
+                companyId)) != null)
             allCommonCategories.addAll(commonCategories);
         tmp = p_request.getParameterValues("qualityTo");
-        if ((commonCategories = createCategoryList(tmp, CategoryType.Quality, true, companyId)) != null)
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Quality, true,
+                companyId)) != null)
             allCommonCategories.addAll(commonCategories);
 
         tmp = p_request.getParameterValues("marketFrom");
-        if ((commonCategories = createCategoryList(tmp, CategoryType.Market, false, companyId)) != null)
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Market, false,
+                companyId)) != null)
             allCommonCategories.addAll(commonCategories);
         tmp = p_request.getParameterValues("marketTo");
-        if ((commonCategories = createCategoryList(tmp, CategoryType.Market, true, companyId)) != null)
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Market, true,
+                companyId)) != null)
             allCommonCategories.addAll(commonCategories);
 
         tmp = p_request.getParameterValues("fluencyFrom");
-        if ((commonCategories = createCategoryList(tmp, CategoryType.Fluency, false, companyId)) != null)
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Fluency, false,
+                companyId)) != null)
             allCommonCategories.addAll(commonCategories);
         tmp = p_request.getParameterValues("fluencyTo");
-        if ((commonCategories = createCategoryList(tmp, CategoryType.Fluency, true, companyId)) != null)
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Fluency, true,
+                companyId)) != null)
             allCommonCategories.addAll(commonCategories);
 
         tmp = p_request.getParameterValues("adequacyFrom");
-        if ((commonCategories = createCategoryList(tmp, CategoryType.Adequacy, false, companyId)) != null)
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Adequacy, false,
+                companyId)) != null)
             allCommonCategories.addAll(commonCategories);
         tmp = p_request.getParameterValues("adequacyTo");
-        if ((commonCategories = createCategoryList(tmp, CategoryType.Adequacy, true, companyId)) != null)
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Adequacy, true,
+                companyId)) != null)
             allCommonCategories.addAll(commonCategories);
 
         tmp = p_request.getParameterValues("severityFrom");
-        if ((commonCategories = createCategoryList(tmp, CategoryType.Severity, false, companyId)) != null)
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Severity, false,
+                companyId)) != null)
             allCommonCategories.addAll(commonCategories);
         tmp = p_request.getParameterValues("severityTo");
-        if ((commonCategories = createCategoryList(tmp, CategoryType.Severity, true, companyId)) != null)
+        if ((commonCategories = createCategoryList(tmp, CategoryType.Severity, true,
+                companyId)) != null)
             allCommonCategories.addAll(commonCategories);
 
         CategoryHelper.addCategories(allCommonCategories);
     }
 
-    private ArrayList<com.globalsight.everest.category.CommonCategory> createCategoryList(String[] names,
-            CategoryType type, boolean isValiable, long companyId)
+    private ArrayList<com.globalsight.everest.category.CommonCategory> createCategoryList(
+            String[] names, CategoryType type, boolean isValiable, long companyId)
     {
         ArrayList<com.globalsight.everest.category.CommonCategory> categories = null;
         if (names != null && names.length > 0)
@@ -909,6 +921,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         String enableDitaChecks = p_request.getParameter(CompanyConstants.ENABLE_DITA_CHECKS);
         String enableWorkflowStatePosts = p_request
                 .getParameter(CompanyConstants.ENABLE_WORKFLOW_STATE_POSTS);
+        String enableBlankTmSearch = p_request
+                .getParameter(CompanyConstants.ENABLE_BLANK_TM_SEARCH);
 
         if ("on".equalsIgnoreCase(enableIPFilter))
         {
@@ -971,6 +985,12 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         if ("on".equalsIgnoreCase(enableWorkflowStatePosts))
         {
             company.setEnableWorkflowStatePosts(true);
+        }
+
+        company.setEnableBlankTmSearch(false);
+        if ("on".equalsIgnoreCase(enableBlankTmSearch))
+        {
+            company.setEnableBlankTmSearch(true);
         }
 
         setInContextReview(p_request, company);
@@ -1065,6 +1085,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         String enableDitaChecks = p_request.getParameter(CompanyConstants.ENABLE_DITA_CHECKS);
         String enableWorkflowStatePosts = p_request
                 .getParameter(CompanyConstants.ENABLE_WORKFLOW_STATE_POSTS);
+        String enableBlankTmSearch = p_request
+                .getParameter(CompanyConstants.ENABLE_BLANK_TM_SEARCH);
 
         if ("on".equalsIgnoreCase(enableIPFilter))
         {
@@ -1127,6 +1149,12 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         if ("on".equalsIgnoreCase(enableWorkflowStatePosts))
         {
             company.setEnableWorkflowStatePosts(true);
+        }
+
+        company.setEnableBlankTmSearch(false);
+        if ("on".equalsIgnoreCase(enableBlankTmSearch))
+        {
+            company.setEnableBlankTmSearch(true);
         }
 
         company.setDefaultFluency(ServletUtil.get(p_request, "defaultFluency"));

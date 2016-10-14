@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.ling.tm3.integration.segmenttm;
 
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.FORMAT;
@@ -43,9 +59,8 @@ import com.globalsight.util.GlobalSightLocale;
  */
 class Tm3LeveragerAcrossMutipleTms
 {
-    private static final Logger LOGGER = Logger
-            .getLogger(Tm3LeveragerAcrossMutipleTms.class);
-    
+    private static final Logger LOGGER = Logger.getLogger(Tm3LeveragerAcrossMutipleTms.class);
+
     private static final int MAX_HITS = 10;
     private TM3Manager mgr = DefaultManager.create();
 
@@ -65,8 +80,8 @@ class Tm3LeveragerAcrossMutipleTms
         this.srcLocale = srcLocale;
         this.leverageOptions = options;
         this.progress = progress;
-        this.matchType = leverageOptions.leverageOnlyExactMatches() ?
-                TM3MatchType.EXACT : TM3MatchType.ALL;
+        this.matchType = leverageOptions.leverageOnlyExactMatches() ? TM3MatchType.EXACT
+                : TM3MatchType.ALL;
 
         for (Tm projectTm : projectTms)
         {
@@ -78,15 +93,15 @@ class Tm3LeveragerAcrossMutipleTms
             }
             else
             {
-                LOGGER.warn("TM " + projectTm.getId()
-                        + " is not a TM3 TM, will not be leveraged");
+                LOGGER.warn("TM " + projectTm.getId() + " is not a TM3 TM, will not be leveraged");
             }
         }
     }
 
     void leverageSegment(BaseTmTuv srcTuv, Map<TM3Attribute, Object> attrs)
     {
-        if (LOGGER.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled())
+        {
             LOGGER.debug("leverageSegment: " + srcTuv.toDebugString());
         }
 
@@ -94,9 +109,12 @@ class Tm3LeveragerAcrossMutipleTms
         // if not from TM Search Page, keep old logic(by isMultiLingLeveraging
         // of FileProfile)
         boolean lookupTarget;
-        if (leverageOptions.isFromTMSearchPage()) {
+        if (leverageOptions.isFromTMSearchPage())
+        {
             lookupTarget = true;
-        } else {
+        }
+        else
+        {
             lookupTarget = leverageOptions.isMultiLingLeveraging();
         }
         List<Long> tm3TmIds = new ArrayList<Long>();
@@ -105,18 +123,19 @@ class Tm3LeveragerAcrossMutipleTms
             tm3TmIds.add(pTm.getTm3Id());
         }
 
-        Set<GlobalSightLocale> trgLocales = leverageOptions
-                .getLeveragingLocales().getAllLeveragingLocales();
-        TM3LeverageResults<GSTuvData> results = tm.findMatches(new GSTuvData(
-                srcTuv), srcLocale, trgLocales, attrs, matchType, lookupTarget,
-                MAX_HITS, leverageOptions.getMatchThreshold(), tm3TmIds);
+        Set<GlobalSightLocale> trgLocales = leverageOptions.getLeveragingLocales()
+                .getAllLeveragingLocales();
+        TM3LeverageResults<GSTuvData> results = tm.findMatches(new GSTuvData(srcTuv), srcLocale,
+                trgLocales, attrs, matchType, lookupTarget, MAX_HITS,
+                leverageOptions.getMatchThreshold(), tm3TmIds, leverageOptions);
 
         // NB in this conversion, we lose which tuv was matched, only which
         // tus; identical tus will later be coalesced by
         // leverageDataCenter.addLeverageResultsOfSegmentTmMatching
         // which tuv will globalsight pick as the match? probably random
         LeverageMatches lm = progress.get(srcTuv);
-        if (lm == null) {
+        if (lm == null)
+        {
             lm = new LeverageMatches(srcTuv, leverageOptions);
             progress.put(srcTuv, lm);
         }
@@ -128,19 +147,17 @@ class Tm3LeveragerAcrossMutipleTms
             TM3Tuv<GSTuvData> tmSrcTuv = match.getTuv();
             TM3Tm<GSTuvData> tm = tu.getTm();
             Tm projectTm = tmMap.get(tm);
-            
+
             if (tm != null && projectTm == null)
             {
                 try
                 {
-                    projectTm = ServerProxy.getProjectHandler()
-                            .getProjectTMByTm3id(tm.getId());
+                    projectTm = ServerProxy.getProjectHandler().getProjectTMByTm3id(tm.getId());
                 }
                 catch (Exception e)
                 {
                     throw new IllegalArgumentException(
-                            "Non-existent project tm for TM3 id: " + tm.getId(),
-                            e);
+                            "Non-existent project tm for TM3 id: " + tm.getId(), e);
                 }
                 tmMap.put(tm, projectTm);
             }
@@ -150,11 +167,30 @@ class Tm3LeveragerAcrossMutipleTms
             TM3Attribute sidAttr = TM3Util.getAttr(tm, SID);
             TM3Attribute translatableAttr = TM3Util.getAttr(tm, TRANSLATABLE);
             TM3Attribute fromWsAttr = TM3Util.getAttr(tm, FROM_WORLDSERVER);
-            TM3Attribute projectAttr = TM3Util.getAttr(tm, UPDATED_BY_PROJECT);            
-            
-            LeveragedSegmentTu ltu = new LeveragedSegmentTu(tu.getId(),
-                    projectTm.getId(), (String) tu.getAttribute(formatAttr),
-                    (String) tu.getAttribute(typeAttr), true, srcLocale);
+            TM3Attribute projectAttr = TM3Util.getAttr(tm, UPDATED_BY_PROJECT);
+
+            LeveragedSegmentTu ltu = new LeveragedSegmentTu(tu.getId(), projectTm.getId(),
+                    (String) tu.getAttribute(formatAttr), (String) tu.getAttribute(typeAttr), true,
+                    srcLocale);
+            // GBS-3990, source locale could be blank from tm search page
+            if (srcLocale == null)
+            {
+                TM3Tuv<GSTuvData> sourceTuv = tu.getSourceTuv();
+                if (sourceTuv != null)
+                {
+                    try
+                    {
+                        GlobalSightLocale sourceLocale = ServerProxy.getLocaleManager()
+                                .getLocaleById(sourceTuv.getLocale().getId());
+                        ltu.setSourceLocale(sourceLocale);
+                    }
+                    catch (Exception e)
+                    {
+                        LOGGER.error("Could not get locale by id: " + sourceTuv.getLocale().getId(),
+                                e);
+                    }
+                }
+            }
             ltu.setScore(match.getScore());
             ltu.setMatchState(getMatchState(leverageOptions, match.getScore()));
             ltu.setFromWorldServer((Boolean) tu.getAttribute(fromWsAttr));
@@ -166,22 +202,13 @@ class Tm3LeveragerAcrossMutipleTms
             {
                 ltu.setLocalizable();
             }
-            
+
             String sid = (String) tu.getAttribute(sidAttr);
-            
+
             for (TM3Tuv<GSTuvData> tuv : tu.getAllTuv())
             {
-                // Do not return unwanted TUVs.
-                GlobalSightLocale tuvLocale = (GlobalSightLocale) tuv.getLocale();
-                if (!tuvLocale.equals(srcLocale)
-                        && !trgLocales.contains(tuvLocale))
-                {
-                    continue;
-                }
-
                 LeveragedSegmentTuv ltuv = new LeveragedSegmentTuv(tuv.getId(),
-                        tuv.getContent().getData(),
-                        (GlobalSightLocale) tuv.getLocale());
+                        tuv.getContent().getData(), (GlobalSightLocale) tuv.getLocale());
                 ltuv.setTu(ltu);
                 ltuv.setOrgSid(srcTuv.getSid());
                 ltuv.setSid(sid);
@@ -200,15 +227,14 @@ class Tm3LeveragerAcrossMutipleTms
                 ltuv.setNextHash(tmSrcTuv.getNextHash());
                 if (tuv.getSid() != null)
                 {
-                	ltuv.setSid(tuv.getSid());
+                    ltuv.setSid(tuv.getSid());
                 }
 
                 ltu.addTuv(ltuv);
             }
             if (LOGGER.isDebugEnabled())
             {
-                LOGGER.debug("Score " + ltu.getScore() + ": "
-                        + ltu.getFirstTuv(srcLocale));
+                LOGGER.debug("Score " + ltu.getScore() + ": " + ltu.getFirstTuv(srcLocale));
             }
             lm.add(ltu);
             order++;
@@ -219,10 +245,12 @@ class Tm3LeveragerAcrossMutipleTms
     {
         MatchState state = MatchState.FUZZY_MATCH;
 
-        if (score == 100) {
+        if (score == 100)
+        {
             state = MatchState.SEGMENT_TM_EXACT_MATCH;
         }
-        else if (score < options.getMatchThreshold()) {
+        else if (score < options.getMatchThreshold())
+        {
             state = MatchState.STATISTICS_MATCH;
         }
         return state;
@@ -233,8 +261,7 @@ class Tm3LeveragerAcrossMutipleTms
         TM3Tm<GSTuvData> tm3tm = mgr.getTm(new GSDataFactory(), tm.getTm3Id());
         if (tm3tm == null)
         {
-            throw new IllegalArgumentException("Non-existent tm3 tm: "
-                    + tm.getTm3Id());
+            throw new IllegalArgumentException("Non-existent tm3 tm: " + tm.getTm3Id());
         }
 
         return tm3tm;

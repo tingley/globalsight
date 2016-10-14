@@ -2250,6 +2250,12 @@ public class XmlExtractor extends AbstractExtractor
                             {
                                 skeleton = m_xmlEncoder.decodeStringBasic(skeleton);
                             }
+                            
+                            if (isJsonStr)
+                            {
+                                skeleton = m_xmlEncoder.decodeStringBasic(skeleton);
+                            }
+                            
                             if (m_isOriginalXmlNode)
                             {
                                 skeleton = fixOriginalXmlNode(skeleton, m_originalXmlNode, false);

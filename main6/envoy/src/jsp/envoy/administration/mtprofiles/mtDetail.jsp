@@ -83,7 +83,7 @@
 	var helpFile = "<%=bundle.getString("help_tmprofile_mt_options")%>"; 
 	var forceSave=false;
 	var current_engine='<%=current_engine%>';
-	var jsonInfo=<%=jsonInfo%>;
+	var jsonInfo = '<%=jsonInfo%>';
 	var exInfoVal='<%=exInfoVal%>';
 	
 	$(document).ready(function() {

@@ -390,6 +390,12 @@ function doFinished(urlSent)
         return false;
     }
 
+    if("<%=needDQF%>" == 'true')
+    {
+        alert('Please fill in DQF information before finishing the activity.');
+        return false;
+    }
+
     var checked = false;
     var selectedRadioBtn = null;
     if (DetailsForm.RadioBtn != null)

@@ -21,6 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.globalsight.ling.tm2.BaseTmTuv;
+import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
@@ -57,6 +59,15 @@ abstract class TuStorage<T extends TM3Data>
 
     private StorageInfo<T> storage;
 
+    // GBS-3990
+    private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    private static final String DATE_EQUALS = "eq";
+    private static final String DATE_NOT_EQUALS = "neq";
+    private static final String DATE_GREATER_THAN = "gt";
+    private static final String DATE_LESS_THAN = "lt";
+    private static final String DATE_GREATER_THAN_OR_EQUALS = "gteq";
+    private static final String DATE_LESS_THAN_OR_EQUALS = "lteq";
+
     TuStorage(StorageInfo<T> storage)
     {
         this.storage = storage;
@@ -67,9 +78,8 @@ abstract class TuStorage<T extends TM3Data>
             String modifyUser, Date modifyDate, Date lastUsageDate, long jobId, String jobName,
             long previousHash, long nextHash, String sid)
     {
-        TM3Tuv<T> sourceTuv = new TM3Tuv<T>(sourceLocale, sourceTuvData, creationUser,
-                creationDate, modifyUser, modifyDate, lastUsageDate, jobId, jobName, previousHash,
-                nextHash, sid);
+        TM3Tuv<T> sourceTuv = new TM3Tuv<T>(sourceLocale, sourceTuvData, creationUser, creationDate,
+                modifyUser, modifyDate, lastUsageDate, jobId, jobName, previousHash, nextHash, sid);
         return new TM3Tu<T>(storage.getTm(), this, sourceTuv, attributes);
     }
 
@@ -85,8 +95,7 @@ abstract class TuStorage<T extends TM3Data>
      * @param tu
      * @throws SQLException
      */
-    public abstract void saveTu(Connection conn, TM3Tu<T> tu)
-            throws SQLException;
+    public abstract void saveTu(Connection conn, TM3Tu<T> tu) throws SQLException;
 
     /**
      * Delete a TU, along with all its TUV, attributes, and history.
@@ -99,23 +108,24 @@ abstract class TuStorage<T extends TM3Data>
     {
         try
         {
-        	// tm3_attr_val_shared_xx
-            SQLUtil.exec(conn, new StatementBuilder().append("DELETE FROM ")
-                    .append(storage.getAttrValTableName()).append(" WHERE tuId = ?")
-                    .addValue(tu.getId()));
+            // tm3_attr_val_shared_xx
+            SQLUtil.exec(conn,
+                    new StatementBuilder().append("DELETE FROM ")
+                            .append(storage.getAttrValTableName()).append(" WHERE tuId = ?")
+                            .addValue(tu.getId()));
             // tm3_tuv_ext_shared_xx
-            SQLUtil.exec(conn, new StatementBuilder().append("DELETE FROM ")
-                    .append(storage.getTuvExtTableName()).append(" WHERE tuId = ?")
-                    .addValue(tu.getId()));
+            SQLUtil.exec(conn,
+                    new StatementBuilder().append("DELETE FROM ")
+                            .append(storage.getTuvExtTableName()).append(" WHERE tuId = ?")
+                            .addValue(tu.getId()));
 
             // tm3_tuv_shared_xx
-            SQLUtil.exec(conn, new StatementBuilder().append("DELETE FROM ")
-                    .append(storage.getTuvTableName()).append(" WHERE tuId = ?")
-                    .addValue(tu.getId()));
+            SQLUtil.exec(conn,
+                    new StatementBuilder().append("DELETE FROM ").append(storage.getTuvTableName())
+                            .append(" WHERE tuId = ?").addValue(tu.getId()));
             // tm3_tu_shared_xx
             SQLUtil.exec(conn, new StatementBuilder().append("DELETE FROM ")
-                    .append(storage.getTuTableName()).append(" WHERE id = ?")
-                    .addValue(tu.getId()));
+                    .append(storage.getTuTableName()).append(" WHERE id = ?").addValue(tu.getId()));
         }
         catch (Exception e)
         {
@@ -143,15 +153,16 @@ abstract class TuStorage<T extends TM3Data>
             conn = DbUtil.getConnection();
             conn.setAutoCommit(false);
 
-            // Delete TUV extension as it will not delete cascade. 
-            SQLUtil.exec(conn, new StatementBuilder().append("DELETE FROM ")
-                    .append(storage.getTuvExtTableName()).append(" WHERE tuId IN ")
-                    .append(SQLUtil.longGroup(ids)));
+            // Delete TUV extension as it will not delete cascade.
+            SQLUtil.exec(conn,
+                    new StatementBuilder().append("DELETE FROM ")
+                            .append(storage.getTuvExtTableName()).append(" WHERE tuId IN ")
+                            .append(SQLUtil.longGroup(ids)));
 
             // TUV will be deleted cascade
-            SQLUtil.exec(conn, new StatementBuilder().append("DELETE FROM ")
-                    .append(storage.getTuTableName()).append(" WHERE id IN ")
-                    .append(SQLUtil.longGroup(ids)));
+            SQLUtil.exec(conn,
+                    new StatementBuilder().append("DELETE FROM ").append(storage.getTuTableName())
+                            .append(" WHERE id IN ").append(SQLUtil.longGroup(ids)));
             conn.commit();
         }
         catch (Exception e)
@@ -172,8 +183,7 @@ abstract class TuStorage<T extends TM3Data>
      * @throws IllegalArgumentException
      *             if you try to delete the source TUV for a TU.
      */
-    public void deleteTuvs(Connection conn, List<TM3Tuv<T>> tuvs)
-            throws SQLException
+    public void deleteTuvs(Connection conn, List<TM3Tuv<T>> tuvs) throws SQLException
     {
         if (tuvs.size() == 0)
         {
@@ -181,18 +191,17 @@ abstract class TuStorage<T extends TM3Data>
         }
         try
         {
-			StatementBuilder sb = new StatementBuilder("DELETE FROM ")
-					.append(storage.getTuvExtTableName())
-					.append(" WHERE tuvId IN (?").addValue(tuvs.get(0).getId());
-			for (int i = 1; i < tuvs.size(); i++)
-        	{
-        		sb.append(",?").addValue(tuvs.get(i).getId());
-        	}
+            StatementBuilder sb = new StatementBuilder("DELETE FROM ")
+                    .append(storage.getTuvExtTableName()).append(" WHERE tuvId IN (?")
+                    .addValue(tuvs.get(0).getId());
+            for (int i = 1; i < tuvs.size(); i++)
+            {
+                sb.append(",?").addValue(tuvs.get(i).getId());
+            }
             sb.append(")");
-        	SQLUtil.exec(conn, sb);
+            SQLUtil.exec(conn, sb);
 
-            sb = new StatementBuilder("DELETE FROM ")
-                    .append(storage.getTuvTableName())
+            sb = new StatementBuilder("DELETE FROM ").append(storage.getTuvTableName())
                     .append(" WHERE id IN (?").addValue(tuvs.get(0).getId());
             for (int i = 1; i < tuvs.size(); i++)
             {
@@ -207,20 +216,20 @@ abstract class TuStorage<T extends TM3Data>
         }
     }
 
-    public abstract void addTuvs(Connection conn, TM3Tu<T> tu,
-            List<TM3Tuv<T>> tuvs) throws SQLException;
+    public abstract void addTuvs(Connection conn, TM3Tu<T> tu, List<TM3Tuv<T>> tuvs)
+            throws SQLException;
 
-    List<FuzzyCandidate<T>> loadFuzzyCandidates(List<Long> tuvIds,
-            TM3Locale keyLocale) throws SQLException
+    List<FuzzyCandidate<T>> loadFuzzyCandidates(List<Long> tuvIds, TM3Locale keyLocale)
+            throws SQLException
     {
         if (tuvIds.size() == 0)
         {
             return Collections.emptyList();
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT ").append("id, tuId, fingerprint, content")
-                .append(" FROM ").append(getStorage().getTuvTableName())
-                .append(" WHERE id IN").append(SQLUtil.longGroup(tuvIds));
+        sb.append("SELECT ").append("id, tuId, fingerprint, content").append(" FROM ")
+                .append(getStorage().getTuvTableName()).append(" WHERE id IN")
+                .append(SQLUtil.longGroup(tuvIds));
         Connection conn = null;
         try
         {
@@ -235,8 +244,7 @@ abstract class TuStorage<T extends TM3Data>
                 long tuId = rs.getLong(2);
                 long fingerprint = rs.getLong(3);
                 String content = rs.getString(4);
-                TM3DataFactory<T> factory = getStorage().getTm()
-                        .getDataFactory();
+                TM3DataFactory<T> factory = getStorage().getTm().getDataFactory();
                 fuzzies.add(new FuzzyCandidate<T>(id, tuId, fingerprint,
                         factory.fromSerializedForm(keyLocale, content)));
             }
@@ -257,8 +265,8 @@ abstract class TuStorage<T extends TM3Data>
             throws SQLException;
 
     public void updateAttributes(Connection conn, TM3Tu<T> tu,
-            Map<TM3Attribute, Object> inlineAttributes,
-            Map<TM3Attribute, String> customAttributes) throws SQLException
+            Map<TM3Attribute, Object> inlineAttributes, Map<TM3Attribute, String> customAttributes)
+            throws SQLException
     {
         // This is very simple. Just dump the old values and write the
         // new ones.
@@ -282,16 +290,16 @@ abstract class TuStorage<T extends TM3Data>
         {
             return;
         }
-        StatementBuilder sb = new StatementBuilder("UPDATE ").append(
-                getStorage().getTuTableName()).append(" SET ");
+        StatementBuilder sb = new StatementBuilder("UPDATE ").append(getStorage().getTuTableName())
+                .append(" SET ");
         boolean first = true;
         for (Map.Entry<TM3Attribute, Object> e : attributes.entrySet())
         {
             // SID attribute is always stored into another table
             if (".sid".equalsIgnoreCase(e.getKey().getName()))
             {
-//            	String sid = (String) e.getValue();
-//                long tmId = getStorage().getId();
+                // String sid = (String) e.getValue();
+                // long tmId = getStorage().getId();
                 continue;
             }
 
@@ -299,8 +307,7 @@ abstract class TuStorage<T extends TM3Data>
             {
                 sb.append(", ");
             }
-            sb.append(e.getKey().getColumnName() + " = ? ").addValue(
-                    e.getValue());
+            sb.append(e.getKey().getColumnName() + " = ? ").addValue(e.getValue());
             first = false;
         }
         sb.append(" WHERE id = ? ").addValue(tuId);
@@ -317,16 +324,13 @@ abstract class TuStorage<T extends TM3Data>
     abstract void saveCustomAttributes(Connection conn, long tuId,
             Map<TM3Attribute, String> attributes) throws SQLException;
 
-    private void deleteCustomAttribute(Connection conn, long tuId)
-            throws SQLException
+    private void deleteCustomAttribute(Connection conn, long tuId) throws SQLException
     {
         try
         {
-			SQLUtil.exec(
-					conn,
-					new StatementBuilder("DELETE FROM ")
-							.append(storage.getAttrValTableName())
-							.append(" WHERE tuId = ?").addValue(tuId));
+            SQLUtil.exec(conn,
+                    new StatementBuilder("DELETE FROM ").append(storage.getAttrValTableName())
+                            .append(" WHERE tuId = ?").addValue(tuId));
         }
         catch (Exception e)
         {
@@ -347,8 +351,7 @@ abstract class TuStorage<T extends TM3Data>
         }
     }
 
-    public List<TM3Tu<T>> getTu(List<Long> ids, boolean locking)
-            throws SQLException
+    public List<TM3Tu<T>> getTu(List<Long> ids, boolean locking) throws SQLException
     {
         Connection conn = null;
         try
@@ -366,8 +369,8 @@ abstract class TuStorage<T extends TM3Data>
         }
     }
 
-    public List<TM3Tu<T>> getTu(Connection conn, List<Long> tuIds,
-            boolean locking) throws SQLException
+    public List<TM3Tu<T>> getTu(Connection conn, List<Long> tuIds, boolean locking)
+            throws SQLException
     {
         if (tuIds.size() == 0)
         {
@@ -401,8 +404,7 @@ abstract class TuStorage<T extends TM3Data>
             }
             @SuppressWarnings("unchecked")
             BaseTm<T> currTm = (BaseTm<T>) tm3SegmentTmInfo.getTM3Tm(data.tmId);
-            TM3Tu<T> tu = new TM3Tu<T>(currTm, this, data.srcTuv, data.tgtTuvs,
-                    data.attrs);
+            TM3Tu<T> tu = new TM3Tu<T>(currTm, this, data.srcTuv, data.tgtTuvs, data.attrs);
             tu.setId(data.id);
             tus.add(tu);
             data.srcTuv.setTu(tu);
@@ -425,8 +427,8 @@ abstract class TuStorage<T extends TM3Data>
         return getTu(tuId, false);
     }
 
-    void loadLeverageMatches(List<FuzzyCandidate<T>> candidates,
-            TM3LeverageResults<T> results) throws SQLException
+    void loadLeverageMatches(List<FuzzyCandidate<T>> candidates, TM3LeverageResults<T> results)
+            throws SQLException
     {
         // XXX This could optimize further by reusing content?
         // XXX Currently getTuData() orders by ID
@@ -447,8 +449,7 @@ abstract class TuStorage<T extends TM3Data>
             TM3Tu<T> tu = tuMap.get(candidate.getTuId());
             if (tu == null)
             {
-                throw new TM3Exception("Failed to load TU "
-                        + candidate.getTuId());
+                throw new TM3Exception("Failed to load TU " + candidate.getTuId());
             }
             for (TM3Tuv<T> tuv : tu.getAllTuv())
             {
@@ -461,18 +462,16 @@ abstract class TuStorage<T extends TM3Data>
         }
     }
 
-    private List<TuData<T>> getTuData(Connection conn, List<Long> ids,
-            boolean locking) throws SQLException
+    private List<TuData<T>> getTuData(Connection conn, List<Long> ids, boolean locking)
+            throws SQLException
     {
-        StatementBuilder sb = new StatementBuilder("SELECT ")
-                .append("tmId, id, srcLocaleId");
+        StatementBuilder sb = new StatementBuilder("SELECT ").append("tmId, id, srcLocaleId");
         for (TM3Attribute attr : getStorage().getInlineAttributes())
         {
             sb.append(", ").append(attr.getColumnName());
         }
-        sb.append(" FROM ").append(getStorage().getTuTableName())
-                .append(" WHERE id IN").append(SQLUtil.longGroup(ids))
-                .append(" ORDER BY id");
+        sb.append(" FROM ").append(getStorage().getTuTableName()).append(" WHERE id IN")
+                .append(SQLUtil.longGroup(ids)).append(" ORDER BY id");
 
         try
         {
@@ -509,14 +508,13 @@ abstract class TuStorage<T extends TM3Data>
     /**
      * Load data from "tm3_tuv_shared_xx" and "tm3_tuv_ext_shared_xx" tables.
      */
-    private void loadTuvs(Connection conn, List<Long> tuIds,
-            List<TuData<T>> tuDatas, boolean locking) throws SQLException
+    private void loadTuvs(Connection conn, List<Long> tuIds, List<TuData<T>> tuDatas,
+            boolean locking) throws SQLException
     {
         StatementBuilder sb = new StatementBuilder("SELECT ")
                 .append("tuId, id, localeId, fingerprint, content, creationUser, creationDate, modifyUser, modifyDate")
-                .append(" FROM ").append(getStorage().getTuvTableName())
-                .append(" WHERE tuId IN").append(SQLUtil.longGroup(tuIds))
-                .append("ORDER BY tuId");
+                .append(" FROM ").append(getStorage().getTuvTableName()).append(" WHERE tuId IN")
+                .append(SQLUtil.longGroup(tuIds)).append("ORDER BY tuId");
 
         try
         {
@@ -528,9 +526,9 @@ abstract class TuStorage<T extends TM3Data>
             List<TuvData<T>> rawTuvs = new ArrayList<TuvData<T>>();
             while (rs.next())
             {
-                rawTuvs.add(new TuvData<T>(rs.getLong(1), rs.getLong(2), rs
-                        .getLong(3), rs.getLong(4), rs.getString(5), rs.getString(6), rs
-                        .getTimestamp(7), rs.getString(8), rs.getTimestamp(9)));
+                rawTuvs.add(new TuvData<T>(rs.getLong(1), rs.getLong(2), rs.getLong(3),
+                        rs.getLong(4), rs.getString(5), rs.getString(6), rs.getTimestamp(7),
+                        rs.getString(8), rs.getTimestamp(9)));
             }
             ps.close();
 
@@ -538,39 +536,39 @@ abstract class TuStorage<T extends TM3Data>
             HashMap<Long, TuvData<T>> rawTuvsMap = new HashMap<Long, TuvData<T>>();
             for (TuvData<T> tuvData : rawTuvs)
             {
-            	rawTuvsMap.put(tuvData.id, tuvData);
+                rawTuvsMap.put(tuvData.id, tuvData);
             }
-			sb = new StatementBuilder("SELECT ")
-					.append("tuvId, tuId, tmId, lastUsageDate, jobId, jobName, previousHash, nextHash, sid ")
-					.append("FROM ").append(getStorage().getTuvExtTableName())
-					.append(" WHERE tuId IN").append(SQLUtil.longGroup(tuIds));
-			ps = sb.toPreparedStatement(conn);
-			rs = SQLUtil.execQuery(ps);
-			TuvData<T> tuvData = null;
-			while (rs.next())
-			{
-				tuvData = rawTuvsMap.get(rs.getLong("tuvId"));
-				if (tuvData != null)
-				{
-					tuvData.setLastUsageDate(rs.getTimestamp("lastUsageDate"));
-					tuvData.setJobId(rs.getLong("jobId"));
-					tuvData.setJobName(rs.getString("jobName"));
-					tuvData.setPreviousHash(rs.getLong("previousHash"));
-					tuvData.setNextHash(rs.getLong("nextHash"));
-					tuvData.setSid(rs.getString("sid"));
-				}
-			}
-			ps.close();
+            sb = new StatementBuilder("SELECT ")
+                    .append("tuvId, tuId, tmId, lastUsageDate, jobId, jobName, previousHash, nextHash, sid ")
+                    .append("FROM ").append(getStorage().getTuvExtTableName())
+                    .append(" WHERE tuId IN").append(SQLUtil.longGroup(tuIds));
+            ps = sb.toPreparedStatement(conn);
+            rs = SQLUtil.execQuery(ps);
+            TuvData<T> tuvData = null;
+            while (rs.next())
+            {
+                tuvData = rawTuvsMap.get(rs.getLong("tuvId"));
+                if (tuvData != null)
+                {
+                    tuvData.setLastUsageDate(rs.getTimestamp("lastUsageDate"));
+                    tuvData.setJobId(rs.getLong("jobId"));
+                    tuvData.setJobName(rs.getString("jobName"));
+                    tuvData.setPreviousHash(rs.getLong("previousHash"));
+                    tuvData.setNextHash(rs.getLong("nextHash"));
+                    tuvData.setSid(rs.getString("sid"));
+                }
+            }
+            ps.close();
 
-			TM3Attribute sidAttr = null;
-			for (TM3Attribute att : getStorage().getInlineAttributes())
-			{
-				if (att != null && att.getName().equals(".sid"))
-				{
-					sidAttr = att;
-					break;
-				}
-			}
+            TM3Attribute sidAttr = null;
+            for (TM3Attribute att : getStorage().getInlineAttributes())
+            {
+                if (att != null && att.getName().equals(".sid"))
+                {
+                    sidAttr = att;
+                    break;
+                }
+            }
 
             Iterator<TuData<T>> tus = tuDatas.iterator();
             TuData<T> current = null;
@@ -579,8 +577,7 @@ abstract class TuStorage<T extends TM3Data>
                 current = advanceToTu(current, tus, rawTuv.tuId);
                 if (current == null)
                 {
-                    throw new IllegalStateException("Couldn't find tuId for "
-                            + rawTuv.tuId);
+                    throw new IllegalStateException("Couldn't find tuId for " + rawTuv.tuId);
                 }
                 // "tuId, id, localeId, fingerprint, content";
                 TM3Tuv<T> tuv = createTuv(rawTuv);
@@ -594,8 +591,8 @@ abstract class TuStorage<T extends TM3Data>
                     current.tgtTuvs.add(tuv);
                 }
                 // Put srcTuv SID to in-line SID attribute.
-				if (sidAttr != null && StringUtils.isNotEmpty(tuv.getSid()))
-				{
+                if (sidAttr != null && StringUtils.isNotEmpty(tuv.getSid()))
+                {
                     current.attrs.put(sidAttr, tuv.getSid());
                 }
             }
@@ -606,12 +603,11 @@ abstract class TuStorage<T extends TM3Data>
         }
     }
 
-    private void loadAttrs(Connection conn, List<Long> tuIds,
-            List<TuData<T>> data, boolean locking) throws SQLException
+    private void loadAttrs(Connection conn, List<Long> tuIds, List<TuData<T>> data, boolean locking)
+            throws SQLException
     {
         StatementBuilder sb = new StatementBuilder();
-        sb.append("SELECT tuId, attrId, value FROM ")
-                .append(getStorage().getAttrValTableName())
+        sb.append("SELECT tuId, attrId, value FROM ").append(getStorage().getAttrValTableName())
                 .append(" WHERE tuid IN (?").addValue(tuIds.get(0));
         for (int i = 1; i < tuIds.size(); i++)
         {
@@ -632,11 +628,9 @@ abstract class TuStorage<T extends TM3Data>
                 current = advanceToTu(current, tus, tuId);
                 if (current == null)
                 {
-                    throw new IllegalStateException("Couldn't find tuId for "
-                            + tuId);
+                    throw new IllegalStateException("Couldn't find tuId for " + tuId);
                 }
-                current.attrs.put(getAttributeById(rs.getLong(2)),
-                        rs.getString(3));
+                current.attrs.put(getAttributeById(rs.getLong(2)), rs.getString(3));
             }
             ps.close();
         }
@@ -655,12 +649,11 @@ abstract class TuStorage<T extends TM3Data>
     {
         TM3Tuv<T> tuv = new TM3Tuv<T>();
         tuv.setId(rawData.id);
-        TM3Locale locale = storage.getTm().getDataFactory()
-                .getLocaleById(rawData.localeId);
+        TM3Locale locale = storage.getTm().getDataFactory().getLocaleById(rawData.localeId);
         tuv.setLocale(locale);
         tuv.setFingerprint(rawData.fingerprint);
-        tuv.setContent(storage.getTm().getDataFactory()
-                .fromSerializedForm(locale, rawData.content));
+        tuv.setContent(
+                storage.getTm().getDataFactory().fromSerializedForm(locale, rawData.content));
 
         tuv.setCreationUser(rawData.creationUser);
         tuv.setCreationDate(rawData.creationDate);
@@ -676,8 +669,7 @@ abstract class TuStorage<T extends TM3Data>
         return tuv;
     }
 
-    protected TuData<T> advanceToTu(TuData<T> first, Iterator<TuData<T>> rest,
-            long id)
+    protected TuData<T> advanceToTu(TuData<T> first, Iterator<TuData<T>> rest, long id)
     {
         if (first != null && first.id == id)
         {
@@ -736,41 +728,46 @@ abstract class TuStorage<T extends TM3Data>
             this.modifyDate = modifyDate;
         }
 
-        void setLastUsageDate(Date lastUsageDate) {
-        	this.lastUsageDate = lastUsageDate;
+        void setLastUsageDate(Date lastUsageDate)
+        {
+            this.lastUsageDate = lastUsageDate;
         }
 
-        void setJobId(long jobId) {
-        	this.jobId = jobId;
+        void setJobId(long jobId)
+        {
+            this.jobId = jobId;
         }
 
-        void setJobName(String jobName) {
-        	this.jobName = jobName;
+        void setJobName(String jobName)
+        {
+            this.jobName = jobName;
         }
 
-        void setPreviousHash(long previousHash) {
-        	this.previousHash = previousHash;
+        void setPreviousHash(long previousHash)
+        {
+            this.previousHash = previousHash;
         }
 
-        void setNextHash(long nextHash) {
-        	this.nextHash = nextHash;
+        void setNextHash(long nextHash)
+        {
+            this.nextHash = nextHash;
         }
 
-        void setSid(String sid) {
-        	this.sid = sid;
+        void setSid(String sid)
+        {
+            this.sid = sid;
         }
     }
 
-    public List<TM3Tuv<T>> getExactMatchesForSave(Connection conn, T key,
-            TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> inlineAttributes,
-            Map<TM3Attribute, String> customAttributes, boolean lookupTarget,
-            boolean locking, long preHash, long nextHash) throws SQLException
+    public List<TM3Tuv<T>> getExactMatchesForSave(Connection conn, T key, TM3Locale sourceLocale,
+            Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> inlineAttributes,
+            Map<TM3Attribute, String> customAttributes, boolean lookupTarget, boolean locking,
+            long preHash, long nextHash) throws SQLException
     {
-    	List<Long> tm3TmIds = new ArrayList<Long>();
+        List<Long> tm3TmIds = new ArrayList<Long>();
         tm3TmIds.add(getStorage().getId());
 
-   		// If SID is not empty/null ...
+        // If SID is not empty/null ...
         String sid = getSidFromInlineAttributes(inlineAttributes);
 
         Set<Long> tuvIds = new HashSet<Long>();
@@ -779,8 +776,7 @@ abstract class TuStorage<T extends TM3Data>
         PreparedStatement ps = null;
         ResultSet rs = null;
         // Fetch candidates by previous/next hash values prior.
-		sb = getHashMatchedStatement(key, sourceLocale, tm3TmIds, preHash,
-				nextHash, sid);
+        sb = getHashMatchedStatement(key, sourceLocale, tm3TmIds, preHash, nextHash, sid);
         ps = sb.toPreparedStatement(conn);
         rs = SQLUtil.execQuery(ps);
         while (rs.next())
@@ -806,17 +802,16 @@ abstract class TuStorage<T extends TM3Data>
         return tuvs;
     }
 
-	private String getSidFromInlineAttributes(
-			Map<TM3Attribute, Object> inlineAttributes)
+    private String getSidFromInlineAttributes(Map<TM3Attribute, Object> inlineAttributes)
     {
         if (!inlineAttributes.isEmpty())
         {
             for (Map.Entry<TM3Attribute, Object> e : inlineAttributes.entrySet())
             {
-				if (e.getKey().getAffectsIdentity()
-						&& "sid".equalsIgnoreCase(e.getKey().getColumnName()))
+                if (e.getKey().getAffectsIdentity()
+                        && "sid".equalsIgnoreCase(e.getKey().getColumnName()))
                 {
-					return (String) e.getValue();
+                    return (String) e.getValue();
                 }
             }
         }
@@ -824,23 +819,21 @@ abstract class TuStorage<T extends TM3Data>
         return null;
     }
 
-	/**
-	 * When save TU into TM, narrow the tuId/tuvId scope by previous/next hash
-	 * values and SID for performance.
-	 */
-    private StatementBuilder getHashMatchedStatement(T key,
-			TM3Locale srcLocale, List<Long> tm3TmIds, long preHash,
-			long nextHash, String sid)
+    /**
+     * When save TU into TM, narrow the tuId/tuvId scope by previous/next hash
+     * values and SID for performance.
+     */
+    private StatementBuilder getHashMatchedStatement(T key, TM3Locale srcLocale,
+            List<Long> tm3TmIds, long preHash, long nextHash, String sid)
     {
         StatementBuilder sb = new StatementBuilder();
         boolean joinExtTable = joinExtTable(preHash, nextHash, sid);
         if (joinExtTable)
         {
-            sb.append("SELECT tuv.id, tuv.tuId FROM ")
-                    .append(getStorage().getTuvTableName()).append(" AS tuv, ")
-                    .append(getStorage().getTuvExtTableName()).append(" AS ext");
-            sb.append(" WHERE tuv.id = ext.tuvId")
-                    .append(" AND tuv.tuId = ext.tuId")
+            sb.append("SELECT tuv.id, tuv.tuId FROM ").append(getStorage().getTuvTableName())
+                    .append(" AS tuv, ").append(getStorage().getTuvExtTableName())
+                    .append(" AS ext");
+            sb.append(" WHERE tuv.id = ext.tuvId").append(" AND tuv.tuId = ext.tuId")
                     .append(" AND tuv.fingerprint = ?").addValue(key.getFingerprint())
                     .append(" AND tuv.localeId = ?").addValue(srcLocale.getId());
             if (preHash != -1)
@@ -859,8 +852,8 @@ abstract class TuStorage<T extends TM3Data>
         // for performance
         else
         {
-            sb.append("SELECT tuv.id, tuv.tuId FROM ")
-                    .append(getStorage().getTuvTableName()).append(" AS tuv");
+            sb.append("SELECT tuv.id, tuv.tuId FROM ").append(getStorage().getTuvTableName())
+                    .append(" AS tuv");
             sb.append(" WHERE tuv.fingerprint = ?").addValue(key.getFingerprint())
                     .append(" AND tuv.localeId = ?").addValue(srcLocale.getId());
         }
@@ -883,21 +876,19 @@ abstract class TuStorage<T extends TM3Data>
     /**
      * For create job to leverage TM, it does not care previous/next hash.
      */
-    public List<TM3Tuv<T>> getExactMatches(Connection conn, T key,
-            TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> inlineAttributes,
-            Map<TM3Attribute, String> customAttributes, boolean lookupTarget,
-            boolean locking, List<Long> tm3TmIds) throws SQLException
+    public List<TM3Tuv<T>> getExactMatches(Connection conn, T key, TM3Locale sourceLocale,
+            Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> inlineAttributes,
+            Map<TM3Attribute, String> customAttributes, boolean lookupTarget, boolean locking,
+            List<Long> tm3TmIds, LeverageOptions leverageOptions) throws SQLException
     {
-        // avoid an awkward case in getExactMatchStatement
-        if (targetLocales != null && targetLocales.isEmpty())
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        if (leverageOptions != null)
         {
-            return Collections.emptyList();
+            paramMap = leverageOptions.getParamMap();
         }
-
-        //#1. Find all possible candidates, no max number limitation...
-        StatementBuilder sb = getExactMatchStatement(key, sourceLocale,
-                targetLocales, inlineAttributes, lookupTarget, tm3TmIds);
+        // #1. Find all possible candidates, no max number limitation...
+        StatementBuilder sb = getExactMatchStatement(key, sourceLocale, targetLocales,
+                inlineAttributes, lookupTarget, tm3TmIds, paramMap);
         if (customAttributes.size() > 0)
         {
             sb = getAttributeMatchWrapper(sb, customAttributes);
@@ -906,131 +897,141 @@ abstract class TuStorage<T extends TM3Data>
         ResultSet rs = SQLUtil.execQuery(ps);
         Set<Long> tuvIds = new HashSet<Long>();
         List<Long> tuIds = new ArrayList<Long>();
-		HashMap<Long, Long> tuId2srcTuvId = new HashMap<Long, Long>();
+        HashMap<Long, Long> tuId2srcTuvId = new HashMap<Long, Long>();
         while (rs.next())
         {
-            tuvIds.add(rs.getLong(1));
-            tuIds.add(rs.getLong(2));
-            tuId2srcTuvId.put(rs.getLong(2), rs.getLong(1));
+            long tuvId = rs.getLong(1);
+            long tuId = rs.getLong(2);
+            tuvIds.add(tuvId);
+            if (!tuIds.contains(tuId))
+            {
+                tuIds.add(tuId);
+            }
+            tuId2srcTuvId.put(tuId, tuvId);
         }
         ps.close();
 
-        //#2. If there are too many, need reduce them for performance...
-        boolean isCandidateFiltered = false;
-        int max = 200;
-        if (targetLocales.size() * 10 > max) {
-        	max = targetLocales.size() * 10;
-        }
-        String sid = getSidFromInlineAttributes(inlineAttributes);
-		if (tuvIds.size() > max)
-		{
-			isCandidateFiltered = true;
-			if (logger.isDebugEnabled()) {
-				logger.info("Candidated exact matches tuvIds number: "
-						+ tuvIds.size());				
-			}
-			//#2.1 previous/next hash matched candidates must be returned ...
-	        Set<Long> hashMatchedTuvIds = new HashSet<Long>();
-	        List<Long> hashMatchedTuIds = new ArrayList<Long>();
-			BaseTmTuv srcTuv = ((GSTuvData) key).getSrcTuv();
-			long preHash = srcTuv.getPreviousHash();
-			long nextHash = srcTuv.getNextHash();
-			if (preHash != -1 && nextHash != -1)
-			{
-				sb = new StatementBuilder("SELECT tuv.id, tuv.tuId FROM ");
-				sb.append(getStorage().getTuvTableName()).append(" AS tuv, ");
-				sb.append(getStorage().getTuvExtTableName()).append(" AS ext");
-				sb.append(" WHERE tuv.id = ext.tuvId");
-				sb.append(" AND tuv.tuId = ext.tuId");
-				sb.append(" AND ext.previousHash = ?").addValue(preHash);
-				sb.append(" AND ext.nextHash = ?").addValue(nextHash);
-				if (sid != null && sid.trim().length() > 0)
-				{
-					sb.append(" AND ext.sid = ?").addValue(sid);
-				}
-				sb.append(" AND tuv.tmId IN").append(SQLUtil.longGroup(tm3TmIds));
-				sb.append(" AND tuv.id IN").append(SQLUtil.longGroup(new ArrayList<Long>(tuvIds)));
-
-				ps = sb.toPreparedStatement(conn);
-				rs = SQLUtil.execQuery(ps);
-				while (rs.next())
-				{
-					hashMatchedTuvIds.add(rs.getLong(1));
-					hashMatchedTuIds.add(rs.getLong(2));
-				}
-				ps.close();
-			}
-
-			//#2.2 Ensure returning at most 10 for every locale...
-	        List<Long> targetLocaleIds = new ArrayList<Long>();
-			if (targetLocales != null) {
-				for (TM3Locale locale : targetLocales) {
-					targetLocaleIds.add(locale.getId());
-				}
-			}
-			sb = new StatementBuilder(
-					"SELECT tuv.tuId, tuv.localeId, COUNT(id) FROM ")
-					.append(getStorage().getTuvTableName()).append(" AS tuv, ")
-					.append(getStorage().getTuvExtTableName()).append(" AS ext");
-			sb.append(" WHERE tuv.id = ext.tuvId")
-					.append(" AND tuv.tmId IN")
-					.append(SQLUtil.longGroup(tm3TmIds))
-					.append(" AND tuv.tuId IN").append(SQLUtil.longGroup(tuIds));
-			if (targetLocaleIds.size() > 0) {
-				sb.append(" AND tuv.localeId IN").append(
-						SQLUtil.longGroup(targetLocaleIds));
-			}
-			sb.append(" GROUP BY tuv.tuId, tuv.localeId");
-
-			tuvIds.clear();
-			tuIds.clear();
-			tuvIds.addAll(hashMatchedTuvIds);
-			tuIds.addAll(hashMatchedTuIds);
-
-			long tuId = -1;
-			long localeId = -1;
-	        HashMap<Long, Long> locale2tuvNum = new HashMap<Long, Long>();
-			ps = sb.toPreparedStatement(conn);
-	        rs = SQLUtil.execQuery(ps);
-	        while (rs.next())
-	        {
-	        	tuId = rs.getLong(1);
-	        	localeId = rs.getLong(2);
-	        	Long tuvNum = locale2tuvNum.get(localeId);
-	        	if (tuvNum == null) {
-	        		tuvNum = new Long(0);
-	        	}
-	        	if (tuvNum < 10)
-	        	{
-	        		tuIds.add(tuId);
-	        		tuvIds.add(tuId2srcTuvId.get(tuId));// add source tuvId!!!
-	        		locale2tuvNum.put(localeId, tuvNum + rs.getLong(3));
-	       		}
-	        }
-	        ps.close();
-		}
-
-   		// If SID is not empty/null, need filter the candidate TUs here.
-        // To avoid slow query, we filter TUs via 2 queries.
-		if (!isCandidateFiltered && tuvIds.size() > 0 && sid != null
-				&& sid.length() > 0)
+        if (leverageOptions == null || !leverageOptions.isFromTMSearchPage())
         {
-			sb = new StatementBuilder("SELECT tuvId, tuId FROM ")
-					.append(getStorage().getTuvExtTableName())
-					.append(" WHERE tmId IN").append(SQLUtil.longGroup(tm3TmIds))
-					.append(" AND sid = ?").addValue(sid)
-					.append(" AND tuvId IN ")
-					.append(SQLUtil.longGroup(new ArrayList<Long>(tuvIds)));
-            ps = sb.toPreparedStatement(conn);
-            rs = SQLUtil.execQuery(ps);
-            tuvIds.clear();
-            tuIds.clear();
-            while (rs.next())
+            // #2. If there are too many, need reduce them for performance...
+            boolean isCandidateFiltered = false;
+            int max = 200;
+            if (targetLocales.size() * 10 > max)
             {
-                tuvIds.add(rs.getLong(1));
-                tuIds.add(rs.getLong(2));
+                max = targetLocales.size() * 10;
             }
-            ps.close();
+            String sid = getSidFromInlineAttributes(inlineAttributes);
+            if (tuvIds.size() > max)
+            {
+                isCandidateFiltered = true;
+                if (logger.isDebugEnabled())
+                {
+                    logger.info("Candidated exact matches tuvIds number: " + tuvIds.size());
+                }
+                // #2.1 previous/next hash matched candidates must be returned
+                Set<Long> hashMatchedTuvIds = new HashSet<Long>();
+                List<Long> hashMatchedTuIds = new ArrayList<Long>();
+                BaseTmTuv srcTuv = ((GSTuvData) key).getSrcTuv();
+                long preHash = srcTuv.getPreviousHash();
+                long nextHash = srcTuv.getNextHash();
+                if (preHash != -1 && nextHash != -1)
+                {
+                    sb = new StatementBuilder("SELECT tuv.id, tuv.tuId FROM ");
+                    sb.append(getStorage().getTuvTableName()).append(" AS tuv, ");
+                    sb.append(getStorage().getTuvExtTableName()).append(" AS ext");
+                    sb.append(" WHERE tuv.id = ext.tuvId");
+                    sb.append(" AND tuv.tuId = ext.tuId");
+                    sb.append(" AND ext.previousHash = ?").addValue(preHash);
+                    sb.append(" AND ext.nextHash = ?").addValue(nextHash);
+                    if (sid != null && sid.trim().length() > 0)
+                    {
+                        sb.append(" AND ext.sid = ?").addValue(sid);
+                    }
+                    sb.append(" AND tuv.tmId IN").append(SQLUtil.longGroup(tm3TmIds));
+                    sb.append(" AND tuv.id IN")
+                            .append(SQLUtil.longGroup(new ArrayList<Long>(tuvIds)));
+
+                    ps = sb.toPreparedStatement(conn);
+                    rs = SQLUtil.execQuery(ps);
+                    while (rs.next())
+                    {
+                        hashMatchedTuvIds.add(rs.getLong(1));
+                        hashMatchedTuIds.add(rs.getLong(2));
+                    }
+                    ps.close();
+                }
+
+                // #2.2 Ensure returning at most 10 for every locale...
+                List<Long> targetLocaleIds = new ArrayList<Long>();
+                if (targetLocales != null)
+                {
+                    for (TM3Locale locale : targetLocales)
+                    {
+                        targetLocaleIds.add(locale.getId());
+                    }
+                }
+                sb = new StatementBuilder("SELECT tuv.tuId, tuv.localeId, COUNT(id) FROM ")
+                        .append(getStorage().getTuvTableName()).append(" AS tuv, ")
+                        .append(getStorage().getTuvExtTableName()).append(" AS ext");
+                sb.append(" WHERE tuv.id = ext.tuvId").append(" AND tuv.tmId IN")
+                        .append(SQLUtil.longGroup(tm3TmIds)).append(" AND tuv.tuId IN")
+                        .append(SQLUtil.longGroup(tuIds));
+                if (targetLocaleIds.size() > 0)
+                {
+                    sb.append(" AND tuv.localeId IN").append(SQLUtil.longGroup(targetLocaleIds));
+                }
+                sb.append(" GROUP BY tuv.tuId, tuv.localeId");
+
+                tuvIds.clear();
+                tuIds.clear();
+                tuvIds.addAll(hashMatchedTuvIds);
+                tuIds.addAll(hashMatchedTuIds);
+
+                long tuId = -1;
+                long localeId = -1;
+                HashMap<Long, Long> locale2tuvNum = new HashMap<Long, Long>();
+                ps = sb.toPreparedStatement(conn);
+                rs = SQLUtil.execQuery(ps);
+                while (rs.next())
+                {
+                    tuId = rs.getLong(1);
+                    localeId = rs.getLong(2);
+                    Long tuvNum = locale2tuvNum.get(localeId);
+                    if (tuvNum == null)
+                    {
+                        tuvNum = new Long(0);
+                    }
+                    if (tuvNum < 10)
+                    {
+                        tuIds.add(tuId);
+                        tuvIds.add(tuId2srcTuvId.get(tuId));// add source
+                                                            // tuvId!!!
+                        locale2tuvNum.put(localeId, tuvNum + rs.getLong(3));
+                    }
+                }
+                ps.close();
+            }
+
+            // If SID is not empty/null, need filter the candidate TUs here.
+            // To avoid slow query, we filter TUs via 2 queries.
+            if (!isCandidateFiltered && tuvIds.size() > 0 && sid != null && sid.length() > 0)
+            {
+                sb = new StatementBuilder("SELECT tuvId, tuId FROM ")
+                        .append(getStorage().getTuvExtTableName()).append(" WHERE tmId IN")
+                        .append(SQLUtil.longGroup(tm3TmIds)).append(" AND sid = ?").addValue(sid)
+                        .append(" AND tuvId IN ")
+                        .append(SQLUtil.longGroup(new ArrayList<Long>(tuvIds)));
+                ps = sb.toPreparedStatement(conn);
+                rs = SQLUtil.execQuery(ps);
+                tuvIds.clear();
+                tuIds.clear();
+                while (rs.next())
+                {
+                    tuvIds.add(rs.getLong(1));
+                    tuIds.add(rs.getLong(2));
+                }
+                ps.close();
+            }
         }
 
         // XXX Could save a query by having the lookup fetch the TU row, or even
@@ -1060,40 +1061,50 @@ abstract class TuStorage<T extends TM3Data>
     }
 
     // Note for implementors: targetLocales may be null, but will not be empty
-	private StatementBuilder getExactMatchStatement(T key, TM3Locale srcLocale,
-			Set<? extends TM3Locale> targetLocales,
-			Map<TM3Attribute, Object> inlineAttrs, boolean lookupTarget,
-			List<Long> tm3TmIds)
+    private StatementBuilder getExactMatchStatement(T key, TM3Locale srcLocale,
+            Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> inlineAttrs,
+            boolean lookupTarget, List<Long> tm3TmIds, Map<String, Object> paramMap)
     {
-        StatementBuilder sb = new StatementBuilder(
-                "SELECT tuv.id, tuv.tuId FROM ").append(getStorage()
-                .getTuvTableName() + " AS tuv");
-        if (!inlineAttrs.isEmpty() || !lookupTarget)
+        // GBS-3990
+        boolean isBlankSearch = isBlankFromTmSearch(key);
+        StatementBuilder sb = new StatementBuilder("SELECT tuv.id, tuv.tuId FROM ")
+                .append(getStorage().getTuvTableName() + " AS tuv, ")
+                .append(getStorage().getTuTableName()).append(" as tu");
+        if (needCheckExtTable(paramMap))
         {
-            sb.append(" join " + getStorage().getTuTableName() + " as tu")
-                    .append(" on tu.id = tuv.tuId");
+            sb.append(", ").append(getStorage().getTuvExtTableName()).append(" AS ext")
+                    .append(" WHERE tuv.id = ext.tuvId");
         }
-        sb.append(" WHERE fingerprint = ? AND localeId = ? ")
-                .addValues(key.getFingerprint(), srcLocale.getId())
-                .append("AND tuv.tmId IN").append(SQLUtil.longGroup(tm3TmIds));
-        if (!lookupTarget)
+        else
         {
-            sb.append("AND tu.srcLocaleId = ? ").addValue(srcLocale.getId());
+            sb.append(" WHERE 1=1");
         }
+        sb.append(" AND tu.id = tuv.tuId");
+        if (!isBlankSearch)
+        {
+            sb.append(" AND tuv.fingerprint = ?").addValue(key.getFingerprint());
+        }
+        if (srcLocale != null)
+        {
+            sb.append(" AND tuv.localeId = ?").addValue(srcLocale.getId());
+        }
+        sb.append(" AND tuv.tmId IN").append(SQLUtil.longGroup(tm3TmIds));
+
         if (!inlineAttrs.isEmpty())
         {
             for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
             {
-            	// As SID is in extension table now, ignore sid here
-				if (e.getKey().getAffectsIdentity()
-						&& !"sid".equalsIgnoreCase(e.getKey().getColumnName()))
+                // As SID is in extension table now, ignore sid here
+                if (e.getKey().getAffectsIdentity()
+                        && !"sid".equalsIgnoreCase(e.getKey().getColumnName()))
                 {
                     sb.append(" AND tu." + e.getKey().getColumnName() + " = ?");
                     sb.addValue(e.getValue());
                 }
             }
         }
-        if (targetLocales != null)
+        getParameterSql(sb, paramMap);
+        if (targetLocales != null && !targetLocales.contains(null))
         {
             // an exists subselect seems simpler, but mysql bug 46947 causes
             // exists subselects to take locks even in repeatable read
@@ -1102,15 +1113,227 @@ abstract class TuStorage<T extends TM3Data>
             {
                 targetLocaleIds.add(locale.getId());
             }
-            sb = new StatementBuilder()
-                    .append("SELECT DISTINCT result.* FROM (").append(sb)
+            sb = new StatementBuilder().append("SELECT DISTINCT result.* FROM (").append(sb)
                     .append(") AS result, ")
                     .append(getStorage().getTuvTableName() + " AS targetTuv ")
                     .append("WHERE targetTuv.tuId = result.tuId AND ")
-                    .append("targetTuv.localeId IN")
-                    .append(SQLUtil.longGroup(targetLocaleIds));
+                    .append("targetTuv.localeId IN").append(SQLUtil.longGroup(targetLocaleIds));
         }
         return sb;
+    }
+
+    private static void getParameterSql(StatementBuilder sb, Map<String, Object> paramMap)
+    {
+        if (paramMap != null)
+        {
+            String createStartDateOption = (String) paramMap.get("createStartDateOption");
+            String createEndDateOption = (String) paramMap.get("createEndDateOption");
+            Date createStartDate = (Date) paramMap.get("createStartDate");
+            Date createEndDate = (Date) paramMap.get("createEndDate");
+
+            String modifyStartDateOption = (String) paramMap.get("modifyStartDateOption");
+            String modifyEndDateOption = (String) paramMap.get("modifyEndDateOption");
+            Date modifyStartDate = (Date) paramMap.get("modifyStartDate");
+            Date modifyEndDate = (Date) paramMap.get("modifyEndDate");
+
+            String lastUsageStartDateOption = (String) paramMap.get("lastUsageStartDateOption");
+            String lastUsageEndDateOption = (String) paramMap.get("lastUsageEndDateOption");
+            Date lastUsageStartDate = (Date) paramMap.get("lastUsageStartDate");
+            Date lastUsageEndDate = (Date) paramMap.get("lastUsageEndDate");
+
+            String createUser = (String) paramMap.get("createUser");
+            String modifyUser = (String) paramMap.get("modifyUser");
+            String localeId = (String) paramMap.get("localeIds");
+            String jobIds = (String) paramMap.get("jobIds");
+
+            if (createStartDate != null)
+            {
+                if (createStartDateOption.equals(DATE_EQUALS))
+                {
+                    sb.append(" AND tuv.creationDate >= ? ")
+                            .addValue(parseStartDate(createStartDate));
+                    sb.append(" AND tuv.creationDate <= ? ")
+                            .addValue(parseEndDate(createStartDate));
+                }
+                else if (createStartDateOption.equals(DATE_NOT_EQUALS))
+                {
+                    sb.append(" AND tuv.creationDate < ? ")
+                            .addValue(parseStartDate(createStartDate));
+                    sb.append(" AND tuv.creationDate > ? ").addValue(parseEndDate(createStartDate));
+                }
+                else if (createStartDateOption.equals(DATE_GREATER_THAN))
+                {
+                    sb.append(" AND tuv.creationDate > ? ")
+                            .addValue(parseStartDate(createStartDate));
+                }
+
+                else if (createStartDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
+                {
+                    sb.append(" AND tuv.creationDate >= ? ")
+                            .addValue(parseStartDate(createStartDate));
+                }
+            }
+
+            if (createEndDate != null)
+            {
+                if (createEndDateOption.equals(DATE_LESS_THAN))
+                {
+                    sb.append(" AND tuv.creationDate < ? ").addValue(parseEndDate(createEndDate));
+                }
+                else if (createEndDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
+                {
+                    sb.append(" AND tuv.creationDate <= ? ").addValue(parseEndDate(createEndDate));
+                }
+            }
+
+            if (modifyStartDate != null)
+            {
+                if (modifyStartDateOption.equals(DATE_EQUALS))
+                {
+                    sb.append(" AND tuv.modifyDate >= ? ")
+                            .addValue(parseStartDate(modifyStartDate));
+                    sb.append(" AND tuv.modifyDate <= ? ").addValue(parseEndDate(modifyStartDate));
+                }
+                else if (modifyStartDateOption.equals(DATE_NOT_EQUALS))
+                {
+                    sb.append(" AND tuv.modifyDate < ? ").addValue(parseStartDate(modifyStartDate));
+                    sb.append(" AND tuv.modifyDate > ? ").addValue(parseEndDate(modifyStartDate));
+                }
+                else if (modifyStartDateOption.equals(DATE_GREATER_THAN))
+                {
+                    sb.append(" AND tuv.modifyDate > ? ").addValue(parseStartDate(modifyStartDate));
+                }
+                else if (modifyStartDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
+                {
+                    sb.append(" AND tuv.modifyDate >= ? ")
+                            .addValue(parseStartDate(modifyStartDate));
+                }
+            }
+
+            if (modifyEndDate != null)
+            {
+                if (modifyEndDateOption.equals(DATE_LESS_THAN))
+                {
+                    sb.append(" AND tuv.modifyDate < ? ").addValue(parseEndDate(modifyEndDate));
+                }
+                else if (modifyEndDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
+                {
+                    sb.append(" AND tuv.modifyDate <= ? ").addValue(parseEndDate(modifyEndDate));
+                }
+            }
+
+            if (lastUsageStartDate != null)
+            {
+                if (lastUsageStartDateOption.equals(DATE_EQUALS))
+                {
+                    sb.append(" AND ext.lastUsageDate >= ? ")
+                            .addValue(parseStartDate(lastUsageStartDate));
+                    sb.append(" AND ext.lastUsageDate <= ? ")
+                            .addValue(parseEndDate(lastUsageStartDate));
+                }
+                else if (lastUsageStartDateOption.equals(DATE_NOT_EQUALS))
+                {
+                    sb.append(" AND ext.lastUsageDate < ? ")
+                            .addValue(parseStartDate(lastUsageStartDate));
+                    sb.append(" AND ext.lastUsageDate > ? ")
+                            .addValue(parseEndDate(lastUsageStartDate));
+                }
+                else if (lastUsageStartDateOption.equals(DATE_GREATER_THAN))
+                {
+                    sb.append(" AND ext.lastUsageDate > ? ")
+                            .addValue(parseStartDate(lastUsageStartDate));
+                }
+                else if (lastUsageStartDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
+                {
+                    sb.append(" AND ext.lastUsageDate >= ? ")
+                            .addValue(parseStartDate(lastUsageStartDate));
+                }
+            }
+
+            if (lastUsageEndDate != null)
+            {
+                if (lastUsageEndDateOption.equals(DATE_LESS_THAN))
+                {
+                    sb.append(" AND ext.lastUsageDate < ? ")
+                            .addValue(parseEndDate(lastUsageEndDate));
+                }
+                else if (lastUsageEndDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
+                {
+                    sb.append(" AND ext.lastUsageDate <= ? ")
+                            .addValue(parseEndDate(lastUsageEndDate));
+                }
+            }
+
+            if (StringUtil.isNotEmpty(createUser))
+            {
+                sb.append(" AND tuv.creationUser = ? ").addValues(createUser);
+            }
+            if (StringUtil.isNotEmpty(modifyUser))
+            {
+                sb.append(" AND tuv.modifyUser = ? ").addValues(modifyUser);
+            }
+
+            if (StringUtil.isNotEmpty(localeId))
+            {
+                sb.append(" AND tuv.localeId = ? ").addValue(localeId);
+            }
+
+            if (StringUtil.isNotEmpty(jobIds))
+            {
+                sb.append(" AND ext.jobId in (").append(jobIds).append(")");
+            }
+        }
+    }
+
+    private static String parseStartDate(Date start)
+    {
+        String startDate = format.format(start);
+        if (StringUtil.isNotEmpty(startDate))
+            return startDate + " 00:00:00";
+        else
+            return null;
+    }
+
+    private static String parseEndDate(Date end)
+    {
+        String endDate = format.format(end);
+        if (StringUtil.isNotEmpty(endDate))
+            return endDate + " 23:59:59";
+        else
+            return null;
+    }
+
+    /**
+     * Checks if need to query from TM3_TUV_EXT_SHARED table.
+     * 
+     * @since GBS-3990
+     */
+    private static boolean needCheckExtTable(Map<String, Object> paramMap)
+    {
+        Date lastUsageStartDate = (Date) paramMap.get("lastUsageStartDate");
+        Date lastUsageEndDate = (Date) paramMap.get("lastUsageEndDate");
+        String jobIds = (String) paramMap.get("jobIds");
+        if (lastUsageStartDate != null || lastUsageEndDate != null || StringUtil.isNotEmpty(jobIds))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the search text is blank or not from tm search page.
+     * 
+     * @since GBS-3990
+     */
+    private boolean isBlankFromTmSearch(T key)
+    {
+        String segment = key.getSerializedForm();
+        String searchText = segment.replace("<segment>", "").replace("</segment>", "");
+        if ("".equals(searchText) || "*".equals(searchText))
+        {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -1118,13 +1341,12 @@ abstract class TuStorage<T extends TM3Data>
      * (which is nested as a table, to avoid MySQL's troubles with subquery
      * performance).
      */
-    protected abstract StatementBuilder getAttributeMatchWrapper(
-            StatementBuilder inner, Map<TM3Attribute, String> attributes);
+    protected abstract StatementBuilder getAttributeMatchWrapper(StatementBuilder inner,
+            Map<TM3Attribute, String> attributes);
 
     public abstract Set<TM3Locale> getTuvLocales() throws SQLException;
 
-    public abstract List<Object> getAllAttrValues(TM3Attribute attr)
-            throws SQLException;
+    public abstract List<Object> getAllAttrValues(TM3Attribute attr) throws SQLException;
 
     protected Set<TM3Locale> loadLocales(Collection<Long> ids)
     {
@@ -1140,36 +1362,32 @@ abstract class TuStorage<T extends TM3Data>
     // Data Handle backends
     //
 
-	public abstract long getTuCountByParamMap(Map<String, Object> paramMap)
-			throws SQLException;
-	
-	public abstract long getAllTuCount() throws SQLException;
+    public abstract long getTuCountByParamMap(Map<String, Object> paramMap) throws SQLException;
 
-	public abstract long getTuCountByLocale(Long localeId) throws SQLException;
+    public abstract long getAllTuCount() throws SQLException;
+
+    public abstract long getTuCountByLocale(Long localeId) throws SQLException;
 
     public abstract long getTuvCount(Date start, Date end) throws SQLException;
 
     public abstract void deleteTus(Date start, Date end) throws SQLException;
 
-    public abstract long getTuvCountByLocales(List<TM3Locale> localeList,
-            Date start, Date end) throws SQLException;
-
-    public abstract void deleteTuvsByLocale(TM3Locale locale)
+    public abstract long getTuvCountByLocales(List<TM3Locale> localeList, Date start, Date end)
             throws SQLException;
 
-    public abstract long getTuvCountByAttributes(
-            Map<TM3Attribute, Object> inlineAttrs,
-            Map<TM3Attribute, String> customAttrs, Date start, Date end)
-            throws SQLException;
+    public abstract void deleteTuvsByLocale(TM3Locale locale) throws SQLException;
 
-	public abstract List<TM3Tu<T>> getTuPageByParamMap(long startId, int count,
-			Map<String, Object> paramMap) throws SQLException;
+    public abstract long getTuvCountByAttributes(Map<TM3Attribute, Object> inlineAttrs,
+            Map<TM3Attribute, String> customAttrs, Date start, Date end) throws SQLException;
+
+    public abstract List<TM3Tu<T>> getTuPageByParamMap(long startId, int count,
+            Map<String, Object> paramMap) throws SQLException;
 
     // Support for the "get tu by tuv" hack.
     protected abstract long getTuIdByTuvId(Long tuvId) throws SQLException;
 
-    public boolean doesCustomAttribtueExist(Connection conn, long tuId,
-            long attId) throws SQLException
+    public boolean doesCustomAttribtueExist(Connection conn, long tuId, long attId)
+            throws SQLException
     {
         try
         {
@@ -1178,8 +1396,7 @@ abstract class TuStorage<T extends TM3Data>
             {
                 long tmId = tm.getId();
                 StatementBuilder sb = new StatementBuilder();
-                sb.append("select count(*) from ").append(
-                        storage.getAttrValTableName());
+                sb.append("select count(*) from ").append(storage.getAttrValTableName());
                 sb.append(" where tmId = ? and tuId = ? and attrId = ?");
                 sb.addValues(tmId, tuId, attId);
 
@@ -1198,8 +1415,8 @@ abstract class TuStorage<T extends TM3Data>
         }
     }
 
-    public void saveCustomAttribute(Connection conn, long tuId,
-            TM3Attribute tm3a, String value) throws SQLException
+    public void saveCustomAttribute(Connection conn, long tuId, TM3Attribute tm3a, String value)
+            throws SQLException
     {
         try
         {
@@ -1208,8 +1425,7 @@ abstract class TuStorage<T extends TM3Data>
             {
                 long tmId = tm.getId();
                 StatementBuilder sb = new StatementBuilder();
-                sb.append("INSERT INTO ")
-                        .append(storage.getAttrValTableName())
+                sb.append("INSERT INTO ").append(storage.getAttrValTableName())
                         .append(" (tmId, tuId, attrId, value) VALUES (?, ?, ?, ?)");
                 sb.addValues(tmId, tuId, tm3a.getId(), value);
 
@@ -1222,8 +1438,8 @@ abstract class TuStorage<T extends TM3Data>
         }
     }
 
-    public void updateCustomAttribute(Connection conn, long tuId,
-            TM3Attribute tm3a, String value) throws SQLException
+    public void updateCustomAttribute(Connection conn, long tuId, TM3Attribute tm3a, String value)
+            throws SQLException
     {
         try
         {
@@ -1232,8 +1448,7 @@ abstract class TuStorage<T extends TM3Data>
             {
                 long tmId = tm.getId();
                 StatementBuilder sb = new StatementBuilder();
-                sb.append("UPDATE ")
-                        .append(storage.getAttrValTableName())
+                sb.append("UPDATE ").append(storage.getAttrValTableName())
                         .append(" set value = ? where tmId = ? and tuId = ? and attrId = ?");
                 sb.addValues(value, tmId, tuId, tm3a.getId());
 
@@ -1249,8 +1464,7 @@ abstract class TuStorage<T extends TM3Data>
     @SuppressWarnings("unchecked")
     private TuStorage<T> getTuStorage(Long tm3TmId)
     {
-        BaseTm<T> currentBaseTm = (BaseTm<T>) tm3SegmentTmInfo
-                .getTM3Tm(tm3TmId);
+        BaseTm<T> currentBaseTm = (BaseTm<T>) tm3SegmentTmInfo.getTM3Tm(tm3TmId);
         return currentBaseTm.getStorageInfo().getTuStorage();
     }
 }

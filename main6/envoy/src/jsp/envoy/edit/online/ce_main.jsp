@@ -67,6 +67,7 @@ String cmtTitle = "";
 String cmtStatus = "";
 String cmtPriority = "";
 String cmtCategory = "";
+String cmtSeverity = "";
 String cmtCreatorUserName = "";
 String cmtComment = "";
 List histories = null;
@@ -79,6 +80,7 @@ if (issue != null)
     cmtStatus   = issue.getStatus();
     cmtPriority = issue.getPriority();
     cmtCategory = issue.getCategory();
+    cmtSeverity = issue.getSeverity();
     cmtCreatorUserName  = UserUtil.getUserNameById(issue.getCreatorId());
     histories   = issue.getHistory();
     
@@ -563,10 +565,12 @@ function doOnLoad()
 	</tr>
     <tr class="row1">        
       <td  colspan="3" >
-      <span class="label"><%=bundle.getString("lb_dqf_severity") %>:</span>
+      <span class="label">&nbsp;<%=bundle.getString("lb_dqf_severity") %>:</span>
+        <c:set var="cmtSeverity" value="<%=cmtSeverity%>" />
         <select id="idSeverity" name="idSeverity" onchange="setDirty()" style="width:300">
+            <option value="" selected>&nbsp;</option>
             <c:forEach var="op" items="${severityCategories}">
-                <option title="${op}" value="${op}">${op}</option>
+                <option title="${op}" value="${op}" <c:if test="${op == cmtSeverity}">selected</c:if>>${op}</option>
             </c:forEach>
         </select>
       </td>
@@ -599,8 +603,8 @@ function doOnLoad()
       </td>
   </tr>
   <tr>
-    <td valign="top"><span class="label"><%=bundle.getString("lb_title") %>:</span></td>
-    <td>
+    <td valign="top" align="right"><span class="label"><%=bundle.getString("lb_title") %>:</span></td>
+    <td align="left">
      <% if (b_editSegmentTitle) { %>
       <input id="idTitle" name="idTitle" type="text" size="60" MAXLENGTH="200"
       onchange="setDirty()">
@@ -611,7 +615,7 @@ function doOnLoad()
     </td>
   </tr>
   <tr>
-    <td valign="top"><span class="label"><%=bundle.getString("lb_comment") %>:</span></td>
+    <td valign="top"><span class="label"><span style="color:red">*</span><%=bundle.getString("lb_comment") %>:</span></td>
     <td>
       <textarea id="idComment" name="idComment" rows="4" cols="47" onchange="setDirty()"></textarea>
     </td>
@@ -702,7 +706,7 @@ function doOnLoad()
       </td>
   </tr>
   <tr>
-    <td colspan="2" align="center">
+    <td colspan="4" style="text-align:left;padding-left:160px;">
       <input type="button" id="idCancel" value=<%=bundle.getString("lb_cancel") %>
       onclick="doCancel()" tabindex="1">
       &nbsp;&nbsp;

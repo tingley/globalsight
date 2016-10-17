@@ -54,6 +54,7 @@ public interface CompanyConstants
     public static final String BIG_DATA_STORE_LEVEL = "bigDataStoreLevel";
     public static final String ENABLE_DITA_CHECKS = "enableDitaChecks";
     public static final String ENABLE_WORKFLOW_STATE_POSTS = "enableWorkflowStatePosts";
+    public static final String ENABLE_BLANK_TM_SEARCH = "enableBlankTmSearch";
     public static final String ENABLE_INCTXRV_TOOL_INDD = "enableInCtxRvToolInddField";
     public static final String ENABLE_INCTXRV_TOOL_OFFICE = "enableInCtxRvToolOfficeField";
     public static final String ENABLE_INCTXRV_TOOL_XML = "enableInCtxRvToolXMLField";
@@ -76,8 +77,8 @@ public interface CompanyConstants
 
     /**
      * 2 (job level): "leverage_match_[companyId]_[jobId]",
-     * ""translation_unit_[companyId
-     * ]_[jobId]", "translation_unit_variant_[companyId]_[jobId]".
+     * ""translation_unit_[companyId ]_[jobId]", "
+     * translation_unit_variant_[companyId]_[jobId]".
      */
     public static final Integer BIG_DATA_STORE_LEVEL_JOB = 2;
 }

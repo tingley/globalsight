@@ -190,6 +190,8 @@ public class XmlExtractor extends AbstractExtractor
     private boolean m_isElementPost = false;
     private boolean m_isElementPostToHtml = false;
     private boolean m_isCdataPostToHtml = false;
+    private boolean m_isElementPostToJson = false;
+    private boolean m_isCdataPostToJson = false;
     private boolean m_isOriginalXmlNode = false;
     private List<String> m_originalXmlNode = new ArrayList<String>();
     private boolean m_isCdataPost = false;
@@ -305,10 +307,14 @@ public class XmlExtractor extends AbstractExtractor
             m_isElementPost = m_xmlFilterHelper.isElementPostFilter();
             m_isElementPostToHtml = m_isElementPost
                     ? (IFormatNames.FORMAT_HTML.equals(m_elementPostFormat)) : false;
+            m_isElementPostToJson = m_isElementPost ? (IFormatNames.FORMAT_JSON
+                    .equals(m_elementPostFormat)) : false;
             m_cdataPostFormat = m_xmlFilterHelper.getCdataPostFormat();
             m_isCdataPost = m_xmlFilterHelper.isCdataPostFilter();
-            m_isCdataPostToHtml =  m_isCdataPost
-                    ? (IFormatNames.FORMAT_HTML.equals(m_cdataPostFormat)) : false;
+            m_isCdataPostToHtml = m_isCdataPost ? (IFormatNames.FORMAT_HTML
+                    .equals(m_cdataPostFormat)) : false;
+            m_isCdataPostToJson = m_isCdataPost ? (IFormatNames.FORMAT_JSON
+                    .equals(m_cdataPostFormat)) : false;
                     
             String mainFormat = getMainFormat();
             // get rule map for the document
@@ -2171,7 +2177,8 @@ public class XmlExtractor extends AbstractExtractor
                 String htmlFilterFormat = null;
                 Filter htmlFilterInJson = null;
                 boolean isJsonStr = false;
-                if (!m_isCdataPostToHtml || !m_isElementPostToHtml)
+                if ((!m_isCdataPostToHtml && m_isCdataPostToJson)
+                        || (!m_isElementPostToHtml && m_isElementPostToJson))
                 {
                     isJsonStr = checkTranslateSegementIsJson(replaced);
                     if (!isJsonStr)
@@ -2186,7 +2193,8 @@ public class XmlExtractor extends AbstractExtractor
                 }
 
                 Output output = null;
-                if (!isJsonStr && (!m_isCdataPostToHtml || !m_isElementPostToHtml))
+                if (!isJsonStr
+                        && ((!m_isCdataPostToHtml && m_isCdataPostToJson) || (!m_isElementPostToHtml && m_isElementPostToJson)))
                 {
                     if (htmlFilterFormat != null && htmlFilterInJson != null)
                     {
@@ -2242,6 +2250,12 @@ public class XmlExtractor extends AbstractExtractor
                             {
                                 skeleton = m_xmlEncoder.decodeStringBasic(skeleton);
                             }
+                            
+                            if (isJsonStr)
+                            {
+                                skeleton = m_xmlEncoder.decodeStringBasic(skeleton);
+                            }
+                            
                             if (m_isOriginalXmlNode)
                             {
                                 skeleton = fixOriginalXmlNode(skeleton, m_originalXmlNode, false);

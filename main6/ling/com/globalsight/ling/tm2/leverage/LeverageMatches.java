@@ -66,8 +66,7 @@ import com.globalsight.util.StringUtil;
 
 public class LeverageMatches
 {
-    private static Logger c_logger = Logger.getLogger(LeverageMatches.class
-            .getName());
+    private static Logger c_logger = Logger.getLogger(LeverageMatches.class.getName());
 
     // leverage options
     private LeverageOptions m_leverageOptions = null;
@@ -86,8 +85,7 @@ public class LeverageMatches
     private Job job = null;
 
     // constructor
-    public LeverageMatches(BaseTmTuv p_sourceTuv,
-            LeverageOptions p_leverageOptions)
+    public LeverageMatches(BaseTmTuv p_sourceTuv, LeverageOptions p_leverageOptions)
     {
         m_originalSourceTuv = p_sourceTuv;
         m_leverageOptions = p_leverageOptions;
@@ -119,11 +117,10 @@ public class LeverageMatches
                         tu.setMatchState(MatchState.TYPE_DIFFERENT);
 
                         // type sensitive leveraging?
-                        if (m_leverageOptions
-                                .isTypeSensitiveLeveragingForReimport())
+                        if (m_leverageOptions.isTypeSensitiveLeveragingForReimport())
                         {
-                            tu.setScore(100 - m_leverageOptions
-                                    .getTypeDifferencePenaltyForReimport());
+                            tu.setScore(
+                                    100 - m_leverageOptions.getTypeDifferencePenaltyForReimport());
                         }
                     }
                 }
@@ -166,10 +163,8 @@ public class LeverageMatches
                     repairPlaceholders(tu);
                 }
 
-                String originalFuzzyFormat = m_originalSourceTuv
-                        .getFuzzyIndexFormat();
-                String matchedSrcFuzzyFormat = tu.getSourceTuv()
-                        .getFuzzyIndexFormat();
+                String originalFuzzyFormat = m_originalSourceTuv.getFuzzyIndexFormat();
+                String matchedSrcFuzzyFormat = tu.getSourceTuv().getFuzzyIndexFormat();
 
                 String originalText = m_originalSourceTuv.getExactMatchFormat();
                 String matchedSrcText = tu.getSourceTuv().getExactMatchFormat();
@@ -177,7 +172,9 @@ public class LeverageMatches
                 c_logger.debug("originalText: " + originalText);
                 c_logger.debug("matchedSrcText: " + matchedSrcText);
 
-                if (!originalFuzzyFormat.equals(matchedSrcFuzzyFormat))
+                // GBS-3990, the search text could be blank
+                if (!"".equals(originalText) && !"*".equals(originalText)
+                        && !originalFuzzyFormat.equals(matchedSrcFuzzyFormat))
                 {
                     // Even if the fuzzy match score is 100%, fuzzy
                     // index format is not equal. That means that the
@@ -185,8 +182,7 @@ public class LeverageMatches
                     // might be different or stop words might be
                     // different. Recalculate the score using n-gram
                     // indexing and demote to fuzzy.
-                    float score = ngramScore(originalFuzzyFormat,
-                            matchedSrcFuzzyFormat);
+                    float score = ngramScore(originalFuzzyFormat, matchedSrcFuzzyFormat);
 
                     if (score < m_leverageOptions.getMatchThreshold())
                     {
@@ -214,15 +210,13 @@ public class LeverageMatches
                         // type sensitive leveraging?
                         if (m_leverageOptions.isTypeSensitiveLeveraging())
                         {
-                            tu.setScore(100 - m_leverageOptions
-                                    .getTypeDifferencePenalty());
+                            tu.setScore(100 - m_leverageOptions.getTypeDifferencePenalty());
                         }
                     }
                 }
                 else
                 {
-                    c_logger.debug("Tu " + tu.getId()
-                            + " is quasi exact match.");
+                    c_logger.debug("Tu " + tu.getId() + " is quasi exact match.");
 
                     setOptionAppliedScore(tu);
                 }
@@ -232,32 +226,33 @@ public class LeverageMatches
 
             try
             {
-				// As we have not implemented in-progress TM for GBS-3650, below
-				// rules only apply for golden TM matches.
-    			if (tu instanceof LeveragedSegmentTu && !isAllTmpAttrMatched(tu))
+                // As we have not implemented in-progress TM for GBS-3650, below
+                // rules only apply for golden TM matches.
+                if (tu instanceof LeveragedSegmentTu && !isAllTmpAttrMatched(tu))
                 {
                     TranslationMemoryProfile tmp = m_leverageOptions.getTmProfile();
-    				// "Disregard if TU attributes not matched"
-    				if (TranslationMemoryProfile.CHOICE_DISREGARD.equals(tmp.getChoiceIfAttNotMatch()))
-    				{
-    					itLeveragedTu.remove();
-    				}
-    				// "Penalize if TU attributes not matched"
-    				else
-    				{
-    	                float score = tu.getScore();
-    	                float oriscore = score;
-    					score = score - tmp.getTuAttNotMatchPenalty();
-    					if (score < 0)
-    					{
-    						score = 0;
-    					}
-    	    			tu.setScore(score);
-    	                if (oriscore > score)
-    	                {
-    	                    tu.setMatchState(MatchState.FUZZY_MATCH);
-    	                }
-    				}
+                    // "Disregard if TU attributes not matched"
+                    if (TranslationMemoryProfile.CHOICE_DISREGARD
+                            .equals(tmp.getChoiceIfAttNotMatch()))
+                    {
+                        itLeveragedTu.remove();
+                    }
+                    // "Penalize if TU attributes not matched"
+                    else
+                    {
+                        float score = tu.getScore();
+                        float oriscore = score;
+                        score = score - tmp.getTuAttNotMatchPenalty();
+                        if (score < 0)
+                        {
+                            score = 0;
+                        }
+                        tu.setScore(score);
+                        if (oriscore > score)
+                        {
+                            tu.setMatchState(MatchState.FUZZY_MATCH);
+                        }
+                    }
                 }
             }
             catch (Exception e)
@@ -273,8 +268,7 @@ public class LeverageMatches
      */
     private void removeInvalidLeveragedTus()
     {
-        for (Iterator itLeveragedTu = m_leveragedTus.iterator(); itLeveragedTu
-                .hasNext();)
+        for (Iterator itLeveragedTu = m_leveragedTus.iterator(); itLeveragedTu.hasNext();)
         {
             LeveragedTu tu = (LeveragedTu) itLeveragedTu.next();
             if (tu.getSourceTuv() == null)
@@ -307,8 +301,8 @@ public class LeverageMatches
 
         Set<ProjectTmTuTProp> tuProps = null;
         List<TMPAttribute> tmpAtts = tmp.getAllTMPAttributes();
-		SortUtil.sort(tmpAtts, new TMPAttributeComparator(
-				TMPAttributeComparator.ORDER, Locale.ENGLISH));
+        SortUtil.sort(tmpAtts,
+                new TMPAttributeComparator(TMPAttributeComparator.ORDER, Locale.ENGLISH));
 
         if (!isTM3)
         {
@@ -328,23 +322,20 @@ public class LeverageMatches
             TM3Tm tm3tm = null;
             try
             {
-                tm3tm = DefaultManager.create().getTm(new GSDataFactory(),
-                        ptm.getTm3Id());
+                tm3tm = DefaultManager.create().getTm(new GSDataFactory(), ptm.getTm3Id());
                 if (tm3tm != null)
                 {
                     TM3Tu tm3tu = tm3tm.getTu(tuId);
                     if (tm3tu == null)
                         return false;
 
-                    Map<TM3Attribute, Object> tm3Attributes = tm3tu
-                            .getAttributes();
+                    Map<TM3Attribute, Object> tm3Attributes = tm3tu.getAttributes();
                     if (tm3Attributes != null && !tm3Attributes.isEmpty())
                     {
-                        for (Map.Entry<TM3Attribute, Object> tmAt : tm3Attributes
-                                .entrySet())
+                        for (Map.Entry<TM3Attribute, Object> tmAt : tm3Attributes.entrySet())
                         {
-                            ProjectTmTuTProp prop = TM3Util.toProjectTmTuTProp(
-                                    tmAt.getKey(), tmAt.getValue());
+                            ProjectTmTuTProp prop = TM3Util.toProjectTmTuTProp(tmAt.getKey(),
+                                    tmAt.getValue());
 
                             if (prop != null)
                             {
@@ -394,8 +385,7 @@ public class LeverageMatches
                     c_logger.debug("jobAtts : ");
                     for (JobAttribute jobAtt : jobAtts)
                     {
-                        c_logger.debug(jobAtt.getAttribute().getName() + " : "
-                                + jobAtt.getValue());
+                        c_logger.debug(jobAtt.getAttribute().getName() + " : " + jobAtt.getValue());
                     }
                 }
                 else
@@ -409,24 +399,23 @@ public class LeverageMatches
             }
         }
 
-		boolean isFinalMatched = true;
+        boolean isFinalMatched = true;
         if (tmpAtts != null && tmpAtts.size() > 0)
         {
-        	// Record if it is matched of every TM profile attributes separately.
-        	List<Boolean> matchedList = new ArrayList<Boolean>();
-			for (TMPAttribute tmpAtt : tmpAtts)
+            // Record if it is matched of every TM profile attributes
+            // separately.
+            List<Boolean> matchedList = new ArrayList<Boolean>();
+            for (TMPAttribute tmpAtt : tmpAtts)
             {
                 String tmpAttValueType = tmpAtt.getValueType();
                 String tmpAttName = tmpAtt.getAttributeName();
                 String tmpAttOp = tmpAtt.getOperator();
                 Object jobAttValue = null;
                 // get attribute value of TU
-                String tuAttValue = ProjectTmTuTProp.getAttributeValue(tuProps,
-                        tmpAttName);
+                String tuAttValue = ProjectTmTuTProp.getAttributeValue(tuProps, tmpAttName);
 
                 // get job attribute value if needed
-                if (tmpAttValueType.equals(TMAttributeCons.VALUE_FROM_JOBATT)
-                        && job != null)
+                if (tmpAttValueType.equals(TMAttributeCons.VALUE_FROM_JOBATT) && job != null)
                 {
                     List<JobAttribute> jobAtts = null;
                     if (job instanceof JobImpl)
@@ -442,8 +431,7 @@ public class LeverageMatches
                     {
                         for (JobAttribute jobAtt : jobAtts)
                         {
-                            if (jobAtt.getAttribute().getName()
-                                    .equalsIgnoreCase(tmpAttName))
+                            if (jobAtt.getAttribute().getName().equalsIgnoreCase(tmpAttName))
                             {
                                 Object v = jobAtt.getValue();
                                 jobAttValue = v == null ? "" : v;
@@ -459,53 +447,52 @@ public class LeverageMatches
                 Boolean matched = false;
                 try
                 {
-					matched = TMAttributeManager.isTMPAttributeMatched(
-							tmpAttOp, tuAttValue, jobAttValue);
+                    matched = TMAttributeManager.isTMPAttributeMatched(tmpAttOp, tuAttValue,
+                            jobAttValue);
                 }
                 catch (Exception e)
                 {
-                	c_logger.error(e);
+                    c_logger.error(e);
                 }
-				matchedList.add(new Boolean(matched));
+                matchedList.add(new Boolean(matched));
             }
 
-			// Decide if it is matched for all TM profile TU attributes.
-			String curAndOr = null;
-			boolean preMatched = false;
-			boolean curMatched = false;
-			for (int i = 0; i < tmpAtts.size(); i++)
-			{
-				TMPAttribute tmpAtt = tmpAtts.get(i);
-				if (i == 0)
-				{
-					preMatched = matchedList.get(i);
-					isFinalMatched = preMatched;
-				}
-				else
-				{
-					curAndOr = tmpAtt.getAndOr();
-					curMatched = matchedList.get(i);
-					if ("and".equalsIgnoreCase(curAndOr))
-					{
-						isFinalMatched = preMatched && curMatched;
-						preMatched = isFinalMatched;
-					}
-					else
-					{
-						isFinalMatched = preMatched || curMatched;
-						preMatched = isFinalMatched;
-					}
+            // Decide if it is matched for all TM profile TU attributes.
+            String curAndOr = null;
+            boolean preMatched = false;
+            boolean curMatched = false;
+            for (int i = 0; i < tmpAtts.size(); i++)
+            {
+                TMPAttribute tmpAtt = tmpAtts.get(i);
+                if (i == 0)
+                {
+                    preMatched = matchedList.get(i);
+                    isFinalMatched = preMatched;
+                }
+                else
+                {
+                    curAndOr = tmpAtt.getAndOr();
+                    curMatched = matchedList.get(i);
+                    if ("and".equalsIgnoreCase(curAndOr))
+                    {
+                        isFinalMatched = preMatched && curMatched;
+                        preMatched = isFinalMatched;
+                    }
+                    else
+                    {
+                        isFinalMatched = preMatched || curMatched;
+                        preMatched = isFinalMatched;
+                    }
 
-					// If up to now it is false, and the next is "and", the
-					// result must be false.
-					if (!preMatched
-							&& (i + 1 < tmpAtts.size())
-							&& "and".equalsIgnoreCase(tmpAtts.get(i + 1).getAndOr()))
-					{
-						break;
-					}
-				}
-			}
+                    // If up to now it is false, and the next is "and", the
+                    // result must be false.
+                    if (!preMatched && (i + 1 < tmpAtts.size())
+                            && "and".equalsIgnoreCase(tmpAtts.get(i + 1).getAndOr()))
+                    {
+                        break;
+                    }
+                }
+            }
         }
 
         return isFinalMatched;
@@ -565,17 +552,14 @@ public class LeverageMatches
 
         // break up the original source segment and put them in a Map
         // (sub id as key, LeverageMatches as value)
-        Collection brokenUpSource = TmUtil.createSegmentTmTus(
-                m_originalSourceTuv.getTu(), sourceLocale);
+        Collection brokenUpSource = TmUtil.createSegmentTmTus(m_originalSourceTuv.getTu(),
+                sourceLocale);
         Iterator itBrokenUpSource = brokenUpSource.iterator();
         while (itBrokenUpSource.hasNext())
         {
-            SegmentTmTu brokenUpSourceTu = (SegmentTmTu) itBrokenUpSource
-                    .next();
-            brokenUpLevMatches.put(
-                    brokenUpSourceTu.getSubId(),
-                    new LeverageMatches(brokenUpSourceTu
-                            .getFirstTuv(sourceLocale), m_leverageOptions));
+            SegmentTmTu brokenUpSourceTu = (SegmentTmTu) itBrokenUpSource.next();
+            brokenUpLevMatches.put(brokenUpSourceTu.getSubId(), new LeverageMatches(
+                    brokenUpSourceTu.getFirstTuv(sourceLocale), m_leverageOptions));
         }
 
         // break up each element of m_leveragedTus and add broken up
@@ -583,14 +567,12 @@ public class LeverageMatches
         Iterator itLeveragedPageTu = m_leveragedTus.iterator();
         while (itLeveragedPageTu.hasNext())
         {
-            LeveragedTu leveragedPageTu = (LeveragedTu) itLeveragedPageTu
-                    .next();
-            Iterator itBrokenUpPageTu = TmUtil.createSegmentTmTus(
-                    leveragedPageTu, sourceLocale).iterator();
+            LeveragedTu leveragedPageTu = (LeveragedTu) itLeveragedPageTu.next();
+            Iterator itBrokenUpPageTu = TmUtil.createSegmentTmTus(leveragedPageTu, sourceLocale)
+                    .iterator();
             while (itBrokenUpPageTu.hasNext())
             {
-                SegmentTmTu brokenUpPageTu = (SegmentTmTu) itBrokenUpPageTu
-                        .next();
+                SegmentTmTu brokenUpPageTu = (SegmentTmTu) itBrokenUpPageTu.next();
 
                 LeverageMatches levMatch = (LeverageMatches) brokenUpLevMatches
                         .get(brokenUpPageTu.getSubId());
@@ -669,8 +651,7 @@ public class LeverageMatches
      * @return exact match for a given locale. If there is no exact match for
      *         the locale, null is returned.
      */
-    public LeveragedTuv getExactLeverageMatch(GlobalSightLocale p_targetLocale,
-            Long p_jobId)
+    public LeveragedTuv getExactLeverageMatch(GlobalSightLocale p_targetLocale, Long p_jobId)
     {
         if (m_orderedMatchSegments == null)
         {
@@ -706,8 +687,7 @@ public class LeverageMatches
         {
             if (!m_originalSourceTuv.equals(p_other.m_originalSourceTuv))
             {
-                throw new LingManagerException("LevMatchesMergeUnequalOrig",
-                        null, null);
+                throw new LingManagerException("LevMatchesMergeUnequalOrig", null, null);
             }
 
             m_orderedMatchSegments = null;
@@ -718,15 +698,14 @@ public class LeverageMatches
             }
         }
     }
-    
+
     public void merge(LeverageMatches p_other, GlobalSightLocale targetLocale) throws Exception
     {
         if (p_other != null)
         {
             if (!m_originalSourceTuv.equals(p_other.m_originalSourceTuv))
             {
-                throw new LingManagerException("LevMatchesMergeUnequalOrig",
-                        null, null);
+                throw new LingManagerException("LevMatchesMergeUnequalOrig", null, null);
             }
 
             m_orderedMatchSegments = null;
@@ -806,18 +785,22 @@ public class LeverageMatches
             populateOrderedMatchSegments(p_jobId);
         }
 
-        return m_orderedMatchSegments.matchIterator(p_targetLocale,
-                m_leverageOptions.getNumberOfMatchesReturned(), Math.min(
-                        m_leverageOptions.getMatchThreshold(),
-                        FuzzyMatcher.MIN_MATCH_POINT));
+        int numberOfMatchesReturned = m_leverageOptions.getNumberOfMatchesReturned();
+        if (m_leverageOptions.isFromTMSearchPage())
+        {
+            // GBS-3990, if from tm search page, do not limit the
+            // numberOfMatchesReturned here
+            numberOfMatchesReturned = -1;
+        }
+        return m_orderedMatchSegments.matchIterator(p_targetLocale, numberOfMatchesReturned,
+                Math.min(m_leverageOptions.getMatchThreshold(), FuzzyMatcher.MIN_MATCH_POINT));
     }
 
     // build m_orderedMatchSegments
     private void populateOrderedMatchSegments(long p_jobId)
     {
         m_orderedMatchSegments = new OrderedMatchSegments();
-        m_orderedMatchSegments.populate(m_leveragedTus, m_leverageOptions,
-                p_jobId);
+        m_orderedMatchSegments.populate(m_leveragedTus, m_leverageOptions, p_jobId);
     }
 
     private void setOptionAppliedScore(LeveragedTu p_tu) throws Exception
@@ -838,48 +821,40 @@ public class LeverageMatches
                     && !p_tu.getType().equals(m_originalSourceTuv.getType()))
             {
                 p_tu.setMatchState(MatchState.TYPE_DIFFERENT);
-                p_tu.setScore(100 - m_leverageOptions
-                        .getTypeDifferencePenalty());
+                p_tu.setScore(100 - m_leverageOptions.getTypeDifferencePenalty());
             }
             // if code is different but the code difference cannot
             // allow 100% match, demote the match
             // GBS-615, add code-sensitive leveraging check
-            else if (m_leverageOptions.isCodeSensitiveLeveraging()
-                    && codeDifferent
+            else if (m_leverageOptions.isCodeSensitiveLeveraging() && codeDifferent
                     && !canCodeDifferenceBe100Percent(sourceTuv, matchedTuv))
             {
                 p_tu.setMatchState(MatchState.CODE_DIFFERENT);
-                p_tu.setScore(100 - m_leverageOptions
-                        .getCodeDifferencePenalty());
+                p_tu.setScore(100 - m_leverageOptions.getCodeDifferencePenalty());
             }
             else
             {
                 // score stays 100%. Find a right state.
-                p_tu.setMatchState(getMatchStateForQuasiExact(wsDifferent,
-                        caseDifferent, codeDifferent));
+                p_tu.setMatchState(
+                        getMatchStateForQuasiExact(wsDifferent, caseDifferent, codeDifferent));
             }
         }
         // Can not be 100%. Demote the match.
         else
         {
-            p_tu.setMatchState(getMatchStateForDemoted(wsDifferent,
-                    caseDifferent, codeDifferent));
-            p_tu.setScore(getMatchScore(wsDifferent, caseDifferent,
-                    codeDifferent));
+            p_tu.setMatchState(getMatchStateForDemoted(wsDifferent, caseDifferent, codeDifferent));
+            p_tu.setScore(getMatchScore(wsDifferent, caseDifferent, codeDifferent));
         }
     }
 
-    private boolean canBecomeExact(boolean p_wsDifferent,
-            boolean p_caseDifferent, boolean p_codeDifferent)
+    private boolean canBecomeExact(boolean p_wsDifferent, boolean p_caseDifferent,
+            boolean p_codeDifferent)
     {
         boolean canExact = true;
 
-        if ((p_wsDifferent && m_leverageOptions
-                .isWhiteSpaceSensitiveLeveraging())
-                || (p_caseDifferent && m_leverageOptions
-                        .isCaseSensitiveLeveraging())
-                || (p_codeDifferent && m_leverageOptions
-                        .isCodeSensitiveLeveraging()))
+        if ((p_wsDifferent && m_leverageOptions.isWhiteSpaceSensitiveLeveraging())
+                || (p_caseDifferent && m_leverageOptions.isCaseSensitiveLeveraging())
+                || (p_codeDifferent && m_leverageOptions.isCodeSensitiveLeveraging()))
         {
             canExact = false;
         }
@@ -887,23 +862,20 @@ public class LeverageMatches
         return canExact;
     }
 
-    private MatchState getMatchStateForDemoted(boolean p_wsDifferent,
-            boolean p_caseDifferent, boolean p_codeDifferent)
+    private MatchState getMatchStateForDemoted(boolean p_wsDifferent, boolean p_caseDifferent,
+            boolean p_codeDifferent)
     {
         MatchState state = null;
 
-        if (p_wsDifferent
-                && m_leverageOptions.isWhiteSpaceSensitiveLeveraging())
+        if (p_wsDifferent && m_leverageOptions.isWhiteSpaceSensitiveLeveraging())
         {
             state = MatchState.WHITESPACE_DIFFERENT;
         }
-        else if (p_caseDifferent
-                && m_leverageOptions.isCaseSensitiveLeveraging())
+        else if (p_caseDifferent && m_leverageOptions.isCaseSensitiveLeveraging())
         {
             state = MatchState.CASE_DIFFERENT;
         }
-        else if (p_codeDifferent
-                && m_leverageOptions.isCodeSensitiveLeveraging())
+        else if (p_codeDifferent && m_leverageOptions.isCodeSensitiveLeveraging())
         {
             state = MatchState.CODE_DIFFERENT;
         }
@@ -917,8 +889,8 @@ public class LeverageMatches
         return state;
     }
 
-    private MatchState getMatchStateForQuasiExact(boolean p_wsDifferent,
-            boolean p_caseDifferent, boolean p_codeDifferent)
+    private MatchState getMatchStateForQuasiExact(boolean p_wsDifferent, boolean p_caseDifferent,
+            boolean p_codeDifferent)
     {
         MatchState state = null;
 
@@ -949,8 +921,7 @@ public class LeverageMatches
     {
         int score = 100;
 
-        if (p_wsDifferent
-                && m_leverageOptions.isWhiteSpaceSensitiveLeveraging())
+        if (p_wsDifferent && m_leverageOptions.isWhiteSpaceSensitiveLeveraging())
         {
             score = score - m_leverageOptions.getWhiteSpaceDifferencePenalty();
         }
@@ -968,8 +939,8 @@ public class LeverageMatches
         return score;
     }
 
-    private boolean isWhitespaceDifferent(SegmentTmTuv p_sourceTuv,
-            SegmentTmTuv p_matchedTuv) throws Exception
+    private boolean isWhitespaceDifferent(SegmentTmTuv p_sourceTuv, SegmentTmTuv p_matchedTuv)
+            throws Exception
     {
         String sourceString;
         String matchString;
@@ -979,16 +950,16 @@ public class LeverageMatches
         matchString = p_matchedTuv.getNoCodeFormat();
 
         // normalize case
-        sourceString = sourceString.toLowerCase(((SegmentTmTu) p_sourceTuv
-                .getTu()).getSourceLocale().getLocale());
-        matchString = matchString.toLowerCase(((SegmentTmTu) p_matchedTuv
-                .getTu()).getSourceLocale().getLocale());
+        sourceString = sourceString
+                .toLowerCase(((SegmentTmTu) p_sourceTuv.getTu()).getSourceLocale().getLocale());
+        matchString = matchString
+                .toLowerCase(((SegmentTmTu) p_matchedTuv.getTu()).getSourceLocale().getLocale());
 
         return !sourceString.equals(matchString);
     }
 
-    private boolean isCaseDifferent(SegmentTmTuv p_sourceTuv,
-            SegmentTmTuv p_matchedTuv) throws Exception
+    private boolean isCaseDifferent(SegmentTmTuv p_sourceTuv, SegmentTmTuv p_matchedTuv)
+            throws Exception
     {
         String sourceString;
         String matchString;
@@ -1004,8 +975,8 @@ public class LeverageMatches
         return !sourceString.equals(matchString);
     }
 
-    private boolean isCodeDifferent(SegmentTmTuv p_sourceTuv,
-            SegmentTmTuv p_matchedTuv) throws Exception
+    private boolean isCodeDifferent(SegmentTmTuv p_sourceTuv, SegmentTmTuv p_matchedTuv)
+            throws Exception
     {
         String sourceString;
         String matchString;
@@ -1015,10 +986,10 @@ public class LeverageMatches
         matchString = p_matchedTuv.getExactMatchFormat();
 
         // normalize case
-        sourceString = sourceString.toLowerCase(((SegmentTmTu) p_sourceTuv
-                .getTu()).getSourceLocale().getLocale());
-        matchString = matchString.toLowerCase(((SegmentTmTu) p_matchedTuv
-                .getTu()).getSourceLocale().getLocale());
+        sourceString = sourceString
+                .toLowerCase(((SegmentTmTu) p_sourceTuv.getTu()).getSourceLocale().getLocale());
+        matchString = matchString
+                .toLowerCase(((SegmentTmTu) p_matchedTuv.getTu()).getSourceLocale().getLocale());
 
         // normalize whitespace
         sourceString = Text.normalizeWhiteSpaceForTm(" " + sourceString + " ");
@@ -1027,42 +998,32 @@ public class LeverageMatches
         return !sourceString.equals(matchString);
     }
 
-    private boolean canCodeDifferenceBe100Percent(
-            SegmentTmTuv p_originalSourceTuv, SegmentTmTuv p_matchedSourceTuv)
-            throws Exception
+    private boolean canCodeDifferenceBe100Percent(SegmentTmTuv p_originalSourceTuv,
+            SegmentTmTuv p_matchedSourceTuv) throws Exception
     {
-        TmxTagStatistics originalStatistics = p_originalSourceTuv
-                .getTmxTagStatistics();
-        TmxTagStatistics matchedStatistics = p_matchedSourceTuv
-                .getTmxTagStatistics();
+        TmxTagStatistics originalStatistics = p_originalSourceTuv.getTmxTagStatistics();
+        TmxTagStatistics matchedStatistics = p_matchedSourceTuv.getTmxTagStatistics();
 
         if (c_logger.isDebugEnabled())
         {
-            c_logger.debug("originalStatistics = "
-                    + originalStatistics.toDebugString());
-            c_logger.debug("matchedStatistics = "
-                    + matchedStatistics.toDebugString());            
+            c_logger.debug("originalStatistics = " + originalStatistics.toDebugString());
+            c_logger.debug("matchedStatistics = " + matchedStatistics.toDebugString());
         }
 
         return originalStatistics.areSame(matchedStatistics);
     }
 
-    private float ngramScore(String p_originalText, String p_matchedText)
-            throws Exception
+    private float ngramScore(String p_originalText, String p_matchedText) throws Exception
     {
         NgramTokenizer tokenizer = new NgramTokenizer();
 
         // parameter 2 to 6 of NgramTokenizer.tokenize() method are
         // all dummy.
-        List originalTokens = tokenizer.tokenize(p_originalText, 1, 1, 1, null,
-                true);
-        List matchedTokens = tokenizer.tokenize(p_matchedText, 1, 1, 1, null,
-                true);
+        List originalTokens = tokenizer.tokenize(p_originalText, 1, 1, 1, null, true);
+        List matchedTokens = tokenizer.tokenize(p_matchedText, 1, 1, 1, null, true);
 
-        int originalTokensCount = ((Token) originalTokens.get(0))
-                .getTotalTokenCount();
-        int matchedTokensCount = ((Token) matchedTokens.get(0))
-                .getTotalTokenCount();
+        int originalTokensCount = ((Token) originalTokens.get(0)).getTotalTokenCount();
+        int matchedTokensCount = ((Token) matchedTokens.get(0)).getTotalTokenCount();
 
         // build a map of original tokens
         Map originalTokensMap = new HashMap();
@@ -1080,18 +1041,16 @@ public class LeverageMatches
         while (it.hasNext())
         {
             Token matchToken = (Token) it.next();
-            Token orgToken = (Token) originalTokensMap.get(matchToken
-                    .getTokenString());
+            Token orgToken = (Token) originalTokensMap.get(matchToken.getTokenString());
 
             if (orgToken != null)
             {
-                sharedTokenCount += Math.min(matchToken.getRepetition(),
-                        orgToken.getRepetition());
+                sharedTokenCount += Math.min(matchToken.getRepetition(), orgToken.getRepetition());
             }
         }
 
-        float result = ((float) (2 * sharedTokenCount)
-                / (originalTokensCount + matchedTokensCount) * 100);
+        float result = ((float) (2 * sharedTokenCount) / (originalTokensCount + matchedTokensCount)
+                * 100);
 
         return result;
     }
@@ -1110,20 +1069,22 @@ public class LeverageMatches
                 String refTms = m_leverageOptions.getRefTMsToLeverageFrom();
                 if (!StringUtil.isEmpty(refTms))
                 {
-                    List<Long> refTmIdsForPenalty = new ArrayList<Long>(); 
+                    List<Long> refTmIdsForPenalty = new ArrayList<Long>();
                     String[] ids = refTms.split(",");
-                    for (int i=0; i<ids.length; i++)
+                    for (int i = 0; i < ids.length; i++)
                     {
-                        try {
+                        try
+                        {
                             refTmIdsForPenalty.add(Long.parseLong(ids[i]));
-                        } catch (Exception ignore) {
+                        }
+                        catch (Exception ignore)
+                        {
 
                         }
                     }
                     if (refTmIdsForPenalty.contains(p_tu.getTmId()))
                     {
-                        float score = (p_tu.getScore() - m_leverageOptions
-                                .getRefTmPenalty());
+                        float score = (p_tu.getScore() - m_leverageOptions.getRefTmPenalty());
                         p_tu.setScore(score);
                         p_tu.setMatchState(MatchState.FUZZY_MATCH);
                     }
@@ -1154,13 +1115,19 @@ public class LeverageMatches
     private void repairPlaceholders(LeveragedTu tu) throws Exception
     {
         SegmentTmTuv sourceTuv = (SegmentTmTuv) m_originalSourceTuv;
+        GlobalSightLocale sourceLocale = ((SegmentTmTu) sourceTuv.getTu()).getSourceLocale();
+        // GBS-3990, source locale could be blank from search
+        if (sourceLocale == null)
+        {
+            sourceTuv.setLocale(tu.getSourceLocale());
+            ((SegmentTmTu) sourceTuv.getTu()).setSourceLocale(tu.getSourceLocale());
+        }
         SegmentTmTuv matchedTuv = (SegmentTmTuv) tu.getSourceTuv();
 
         if (isCodeDifferent(sourceTuv, matchedTuv))
         {
-            PlaceholderHander hander = new PlaceholderHander(
-                    (SegmentTmTuv) m_originalSourceTuv, (SegmentTmTu) tu,
-                    m_leverageOptions.getSaveTmId());
+            PlaceholderHander hander = new PlaceholderHander((SegmentTmTuv) m_originalSourceTuv,
+                    (SegmentTmTu) tu, m_leverageOptions.getSaveTmId());
             hander.repair();
         }
     }
@@ -1184,6 +1151,6 @@ public class LeverageMatches
             LeveragedTu tu = (LeveragedTu) it.next();
             tu.removeTuvsForLocale(gsl);
         }
-        
+
     }
 }

@@ -242,11 +242,56 @@ $("#lb_terminology").attr("title","<%=bundle.getString("lb_terminology_title")%>
 </TABLE>
 <br>
 </form>
+<div class="standardText">DQF Information</div>
+<form id="dqfForm" name="dqfForm" method="post" action="/globalsight/ControlServlet?linkName=jobScorecard&pageName=SCORECARD&jobId=${jobId}&action=updateDQF">
+  <input type="hidden" name="currentWfId" id="currentWfId" value="">
+  <table id="dqfTable" name="dqfTable" CELLSPACING="0" CELLPADDING="2" style="border:solid 1px slategray;">
+    <thead CLASS="tableHeadingBasic">
+      <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">Target Locale</th>
+      <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">Fluency</th>
+      <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">Adequacy</th>
+      <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">Comment</th>
+      <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">&nbsp;</th>
+    </thead>
+    <tbody>
+      <c:forEach var="data" items="${dqfData}">
+        <tr BGCOLOR="<%=toggleBgColor(rowNum++)%>">
+          <td style="text-align:center" class="standardText">
+            <c:out value="${data.targetLocale}" />
+          </td>
+          <td style="text-align:left;width:150px;" class="standardText">
+            <input type="hidden" id="fluency${data.workflowId}" name="fluency${data.workflowId}" value="${data.fluency}" />
+            <div id="fluencySet${data.workflowId}">
+                <c:out value="${data.fluency}" />
+            </div>
+          </td>
+          <td style="text-align:left;width:100px;" class="standardText">
+            <input type="hidden" id="adequacy${data.workflowId}" name="adequacy${data.workflowId}" value="${data.adequacy}" />
+            <div id="adequacySet${data.workflowId}">
+                <c:out value="${data.adequacy}" />
+            </div>
+          </td>
+          <td style="text-align:left;width:450px;" class="standardText">
+            <input type="hidden" id="dqfCommentData${data.workflowId}" name="dqfCommentData${data.workflowId}" value="${data.comment}" />
+            <div id="dqfComment${data.workflowId}"">
+              <c:out value="${data.comment}" />
+            </div>
+          </td>
+          <td style="text-align:center">
+		    <input id="saveDQFBtn${data.workflowId}" type="button" value="Save" onclick="saveDQF(${data.workflowId})" style="text-align:center;vertical-align:middle;display:none;"/>
+		    <input id="editDQFBtn${data.workflowId}" type="button" value="Edit" onclick="editDQF(${data.workflowId})"/>
+          </td>
+        </tr>
+      </c:forEach>
+    </tbody>
+  </table>
+</form>
 </div>
 
 <script src="/globalsight/jquery/jquery.progressbar.js"></script>
 <script src="/globalsight/envoy/projects/workflows/jobDetails.js"></script>
 <script type="text/javascript">
+var notSave = false;
 var needWarning = false;
 var guideNode = "myJobs";
 var helpFile = "<%=bundle.getString("help_job_scorecard")%>";
@@ -270,6 +315,51 @@ $(document).ready(function(){
 		$(this).hide();
 	})
 })
+
+function editDQF(index) {
+    if (notSave) {
+        alert("Please save current DQF data and then edit another one.");
+        return false;
+    }
+    var $fluency = $("#fluencySet" + index);
+    
+    var str = "<select id='fluencyScore' name='fluencyScore'>";
+    <c:forEach var="fluency" items="${fluencyCategories}">
+      str += "<option value='${fluency}'>${fluency}</option>";
+    </c:forEach>
+    str += "</select>";
+    $fluency.html("").append(str);
+    $("#fluencyScore").val($("#fluency" + index).val());
+    
+    var $adequacy = $("#adequacySet" + index);
+    str = "<select id='adequacyScore' name='adequacyScore'>";
+    <c:forEach var="adequacy" items="${adequacyCategories}">
+      str += "<option value='${adequacy}'>${adequacy}</option>";
+    </c:forEach>
+    str += "</select>";
+    $adequacy.html("").append(str);
+    $("#adequacyScore").val($("#adequacy" + index).val());
+    
+    var $dqfComment = $("#dqfComment" + index);
+    $dqfComment.html("");
+    $dqfComment.append("<textarea id='dqfComment' name='dqfComment' rows=3 cols=50>" + $("#dqfCommentData" + index).val() + "</textarea>");
+    
+    $("#saveDQFBtn" + index).css("display", "");
+    $("#editDQFBtn" + index).css("display", "none");
+    
+    notSave = true;
+}
+
+function saveDQF(index) {
+    if ($.trim($("#dqfComment").val()) == "") {
+        alert("Please fill in the comment for the DQF.");
+        return false;
+    }
+    
+    notSave = false;
+    $("#currentWfId").val(index);
+    $("#dqfForm").submit();
+}
 
 function editScore(workflowId)
 {

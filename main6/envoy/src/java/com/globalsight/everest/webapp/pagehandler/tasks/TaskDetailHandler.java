@@ -351,6 +351,7 @@ public class TaskDetailHandler extends PageHandler
             String dqfComment = wf.getDQFComment();
             String fluencyScore = wf.getFluencyScore();
             String adequacyScore = wf.getAdequacyScore();
+            boolean isDQFDone = StringUtil.isNotEmpty(dqfComment);
 
             sessionMgr.setAttribute("scorecardCategories", scorecardCategories);
             sessionMgr.setAttribute("scorecard", scorecardMap);
@@ -364,6 +365,7 @@ public class TaskDetailHandler extends PageHandler
             sessionMgr.setAttribute("dqfComment", dqfComment);
             sessionMgr.setAttribute("fluencyScore", fluencyScore);
             sessionMgr.setAttribute("adequacyScore", adequacyScore);
+            sessionMgr.setAttribute("isDQFDone", isDQFDone);
             if (StringUtil.isEmpty(scorecardComment))
                 scorecardComment = "";
             sessionMgr.setAttribute("scorecardComment", scorecardComment);
@@ -393,9 +395,6 @@ public class TaskDetailHandler extends PageHandler
             long jobId = task.getJobId();
             String userId = (String) httpSession.getAttribute(WebAppConstants.USER_NAME);
             String scorecardComment = p_request.getParameter("scoreComment");
-            String dqfComment = ServletUtil.get(p_request, "dqfComment");
-            String fluencyScore = ServletUtil.get(p_request, "fluencyScore");
-            String adequacyScore = ServletUtil.get(p_request, "adequacyScore");
 
             Session session = HibernateUtil.getSession();
             Transaction tx = session.beginTransaction();
@@ -416,9 +415,6 @@ public class TaskDetailHandler extends PageHandler
 
                 WorkflowImpl workflowImpl = (WorkflowImpl) task.getWorkflow();
                 workflowImpl.setScorecardComment(scorecardComment);
-                workflowImpl.setFluencyScore(fluencyScore);
-                workflowImpl.setAdequacyScore(adequacyScore);
-                workflowImpl.setDQFComment(dqfComment);
                 HibernateUtil.save(workflowImpl);
                 tx.commit();
             }
@@ -434,9 +430,49 @@ public class TaskDetailHandler extends PageHandler
             sessionMgr.setAttribute("scorecard", scorecardMap);
             sessionMgr.setAttribute("isScored", isScored);
             sessionMgr.setAttribute("scorecardComment", scorecardComment);
+        }
+        else if (TASK_ACTION_SAVE_DQF.equals(action))
+        {
+            // Get taskId parameter
+            String taskIdParam = p_request.getParameter(TASK_ID);
+            long taskId = TaskHelper.getLong(taskIdParam);
+            String taskStateParam = p_request.getParameter(TASK_STATE);
+            int taskState = TaskHelper.getInt(taskStateParam, -10);
+            Task task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
+
+            HashMap<String, Integer> scorecardMap = new HashMap<String, Integer>();
+            long companyId = task.getCompanyId();
+            ResourceBundle bundle = PageHandler.getBundle(httpSession);
+
+            // save
+            long workflowId = task.getWorkflow().getId();
+            long jobId = task.getJobId();
+            String userId = (String) httpSession.getAttribute(WebAppConstants.USER_NAME);
+            String dqfComment = ServletUtil.get(p_request, "dqfComment");
+            String fluencyScore = ServletUtil.get(p_request, "fluencyScore");
+            String adequacyScore = ServletUtil.get(p_request, "adequacyScore");
+
+            Session session = HibernateUtil.getSession();
+            Transaction tx = session.beginTransaction();
+            try
+            {
+                WorkflowImpl workflowImpl = (WorkflowImpl) task.getWorkflow();
+                workflowImpl.setFluencyScore(fluencyScore);
+                workflowImpl.setAdequacyScore(adequacyScore);
+                workflowImpl.setDQFComment(dqfComment);
+                HibernateUtil.save(workflowImpl);
+                tx.commit();
+            }
+            catch (Exception e)
+            {
+                tx.rollback();
+                e.printStackTrace();
+            }
+
             sessionMgr.setAttribute("dqfComment", dqfComment);
             sessionMgr.setAttribute("fluencyScore", fluencyScore);
             sessionMgr.setAttribute("adequacyScore", adequacyScore);
+            sessionMgr.setAttribute("isDQFDone", true);
         }
         else if ("leverageMT".equals(action))
         {

@@ -12,11 +12,14 @@ CREATE TABLE CATEGORIES (
     PRIMARY KEY (ID)
 ) ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+## Add columns for DQF fields
 ALTER TABLE COMPANY ADD COLUMN DEFAULT_FLUENCY VARCHAR(200);
 ALTER TABLE COMPANY ADD COLUMN DEFAULT_ADEQUACY VARCHAR(200);
 
+## Add columns for Severity field
 ALTER TABLE ISSUE ADD COLUMN SEVERITY VARCHAR(200);
 
+## Add columns for DQF fields
 ALTER TABLE WORKFLOW ADD COLUMN FLUENCY_SCORE VARCHAR(200);
 ALTER TABLE WORKFLOW ADD COLUMN ADEQUACY_SCORE VARCHAR(200);
 ALTER TABLE WORKFLOW ADD COLUMN DQF_COMMENT VARCHAR(200);
@@ -51,3 +54,21 @@ UPDATE categories SET NAME='Suitable & Fluent' WHERE NAME='lb_suitable_fluent';
 UPDATE categories SET NAME='Literal at Times' WHERE NAME='lb_literal_at_times';
 UPDATE categories SET NAME='Unsuitable' WHERE NAME='lb_unsuitable';
 UPDATE categories SET NAME='None' WHERE NAME='lb_none';
+
+## Add new DQF categories for old company
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Incomprehensible',5,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Disfluent',5,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Good',5,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Flawless',5,'Y', id FROM company where is_active='Y' and id>1;
+
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Little',6,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Most',6,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Everything',6,'Y', id FROM company where is_active='Y' and id>1;
+
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Critical',7,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Major',7,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Minor',7,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Neutral',7,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Positive',7,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Invalid',7,'Y', id FROM company where is_active='Y' and id>1;
+

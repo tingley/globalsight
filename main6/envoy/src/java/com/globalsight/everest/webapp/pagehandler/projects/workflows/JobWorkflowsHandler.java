@@ -61,6 +61,7 @@ import com.globalsight.cxe.engine.util.XmlUtils;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
+import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
@@ -83,6 +84,7 @@ import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.CookieUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.statistics.StatisticsService;
 import com.globalsight.everest.taskmanager.Task;
@@ -97,6 +99,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.tasks.UpdateLeverageHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.Activity;
+import com.globalsight.everest.workflow.DQFData;
 import com.globalsight.everest.workflow.ScorecardData;
 import com.globalsight.everest.workflow.ScorecardScore;
 import com.globalsight.everest.workflow.ScorecardScoreHelper;
@@ -308,6 +311,27 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
             scorecardFlag = "scorecard";
         }
+        
+        if ("updateDQF".equals(p_request.getParameter("action"))) {
+            //Update DQF info
+            String wfIdString = ServletUtil.get(p_request, "currentWfId");
+            if (!StringUtil.isEmpty(wfIdString)) {
+                try
+                {
+                    long wfId = Long.parseLong(wfIdString);
+                    WorkflowImpl workflowImpl = (WorkflowImpl)ServerProxy.getWorkflowManager().getWorkflowById(wfId);
+                    workflowImpl.setFluencyScore(ServletUtil.get(p_request, "fluencyScore"));
+                    workflowImpl.setAdequacyScore(ServletUtil.get(p_request, "adequacyScore"));
+                    workflowImpl.setDQFComment(ServletUtil.get(p_request, "dqfComment"));
+                    HibernateUtil.update(workflowImpl);
+                }
+                catch (Exception e)
+                {
+                    CATEGORY.error("Error found when saving DQF information", e);
+                }
+            }
+            scorecardFlag = "scorecard";
+        }
 
         if ("scorecard".equals(p_request.getParameter("action"))
                 || "scorecard".equals(scorecardFlag))
@@ -327,96 +351,130 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             List<Workflow> workflows = new ArrayList<Workflow>(job.getWorkflows());
             Collections.sort(workflows, new WorkflowComparator(
                     WorkflowComparator.TARG_LOCALE_SIMPLE, Locale.getDefault()));
+            List<DQFData> dqfData = new ArrayList<DQFData>();
+            long companyId = -1l;
+            String localeString = "";
             for (Workflow workflow : workflows)
             {
                 if (workflow.getScorecardShowType() == -1)
                     continue;
-
-                ScorecardData scoreData = new ScorecardData();
-                scoreData.setWorkflowId(workflow.getId());
-                scoreData.setLocaleDisplayname(workflow.getTargetLocale().toString());
-                if (StringUtil.isEmpty(((WorkflowImpl) workflow).getScorecardComment()))
+                
+                localeString = workflow.getTargetLocale().toString();
+                companyId = workflow.getCompanyId();
+                //handle DQF info if scorecardShowType is larger than 1,
+                //including DQF
+                if (workflow.getScorecardShowType() > 1)
                 {
-                    scoreData.setScoreComment("");
+                    DQFData data = new DQFData();
+                    data.setWorkflowId(workflow.getId());
+                    data.setTargetLocale(localeString);
+                    data.setFluency(StringUtil.isEmpty(workflow.getFluencyScore()) ? "" : workflow
+                            .getFluencyScore());
+                    data.setAdequacy(StringUtil.isEmpty(workflow.getAdequacyScore()) ? ""
+                            : workflow.getAdequacyScore());
+                    data.setComment(StringUtil.isEmpty(workflow.getDQFComment()) ? "" : workflow
+                            .getDQFComment());
+                    dqfData.add(data);
                 }
-                else
+                
+                // handle scorecard info
+                if (workflow.getScorecardShowType() < 4)
                 {
-                    scoreData.setScoreComment(((WorkflowImpl) workflow).getScorecardComment());
-                }
-
-                int localeSocreNum = 0;
-                int localeScoreSum = 0;
-                for (Select category : categoryList)
-                {
-                    String mapKey = workflow.getId() + "." + category.getValue();
-                    if (scoreMap.get(mapKey) == null)
+                    ScorecardData scoreData = new ScorecardData();
+                    scoreData.setWorkflowId(workflow.getId());
+                    scoreData.setLocaleDisplayname(localeString);
+                    if (StringUtil.isEmpty(((WorkflowImpl) workflow).getScorecardComment()))
                     {
-                        tmpScoreMap.put(mapKey, "--");
+                        scoreData.setScoreComment("");
                     }
                     else
                     {
-                        localeSocreNum++;
-                        localeScoreSum = localeScoreSum + scoreMap.get(mapKey).getScore();
-                        if (avgScoreSum.get(category.getValue()) == null)
+                        scoreData.setScoreComment(((WorkflowImpl) workflow).getScorecardComment());
+                    }
+
+                    int localeSocreNum = 0;
+                    int localeScoreSum = 0;
+                    for (Select category : categoryList)
+                    {
+                        String mapKey = workflow.getId() + "." + category.getValue();
+                        if (scoreMap.get(mapKey) == null)
                         {
-                            avgScoreSum.put(category.getValue(), scoreMap.get(mapKey).getScore());
-                            avgScoreNum.put(category.getValue(), 1);
+                            tmpScoreMap.put(mapKey, "--");
                         }
                         else
                         {
-                            avgScoreSum.put(category.getValue(),
-                                    avgScoreSum.get(category.getValue())
-                                            + scoreMap.get(mapKey).getScore());
-                            avgScoreNum.put(category.getValue(),
-                                    avgScoreNum.get(category.getValue()) + 1);
+                            localeSocreNum++;
+                            localeScoreSum = localeScoreSum + scoreMap.get(mapKey).getScore();
+                            if (avgScoreSum.get(category.getValue()) == null)
+                            {
+                                avgScoreSum.put(category.getValue(), scoreMap.get(mapKey)
+                                        .getScore());
+                                avgScoreNum.put(category.getValue(), 1);
+                            }
+                            else
+                            {
+                                avgScoreSum.put(category.getValue(),
+                                        avgScoreSum.get(category.getValue())
+                                                + scoreMap.get(mapKey).getScore());
+                                avgScoreNum.put(category.getValue(),
+                                        avgScoreNum.get(category.getValue()) + 1);
+                            }
+                            tmpScoreMap.put(mapKey, scoreMap.get(mapKey).getScore() + "");
                         }
-                        tmpScoreMap.put(mapKey, scoreMap.get(mapKey).getScore() + "");
+                    }
+
+                    if (localeSocreNum > 0)
+                    {
+                        Double avgScore = (double) localeScoreSum / localeSocreNum;
+                        scoreData.setAvgScore(numFormat.format(avgScore));
+                    }
+                    else
+                    {
+                        scoreData.setAvgScore("--");
+                    }
+                    scorecardDataList.add(scoreData);
+                }
+            }
+            
+            if (scorecardDataList != null && scorecardDataList.size() > 0)
+            {
+                int totalScoreSum = 0;
+                int totalScoreNum = 0;
+                for (Select category : categoryList)
+                {
+                    if (avgScoreSum.get(category.getValue()) != null)
+                    {
+                        Double avgScore = (double) avgScoreSum.get(category.getValue())
+                                / avgScoreNum.get(category.getValue());
+                        totalScoreSum = totalScoreSum + avgScoreSum.get(category.getValue());
+                        totalScoreNum = totalScoreNum + avgScoreNum.get(category.getValue());
+                        avgScoreMap.put(category.getValue(), numFormat.format(avgScore));
+                    }
+                    else
+                    {
+                        avgScoreMap.put(category.getValue(), "--");
                     }
                 }
-
-                if (localeSocreNum > 0)
+                if (totalScoreSum > 0)
                 {
-                    Double avgScore = (double) localeScoreSum / localeSocreNum;
-                    scoreData.setAvgScore(numFormat.format(avgScore));
+                    Double avgScore = (double) totalScoreSum / totalScoreNum;
+                    avgScoreMap.put("avgScore", numFormat.format(avgScore));
                 }
                 else
                 {
-                    scoreData.setAvgScore("--");
+                    avgScoreMap.put("avgScore", "--");
                 }
-                scorecardDataList.add(scoreData);
-            }
-
-            int totalScoreSum = 0;
-            int totalScoreNum = 0;
-            for (Select category : categoryList)
-            {
-                if (avgScoreSum.get(category.getValue()) != null)
-                {
-                    Double avgScore = (double) avgScoreSum.get(category.getValue())
-                            / avgScoreNum.get(category.getValue());
-                    totalScoreSum = totalScoreSum + avgScoreSum.get(category.getValue());
-                    totalScoreNum = totalScoreNum + avgScoreNum.get(category.getValue());
-                    avgScoreMap.put(category.getValue(), numFormat.format(avgScore));
-                }
-                else
-                {
-                    avgScoreMap.put(category.getValue(), "--");
-                }
-            }
-            if (totalScoreSum > 0)
-            {
-                Double avgScore = (double) totalScoreSum / totalScoreNum;
-                avgScoreMap.put("avgScore", numFormat.format(avgScore));
-            }
-            else
-            {
-                avgScoreMap.put("avgScore", "--");
             }
 
             sessionMgr.setAttribute("avgScoreMap", avgScoreMap);
             sessionMgr.setAttribute("categoryList", categoryList);
             sessionMgr.setAttribute("scorecardDataList", scorecardDataList);
             sessionMgr.setAttribute("tmpScoreMap", tmpScoreMap);
+            p_request.setAttribute("dqfData", dqfData);
+            p_request.setAttribute("fluencyCategories", CompanyWrapper.getCompanyCategoryNames(
+                    String.valueOf(companyId), CategoryType.Fluency, true));
+            p_request.setAttribute("adequacyCategories", CompanyWrapper.getCompanyCategoryNames(
+                    String.valueOf(companyId), CategoryType.Adequacy, true));
         }
         else if ("checkDownloadQAReport".equals(p_request.getParameter("action")))
         {

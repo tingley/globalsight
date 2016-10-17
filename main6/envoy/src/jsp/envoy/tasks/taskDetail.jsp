@@ -245,12 +245,20 @@
     WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;
-    if(StringUtil.isEmpty(workflowImpl.getScorecardComment()) &&
-    		workflowImpl.getScorecardShowType() == 1 &&
-    		theTask.isType(Task.TYPE_REVIEW))
-    { 
-    	needScore = true;
+    boolean needDQF = false;
+    int scorecardShowType = workflowImpl.getScorecardShowType();
+    if (theTask.isType(Task.TYPE_REVIEW) || theTask.isType(Task.TYPE_REVIEW_EDITABLE)) 
+    {
+        if (scorecardShowType == 1 || scorecardShowType == 3) 
+        {
+		    //Scorecard
+		    needScore = StringUtil.isEmpty(workflowImpl.getScorecardComment());
+        } else if (scorecardShowType == 3 || scorecardShowType == 5) 
+        {
+            needDQF = StringUtil.isEmpty(workflowImpl.getScorecardComment());
+        }
     }
+    
     if(theTask.isType(Task.TYPE_REVIEW))
     {
     	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";
@@ -299,7 +307,7 @@
     String pictureEditorUrl = pictureEditor.getPageURL();
     String incontextreviewUrl = incontextreiview.getPageURL();
     String incontextreviewUrlRe = incontextreiview.getPageURL() +
-            "&" + WebAppConstants.REVIEW_MODE + "=true";
+    "&" + WebAppConstants.REVIEW_MODE + "=true";
 
     String createStfUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
 					    	//GBS-2913 Added to the url parameter taskId,state
@@ -342,20 +350,20 @@
 							"=" + theTask.getState();
 
     String downloadQAReportUrl = downloadQAReport.getPageURL()
-            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
-            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+    + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+    + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
 
     String uploadQAReportUrl = uploadQAReport.getPageURL()
-            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
-            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+    + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+    + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
 
     String downloadDitaReportUrl = downloadDitaReport.getPageURL()
-            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
-            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+    + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+    + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
 
     String uploadDitaReportUrl = uploadDitaReport.getPageURL()
-            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
-            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+    + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+    + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
 
     String searchTextUrl = searchText.getPageURL()
 				    		+ "&" + WebAppConstants.TASK_ID
@@ -450,8 +458,8 @@
         "&" + WebAppConstants.TASK_ACTION +
         "=" + WebAppConstants.TASK_ACTION_TRANSLATED_TEXT_RETRIEVE;
    /* String approveTextUrl = detail.getPageURL().replaceAll("&", "#") +
-            "#" + WebAppConstants.TASK_ACTION +
-            "=" + WebAppConstants.TASK_ACTION_APPROVE_TUV;*/
+    "#" + WebAppConstants.TASK_ACTION +
+    "=" + WebAppConstants.TASK_ACTION_APPROVE_TUV;*/
    // treeLink.append("&ajaxUrl="+approveTextUrl.replaceAll("&", "#")+"&tfilePath=");
     String detailUrl = detail.getPageURL() +
         "&" + WebAppConstants.TASK_ACTION +
@@ -513,7 +521,7 @@
     //save this in the user's session so it doesn't have to get passed around
     //but don't use SessionMgr so it will persist between web activities
     session.setAttribute(WebAppConstants.IS_LAST_ACTIVITY_REVIEW_ONLY,
-                         new Boolean(isReviewActivity));
+         new Boolean(isReviewActivity));
 
     if (isReviewActivity ||
         "false".equals(request.getAttribute(WebAppConstants.PARAGRAPH_EDITOR)))
@@ -534,54 +542,54 @@
     switch (state)
     {
         case Task.STATE_ACCEPTED:
-            status = labelAccepted;
-            isPageDetailOne = false;
-            break;
+    status = labelAccepted;
+    isPageDetailOne = false;
+    break;
         case Task.STATE_COMPLETED:
-            status = labelFinished;
-            disableButtons = true;
-            labelABorDBorCODate = labelCompletedOn;
-            valueABorDBorCODate = completedOn;
-            break;
+    status = labelFinished;
+    disableButtons = true;
+    labelABorDBorCODate = labelCompletedOn;
+    valueABorDBorCODate = completedOn;
+    break;
         case Task.STATE_REJECTED:
-            status = labelRejected;
-            disableButtons = true;
-            break;
+    status = labelRejected;
+    disableButtons = true;
+    break;
         case Task.STATE_DEACTIVE:
-            alreadyAccepted = true;
-            break;
+    alreadyAccepted = true;
+    break;
         case Task.STATE_ACTIVE:
-            status = labelAvailable;
-            labelABorDBorCODate = labelAcceptBy;
+    status = labelAvailable;
+    labelABorDBorCODate = labelAcceptBy;
            	valueABorDBorCODate = acceptBy;
-            rowspan = 12;
-            break;
+    rowspan = 12;
+    break;
         case Task.STATE_DISPATCHED_TO_TRANSLATION:
-            status = labelAccepted;
-            isPageDetailOne = false;
-            disableButtons = true;
-            break;
+    status = labelAccepted;
+    isPageDetailOne = false;
+    disableButtons = true;
+    break;
         case Task.STATE_IN_TRANSLATION:
-            status = labelAccepted;
-            isPageDetailOne = false;
-            disableButtons = true;
-            break;
+    status = labelAccepted;
+    isPageDetailOne = false;
+    disableButtons = true;
+    break;
         case Task.STATE_TRANSLATION_COMPLETED:
-            status = labelAccepted;
-            isPageDetailOne = false;
-            break;
+    status = labelAccepted;
+    isPageDetailOne = false;
+    break;
         case Task.STATE_REDEAY_DISPATCH_GSEDTION:
-            status = labelAccepted;
-            isPageDetailOne = false;
-            disableButtons = true;
-            break;
+    status = labelAccepted;
+    isPageDetailOne = false;
+    disableButtons = true;
+    break;
         case Task.STATE_FINISHING:
-            status = labelFinishing;
-            isPageDetailOne = false;
-            disableButtons = true;
-            break;
+    status = labelFinishing;
+    isPageDetailOne = false;
+    disableButtons = true;
+    break;
         default:
-            break;
+    break;
     }
     
 	String stfStatusMessage = "null";	// Secondary Target Files Status
@@ -602,7 +610,7 @@
         {
            if(defaultStfExport)
            {
-               isExportSTF = "true";
+       isExportSTF = "true";
            }
         }
     }
@@ -656,8 +664,8 @@
   
     //Create the downloadLink for the download button
     String downloadUrl2 = "/globalsight/ControlServlet" +
-            "?linkName=jobDownload&pageName=TK2" + 
-            "&firstEntry=true&fromTaskDetail=true";
+    "?linkName=jobDownload&pageName=TK2" + 
+    "&firstEntry=true&fromTaskDetail=true";
     StringBuffer downloadLink = TaskDetailHelper.getDownloadLink(theTask, downloadUrl2, workflowId, jobId);
     
     UserParameter param = PageHandler.getUserParameter(session, UserParamNames.PAGENAME_DISPLAY);
@@ -687,7 +695,7 @@
         Date startTimeObj = (Date)delayTimeTable.get(delayTimeKey);         
         if(startTimeObj != null)
         {
-            startTime = startTimeObj.getTime();
+    startTime = startTimeObj.getTime();
         }
     }
 
@@ -699,7 +707,7 @@
         Date startTimeObj = (Date)delayExportTimeTable.get(delayTimeKey);
         if(startTimeObj != null)
         {
-            startExportTime = startTimeObj.getTime();   
+    startExportTime = startTimeObj.getTime();   
         }
     }
     
@@ -713,11 +721,11 @@
         "=leverageMT" + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
 
     String getLeverageMTPercentageUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
-            "=getLeverageMTPercentage" + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
+    "=getLeverageMTPercentage" + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
 
     boolean hasMtProfile = false;
     MachineTranslationProfile mtProfile = MTProfileHandlerHelper.getMtProfileByL10nProfile(
-            theJob.getL10nProfile(), workflowImpl.getTargetLocale());
+    theJob.getL10nProfile(), workflowImpl.getTargetLocale());
     if (mtProfile != null && mtProfile.isActive())
     {
         hasMtProfile = true;

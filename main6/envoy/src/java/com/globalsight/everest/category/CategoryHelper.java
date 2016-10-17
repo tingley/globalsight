@@ -48,10 +48,10 @@ public class CategoryHelper
     public static String[] MARKET = new String[]
     { "lb_suitable_fluent", "lb_literal_at_times", "lb_unsuitable" };
     public static String[] FLUENCY = new String[]
-    { "lb_none", "lb_dqf_fluency_incomprehensible", "lb_dqf_fluency_disfluent",
+    { "lb_dqf_fluency_incomprehensible", "lb_dqf_fluency_disfluent",
             "lb_dqf_fluency_good", "lb_dqf_fluency_flawless" };
     public static String[] ADEQUACY = new String[]
-    { "lb_none", "lb_dqf_adequacy_little", "lb_dqf_adequacy_most", "lb_dqf_adequacy_everything" };
+    { "lb_dqf_adequacy_little", "lb_dqf_adequacy_most", "lb_dqf_adequacy_everything" };
     public static String[] SEVERITY = new String[]
     { "lb_dqf_severity_critical", "lb_dqf_severity_major", "lb_dqf_severity_minor",
             "lb_dqf_severity_neutral", "lb_dqf_severity_positive", "lb_dqf_severity_invalid" };

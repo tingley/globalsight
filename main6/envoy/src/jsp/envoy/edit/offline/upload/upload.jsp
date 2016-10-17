@@ -307,11 +307,18 @@ $(document).ready(function(){
 	WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
     boolean needScore = false;
-    if(StringUtil.isEmpty(workflowImpl.getScorecardComment()) &&
-    		workflowImpl.getScorecardShowType() == 1 &&
-    		theTask.isType(Task.TYPE_REVIEW))
+    boolean needDQF = false;
+    int scorecardShowType = workflowImpl.getScorecardShowType();
+    if (theTask.isType(Task.TYPE_REVIEW) || theTask.isType(Task.TYPE_REVIEW_EDITABLE)) 
     {
-    	needScore = true;
+        if (scorecardShowType == 1 || scorecardShowType == 3) 
+        {
+            //Scorecard
+            needScore = StringUtil.isEmpty(workflowImpl.getScorecardComment());
+        } else if (scorecardShowType == 3 || scorecardShowType == 5) 
+        {
+            needDQF = StringUtil.isEmpty(workflowImpl.getScorecardComment());
+        }
     }
     String labelReportUploadCheckWarning = "Translation Edit Report not uploaded";
     String labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_translation_edit_report_upload_check");

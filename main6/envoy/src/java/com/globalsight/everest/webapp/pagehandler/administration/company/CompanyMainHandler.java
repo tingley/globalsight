@@ -995,8 +995,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
 
         setInContextReview(p_request, company);
 
-        company.setDefaultFluency(ServletUtil.get(p_request, "defaultFluency"));
-        company.setDefaultAdequacy(ServletUtil.get(p_request, "defaultAdequacy"));
+        //company.setDefaultFluency(ServletUtil.get(p_request, "defaultFluency"));
+        //company.setDefaultAdequacy(ServletUtil.get(p_request, "defaultAdequacy"));
     }
 
     private void setInContextReview(HttpServletRequest p_request, Company company)
@@ -1157,8 +1157,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
             company.setEnableBlankTmSearch(true);
         }
 
-        company.setDefaultFluency(ServletUtil.get(p_request, "defaultFluency"));
-        company.setDefaultAdequacy(ServletUtil.get(p_request, "defaultAdequacy"));
+        //company.setDefaultFluency(ServletUtil.get(p_request, "defaultFluency"));
+        //company.setDefaultAdequacy(ServletUtil.get(p_request, "defaultAdequacy"));
 
         return company;
     }

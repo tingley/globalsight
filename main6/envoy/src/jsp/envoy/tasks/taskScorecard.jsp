@@ -366,14 +366,43 @@ private static String toggleBgColor(int p_rowNumber)
     }
     WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
+    int scorecardShowType = workflowImpl.getScorecardShowType();
     boolean needScore = false;
+    boolean needDQF = false;
+    boolean showScore = false, showDQF = false;
     String scorecardComment = (String)sessionMgr.getAttribute("scorecardComment");
-    if(StringUtil.isEmpty(scorecardComment) &&
-    		workflowImpl.getScorecardShowType() == 1 &&
-    		theTask.isType(Task.TYPE_REVIEW))
+    String dqfComment = (String)sessionMgr.getAttribute("dqfComment");
+    if (theTask.isType(Task.TYPE_REVIEW) || theTask.isType(Task.TYPE_REVIEW_EDITABLE)) 
     {
-    	needScore = true;
+        if (scorecardShowType == 1 || scorecardShowType == 3) 
+        {
+            //Scorecard
+            needScore = StringUtil.isEmpty(scorecardComment);
+        } else if (scorecardShowType == 3 || scorecardShowType == 5) 
+        {
+            needDQF = StringUtil.isEmpty(dqfComment);
+        }
     }
+    switch (scorecardShowType) {
+        case -1: 
+            break;
+        case 0:
+        case 1:
+            showScore = true;
+            break;
+        case 2:
+        case 3:
+            showScore = true;
+            showDQF = true;
+            break;
+        case 4:
+        case 5:
+            showDQF = true;
+            break;
+        default:
+            break;
+    }
+    
     if(theTask.isType(Task.TYPE_REVIEW))
     {
     	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";
@@ -592,7 +621,15 @@ private static String toggleBgColor(int p_rowNumber)
 	    "=" + state +
 	    "&" + WebAppConstants.TASK_ID +
 	    "=" + task_id;
-    
+
+    String saveDQFUrl = taskScorecard.getPageURL() +
+	    "&" + WebAppConstants.TASK_ACTION +
+	    "=" + WebAppConstants.TASK_ACTION_SAVE_DQF +
+	    "&" + WebAppConstants.TASK_STATE +
+	    "=" + state +
+	    "&" + WebAppConstants.TASK_ID +
+	    "=" + task_id;
+        
     String saveUrl = detail.getPageURL() +
         "&" + WebAppConstants.TASK_ACTION +
         "=" + WebAppConstants.TASK_ACTION_SAVEDETAILS +
@@ -849,6 +886,7 @@ private static String toggleBgColor(int p_rowNumber)
     HashMap<String, Integer> scorecardMap = (HashMap<String,Integer>)sessionMgr.getAttribute("scorecard");
     List<Select> scorecardCategories = (List<Select>)sessionMgr.getAttribute("scorecardCategories");
     boolean isScored = (Boolean)sessionMgr.getAttribute("isScored");
+    boolean isDQFDone = (Boolean)sessionMgr.getAttribute("isDQFDone");
     int categoryNum = scorecardMap.keySet().size();
 
     String labelLeverageMT = bundle.getString("lb_leverage_mt");
@@ -1195,12 +1233,51 @@ function doOnload()
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
 <%@ include file="/envoy/tasks/includeTaskSummaryTabs.jspIncl" %>
 <!-- Lower table -->
+<div id="scorecardPanel">
+<% if (showScore) { %>
 <form METHOD="post" name="scorecardForm" action="<%=saveScorecardUrl%>">
+<SPAN CLASS="standardText"><p>Translation Scorecard, 1 is poor and 5 is excellent.</p></SPAN>
+<TABLE CLASS="standardText" CELLSPACING="0" CELLPADDING="2" style="border:solid 1px slategray;">
+<TR CLASS="tableHeadingBasic">
+    <TD style="padding-top: 8px; padding-bottom: 8px;text-align:center;width:240px;">Scorecard Category</TD>
+    <TD style="width:600px;text-align:center;">Score</TD>
+</TR>
+<%
+	for(Select category: scorecardCategories)
+	{%>
+		<TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+		<TD><%=category.getValue()%></TD> 
+		<TD>
+		<input type="radio" name="<%=category.getValue()%>" value="1" <%if(scorecardMap.get(category.getValue()) == 1){%>checked<%}%> <%=isScored ? "disabled" : ""%>>1 
+		<input type="radio" name="<%=category.getValue()%>" style="margin-left:45px" value="2" <%if(scorecardMap.get(category.getValue()) == 2){%>checked<%}%> <%=isScored ? "disabled" : ""%>>2 
+		<input type="radio" name="<%=category.getValue()%>" style="margin-left:45px" value="3" <%if(scorecardMap.get(category.getValue()) == 3){%>checked<%}%> <%=isScored ? "disabled" : ""%>>3 
+		<input type="radio" name="<%=category.getValue()%>" style="margin-left:45px" value="4" <%if(scorecardMap.get(category.getValue()) == 4){%>checked<%}%> <%=isScored ? "disabled" : ""%>>4 
+		<input type="radio" name="<%=category.getValue()%>" style="margin-left:45px" value="5" <%if(scorecardMap.get(category.getValue()) == 5){%>checked<%}%> <%=isScored ? "disabled" : ""%>>5
+		</TD>
+		</TR>
+	<%}
+
+%>
+<TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+	<TD><%=bundle.getString("lb_comment")%></TD>
+	<TD><TEXTAREA name="scoreComment" id="scoreComment" maxlength="495" cols="40" style="resize: none;height:80px" <%=isScored ? "disabled" : ""%>><%=scorecardComment %></TEXTAREA></TD>
+</TR>
+</TABLE>
+    <%if(!isScored){ %>
+    <input type="button" value="Save" onclick="submitForm()"/>
+    <%} %>
+</form>
+<% } %>
+</div>
+<br>
+<div id="dqfPanel">
+<% if (showDQF) { %>
+<form id="dqfForm" name="dqfForm" method="post" action="<%=saveDQFUrl%>">
 <SPAN CLASS="standardText"><p>Dynamic Quality Framework(DQF) Evaluation</p></SPAN>
 <TABLE CLASS="standardText" CELLSPACING="0" CELLPADDING="2" style="border:solid 1px slategray;">
 <TR CLASS="tableHeadingBasic">
-    <TD style="padding-top: 8px; padding-bottom: 8px;text-align:center">DQF Category</TD>
-    <TD style="width:90px;text-align:center;">Score</TD>
+    <TD style="padding-top: 8px; padding-bottom: 8px;text-align:center;width:240px;">DQF Category</TD>
+    <TD style="width:600px;text-align:center;">Score</TD>
 </TR>
 <%
 List<String> fluencyCategories = (List<String>) sessionMgr.getAttribute("fluencyCategories");
@@ -1209,7 +1286,6 @@ String fluencyScore = (String)sessionMgr.getAttribute("fluencyScore");
 if (StringUtil.isEmpty(fluencyScore)) fluencyScore = "";
 String adequacyScore = (String)sessionMgr.getAttribute("adequacyScore");
 if (StringUtil.isEmpty(adequacyScore)) adequacyScore = "";
-String dqfComment = (String)sessionMgr.getAttribute("dqfComment");
 if (StringUtil.isEmpty(dqfComment)) dqfComment = "";
 %>
 <tr bgcolor="#FFF" class="standardText">
@@ -1219,7 +1295,7 @@ if (StringUtil.isEmpty(dqfComment)) dqfComment = "";
     </td>
     <td>
         <% for (String s : fluencyCategories) { %>
-        <input type="radio" id="fluencyScore" name="fluencyScore" value="<%=s %>" <%=s.equals(fluencyScore) ? "checked" : "" %>><%=s %></input>
+        <input type="radio" id="fluencyScore" name="fluencyScore" value="<%=s %>" <%=s.equals(fluencyScore) ? "checked" : "" %> <%=isDQFDone ? "disabled" : ""%>><%=s %></input>
         <% } %>
     </td>
 </tr>
@@ -1230,7 +1306,7 @@ if (StringUtil.isEmpty(dqfComment)) dqfComment = "";
     </td>
     <td>
         <% for (String s : adequacyCategories) { %>
-        <input type="radio" id="adequacyScore" name="adequacyScore" value="<%=s %>" <%=s.equals(adequacyScore) ? "checked" : "" %>><%=s %></input>
+        <input type="radio" id="adequacyScore" name="adequacyScore" value="<%=s %>" <%=s.equals(adequacyScore) ? "checked" : "" %> <%=isDQFDone ? "disabled" : ""%>><%=s %></input>
         <% } %>
     </td>
 </tr>
@@ -1239,46 +1315,22 @@ if (StringUtil.isEmpty(dqfComment)) dqfComment = "";
         Comment
     </td>
     <td>
-        <textarea name="dqfComment" id="dqfComment" maxlength="495" cols="40" style="resize: none;height:80px">
-            <%=dqfComment %>
-        </textarea>
+        <textarea name="dqfComment" id="dqfComment" maxlength="495" cols="40" style="resize: none;height:80px" <%=isDQFDone ? "disabled" : ""%>><%=dqfComment %></textarea>
     </td>
 </tr>
+<tr>
+  <td colspan="2">
+    &nbsp;
+  </td>
+</tr>
 </table>
-<br>
-<SPAN CLASS="standardText"><p>Translation Scorecard, 1 is poor and 5 is excellent.</p></SPAN>
-<TABLE CLASS="standardText" CELLSPACING="0" CELLPADDING="2" style="border:solid 1px slategray;">
-<TR CLASS="tableHeadingBasic">
-    <TD style="padding-top: 8px; padding-bottom: 8px;text-align:center">Scorecard Category</TD>
-    <TD style="width:90px;text-align:center;">Score</TD>
-</TR>
-<%
-	for(Select category: scorecardCategories)
-	{%>
-		<TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
-		<TD><%=category.getValue()%></TD> 
-		<TD>
-		<input type="radio" name="<%=category.getValue()%>" value="1" <%if(scorecardMap.get(category.getValue()) == 1){%>checked<%}%>>1 
-		<input type="radio" name="<%=category.getValue()%>" style="margin-left:45px" value="2" <%if(scorecardMap.get(category.getValue()) == 2){%>checked<%}%>>2 
-		<input type="radio" name="<%=category.getValue()%>" style="margin-left:45px" value="3" <%if(scorecardMap.get(category.getValue()) == 3){%>checked<%}%>>3 
-		<input type="radio" name="<%=category.getValue()%>" style="margin-left:45px" value="4" <%if(scorecardMap.get(category.getValue()) == 4){%>checked<%}%>>4 
-		<input type="radio" name="<%=category.getValue()%>" style="margin-left:45px" value="5" <%if(scorecardMap.get(category.getValue()) == 5){%>checked<%}%>>5
-		</TD>
-		</TR>
-	<%}
-
-%>
-<TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
-	<TD><%=bundle.getString("lb_comment")%></TD>
-	<TD><TEXTAREA name="scoreComment" id="scoreComment" maxlength="495" cols="40" style="resize: none;height:80px"><%=scorecardComment %></TEXTAREA></TD>
-</TR>
-</TABLE>
-<br>
-<%if(!isScored){ %>
-<input type="button" value="Save" onclick="submitForm()"/>
-<%} %>
+<% if (!isDQFDone) { %>
+    <input type="button" id="saveDQFBtn" name="saveDQFBtn" value="Save" onclick="saveDQF()" />
+<% } %>
 </form>
-<BR>
+<% } %>
+</div>
+<br>
 <!-- End Lower table -->
 </DIV>
 <!--// Task Completed Dialog  -->
@@ -1348,10 +1400,9 @@ function translatedText()
 
 function submitForm()
 {
-    /**
 	var allChecked = true;
 	var i= 0;
-	$(':input:radio').each(function(){
+	$('#scorecardPanel :input:radio').each(function(){
 		if($(this).is(':checked') && $(this).attr("name") != "RadioBtn")
 		{
 			i++;
@@ -1362,7 +1413,6 @@ function submitForm()
 		alert('Please socre all the options.');
 		return;
 	}
-    */
 
 	if($("#scoreComment").val().trim() == '')
 	{
@@ -1371,5 +1421,27 @@ function submitForm()
 	}
 
 	scorecardForm.submit();
+}
+
+function saveDQF() {
+	var i=0;
+    $('#dqfPanel :input:radio').each(function(){
+        if($(this).is(':checked'))
+        {
+            i++;
+        }
+    })
+    if(i != 2)
+    {
+        alert('Please select all DQF scores first.');
+        return false;
+    }
+	
+    var comment = $("#dqfComment").val();
+    if ($.trim(comment) == "") {
+        alert("Please fill in the DQF comment first.");
+        return false;
+    }
+    $("#dqfForm").submit();
 }
 </SCRIPT>

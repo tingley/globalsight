@@ -165,14 +165,12 @@ public class CompanyBasicHandler extends PageHandler implements
                     
                     p_request.setAttribute(
                             "allSegmentCommentCategories",
-                            showCategories(bundle, CompanyWrapper
-                            .getCompanyCategories(companyID, CategoryType.SegmentComment, false,
- false)));
+                            showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,
+                                    CategoryType.SegmentComment, false, false)));
                     p_request.setAttribute(
                             "segmentCommentCategories",
-                            showCategories(bundle, CompanyWrapper
-                            .getCompanyCategories(companyID, CategoryType.SegmentComment, true,
- false)));
+                            showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,
+                                    CategoryType.SegmentComment, true, false)));
                     p_request.setAttribute(
                             "allScorecardCategories",
                             showCategories(bundle, CompanyWrapper.getCompanyCategories(companyID,

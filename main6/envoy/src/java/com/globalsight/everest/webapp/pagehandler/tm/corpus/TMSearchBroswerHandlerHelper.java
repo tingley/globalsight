@@ -1212,10 +1212,17 @@ public class TMSearchBroswerHandlerHelper
             BaseTm baseTM, long tm3Id)
     {
         sb.append("SELECT DISTINCT tuv.tuId AS tuId FROM ").append(baseTM.getTuvTableName())
-                .append(" as tuv, ").append(baseTM.getTuvExtTableName()).append(" AS ext,")
-                .append(baseTM.getTuTableName()).append(" as tu ").append(" WHERE 1 = 1")
-                .append(" AND tuv.id = ext.tuvId ").append(" AND tu.id = ext.tuId ")
-                .append(" AND tuv.tmId = ?").addValue(tm3Id);
+                .append(" as tuv");
+        if (needCheckExtTable(paramMap))
+        {
+            sb.append(", ").append(baseTM.getTuvExtTableName()).append(" AS ext")
+                    .append(" WHERE tuv.id = ext.tuvId").append(" AND tuv.tmId = ?")
+                    .addValue(tm3Id);
+        }
+        else
+        {
+            sb.append(" WHERE tuv.tmId = ?").addValue(tm3Id);
+        }
         getParameterSql(sb, paramMap, "TM3");
     }
 
@@ -1538,6 +1545,23 @@ public class TMSearchBroswerHandlerHelper
                 }
             }
         }
+    }
+
+    /**
+     * Checks if need to query from TM3_TUV_EXT_SHARED table.
+     * 
+     * @since GBS-3990
+     */
+    private static boolean needCheckExtTable(Map<String, Object> paramMap)
+    {
+        Date lastUsageStartDate = (Date) paramMap.get("lastUsageStartDate");
+        Date lastUsageEndDate = (Date) paramMap.get("lastUsageEndDate");
+        String jobIds = (String) paramMap.get("jobIds");
+        if (lastUsageStartDate != null || lastUsageEndDate != null || StringUtil.isNotEmpty(jobIds))
+        {
+            return true;
+        }
+        return false;
     }
 
     private static String parseStartDate(Date start)

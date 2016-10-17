@@ -290,8 +290,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         // GBS-3990, blank search from tm search page does not need to search
         // fuzzy matches as the exact matches should already include all the
         // expected results
-        boolean ignoreFuzzyMatches = leverageOptions.isFromTMSearchPage()
-                && isBlankFromTmSearch(matchKey);
+        boolean ignoreFuzzyMatches = leverageOptions == null ? false
+                : leverageOptions.isFromTMSearchPage() && isBlankFromTmSearch(matchKey);
         int count = 0;
         Connection conn = null;
         try

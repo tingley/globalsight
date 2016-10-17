@@ -881,9 +881,14 @@ abstract class TuStorage<T extends TM3Data>
             Map<TM3Attribute, String> customAttributes, boolean lookupTarget, boolean locking,
             List<Long> tm3TmIds, LeverageOptions leverageOptions) throws SQLException
     {
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        if (leverageOptions != null)
+        {
+            paramMap = leverageOptions.getParamMap();
+        }
         // #1. Find all possible candidates, no max number limitation...
         StatementBuilder sb = getExactMatchStatement(key, sourceLocale, targetLocales,
-                inlineAttributes, lookupTarget, tm3TmIds, leverageOptions.getParamMap());
+                inlineAttributes, lookupTarget, tm3TmIds, paramMap);
         if (customAttributes.size() > 0)
         {
             sb = getAttributeMatchWrapper(sb, customAttributes);
@@ -906,7 +911,7 @@ abstract class TuStorage<T extends TM3Data>
         }
         ps.close();
 
-        if (!leverageOptions.isFromTMSearchPage())
+        if (leverageOptions == null || !leverageOptions.isFromTMSearchPage())
         {
             // #2. If there are too many, need reduce them for performance...
             boolean isCandidateFiltered = false;
@@ -1064,10 +1069,17 @@ abstract class TuStorage<T extends TM3Data>
         boolean isBlankSearch = isBlankFromTmSearch(key);
         StatementBuilder sb = new StatementBuilder("SELECT tuv.id, tuv.tuId FROM ")
                 .append(getStorage().getTuvTableName() + " AS tuv, ")
-                .append(getStorage().getTuvExtTableName()).append(" AS ext, ")
-                .append(getStorage().getTuTableName()).append(" as tu ")
-                .append(" WHERE tu.id = tuv.tuId").append(" AND tuv.id = ext.tuvId")
-                .append(" AND tu.id = ext.tuId");
+                .append(getStorage().getTuTableName()).append(" as tu");
+        if (needCheckExtTable(paramMap))
+        {
+            sb.append(", ").append(getStorage().getTuvExtTableName()).append(" AS ext")
+                    .append(" WHERE tuv.id = ext.tuvId");
+        }
+        else
+        {
+            sb.append(" WHERE 1=1");
+        }
+        sb.append(" AND tu.id = tuv.tuId");
         if (!isBlankSearch)
         {
             sb.append(" AND tuv.fingerprint = ?").addValue(key.getFingerprint());
@@ -1078,13 +1090,6 @@ abstract class TuStorage<T extends TM3Data>
         }
         sb.append(" AND tuv.tmId IN").append(SQLUtil.longGroup(tm3TmIds));
 
-        if (!lookupTarget)
-        {
-            if (srcLocale != null)
-            {
-                sb.append("AND tu.srcLocaleId = ? ").addValue(srcLocale.getId());
-            }
-        }
         if (!inlineAttrs.isEmpty())
         {
             for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet())
@@ -1296,6 +1301,23 @@ abstract class TuStorage<T extends TM3Data>
             return endDate + " 23:59:59";
         else
             return null;
+    }
+
+    /**
+     * Checks if need to query from TM3_TUV_EXT_SHARED table.
+     * 
+     * @since GBS-3990
+     */
+    private static boolean needCheckExtTable(Map<String, Object> paramMap)
+    {
+        Date lastUsageStartDate = (Date) paramMap.get("lastUsageStartDate");
+        Date lastUsageEndDate = (Date) paramMap.get("lastUsageEndDate");
+        String jobIds = (String) paramMap.get("jobIds");
+        if (lastUsageStartDate != null || lastUsageEndDate != null || StringUtil.isNotEmpty(jobIds))
+        {
+            return true;
+        }
+        return false;
     }
 
     /**

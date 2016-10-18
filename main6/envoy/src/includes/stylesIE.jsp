@@ -725,3 +725,8 @@ a.wordCountLinks:link {
 	height:30px;
     background: #EEEEEE
 }
+
+textarea {
+    font-family:Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+}

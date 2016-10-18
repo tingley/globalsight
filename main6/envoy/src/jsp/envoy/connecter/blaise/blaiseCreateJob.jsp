@@ -768,19 +768,20 @@ $(document).ready(function ()
 					var attachment =  $("#attachment").val();
 					var combineByLangs = $("#combineByLangs").prop("checked");
 
-                    var createJobUrl = "<%=createBlaiseJobUrl%>" 
-                    	+ "&blaiseConnectorId=" + blaiseConnectorId
-                    	+ "&fileMapFileProfile=" + fileMapFileProfile
-                    	+ "&userName=" + userName
-                    	+ "&priority=" + priority
-                    	+ "&comment=" + comment
-                    	+ "&combineByLangs=" + combineByLangs
-                    	+ "&attachment=" + attachment
-                    	+ "&attributeString=" + attributeString;
-
+                    var createJobUrl = "<%=createBlaiseJobUrl%>";
                     $("#createJobForm").ajaxSubmit({
                			type: 'post',
                         url: createJobUrl,
+                        data:{
+                        	'blaiseConnectorId':blaiseConnectorId,
+                        	'fileMapFileProfile':fileMapFileProfile,
+                        	'userName':userName,
+                        	'priority':priority,
+                        	'comment':comment,
+                        	'combineByLangs':combineByLangs,
+                        	'attachment':attachment,
+                        	'attributeString':attributeString
+                        },
                         dataType:'text',
                         timeout:100000000,
                         success: function(data) {

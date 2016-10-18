@@ -18,7 +18,6 @@ package com.globalsight.connector.blaise;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -250,11 +249,9 @@ public class CreateBlaiseJobThread  extends Thread
     /**
      * Save job attributes of the job
      * 
-     * @param attributeString
-     * @param job
+     * @param jobAttributeList
      * @param currentCompanyId
-     * @param l10Profile
-     * @throws ParseException
+     * @param job
      */
     private void saveAttributes(List<JobAttribute> jobAttributeList, String currentCompanyId,
             Job job)

@@ -53,12 +53,14 @@ import org.hibernate.Transaction;
 
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
+import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
 import com.globalsight.everest.comment.IssueHistoryImpl;
 import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.comment.IssueOptions;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
@@ -97,6 +99,8 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.generat
 import com.globalsight.everest.webapp.pagehandler.edit.EditCommonHelper;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
+import com.globalsight.everest.workflow.ScorecardScore;
+import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.ling.rtf.RtfAPI;
 import com.globalsight.ling.rtf.RtfDocument;
 import com.globalsight.ling.tm2.persistence.DbUtil;
@@ -166,6 +170,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
     private Map<Long, String> segId2CommentStatus = null;
 
+    private Map<Long, String> segId2Severity = null;
+
     String qualityAssessment = null;
 
     String marketSuitabilty = null;
@@ -207,6 +213,15 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
     private static String GS_TOOLKIT_FORMAT = XliffConstants.WARN_SIGN
             + XliffConstants.GS_TOOLKIT_FORMAT;
+
+    private int DQF_START_ROW = -1;
+    private int SCORECARD_START_ROW = -1;
+    private int SEGMENT_START_ROW = -1;
+    private String fluencyScore = null;
+    private String adequacyScore = null;
+    private String dqfComment = null;
+    private String scoreComment = null;
+    private HashMap<String, Integer> scores = null;
 
     public OEMProcessStatus getStatus()
     {
@@ -552,7 +567,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     }
 
     public String processReport(File p_tempFile, User p_user, Task p_task, String p_fileName,
-            String p_reportName) throws Exception
+            String p_reportName, String scorecard) throws Exception
     {
         String errPage = null;
         boolean uploaded = false;
@@ -563,6 +578,29 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         if ((errPage = preLoadInit(taskId, p_user)) != null)
         {
             return errPage;
+        }
+        if (StringUtil.isNotEmpty(scorecard))
+        {
+            // Has DQF/Scorecard info, which also means the start row of segment
+            // had been changed
+            String[] tmp = scorecard.split("_");
+            if (tmp != null && tmp.length == 3)
+            {
+                try
+                {
+                    DQF_START_ROW = Integer.parseInt(tmp[0]);
+                    // Because 'Scorecard' will be the first row of scorecard
+                    // part
+                    SCORECARD_START_ROW = Integer.parseInt(tmp[1]);
+                    SEGMENT_START_ROW = Integer.parseInt(tmp[2]);
+                }
+                catch (Exception e)
+                {
+                    DQF_START_ROW = -1;
+                    SCORECARD_START_ROW = -1;
+                    SEGMENT_START_ROW = -1;
+                }
+            }
         }
 
         try
@@ -720,6 +758,13 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 segmentStartRow = ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
             }
 
+            if (SEGMENT_START_ROW > 0)
+            {
+                // Changed by DQF/Scorecard info
+                segmentHeaderRow = SEGMENT_START_ROW - 1;
+                segmentStartRow = SEGMENT_START_ROW;
+            }
+
             String targetLanguage = sheet.getRow(languageInfoRow).getCell(1).toString();
             if (StringUtil.isEmpty(targetLanguage))
             {
@@ -863,7 +908,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     private String loadTERReportData(Sheet sheet, Task task, GlobalSightLocale tLocale)
             throws RemoteException
     {
-        int segmentStartRow = ImplementedCommentsCheckReportGenerator.SEGMENT_START_ROW;
+        int segmentStartRow = SEGMENT_START_ROW > 0 ? SEGMENT_START_ROW
+                : ImplementedCommentsCheckReportGenerator.SEGMENT_START_ROW;
         Set<String> jobIds = new HashSet<String>();
 
         segId2RequiredTranslation = new HashMap<Long, String>();
@@ -871,6 +917,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         segId2FailureType = new HashMap<Long, String>();
         segId2Comment = new HashMap<Long, String>();
         segId2CommentStatus = new HashMap<Long, String>();
+        segId2Severity = new HashMap<Long, String>();
 
         String segmentId = null;
         long segIdLong;
@@ -879,7 +926,9 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         String comment = null;
         String requiredComment = null;
         String commentStatus = null;
+        String severity = null;
         boolean hasSegmentIdErro = false;
+        boolean isNew = SEGMENT_START_ROW > 0;
 
         int n = 5;
         int m = LOAD_DATA - n;
@@ -892,11 +941,25 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             int x = j * m / row;
             updateProcess(n + x);
 
-            segmentId = ExcelUtil.getCellValue(sheet, j, 11);
+            if (isNew)
+            {
+                severity = ExcelUtil.getCellValue(sheet, j, 7);
+                jobIdText = ExcelUtil.getCellValue(sheet, j, 11);
+                segmentId = ExcelUtil.getCellValue(sheet, j, 12);
+            }
+            else
+            {
+                severity = "";
+                jobIdText = ExcelUtil.getCellValue(sheet, j, 10);
+                segmentId = ExcelUtil.getCellValue(sheet, j, 11);
+            }
+
+            // TODO: why this?
             if (StringUtil.isEmpty(segmentId))
             {
                 break;
             }
+
             segIdLong = new Long(Long.parseLong(segmentId));
 
             updatedText = ExcelUtil.getCellValue(sheet, j, 2);
@@ -907,18 +970,16 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             if (EditUtil.isRTLLocale(tLocale))
                 updatedText = EditUtil.removeU200F(updatedText);
 
-            jobIdText = ExcelUtil.getCellValue(sheet, j, 10);
             jobIds.add(jobIdText);
-            if (segmentId != null && !segmentId.equals(""))
+            if (StringUtil.isNotEmpty(segmentId))
             {
-                if (updatedText != null && !updatedText.equals(""))
+                if (StringUtil.isNotEmpty(updatedText))
                 {
                     segId2RequiredTranslation.put(segIdLong, updatedText);
                 }
-                if (comment != null && !comment.equals(""))
+                if (StringUtil.isNotEmpty(comment))
                 {
-                    if (requiredComment != null && !requiredComment.equals("")
-                            && !StringUtil.equalsIgnoreSpace(requiredComment, ""))
+                    if (StringUtil.isNotEmpty(requiredComment))
                     {
                         segId2Comment.put(segIdLong, requiredComment);
                     }
@@ -926,13 +987,13 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 }
                 else
                 {
-                    if (requiredComment != null && !requiredComment.equals("")
-                            && !StringUtil.equalsIgnoreSpace(requiredComment, ""))
+                    if (StringUtil.isNotEmpty(requiredComment))
                     {
                         segId2Comment.put(segIdLong, requiredComment);
                         segId2CommentStatus.put(segIdLong, "query");
                     }
                 }
+                segId2Severity.put(segIdLong, severity);
             }
             else
             {
@@ -1157,13 +1218,16 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     private String loadRCRReportData(Sheet sheet, Task task, GlobalSightLocale tLocale,
             ResourceBundle bundle) throws RemoteException
     {
-        int segmentStartRow = ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
+        boolean isNew = SEGMENT_START_ROW > 0;
+        int segmentStartRow = isNew ? SEGMENT_START_ROW
+                : ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
         Set<String> jobIds = new HashSet<String>();
 
         segId2Comment = new HashMap<Long, String>();
         segId2PageId = new HashMap<Long, Long>();
         segId2FailureType = new HashMap<Long, String>();
         segId2CommentStatus = new HashMap<Long, String>();
+        segId2Severity = new HashMap<Long, String>();
         String segmentId = null;
         String pageId = null;
         String reviewerComment = null;
@@ -1171,19 +1235,161 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         String jobIdText = null;
         String failureType = null;
         String commentStatus = null;
+        String severity = null;
+
+        if (task.isType(Task.TYPE_REVIEW) || task.isType(Task.TYPE_REVIEW_EDITABLE))
+        {
+            // Handle DQF/Scorecard info
+            WorkflowImpl workflow = (WorkflowImpl) task.getWorkflow();
+            String tmpDQFComment = workflow.getDQFComment();
+            String tmpScoreComment = workflow.getScorecardComment();
+            boolean isWorkflowChanged = false;
+            if (StringUtil.isEmpty(tmpDQFComment) && DQF_START_ROW > 0)
+            {
+                // No DQF data before
+                fluencyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW, 1);
+                adequacyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 1, 1);
+                dqfComment = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 2, 1);
+                if (StringUtil.isNotEmpty(fluencyScore) && StringUtil.isNotEmpty(adequacyScore)
+                        && StringUtil.isNotEmpty(dqfComment))
+                {
+                    workflow.setFluencyScore(fluencyScore);
+                    workflow.setAdequacyScore(adequacyScore);
+                    workflow.setDQFComment(dqfComment);
+                    isWorkflowChanged = true;
+                }
+                else if (StringUtil.isEmpty(fluencyScore) && StringUtil.isEmpty(adequacyScore)
+                        && StringUtil.isEmpty(dqfComment))
+                {
+                    // ignore to store DQF info because all 3 fields are empty
+                }
+                else
+                {
+                    // User does not fill in all DQF fields, report error
+                    m_errWriter
+                            .addFileErrorMsg("All DQF fields are not filled in, you need to fill in all 3 fields or empty them all"
+                                    + "\r\nPlease make sure they are correct and upload again.");
+                    return m_errWriter.buildReportErroPage().toString();
+                }
+            }
+            if (StringUtil.isEmpty(tmpScoreComment) && SCORECARD_START_ROW > 0)
+            {
+                // No Scorecard data before
+                scores = new HashMap<String, Integer>();
+                List<String> scorecardCategories = CompanyWrapper.getCompanyCategoryNames(
+                        String.valueOf(workflow.getCompanyId()), CategoryType.ScoreCard, true);
+                String category = "", valueString = "";
+                int value = -1;
+                int startRow = SCORECARD_START_ROW + 1;
+                int rowCount = SEGMENT_START_ROW - 4 - startRow;
+                for (int i = 0; i < rowCount; i++)
+                {
+                    category = ExcelUtil.getCellValue(sheet, startRow + i, 0);
+                    valueString = ExcelUtil.getCellValue(sheet, startRow + i, 1);
+                    try
+                    {
+                        value = Integer.parseInt(valueString);
+                    }
+                    catch (Exception e)
+                    {
+                        continue;
+                    }
+
+                    if (value < 0 || value > 5 || !scorecardCategories.contains(category))
+                        continue;
+
+                    scores.put(category, value);
+                }
+                scoreComment = ExcelUtil.getCellValue(sheet, SEGMENT_START_ROW - 3, 1);
+                if (StringUtil.isEmpty(scoreComment) && scores.size() == 0)
+                {
+                    // ignore because user don't fill in any scorecard fields
+                }
+                else if (StringUtil.isNotEmpty(scoreComment) && scores.size() == rowCount)
+                {
+                    workflow.setScorecardComment(scoreComment);
+                    isWorkflowChanged = true;
+
+                    for (Iterator<String> iterator = scores.keySet().iterator(); iterator.hasNext();)
+                    {
+                        category = iterator.next();
+                        value = scores.get(category);
+
+                        ScorecardScore score = new ScorecardScore();
+                        score.setScorecardCategory(category);
+                        score.setScore(value);
+                        score.setWorkflowId(workflow.getId());
+                        score.setJobId(workflow.getJob().getId());
+                        score.setCompanyId(workflow.getCompanyId());
+                        score.setModifyUserId("ByReport");
+                        score.setIsActive(true);
+                        try
+                        {
+                            HibernateUtil.saveOrUpdate(score);
+                        }
+                        catch (Exception e)
+                        {
+                            CATEGORY.error(
+                                    "Error found when storing scorecard data via uploading report.",
+                                    e);
+                        }
+                    }
+                }
+                else
+                {
+                    // User does not fill in all DQF fields, report error
+                    m_errWriter
+                            .addFileErrorMsg("All Scorecard fields are not filled in, you need to fill in all fields or empty them all"
+                                    + "\r\nPlease make sure they are correct and upload again.");
+                    return m_errWriter.buildReportErroPage().toString();
+                }
+            }
+            if (isWorkflowChanged)
+            {
+                // store DQF/Scorecard data reading through report
+                try
+                {
+                    HibernateUtil.update(workflow);
+                }
+                catch (Exception e)
+                {
+                    CATEGORY.error(
+                            "Error found when saving workflow info with DQF and Scorecard through report",
+                            e);
+                }
+            }
+        }
+
         boolean hasIdErro = false;
         for (int k = segmentStartRow, row = sheet.getLastRowNum(); k <= row; k++)
         {
             if (cancel)
                 return null;
 
-            segmentId = ExcelUtil.getCellValue(sheet, k, 10);
-            if (segmentId == null || segmentId.trim().length() == 0)
+            reviewerComment = ExcelUtil.getCellValue(sheet, k, 3);
+            if (EditUtil.isRTLLocale(tLocale))
+                reviewerComment = EditUtil.removeU200F(reviewerComment);
+
+            failureType = ExcelUtil.getCellValue(sheet, k, 4);
+            commentStatus = ExcelUtil.getCellValue(sheet, k, 5);
+            severity = ExcelUtil.getCellValue(sheet, k, 6);
+
+            if (isNew)
+            {
+                jobIdText = ExcelUtil.getCellValue(sheet, k, 10);
+                segmentId = ExcelUtil.getCellValue(sheet, k, 11);
+            }
+            else
+            {
+                jobIdText = ExcelUtil.getCellValue(sheet, k, 9);
+                segmentId = ExcelUtil.getCellValue(sheet, k, 10);
+            }
+
+            if (StringUtil.isEmpty(segmentId))
             {
                 break;
             }
 
-            jobIdText = ExcelUtil.getCellValue(sheet, k, 9);
             jobIds.add(jobIdText);
             long curJobId = Long.parseLong(jobIdText);
             segIdLong = new Long(Long.parseLong(segmentId));
@@ -1194,13 +1400,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             TargetPage targetPage = tuvImpl.getTargetPage(curJobId);
             pageId = new String(String.valueOf(targetPage.getId()));
 
-            reviewerComment = ExcelUtil.getCellValue(sheet, k, 3);
-            if (EditUtil.isRTLLocale(tLocale))
-                reviewerComment = EditUtil.removeU200F(reviewerComment);
-
-            failureType = ExcelUtil.getCellValue(sheet, k, 4);
-            commentStatus = ExcelUtil.getCellValue(sheet, k, 5);
-
             if (StringUtil.isNotEmpty(reviewerComment) || checkCommentStatus(sheet, k))
             {
                 if (segmentId != null && !segmentId.equals("") && pageId != null
@@ -1210,6 +1409,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     segId2Comment.put(segIdLong, reviewerComment);
                     segId2FailureType.put(segIdLong, failureType);
                     segId2CommentStatus.put(segIdLong, commentStatus);
+                    segId2Severity.put(segIdLong, severity);
                 }
                 else
                 {
@@ -1250,14 +1450,28 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     // This is since 8.5.0.1 version (Aug. 2013)
     private boolean isTERReport(Sheet sheet, int segmentHeaderRow)
     {
-        // Cell "K7"
-        String jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 10);
-        // Cell "L7"
-        String segmentId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 11);
-        // Cell "M7"
-        String pageName = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 12);
-        // Cell "C7"
+        boolean isNew = SEGMENT_START_ROW > 0;
+        String jobId, segmentId, pageName;
+
         String modifyTranslation = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 2);
+        if (isNew)
+        {
+            // Cell "K7"
+            jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 11);
+            // Cell "L7"
+            segmentId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 12);
+            // Cell "M7"
+            pageName = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 13);
+        }
+        else
+        {
+            // Cell "K7"
+            jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 10);
+            // Cell "L7"
+            segmentId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 11);
+            // Cell "M7"
+            pageName = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 12);
+        }
 
         if ("Job id".equalsIgnoreCase(jobId) && "Segment id".equalsIgnoreCase(segmentId)
                 && "Page name".equalsIgnoreCase(pageName)
@@ -1275,14 +1489,29 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
      */
     private boolean isRCRReport(Sheet sheet, int segmentHeaderRow)
     {
-        // Cell "J7"
-        String jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 9);
-        // Cell "K7"
-        String segmentId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 10);
-        // Cell "L7"
-        String pageName = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 11);
+        boolean isNew = SEGMENT_START_ROW > 0;
+        String jobId, segmentId, pageName, revComments;
+
+        if (isNew)
+        {
+            // Cell "J7"
+            jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 10);
+            // Cell "K7"
+            segmentId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 11);
+            // Cell "L7"
+            pageName = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 12);
+        }
+        else
+        {
+            // Cell "J7"
+            jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 9);
+            // Cell "K7"
+            segmentId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 10);
+            // Cell "L7"
+            pageName = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 11);
+        }
         // Cell "D7"
-        String revComments = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 3);
+        revComments = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 3);
 
         if ("Job id".equalsIgnoreCase(jobId) && "Segment Id".equalsIgnoreCase(segmentId)
                 && "Page name".equalsIgnoreCase(pageName)
@@ -1354,10 +1583,11 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     }
 
     // Updated comment status.
-    private void updateCommentStatus(Issue p_issue, String commentStatus)
+    private void updateCommentStatus(Issue p_issue, String commentStatus, String severity)
     {
         IssueImpl issue = HibernateUtil.get(IssueImpl.class, p_issue.getId());
         issue.setStatus(commentStatus);
+        issue.setSeverity(severity);
         HibernateUtil.update(issue);
     }
 
@@ -1373,6 +1603,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         String comment = null;
         String failureType = null;
         String commentStatus = null;
+        String severity = null;
 
         // Used to tell which target page's issues have been cached
         Set<Long> cachedTargetPageIds = new HashSet<Long>();
@@ -1412,6 +1643,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             comment = (String) segId2Comment.get(tuIdLong);
             failureType = (String) segId2FailureType.get(tuIdLong);
             commentStatus = (String) segId2CommentStatus.get(tuIdLong);
+            severity = (String) segId2Severity.get(tuIdLong);
+            severity = StringUtil.isEmpty(severity) ? "" : severity;
             boolean commentStatusError = false;
             boolean failureTypeError = false;
             // Fix for GBS-2383
@@ -1459,7 +1692,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 failureType = failureTypeError ? "" : failureType;
                 commentStatus = commentStatusError ? Issue.STATUS_OPEN : commentStatus;
                 IssueImpl issue = new IssueImpl(Issue.TYPE_SEGMENT, tuvId, "Comment by LSO",
-                        Issue.PRI_MEDIUM, commentStatus, failureType.trim(), p_user.getUserId(),
+                        Issue.PRI_MEDIUM, commentStatus, failureType.trim(), severity,
+                        p_user.getUserId(),
                         comment, CommentHelper.makeLogicalKey(targetPageId, tuId, tuvId, 0));
                 issue.setShare(false);
                 issue.setOverwrite(false);
@@ -1476,6 +1710,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
                     commentStatus = commentStatusError ? issue.getStatus() : commentStatus;
                     failureType = failureTypeError ? issue.getCategory() : failureType;
+
                     if (histories != null && histories.size() > 0)
                     {
                         IssueHistory history = (IssueHistory) histories.get(0);
@@ -1493,10 +1728,11 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                                 vo.failureType = failureType.trim();
                                 vo.userId = p_user.getUserId();
                                 vo.comment = comment;
+                                vo.severity = severity;
                             }
                             else
                             {
-                                updateCommentStatus(issue, commentStatus);
+                                updateCommentStatus(issue, commentStatus, severity);
                             }
                         }
                         else
@@ -1510,6 +1746,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                             else
                             {
                                 issue.setStatus(commentStatus);
+                                issue.setSeverity(severity);
                                 HibernateUtil.saveOrUpdate(issue);
                             }
                         }
@@ -1540,6 +1777,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         String failureType;
         String userId;
         String comment;
+        String severity;
     }
 
     // ih.reportedBy().equals(vo.userId)
@@ -1571,6 +1809,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 issue.setPriority(vo.priority);
                 issue.setStatus(vo.commentStatus);
                 issue.setCategory(vo.failureType);
+                issue.setSeverity(vo.severity);
                 issue.setOverwrite(false);
                 issue.setShare(false);
 

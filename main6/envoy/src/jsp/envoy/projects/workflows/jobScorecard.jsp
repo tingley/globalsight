@@ -14,6 +14,7 @@
             com.globalsight.everest.webapp.pagehandler.projects.workflows.AddSourceHandler,
             com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
             java.text.MessageFormat,
+            com.globalsight.util.StringUtil,
             java.util.*"
     session="true"
 %>
@@ -231,9 +232,9 @@ $("#lb_terminology").attr("title","<%=bundle.getString("lb_terminology_title")%>
 <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
 	<TD align="center" valign="middle" style="border-top: #0C1476 1px solid;">AVG</TD>
 	<% for(Select category: categoryList){%>
-    <TD align="center" valign="middle" style="border-top: #0C1476 1px solid;"><%=avgScoreMap.get(category.getValue()) %></TD>
+    <TD align="center" valign="middle" style="border-top: #0C1476 1px solid;"><%=StringUtil.isEmpty(avgScoreMap.get(category.getValue())) ? "--" : avgScoreMap.get(category.getValue()) %></TD>
     <%}%>
-	<TD align="center" valign="middle" style="border-top: #0C1476 1px solid;"><%=avgScoreMap.get("avgScore")%></TD>
+	<TD align="center" valign="middle" style="border-top: #0C1476 1px solid;"><%=StringUtil.isEmpty(avgScoreMap.get("avgScore")) ? "--" : avgScoreMap.get("avgScore") %></TD>
 	<TD align="center" valign="middle" style="border-top: #0C1476 1px solid;">&nbsp;</TD>
 	<%if(disableInput.equals("")){ %>
     <TD align="center" valign="middle" style="border-top: #0C1476 1px solid;">&nbsp;</TD>
@@ -242,16 +243,16 @@ $("#lb_terminology").attr("title","<%=bundle.getString("lb_terminology_title")%>
 </TABLE>
 <br>
 </form>
-<div class="standardText">DQF Information</div>
+<div class="standardText">Dynamic Quality Framework (DQF) Evaluation</div>
 <form id="dqfForm" name="dqfForm" method="post" action="/globalsight/ControlServlet?linkName=jobScorecard&pageName=SCORECARD&jobId=${jobId}&action=updateDQF">
   <input type="hidden" name="currentWfId" id="currentWfId" value="">
-  <table id="dqfTable" name="dqfTable" CELLSPACING="0" CELLPADDING="2" style="border:solid 1px slategray;">
+  <table id="dqfTable" name="dqfTable" CELLSPACING="0" CELLPADDING="2" style="border:solid 1px slategray;" class="standardText">
     <thead CLASS="tableHeadingBasic">
       <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">Target Locale</th>
       <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">Fluency</th>
       <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">Adequacy</th>
-      <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">Comment</th>
-      <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">&nbsp;</th>
+      <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">Comments</th>
+      <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;"></th>
     </thead>
     <tbody>
       <c:forEach var="data" items="${dqfData}">

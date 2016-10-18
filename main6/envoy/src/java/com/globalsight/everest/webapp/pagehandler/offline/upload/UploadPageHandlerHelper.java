@@ -151,6 +151,7 @@ public class UploadPageHandlerHelper implements WebAppConstants
         Date taskUploadFileStartTime = new Date();
         String userId = user.getUserId();
         String taskId = "";
+        String scorecardData = "";
         if (fromTaskUploadPage)
         {
             taskId = (String) sessionMgr.getAttribute(TASK_ID);
@@ -170,6 +171,7 @@ public class UploadPageHandlerHelper implements WebAppConstants
             {
                 taskId = taskInfo[2];
             }
+            scorecardData = taskInfo[3];
 
             // Locate current in progress task.
             try
@@ -204,8 +206,8 @@ public class UploadPageHandlerHelper implements WebAppConstants
         OEM = (OfflineEditManager) sessionMgr.getAttribute(UPLOAD_MANAGER);
         if ("yes".equals(isReport))
         {
-            processReportFileContents(file, user, fileName, p_request, status,
-                    OEM, reportTypeInfo, taskId);
+            processReportFileContents(file, user, fileName, p_request, status, OEM, reportTypeInfo,
+                    taskId, scorecardData);
 
             p_response.setContentType("text/html");
         }
@@ -383,7 +385,8 @@ public class UploadPageHandlerHelper implements WebAppConstants
     private void processReportFileContents(File p_tmpFile, User p_user,
             String p_fileName, HttpServletRequest p_request,
             OEMProcessStatus p_status, OfflineEditManager p_OEM,
-            String p_reportName, String p_taskId) throws EnvoyServletException
+            String p_reportName, String p_taskId, String scorecardData)
+            throws EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
         SessionManager sessionManager = (SessionManager) session
@@ -403,8 +406,8 @@ public class UploadPageHandlerHelper implements WebAppConstants
                 task = ServerProxy.getTaskManager().getTask(id);
             }
 
-            p_OEM.processUploadReportPage(p_tmpFile, p_user, task, p_fileName,
-                    p_reportName);
+            p_OEM.processUploadReportPage(p_tmpFile, p_user, task, p_fileName, p_reportName,
+                    scorecardData);
         }
         catch (Exception e)
         {
@@ -428,7 +431,7 @@ public class UploadPageHandlerHelper implements WebAppConstants
             HttpServletRequest p_request)
     {
         String[] result =
-        { "", "", "" };
+        { "", "", "", "" };
         try
         {
             String fileSuff = p_fileName.substring(p_fileName.lastIndexOf("."));
@@ -471,10 +474,16 @@ public class UploadPageHandlerHelper implements WebAppConstants
                     reportType = WebAppConstants.TRANSLATION_VERIFICATION;
                 }
 
-                if (reportType != null && !"".equals(reportType))
+                if (StringUtil.isNotEmpty(reportType))
                 {
                     isReport = "yes";
                     taskId = infos[1];
+                }
+                if (infos != null && infos.length > 2)
+                {
+                    // New RCR/TER report which contains DQF/Scorecard info
+                    // DQFStartRow_ScorecardStartRow_SegmentStartRow
+                    result[3] = infos[2] + "_" + infos[3] + "_" + infos[4];
                 }
             }
             // Report file generated before 8.5.8 build has no task info in

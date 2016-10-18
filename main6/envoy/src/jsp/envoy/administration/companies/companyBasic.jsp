@@ -764,8 +764,9 @@ function addQualityTo()
         <tr valign="top">
     		<td colspan=3>
                  <br/>        
-               <div id="toShowSegmentComment" style="cursor:pointer;font-weight:bold;display:inline-block;">Segment Comment Category 
+               <div id="toShowSegmentComment" style="cursor:pointer;font-weight:bold;display:inline-block;">
                 <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
+                Segment Comment Category 
                 </div>
     			<br/><div class="standardText"><c:out value="${helpMsg}" escapeXml="false"/></div>
                 <div id="segmentCommentPanel" style="display:none;">
@@ -834,8 +835,9 @@ function addQualityTo()
   		<tr valign="top">
     		<td colspan=3>
                 <br/>        
-                <div id="toShowScorecard" style="cursor:pointer;display:inline-block;"><b>Scorecard Category</b>
+                <div id="toShowScorecard" style="cursor:pointer;display:inline-block;">
                     <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
+                    <b>Scorecard Category</b>
                     <div class="standardText"><c:out value="${scorecardHelpMsg}" escapeXml="false"/></div>
                 </div>
                 <div id="scorecardPanel" style="display:none;">
@@ -904,8 +906,9 @@ function addQualityTo()
   		<tr valign="top">
     		<td colspan=3>
                  <br/>        
-               <div id="toShowQuality" style="cursor:pointer;display:inline-block;"><b>Quality Category </b>
+               <div id="toShowQuality" style="cursor:pointer;display:inline-block;">
                     <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
+                    <b>Quality Category </b>
                     <div class="standardText"><c:out value="${qualityHelpMsg}" escapeXml="false"/></div>
                 </div>
                 <div id="qualityPanel" style="display:none;">
@@ -974,8 +977,9 @@ function addQualityTo()
   		<tr valign="top">
     		<td colspan=3>
                 <br/>        
-                <div id="toShowMarket" style="cursor:pointer;display:inline-block;"><b>Market Category</b>
+                <div id="toShowMarket" style="cursor:pointer;display:inline-block;">
                     <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
+                    <b>Market Category</b>
                     <div class="standardText"><c:out value="${marketHelpMsg}" escapeXml="false"/></div>
                 </div>
                 <div id="marketPanel" style="display:none;">
@@ -1044,9 +1048,10 @@ function addQualityTo()
         <tr valign="top">
             <td colspan=3>
                  <br/>        
-               <div id="toShowDQF" style="cursor:pointer;display:inline-block;"><b>DQF Category </b>
+               <div id="toShowDQF" style="cursor:pointer;display:inline-block;">
                     <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
-                    <div class="standardText">Define categories for DQF(Dynamic Quality Framework)</div>
+                    <b>DQF Category </b>
+                    <div class="standardText">Define <b>Fluency and Adequacy</b> categories for DQF (Dynamic Quality Framework)</div>
                 </div>
                 <div id="dqfPanel" style="display:none;">
                 <br/>
@@ -1170,6 +1175,9 @@ function addQualityTo()
                         </td>
                     </tr>
                     <tr><td colspan="3">&nbsp;</td></tr>
+                    <tr>
+                        <td colspan="3"><div class="standardText"><c:out value="${defaultSettingHelpMsg}" escapeXml="false"/>:</div></td>
+                    </tr>
                   </table>
                 </div>
             </td>
@@ -1177,8 +1185,9 @@ function addQualityTo()
         <tr valign="top">
             <td colspan=3>
                 <br/>        
-                <div id="toShowSeverity" style="cursor:pointer;display:inline-block;"><b>DQF Severity Category</b>
+                <div id="toShowSeverity" style="cursor:pointer;display:inline-block;">
                     <span style="display:show;"><img src="/globalsight/images/enlarge.jpg"/></span>
+                    <b><%=bundle.getString("lb_dqf_severity_category") %></b>
                     <div class="standardText"><c:out value="${severityHelpMsg}" escapeXml="false"/></div>
                 </div>
                 <div id="severityPanel" style="display:none;">

@@ -17,14 +17,13 @@
 
 package com.globalsight.everest.edit.offline;
 
-import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
+import java.io.File;
+import java.rmi.RemoteException;
+
 import com.globalsight.everest.edit.offline.download.DownloadParams;
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.util.progress.IProcessStatusListener;
-
-import java.rmi.RemoteException;
-import java.io.File;
 
 /**
  * The OfflineEditManager interface is intended to manage the download
@@ -96,9 +95,9 @@ public interface OfflineEditManager
      * @exception AmbassadorDwUpException - Component related exception.
      * @exception java.rmi.RemoteException Network related exception.
      */
-    public void processUploadReportPage(File p_tempFile,
-        User p_user, Task p_task, String p_fileName, String p_reportName)
-        throws AmbassadorDwUpException, RemoteException;
+    public void processUploadReportPage(File p_tempFile, User p_user, Task p_task,
+            String p_fileName, String p_reportName, String scorecardData)
+            throws AmbassadorDwUpException, RemoteException;
 
     /**
      * Attaches a ProcessStatus event listener to this object for
@@ -114,8 +113,8 @@ public interface OfflineEditManager
     public void runProcessDownloadRequest(DownloadParams downloadParams)
             throws OfflineEditorManagerException, RemoteException;
 
-    public String runProcessUploadReportPage(File p_tmpFile, User p_user,
-            Task p_task, String p_fileName, String p_reportName)
+    public String runProcessUploadReportPage(File p_tmpFile, User p_user, Task p_task,
+            String p_fileName, String p_reportName, String scorecardData)
             throws AmbassadorDwUpException;
 
     public String runProcessUploadPage(File p_tmpFile, User p_user, Task p_task,

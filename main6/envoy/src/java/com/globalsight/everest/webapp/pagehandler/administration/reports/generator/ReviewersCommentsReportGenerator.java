@@ -130,8 +130,8 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
     public static final int LANGUAGE_INFO_ROW = 4;
     public static int SEGMENT_HEADER_ROW = 6;
     public static int SEGMENT_START_ROW = 7;
-    public static int SCORECARD_START_ROW = 0;
-    public static int DQF_START_ROW = 0;
+    public int SCORECARD_START_ROW = 0;
+    public int DQF_START_ROW = 0;
     
     // "E" column, index 4
     public static final int CATEGORY_FAILURE_COLUMN = 4;
@@ -349,6 +349,11 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             isScorecradEnabled = false;
             needProtect = false;
             
+            DQF_START_ROW = 0;
+            SCORECARD_START_ROW = 0;
+            SEGMENT_HEADER_ROW = 6;
+            SEGMENT_START_ROW = 7;
+
             if (!jobTL.contains(trgLocale))
                 continue;
 
@@ -416,6 +421,10 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             {
                 cell.setCellStyle(getLockedStyle(workbook));
             }
+            else
+            {
+                cell.setCellStyle(getUnlockedStyle(workbook));
+            }
             cell.setCellValue(fluencyScore);
            
             row++;
@@ -429,6 +438,10 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             {
                 cell.setCellStyle(getLockedStyle(workbook));
             }
+            else
+            {
+                cell.setCellStyle(getUnlockedStyle(workbook));
+            }
             cell.setCellValue(adequacyScore);
             row++;
             
@@ -440,6 +453,10 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             if (isStored || needProtect)
             {
                 cell.setCellStyle(getLockedStyle(workbook));
+            }
+            else
+            {
+                cell.setCellStyle(getUnlockedStyle(workbook));
             }
             cell.setCellValue(dqfComment);
         }
@@ -460,6 +477,9 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                     cell = getCell(rowLine, col);
                     cell.setCellValue(scorecard);
                     
+                    cell = getCell(rowLine, 1);
+                    cell.setCellStyle(getUnlockedStyle(workbook));
+
                     elements.put(scorecard, Integer.valueOf(row));
                     row++;
                 }
@@ -474,6 +494,8 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                 cell = getCell(rowLine, 1);
                 if (isStored || needProtect)
                     cell.setCellStyle(getLockedStyle(workbook));
+                else
+                    cell.setCellStyle(getUnlockedStyle(workbook));
                 cell.setCellValue(score.getScore());
             }
 
@@ -485,6 +507,10 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             if (isStored || needProtect)
             {
                 cell.setCellStyle(getLockedStyle(workbook));
+            }
+            else
+            {
+                cell.setCellStyle(getUnlockedStyle(workbook));
             }
             cell.setCellValue(scoreComment);
         }
@@ -573,7 +599,8 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
         SEGMENT_START_ROW = SEGMENT_HEADER_ROW + 1;
         
         //add additional info for DQF and scorecard used to read data via uploading report
-        reportInfo += "_" + DQF_START_ROW + "_" + SCORECARD_START_ROW + "_" + SEGMENT_START_ROW;
+        reportInfo += "_" + DQF_START_ROW + "_" + SCORECARD_START_ROW + "_"
+                + SEGMENT_START_ROW;
 
         Row titleRow = getRow(p_sheet, 0);
         Cell taskIdCell = getCell(titleRow, 26);

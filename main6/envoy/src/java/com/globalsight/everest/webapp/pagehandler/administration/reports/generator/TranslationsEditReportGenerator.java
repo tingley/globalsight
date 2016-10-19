@@ -40,8 +40,6 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -89,8 +87,10 @@ import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
+import com.globalsight.util.ExcelUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.ReportStyle;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -106,18 +106,6 @@ import com.globalsight.util.resourcebundle.SystemResourceBundle;
 public class TranslationsEditReportGenerator implements ReportGenerator, Cancelable
 {
     private static final Logger logger = Logger.getLogger(TranslationsEditReportGenerator.class);
-
-    private static final String CATEGORY_FAILURE_DROP_DOWN_LIST = "categoryFailureDropDownList";
-    private static final String CATEGORY_SEVERITY_LIST = "categorySeverityList";
-    private static final String CATEGORY_FLUENCY_LIST = "categoryFluencyList";
-    private static final String CATEGORY_ADEQUACY_LIST = "categoryAdequacyList";
-
-    private CellStyle contentStyle = null;
-    private CellStyle rtlContentStyle = null;
-    private CellStyle unlockedStyle = null;
-    private CellStyle lockedStyle = null;
-    private CellStyle headerStyle = null;
-    private CellStyle unlockedRightStyle = null;
 
     public static final int LANGUAGE_HEADER_ROW = 3;
     public static final int LANGUAGE_INFO_ROW = 4;
@@ -152,6 +140,8 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
     private List<String> scorecardCategories = null;
     private String scoreComment = "";
     private boolean needProtect = false;
+
+    private static ReportStyle REPORT_STYLE = null;
 
     public TranslationsEditReportGenerator(String p_currentCompanyName)
     {
@@ -231,6 +221,8 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                 continue;
 
             Workbook workBook = new SXSSFWorkbook();
+            REPORT_STYLE = new ReportStyle(workBook);
+
             createReport(workBook, job, p_targetLocales, m_dateFormat);
             File file = getFile(getReportType(), job, workBook);
             FileOutputStream out = new FileOutputStream(file);
@@ -289,10 +281,26 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         addSegmentHeader(p_workbook, sheet);
 
         // Create Name Areas for drop down list.
-        createCategoryFailureNameArea(p_workbook);
-        createSeverityNameArea(p_workbook);
-        createFluencyNameArea(p_workbook);
-        createAdequacyNameArea(p_workbook);
+        ExcelUtil.createValidatorList(p_workbook, getFailureCategoriesList(),
+                SEGMENT_START_ROW, -1, CATEGORY_FAILURE_COLUMN);
+        
+        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+        List<String> categories = CompanyWrapper.getCompanyCategoryNames(currentCompanyId, CategoryType.Severity, true);
+        ExcelUtil.createValidatorList(p_workbook, categories, SEGMENT_START_ROW, -1, SEVERITY_COLUMN);
+        
+        if (DQF_START_ROW > 0)
+        {
+            categories = CompanyWrapper.getCompanyCategoryNames(currentCompanyId, CategoryType.Fluency, true);
+            ExcelUtil.createValidatorList(p_workbook, categories, DQF_START_ROW, DQF_START_ROW, 1);
+
+            categories = CompanyWrapper.getCompanyCategoryNames(currentCompanyId, CategoryType.Adequacy, true);
+            ExcelUtil.createValidatorList(p_workbook, categories, DQF_START_ROW + 1, DQF_START_ROW + 1, 1);
+        }
+        if (SCORECARD_START_ROW > 0)
+        {
+            String[] data = new String[] { "5", "4", "3", "2", "1" };
+            ExcelUtil.createValidatorList(p_workbook, data, SCORECARD_START_ROW + 1, -1, 1);
+        }
 
         // Insert Data into Report
         String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
@@ -302,104 +310,6 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat, SEGMENT_START_ROW);
     }
     
-    private void createSeverityNameArea(Workbook p_workbook)
-    {
-        try
-        {
-            if (p_workbook.getNumberOfSheets() == 1) {
-                Sheet firstSheet = getSheet(p_workbook, 0);
-                String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-                List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId, CategoryType.Severity, true);
-                // Set the categories in "AC" column, starts with row 8.
-                int col = 28;
-                int baseRowIndex = SEGMENT_START_ROW;
-                for (int i = 0; i < categories.size(); i++)
-                {
-                    Row row = getRow(firstSheet, baseRowIndex + i);
-                    Cell cell = getCell(row, col);
-                    cell.setCellValue(categories.get(i));
-                }
-
-                String formula = firstSheet.getSheetName() + "!$AC$" + (baseRowIndex + 1) + ":$AC$"
-                        + (baseRowIndex + categories.size());
-                Name name = p_workbook.createName();
-                name.setRefersToFormula(formula);
-                name.setNameName(CATEGORY_SEVERITY_LIST);
-
-                // Hide "AC" column
-                firstSheet.setColumnHidden(28, true);
-            }
-        }
-        catch (Exception e)
-        {
-            logger.error("Error when create hidden area for category failures.", e);
-        }
-    }
-
-    private void createFluencyNameArea(Workbook p_workbook)
-    {
-        try
-        {
-            Sheet firstSheet = getSheet(p_workbook, 0);
-            String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-            List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
-                    currentCompanyId, CategoryType.Fluency, true);
-            // Set the categories in "AD" column, starts with row 8.
-            int col = 29;
-            for (int i = 0; i < categories.size(); i++)
-            {
-                Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
-                Cell cell = getCell(row, col);
-                cell.setCellValue(categories.get(i));
-            }
-
-            String formula = firstSheet.getSheetName() + "!$AD$" + (SEGMENT_START_ROW + 1)
-                    + ":$AD$" + (SEGMENT_START_ROW + categories.size());
-            Name name = p_workbook.createName();
-            name.setRefersToFormula(formula);
-            name.setNameName(CATEGORY_FLUENCY_LIST);
-
-            // Hide "AD" column
-            firstSheet.setColumnHidden(29, true);
-        }
-        catch (Exception e)
-        {
-            logger.error("Error when create hidden area for category failures.", e);
-        }
-    }
-
-    private void createAdequacyNameArea(Workbook p_workbook)
-    {
-        try
-        {
-            Sheet firstSheet = getSheet(p_workbook, 0);
-            String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-            List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
-                    currentCompanyId, CategoryType.Adequacy, true);
-            // Set the categories in "AE" column, starts with row 8.
-            int col = 30;
-            for (int i = 0; i < categories.size(); i++)
-            {
-                Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
-                Cell cell = getCell(row, col);
-                cell.setCellValue(categories.get(i));
-            }
-
-            String formula = firstSheet.getSheetName() + "!$AE$" + (SEGMENT_START_ROW + 1)
-                    + ":$AE$" + (SEGMENT_START_ROW + categories.size());
-            Name name = p_workbook.createName();
-            name.setRefersToFormula(formula);
-            name.setNameName(CATEGORY_ADEQUACY_LIST);
-
-            // Hide "AE" column
-            firstSheet.setColumnHidden(30, true);
-        }
-        catch (Exception e)
-        {
-            logger.error("Error when create hidden area for category failures.", e);
-        }
-    }
-
     private void addDQFHeader(Workbook workbook, Sheet sheet) throws Exception {
         int col = 0;
         int row = LANGUAGE_HEADER_ROW;
@@ -412,52 +322,52 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             
             // DQF enabled
             row = DQF_START_ROW;
-            rowLine = getRow(sheet, row);
-            cell = getCell(rowLine, col);
+            rowLine = ExcelUtil.getRow(sheet, row);
+            cell = ExcelUtil.getCell(rowLine, col);
             cell.setCellValue(m_bundle.getString("lb_dqf_fluency_only"));
-            cell.setCellStyle(getHeaderStyle(workbook));
+            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
             
-            cell = getCell(rowLine, 1);
+            cell = ExcelUtil.getCell(rowLine, 1);
             if (isStored || needProtect)
             {
-                cell.setCellStyle(getLockedStyle(workbook));
+                cell.setCellStyle(REPORT_STYLE.getLockedStyle());
             }
             else
             {
-                cell.setCellStyle(getUnlockedStyle(workbook));
+                cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
             }
             cell.setCellValue(fluencyScore);
            
             row++;
 
-            rowLine = getRow(sheet, row);
-            cell = getCell(rowLine, col);
+            rowLine = ExcelUtil.getRow(sheet, row);
+            cell = ExcelUtil.getCell(rowLine, col);
             cell.setCellValue(m_bundle.getString("lb_dqf_adequacy_only"));
-            cell.setCellStyle(getHeaderStyle(workbook));
-            cell = getCell(rowLine, 1);
+            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
+            cell = ExcelUtil.getCell(rowLine, 1);
             if (isStored || needProtect)
             {
-                cell.setCellStyle(getLockedStyle(workbook));
+                cell.setCellStyle(REPORT_STYLE.getLockedStyle());
             }
             else
             {
-                cell.setCellStyle(getUnlockedStyle(workbook));
+                cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
             }
             cell.setCellValue(adequacyScore);
             row++;
             
-            rowLine = getRow(sheet, row);
-            cell = getCell(rowLine, col);
+            rowLine = ExcelUtil.getRow(sheet, row);
+            cell = ExcelUtil.getCell(rowLine, col);
             cell.setCellValue(m_bundle.getString("lb_comment"));
-            cell.setCellStyle(getHeaderStyle(workbook));
-            cell = getCell(rowLine, 1);
+            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
+            cell = ExcelUtil.getCell(rowLine, 1);
             if (isStored || needProtect)
             {
-                cell.setCellStyle(getLockedStyle(workbook));
+                cell.setCellStyle(REPORT_STYLE.getLockedStyle());
             }
             else
             {
-                cell.setCellStyle(getUnlockedStyle(workbook));
+                cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
             }
             cell.setCellValue(dqfComment);
         }
@@ -466,16 +376,16 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             
             // Scorecard enabled
             row = SCORECARD_START_ROW;
-            rowLine = getRow(sheet, row);
-            cell = getCell(rowLine, col);
+            rowLine = ExcelUtil.getRow(sheet, row);
+            cell = ExcelUtil.getCell(rowLine, col);
             cell.setCellValue(m_bundle.getString("lb_scorecard"));
-            cell.setCellStyle(getHeaderStyle(workbook));
+            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
             row++;
             Hashtable<String, Integer> elements = new Hashtable<String, Integer>();
             if (scorecardCategories != null && scorecardCategories.size()>0) {
                 for (String scorecard : scorecardCategories) {
-                    rowLine = getRow(sheet, row);
-                    cell = getCell(rowLine, col);
+                    rowLine = ExcelUtil.getRow(sheet, row);
+                    cell = ExcelUtil.getCell(rowLine, col);
                     cell.setCellValue(scorecard);
                     
                     elements.put(scorecard, Integer.valueOf(row));
@@ -488,27 +398,27 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             {
                 key = score.getScorecardCategory();
                 rowValue = elements.get(key);
-                rowLine = getRow(sheet, rowValue);
-                cell = getCell(rowLine, 1);
+                rowLine = ExcelUtil.getRow(sheet, rowValue);
+                cell = ExcelUtil.getCell(rowLine, 1);
                 if (isStored || needProtect)
-                    cell.setCellStyle(getLockedStyle(workbook));
+                    cell.setCellStyle(REPORT_STYLE.getLockedStyle());
                 else
-                    cell.setCellStyle(getUnlockedStyle(workbook));
+                    cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
                 cell.setCellValue(score.getScore());
             }
 
-            rowLine = getRow(sheet, row);
-            cell = getCell(rowLine, col);
+            rowLine = ExcelUtil.getRow(sheet, row);
+            cell = ExcelUtil.getCell(rowLine, col);
             cell.setCellValue(m_bundle.getString("lb_comment"));
-            cell.setCellStyle(getHeaderStyle(workbook));
-            cell = getCell(rowLine, 1);
+            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
+            cell = ExcelUtil.getCell(rowLine, 1);
             if (isStored || needProtect)
             {
-                cell.setCellStyle(getLockedStyle(workbook));
+                cell.setCellStyle(REPORT_STYLE.getLockedStyle());
             }
             else
             {
-                cell.setCellStyle(getUnlockedStyle(workbook));
+                cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
             }
             cell.setCellValue(scoreComment);
 
@@ -525,18 +435,10 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
      */
     private void addTitle(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
-        Font titleFont = p_workBook.createFont();
-        titleFont.setUnderline(Font.U_NONE);
-        titleFont.setFontName("Times");
-        titleFont.setFontHeightInPoints((short) 14);
-        titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
-        CellStyle cs = p_workBook.createCellStyle();
-        cs.setFont(titleFont);
-
-        Row titleRow = getRow(p_sheet, 0);
-        Cell titleCell = getCell(titleRow, 0);
+        Row titleRow = ExcelUtil.getRow(p_sheet, 0);
+        Cell titleCell = ExcelUtil.getCell(titleRow, 0);
         titleCell.setCellValue(m_bundle.getString("lb_translation_edit_report"));
-        titleCell.setCellStyle(cs);
+        titleCell.setCellStyle(REPORT_STYLE.getTitleStyle());
     }
 
     /**
@@ -601,10 +503,10 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         reportInfo += "_" + DQF_START_ROW + "_" + SCORECARD_START_ROW + "_"
                 + SEGMENT_START_ROW;
 
-        Row titleRow = getRow(p_sheet, 0);
-        Cell taskIdCell = getCell(titleRow, 26);
+        Row titleRow = ExcelUtil.getRow(p_sheet, 0);
+        Cell taskIdCell = ExcelUtil.getCell(titleRow, 26);
         taskIdCell.setCellValue(reportInfo);
-        taskIdCell.setCellStyle(contentStyle);
+        taskIdCell.setCellStyle(REPORT_STYLE.getContentStyle());
 
         p_sheet.setColumnHidden(26, true);
     }
@@ -622,15 +524,15 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         int col = 0;
         int row = LANGUAGE_HEADER_ROW;
 
-        Row langRow = getRow(p_sheet, row);
-        Cell srcLangCell = getCell(langRow, col);
+        Row langRow = ExcelUtil.getRow(p_sheet, row);
+        Cell srcLangCell = ExcelUtil.getCell(langRow, col);
         srcLangCell.setCellValue(m_bundle.getString("lb_source_language"));
-        srcLangCell.setCellStyle(getHeaderStyle(p_workBook));
+        srcLangCell.setCellStyle(REPORT_STYLE.getHeaderStyle());
         col++;
 
-        Cell trgLangCell = getCell(langRow, col);
+        Cell trgLangCell = ExcelUtil.getCell(langRow, col);
         trgLangCell.setCellValue(m_bundle.getString("lb_target_language"));
-        trgLangCell.setCellStyle(getHeaderStyle(p_workBook));
+        trgLangCell.setCellStyle(REPORT_STYLE.getHeaderStyle());
     }
 
     /**
@@ -645,95 +547,95 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
     {
         int col = 0;
         int row = SEGMENT_HEADER_ROW;
-        Row segHeaderRow = getRow(p_sheet, row);
+        Row segHeaderRow = ExcelUtil.getRow(p_sheet, row);
 
-        Cell cell_A = getCell(segHeaderRow, col);
+        Cell cell_A = ExcelUtil.getCell(segHeaderRow, col);
         cell_A.setCellValue(m_bundle.getString("lb_source_segment"));
-        cell_A.setCellStyle(getHeaderStyle(p_workBook));
+        cell_A.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
-        Cell cell_B = getCell(segHeaderRow, col);
+        Cell cell_B = ExcelUtil.getCell(segHeaderRow, col);
         cell_B.setCellValue(m_bundle.getString("lb_target_segment"));
-        cell_B.setCellStyle(getHeaderStyle(p_workBook));
+        cell_B.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
-        Cell cell_C = getCell(segHeaderRow, col);
+        Cell cell_C = ExcelUtil.getCell(segHeaderRow, col);
         cell_C.setCellValue(m_bundle.getString("lb_modify_the_translation"));
-        cell_C.setCellStyle(getHeaderStyle(p_workBook));
+        cell_C.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 50 * 256);
         col++;
 
-        Cell cell_D = getCell(segHeaderRow, col);
+        Cell cell_D = ExcelUtil.getCell(segHeaderRow, col);
         cell_D.setCellValue(m_bundle.getString("latest_comments"));
-        cell_D.setCellStyle(getHeaderStyle(p_workBook));
+        cell_D.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
-        Cell cell_E = getCell(segHeaderRow, col);
+        Cell cell_E = ExcelUtil.getCell(segHeaderRow, col);
         cell_E.setCellValue(m_bundle.getString("translation_comments"));
-        cell_E.setCellStyle(getHeaderStyle(p_workBook));
+        cell_E.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
-        Cell cell_F = getCell(segHeaderRow, col);
+        Cell cell_F = ExcelUtil.getCell(segHeaderRow, col);
         cell_F.setCellValue(m_bundle.getString("lb_category_failure"));
-        cell_F.setCellStyle(getHeaderStyle(p_workBook));
+        cell_F.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
-        Cell cell_G = getCell(segHeaderRow, col);
+        Cell cell_G = ExcelUtil.getCell(segHeaderRow, col);
         cell_G.setCellValue(m_bundle.getString("lb_comment_status"));
-        cell_G.setCellStyle(getHeaderStyle(p_workBook));
+        cell_G.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
         
-        Cell cell_S = getCell(segHeaderRow, col);
+        Cell cell_S = ExcelUtil.getCell(segHeaderRow, col);
         cell_S.setCellValue(m_bundle.getString("lb_dqf_severity"));
-        cell_S.setCellStyle(getHeaderStyle(p_workBook));
+        cell_S.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
-        Cell cell_H = getCell(segHeaderRow, col);
+        Cell cell_H = ExcelUtil.getCell(segHeaderRow, col);
         cell_H.setCellValue(m_bundle.getString("lb_tm_match_original"));
-        cell_H.setCellStyle(getHeaderStyle(p_workBook));
+        cell_H.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 20 * 256);
         col++;
 
-        Cell cell_I = getCell(segHeaderRow, col);
+        Cell cell_I = ExcelUtil.getCell(segHeaderRow, col);
         cell_I.setCellValue(m_bundle.getString("lb_glossary_source"));
-        cell_I.setCellStyle(getHeaderStyle(p_workBook));
+        cell_I.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 25 * 256);
         col++;
 
-        Cell cell_J = getCell(segHeaderRow, col);
+        Cell cell_J = ExcelUtil.getCell(segHeaderRow, col);
         cell_J.setCellValue(m_bundle.getString("lb_glossary_target"));
-        cell_J.setCellStyle(getHeaderStyle(p_workBook));
+        cell_J.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 25 * 256);
         col++;
 
-        Cell cell_K = getCell(segHeaderRow, col);
+        Cell cell_K = ExcelUtil.getCell(segHeaderRow, col);
         cell_K.setCellValue(m_bundle.getString("lb_job_id_report"));
-        cell_K.setCellStyle(getHeaderStyle(p_workBook));
+        cell_K.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
-        Cell cell_L = getCell(segHeaderRow, col);
+        Cell cell_L = ExcelUtil.getCell(segHeaderRow, col);
         cell_L.setCellValue(m_bundle.getString("lb_segment_id"));
-        cell_L.setCellStyle(getHeaderStyle(p_workBook));
+        cell_L.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
 
-        Cell cell_M = getCell(segHeaderRow, col);
+        Cell cell_M = ExcelUtil.getCell(segHeaderRow, col);
         cell_M.setCellValue(m_bundle.getString("lb_page_name"));
-        cell_M.setCellStyle(getHeaderStyle(p_workBook));
+        cell_M.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 25 * 256);
         col++;
 
-        Cell cell_N = getCell(segHeaderRow, col);
+        Cell cell_N = ExcelUtil.getCell(segHeaderRow, col);
         cell_N.setCellValue(m_bundle.getString("lb_sid"));
-        cell_N.setCellStyle(getHeaderStyle(p_workBook));
+        cell_N.setCellStyle(REPORT_STYLE.getHeaderStyle());
         p_sheet.setColumnWidth(col, 15 * 256);
         col++;
     }
@@ -743,16 +645,16 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
     {
         int col = 0;
         int row = LANGUAGE_INFO_ROW;
-        CellStyle contentStyle = getContentStyle(p_workbook);
-        Row langInfoRow = getRow(p_sheet, row);
+        CellStyle contentStyle = REPORT_STYLE.getContentStyle();
+        Row langInfoRow = ExcelUtil.getRow(p_sheet, row);
 
         // Source Language
-        Cell srcLangCell = getCell(langInfoRow, col++);
+        Cell srcLangCell = ExcelUtil.getCell(langInfoRow, col++);
         srcLangCell.setCellValue(p_sourceLang);
         srcLangCell.setCellStyle(contentStyle);
 
         // Target Language
-        Cell trgLangCell = getCell(langInfoRow, col++);
+        Cell trgLangCell = ExcelUtil.getCell(langInfoRow, col++);
         trgLangCell.setCellValue(p_targetLang);
         trgLangCell.setCellStyle(contentStyle);
     }
@@ -923,59 +825,56 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                         }
                     }
 
-                    Row currentRow = getRow(p_sheet, p_row);
+                    Row currentRow = ExcelUtil.getRow(p_sheet, p_row);
 
                     // Source segment with compact tags
-                    CellStyle srcStyle = m_rtlSourceLocale ? getRtlContentStyle(p_workBook)
-                            : getContentStyle(p_workBook);
-                    Cell cell_A = getCell(currentRow, col);
+                    CellStyle srcStyle = m_rtlSourceLocale ? REPORT_STYLE.getRtlContentStyle()
+                            : REPORT_STYLE.getContentStyle();
+                    Cell cell_A = ExcelUtil.getCell(currentRow, col);
                     cell_A.setCellValue(
                             getSegment(pData, sourceTuv, m_rtlSourceLocale, p_job.getId()));
                     cell_A.setCellStyle(srcStyle);
                     col++;
 
                     // Target segment with compact tags
-                    CellStyle trgStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
-                            : getContentStyle(p_workBook);
-                    Cell cell_B = getCell(currentRow, col);
+                    CellStyle trgStyle = m_rtlTargetLocale ? REPORT_STYLE.getRtlContentStyle()
+                            : REPORT_STYLE.getContentStyle();
+                    Cell cell_B = ExcelUtil.getCell(currentRow, col);
                     cell_B.setCellValue(
                             getSegment(pData, targetTuv, m_rtlTargetLocale, p_job.getId()));
                     cell_B.setCellStyle(trgStyle);
                     col++;
 
                     // Modify the translation
-                    CellStyle modifyTranslationStyle = m_rtlTargetLocale
-                            ? getUnlockedRightStyle(p_workBook) : getUnlockedStyle(p_workBook);
-                    Cell cell_C = getCell(currentRow, col);
+                    CellStyle modifyTranslationStyle = m_rtlTargetLocale ? REPORT_STYLE
+                            .getUnlockedRightStyle() : REPORT_STYLE.getUnlockedStyle();
+                    Cell cell_C = ExcelUtil.getCell(currentRow, col);
                     cell_C.setCellValue("");
                     cell_C.setCellStyle(modifyTranslationStyle);
                     col++;
 
                     // Reviewers Comments
-                    Cell cell_D = getCell(currentRow, col);
+                    Cell cell_D = ExcelUtil.getCell(currentRow, col);
                     cell_D.setCellValue(lastComment);
-                    cell_D.setCellStyle(getContentStyle(p_workBook));
+                    cell_D.setCellStyle(REPORT_STYLE.getContentStyle());
                     col++;
 
                     // Translators Comments
-                    Cell cell_E = getCell(currentRow, col);
+                    Cell cell_E = ExcelUtil.getCell(currentRow, col);
                     cell_E.setCellValue("");
-                    cell_E.setCellStyle(getUnlockedStyle(p_workBook));
+                    cell_E.setCellStyle(REPORT_STYLE.getUnlockedStyle());
                     col++;
 
                     // Category failure
-                    Cell cell_F = getCell(currentRow, col);
+                    Cell cell_F = ExcelUtil.getCell(currentRow, col);
                     cell_F.setCellValue(failure);
-                    cell_F.setCellStyle(getContentStyle(p_workBook));
+                    cell_F.setCellStyle(REPORT_STYLE.getContentStyle());
                     col++;
 
                     // Comment Status
-                    Cell cell_G = getCell(currentRow, col);
+                    Cell cell_G = ExcelUtil.getCell(currentRow, col);
                     cell_G.setCellValue(commentStatus);
-                    CellStyle commentCS = p_workBook.createCellStyle();
-                    commentCS.cloneStyleFrom(getContentStyle(p_workBook));
-                    commentCS.setLocked(false);
-                    cell_G.setCellStyle(commentCS);
+                    cell_G.setCellStyle(REPORT_STYLE.getUnlockedStyle());
                     
                     // add comment status drop down list for current row.
                     String[] statusArray = getCommentStatusList(lastComment);
@@ -986,39 +885,39 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     col++;
 
                     // Severity
-                    Cell cell_S = getCell(currentRow, col);
+                    Cell cell_S = ExcelUtil.getCell(currentRow, col);
                     cell_S.setCellValue(severity);
-                    cell_S.setCellStyle(getContentStyle(p_workBook));
+                    cell_S.setCellStyle(REPORT_STYLE.getContentStyle());
                     col++;
 
                     // TM match
-                    Cell cell_H = getCell(currentRow, col);
+                    Cell cell_H = ExcelUtil.getCell(currentRow, col);
                     cell_H.setCellValue(matches.toString());
-                    cell_H.setCellStyle(getContentStyle(p_workBook));
+                    cell_H.setCellStyle(REPORT_STYLE.getContentStyle());
                     col++;
 
                     // Glossary source
-                    Cell cell_I = getCell(currentRow, col);
+                    Cell cell_I = ExcelUtil.getCell(currentRow, col);
                     cell_I.setCellValue(sourceTerms);
-                    cell_I.setCellStyle(getContentStyle(p_workBook));
+                    cell_I.setCellStyle(REPORT_STYLE.getContentStyle());
                     col++;
 
                     // Glossary target
-                    Cell cell_J = getCell(currentRow, col);
+                    Cell cell_J = ExcelUtil.getCell(currentRow, col);
                     cell_J.setCellValue(targetTerms);
-                    cell_J.setCellStyle(getContentStyle(p_workBook));
+                    cell_J.setCellStyle(REPORT_STYLE.getContentStyle());
                     col++;
 
                     // Job Id
-                    Cell cell_K = getCell(currentRow, col);
+                    Cell cell_K = ExcelUtil.getCell(currentRow, col);
                     cell_K.setCellValue(p_job.getId());
-                    cell_K.setCellStyle(getContentStyle(p_workBook));
+                    cell_K.setCellStyle(REPORT_STYLE.getContentStyle());
                     col++;
 
                     // Segment id
-                    Cell cell_L = getCell(currentRow, col);
+                    Cell cell_L = ExcelUtil.getCell(currentRow, col);
                     cell_L.setCellValue(sourceTuv.getTu(p_job.getId()).getId());
-                    cell_L.setCellStyle(getContentStyle(p_workBook));
+                    cell_L.setCellStyle(REPORT_STYLE.getContentStyle());
                     col++;
 
                     // Fix for GBS-1484
@@ -1033,15 +932,15 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                         name = name + detailName + ")";
                     }
                     // Page Name
-                    Cell cell_M = getCell(currentRow, col);
+                    Cell cell_M = ExcelUtil.getCell(currentRow, col);
                     cell_M.setCellValue(name);
-                    cell_M.setCellStyle(getContentStyle(p_workBook));
+                    cell_M.setCellStyle(REPORT_STYLE.getContentStyle());
                     col++;
 
                     // SID
-                    Cell cell_N = getCell(currentRow, col);
+                    Cell cell_N = ExcelUtil.getCell(currentRow, col);
                     cell_N.setCellValue(sid);
-                    cell_N.setCellStyle(getContentStyle(p_workBook));
+                    cell_N.setCellStyle(REPORT_STYLE.getContentStyle());
                     col++;
 
                     p_row++;
@@ -1050,63 +949,11 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
             
             // Add comment status
             addCommentStatus(p_sheet, rowsWithCommentSet, p_row);
-            // Add category failure drop down list here.
-            addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row - 1,
-                    CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
-            addSeverityCategoryList(p_sheet, SEGMENT_START_ROW, p_row, SEVERITY_COLUMN,
-                    SEVERITY_COLUMN);
-            addFluencyCategoryList(p_sheet, DQF_START_ROW, DQF_START_ROW, 1, 1);
-            addAdequacyCategoryList(p_sheet, DQF_START_ROW + 1, DQF_START_ROW + 1, 1, 1);
         }
 
         return p_row;
     }
     
-    private void addFluencyCategoryList(Sheet p_sheet, int startRow, int lastRow, int startColumn,
-            int lastColumn)
-    {
-        // Add category failure drop down list here.
-        DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
-        DataValidationConstraint dvConstraint = dvHelper
-                .createFormulaListConstraint(CATEGORY_FLUENCY_LIST);
-        CellRangeAddressList addressList = new CellRangeAddressList(startRow, lastRow, startColumn,
-                lastColumn);
-        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
-        validation.setSuppressDropDownArrow(true);
-        validation.setShowErrorBox(true);
-        p_sheet.addValidationData(validation);
-    }
-
-    private void addAdequacyCategoryList(Sheet p_sheet, int startRow, int lastRow, int startColumn,
-            int lastColumn)
-    {
-        // Add category failure drop down list here.
-        DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
-        DataValidationConstraint dvConstraint = dvHelper
-                .createFormulaListConstraint(CATEGORY_ADEQUACY_LIST);
-        CellRangeAddressList addressList = new CellRangeAddressList(startRow, lastRow, startColumn,
-                lastColumn);
-        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
-        validation.setSuppressDropDownArrow(true);
-        validation.setShowErrorBox(true);
-        p_sheet.addValidationData(validation);
-    }
-
-    private void addSeverityCategoryList(Sheet p_sheet, int startRow, int lastRow,
-            int startColumn, int lastColumn)
-    {
-        // Add category failure drop down list here.
-        DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
-        DataValidationConstraint dvConstraint = dvHelper
-                .createFormulaListConstraint(CATEGORY_SEVERITY_LIST);
-        CellRangeAddressList addressList = new CellRangeAddressList(startRow, lastRow, startColumn,
-                lastColumn);
-        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
-        validation.setSuppressDropDownArrow(true);
-        validation.setShowErrorBox(true);
-        p_sheet.addValidationData(validation);
-    }
-
     private void addCommentStatus(Sheet p_sheet, Set<Integer> rowsWithCommentSet, int last_row)
     {
         DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
@@ -1261,135 +1108,6 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         return options;
     }
 
-    private CellStyle getHeaderStyle(Workbook p_workbook) throws Exception
-    {
-        if (headerStyle == null)
-        {
-            Font font = p_workbook.createFont();
-            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
-            font.setColor(IndexedColors.BLACK.getIndex());
-            font.setUnderline(Font.U_NONE);
-            font.setFontName("Times");
-            font.setFontHeightInPoints((short) 11);
-
-            CellStyle cs = p_workbook.createCellStyle();
-            cs.setFont(font);
-            cs.setWrapText(true);
-            cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
-            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-            cs.setBorderTop(CellStyle.BORDER_THIN);
-            cs.setBorderRight(CellStyle.BORDER_THIN);
-            cs.setBorderBottom(CellStyle.BORDER_THIN);
-            cs.setBorderLeft(CellStyle.BORDER_THIN);
-
-            headerStyle = cs;
-        }
-
-        return headerStyle;
-    }
-
-    private CellStyle getContentStyle(Workbook p_workbook) throws Exception
-    {
-        if (contentStyle == null)
-        {
-            CellStyle style = p_workbook.createCellStyle();
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_LEFT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-            style.setFont(font);
-
-            contentStyle = style;
-        }
-
-        return contentStyle;
-    }
-
-    private CellStyle getRtlContentStyle(Workbook p_workbook) throws Exception
-    {
-        if (rtlContentStyle == null)
-        {
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-
-            CellStyle style = p_workbook.createCellStyle();
-            style.setFont(font);
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_RIGHT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-
-            rtlContentStyle = style;
-        }
-
-        return rtlContentStyle;
-    }
-
-    private CellStyle getUnlockedStyle(Workbook p_workbook) throws Exception
-    {
-        if (unlockedStyle == null)
-        {
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-
-            CellStyle style = p_workbook.createCellStyle();
-            style.setFont(font);
-            style.setLocked(false);
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_LEFT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-
-            unlockedStyle = style;
-        }
-
-        return unlockedStyle;
-    }
-
-    private CellStyle getLockedStyle(Workbook p_workbook) throws Exception
-    {
-        if (lockedStyle == null)
-        {
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-
-            CellStyle style = p_workbook.createCellStyle();
-            style.setFont(font);
-            style.setLocked(true);
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_LEFT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-
-            lockedStyle = style;
-        }
-
-        return lockedStyle;
-    }
-
-    private CellStyle getUnlockedRightStyle(Workbook p_workbook) throws Exception
-    {
-        if (unlockedRightStyle == null)
-        {
-            Font font = p_workbook.createFont();
-            font.setFontName("Arial");
-            font.setFontHeightInPoints((short) 10);
-
-            CellStyle style = p_workbook.createCellStyle();
-            style.setFont(font);
-            style.setLocked(false);
-            style.setWrapText(true);
-            style.setAlignment(CellStyle.ALIGN_RIGHT);
-            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-
-            unlockedRightStyle = style;
-        }
-
-        return unlockedRightStyle;
-    }
-
     private List<String> getFailureCategoriesList()
     {
         List<String> result = new ArrayList<String>();
@@ -1421,7 +1139,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         for (int col = 0; col < p_colLen; col++)
         {
             Row row = p_sheet.getRow(p_row);
-            Cell cell = getCell(row, col);
+            Cell cell = ExcelUtil.getCell(row, col);
             cell.setCellValue("");
             col++;
         }
@@ -1469,77 +1187,6 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         cancel = true;
     }
 
-    private Sheet getSheet(Workbook p_workbook, int index)
-    {
-        Sheet sheet = p_workbook.getSheetAt(index);
-        if (sheet == null)
-            sheet = p_workbook.createSheet();
-        return sheet;
-    }
-
-    private Row getRow(Sheet p_sheet, int p_col)
-    {
-        Row row = p_sheet.getRow(p_col);
-        if (row == null)
-            row = p_sheet.createRow(p_col);
-        return row;
-    }
-
-    private Cell getCell(Row p_row, int index)
-    {
-        Cell cell = p_row.getCell(index);
-        if (cell == null)
-            cell = p_row.createCell(index);
-        return cell;
-    }
-
-    /**
-     * Create workbook name areas for category failure drop down list, it is
-     * from "AA8" to "AAn".
-     * <P>
-     * Only write the data of drop down list into the first sheet as it can be
-     * referenced from all sheets.
-     * </P>
-     * <P>
-     * The formula is like
-     * "[sheetName]!$AA$[startRow]:$AA$[endRow]",i.e."TER!$AA$8:$AA$32".
-     * </P>
-     */
-    private void createCategoryFailureNameArea(Workbook p_workbook)
-    {
-        try
-        {
-            // Ensure the name area is written only one time,otherwise it has
-            // problem when open generated excel file.
-            if (p_workbook.getNumberOfSheets() == 1)
-            {
-                Sheet firstSheet = getSheet(p_workbook, 0);
-                List<String> categories = getFailureCategoriesList();
-                // Set the categories in "AA" column, starts with row 8.
-                int col = 26;
-                for (int i = 0; i < categories.size(); i++)
-                {
-                    Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
-                    Cell cell = getCell(row, col);
-                    cell.setCellValue(categories.get(i));
-                }
-
-                String formula = firstSheet.getSheetName() + "!$AA$" + (SEGMENT_START_ROW + 1)
-                        + ":$AA$" + (SEGMENT_START_ROW + categories.size());
-                Name name = p_workbook.createName();
-                name.setRefersToFormula(formula);
-                name.setNameName(CATEGORY_FAILURE_DROP_DOWN_LIST);
-
-                // Hide "AA" column
-                firstSheet.setColumnHidden(26, true);
-            }
-        }
-        catch (Exception e)
-        {
-            logger.error("Error when create hidden area for category failures.", e);
-        }
-    }
-
     private String[] getCommentStatusList(String lastComment)
     {
         List<String> status = new ArrayList<String>();
@@ -1568,30 +1215,6 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         validationOne.setSuppressDropDownArrow(true);
         validationOne.setShowErrorBox(true);
         p_sheet.addValidationData(validationOne);
-    }
-
-    /**
-     * Add category failure drop down list.
-     * 
-     * @param p_sheet
-     * @param startRow
-     * @param lastRow
-     * @param startColumn
-     * @param lastColumn
-     */
-    private void addCategoryFailureValidation(Sheet p_sheet, int startRow, int lastRow,
-            int startColumn, int lastColumn)
-    {
-        // Add category failure drop down list here.
-        DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
-        DataValidationConstraint dvConstraint = dvHelper
-                .createFormulaListConstraint(CATEGORY_FAILURE_DROP_DOWN_LIST);
-        CellRangeAddressList addressList = new CellRangeAddressList(startRow, lastRow, startColumn,
-                lastColumn);
-        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
-        validation.setSuppressDropDownArrow(true);
-        validation.setShowErrorBox(true);
-        p_sheet.addValidationData(validation);
     }
 
     private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale, long p_jobId)

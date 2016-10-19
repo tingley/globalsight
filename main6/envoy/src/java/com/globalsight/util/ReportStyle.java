@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.globalsight.everest.webapp.pagehandler.administration.reports;
+package com.globalsight.util;
 
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -38,6 +38,8 @@ public class ReportStyle
     private CellStyle unlockedStyle = null;
     private CellStyle unlockedRightStyle = null;
     private CellStyle titleStyle = null;
+    private CellStyle colorStyle = null;
+    private short colorIndex;
 
     public ReportStyle()
     {
@@ -214,5 +216,23 @@ public class ReportStyle
     public void setTitleStyle(CellStyle titleStyle)
     {
         this.titleStyle = titleStyle;
+    }
+
+    public CellStyle getColorStyle(short color)
+    {
+        if (colorStyle == null || color != colorIndex) {
+            colorStyle = workbook.createCellStyle();
+            colorStyle.cloneStyleFrom(getContentStyle());
+            
+            colorStyle.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            colorStyle.setFillForegroundColor(color);
+        }
+        
+        return colorStyle;
+    }
+
+    public void setColorStyle(CellStyle colorStyle)
+    {
+        this.colorStyle = colorStyle;
     }
 }

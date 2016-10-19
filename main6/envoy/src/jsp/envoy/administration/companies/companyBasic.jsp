@@ -1175,9 +1175,6 @@ function addQualityTo()
                         </td>
                     </tr>
                     <tr><td colspan="3">&nbsp;</td></tr>
-                    <tr>
-                        <td colspan="3"><div class="standardText"><c:out value="${defaultSettingHelpMsg}" escapeXml="false"/>:</div></td>
-                    </tr>
                   </table>
                 </div>
             </td>

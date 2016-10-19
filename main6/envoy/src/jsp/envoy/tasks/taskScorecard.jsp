@@ -1407,7 +1407,7 @@ function submitForm()
 	})
 	if(i != <%=categoryNum%>)
 	{
-		alert('Please socre all the options.');
+		alert('Please score all the options.');
 		return;
 	}
 
@@ -1430,13 +1430,13 @@ function saveDQF() {
     })
     if(i != 2)
     {
-        alert('Please select all DQF scores first.');
+        alert('Please score all DQF fields first.');
         return false;
     }
 	
     var comment = $("#dqfComment").val();
     if ($.trim(comment) == "") {
-        alert("Please fill in the DQF comment first.");
+        alert("Please fill in your DQF comment first.");
         return false;
     }
     $("#dqfForm").submit();

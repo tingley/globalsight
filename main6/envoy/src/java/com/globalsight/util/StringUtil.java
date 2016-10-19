@@ -32,6 +32,7 @@ public class StringUtil
 {
 
     public static final String EMPTY_STRING = "";
+    public static final String STRING_SEPARARTOR = ",";
 
     public static String transactSQLInjection(String str)
     {
@@ -48,7 +49,7 @@ public class StringUtil
 
     public static boolean isEmptyAndNull(String s)
     {
-        return s == null || s.trim().length() == 0 || s.equalsIgnoreCase("null");
+        return isEmpty(s) || "null".equalsIgnoreCase(s.trim());
     }
 
     public static boolean isNotEmptyAndNull(String s) {
@@ -79,7 +80,132 @@ public class StringUtil
 
         return src;
     }
-    
+
+    /**
+     * Get string value, default value is ""
+     * 
+     * @since 8.7.2
+     * @param s
+     *            String value
+     * @return String value
+     */
+    public static String get(String s)
+    {
+        return get(s, "");
+    }
+
+    /**
+     * Get string value, if string is null or empty, then return default value
+     * 
+     * @since 8.7.2
+     * @param s
+     *            String value
+     * @param defaultString
+     *            Default value
+     * @return String value
+     */
+    public static String get(String s, String defaultString)
+    {
+        defaultString = isEmpty(defaultString) ? "" : defaultString;
+        return isEmpty(s) ? defaultString : s;
+    }
+
+    /**
+     * Get integer value through string, if string is null or empty, then return
+     * -1 as default
+     * 
+     * @since 8.7.2
+     * @param s
+     *            String value
+     * @return int value
+     */
+    public static int getInt(String s)
+    {
+        return getInt(s, -1);
+    }
+
+    /**
+     * Get integer value through string, if string is null or empty, then
+     * default integer value
+     * 
+     * @since 8.7.2
+     * @param s
+     *            String value
+     * @param defaultValue
+     *            Default int value
+     * @return int value
+     */
+    public static int getInt(String s, int defaultValue)
+    {
+        if (isEmpty(s))
+            return defaultValue;
+        try
+        {
+            return Integer.parseInt(s);
+        }
+        catch (Exception e)
+        {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Get long value through string, if string is null or empty, then return
+     * -1L as default
+     * 
+     * @since 8.7.2
+     * @param s
+     *            String value
+     * @return long value
+     */
+    public static long getLong(String s)
+    {
+        return getLong(s, -1L);
+    }
+
+    /**
+     * Get long value through string, if string is null or empty, then return
+     * default long value
+     * 
+     * @since 8.7.2
+     * @param s
+     *            String value
+     * @param defaultValue
+     *            Default long value
+     * @return long value
+     */
+    public static long getLong(String s, long defaultValue)
+    {
+        if (isEmpty(s))
+            return defaultValue;
+        try
+        {
+            return Long.parseLong(s);
+        }
+        catch (Exception e)
+        {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Get boolean value through string If string is 'yes' or 'true' either
+     * uppercase or lowercase, return true. Otherwise will return false
+     * 
+     * @since 8.7.2
+     * @param s
+     *            String value
+     * @return boolean Boolean value
+     */
+    public static boolean getBoolean(String s)
+    {
+        if (isEmpty(s))
+            return false;
+        s = s.trim();
+
+        return "true".equalsIgnoreCase(s) || "yes".equalsIgnoreCase(s);
+    }
+
     /**
      * Take place of String Replace method, refined for performance
      * @param src
@@ -89,16 +215,10 @@ public class StringUtil
      */
     public static String replace(String src, String oldString, String newString)
     {
-        if (src == null || src.length() == 0 || oldString == null
-                || oldString.length() == 0 || oldString.equals(newString))
-        {
+        if (isEmpty(src) || isEmpty(oldString) || oldString.equals(newString))
             return src;
-        }
 
-        if (newString == null)
-        {
-            newString = "";
-        }
+        newString = isEmpty(newString) ? "" : newString;
 
         StringBuilder output = new StringBuilder();
         int start = 0;
@@ -127,15 +247,12 @@ public class StringUtil
      */
     public static String replaceWithRE(String src, String re, String newString)
     {
-        if (src == null || src.length() == 0 || re == null || re.length() == 0)
+        if (isEmpty(src) || isEmpty(re))
         {
             return src;
         }
 
-        if (newString == null)
-        {
-            newString = "";
-        }
+        newString = isEmpty(newString) ? "" : newString;
 
         Pattern p = Pattern.compile(re);
         Matcher m = p.matcher(src);
@@ -156,7 +273,7 @@ public class StringUtil
     
     public static String replaceWithRE(String src, Pattern p, Replacer replacer)
     {
-        if (src == null || src.length() == 0 || p == null || replacer == null)
+        if (isEmpty(src) || p == null || replacer == null)
         {
             return src;
         }
@@ -180,15 +297,12 @@ public class StringUtil
     public static void replaceStringBuffer(StringBuffer src, String oldString,
             String newString, boolean oneTime)
     {
-        if (src == null || oldString == null || oldString.equals(newString))
+        if (src == null || src.length() == 0 || isEmpty(oldString) || oldString.equals(newString))
         {
             return;
         }
 
-        if (newString == null)
-        {
-            newString = "";
-        }
+        newString = isEmpty(newString) ? "" : newString;
 
         int oldLen = oldString.length();
         int newLen = newString.length();
@@ -205,29 +319,38 @@ public class StringUtil
         }
     }
 
+    /**
+     * Get all integer values in a List through a string
+     * @param src String value
+     * @return List of all integer value
+     */
     public static List getIncludedInts(String src)
     {
         List ints = new ArrayList();
+        if (isEmpty(src))
+            return ints;
+
         String regex = "\\d+";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(src);
         while (matcher.find())
         {
-            String s = matcher.group(0);
-            ints.add(s);
+            ints.add(matcher.group(0));
         }
 
         return ints;
     }
 
-    // public static void main(String[] args)
-    // {
-    // String s = "12*2*45";
-    // System.out.println(replace(s, "2*", "2*2"));
-    // }
-
+    /**
+     * Remove BOM data
+     * @param bs Bytes of content
+     * @return Bytes which don't include BOM data
+     */
     public static byte[] removeBom(byte[] bs)
     {
+        if (bs == null || bs.length == 0)
+            return bs;
+
         int unread = 0;
 
         if (bs.length > 3 && (bs[0] == (byte) 0x00) && (bs[1] == (byte) 0x00)
@@ -276,9 +399,18 @@ public class StringUtil
         return bs;
     }
 
+    /**
+     * Remove BOM data
+     * @param s String content
+     * @param encoding Encoding
+     * @return String content without BOM data
+     * @throws UnsupportedEncodingException
+     */
     public static String removeBom(String s, String encoding)
             throws UnsupportedEncodingException
     {
+        if (isEmpty(s) || isEmpty(encoding))
+            return s;
 
         byte[] bs = s.getBytes(encoding);
         return new String(removeBom(bs), encoding);
@@ -290,15 +422,14 @@ public class StringUtil
      */
     public static String formatPCT(Object num)
     {
+        if (num == null)
+            return "";
+
         String result;
         if(num instanceof Number)
         {
             Locale en = new Locale("en");
             DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(en);
-//            df.applyPattern("0.00");
-
-            // Changes default Rounding Mode
-//            df.setRoundingMode(RoundingMode.DOWN);
             result = df.format(((Number) num).intValue())+"%";
         }
         else
@@ -348,66 +479,46 @@ public class StringUtil
         DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(en);
         df.applyPattern("0.00");
 
-//        String pattern = "##.";
-//        for (int i = 0; i < p_digits; i++)
-//        {
-//            pattern = pattern.concat("0");
-//        }
-//
-//        DecimalFormat ndf = new DecimalFormat(pattern);
-
         return df.format(tmpF);
     }
 
     /**
      * Compares 2 string, ignoring white space considerations.
      */
-    public static boolean equalsIgnoreSpace(String p_str1, String p_str2)
+    public static boolean equalsIgnoreSpace(String source, String dest)
     {
-        if (p_str1 == null || p_str2 == null)
+        if (isEmptyAndNull(source) || isEmptyAndNull(dest))
             return false;
 
-        String[] arr1 = p_str1.split("\\s");
-        String[] arr2 = p_str2.split("\\s");
-        StringBuffer sb1 = new StringBuffer();
-        StringBuffer sb2 = new StringBuffer();
-        for (String temp : arr1)
-        {
-            sb1.append(temp);
-        }
-        for (String temp : arr2)
-        {
-            sb2.append(temp);
-        }
+        source = replace(source, " ", "");
+        dest = replace(dest, " ", "");
 
-        return sb1.toString().equalsIgnoreCase(sb2.toString());
+        return source.equalsIgnoreCase(dest);
     }
 
     /**
      * Get the sub string before the suffix string.
      * If can not find p_suffix, then return p_input.
      *
-     * @param p_input
+     * @param src
      *            input string
-     * @param p_suffix
+     * @param suffix
      *            special string
      *
      * @see StringUtilTest.testDelSuffix
      */
-    public static String delSuffix(String p_input, String p_suffix)
+    public static String delSuffix(String src, String suffix)
     {
-        if (p_input == null || p_input.trim().length() == 0)
+        if (isEmpty(src) || isEmpty(suffix))
+            return get(src);
+
+        if (src.endsWith(suffix))
         {
-            return "";
+            int index = src.lastIndexOf(suffix);
+            src = src.substring(0, index);
         }
 
-        if (p_input.endsWith(p_suffix))
-        {
-            int index = p_input.lastIndexOf(p_suffix);
-            p_input = p_input.substring(0, index);
-        }
-
-        return p_input.trim();
+        return src.trim();
     }
 
     /**
@@ -430,12 +541,12 @@ public class StringUtil
             return EMPTY_STRING;
         }
         Iterator<? extends Object> i = objs.iterator();
-        StringBuilder r = new StringBuilder(i.next().toString());
-        while (i.hasNext()) {
-            r.append(separator);
-            r.append(i.next().toString());
+        StringBuffer result = new StringBuffer(512);
+        for (Iterator<? extends Object> iterator = objs.iterator(); iterator.hasNext();)
+        {
+            result.append(separator).append(iterator.next().toString());
         }
-        return r.toString();
+        return result.deleteCharAt(0).toString();
     }
 
     /** @see #join(String, List) */
@@ -446,43 +557,37 @@ public class StringUtil
 
     /**
      * Check if the value is included in the array
-     * @param strArray
+     * @param array
      * @param value
      * @return
      */
-    public static boolean isIncludedInArray(String[] strArray, String value)
+    public static boolean isIncludedInArray(String[] array, String value)
     {
-        if (strArray == null || value == null)
-        {
+        if (isEmpty(value) || array == null || array.length == 0)
             return false;
-        }
 
-        for (int i = 0; i < strArray.length; i++)
+        for (String v : array)
         {
-            String str = strArray[i];
-            if (value.equals(str))
-            {
+            if (v.equals(value))
                 return true;
-            }
         }
-
         return false;
     }
 
-    public static Set<String> split(String p_str)
+    public static Set<String> split(String str)
     {
-        return split(p_str, ",");
+        return split(str, STRING_SEPARARTOR);
     }
 
-    public static Set<String> split(String p_str, String p_sep)
+    public static Set<String> split(String str, String separator)
     {
         Set<String> result = new HashSet<String>();
-        String[] arr = p_str.split(p_sep);
-        for (String str : arr)
+        String[] array = str.split(separator);
+        for (String s : array)
         {
-            if (str != null && str.trim().length() > 0)
+            if (isNotEmpty(s))
             {
-                result.add(str);
+                result.add(s);
             }
         }
         return result;

@@ -1266,9 +1266,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 else
                 {
                     // User does not fill in all DQF fields, report error
-                    m_errWriter
-                            .addFileErrorMsg("All DQF fields are not filled in, you need to fill in all 3 fields or empty them all"
-                                    + "\r\nPlease make sure they are correct and upload again.");
+                    m_errWriter.addFileErrorMsg(bundle.getString("msg_dqf_all_dqf_need"));
                     return m_errWriter.buildReportErroPage().toString();
                 }
             }
@@ -1281,7 +1279,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 String category = "", valueString = "";
                 int value = -1;
                 int startRow = SCORECARD_START_ROW + 1;
-                int rowCount = SEGMENT_START_ROW - 4 - startRow;
+                int rowCount = SEGMENT_START_ROW - 3 - startRow;
                 for (int i = 0; i < rowCount; i++)
                 {
                     category = ExcelUtil.getCellValue(sheet, startRow + i, 0);
@@ -1338,9 +1336,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 else
                 {
                     // User does not fill in all DQF fields, report error
-                    m_errWriter
-                            .addFileErrorMsg("All Scorecard fields are not filled in, you need to fill in all fields or empty them all"
-                                    + "\r\nPlease make sure they are correct and upload again.");
+                    m_errWriter.addFileErrorMsg(bundle.getString("msg_dqf_all_scorecard_need"));
                     return m_errWriter.buildReportErroPage().toString();
                 }
             }

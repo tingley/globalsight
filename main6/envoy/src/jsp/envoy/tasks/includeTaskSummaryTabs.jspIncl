@@ -972,7 +972,7 @@ function doUploadingCheck(urlSent)
                 // Score Card Tab
 	            if(!disableButtons)
 	            {
-	            	if(review_only && showScorecard)
+	            	if((review_only || review_editable) && showScorecard)
 	            	{%>
 	            		<td WIDTH="2"></td>
 	                	 <td id="taskScorecardTab" CLASS="tableHeadingListOff">

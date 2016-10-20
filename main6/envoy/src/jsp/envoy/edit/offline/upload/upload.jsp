@@ -333,6 +333,7 @@ $(document).ready(function(){
     
 	state = theTask.getState();
 	review_only = theTask.isType(Task.TYPE_REVIEW);
+    boolean review_editable = theTask.isType(Task.TYPE_REVIEW_EDITABLE);
 	String pageId = (String)TaskHelper.retrieveObject(session, WebAppConstants.TASK_DETAILPAGE_ID);
 	boolean isPageDetailOne = TaskHelper.DETAIL_PAGE_1.equals(pageId) ? true:false;
 	boolean alreadyAccepted = false;

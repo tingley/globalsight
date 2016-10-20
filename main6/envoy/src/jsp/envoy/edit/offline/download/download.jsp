@@ -437,6 +437,7 @@
 	boolean alreadyAccepted = false;
     boolean disableButtons = false;
 	boolean review_only = task.isType(Task.TYPE_REVIEW);
+    boolean review_editable = task.isType(Task.TYPE_REVIEW_EDITABLE);
 	PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
 	Date dt = new Date();
 	String labelABorDBorCODate = bundle.getString("lb_due_date") + bundle.getString("lb_colon");

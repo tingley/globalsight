@@ -347,7 +347,7 @@ function resultDisplay(page)
 			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_sid}</th>'
 			    + '<th width="10%" align="left" style="border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
 		}
-		else if (targetLocale == -1 && sourceLocaleText != -1)
+		else if (targetLocale == -1 && sourceLocale != -1)
 		{
 			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
 			    + '<input type="checkbox" id="checkAllEntries"></input></th>'

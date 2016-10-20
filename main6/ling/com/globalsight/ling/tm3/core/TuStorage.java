@@ -882,6 +882,8 @@ abstract class TuStorage<T extends TM3Data>
             Map<TM3Attribute, String> customAttributes, boolean lookupTarget, boolean locking,
             List<Long> tm3TmIds, LeverageOptions leverageOptions) throws SQLException
     {
+        // GBS-3990
+        boolean isBlankSearch = isBlankFromTmSearch(key);
         Map<String, Object> paramMap = new HashMap<String, Object>();
         if (leverageOptions != null)
         {
@@ -901,18 +903,27 @@ abstract class TuStorage<T extends TM3Data>
         HashMap<Long, Long> tuId2srcTuvId = new HashMap<Long, Long>();
         while (rs.next())
         {
-            long tuvId = rs.getLong(1);
-            long tuId = rs.getLong(2);
-            tuvIds.add(tuvId);
+            long tuvId = -1;
+            long tuId = -1;
+            if (isBlankSearch)
+            {
+                tuId = rs.getLong(1);
+            }
+            else
+            {
+                tuvId = rs.getLong(1);
+                tuId = rs.getLong(2);
+                tuvIds.add(tuvId);
+                tuId2srcTuvId.put(tuId, tuvId);
+            }
             if (!tuIds.contains(tuId))
             {
                 tuIds.add(tuId);
             }
-            tuId2srcTuvId.put(tuId, tuvId);
         }
         ps.close();
 
-        if (leverageOptions == null || !leverageOptions.isFromTMSearchPage())
+        if (!isBlankSearch)
         {
             // #2. If there are too many, need reduce them for performance...
             boolean isCandidateFiltered = false;
@@ -1051,7 +1062,11 @@ abstract class TuStorage<T extends TM3Data>
                 // to make this comparison. Since this only matters if
                 // there is a hash collision, I'm not going to worry about
                 // it for now.
-                if (tuvIds.contains(tuv.getId()))
+                if (isBlankSearch)
+                {
+                    tuvs.add(tuv);
+                }
+                else if (tuvIds.contains(tuv.getId()))
                 {
                     tuvs.add(tuv);
                 }
@@ -1066,11 +1081,22 @@ abstract class TuStorage<T extends TM3Data>
             Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> inlineAttrs,
             boolean lookupTarget, List<Long> tm3TmIds, Map<String, Object> paramMap)
     {
+        StatementBuilder sb = new StatementBuilder();
         // GBS-3990
         boolean isBlankSearch = isBlankFromTmSearch(key);
-        StatementBuilder sb = new StatementBuilder("SELECT tuv.id, tuv.tuId FROM ")
-                .append(getStorage().getTuvTableName() + " AS tuv, ")
+        if (isBlankSearch)
+        {
+            // to avoid any influence on other function which is invoking this
+            // code, add isBlankSearch check for GBS-3990
+            sb.append("SELECT DISTINCT tuv.tuId FROM ");
+        }
+        else
+        {
+            sb.append("SELECT tuv.id, tuv.tuId FROM ");
+        }
+        sb.append(getStorage().getTuvTableName() + " AS tuv, ")
                 .append(getStorage().getTuTableName()).append(" as tu");
+
         boolean needQueryExtTable = TMSearchBroswerHandlerHelper.needQueryExtTable(paramMap);
         boolean needQueryAttrValTable = TMSearchBroswerHandlerHelper
                 .needQueryAttrValTable(paramMap);
@@ -1138,7 +1164,8 @@ abstract class TuStorage<T extends TM3Data>
         if (isBlankSearch)
         {
             TMSearchBroswerHandlerHelper.getParameterSql(sb, paramMap, "TM3");
-            sb.append(" LIMIT ").append(String.valueOf(TMSearchBroswerHandlerHelper.MAX_RETURNS));
+            sb.append(" LIMIT ")
+                    .append(String.valueOf(TMSearchBroswerHandlerHelper.MAX_RETURNS + 1));
         }
         return sb;
     }

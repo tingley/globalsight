@@ -255,10 +255,9 @@ function resultDisplay(page)
 		{
 			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
 			    + '<input type="checkbox" id="checkAllEntries"></input></th>'
-			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_percentage} (%)</th>'
+			    + '<th width="36%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_tm_search_source_content}</th>'
+			    + '<th width="36%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+targetLocaleText+'</th>'
 			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_source_locale}</th>'
-			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_tm_search_source_content}</th>'
-			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+targetLocaleText+'</th>'
 			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_sid}</th>'
 			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
 		}
@@ -266,9 +265,8 @@ function resultDisplay(page)
 		{
 			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
 			    + '<input type="checkbox" id="checkAllEntries"></input></th>'
-			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_percentage} (%)</th>'
-			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+sourceLocaleText+'</th>'
-			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_tm_search_target_content}</th>'
+			    + '<th width="36%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+sourceLocaleText+'</th>'
+			    + '<th width="36%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_tm_search_target_content}</th>'
 			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_target_locale}</th>'
 			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_sid}</th>'
 			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
@@ -277,23 +275,31 @@ function resultDisplay(page)
 		{
 			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
 			    + '<input type="checkbox" id="checkAllEntries"></input></th>'
-			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_percentage} (%)</th>'
+			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_tm_search_source_content}</th>'
+			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_tm_search_target_content}</th>'
 			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_source_locale}</th>'
-			    + '<th width="28%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_tm_search_source_content}</th>'
-			    + '<th width="28%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_tm_search_target_content}</th>'
 			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_target_locale}</th>'
 			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_sid}</th>'
 			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
 		}
-		else
+		else if (searchText == "" || searchText == "*")
 		{
 			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
 			    + '<input type="checkbox" id="checkAllEntries"></input></th>'
-			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_percentage} (%)</th>'
-			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+sourceLocaleText+'</th>'
-			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+targetLocaleText+'</th>'
+			    + '<th width="37%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+sourceLocaleText+'</th>'
+			    + '<th width="37%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+targetLocaleText+'</th>'
 			    + '<th width="14%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_sid}</th>'
 			    + '<th width="12%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
+		}
+		else
+		{
+			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
+				    + '<input type="checkbox" id="checkAllEntries"></input></th>'
+				    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_percentage} (%)</th>'
+				    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+sourceLocaleText+'</th>'
+				    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">'+targetLocaleText+'</th>'
+				    + '<th width="14%" align="left" style="border-right: #FFFFFF 1px solid;border-right: #FFFFFF 1px solid;">${lb_sid}</th>'
+				    + '<th width="12%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
 		}
 		
 	  for(var i=0;i<result.length;i++)
@@ -303,10 +309,9 @@ function resultDisplay(page)
 	     
 	     buf.push("<tr style='background:#DEE3ED;'>");
 	     buf.push("<td style='border: #FFFFFF 1px solid;'><input name='entries' type='checkbox' value='"+i+"'></input></td>");
-	     buf.push("<td style='border: #FFFFFF 1px solid;' align='left'>"+score.substring(0,score.indexOf("%"))+"</td>");
-	     if (sourceLocale == -1)
+	     if (searchText != "" && searchText != "*")
 	     {
-	    	 buf.push("<td style='border: #FFFFFF 1px solid;'>"+obj.sourceLocale+"</td>");
+	    	 buf.push("<td style='border: #FFFFFF 1px solid;' align='left'>"+score.substring(0,score.indexOf("%"))+"</td>");
 	     }
 	     if(hasEditEntriesPerm)
 	     {
@@ -317,6 +322,10 @@ function resultDisplay(page)
 	    	 buf.push("<td style='border: #FFFFFF 1px solid;' dir='"+obj.source.dir+"'>"+obj.source.content+"</td>");
 	     }
     	 buf.push("<td style='border: #FFFFFF 1px solid;' dir='"+obj.target.dir+"'>"+obj.target.content+"</td>");
+    	 if (sourceLocale == -1)
+	     {
+	    	 buf.push("<td style='border: #FFFFFF 1px solid;'>"+obj.sourceLocale+"</td>");
+	     }
     	 if (targetLocale == -1)
 	     {
 	    	 buf.push("<td style='border: #FFFFFF 1px solid;'>"+obj.targetLocale+"</td>");
@@ -332,13 +341,13 @@ function resultDisplay(page)
 		{
 			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
 			    + '<input type="checkbox" id="checkAllEntries"></input></th>'
-			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_source_locale}</th>'
 			    + '<th width="36%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_source_content}</th>'
 				+ '<th width="36%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">'+targetLocaleText+'</th>'
+				+ '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_source_locale}</th>'
 			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_sid}</th>'
 			    + '<th width="10%" align="left" style="border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
 		}
-		else if (targetLocale == -1 && sourceLocale != -1)
+		else if (targetLocale == -1 && sourceLocaleText != -1)
 		{
 			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
 			    + '<input type="checkbox" id="checkAllEntries"></input></th>'
@@ -352,9 +361,9 @@ function resultDisplay(page)
 		{
 			buf.push('<tr class="tableHeadingBasic"><th style="border-left: #0C1476 1px solid;border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;color:#0C1476">'
 			    + '<input type="checkbox" id="checkAllEntries"></input></th>'
-			    + '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_source_locale}</th>'
 			    + '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_source_content}</th>'
 				+ '<th width="32%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_target_content}</th>'
+				+ '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_source_locale}</th>'
 				+ '<th width="8%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_tm_search_target_locale}</th>'
 			    + '<th width="10%" align="left" style="border-right: #FFFFFF 1px solid;border-bottom: #FFFFFF 1px solid;">${lb_sid}</th>'
 			    + '<th width="10%" align="left" style="border-bottom: #FFFFFF 1px solid;">${lb_tm_name}</th></tr>');
@@ -374,10 +383,6 @@ function resultDisplay(page)
 		 var obj = result[i];
 	     buf.push("<tr style='background:#DEE3ED;'>");
 	     buf.push("<td style='border: #FFFFFF 1px solid;'><input id='11' name='entries' type='checkbox' value='"+i+"'></input></td>");
-	     if (sourceLocale == -1)
-	     {
-	    	 buf.push("<td style='border: #FFFFFF 1px solid;'>"+obj.sourceLocale+"</td>");
-	     }
 	     if(hasEditEntriesPerm)
 	     {
 	    	 buf.push("<td style='border: #FFFFFF 1px solid;' dir='"+obj.source.dir+"'><a href=\"javascript:editEntry('"+obj.tmId+"','"+ obj.tuId+"','"+obj.sourceLocale+"','"+obj.sourceTuvId+"','"+obj.targetLocale+"','"+obj.targetTuvId+"');\" class='link'>"+obj.source.content+"</a></td>");
@@ -387,6 +392,10 @@ function resultDisplay(page)
 	    	 buf.push("<td style='border: #FFFFFF 1px solid;' dir='"+obj.source.dir+"'>"+obj.source.content+"</td>");
 	     } 
 		 buf.push("<td style='border: #FFFFFF 1px solid;' dir='"+obj.target.dir+"'>"+obj.target.content+"</td>");
+		 if (sourceLocale == -1)
+	     {
+	    	 buf.push("<td style='border: #FFFFFF 1px solid;'>"+obj.sourceLocale+"</td>");
+	     }
 		 if (targetLocale == -1)
 	     {
 	    	 buf.push("<td style='border: #FFFFFF 1px solid;'>"+obj.targetLocale+"</td>");

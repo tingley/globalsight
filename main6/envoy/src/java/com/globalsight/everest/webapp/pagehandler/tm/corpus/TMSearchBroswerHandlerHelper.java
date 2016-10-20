@@ -1232,7 +1232,7 @@ public class TMSearchBroswerHandlerHelper
             sb.append(" WHERE tuv.tmId = ?").addValue(tm3Id);
         }
         getParameterSql(sb, paramMap, "TM3");
-        sb.append(" order by tuId LIMIT ").append(String.valueOf(MAX_RETURNS));
+        sb.append(" LIMIT ").append(String.valueOf(MAX_RETURNS));
     }
 
     public static void getParameterSql(StatementBuilder sb, Map<String, Object> paramMap,
@@ -1713,6 +1713,7 @@ public class TMSearchBroswerHandlerHelper
             }
         }
         ps.close();
+        SortUtil.sort(idList);
         return idList;
     }
 

@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -43,6 +44,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -435,21 +439,20 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         pageReturn();
     }
 
-    @ActionHandler(action = "createBlaiseJob", formClass = "com.globalsight.connector.blaise.form.CreateBlaiseJobForm")
-    public void createBlaiseJob(HttpServletRequest request,
-            HttpServletResponse response, Object form) throws Exception
+    @ActionHandler(action = "createBlaiseJob", formClass = "")
+    public void createBlaiseJob(HttpServletRequest request, HttpServletResponse response,
+            Object form) throws Exception
     {
-    	CreateBlaiseJobForm blaiseForm = (CreateBlaiseJobForm) form;
-        SessionManager sessionMgr = this.getSessionManager(request);
-
-        // Have to reset?
-        resetParameters(request, blaiseForm);
+        Hashtable<String, String> fields = possibleGetParamsFromMultipartRequest(request);
+        // put all required parameters into form
+        CreateBlaiseJobForm blaiseForm = getParameters(request, fields);
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+        SessionManager sessionMgr = this.getSessionManager(request);
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
         if (user == null)
         {
-            String userName = request.getParameter("userName");
+            String userName = blaiseForm.getUserName();
             if (userName != null && !"".equals(userName))
             {
                 user = ServerProxy.getUserManager().getUserByName(userName);
@@ -467,8 +470,6 @@ public class BlaiseCreateJobHandler extends PageActionHandler
             attachFile = new File(jobCommentFilePathName);
         }
         sessionMgr.removeElement("uploadAttachment");
-        String attachFileName = request.getParameter("attachment");
-
         List<Long> entryIds = new ArrayList<Long>();
         List<FileProfile> fileProfileList = new ArrayList<FileProfile>();
         String[] ffs = blaiseForm.getFileMapFileProfile().split(",");
@@ -503,7 +504,7 @@ public class BlaiseCreateJobHandler extends PageActionHandler
 
         ExecutorService pool = Executors.newFixedThreadPool(MAX_THREAD);
         // Entries with same source and target locale will be in one job.
-        String combineByLangs = request.getParameter("combineByLangs");
+        String combineByLangs = blaiseForm.getCombineByLangs();
         if ("true".equalsIgnoreCase(combineByLangs) || "on".equalsIgnoreCase(combineByLangs))
         {
             // Group TranslationInboxEntryVo objects by source and target.
@@ -533,8 +534,8 @@ public class BlaiseCreateJobHandler extends PageActionHandler
                 List<JobAttribute> jobAttribtues = getJobAttributes(
                         blaiseForm.getAttributeString(), l10Profile);
                 CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user, currentCompanyId,
-                        blc, blaiseForm, entries, fileProfiles, attachFile, attachFileName, uuid,
-                        jobAttribtues);
+                        blc, blaiseForm, entries, fileProfiles, attachFile,
+                        blaiseForm.getAttachment(), uuid, jobAttribtues);
                 Thread t = new MultiCompanySupportedThread(runnable);
                 pool.execute(t);
             }
@@ -563,8 +564,8 @@ public class BlaiseCreateJobHandler extends PageActionHandler
                 List<JobAttribute> jobAttribtues = getJobAttributes(
                         blaiseForm.getAttributeString(), l10Profile);
                 CreateBlaiseJobThread runnable = new CreateBlaiseJobThread(user, currentCompanyId,
-                        blc, blaiseForm, entries, fileProfiles, attachFile, attachFileName, uuid,
-                        jobAttribtues);
+                        blc, blaiseForm, entries, fileProfiles, attachFile,
+                        blaiseForm.getAttachment(), uuid, jobAttribtues);
                 Thread t = new MultiCompanySupportedThread(runnable);
                 pool.execute(t);
             }
@@ -577,6 +578,35 @@ public class BlaiseCreateJobHandler extends PageActionHandler
         }
 
         pageReturn();
+    }
+
+    /**
+     * If create job with attachment, the request "enctype" will be
+     * "multipart/form-data". In this case, need get parameters in another way.
+     */
+    private Hashtable<String, String> possibleGetParamsFromMultipartRequest(
+            HttpServletRequest request)
+    {
+        Hashtable<String, String> fields = new Hashtable<String, String>();
+        try
+        {
+            DiskFileItemFactory factory = new DiskFileItemFactory();
+            factory.setSizeThreshold(1024000);
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            List<FileItem> fileItems = upload.parseRequest(request);
+            for (FileItem item : fileItems)
+            {
+                if (item.isFormField())
+                {
+                    fields.put(item.getFieldName(), item.getString("utf-8"));
+                }
+            }
+        }
+        catch (Exception ignore)
+        {
+
+        }
+        return fields;
     }
 
     @ActionHandler(action = "uploadAttachment", formClass = "")
@@ -631,30 +661,86 @@ public class BlaiseCreateJobHandler extends PageActionHandler
 		dataForTable(request);
 	}
 
-	private void resetParameters(HttpServletRequest request, CreateBlaiseJobForm blaiseForm)
+    private CreateBlaiseJobForm getParameters(HttpServletRequest request,
+            Hashtable<String, String> fields)
 	{
+        CreateBlaiseJobForm blaiseForm = new CreateBlaiseJobForm(); 
+
         String blaiseConnectorId = request.getParameter("blaiseConnectorId");
+        if (StringUtil.isEmpty(blaiseConnectorId))
+        {
+            blaiseConnectorId = fields.get("blaiseConnectorId");
+        }
         if (StringUtil.isNotEmpty(blaiseConnectorId))
         {
             blaiseForm.setBlaiseConnectorId(blaiseConnectorId);
         }
+
         String attributeString = request.getParameter("attributeString");
+        if (StringUtil.isEmpty(attributeString))
+        {
+            attributeString = fields.get("attributeString");
+        }
         if (StringUtil.isNotEmpty(attributeString))
         {
             blaiseForm.setAttributeString(attributeString);
         }
+
         String fileMapFileProfile = request.getParameter("fileMapFileProfile");
+        if (StringUtil.isEmpty(fileMapFileProfile))
+        {
+            fileMapFileProfile = fields.get("fileMapFileProfile");
+        }
         if (StringUtil.isNotEmpty(fileMapFileProfile))
         {
             blaiseForm.setFileMapFileProfile(fileMapFileProfile);
         }
+
         String priority = request.getParameter("priority");
+        if (StringUtil.isEmpty(priority))
+        {
+            priority = fields.get("priority");
+        }
         if (StringUtil.isNotEmpty(priority))
         {
             blaiseForm.setPriority(priority);
         }
+
         String comment = request.getParameter("comment");
-        blaiseForm.setComment(comment);
+        if (StringUtil.isEmpty(comment))
+        {
+            comment = fields.get("comment");
+        }
+        if (StringUtil.isNotEmpty(comment))
+        {
+            blaiseForm.setComment(comment);
+        }
+
+        String userName = request.getParameter("userName");
+        if (StringUtil.isEmpty(userName))
+        {
+            userName = fields.get("userName");
+        }
+        if (StringUtil.isNotEmpty(userName))
+        {
+            blaiseForm.setUserName(userName);
+        }
+
+        String combineByLangs = request.getParameter("combineByLangs");
+        if (StringUtil.isEmpty(combineByLangs))
+        {
+            combineByLangs = fields.get("combineByLangs");
+        }
+        blaiseForm.setCombineByLangs(combineByLangs);
+
+        String attachment = request.getParameter("attachment");
+        if (StringUtil.isEmpty(attachment))
+        {
+            attachment = fields.get("attachment");
+        }
+        blaiseForm.setAttachment(attachment);
+
+        return blaiseForm;
 	}
 
 	private void setEntryInfo(HttpServletRequest request)

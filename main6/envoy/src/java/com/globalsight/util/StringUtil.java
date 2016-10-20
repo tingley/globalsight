@@ -215,10 +215,11 @@ public class StringUtil
      */
     public static String replace(String src, String oldString, String newString)
     {
-        if (isEmpty(src) || isEmpty(oldString) || oldString.equals(newString))
+        if (src == null || src.length() == 0 || oldString == null
+                || oldString.length() == 0 || oldString.equals(newString))
             return src;
 
-        newString = isEmpty(newString) ? "" : newString;
+        newString = newString == null ? "" : newString;
 
         StringBuilder output = new StringBuilder();
         int start = 0;
@@ -247,12 +248,12 @@ public class StringUtil
      */
     public static String replaceWithRE(String src, String re, String newString)
     {
-        if (isEmpty(src) || isEmpty(re))
+        if (src == null || src.length() == 0 || re == null || re.length() == 0)
         {
             return src;
         }
 
-        newString = isEmpty(newString) ? "" : newString;
+        newString = newString==null ? "" : newString;
 
         Pattern p = Pattern.compile(re);
         Matcher m = p.matcher(src);
@@ -273,7 +274,7 @@ public class StringUtil
     
     public static String replaceWithRE(String src, Pattern p, Replacer replacer)
     {
-        if (isEmpty(src) || p == null || replacer == null)
+        if (src == null || src.length() == 0 || p == null || replacer == null)
         {
             return src;
         }
@@ -302,7 +303,7 @@ public class StringUtil
             return;
         }
 
-        newString = isEmpty(newString) ? "" : newString;
+        newString = newString == null ? "" : newString;
 
         int oldLen = oldString.length();
         int newLen = newString.length();

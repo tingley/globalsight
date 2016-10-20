@@ -1088,7 +1088,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
 
     /****** START: PROCESS UPLOAD REPORT PAGE ******/
     public void processUploadReportPage(final File p_tmpFile, final User p_user, final Task p_task,
-            final String p_fileName, final String p_reportName)
+            final String p_fileName, final String p_reportName, final String scorecardData)
             throws AmbassadorDwUpException, RemoteException
     {
         // Note: Currently there is only one thread encompassing the
@@ -1100,7 +1100,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             {
                 try
                 {
-                    runProcessUploadReportPage(p_tmpFile, p_user, p_task, p_fileName, p_reportName);
+                    runProcessUploadReportPage(p_tmpFile, p_user, p_task, p_fileName, p_reportName,
+                            scorecardData);
                 }
                 catch (Throwable e)
                 {
@@ -1132,7 +1133,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
      * @see OfflineEditManager interface
      */
     public String runProcessUploadReportPage(File p_tmpFile, User p_user, Task p_task,
-            String p_fileName, String p_reportName) throws AmbassadorDwUpException
+            String p_fileName, String p_reportName, String scorecardData)
+            throws AmbassadorDwUpException
     {
         setUILocaleResources(GlobalSightLocale.makeLocaleFromString(p_user.getDefaultUILocale()));
 
@@ -1166,7 +1168,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             else
             {
                 errorString = api.processReport(p_tmpFile, p_user, p_task, p_fileName,
-                        p_reportName);
+                        p_reportName, scorecardData);
             }
             m_status.setResults(errorString);
             m_status.setCounter(1);

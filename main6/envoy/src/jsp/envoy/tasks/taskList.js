@@ -518,7 +518,10 @@ function initButtonActions() {
             {
             	alert("Below activities of jobs need be scored, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isNeedScoreTaskId);
             }
-            
+            if (data.isNeedDQFTaskId)
+            {
+            	alert("Below activities of jobs need be fill in DQF scores, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isNeedDQFTaskId);
+            }
             var reportUploadCheckConfirmInfo = "One or more activities you selected require uploading Translation Edit/ Reviewer Comments Report before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
             var activityCommentUploadCheckConfirmInfo = "One or more activities you selected require uploading an activity comment attachment before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
             if(taskIds.indexOf(",") < 0)
@@ -668,7 +671,10 @@ function initButtonActions() {
             {
             	alert("Below activities of jobs need be scored, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isNeedScoreTaskId);
             }
-            
+            if (data.isNeedDQFTaskId)
+            {
+            	alert("Below activities of jobs need be fill in DQF scores, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isNeedDQFTaskId);
+            }
             var reportUploadCheckConfirmInfo = "One or more activities you selected require uploading Translation Edit/ Reviewer Comments Report before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
             var activityCommentUploadCheckConfirmInfo = "One or more activities you selected require uploading an activity comment attachment before complete the activities. Click OK to complete them all anyway, or Click Cancel to omit those activities.";
             if(taskIds.indexOf(",") < 0)

@@ -127,8 +127,8 @@ public class TMSearchBroswerHandlerHelper
     private static final String DATE_LESS_THAN_OR_EQUALS = "lteq";
     private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-    // GBS-3990 limit to configured max returns
-    private static int MAX_RETURNS = 300;
+    // GBS-3990 limit sql to configured max returns
+    public static int MAX_RETURNS = 300;
     private static final String PROP_MAX_RETURNS = "max_returns";
 
     static
@@ -590,17 +590,32 @@ public class TMSearchBroswerHandlerHelper
         boolean advancedSearch = "true".equals((String) request.getParameter("advancedSearch"));
 
         Map<String, Object> filterMap = getFilterMap(request, advancedSearch);
-        String attributeName = null;
-        String attributeValue = null;
-        if (advancedSearch)
-        {
-            attributeName = (String) request.getParameter("attributeName");
-            attributeValue = (String) request.getParameter("attributeValue");
-        }
-        LocaleManager lm = ServerProxy.getLocaleManager();
-        GlobalSightLocale sourceGSL = lm.getLocaleById(Long.parseLong(sourceLocaleId));
-        GlobalSightLocale targetGSL = lm.getLocaleById(Long.parseLong(targetLocaleId));
 
+        LocaleManager lm = ServerProxy.getLocaleManager();
+        GlobalSightLocale sourceGSL = null;
+        GlobalSightLocale targetGSL = null;
+        if (!"-1".equals(sourceLocaleId))
+        {
+            sourceGSL = lm.getLocaleById(Long.parseLong(sourceLocaleId));
+        }
+        if (!"-1".equals(targetLocaleId))
+        {
+            targetGSL = lm.getLocaleById(Long.parseLong(targetLocaleId));
+        }
+        if (searchInSource)
+        {
+            if (sourceGSL != null)
+            {
+                filterMap.put("localeId", String.valueOf(sourceGSL.getId()));
+            }
+        }
+        else
+        {
+            if (targetGSL != null)
+            {
+                filterMap.put("localeId", String.valueOf(targetGSL.getId()));
+            }
+        }
         // Prepare target locale according to leverage from
         List<GlobalSightLocale> searchTrgLocales = new ArrayList<GlobalSightLocale>();
         searchTrgLocales.add(searchInSource ? targetGSL : sourceGSL);
@@ -632,15 +647,7 @@ public class TMSearchBroswerHandlerHelper
                 Collections.singletonList(tuv), searchFromLocale, searchTrgLocales, levOptions);
         Iterator<LeverageMatches> itLeverageMatches = leverageDataCenter.leverageResultIterator();
         List<Map<String, Object>> leverageResult = new ArrayList<Map<String, Object>>();
-        Set<Long> attributeFilterTuIds = new HashSet<Long>();
-        boolean attributeFilter = false;
-        if (advancedSearch && StringUtil.isNotEmpty(attributeName)
-                && StringUtil.isNotEmpty(attributeValue))
-        {
-            attributeFilter = true;
-            attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(itLeverageMatches),
-                    attributeName, attributeValue);
-        }
+
         boolean isMaxed = false;
         long jobId = -1; // -1 is fine here
         WHILE_TOP: while (itLeverageMatches.hasNext())
@@ -658,20 +665,7 @@ public class TMSearchBroswerHandlerHelper
                 while (itMatch.hasNext())
                 {
                     LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();
-                    if (attributeFilter)
-                    {
-                        if (attributeFilterTuIds.size() == 0
-                                || !attributeFilterTuIds.contains(matchedTuv.getTu().getId()))
-                        {
-                            continue;
-                        }
-                    }
                     BaseTmTuv sourceTuv = matchedTuv.getSourceTuv();
-                    if (advancedSearch)
-                    {
-                        if (!searchFilterBySid(filterMap, searchInSource ? sourceTuv : matchedTuv))
-                            continue;
-                    }
                     if (leverageResult.size() == MAX_RETURNS)
                     {
                         isMaxed = true;
@@ -962,14 +956,6 @@ public class TMSearchBroswerHandlerHelper
             }
         }
 
-        String attributeName = null;
-        String attributeValue = null;
-        if (advancedSearch)
-        {
-            attributeName = (String) request.getParameter("attributeName");
-            attributeValue = (String) request.getParameter("attributeValue");
-        }
-
         // get all selected TMS
         List<TMidTUid> queryResult = new ArrayList<TMidTUid>(MAX_RETURNS);
         setQueryResult(queryResult, tms, filterMap);
@@ -979,15 +965,6 @@ public class TMSearchBroswerHandlerHelper
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         String findText = EditUtil.encodeHtmlEntities(searchText);
         replaceText = EditUtil.encodeHtmlEntities(replaceText);
-        Set<Long> attributeFilterTuIds = new HashSet<Long>();
-        boolean attributeFilter = false;
-        if (advancedSearch && StringUtil.isNotEmpty(attributeName)
-                && StringUtil.isNotEmpty(attributeValue))
-        {
-            attributeFilter = true;
-            attributeFilterTuIds = getAttributeFilterTuIds(getTuIds(tus), attributeName,
-                    attributeValue);
-        }
 
         boolean isMaxed = false;
         FOR_TOP: for (int i = 0, max = tus.size(); i < max; i++)
@@ -1000,13 +977,6 @@ public class TMSearchBroswerHandlerHelper
                     continue;
                 }
                 long tuId = tu.getId();
-                if (attributeFilter)
-                {
-                    if (attributeFilterTuIds.size() == 0 || !attributeFilterTuIds.contains(tuId))
-                    {
-                        continue;
-                    }
-                }
                 BaseTmTuv srcTuv = null;
                 if (sourceGSL == null)
                 {
@@ -1015,11 +985,6 @@ public class TMSearchBroswerHandlerHelper
                 else
                 {
                     srcTuv = tu.getFirstTuv(sourceGSL);
-                }
-                if (advancedSearch && searchInSource)
-                {
-                    if (!searchFilterBySid(filterMap, srcTuv))
-                        continue;
                 }
                 String gxml = GxmlUtil.stripRootTag(srcTuv.getSegment());
 
@@ -1046,11 +1011,6 @@ public class TMSearchBroswerHandlerHelper
                         break FOR_TOP;
                     }
                     Map<String, Object> map = new HashMap<String, Object>();
-                    if (advancedSearch && !searchInSource)
-                    {
-                        if (!searchFilterBySid(filterMap, trgTuv))
-                            continue;
-                    }
 
                     String sid = trgTuv.getSid();
                     long tuvId = trgTuv.getId();
@@ -1213,10 +1173,58 @@ public class TMSearchBroswerHandlerHelper
     {
         sb.append("SELECT DISTINCT tuv.tuId AS tuId FROM ").append(baseTM.getTuvTableName())
                 .append(" as tuv");
-        if (needCheckExtTable(paramMap))
+        boolean needQueryTuTable = needQueryTuTable(paramMap);
+        boolean needQueryExtTable = needQueryExtTable(paramMap);
+        boolean needQueryAttrValTable = needQueryAttrValTable(paramMap);
+        if (needQueryTuTable && needQueryExtTable && needQueryAttrValTable)
+        {
+            sb.append(", ").append(baseTM.getTuTableName()).append(" AS tu, ")
+                    .append(baseTM.getTuvExtTableName()).append(" AS ext, ")
+                    .append("tm3_attr AS attr, ").append(baseTM.getAttrValTableName())
+                    .append(" AS attrVal").append(" WHERE tuv.tuId = tu.id")
+                    .append(" AND tuv.id = ext.tuvId").append(" AND tuv.tuId = attrVal.tuId")
+                    .append(" AND attrVal.attrId = attr.id").append(" AND tuv.tmId = ?")
+                    .addValue(tm3Id);
+        }
+        else if (needQueryTuTable && needQueryExtTable && !needQueryAttrValTable)
+        {
+            sb.append(", ").append(baseTM.getTuTableName()).append(" AS tu, ")
+                    .append(baseTM.getTuvExtTableName()).append(" AS ext")
+                    .append(" WHERE tuv.tuId = tu.id").append(" AND tuv.id = ext.tuvId")
+                    .append(" AND tuv.tmId = ?").addValue(tm3Id);
+        }
+        else if (needQueryTuTable && needQueryAttrValTable && !needQueryExtTable)
+        {
+            sb.append(", ").append(baseTM.getTuTableName()).append(" AS tu, ")
+                    .append("tm3_attr AS attr, ").append(baseTM.getAttrValTableName())
+                    .append(" AS attrVal").append(" WHERE tuv.tuId = tu.id")
+                    .append(" AND tuv.tuId = attrVal.tuId").append(" AND attrVal.attrId = attr.id")
+                    .append(" AND tuv.tmId = ?").addValue(tm3Id);
+        }
+        else if (needQueryExtTable && needQueryAttrValTable && !needQueryTuTable)
+        {
+            sb.append(", ").append(baseTM.getTuvExtTableName()).append(" AS ext, ")
+                    .append("tm3_attr AS attr, ").append(baseTM.getAttrValTableName())
+                    .append(" AS attrVal").append(" WHERE tuv.id = ext.tuvId")
+                    .append(" AND tuv.tuId = attrVal.tuId").append(" AND attrVal.attrId = attr.id")
+                    .append(" AND tuv.tmId = ?").addValue(tm3Id);
+        }
+        else if (needQueryTuTable && !needQueryExtTable && !needQueryAttrValTable)
+        {
+            sb.append(", ").append(baseTM.getTuTableName()).append(" AS tu")
+                    .append(" WHERE tuv.tuId = tu.id").append(" AND tuv.tmId = ?").addValue(tm3Id);
+        }
+        else if (needQueryExtTable && !needQueryTuTable && !needQueryAttrValTable)
         {
             sb.append(", ").append(baseTM.getTuvExtTableName()).append(" AS ext")
                     .append(" WHERE tuv.id = ext.tuvId").append(" AND tuv.tmId = ?")
+                    .addValue(tm3Id);
+        }
+        else if (needQueryAttrValTable && !needQueryTuTable && !needQueryExtTable)
+        {
+            sb.append(", ").append("tm3_attr AS attr, ").append(baseTM.getAttrValTableName())
+                    .append(" AS attrVal").append(" WHERE tuv.tuId = attrVal.tuId")
+                    .append(" AND attrVal.attrId = attr.id").append(" AND tuv.tmId = ?")
                     .addValue(tm3Id);
         }
         else
@@ -1224,13 +1232,24 @@ public class TMSearchBroswerHandlerHelper
             sb.append(" WHERE tuv.tmId = ?").addValue(tm3Id);
         }
         getParameterSql(sb, paramMap, "TM3");
+        sb.append(" LIMIT ").append(String.valueOf(MAX_RETURNS + 1));
     }
 
-    private static void getParameterSql(StatementBuilder sb, Map<String, Object> paramMap,
+    public static void getParameterSql(StatementBuilder sb, Map<String, Object> paramMap,
             String tmType)
     {
         if (paramMap != null)
         {
+            String localeId = (String) paramMap.get("localeId");
+            String sids = (String) paramMap.get("sids");
+            String isRegex = (String) paramMap.get("isRegex");
+            String tuIds = (String) paramMap.get("tuIds");
+            String attributeName = (String) paramMap.get("attributeName");
+            String attributeValue = (String) paramMap.get("attributeValue");
+            String createUser = (String) paramMap.get("createUser");
+            String modifyUser = (String) paramMap.get("modifyUser");
+            String jobIds = (String) paramMap.get("jobIds");
+
             String createStartDateOption = (String) paramMap.get("createStartDateOption");
             String createEndDateOption = (String) paramMap.get("createEndDateOption");
             Date createStartDate = (Date) paramMap.get("createStartDate");
@@ -1246,10 +1265,120 @@ public class TMSearchBroswerHandlerHelper
             Date lastUsageStartDate = (Date) paramMap.get("lastUsageStartDate");
             Date lastUsageEndDate = (Date) paramMap.get("lastUsageEndDate");
 
-            String createUser = (String) paramMap.get("createUser");
-            String modifyUser = (String) paramMap.get("modifyUser");
-            String localeId = (String) paramMap.get("localeId");
-            String jobIds = (String) paramMap.get("jobIds");
+            // Source Locale or Target Locale
+            if (StringUtil.isNotEmpty(localeId))
+            {
+                if (tmType.equalsIgnoreCase("TM3"))
+                {
+                    sb.append(" AND tuv.localeId = ?").addValue(localeId);
+                }
+                else if (tmType.equalsIgnoreCase("TM2"))
+                {
+                    sb.append(" AND tuv.LOCALE_ID = ?").addValue(localeId);
+                }
+            }
+
+            // String ID
+            if (StringUtil.isNotEmpty(sids))
+            {
+                if ("true".equals(isRegex))
+                {
+                    sb.append(" AND ext.sid REGEXP '").append(sids).append("'");
+                }
+                else
+                {
+                    sb.append(" AND ext.sid = ?").addValue(sids);
+                }
+            }
+
+            // TU ID
+            if (StringUtil.isNotEmpty(tuIds))
+            {
+                if (tuIds.indexOf(",") > 0)
+                {
+                    for (String tuId : tuIds.split(","))
+                    {
+                        if (tuId.indexOf("-") > 0)
+                        {
+                            String[] temp = tuId.split("-");
+                            long minTuId = Long.parseLong(temp[0]);
+                            long maxTuId = Long.parseLong(temp[1]);
+                            sb.append(" AND tu.id >= ?").addValue(minTuId);
+                            sb.append(" AND tu.id <= ?").addValue(maxTuId);
+                        }
+                        else
+                        {
+                            sb.append(" AND tu.id = ?").addValue(tuId);
+                        }
+                    }
+                }
+                else if (tuIds.indexOf("-") > 0)
+                {
+                    String[] temp = tuIds.split("-");
+                    long minTuId = Long.parseLong(temp[0]);
+                    long maxTuId = Long.parseLong(temp[1]);
+                    sb.append(" AND tu.id >= ?").addValue(minTuId);
+                    sb.append(" AND tu.id <= ?").addValue(maxTuId);
+                }
+                else
+                {
+                    sb.append(" AND tu.id = ?").addValue(tuIds);
+                }
+            }
+
+            // Attribute Name
+            if (StringUtil.isNotEmpty(attributeName))
+            {
+                if (tmType.equalsIgnoreCase("TM3"))
+                {
+                    sb.append(" AND attr.name = ?").addValue(attributeName);
+                }
+            }
+
+            // Attribute Value
+            if (StringUtil.isNotEmpty(attributeValue))
+            {
+                if (tmType.equalsIgnoreCase("TM3"))
+                {
+                    sb.append(" AND attrVal.value = ?").addValue(attributeValue);
+                }
+            }
+
+            // create user
+            if (StringUtil.isNotEmpty(createUser))
+            {
+                if (tmType.equalsIgnoreCase("TM3"))
+                {
+                    sb.append(" AND tuv.creationUser = ?").addValues(createUser);
+                }
+                else if (tmType.equalsIgnoreCase("TM2"))
+                {
+                    sb.append(" AND tuv.CREATION_USER = ?").addValues(createUser);
+                }
+            }
+
+            // modify user
+            if (StringUtil.isNotEmpty(modifyUser))
+            {
+                if (tmType.equalsIgnoreCase("TM3"))
+                {
+                    sb.append(" AND tuv.modifyUser = ?").addValues(modifyUser);
+                }
+                else if (tmType.equalsIgnoreCase("TM2"))
+                {
+                    sb.append(" AND tuv.MODIFY_USER = ?").addValues(modifyUser);
+                }
+            }
+
+            // Job ID
+            if (StringUtil.isNotEmpty(jobIds))
+            {
+                if (tmType.equalsIgnoreCase("TM3"))
+                {
+                    sb.append(" AND ext.jobId in (").append(jobIds).append(")");
+                }
+            }
+
             // create date
             if (createStartDate != null)
             {
@@ -1257,16 +1386,16 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.creationDate >= ? ")
+                        sb.append(" AND tuv.creationDate >= ?")
                                 .addValue(parseStartDate(createStartDate));
-                        sb.append(" AND tuv.creationDate <= ? ")
+                        sb.append(" AND tuv.creationDate <= ?")
                                 .addValue(parseEndDate(createStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
                     {
-                        sb.append(" AND tuv.CREATION_DATE >= ? ")
+                        sb.append(" AND tuv.CREATION_DATE >= ?")
                                 .addValue(parseStartDate(createStartDate));
-                        sb.append(" AND tuv.CREATION_DATE <= ? ")
+                        sb.append(" AND tuv.CREATION_DATE <= ?")
                                 .addValue(parseEndDate(createStartDate));
                     }
                 }
@@ -1274,16 +1403,16 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.creationDate < ? ")
+                        sb.append(" AND tuv.creationDate < ?")
                                 .addValue(parseStartDate(createStartDate));
-                        sb.append(" AND tuv.creationDate > ? ")
+                        sb.append(" AND tuv.creationDate > ?")
                                 .addValue(parseEndDate(createStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
                     {
-                        sb.append(" AND tuv.CREATION_DATE < ? ")
+                        sb.append(" AND tuv.CREATION_DATE < ?")
                                 .addValue(parseStartDate(createStartDate));
-                        sb.append(" AND tuv.CREATION_DATE > ? ")
+                        sb.append(" AND tuv.CREATION_DATE > ?")
                                 .addValue(parseEndDate(createStartDate));
                     }
                 }
@@ -1291,12 +1420,12 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.creationDate > ? ")
+                        sb.append(" AND tuv.creationDate > ?")
                                 .addValue(parseStartDate(createStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
                     {
-                        sb.append(" AND tuv.CREATION_DATE > ? ")
+                        sb.append(" AND tuv.CREATION_DATE > ?")
                                 .addValue(parseStartDate(createStartDate));
                     }
                 }
@@ -1305,7 +1434,7 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.creationDate >= ? ")
+                        sb.append(" AND tuv.creationDate >= ?")
                                 .addValue(parseStartDate(createStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
@@ -1322,7 +1451,7 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.creationDate < ? ")
+                        sb.append(" AND tuv.creationDate < ?")
                                 .addValue(parseEndDate(createEndDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
@@ -1335,7 +1464,7 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.creationDate <= ? ")
+                        sb.append(" AND tuv.creationDate <= ?")
                                 .addValue(parseEndDate(createEndDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
@@ -1353,16 +1482,16 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.modifyDate >= ? ")
+                        sb.append(" AND tuv.modifyDate >= ?")
                                 .addValue(parseStartDate(modifyStartDate));
-                        sb.append(" AND tuv.modifyDate <= ? ")
+                        sb.append(" AND tuv.modifyDate <= ?")
                                 .addValue(parseEndDate(modifyStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
                     {
-                        sb.append(" AND tuv.MODIFY_DATE >= ? ")
+                        sb.append(" AND tuv.MODIFY_DATE >= ?")
                                 .addValue(parseStartDate(modifyStartDate));
-                        sb.append(" AND tuv.MODIFY_DATE <= ? ")
+                        sb.append(" AND tuv.MODIFY_DATE <= ?")
                                 .addValue(parseEndDate(modifyStartDate));
                     }
                 }
@@ -1370,16 +1499,16 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.modifyDate < ? ")
+                        sb.append(" AND tuv.modifyDate < ?")
                                 .addValue(parseStartDate(modifyStartDate));
-                        sb.append(" AND tuv.modifyDate > ? ")
+                        sb.append(" AND tuv.modifyDate > ?")
                                 .addValue(parseEndDate(modifyStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
                     {
-                        sb.append(" AND tuv.MODIFY_DATE < ? ")
+                        sb.append(" AND tuv.MODIFY_DATE < ?")
                                 .addValue(parseStartDate(modifyStartDate));
-                        sb.append(" AND tuv.MODIFY_DATE > ? ")
+                        sb.append(" AND tuv.MODIFY_DATE > ?")
                                 .addValue(parseEndDate(modifyStartDate));
                     }
                 }
@@ -1387,7 +1516,7 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.modifyDate > ? ")
+                        sb.append(" AND tuv.modifyDate > ?")
                                 .addValue(parseStartDate(modifyStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
@@ -1400,7 +1529,7 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.modifyDate >= ? ")
+                        sb.append(" AND tuv.modifyDate >= ?")
                                 .addValue(parseStartDate(modifyStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
@@ -1417,7 +1546,7 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.modifyDate < ? ").addValue(parseEndDate(modifyEndDate));
+                        sb.append(" AND tuv.modifyDate < ?").addValue(parseEndDate(modifyEndDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
                     {
@@ -1428,8 +1557,7 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.modifyDate <= ? ")
-                                .addValue(parseEndDate(modifyEndDate));
+                        sb.append(" AND tuv.modifyDate <= ?").addValue(parseEndDate(modifyEndDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
                     {
@@ -1446,9 +1574,9 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND ext.lastUsageDate >= ? ")
+                        sb.append(" AND ext.lastUsageDate >= ?")
                                 .addValue(parseStartDate(lastUsageStartDate));
-                        sb.append(" AND ext.lastUsageDate <= ? ")
+                        sb.append(" AND ext.lastUsageDate <= ?")
                                 .addValue(parseEndDate(lastUsageStartDate));
                     }
                 }
@@ -1456,9 +1584,9 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND ext.lastUsageDate < ? ")
+                        sb.append(" AND ext.lastUsageDate < ?")
                                 .addValue(parseStartDate(lastUsageStartDate));
-                        sb.append(" AND ext.lastUsageDate > ? ")
+                        sb.append(" AND ext.lastUsageDate > ?")
                                 .addValue(parseEndDate(lastUsageStartDate));
                     }
                 }
@@ -1466,7 +1594,7 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND ext.lastUsageDate > ? ")
+                        sb.append(" AND ext.lastUsageDate > ?")
                                 .addValue(parseStartDate(lastUsageStartDate));
                     }
                 }
@@ -1474,7 +1602,7 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND ext.lastUsageDate >= ? ")
+                        sb.append(" AND ext.lastUsageDate >= ?")
                                 .addValue(parseStartDate(lastUsageStartDate));
                     }
                 }
@@ -1486,7 +1614,7 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND ext.lastUsageDate < ? ")
+                        sb.append(" AND ext.lastUsageDate < ?")
                                 .addValue(parseEndDate(lastUsageEndDate));
                     }
                 }
@@ -1494,54 +1622,9 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND ext.lastUsageDate <= ? ")
+                        sb.append(" AND ext.lastUsageDate <= ?")
                                 .addValue(parseEndDate(lastUsageEndDate));
                     }
-                }
-            }
-
-            // create user
-            if (StringUtil.isNotEmpty(createUser))
-            {
-                if (tmType.equalsIgnoreCase("TM3"))
-                {
-                    sb.append(" AND tuv.creationUser = ? ").addValues(createUser);
-                }
-                else if (tmType.equalsIgnoreCase("TM2"))
-                {
-                    sb.append(" AND tuv.CREATION_USER = ? ").addValues(createUser);
-                }
-            }
-            // modify user
-            if (StringUtil.isNotEmpty(modifyUser))
-            {
-                if (tmType.equalsIgnoreCase("TM3"))
-                {
-                    sb.append(" AND tuv.modifyUser = ? ").addValues(modifyUser);
-                }
-                else if (tmType.equalsIgnoreCase("TM2"))
-                {
-                    sb.append(" AND tuv.MODIFY_USER = ? ").addValues(modifyUser);
-                }
-            }
-
-            if (StringUtil.isNotEmpty(localeId))
-            {
-                if (tmType.equalsIgnoreCase("TM3"))
-                {
-                    sb.append(" AND tuv.localeId = ? ").addValue(localeId);
-                }
-                else if (tmType.equalsIgnoreCase("TM2"))
-                {
-                    sb.append(" AND tuv.LOCALE_ID = ? ").addValue(localeId);
-                }
-            }
-
-            if (StringUtil.isNotEmpty(jobIds))
-            {
-                if (tmType.equalsIgnoreCase("TM3"))
-                {
-                    sb.append(" AND ext.jobId in (").append(jobIds).append(")");
                 }
             }
         }
@@ -1552,12 +1635,45 @@ public class TMSearchBroswerHandlerHelper
      * 
      * @since GBS-3990
      */
-    private static boolean needCheckExtTable(Map<String, Object> paramMap)
+    public static boolean needQueryExtTable(Map<String, Object> paramMap)
     {
+        String sids = (String) paramMap.get("sids");
         Date lastUsageStartDate = (Date) paramMap.get("lastUsageStartDate");
         Date lastUsageEndDate = (Date) paramMap.get("lastUsageEndDate");
         String jobIds = (String) paramMap.get("jobIds");
-        if (lastUsageStartDate != null || lastUsageEndDate != null || StringUtil.isNotEmpty(jobIds))
+        if (StringUtil.isNotEmpty(sids) || lastUsageStartDate != null || lastUsageEndDate != null
+                || StringUtil.isNotEmpty(jobIds))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if need to query from TM3_TU_SHARED table.
+     * 
+     * @since GBS-3990
+     */
+    public static boolean needQueryTuTable(Map<String, Object> paramMap)
+    {
+        String tuIds = (String) paramMap.get("tuIds");
+        if (StringUtil.isNotEmpty(tuIds))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if need to query from TM3_ATTR and TM3_ATTR_VAL_SHARED table.
+     * 
+     * @since GBS-3990
+     */
+    public static boolean needQueryAttrValTable(Map<String, Object> paramMap)
+    {
+        String attributeName = (String) paramMap.get("attributeName");
+        String attributeValue = (String) paramMap.get("attributeValue");
+        if (StringUtil.isNotEmpty(attributeName) || StringUtil.isNotEmpty(attributeValue))
         {
             return true;
         }
@@ -1597,6 +1713,7 @@ public class TMSearchBroswerHandlerHelper
             }
         }
         ps.close();
+        SortUtil.sort(idList);
         return idList;
     }
 
@@ -1604,6 +1721,15 @@ public class TMSearchBroswerHandlerHelper
             boolean advancedSearch)
     {
         Map<String, Object> filterMap = new HashMap<String, Object>();
+
+        String sids = null;
+        String isRegex = null;
+        String tuIds = null;
+        String attributeName = null;
+        String attributeValue = null;
+        String createUser = null;
+        String modifyUser = null;
+        String jobIds = null;
         String createStartDateOption = null;
         Date createStartDate = null;
         String createEndDateOption = null;
@@ -1616,15 +1742,18 @@ public class TMSearchBroswerHandlerHelper
         Date lastUsageStartDate = null;
         String lastUsageEndDateOption = null;
         Date lastUsageEndDate = null;
-        String tuIds = null;
-        String sids = null;
-        String isRegex = null;
-        String createUser = null;
-        String modifyUser = null;
-        String jobIds = null;
 
         if (advancedSearch)
         {
+            sids = (String) request.getParameter("sids");
+            isRegex = (String) request.getParameter("isRegex");
+            tuIds = (String) request.getParameter("tuIds");
+            attributeName = (String) request.getParameter("attributeName");
+            attributeValue = (String) request.getParameter("attributeValue");
+            createUser = (String) request.getParameter("createUser");
+            modifyUser = (String) request.getParameter("modifyUser");
+            jobIds = (String) request.getParameter("jobIds");
+
             createStartDateOption = (String) request.getParameter("createStartDateOption");
             createStartDate = parseDate((String) request.getParameter("createStartDate"));
             createEndDateOption = (String) request.getParameter("createEndDateOption");
@@ -1640,13 +1769,14 @@ public class TMSearchBroswerHandlerHelper
             lastUsageEndDateOption = (String) request.getParameter("lastUsageEndDateOption");
             lastUsageEndDate = parseDate((String) request.getParameter("lastUsageEndDate"));
 
-            tuIds = (String) request.getParameter("tuIds");
-            sids = (String) request.getParameter("sids");
-            isRegex = (String) request.getParameter("isRegex");
-            createUser = (String) request.getParameter("createUser");
-            modifyUser = (String) request.getParameter("modifyUser");
-            jobIds = (String) request.getParameter("jobIds");
-
+            filterMap.put("sids", sids);
+            filterMap.put("isRegex", isRegex);
+            filterMap.put("tuIds", tuIds);
+            filterMap.put("attributeName", attributeName);
+            filterMap.put("attributeValue", attributeValue);
+            filterMap.put("createUser", createUser);
+            filterMap.put("modifyUser", modifyUser);
+            filterMap.put("jobIds", jobIds);
             filterMap.put("createStartDateOption", createStartDateOption);
             filterMap.put("createStartDate", createStartDate);
             filterMap.put("createEndDateOption", createEndDateOption);
@@ -1659,12 +1789,6 @@ public class TMSearchBroswerHandlerHelper
             filterMap.put("lastUsageStartDate", lastUsageStartDate);
             filterMap.put("lastUsageEndDateOption", lastUsageEndDateOption);
             filterMap.put("lastUsageEndDate", lastUsageEndDate);
-            filterMap.put("tuIds", tuIds);
-            filterMap.put("sids", sids);
-            filterMap.put("isRegex", isRegex);
-            filterMap.put("createUser", createUser);
-            filterMap.put("modifyUser", modifyUser);
-            filterMap.put("jobIds", jobIds);
         }
         return filterMap;
     }
@@ -1877,91 +2001,6 @@ public class TMSearchBroswerHandlerHelper
             }
         }
 
-        // if (StringUtil.isNotEmpty(jobIds))
-        // {
-        // if (!jobIds.contains(String.valueOf(tuv.getJobId())))
-        // {
-        // return false;
-        // }
-        // }
-
-        return true;
-    }
-
-    private static boolean searchFilterBySid(Map<String, Object> filterMap, BaseTmTuv tuv)
-    {
-        String tuIds = (String) filterMap.get("tuIds");
-        String sids = (String) filterMap.get("sids");
-        String isRegex = (String) filterMap.get("isRegex");
-
-        if (StringUtil.isNotEmpty(tuIds))
-        {
-            boolean tuidMatch = false;
-            if (tuIds.indexOf(",") > 0)
-            {
-                String[] temp = tuIds.split(",");
-                for (String tuid : temp)
-                {
-                    if (tuid.indexOf("-") > 0)
-                    {
-                        String[] temp2 = tuid.split("-");
-                        Long minTuid = Long.parseLong(temp2[0]);
-                        Long maxTuid = Long.parseLong(temp2[1]);
-                        Long tuId = tuv.getTu().getId();
-                        if (tuId >= minTuid && tuId <= maxTuid)
-                        {
-                            tuidMatch = true;
-                            break;
-                        }
-                    }
-                    else if (tuv.getTu().getId() == Long.parseLong(tuid))
-                    {
-                        tuidMatch = true;
-                        break;
-                    }
-                }
-            }
-            else if (tuIds.indexOf("-") > 0)
-            {
-                String[] temp = tuIds.split("-");
-                Long minTuid = Long.parseLong(temp[0]);
-                Long maxTuid = Long.parseLong(temp[1]);
-                Long tuId = tuv.getTu().getId();
-                if (tuId >= minTuid && tuId <= maxTuid)
-                {
-                    tuidMatch = true;
-                }
-            }
-            else if (tuv.getTu().getId() == Long.parseLong(tuIds))
-            {
-                tuidMatch = true;
-            }
-
-            if (!tuidMatch)
-            {
-                return false;
-            }
-        }
-
-        if (StringUtil.isNotEmpty(sids))
-        {
-            if (isRegex.equals("true"))
-            {
-                Pattern p = Pattern.compile(sids);
-                Matcher m = p.matcher(tuv.getSid());
-                if (!m.matches())
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                if (!sids.equals(tuv.getSid()))
-                {
-                    return false;
-                }
-            }
-        }
         return true;
     }
 

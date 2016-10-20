@@ -1,15 +1,16 @@
 package com.globalsight.util;
 
-import static org.junit.Assert.*;
 import static com.globalsight.util.StringUtil.join;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
-import org.junit.BeforeClass;
-import org.junit.AfterClass;
-import org.junit.Test;
-import org.junit.Before;
 import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class StringUtilTest
 {
@@ -177,5 +178,67 @@ public class StringUtilTest
         String msg = "a,b,a,d,e";
         Set result = StringUtil.split(msg, ",");
         assertTrue("Size Error", result.size() == 4);
+    }
+    
+    @Test
+    public void testReplace() {
+        assertEquals("test newString", StringUtil.replace("test string", "string", "newString"));
+        assertEquals("teststring", StringUtil.replace("test string", " ", ""));
+        assertEquals("_test string", StringUtil.replace("\r\ntest string", "\r\n", "_"));
+        assertEquals("teststring", StringUtil.replace("  test  string", " ", ""));
+        assertEquals("test<br>string", StringUtil.replace("test\r\nstring", "\r\n", "<br>"));
+    }
+
+    @Test
+    public void testGet()
+    {
+        assertEquals("", StringUtil.get(null));
+        assertEquals("", StringUtil.get(" "));
+        assertEquals("", StringUtil.get(""));
+
+        assertEquals("test", StringUtil.get(null, "test"));
+        assertEquals("test", StringUtil.get(" ", "test"));
+        assertEquals("test", StringUtil.get("", "test"));
+    }
+
+    @Test
+    public void testGetInt()
+    {
+        assertEquals(-1, StringUtil.getInt(null));
+        assertEquals(-1, StringUtil.getInt(" "));
+        assertEquals(-1, StringUtil.getInt("test"));
+
+        assertEquals(0, StringUtil.getInt(null, 0));
+        assertEquals(0, StringUtil.getInt(" ", 0));
+        assertEquals(0, StringUtil.getInt("test", 0));
+        assertEquals(1, StringUtil.getInt("1", 0));
+    }
+
+    @Test
+    public void testGetLong()
+    {
+        assertEquals(-1l, StringUtil.getLong(null));
+        assertEquals(-1l, StringUtil.getLong(" "));
+        assertEquals(-1l, StringUtil.getLong("test"));
+
+        assertEquals(0l, StringUtil.getLong(null, 0l));
+        assertEquals(0l, StringUtil.getLong(" ", 0l));
+        assertEquals(0l, StringUtil.getLong("test", 0l));
+        assertEquals(1l, StringUtil.getLong("1", 0l));
+    }
+
+    @Test
+    public void testGetBoolean()
+    {
+        assertEquals(false, StringUtil.getBoolean(null));
+        assertEquals(false, StringUtil.getBoolean(" "));
+        assertEquals(false, StringUtil.getBoolean("false"));
+        assertEquals(false, StringUtil.getBoolean("no"));
+        assertEquals(false, StringUtil.getBoolean("test"));
+
+        assertTrue(StringUtil.getBoolean("true"));
+        assertTrue(StringUtil.getBoolean("True "));
+        assertTrue(StringUtil.getBoolean("yes"));
+        assertTrue(StringUtil.getBoolean("yEs"));
     }
 }

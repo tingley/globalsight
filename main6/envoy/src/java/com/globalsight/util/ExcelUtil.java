@@ -19,14 +19,19 @@ package com.globalsight.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataValidation;
+import org.apache.poi.ss.usermodel.DataValidationConstraint;
+import org.apache.poi.ss.usermodel.DataValidationHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelUtil
@@ -122,7 +127,11 @@ public class ExcelUtil
         if (workbook == null || sheetNumber < 0)
             return null;
 
-        return workbook.getSheetAt(sheetNumber);
+        Sheet sheet = workbook.getSheetAt(sheetNumber);
+        if (sheet == null)
+            sheet = workbook.createSheet();
+
+        return sheet;
     }
 
     public static Sheet getDefaultSheet(Workbook workbook)
@@ -131,6 +140,28 @@ public class ExcelUtil
             return null;
 
         return workbook.getSheetAt(0);
+    }
+
+    public static Row getRow(Sheet sheet, int index)
+    {
+        Row row = sheet.getRow(index);
+        if (row == null)
+            row = sheet.createRow(index);
+        return row;
+    }
+
+    public static Cell getCell(Row row, int index)
+    {
+        Cell cell = row.getCell(index);
+        if (cell == null)
+            cell = row.createCell(index);
+        return cell;
+    }
+
+    public static Cell getCell(Sheet sheet, int row, int col)
+    {
+        Row rowLine = getRow(sheet, row);
+        return getCell(rowLine, col);
     }
 
     public static String getCellValue(Sheet sheet, int row, int col)
@@ -160,4 +191,44 @@ public class ExcelUtil
 
         return value;
     }
+
+    public static void createValidatorList(Workbook workbook, String[] values, int startRow,
+            int endRow, int columnNumber)
+    {
+        if (workbook == null || values == null || values.length == 0)
+            return;
+
+        try
+        {
+            Sheet sheet = workbook.getSheetAt(0);
+
+            endRow = endRow < 0 ? startRow + values.length : endRow;
+
+            DataValidationHelper dvHelper = sheet.getDataValidationHelper();
+            DataValidationConstraint dvConstraint = dvHelper.createExplicitListConstraint(values);
+            CellRangeAddressList addressList = new CellRangeAddressList(startRow, endRow,
+                    columnNumber, columnNumber);
+            DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
+            validation.setSuppressDropDownArrow(true);
+            validation.setShowErrorBox(true);
+            sheet.addValidationData(validation);
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when create hidden area for category failures.", e);
+        }
+    }
+
+    public static void createValidatorList(Workbook workbook, List<String> values, int startRow,
+            int endRow, int columnNumber)
+    {
+        if (workbook == null || values == null || values.size() == 0)
+            return;
+
+        String[] array = new String[values.size()];
+        values.toArray(array);
+
+        createValidatorList(workbook, array, startRow, endRow, columnNumber);
+    }
+
 }

@@ -91,6 +91,7 @@
     int state = task.getState();
     long task_id = task.getId();
     boolean review_only = task.isType(Task.TYPE_REVIEW);
+    boolean review_editable = task.isType(Task.TYPE_REVIEW_EDITABLE);
 
     String detailUrl = detail.getPageURL() + 
         "&" + WebAppConstants.TASK_ACTION + 

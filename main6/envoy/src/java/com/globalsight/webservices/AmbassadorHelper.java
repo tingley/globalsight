@@ -39,6 +39,8 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.hibernate.Query;
@@ -100,9 +102,6 @@ import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.RegexUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.XmlParser;
-
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 
 /**
  * Helper for Ambassador.java.
@@ -2993,6 +2992,7 @@ public class AmbassadorHelper extends JsonTypeWebService
             throws WebServiceException
     {
         String repName = null;
+        String scorecardData = null;
         if (StringUtil.isEmpty(p_identifyKey))
         {
             return makeErrorMessage(p_isJson, IMPORT_WORK_OFFLINE_FILES, "Empty parameter identifyKey");
@@ -3077,6 +3077,13 @@ public class AmbassadorHelper extends JsonTypeWebService
                 Workbook wb = ExcelUtil.getWorkbook(tmpSaveFile.getAbsolutePath(), fis);
                 Sheet sheet = ExcelUtil.getDefaultSheet(wb);
                 repName = sheet.getRow(0).getCell(0).toString();
+                String taskInfo = ExcelUtil.getCellValue(sheet, 0, 26);
+                String[] tmp = jodd.util.StringUtil.split(taskInfo, "_");
+                if (tmp != null && tmp.length == 5)
+                {
+                    // Include DQF/Scorecard data
+                    scorecardData = tmp[2] + "_" + tmp[3] + "_" + tmp[4];
+                }
                 if (!"Translation Edit Report".equalsIgnoreCase(repName)
                         && !"Reviewers Comments Report"
                                 .equalsIgnoreCase(repName)
@@ -3129,8 +3136,8 @@ public class AmbassadorHelper extends JsonTypeWebService
                 }
                 // Process uploading in same thread, not use separate thread so
                 // that error message can be returned to invoker.
-                String errMsg = OEM.runProcessUploadReportPage(tmpSaveFile,
-                        loggedUser, task, tmpSaveFile.getName(), reportName);
+                String errMsg = OEM.runProcessUploadReportPage(tmpSaveFile, loggedUser, task,
+                        tmpSaveFile.getName(), reportName, scorecardData);
                 if (StringUtil.isNotEmpty(errMsg))
                 {
                     errMsg = errMsg.replaceAll("</?\\w+>", "").replace("&nbsp;", "");

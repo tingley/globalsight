@@ -522,6 +522,7 @@ private static String toggleBgColor(int p_rowNumber)
     String pageId = (String)TaskHelper.retrieveObject(session, WebAppConstants.TASK_DETAILPAGE_ID);
     
     boolean review_only = theTask.isType(Task.TYPE_REVIEW);
+    boolean review_editable = theTask.isType(Task.TYPE_REVIEW_EDITABLE);
      
     List targetPgs = (List)TaskHelper.retrieveObject(session, JobManagementHandler.TARGET_PAGES);
 
@@ -1246,8 +1247,8 @@ function doOnload()
 	for(Select category: scorecardCategories)
 	{%>
 		<TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
-		<TD><%=category.getValue()%></TD> 
-		<TD>
+		<TD style="padding-top: 8px; padding-bottom: 8px;text-align:left;width:240px;"><%=category.getValue()%></TD> 
+		<TD style="width:600px;text-align:left;">
 		<input type="radio" name="<%=category.getValue()%>" value="1" <%if(scorecardMap.get(category.getValue()) == 1){%>checked<%}%> <%=isScored ? "disabled" : ""%>>1 
 		<input type="radio" name="<%=category.getValue()%>" style="margin-left:45px" value="2" <%if(scorecardMap.get(category.getValue()) == 2){%>checked<%}%> <%=isScored ? "disabled" : ""%>>2 
 		<input type="radio" name="<%=category.getValue()%>" style="margin-left:45px" value="3" <%if(scorecardMap.get(category.getValue()) == 3){%>checked<%}%> <%=isScored ? "disabled" : ""%>>3 
@@ -1259,12 +1260,13 @@ function doOnload()
 
 %>
 <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
-	<TD><%=bundle.getString("lb_comment")%></TD>
-	<TD><TEXTAREA name="scoreComment" id="scoreComment" maxlength="495" cols="40" style="resize: none;height:80px" <%=isScored ? "disabled" : ""%>><%=scorecardComment %></TEXTAREA></TD>
+	<TD style="padding-top: 8px; padding-bottom: 8px;text-align:left;width:240px;"><%=bundle.getString("lb_comment")%></TD>
+	<TD style="width:600px;text-align:left;"><TEXTAREA name="scoreComment" id="scoreComment" maxlength="495" style="resize: none;height:80px;width:80%;" <%=isScored ? "disabled" : ""%>><%=scorecardComment %></TEXTAREA></TD>
 </TR>
 </TABLE>
+<br>
     <%if(!isScored){ %>
-    <input type="button" value="Save" onclick="submitForm()"/>
+    <input type="button" value="<%=bundle.getString("lb_save") %>" onclick="submitForm()"/>
     <%} %>
 </form>
 <% } %>
@@ -1273,10 +1275,10 @@ function doOnload()
 <div id="dqfPanel">
 <% if (showDQF) { %>
 <form id="dqfForm" name="dqfForm" method="post" action="<%=saveDQFUrl%>">
-<SPAN CLASS="standardText"><p>Dynamic Quality Framework(DQF) Evaluation</p></SPAN>
+<SPAN CLASS="standardText"><p><%=bundle.getString("lb_dqf_evaluation") %></p></SPAN>
 <TABLE CLASS="standardText" CELLSPACING="0" CELLPADDING="2" style="border:solid 1px slategray;">
 <TR CLASS="tableHeadingBasic">
-    <TD style="padding-top: 8px; padding-bottom: 8px;text-align:center;width:240px;">DQF Category</TD>
+    <TD style="padding-top: 8px; padding-bottom: 8px;text-align:center;width:240px;word-wrap:break-word;">DQF Category</TD>
     <TD style="width:600px;text-align:center;">Score</TD>
 </TR>
 <%
@@ -1288,23 +1290,23 @@ String adequacyScore = (String)sessionMgr.getAttribute("adequacyScore");
 if (StringUtil.isEmpty(adequacyScore)) adequacyScore = "";
 if (StringUtil.isEmpty(dqfComment)) dqfComment = "";
 %>
-<tr bgcolor="#FFF" class="standardText">
-    <td>
-        <b>Fluency</b><br>
-        How well is the translation formed and the language natural/intuitive to a native speaker?
+<tr bgcolor="#FFFFFF" class="standardText">
+    <td style="padding-top: 8px; padding-bottom: 8px;text-align:left;width:240px;word-wrap:break-word;">
+        <b><%=bundle.getString("lb_dqf_fluency_only") %></b><br>
+        <%=bundle.getString("helper_text_dqf_fluency_note") %>
     </td>
-    <td>
+    <td style="width:600px;text-align:left;">
         <% for (String s : fluencyCategories) { %>
         <input type="radio" id="fluencyScore" name="fluencyScore" value="<%=s %>" <%=s.equals(fluencyScore) ? "checked" : "" %> <%=isDQFDone ? "disabled" : ""%>><%=s %></input>
         <% } %>
     </td>
 </tr>
-<tr bgcolor="#EEE" class="standardText">
-    <td>
-        <b>Adequacy</b><br>
-        How much of the source text meaning is expressed in the target translation?
+<tr bgcolor="#EEEEEE" class="standardText">
+    <td style="padding-top: 8px; padding-bottom: 8px;text-align:left;width:240px;word-wrap:break-word;">
+        <b><%=bundle.getString("lb_dqf_adequacy_only") %></b><br>
+        <%=bundle.getString("helper_text_dqf_adequacy_note") %>
     </td>
-    <td>
+    <td style="width:600px;text-align:left;">
         <% for (String s : adequacyCategories) { %>
         <input type="radio" id="adequacyScore" name="adequacyScore" value="<%=s %>" <%=s.equals(adequacyScore) ? "checked" : "" %> <%=isDQFDone ? "disabled" : ""%>><%=s %></input>
         <% } %>
@@ -1312,20 +1314,16 @@ if (StringUtil.isEmpty(dqfComment)) dqfComment = "";
 </tr>
 <tr bgcolor="#FFFFFF" class="standardText">
     <td>
-        Comment
+        <%=bundle.getString("lb_comment") %>
     </td>
     <td>
-        <textarea name="dqfComment" id="dqfComment" maxlength="495" cols="40" style="resize: none;height:80px" <%=isDQFDone ? "disabled" : ""%>><%=dqfComment %></textarea>
+        <textarea name="dqfComment" id="dqfComment" maxlength="495" style="resize: none;height:80px;width:80%;" <%=isDQFDone ? "disabled" : ""%>><%=dqfComment %></textarea>
     </td>
 </tr>
-<tr>
-  <td colspan="2">
-    &nbsp;
-  </td>
-</tr>
 </table>
+<br>
 <% if (!isDQFDone) { %>
-    <input type="button" id="saveDQFBtn" name="saveDQFBtn" value="Save" onclick="saveDQF()" />
+    <input type="button" id="saveDQFBtn" name="saveDQFBtn" value="<%=bundle.getString("lb_save") %>" onclick="saveDQF()" />
 <% } %>
 </form>
 <% } %>
@@ -1410,7 +1408,7 @@ function submitForm()
 	})
 	if(i != <%=categoryNum%>)
 	{
-		alert('Please socre all the options.');
+		alert('Please score all the options.');
 		return;
 	}
 
@@ -1433,13 +1431,13 @@ function saveDQF() {
     })
     if(i != 2)
     {
-        alert('Please select all DQF scores first.');
+        alert('Please score all DQF fields first.');
         return false;
     }
 	
     var comment = $("#dqfComment").val();
     if ($.trim(comment) == "") {
-        alert("Please fill in the DQF comment first.");
+        alert("Please fill in your DQF comment first.");
         return false;
     }
     $("#dqfForm").submit();

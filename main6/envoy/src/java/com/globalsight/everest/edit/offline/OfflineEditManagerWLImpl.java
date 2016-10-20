@@ -18,18 +18,16 @@
 package com.globalsight.everest.edit.offline;
 
 
-import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
+import java.io.File;
+import java.rmi.RemoteException;
+
 import com.globalsight.everest.edit.offline.download.DownloadParams;
-import com.globalsight.everest.edit.offline.OfflineEditManager;
+import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.util.system.SystemStartupException;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.Cancelable;
-import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.util.progress.IProcessStatusListener;
-
-import java.rmi.RemoteException;
-import java.io.File;
 
 /**
  * OfflineEditManagerWLRMIImpl is the remote implementation of
@@ -110,12 +108,12 @@ public final class OfflineEditManagerWLImpl
             p_user, p_task, p_fileName);
     }
     
-    public void processUploadReportPage(File p_tmpFile,
-            User p_user, Task p_task, String p_fileName, String p_reportName)
+    public void processUploadReportPage(File p_tmpFile, User p_user, Task p_task,
+            String p_fileName, String p_reportName, String scorecardData)
             throws AmbassadorDwUpException, RemoteException
     {
-        m_localInstance.processUploadReportPage( p_tmpFile,
-            p_user, p_task, p_fileName, p_reportName);
+        m_localInstance.processUploadReportPage(p_tmpFile, p_user, p_task, p_fileName,
+                p_reportName, scorecardData);
     }
 
     /**
@@ -159,12 +157,12 @@ public final class OfflineEditManagerWLImpl
     }
 
     @Override
-    public String runProcessUploadReportPage(File p_tmpFile, User p_user,
-            Task p_task, String p_fileName, String p_reportName)
+    public String runProcessUploadReportPage(File p_tmpFile, User p_user, Task p_task,
+            String p_fileName, String p_reportName, String scorecardData)
             throws AmbassadorDwUpException
     {
-        return m_localInstance.runProcessUploadReportPage(p_tmpFile, p_user,
-                p_task, p_fileName, p_reportName);
+        return m_localInstance.runProcessUploadReportPage(p_tmpFile, p_user, p_task, p_fileName,
+                p_reportName, scorecardData);
     }
 
     @Override

@@ -815,6 +815,7 @@ public class BlaiseHelper
 			specialChars.add("\\");
 			specialChars.add("/");
 			specialChars.add(":");
+			specialChars.add(";");
 			specialChars.add("*");
 			specialChars.add("?");
 			specialChars.add("\"");
@@ -822,6 +823,8 @@ public class BlaiseHelper
 			specialChars.add("<");
 			specialChars.add(">");
 			specialChars.add("|");
+			specialChars.add("%");
+			specialChars.add("&");
 		}
 	}
 

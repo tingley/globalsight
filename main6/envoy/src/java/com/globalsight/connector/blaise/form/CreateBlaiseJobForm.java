@@ -25,6 +25,8 @@ public class CreateBlaiseJobForm
     private String attributeString;
     private String userName;
     private String blaiseConnectorId;
+    private String combineByLangs;
+    private String attachment;
 
     public String getJobName()
     {
@@ -95,4 +97,24 @@ public class CreateBlaiseJobForm
 	{
 		this.blaiseConnectorId = blaiseConnectorId;
 	}
+
+    public String getCombineByLangs()
+    {
+        return combineByLangs;
+    }
+
+    public void setCombineByLangs(String combineByLangs)
+    {
+        this.combineByLangs = combineByLangs;
+    }
+
+    public String getAttachment()
+    {
+        return attachment;
+    }
+
+    public void setAttachment(String attachment)
+    {
+        this.attachment = attachment;
+    }
 }

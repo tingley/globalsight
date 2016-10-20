@@ -14,6 +14,7 @@
             com.globalsight.everest.webapp.pagehandler.projects.workflows.AddSourceHandler,
             com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
             java.text.MessageFormat,
+            com.globalsight.util.StringUtil,
             java.util.*"
     session="true"
 %>
@@ -165,17 +166,17 @@ $("#lb_terminology").attr("title","<%=bundle.getString("lb_terminology_title")%>
 <div id="includeSummaryTabs">
 	<%@ include file="/envoy/projects/workflows/includeJobSummaryTabs.jspIncl" %>
 </div>
-<p CLASS="standardText">Only 1,2,3,4,5 are allowed , 1 is poor and 5 is excellent.</p>
+<p CLASS="standardText"><%=bundle.getString("lb_dqf_scorecard_allowed") %></p>
 <form METHOD="post" name="scorecardForm" action="/globalsight/ControlServlet?linkName=jobScorecard&pageName=SCORECARD&jobId=${jobId}&action=updateScorecard">
 <input type="hidden" name="savedWorkflowId" id="savedWorkflowId" value="">
 <TABLE CLASS="standardText" CELLSPACING="0" CELLPADDING="2" style="border:solid 1px slategray;">
 <TR CLASS="tableHeadingBasic">
-    <TD style="border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;text-align:center">Target Locale</TD>
+    <TD style="border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;text-align:center"><%=bundle.getString("lb_target_locale") %></TD>
     <% for(Select category: categoryList){%>
     <TD style="border-right: #FFFFFF 1px solid;text-align:center;max-width:150px;word-break: break-all"><div id=<%=category.getKey()%> ><%=category.getValue()%></div></TD>
     <%}%>
-    <TD style="border-right: #FFFFFF 1px solid;width:50px;text-align:center;">AVG</TD>
-    <TD style="border-right: #FFFFFF 1px solid;width:260px;text-align:center;">Comments</TD>
+    <TD style="border-right: #FFFFFF 1px solid;width:50px;text-align:center;"><%=bundle.getString("lb_avg") %></TD>
+    <TD style="border-right: #FFFFFF 1px solid;width:260px;text-align:center;"><%=bundle.getString("lb_dqf_comments") %></TD>
     <%if(disableInput.equals("")){ %>
     <TD></TD>
 	<%} %>
@@ -229,11 +230,11 @@ $("#lb_terminology").attr("title","<%=bundle.getString("lb_terminology_title")%>
 	</TR>
 <%} %>
 <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
-	<TD align="center" valign="middle" style="border-top: #0C1476 1px solid;">AVG</TD>
+	<TD align="center" valign="middle" style="border-top: #0C1476 1px solid;"><%=bundle.getString("lb_avg") %></TD>
 	<% for(Select category: categoryList){%>
-    <TD align="center" valign="middle" style="border-top: #0C1476 1px solid;"><%=avgScoreMap.get(category.getValue()) %></TD>
+    <TD align="center" valign="middle" style="border-top: #0C1476 1px solid;"><%=StringUtil.isEmpty(avgScoreMap.get(category.getValue())) ? "--" : avgScoreMap.get(category.getValue()) %></TD>
     <%}%>
-	<TD align="center" valign="middle" style="border-top: #0C1476 1px solid;"><%=avgScoreMap.get("avgScore")%></TD>
+	<TD align="center" valign="middle" style="border-top: #0C1476 1px solid;"><%=StringUtil.isEmpty(avgScoreMap.get("avgScore")) ? "--" : avgScoreMap.get("avgScore") %></TD>
 	<TD align="center" valign="middle" style="border-top: #0C1476 1px solid;">&nbsp;</TD>
 	<%if(disableInput.equals("")){ %>
     <TD align="center" valign="middle" style="border-top: #0C1476 1px solid;">&nbsp;</TD>
@@ -242,17 +243,18 @@ $("#lb_terminology").attr("title","<%=bundle.getString("lb_terminology_title")%>
 </TABLE>
 <br>
 </form>
-<div class="standardText">DQF Information</div>
+<div class="standardText"><%=bundle.getString("lb_dqf_evaluation") %></div>
+<br>
 <form id="dqfForm" name="dqfForm" method="post" action="/globalsight/ControlServlet?linkName=jobScorecard&pageName=SCORECARD&jobId=${jobId}&action=updateDQF">
   <input type="hidden" name="currentWfId" id="currentWfId" value="">
-  <table id="dqfTable" name="dqfTable" CELLSPACING="0" CELLPADDING="2" style="border:solid 1px slategray;">
-    <thead CLASS="tableHeadingBasic">
-      <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">Target Locale</th>
-      <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">Fluency</th>
-      <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">Adequacy</th>
-      <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">Comment</th>
-      <th style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;">&nbsp;</th>
-    </thead>
+  <table id="dqfTable" name="dqfTable" CELLSPACING="0" CELLPADDING="2" style="border:solid 1px slategray;" class="standardText">
+    <tr CLASS="tableHeadingBasic">
+      <td style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;"><%=bundle.getString("lb_target_locale") %></td>
+      <td style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;"><%=bundle.getString("lb_dqf_fluency_only") %></td>
+      <td style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;"><%=bundle.getString("lb_dqf_adequacy_only") %></td>
+      <td style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;"><%=bundle.getString("lb_dqf_comments") %></td>
+      <td style="text-align:center;border-right: #FFFFFF 1px solid;padding-top: 8px; padding-bottom: 8px;width:100px;"></td>
+    </tr>
     <tbody>
       <c:forEach var="data" items="${dqfData}">
         <tr BGCOLOR="<%=toggleBgColor(rowNum++)%>">
@@ -401,7 +403,7 @@ function submitScorecardForm(workflowId)
 	})
 	if(!correctScoreInput)
 	{
-		alert("Invalid score, only 1,2,3,4,5 are allowed.");
+		alert("Invalid score, only 1, 2, 3, 4, 5 are allowed.");
 		return;
 	}
 
@@ -419,7 +421,7 @@ function submitScorecardForm(workflowId)
 
 	if(!correctCommentInput)
 	{
-		alert("Comment can not be empty.");
+		alert("Please fill in scorecard comment first.");
 		return;
 	}
 

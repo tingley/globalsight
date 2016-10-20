@@ -36,6 +36,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.webapp.pagehandler.tm.corpus.TMSearchBroswerHandlerHelper;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.persistence.DbUtil;
@@ -881,6 +882,8 @@ abstract class TuStorage<T extends TM3Data>
             Map<TM3Attribute, String> customAttributes, boolean lookupTarget, boolean locking,
             List<Long> tm3TmIds, LeverageOptions leverageOptions) throws SQLException
     {
+        // GBS-3990
+        boolean isBlankSearch = isBlankFromTmSearch(key);
         Map<String, Object> paramMap = new HashMap<String, Object>();
         if (leverageOptions != null)
         {
@@ -900,18 +903,27 @@ abstract class TuStorage<T extends TM3Data>
         HashMap<Long, Long> tuId2srcTuvId = new HashMap<Long, Long>();
         while (rs.next())
         {
-            long tuvId = rs.getLong(1);
-            long tuId = rs.getLong(2);
-            tuvIds.add(tuvId);
+            long tuvId = -1;
+            long tuId = -1;
+            if (isBlankSearch)
+            {
+                tuId = rs.getLong(1);
+            }
+            else
+            {
+                tuvId = rs.getLong(1);
+                tuId = rs.getLong(2);
+                tuvIds.add(tuvId);
+                tuId2srcTuvId.put(tuId, tuvId);
+            }
             if (!tuIds.contains(tuId))
             {
                 tuIds.add(tuId);
             }
-            tuId2srcTuvId.put(tuId, tuvId);
         }
         ps.close();
 
-        if (leverageOptions == null || !leverageOptions.isFromTMSearchPage())
+        if (!isBlankSearch)
         {
             // #2. If there are too many, need reduce them for performance...
             boolean isCandidateFiltered = false;
@@ -1050,7 +1062,11 @@ abstract class TuStorage<T extends TM3Data>
                 // to make this comparison. Since this only matters if
                 // there is a hash collision, I'm not going to worry about
                 // it for now.
-                if (tuvIds.contains(tuv.getId()))
+                if (isBlankSearch)
+                {
+                    tuvs.add(tuv);
+                }
+                else if (tuvIds.contains(tuv.getId()))
                 {
                     tuvs.add(tuv);
                 }
@@ -1065,15 +1081,42 @@ abstract class TuStorage<T extends TM3Data>
             Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> inlineAttrs,
             boolean lookupTarget, List<Long> tm3TmIds, Map<String, Object> paramMap)
     {
+        StatementBuilder sb = new StatementBuilder();
         // GBS-3990
         boolean isBlankSearch = isBlankFromTmSearch(key);
-        StatementBuilder sb = new StatementBuilder("SELECT tuv.id, tuv.tuId FROM ")
-                .append(getStorage().getTuvTableName() + " AS tuv, ")
+        if (isBlankSearch)
+        {
+            // to avoid any influence on other function which is invoking this
+            // code, add isBlankSearch check for GBS-3990
+            sb.append("SELECT DISTINCT tuv.tuId FROM ");
+        }
+        else
+        {
+            sb.append("SELECT tuv.id, tuv.tuId FROM ");
+        }
+        sb.append(getStorage().getTuvTableName() + " AS tuv, ")
                 .append(getStorage().getTuTableName()).append(" as tu");
-        if (needCheckExtTable(paramMap))
+
+        boolean needQueryExtTable = TMSearchBroswerHandlerHelper.needQueryExtTable(paramMap);
+        boolean needQueryAttrValTable = TMSearchBroswerHandlerHelper
+                .needQueryAttrValTable(paramMap);
+        if (needQueryExtTable && needQueryAttrValTable)
+        {
+            sb.append(", ").append(getStorage().getTuvExtTableName()).append(" AS ext, ")
+                    .append("tm3_attr AS attr, ").append(getStorage().getAttrValTableName())
+                    .append(" AS attrVal").append(" WHERE tuv.id = ext.tuvId")
+                    .append(" AND tuv.tuId = attrVal.tuId").append(" AND attrVal.attrId = attr.id");
+        }
+        else if (needQueryExtTable && !needQueryAttrValTable)
         {
             sb.append(", ").append(getStorage().getTuvExtTableName()).append(" AS ext")
                     .append(" WHERE tuv.id = ext.tuvId");
+        }
+        else if (needQueryAttrValTable && !needQueryExtTable)
+        {
+            sb.append(", ").append("tm3_attr AS attr, ").append(getStorage().getAttrValTableName())
+                    .append(" AS attrVal").append(" WHERE tuv.tuId = attrVal.tuId")
+                    .append(" AND attrVal.attrId = attr.id");
         }
         else
         {
@@ -1084,7 +1127,7 @@ abstract class TuStorage<T extends TM3Data>
         {
             sb.append(" AND tuv.fingerprint = ?").addValue(key.getFingerprint());
         }
-        if (srcLocale != null)
+        if (!isBlankSearch && srcLocale != null)
         {
             sb.append(" AND tuv.localeId = ?").addValue(srcLocale.getId());
         }
@@ -1103,8 +1146,7 @@ abstract class TuStorage<T extends TM3Data>
                 }
             }
         }
-        getParameterSql(sb, paramMap);
-        if (targetLocales != null && !targetLocales.contains(null))
+        if (!isBlankSearch && targetLocales != null)
         {
             // an exists subselect seems simpler, but mysql bug 46947 causes
             // exists subselects to take locks even in repeatable read
@@ -1119,205 +1161,13 @@ abstract class TuStorage<T extends TM3Data>
                     .append("WHERE targetTuv.tuId = result.tuId AND ")
                     .append("targetTuv.localeId IN").append(SQLUtil.longGroup(targetLocaleIds));
         }
+        if (isBlankSearch)
+        {
+            TMSearchBroswerHandlerHelper.getParameterSql(sb, paramMap, "TM3");
+            sb.append(" LIMIT ")
+                    .append(String.valueOf(TMSearchBroswerHandlerHelper.MAX_RETURNS + 1));
+        }
         return sb;
-    }
-
-    private static void getParameterSql(StatementBuilder sb, Map<String, Object> paramMap)
-    {
-        if (paramMap != null)
-        {
-            String createStartDateOption = (String) paramMap.get("createStartDateOption");
-            String createEndDateOption = (String) paramMap.get("createEndDateOption");
-            Date createStartDate = (Date) paramMap.get("createStartDate");
-            Date createEndDate = (Date) paramMap.get("createEndDate");
-
-            String modifyStartDateOption = (String) paramMap.get("modifyStartDateOption");
-            String modifyEndDateOption = (String) paramMap.get("modifyEndDateOption");
-            Date modifyStartDate = (Date) paramMap.get("modifyStartDate");
-            Date modifyEndDate = (Date) paramMap.get("modifyEndDate");
-
-            String lastUsageStartDateOption = (String) paramMap.get("lastUsageStartDateOption");
-            String lastUsageEndDateOption = (String) paramMap.get("lastUsageEndDateOption");
-            Date lastUsageStartDate = (Date) paramMap.get("lastUsageStartDate");
-            Date lastUsageEndDate = (Date) paramMap.get("lastUsageEndDate");
-
-            String createUser = (String) paramMap.get("createUser");
-            String modifyUser = (String) paramMap.get("modifyUser");
-            String localeId = (String) paramMap.get("localeIds");
-            String jobIds = (String) paramMap.get("jobIds");
-
-            if (createStartDate != null)
-            {
-                if (createStartDateOption.equals(DATE_EQUALS))
-                {
-                    sb.append(" AND tuv.creationDate >= ? ")
-                            .addValue(parseStartDate(createStartDate));
-                    sb.append(" AND tuv.creationDate <= ? ")
-                            .addValue(parseEndDate(createStartDate));
-                }
-                else if (createStartDateOption.equals(DATE_NOT_EQUALS))
-                {
-                    sb.append(" AND tuv.creationDate < ? ")
-                            .addValue(parseStartDate(createStartDate));
-                    sb.append(" AND tuv.creationDate > ? ").addValue(parseEndDate(createStartDate));
-                }
-                else if (createStartDateOption.equals(DATE_GREATER_THAN))
-                {
-                    sb.append(" AND tuv.creationDate > ? ")
-                            .addValue(parseStartDate(createStartDate));
-                }
-
-                else if (createStartDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
-                {
-                    sb.append(" AND tuv.creationDate >= ? ")
-                            .addValue(parseStartDate(createStartDate));
-                }
-            }
-
-            if (createEndDate != null)
-            {
-                if (createEndDateOption.equals(DATE_LESS_THAN))
-                {
-                    sb.append(" AND tuv.creationDate < ? ").addValue(parseEndDate(createEndDate));
-                }
-                else if (createEndDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
-                {
-                    sb.append(" AND tuv.creationDate <= ? ").addValue(parseEndDate(createEndDate));
-                }
-            }
-
-            if (modifyStartDate != null)
-            {
-                if (modifyStartDateOption.equals(DATE_EQUALS))
-                {
-                    sb.append(" AND tuv.modifyDate >= ? ")
-                            .addValue(parseStartDate(modifyStartDate));
-                    sb.append(" AND tuv.modifyDate <= ? ").addValue(parseEndDate(modifyStartDate));
-                }
-                else if (modifyStartDateOption.equals(DATE_NOT_EQUALS))
-                {
-                    sb.append(" AND tuv.modifyDate < ? ").addValue(parseStartDate(modifyStartDate));
-                    sb.append(" AND tuv.modifyDate > ? ").addValue(parseEndDate(modifyStartDate));
-                }
-                else if (modifyStartDateOption.equals(DATE_GREATER_THAN))
-                {
-                    sb.append(" AND tuv.modifyDate > ? ").addValue(parseStartDate(modifyStartDate));
-                }
-                else if (modifyStartDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
-                {
-                    sb.append(" AND tuv.modifyDate >= ? ")
-                            .addValue(parseStartDate(modifyStartDate));
-                }
-            }
-
-            if (modifyEndDate != null)
-            {
-                if (modifyEndDateOption.equals(DATE_LESS_THAN))
-                {
-                    sb.append(" AND tuv.modifyDate < ? ").addValue(parseEndDate(modifyEndDate));
-                }
-                else if (modifyEndDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
-                {
-                    sb.append(" AND tuv.modifyDate <= ? ").addValue(parseEndDate(modifyEndDate));
-                }
-            }
-
-            if (lastUsageStartDate != null)
-            {
-                if (lastUsageStartDateOption.equals(DATE_EQUALS))
-                {
-                    sb.append(" AND ext.lastUsageDate >= ? ")
-                            .addValue(parseStartDate(lastUsageStartDate));
-                    sb.append(" AND ext.lastUsageDate <= ? ")
-                            .addValue(parseEndDate(lastUsageStartDate));
-                }
-                else if (lastUsageStartDateOption.equals(DATE_NOT_EQUALS))
-                {
-                    sb.append(" AND ext.lastUsageDate < ? ")
-                            .addValue(parseStartDate(lastUsageStartDate));
-                    sb.append(" AND ext.lastUsageDate > ? ")
-                            .addValue(parseEndDate(lastUsageStartDate));
-                }
-                else if (lastUsageStartDateOption.equals(DATE_GREATER_THAN))
-                {
-                    sb.append(" AND ext.lastUsageDate > ? ")
-                            .addValue(parseStartDate(lastUsageStartDate));
-                }
-                else if (lastUsageStartDateOption.equals(DATE_GREATER_THAN_OR_EQUALS))
-                {
-                    sb.append(" AND ext.lastUsageDate >= ? ")
-                            .addValue(parseStartDate(lastUsageStartDate));
-                }
-            }
-
-            if (lastUsageEndDate != null)
-            {
-                if (lastUsageEndDateOption.equals(DATE_LESS_THAN))
-                {
-                    sb.append(" AND ext.lastUsageDate < ? ")
-                            .addValue(parseEndDate(lastUsageEndDate));
-                }
-                else if (lastUsageEndDateOption.equals(DATE_LESS_THAN_OR_EQUALS))
-                {
-                    sb.append(" AND ext.lastUsageDate <= ? ")
-                            .addValue(parseEndDate(lastUsageEndDate));
-                }
-            }
-
-            if (StringUtil.isNotEmpty(createUser))
-            {
-                sb.append(" AND tuv.creationUser = ? ").addValues(createUser);
-            }
-            if (StringUtil.isNotEmpty(modifyUser))
-            {
-                sb.append(" AND tuv.modifyUser = ? ").addValues(modifyUser);
-            }
-
-            if (StringUtil.isNotEmpty(localeId))
-            {
-                sb.append(" AND tuv.localeId = ? ").addValue(localeId);
-            }
-
-            if (StringUtil.isNotEmpty(jobIds))
-            {
-                sb.append(" AND ext.jobId in (").append(jobIds).append(")");
-            }
-        }
-    }
-
-    private static String parseStartDate(Date start)
-    {
-        String startDate = format.format(start);
-        if (StringUtil.isNotEmpty(startDate))
-            return startDate + " 00:00:00";
-        else
-            return null;
-    }
-
-    private static String parseEndDate(Date end)
-    {
-        String endDate = format.format(end);
-        if (StringUtil.isNotEmpty(endDate))
-            return endDate + " 23:59:59";
-        else
-            return null;
-    }
-
-    /**
-     * Checks if need to query from TM3_TUV_EXT_SHARED table.
-     * 
-     * @since GBS-3990
-     */
-    private static boolean needCheckExtTable(Map<String, Object> paramMap)
-    {
-        Date lastUsageStartDate = (Date) paramMap.get("lastUsageStartDate");
-        Date lastUsageEndDate = (Date) paramMap.get("lastUsageEndDate");
-        String jobIds = (String) paramMap.get("jobIds");
-        if (lastUsageStartDate != null || lastUsageEndDate != null || StringUtil.isNotEmpty(jobIds))
-        {
-            return true;
-        }
-        return false;
     }
 
     /**

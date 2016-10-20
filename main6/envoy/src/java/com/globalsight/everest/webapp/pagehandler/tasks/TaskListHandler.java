@@ -1384,6 +1384,7 @@ public class TaskListHandler extends PageHandler
         StringBuffer isFinishedTaskId = new StringBuffer();
         StringBuffer isUploadingJobName = new StringBuffer();
         StringBuffer isNeedScoreTaskId = new StringBuffer();
+        StringBuffer isNeedDQFTaskId = new StringBuffer();
         StringBuffer isNeedActivityCommentCheckTaskId = new StringBuffer();
         StringBuffer isNeedReportUploadCheckTaskId = new StringBuffer();
         StringBuffer isFinishedActivityCommentUploadTaskId = new StringBuffer();
@@ -1422,13 +1423,19 @@ public class TaskListHandler extends PageHandler
                         {
                             WorkflowImpl workflowImpl = (WorkflowImpl) task
                                     .getWorkflow();
-                            if ((workflowImpl.getScorecardShowType() == 1 || workflowImpl
-                                    .getScorecardShowType() == 3)
+                            int showType = workflowImpl.getScorecardShowType();
+                            if ((showType == 1 || showType == 3)
                                     && StringUtil.isEmpty(workflowImpl.getScorecardComment()))
                             {
                                 isNeedScoreTaskId.append("[JobID:").append(task.getJobId())
                                         .append(",JobName:").append(task.getJobName()).append("],");
                                 continue;
+                            }
+                            else if ((showType == 3 || showType == 5)
+                                    && StringUtil.isEmpty(workflowImpl.getDQFComment()))
+                            {
+                                isNeedDQFTaskId.append("[JobID:").append(task.getJobId())
+                                        .append(",JobName:").append(task.getJobName()).append("],");
                             }
                         }
                         ProjectImpl project = (ProjectImpl) task.getWorkflow()
@@ -1540,6 +1547,11 @@ public class TaskListHandler extends PageHandler
                         + "\"isNeedScoreTaskId\":\""
                         + isNeedScoreTaskId.substring(0,
                                 isNeedScoreTaskId.length() - 1) + "\",";
+            }
+            if (isNeedDQFTaskId.length() != 0)
+            {
+                result = result + "\"isNeedDQFTaskId\":\""
+                        + isNeedDQFTaskId.substring(0, isNeedDQFTaskId.length() - 1) + "\",";
             }
             if (isNeedReportUploadCheckTaskId.length() != 0)
             {

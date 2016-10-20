@@ -186,6 +186,7 @@
 							"&toTask=ture";
 	    
     boolean review_only = task.isType(Task.TYPE_REVIEW);
+    boolean review_editable = task.isType(Task.TYPE_REVIEW_EDITABLE);
     
     String pageId = (String)TaskHelper.retrieveObject(
       session, WebAppConstants.TASK_DETAILPAGE_ID);

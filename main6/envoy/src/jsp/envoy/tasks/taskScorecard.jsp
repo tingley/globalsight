@@ -1289,7 +1289,7 @@ String adequacyScore = (String)sessionMgr.getAttribute("adequacyScore");
 if (StringUtil.isEmpty(adequacyScore)) adequacyScore = "";
 if (StringUtil.isEmpty(dqfComment)) dqfComment = "";
 %>
-<tr bgcolor="#FFF" class="standardText">
+<tr bgcolor="#FFFFFF" class="standardText">
     <td style="padding-top: 8px; padding-bottom: 8px;text-align:left;width:240px;word-wrap:break-word;">
         <b><%=bundle.getString("lb_dqf_fluency_only") %></b><br>
         <%=bundle.getString("helper_text_dqf_fluency_note") %>
@@ -1300,7 +1300,7 @@ if (StringUtil.isEmpty(dqfComment)) dqfComment = "";
         <% } %>
     </td>
 </tr>
-<tr bgcolor="#EEE" class="standardText">
+<tr bgcolor="#EEEEEE" class="standardText">
     <td style="padding-top: 8px; padding-bottom: 8px;text-align:left;width:240px;word-wrap:break-word;">
         <b><%=bundle.getString("lb_dqf_adequacy_only") %></b><br>
         <%=bundle.getString("helper_text_dqf_adequacy_note") %>

@@ -179,6 +179,15 @@ public class StringUtilTest
         Set result = StringUtil.split(msg, ",");
         assertTrue("Size Error", result.size() == 4);
     }
+    
+    @Test
+    public void testReplace() {
+        assertEquals("test newString", StringUtil.replace("test string", "string", "newString"));
+        assertEquals("teststring", StringUtil.replace("test string", " ", ""));
+        assertEquals("_test string", StringUtil.replace("\r\ntest string", "\r\n", "_"));
+        assertEquals("teststring", StringUtil.replace("  test  string", " ", ""));
+        assertEquals("test<br>string", StringUtil.replace("test\r\nstring", "\r\n", "<br>"));
+    }
 
     @Test
     public void testGet()

@@ -372,7 +372,7 @@ public class TaskListServlet extends HttpServlet
 
                 if (!disableButtons)
                 {
-                    if (reviewOnly && isShowScorecard)
+                    if ((reviewOnly || task.isType(Task.TYPE_REVIEW_EDITABLE)) && isShowScorecard)
                     {
                         realShowScorecard = true;
                         scorecardUrl = "/globalsight/ControlServlet?linkName=taskScorecard&pageName=TK2&taskAction=scorecard&state="

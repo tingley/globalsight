@@ -48,6 +48,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
+import com.alibaba.fastjson.asm.Type;
 import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
@@ -467,7 +468,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                         Task task = (Task) it.next();
                         reportInfo = ReportConstants.TRANSLATIONS_EDIT_REPORT_ABBREVIATION + "_"
                                 + task.getId();
-                        needProtect = task.isType(Task.TYPE_TRANSLATE);
+                        needProtect = !(task.isType(Task.TYPE_REVIEW) || task.isType(Task.TYPE_REVIEW_EDITABLE));
                     }
                 }
                 int scoreShowType = wf.getScorecardShowType();

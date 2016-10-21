@@ -545,7 +545,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                         Task task = (Task) it.next();
                         reportInfo = ReportConstants.REVIEWERS_COMMENTS_REPORT_ABBREVIATION + "_"
                                 + task.getId();
-                        needProtect = task.isType(Task.TYPE_TRANSLATE);
+                        needProtect = !(task.isType(Task.TYPE_REVIEW) || task.isType(Task.TYPE_REVIEW_EDITABLE));
                     }
                 }
                 int scoreShowType = wf.getScorecardShowType();

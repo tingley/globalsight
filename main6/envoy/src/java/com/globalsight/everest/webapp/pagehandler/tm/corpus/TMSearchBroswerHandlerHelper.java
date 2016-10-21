@@ -1405,7 +1405,7 @@ public class TMSearchBroswerHandlerHelper
                     {
                         sb.append(" AND tuv.creationDate < ?")
                                 .addValue(parseStartDate(createStartDate));
-                        sb.append(" AND tuv.creationDate > ?")
+                        sb.append(" OR tuv.creationDate > ?")
                                 .addValue(parseEndDate(createStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
@@ -1501,8 +1501,7 @@ public class TMSearchBroswerHandlerHelper
                     {
                         sb.append(" AND tuv.modifyDate < ?")
                                 .addValue(parseStartDate(modifyStartDate));
-                        sb.append(" AND tuv.modifyDate > ?")
-                                .addValue(parseEndDate(modifyStartDate));
+                        sb.append(" OR tuv.modifyDate > ?").addValue(parseEndDate(modifyStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
                     {
@@ -1586,7 +1585,7 @@ public class TMSearchBroswerHandlerHelper
                     {
                         sb.append(" AND ext.lastUsageDate < ?")
                                 .addValue(parseStartDate(lastUsageStartDate));
-                        sb.append(" AND ext.lastUsageDate > ?")
+                        sb.append(" OR ext.lastUsageDate > ?")
                                 .addValue(parseEndDate(lastUsageStartDate));
                     }
                 }
@@ -2348,6 +2347,13 @@ public class TMSearchBroswerHandlerHelper
      */
     public static String applyReplaced(HttpServletRequest request, String userId) throws Exception
     {
+        // GBS-3990, for blank/wild card search, do not do replacement, just
+        // return.
+        String searchText = (String) request.getParameter("searchText");
+        if ("*".equals(searchText) || StringUtil.isEmpty(searchText))
+        {
+            return "";
+        }
         HttpSession httpSession = request.getSession();
         SessionManager sessionMgr = (SessionManager) httpSession
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
@@ -2367,7 +2373,6 @@ public class TMSearchBroswerHandlerHelper
 
         String searchIn = (String) request.getParameter("searchIn");
         boolean searchInSource = "source".equals(searchIn);
-        String searchText = (String) request.getParameter("searchText");
         String replaceText = (String) request.getParameter("replaceText");
 
         // Get selected index of entries

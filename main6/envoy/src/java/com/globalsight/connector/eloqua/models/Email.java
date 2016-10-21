@@ -83,6 +83,7 @@ public class Email extends EloquaObject
                 
                 EloquaHelper eh = new EloquaHelper(getConnect());
                 ViewUtil util = new ViewUtil(root, eh);
+                util.setSubject(this.getSubject());
                 String html = util.generateHtml();
                 FileUtil.writeFile(f, html, "utf-8");
             }
@@ -135,6 +136,11 @@ public class Email extends EloquaObject
                 String newRoot = util.updateFromFile(content, uploaded, targetLocale);
                 cont.put("root", newRoot);
                 cont.remove("htmlBody");
+                
+                //update email subject
+                String subject = util.getEmailSubject(content);
+                if (subject != null)
+                    js.put("subject", subject);
                 
                 return false;
             }

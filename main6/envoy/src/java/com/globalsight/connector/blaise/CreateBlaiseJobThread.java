@@ -156,6 +156,8 @@ public class CreateBlaiseJobThread  extends Thread
                     FileUtil.copyFile(attachFile, src);
                 }
 
+                if (comment == null)
+                    comment = "";
                 SaveCommentThread sct = new SaveCommentThread(jobName, comment, attachFileName,
                         user.getUserId(), dir.toString());
                 sct.start();

@@ -1583,9 +1583,10 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND ext.lastUsageDate < ?")
+                        sb.append(" AND (ext.lastUsageDate is NULL");
+                        sb.append(" OR ext.lastUsageDate < ?")
                                 .addValue(parseStartDate(lastUsageStartDate));
-                        sb.append(" OR ext.lastUsageDate > ?")
+                        sb.append(" OR ext.lastUsageDate > ?)")
                                 .addValue(parseEndDate(lastUsageStartDate));
                     }
                 }

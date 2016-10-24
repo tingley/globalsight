@@ -196,6 +196,18 @@ if( typeof( kadovInitEffects ) != 'function' ) kadovInitEffects = new Function()
  TM Profile will specify the fuzzy match penalties for white-space, case, 
  code, type and multiple exact matches.</td></tr>
 
+<tr valign="top" class="whs4">
+<td colspan="1" rowspan="1" width="25.654%" class="whs10">
+<p class="whs9">String ID</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs11">
+<p>Filter by SID.</td></tr>
+
+<tr valign="top" class="whs4">
+<td colspan="1" rowspan="1" width="25.654%" class="whs10">
+<p class="whs9">Is Regex</td>
+<td colspan="1" rowspan="1" width="74.346%" class="whs11">
+<p>Select to use String ID as regex input.<br>For blank and wild card search, SID is used as a condition in the SQL statement. According to MySQL manual, following REGEXP operator can only be used:<br>
+^, $, ., [...], [^...], p1|p2|p3, *, +, {n}, {m,n}. For more details, please check MySQL manual online.</td></tr>
 
 <tr valign="top" class="whs4">
 <td colspan="1" rowspan="1" width="25.654%" class="whs10">
@@ -296,7 +308,8 @@ if( typeof( kadovInitEffects ) != 'function' ) kadovInitEffects = new Function()
 <td colspan="1" rowspan="1" width="25.654%" class="whs10">
 <p class="whs9">Search Results Table</td>
 <td colspan="1" rowspan="1" width="74.346%" class="whs11">
-<p>&nbsp;</td></tr>
+<p>Limit SQL to return max of 300 results by default (configurable setting in a properties file jboss\server\standalone\deployments\globalsight.ear\lib\classes\properties\tmSearch.properties). <br>Warning message shows when the configured max terms reached. 
+</td></tr>
 
 <tr valign="top" class="whs4">
 <td colspan="1" rowspan="1" width="25.654%" class="whs10">

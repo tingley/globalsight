@@ -192,16 +192,14 @@ public class ExcelUtil
         return value;
     }
 
-    public static void createValidatorList(Workbook workbook, String[] values, int startRow,
+    public static void createValidatorList(Sheet sheet, String[] values, int startRow,
             int endRow, int columnNumber)
     {
-        if (workbook == null || values == null || values.length == 0)
+        if (sheet == null || values == null || values.length == 0)
             return;
 
         try
         {
-            Sheet sheet = workbook.getSheetAt(0);
-
             endRow = endRow < 0 ? startRow + values.length : endRow;
 
             DataValidationHelper dvHelper = sheet.getDataValidationHelper();
@@ -219,16 +217,16 @@ public class ExcelUtil
         }
     }
 
-    public static void createValidatorList(Workbook workbook, List<String> values, int startRow,
+    public static void createValidatorList(Sheet sheet, List<String> values, int startRow,
             int endRow, int columnNumber)
     {
-        if (workbook == null || values == null || values.size() == 0)
+        if (sheet == null || values == null || values.size() == 0)
             return;
 
         String[] array = new String[values.size()];
         values.toArray(array);
 
-        createValidatorList(workbook, array, startRow, endRow, columnNumber);
+        createValidatorList(sheet, array, startRow, endRow, columnNumber);
     }
 
 }

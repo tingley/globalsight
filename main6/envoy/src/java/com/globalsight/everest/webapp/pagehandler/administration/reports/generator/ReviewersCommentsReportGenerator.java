@@ -545,7 +545,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                         Task task = (Task) it.next();
                         reportInfo = ReportConstants.REVIEWERS_COMMENTS_REPORT_ABBREVIATION + "_"
                                 + task.getId();
-                        needProtect = task.isType(Task.TYPE_TRANSLATE);
+                        needProtect = !(task.isType(Task.TYPE_REVIEW) || task.isType(Task.TYPE_REVIEW_EDITABLE));
                     }
                 }
                 int scoreShowType = wf.getScorecardShowType();
@@ -991,35 +991,33 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             }
 
             // Add category failure drop down list here.
-            ExcelUtil.createValidatorList(p_workBook, getFailureCategoriesList(),
+            ExcelUtil.createValidatorList(p_sheet, getFailureCategoriesList(),
                     SEGMENT_START_ROW, -1, CATEGORY_FAILURE_COLUMN);
-            ExcelUtil.createValidatorList(p_workBook, (List<String>) IssueOptions.getAllStatus(),
+            ExcelUtil.createValidatorList(p_sheet, (List<String>) IssueOptions.getAllStatus(),
                     SEGMENT_START_ROW, -1, COMMENT_STATUS_COLUMN);
 
             String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
             List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
                     currentCompanyId, CategoryType.Severity, true);
-            ExcelUtil.createValidatorList(p_workBook, categories, SEGMENT_START_ROW, -1,
-                    SEVERITY_COLUMN);
+            ExcelUtil.createValidatorList(p_sheet, categories, SEGMENT_START_ROW, -1, SEVERITY_COLUMN);
             
             if (DQF_START_ROW > 0)
             {
                 categories = CompanyWrapper.getCompanyCategoryNames(currentCompanyId,
                         CategoryType.Fluency, true);
-                ExcelUtil.createValidatorList(p_workBook, categories, DQF_START_ROW, DQF_START_ROW,
-                        1);
+                ExcelUtil.createValidatorList(p_sheet, categories, DQF_START_ROW, DQF_START_ROW, 1);
 
                 categories = CompanyWrapper.getCompanyCategoryNames(currentCompanyId,
                         CategoryType.Adequacy, true);
-                ExcelUtil.createValidatorList(p_workBook, categories, DQF_START_ROW + 1,
+                ExcelUtil.createValidatorList(p_sheet, categories, DQF_START_ROW + 1,
                         DQF_START_ROW + 1, 1);
             }
             if (SCORECARD_START_ROW > 0)
             {
                 String[] data = new String[]
                 { "5", "4", "3", "2", "1" };
-                ExcelUtil.createValidatorList(p_workBook, data, SCORECARD_START_ROW + 1, -1,
-                        1);
+                ExcelUtil.createValidatorList(p_sheet, data, SCORECARD_START_ROW + 1,
+                        SCORECARD_START_ROW + scorecardCategories.size(), 1);
             }
         }
 

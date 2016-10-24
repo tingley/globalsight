@@ -61,6 +61,10 @@ public class InternalTextHelper
     public static String GS_INTERNALT_TAG_END = "</GS-INTERNAL-TEXT>";
     public static String REG_INTERNAL_TEXT = "<(GS-INTERNAL-TEXT)>(.*)</GS-INTERNAL-TEXT>";
     public static final String m_tag_amp = "AmpersandOfGS";
+    
+    private static String REGEX_PO = "^<segment segmentId=\"([^\"]*)\"><bpt i=\"[^\"]*\" internal=\"yes\"/>.*?<ept i=\"([^\"]*)\"/></segment>$";
+    private static Pattern PO_P = Pattern.compile(REGEX_PO);
+    
     /**
      * Handle the internal texts for one string
      * 
@@ -873,5 +877,15 @@ public class InternalTextHelper
                     break;
             }
         }
+    }
+    
+    public static boolean isSegmentAllInternalTag(String segment){
+        Matcher m = PO_P.matcher(segment);
+        if (m.find())
+        {
+            return m.group(1).equals(m.group(2));
+        }
+        
+        return false;
     }
 }

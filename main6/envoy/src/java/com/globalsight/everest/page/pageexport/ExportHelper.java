@@ -55,6 +55,7 @@ import com.globalsight.cxe.adapter.ling.StandardMerger;
 import com.globalsight.cxe.adapter.msoffice.EventFlowXmlParser;
 import com.globalsight.cxe.adapter.openoffice.StringIndex;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
@@ -92,6 +93,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.RemovedPrefixTag;
 import com.globalsight.everest.tuv.RemovedSuffixTag;
 import com.globalsight.everest.tuv.RemovedTag;
+import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
@@ -2697,6 +2699,24 @@ public class ExportHelper
             {
                 Tuv targetSegment = (Tuv) p_targetSegments.get(i);
                 String mergeState = targetSegment.getMergeState();
+                
+                // for GBS-4467.
+                Tuv sourceTuv = (Tuv) sourceSegmentMap.get(targetSegment.getTuId());
+                if (sourceTuv != null && sourceTuv instanceof TuvImpl)
+                {
+                    Tu tu = sourceTuv.getTu(-1);
+                    if (tu != null)
+                    {
+                        if ("po".equals(tu.getDataType()))
+                        {
+                            if (InternalTextHelper.isSegmentAllInternalTag(((TuvImpl)sourceTuv).getSegmentString()))
+                            {
+                                targetSegment.setGxml(sourceTuv.getGxml());
+                                continue;
+                            }
+                        }
+                    }
+                }
 
                 if (mergeState.equals(Tuv.NOT_MERGED))
                 {

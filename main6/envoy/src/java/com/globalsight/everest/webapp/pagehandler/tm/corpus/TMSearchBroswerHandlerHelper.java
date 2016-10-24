@@ -643,98 +643,114 @@ public class TMSearchBroswerHandlerHelper
         tuv.setExactMatchKey();
         tu.addTuv(tuv);
         // Do leverage
-        LeverageDataCenter leverageDataCenter = LingServerProxy.getTmCoreManager().leverageSegments(
-                Collections.singletonList(tuv), searchFromLocale, searchTrgLocales, levOptions);
-        Iterator<LeverageMatches> itLeverageMatches = leverageDataCenter.leverageResultIterator();
-        List<Map<String, Object>> leverageResult = new ArrayList<Map<String, Object>>();
-
-        boolean isMaxed = false;
-        long jobId = -1; // -1 is fine here
-        WHILE_TOP: while (itLeverageMatches.hasNext())
+        LeverageDataCenter leverageDataCenter = null;
+        boolean inputWrongSIDRegex = false;
+        try
         {
-            LeverageMatches levMatches = itLeverageMatches.next();
-
-            // walk through all target locale in the LeverageMatches
-            Iterator itLocales = levMatches.targetLocaleIterator(jobId);
-            while (itLocales.hasNext())
+            leverageDataCenter = LingServerProxy.getTmCoreManager().leverageSegments(
+                    Collections.singletonList(tuv), searchFromLocale, searchTrgLocales, levOptions);
+        }
+        catch (Exception e)
+        {
+            // GBS-3990, This error means the SID is using regex and the regex
+            // is not correctly following the MySQL REGEXP manual.
+            String message = e.getMessage();
+            if (message != null && message
+                    .endsWith("Got error 'repetition-operator operand invalid' from regexp"))
             {
-                GlobalSightLocale tLocale = (GlobalSightLocale) itLocales.next();
-
-                // walk through all matches in the locale
-                Iterator itMatch = levMatches.matchIterator(tLocale, jobId);
-                while (itMatch.hasNext())
+                inputWrongSIDRegex = true;
+            }
+        }
+        boolean isMaxed = false;
+        List<Map<String, Object>> leverageResult = new ArrayList<Map<String, Object>>();
+        if (leverageDataCenter != null)
+        {
+            Iterator<LeverageMatches> itLeverageMatches = leverageDataCenter
+                    .leverageResultIterator();
+            long jobId = -1; // -1 is fine here
+            WHILE_TOP: while (itLeverageMatches.hasNext())
+            {
+                LeverageMatches levMatches = itLeverageMatches.next();
+                // walk through all target locale in the LeverageMatches
+                Iterator itLocales = levMatches.targetLocaleIterator(jobId);
+                while (itLocales.hasNext())
                 {
-                    LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();
-                    BaseTmTuv sourceTuv = matchedTuv.getSourceTuv();
-                    if (leverageResult.size() == MAX_RETURNS)
+                    GlobalSightLocale tLocale = (GlobalSightLocale) itLocales.next();
+                    // walk through all matches in the locale
+                    Iterator itMatch = levMatches.matchIterator(tLocale, jobId);
+                    while (itMatch.hasNext())
                     {
-                        isMaxed = true;
-                        break WHILE_TOP;
-                    }
-                    long score = new Float(matchedTuv.getScore()).longValue();
-                    String scoreStr = StringUtil.formatPCT(score);
-                    long tuId = matchedTuv.getTu().getId();
-                    long tmId = matchedTuv.getTu().getTmId();
-                    long sourceTuvId;
-                    long targetTuvId;
-                    String sourceLocale;
-                    String targetLocale;
-                    String sid;
-                    String tmName = ServerProxy.getProjectHandler().getProjectTMById(tmId, false)
-                            .getName();
-
-                    Map<String, String> formattedSource;
-                    Map<String, String> formattedTarget;
-                    if (searchInSource)
-                    {
-                        sourceTuvId = sourceTuv.getId();
-                        sourceLocale = sourceTuv.getLocale().toString();
-                        targetTuvId = matchedTuv.getId();
-                        targetLocale = matchedTuv.getLocale().toString();
-                        sid = matchedTuv.getSid();
-                        if (null == sid)
+                        LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();
+                        BaseTmTuv sourceTuv = matchedTuv.getSourceTuv();
+                        if (leverageResult.size() == MAX_RETURNS)
                         {
-                            sid = "N/A";
+                            isMaxed = true;
+                            break WHILE_TOP;
                         }
-                        formattedSource = getFormattedSegment(
-                                EditUtil.encodeHtmlEntities(queryText),
-                                EditUtil.encodeHtmlEntities(replaceText), sourceTuv);
-                        formattedTarget = getFormattedSegment(null, null, matchedTuv);
-                    }
-                    else
-                    {
-                        sourceTuvId = matchedTuv.getId();
-                        sourceLocale = matchedTuv.getLocale().toString();
-                        targetTuvId = sourceTuv.getId();
-                        targetLocale = sourceTuv.getLocale().toString();
-                        sid = sourceTuv.getSid();
-                        if (null == sid)
-                        {
-                            sid = "N/A";
-                        }
-                        formattedSource = getFormattedSegment(null, null, matchedTuv);
-                        formattedTarget = getFormattedSegment(
-                                EditUtil.encodeHtmlEntities(queryText),
-                                EditUtil.encodeHtmlEntities(replaceText), sourceTuv);
-                    }
+                        long score = new Float(matchedTuv.getScore()).longValue();
+                        String scoreStr = StringUtil.formatPCT(score);
+                        long tuId = matchedTuv.getTu().getId();
+                        long tmId = matchedTuv.getTu().getTmId();
+                        long sourceTuvId;
+                        long targetTuvId;
+                        String sourceLocale;
+                        String targetLocale;
+                        String sid;
+                        String tmName = ServerProxy.getProjectHandler()
+                                .getProjectTMById(tmId, false).getName();
 
-                    Map<String, Object> matchMap = new HashMap<String, Object>();
-                    matchMap.put("sid", sid);
-                    matchMap.put("source", formattedSource);
-                    matchMap.put("target", formattedTarget);
-                    matchMap.put("score", scoreStr);
-                    matchMap.put("tm", tmName);
-                    matchMap.put("tmId", tmId);
-                    matchMap.put("tuId", tuId);
-                    matchMap.put("sourceTuvId", sourceTuvId);
-                    matchMap.put("targetTuvId", targetTuvId);
-                    matchMap.put("sourceLocale", sourceLocale);
-                    matchMap.put("targetLocale", targetLocale);
-                    leverageResult.add(matchMap);
+                        Map<String, String> formattedSource;
+                        Map<String, String> formattedTarget;
+                        if (searchInSource)
+                        {
+                            sourceTuvId = sourceTuv.getId();
+                            sourceLocale = sourceTuv.getLocale().toString();
+                            targetTuvId = matchedTuv.getId();
+                            targetLocale = matchedTuv.getLocale().toString();
+                            sid = matchedTuv.getSid();
+                            if (null == sid)
+                            {
+                                sid = "N/A";
+                            }
+                            formattedSource = getFormattedSegment(
+                                    EditUtil.encodeHtmlEntities(queryText),
+                                    EditUtil.encodeHtmlEntities(replaceText), sourceTuv);
+                            formattedTarget = getFormattedSegment(null, null, matchedTuv);
+                        }
+                        else
+                        {
+                            sourceTuvId = matchedTuv.getId();
+                            sourceLocale = matchedTuv.getLocale().toString();
+                            targetTuvId = sourceTuv.getId();
+                            targetLocale = sourceTuv.getLocale().toString();
+                            sid = sourceTuv.getSid();
+                            if (null == sid)
+                            {
+                                sid = "N/A";
+                            }
+                            formattedSource = getFormattedSegment(null, null, matchedTuv);
+                            formattedTarget = getFormattedSegment(
+                                    EditUtil.encodeHtmlEntities(queryText),
+                                    EditUtil.encodeHtmlEntities(replaceText), sourceTuv);
+                        }
+
+                        Map<String, Object> matchMap = new HashMap<String, Object>();
+                        matchMap.put("sid", sid);
+                        matchMap.put("source", formattedSource);
+                        matchMap.put("target", formattedTarget);
+                        matchMap.put("score", scoreStr);
+                        matchMap.put("tm", tmName);
+                        matchMap.put("tmId", tmId);
+                        matchMap.put("tuId", tuId);
+                        matchMap.put("sourceTuvId", sourceTuvId);
+                        matchMap.put("targetTuvId", targetTuvId);
+                        matchMap.put("sourceLocale", sourceLocale);
+                        matchMap.put("targetLocale", targetLocale);
+                        leverageResult.add(matchMap);
+                    }
                 }
             }
         }
-
         // Set the search result to session
         HttpSession session = request.getSession();
         SessionManager sessionMgr = (SessionManager) session
@@ -743,14 +759,20 @@ public class TMSearchBroswerHandlerHelper
         // Get the displayed result according records number and the max number
         // per pages
         Map<String, Object> temp = getDisplayResult(leverageResult, 1, maxEntriesPerPageStr);
+        ResourceBundle bundle = PageHandler.getBundle(session);
+        // GBS-3990, warn user of wrong SID regex input
+        if (inputWrongSIDRegex)
+        {
+            temp.put("warningWrongSIDRegex",
+                    bundle.getString("lb_tm_search_warning_wrong_sid_regex"));
+        }
         // GBS-3990, warn user of max returns
         if (isMaxed)
         {
             temp.put("maxReturns", MAX_RETURNS);
-            ResourceBundle bundle = PageHandler.getBundle(session);
-            String label = MessageFormat.format(bundle.getString("lb_tm_search_max_returns"),
-                    MAX_RETURNS);
-            temp.put("maxReturnsWarning", label);
+            String label = MessageFormat
+                    .format(bundle.getString("lb_tm_search_warning_max_returns"), MAX_RETURNS);
+            temp.put("warningMaxReturns", label);
         }
         String jsonStr = getJsonStr(JsonUtil.toJson(temp));
         return jsonStr;
@@ -955,11 +977,24 @@ public class TMSearchBroswerHandlerHelper
                 filterMap.put("localeId", String.valueOf(targetGSL.getId()));
             }
         }
-
         // get all selected TMS
         List<TMidTUid> queryResult = new ArrayList<TMidTUid>(MAX_RETURNS);
-        setQueryResult(queryResult, tms, filterMap);
-
+        boolean inputWrongSIDRegex = false;
+        try
+        {
+            setQueryResult(queryResult, tms, filterMap);
+        }
+        catch (Exception e)
+        {
+            // GBS-3990, This error means the SID is using regex and the regex
+            // is not correctly following the MySQL REGEXP manual.
+            String message = e.getMessage();
+            if (message != null && message
+                    .endsWith("Got error 'repetition-operator operand invalid' from regexp"))
+            {
+                inputWrongSIDRegex = true;
+            }
+        }
         // Get all TUS by queryResult, then get all needed properties
         List<SegmentTmTu> tus = LingServerProxy.getTmCoreManager().getSegmentsById(queryResult);
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
@@ -1047,7 +1082,6 @@ public class TMSearchBroswerHandlerHelper
                 // ignore this.
             }
         }
-
         // Find the exact match and put the exact match record to beginning
         List<Map<String, Object>> resultExact = new ArrayList<Map<String, Object>>();
         List<Map<String, Object>> resultTemp = new ArrayList<Map<String, Object>>();
@@ -1065,24 +1099,28 @@ public class TMSearchBroswerHandlerHelper
         }
         resultNew.addAll(resultExact);
         resultNew.addAll(resultTemp);
-
         // Set the search result to session
         HttpSession session = request.getSession();
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
         sessionMgr.setAttribute("searchResult", resultNew);
-
         // Get the displayed result according records number and the max number
         // per pages
         Map<String, Object> temp = getDisplayResult(resultNew, 1, maxEntriesPerPageStr);
-        // GBS-3990, warn user of max returns
+        ResourceBundle bundle = PageHandler.getBundle(session);
+        // GBS-3990, warn user of wrong SID regex input
+        if (inputWrongSIDRegex)
+        {
+            temp.put("warningWrongSIDRegex",
+                    bundle.getString("lb_tm_search_warning_wrong_sid_regex"));
+        }
+        // GBS-3990, warn user of max returns reached
         if (isMaxed)
         {
             temp.put("maxReturns", MAX_RETURNS);
-            ResourceBundle bundle = PageHandler.getBundle(session);
-            String label = MessageFormat.format(bundle.getString("lb_tm_search_max_returns"),
-                    MAX_RETURNS);
-            temp.put("maxReturnsWarning", label);
+            String label = MessageFormat
+                    .format(bundle.getString("lb_tm_search_warning_max_returns"), MAX_RETURNS);
+            temp.put("warningMaxReturns", label);
         }
         String jsonStr = getJsonStr(JsonUtil.toJson(temp));
         return jsonStr;
@@ -1405,7 +1443,7 @@ public class TMSearchBroswerHandlerHelper
                     {
                         sb.append(" AND tuv.creationDate < ?")
                                 .addValue(parseStartDate(createStartDate));
-                        sb.append(" AND tuv.creationDate > ?")
+                        sb.append(" OR tuv.creationDate > ?")
                                 .addValue(parseEndDate(createStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
@@ -1501,8 +1539,7 @@ public class TMSearchBroswerHandlerHelper
                     {
                         sb.append(" AND tuv.modifyDate < ?")
                                 .addValue(parseStartDate(modifyStartDate));
-                        sb.append(" AND tuv.modifyDate > ?")
-                                .addValue(parseEndDate(modifyStartDate));
+                        sb.append(" OR tuv.modifyDate > ?").addValue(parseEndDate(modifyStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
                     {
@@ -1584,9 +1621,10 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND ext.lastUsageDate < ?")
+                        sb.append(" AND (ext.lastUsageDate is NULL");
+                        sb.append(" OR ext.lastUsageDate < ?")
                                 .addValue(parseStartDate(lastUsageStartDate));
-                        sb.append(" AND ext.lastUsageDate > ?")
+                        sb.append(" OR ext.lastUsageDate > ?)")
                                 .addValue(parseEndDate(lastUsageStartDate));
                     }
                 }
@@ -2348,6 +2386,13 @@ public class TMSearchBroswerHandlerHelper
      */
     public static String applyReplaced(HttpServletRequest request, String userId) throws Exception
     {
+        // GBS-3990, for blank/wild card search, do not do replacement, just
+        // return.
+        String searchText = (String) request.getParameter("searchText");
+        if ("*".equals(searchText) || StringUtil.isEmpty(searchText))
+        {
+            return "";
+        }
         HttpSession httpSession = request.getSession();
         SessionManager sessionMgr = (SessionManager) httpSession
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
@@ -2367,7 +2412,6 @@ public class TMSearchBroswerHandlerHelper
 
         String searchIn = (String) request.getParameter("searchIn");
         boolean searchInSource = "source".equals(searchIn);
-        String searchText = (String) request.getParameter("searchText");
         String replaceText = (String) request.getParameter("replaceText");
 
         // Get selected index of entries

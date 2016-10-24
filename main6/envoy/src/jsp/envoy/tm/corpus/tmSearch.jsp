@@ -247,7 +247,7 @@ function resultDisplay(page)
 	buf.push('<table id="rData" cellspacing="0" cellpadding="3" class="standardTextNew" width="100%"  style="border: 1px solid #0C1476;background:#FFFFFF;">');
 	if (maxReturns)
     {
-		buf.push("<tr><span class='warningText'>" + maxReturnsWarning + "</span></tr>");
+		buf.push("<tr><span class='warningText'>" + warningMaxReturns + "</span></tr>");
     }
 	if(searchType=="matchSearch")
 	{
@@ -564,6 +564,10 @@ function showNoResults()
 	result = new Array();
     var buf = new Array();
 	buf.push('<table id="rData" cellspacing="0" cellpadding="3" class="standardTextNew" width="100%">');
+	if (warningWrongSIDRegex)
+    {
+		buf.push("<tr><span class='warningText'>" + warningWrongSIDRegex + "</span></tr>");
+    }
 	if(searchType=="matchSearch")
 	{
 		buf.push('<tr class="tableHeadingBasic">');
@@ -1511,11 +1515,15 @@ $(document).ready(function(){
 			   $("#loading").html("");
 			   result = json.result;
 			   maxReturns = json.maxReturns;
-			   maxReturnsWarning = json.maxReturnsWarning;
+			   warningMaxReturns = json.warningMaxReturns;
 			   resultDisplay(1);
 			 } 
 			 else 
 			 {
+				 if (json != null)
+				 {
+					 warningWrongSIDRegex = json.warningWrongSIDRegex;
+				 }
 			   showNoResults();
 			 }
 		   }

@@ -16,6 +16,9 @@
  */
 package com.globalsight.connector.eloqua.models.view;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,6 +27,9 @@ import com.globalsight.connector.eloqua.util.EloquaHelper;
 
 public class ViewUtil
 {
+    private static Pattern P = Pattern.compile("<eloquaSubject>([\\d\\D]*?)</eloquaSubject>");
+    
+    private String subject = null;
     private String root;
     private EloquaHelper eh;
 
@@ -37,13 +43,18 @@ public class ViewUtil
     public String generateHtml() throws JSONException
     {
         StringBuffer sb = new StringBuffer("<body>").append("\n");
+        
+        if (subject != null){
+            sb.append("<eloquaSubject>").append(subject).append("</eloquaSubject>").append("\n");
+        }
+        
         addTextBoxView(sb);
         addImgTitle(sb);
         addReplaceableContentView(sb, eh);
         sb.append("</body>");
         return sb.toString();
     }
-
+    
     public void addTextBoxView(StringBuffer sb) throws JSONException
     {
         TextBoxViewHandler handler = new TextBoxViewHandler();
@@ -69,6 +80,16 @@ public class ViewUtil
             sb.append("<eloquaImg>").append(txt).append("</eloquaImg>").append("\n");
         }
         sb.append("</eloquaImgTitles>").append("\n");
+    }
+    
+    public String getSubject()
+    {
+        return subject;
+    }
+
+    public void setSubject(String subject)
+    {
+        this.subject = subject;
     }
     
 //    public void addFormView(StringBuffer sb, EloquaHelper eh)
@@ -236,5 +257,16 @@ public class ViewUtil
 
             n = root.indexOf(type, n + 1);
         }
+    }
+    
+    public String getEmailSubject(String fileContent)
+    {
+        Matcher m = P.matcher(fileContent);
+        if (m.find())
+        {
+            return m.group(1);
+        }
+        
+        return null;
     }
 }

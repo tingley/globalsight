@@ -40,7 +40,6 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
-import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -281,25 +280,27 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         addSegmentHeader(p_workbook, sheet);
 
         // Create Name Areas for drop down list.
-        ExcelUtil.createValidatorList(p_workbook, getFailureCategoriesList(),
+        ExcelUtil.createValidatorList(sheet, getFailureCategoriesList(),
                 SEGMENT_START_ROW, -1, CATEGORY_FAILURE_COLUMN);
         
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         List<String> categories = CompanyWrapper.getCompanyCategoryNames(currentCompanyId, CategoryType.Severity, true);
-        ExcelUtil.createValidatorList(p_workbook, categories, SEGMENT_START_ROW, -1, SEVERITY_COLUMN);
+        ExcelUtil.createValidatorList(sheet, categories, SEGMENT_START_ROW, -1, SEVERITY_COLUMN);
         
         if (DQF_START_ROW > 0)
         {
             categories = CompanyWrapper.getCompanyCategoryNames(currentCompanyId, CategoryType.Fluency, true);
-            ExcelUtil.createValidatorList(p_workbook, categories, DQF_START_ROW, DQF_START_ROW, 1);
+            ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW, DQF_START_ROW, 1);
 
             categories = CompanyWrapper.getCompanyCategoryNames(currentCompanyId, CategoryType.Adequacy, true);
-            ExcelUtil.createValidatorList(p_workbook, categories, DQF_START_ROW + 1, DQF_START_ROW + 1, 1);
+            ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW + 1, DQF_START_ROW + 1,
+                    1);
         }
         if (SCORECARD_START_ROW > 0)
         {
             String[] data = new String[] { "5", "4", "3", "2", "1" };
-            ExcelUtil.createValidatorList(p_workbook, data, SCORECARD_START_ROW + 1, -1, 1);
+            ExcelUtil.createValidatorList(sheet, data, SCORECARD_START_ROW + 1,
+                    SCORECARD_START_ROW + scorecardCategories.size(), 1);
         }
 
         // Insert Data into Report
@@ -388,6 +389,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     cell = ExcelUtil.getCell(rowLine, col);
                     cell.setCellValue(scorecard);
                     
+                    cell = ExcelUtil.getCell(rowLine, col + 1);
+                    cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
+                    
                     elements.put(scorecard, Integer.valueOf(row));
                     row++;
                 }
@@ -421,7 +425,6 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                 cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
             }
             cell.setCellValue(scoreComment);
-
         }
     }
 
@@ -467,7 +470,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                         Task task = (Task) it.next();
                         reportInfo = ReportConstants.TRANSLATIONS_EDIT_REPORT_ABBREVIATION + "_"
                                 + task.getId();
-                        needProtect = task.isType(Task.TYPE_TRANSLATE);
+                        needProtect = !(task.isType(Task.TYPE_REVIEW) || task.isType(Task.TYPE_REVIEW_EDITABLE));
                     }
                 }
                 int scoreShowType = wf.getScorecardShowType();

@@ -1018,7 +1018,8 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             {
                 String[] data = new String[]
                 { "5", "4", "3", "2", "1" };
-                ExcelUtil.createValidatorList(p_workBook, data, SCORECARD_START_ROW + 1, -1,
+                ExcelUtil.createValidatorList(p_workBook, data, SCORECARD_START_ROW + 1,
+                        SCORECARD_START_ROW + scorecardCategories.size(),
                         1);
             }
         }

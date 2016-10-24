@@ -813,7 +813,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             {
                 if (isTERReport(sheet, segmentHeaderRow))
                 {
-                    return loadTERReportData(sheet, task, tLocale);
+                    return loadTERReportData(sheet, task, tLocale, bundle);
                 }
                 else
                 {
@@ -905,7 +905,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         return null;
     }
 
-    private String loadTERReportData(Sheet sheet, Task task, GlobalSightLocale tLocale)
+    private String loadTERReportData(Sheet sheet, Task task, GlobalSightLocale tLocale,
+            ResourceBundle bundle)
             throws RemoteException
     {
         int segmentStartRow = SEGMENT_START_ROW > 0 ? SEGMENT_START_ROW
@@ -929,6 +930,125 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         String severity = null;
         boolean hasSegmentIdErro = false;
         boolean isNew = SEGMENT_START_ROW > 0;
+
+        if (task.isType(Task.TYPE_REVIEW) || task.isType(Task.TYPE_REVIEW_EDITABLE))
+        {
+            // Handle DQF/Scorecard info
+            WorkflowImpl workflow = (WorkflowImpl) task.getWorkflow();
+            String tmpDQFComment = workflow.getDQFComment();
+            String tmpScoreComment = workflow.getScorecardComment();
+            boolean isWorkflowChanged = false;
+            if (StringUtil.isEmpty(tmpDQFComment) && DQF_START_ROW > 0)
+            {
+                // No DQF data before
+                fluencyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW, 1);
+                adequacyScore = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 1, 1);
+                dqfComment = ExcelUtil.getCellValue(sheet, DQF_START_ROW + 2, 1);
+                if (StringUtil.isNotEmpty(fluencyScore) && StringUtil.isNotEmpty(adequacyScore)
+                        && StringUtil.isNotEmpty(dqfComment))
+                {
+                    workflow.setFluencyScore(fluencyScore);
+                    workflow.setAdequacyScore(adequacyScore);
+                    workflow.setDQFComment(dqfComment);
+                    isWorkflowChanged = true;
+                }
+                else if (StringUtil.isEmpty(fluencyScore) && StringUtil.isEmpty(adequacyScore)
+                        && StringUtil.isEmpty(dqfComment))
+                {
+                    // ignore to store DQF info because all 3 fields are empty
+                }
+                else
+                {
+                    // User does not fill in all DQF fields, report error
+                    m_errWriter.addFileErrorMsg(bundle.getString("msg_dqf_all_dqf_need"));
+                    return m_errWriter.buildReportErroPage().toString();
+                }
+            }
+            if (StringUtil.isEmpty(tmpScoreComment) && SCORECARD_START_ROW > 0)
+            {
+                // No Scorecard data before
+                scores = new HashMap<String, Integer>();
+                List<String> scorecardCategories = CompanyWrapper.getCompanyCategoryNames(
+                        String.valueOf(workflow.getCompanyId()), CategoryType.ScoreCard, true);
+                String category = "", valueString = "";
+                int value = -1;
+                int startRow = SCORECARD_START_ROW + 1;
+                int rowCount = SEGMENT_START_ROW - 3 - startRow;
+                for (int i = 0; i < rowCount; i++)
+                {
+                    category = ExcelUtil.getCellValue(sheet, startRow + i, 0);
+                    valueString = ExcelUtil.getCellValue(sheet, startRow + i, 1);
+                    try
+                    {
+                        value = Integer.parseInt(valueString);
+                    }
+                    catch (Exception e)
+                    {
+                        continue;
+                    }
+
+                    if (value < 0 || value > 5 || !scorecardCategories.contains(category))
+                        continue;
+
+                    scores.put(category, value);
+                }
+                scoreComment = ExcelUtil.getCellValue(sheet, SEGMENT_START_ROW - 3, 1);
+                if (StringUtil.isEmpty(scoreComment) && scores.size() == 0)
+                {
+                    // ignore because user don't fill in any scorecard fields
+                }
+                else if (StringUtil.isNotEmpty(scoreComment) && scores.size() == rowCount)
+                {
+                    workflow.setScorecardComment(scoreComment);
+                    isWorkflowChanged = true;
+
+                    for (Iterator<String> iterator = scores.keySet().iterator(); iterator.hasNext();)
+                    {
+                        category = iterator.next();
+                        value = scores.get(category);
+
+                        ScorecardScore score = new ScorecardScore();
+                        score.setScorecardCategory(category);
+                        score.setScore(value);
+                        score.setWorkflowId(workflow.getId());
+                        score.setJobId(workflow.getJob().getId());
+                        score.setCompanyId(workflow.getCompanyId());
+                        score.setModifyUserId("ByReport");
+                        score.setIsActive(true);
+                        try
+                        {
+                            HibernateUtil.saveOrUpdate(score);
+                        }
+                        catch (Exception e)
+                        {
+                            CATEGORY.error(
+                                    "Error found when storing scorecard data via uploading report.",
+                                    e);
+                        }
+                    }
+                }
+                else
+                {
+                    // User does not fill in all DQF fields, report error
+                    m_errWriter.addFileErrorMsg(bundle.getString("msg_dqf_all_scorecard_need"));
+                    return m_errWriter.buildReportErroPage().toString();
+                }
+            }
+            if (isWorkflowChanged)
+            {
+                // store DQF/Scorecard data reading through report
+                try
+                {
+                    HibernateUtil.update(workflow);
+                }
+                catch (Exception e)
+                {
+                    CATEGORY.error(
+                            "Error found when saving workflow info with DQF and Scorecard through report",
+                            e);
+                }
+            }
+        }
 
         int n = 5;
         int m = LOAD_DATA - n;

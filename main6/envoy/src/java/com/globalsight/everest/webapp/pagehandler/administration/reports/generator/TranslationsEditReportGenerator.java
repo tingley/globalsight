@@ -40,7 +40,6 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
-import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -48,7 +47,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
-import com.alibaba.fastjson.asm.Type;
 import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
@@ -300,7 +298,8 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         if (SCORECARD_START_ROW > 0)
         {
             String[] data = new String[] { "5", "4", "3", "2", "1" };
-            ExcelUtil.createValidatorList(p_workbook, data, SCORECARD_START_ROW + 1, -1, 1);
+            ExcelUtil.createValidatorList(p_workbook, data, SCORECARD_START_ROW + 1,
+                    SCORECARD_START_ROW + scorecardCategories.size(), 1);
         }
 
         // Insert Data into Report
@@ -389,6 +388,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     cell = ExcelUtil.getCell(rowLine, col);
                     cell.setCellValue(scorecard);
                     
+                    cell = ExcelUtil.getCell(rowLine, col + 1);
+                    cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
+                    
                     elements.put(scorecard, Integer.valueOf(row));
                     row++;
                 }
@@ -422,7 +424,6 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                 cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
             }
             cell.setCellValue(scoreComment);
-
         }
     }
 

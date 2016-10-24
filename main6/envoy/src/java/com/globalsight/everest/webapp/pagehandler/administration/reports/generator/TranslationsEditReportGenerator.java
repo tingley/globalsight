@@ -280,25 +280,26 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         addSegmentHeader(p_workbook, sheet);
 
         // Create Name Areas for drop down list.
-        ExcelUtil.createValidatorList(p_workbook, getFailureCategoriesList(),
+        ExcelUtil.createValidatorList(sheet, getFailureCategoriesList(),
                 SEGMENT_START_ROW, -1, CATEGORY_FAILURE_COLUMN);
         
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         List<String> categories = CompanyWrapper.getCompanyCategoryNames(currentCompanyId, CategoryType.Severity, true);
-        ExcelUtil.createValidatorList(p_workbook, categories, SEGMENT_START_ROW, -1, SEVERITY_COLUMN);
+        ExcelUtil.createValidatorList(sheet, categories, SEGMENT_START_ROW, -1, SEVERITY_COLUMN);
         
         if (DQF_START_ROW > 0)
         {
             categories = CompanyWrapper.getCompanyCategoryNames(currentCompanyId, CategoryType.Fluency, true);
-            ExcelUtil.createValidatorList(p_workbook, categories, DQF_START_ROW, DQF_START_ROW, 1);
+            ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW, DQF_START_ROW, 1);
 
             categories = CompanyWrapper.getCompanyCategoryNames(currentCompanyId, CategoryType.Adequacy, true);
-            ExcelUtil.createValidatorList(p_workbook, categories, DQF_START_ROW + 1, DQF_START_ROW + 1, 1);
+            ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW + 1, DQF_START_ROW + 1,
+                    1);
         }
         if (SCORECARD_START_ROW > 0)
         {
             String[] data = new String[] { "5", "4", "3", "2", "1" };
-            ExcelUtil.createValidatorList(p_workbook, data, SCORECARD_START_ROW + 1,
+            ExcelUtil.createValidatorList(sheet, data, SCORECARD_START_ROW + 1,
                     SCORECARD_START_ROW + scorecardCategories.size(), 1);
         }
 

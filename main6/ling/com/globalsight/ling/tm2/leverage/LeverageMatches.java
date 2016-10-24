@@ -158,6 +158,15 @@ public class LeverageMatches
 
             if (tu.getScore() == 100)
             {
+                SegmentTmTuv sourceTuv = (SegmentTmTuv) m_originalSourceTuv;
+                GlobalSightLocale sourceLocale = ((SegmentTmTu) sourceTuv.getTu())
+                        .getSourceLocale();
+                // GBS-3990, source locale could be blank from tm search page
+                if (sourceLocale == null)
+                {
+                    sourceTuv.setLocale(tu.getSourceLocale());
+                    ((SegmentTmTu) sourceTuv.getTu()).setSourceLocale(tu.getSourceLocale());
+                }
                 if (m_leverageOptions.isAutoRepair())
                 {
                     repairPlaceholders(tu);
@@ -172,8 +181,8 @@ public class LeverageMatches
                 c_logger.debug("originalText: " + originalText);
                 c_logger.debug("matchedSrcText: " + matchedSrcText);
 
-                // GBS-3990, the search text could be blank
-                if (!"".equals(originalText) && !"*".equals(originalText)
+                // GBS-3990, the search text could be blank from tm search page
+                if (StringUtil.isNotEmpty(originalText) && !"*".equals(originalText)
                         && !originalFuzzyFormat.equals(matchedSrcFuzzyFormat))
                 {
                     // Even if the fuzzy match score is 100%, fuzzy
@@ -1115,13 +1124,6 @@ public class LeverageMatches
     private void repairPlaceholders(LeveragedTu tu) throws Exception
     {
         SegmentTmTuv sourceTuv = (SegmentTmTuv) m_originalSourceTuv;
-        GlobalSightLocale sourceLocale = ((SegmentTmTu) sourceTuv.getTu()).getSourceLocale();
-        // GBS-3990, source locale could be blank from search
-        if (sourceLocale == null)
-        {
-            sourceTuv.setLocale(tu.getSourceLocale());
-            ((SegmentTmTu) sourceTuv.getTu()).setSourceLocale(tu.getSourceLocale());
-        }
         SegmentTmTuv matchedTuv = (SegmentTmTuv) tu.getSourceTuv();
 
         if (isCodeDifferent(sourceTuv, matchedTuv))

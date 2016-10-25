@@ -1441,9 +1441,9 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.creationDate < ?")
+                        sb.append(" AND (tuv.creationDate < ?")
                                 .addValue(parseStartDate(createStartDate));
-                        sb.append(" OR tuv.creationDate > ?")
+                        sb.append(" OR tuv.creationDate > ?)")
                                 .addValue(parseEndDate(createStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
@@ -1537,9 +1537,10 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.modifyDate < ?")
+                        sb.append(" AND (tuv.modifyDate < ?")
                                 .addValue(parseStartDate(modifyStartDate));
-                        sb.append(" OR tuv.modifyDate > ?").addValue(parseEndDate(modifyStartDate));
+                        sb.append(" OR tuv.modifyDate > ?)")
+                                .addValue(parseEndDate(modifyStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
                     {

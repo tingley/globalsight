@@ -62,7 +62,7 @@ public class InternalTextHelper
     public static String REG_INTERNAL_TEXT = "<(GS-INTERNAL-TEXT)>(.*)</GS-INTERNAL-TEXT>";
     public static final String m_tag_amp = "AmpersandOfGS";
     
-    private static String REGEX_PO = "^<segment segmentId=\"([^\"]*)\"><bpt i=\"[^\"]*\" internal=\"yes\"/>.*?<ept i=\"([^\"]*)\"/></segment>$";
+    private static String REGEX_PO = "^<segment segmentId=\"[^\"]*\"><bpt i=\"([^\"]*)\" internal=\"yes\"/>.*?<ept i=\"([^\"]*)\"/></segment>$";
     private static Pattern PO_P = Pattern.compile(REGEX_PO);
     
     /**

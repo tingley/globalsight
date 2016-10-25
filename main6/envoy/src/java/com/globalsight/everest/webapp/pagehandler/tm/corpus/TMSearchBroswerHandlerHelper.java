@@ -865,6 +865,11 @@ public class TMSearchBroswerHandlerHelper
                 {
                     Map<String, Object> map = new HashMap<String, Object>();
                     trgTuv = (BaseTmTuv) it.next();
+                    if (result.size() == MAX_RETURNS)
+                    {
+                        isMaxed = true;
+                        break FOR_TOP;
+                    }
                     if (advancedSearch && !searchInSource)
                     {
                         if (!searchFilter(filterMap, trgTuv))

@@ -832,7 +832,8 @@ public class TMSearchBroswerHandlerHelper
                     attributeValue);
         }
         String jobIds = (String) filterMap.get("jobIds");
-        for (int i = 0, max = tus.size(); i < max; i++)
+        boolean isMaxed = false;
+        FOR_TOP: for (int i = 0, max = tus.size(); i < max; i++)
         {
             try
             {
@@ -864,6 +865,11 @@ public class TMSearchBroswerHandlerHelper
                 {
                     Map<String, Object> map = new HashMap<String, Object>();
                     trgTuv = (BaseTmTuv) it.next();
+                    if (result.size() == MAX_RETURNS)
+                    {
+                        isMaxed = true;
+                        break FOR_TOP;
+                    }
                     if (advancedSearch && !searchInSource)
                     {
                         if (!searchFilter(filterMap, trgTuv))
@@ -941,6 +947,15 @@ public class TMSearchBroswerHandlerHelper
         // Get the displayed result according records number and the max number
         // per pages
         Map<String, Object> temp = getDisplayResult(resultNew, 1, maxEntriesPerPageStr);
+        // GBS-3990, warn user of max returns
+        if (isMaxed)
+        {
+            temp.put("maxReturns", MAX_RETURNS);
+            String label = MessageFormat.format(
+                    PageHandler.getBundle(session).getString("lb_tm_search_warning_max_returns"),
+                    MAX_RETURNS);
+            temp.put("warningMaxReturns", label);
+        }
         String jsonStr = getJsonStr(JsonUtil.toJson(temp));
         return jsonStr;
     }

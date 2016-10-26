@@ -64,7 +64,11 @@ function submitForm(button)
     {
         value = getRadioValue(attributeForm.selectAttributeSetIds);
 
-        if (button == "Remove")
+        if (button == "Edit")
+        {
+            attributeForm.action = "<%=editURL%>" + "&id=" + value;
+        }
+        else if (button == "Remove")
         {
         	var referencedNames = "";
             var ids = document.getElementsByName("selectAttributeSetIds");
@@ -107,6 +111,8 @@ function submitForm(button)
 
 function enableButtons()
 {
+    if (attributeForm.editBtn)
+        attributeForm.editBtn.disabled = false;
     if (attributeForm.dupBtn)
         attributeForm.dupBtn.disabled = false;
     if (attributeForm.remBtn)
@@ -137,6 +143,18 @@ function setButtonState()
             {
                 selectedIndex.push(0);
             }
+        }
+    }
+    
+    if (attributeForm.editBtn)
+    {
+        if (selectedIndex.length != 1)
+        {
+            attributeForm.editBtn.disabled = true;
+        }
+        else
+        {
+            attributeForm.editBtn.disabled = false;
         }
     }
     
@@ -266,6 +284,10 @@ function handleSelectAll() {
     <amb:permission name="<%=Permission.ATTRIBUTE_GROUP_REMOVE%>" >
       <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>"
       name="remBtn" disabled onclick="submitForm('Remove');">
+    </amb:permission>
+    <amb:permission name="<%=Permission.ATTRIBUTE_GROUP_EDIT%>" >
+      <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_edit")%>..."
+      name="editBtn" disabled onclick="submitForm('Edit');">
     </amb:permission>
     <amb:permission name="<%=Permission.ATTRIBUTE_GROUP_NEW%>" >
       <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..."

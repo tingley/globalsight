@@ -681,7 +681,18 @@ public class TMSearchBroswerHandlerHelper
                     while (itMatch.hasNext())
                     {
                         LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();
+                        if (advancedSearch && !searchInSource)
+                        {
+                            if (!searchFilter(filterMap, matchedTuv))
+                                continue;
+                        }
+
                         BaseTmTuv sourceTuv = matchedTuv.getSourceTuv();
+                        if (advancedSearch && searchInSource)
+                        {
+                            if (!searchFilter(filterMap, sourceTuv))
+                                continue;
+                        }
                         if (leverageResult.size() == MAX_RETURNS)
                         {
                             isMaxed = true;
@@ -865,11 +876,6 @@ public class TMSearchBroswerHandlerHelper
                 {
                     Map<String, Object> map = new HashMap<String, Object>();
                     trgTuv = (BaseTmTuv) it.next();
-                    if (result.size() == MAX_RETURNS)
-                    {
-                        isMaxed = true;
-                        break FOR_TOP;
-                    }
                     if (advancedSearch && !searchInSource)
                     {
                         if (!searchFilter(filterMap, trgTuv))
@@ -1040,6 +1046,11 @@ public class TMSearchBroswerHandlerHelper
                 {
                     srcTuv = tu.getFirstTuv(sourceGSL);
                 }
+                if (advancedSearch && searchInSource)
+                {
+                    if (!searchFilter(filterMap, srcTuv))
+                        continue;
+                }
                 String gxml = GxmlUtil.stripRootTag(srcTuv.getSegment());
 
                 BaseTmTuv trgTuv;
@@ -1058,6 +1069,11 @@ public class TMSearchBroswerHandlerHelper
                     if (trgTuv.getLocale().equals(srcTuv.getLocale()))
                     {
                         continue;
+                    }
+                    if (advancedSearch && !searchInSource)
+                    {
+                        if (!searchFilter(filterMap, trgTuv))
+                            continue;
                     }
                     if (result.size() == MAX_RETURNS)
                     {
@@ -1934,6 +1950,13 @@ public class TMSearchBroswerHandlerHelper
 
     private static boolean searchFilter(Map<String, Object> filterMap, BaseTmTuv tuv)
     {
+        String sids = (String) filterMap.get("sids");
+        String isRegex = (String) filterMap.get("isRegex");
+        String tuIds = (String) filterMap.get("tuIds");
+        String createUser = (String) filterMap.get("createUser");
+        String modifyUser = (String) filterMap.get("modifyUser");
+        String jobIds = (String) filterMap.get("jobIds");
+
         String createStartDateOption = (String) filterMap.get("createStartDateOption");
         Date createStartDate = (Date) filterMap.get("createStartDate");
         String createEndDateOption = (String) filterMap.get("createEndDateOption");
@@ -1946,12 +1969,6 @@ public class TMSearchBroswerHandlerHelper
         Date lastUsageStartDate = (Date) filterMap.get("lastUsageStartDate");
         String lastUsageEndDateOption = (String) filterMap.get("lastUsageEndDateOption");
         Date lastUsageEndDate = (Date) filterMap.get("lastUsageEndDate");
-        String tuIds = (String) filterMap.get("tuIds");
-        String sids = (String) filterMap.get("sids");
-        String isRegex = (String) filterMap.get("isRegex");
-        String createUser = (String) filterMap.get("createUser");
-        String modifyUser = (String) filterMap.get("modifyUser");
-        // String jobIds = (String) filterMap.get("jobIds");
 
         boolean checkCreateDate = searchByDate("create", createStartDateOption, createEndDateOption,
                 createStartDate, createEndDate, tuv);
@@ -2054,6 +2071,14 @@ public class TMSearchBroswerHandlerHelper
         if (StringUtil.isNotEmpty(modifyUser))
         {
             if (!modifyUser.equals(tuv.getModifyUser()))
+            {
+                return false;
+            }
+        }
+
+        if (StringUtil.isNotEmpty(jobIds))
+        {
+            if (!jobIds.contains(String.valueOf(tuv.getJobId())))
             {
                 return false;
             }

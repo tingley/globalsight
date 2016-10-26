@@ -164,7 +164,7 @@ public class SourceComment
         String key = CommentHelper.makeLogicalKey(tPage.getId(), tu.getId(), tuv.getId(), 0);
         IssueImpl issue = new IssueImpl(Issue.TYPE_SEGMENT, tuv.getId(),
                 SourceComment.srcComment_title, SourceComment.srcComment_priority,
-                SourceComment.srcComment_status, SourceComment.srcComment_category, uid,
+                SourceComment.srcComment_status, SourceComment.srcComment_category, null, uid,
                 tuv.getSrcComment(), key);
         issue.setShare(false);
         issue.setOverwrite(false);

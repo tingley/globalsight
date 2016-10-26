@@ -415,7 +415,7 @@ function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, stat
     
 }
 
-function SaveComment(tuId, tuvId, subId, action, title, comment, priority, status, category)
+function SaveComment(tuId, tuvId, subId, action, title, comment, priority, status, category, severity)
 {
     var o_form = document.CommentForm;
 
@@ -428,6 +428,7 @@ function SaveComment(tuId, tuvId, subId, action, title, comment, priority, statu
     o_form.cmtPriority.value = priority;
     o_form.cmtStatus.value = status;
     o_form.cmtCategory.value = category;
+    o_form.cmtSeverity.value = severity;
     main.localData=null;
     o_form.submit();
     

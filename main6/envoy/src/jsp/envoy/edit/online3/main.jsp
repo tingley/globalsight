@@ -585,6 +585,7 @@ var lb_title = "<%=bundle.getString("lb_segment_details")%>";
 <input type="hidden" name="cmtPriority" value="">
 <input type="hidden" name="cmtStatus"   value="">
 <input type="hidden" name="cmtCategory"   value="">
+<input type="hidden" name="cmtSeverity"   value="">
 <input type="hidden" name="cmtShare"   value="">
 <input type="hidden" name="cmtOverwrite"   value="">
 </FORM>

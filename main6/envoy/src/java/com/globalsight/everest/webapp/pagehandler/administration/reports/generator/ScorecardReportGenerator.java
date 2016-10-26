@@ -291,20 +291,26 @@ public class ScorecardReportGenerator implements ReportGenerator
         }
     }
 
-    private double getAvgScore(Sheet sheet, int row, int col)
+    private double getAvgScore(Sheet sheet, int lastRowNumber, int col)
     {
+        // Becuase the header line is used 0 line. So if lastRowNumber is 1, it means that
+        // there is no data in Statistics sheet.
+        if (lastRowNumber <= 1)
+            return 0.00d;
+
         double score, totalScore = 0.00d;
         String tmp = null;
 
-        for (int i = 1; i < row; i++)
+        for (int i = 1; i < lastRowNumber; i++)
         {
             tmp = ExcelUtil.getCellValue(sheet, i, col, true);
             score = tmp == null || tmp.equals("") ? 0.00d : Double.parseDouble(tmp);
             totalScore += score;
         }
 
-        int count = row - 1;
-        return Double.parseDouble(numFormat.format(totalScore / count));
+        int count = lastRowNumber - 1;
+        score = totalScore / count;
+        return Double.parseDouble(numFormat.format(score));
     }
 
     private List<GlobalSightLocale> sortLocales(List<GlobalSightLocale> targetLocales)

@@ -588,6 +588,7 @@ public class TMSearchBroswerHandlerHelper
     {
         boolean searchInSource = "source".equals(searchIn);
         boolean advancedSearch = "true".equals((String) request.getParameter("advancedSearch"));
+        boolean isBlankSearch = "".equals(queryText) || "*".equals(queryText);
 
         Map<String, Object> filterMap = getFilterMap(request, advancedSearch);
 
@@ -618,13 +619,14 @@ public class TMSearchBroswerHandlerHelper
         }
         // Prepare target locale according to leverage from
         List<GlobalSightLocale> searchTrgLocales = new ArrayList<GlobalSightLocale>();
-        searchTrgLocales.add(searchInSource ? targetGSL : sourceGSL);
+        searchTrgLocales.add(isBlankSearch ? targetGSL : (searchInSource ? targetGSL : sourceGSL));
         LeveragingLocales searchLevLocales = new LeveragingLocales();
 
         Set<GlobalSightLocale> set = new HashSet<GlobalSightLocale>();
-        set.add(searchInSource ? targetGSL : sourceGSL);
+        set.add(isBlankSearch ? targetGSL : (searchInSource ? targetGSL : sourceGSL));
 
-        searchLevLocales.setLeveragingLocale(searchInSource ? targetGSL : sourceGSL, set);
+        searchLevLocales.setLeveragingLocale(
+                isBlankSearch ? targetGSL : (searchInSource ? targetGSL : sourceGSL), set);
 
         Long tmProfileId = Long.parseLong(tmpId);
         TranslationMemoryProfile tmp = ServerProxy.getProjectHandler()
@@ -661,6 +663,7 @@ public class TMSearchBroswerHandlerHelper
                 inputWrongSIDRegex = true;
             }
         }
+        String jobIds = (String) filterMap.get("jobIds");
         boolean isMaxed = false;
         List<Map<String, Object>> leverageResult = new ArrayList<Map<String, Object>>();
         if (leverageDataCenter != null)
@@ -686,7 +689,13 @@ public class TMSearchBroswerHandlerHelper
                             if (!searchFilter(filterMap, matchedTuv))
                                 continue;
                         }
-
+                        if (StringUtil.isNotEmpty(jobIds))
+                        {
+                            if (!jobIds.contains(String.valueOf(matchedTuv.getJobId())))
+                            {
+                                continue;
+                            }
+                        }
                         BaseTmTuv sourceTuv = matchedTuv.getSourceTuv();
                         if (advancedSearch && searchInSource)
                         {
@@ -702,48 +711,23 @@ public class TMSearchBroswerHandlerHelper
                         String scoreStr = StringUtil.formatPCT(score);
                         long tuId = matchedTuv.getTu().getId();
                         long tmId = matchedTuv.getTu().getTmId();
-                        long sourceTuvId;
-                        long targetTuvId;
-                        String sourceLocale;
-                        String targetLocale;
-                        String sid;
                         String tmName = ServerProxy.getProjectHandler()
                                 .getProjectTMById(tmId, false).getName();
 
-                        Map<String, String> formattedSource;
-                        Map<String, String> formattedTarget;
-                        if (searchInSource)
+                        long sourceTuvId = sourceTuv.getId();
+                        String sourceLocale = sourceTuv.getLocale().toString();
+                        long targetTuvId = matchedTuv.getId();
+                        String targetLocale = matchedTuv.getLocale().toString();
+                        String sid = matchedTuv.getSid();
+                        if (null == sid)
                         {
-                            sourceTuvId = sourceTuv.getId();
-                            sourceLocale = sourceTuv.getLocale().toString();
-                            targetTuvId = matchedTuv.getId();
-                            targetLocale = matchedTuv.getLocale().toString();
-                            sid = matchedTuv.getSid();
-                            if (null == sid)
-                            {
-                                sid = "N/A";
-                            }
-                            formattedSource = getFormattedSegment(
-                                    EditUtil.encodeHtmlEntities(queryText),
-                                    EditUtil.encodeHtmlEntities(replaceText), sourceTuv);
-                            formattedTarget = getFormattedSegment(null, null, matchedTuv);
+                            sid = "N/A";
                         }
-                        else
-                        {
-                            sourceTuvId = matchedTuv.getId();
-                            sourceLocale = matchedTuv.getLocale().toString();
-                            targetTuvId = sourceTuv.getId();
-                            targetLocale = sourceTuv.getLocale().toString();
-                            sid = sourceTuv.getSid();
-                            if (null == sid)
-                            {
-                                sid = "N/A";
-                            }
-                            formattedSource = getFormattedSegment(null, null, matchedTuv);
-                            formattedTarget = getFormattedSegment(
-                                    EditUtil.encodeHtmlEntities(queryText),
-                                    EditUtil.encodeHtmlEntities(replaceText), sourceTuv);
-                        }
+                        Map<String, String> formattedSource = getFormattedSegment(
+                                EditUtil.encodeHtmlEntities(queryText),
+                                EditUtil.encodeHtmlEntities(replaceText), sourceTuv);
+                        Map<String, String> formattedTarget = getFormattedSegment(null, null,
+                                matchedTuv);
 
                         Map<String, Object> matchMap = new HashMap<String, Object>();
                         matchMap.put("sid", sid);
@@ -1026,6 +1010,7 @@ public class TMSearchBroswerHandlerHelper
         String findText = EditUtil.encodeHtmlEntities(searchText);
         replaceText = EditUtil.encodeHtmlEntities(replaceText);
 
+        String jobIds = (String) filterMap.get("jobIds");
         boolean isMaxed = false;
         FOR_TOP: for (int i = 0, max = tus.size(); i < max; i++)
         {
@@ -1074,6 +1059,13 @@ public class TMSearchBroswerHandlerHelper
                     {
                         if (!searchFilter(filterMap, trgTuv))
                             continue;
+                    }
+                    if (StringUtil.isNotEmpty(jobIds))
+                    {
+                        if (!jobIds.contains(String.valueOf(trgTuv.getJobId())))
+                        {
+                            continue;
+                        }
                     }
                     if (result.size() == MAX_RETURNS)
                     {
@@ -1313,7 +1305,6 @@ public class TMSearchBroswerHandlerHelper
     {
         if (paramMap != null)
         {
-            String localeId = (String) paramMap.get("localeId");
             String sids = (String) paramMap.get("sids");
             String isRegex = (String) paramMap.get("isRegex");
             String tuIds = (String) paramMap.get("tuIds");
@@ -1337,19 +1328,6 @@ public class TMSearchBroswerHandlerHelper
             String lastUsageEndDateOption = (String) paramMap.get("lastUsageEndDateOption");
             Date lastUsageStartDate = (Date) paramMap.get("lastUsageStartDate");
             Date lastUsageEndDate = (Date) paramMap.get("lastUsageEndDate");
-
-            // Source Locale or Target Locale
-            if (StringUtil.isNotEmpty(localeId))
-            {
-                if (tmType.equalsIgnoreCase("TM3"))
-                {
-                    sb.append(" AND tuv.localeId = ?").addValue(localeId);
-                }
-                else if (tmType.equalsIgnoreCase("TM2"))
-                {
-                    sb.append(" AND tuv.LOCALE_ID = ?").addValue(localeId);
-                }
-            }
 
             // String ID
             if (StringUtil.isNotEmpty(sids))
@@ -1955,7 +1933,6 @@ public class TMSearchBroswerHandlerHelper
         String tuIds = (String) filterMap.get("tuIds");
         String createUser = (String) filterMap.get("createUser");
         String modifyUser = (String) filterMap.get("modifyUser");
-        String jobIds = (String) filterMap.get("jobIds");
 
         String createStartDateOption = (String) filterMap.get("createStartDateOption");
         Date createStartDate = (Date) filterMap.get("createStartDate");
@@ -2071,14 +2048,6 @@ public class TMSearchBroswerHandlerHelper
         if (StringUtil.isNotEmpty(modifyUser))
         {
             if (!modifyUser.equals(tuv.getModifyUser()))
-            {
-                return false;
-            }
-        }
-
-        if (StringUtil.isNotEmpty(jobIds))
-        {
-            if (!jobIds.contains(String.valueOf(tuv.getJobId())))
             {
                 return false;
             }

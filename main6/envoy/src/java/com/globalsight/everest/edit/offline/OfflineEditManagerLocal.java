@@ -2010,7 +2010,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                                 String key = CommentHelper.makeLogicalKey(tPage.getId(), tu.getId(),
                                         tuv.getId(), 0);
                                 issue = new IssueImpl(Issue.TYPE_SEGMENT, tuv.getId(), title,
-                                        priority, status, category, p_user.getUserId(), textContent,
+                                        priority, status, category, null, p_user.getUserId(), textContent,
                                         key);
                                 issue.setShare(false);
                                 issue.setOverwrite(false);

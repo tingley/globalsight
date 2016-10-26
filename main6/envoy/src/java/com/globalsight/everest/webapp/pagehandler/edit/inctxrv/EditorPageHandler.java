@@ -2354,7 +2354,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                         String key = CommentHelper.makeLogicalKey(tp.getId(),
                                 tu.getId(), tuv.getId(), 0);
                         issue = new IssueImpl(Issue.TYPE_SEGMENT, tuv.getId(),
-                                title, priority, status, category,
+                                title, priority, status, category, severity,
                                 p_user.getUserId(), comment, key);
                         issue.setShare(share);
                         issue.setOverwrite(overwrite);

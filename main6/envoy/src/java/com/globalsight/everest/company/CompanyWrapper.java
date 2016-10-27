@@ -447,6 +447,30 @@ public class CompanyWrapper
         return (List<CommonCategory>) HibernateUtil.search(hql.toString());
     }
 
+    public static List<CommonCategory> getCompanyCategories(ResourceBundle bundle, String companyId, CategoryType type,
+            boolean isAvaliable, boolean isAll)
+    {
+        List<CommonCategory> categories = getCompanyCategories(companyId, type, isAvaliable, isAll);
+        if (categories == null)
+            return new ArrayList<CommonCategory>();
+
+        CommonCategory cc = null;
+        String tmp = null;
+        for (int i = 0, count = categories.size(); i < count; i++)
+        {
+            cc = categories.get(i);
+            tmp = cc.getName();
+            try
+            {
+                cc.setName(bundle.getString(tmp));
+            }
+            catch (Exception e)
+            {
+            }
+        }
+        return categories;
+    }
+
     public static List<String> getCompanyCategoryNames(String companyId, CategoryType type,
             boolean isAvailable)
     {

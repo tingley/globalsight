@@ -357,9 +357,9 @@ public class TaskDetailHandler extends PageHandler
             sessionMgr.setAttribute("scorecard", scorecardMap);
             sessionMgr.setAttribute("isScored", isScored);
             sessionMgr.setAttribute("fluencyCategories", CompanyWrapper.getCompanyCategoryNames(
-                    String.valueOf(companyId), CategoryType.Fluency, true));
+                    bundle, String.valueOf(companyId), CategoryType.Fluency, true));
             sessionMgr.setAttribute("adequacyCategories", CompanyWrapper.getCompanyCategoryNames(
-                    String.valueOf(companyId), CategoryType.Adequacy, true));
+                    bundle, String.valueOf(companyId), CategoryType.Adequacy, true));
             if (StringUtil.isEmpty(dqfComment))
                 dqfComment = "";
             sessionMgr.setAttribute("dqfComment", dqfComment);

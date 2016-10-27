@@ -824,7 +824,8 @@ function addQualityTo()
         				<input style="display:none">
         			</td>
         			<td>
-        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('segmentComment')">
+        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('segmentComment')">&nbsp;
+						<input type="button" name="remove" value="<%=bundle.getString("lb_remove") %>" onclick="removeCategory('segmentComment')">
         			</td>
         		</tr>
       			</table>
@@ -896,7 +897,8 @@ function addQualityTo()
         				<input style="display:none">
         			</td>
         			<td>
-        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('scorecard')">
+        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('scorecard')">&nbsp;
+						<input type="button" name="remove" value="<%=bundle.getString("lb_remove") %>" onclick="removeCategory('scorecard')">
         			</td>
         		</tr>
       			</table>
@@ -967,7 +969,8 @@ function addQualityTo()
         				<input style="display:none">
         			</td>
         			<td>
-        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('quality')">
+        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('quality')">&nbsp;
+						<input type="button" name="remove" value="<%=bundle.getString("lb_remove") %>" onclick="removeCategory('quality')">
         			</td>
         		</tr>
       			</table>
@@ -1038,7 +1041,8 @@ function addQualityTo()
         				<input style="display:none">
         			</td>
         			<td>
-        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('market')">
+        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('market')">&nbsp;
+						<input type="button" name="remove" value="<%=bundle.getString("lb_remove") %>" onclick="removeCategory('market')">
         			</td>
         		</tr>
       			</table>
@@ -1113,7 +1117,8 @@ function addQualityTo()
                                         <input style="display:none">
                                     </td>
                                     <td>
-                                        <input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('fluency')">
+                                        <input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('fluency')">&nbsp;
+										<input type="button" name="remove" value="<%=bundle.getString("lb_remove") %>" onclick="removeCategory('fluency')">
                                     </td>
                                 </tr>
                             </table>
@@ -1122,6 +1127,15 @@ function addQualityTo()
                     <tr><td colspan="3">&nbsp;</td></tr>
                     <tr>
                         <td colspan="3"><div class="standardText"><c:out value="${adequacyHelpMsg}" escapeXml="false"/>:</div></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span><c:out value="${labelForLeftTable}"/>
+                        </td>
+                        <td>&nbsp;</td>
+                        <td>
+                            <span><c:out value="${labelForRightTable}"/>
+                        </td>
                     </tr>
                     <tr>
                         <td>
@@ -1168,7 +1182,8 @@ function addQualityTo()
                                         <input style="display:none">
                                     </td>
                                     <td>
-                                        <input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('adequacy')">
+                                        <input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('adequacy')">&nbsp;
+										<input type="button" name="remove" value="<%=bundle.getString("lb_remove") %>" onclick="removeCategory('adequacy')">
                                     </td>
                                 </tr>
                             </table>
@@ -1243,7 +1258,8 @@ function addQualityTo()
                             <input style="display:none">
                         </td>
                         <td>
-                            <input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('severity')">
+                            <input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addCategory('severity')">&nbsp;
+							<input type="button" name="remove" value="<%=bundle.getString("lb_remove") %>" onclick="removeCategory('severity')">
                         </td>
                             </tr>
                         </table>
@@ -1396,6 +1412,19 @@ function addCategory(key) {
     	return;
     }
 }
+
+//Add new category
+function removeCategory(key) {
+	var $from = $("#" + key + "From" + " option:selected");
+	if ($from.length>0) {
+		$from.each(function() {
+			$(this).remove();
+		});
+	} else {
+		alert("<%=bundle.getString("msg_category_remove_alert") %>");
+	}
+}
+
 
 function checkNewCategory(key, name) {
 	var tmp = "";

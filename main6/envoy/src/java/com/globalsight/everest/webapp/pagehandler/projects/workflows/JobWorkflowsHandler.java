@@ -471,10 +471,11 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             sessionMgr.setAttribute("scorecardDataList", scorecardDataList);
             sessionMgr.setAttribute("tmpScoreMap", tmpScoreMap);
             p_request.setAttribute("dqfData", dqfData);
+            ResourceBundle bundle = getBundle(httpSession);
             p_request.setAttribute("fluencyCategories", CompanyWrapper.getCompanyCategoryNames(
-                    String.valueOf(companyId), CategoryType.Fluency, true));
+                    bundle, String.valueOf(companyId), CategoryType.Fluency, true));
             p_request.setAttribute("adequacyCategories", CompanyWrapper.getCompanyCategoryNames(
-                    String.valueOf(companyId), CategoryType.Adequacy, true));
+                    bundle, String.valueOf(companyId), CategoryType.Adequacy, true));
         }
         else if ("checkDownloadQAReport".equals(p_request.getParameter("action")))
         {

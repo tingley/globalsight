@@ -968,7 +968,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             {
                 // No Scorecard data before
                 scores = new HashMap<String, Integer>();
-                List<String> scorecardCategories = CompanyWrapper.getCompanyCategoryNames(
+                List<String> scorecardCategories = CompanyWrapper.getCompanyCategoryNames(bundle,
                         String.valueOf(workflow.getCompanyId()), CategoryType.ScoreCard, true);
                 String category = "", valueString = "";
                 int value = -1;
@@ -1063,7 +1063,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
             if (isNew)
             {
-                severity = ExcelUtil.getCellValue(sheet, j, 7);
+                severity = ExcelUtil.getCellValue(sheet, j, 6);
+                commentStatus = ExcelUtil.getCellValue(sheet, j, 7);
                 jobIdText = ExcelUtil.getCellValue(sheet, j, 11);
                 segmentId = ExcelUtil.getCellValue(sheet, j, 12);
             }
@@ -1072,6 +1073,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 severity = "";
                 jobIdText = ExcelUtil.getCellValue(sheet, j, 10);
                 segmentId = ExcelUtil.getCellValue(sheet, j, 11);
+                commentStatus = ExcelUtil.getCellValue(sheet, j, 6);
             }
 
             // TODO: why this?
@@ -1085,7 +1087,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             updatedText = ExcelUtil.getCellValue(sheet, j, 2);
             comment = ExcelUtil.getCellValue(sheet, j, 3);
             requiredComment = ExcelUtil.getCellValue(sheet, j, 4);
-            commentStatus = ExcelUtil.getCellValue(sheet, j, 6);
 
             if (EditUtil.isRTLLocale(tLocale))
                 updatedText = EditUtil.removeU200F(updatedText);
@@ -1394,7 +1395,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             {
                 // No Scorecard data before
                 scores = new HashMap<String, Integer>();
-                List<String> scorecardCategories = CompanyWrapper.getCompanyCategoryNames(
+                List<String> scorecardCategories = CompanyWrapper.getCompanyCategoryNames(bundle,
                         String.valueOf(workflow.getCompanyId()), CategoryType.ScoreCard, true);
                 String category = "", valueString = "";
                 int value = -1;
@@ -1487,16 +1488,18 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 reviewerComment = EditUtil.removeU200F(reviewerComment);
 
             failureType = ExcelUtil.getCellValue(sheet, k, 4);
-            commentStatus = ExcelUtil.getCellValue(sheet, k, 5);
-            severity = ExcelUtil.getCellValue(sheet, k, 6);
 
             if (isNew)
             {
+                severity = ExcelUtil.getCellValue(sheet, k, 5);
+                commentStatus = ExcelUtil.getCellValue(sheet, k, 6);
                 jobIdText = ExcelUtil.getCellValue(sheet, k, 10);
                 segmentId = ExcelUtil.getCellValue(sheet, k, 11);
             }
             else
             {
+                severity = "";
+                commentStatus = ExcelUtil.getCellValue(sheet, k, 5);
                 jobIdText = ExcelUtil.getCellValue(sheet, k, 9);
                 segmentId = ExcelUtil.getCellValue(sheet, k, 10);
             }

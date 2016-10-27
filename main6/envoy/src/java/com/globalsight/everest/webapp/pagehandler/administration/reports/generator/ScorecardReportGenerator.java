@@ -131,8 +131,8 @@ public class ScorecardReportGenerator implements ReportGenerator
             defaultTargetLocales = ReportHelper.getTargetLocaleList(
                     request.getParameterValues(ReportConstants.TARGETLOCALE_LIST), comparator);
         }
-        scorecardCategories = CompanyWrapper.getCompanyCategoryNames(String.valueOf(companyId),
-                CategoryType.ScoreCard, true);
+        scorecardCategories = CompanyWrapper.getCompanyCategoryNames(bundle,
+                String.valueOf(companyId), CategoryType.ScoreCard, true);
         scorecardCategoryCount = scorecardCategories.size();
         scorecardColumnsInScorecard = new HashMap<String, Integer>(scorecardCategories.size());
         scorecardColumnsInStatistics = new HashMap<String, Integer>(scorecardCategories.size());

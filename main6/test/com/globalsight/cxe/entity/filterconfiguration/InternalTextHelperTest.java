@@ -116,4 +116,21 @@ public class InternalTextHelperTest
         String seg4 = "<segment segmentId=\"1\">1<bpt i=\"1\" internal=\"yes\"/>Title for stats section for Posts &amp; Pages<ept i=\"1\"/></segment>";
         assertFalse(InternalTextHelper.isSegmentAllInternalTag(seg4));
     }
+    
+    @Test
+    public void testIsContentAllInternalTag()
+    {
+        String seg1 = "<bpt internal=\"yes\" i=\"1\"></bpt>Title for&apos;s stats section for Posts &amp; Pages<ept i=\"1\"></ept>";
+        assertTrue(InternalTextHelper.isContentAllInternalTag(seg1));
+        
+        String seg2 = "<bpt i=\"1\" internal=\"yes\"></bpt>Title for&apos;s stats section for Posts &amp; Pages<ept i=\"1\"></ept>";
+        assertTrue(InternalTextHelper.isContentAllInternalTag(seg2));
+        
+        String seg3 = "1<bpt internal=\"yes\" i=\"1\"></bpt>Title for&apos;s stats section for Posts &amp; Pages<ept i=\"1\"></ept>";
+        assertFalse(InternalTextHelper.isContentAllInternalTag(seg3));
+        
+        String seg4 = "<bpt internal=\"yes\" i=\"1\"></bpt>Title for&apos;s stats section for Posts &amp; Pages<ept i=\"1\"></ept>1";
+        assertFalse(InternalTextHelper.isContentAllInternalTag(seg4));
+    }
+    
 }

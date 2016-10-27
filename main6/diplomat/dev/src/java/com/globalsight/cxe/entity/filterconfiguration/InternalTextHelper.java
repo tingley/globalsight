@@ -65,6 +65,12 @@ public class InternalTextHelper
     private static String REGEX_PO = "^<segment segmentId=\"[^\"]*\"><bpt i=\"([^\"]*)\" internal=\"yes\"/>.*?<ept i=\"([^\"]*)\"/></segment>$";
     private static Pattern PO_P = Pattern.compile(REGEX_PO);
     
+    private static String REGEX_PO2 = "^<bpt i=\"([^\"]*)\" internal=\"yes\"></bpt>.*?<ept i=\"([^\"]*)\"></ept>$";
+    private static Pattern PO_P2 = Pattern.compile(REGEX_PO2);
+    
+    private static String REGEX_PO3 = "^<bpt internal=\"yes\" i=\"([^\"]*)\"></bpt>.*?<ept i=\"([^\"]*)\"></ept>$";
+    private static Pattern PO_P3 = Pattern.compile(REGEX_PO3);
+    
     /**
      * Handle the internal texts for one string
      * 
@@ -879,8 +885,26 @@ public class InternalTextHelper
         }
     }
     
-    public static boolean isSegmentAllInternalTag(String segment){
+    public static boolean isSegmentAllInternalTag(String segment)
+    {
         Matcher m = PO_P.matcher(segment);
+        if (m.find())
+        {
+            return m.group(1).equals(m.group(2));
+        }       
+        
+        return false;
+    }
+    
+    public static boolean isContentAllInternalTag(String segment)
+    {      
+        Matcher m = PO_P2.matcher(segment);
+        if (m.find())
+        {
+            return m.group(1).equals(m.group(2));
+        }
+        
+        m = PO_P3.matcher(segment);
         if (m.find())
         {
             return m.group(1).equals(m.group(2));

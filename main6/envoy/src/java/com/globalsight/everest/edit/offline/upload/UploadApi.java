@@ -1762,7 +1762,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             comment = (String) segId2Comment.get(tuIdLong);
             failureType = (String) segId2FailureType.get(tuIdLong);
             commentStatus = (String) segId2CommentStatus.get(tuIdLong);
-            severity = (String) segId2Severity.get(tuIdLong);
+            if (segId2Severity != null && segId2Severity.size() > 0)
+                severity = (String) segId2Severity.get(tuIdLong);
             severity = StringUtil.isEmpty(severity) ? "" : severity;
             boolean commentStatusError = false;
             boolean failureTypeError = false;

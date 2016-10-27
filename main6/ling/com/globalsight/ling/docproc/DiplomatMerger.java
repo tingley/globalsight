@@ -34,6 +34,7 @@ import com.globalsight.cxe.entity.filterconfiguration.Escaping;
 import com.globalsight.cxe.entity.filterconfiguration.EscapingHelper;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
+import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.cxe.entity.filterconfiguration.JsonFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConstants;
@@ -960,6 +961,14 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                     else
                     {
                         chunk = ((TranslatableElement) de).getChunk();
+                    }
+                    
+                    // for GBS-4467 issues. 0002052: Escaping in the base text filter affects in the exported target file
+                    if (IFormatNames.FORMAT_PO.equals(srcDataType) && InternalTextHelper.isContentAllInternalTag(chunk))
+                    {
+                        parseDiplomatSnippet(chunk);
+                        m_stateStack.pop();
+                        break;
                     }
 
                     if (chunk.contains(OfficeContentPostFilterHelper.IS_FROM_OFFICE_CONTENT))

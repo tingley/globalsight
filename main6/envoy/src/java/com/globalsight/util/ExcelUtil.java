@@ -192,6 +192,34 @@ public class ExcelUtil
         return value;
     }
 
+    public static String getCellValue(Sheet sheet, int row, int col, boolean needDouble)
+    {
+        String value = "";
+        if (sheet == null || row < 0 || col < 0)
+            return "";
+
+        Row rowData = sheet.getRow(row);
+        if (rowData == null)
+            return "";
+        Cell cell = rowData.getCell(col);
+        if (cell == null)
+            return "";
+        switch (cell.getCellType())
+        {
+            case Cell.CELL_TYPE_NUMERIC:
+                value = String.valueOf(cell.getNumericCellValue());
+                break;
+            case Cell.CELL_TYPE_STRING:
+                value = cell.getStringCellValue();
+                break;
+
+            default:
+                value = cell.toString();
+        }
+
+        return value;
+    }
+
     public static void createValidatorList(Sheet sheet, String[] values, int startRow,
             int endRow, int columnNumber)
     {

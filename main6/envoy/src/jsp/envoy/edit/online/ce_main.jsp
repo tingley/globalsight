@@ -133,6 +133,9 @@ if (issue != null)
     if(request.getAttribute("uploaderCategory")!=null) {
        cmtCategory = (String)request.getAttribute("uploaderCategory");
     }
+    if(request.getAttribute("uploaderSeverity")!=null) {
+       cmtSeverity = (String)request.getAttribute("uploaderSeverity");
+    }
     
     if(request.getAttribute("uploaderComment")!=null) {
         cmtComment = (String)request.getAttribute("uploaderComment");
@@ -244,7 +247,10 @@ var g_cmt_title    = "<%=EditUtil.toJavascript(cmtTitle)%>";
 var g_cmt_status   = "<%=cmtStatus%>";
 var g_cmt_priority = "<%=cmtPriority%>";
 var g_cmt_category = "<%=cmtCategory%>";
+var g_cmt_severity = "<%=cmtSeverity%>";
+
 var g_cmt_creatorUserName  = "<%=EditUtil.toJavascript(cmtCreatorUserName)%>";
+
 var g_cmt_comment  = "<%=EditUtil.toJavascript(cmtComment)%>";
 
 var g_create = eval("<%=b_create%>");
@@ -458,6 +464,7 @@ function doOnLoad()
         selectValue(document.getElementById("idStatus"), g_cmt_status);
         selectValue(document.getElementById("idPriority"), g_cmt_priority);
         selectCategory(document.getElementById("idCategory"), g_cmt_category);
+		selectValue(document.getElementById("idSeverity"), g_cmt_severity);
         document.getElementById("idTitle").value = g_cmt_title;
 
         if (g_edit || g_create)

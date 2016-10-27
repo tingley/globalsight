@@ -47,6 +47,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.StringUtil;
 
 public class CompanyBasicHandler extends PageHandler implements
         CompanyConstants
@@ -268,11 +269,11 @@ public class CompanyBasicHandler extends PageHandler implements
             try
             {
                 showName = bundle.getString(category.getName());
-                category.setMemo(showName);
+                if (StringUtil.isNotEmpty(showName))
+                    category.setName(showName);
             }
             catch (Exception e)
             {
-                category.setMemo(category.getName());
             }
 
             categories.add(category);

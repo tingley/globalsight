@@ -21,7 +21,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,15 +58,6 @@ abstract class TuStorage<T extends TM3Data>
     private Tm3SegmentTmInfo tm3SegmentTmInfo = new Tm3SegmentTmInfo();
 
     private StorageInfo<T> storage;
-
-    // GBS-3990
-    private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-    private static final String DATE_EQUALS = "eq";
-    private static final String DATE_NOT_EQUALS = "neq";
-    private static final String DATE_GREATER_THAN = "gt";
-    private static final String DATE_LESS_THAN = "lt";
-    private static final String DATE_GREATER_THAN_OR_EQUALS = "gteq";
-    private static final String DATE_LESS_THAN_OR_EQUALS = "lteq";
 
     TuStorage(StorageInfo<T> storage)
     {

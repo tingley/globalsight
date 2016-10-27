@@ -52,6 +52,7 @@ public class EloquaHelper
     private static Pattern DYNAMIC_PATTERN = Pattern.compile("(<span )elqid=\"[^\"]*\" elqtype=\"DynamicContent\"([^>]*>)([\\d\\D]*?)</span>");
 //    private static Pattern DYNAMIC_PATTERN = Pattern.compile("(><span elqid=\")([^\"]*)(\" elqtype=\"DynamicContent\"[^>]*>)([\\d\\D]*?)(</span><)");
     private EloquaConnector conn;
+    // api document:http://docs.oracle.com/cloud/latest/marketingcs_gs/OMCAB/index.html#Developers/RESTAPI/REST-API.htm%3FTocPath%3D%2520REST%2520API%7C_____0
     
     static
     {

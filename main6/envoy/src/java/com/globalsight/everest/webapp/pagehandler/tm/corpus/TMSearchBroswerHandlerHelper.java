@@ -77,7 +77,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.localepairs.LocalePairConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
-import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileHandlerHelper;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm.LingManagerException;
@@ -514,72 +513,6 @@ public class TMSearchBroswerHandlerHelper
     }
 
     /**
-     * Get locale of leverage from
-     * 
-     * @param p_request
-     * @param localePairs
-     * @throws GeneralException
-     * @throws RemoteException
-     * @throws NumberFormatException
-     * @throws LocaleManagerException
-     */
-    private static List<String> getLeverageLocales(Locale uiLocale, String localeId)
-            throws LocaleManagerException, NumberFormatException, RemoteException, GeneralException
-    {
-        GlobalSightLocale trgLocale = ServerProxy.getLocaleManager()
-                .getLocaleById(Long.parseLong(localeId));
-        String newTargetLangCode = trgLocale.getLanguageCode();
-        Vector supportedLocales = LocProfileHandlerHelper.getSupportedLocales();
-        List<String> list = new ArrayList<String>();
-
-        // add matching cross-locales based on lang code
-        for (int j = 0; j < supportedLocales.size(); j++)
-        {
-            String lang = ((GlobalSightLocale) supportedLocales.elementAt(j)).getLanguageCode();
-            if (newTargetLangCode.equals(lang))
-            {
-                // check special exclusionary cases
-                if (!validLeverageLocale(trgLocale,
-                        (GlobalSightLocale) supportedLocales.elementAt(j)))
-                {
-                    continue;
-                }
-                list.add(supportedLocales.elementAt(j).toString());
-            }
-        }
-        return list;
-    }
-
-    /**
-     * Helps to handle certain leverage exclusions
-     * 
-     * @param defaultTargetLocale
-     * @param leverageLocale
-     * @return
-     */
-    private static boolean validLeverageLocale(GlobalSightLocale defaultTargetLocale,
-            GlobalSightLocale leverageLocale)
-    {
-        boolean result = true;
-
-        // exclude Chinese (tiwan) if default target is Chinese (china)
-        if (defaultTargetLocale.toString().equals("zh_CN")
-                && leverageLocale.toString().equals("zh_TW"))
-        {
-            result = false;
-        }
-
-        // exclude Chinese (china) if default target is Chinese (Tiwan)
-        if (defaultTargetLocale.toString().equals("zh_TW")
-                && leverageLocale.toString().equals("zh_CN"))
-        {
-            result = false;
-        }
-
-        return result;
-    }
-
-    /**
      * Exact/Fuzzy match search
      */
     public static String searchExact(HttpServletRequest request, String queryText,
@@ -588,6 +521,7 @@ public class TMSearchBroswerHandlerHelper
     {
         boolean searchInSource = "source".equals(searchIn);
         boolean advancedSearch = "true".equals((String) request.getParameter("advancedSearch"));
+        boolean isBlankSearch = "".equals(queryText) || "*".equals(queryText);
 
         Map<String, Object> filterMap = getFilterMap(request, advancedSearch);
 
@@ -602,29 +536,20 @@ public class TMSearchBroswerHandlerHelper
         {
             targetGSL = lm.getLocaleById(Long.parseLong(targetLocaleId));
         }
-        if (searchInSource)
+        if (sourceGSL != null)
         {
-            if (sourceGSL != null)
-            {
-                filterMap.put("localeId", String.valueOf(sourceGSL.getId()));
-            }
-        }
-        else
-        {
-            if (targetGSL != null)
-            {
-                filterMap.put("localeId", String.valueOf(targetGSL.getId()));
-            }
+            filterMap.put("sourceLocaleId", String.valueOf(sourceGSL.getId()));
         }
         // Prepare target locale according to leverage from
         List<GlobalSightLocale> searchTrgLocales = new ArrayList<GlobalSightLocale>();
-        searchTrgLocales.add(searchInSource ? targetGSL : sourceGSL);
+        searchTrgLocales.add(isBlankSearch ? targetGSL : (searchInSource ? targetGSL : sourceGSL));
         LeveragingLocales searchLevLocales = new LeveragingLocales();
 
         Set<GlobalSightLocale> set = new HashSet<GlobalSightLocale>();
-        set.add(searchInSource ? targetGSL : sourceGSL);
+        set.add(isBlankSearch ? targetGSL : (searchInSource ? targetGSL : sourceGSL));
 
-        searchLevLocales.setLeveragingLocale(searchInSource ? targetGSL : sourceGSL, set);
+        searchLevLocales.setLeveragingLocale(
+                isBlankSearch ? targetGSL : (searchInSource ? targetGSL : sourceGSL), set);
 
         Long tmProfileId = Long.parseLong(tmpId);
         TranslationMemoryProfile tmp = ServerProxy.getProjectHandler()
@@ -661,6 +586,7 @@ public class TMSearchBroswerHandlerHelper
                 inputWrongSIDRegex = true;
             }
         }
+        String jobIds = (String) filterMap.get("jobIds");
         boolean isMaxed = false;
         List<Map<String, Object>> leverageResult = new ArrayList<Map<String, Object>>();
         if (leverageDataCenter != null)
@@ -681,7 +607,32 @@ public class TMSearchBroswerHandlerHelper
                     while (itMatch.hasNext())
                     {
                         LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();
+                        if (targetGSL != null && !matchedTuv.getLocale().equals(targetGSL))
+                        {
+                            continue;
+                        }
+                        if (advancedSearch && !searchInSource)
+                        {
+                            if (!searchFilter(filterMap, matchedTuv))
+                                continue;
+                        }
+                        if (StringUtil.isNotEmpty(jobIds))
+                        {
+                            if (!jobIds.contains(String.valueOf(matchedTuv.getJobId())))
+                            {
+                                continue;
+                            }
+                        }
                         BaseTmTuv sourceTuv = matchedTuv.getSourceTuv();
+                        if (sourceGSL != null && !sourceGSL.equals(sourceTuv.getLocale()))
+                        {
+                            continue;
+                        }
+                        if (advancedSearch && searchInSource)
+                        {
+                            if (!searchFilter(filterMap, sourceTuv))
+                                continue;
+                        }
                         if (leverageResult.size() == MAX_RETURNS)
                         {
                             isMaxed = true;
@@ -691,48 +642,23 @@ public class TMSearchBroswerHandlerHelper
                         String scoreStr = StringUtil.formatPCT(score);
                         long tuId = matchedTuv.getTu().getId();
                         long tmId = matchedTuv.getTu().getTmId();
-                        long sourceTuvId;
-                        long targetTuvId;
-                        String sourceLocale;
-                        String targetLocale;
-                        String sid;
                         String tmName = ServerProxy.getProjectHandler()
                                 .getProjectTMById(tmId, false).getName();
 
-                        Map<String, String> formattedSource;
-                        Map<String, String> formattedTarget;
-                        if (searchInSource)
+                        long sourceTuvId = sourceTuv.getId();
+                        String sourceLocale = sourceTuv.getLocale().toString();
+                        long targetTuvId = matchedTuv.getId();
+                        String targetLocale = matchedTuv.getLocale().toString();
+                        String sid = matchedTuv.getSid();
+                        if (null == sid)
                         {
-                            sourceTuvId = sourceTuv.getId();
-                            sourceLocale = sourceTuv.getLocale().toString();
-                            targetTuvId = matchedTuv.getId();
-                            targetLocale = matchedTuv.getLocale().toString();
-                            sid = matchedTuv.getSid();
-                            if (null == sid)
-                            {
-                                sid = "N/A";
-                            }
-                            formattedSource = getFormattedSegment(
-                                    EditUtil.encodeHtmlEntities(queryText),
-                                    EditUtil.encodeHtmlEntities(replaceText), sourceTuv);
-                            formattedTarget = getFormattedSegment(null, null, matchedTuv);
+                            sid = "N/A";
                         }
-                        else
-                        {
-                            sourceTuvId = matchedTuv.getId();
-                            sourceLocale = matchedTuv.getLocale().toString();
-                            targetTuvId = sourceTuv.getId();
-                            targetLocale = sourceTuv.getLocale().toString();
-                            sid = sourceTuv.getSid();
-                            if (null == sid)
-                            {
-                                sid = "N/A";
-                            }
-                            formattedSource = getFormattedSegment(null, null, matchedTuv);
-                            formattedTarget = getFormattedSegment(
-                                    EditUtil.encodeHtmlEntities(queryText),
-                                    EditUtil.encodeHtmlEntities(replaceText), sourceTuv);
-                        }
+                        Map<String, String> formattedSource = getFormattedSegment(
+                                EditUtil.encodeHtmlEntities(queryText),
+                                EditUtil.encodeHtmlEntities(replaceText), sourceTuv);
+                        Map<String, String> formattedTarget = getFormattedSegment(null, null,
+                                matchedTuv);
 
                         Map<String, Object> matchMap = new HashMap<String, Object>();
                         matchMap.put("sid", sid);
@@ -832,7 +758,8 @@ public class TMSearchBroswerHandlerHelper
                     attributeValue);
         }
         String jobIds = (String) filterMap.get("jobIds");
-        for (int i = 0, max = tus.size(); i < max; i++)
+        boolean isMaxed = false;
+        FOR_TOP: for (int i = 0, max = tus.size(); i < max; i++)
         {
             try
             {
@@ -877,7 +804,11 @@ public class TMSearchBroswerHandlerHelper
                             continue;
                         }
                     }
-
+                    if (result.size() == MAX_RETURNS)
+                    {
+                        isMaxed = true;
+                        break FOR_TOP;
+                    }
                     String sid = trgTuv.getSid();
                     long tuvId = trgTuv.getId();
                     if (null == sid)
@@ -941,6 +872,15 @@ public class TMSearchBroswerHandlerHelper
         // Get the displayed result according records number and the max number
         // per pages
         Map<String, Object> temp = getDisplayResult(resultNew, 1, maxEntriesPerPageStr);
+        // GBS-3990, warn user of max returns
+        if (isMaxed)
+        {
+            temp.put("maxReturns", MAX_RETURNS);
+            String label = MessageFormat.format(
+                    PageHandler.getBundle(session).getString("lb_tm_search_warning_max_returns"),
+                    MAX_RETURNS);
+            temp.put("warningMaxReturns", label);
+        }
         String jsonStr = getJsonStr(JsonUtil.toJson(temp));
         return jsonStr;
     }
@@ -963,19 +903,9 @@ public class TMSearchBroswerHandlerHelper
         {
             targetGSL = lm.getLocaleById(Long.parseLong(targetLocaleId));
         }
-        if (searchInSource)
+        if (sourceGSL != null)
         {
-            if (sourceGSL != null)
-            {
-                filterMap.put("localeId", String.valueOf(sourceGSL.getId()));
-            }
-        }
-        else
-        {
-            if (targetGSL != null)
-            {
-                filterMap.put("localeId", String.valueOf(targetGSL.getId()));
-            }
+            filterMap.put("sourceLocaleId", String.valueOf(sourceGSL.getId()));
         }
         // get all selected TMS
         List<TMidTUid> queryResult = new ArrayList<TMidTUid>(MAX_RETURNS);
@@ -1001,6 +931,7 @@ public class TMSearchBroswerHandlerHelper
         String findText = EditUtil.encodeHtmlEntities(searchText);
         replaceText = EditUtil.encodeHtmlEntities(replaceText);
 
+        String jobIds = (String) filterMap.get("jobIds");
         boolean isMaxed = false;
         FOR_TOP: for (int i = 0, max = tus.size(); i < max; i++)
         {
@@ -1012,14 +943,15 @@ public class TMSearchBroswerHandlerHelper
                     continue;
                 }
                 long tuId = tu.getId();
-                BaseTmTuv srcTuv = null;
-                if (sourceGSL == null)
+                BaseTmTuv srcTuv = tu.getSourceTuv();
+                if (sourceGSL != null && !sourceGSL.equals(srcTuv.getLocale()))
                 {
-                    srcTuv = tu.getSourceTuv();
+                    continue;
                 }
-                else
+                if (advancedSearch && searchInSource)
                 {
-                    srcTuv = tu.getFirstTuv(sourceGSL);
+                    if (!searchFilter(filterMap, srcTuv))
+                        continue;
                 }
                 String gxml = GxmlUtil.stripRootTag(srcTuv.getSegment());
 
@@ -1036,9 +968,22 @@ public class TMSearchBroswerHandlerHelper
                 for (Iterator it = targetTuvs.iterator(); it.hasNext();)
                 {
                     trgTuv = (BaseTmTuv) it.next();
-                    if (trgTuv.getLocale().equals(srcTuv.getLocale()))
+                    if (trgTuv.getLocale().equals(srcTuv.getLocale())
+                            || (targetGSL != null && !trgTuv.getLocale().equals(targetGSL)))
                     {
                         continue;
+                    }
+                    if (advancedSearch && !searchInSource)
+                    {
+                        if (!searchFilter(filterMap, trgTuv))
+                            continue;
+                    }
+                    if (StringUtil.isNotEmpty(jobIds))
+                    {
+                        if (!jobIds.contains(String.valueOf(trgTuv.getJobId())))
+                        {
+                            continue;
+                        }
                     }
                     if (result.size() == MAX_RETURNS)
                     {
@@ -1278,7 +1223,7 @@ public class TMSearchBroswerHandlerHelper
     {
         if (paramMap != null)
         {
-            String localeId = (String) paramMap.get("localeId");
+            String sourceLocaleId = (String) paramMap.get("sourceLocaleId");
             String sids = (String) paramMap.get("sids");
             String isRegex = (String) paramMap.get("isRegex");
             String tuIds = (String) paramMap.get("tuIds");
@@ -1303,16 +1248,12 @@ public class TMSearchBroswerHandlerHelper
             Date lastUsageStartDate = (Date) paramMap.get("lastUsageStartDate");
             Date lastUsageEndDate = (Date) paramMap.get("lastUsageEndDate");
 
-            // Source Locale or Target Locale
-            if (StringUtil.isNotEmpty(localeId))
+            // Source Locale
+            if (StringUtil.isNotEmpty(sourceLocaleId))
             {
                 if (tmType.equalsIgnoreCase("TM3"))
                 {
-                    sb.append(" AND tuv.localeId = ?").addValue(localeId);
-                }
-                else if (tmType.equalsIgnoreCase("TM2"))
-                {
-                    sb.append(" AND tuv.LOCALE_ID = ?").addValue(localeId);
+                    sb.append(" AND tu.srcLocaleId = ?").addValue(sourceLocaleId);
                 }
             }
 
@@ -1441,9 +1382,9 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.creationDate < ?")
+                        sb.append(" AND (tuv.creationDate < ?")
                                 .addValue(parseStartDate(createStartDate));
-                        sb.append(" OR tuv.creationDate > ?")
+                        sb.append(" OR tuv.creationDate > ?)")
                                 .addValue(parseEndDate(createStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
@@ -1537,9 +1478,10 @@ public class TMSearchBroswerHandlerHelper
                 {
                     if (tmType.equalsIgnoreCase("TM3"))
                     {
-                        sb.append(" AND tuv.modifyDate < ?")
+                        sb.append(" AND (tuv.modifyDate < ?")
                                 .addValue(parseStartDate(modifyStartDate));
-                        sb.append(" OR tuv.modifyDate > ?").addValue(parseEndDate(modifyStartDate));
+                        sb.append(" OR tuv.modifyDate > ?)")
+                                .addValue(parseEndDate(modifyStartDate));
                     }
                     else if (tmType.equalsIgnoreCase("TM2"))
                     {
@@ -1694,8 +1636,9 @@ public class TMSearchBroswerHandlerHelper
      */
     public static boolean needQueryTuTable(Map<String, Object> paramMap)
     {
+        String sourceLocaleId = (String) paramMap.get("sourceLocaleId");
         String tuIds = (String) paramMap.get("tuIds");
-        if (StringUtil.isNotEmpty(tuIds))
+        if (StringUtil.isNotEmpty(sourceLocaleId) || StringUtil.isNotEmpty(tuIds))
         {
             return true;
         }
@@ -1914,6 +1857,12 @@ public class TMSearchBroswerHandlerHelper
 
     private static boolean searchFilter(Map<String, Object> filterMap, BaseTmTuv tuv)
     {
+        String sids = (String) filterMap.get("sids");
+        String isRegex = (String) filterMap.get("isRegex");
+        String tuIds = (String) filterMap.get("tuIds");
+        String createUser = (String) filterMap.get("createUser");
+        String modifyUser = (String) filterMap.get("modifyUser");
+
         String createStartDateOption = (String) filterMap.get("createStartDateOption");
         Date createStartDate = (Date) filterMap.get("createStartDate");
         String createEndDateOption = (String) filterMap.get("createEndDateOption");
@@ -1926,12 +1875,6 @@ public class TMSearchBroswerHandlerHelper
         Date lastUsageStartDate = (Date) filterMap.get("lastUsageStartDate");
         String lastUsageEndDateOption = (String) filterMap.get("lastUsageEndDateOption");
         Date lastUsageEndDate = (Date) filterMap.get("lastUsageEndDate");
-        String tuIds = (String) filterMap.get("tuIds");
-        String sids = (String) filterMap.get("sids");
-        String isRegex = (String) filterMap.get("isRegex");
-        String createUser = (String) filterMap.get("createUser");
-        String modifyUser = (String) filterMap.get("modifyUser");
-        // String jobIds = (String) filterMap.get("jobIds");
 
         boolean checkCreateDate = searchByDate("create", createStartDateOption, createEndDateOption,
                 createStartDate, createEndDate, tuv);

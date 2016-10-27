@@ -55,6 +55,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 
 /**
  * <p>
@@ -584,7 +585,8 @@ public class CommentManagerLocal implements CommentManager
             issue.setPriority(p_priority);
             issue.setStatus(p_status);
             issue.setCategory(p_category);
-            issue.setSeverity(severity);
+            if (StringUtil.isNotEmpty(severity))
+                issue.setSeverity(severity);
             issue.setOverwrite(overwrite);
             issue.setShare(share);
 
@@ -643,7 +645,8 @@ public class CommentManagerLocal implements CommentManager
             issue.setPriority(p_priority);
             issue.setStatus(p_status);
             issue.setCategory(p_category);
-            issue.setSeverity(severity);
+            if (StringUtil.isNotEmpty(severity))
+                issue.setSeverity(severity);
             issue.setOverwrite(overwrite);
             issue.setShare(share);
 

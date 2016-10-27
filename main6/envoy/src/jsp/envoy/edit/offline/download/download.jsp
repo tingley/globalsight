@@ -418,7 +418,7 @@
             needScore = StringUtil.isEmpty(workflowImpl.getScorecardComment());
         } else if (scorecardShowType == 3 || scorecardShowType == 5) 
         {
-            needDQF = StringUtil.isEmpty(workflowImpl.getScorecardComment());
+            needDQF = StringUtil.isEmpty(workflowImpl.getDQFComment());
         }
     }
 	String labelReportUploadCheckWarning = "Translation Edit Report not uploaded";

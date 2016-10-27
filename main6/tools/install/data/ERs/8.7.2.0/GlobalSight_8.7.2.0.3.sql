@@ -37,38 +37,21 @@ INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT scorecard_c
 INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT category, 1, 'Y', company_id FROM category_segment_comment WHERE is_active='Y';
 INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT category, 1, 'N', company_id FROM category_segment_comment WHERE is_active='N';
 
-## Rename the name of categories
-UPDATE categories SET NAME='Conflicts with glossary or style guide' WHERE NAME='lb_conflicts_glossary_guide';
-UPDATE categories SET NAME='Formatting error' WHERE NAME='lb_formatting_error';
-UPDATE categories SET NAME='Mistranslated' WHERE NAME='lb_mistranslated';
-UPDATE categories SET NAME='Omission of text' WHERE NAME='lb_omission_of_text';
-UPDATE categories SET NAME='Spelling or grammar or punctuation error' WHERE NAME='lb_spelling_grammar_punctuation_error';
-UPDATE categories SET NAME='Spelling and grammar' WHERE NAME='lb_spelling_grammar';
-UPDATE categories SET NAME='Consistency' WHERE NAME='lb_consistency';
-UPDATE categories SET NAME='Style' WHERE NAME='lb_style';
-UPDATE categories SET NAME='Terminology' WHERE NAME='lb_terminology';
-UPDATE categories SET NAME='Good' WHERE NAME='lb_good';
-UPDATE categories SET NAME='Acceptable' WHERE NAME='lb_acceptable';
-UPDATE categories SET NAME='Poor' WHERE NAME='lb_poor';
-UPDATE categories SET NAME='Suitable & Fluent' WHERE NAME='lb_suitable_fluent';
-UPDATE categories SET NAME='Literal at Times' WHERE NAME='lb_literal_at_times';
-UPDATE categories SET NAME='Unsuitable' WHERE NAME='lb_unsuitable';
-UPDATE categories SET NAME='None' WHERE NAME='lb_none';
-
 ## Add new DQF categories for old company
-INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Incomprehensible',5,'Y', id FROM company where is_active='Y' and id>1;
-INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Disfluent',5,'Y', id FROM company where is_active='Y' and id>1;
-INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Good',5,'Y', id FROM company where is_active='Y' and id>1;
-INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Flawless',5,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'lb_dqf_fluency_incomprehensible',5,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'lb_dqf_fluency_disfluent',5,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'lb_dqf_fluency_good',5,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'lb_dqf_fluency_flawless',5,'Y', id FROM company where is_active='Y' and id>1;
 
-INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Little',6,'Y', id FROM company where is_active='Y' and id>1;
-INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Most',6,'Y', id FROM company where is_active='Y' and id>1;
-INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Everything',6,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'lb_none',6,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'lb_dqf_adequacy_little',6,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'lb_dqf_adequacy_most',6,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'lb_dqf_adequacy_everything',6,'Y', id FROM company where is_active='Y' and id>1;
 
-INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Critical',7,'Y', id FROM company where is_active='Y' and id>1;
-INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Major',7,'Y', id FROM company where is_active='Y' and id>1;
-INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Minor',7,'Y', id FROM company where is_active='Y' and id>1;
-INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Neutral',7,'Y', id FROM company where is_active='Y' and id>1;
-INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Positive',7,'Y', id FROM company where is_active='Y' and id>1;
-INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'Invalid',7,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'lb_dqf_severity_critical',7,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'lb_dqf_severity_major',7,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'lb_dqf_severity_minor',7,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'lb_dqf_severity_neutral',7,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'lb_dqf_severity_positive',7,'Y', id FROM company where is_active='Y' and id>1;
+INSERT INTO categories (NAME, TYPE, is_available, company_id) SELECT 'lb_dqf_severity_invalid',7,'Y', id FROM company where is_active='Y' and id>1;
 

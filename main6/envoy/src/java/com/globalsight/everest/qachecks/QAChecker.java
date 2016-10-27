@@ -111,7 +111,7 @@ public class QAChecker
     public static final int ROW_LANGUAGE_INFO = 4;
     public static final int ROW_SEGMENT_HEADER = 6;
     public static final int ROW_SEGMENT_START = 7;
-    public static final int COLUMN_FALSE_POSITIVE = 7;
+    public static final int COLUMN_FALSE_POSITIVE = 8;
     public static final int COLUMN_HIDDEN_INFO = 26;
 
     public void runQAChecksAndGenerateReport(TaskInstance taskInstance)

@@ -74,4 +74,26 @@ public class ScorecardScoreHelper {
                 String.valueOf(companyId), CategoryType.ScoreCard, true);
     	return scorecardCategories;
     }
+
+    public static List<String> getScorecardCategories(long companyId, ResourceBundle bundle)
+    {
+        List<String> scorecardCategories = CompanyWrapper.getCompanyCategoryNames(
+                String.valueOf(companyId), CategoryType.ScoreCard, true);
+
+        List<String> list = new ArrayList<String>();
+        for (String key : scorecardCategories)
+        {
+            String valueOfSelect = "";
+            try
+            {
+                valueOfSelect = bundle.getString(key);
+            }
+            catch (MissingResourceException e)
+            {
+                valueOfSelect = key;
+            }
+            list.add(valueOfSelect);
+        }
+        return list;
+    }
 }

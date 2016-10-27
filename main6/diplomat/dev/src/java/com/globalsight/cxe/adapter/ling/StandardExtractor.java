@@ -826,6 +826,12 @@ public class StandardExtractor
                     segTarget = segments;
                     elemTarget = (TranslatableElement) element;
                 }
+                else 
+                {   
+                	// For GBS-4467 issue 0002027: Exported target file is incorrect if use element post filter in po filter
+                    p_extractedOutPut.addDocumentElement(element);
+                    continue;
+                }
 
                 // It is always true as we have no way to know if "msgstr" is
                 // for wanted language.

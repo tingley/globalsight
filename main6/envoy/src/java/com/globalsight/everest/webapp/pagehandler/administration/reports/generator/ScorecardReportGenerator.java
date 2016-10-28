@@ -396,7 +396,7 @@ public class ScorecardReportGenerator implements ReportGenerator
         col++;
 
         cell = ExcelUtil.getCell(segHeaderRow, col);
-        cell.setCellValue(bundle.getString("lb_comments"));
+        cell.setCellValue(bundle.getString("lb_dqf_scorecard_comments"));
         cell.setCellStyle(headerStyle);
         sheet.setColumnWidth(col, 40 * 256);
         col++;
@@ -414,7 +414,7 @@ public class ScorecardReportGenerator implements ReportGenerator
         col++;
 
         cell = ExcelUtil.getCell(segHeaderRow, col);
-        cell.setCellValue(bundle.getString("lb_dqf_comments"));
+        cell.setCellValue(bundle.getString("lb_dqf_dqf_comments"));
         cell.setCellStyle(headerStyle);
         sheet.setColumnWidth(col, 40 * 256);
     }

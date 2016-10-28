@@ -140,7 +140,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
     private String scoreComment = "";
     private boolean needProtect = false;
 
-    private static ReportStyle REPORT_STYLE = null;
+    private ReportStyle REPORT_STYLE = null;
 
     public TranslationsEditReportGenerator(String p_currentCompanyName)
     {

@@ -140,7 +140,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
     private String scoreComment = "";
     private boolean needProtect = false;
 
-    private static ReportStyle REPORT_STYLE = null;
+    private ReportStyle REPORT_STYLE = null;
 
     public ReviewersCommentsReportGenerator(String p_cureentCompanyName)
     {

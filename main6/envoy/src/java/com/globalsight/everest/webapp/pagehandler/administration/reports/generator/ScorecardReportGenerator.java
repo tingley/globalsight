@@ -71,7 +71,7 @@ import com.globalsight.util.edit.EditUtil;
 public class ScorecardReportGenerator implements ReportGenerator
 {
     private static final Logger logger = Logger.getLogger(ScorecardReportGenerator.class);
-    private static ReportStyle REPORT_STYLE = null;
+    private ReportStyle REPORT_STYLE = null;
 
     protected long companyId = -1L;
     protected List<Long> defaultJobIds = new ArrayList<Long>();

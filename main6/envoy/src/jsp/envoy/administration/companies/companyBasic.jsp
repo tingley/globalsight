@@ -151,456 +151,8 @@
 <html>
 <head>
 <title><%=title%></title>
-<script SRC="/globalsight/includes/utilityScripts.js"></script>
-<script SRC="/globalsight/includes/setStyleSheet.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
-<script>
-var needWarning = true;
-var objectName = "<%=bundle.getString("lb_company")%>";
-var guideNode="companies";
-var helpFile = "<%=bundle.getString("help_companies_basic_screen")%>";
-function submitForm(formAction)
-{
-    if (formAction == "cancel")
-    {
-        companyForm.action = "<%=cancelURL%>";
-        companyForm.submit();
-    }
-    else if (formAction == "save")
-    {
-    	if (confirmForm() && confirmTime())
-		{
-            $("select[id$='From'] option").each(function() {
-                $(this).attr("selected", true);
-            });
-            $("select[id$='To'] option").each(function() {
-                $(this).attr("selected", true);
-            });
-            
-        	companyForm.action = "<%=saveURL%>";
-            companyForm.submit();
-		}
-    }
-}
-
-//
-// Check required fields(SSO, email, name).
-// Check duplicate activity name.
-//
-function confirmForm()
-{
-	// check sso
-	var ssoLogonElem = companyForm.enableSsoLogonField;
-	if(ssoLogonElem!=null && ssoLogonElem.checked)
-    {
-        var idpUrl = companyForm.ssoIdpUrlField.value;
-        if (isEmptyString(idpUrl))
-        {
-        	alert("<%=bundle.getString("msg_sso_input_valid_idpurl")%>");
-            return false;
-        }
-    }
-	
-	// Check Email Field
-	var emailElem = document.getElementById("emailId");
-	var sysNotificationEnable = "<%=request.getAttribute(SystemConfigParamNames.SYSTEM_NOTIFICATION_ENABLED)%>";
-    if("true" == sysNotificationEnable)
-    {
-    	var email = stripBlanks(emailElem.value);
-    	if(email.length > 0 && !validEmail(email))
-    	{
-    		alert("<%=bundle.getString("jsmsg_email_invalid")%>");
-            return false;
-    	}
-    }
-	
-	// check name
-    if (!companyForm.nameField) 
-    {
-        // can't change name on edit
-        return true;
-    }
-    if (isEmptyString(companyForm.nameField.value))
-    {
-        alert("<%=EditUtil.toJavascript(bundle.getString("jsmsg_company_name"))%>");
-        companyForm.nameField.value = "";
-        companyForm.nameField.focus();
-        return false;
-    }   
-    
-    //Check if the company name is one of key words
-    var companyName = ATrim(companyForm.nameField.value).toLowerCase();
-	var words = new Array("com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9", "con", "prn", "aux", "nul", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9");
-	var tmp = "", tmpPrefix = "";
-	for (x in words) {
-	  tmp = words[x];
-	  tmpPrefix = tmp + ".";
-	  if (companyName == tmp || companyName.indexOf(tmpPrefix) == 0) {
-		alert("<%=EditUtil.toJavascript(bundle.getString("msg_invalid_company_name"))%>");
-		return false;
-	  }
-	}
-    
-    if (hasSpecialChars(companyForm.nameField.value))
-    {
-        alert("<%=EditUtil.toJavascript(bundle.getString("lb_name"))%>" +
-          "<%=EditUtil.toJavascript(bundle.getString("msg_invalid_entry"))%>");
-        return false;
-    }
-    // check for dups 
-<%
-    if (names != null)
-    {
-        for (int i = 0; i < names.size(); i++)
-        {
-            String comName = (String)names.get(i);
-%>
-            if ("<%=comName%>".toLowerCase() == companyForm.nameField.value.toLowerCase())
-            {
-                alert("<%=EditUtil.toJavascript(bundle.getString("msg_duplicate_company"))%>");
-                return false;
-            }
-<%
-        }
-    }
-%>
-
-	return true;
-}
-
-function confirmTime()
-{
-	var sessionTime = companyForm.sessionTimeField.value;
-	{
-		if (sessionTime!='')
-		{
-			if(isNumeric(sessionTime))
-			{
-				sessionTime = parseInt(sessionTime)
-				if (sessionTime > 480 || sessionTime < 30)
-				{
-					alert("<%=EditUtil.toJavascript(bundle.getString("msg_duplicate_company_time"))%>");
-					return false;
-				}
-			}
-			else
-			{
-				alert("<%=EditUtil.toJavascript(bundle.getString("msg_duplicate_company_time"))%>");
-				return false;
-			}
-		}
-	}
-    return true;
-}
-
-function isNumeric(str){
-	if (str.startsWith("0"))
-		return false;
-	return /^(-|\+)?\d+(\.\d+)?$/.test(str);
-}
-
-function onEnableSSOSwitch()
-{
-	onEnableSSO(companyForm.enableSsoLogonField.checked);
-}
-
-function onEnableSSO(checked)
-{
-	var ele = document.getElementById("ssoIdpUrlCC");
-	var display = checked ? "" : "none";
-	ele.style.display = display;
-}
-
-function doOnload()
-{
-    loadGuides();
-
-    var edit = eval("<%=edit%>");
-    if (edit)
-    {
-        companyForm.<%=CompanyConstants.DESC%>.focus();
-    }
-    else
-    {
-        companyForm.<%=CompanyConstants.NAME%>.focus();
-    }
-
-    var enableSSO = <%=request.getAttribute(SystemConfigParamNames.ENABLE_SSO)%>;
-    if(!enableSSO)
-    {
-		document.getElementById("ssoCheck").style.display = "none";
-		document.getElementById("ssoIdpUrlCC").style.display = "none";
-    }
-    else
-    {
-    	onEnableSSO(eval("<%=isSsoChecked%>"));
-    }
-}
-
-function addTo()
-{
-	var txt = document.getElementById("newCategory").value;
-	if(txt.indexOf(",")>0)
-	{
-		alert("<%=bundle.getString("msg_company_category_invalid") %>");
-		return;
-	}
-	if(Trim(txt) != "")
-	{
-		txt = Trim(txt);
-		if (!isLetterAndNumber(txt) && !isChinese(txt))
-		{
-			alert("<c:out value='${alert_illegal}' escapeXml='false'/>");
-			return false;
-		}
-
-		if(checkForCommentCategory(txt))
-		{
-			alert("You cannot add " + txt + " manually.");
-			return false;
-		}
-		
-		var toBox = document.getElementById("to");
-		var fromBox = document.getElementById("from");
-		for (var i=0;i<toBox.options.length;i++)
-		{
-			if(toBox.options[i].text.toLowerCase()==txt.toLowerCase())
-			{
-				alert("<c:out value='${alert_same}'/>");
-				return false;
-			}
-		}
-		for (var j=0;j<fromBox.options.length;j++)
-		{
-			if(fromBox.options[j].text.toLowerCase()==txt.toLowerCase())
-			{
-				alert("<c:out value='${alert_same}'/>");
-				return false;
-			}
-		}
-		var op = new Option();
-		op.value = txt;
-		op.text = txt;
-		op.title = txt;
-		toBox.options[toBox.options.length] = op;
-		document.getElementById("newCategory").value = "";
-
-		SortD(toBox);
-	}
-}
-
-function checkForCommentCategory(txt)
-{
-	if(txt == "lb_conflicts_glossary_guide" || txt == "lb_formatting_error" 
-		||	txt ==  "lb_mistranslated" || txt ==  "lb_omission_of_text" 
-		|| txt == "lb_spelling_grammar_punctuation_error")
-	{
-		return true;
-	}
-
-	return false;
-}
-
-function addScorecardTo()
-{
-	var txt = document.getElementById("newScorecardCategory").value;
-	if(txt.indexOf(",")>0)
-	{
-		alert("<%=bundle.getString("msg_company_category_invalid") %>");
-		return;
-	}
-
-	if(checkForScorecardCategory(txt))
-	{
-		alert("You cannot add " + txt + "manually.");
-		return false;
-	}
-	
-	if(Trim(txt) != "")
-	{
-		txt = Trim(txt);
-		if (!isLetterAndNumber(txt) && !isChinese(txt))
-		{
-			alert("<c:out value='${alert_illegal}' escapeXml='false'/>");
-			return false;
-		}
-		
-		var toBox = document.getElementById("scorecardTo");
-		var fromBox = document.getElementById("scorecardFrom");
-		for (var i=0;i<toBox.options.length;i++)
-		{
-			if(toBox.options[i].text.toLowerCase()==txt.toLowerCase())
-			{
-				alert("<c:out value='${alert_same}'/>");
-				return false;
-			}
-		}
-		for (var j=0;j<fromBox.options.length;j++)
-		{
-			if(fromBox.options[j].text.toLowerCase()==txt.toLowerCase())
-			{
-				alert("<c:out value='${alert_same}'/>");
-				return false;
-			}
-		}
-		var op = new Option();
-		op.value = txt;
-		op.text = txt;
-		op.title = txt;
-		toBox.options[toBox.options.length] = op;
-		document.getElementById("newScorecardCategory").value = "";
-
-		SortD(toBox);
-	}
-}
-
-function checkForScorecardCategory(txt)
-{
-	if(txt == "lb_spelling_grammar" || txt == "lb_consistency" 
-		||	txt ==  "lb_style" || txt ==  "lb_terminology")
-	{
-		return true;
-	}
-
-	return false;
-}
-
-function Trim(str)
-{
-	if(str=="") return str;
-	var newStr = ""+str;
-	RegularExp = /^\s+|\s+$/gi;
-	return newStr.replace( RegularExp,"" );
-}
-
-function addQualityTo()
-{
-	var txt = document.getElementById("newQualityCategory").value;
-	if(txt.indexOf(",")>0)
-	{
-		alert("<%=bundle.getString("msg_company_category_invalid") %>");
-		return;
-	}
-
-	if(checkForQualityCategory(txt))
-	{
-		alert("You cannot add " + txt + "manually.");
-		return false;
-	}
-	
-	if(Trim(txt) != "")
-	{
-		txt = Trim(txt);
-		if (!isLetterAndNumber(txt) && !isChinese(txt))
-		{
-			alert("<c:out value='${alert_illegal}' escapeXml='false'/>");
-			return false;
-		}
-		
-		var toBox = document.getElementById("qualityTo");
-		var fromBox = document.getElementById("qualityFrom");
-		for (var i=0;i<toBox.options.length;i++)
-		{
-			if(toBox.options[i].text.toLowerCase()==txt.toLowerCase())
-			{
-				alert("<c:out value='${alert_same}'/>");
-				return false;
-			}
-		}
-		for (var j=0;j<fromBox.options.length;j++)
-		{
-			if(fromBox.options[j].text.toLowerCase()==txt.toLowerCase())
-			{
-				alert("<c:out value='${alert_same}'/>");
-				return false;
-			}
-		}
-		var op = new Option();
-		op.value = txt;
-		op.text = txt;
-		op.title = txt;
-		toBox.options[toBox.options.length] = op;
-		document.getElementById("newQualityCategory").value = "";
-
-		SortD(toBox);
-	}
-	}
-	
-	function checkForQualityCategory(txt)
-	{
-		if(txt == "lb_good" || txt == "lb_acceptable" 
-			||	txt ==  "lb_poor")
-		{
-			return true;
-		}
-
-		return false;
-	}
-	
-	function addMarketTo()
-	{
-		var txt = document.getElementById("newMarketCategory").value;
-		if(txt.indexOf(",")>0)
-		{
-			alert("<%=bundle.getString("msg_company_category_invalid") %>");
-			return;
-		}
-
-		if(checkForMarketCategory(txt))
-		{
-			alert("You cannot add " + txt + "manually.");
-			return false;
-		}
-		
-		if(Trim(txt) != "")
-		{
-			txt = Trim(txt);
-			if (!isLetterAndNumber(txt) && !isChinese(txt))
-			{
-				alert("<c:out value='${alert_illegal}' escapeXml='false'/>");
-				return false;
-			}
-			
-			var toBox = document.getElementById("marketTo");
-			var fromBox = document.getElementById("marketFrom");
-			for (var i=0;i<toBox.options.length;i++)
-			{
-				if(toBox.options[i].text.toLowerCase()==txt.toLowerCase())
-				{
-					alert("<c:out value='${alert_same}'/>");
-					return false;
-				}
-			}
-			for (var j=0;j<fromBox.options.length;j++)
-			{
-				if(fromBox.options[j].text.toLowerCase()==txt.toLowerCase())
-				{
-					alert("<c:out value='${alert_same}'/>");
-					return false;
-				}
-			}
-			var op = new Option();
-			op.value = txt;
-			op.text = txt;
-			op.title = txt;
-			toBox.options[toBox.options.length] = op;
-			document.getElementById("newMarketCategory").value = "";
-
-			SortD(toBox);
-		}}
-		
-		function checkForMarketCategory(txt)
-		{
-			if(txt == "lb_suitable_fluent" || txt == "lb_literal_at_times" 
-				||	txt ==  "lb_unsuitable")
-			{
-				return true;
-			}
-
-			return false;
-		} 
-</script>
 <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </head>
 
@@ -1287,6 +839,8 @@ function addQualityTo()
 </div>
 </body>
 <script SRC="/globalsight/jquery/jquery-1.11.3.min.js"></script>
+<script SRC="/globalsight/includes/utilityScripts.js"></script>
+<script SRC="/globalsight/includes/setStyleSheet.js"></script>
 <script>
 $().ready(function() {
     initCategoryShow();
@@ -1440,6 +994,191 @@ function checkNewCategory(key, name) {
     return exist;
 }
 
-</script>
+var needWarning = true;
+var objectName = "<%=bundle.getString("lb_company")%>";
+var guideNode="companies";
+var helpFile = "<%=bundle.getString("help_companies_basic_screen")%>";
+function submitForm(formAction)
+{
+    if (formAction == "cancel")
+    {
+        companyForm.action = "<%=cancelURL%>";
+        companyForm.submit();
+    }
+    else if (formAction == "save")
+    {
+    	if (confirmForm() && confirmTime())
+		{
+            $("select option").each(function() {
+                $(this).attr("selected", true);
+            });
+            
+        	companyForm.action = "<%=saveURL%>";
+            companyForm.submit();
+		}
+    }
+}
 
+//
+// Check required fields(SSO, email, name).
+// Check duplicate activity name.
+//
+function confirmForm()
+{
+	// check sso
+	var ssoLogonElem = companyForm.enableSsoLogonField;
+	if(ssoLogonElem!=null && ssoLogonElem.checked)
+    {
+        var idpUrl = companyForm.ssoIdpUrlField.value;
+        if (isEmptyString(idpUrl))
+        {
+        	alert("<%=bundle.getString("msg_sso_input_valid_idpurl")%>");
+            return false;
+        }
+    }
+	
+	// Check Email Field
+	var emailElem = document.getElementById("emailId");
+	var sysNotificationEnable = "<%=request.getAttribute(SystemConfigParamNames.SYSTEM_NOTIFICATION_ENABLED)%>";
+    if("true" == sysNotificationEnable)
+    {
+    	var email = stripBlanks(emailElem.value);
+    	if(email.length > 0 && !validEmail(email))
+    	{
+    		alert("<%=bundle.getString("jsmsg_email_invalid")%>");
+            return false;
+    	}
+    }
+	
+	// check name
+    if (!companyForm.nameField) 
+    {
+        // can't change name on edit
+        return true;
+    }
+    if (isEmptyString(companyForm.nameField.value))
+    {
+        alert("<%=EditUtil.toJavascript(bundle.getString("jsmsg_company_name"))%>");
+        companyForm.nameField.value = "";
+        companyForm.nameField.focus();
+        return false;
+    }   
+    
+    //Check if the company name is one of key words
+    var companyName = ATrim(companyForm.nameField.value).toLowerCase();
+	var words = new Array("com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9", "con", "prn", "aux", "nul", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9");
+	var tmp = "", tmpPrefix = "";
+	for (x in words) {
+	  tmp = words[x];
+	  tmpPrefix = tmp + ".";
+	  if (companyName == tmp || companyName.indexOf(tmpPrefix) == 0) {
+		alert("<%=EditUtil.toJavascript(bundle.getString("msg_invalid_company_name"))%>");
+		return false;
+	  }
+	}
+    
+    if (hasSpecialChars(companyForm.nameField.value))
+    {
+        alert("<%=EditUtil.toJavascript(bundle.getString("lb_name"))%>" +
+          "<%=EditUtil.toJavascript(bundle.getString("msg_invalid_entry"))%>");
+        return false;
+    }
+    // check for dups 
+<%
+    if (names != null)
+    {
+        for (int i = 0; i < names.size(); i++)
+        {
+            String comName = (String)names.get(i);
+%>
+            if ("<%=comName%>".toLowerCase() == companyForm.nameField.value.toLowerCase())
+            {
+                alert("<%=EditUtil.toJavascript(bundle.getString("msg_duplicate_company"))%>");
+                return false;
+            }
+<%
+        }
+    }
+%>
+
+	return true;
+}
+
+function confirmTime()
+{
+	var sessionTime = companyForm.sessionTimeField.value;
+	{
+		if (sessionTime!='')
+		{
+			if(isNumeric(sessionTime))
+			{
+				sessionTime = parseInt(sessionTime)
+				if (sessionTime > 480 || sessionTime < 30)
+				{
+					alert("<%=EditUtil.toJavascript(bundle.getString("msg_duplicate_company_time"))%>");
+					return false;
+				}
+			}
+			else
+			{
+				alert("<%=EditUtil.toJavascript(bundle.getString("msg_duplicate_company_time"))%>");
+				return false;
+			}
+		}
+	}
+    return true;
+}
+
+function isNumeric(str){
+	if (str.startsWith("0"))
+		return false;
+	return /^(-|\+)?\d+(\.\d+)?$/.test(str);
+}
+
+function onEnableSSOSwitch()
+{
+	onEnableSSO(companyForm.enableSsoLogonField.checked);
+}
+
+function onEnableSSO(checked)
+{
+	var ele = document.getElementById("ssoIdpUrlCC");
+	var display = checked ? "" : "none";
+	ele.style.display = display;
+}
+
+function doOnload()
+{
+    loadGuides();
+
+    var edit = eval("<%=edit%>");
+    if (edit)
+    {
+        companyForm.<%=CompanyConstants.DESC%>.focus();
+    }
+    else
+    {
+        companyForm.<%=CompanyConstants.NAME%>.focus();
+    }
+
+    var enableSSO = <%=request.getAttribute(SystemConfigParamNames.ENABLE_SSO)%>;
+    if(!enableSSO)
+    {
+		document.getElementById("ssoCheck").style.display = "none";
+		document.getElementById("ssoIdpUrlCC").style.display = "none";
+    }
+    else
+    {
+    	onEnableSSO(eval("<%=isSsoChecked%>"));
+    }
+}
+
+function Trim(str)
+{
+	if(str=="") return str;
+	var newStr = ""+str;
+	RegularExp = /^\s+|\s+$/gi;
+	return newStr.replace( RegularExp,"" );
+}
+</script>
 </html>

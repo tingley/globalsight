@@ -210,6 +210,7 @@ public class ExtractedFileImporter extends FileImporter
                         if (p_request.getL10nProfile().getTmChoice() != L10nProfile.NO_TM)
                         {
                             leveragePage = true;
+                            break;
                         }
                     }
                 }

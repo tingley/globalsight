@@ -198,8 +198,23 @@ public class ExtractedFileImporter extends FileImporter
                         }
                     }
                 }
-
-                if (p_request.getL10nProfile().getTmChoice() != L10nProfile.NO_TM)
+                
+                // For issue that can't create job with MT if the option "Ignore TM Matches for MT:" is selected.
+                boolean leveragePage = false;
+                for (GlobalSightLocale trgLocale : targetLocales)
+                {
+                    MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                            .getMtProfileBySourcePage(sourcePage, trgLocale);
+                    if (mtProfile == null || !mtProfile.isIgnoreTMMatch())
+                    {
+                        if (p_request.getL10nProfile().getTmChoice() != L10nProfile.NO_TM)
+                        {
+                            leveragePage = true;
+                        }
+                    }
+                }
+               
+                if (leveragePage && p_request.getL10nProfile().getTmChoice() != L10nProfile.NO_TM)
                 {
                     c_logger.info("TM leveraging for page: "
                             + p_request.getExternalPageId());

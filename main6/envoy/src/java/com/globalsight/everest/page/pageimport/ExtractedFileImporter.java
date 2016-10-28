@@ -215,7 +215,7 @@ public class ExtractedFileImporter extends FileImporter
                     }
                 }
                
-                if (leveragePage && p_request.getL10nProfile().getTmChoice() != L10nProfile.NO_TM)
+                if (leveragePage)
                 {
                     c_logger.info("TM leveraging for page: "
                             + p_request.getExternalPageId());

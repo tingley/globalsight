@@ -989,14 +989,14 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
 
             // Add category failure drop down list here.
             ExcelUtil.createValidatorList(p_sheet, getFailureCategoriesList(), SEGMENT_START_ROW,
-                    p_row, CATEGORY_FAILURE_COLUMN);
+                    p_row - 1, CATEGORY_FAILURE_COLUMN);
             ExcelUtil.createValidatorList(p_sheet, (List<String>) IssueOptions.getAllStatus(),
-                    SEGMENT_START_ROW, p_row, COMMENT_STATUS_COLUMN);
+                    SEGMENT_START_ROW, p_row - 1, COMMENT_STATUS_COLUMN);
 
             String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
             List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
                     currentCompanyId, CategoryType.Severity, true);
-            ExcelUtil.createValidatorList(p_sheet, categories, SEGMENT_START_ROW, p_row,
+            ExcelUtil.createValidatorList(p_sheet, categories, SEGMENT_START_ROW, p_row - 1,
                     SEVERITY_COLUMN);
 
             if (DQF_START_ROW > 0)

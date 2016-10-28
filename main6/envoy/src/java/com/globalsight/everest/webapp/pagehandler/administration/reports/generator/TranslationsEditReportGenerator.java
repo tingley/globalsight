@@ -287,13 +287,13 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat, SEGMENT_START_ROW);
         
         // Create Name Areas for drop down list.
-        ExcelUtil.createValidatorList(sheet, getFailureCategoriesList(),
-                SEGMENT_START_ROW, lastRow, CATEGORY_FAILURE_COLUMN);
-        
+        ExcelUtil.createValidatorList(sheet, getFailureCategoriesList(), SEGMENT_START_ROW,
+                lastRow - 1, CATEGORY_FAILURE_COLUMN);
+
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
                 currentCompanyId, CategoryType.Severity, true);
-        ExcelUtil.createValidatorList(sheet, categories, SEGMENT_START_ROW, lastRow,
+        ExcelUtil.createValidatorList(sheet, categories, SEGMENT_START_ROW, lastRow - 1,
                 SEVERITY_COLUMN);
 
         if (DQF_START_ROW > 0)

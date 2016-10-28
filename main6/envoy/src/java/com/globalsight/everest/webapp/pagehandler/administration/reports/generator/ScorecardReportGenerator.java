@@ -78,14 +78,14 @@ public class ScorecardReportGenerator implements ReportGenerator
     protected List<GlobalSightLocale> defaultTargetLocales = new ArrayList<GlobalSightLocale>();
     protected List<String> scorecardCategories = new ArrayList<String>();
 
-    public static final String REPORT_TYPE = ReportConstants.SCORECARD_REPORT;
+    public final String REPORT_TYPE = ReportConstants.SCORECARD_REPORT;
 
-    public static final int SEGMENT_HEADER_ROW = 2;
-    public static final int SEGMENT_START_ROW = 3;
-    public static final int CATEGORY_FAILURE_COLUMN = 8;
+    public final int SEGMENT_HEADER_ROW = 2;
+    public final int SEGMENT_START_ROW = 3;
+    public final int CATEGORY_FAILURE_COLUMN = 8;
 
-    private static final String SCORECARD_SHEET_NAME = "Scorecard";
-    private static final String STATISTICS_SHEET_NAME = "Statistics";
+    private final String SCORECARD_SHEET_NAME = "Scorecard";
+    private final String STATISTICS_SHEET_NAME = "Statistics";
 
     private int targetLocaleCount = 0;
     private int scorecardCategoryCount = 0;

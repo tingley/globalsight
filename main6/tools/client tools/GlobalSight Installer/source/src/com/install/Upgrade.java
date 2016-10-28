@@ -184,6 +184,36 @@ public class Upgrade
     	}
     }
     
+    private void backTerminologyImg() throws Exception
+    {
+    	String imagePath = "/jboss/server/standalone/deployments/globalsight.ear/globalsight-web.war/terminologyImg";
+    	File root = new File(ServerUtil.getPath() + imagePath);
+    	if (!root.exists())
+    		return;
+    	
+    	List<File> files = FileUtil.getAllFiles(root, new FileFilter() 
+    	{
+			@Override
+			public boolean accept(File pathname) 
+			{
+				return true;
+			}
+		});
+    	
+    	for (File f : files)
+    	{
+    		String path = f.getCanonicalPath().replace("\\", "/");
+            String serverPath = ServerUtil.getPath().replace("\\", "/");
+            String upgradePath = UPGRADE_UTIL.getPath().replace("\\", "/");
+            
+            path = path.replace(serverPath, upgradePath);
+            if (!path.contains("globe_header.gif"))
+            {//Add condition to skip globe_header.gif
+                FileUtil.copyFile(f, new File(path));
+            }
+    	}
+    }
+    
     private void backupKeystore() throws Exception
     {
         File f1 = new File(ServerUtil.getPath() + "/jboss/jboss_server/server/default/conf/globalsight.keystore");
@@ -307,6 +337,7 @@ public class Upgrade
             backupKeystore();
             backupForUpdateJboss();
             backImages();
+            backTerminologyImg();
             backup();
             removeFilesForUpdateJboss();
             copyFiles();

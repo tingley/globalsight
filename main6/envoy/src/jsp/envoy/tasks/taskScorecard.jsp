@@ -378,7 +378,8 @@ private static String toggleBgColor(int p_rowNumber)
         {
             //Scorecard
             needScore = StringUtil.isEmpty(scorecardComment);
-        } else if (scorecardShowType == 3 || scorecardShowType == 5) 
+        } 
+		if (scorecardShowType == 3 || scorecardShowType == 5) 
         {
             needDQF = StringUtil.isEmpty(dqfComment);
         }

@@ -828,9 +828,10 @@ public abstract class AbstractTargetPagePersistence implements
             // }
 
             // Put target TUV that need not go on into result map.
-            if (/* rootSegmentHasLeverage || */tuvGotChanged
+            if (tuvGotChanged
                     || targetTuv.isLocalizable(jobId)
-                    || maxScoreNum >= threshold)
+                    || (maxScoreNum >= threshold && !GxmlUtil.isEntireInternalText(sourceTuv
+                            .getGxmlElement())))
             {
                 tu.addTuv(targetTuv);
                 p_appliedTuTuvMap.put(tu, targetTuv);

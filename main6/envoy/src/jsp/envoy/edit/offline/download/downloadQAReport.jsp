@@ -240,7 +240,8 @@
         {
             //Scorecard
             needScore = StringUtil.isEmpty(workflowImpl.getScorecardComment());
-        } else if (scorecardShowType == 3 || scorecardShowType == 5) 
+        } 
+		if (scorecardShowType == 3 || scorecardShowType == 5) 
         {
             needDQF = StringUtil.isEmpty(workflowImpl.getDQFComment());
         }

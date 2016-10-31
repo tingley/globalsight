@@ -110,19 +110,19 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
     // Is Run setPercent/isCancelled function or not.
     private boolean m_isCalculatePercent;
 
-    public static final int LANGUAGE_HEADER_ROW = 3;
-    public static final int LANGUAGE_INFO_ROW = 4;
-    public static int SEGMENT_HEADER_ROW = 6;
-    public static int SEGMENT_START_ROW = 7;
+    public final int LANGUAGE_HEADER_ROW = 3;
+    public final int LANGUAGE_INFO_ROW = 4;
+    public int SEGMENT_HEADER_ROW = 6;
+    public int SEGMENT_START_ROW = 7;
     public int SCORECARD_START_ROW = 0;
     public int DQF_START_ROW = 0;
     
     // "E" column, index 4
-    public static final int CATEGORY_FAILURE_COLUMN = 4;
+    public final int CATEGORY_FAILURE_COLUMN = 4;
     // "F" column, index 5
-    public static final int COMMENT_STATUS_COLUMN = 6;
+    public final int COMMENT_STATUS_COLUMN = 6;
     
-    public static final int SEVERITY_COLUMN = 5;
+    public final int SEVERITY_COLUMN = 5;
 
     private Locale m_uiLocale = Locale.US;
     String m_userId;
@@ -140,7 +140,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
     private String scoreComment = "";
     private boolean needProtect = false;
 
-    private static ReportStyle REPORT_STYLE = null;
+    private ReportStyle REPORT_STYLE = null;
 
     public ReviewersCommentsReportGenerator(String p_cureentCompanyName)
     {
@@ -989,14 +989,14 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
 
             // Add category failure drop down list here.
             ExcelUtil.createValidatorList(p_sheet, getFailureCategoriesList(), SEGMENT_START_ROW,
-                    p_row, CATEGORY_FAILURE_COLUMN);
+                    p_row - 1, CATEGORY_FAILURE_COLUMN);
             ExcelUtil.createValidatorList(p_sheet, (List<String>) IssueOptions.getAllStatus(),
-                    SEGMENT_START_ROW, p_row, COMMENT_STATUS_COLUMN);
+                    SEGMENT_START_ROW, p_row - 1, COMMENT_STATUS_COLUMN);
 
             String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
             List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
                     currentCompanyId, CategoryType.Severity, true);
-            ExcelUtil.createValidatorList(p_sheet, categories, SEGMENT_START_ROW, p_row,
+            ExcelUtil.createValidatorList(p_sheet, categories, SEGMENT_START_ROW, p_row - 1,
                     SEVERITY_COLUMN);
 
             if (DQF_START_ROW > 0)

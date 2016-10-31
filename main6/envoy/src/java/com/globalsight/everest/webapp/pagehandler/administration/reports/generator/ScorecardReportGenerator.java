@@ -71,21 +71,21 @@ import com.globalsight.util.edit.EditUtil;
 public class ScorecardReportGenerator implements ReportGenerator
 {
     private static final Logger logger = Logger.getLogger(ScorecardReportGenerator.class);
-    private static ReportStyle REPORT_STYLE = null;
+    private ReportStyle REPORT_STYLE = null;
 
     protected long companyId = -1L;
     protected List<Long> defaultJobIds = new ArrayList<Long>();
     protected List<GlobalSightLocale> defaultTargetLocales = new ArrayList<GlobalSightLocale>();
     protected List<String> scorecardCategories = new ArrayList<String>();
 
-    public static final String REPORT_TYPE = ReportConstants.SCORECARD_REPORT;
+    public final String REPORT_TYPE = ReportConstants.SCORECARD_REPORT;
 
-    public static final int SEGMENT_HEADER_ROW = 2;
-    public static final int SEGMENT_START_ROW = 3;
-    public static final int CATEGORY_FAILURE_COLUMN = 8;
+    public final int SEGMENT_HEADER_ROW = 2;
+    public final int SEGMENT_START_ROW = 3;
+    public final int CATEGORY_FAILURE_COLUMN = 8;
 
-    private static final String SCORECARD_SHEET_NAME = "Scorecard";
-    private static final String STATISTICS_SHEET_NAME = "Statistics";
+    private final String SCORECARD_SHEET_NAME = "Scorecard";
+    private final String STATISTICS_SHEET_NAME = "Statistics";
 
     private int targetLocaleCount = 0;
     private int scorecardCategoryCount = 0;
@@ -396,7 +396,7 @@ public class ScorecardReportGenerator implements ReportGenerator
         col++;
 
         cell = ExcelUtil.getCell(segHeaderRow, col);
-        cell.setCellValue(bundle.getString("lb_comments"));
+        cell.setCellValue(bundle.getString("lb_dqf_scorecard_comments"));
         cell.setCellStyle(headerStyle);
         sheet.setColumnWidth(col, 40 * 256);
         col++;
@@ -414,7 +414,7 @@ public class ScorecardReportGenerator implements ReportGenerator
         col++;
 
         cell = ExcelUtil.getCell(segHeaderRow, col);
-        cell.setCellValue(bundle.getString("lb_dqf_comments"));
+        cell.setCellValue(bundle.getString("lb_dqf_dqf_comments"));
         cell.setCellStyle(headerStyle);
         sheet.setColumnWidth(col, 40 * 256);
     }
@@ -531,32 +531,36 @@ public class ScorecardReportGenerator implements ReportGenerator
         List<ScorecardScore> scoreList = ScorecardScoreHelper.getScoreByWrkflowId(workflow.getId());
         CellStyle contentStyle = REPORT_STYLE.getContentStyle();
         String targetLocale;
+
+        int col = 0;
+
+        Sheet scorecardSheet = workbook.getSheet(SCORECARD_SHEET_NAME);
+        targetLocale = workflow.getTargetLocale().toString();
+        boolean rtlTargetLocale = EditUtil.isRTLLocale(targetLocale);
+        CellStyle commentStyle = rtlTargetLocale ? REPORT_STYLE.getUnlockedRightStyle()
+                : REPORT_STYLE.getUnlockedStyle();
+
+        Row currentRow = ExcelUtil.getRow(scorecardSheet, row);
+        // Job id
+        Cell cell = ExcelUtil.getCell(currentRow, col);
+        cell.setCellValue(job.getId());
+        cell.setCellStyle(contentStyle);
+        col++;
+
+        // job name
+        cell = ExcelUtil.getCell(currentRow, col);
+        cell.setCellValue(job.getJobName());
+        cell.setCellStyle(contentStyle);
+        col++;
+
+        // TargetPage id
+        cell = ExcelUtil.getCell(currentRow, col);
+        cell.setCellValue(targetLocale);
+        cell.setCellStyle(contentStyle);
+        col++;
+
         if (scoreList != null && scoreList.size() > 0)
         {
-            int col = 0;
-
-            Sheet scorecardSheet = workbook.getSheet(SCORECARD_SHEET_NAME);
-
-            Row currentRow = ExcelUtil.getRow(scorecardSheet, row);
-            // Job id
-            Cell cell = ExcelUtil.getCell(currentRow, col);
-            cell.setCellValue(job.getId());
-            cell.setCellStyle(contentStyle);
-            col++;
-
-            // job name
-            cell = ExcelUtil.getCell(currentRow, col);
-            cell.setCellValue(job.getJobName());
-            cell.setCellStyle(contentStyle);
-            col++;
-
-            // TargetPage id
-            targetLocale = workflow.getTargetLocale().toString();
-            cell = ExcelUtil.getCell(currentRow, col);
-            cell.setCellValue(targetLocale);
-            cell.setCellStyle(contentStyle);
-            col++;
-
             String category = null;
             Integer column = null;
             int totalScore = 0, score = 0;
@@ -616,36 +620,35 @@ public class ScorecardReportGenerator implements ReportGenerator
             col++;
 
             // Comments
-            boolean rtlTargetLocale = EditUtil.isRTLLocale(targetLocale);
-            CellStyle commentStyle = rtlTargetLocale ? REPORT_STYLE.getUnlockedRightStyle()
-                    : REPORT_STYLE.getUnlockedStyle();
             cell = ExcelUtil.getCell(currentRow, col);
             cell.setCellValue(((WorkflowImpl) workflow).getScorecardComment());
             cell.setCellStyle(commentStyle);
             col++;
 
-            // DQF Fluency
-            cell = ExcelUtil.getCell(currentRow, col);
-            cell.setCellStyle(contentStyle);
-            cell.setCellValue(workflow.getFluencyScore());
-            col++;
-
-            // DQF Adequacy
-            cell = ExcelUtil.getCell(currentRow, col);
-            cell.setCellStyle(contentStyle);
-            cell.setCellValue(workflow.getAdequacyScore());
-            col++;
-
-            // DQF Comment
-            cell = ExcelUtil.getCell(currentRow, col);
-            cell.setCellStyle(commentStyle);
-            cell.setCellValue(workflow.getDQFComment());
-            col++;
-
-            return 1;
         }
         else
-            return 0;
+        {
+            col += scorecardCategoryCount + 3;
+        }
+        // DQF Fluency
+        cell = ExcelUtil.getCell(currentRow, col);
+        cell.setCellStyle(contentStyle);
+        cell.setCellValue(workflow.getFluencyScore());
+        col++;
+
+        // DQF Adequacy
+        cell = ExcelUtil.getCell(currentRow, col);
+        cell.setCellStyle(contentStyle);
+        cell.setCellValue(workflow.getAdequacyScore());
+        col++;
+
+        // DQF Comment
+        cell = ExcelUtil.getCell(currentRow, col);
+        cell.setCellStyle(commentStyle);
+        cell.setCellValue(workflow.getDQFComment());
+        col++;
+
+        return 1;
     }
 
     private CellStyle getScoreCellStyle(double score)

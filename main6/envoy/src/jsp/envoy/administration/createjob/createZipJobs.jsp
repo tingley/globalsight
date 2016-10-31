@@ -630,7 +630,7 @@ function queryFileProfile(id)
     $("#bp" + id).find(".icons").html("<img src='/globalsight/images/createjob/success.png' style='width:20px;height:20px'>");
     var profile = $("#bp" + id).find(".profileArea");
     var theFileName = $("#Hidden" + id).attr("value");
-    $.get("/globalsight/ControlServlet?activityName=createZipJobs", 
+    $.post("/globalsight/ControlServlet?activityName=createZipJobs", 
             {"uploadAction":"queryFileProfile","fileName":theFileName,"l10Nid":l10Nid,"no":Math.random(), "userName":"<%=userName%>"}, 
             function(data){
                 profile.html("<select id='fp" + id

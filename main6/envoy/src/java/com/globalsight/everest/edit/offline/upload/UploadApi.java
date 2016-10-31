@@ -753,9 +753,9 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
             if (p_reportName.equals(WebAppConstants.LANGUAGE_SIGN_OFF))
             {
-                languageInfoRow = ReviewersCommentsReportGenerator.LANGUAGE_INFO_ROW;
-                segmentHeaderRow = ReviewersCommentsReportGenerator.SEGMENT_HEADER_ROW;
-                segmentStartRow = ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
+                languageInfoRow = 4;
+                segmentHeaderRow = 6;
+                segmentStartRow = 7;
             }
 
             if (SEGMENT_START_ROW > 0)
@@ -1154,7 +1154,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     private String loadRCRSimpleReportDataAfter855(Sheet sheet, Task task,
             GlobalSightLocale tLocale, ResourceBundle bundle) throws RemoteException
     {
-        int segmentStartRow = ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
+        int segmentStartRow = 7;
         Set<String> jobIds = new HashSet<String>();
 
         segId2Comment = new HashMap<Long, String>();
@@ -1246,7 +1246,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     private String loadRCRSimpleReportDataFor855(Sheet sheet, Task task, GlobalSightLocale tLocale,
             ResourceBundle bundle) throws RemoteException
     {
-        int segmentStartRow = ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
+        int segmentStartRow = 7;
         Set<String> jobIds = new HashSet<String>();
 
         segId2Comment = new HashMap<Long, String>();
@@ -1341,7 +1341,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     {
         boolean isNew = SEGMENT_START_ROW > 0;
         int segmentStartRow = isNew ? SEGMENT_START_ROW
-                : ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
+                : 7;
         Set<String> jobIds = new HashSet<String>();
 
         segId2Comment = new HashMap<Long, String>();

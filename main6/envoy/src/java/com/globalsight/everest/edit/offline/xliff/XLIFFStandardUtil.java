@@ -40,6 +40,11 @@ public class XLIFFStandardUtil
     static final String att_ctype = " ctype=\"";
     
     static final String att_ctype_x = " ctype=\"x-";
+    
+    //GBS-4571 issue Offline downloaded xliff 1.2 file from 8.6.7 version can’t be uploaded to 8.7.2 version
+    static final String att_ctype_xx_nbspacve = "ctype=\"x-x-nbspace\"";
+    
+    static final String att_ctype_x_nbspacve = "ctype=\"x-nbspace\"";
 
     static final String att_type = " type=\"";
 
@@ -118,9 +123,7 @@ public class XLIFFStandardUtil
 
         // bpt
         segment = replaceAtts(segment, bpt_start, bpt_end, false, att_x,
-                att_xid, att_i, att_rid, att_i, att_id, att_type, att_ctype_x);
-        segment = replaceAtts(segment, bpt_start, bpt_end, false, att_x,
-                att_xid, att_i, att_rid, att_i, att_id, att_type, att_ctype);
+                att_xid, att_i, att_rid, att_i, att_id, att_type, att_ctype_x, att_type, att_ctype);
 
         // ept
         segment = replaceAtts(segment, ept_start, ept_end, false, att_i,
@@ -129,18 +132,14 @@ public class XLIFFStandardUtil
         // it
         segment = removeAtts(segment, it_start, it_end, att_id);
         segment = replaceAtts(segment, it_start, it_end, false, att_posBegin,
-                att_posOpen, att_posEnd, att_posClose, att_type, att_ctype_x,
-                att_x, att_xid);
-        segment = replaceAtts(segment, it_start, it_end, false, att_posBegin,
-                att_posOpen, att_posEnd, att_posClose, att_type, att_ctype,
+                att_posOpen, att_posEnd, att_posClose, att_type, att_ctype_x, att_type, att_ctype,
                 att_x, att_xid);
 
+        int i ;
         // ph
         segment = removeAtts(segment, ph_start, ph_end, att_id);
-        segment = replaceAtts(segment, ph_start, ph_end, false, att_type,
-                att_ctype_x, att_x, att_xid);
-        segment = replaceAtts(segment, ph_start, ph_end, false, att_type,
-                att_ctype, att_x, att_xid);
+        segment = replaceAtts(segment, ph_start, ph_end, false, att_ctype_xx_nbspacve,att_ctype_x_nbspacve, att_type,
+                att_ctype_x, att_type, att_ctype, att_x, att_xid);
 
         return segment;
     }

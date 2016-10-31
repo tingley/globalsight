@@ -106,19 +106,19 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
 {
     private static final Logger logger = Logger.getLogger(TranslationsEditReportGenerator.class);
 
-    public static final int LANGUAGE_HEADER_ROW = 3;
-    public static final int LANGUAGE_INFO_ROW = 4;
-    public static int SEGMENT_HEADER_ROW = 6;
-    public static int SEGMENT_START_ROW = 7;
+    public final int LANGUAGE_HEADER_ROW = 3;
+    public final int LANGUAGE_INFO_ROW = 4;
+    public int SEGMENT_HEADER_ROW = 6;
+    public int SEGMENT_START_ROW = 7;
     public int SCORECARD_START_ROW = 0;
     public int DQF_START_ROW = 0;
     
     // "E" column, index 4
-    public static final int CATEGORY_FAILURE_COLUMN = 5;
+    public final int CATEGORY_FAILURE_COLUMN = 5;
     // "F" column, index 5
-    public static final int COMMENT_STATUS_COLUMN = 7;
+    public final int COMMENT_STATUS_COLUMN = 7;
     
-    public static final int SEVERITY_COLUMN = 6;
+    public final int SEVERITY_COLUMN = 6;
 
     private Locale m_uiLocale;
     private String m_companyName = "";
@@ -140,7 +140,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
     private String scoreComment = "";
     private boolean needProtect = false;
 
-    private static ReportStyle REPORT_STYLE = null;
+    private ReportStyle REPORT_STYLE = null;
 
     public TranslationsEditReportGenerator(String p_currentCompanyName)
     {
@@ -287,13 +287,13 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat, SEGMENT_START_ROW);
         
         // Create Name Areas for drop down list.
-        ExcelUtil.createValidatorList(sheet, getFailureCategoriesList(),
-                SEGMENT_START_ROW, lastRow, CATEGORY_FAILURE_COLUMN);
-        
+        ExcelUtil.createValidatorList(sheet, getFailureCategoriesList(), SEGMENT_START_ROW,
+                lastRow - 1, CATEGORY_FAILURE_COLUMN);
+
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
                 currentCompanyId, CategoryType.Severity, true);
-        ExcelUtil.createValidatorList(sheet, categories, SEGMENT_START_ROW, lastRow,
+        ExcelUtil.createValidatorList(sheet, categories, SEGMENT_START_ROW, lastRow - 1,
                 SEVERITY_COLUMN);
 
         if (DQF_START_ROW > 0)
@@ -394,7 +394,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     cell.setCellValue(scorecard);
                     
                     cell = ExcelUtil.getCell(rowLine, col + 1);
-                    cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
+                    cell.setCellStyle(REPORT_STYLE.getLockedStyle());
                     
                     elements.put(scorecard, Integer.valueOf(row));
                     row++;

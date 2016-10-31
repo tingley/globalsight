@@ -1436,6 +1436,7 @@ public class TaskListHandler extends PageHandler
                             {
                                 isNeedDQFTaskId.append("[JobID:").append(task.getJobId())
                                         .append(",JobName:").append(task.getJobName()).append("],");
+                                continue;
                             }
                         }
                         ProjectImpl project = (ProjectImpl) task.getWorkflow()

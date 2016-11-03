@@ -59,6 +59,7 @@ import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.util.comparator.JobComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -78,6 +79,7 @@ import com.globalsight.util.edit.EditUtil;
 
 public class MTPostEditDistanceReportGenerator implements ReportGenerator
 {
+    @SuppressWarnings("unused")
     static private final Logger logger = Logger.getLogger(MTPostEditDistanceReportGenerator.class);
 
     private static int SUMMARY_HEADER_ROW = 2;
@@ -91,12 +93,16 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
     protected HttpServletRequest m_request = null;
     protected String m_companyName = "";
     private RequestData data = new RequestData();
-    String m_userId;
+    private String m_userId;
+    private String INCLUDE_SEGS_FROM_LATEST = "latest";
+    private String INCLUDE_SEGS_FROM_ALL = "all";
+    private String includeSegsFrom = INCLUDE_SEGS_FROM_LATEST;//default
 
     private NumberFormat twoDigitFormater = null;
     private NumberFormat threeDigitFormater = null;
 
-    private static final String GET_DETAILED_DATA_SQL = "SELECT t2.tuvId, tuId, source, MT, t1.segment_string AS target, t2.mt_name "
+    private static final String GET_DETAILED_DATA_SQL1 =
+            "SELECT t1.Id as tuvId, t2.tuId, t2.source, t2.MT, t1.segment_string AS target, t2.mt_name, t1.state "
             + " FROM " + TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " AS t1,"
             + " (SELECT lm.source_page_id, lm.original_source_tuv_id AS tuvId, tuv.tu_id AS tuId, tuv.segment_string AS source, lm.matched_text_string AS MT, lm.mt_name"
             + "  FROM " + TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " AS tuv, " + TuvQueryConstants.LM_TABLE_PLACEHOLDER + " AS lm"
@@ -105,20 +111,21 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             + "  AND lm.target_locale_id = ?"
             + "  AND lm.order_num = 301"
             + "  AND lm.sub_id = '0'"
-            + "  AND tuv.state != 'OUT_OF_DATE'"
-            + "  ORDER BY lm.source_page_id, lm.original_source_tuv_id) AS t2"
+            + "  AND tuv.state != 'OUT_OF_DATE') AS t2"
             + "  WHERE t1.tu_id = t2.tuId"
-            + "  AND t1.locale_id = ?"
-            + "  AND t1.state != 'OUT_OF_DATE'"
-            + "  ORDER BY t1.tu_id ASC;";
+            + "  AND t1.locale_id = ?";
+    private static final String GET_DETAILED_DATA_SQL2 = " AND t1.state != 'OUT_OF_DATE'";
+    private static final String GET_DETAILED_DATA_SQL3 = " ORDER BY t1.tu_id ASC, t1.id ASC";
 
     private class RequestData
     {
         // Report on job Ids
         boolean reportOnJobIds = true;
 
+        @SuppressWarnings("unused")
         boolean wantsAllProjects = false;
 
+        @SuppressWarnings("unused")
         boolean wantsAllLocales = false;
 
         // Need to search job by projects, status, date
@@ -151,6 +158,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         m_request = p_request;
         m_companyName = UserUtil.getCurrentCompanyName(p_request);
         CompanyThreadLocal.getInstance().setValue(m_companyName);
+
+        includeSegsFrom = m_request.getParameter("includeSegsFrom");
 
         setProjectIdList(p_request);
         setTargetLocales(p_request);
@@ -425,11 +434,26 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             String sql = getSql(job, sourcePageIds);
 
             List<DetailedData> detailedDatas = getDetailedData(sql, jobId, jobName, targetLocale);
+            if (INCLUDE_SEGS_FROM_ALL.equalsIgnoreCase(includeSegsFrom))
+            {
+                // Ensure translations for same TU are in order by translation
+                // sequence, latest segment should be the last one for a TU.
+                detailedDatas = sortDetailedData(detailedDatas);
+                // Remove duplicated translations
+//                detailedDatas = removeDuplicates(detailedDatas);
+            }
+
             if (detailedDatas.size() > 0)
             {
-                dataMap.put(getKey(jobId, targetLocale.getId()), detailedDatas);
                 addDetailedDatas(p_workBook, p_sheet, detailedDatas, row, sourceLocale,
                         targetLocale);
+
+                // "Summary" sheet ALWAYS need "latest" translation only.
+                if (INCLUDE_SEGS_FROM_ALL.equalsIgnoreCase(includeSegsFrom))
+                {
+                    removeOutOfDateData(detailedDatas);
+                }
+                dataMap.put(getKey(jobId, targetLocale.getId()), detailedDatas);
             }
         }
     }
@@ -437,6 +461,76 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
     private String getKey(long jobId, long targetLocaleId)
     {
         return jobId + "-" + targetLocaleId;
+    }
+
+    private List<DetailedData> sortDetailedData(List<DetailedData> detailedDatas)
+    {
+        List<DetailedData> newList = new ArrayList<DetailedData>();
+        DetailedData curActiveData = null;
+        for (DetailedData currData : detailedDatas)
+        {
+            if (TuvState.OUT_OF_DATE.getName().equalsIgnoreCase(currData.getState()))
+            {
+                newList.add(currData);
+            }
+            else
+            {
+                if (curActiveData != null && curActiveData.getTuId() != currData.getTuId())
+                {
+                    newList.add(curActiveData);
+                }
+                curActiveData = currData;
+            }
+        }
+
+        if (curActiveData != null)
+        {
+            newList.add(curActiveData);            
+        }
+
+        return newList;
+    }
+
+    /**
+     * Remove duplicated translations(same tuId, same source/MT/target).
+     */
+    @SuppressWarnings("unused")
+    private List<DetailedData> removeDuplicates(List<DetailedData> detailedDatas)
+    {
+        List<DetailedData> detailedDatasNoDuplicates = new ArrayList<DetailedData>();
+        long previousTuId = -1;
+        String previousTarget = null;
+        for (int i = detailedDatas.size() - 1; i >= 0; i--)
+        {
+            DetailedData data = detailedDatas.get(i);
+            if (data.getTuId() != previousTuId || !data.getTarget().equals(previousTarget)
+                    || !TuvState.OUT_OF_DATE.getName().equalsIgnoreCase(data.getState()))
+            {
+                detailedDatasNoDuplicates.add(0, data);
+            }
+
+            previousTuId = data.getTuId();
+            previousTarget = data.getTarget();
+        }
+
+        return detailedDatasNoDuplicates;
+    }
+
+    /**
+     * For "Summary" sheet, it should ALWAYS include latest segments only.
+     * 
+     * @param detailedDatas
+     */
+    private void removeOutOfDateData(List<DetailedData> detailedDatas)
+    {
+        for (Iterator<DetailedData> it = detailedDatas.iterator(); it.hasNext();)
+        {
+            DetailedData data = it.next();
+            if (TuvState.OUT_OF_DATE.getName().equalsIgnoreCase(data.getState()))
+            {
+                it.remove();
+            }
+        }
     }
 
     /**
@@ -465,8 +559,17 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
     {
         String tuvTable = BigTableUtil.getTuvTableJobDataInByJobId(job.getId());
         String lmTable = BigTableUtil.getLMTableJobDataInByJobId(job.getId());
+        String sql = null;
+        if (INCLUDE_SEGS_FROM_ALL.equalsIgnoreCase(includeSegsFrom))
+        {
+            sql = GET_DETAILED_DATA_SQL1 + GET_DETAILED_DATA_SQL3;
+        }
+        else
+        {
+            sql = GET_DETAILED_DATA_SQL1 + GET_DETAILED_DATA_SQL2 + GET_DETAILED_DATA_SQL3;
+        }
 
-        return GET_DETAILED_DATA_SQL.replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER, tuvTable)
+        return sql.replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER, tuvTable)
                 .replace(TuvQueryConstants.LM_TABLE_PLACEHOLDER, lmTable)
                 .replace("_SOURCE_PAGE_IDS_", sourcePageIds);
     }
@@ -493,7 +596,9 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
                 data.setJobId(jobId);
                 data.setJobName(jobName);
 
-//                long tuvId = rs.getLong("tuvId");
+                long tuvId = rs.getLong("tuvId");
+                data.setTuvId(tuvId);
+
                 long tuId = rs.getLong("tuId");
                 data.setTuId(tuId);
 
@@ -514,6 +619,9 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
 
                 String mtName = rs.getString("mt_name");
                 data.setMtEngineName(mtName);
+                
+                String state = rs.getString("state");
+                data.setState(state);
 
                 detailedDatas.add(data);
             }
@@ -1121,9 +1229,11 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         long jobId = 0;
         String jobName = null;
         long tuId = 0;
+        private long tuvId = 0;
         String source, mt, target;
         private int levenshteinDistance = 0;
         private String mtEngineName = null;
+        private String state = null;
 
         public long getJobId()
         {
@@ -1153,6 +1263,16 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         public void setTuId(long tuId)
         {
             this.tuId = tuId;
+        }
+
+        public long getTuvId()
+        {
+            return tuvId;
+        }
+
+        public void setTuvId(long tuvId)
+        {
+            this.tuvId = tuvId;
         }
 
         public String getSource()
@@ -1193,6 +1313,16 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         public void setLevenshteinDistance(int levenshteinDistance)
         {
             this.levenshteinDistance = levenshteinDistance;
+        }
+
+        public void setState(String state)
+        {
+            this.state = state;
+        }
+
+        public String getState()
+        {
+            return this.state;
         }
 
         // Utility

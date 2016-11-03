@@ -343,6 +343,13 @@ function doOnload()
         </select>
     </td>
 </tr>
+<tr>
+    <td class="standardText"><%=bundle.getString("lb_include_segments_from")%>:</td>
+    <td class="standardText">
+        <input name="includeSegsFrom" value="latest" type="radio" checked/><%=bundle.getString("lb_include_segments_from_latest")%><br>
+        <input name="includeSegsFrom" value="all" type="radio"/><%=bundle.getString("lb_include_segments_from_all")%><br>
+    </td>
+</tr>
 
 <tr>
 	<TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" id="submitButton" name="submitButton" onClick="submitForm()"></TD>

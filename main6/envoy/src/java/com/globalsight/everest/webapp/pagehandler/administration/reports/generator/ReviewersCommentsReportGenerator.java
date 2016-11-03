@@ -465,25 +465,28 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                     cell.setCellValue(scorecard);
                     
                     cell = ExcelUtil.getCell(rowLine, 1);
-                    cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
+                    if (needProtect)
+                        cell.setCellStyle(REPORT_STYLE.getLockedStyle());
+                    else
+                        cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
 
                     elements.put(scorecard, Integer.valueOf(row));
                     row++;
                 }
-            }
-            String key = "";
-            Integer rowValue = 0;
-            for (ScorecardScore score : scores)
-            {
-                key = score.getScorecardCategory();
-                rowValue = elements.get(key);
-                rowLine = ExcelUtil.getRow(sheet, rowValue);
-                cell = ExcelUtil.getCell(rowLine, 1);
-                if (isStored || needProtect)
-                    cell.setCellStyle(REPORT_STYLE.getLockedStyle());
-                else
-                    cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
-                cell.setCellValue(score.getScore());
+                String key = "";
+                Integer rowValue = 0;
+                for (ScorecardScore score : scores)
+                {
+                    key = score.getScorecardCategory();
+                    rowValue = elements.get(key);
+                    rowLine = ExcelUtil.getRow(sheet, rowValue);
+                    cell = ExcelUtil.getCell(rowLine, 1);
+                    if (isStored)
+                        cell.setCellStyle(REPORT_STYLE.getLockedStyle());
+                    else
+                        cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
+                    cell.setCellValue(score.getScore());
+                }
             }
 
             rowLine = ExcelUtil.getRow(sheet, row);

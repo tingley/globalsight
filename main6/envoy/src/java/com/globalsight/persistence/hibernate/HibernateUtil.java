@@ -436,7 +436,13 @@ public class HibernateUtil
             {
                 session = getSession();
                 result = (T) session.get(clazz, id);
-
+                if (s_logger.isDebugEnabled())
+                {
+                    if (result == null)
+                    {
+                        s_logger.warn("Result is null for '" + clazz.getName() + "' by id " + id);
+                    }
+                }
                 if (ignoreInActiveOb && result != null && isUseActive(result))
                 {
                     Method method = result.getClass().getMethod("isActive");

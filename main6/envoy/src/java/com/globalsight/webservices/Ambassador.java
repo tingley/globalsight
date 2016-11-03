@@ -5723,7 +5723,7 @@ public class Ambassador extends AbstractWebService
                     return rtnStr;
                 }
             }
-            if (isRequriedScore && isReviewOnly)
+            if (isRequriedScore && (isReviewOnly || dbTask.isType(Task.TYPE_REVIEW_EDITABLE)))
             {
                 if (StringUtil.isEmpty(workflowImpl.getScorecardComment()))
                 {
@@ -5731,7 +5731,7 @@ public class Ambassador extends AbstractWebService
                     return rtnStr;
                 }
             }
-            if (isRequiredDQF && isReviewOnly)
+            if (isRequiredDQF && (isReviewOnly || dbTask.isType(Task.TYPE_REVIEW_EDITABLE)))
             {
                 if (StringUtil.isEmpty(workflowImpl.getDQFComment()))
                 {

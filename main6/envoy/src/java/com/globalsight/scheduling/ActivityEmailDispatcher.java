@@ -25,6 +25,7 @@ import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * ActivityEmailDispatcher is responsible for sending warning/deadline emails to
@@ -111,7 +112,11 @@ public class ActivityEmailDispatcher extends EventHandler
         catch (Exception e)
         {
             s_category.error(
-                    "Failed to notify Project Manager about a warning/deadline notification.", e);
+                    "Failed to notify Project Manager/User about a warning/deadline notification.", e);
+        }
+        finally
+        {
+            HibernateUtil.closeSession();
         }
     }
 

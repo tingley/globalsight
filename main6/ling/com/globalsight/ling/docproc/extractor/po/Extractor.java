@@ -199,6 +199,13 @@ public class Extractor extends AbstractExtractor implements ExtractorExceptionCo
 
             if (p_msgIDPluralList != null && p_msgIDPluralList.size() > 0)
             {
+                if (p_msgIDList != null && p_msgIDList.size() > 0)
+                {
+                    String msgID = getStringFromList(p_msgIDList);
+                    p_output.addSkeleton(POToken.MSGSID + " \"");
+                    p_output.addSkeleton(msgID);
+                    p_output.addSkeleton("\"\n");
+                }
                 String msgIDPlural = getStringFromList(p_msgIDPluralList);
                 p_output.addSkeleton(POToken.MSGSID_PLURAL + " \"");
                 p_output.addSkeleton(msgIDPlural);

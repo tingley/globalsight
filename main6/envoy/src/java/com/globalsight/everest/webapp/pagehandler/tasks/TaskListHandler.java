@@ -1419,7 +1419,7 @@ public class TaskListHandler extends PageHandler
                     }
                     else
                     {
-                        if (task.isReviewOnly())
+                        if (task.isReviewOnly() || task.isType(Task.TYPE_REVIEW_EDITABLE))
                         {
                             WorkflowImpl workflowImpl = (WorkflowImpl) task
                                     .getWorkflow();
@@ -1431,7 +1431,7 @@ public class TaskListHandler extends PageHandler
                                         .append(",JobName:").append(task.getJobName()).append("],");
                                 continue;
                             }
-                            else if ((showType == 3 || showType == 5)
+                            if ((showType == 3 || showType == 5)
                                     && StringUtil.isEmpty(workflowImpl.getDQFComment()))
                             {
                                 isNeedDQFTaskId.append("[JobID:").append(task.getJobId())

@@ -262,6 +262,7 @@ public class JobCreationMonitor
                 return;
             }
 
+            job = HibernateUtil.get(JobImpl.class, job.getId());
             job.setState(state);
             HibernateUtil.update(job);
 

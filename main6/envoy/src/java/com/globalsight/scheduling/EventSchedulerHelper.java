@@ -44,6 +44,7 @@ import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.scheduling.FluxEventMapDescriptorModifier;
 import com.globalsight.util.GeneralException;
@@ -256,7 +257,7 @@ public class EventSchedulerHelper
         }
 
         Long wfId = (Long) p_emailInfo.get(SchedulerConstants.WF_ID);
-        Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(wfId.longValue());
+        Workflow wf = getWorkflow(wfId.longValue());
         WorkflowTemplateInfo wfti = wf.getJob().getL10nProfile()
                 .getWorkflowTemplateInfo(wf.getTargetLocale());
         List wfManagerIds = wf.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER);
@@ -346,10 +347,10 @@ public class EventSchedulerHelper
         Workflow wf = null;
         try
         {
-            wf = ServerProxy.getWorkflowManager().getWorkflowById(wfId.longValue());
+            wf = getWorkflow(wfId.longValue());
             if (wf == null)
             {
-                throw new PersistenceException("Can't get workflow by id:" + wfId);
+                throw new PersistenceException(new Exception("Can't get workflow by Id: " + wfId));
             }
         }
         catch (Exception e)
@@ -397,10 +398,10 @@ public class EventSchedulerHelper
             RemoteException, ProjectHandlerException, GeneralException, NamingException
     {
         Long wfId = (Long) p_emailInfo.get(SchedulerConstants.WF_ID);
-        Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(wfId.longValue());
+        Workflow wf = getWorkflow(wfId.longValue());
         if (wf == null)
         {
-            throw new PersistenceException("Can't get workflow by Id: " + wfId);
+            throw new PersistenceException(new Exception("Can't get workflow by Id: " + wfId));
         }
 
         long jobId = wf.getJob().getJobId();
@@ -506,6 +507,13 @@ public class EventSchedulerHelper
         ServerProxy.getMailer().sendMail((EmailInformation) null, receipt, p_subjectKey,
                 p_messageKey, p_messageArguments, p_companyId);
     }
+
+    private static WorkflowImpl getWorkflow(long wfId)
+    {
+        String hql = "from WorkflowImpl wf where wf.id = ?";
+        return (WorkflowImpl) HibernateUtil.getFirst(hql, wfId);
+    }
+
     // ////////////////////////////////////////////////////////////////////
     // End: Private Methods
     // ////////////////////////////////////////////////////////////////////

@@ -97,6 +97,7 @@ public class ExcelReportsMainHandler extends PageHandler
             ServletContext p_context) throws ServletException, IOException,
             EnvoyServletException
     {
+        String activityName = (String) p_request.getParameter("activityName");
         String action = p_request.getParameter("action");
         HttpSession session = p_request.getSession(false);
         uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
@@ -104,53 +105,38 @@ public class ExcelReportsMainHandler extends PageHandler
         {
             try
             {
-                JSONArray jsonArray = new JSONArray();
-                JSONObject jsonObject = null;
-                String result = "";
-                String jobId = p_request.getParameter("jobId");
-                Job job = ServerProxy.getJobHandler().getJobById(
-                        Long.parseLong(jobId));
-                jsonObject = new JSONObject();
-                for (Workflow wf : job.getWorkflows())
-                {
-                    jsonObject = new JSONObject();
-                    GlobalSightLocale targetLocale = wf.getTargetLocale();
-                    jsonObject.put("targetLocId", targetLocale.getId());
-                    jsonObject.put("targetLocName",targetLocale.getDisplayName(uiLocale));
-                    jsonArray.add(jsonObject);
-                }
-                result = jsonArray.toJSONString();
-                p_response.getWriter().write(result);
+                long jobId = Long.parseLong(p_request.getParameter("jobId"));
+                String trgLocalesJson = getTargetLocalesJsonByJobId(jobId);
+                p_response.setContentType("text/html;charset=UTF-8");
+                p_response.getWriter().write(trgLocalesJson);
                 return;
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                LOGGER.error(e);
             }
+        }
+        else if ("getReportJobInfo".equals(action))
+        {
+            List<ReportJobInfo> reportJobInfoList = getReportJobInfo(activityName);
+            net.sf.json.JSONArray jsonArray = net.sf.json.JSONArray.fromObject(reportJobInfoList);
+            p_response.setContentType("text/html;charset=UTF-8");
+            p_response.getWriter().write(jsonArray.toString());
+            return;
         }
         else
         {
-            String activityName = (String) p_request.getParameter("activityName");
-
             User curUser = getUser(session);
             initData(curUser.getUserId(), activityName);
 
-            List<ReportJobInfo> reportJobInfoList = new ArrayList<ReportJobInfo>();
-            if (reportNameListUsing6States.contains(activityName))
+            // "Detailed Word Counts by Job" report get jobs via ajax.
+            if (!"xlsReportFileList".equals(activityName))
             {
-                reportJobInfoList = getReportJobInfoForSixStates();
-            }
-            else if ("MTPostEditDistanceReport".equals(activityName))
-            {
-                reportJobInfoList = getReportJobInfoForFiveStates();
-            }
-            else
-            {
-                reportJobInfoList = getReportJobInfoForSevenStates();
+                List<ReportJobInfo> reportJobInfoList = getReportJobInfo(activityName);
+                p_request.setAttribute(ReportConstants.REPORTJOBINFO_LIST, reportJobInfoList);
             }
 
             // Set into Request
-            p_request.setAttribute(ReportConstants.REPORTJOBINFO_LIST, reportJobInfoList);
             p_request.setAttribute(ReportConstants.PROJECT_LIST, projectList);
             p_request.setAttribute(ReportConstants.TARGETLOCALE_LIST, targetLocales);
         }
@@ -181,6 +167,50 @@ public class ExcelReportsMainHandler extends PageHandler
         {
             LOGGER.error("Getting target locales or project error", e);
         }
+    }
+
+    // For TER reports
+    private String getTargetLocalesJsonByJobId(long jobId)
+    {
+        try
+        {
+            JSONArray jsonArray = new JSONArray();
+            JSONObject jsonObject = null;
+            Job job = ServerProxy.getJobHandler().getJobById(jobId);
+            jsonObject = new JSONObject();
+            for (Workflow wf : job.getWorkflows())
+            {
+                jsonObject = new JSONObject();
+                GlobalSightLocale targetLocale = wf.getTargetLocale();
+                jsonObject.put("targetLocId", targetLocale.getId());
+                jsonObject.put("targetLocName",targetLocale.getDisplayName(uiLocale));
+                jsonArray.add(jsonObject);
+            }
+            return jsonArray.toJSONString();
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("Fail to get target locales json for TER report", e);
+        }
+        return "";
+    }
+
+    private List<ReportJobInfo> getReportJobInfo(String activityName)
+    {
+        List<ReportJobInfo> reportJobInfoList = new ArrayList<ReportJobInfo>();
+        if (reportNameListUsing6States.contains(activityName))
+        {
+            reportJobInfoList = getReportJobInfoForSixStates();
+        }
+        else if ("MTPostEditDistanceReport".equals(activityName))
+        {
+            reportJobInfoList = getReportJobInfoForFiveStates();
+        }
+        else
+        {
+            reportJobInfoList = getReportJobInfoForSevenStates();
+        }
+        return reportJobInfoList;
     }
 
     /**

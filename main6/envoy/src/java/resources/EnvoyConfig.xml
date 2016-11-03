@@ -2773,7 +2773,9 @@
       <WebPage pageName="ONLINEREVSTATUS" isDefault="true" jspName="/envoy/administration/reports/onlineRevStatusXlsReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportFileList">
-      <WebPage pageName="FILELIST" isDefault="true" jspName="/envoy/administration/reports/fileListReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+      <WebPage pageName="FILELIST" isDefault="true" jspName="/envoy/administration/reports/fileListReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler">
+        <PageLink linkName="self" destinationPageName="FILELIST"></PageLink>
+      </WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportVendorPO">
       <WebPage pageName="VENDORPO" isDefault="true" jspName="/envoy/administration/reports/vendorPOXlsReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>

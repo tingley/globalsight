@@ -170,7 +170,7 @@ function filterTargetLocale()
 		return;
 	}
 	$("#targetLocalesList").find("option").remove();
-	var url ="${self.pageURL}&action=ajaxTERS";
+	var url ="${self.pageURL}&action=ajaxTERS"
 	$.getJSON(url,{jobId:jobID},function(data){
 		$(data).each(function(i, item){
 			var sel = document.getElementById("targetLocalesList");

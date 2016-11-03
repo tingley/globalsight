@@ -193,8 +193,10 @@ public class TaskManagerLocal implements TaskManager
             // now update the estimated acceptance/completion for the rest
             // of the tasks in the default path (following the accepted
             // task) and the workflow's completion time.
-            updateDefaultPathTasks(taskInfo.getCompleteByDate(), wfTaskInfos,
-                    wfClone, task_temp.getId(), session);
+            // GBS-4563: when accept task, should not update completion date,
+            // take "time to accept" and "time to complete" as a whole duration.
+//            updateDefaultPathTasks(taskInfo.getCompleteByDate(), wfTaskInfos,
+//                    wfClone, task_temp.getId(), session);
 
             tx.commit();
 
@@ -246,7 +248,7 @@ public class TaskManagerLocal implements TaskManager
         }
         catch (WorkflowException we)
         {
-            // rollback the above DB action for transaction consistence
+            // rollback the above DB action for transaction consistency.
             try
             {
                 unacceptTask(task, wfTaskInfos, originalCompletedBy, p_userId,
@@ -1670,8 +1672,8 @@ public class TaskManagerLocal implements TaskManager
     }
 
     /*
-     * Update the attributes of the accepted task by setting the acceptance
-     * date, acceptor's user id, and estimated completion date.
+     * Update accepted task properties such as acceptance date, acceptor's user
+     * id. Note that we do not update estimated completion date.
      */
     private TaskInfo updateAcceptedTask(Date p_baseDate, TaskImpl p_clonedTask,
             String p_userId, Session p_session) throws Exception
@@ -1701,15 +1703,15 @@ public class TaskManagerLocal implements TaskManager
                     WorkflowConstants.FIELD_OVERDUE_USER_TIME,
                     WorkflowTaskInstance.NO_RATE);
 
-            Date estimatedDate = createReservedTime(p_baseDate, p_clonedTask,
-                    p_clonedTask.getTaskDuration(), ReservedTime.TYPE_ACTIVITY,
-                    p_userId, p_session);
+//            Date estimatedDate = createReservedTime(p_baseDate, p_clonedTask,
+//                    p_clonedTask.getTaskDuration(), ReservedTime.TYPE_ACTIVITY,
+//                    p_userId, p_session);
             p_clonedTask.setAcceptedDate(p_baseDate);
-            p_clonedTask.setEstimatedCompletionDate(estimatedDate);
+//            p_clonedTask.setEstimatedCompletionDate(estimatedDate);
 
-            TaskInfo taskInfo = new TaskInfo(p_clonedTask.getId(),
-                    p_clonedTask.getTaskName(), p_clonedTask.getState(), null,
-                    estimatedDate, p_baseDate, null, p_clonedTask.getType());
+            TaskInfo taskInfo = new TaskInfo(p_clonedTask.getId(), p_clonedTask.getTaskName(),
+                    p_clonedTask.getState(), null, p_clonedTask.getEstimatedCompletionDate(),
+                    p_baseDate, null, p_clonedTask.getType());
             taskInfo.setOverdueToPM(overdueToPM);
             taskInfo.setOverdueToUser(overdueToUser);
 

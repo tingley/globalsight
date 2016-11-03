@@ -230,68 +230,65 @@ public class Quartz
 				event.getRecurrenceRule());
 
 		if (timeExpressionConverter.isInterval())
- {
-			int repeatCount = (event.getRepeatCount() > -1) ? event
-					.getRepeatCount() : -1;
+        {
+            int repeatCount = (event.getRepeatCount() > -1) ? event.getRepeatCount() : -1;
 
-			if (event.getCalendar() != null
-					|| timeExpressionConverter.getCalendar() != null) {
-				trigger = TriggerBuilder.newTrigger().withIdentity(
-						jobName + TRIGGER_SUFFIX,
-						SchedulerConstants.DEFAULT_GROUP).withSchedule(
-						SimpleScheduleBuilder.simpleSchedule()
-								.withIntervalInMilliseconds(
-										timeExpressionConverter
-												.getIntervalMilli())
-								.withRepeatCount(repeatCount))
-						.modifiedByCalendar(jobName + CALENDAR_SUFFIX).startAt(
-								event.getStartTime() == null ? new Date()
-										: event.getStartTime()).endAt(
-								event.getEndTime() != null ? event.getEndTime()
-										: null).build();
-			} else {
-				trigger = TriggerBuilder.newTrigger().withIdentity(
-						jobName + TRIGGER_SUFFIX,
-						SchedulerConstants.DEFAULT_GROUP).withSchedule(
-						SimpleScheduleBuilder.simpleSchedule()
-								.withIntervalInMilliseconds(
-										timeExpressionConverter
-												.getIntervalMilli())
-								.withRepeatCount(repeatCount)).startAt(
-						event.getStartTime() == null ? new Date() : event
-								.getStartTime()).endAt(
-						event.getEndTime() != null ? event.getEndTime() : null)
-						.build();
-			}
-		}
+            if (event.getCalendar() != null || timeExpressionConverter.getCalendar() != null)
+            {
+                trigger = TriggerBuilder
+                        .newTrigger()
+                        .withIdentity(jobName + TRIGGER_SUFFIX, SchedulerConstants.DEFAULT_GROUP)
+                        .withSchedule(
+                                SimpleScheduleBuilder
+                                        .simpleSchedule()
+                                        .withIntervalInMilliseconds(
+                                                timeExpressionConverter.getIntervalMilli())
+                                        .withRepeatCount(repeatCount))
+                        .modifiedByCalendar(jobName + CALENDAR_SUFFIX)
+                        .startAt(event.getStartTime() == null ? new Date() : event.getStartTime())
+                        .endAt(event.getEndTime() != null ? event.getEndTime() : null).build();
+            }
+            else
+            {
+                trigger = TriggerBuilder
+                        .newTrigger()
+                        .withIdentity(jobName + TRIGGER_SUFFIX, SchedulerConstants.DEFAULT_GROUP)
+                        .withSchedule(
+                                SimpleScheduleBuilder
+                                        .simpleSchedule()
+                                        .withIntervalInMilliseconds(
+                                                timeExpressionConverter.getIntervalMilli())
+                                        .withRepeatCount(repeatCount))
+                        .startAt(event.getStartTime() == null ? new Date() : event.getStartTime())
+                        .endAt(event.getEndTime() != null ? event.getEndTime() : null).build();
+            }
+        }
 		else
- {
-			if (event.getCalendar() != null
-					|| timeExpressionConverter.getCalendar() != null) {
-				trigger = (CronTrigger) TriggerBuilder.newTrigger()
-						.withIdentity(jobName + TRIGGER_SUFFIX,
-								SchedulerConstants.DEFAULT_GROUP).withSchedule(
-								CronScheduleBuilder
-										.cronSchedule(timeExpressionConverter
-												.getCronExpression()))
-						.modifiedByCalendar(jobName + CALENDAR_SUFFIX).startAt(
-								event.getStartTime() == null ? new Date()
-										: event.getStartTime()).endAt(
-								event.getEndTime() != null ? event.getEndTime()
-										: null).build();
-			} else {
-				trigger = (CronTrigger) TriggerBuilder.newTrigger()
-						.withIdentity(jobName + TRIGGER_SUFFIX,
-								SchedulerConstants.DEFAULT_GROUP).withSchedule(
-								CronScheduleBuilder
-										.cronSchedule(timeExpressionConverter
-												.getCronExpression())).startAt(
-								event.getStartTime() == null ? new Date()
-										: event.getStartTime()).endAt(
-								event.getEndTime() != null ? event.getEndTime()
-										: null).build();
-			}
-		}
+        {
+            if (event.getCalendar() != null || timeExpressionConverter.getCalendar() != null)
+            {
+                trigger = (CronTrigger) TriggerBuilder
+                        .newTrigger()
+                        .withIdentity(jobName + TRIGGER_SUFFIX, SchedulerConstants.DEFAULT_GROUP)
+                        .withSchedule(
+                                CronScheduleBuilder.cronSchedule(timeExpressionConverter
+                                        .getCronExpression()))
+                        .modifiedByCalendar(jobName + CALENDAR_SUFFIX)
+                        .startAt(event.getStartTime() == null ? new Date() : event.getStartTime())
+                        .endAt(event.getEndTime() != null ? event.getEndTime() : null).build();
+            }
+            else
+            {
+                trigger = (CronTrigger) TriggerBuilder
+                        .newTrigger()
+                        .withIdentity(jobName + TRIGGER_SUFFIX, SchedulerConstants.DEFAULT_GROUP)
+                        .withSchedule(
+                                CronScheduleBuilder.cronSchedule(timeExpressionConverter
+                                        .getCronExpression()))
+                        .startAt(event.getStartTime() == null ? new Date() : event.getStartTime())
+                        .endAt(event.getEndTime() != null ? event.getEndTime() : null).build();
+            }
+        }
 
 		// Add calendar if necessary
 		if (event.getCalendar() != null
@@ -407,7 +404,7 @@ public class Quartz
      * 
      * @return The index value.
      */
-	private int getIndex()
+	private synchronized int getIndex()
 	{
 		if (index > MAX_INDEX)
 		{

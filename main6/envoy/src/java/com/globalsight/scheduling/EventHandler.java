@@ -18,10 +18,11 @@
 package com.globalsight.scheduling;
 
 
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.StatefulJob;
+import org.quartz.PersistJobDataAfterExecution;
 
 /**
  * EventHandler is an abstract class that implements the required behavior
@@ -35,7 +36,9 @@ import org.quartz.StatefulJob;
  * To qualify as a valid subclass, the new class <i>must</i> implement the
  * method <code>eventFired(KeyFlowContext)</code>.
  */
-public abstract class EventHandler implements StatefulJob
+@PersistJobDataAfterExecution
+@DisallowConcurrentExecution
+public abstract class EventHandler implements Job
 {
 
     /**
@@ -64,9 +67,8 @@ public abstract class EventHandler implements StatefulJob
     public abstract void eventFired(KeyFlowContext p_flowContext)
         throws EventHandlerException;
 
-	public void execute(JobExecutionContext context)
-			throws JobExecutionException {
-
-		eventFired(new KeyFlowContext(context));
-	}
+    public void execute(JobExecutionContext context) throws JobExecutionException
+    {
+        eventFired(new KeyFlowContext(context));
+    }
 }

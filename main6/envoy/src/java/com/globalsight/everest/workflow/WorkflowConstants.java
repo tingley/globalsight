@@ -554,13 +554,6 @@ public class WorkflowConstants
      */
     public static final int TASK_ACCEPTED = 8;
 
-    // The three constants are for GlobalSight Edition tasks.
-    public static final int TASK_DISPATCHED_TO_TRANSLATION = 81;
-    public static final int TASK_IN_TRANSLATION = 82;
-    public static final int TASK_TRANSLATION_COMPLETED = 83;
-    public static final int TASK_READEAY_DISPATCH_GSEDTION = 84;
-    public static final int TASK_GSEDITION_IN_PROGESS = 85;
-
     /**
      * Constant identifying a declined state for a task.
      */

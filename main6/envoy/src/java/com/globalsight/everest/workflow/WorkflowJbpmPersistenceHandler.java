@@ -119,28 +119,10 @@ public class WorkflowJbpmPersistenceHandler
 				return rejectedTaskInstances(p_userId, session, p_pm);
 				// available activities
 			case WorkflowConstants.TASK_ACTIVE:
-
 				return activeTaskInstances(p_userId, session, p_pm);
-
             // in progress activities
 			case WorkflowConstants.TASK_ACCEPTED:
 				return acceptedTaskInstances(p_userId, session, p_pm);
-			
-			case WorkflowConstants.TASK_READEAY_DISPATCH_GSEDTION:
-                return acceptedTaskInstances(p_userId, session, p_pm);
-                
-			case WorkflowConstants.TASK_DISPATCHED_TO_TRANSLATION:
-                return acceptedTaskInstances(p_userId, session, p_pm);
-                
-			case WorkflowConstants.TASK_IN_TRANSLATION:
-                return acceptedTaskInstances(p_userId, session, p_pm);
-                
-			case WorkflowConstants.TASK_TRANSLATION_COMPLETED:
-                return acceptedTaskInstances(p_userId, session, p_pm);
-            
-			case WorkflowConstants.TASK_GSEDITION_IN_PROGESS:
-                return acceptedTaskInstances(p_userId, session, p_pm);
-                
 				// finished activities
 			case WorkflowConstants.TASK_COMPLETED:
 				return completedTaskInstances(p_userId, session, p_pm);

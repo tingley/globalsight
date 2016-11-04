@@ -16,8 +16,6 @@
  */
 package com.globalsight.everest.persistence.task;
 
-import com.globalsight.everest.taskmanager.Task;
-
 /**
  * TaskDescriptorModifier extends DescriptorModifier by providing amendment
  * methods unique to the Task descriptor.
@@ -84,12 +82,7 @@ public class TaskDescriptorModifier
         sb.append(TABLE_NAME);
         sb.append(" WHERE WORKFLOW_ID = :");
         sb.append(WORKFLOW_ID_ARG);
-        sb.append(" AND STATE IN (\'ACTIVE\', \'ACCEPTED\',\'" 
-                + Task.STATE_DISPATCHED_TO_TRANSLATION_STR 
-                + "\',\'" + Task.STATE_IN_TRANSLATION_STR
-                + "\',\'" + Task.STATE_DISPATCHED_TO_TRANSLATION_STR
-                + "\',\'" + Task.STATE_TRANSLATION_COMPLETED_STR
-                + "\')");
+        sb.append(" AND STATE IN (\'ACTIVE\', \'ACCEPTED\')");
         CURRENT_TASKS_BY_WORKFLOW_ID_SQL = sb.toString();
     }
     

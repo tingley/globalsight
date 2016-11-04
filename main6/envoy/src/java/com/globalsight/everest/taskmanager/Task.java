@@ -57,10 +57,6 @@ public interface Task extends WorkObject
     // in our table.
     public static final int STATE_ACTIVE = WorkflowConstants.TASK_ACTIVE; // ACTIVE
     public static final int STATE_ACCEPTED = WorkflowConstants.TASK_ACCEPTED; // ACCEPTED
-    public static final int STATE_DISPATCHED_TO_TRANSLATION = WorkflowConstants.TASK_DISPATCHED_TO_TRANSLATION; // DISPATCHED_TO_TRANSLATION
-    public static final int STATE_IN_TRANSLATION = WorkflowConstants.TASK_IN_TRANSLATION; // IN_TRANSLATION
-    public static final int STATE_TRANSLATION_COMPLETED = WorkflowConstants.TASK_TRANSLATION_COMPLETED; // TRANSLATION_COMPLETED
-    public static final int STATE_REDEAY_DISPATCH_GSEDTION = WorkflowConstants.TASK_READEAY_DISPATCH_GSEDTION;
     public static final int STATE_COMPLETED = WorkflowConstants.TASK_COMPLETED; // COMPLETED
     public static final int STATE_DEACTIVE = WorkflowConstants.TASK_DEACTIVE; // DEACTIVE
     public static final int STATE_REJECTED = WorkflowConstants.TASK_DECLINED;
@@ -71,10 +67,6 @@ public interface Task extends WorkObject
     public static final String STATE_FINISHING_STR = "FINISHING";
     public static final String STATE_ACTIVE_STR = "ACTIVE"; // ACTIVE
     public static final String STATE_ACCEPTED_STR = "ACCEPTED"; // ACCEPTED
-    public static final String STATE_DISPATCHED_TO_TRANSLATION_STR = "DISPATCHED_TO_TRANSLATION"; // DISPATCHED_TO_TRANSLATION
-    public static final String STATE_IN_TRANSLATION_STR = "IN_TRANSLATION"; // IN_TRANSLATION
-    public static final String STATE_TRANSLATION_COMPLETED_STR = "TRANSLATION_COMPLETED"; // TRANSLATION_COMPLETED
-    public static final String STATE_REDEAY_DISPATCH_GSEDTION_STR = "READY_FOR_DISPATCHING_TO_TRANSLATION";
     public static final String STATE_COMPLETED_STR = "COMPLETED"; // COMPLETED
     public static final String STATE_DEACTIVE_STR = "DEACTIVE"; // DEACTIVE
     // for gbs-1302, 'TRIGGERED' mark

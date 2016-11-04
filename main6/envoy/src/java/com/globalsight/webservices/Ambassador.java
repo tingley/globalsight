@@ -6822,8 +6822,7 @@ public class Ambassador extends AbstractWebService
     }
 
     /**
-     * Get server version such as 7.1.7.2. For GS edition feature,it need to be
-     * run on 7.1.7.2 or upper servers.
+     * Get server version such as 7.1.7.2.
      * 
      * @param p_accessToken
      * @return
@@ -13303,10 +13302,9 @@ public class Ambassador extends AbstractWebService
      * 
      * @param p_state
      *            : task state number, available values: 3 : "ACTIVE" (for
-     *            "Available" tasks) 8 : "ACCEPTED" (for "In Progress" tasks) 81
-     *            : "DISPATCHED_TO_TRANSLATION" 82 : "IN_TRANSLATION" 83 :
-     *            "TRANSLATION_COMPLETED" -1 : "COMPLETED" (for "Finished"
-     *            tasks) 4 : "DEACTIVE" (for "Rejected" tasks)
+     *            "Available" tasks) 8 : "ACCEPTED" (for "In Progress" tasks)
+     *            -1 : "COMPLETED" (for "Finished" tasks)
+     *             4 : "DEACTIVE" (for "Rejected" tasks)
      * @see com.globalsight.everest.taskmanager.Task
      * 
      *      As the three state are all task inner state, no need more actions
@@ -13368,6 +13366,7 @@ public class Ambassador extends AbstractWebService
      * Upload translated files to server for offline uploading purpose.
      * 
      * This should be invoked before importOfflineTargetFiles() API.
+     * @deprecated
      * 
      * @param p_accessToken
      *            The String of access token.
@@ -13418,7 +13417,6 @@ public class Ambassador extends AbstractWebService
      * Offline uploading support.
      * 
      * Before invoking this, uploadEditionFileBack() API should be invoked.
-     * After invoking this, sendSegmentCommentBack() API should be invoked.
      * 
      * @param p_accessToken
      * @param p_originalTaskId

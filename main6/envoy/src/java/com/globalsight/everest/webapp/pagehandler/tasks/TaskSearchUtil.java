@@ -23,7 +23,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,6 +50,7 @@ import com.globalsight.util.StringUtil;
 public class TaskSearchUtil
 {
     private static Logger logger = Logger.getLogger(TaskSearchUtil.class);
+
     private static String IS_REJECT_SQL = null;
     static
     {
@@ -247,22 +247,6 @@ public class TaskSearchUtil
                     sql.append(" and ti.ACTORID_ = :actorId ");
                 }
                 sql.append("and ti.START_ is not null and ti.END_ is null ");
-                break;
-            case WorkflowConstants.TASK_GSEDITION_IN_PROGESS:
-                if (isPm)
-                {
-                    sql.append(" and (ti.ACTORID_ = :actorId or ti.DESCRIPTION_ = :actorId) ");
-                }
-                else
-                {
-                    sql.append(" and ti.ACTORID_ = :actorId ");
-                }
-                sql.append(" and ti.ACTORID_ = :actorId ");
-                sql.append(" and t.STATE in ('"
-                        + TaskImpl.STATE_REDEAY_DISPATCH_GSEDTION_STR + "','"
-                        + TaskImpl.STATE_DISPATCHED_TO_TRANSLATION_STR + "','"
-                        + TaskImpl.STATE_IN_TRANSLATION_STR + "','"
-                        + TaskImpl.STATE_TRANSLATION_COMPLETED_STR + "') ");
                 break;
             case WorkflowConstants.TASK_DECLINED:
                 sql.append(" vi.NAME = 'isRejected' ");

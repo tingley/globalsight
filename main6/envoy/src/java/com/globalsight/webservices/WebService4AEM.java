@@ -402,8 +402,7 @@ public interface WebService4AEM
             throws WebServiceException;
 
     /**
-     * Get server version such as 7.1.7.2. For GS edition feature,it need to be
-     * run on 7.1.7.2 or upper servers.
+     * Get server version such as 7.1.7.2.
      * 
      * @param p_accessToken
      * @return

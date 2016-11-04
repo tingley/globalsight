@@ -25,7 +25,6 @@ import java.util.Set;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
-import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -253,23 +252,8 @@ public class TaskSearchCriteria
     private void activityState(Object p_key, Map criteria)
     {
         Integer state = (Integer) criteria.get(p_key);
-        String stateStr = TaskImpl.getStateAsString(state.intValue());
-
-        if (state == WorkflowConstants.TASK_GSEDITION_IN_PROGESS)
-        {
-            // add the "dispatched_to_translation","in translation",
-            // "translation completed" status into "in progress" search
-            hql.append(" and t.stateStr in ('"
-                    + TaskImpl.STATE_REDEAY_DISPATCH_GSEDTION_STR + "','"
-                    + TaskImpl.STATE_DISPATCHED_TO_TRANSLATION_STR + "','"
-                    + TaskImpl.STATE_IN_TRANSLATION_STR + "','"
-                    + TaskImpl.STATE_TRANSLATION_COMPLETED_STR + "') ");
-        }
-        else
-        {
-            hql.append(" and t.stateStr = :state ");
-            params.put("state", stateStr);
-        }
+        hql.append(" and t.stateStr = :state ");
+        params.put("state", TaskImpl.getStateAsString(state.intValue()));
     }
 
     /**

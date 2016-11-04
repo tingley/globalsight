@@ -63,7 +63,7 @@
 	<classpathentry kind="lib" path="main6/tools/lib/common/poi-ooxml-schemas-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/poi-scratchpad-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/promtUtil.jar"/>
-	<classpathentry kind="lib" path="main6/tools/lib/common/quartz-2.2.1.jar"/>
+	<classpathentry kind="lib" path="main6/tools/lib/common/quartz-2.2.1.jar" sourcepath="main6/tools/lib/sources/quartz-2.2.1-sources.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/relaxngDatatype.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/ridl-3.1.0.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/rome-1.0.jar"/>
@@ -107,7 +107,7 @@
 	<classpathentry kind="lib" path="main6/tools/j2eeVendor/jboss/wildfly-10.0.0.Final/server/modules/system/layers/base/org/apache/xerces/main/xercesImpl-2.11.0.SP4.jar"/>
 	<classpathentry kind="lib" path="main6/tools/j2eeVendor/jboss/wildfly-10.0.0.Final/server/modules/system/layers/base/org/codehaus/jackson/jackson-core-asl/main/jackson-core-asl-1.9.13.jar"/>
 	<classpathentry kind="lib" path="main6/tools/j2eeVendor/jboss/wildfly-10.0.0.Final/server/modules/system/layers/base/org/codehaus/jackson/jackson-mapper-asl/main/jackson-mapper-asl-1.9.13.jar"/>
-	<classpathentry kind="lib" path="main6/tools/j2eeVendor/jboss/wildfly-10.0.0.Final/server/modules/system/layers/base/org/hibernate/main/hibernate-core-5.0.7.Final.jar"/>
+	<classpathentry kind="lib" path="main6/tools/j2eeVendor/jboss/wildfly-10.0.0.Final/server/modules/system/layers/base/org/hibernate/main/hibernate-core-5.0.7.Final.jar" sourcepath="main6/tools/lib/sources/hibernate-core-5.0.7.Final-sources.jar"/>
 	<classpathentry kind="lib" path="main6/tools/j2eeVendor/jboss/wildfly-10.0.0.Final/server/modules/system/layers/base/org/hibernate/optional/c3p0/main/c3p0-0.9.5.2.jar"/>
 	<classpathentry kind="lib" path="main6/tools/j2eeVendor/jboss/wildfly-10.0.0.Final/server/modules/system/layers/base/org/hibernate/optional/c3p0/main/hibernate-c3p0-5.1.0.Final.jar"/>
 	<classpathentry kind="lib" path="main6/tools/j2eeVendor/jboss/wildfly-10.0.0.Final/server/modules/system/layers/base/org/hibernate/optional/c3p0/main/mchange-commons-java-0.2.11.jar"/>

@@ -15,6 +15,7 @@
                  com.globalsight.everest.webapp.pagehandler.edit.inctxrv.pdf.PreviewPDFHelper,
                  com.globalsight.util.GeneralException,
                  java.text.MessageFormat,
+                 com.globalsight.util.StringUtil,
                  java.util.*"
           session="true"
 %>
@@ -87,7 +88,7 @@
     
     String defaultCompanyFluency = "";
     String defaultCompanyAdequacy = "";
-    
+    String diableUploadFileTypes = "";
     if (company != null)
     {
         companyName = company.getName();
@@ -146,6 +147,10 @@
         
         defaultCompanyFluency = company.getDefaultFluency();
         defaultCompanyAdequacy = company.getDefaultAdequacy();
+        diableUploadFileTypes = company.getDisableUploadFileTypes();
+        if(StringUtil.isEmptyAndNull(diableUploadFileTypes)){
+        	diableUploadFileTypes = "";
+        }
     }
 %>
 <html>
@@ -200,6 +205,13 @@
             <td valign="top"><%=bundle.getString("lb_email")%>:</td>
             <td colspan="2">
                 <input type="text" style="width:350px;" name="<%=CompanyConstants.EMAIL%>" id="emailId" value="<%=email%>">
+            </td>
+        </tr>
+        
+        <tr>
+            <td valign="top"><%=bundle.getString("lb_disable_upload_file_types")%>:</td>
+            <td colspan="2">
+                <input type="text" style="width:350px;" name="<%=CompanyConstants.DISABLE_UPLOAD_FILE_TYPES%>" id="fileTypeId" value="<%=diableUploadFileTypes%>">
             </td>
         </tr>
         
@@ -1048,6 +1060,23 @@ function confirmForm()
     		alert("<%=bundle.getString("jsmsg_email_invalid")%>");
             return false;
     	}
+    }
+
+    //check disable upload file types
+	var disableFileTypes = document.getElementById("fileTypeId").value;
+	if (disableFileTypes.replace(/^\s+|\s+$/g,"").length > 0)
+	{
+		var array= new Array();
+		array = disableFileTypes.split(",");
+		for (i=0;i<array.length ;i++ )
+		{
+			var fileType = array[i].replace(/^\s+|\s+$/g,"");
+			if(fileType.charAt(0) != ".")
+			{
+				alert("<%=bundle.getString("jsmsg_disable_upload_file_types")%>"+disableFileTypes);
+	            return false;
+			}
+		}
     }
 	
 	// check name

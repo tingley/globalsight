@@ -264,6 +264,10 @@ public interface WorkflowTemplateConstants
      */
     public static final String IMPORT_ACTION = "import";
     /**
+     * Constant used for a check action.
+     */
+    public static final String CHECK_UPLOAD_FILE_TYPE = "checkUploadFileType";
+    /**
      * Constant used for a export action.
      */
     public static final String EXPORT_ACTION = "export";

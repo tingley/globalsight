@@ -282,7 +282,8 @@ public class FilterConfigurationImportHandler extends PageHandler
         String[] labels = new String[]
         { "lb_filter_import", "helper_text_filter_import", "msg_file_none", "lb_cancel",
                 "lb_upload", "lb_processing_import_file", "lb_please_wait", "lb_ok", "lb_back",
-                "msg_alert_filter_import", "lb_refresh", "help_filter_configuration_import_screen" };
+                "msg_alert_filter_import", "lb_refresh", "help_filter_configuration_import_screen" 
+                ,"lb_message_check_upload_file_type"};
         for (String label : labels)
         {
             setLabelToJsp(request, bundle, label);

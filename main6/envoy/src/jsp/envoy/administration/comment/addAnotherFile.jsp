@@ -114,6 +114,9 @@
 			+ CommentConstants.DELETE + "="
 			+ WebAppConstants.COMMENT_REFERENCE_DELETE+"&"
 			+ CommentConstants.SAVE_COMMENT_STATUS + "=" + saveCommStatus;
+	
+	String url_check_upload_file_type = referenceUpload.getPageURL() + "&" 
+			+ WebAppConstants.TASK_ACTION+"=checkUploadFileType";
 
 	boolean displaySupportRadio = false;
 	if (wo != null) {
@@ -177,6 +180,14 @@
 						+ "&" + WebAppConstants.TASK_COMMENT
 						+ "=" + comments
 						+ "&toTask=ture";
+			url_check_upload_file_type += "&" + WebAppConstants.TASK_ID
+					+ "=" + task.getId()
+					+ "&" + WebAppConstants.TASK_STATE
+					+ "=" + task.getState()
+					+ "&" + WebAppConstants.TASK_COMMENT
+					+ "=" + comments
+					+ "&toTask=ture";
+			
 			if(comment != null){
 				doneUrl += "&commentId="+comment.getId();
 				cancelUrl += "&commentId="+comment.getId();
@@ -184,6 +195,7 @@
 				url_upload_true += "&commentId="+comment.getId();
 				url_upload_support_file += "&commentId="+comment.getId();
 				url_delete += "&commentId="+comment.getId();
+				url_check_upload_file_type += "&commentId="+comment.getId();
 			}
 			companyId = ((Task) wo).getCompanyId();
 			jobName = ((Task) wo).getJobName();
@@ -233,14 +245,20 @@
 						+ "&" + WebAppConstants.TASK_COMMENT
 						+ "=" + comments
 						+ "&toJob=ture";
-			
-			if(comment != null){
+			url_check_upload_file_type += "&" + WebAppConstants.JOB_ID + "="
+									+ job.getId()
+									+ "&" + WebAppConstants.TASK_COMMENT
+									+ "=" + comments
+									+ "&toJob=ture";
+			if(comment != null)
+			{
 				doneUrl += "&commentId="+comment.getId();
 				cancelUrl += "&commentId="+comment.getId();
 				url_upload += "&commentId="+comment.getId();
 				url_upload_true += "&commentId="+comment.getId();
 				url_upload_support_file += "&commentId="+comment.getId();
 				url_delete += "&commentId="+comment.getId();
+				url_check_upload_file_type += "&commentId="+comment.getId();
 			}
 			companyId = ((Job) wo).getCompanyId();
 			jobName = ((Job) wo).getJobName();
@@ -321,6 +339,11 @@ function prepToClose()
 
 function isReady(form)
 {
+	if(!checkUploadFileType())
+	{
+		return false;
+	}
+	
     var field = form.filename;
     var filename = field.value;
 
@@ -367,6 +390,38 @@ function isReady(form)
         uploadForm.idSubmit.style.cursor = "wait";
         return true;
     }
+}
+
+function checkUploadFileType()
+{
+	var checkAction = "<%=url_check_upload_file_type%>"
+	var formData = new FormData($( "#uploadForm" )[0]);
+	var result = true;
+    $.ajax({
+        type : "POST",
+        url : checkAction,
+        traditional:true,
+        async : false,
+        cache : false,
+        contentType: false,  
+        processData: false,  
+        data: formData,
+        success : function(data) {
+			if(data == 'notContain'){
+				//upload file does not contain disable file type
+				result = true;
+        	}else{
+        		//upload file contain disable file type
+        		alert(data);
+        		result = false;
+        	}
+        },
+        error : function(request, error, status) {
+            alert(error);
+            result = false;
+        }
+    });
+    return result;
 }
 
 function showMessage(message)
@@ -703,7 +758,7 @@ sort();
 
 <P>
 
-<FORM NAME="uploadForm" METHOD="POST" ACTION="<%=url_upload%>"
+<FORM NAME="uploadForm" ID="uploadForm" METHOD="POST" ACTION="<%=url_upload%>"
         ENCTYPE="multipart/form-data" onSubmit="return isReady(this)"
         CLASS="standardText">
 

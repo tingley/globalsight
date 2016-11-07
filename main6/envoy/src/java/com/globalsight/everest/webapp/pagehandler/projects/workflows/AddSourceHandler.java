@@ -48,6 +48,7 @@ import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.cxe.util.addSource.AddSourceFileUtil;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
@@ -78,6 +79,7 @@ import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.ProcessStatus;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.file.XliffFileUtil;
 import com.globalsight.util.zip.ZipIt;
 
@@ -617,7 +619,14 @@ public class AddSourceHandler extends PageActionHandler
             dir.mkdirs();
             File trg = new File(dir.getPath() + File.separator + uploader.getName());
             FileUtil.copyFile(file, trg);
-
+            //check upload file type
+            String errorString = checkUploadFileType(trg);
+            if (StringUtil.isNotEmptyAndNull(errorString))
+            {
+                out.write(errorString);
+                return;
+            }
+            
             List<String> paths = new ArrayList<String>();
             if (trg.getName().endsWith(".zip"))
             {
@@ -637,9 +646,8 @@ public class AddSourceHandler extends PageActionHandler
             {
                 file.delete();
             }
-
+            
             StringBuffer result = new StringBuffer();
-
             Map<String, String> error = updateSouceFiles(Long.parseLong(jobId), paths, randomNum);
             if (error.size() > 0)
             {
@@ -698,6 +706,48 @@ public class AddSourceHandler extends PageActionHandler
         logger.debug("Updating souce files finished.");
     }
 
+    private String checkUploadFileType(File trg)
+    {
+        StringBuffer result = new StringBuffer();
+        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+        List<File> uploadFiles = new ArrayList<File>();
+        uploadFiles.add(trg);
+        List<File> canNotUploadFiles = StringUtil.isDisableUploadFileType(
+                CompanyWrapper.getCompanyById(currentCompanyId), uploadFiles);
+        
+        if (canNotUploadFiles != null && canNotUploadFiles.size() > 0)
+        {
+            result.append("<html><body onload='parent.popupUploadErrorMessage()'><div id='uploadFileErroInfo' style='margin:20px 50px'>");
+            StringBuffer html = new StringBuffer();
+            html.append(bundle.getString("msg_add_failed"));
+            html.append("<table CLASS='listborder' CELLPADDING='3' style='width:480px; ' CELLSPACING='0' BORDER='0'>");
+            html.append("<tr CLASS=\"tableHeadingBasic\" style='padding:5px; height:24px;'><td>");
+            html.append(bundle.getString("lb_file")).append("</td><td>");
+            html.append(bundle.getString("lb_error")).append("</td></tr>");
+            html.append("<tr height='3'/>");
+            String fileName = "";
+            for (int i = 0; i < canNotUploadFiles.size(); i++)
+            {
+                fileName += canNotUploadFiles.get(i).getName() + ",";
+            }
+            if (StringUtil.isNotEmptyAndNull(fileName))
+            {
+                fileName = fileName.substring(0, fileName.lastIndexOf(","));
+            }
+
+            html.append("<tr CLASS='").append("tableRowEven");
+            html.append("'style='padding:5px; height:24px;'><td>").append(fileName)
+                    .append("</td><td>");
+            html.append(
+                    bundle.getString("lb_message_check_upload_file_type")
+                            + CompanyWrapper.getCompanyById(currentCompanyId)
+                                    .getDisableUploadFileTypes()).append("</td></tr>");
+            result.append(html.toString());
+            result.append("</div></body></html>");
+        }
+        return result.toString();
+    }
+    
     private void deletePages(long jobId, List<Long> ids, String randomNum) throws Exception
     {
         JobImpl job = HibernateUtil.get(JobImpl.class, jobId);

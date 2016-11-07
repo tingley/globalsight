@@ -27,14 +27,19 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
+import com.globalsight.util.StringUtil;
 
 public class CommentUpload
 {
@@ -128,14 +133,39 @@ public class CommentUpload
         try
         {
             // read request and save uploaded file into a temp file
-            readRequest(p_request);
+//            readRequest(p_request);
             // verify that the upload contained full information;
             // throws exception if not
-            verifyUpload();
+//            verifyUpload();
             // rename the temp file to the first real file
-            boolean fromUI =  true;
-            renameFile(fromUI, p_request, null, -1, null);
+            getUploadFileMessage(p_request);
+            renameFile(true, p_request, null, -1, null);
             // if requested, copy file to other src/trg locations
+        }
+        catch (SecurityException se)
+        {
+            throw new CommentException(se);
+        }
+        catch (Exception ioe)
+        {
+            throw new CommentException(ioe);
+        }
+    }
+
+    public List<File> checkUploadFileType(HttpServletRequest p_request, String currentCompanyId)
+            throws CommentException
+    {
+        try
+        {
+            // read request and save uploaded file into a temp file
+            readRequest(p_request);
+            verifyUpload();
+            File uploadFile = saveUploadFile();
+            List<File> fileList = new ArrayList<File>();
+            fileList.add(uploadFile);
+            List<File> canNotUploadFiles = StringUtil.isDisableUploadFileType(
+                    CompanyWrapper.getCompanyById(currentCompanyId), fileList);
+            return canNotUploadFiles;
         }
         catch (SecurityException se)
         {
@@ -146,7 +176,6 @@ public class CommentUpload
             throw new CommentException(ioe);
         }
     }
-
     
     /**
      * Main method: reads file 
@@ -176,57 +205,141 @@ public class CommentUpload
         }
     }
 
+    private void getUploadFileMessage(HttpServletRequest p_request) throws CommentException,
+            IOException
+    {
+        byte[] inBuf = new byte[MAX_LINE_LENGTH];
+        String boundary;
+        int bytesRead;
+        ServletInputStream in;
+        String contentType = p_request.getContentType();
+        if (contentType == null || !contentType.toLowerCase().startsWith("multipart/form-data"))
+        {
+            String[] arg =
+            { "form did not use ENCTYPE=multipart/form-data but `" + contentType + "'" };
+            throw new CommentException(CommentException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
+        }
+        
+        int bi = contentType.indexOf("boundary=");
+        if (bi == -1)
+        {
+            String[] arg =
+            { "no boundary string found in request" };
+
+            throw new CommentException(CommentException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
+        }
+        else
+        {
+            boundary = contentType.substring(bi + 9);
+            boundary = "--" + boundary;
+        }
+
+        in = p_request.getInputStream();
+        bytesRead = in.readLine(inBuf, 0, inBuf.length);
+        
+        if (bytesRead < 3)
+        {
+            String[] arg =
+            { "incomplete request (not enough data)" };
+            throw new CommentException(CommentException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
+        }
+        
+        while (bytesRead != -1)
+        {
+            String lineRead = new String(inBuf, 0, bytesRead, "utf-8");
+            if (lineRead.startsWith("Content-Disposition: form-data; name=\""))
+            {
+                if (lineRead.indexOf("filename=\"") != -1)
+                {
+                    setFilename(lineRead.substring(0, lineRead.length() - 2));
+                    break;
+                }
+                else
+                {
+                    // This is the field part
+                    // First get the field name
+                    int start = lineRead.indexOf("name=\"");
+                    int end = lineRead.indexOf("\"", start + 7);
+                    String fieldName = lineRead.substring(start + 6, end);
+                    bytesRead = in.readLine(inBuf, 0, inBuf.length);
+                    
+                    StringBuffer fieldValue = new StringBuffer();
+                    boolean writeRN = false;
+                    while ((bytesRead = in.readLine(inBuf, 0, inBuf.length)) != -1)
+                    {
+                        lineRead = new String(inBuf, 0, bytesRead, "utf-8");
+                        // Let's first check if we are already on boundary line
+                        if (bytesRead > 2 && inBuf[0] == '-' && inBuf[1] == '-')
+                        {
+                            if (lineRead.startsWith(boundary))
+                                break;
+                        }
+                        // Write out carriage-return, new-line pair which might have been left over from last write.
+                        if (writeRN)
+                        {
+                            fieldValue.append("\r\n");
+                            writeRN = false;
+                        }
+                        if (bytesRead > 2 && inBuf[bytesRead - 2] == '\r'
+                                && inBuf[bytesRead - 1] == '\n')
+                        {
+                            fieldValue.append(lineRead.substring(0, lineRead.length() - 2));
+                            writeRN = true;
+                        }
+                        else
+                        {
+                            fieldValue.append(lineRead);
+                        }
+                    }
+                    // Add field to collection of field
+                    setFieldValue(fieldName, fieldValue.toString());
+                }
+            }
+            bytesRead = in.readLine(inBuf, 0, inBuf.length);
+        }
+    }
+    
     /**
      * Parses a HttpRequest into parameters and file data and saves
      * the file data into a temporary file.
      */
-    private void readRequest (HttpServletRequest p_request)
-        throws CommentException,
-               IOException
+    private void readRequest(HttpServletRequest p_request) throws CommentException, IOException
     {
-        byte[]              inBuf = new byte[MAX_LINE_LENGTH];
-        int                 bytesRead;
-        ServletInputStream  in;
-        String              contentType;
-        String              boundary;
+        byte[] inBuf = new byte[MAX_LINE_LENGTH];
+        int bytesRead;
+        ServletInputStream in;
+        String contentType;
+        String boundary;
 
-        //  Let's make sure that we have the right type of content
+        // Let's make sure that we have the right type of content
         //
         contentType = p_request.getContentType();
-        if (contentType == null ||
-            !contentType.toLowerCase().startsWith("multipart/form-data"))
+        if (contentType == null || !contentType.toLowerCase().startsWith("multipart/form-data"))
         {
-            String[] arg = {
-               "form did not use ENCTYPE=multipart/form-data but `" +
-                contentType + "'"
-            };
+            String[] arg =
+            { "form did not use ENCTYPE=multipart/form-data but `" + contentType + "'" };
 
-            throw new CommentException(
-                CommentException.MSG_FAILED_TO_UPLOAD_FILE,
-                arg, null);
+            throw new CommentException(CommentException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
         }
 
-        //  Extract the boundary string in this request. The
-        //  boundary string is part of the content type string
+        // Extract the boundary string in this request. The
+        // boundary string is part of the content type string
         //
         int bi = contentType.indexOf("boundary=");
         if (bi == -1)
         {
-            String[] arg = {
-                "no boundary string found in request"
-            };
+            String[] arg =
+            { "no boundary string found in request" };
 
-            throw new CommentException(
-                CommentException.MSG_FAILED_TO_UPLOAD_FILE,
-                arg, null);
+            throw new CommentException(CommentException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
         }
         else
         {
             // 9 := len("boundary=")
             boundary = contentType.substring(bi + 9);
 
-            //  The real boundary has additional two dashes in
-            //  front
+            // The real boundary has additional two dashes in
+            // front
             //
             boundary = "--" + boundary;
         }
@@ -236,15 +349,12 @@ public class CommentUpload
 
         if (bytesRead < 3)
         {
-            String[] arg = {
-            "incomplete request (not enough data)"
-            };
+            String[] arg =
+            { "incomplete request (not enough data)" };
 
-            //  Not enough content was send as part of the post
+            // Not enough content was send as part of the post
             //
-            throw new CommentException(
-                CommentException.MSG_FAILED_TO_UPLOAD_FILE,
-                arg, null);
+            throw new CommentException(CommentException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
         }
 
         while (bytesRead != -1)
@@ -254,44 +364,40 @@ public class CommentUpload
             {
                 if (lineRead.indexOf("filename=\"") != -1)
                 {
-                    //  This is a file part
+                    // This is a file part
 
-                    //  Get file name
+                    // Get file name
                     setFilename(lineRead.substring(0, lineRead.length() - 2));
 
-                    //  Get content type line
+                    // Get content type line
                     bytesRead = in.readLine(inBuf, 0, inBuf.length);
                     lineRead = new String(inBuf, 0, bytesRead - 2, "utf-8");
                     setContentType(lineRead);
 
-                    //  Read and ignore the blank line
+                    // Read and ignore the blank line
                     bytesRead = in.readLine(inBuf, 0, inBuf.length);
 
-                    //  Create a temporary file to store the
-                    //  contents in it for now.
-                    //  Save the contents in this file for now and
-                    //  finally rename it to correct file name.
+                    // Create a temporary file to store the
+                    // contents in it for now.
+                    // Save the contents in this file for now and
+                    // finally rename it to correct file name.
                     //
-                    m_tempFile  = File.createTempFile("GSCommentsUpload", null, 
+                    m_tempFile = File.createTempFile("GSCommentsUpload", null,
                             AmbFileStoragePathUtils.getCommentReferenceTempDir());
 
                     FileOutputStream fos = new FileOutputStream(m_tempFile);
-                    BufferedOutputStream bos =
-                        new BufferedOutputStream(fos, MAX_LINE_LENGTH * 4);
+                    BufferedOutputStream bos = new BufferedOutputStream(fos, MAX_LINE_LENGTH * 4);
 
-                    //  Read through the file contents and write
-                    //  it out to a local temp file.
+                    // Read through the file contents and write
+                    // it out to a local temp file.
                     //
                     boolean writeRN = false;
-                    while ((bytesRead =
-                        in.readLine(inBuf, 0, inBuf.length)) != -1)
+                    while ((bytesRead = in.readLine(inBuf, 0, inBuf.length)) != -1)
                     {
-                        //  Let's first check if we are already on
-                        //  boundary line
+                        // Let's first check if we are already on
+                        // boundary line
                         //
-                        if (bytesRead > 2 &&
-                            inBuf[0] == '-' &&
-                            inBuf[1] == '-')
+                        if (bytesRead > 2 && inBuf[0] == '-' && inBuf[1] == '-')
                         {
                             lineRead = new String(inBuf, 0, bytesRead, "utf-8");
                             if (lineRead.startsWith(boundary))
@@ -300,27 +406,27 @@ public class CommentUpload
                             }
                         }
 
-                        //  Write out carriage-return, new-line
-                        //  pair which might have been left over
-                        //  from last write.
+                        // Write out carriage-return, new-line
+                        // pair which might have been left over
+                        // from last write.
                         //
                         if (writeRN)
                         {
-                            bos.write(new byte[] {(byte)'\r', (byte)'\n'});
+                            bos.write(new byte[]
+                            { (byte) '\r', (byte) '\n' });
                             writeRN = false;
                         }
 
-                        //  The ServletInputStream.readline() adds
-                        //  "\r\n" bytes for the last line of the
-                        //  file contents.  If we find these pair
-                        //  as the last bytes we need to delay
-                        //  writing it until the next go, since it
-                        //  could very well be the last line of
-                        //  file content.
+                        // The ServletInputStream.readline() adds
+                        // "\r\n" bytes for the last line of the
+                        // file contents. If we find these pair
+                        // as the last bytes we need to delay
+                        // writing it until the next go, since it
+                        // could very well be the last line of
+                        // file content.
                         //
-                        if (bytesRead > 2 &&
-                            inBuf[bytesRead - 2] == '\r' &&
-                            inBuf[bytesRead - 1] == '\n')
+                        if (bytesRead > 2 && inBuf[bytesRead - 2] == '\r'
+                                && inBuf[bytesRead - 1] == '\n')
                         {
                             bos.write(inBuf, 0, bytesRead - 2);
                             writeRN = true;
@@ -337,41 +443,38 @@ public class CommentUpload
                 }
                 else
                 {
-                    //  This is the field part
+                    // This is the field part
 
-                    //  First get the field name
+                    // First get the field name
                     //
-                    int     start = lineRead.indexOf("name=\"");
-                    int     end = lineRead.indexOf("\"", start + 7);
-                    String  fieldName = lineRead.substring(start + 6, end);
+                    int start = lineRead.indexOf("name=\"");
+                    int end = lineRead.indexOf("\"", start + 7);
+                    String fieldName = lineRead.substring(start + 6, end);
 
-                    //  Read and ignore the blank line
+                    // Read and ignore the blank line
                     bytesRead = in.readLine(inBuf, 0, inBuf.length);
 
-                    //  String Buffer to keep the field value
+                    // String Buffer to keep the field value
                     //
                     StringBuffer fieldValue = new StringBuffer();
 
                     boolean writeRN = false;
-                    while ((bytesRead =
-                        in.readLine(inBuf, 0, inBuf.length)) != -1)
+                    while ((bytesRead = in.readLine(inBuf, 0, inBuf.length)) != -1)
                     {
                         lineRead = new String(inBuf, 0, bytesRead, "utf-8");
 
-                        //  Let's first check if we are already on
-                        //  boundary line
+                        // Let's first check if we are already on
+                        // boundary line
                         //
-                        if (bytesRead > 2 &&
-                            inBuf[0] == '-' &&
-                            inBuf[1] == '-')
+                        if (bytesRead > 2 && inBuf[0] == '-' && inBuf[1] == '-')
                         {
                             if (lineRead.startsWith(boundary))
                                 break;
                         }
 
-                        //  Write out carriage-return, new-line
-                        //  pair which might have been left over
-                        //  from last write.
+                        // Write out carriage-return, new-line
+                        // pair which might have been left over
+                        // from last write.
                         //
                         if (writeRN)
                         {
@@ -379,20 +482,18 @@ public class CommentUpload
                             writeRN = false;
                         }
 
-                        //  The ServletInputStream.readline() adds
-                        //  "\r\n" bytes for the last line of the
-                        //  field value.  If we find these pair as
-                        //  the last bytes we need to delay
-                        //  writing it until the next go, since it
-                        //  could very well be the last line of
-                        //  field value.
+                        // The ServletInputStream.readline() adds
+                        // "\r\n" bytes for the last line of the
+                        // field value. If we find these pair as
+                        // the last bytes we need to delay
+                        // writing it until the next go, since it
+                        // could very well be the last line of
+                        // field value.
                         //
-                        if (bytesRead > 2 &&
-                            inBuf[bytesRead - 2] == '\r' &&
-                            inBuf[bytesRead - 1] == '\n')
+                        if (bytesRead > 2 && inBuf[bytesRead - 2] == '\r'
+                                && inBuf[bytesRead - 1] == '\n')
                         {
-                            fieldValue.append(lineRead.substring(
-                                0, lineRead.length() - 2));
+                            fieldValue.append(lineRead.substring(0, lineRead.length() - 2));
                             writeRN = true;
                         }
                         else
@@ -467,18 +568,43 @@ public class CommentUpload
                 CommentException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
         }
     }
+    
+    private File saveUploadFile()
+    {
+        String tempDir = getTmpDir();
+        if (m_tempFile != null && m_tempFile.exists())
+        {
+            try
+            {
+                File savedDir = new File(AmbFileStoragePathUtils.getCommentReferenceDirPath() + "/"
+                        + tempDir + "/checkUploadFile/");
+                savedDir.mkdirs();
+                File finalFile = new File(savedDir, getFilename());
+                m_tempFile.renameTo(finalFile);
+                return finalFile;
+            }
+            catch (SecurityException ex)
+            {
+                try
+                {
+                    m_tempFile.delete();
+                }
+                catch (Exception e)
+                {
+                }
+
+                throw ex;
+            }
+        }
+        return null;
+    }
 
     /**
      * Renames the temporary file to the real name; if that fails, the
      * temporary file is deleted.
      */
-    private void renameFile(boolean p_fromUI,
-                            HttpServletRequest p_request, 
-                            String p_restrict, 
-                            long p_taskId, 
-                            String p_userId)
-        throws CommentException,
-               SecurityException
+    private void renameFile(boolean p_fromUI, HttpServletRequest p_request, String p_restrict,
+            long p_taskId, String p_userId) throws CommentException, SecurityException
     {
         String restrictedValue = null;
         String includeSupportFile = null;
@@ -545,7 +671,9 @@ public class CommentUpload
             access = GENERAL;
         }
         
-        if (m_tempFile != null && m_tempFile.exists())
+        File srcFile = new File(AmbFileStoragePathUtils.getCommentReferenceDirPath() + "/"
+                + tempDir + "/checkUploadFile/", getFilename());
+        if (srcFile.exists() && srcFile.isFile())
         {
             try
             {
@@ -564,19 +692,31 @@ public class CommentUpload
                 //  from temporary location to upload directory
                 //
                 File finalFile = new File(savedDir, getFilename());
-                m_tempFile.renameTo(finalFile);
+                FileUtil.copyFile(srcFile, finalFile);
+                srcFile.delete();
+                //delete "checkUploadFile" file
+                File checkUploadFile = new File(
+                        AmbFileStoragePathUtils.getCommentReferenceDirPath() + "/" + tempDir
+                                + "/checkUploadFile/");
+                if (checkUploadFile.isDirectory())
+                {
+                    File[] uploadFiles = checkUploadFile.listFiles();
+                    for (int i = 0; i < uploadFiles.length; i++)
+                    {
+                        if (uploadFiles[i].exists())
+                        {
+                            if (uploadFiles[i].isFile())
+                            {
+                                uploadFiles[i].delete();
+                            }
+                        }
+                    }
+                    checkUploadFile.delete();
+                }
             }
-            catch (SecurityException ex)
+            catch (Exception ex)
             {
-                try
-                {
-                    m_tempFile.delete();
-                }
-                catch (Exception e)
-                {
-                }
-
-                throw ex;
+                ex.printStackTrace();
             }
         }
     }

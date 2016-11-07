@@ -6,6 +6,7 @@
          com.globalsight.everest.servlet.util.SessionManager,
          com.globalsight.everest.webapp.pagehandler.PageHandler,
          com.globalsight.everest.company.CompanyWrapper,
+         com.globalsight.everest.company.CompanyThreadLocal,
          java.util.ResourceBundle,
          java.util.List"
 %>
@@ -28,6 +29,8 @@ if(isSuperAdmin){
 	String currentIdStr = (String)request.getAttribute("currentId");
 	currentId = Long.parseLong(currentIdStr);
 }
+String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+String disableUploadFileTypes = CompanyWrapper.getCompanyById(currentCompanyId).getDisableUploadFileTypes();
 %>
 <html>
 <head>
@@ -42,6 +45,7 @@ var helpFile = "<%=bundle.getString("help_locale_pairs_import_screen")%>";
 var startUploadURL = "<%=startUploadURL%>";
 var companyId = -1;
 var isSuperAdmin = "<%=isSuperAdmin%>";
+var disableUploadFileTypes = "<%=disableUploadFileTypes%>";
 function confirmJump()
 {
 	return true;
@@ -57,11 +61,24 @@ $(document).ready(function(){
 	
 	$("#uploadBtn").click(function(){
 		var file = $("#fileInput").val();
-		var ext = file.substring(file.lastIndexOf(".") + 1);
-		if(ext.toLowerCase() != "properties") {
+		var ext = file.substring(file.lastIndexOf("."));
+		
+		var fileTypeArr= new Array(); 
+    	fileTypeArr = disableUploadFileTypes.split(",");
+    	for(i=0;i<fileTypeArr.length ;i++ )
+    	{
+    		if(fileTypeArr[i] == ext)
+    		{
+    			alert("<%=bundle.getString("lb_message_check_upload_file_type")%>"+disableUploadFileTypes);
+        		return false;
+    		}
+    	}
+    	
+		if(ext.toLowerCase() != ".properties") {
 			alert("<%=bundle.getString("msg_alert_filter_import")%>");
 			return;
 		}
+		
 		$("#progressbar").show();
 		
 		if(isSuperAdmin == "true"){

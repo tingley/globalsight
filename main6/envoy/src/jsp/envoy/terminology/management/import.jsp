@@ -27,6 +27,9 @@ String xmlDefinition =
   (String)sessionMgr.getAttribute(WebAppConstants.TERMBASE_DEFINITION);
 String xmlImportOptions =
   (String)sessionMgr.getAttribute(WebAppConstants.TERMBASE_IMPORT_OPTIONS);
+String checkUploadFileTypeUrl = nextXml.getPageURL()+ "&"
+		+ WebAppConstants.TERMBASE_ACTION + "="
+		+ WebAppConstants.CHECK_UPLOAD_FILE_TYPE;
 
 String urlNextXml = nextXml.getPageURL();
 String urlNextCsv = nextCsv.getPageURL();
@@ -78,6 +81,11 @@ function doNext()
     }
     else
     {
+      	if(!checkUploadFileType())
+    	{
+    		return false;
+    	}
+      	
         var url;
         var dom = result.dom;
         
@@ -124,11 +132,47 @@ function doExcelImport()
     }
     else
     {
+    	if(!checkUploadFileType())
+    	{
+    		return false;
+    	}
         oForm.action = "<%=urlNextExcel%>&<%=WebAppConstants.TERMBASE_ACTION%>" +
             "=<%=WebAppConstants.TERMBASE_ACTION_UPLOAD_IMPORT_EXCEL_FILE%>";
         oForm.importoptions.value = getDomString(result.dom);
         oForm.submit();
     }
+}
+
+function checkUploadFileType()
+{
+	var checkAction = "<%=checkUploadFileTypeUrl%>"
+	var formData = new FormData($("#oForm")[0]);
+	var result = true;
+    $.ajax({
+        type : "POST",
+        url : checkAction,
+        traditional:true,
+        async : false,
+        cache : false,
+        contentType: false,  
+        processData: false,  
+        data: formData,
+        success : function(data) {
+			if(data == 'notContain'){
+				//upload file does not contain disable file type
+				result = true;
+        	}else{
+        		//upload file contain disable file type
+        		alert(data);
+        		result = false;
+        	}
+        },
+        error : function(request, error, status) {
+            alert(error);
+            result = false;
+        }
+    });
+    return result;
 }
 
 function checkExtension(path)
@@ -448,7 +492,7 @@ function doOnLoad()
 <XML id="oImportOptions" style="display:none;"><%=xmlImportOptions%></XML>
 
 <%-- We wrap the form around the file only. --%>
-<FORM NAME="oForm" ACTION="" ENCTYPE="multipart/form-data" METHOD="post">
+<FORM NAME="oForm" ID="oForm" ACTION="" ENCTYPE="multipart/form-data" METHOD="post">
 
 <DIV style="margin-bottom: 12px">
 <%=bundle.getString("lb_terminology_select_import_file")%><BR>

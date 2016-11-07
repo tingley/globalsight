@@ -62,6 +62,7 @@
     String getFilesUrl = selfIdUrl + "&action=" + AttributeConstant.GET_FILES;
     String deleteFilesUrl = selfIdUrl + "&action=" + AttributeConstant.DELETE_FILES;
     String downloadFilesUrl = selfIdUrl + "&action=" + AttributeConstant.DOWNLOAD_FILES;
+    String checkUploadFileTypeUrl =  selfIdUrl + "&action="+AttributeConstant.CHECK_UPLOAD_FILE_TYPE;
     
     String jobCommentsURL = jobComments.getPageURL() + "&jobId=" + request.getAttribute("jobId");
 	String jobReportsURL = jobReports.getPageURL() 
@@ -419,6 +420,7 @@ $(document).ready(function(){
   <form name="uploadForm" method="post" action="<%=uploadFileUrl%>" enctype="multipart/form-data" id="uploadForm"  target="ajaxUpload">
 	  <input type="hidden" id="attributeId" name="attributeId" value="-1">
 	  <input type="hidden" id="jobAttributeId" name="jobAttributeId" value="-1">
+	  <input type="hidden" id="uploadFileName" name="uploadFileName" value="-1">
 	  <table id = "uploadFormTable" style="width:97%;" class="standardText">
 	    <tr>
 	      <td colspan="2">
@@ -558,8 +560,59 @@ function setOptionColor()
 
 function uploadFileMethod() 
 {
+	if(!checkUploadFileType())
+	{
+		return false;
+	}
+	var jobAttributeId = document.getElementById("jobAttributeId").value;
+	var uploadFileName = document.getElementById("uploadFileName").value;
+	uploadForm.action = "<%=uploadFileUrl%>"+"&jobAttributeId="+jobAttributeId+"&uploadFileName="+uploadFileName;
 	$("#uploadForm").submit();
 	setTimeout("getAllFiles()", 500);
+}
+
+function checkUploadFileType()
+{
+	var checkAction = "<%=checkUploadFileTypeUrl%>"
+	var formData = new FormData($( "#uploadForm" )[0]);
+	var result = true;
+    $.ajax({
+        type : "POST",
+        url : checkAction,
+        traditional:true,
+        async : false,
+        cache : false,
+        contentType: false,  
+        processData: false,  
+        data: formData,
+        success : function(data) {
+        	var returnData = eval(data);
+	   		  if (returnData.error)
+	          {
+	      	    alert(returnData.error);
+	      	  	result = false;
+	          }
+	          else
+	          {
+	        	  if(returnData.isContain == 'notContain')
+	        	  {
+	        		  document.getElementById("jobAttributeId").value = returnData.jobAttributeId;
+	        		  document.getElementById("uploadFileName").value = returnData.uploadFileName;
+	        		  result = true;
+	        	  }
+	        	  else if(returnData.isContain == 'contain')
+	        	  {
+	        		  alert(returnData.message);
+	        		  result = false;
+	        	  }
+	          }
+        },
+        error : function(request, error, status) {
+            alert(error);
+            result = false;
+        }
+    });
+    return result;
 }
 
 function getAllFiles()

@@ -19,6 +19,9 @@ package com.globalsight.everest.webapp.pagehandler.administration.glossaries;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.comment.CommentUpload;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.glossaries.GlossaryUpload;
 import com.globalsight.everest.glossaries.GlossaryException;
@@ -32,21 +35,25 @@ import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
-
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.Vector;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -103,12 +110,40 @@ public class UploadHandler
         m_state = (GlossaryState)session.getAttribute(
             WebAppConstants.GLOSSARYSTATE);
 
+        String action = p_request.getParameter(ACTION_STRING);
         GlossaryUpload uploader = new GlossaryUpload();
 
         try
         {
-            uploader.doUpload(p_request);
-            m_state.setMessage("");
+            if (action != null && action.equals(CHECK_UPLOAD_FILE_TYPE))
+            {
+                ResourceBundle bundle = PageHandler.getBundle(session);
+                String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+                p_response.setContentType("text/html;charset=UTF-8");
+                ServletOutputStream out = p_response.getOutputStream();
+                List<File> canNotUploadFiles = uploader.checkUploadFileType(p_request,
+                        currentCompanyId);
+                if (canNotUploadFiles != null && canNotUploadFiles.size() > 0)
+                {
+                    out.write(((bundle.getString("lb_message_check_upload_file_type") + CompanyWrapper
+                            .getCompanyById(currentCompanyId).getDisableUploadFileTypes()))
+                            .getBytes("UTF-8"));
+                    for (File file : canNotUploadFiles)
+                    {
+                        file.delete();
+                    }
+                }
+                else
+                {
+                    out.write(("notContain").getBytes("UTF-8"));
+                }
+                return;
+            }
+            else
+            {
+                uploader.doUpload(p_request);
+                m_state.setMessage("");
+            }
         }
         catch (GlossaryException ex)
         {

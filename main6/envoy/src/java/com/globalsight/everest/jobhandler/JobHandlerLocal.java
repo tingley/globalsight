@@ -593,6 +593,7 @@ public class JobHandlerLocal implements JobHandler
                 c.setEnableBlankTmSearch(p_company.getEnableBlankTmSearch());
                 c.setDefaultFluency(p_company.getDefaultFluency());
                 c.setDefaultAdequacy(p_company.getDefaultAdequacy());
+                c.setDisableUploadFileTypes(p_company.getDisableUploadFileTypes());
                 HibernateUtil.update(c);
 
                 if (p_company.getTmVersion().getValue() == 3)

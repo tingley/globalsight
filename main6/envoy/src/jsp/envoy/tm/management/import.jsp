@@ -35,6 +35,9 @@ String urlCancel = cancel.getPageURL() + "&"
 String urlRefresh = next.getPageURL() + "&"
         + WebAppConstants.TM_ACTION + "="
         + WebAppConstants.TM_ACTION_VALIDATION_REFRESH;
+String checkUploadFileTypeUrl = next.getPageURL()+ "&"
+			+ WebAppConstants.TM_ACTION + "="
+			+ WebAppConstants.CHECK_UPLOAD_FILE_TYPE;
 
 String str_databaseName = (String) sessionMgr
 .getAttribute(WebAppConstants.TM_TM_NAME);
@@ -216,6 +219,11 @@ function doNext()
     }
     else
     {
+    	if(!checkUploadFileType())
+    	{
+    		return false;
+    	}
+    	
         var url = "<%=urlNext +
             "&" + WebAppConstants.TM_ACTION +
             "=" + WebAppConstants.TM_ACTION_UPLOAD_FILE%>";
@@ -229,6 +237,38 @@ function doNext()
          
         callServer("<%=urlRefresh%>");
     }
+}
+
+function checkUploadFileType()
+{
+	var checkAction = "<%=checkUploadFileTypeUrl%>"
+	var formData = new FormData($( "#oForm" )[0]);
+	var result = true;
+    $.ajax({
+        type : "POST",
+        url : checkAction,
+        traditional:true,
+        async : false,
+        cache : false,
+        contentType: false,  
+        processData: false,  
+        data: formData,
+        success : function(data) {
+			if(data == 'notContain'){
+				//upload file does not contain disable file type
+				result = true;
+        	}else{
+        		//upload file contain disable file type
+        		alert(data);
+        		result = false;
+        	}
+        },
+        error : function(request, error, status) {
+            alert(error);
+            result = false;
+        }
+    });
+    return result;
 }
 
 function checkExtension(path)
@@ -460,7 +500,7 @@ function doOnLoad()
 <XML id="oImportOptions" style="display:none"><%=xmlImportOptions%></XML>
 
 <%-- We wrap the form around the file only. --%>
-<FORM NAME="oForm" ACTION="" ENCTYPE="multipart/form-data" METHOD="post">
+<FORM NAME="oForm"  ID="oForm" ACTION="" ENCTYPE="multipart/form-data" METHOD="post">
 <INPUT TYPE="hidden" NAME="importoptions" VALUE="ImportOptions XML goes here" />
 <DIV style="margin-bottom: 12px"><%=bundle.getString("lb_select_import_file")%><BR>
 <INPUT TYPE="file" NAME="filename" id="idFilename"

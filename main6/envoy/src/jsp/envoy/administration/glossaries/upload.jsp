@@ -26,6 +26,9 @@ GlossaryState state =
 Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
 
 String url_upload = upload.getPageURL();
+String checkUploadFileTypeUrl = upload.getPageURL()+ "&"
+			+ WebAppConstants.ACTION_STRING + "="
+			+ WebAppConstants.CHECK_UPLOAD_FILE_TYPE;
 
 String lb_title = bundle.getString("lb_upload_glossary");
 String lb_sourceLocale = bundle.getString("lb_source_locale");
@@ -68,6 +71,7 @@ if (str_message != null)
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/menuparams.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/menuengine.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT>
 var reload = false;
 
@@ -92,7 +96,6 @@ function isReady(form)
 {
     var field = form.filename;
     var filename = field.value;
-
     if (filename == null || filename == "")
     {
         alert("<%=lb_pleaseEnterData%>");
@@ -102,10 +105,49 @@ function isReady(form)
     }
     else
     {
-        idBody.style.cursor = "wait";
-        uploadForm.idSubmit.style.cursor = "wait";
-        return true;
+    	if(!checkUploadFileType())
+    	{
+    		return false;
+    	}
+    	else
+    	{
+	        idBody.style.cursor = "wait";
+	        uploadForm.idSubmit.style.cursor = "wait";
+	        return true;
+    	}
     }
+}
+
+function checkUploadFileType()
+{
+	var checkAction = "<%=checkUploadFileTypeUrl%>"
+	var formData = new FormData($("#uploadForm")[0]);
+	var result = true;
+    $.ajax({
+        type : "POST",
+        url : checkAction,
+        traditional:true,
+        async : false,
+        cache : false,
+        contentType: false,  
+        processData: false,  
+        data: formData,
+        success : function(data) {
+			if(data == 'notContain'){
+				//upload file does not contain disable file type
+				result = true;
+        	}else{
+        		//upload file contain disable file type
+        		alert(data);
+        		result = false;
+        	}
+        },
+        error : function(request, error, status) {
+            alert(error);
+            result = false;
+        }
+    });
+    return result;
 }
 
 function showMessage(message)
@@ -151,7 +193,7 @@ function doOnunload()
 
 <P>
 
-<FORM NAME="uploadForm" METHOD="POST" ACTION="<%=url_upload%>"
+<FORM NAME="uploadForm" ID="uploadForm" METHOD="POST" ACTION="<%=url_upload%>"
  ENCTYPE="multipart/form-data" onSubmit="reload=true; return isReady(this)"
  CLASS="standardText">
 

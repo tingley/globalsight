@@ -1,0 +1,2 @@
+##GBS-4540:disable upload of exe, dll file types
+ALTER TABLE COMPANY ADD COLUMN DISABLE_UPLOAD_FILE_TYPES VARCHAR(400);

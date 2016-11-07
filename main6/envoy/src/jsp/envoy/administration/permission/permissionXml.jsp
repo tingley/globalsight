@@ -286,9 +286,6 @@
 <% if (b_database) { %>
   <permission id="<%=Permission.DATABASE_INTEGRATION%>"/>
 <% } %>
-<% if (b_documentum) { %>
-     <permission id="<%=Permission.DOCUMENTUM_IMPORT%>"/>
-<% } %>
 <% if (b_customerAccessGroup) { %>
   <permission id="<%=Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE%>"/>
   <% } %>

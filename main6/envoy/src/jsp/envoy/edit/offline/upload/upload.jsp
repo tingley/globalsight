@@ -143,6 +143,9 @@
     String uploadUrl = startupload.getPageURL() +
             "&" + WebAppConstants.UPLOAD_ACTION +
             "=" + WebAppConstants.UPLOAD_ACTION_START_UPLOAD;;
+    String checkUploadFileTypeUrl = startupload.getPageURL() +
+      		 "&" + WebAppConstants.UPLOAD_ACTION + 
+      		 "=" + WebAppConstants.CHECK_UPLOAD_FILE_TYPE ;
     
     String supportFilesUrl = supportFiles.getPageURL();
     String errorPageUrl = errorPage.getPageURL();
@@ -200,7 +203,7 @@
         		//GBS 2913 add taskId and state
         		+ taskParam;
         uploadUrl += taskParam;
-        
+        checkUploadFileTypeUrl += taskParam;
         cancelUrl += taskParam;
         // Get data for the Hints table
         activityName = task.getTaskDisplayName();
@@ -241,6 +244,11 @@ var helpFile = "<%=bundle.getString("help_upload")%>";
 
 function submitForm()
 {
+	if(!checkUploadFileType())
+	{
+		return false;
+	}
+	
     ignoreClose = true;
     if (document.layers)
     {
@@ -261,6 +269,38 @@ function submitForm()
     {
         alert("<%= bundle.getString("jsmsg_upload_no_file") %>");
     }
+}
+
+function checkUploadFileType()
+{
+	var checkAction = "<%=checkUploadFileTypeUrl%>"
+	var formData = new FormData($( "#uploadForm" )[0]);
+	var result = true;
+    $.ajax({
+        type : "POST",
+        url : checkAction,
+        traditional:true,
+        async : false,
+        cache : false,
+        contentType: false,  
+        processData: false,  
+        data: formData,
+        success : function(data) {
+			if(data == 'notContain'){
+				//upload file does not contain disable file type
+				result = true;
+        	}else{
+        		//upload file contain disable file type
+        		alert(data);
+        		result = false;
+        	}
+        },
+        error : function(request, error, status) {
+            alert(error);
+            result = false;
+        }
+    });
+    return result;
 }
 
 function doOnLoad()
@@ -402,25 +442,6 @@ $(document).ready(function(){
         status = labelAvailable;
         labelABorDBorCODate = labelAcceptBy;
         valueABorDBorCODate = acceptBy;
-        break;
-    case Task.STATE_DISPATCHED_TO_TRANSLATION:
-        status = labelAccepted;
-        isPageDetailOne = false;
-        disableButtons = true;
-        break;
-    case Task.STATE_IN_TRANSLATION:
-        status = labelAccepted;
-        isPageDetailOne = false;
-        disableButtons = true;
-        break;
-    case Task.STATE_TRANSLATION_COMPLETED:
-        status = labelAccepted;
-        isPageDetailOne = false;
-        break;
-    case Task.STATE_REDEAY_DISPATCH_GSEDTION:
-        status = labelAccepted;
-        isPageDetailOne = false;
-        disableButtons = true;
         break;
     case Task.STATE_FINISHING:
         status = labelFinishing;
@@ -695,7 +716,7 @@ var taskId = <%=theTask.getId()%>;
   <TR>
     <TD>&nbsp;</TD>
     <TD>
-      <FORM ACTION="<%=uploadUrl%>" NAME="uploadForm" METHOD="POST" ENCTYPE="multipart/form-data">
+      <FORM ACTION="<%=uploadUrl%>" NAME="uploadForm" ID="uploadForm" METHOD="POST" ENCTYPE="multipart/form-data">
       <BR>
       <INPUT TYPE="file"  CLASS="standardText" SIZE="40" NAME="<%=fileFieldName%>">
       </FORM>

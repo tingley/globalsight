@@ -8,6 +8,8 @@
             com.globalsight.everest.webapp.pagehandler.administration.config.segmentationrulefile.SegmentationRuleConstant,
             com.globalsight.everest.webapp.webnavigation.LinkHelper,
             com.globalsight.everest.servlet.EnvoyServletException,
+            com.globalsight.everest.company.CompanyWrapper,
+            com.globalsight.everest.company.CompanyThreadLocal,
             com.globalsight.util.edit.EditUtil,
             com.globalsight.util.GeneralException,
             java.text.MessageFormat,
@@ -26,6 +28,8 @@
 
     String uploadURL = upload.getPageURL() + "&action=" + SegmentationRuleConstant.UPLOAD;
     String cancelURL = cancel.getPageURL() + "&action=" + SegmentationRuleConstant.CANCEL;
+    String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+    String disableUploadFileTypes = CompanyWrapper.getCompanyById(currentCompanyId).getDisableUploadFileTypes();
 %>
 <html>
 <head>
@@ -41,6 +45,7 @@ var needWarning = true;
 var objectName = "<%=bundle.getString("lb_segmentation_rule")%>";
 var guideNode="segmentationRules";
 var helpFile = "<%=bundle.getString("help_segmentation_rules_basic_screen")%>";
+var disableUploadFileTypes = "<%=disableUploadFileTypes%>";
 
 function submitForm(formAction)
 {
@@ -54,19 +59,31 @@ function submitForm(formAction)
 		var file_name = fileForm.filename.value;
 		var file_extension = file_name.substring(file_name.lastIndexOf("."), file_name.length);
 		var accept_extension = "*.srx,*.xml,*.txt";
-		
+    	
 		if(file_name == "")
 		{
 			alert("<%=bundle.getString("lb_select_files_to_upload")%>");
+			return false;
 		}
-		else if(accept_extension.indexOf(file_extension.toLowerCase()) == -1)
+		
+		var fileTypeArr= new Array(); 
+    	fileTypeArr = disableUploadFileTypes.split(",");
+    	for(i=0;i<fileTypeArr.length ;i++ )
+    	{
+    		if(fileTypeArr[i] == file_extension)
+    		{
+    			alert("<%=bundle.getString("lb_message_check_upload_file_type")%>"+disableUploadFileTypes);
+        		return false;
+    		}
+    	}
+    	
+		if(accept_extension.indexOf(file_extension.toLowerCase()) == -1)
 		{
 			alert("<%=bundle.getString("lb_rules_files_extension")%>" + "\n" + accept_extension);
+			return false;
 		}
-		else
-		{
-			fileForm.submit();
-		}
+    	
+		fileForm.submit();
 	}
 }
 

@@ -50,7 +50,7 @@ public class UILocaleConstant
             "CommentException", "CopyFlowAdapterMsg", "CostingException",
             "DatabaseAdapterMsg", "DBConnectionPersistenceManager",
             "DependencyCheckException", "DesktopApplicationAdapterMsg",
-            "DiplomatMergerException", "DocumentumPersistenceManagerException",
+            "DiplomatMergerException",
             "EditorMatchTypeLabels", "EnvoyServletException",
             "EventSchedulerException", "ExceptionResource",
             "ExportEventObserverException", "FileExtensionEntityException",

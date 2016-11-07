@@ -274,9 +274,6 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS))
       key="<%=WordCountHandler.TP_KEY%>"
       dataClass="com.globalsight.everest.page.TargetPage" pageUrl="self"
       emptyTableMsg="">
-      <%
-        PageWordCounts tpWc = targetPage.getWordCount();
-      %>
       <amb:column label="lb_primary_target_file" width="250px" sortBy="<%=TPWordCountComparator.FILE_NAME%>">
       <%
           boolean isExtracted = targetPage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE;
@@ -312,38 +309,38 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS))
          if(isInContextMatch) {
       %>
         <amb:column label="lb_100" width="60px" sortBy="<%=TPWordCountComparator.EXACT%>">
-              <%=tpWc.getSegmentTmWordCount()%>
+              <%=targetPage.getWordCount().getSegmentTmWordCount()%>
         </amb:column>
       <% } else { %>
         <amb:column label="lb_100" width="60px" sortBy="<%=TPWordCountComparator.TOTAL_EXACT%>">
-            <%=tpWc.getTotalExactMatchWordCount()%>
+            <%=targetPage.getWordCount().getTotalExactMatchWordCount()%>
         </amb:column>
       <% } %>
       
-      <amb:column label="lb_95" width="60px" sortBy="<%=TPWordCountComparator.BAND1%>"><%=tpWc.getThresholdHiFuzzyWordCount()%></amb:column>
-      <amb:column label="lb_85" width="60px" sortBy="<%=TPWordCountComparator.BAND2%>"><%=tpWc.getThresholdMedHiFuzzyWordCount()%></amb:column>
-      <amb:column label="lb_75" width="60px" sortBy="<%=TPWordCountComparator.BAND3%>"><%=tpWc.getThresholdMedFuzzyWordCount()%></amb:column>
+      <amb:column label="lb_95" width="60px" sortBy="<%=TPWordCountComparator.BAND1%>"><%=targetPage.getWordCount().getThresholdHiFuzzyWordCount()%></amb:column>
+      <amb:column label="lb_85" width="60px" sortBy="<%=TPWordCountComparator.BAND2%>"><%=targetPage.getWordCount().getThresholdMedHiFuzzyWordCount()%></amb:column>
+      <amb:column label="lb_75" width="60px" sortBy="<%=TPWordCountComparator.BAND3%>"><%=targetPage.getWordCount().getThresholdMedFuzzyWordCount()%></amb:column>
 
       <% if (lmt < 75) { %>
         <amb:column label="lb_74_and_below" width="60px" sortBy="<%=TPWordCountComparator.BAND4%>">
-        	<%=hasMtColumnFlag && lmt <= 60 ? tpWc.getThresholdLowFuzzyWordCount() - tpWc.getMtFuzzyNoMatchWordCount() : tpWc.getThresholdLowFuzzyWordCount() %>
+        	<%=hasMtColumnFlag && lmt <= 60 ? targetPage.getWordCount().getThresholdLowFuzzyWordCount() - targetPage.getWordCount().getMtFuzzyNoMatchWordCount() : targetPage.getWordCount().getThresholdLowFuzzyWordCount() %>
         </amb:column>
       <% } %>
       <amb:column label="lb_no_match" width="60px" sortBy="<%=TPWordCountComparator.NO_MATCH%>">
-      <%=hasMtColumnFlag & lmt > 60 ? tpWc.getThresholdNoMatchWordCount() - tpWc.getMtFuzzyNoMatchWordCount() : tpWc.getThresholdNoMatchWordCount() %>
+      <%=hasMtColumnFlag & lmt > 60 ? targetPage.getWordCount().getThresholdNoMatchWordCount() - targetPage.getWordCount().getMtFuzzyNoMatchWordCount() : targetPage.getWordCount().getThresholdNoMatchWordCount() %>
       </amb:column>
 
       <amb:column label="lb_repetition_word_cnt" width="70px" sortBy="<%=TPWordCountComparator.REPETITIONS%>">
-      	<%=hasMtColumnFlag ? tpWc.getRepetitionWordCount() - tpWc.getMtRepetitionsWordCount(): tpWc.getRepetitionWordCount()%>
+      	<%=hasMtColumnFlag ? targetPage.getWordCount().getRepetitionWordCount() - targetPage.getWordCount().getMtRepetitionsWordCount(): targetPage.getWordCount().getRepetitionWordCount()%>
       </amb:column>
 
       <% if (isInContextMatch) { %>
-        <amb:column label="lb_in_context_tm" width="110px" sortBy="<%=TPWordCountComparator.IN_CONTEXT%>"><%=tpWc.getInContextWordCount()%></amb:column>
+        <amb:column label="lb_in_context_tm" width="110px" sortBy="<%=TPWordCountComparator.IN_CONTEXT%>"><%=targetPage.getWordCount().getInContextWordCount()%></amb:column>
       <% } %>
 
        <% if (hasMtColumnFlag) {%>
        <amb:column label="lb_tm_mt" width="50px" sortBy="<%=TPWordCountComparator.MT_TOTAL%>">
-            <%=tpWc.getMtTotalWordCount()%>
+            <%=targetPage.getWordCount().getMtTotalWordCount()%>
        </amb:column>
        <% } %>
 

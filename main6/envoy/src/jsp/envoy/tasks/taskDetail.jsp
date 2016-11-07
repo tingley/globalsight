@@ -544,56 +544,37 @@
     switch (state)
     {
         case Task.STATE_ACCEPTED:
-    status = labelAccepted;
-    isPageDetailOne = false;
-    break;
+		    status = labelAccepted;
+		    isPageDetailOne = false;
+		    break;
         case Task.STATE_COMPLETED:
-    status = labelFinished;
-    disableButtons = true;
-    labelABorDBorCODate = labelCompletedOn;
-    valueABorDBorCODate = completedOn;
-    break;
+		    status = labelFinished;
+		    disableButtons = true;
+		    labelABorDBorCODate = labelCompletedOn;
+		    valueABorDBorCODate = completedOn;
+		    break;
         case Task.STATE_REJECTED:
-    status = labelRejected;
-    disableButtons = true;
-    break;
+		    status = labelRejected;
+		    disableButtons = true;
+		    break;
         case Task.STATE_DEACTIVE:
-    alreadyAccepted = true;
-    break;
+		    alreadyAccepted = true;
+		    break;
         case Task.STATE_ACTIVE:
-    status = labelAvailable;
-    labelABorDBorCODate = labelAcceptBy;
+		    status = labelAvailable;
+		    labelABorDBorCODate = labelAcceptBy;
            	valueABorDBorCODate = acceptBy;
-    rowspan = 12;
-    break;
-        case Task.STATE_DISPATCHED_TO_TRANSLATION:
-    status = labelAccepted;
-    isPageDetailOne = false;
-    disableButtons = true;
-    break;
-        case Task.STATE_IN_TRANSLATION:
-    status = labelAccepted;
-    isPageDetailOne = false;
-    disableButtons = true;
-    break;
-        case Task.STATE_TRANSLATION_COMPLETED:
-    status = labelAccepted;
-    isPageDetailOne = false;
-    break;
-        case Task.STATE_REDEAY_DISPATCH_GSEDTION:
-    status = labelAccepted;
-    isPageDetailOne = false;
-    disableButtons = true;
-    break;
-        case Task.STATE_FINISHING:
-    status = labelFinishing;
-    isPageDetailOne = false;
-    disableButtons = true;
-    break;
+		    rowspan = 12;
+		    break;
+	    case Task.STATE_FINISHING:
+		    status = labelFinishing;
+		    isPageDetailOne = false;
+		    disableButtons = true;
+		    break;
         default:
-    break;
+		    break;
     }
-    
+
 	String stfStatusMessage = "null";	// Secondary Target Files Status
 	String isExportSTF = "false";		// Whether export Secondary Target Files
     if (Task.IN_PROGRESS.equals(stfCreationState))

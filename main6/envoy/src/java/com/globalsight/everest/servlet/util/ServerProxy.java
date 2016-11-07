@@ -30,7 +30,6 @@ import com.globalsight.config.UserParameterPersistenceManager;
 import com.globalsight.cxe.persistence.databasecolumn.DatabaseColumnPersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.databaseprofile.DatabaseProfilePersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.dbconnection.DBConnectionPersistenceManagerWLRemote;
-import com.globalsight.cxe.persistence.documentum.DocumentumPersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.exportlocation.ExportLocationPersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.previewurl.PreviewUrlPersistenceManagerWLRemote;
@@ -141,7 +140,6 @@ public class ServerProxy
     private static WorkflowServerWLRemote m_workflowServer = null;
     private static XmlRuleFilePersistenceManagerWLRemote m_xmlruleManager = null;
     private static SegmentationRuleFilePersistenceManagerWLRemote m_segmentationruleManager = null;
-    private static DocumentumPersistenceManagerWLRemote m_documentumPersistenceManager = null;
     private static RSSPersistenceManagerWLRemote m_rssPersistenceManager = null;
     private static RemoteAccessManagerWLRemote m_remoteAccessManager = null;
 
@@ -1088,21 +1086,6 @@ public class ServerProxy
         }
 
         return m_calendarManager;
-    }
-
-    public static DocumentumPersistenceManagerWLRemote getDocumentumPersistenceManager()
-    throws GeneralException,
-           NamingException,
-           RemoteException
-    {
-        if (m_documentumPersistenceManager == null)
-        {
-            m_documentumPersistenceManager = (DocumentumPersistenceManagerWLRemote)
-                SERVER_REGISTRY.lookup(
-                        DocumentumPersistenceManagerWLRemote.SERVICE_NAME);
-        }
-    
-        return m_documentumPersistenceManager;
     }
 
     public static RSSPersistenceManagerWLRemote getRSSPersistenceManager()

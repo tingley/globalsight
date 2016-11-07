@@ -33,7 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
@@ -58,9 +57,7 @@ import com.globalsight.calendar.CalendarManager;
 import com.globalsight.calendar.FluxCalendar;
 import com.globalsight.calendar.ReservedTime;
 import com.globalsight.calendar.UserFluxCalendar;
-import com.globalsight.cxe.adapter.documentum.DocumentumOperator;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
-import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.cxe.util.workflow.JobCancelUtil;
 import com.globalsight.cxe.util.workflow.WorkflowCancelUtil;
 import com.globalsight.everest.comment.CommentException;
@@ -397,7 +394,6 @@ public class WorkflowManagerLocal implements WorkflowManager
      * @param p_job
      * @param reimport
      */
-    @SuppressWarnings("unchecked")
     private void cancel(Job p_job, boolean reimport)
     {
         JobImpl job = HibernateUtil.get(JobImpl.class, new Long(p_job.getId()));
@@ -3643,44 +3639,6 @@ public class WorkflowManagerLocal implements WorkflowManager
             // register for export notification
             long exportBatchId = createExportBatchId(exportParams, p_workflow, p_userId, pageIds,
                     p_taskId);
-
-            // Export Documentum Workflows
-            TargetPage trgpage = targetPages.iterator().next();
-            SourcePage srcPage = trgpage.getSourcePage();
-            String category = srcPage.getDataSourceType();
-            // Are these documentum workflows.
-            if (category.equalsIgnoreCase(DocumentumOperator.DCTM_CATEGORY))
-            {
-                String eventFlowXml = srcPage.getRequest().getEventFlowXml();
-                EventFlowXmlParser parser = new EventFlowXmlParser();
-                parser.parse(eventFlowXml);
-
-                try
-                {
-                    org.w3c.dom.Element msCategory = parser
-                            .getCategory(DocumentumOperator.DCTM_CATEGORY);
-                    s_logger.debug("Starting to export a documentum workflow......");
-                    String srcObjId = parser.getCategoryDaValue(msCategory,
-                            DocumentumOperator.DCTM_OBJECTID)[0];
-                    String userId = parser.getCategoryDaValue(msCategory,
-                            DocumentumOperator.DCTM_USERID)[0];
-
-                    // Copy a file object and return a new object id.
-                    String newObjId = DocumentumOperator.getInstance().doCopy(userId, srcObjId,
-                            null);
-                    if (newObjId == null)
-                    {
-                        s_logger.error("Failed to execute copy operation for DCTM Object");
-                        throw new Exception();
-                    }
-                    s_logger.debug("New DCTM file object Id :" + newObjId);
-                    exportParams.setNewObjectId(newObjId);
-                }
-                catch (NoSuchElementException nsex)
-                {
-                    s_logger.debug("Not a documentum Workflow");
-                }
-            }
 
             boolean isTargetPage = true;
             ServerProxy.getPageManager().exportPage(exportParams, pageIds, isTargetPage,

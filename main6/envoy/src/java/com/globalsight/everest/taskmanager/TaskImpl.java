@@ -667,18 +667,6 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
             case 8:
                 state = STATE_ACCEPTED_STR;
                 break;
-            case 81:
-                state = STATE_DISPATCHED_TO_TRANSLATION_STR;
-                break;
-            case 82:
-                state = STATE_IN_TRANSLATION_STR;
-                break;
-            case 83:
-                state = STATE_TRANSLATION_COMPLETED_STR;
-                break;
-            case 84:
-                state = STATE_REDEAY_DISPATCH_GSEDTION_STR;
-                break;
             case 3:
                 state = STATE_ACTIVE_STR;
                 break;
@@ -706,22 +694,6 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         else if (p_state.equals(STATE_ACCEPTED_STR))
         {
             state = STATE_ACCEPTED;
-        }
-        else if (p_state.equals(STATE_DISPATCHED_TO_TRANSLATION_STR))
-        {
-            state = STATE_DISPATCHED_TO_TRANSLATION;
-        }
-        else if (p_state.equals(STATE_IN_TRANSLATION_STR))
-        {
-            state = STATE_IN_TRANSLATION;
-        }
-        else if (p_state.equals(STATE_TRANSLATION_COMPLETED_STR))
-        {
-            state = STATE_TRANSLATION_COMPLETED;
-        }
-        else if (p_state.equals(STATE_REDEAY_DISPATCH_GSEDTION_STR))
-        {
-            state = STATE_REDEAY_DISPATCH_GSEDTION;
         }
         else if (p_state.equals(STATE_COMPLETED_STR))
         {

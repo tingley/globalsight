@@ -842,8 +842,7 @@ public class EditorHelper implements EditorConstants
             Task task = ServerProxy.getTaskManager().getTask(p_userId, Long.parseLong(p_taskId),
                     p_taskState);
 
-            if (task.getState() == Task.STATE_ACCEPTED
-                    || task.getState() == Task.STATE_TRANSLATION_COMPLETED)
+            if (task.getState() == Task.STATE_ACCEPTED)
             {
                 return false;
             }

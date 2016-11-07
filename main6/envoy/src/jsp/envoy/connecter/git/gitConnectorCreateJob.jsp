@@ -51,6 +51,9 @@
     Integer creatingJobsNum = (Integer)request.getAttribute("creatingJobsNum");
     if (creatingJobsNum == null)
         creatingJobsNum = 0;
+    
+    String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+    String disableUploadFileTypes = CompanyWrapper.getCompanyById(currentCompanyId).getDisableUploadFileTypes();
 %>
 <html>
 <head>
@@ -122,6 +125,7 @@ var isUploading = false;
 var uploadedFiles = new Array();
 var defaultFileProfile = "-1";
 var checkout = "no";
+var disableUploadFileTypes = "<%=disableUploadFileTypes%>";
 
 function confirmJump() {
     return true;
@@ -393,7 +397,7 @@ $(document).ready(function ()
         })
         if(!allMapping)
         {
-        	var msg = "Not all files are mapped on all target locales, you can click ‘Check File Mapping’ button to see detailed information. Do you want to continue to create job?";
+        	var msg = "Not all files are mapped on all target locales, you can click âCheck File Mappingâ button to see detailed information. Do you want to continue to create job?";
         	if(!confirm(msg))
         	{
         		creating = false;
@@ -575,6 +579,8 @@ function goToCreateJob() {
 
     showCreatePage();
     //$("#fileQueue").html("");
+    var fileTypeArr= new Array(); 
+	fileTypeArr = disableUploadFileTypes.split(",");
     for (var i = 0; i < selNodes.length; i++) {
     	var path = selNodes[i].data.path;
     	var name = selNodes[i].data.title;
@@ -582,6 +588,15 @@ function goToCreateJob() {
 
 		if(name.indexOf(".") > 0)
 		{
+			var ext = name.substring(name.lastIndexOf("."));
+	    	for(j=0;j<fileTypeArr.length ;j++ )
+	    	{
+	    		if(fileTypeArr[j] == ext)
+	    		{
+	    			alert("<%=bundle.getString("lb_message_check_upload_file_type")%>"+disableUploadFileTypes);
+	        		return false;
+	    		}
+	    	}
 	    	addFullDivElement(id, name, path, name, true);
 		}
     }

@@ -28,6 +28,7 @@
             com.globalsight.cxe.entity.filterconfiguration.Filter,
             com.globalsight.everest.foundation.L10nProfile,
             com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileHandlerHelper,
+            com.globalsight.everest.company.CompanyWrapper,
             java.lang.*,
             java.io.*,
             java.util.Map,
@@ -45,7 +46,9 @@
     // bring in "state" from session
     SessionManager sessionMgr =
       (SessionManager) request.getSession().getAttribute(WebAppConstants.SESSION_MANAGER);
-
+    String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+    String disableUploadFileTypes = CompanyWrapper.getCompanyById(currentCompanyId).getDisableUploadFileTypes();
+    
     String saveURL = save.getPageURL();
     String cancelURL = cancel.getPageURL() + "&action=cancel";
     String selfURL = self.getPageURL()  + "&action=verify";
@@ -212,7 +215,8 @@ var guideNode = "fileProfiles";
 var helpFile = "<%=bundle.getString("help_file_profiles_basic_info")%>";
 var xmlHttp = XmlHttp.create();
 var toUploadXsl = false;
-var companyId = "<%=CompanyThreadLocal.getInstance().getValue()%>";
+var companyId = "<%=currentCompanyId%>";
+var disableUploadFileTypes = "<%=disableUploadFileTypes%>";
 
 function confirmFile(fieldName)
 {
@@ -462,6 +466,19 @@ function confirmForm()
             var path = fpForm.xslFile.value;
             if(path != null && path != "")
             {
+            	var index = path.lastIndexOf(".")
+            	var ext = path.substring(index).toLowerCase();
+            	var fileTypeArr= new Array(); 
+            	fileTypeArr = disableUploadFileTypes.split(",");
+            	for(i=0;i<fileTypeArr.length ;i++ )
+            	{
+            		if(fileTypeArr[i] == ext)
+            		{
+            			alert("<%=EditUtil.toJavascript(bundle.getString("lb_message_check_upload_file_type"))%>"+disableUploadFileTypes);
+                		return false;
+            		}
+            	}
+            	
                 if(!isXslFile(path))
                 {
                     alert("XSL file extension should be xsl, xslt or xml.");

@@ -315,28 +315,9 @@ public class TaskListServlet extends HttpServlet
             Task task = ServerProxy.getTaskManager().getTask(taskId);
             int taskState = task.getState();
             reviewOnly = task.isType(Task.TYPE_REVIEW);
-            switch (task.getState())
+            if (task.getState() == Task.STATE_ACCEPTED)
             {
-                case Task.STATE_ACCEPTED:
-                    isPageDetailOne = false;
-                    break;
-                case Task.STATE_DISPATCHED_TO_TRANSLATION:
-                    isPageDetailOne = false;
-                    disableButtons = true;
-                    break;
-                case Task.STATE_IN_TRANSLATION:
-                    isPageDetailOne = false;
-                    disableButtons = true;
-                    break;
-                case Task.STATE_TRANSLATION_COMPLETED:
-                    isPageDetailOne = false;
-                    break;
-                case Task.STATE_REDEAY_DISPATCH_GSEDTION:
-                    isPageDetailOne = false;
-                    disableButtons = true;
-                    break;
-                default:
-                    break;
+                isPageDetailOne = false;
             }
             TaskImpl taskImpl = HibernateUtil.get(TaskImpl.class, taskId);
             TaskSearchUtil.setAllAssignees(taskImpl);

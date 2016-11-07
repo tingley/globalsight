@@ -159,16 +159,6 @@
 		<copy file="${desktopicon.dir}/build/DesktopIcon.zip" todir="${dist}" />
 	</target>
 
-	<!-- Target for webtop plug in package-->
-	<target name="WebtopZip" depends="Webtop">
-		<copy file="../../${diplomatDevSrcJava}/../webtop-plugin/dist/webtop-plug-in.zip" todir="${dist}" />
-	</target>
-
-	<target name="Webtop">
-		<echo message="../../${diplomatDevSrcJava}/../webtop-plugin" />
-		<ant dir="../../${diplomatDevSrcJava}/../webtop-plugin" antfile="build.xml" target="dist" inheritAll="false" />
-	</target>
-
 	<!-- Targets for linguistics tools -->
 	<target name="LingTools" depends="Debex, GAlign" />
 	<target name="LingToolsZip" depends="Debex, GAlign">
@@ -329,7 +319,7 @@
 	</target>
 
 	<!--     Build everything and make the zip file -->
-	<target name="dist" depends="clean, zip, WebServiceClients, LingToolsZip, WebtopZip, DesktopIconZip" />
+	<target name="dist" depends="clean, zip, WebServiceClients, LingToolsZip, DesktopIconZip" />
 
 	<target name="distnojsp" depends="dist" />
 
@@ -339,7 +329,6 @@
 		<ant antfile="../install/build.xml" target="clean" />
 		<ant dir="${lingtools}/debex" antfile="build.xml" target="clean" />
 		<ant dir="${lingtools}/galign" antfile="build.xml" target="clean" />
-		<ant dir="../../${diplomatDevSrcJava}/../webtop-plugin" antfile="build.xml" target="clean" inheritAll="false" />
 		<ant antfile="../../envoy/src/webserviceClients/java/build.xml" target="clean" inheritAll="false" />
 		<ant dir="${globalsightServices}" antfile="build.xml" target="clean" inheritAll="false" />
 		<delete dir="${capclasses}" />

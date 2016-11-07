@@ -63,7 +63,10 @@
    String saveURL = save.getPageURL() + "&" 
                      + WorkflowTemplateConstants.ACTION 
                      + "=" + WorkflowTemplateConstants.IMPORT_ACTION;
-   
+   String checkUploadFileTypeUrl = save.getPageURL()+ "&"
+			+ WorkflowTemplateConstants.ACTION + "="
+			+ WorkflowTemplateConstants.CHECK_UPLOAD_FILE_TYPE;
+
    // Titles                                 
    String dupTitle = bundle.getString("msg_wf_template_imp_title");	
    String lbSave = bundle.getString("lb_save");	
@@ -78,6 +81,7 @@
 <TITLE><%= dupTitle %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT language="JavaScript">
@@ -287,6 +291,11 @@ function confirmForm() {
 	    impTemplateForm.nameTF.focus();
 	    return false;
 	}
+	if(!checkUploadFileType())
+	{
+		return false;
+	}
+	
 	if (isEmptyString(impTemplateForm.filename.value)) {
 	    alert("<%= bundle.getString("jsmsg_wf_template_file") %>");
 	    return false;	
@@ -305,6 +314,38 @@ function confirmForm() {
 	}
 
 	return true;
+}
+
+function checkUploadFileType()
+{
+	var checkAction = "<%=checkUploadFileTypeUrl%>"
+	var formData = new FormData($("#impTemplateForm")[0]);
+	var result = true;
+    $.ajax({
+        type : "POST",
+        url : checkAction,
+        traditional:true,
+        async : false,
+        cache : false,
+        contentType: false,  
+        processData: false,  
+        data: formData,
+        success : function(data) {
+			if(data == 'notContain'){
+				//upload file does not contain disable file type
+				result = true;
+        	}else{
+        		//upload file contain disable file type
+        		alert(data);
+        		result = false;
+        	}
+        },
+        error : function(request, error, status) {
+            alert(error);
+            result = false;
+        }
+    });
+    return result;
 }
 
 </SCRIPT>
@@ -326,7 +367,7 @@ function confirmForm() {
 <TD VALIGN="TOP">
     <!-- left table -->
     <TABLE CELLSPACING="8" CELLPADDING="0" BORDER="0" CLASS="standardText">
-	<form name="impTemplateForm" ENCTYPE="multipart/form-data" METHOD="post">
+	<form name="impTemplateForm"  ID="impTemplateForm" ENCTYPE="multipart/form-data" METHOD="post">
         <INPUT TYPE="HIDDEN" NAME="formAction" VALUE="">
         <TR>
             <TD colspan="3">

@@ -54,6 +54,7 @@ public class AttributeConstant
     public static final String EDIT_FILE = "editFile";
     public static final String EDIT_TEXT = "editText";
     public static final String EDIT_DATE = "editDate";
+    public static final String CHECK_UPLOAD_FILE_TYPE = "checkUploadFileType";
     
     public static final String GET_FILES = "getFiles";
     public static final String DELETE_FILES = "deleteFiles";
@@ -63,5 +64,3 @@ public class AttributeConstant
     
     public static final String NEXT = "next";
 }
-
-

@@ -8,10 +8,12 @@ import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -164,6 +166,9 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         }
 
         ArrayList<Job> jobs = ReportHelper.getJobListByIDS(p_jobIDS);
+        // 
+        filterInvalidJobs(jobs);
+
         File file;
         if (data.exportWithXlsx)
         {
@@ -1525,5 +1530,38 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
     private void printMsg(String p_msg)
     {
         // logger.info(p_msg);
+    }
+
+    /**
+     * Ensure jobs belong to current user's projects.
+     */
+    private void filterInvalidJobs(ArrayList<Job> jobs)
+    {
+        try
+        {
+            ArrayList<Project> projectList = (ArrayList<Project>) ServerProxy.getProjectHandler()
+                    .getProjectsByUser(m_userId);
+
+            Set<Long> projectIds = new HashSet<Long>();
+            if (projectList != null && projectList.size() > 0)
+            {
+                for (Project pro : projectList)
+                {
+                    projectIds.add(pro.getIdAsLong());
+                }
+            }
+
+            for (Iterator<Job> it = jobs.iterator(); it.hasNext();)
+            {
+                if (!projectIds.contains(it.next().getProjectId()))
+                {
+                    it.remove();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+        }
     }
 }

@@ -17,12 +17,16 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.comment;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 import java.util.Vector;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -35,6 +39,7 @@ import com.globalsight.everest.comment.CommentFile;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.CommentUpload;
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.jobhandler.Job;
@@ -230,6 +235,32 @@ public class CommentUploadHandler extends PageHandler implements
                             typeArr, tmpDir, sessionMgr);
                 }
             }
+        }
+        else if (StringUtil.isNotEmptyAndNull(action)
+                && action.equalsIgnoreCase(CHECK_UPLOAD_FILE_TYPE))
+        {
+            ResourceBundle bundle = PageHandler.getBundle(session);
+            String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+            p_response.setContentType("text/html;charset=UTF-8");
+            ServletOutputStream out = p_response.getOutputStream();
+            CommentUpload uploader = new CommentUpload();
+            List<File> canNotUploadFiles = uploader
+                    .checkUploadFileType(p_request, currentCompanyId);
+            if (canNotUploadFiles != null && canNotUploadFiles.size() > 0)
+            {
+                out.write(((bundle.getString("lb_message_check_upload_file_type") + CompanyWrapper
+                        .getCompanyById(currentCompanyId).getDisableUploadFileTypes()))
+                        .getBytes("UTF-8"));
+                for (File file : canNotUploadFiles)
+                {
+                    file.delete();
+                }
+            }
+            else
+            {
+                out.write(("notContain").getBytes("UTF-8"));
+            }
+            return;
         }
 
         getCommentReferences(tmpDir, sessionMgr);

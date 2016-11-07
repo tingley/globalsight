@@ -45,6 +45,7 @@ import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -108,6 +109,7 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.RuntimeCache;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.file.XliffFileUtil;
 import com.globalsight.util.mail.MailerConstants;
@@ -203,6 +205,40 @@ public class CreateJobsMainHandler extends PageHandler
                 writer.write(creatingJobsNum.toString());
                 return;
             }
+            else if (action.equals("checkUploadFileType"))
+            {
+                response.setContentType("text/html;charset=UTF-8");
+                ServletOutputStream out = response.getOutputStream();
+                String tempFolder = request.getParameter("tempFolder");
+                String type = request.getParameter("type");
+                List<File> uploadedFiles = new ArrayList<File>();
+                try
+                {
+                    uploadedFiles = uploadSelectedFile(request, tempFolder, type,"checkUploadFileType");
+                    List<File> canNotUploadFiles = StringUtil.isDisableUploadFileType(
+                          CompanyWrapper.getCompanyById(currentCompanyId), uploadedFiles);
+                    if (canNotUploadFiles != null && canNotUploadFiles.size() > 0)
+                    {
+                        out.write(((bundle.getString("lb_message_check_upload_file_type") + CompanyWrapper
+                                .getCompanyById(currentCompanyId).getDisableUploadFileTypes()))
+                                .getBytes("UTF-8"));
+                        for (File file : canNotUploadFiles)
+                        {
+                            file.delete();
+                        }
+                    }
+                    else
+                    {
+                        out.write(("notContain").getBytes("UTF-8"));
+                    }
+                    return;
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+                return;
+            }
             else if (action.equals("uploadSelectedFile"))
             {
                 String tempFolder = request.getParameter("tempFolder");
@@ -210,7 +246,7 @@ public class CreateJobsMainHandler extends PageHandler
                 List<File> uploadedFiles = new ArrayList<File>();
                 try
                 {
-                    uploadedFiles = uploadSelectedFile(request, tempFolder, type);
+                    uploadedFiles = uploadSelectedFile(request, tempFolder, type,"uploadSelectedFile");
                     for (File uploadedFile : uploadedFiles)
                     {
                         StringBuffer ret = new StringBuffer("[");
@@ -1723,7 +1759,7 @@ public class CreateJobsMainHandler extends PageHandler
     }
 
     private List<File> uploadSelectedFile(HttpServletRequest request, String tempFolder,
-            String type) throws Exception
+            String type, String methodParamter) throws Exception
     {
         File parentFile = null;
         List<String> fileNames = new ArrayList<String>();
@@ -1732,17 +1768,34 @@ public class CreateJobsMainHandler extends PageHandler
         {
             File saveDir = AmbFileStoragePathUtils.getCxeDocDir();
             String baseTmpDir = saveDir + File.separator + TMP_FOLDER_NAME;
-            parentFile = new File(baseTmpDir + File.separator + tempFolder);
+            if (methodParamter.equals("checkUploadFileType"))
+            {
+                parentFile = new File(baseTmpDir + File.separator + tempFolder + File.separator
+                        + "checkUploadFile");
+            }
+            else if (methodParamter.equals("uploadSelectedFile"))
+            {
+                parentFile = new File(baseTmpDir + File.separator + tempFolder);
+            }
             parentFile.mkdirs();
         }
         else if (type.equals("1"))// comment file
         {
             File saveDir = AmbFileStoragePathUtils.getCommentReferenceDir();
-            parentFile = new File(saveDir + File.separator + "tmp" + File.separator + tempFolder);
+            if (methodParamter.equals("checkUploadFileType"))
+            {
+                parentFile = new File(saveDir + File.separator + "tmp" + File.separator
+                        + tempFolder + File.separator + "checkUploadFile");
+            }
+            else if (methodParamter.equals("uploadSelectedFile"))
+            {
+                parentFile = new File(saveDir + File.separator + "tmp" + File.separator
+                        + tempFolder);
+            }
             parentFile.mkdirs();
         }
 
-        fileNames = uploadFile(request, parentFile,type);
+        fileNames = uploadFile(request, parentFile, type, methodParamter);
         for (String fileName : fileNames)
         {
             File uploadedFile = new File(fileName);
@@ -1750,9 +1803,9 @@ public class CreateJobsMainHandler extends PageHandler
         }
         return uploadedFiles;
     }
-
-    private List<String> uploadFile(HttpServletRequest p_request, File parentFile,String type)
-            throws GlossaryException, IOException
+    
+    private List<String> uploadFile(HttpServletRequest p_request, File parentFile, String type,
+            String methodParamter) throws GlossaryException, IOException
     {
         byte[] inBuf = new byte[MAX_LINE_LENGTH];
         int bytesRead;
@@ -1760,6 +1813,17 @@ public class CreateJobsMainHandler extends PageHandler
         String contentType;
         String boundary;
         String filePath = "";
+        Set<String> checkFileNames = new HashSet<String>();
+        if (methodParamter.equals("uploadSelectedFile"))
+        {
+            String checkPath = parentFile.getPath() + File.separator + "checkUploadFile"
+                    + File.separator;
+            File file = new File(checkPath);
+            for (File f : file.listFiles())
+            {
+                checkFileNames.add(f.getName());
+            }
+        }
         String path = parentFile.getPath() + File.separator;
         List<String> filePaths = new ArrayList<String>();
         File file = new File(path);
@@ -1846,6 +1910,34 @@ public class CreateJobsMainHandler extends PageHandler
                         {
                             continue;
                         }
+                    }
+
+                    if (!uploadedFileNames.contains(fileName) && checkFileNames.contains(fileName))
+                    {
+                        filePath = path + fileName;
+                        filePaths.add(filePath);
+                        File srcFile = new File(path + "checkUploadFile" + File.separator+fileName+ File.separator);
+                        File targetFile = new File(filePath);
+                        FileUtil.copyFile(srcFile, targetFile);
+                        srcFile.delete();
+                        //delete "checkUploadFile" file
+                        File checkUploadFile = new File(path + "checkUploadFile" + File.separator);
+                        if (checkUploadFile.isDirectory())
+                        {
+                            File[] uploadFiles = checkUploadFile.listFiles();
+                            for (int i = 0; i < uploadFiles.length; i++)
+                            {
+                                if (uploadFiles[i].exists())
+                                {
+                                    if (uploadFiles[i].isFile())
+                                    {
+                                        uploadFiles[i].delete();
+                                    }
+                                }
+                            }
+                            checkUploadFile.delete();
+                        }
+                        continue;
                     }
 
                     filePath = path + fileName;

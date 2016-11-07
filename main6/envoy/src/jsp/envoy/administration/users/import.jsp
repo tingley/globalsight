@@ -2,6 +2,13 @@
 <%@ page contentType="text/html; charset=UTF-8"
          errorPage="/envoy/common/error.jsp"
          session="true"
+         import="com.globalsight.everest.company.CompanyWrapper,
+         			com.globalsight.everest.company.CompanyThreadLocal"
+         
+%>
+<%
+String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+String disableUploadFileTypes = CompanyWrapper.getCompanyById(currentCompanyId).getDisableUploadFileTypes();
 %>
 <html>
 <head>
@@ -14,6 +21,7 @@
 <script type="text/javascript">
 var guideNode = "users";
 var helpFile = "<c:out value='${help_users_import_screen}'/>";
+var disableUploadFileTypes = "<%=disableUploadFileTypes%>";
 function confirmJump()
 {
 	return true;
@@ -26,11 +34,24 @@ $(document).ready(function(){
 	
 	$("#uploadBtn").click(function(){
 		var file = $("#fileInput").val();
-		var ext = file.substring(file.lastIndexOf(".") + 1);
-		if(ext.toLowerCase() != "xml") {
+		var ext = file.substring(file.lastIndexOf("."));
+		
+		var fileTypeArr= new Array(); 
+    	fileTypeArr = disableUploadFileTypes.split(",");
+    	for(i=0;i<fileTypeArr.length ;i++ )
+    	{
+    		if(fileTypeArr[i] == ext)
+    		{
+    			alert("<c:out value='${lb_message_check_upload_file_type}'/>"+disableUploadFileTypes);
+        		return false;
+    		}
+    	}
+    	
+		if(ext.toLowerCase() != ".xml") {
 			alert("<c:out value='${msg_alert_user_import}'/>");
 			return;
 		}
+
 		var isIgnore = $('input:radio[name="existedUserRadio"]:checked').val();
 	    if ("0" == isIgnore) {
 	    	document.userImportForm.action += "&ifUserExistedFlag=0";

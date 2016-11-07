@@ -86,7 +86,6 @@ import com.globalsight.calendar.ReservedTime;
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
 import com.globalsight.config.UserParameterPersistenceManagerLocal;
-import com.globalsight.cxe.adapter.documentum.DocumentumOperator;
 import com.globalsight.cxe.adaptermdb.filesystem.FileSystemUtil;
 import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
@@ -345,13 +344,7 @@ public class Ambassador extends AbstractWebService
 
     public static final String GET_USER_UNAVAILABILITY_REPORT = "getUserUnavailabilityReport";
 
-    public static final String PASS_DCTMACCOUNT = "passDCTMAccount";
-
-    public static final String CREATE_DTCMJOB = "createDocumentumJob";
-
     public static final String GET_FILE_PROFILEINFOEX = "getFileProfileInformationEx";
-
-    public static final String CANCEL_DCTMJOB = "cancelDocumentumJob";
 
     public static final String GET_DOWNLOADABLE_JOBS = "getDownloadableJobs";
 
@@ -5637,7 +5630,7 @@ public class Ambassador extends AbstractWebService
             return makeErrorXml(COMPLETE_TASK, e.getMessage());
         }
 
-        String userName = this.getUsernameFromSession(p_accessToken);
+        String userName = getUsernameFromSession(p_accessToken);
         String userId = UserUtil.getUserIdByName(userName);
 
         // Task object
@@ -6207,6 +6200,8 @@ public class Ambassador extends AbstractWebService
      * Pass the DCTM account to GlobalSight side, used to read or write the DCTM
      * server.
      * 
+     * @deprecated since 8.7.3
+     * 
      * @param p_accessToken
      * @param docBase
      * @param dctmUserName
@@ -6217,25 +6212,7 @@ public class Ambassador extends AbstractWebService
     public String passDCTMAccount(String p_accessToken, String docBase, String dctmUserName,
             String dctmPassword) throws WebServiceException
     {
-
-        checkAccess(p_accessToken, PASS_DCTMACCOUNT);
-        try
-        {
-            logger.info("Starting to save dctm account");
-            String userId = DocumentumOperator.getInstance().saveDCTMAccount(docBase, dctmUserName,
-                    dctmPassword);
-            logger.info("Finish to save dctm account");
-            return userId;
-        }
-        catch (Exception e)
-        {
-            logger.error(PASS_DCTMACCOUNT, e);
-            String message = "Could not save Documentum account "
-                    + " for docBase, dctmUserName, dctmPassword" + docBase + ", " + dctmUserName
-                    + ", " + dctmPassword;
-            message = makeErrorXml(PASS_DCTMACCOUNT, message);
-            throw new WebServiceException(message.toString());
-        }
+        throw new WebServiceException("Documentum API is not supported any longer.");
     }
 
     /**
@@ -6493,6 +6470,8 @@ public class Ambassador extends AbstractWebService
     /**
      * Create a job for Documentum CMS, one Documentum file for one job.
      * 
+     * @deprecated since 8.7.3
+     * 
      * @param p_accessToken
      *            - The access token received from the login.
      * @param jobName
@@ -6510,115 +6489,14 @@ public class Ambassador extends AbstractWebService
     public void createDocumentumJob(String p_accessToken, String jobName, String fileProfileId,
             String objectId, String userId) throws WebServiceException
     {
-
-        checkAccess(p_accessToken, CREATE_DTCMJOB);
-        String jobNameValidation = validateJobName(jobName);
-        if (jobNameValidation != null)
-        {
-            throw new WebServiceException(makeErrorXml("createDocumentumJob", jobNameValidation));
-        }
-
-        StringBuffer errorMessage = new StringBuffer();
-        WebServicesLog.Start activityStart = null;
-        try
-        {
-            if (logger.isDebugEnabled())
-            {
-                logger.debug("Creating a documentum job (fileProfileId =" + fileProfileId
-                        + ",objectId =" + userId + ", userId =" + objectId + ")");
-            }
-
-            String dcmtFileName = null;
-            String attrFileName = null;
-            String loggedUserName = this.getUsernameFromSession(p_accessToken);
-            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName", loggedUserName);
-            activityArgs.put("jobName", jobName);
-            activityArgs.put("fileProfileId", fileProfileId);
-            activityArgs.put("objectId", objectId);
-            activityArgs.put("userId", userId);
-            activityStart = WebServicesLog.start(Ambassador.class,
-                    "createDocumentumJob(p_accessToken,jobName,fileProfileId,objectId,userId)",
-                    activityArgs);
-            // Get file name from Documentum via objectId.
-            dcmtFileName = DocumentumOperator.getInstance().getObjectName(userId, objectId);
-            attrFileName = dcmtFileName + ".attribute";
-            if (dcmtFileName == null)
-            {
-                dcmtFileName = "";
-                logger.warn("dcmt name is null");
-                // throw new WebServiceException("Can't get the file name via
-                // objectId from documentum");
-            }
-
-            // Get the dctm file attribute to be translatable content as a xml
-            // string.
-            String dctmFileAttrXml = DocumentumOperator.getInstance().generateAttributesXml(userId,
-                    objectId);
-            if (dctmFileAttrXml == null || dctmFileAttrXml.length() == 0)
-            {
-                // throw new WebServiceException("Can't get the dctm file
-                // attribute as a xml String");
-                // create a unique batch ID
-                String batchId = jobName + Long.toString(System.currentTimeMillis());
-                CxeProxy.importFromDocumentum(objectId, dcmtFileName, jobName, batchId,
-                        fileProfileId, new Integer(1), new Integer(1), new Integer(1),
-                        new Integer(1), false, null, userId);
-                logger.info("Trying to import a documentum file");
-            }
-            else
-            {
-                if (logger.isDebugEnabled())
-                {
-                    logger.debug("The dctm file attribute xml String :" + dctmFileAttrXml);
-                }
-
-                // One job includes two files(documentum file, xml attribute
-                // file),
-                // so hard code here.
-                Integer pageCount = new Integer(2);
-                // create a unique batch ID
-                String batchId = jobName + Long.toString(System.currentTimeMillis());
-                // Get the fileprofile id used to translate xml attribute file.
-                String xmlFPId = getXmlFileProfile(fileProfileId);
-                if (xmlFPId == null)
-                {
-                    errorMessage.append("Can't get a xml Fileprofile");
-                    throw new WebServiceException("Can't get a xml Fileprofile");
-                }
-
-                CxeProxy.importFromDocumentum(objectId, dcmtFileName, jobName, batchId,
-                        fileProfileId, pageCount, Integer.valueOf(1), Integer.valueOf(1),
-                        Integer.valueOf(1), false, null, userId);
-                logger.info("Trying to import a documentum file");
-
-                CxeProxy.importFromDocumentum(objectId, attrFileName, jobName, batchId, xmlFPId,
-                        pageCount, Integer.valueOf(2), Integer.valueOf(1), Integer.valueOf(1), true,
-                        dctmFileAttrXml, userId);
-                logger.info("Trying to import a documentum attribute file");
-
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.error("Failed to create a documentum job", ex);
-            errorMessage.append(" Failed to create a documentum job");
-            String message = makeErrorXml(CREATE_DTCMJOB, errorMessage.toString());
-            throw new WebServiceException(message);
-        }
-        finally
-        {
-            if (activityStart != null)
-            {
-                activityStart.end();
-            }
-        }
-
+        throw new WebServiceException("Documentum API is not supported any longer.");
     }
 
     /**
      * Cancel the Documentum job using objectId and jobId.
      * 
+     * @deprecated since 8.7.3
+     *  
      * @param p_accessToken
      *            - The access token received from the login.
      * @param objectId
@@ -6633,56 +6511,7 @@ public class Ambassador extends AbstractWebService
     public void cancelDocumentumJob(String p_accessToken, String objectId, String jobId,
             String userId) throws WebServiceException
     {
-
-        checkAccess(p_accessToken, CANCEL_DCTMJOB);
-        WebServicesLog.Start activityStart = null;
-        try
-        {
-            String userName = getUsernameFromSession(p_accessToken);
-            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName", userName);
-            activityArgs.put("objectId", objectId);
-            activityArgs.put("jobId", jobId);
-            activityArgs.put("userId", userId);
-            activityStart = WebServicesLog.start(Ambassador.class,
-                    "cancelDocumentumJob(p_accessToken,objectId,jobId,userId)", activityArgs);
-            String uid = UserUtil.getUserIdByName(userName);
-            Job job = ServerProxy.getJobHandler().getJobById(Long.valueOf(jobId).longValue());
-
-            logger.info("Cancelling all workflows for job " + jobId);
-            ServerProxy.getJobHandler().cancelJob(uid, job, null);
-
-            DocumentumOperator.getInstance().cleanCustomAttrs(userId, objectId);
-        }
-        catch (JobException je)
-        {
-            StringBuffer messageBuf = new StringBuffer("Unable to cancel the job ");
-            messageBuf.append(jobId);
-
-            // couldn't find the user specified
-            if (je.getMessageKey().equals(JobException.MSG_FAILED_TO_GET_JOB_BY_ID))
-            {
-                messageBuf.append(" The job couldn't be found.");
-            }
-            String message = messageBuf.toString();
-            logger.error(message, je);
-            message = makeErrorXml(CANCEL_JOB_BY_ID, message);
-            throw new WebServiceException(message);
-        }
-        catch (Exception e)
-        {
-            logger.error(CANCEL_JOB_BY_ID, e);
-            String message = "Could not cancel job " + jobId;
-            message = makeErrorXml(CANCEL_JOB_BY_ID, message);
-            throw new WebServiceException(message);
-        }
-        finally
-        {
-            if (activityStart != null)
-            {
-                activityStart.end();
-            }
-        }
+        throw new WebServiceException("Documentum API is not supported any longer.");
     }
 
     /**
@@ -6822,8 +6651,7 @@ public class Ambassador extends AbstractWebService
     }
 
     /**
-     * Get server version such as 7.1.7.2. For GS edition feature,it need to be
-     * run on 7.1.7.2 or upper servers.
+     * Get server version such as 7.1.7.2.
      * 
      * @param p_accessToken
      * @return
@@ -6912,72 +6740,6 @@ public class Ambassador extends AbstractWebService
         }
 
         xmlStr.append("\t</fileProfile>\r\n");
-    }
-
-    /**
-     * Get a xml FileProfile with the same localization profile as a given
-     * FileProfile.
-     * 
-     * This xml fileprofile, including xml extension, is used to translate a
-     * documentum file attributes.
-     * 
-     * @param fpId
-     *            - A given FileProfile.
-     * @return String - a xml FileProfile Id.
-     */
-    private String getXmlFileProfile(String fpId)
-    {
-
-        FileProfile xmlFileProfile = null;
-        try
-        {
-            FileProfilePersistenceManager fpManager = ServerProxy
-                    .getFileProfilePersistenceManager();
-            FileProfile oriFileProfile = fpManager
-                    .getFileProfileById(Long.valueOf(fpId).longValue(), false);
-            long l10nProfileId = oriFileProfile.getL10nProfileId();
-
-            // Try to find a xml file profile with the same l10nProfile Id, and
-            // xml format.
-            Collection fileProfiles = fpManager.getAllFileProfiles();
-            Iterator iter = fileProfiles.iterator();
-            while (iter.hasNext())
-            {
-                FileProfile fp = (FileProfile) iter.next();
-                if (fp.getL10nProfileId() == l10nProfileId && fp.getKnownFormatTypeId() == 7)
-                {
-                    xmlFileProfile = fp;
-                    break;
-                }
-            }
-
-            // Can't find any file profile on condition, create a new one on
-            // request.
-            if (xmlFileProfile == null)
-            {
-                String fpName = "DCMT_XML_FP_" + String.valueOf(System.currentTimeMillis());
-                xmlFileProfile = new FileProfileImpl(oriFileProfile);
-                Vector fileExts = new Vector();
-                // Add *.xml file extension.
-                fileExts.add(Long.valueOf(14));
-                xmlFileProfile.setFileExtensionIds(fileExts);
-                xmlFileProfile.setName(fpName);
-                xmlFileProfile.setKnownFormatTypeId(7);
-                fpManager.createFileProfile(xmlFileProfile);
-            }
-
-            if (logger.isDebugEnabled())
-            {
-                logger.debug("Using a xml fileprofile, id=" + xmlFileProfile.getId());
-            }
-
-            return String.valueOf(xmlFileProfile.getId());
-        }
-        catch (Exception ex)
-        {
-            logger.error("Failed to get xml file profile", ex);
-            return null;
-        }
     }
 
     /**
@@ -13303,10 +13065,9 @@ public class Ambassador extends AbstractWebService
      * 
      * @param p_state
      *            : task state number, available values: 3 : "ACTIVE" (for
-     *            "Available" tasks) 8 : "ACCEPTED" (for "In Progress" tasks) 81
-     *            : "DISPATCHED_TO_TRANSLATION" 82 : "IN_TRANSLATION" 83 :
-     *            "TRANSLATION_COMPLETED" -1 : "COMPLETED" (for "Finished"
-     *            tasks) 4 : "DEACTIVE" (for "Rejected" tasks)
+     *            "Available" tasks) 8 : "ACCEPTED" (for "In Progress" tasks)
+     *            -1 : "COMPLETED" (for "Finished" tasks)
+     *             4 : "DEACTIVE" (for "Rejected" tasks)
      * @see com.globalsight.everest.taskmanager.Task
      * 
      *      As the three state are all task inner state, no need more actions
@@ -13368,6 +13129,7 @@ public class Ambassador extends AbstractWebService
      * Upload translated files to server for offline uploading purpose.
      * 
      * This should be invoked before importOfflineTargetFiles() API.
+     * @deprecated
      * 
      * @param p_accessToken
      *            The String of access token.
@@ -13418,7 +13180,6 @@ public class Ambassador extends AbstractWebService
      * Offline uploading support.
      * 
      * Before invoking this, uploadEditionFileBack() API should be invoked.
-     * After invoking this, sendSegmentCommentBack() API should be invoked.
      * 
      * @param p_accessToken
      * @param p_originalTaskId

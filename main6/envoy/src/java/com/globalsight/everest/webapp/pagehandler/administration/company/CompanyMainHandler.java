@@ -923,6 +923,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
                 .getParameter(CompanyConstants.ENABLE_WORKFLOW_STATE_POSTS);
         String enableBlankTmSearch = p_request
                 .getParameter(CompanyConstants.ENABLE_BLANK_TM_SEARCH);
+        String disableUploadFileTypes = p_request
+                .getParameter(CompanyConstants.DISABLE_UPLOAD_FILE_TYPES);
 
         if ("on".equalsIgnoreCase(enableIPFilter))
         {
@@ -992,7 +994,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         {
             company.setEnableBlankTmSearch(true);
         }
-
+        company.setDisableUploadFileTypes(disableUploadFileTypes);
+        
         setInContextReview(p_request, company);
 
         //company.setDefaultFluency(ServletUtil.get(p_request, "defaultFluency"));
@@ -1087,7 +1090,9 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
                 .getParameter(CompanyConstants.ENABLE_WORKFLOW_STATE_POSTS);
         String enableBlankTmSearch = p_request
                 .getParameter(CompanyConstants.ENABLE_BLANK_TM_SEARCH);
-
+        String disableUploadFileTypes = p_request
+                .getParameter(CompanyConstants.DISABLE_UPLOAD_FILE_TYPES);
+        
         if ("on".equalsIgnoreCase(enableIPFilter))
         {
             company.setEnableIPFilter(true);
@@ -1156,7 +1161,7 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         {
             company.setEnableBlankTmSearch(true);
         }
-
+        company.setDisableUploadFileTypes(disableUploadFileTypes);
         //company.setDefaultFluency(ServletUtil.get(p_request, "defaultFluency"));
         //company.setDefaultAdequacy(ServletUtil.get(p_request, "defaultAdequacy"));
 

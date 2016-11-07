@@ -21,13 +21,19 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 
+import com.globalsight.everest.comment.CommentException;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.StringUtil;
 
 public class GlossaryUpload
 {
@@ -122,6 +128,58 @@ public class GlossaryUpload
 		uploadBaseDir += WebAppConstants.VIRTUALDIR_SUPPORTFILES;
 	}
 
+	public List<File> checkUploadFileType(HttpServletRequest p_request, String currentCompanyId)
+            throws CommentException
+    {
+        try
+        {
+            // read request and save uploaded file into a temp file
+            readRequest(p_request);
+            verifyUpload();
+            File uploadFile = saveUploadFile();
+            List<File> fileList = new ArrayList<File>();
+            fileList.add(uploadFile);
+            List<File> canNotUploadFiles = StringUtil.isDisableUploadFileType(
+                    CompanyWrapper.getCompanyById(currentCompanyId), fileList);
+            return canNotUploadFiles;
+        }
+        catch (SecurityException se)
+        {
+            throw new CommentException(se);
+        }
+        catch (IOException ioe)
+        {
+            throw new CommentException(ioe);
+        }
+    }
+	
+    private File saveUploadFile()
+    {
+        if (m_tempFile != null && m_tempFile.exists())
+        {
+            try
+            {
+                File savedDir = new File(uploadBaseDir + "/checkUploadFile/");
+                savedDir.mkdirs();
+                File finalFile = new File(savedDir, getFilename());
+                m_tempFile.renameTo(finalFile);
+                return finalFile;
+            }
+            catch (SecurityException ex)
+            {
+                try
+                {
+                    m_tempFile.delete();
+                }
+                catch (Exception e)
+                {
+                }
+
+                throw ex;
+            }
+        }
+        return null;
+    }
 	/**
      * Main method: reads an uploaded file from a http request (result of a form
      * post) and saves it to the file system.
@@ -130,14 +188,8 @@ public class GlossaryUpload
 	{
 		try
 		{
-			// read request and save uploaded file into a temp file
-			readRequest(p_request);
-			// verify that the upload contained full information;
-			// throws exception if not
-			verifyUpload();
-			// rename the temp file to the first real file (src/trg)
-			renameFile(p_request);
-			// if requested, copy file to other src/trg locations
+			getUploadFileMessage(p_request);
+			renameFile();
 			copyToTargets();
 		}
 		catch (SecurityException se)
@@ -366,6 +418,98 @@ public class GlossaryUpload
 		}
 	}
 
+    private void getUploadFileMessage(HttpServletRequest p_request) throws CommentException,
+            IOException
+    {
+        byte[] inBuf = new byte[MAX_LINE_LENGTH];
+        String boundary;
+        int bytesRead;
+        ServletInputStream in;
+        String contentType = p_request.getContentType();
+        if (contentType == null || !contentType.toLowerCase().startsWith("multipart/form-data"))
+        {
+            String[] arg =
+            { "form did not use ENCTYPE=multipart/form-data but `" + contentType + "'" };
+            throw new GlossaryException(GlossaryException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
+        }
+
+        int bi = contentType.indexOf("boundary=");
+        if (bi == -1)
+        {
+            String[] arg =
+            { "no boundary string found in request" };
+            throw new GlossaryException(GlossaryException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
+        }
+        else
+        {
+            boundary = contentType.substring(bi + 9);
+            boundary = "--" + boundary;
+        }
+
+        in = p_request.getInputStream();
+        bytesRead = in.readLine(inBuf, 0, inBuf.length);
+        if (bytesRead < 3)
+        {
+            String[] arg =
+            { "incomplete request (not enough data)" };
+            throw new GlossaryException(GlossaryException.MSG_FAILED_TO_UPLOAD_FILE, arg, null);
+        }
+
+        while (bytesRead != -1)
+        {
+            String lineRead = new String(inBuf, 0, bytesRead, "utf-8");
+            if (lineRead.startsWith("Content-Disposition: form-data; name=\""))
+            {
+                if (lineRead.indexOf("filename=\"") != -1)
+                {
+                    setFilename(lineRead.substring(0, lineRead.length() - 2));
+                    break;
+                }
+                else
+                {
+                    // This is the field part
+                    // First get the field name
+                    int start = lineRead.indexOf("name=\"");
+                    int end = lineRead.indexOf("\"", start + 7);
+                    String fieldName = lineRead.substring(start + 6, end);
+                    bytesRead = in.readLine(inBuf, 0, inBuf.length);
+
+                    StringBuffer fieldValue = new StringBuffer();
+                    boolean writeRN = false;
+                    while ((bytesRead = in.readLine(inBuf, 0, inBuf.length)) != -1)
+                    {
+                        lineRead = new String(inBuf, 0, bytesRead, "utf-8");
+                        // Let's first check if we are already on boundary line
+                        if (bytesRead > 2 && inBuf[0] == '-' && inBuf[1] == '-')
+                        {
+                            if (lineRead.startsWith(boundary))
+                                break;
+                        }
+                        // Write out carriage-return, new-line pair which might
+                        // have been left over from last write.
+                        if (writeRN)
+                        {
+                            fieldValue.append("\r\n");
+                            writeRN = false;
+                        }
+                        if (bytesRead > 2 && inBuf[bytesRead - 2] == '\r'
+                                && inBuf[bytesRead - 1] == '\n')
+                        {
+                            fieldValue.append(lineRead.substring(0, lineRead.length() - 2));
+                            writeRN = true;
+                        }
+                        else
+                        {
+                            fieldValue.append(lineRead);
+                        }
+                    }
+                    // Add field to collection of field
+                    setFieldValue(fieldName, fieldValue.toString());
+                }
+            }
+            bytesRead = in.readLine(inBuf, 0, inBuf.length);
+        }
+    }
 	/**
      * Verifies that the uploaded information was complete: source and target
      * locale must have been specified, and a temporary file must have been
@@ -424,42 +568,16 @@ public class GlossaryUpload
      * Renames the temporary file to the real name; if that fails, the temporary
      * file is deleted.
      */
-	private void renameFile(HttpServletRequest p_request)
-			throws GlossaryException, SecurityException
-	{
-		// We should have all parameter values needed to construct a
-		// correct filepath to save the uploaded file.
-		if (m_tempFile != null && m_tempFile.exists())
-		{
-			try
-			{
-				// First, define and create upload directory structure,
-				// if not already done so
-				setSavedFilepath(uploadBaseDir + getSourceLocale() + "/"
-						+ getTargetLocale() + "/");
-
-				File savedDir = new File(getSavedFilepath());
-				savedDir.mkdirs();
-
-				// Create a destination file and rename/move the file
-				// from temporary location to upload directory
-				File finalFile = new File(savedDir, getFilename());
-				m_tempFile.renameTo(finalFile);
-			}
-			catch (SecurityException ex)
-			{
-				try
-				{
-					m_tempFile.delete();
-				}
-				catch (Exception e)
-				{
-				}
-
-				throw ex;
-			}
-		}
-	}
+	private void renameFile()
+    {
+        File srcDir = new File(uploadBaseDir + "/checkUploadFile/", getFilename());
+        setSavedFilepath(uploadBaseDir + getSourceLocale() + "/" + getTargetLocale() + "/");
+        File savedDir = new File(getSavedFilepath());
+        savedDir.mkdirs();
+        File finalFile = new File(savedDir, getFilename());
+        srcDir.renameTo(finalFile);
+        srcDir.getParentFile().delete();
+    }
 
 	/**
      * Copy the file to other source/target locale directories

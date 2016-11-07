@@ -165,6 +165,10 @@ public class TranslationMemoryProfile extends PersistentObject
     private boolean m_selectRefTm = false;
     private long m_refTmPenalty = -1;
     private String m_refTMsToLeverageFrom;
+    
+    private boolean m_isOldTuvMatch = false;
+    private long m_oldTuvMatchPenalty = -1;
+    private long m_oldTuvMatchDay = -1;
 
     private boolean isMatchPercentage = true;
 
@@ -768,7 +772,41 @@ public class TranslationMemoryProfile extends PersistentObject
         m_selectRefTm = refTm;
     }
 
-
+    public boolean isOldTuvMatch()
+    {
+        return m_isOldTuvMatch;
+    }
+    
+    public boolean getIsOldTuvMatch()
+    {
+        return m_isOldTuvMatch;
+    }
+    
+    public void setIsOldTuvMatch(boolean p_isOldTuvMatch)
+    {
+        m_isOldTuvMatch = p_isOldTuvMatch;
+    }
+    
+    public long getOldTuvMatchPenalty()
+    {
+        return m_oldTuvMatchPenalty;
+    }
+    
+    public void setOldTuvMatchPenalty(long p_oldTuvMatchPenalty)
+    {
+        m_oldTuvMatchPenalty = p_oldTuvMatchPenalty;
+    }
+    
+    public long getOldTuvMatchDay()
+    {
+        return m_oldTuvMatchDay;
+    }
+    
+    public void setOldTuvMatchDay(long p_oldTuvMatchDay)
+    {
+        m_oldTuvMatchDay = p_oldTuvMatchDay;
+    }
+    
     public boolean tmOrderChanged()
     {
         if (m_newProjectTMsToLeverageFrom == null

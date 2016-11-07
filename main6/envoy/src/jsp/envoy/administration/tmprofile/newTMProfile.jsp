@@ -556,6 +556,16 @@ function confirmForm(formSent) {
        alert("<%=lbpenalty%>" + "<%= bundle.getString("jsmsg_numeric") %>");
        return false;
     }
+	if(!isAllDigits(formSent.oldDiffPenalty.value))
+    {
+   	 	alert("<%=lbpenalty%>" + "<%= bundle.getString("jsmsg_numeric") %>");
+        return false;
+   	}
+    if(!isAllDigits(formSent.oldTuvMatchDay.value))
+   	{
+   	 	alert("<%=bundle.getString("lb_day")%>" + "<%= bundle.getString("jsmsg_numeric") %>");
+        return false;
+   	}
     if (formSent.tuAttNotMatchPenalty && !isAllDigits(formSent.tuAttNotMatchPenalty.value))
     {
        alert("<%= bundle.getString("msg_tu_attribute_penalty") %>" + "<%= bundle.getString("jsmsg_numeric") %>");
@@ -566,6 +576,9 @@ function confirmForm(formSent) {
 	if (!checkIsVaildPercent(formSent.refTmPenalty.value)){
 	   return false;
 	}
+	if (!checkIsVaildPercent(formSent.oldDiffPenalty.value)){
+		   return false;
+		}
 	if (!checkIsVaildPercent(formSent.multDiffPenalty.value)){
 	   return false;
 	}
@@ -1276,7 +1289,21 @@ function doOnLoad()
                                 </SELECT>
                               </TD>
                         </TR>
-
+						<TR ALIGN="LEFT">
+                        	  <TD ALIGN="LEFT" STYLE="vertical-align: middle">
+                            <%=bundle.getString("lb_old_tuv_matche_leveraging") %>:</TD>
+                            <TD>
+                           
+                            <INPUT TYPE="checkbox" NAME="<%="isOldTuvMatch"%>"
+                              VALUE="true">
+                              
+                                <SPAN ID="penaltyCodeSensitive">
+                                    <%=lbpenalty%>: <INPUT NAME="<%="oldDiffPenalty"%>" SIZE="1" MAXLENGTH="3" VALUE="1">%
+                                </SPAN>
+                                <br/>
+                                 <input id="oldTuvMatchDay" name="oldTuvMatchDay" size="2" MAXLENGTH="4" value="1095">days
+                             </TD>
+                        </TR>
                         <TR ALIGN="LEFT">
                             <TD ALIGN="LEFT" STYLE="vertical-align: middle">
                             <%=lbmultLingLeveraging%>:</TD>

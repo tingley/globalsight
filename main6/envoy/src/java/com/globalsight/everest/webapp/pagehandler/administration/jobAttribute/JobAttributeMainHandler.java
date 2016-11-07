@@ -42,6 +42,8 @@ import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.cxe.entity.filterconfiguration.ValidateException;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -54,7 +56,9 @@ import com.globalsight.everest.webapp.pagehandler.administration.config.attribut
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.FileUploader;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.zip.ZipIt;
 
 /**
@@ -419,16 +423,18 @@ public class JobAttributeMainHandler extends PageActionHandler
         logger.debug("Updating float value finished.");
     }
 
-    @ActionHandler(action = AttributeConstant.EDIT_FILE, formClass = "")
-    public void saveFile(HttpServletRequest request,
+    @ActionHandler(action = AttributeConstant.CHECK_UPLOAD_FILE_TYPE, formClass = "")
+    public void checkUploadFileType(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
-        logger.debug("Update float value...");
-
+        logger.debug("Check upload file type ...");
+        response.setContentType("text/html;charset=UTF-8");
+        ServletOutputStream out = response.getOutputStream();
         try
         {
+            ResourceBundle bundle = PageHandler.getBundle(request.getSession());
+            String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
             String jobId = request.getParameter("jobId");
-
             FileUploader uploader = new FileUploader();
             File file = uploader.upload(request);
 
@@ -438,10 +444,9 @@ public class JobAttributeMainHandler extends PageActionHandler
             if (jobAttId < 1)
             {
                 String attributeId = uploader.getFieldValue("attributeId");
-                Attribute attribute = HibernateUtil.get(Attribute.class, Long
-                        .parseLong(attributeId));
-                JobImpl job = HibernateUtil.get(JobImpl.class, Long
-                        .parseLong(jobId));
+                Attribute attribute = HibernateUtil.get(Attribute.class,
+                        Long.parseLong(attributeId));
+                JobImpl job = HibernateUtil.get(JobImpl.class, Long.parseLong(jobId));
                 jobAtt = new JobAttribute();
                 jobAtt.setJob(job);
                 jobAtt.setAttribute(attribute.getCloneAttribute());
@@ -462,25 +467,100 @@ public class JobAttributeMainHandler extends PageActionHandler
 
             if (uploader.getName().length() > 0)
             {
-                File targetFile = new File(JobAttributeFileManager
-                        .getStorePath(jobAttId)
-                        + "/" + uploader.getName());
+                File targetFile = new File(JobAttributeFileManager.getStorePath(jobAttId)
+                        + "/checkUploadFile/" + uploader.getName());
                 if (!file.renameTo(targetFile))
                 {
                     FileUtils.copyFile(file, targetFile);
+                }
+
+                List<File> uploadFileList = new ArrayList<File>();
+                uploadFileList.add(targetFile);
+                List<File> canNotUploadFiles = StringUtil.isDisableUploadFileType(
+                        CompanyWrapper.getCompanyById(currentCompanyId), uploadFileList);
+                if (canNotUploadFiles != null && canNotUploadFiles.size() > 0)
+                {
+                    Map<String, Object> returnValue = new HashMap();
+                    returnValue.put("isContain", "contain");
+                    returnValue.put("message", (bundle
+                            .getString("lb_message_check_upload_file_type") + CompanyWrapper
+                            .getCompanyById(currentCompanyId).getDisableUploadFileTypes()));
+                    out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
+
+                    for (File notUploadFile : canNotUploadFiles)
+                    {
+                        notUploadFile.delete();
+                    }
+                }
+                else
+                {
+                    Map<String, Object> returnValue = new HashMap();
+                    returnValue.put("jobAttributeId", jobAttId);
+                    returnValue.put("uploadFileName", uploader.getName());
+                    returnValue.put("isContain", "notContain");
+                    out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
                 }
             }
         }
         catch (ValidateException ve)
         {
             ResourceBundle bundle = PageHandler.getBundle(request.getSession());
-            String s = "({\"error\" : "
-                    + JsonUtil.toJson(ve.getMessage(bundle)) + "})";
+            String s = "({\"error\" : " + JsonUtil.toJson(ve.getMessage(bundle)) + "})";
+            out.write(s.toString().getBytes("UTF-8"));
         }
         catch (Exception e)
         {
-            String s = "({\"error\" : " + JsonUtil.toObjectJson(e.getMessage())
-                    + "})";
+            String s = "({\"error\" : " + JsonUtil.toObjectJson(e.getMessage()) + "})";
+            out.write(s.toString().getBytes("UTF-8"));
+            logger.error(e.getMessage(), e);
+        }
+        finally
+        {
+            out.close();
+            pageReturn();
+        }
+
+        logger.debug("Check upload file finished.");
+    }
+    
+    @ActionHandler(action = AttributeConstant.EDIT_FILE, formClass = "")
+    public void saveFile(HttpServletRequest request,
+            HttpServletResponse response, Object form) throws Exception
+    {
+        logger.debug("Update float value...");
+
+        try
+        {
+            String jobAttributeId = request.getParameter("jobAttributeId");
+            String uploadName = request.getParameter("uploadFileName");
+            long jobAttId = Long.parseLong(jobAttributeId);
+            File targetFile = new File(JobAttributeFileManager.getStorePath(jobAttId) + "/"
+                    + uploadName);
+            File srcFile = new File(JobAttributeFileManager.getStorePath(jobAttId)
+                    + "/checkUploadFile/" + uploadName);
+            FileUtils.copyFile(srcFile, targetFile);
+            srcFile.delete();
+            //delete "checkUploadFile" file
+            File checkUploadFile = new File(JobAttributeFileManager.getStorePath(jobAttId)
+                    + "/checkUploadFile/");
+            if (checkUploadFile.isDirectory())
+            {
+                File[] uploadFiles = checkUploadFile.listFiles();
+                for (int i = 0; i < uploadFiles.length; i++)
+                {
+                    if (uploadFiles[i].exists())
+                    {
+                        if (uploadFiles[i].isFile())
+                        {
+                            uploadFiles[i].delete();
+                        }
+                    }
+                }
+                checkUploadFile.delete();
+            }
+        }
+        catch (Exception e)
+        {
             logger.error(e.getMessage(), e);
         }
         finally

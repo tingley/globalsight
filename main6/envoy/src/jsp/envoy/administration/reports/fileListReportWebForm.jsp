@@ -72,14 +72,13 @@ function validateForm()
 {
     if(searchForm.reportOnJobId.checked)
     {
-    	
         var jobIDArr =  searchForm.jobIds.value.split(",");
-        var idInput=$("#jobNameList").find("option");
-		var idArray=new Array();
-		idInput.each(function(){
-			idArray.push({"jobId":$(this).val()});
-		})
-        if(!validateIDS(jobIDArr, idArray))
+//        var idInput=$("#jobNameList").find("option");
+//		var idArray=new Array();
+//		idInput.each(function(){
+//			idArray.push({"jobId":$(this).val()});
+//		})
+        if(!validateIDS(jobIDArr, null))
         {
         	$("#jobNameList").attr("selected", true);
            return ('<%=bundle.getString("lb_invalid_jobid")%>');
@@ -231,6 +230,8 @@ function filterJob2()
             $.each(item.targetLocales, function(i, item) {
                 if (contains(currSelectValueTargetLocale, item)) {
                 	isLocaleFlag = "true";
+                	//break the target locales check for performance
+                	return false;
                 }
             });
             if(isLocaleFlag == "true")

@@ -16,6 +16,7 @@
  */
 package com.globalsight.ling.tm2.leverage;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -140,6 +141,7 @@ public class LeverageMatches
             }
 
             setRefTmScores(tu);
+            setOldTuvScores(tu);
         }
     }
 
@@ -232,7 +234,7 @@ public class LeverageMatches
             }
 
             setRefTmScores(tu);
-
+            setOldTuvScores(tu);
             try
             {
                 // As we have not implemented in-progress TM for GBS-3650, below
@@ -1102,6 +1104,44 @@ public class LeverageMatches
         }
     }
 
+    private void setOldTuvScores(LeveragedTu p_tu)
+    {
+        if (m_leverageOptions.isOldTuvMatch())
+        {
+            if (m_leverageOptions.getOldTuvMatchPenalty() != 0)
+            {
+                BaseTmTuv baseTmTuv = p_tu.getSourceTuv();
+                Timestamp creationDate = baseTmTuv.getCreationDate();
+                Timestamp modifyDate = baseTmTuv.getModifyDate();
+                Timestamp lastUsageDate = baseTmTuv.getLastUsageDate();
+                Timestamp currentDate = new Timestamp(System.currentTimeMillis());
+                int day1 = 10000;
+                int day2 = 10000;
+                int day3 = 10000;
+                if (creationDate != null)
+                {
+                    day1 = (int) ((currentDate.getTime() - creationDate.getTime()) / 1000 / 60 / 60 / 24);
+                }
+                if (modifyDate != null)
+                {
+                    day2 = (int) ((currentDate.getTime() - modifyDate.getTime()) / 1000 / 60 / 60 / 24);
+                }
+                if (lastUsageDate != null)
+                {
+                    day3 = (int) ((currentDate.getTime() - lastUsageDate.getTime()) / 1000 / 60 / 60 / 24);
+                }
+                if (day1 > m_leverageOptions.getOldTuvMatchDay()
+                        && day2 > m_leverageOptions.getOldTuvMatchDay()
+                        && day3 > m_leverageOptions.getOldTuvMatchDay())
+                {
+                    float score = (p_tu.getScore() - m_leverageOptions.getOldTuvMatchPenalty());
+                    p_tu.setScore(score);
+                    p_tu.setMatchState(MatchState.FUZZY_MATCH);
+                }
+            }
+        }
+    }
+    
     /**
      * Try to replace all placeholders of the specified tu.
      * <p>

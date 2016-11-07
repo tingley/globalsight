@@ -147,7 +147,10 @@
             "&" + WebAppConstants.UPLOAD_ACTION +
             "=" + WebAppConstants.UPLOAD_ACTION_START_UPLOAD +
             "&" + WebAppConstants.TASK_STATE + "=" + state;
-
+    String checkUploadFileTypeUrl = startupload.getPageURL() +
+    		 "&" + WebAppConstants.UPLOAD_ACTION + 
+    		 "=" + WebAppConstants.CHECK_UPLOAD_FILE_TYPE ;
+    
     String uploadInstruction = null;
     String uploadHelper = null;
     String workOfflineUrl = null;
@@ -326,25 +329,6 @@
         status = labelAvailable;
         labelABorDBorCODate = labelAcceptBy;
         valueABorDBorCODate = acceptBy;
-        break;
-    case Task.STATE_DISPATCHED_TO_TRANSLATION:
-        status = labelAccepted;
-        isPageDetailOne = false;
-        disableButtons = true;
-        break;
-    case Task.STATE_IN_TRANSLATION:
-        status = labelAccepted;
-        isPageDetailOne = false;
-        disableButtons = true;
-        break;
-    case Task.STATE_TRANSLATION_COMPLETED:
-        status = labelAccepted;
-        isPageDetailOne = false;
-        break;
-    case Task.STATE_REDEAY_DISPATCH_GSEDTION:
-        status = labelAccepted;
-        isPageDetailOne = false;
-        disableButtons = true;
         break;
     case Task.STATE_FINISHING:
         status = labelFinishing;
@@ -577,6 +561,11 @@ var taskId = <%=task_id%>;
 
 function submitForm()
 {
+	if(!checkUploadFileType())
+	{
+		return false;
+	}
+	
     ignoreClose = true;
     if (document.layers)
     {
@@ -600,6 +589,38 @@ function submitForm()
         ignoreClose = false;
         return false;
     }
+}
+
+function checkUploadFileType()
+{
+	var checkAction = "<%=checkUploadFileTypeUrl%>";
+	var formData = new FormData($( "#uploadForm" )[0]);
+	var result = true;
+    $.ajax({
+        type : "POST",
+        url : checkAction,
+        traditional:true,
+        async : false,
+        cache : false,
+        contentType: false,  
+        processData: false,  
+        data: formData,
+        success : function(data) {
+			if(data == 'notContain'){
+				//upload file does not contain disable file type
+				result = true;
+        	}else{
+        		//upload file contain disable file type
+        		alert(data);
+        		result = false;
+        	}
+        },
+        error : function(request, error, status) {
+            alert(error);
+            result = false;
+        }
+    });
+    return result;
 }
 
 function doOnLoad()
@@ -688,7 +709,7 @@ if (!review_only)
   <TR>
     <TD>&nbsp;</TD>
     <TD>
-      <FORM ACTION="<%=startUploadReportUrl%>" NAME="uploadForm" METHOD="POST" ENCTYPE="multipart/form-data">
+      <FORM ACTION="<%=startUploadReportUrl%>" NAME="uploadForm" ID="uploadForm" METHOD="POST" ENCTYPE="multipart/form-data">
       <BR>
       <INPUT TYPE="file"  CLASS="standardText" SIZE="40" NAME="<%=fileFieldName%>">
       </FORM>
@@ -723,4 +744,3 @@ if (!review_only)
 </DIV>
 </BODY>
 </HTML>
-

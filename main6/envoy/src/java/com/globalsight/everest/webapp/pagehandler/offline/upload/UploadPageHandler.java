@@ -16,20 +16,30 @@
  */
 package com.globalsight.everest.webapp.pagehandler.offline.upload;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.globalsight.cxe.engine.util.FileUtils;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.StringUtil;
 
 public class UploadPageHandler extends PageHandler
 {
@@ -68,7 +78,52 @@ public class UploadPageHandler extends PageHandler
 		if (action != null)
 		{
             UploadPageHandlerHelper uploadPageHandlerHelper = new UploadPageHandlerHelper();
-			if (action.equals(UPLOAD_ACTION_START_UPLOAD))
+            if (action.equals(CHECK_UPLOAD_FILE_TYPE))
+            {
+                try
+                {
+                    String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+                    MultipartFormDataReader reader = new MultipartFormDataReader();
+                    File tempFile = reader.uploadToTempFile(p_request);
+                    File savedDir = new File(AmbFileStoragePathUtils.getUploadDir()
+                            + "/checkUploadFile/");
+                    savedDir.mkdirs();
+                    File uploadFile = new File(savedDir, reader.getFilename());
+                    if (!tempFile.renameTo(uploadFile))
+                    {
+                        FileUtils.copyFile(tempFile, uploadFile);
+                    }
+                    tempFile.delete();
+
+                    ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
+                    p_response.setContentType("text/html;charset=UTF-8");
+                    ServletOutputStream out = p_response.getOutputStream();
+                    List<File> uploadFileList = new ArrayList<File>();
+                    uploadFileList.add(uploadFile);
+                    List<File> canNotUploadFiles = StringUtil.isDisableUploadFileType(
+                            CompanyWrapper.getCompanyById(currentCompanyId), uploadFileList);
+                    if (canNotUploadFiles != null && canNotUploadFiles.size() > 0)
+                    {
+                        out.write(((bundle.getString("lb_message_check_upload_file_type") + CompanyWrapper
+                                .getCompanyById(currentCompanyId).getDisableUploadFileTypes()))
+                                .getBytes("UTF-8"));
+                        for (File file : canNotUploadFiles)
+                        {
+                            file.delete();
+                        }
+                    }
+                    else
+                    {
+                        out.write(("notContain").getBytes("UTF-8"));
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+                return;
+            }
+            else if (action.equals(UPLOAD_ACTION_START_UPLOAD))
 			{
                 uploadPageHandlerHelper.uploadStartPrepare(p_request,
                         httpSession, status, contentType);

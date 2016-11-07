@@ -17,7 +17,10 @@
 
 package com.globalsight.everest.webapp.pagehandler.tm.management;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -28,10 +31,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -156,6 +164,7 @@ public class TmImportPageHandler extends PageHandler implements
                 }
             }
 
+     
             if (action.equals(TM_ACTION_IMPORT))
             {
                 if (tmid == null
@@ -245,6 +254,61 @@ public class TmImportPageHandler extends PageHandler implements
                     CATEGORY.error("Error in canceling conversion"
                             + e.getMessage());
                 }
+            }
+            else if (action.equalsIgnoreCase(CHECK_UPLOAD_FILE_TYPE))
+            {
+                DiskFileItemFactory factory = new DiskFileItemFactory();
+                factory.setSizeThreshold(1024000);
+                ServletFileUpload upload = new ServletFileUpload(factory);
+                List<FileItem> fileItems = upload.parseRequest(p_request);
+                File uploadFile = null;
+                String filePath = AmbFileStoragePathUtils.getFileStorageDirPath() + File.separator
+                        + AmbFileStoragePathUtils.TM_IMPORT_FILE_SUB_DIR + File.separator
+                        + "checkUploadFile";
+                for (int i = 0; i < fileItems.size(); i++)
+                {
+                    FileItem item = (FileItem) fileItems.get(i);
+                    if (!item.isFormField())
+                    {
+                        String fileName = item.getName();
+                        if (fileName.contains(":"))
+                        {
+                            fileName = fileName.substring(filePath.indexOf(":") + 1);
+                        }
+                        String originalFilePath = fileName.replace("\\", File.separator).replace(
+                                "/", File.separator);
+                        String finalPath = filePath + File.separator + originalFilePath;
+                        uploadFile = new File(finalPath);
+                        uploadFile.getParentFile().mkdirs();
+                        item.write(uploadFile);
+                    }
+                }
+
+                ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
+                p_response.setContentType("text/html;charset=UTF-8");
+                ServletOutputStream out = p_response.getOutputStream();
+                String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+                List<File> uploadFileList = new ArrayList<File>();
+                uploadFileList.add(uploadFile);
+                List<File> canNotUploadFiles = StringUtil.isDisableUploadFileType(
+                        CompanyWrapper.getCompanyById(currentCompanyId), uploadFileList);
+                if (canNotUploadFiles != null && canNotUploadFiles.size() > 0)
+                {
+                    out.write(((bundle.getString("lb_message_check_upload_file_type") + CompanyWrapper
+                            .getCompanyById(currentCompanyId).getDisableUploadFileTypes()))
+                            .getBytes("UTF-8"));
+                    for (File file : canNotUploadFiles)
+                    {
+                        file.delete();
+                    }
+                }
+                else
+                {
+                    uploadFile.delete();
+                    out.write(("notContain").getBytes("UTF-8"));
+                }
+                uploadFile.getParentFile().delete();
+                return;
             }
             else if (action.equals(TM_ACTION_UPLOAD_FILE))
             {

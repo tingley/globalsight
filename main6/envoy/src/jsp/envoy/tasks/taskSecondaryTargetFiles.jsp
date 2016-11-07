@@ -644,25 +644,6 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
             valueABorDBorCODate = acceptBy;
             rowspan = 12;
             break;
-        case Task.STATE_DISPATCHED_TO_TRANSLATION:
-            status = labelAccepted;
-            isPageDetailOne = false;
-            disableButtons = true;
-            break;
-        case Task.STATE_IN_TRANSLATION:
-            status = labelAccepted;
-            isPageDetailOne = false;
-            disableButtons = true;
-            break;
-        case Task.STATE_TRANSLATION_COMPLETED:
-            status = labelAccepted;
-            isPageDetailOne = false;
-            break;
-        case Task.STATE_REDEAY_DISPATCH_GSEDTION:
-            status = labelAccepted;
-            isPageDetailOne = false;
-            disableButtons = true;
-            break;
         case Task.STATE_FINISHING:
             status = labelFinishing;
             isPageDetailOne = false;

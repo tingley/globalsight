@@ -19,8 +19,6 @@ package com.globalsight.everest.jobhandler.jobcreation;
 import java.io.File;
 import java.rmi.RemoteException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,7 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -37,13 +34,11 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import com.globalsight.cxe.adapter.documentum.DocumentumOperator;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.cxe.util.XmlUtil;
-import com.globalsight.cxe.util.fileImport.eventFlow.Category;
 import com.globalsight.cxe.util.fileImport.eventFlow.EventFlowXml;
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -209,12 +204,6 @@ public class JobCreatorLocal implements JobCreator
 
             // Update job state
             updateJobState(job, isBatch, isBatchComplete, sp, e);
-
-            // Handle Documentum job
-            if (DocumentumOperator.DCTM_CATEGORY.equalsIgnoreCase(p_request.getDataSourceType()))
-            {
-                priorHandleDocumentumJob(e, job);
-            }
 
             // remove job cache after batch complete
             if (isBatchComplete)
@@ -1417,88 +1406,4 @@ public class JobCreatorLocal implements JobCreator
         return sB.toString();
     }
 
-    /**
-     * Prior real Documentum job handling.
-     */
-    private void priorHandleDocumentumJob(EventFlowXml e, Job job)
-    {
-        try
-        {
-            Category c = e.getCategory(DocumentumOperator.DCTM_CATEGORY);
-            c_logger.debug("Starting to create a documentum job......");
-
-            String dctmObjId = c.getValue(DocumentumOperator.DCTM_OBJECTID);
-            String isAttrFileStr = c.getValue(DocumentumOperator.DCTM_ISATTRFILE);
-            String userId = c.getValue(DocumentumOperator.DCTM_USERID);
-            Boolean isAttrFile = Boolean.valueOf(isAttrFileStr);
-
-            if (!isAttrFile.booleanValue())
-            {
-                handleDocumentumJob(job, dctmObjId, userId);
-            }
-            c_logger.debug("Finish to create a documentum job");
-        }
-        catch (NoSuchElementException nex)
-        {
-            c_logger.debug("Not a valid Documentum job");
-        }
-        catch (Exception ex)
-        {
-            c_logger.error(
-                    "Failed to write attribute back to Documentum server", ex);
-        }
-    }
-
-    /**
-     * Write the custom attributes back to Documentum Server, including jobId,
-     * Workflow Ids.
-     * 
-     * @param job
-     *            - The new job created just now.
-     * @param objId
-     *            - Documentum Object Id.
-     * @throws Exception
-     */
-    private void handleDocumentumJob(Job job, String objId, String userId)
-            throws Exception
-    {
-        Connection connection = null;
-        PreparedStatement psQueryWfIds = null;
-        ResultSet rs = null;
-        try
-        {
-            Collection<Long> wfIdsList = new ArrayList<Long>();
-            connection = DbUtil.getConnection();
-            StringBuffer debugInfo = new StringBuffer();
-
-            // Find all the workflows for this Documentum Job.
-            String jobId = String.valueOf(job.getJobId());
-            debugInfo.append("JobId=").append(jobId).append(", ");
-            debugInfo.append("WorkflowIds=");
-
-            psQueryWfIds = connection
-                    .prepareStatement(DocumentumOperator.DCTM_SELWFI_SQL);
-            psQueryWfIds.setLong(1, job.getId());
-            rs = psQueryWfIds.executeQuery();
-            while (rs.next())
-            {
-                long wfId = rs.getLong(1);
-                wfIdsList.add(new Long(wfId));
-                debugInfo.append(wfId).append(" ");
-            }
-
-            c_logger.debug("Writing the custom attributes(jobId, workflow ids) back to Documentum server");
-            // Write custom attributes(jobId, workflow ids) back to Documentum
-            // Server.
-            DocumentumOperator.getInstance().writeCustomAttrsBack(userId,
-                    objId, jobId, wfIdsList);
-            c_logger.debug(debugInfo.toString());
-        }
-        finally
-        {
-            DbUtil.silentClose(rs);
-            DbUtil.silentClose(psQueryWfIds);
-            DbUtil.silentReturnConnection(connection);
-        }
-    }
 }

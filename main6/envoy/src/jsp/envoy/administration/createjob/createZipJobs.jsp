@@ -904,8 +904,45 @@ function setInputFileDisable(t)
 	}
 }
 
+function checkUploadFileType()
+{
+	var checkAction = $("#createJobForm").attr("action")+"&uploadAction=checkUploadFileType&type="+type+"&tempFolder="+tempFolder;
+	var formData = new FormData($( "#createJobForm" )[0]);
+	var result = true;
+    $.ajax({
+        type : "POST",
+        url : checkAction,
+        traditional:true,
+        async : false,
+        cache : false,
+        contentType: false,  
+        processData: false,  
+        data: formData,
+        success : function(data) {
+			if(data == 'notContain'){
+				//upload file does not contain disable file type
+				result = true;
+        	}else{
+        		//upload file contain disable file type
+        		alert(data);
+        		result = false;
+        	}
+        },
+        error : function(request, error, status) {
+            alert(error);
+            result = false;
+        }
+    });
+    return result;
+}
+
 function checkAndUpload()
 {
+	if(!checkUploadFileType())
+	{
+		return false;
+	}   
+	
 	if (isUploading)
 	{
 		alert("Please wait for the last file upload.");

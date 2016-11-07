@@ -3,11 +3,13 @@
          errorPage="/envoy/common/error.jsp"
          session="true"
          import = "com.globalsight.everest.webapp.WebAppConstants,
+         com.globalsight.everest.company.CompanyWrapper,
          com.globalsight.everest.servlet.util.SessionManager"
 %>
 <%
 SessionManager sessionManager = (SessionManager) session.getAttribute(WebAppConstants.SESSION_MANAGER);
 String companyId = (String) sessionManager.getAttribute("companyId");
+String disableUploadFileTypes = CompanyWrapper.getCompanyById(companyId).getDisableUploadFileTypes();
 %>
 <html>
 <head>
@@ -21,6 +23,7 @@ String companyId = (String) sessionManager.getAttribute("companyId");
 var guideNode = "filterConfiguration";
 var companyId = "<%=companyId%>";
 var helpFile = "<c:out value='${help_filter_configuration_import_screen}'/>";
+var disableUploadFileTypes = "<%=disableUploadFileTypes%>";
 function confirmJump()
 {
 	return true;
@@ -33,8 +36,20 @@ $(document).ready(function(){
 	
 	$("#uploadBtn").click(function(){
 		var file = $("#fileInput").val();
-		var ext = file.substring(file.lastIndexOf(".") + 1);
-		if(ext.toLowerCase() != "properties") {
+		var ext = file.substring(file.lastIndexOf("."));
+		
+		var fileTypeArr= new Array(); 
+    	fileTypeArr = disableUploadFileTypes.split(",");
+    	for(i=0;i<fileTypeArr.length ;i++ )
+    	{
+    		if(fileTypeArr[i] == ext)
+    		{
+    			alert("<c:out value='${lb_message_check_upload_file_type}'/>"+disableUploadFileTypes);
+        		return false;
+    		}
+    	}
+	   	
+		if(ext.toLowerCase() != ".properties") {
 			alert("<c:out value='${msg_alert_filter_import}'/>");
 			return;
 		}

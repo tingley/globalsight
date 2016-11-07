@@ -672,4 +672,16 @@ public interface Workflow extends WorkObject
     public String getDQFComment();
     
     public void setDQFComment(String dqfComment);
+    
+    public boolean enableDQF();
+
+    public boolean enableScorecard();
+
+    public boolean hasDQFStored();
+
+    public boolean hasScorecardStored();
+    
+    public boolean requiredDQF();
+
+    public boolean requiredScorecard();
 }

@@ -172,6 +172,8 @@ public interface WebAppConstants
     public static final String TRANSLATION_EDIT = "translationEdit";
     public static final String POST_REVIEW_QA = "postReviewQA";
     public static final String TRANSLATION_VERIFICATION = "translationVerification";
+    public static final String CHECK_UPLOAD_FILE_TYPE = "checkUploadFileType";
+
 
     public static final String UPLOAD_ACTION_UPLOAD_REPORT = "uploadReport";
     public static final String DOWNLOAD_ACTION_START_DOWNLOAD_TER = "downloadTER";

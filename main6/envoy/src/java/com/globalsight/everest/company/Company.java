@@ -67,6 +67,7 @@ public class Company extends PersistentObject
 
     private String defaultFluency = "";
     private String defaultAdequacy = "";
+    private String m_diableUploadFileTypes = "";
 
     // ////////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
@@ -393,5 +394,15 @@ public class Company extends PersistentObject
     public void setDefaultAdequacy(String defaultAdequacy)
     {
         this.defaultAdequacy = defaultAdequacy;
+    }
+    
+    public String getDisableUploadFileTypes()
+    {
+        return m_diableUploadFileTypes;
+    }
+
+    public void setDisableUploadFileTypes(String disableUploadFileTypes)
+    {
+        this.m_diableUploadFileTypes = disableUploadFileTypes;
     }
 }

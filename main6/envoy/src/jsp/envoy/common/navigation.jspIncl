@@ -450,12 +450,6 @@ dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_db_previe
 <%}%>
 <%}%>
 
-<% if (b_documentum){%>
-<% if (userPerms.getPermissionFor(Permission.DOCUMENTUM_IMPORT)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("Documentum Import", "javascript:window.open('/globalsight/envoy/documentum/index.jsp','DocumentumWindow','HEIGHT=600,WIDTH=1000,scrollbars,resizable');", ""));
-<%}%>
-<%}%>
-
 <% if (userPerms.getPermissionFor(Permission.EXPORT_LOC_VIEW)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_export_locations")%>", "javascript:goToUrl('<%=exportLocationsUrl%>');", ""));
 <% } %>

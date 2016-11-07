@@ -21,7 +21,6 @@ import org.apache.log4j.Logger;
 import com.globalsight.calendar.CalendarManagerLocal;
 import com.globalsight.cxe.adapter.catalyst.CatalystAdapter;
 import com.globalsight.cxe.adapter.database.DatabaseAdapter;
-import com.globalsight.cxe.adapter.documentum.DocumentumAdapter;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
@@ -40,8 +39,6 @@ public class Modules
 
     // Keeps track of whether certain modules are installed
     private static boolean s_db = false;
-
-    private static boolean s_documentum = false;
 
     private static boolean s_quark, s_frame, s_pdf = false;
 
@@ -82,7 +79,6 @@ public class Modules
             s_vmWebService = s_vendorMgmt && s_l10nWebService;
             s_calendar = CalendarManagerLocal.isInstalled();
             s_catalyst = CatalystAdapter.isInstalled();
-            s_documentum = DocumentumAdapter.isInstalled();
             checkCustomerAccessGroup();
         }
         catch (Exception e)
@@ -211,16 +207,6 @@ public class Modules
     public static boolean isCatalystAdapterInstalled()
     {
         return s_catalyst;
-    }
-
-    /**
-     * Returns true if the Documentum Adapter is installed
-     * 
-     * @return true | false
-     */
-    public static boolean isDocumentumAdapterInstalled()
-    {
-        return s_documentum;
     }
 
     /**

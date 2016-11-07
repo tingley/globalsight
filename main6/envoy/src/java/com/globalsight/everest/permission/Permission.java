@@ -191,7 +191,6 @@ public class Permission
     static public final String EXPORT_LOC_DEFAULT = "exportloc.default";
     static public final String EXPORT_LOC_EDIT = "exportloc.edit";
     static public final String EXPORT_LOC_NEW = "exportloc.new";
-    static public final String DOCUMENTUM_IMPORT = "documentum.import";
     static public final String JOB_SCOPE_ALL = "jobscope.all";
     static public final String JOBS_VIEW = "jobs.view";
     static public final String JOBS_SEARCH_REPLACE = "jobs.searchreplace";
@@ -709,7 +708,6 @@ public class Permission
         added = addPermission(185, VENDORS_RATING_EDIT) || added;
         added = addPermission(186, VENDORS_RATING_REMOVE) || added;
         added = addPermission(188, CUSTOMER_UPLOAD) || added;
-        added = addPermission(189, DOCUMENTUM_IMPORT) || added;
         added = addPermission(190, GET_ALL_PROJECTS) || added;
         added = addPermission(191, GET_PROJECTS_I_MANAGE) || added;
         added = addPermission(192, GET_PROJECTS_I_BELONG) || added;

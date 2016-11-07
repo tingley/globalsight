@@ -2659,10 +2659,8 @@ public class ExportHelper
             CxeProxy.exportFile(getEventFlowXML(), p_messageData, cxeRequestType, targetLocale,
                     codeSet, bomType, messageId, p_exportParameters.getExportLocation(),
                     p_exportParameters.getLocaleSubDir(), p_exportBatchId, p_pageCount, p_pageNum,
-                    p_docPageCount, p_docPageNum, p_exportParameters.getNewObjectId(),
-                    p_exportParameters.getWorkflowId(), p_exportParameters.isJobDone(),
-                    p_isUnextracted, p_exportingFileName, p_sourcePageBomType,
-                    p_exportParameters.getIsFinalExport(),
+                    p_docPageCount, p_docPageNum, null, p_exportParameters.getWorkflowId(), true,
+                    p_isUnextracted, p_exportingFileName, p_sourcePageBomType, true,
                     CompanyThreadLocal.getInstance().getValue());
         }
         catch (Exception e)

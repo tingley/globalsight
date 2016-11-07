@@ -111,7 +111,7 @@ function initSortActions() {
 		if (currentTaskState == "3")
 			sortSearch("ecaDate",true);
 		else if (currentTaskState == "8")
-			sortSearch("acceptedDate",true);
+			sortSearch("ecdDate",true);
 		else if (currentTaskState == "-1")
 			sortSearch("completedDate",true);
 		else if (currentTaskState == "6")

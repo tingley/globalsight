@@ -1,0 +1,3 @@
+## Clean "documentum" codes
+
+DROP TABLE IF EXISTS DOCUMENTUM_USER CASCADE;

@@ -27,8 +27,6 @@ import com.globalsight.cxe.adaptermdb.catalyst.CatalystTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.copyflow.CopyFlowSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.copyflow.CopyFlowTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.database.DatabaseTargetAdapterMDB;
-import com.globalsight.cxe.adaptermdb.documentum.DocumentumSourceAdapterMDB;
-import com.globalsight.cxe.adaptermdb.documentum.DocumentumTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.filesystem.FileSystemSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.filesystem.FileSystemTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.idml.IdmlSourceAdapterMDB;
@@ -127,11 +125,6 @@ public class EventTopicMap
         // catalyst
         m_classMap.put(CxeMessageType.CATALYST_IMPORTED_EVENT, new CatalystSourceAdapterMDB());
         m_classMap.put(CxeMessageType.CATALYST_LOCALIZED_EVENT, new CatalystTargetAdapterMDB());
-
-        // documentum
-        m_classMap.put(CxeMessageType.DOCUMENTUM_FILE_SELECTED_EVENT,
-                new DocumentumSourceAdapterMDB());
-        m_classMap.put(CxeMessageType.DOCUMENTUM_EXPORT_EVENT, new DocumentumTargetAdapterMDB());
 
         // adobe
         m_classMap.put(CxeMessageType.ADOBE_IMPORTED_EVENT, new AdobeSourceAdapterMDB());

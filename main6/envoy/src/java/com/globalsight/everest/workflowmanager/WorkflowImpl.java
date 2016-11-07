@@ -52,6 +52,7 @@ import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 
 /**
  * Need to include "WorkObject" here also - as well as in Workflow.java TL can't
@@ -1706,5 +1707,36 @@ public class WorkflowImpl extends PersistentObject implements Workflow, WorkObje
     public void setIsSinceVersion87(boolean isSinceVersion87)
     {
         this.isSinceVersion87 = isSinceVersion87;
+    }
+    
+    public boolean enableDQF()
+    {
+        return (this.scorecardShowType > 1 && this.scorecardShowType < 6);
+    }
+    
+    public boolean requiredDQF()
+    {
+        return scorecardShowType == 3 || scorecardShowType == 5;
+    }
+
+    public boolean enableScorecard()
+    {
+        return (this.scorecardShowType > -1 && this.scorecardShowType < 4);
+    }
+    
+    public boolean requiredScorecard()
+    {
+        return scorecardShowType == 1 || scorecardShowType == 3;
+    }
+
+    public boolean hasDQFStored()
+    {
+        return StringUtil.isNotEmpty(this.dqfComment) && StringUtil.isNotEmpty(fluencyScore)
+                && StringUtil.isNotEmpty(adequacyScore);
+    }
+
+    public boolean hasScorecardStored()
+    {
+        return StringUtil.isNotEmpty(scorecardComment);
     }
 }

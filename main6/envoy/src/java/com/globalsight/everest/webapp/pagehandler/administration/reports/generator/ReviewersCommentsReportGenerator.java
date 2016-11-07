@@ -551,15 +551,14 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                         needProtect = !(task.isType(Task.TYPE_REVIEW) || task.isType(Task.TYPE_REVIEW_EDITABLE));
                     }
                 }
-                int scoreShowType = wf.getScorecardShowType();
-                if (scoreShowType > 1) {
+                if (wf.enableDQF()) {
                     isDQFEnabled = true;
                     fluencyScore = wf.getFluencyScore();
                     adequacyScore = wf.getAdequacyScore();
                     dqfComment = wf.getDQFComment();
                     DQF_START_ROW = 6;
                 }
-                if (scoreShowType > -1 && scoreShowType < 4) {
+                if (wf.enableScorecard()) {
                     isScorecradEnabled = true;
                     scorecardCategories = ScorecardScoreHelper.getScorecardCategories(wf.getCompanyId(), m_bundle);
                     scores = ScorecardScoreHelper.getScoreByWrkflowId(wf.getId());

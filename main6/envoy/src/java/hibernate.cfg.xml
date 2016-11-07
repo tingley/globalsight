@@ -28,7 +28,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/DBConnectionImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/DBDispatchImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/DelayedImportRequest.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/DocumentumUserInfo.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ExportBatchEvent.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ExportingPage.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ExportLocationImpl.hbm.xml" />

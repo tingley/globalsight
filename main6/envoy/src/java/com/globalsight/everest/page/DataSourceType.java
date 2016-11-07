@@ -45,9 +45,4 @@ public interface DataSourceType
      * Constant used for identifying a "data base" data source type.
      */
     public final static String DATABASE = "db";
-    
-    /**
-     * Constant used for identifying a "Documentum CMS" data source type
-     */
-    public final static String DOCUMENTUM = "documentum";
 }

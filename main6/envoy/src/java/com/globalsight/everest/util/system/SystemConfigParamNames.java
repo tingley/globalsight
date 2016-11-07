@@ -371,9 +371,6 @@ public interface SystemConfigParamNames
     public static final String ACCOUNT_USERNAME = "account.username";
     public static final String ACCOUNT_PASSWORD = "account.password";
 
-    /** Documentum Constants */
-    public static final String DOCUMENTUM_INSTALL_KEY = "documentum.installKey";
-
     /** Analyze script */
     public static final String ANALYZE_SCRIPT_RUN = "analyze_script.run";
     public static final String ANALYZE_SCRIPT_INTERVAL = "analyze_script.interval";

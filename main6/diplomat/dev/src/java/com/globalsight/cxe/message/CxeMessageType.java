@@ -115,9 +115,6 @@ public class CxeMessageType implements Serializable
     public static final int CATALYST_IMPORTED_EVENT = 515;
     public static final int CATALYST_LOCALIZED_EVENT = 516;
 
-    public static final int DOCUMENTUM_FILE_SELECTED_EVENT = 521;
-    public static final int DOCUMENTUM_EXPORT_EVENT = 522;
-
     //////////////////////////////////////
     // Private Members                  //
     //////////////////////////////////////
@@ -215,10 +212,6 @@ public class CxeMessageType implements Serializable
         fillMaps(CATALYST_IMPORTED_EVENT, "CATALYST_IMPORTED_EVENT");
         fillMaps(CATALYST_LOCALIZED_EVENT, "CATALYST_LOCALIZED_EVENT");
 
-       //documentum
-        fillMaps(DOCUMENTUM_FILE_SELECTED_EVENT, "DOCUMENTUM_FILE_SELECTED_EVENT");
-        fillMaps(DOCUMENTUM_EXPORT_EVENT, "DOCUMENTUM_EXPORT_EVENT");
-        
         //mif
         fillMaps(MIF_IMPORTED_EVENT, "MIF_IMPORTED_EVENT");
         fillMaps(MIF_LOCALIZED_EVENT, "MIF_LOCALIZED_EVENT");

@@ -25,7 +25,6 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageException;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -58,11 +57,7 @@ public class ExportParameters implements java.io.Serializable, Cloneable
     public static final int XLF_SRC_AS_TRG_NO = 0;
     public static final int XLF_SRC_AS_TRG_YES = 1;
 
-    // For documentum Job
     private long m_workflowId = 0;
-    private String m_newObjId = null;
-    private boolean m_isJobDone = false;
-    private boolean m_isFinalExport = false;
 
     // ////////////////////////////////////////////////////////////////////
     // Begin: Constructor
@@ -156,17 +151,6 @@ public class ExportParameters implements java.io.Serializable, Cloneable
     }
 
     /**
-     * Returns true if this export occurs at the completion of a workflow. This
-     * is not interim export or preview.
-     * 
-     * @return true | false
-     */
-    public boolean getIsFinalExport()
-    {
-        return m_isFinalExport;
-    }
-
-    /**
      * Get the URL to CXE for sending the export request.
      * 
      * @return The CXE's URL.
@@ -212,35 +196,11 @@ public class ExportParameters implements java.io.Serializable, Cloneable
     }
 
     /**
-     * Set the new documentum object id.
-     */
-    public void setNewObjectId(String newObjId)
-    {
-        m_newObjId = newObjId;
-    }
-
-    /**
-     * Get the new documentum object id.
-     */
-    public String getNewObjectId()
-    {
-        return m_newObjId;
-    }
-
-    /**
-     * Get the workflow id for the export (just for documentum job).
+     * Get the workflow id for the export.
      */
     public long getWorkflowId()
     {
         return m_workflowId;
-    }
-
-    /**
-     * Get the job state for the export (just for documentum job).
-     */
-    public boolean isJobDone()
-    {
-        return m_isJobDone;
     }
 
     // ////////////////////////////////////////////////////////////////////
@@ -278,19 +238,7 @@ public class ExportParameters implements java.io.Serializable, Cloneable
             m_exportCodeset = p_exportCodeset == null ? getExportCodeset(p_workflow)
                     : p_exportCodeset;
 
-            // export of a localized workflow is a final export
-            if (p_workflow.getState().equals(Workflow.LOCALIZED))
-            {
-                m_isFinalExport = true;
-            }
-
-            // These two variables just for Documentum job
             m_workflowId = p_workflow.getId();
-            String jobState = p_workflow.getJob().getState();
-            if (jobState.equals(Job.LOCALIZED) || jobState.equals(Job.EXPORTED))
-            {
-                m_isJobDone = true;
-            }
             companyId = String.valueOf(p_workflow.getJob().getCompanyId());
         }
 
@@ -431,7 +379,6 @@ public class ExportParameters implements java.io.Serializable, Cloneable
         } 
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }             
         

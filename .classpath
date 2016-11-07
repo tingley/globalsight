@@ -21,8 +21,6 @@
 	<classpathentry kind="lib" path="main6/tools/lib/common/commons-httpclient-3.0-rc2.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/commons-lang3-3.1.jar" sourcepath="main6/tools/lib/sources/commons-lang3-3.1-sources.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/commons-logging.jar"/>
-	<classpathentry kind="lib" path="main6/tools/lib/common/dfc.jar"/>
-	<classpathentry kind="lib" path="main6/tools/lib/common/dfcbase.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/dom4j.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/ezmorph-1.0.6.jar"/>
 	<classpathentry kind="lib" path="main6/tools/lib/common/fastjson-1.1.36.jar"/>

@@ -23,7 +23,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.database.DatabaseAdapter;
-import com.globalsight.cxe.adapter.documentum.DocumentumOperator;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
@@ -59,7 +58,7 @@ public class CxeProxy
 
     static private final Integer ONE = new Integer(1);
 
-    static private HashMap s_targetLocales = new HashMap();
+    static private HashMap<String, String> s_targetLocales = new HashMap<String, String>();
 
     /**
      * store target locales which were choosed when importing file
@@ -430,8 +429,7 @@ public class CxeProxy
     }
 
     /**
-     * Initiates an export within CXE (Override method for documentum workflow
-     * Id).
+     * Initiates an export within CXE.
      * 
      * @param p_eventFlowXml
      *            string of event flow xml
@@ -561,27 +559,41 @@ public class CxeProxy
      * Initiates an export within CXE.
      * 
      * @param p_eventFlowXml
-     *            string of event flow xml
-     * @param p_gxmlFileName
-     *            filename of a file that contains GXML
+     *            -- string of event flow xml
+     * @param p_gxml
+     *            -- filename of a file that contains GXML
      * @param p_cxeRequestType
-     *            CXE Request Type
+     *            -- CXE Request Type
      * @param p_targetLocale
-     *            target locale
+     *            -- target locale
      * @param p_targetCharset
-     *            target encoding
+     *            -- target encoding
+     * @param p_bomType
      * @param p_messageId
-     *            export message ID
+     *            -- export message ID
      * @param p_exportLocation
-     *            export location
+     *            -- export location
      * @param p_localeSubDir
      * @param p_exportBatchId
      * @param p_pageCount
      * @param p_pageNum
+     * @param p_docPageCount
+     * @param p_docPageNum
+     * @param newObjId
+     *            -- deprecated
+     * @param wfId
+     * @param isJobDone
+     *            -- deprecated
      * @param p_isUnextracted
      * @param p_sessionId
      * @param p_fileName
-     *            The name of the file that is being exported (relative path)
+     *            -- The name of the file that is being exported (relative path)
+     * @param p_sourcePageBomType
+     * @param p_isFinalExport
+     *            -- deprecated
+     * @param p_companyId
+     * 
+     * @throws Exception
      */
     static private void exportFile(String p_eventFlowXml, MessageData p_gxml,
             String p_cxeRequestType, String p_targetLocale, String p_targetCharset, int p_bomType,
@@ -648,14 +660,11 @@ public class CxeProxy
         params.put("DocPageCount", p_docPageCount);
         params.put("DocPageNum", p_docPageNum);
 
-        params.put(DocumentumOperator.DCTM_NEWOBJECTID, newObjId);
-        params.put(DocumentumOperator.DCTM_WORKFLOWID, String.valueOf(wfId));
-        params.put(DocumentumOperator.DCTM_ISJOBDONE, new Boolean(isJobDone));
+        params.put("WorkflowId", String.valueOf(wfId));
 
         params.put("SessionId", p_sessionId);
         params.put("TargetFileName", p_fileName);
         params.put("SourcePageBomType", Integer.valueOf(p_sourcePageBomType));
-        params.put("IsFinalExport", new Boolean(p_isFinalExport));
 
         exportMsg.setParameters(params);
         exportMsg.setEventFlowXml(p_eventFlowXml);
@@ -696,201 +705,6 @@ public class CxeProxy
         }
 
         return;
-    }
-
-    /**
-     * Initiates an export within CXE (Override method for documentum workflow
-     * Id).
-     * 
-     * @param p_eventFlowXml
-     *            string of event flow xml
-     * @param p_gxmlFileName
-     *            filename of a file that contains GXML
-     * @param p_cxeRequestType
-     *            CXE Request Type
-     * @param p_targetLocale
-     *            target locale
-     * @param p_targetCharset
-     *            target encoding
-     * @param p_bomType
-     *            BOM type
-     * @param p_messageId
-     *            export message ID
-     * @param p_exportLocation
-     *            export location
-     * @param p_localeSubDir
-     * @param p_exportBatchId
-     * @param p_pageCount
-     * @param p_pageNum
-     * @param p_docPageCount
-     * @param p_docPageNum
-     * @param wfId
-     * @param p_isUnextracted
-     * @param p_fileName
-     *            The name of the file to be exported (relative path)
-     */
-    static public CxeMessage getExportCxeMessage(String p_eventFlowXml, MessageData p_gxml,
-            String p_cxeRequestType, String p_targetLocale, String p_targetCharset, int p_bomType,
-            String p_messageId, String p_exportLocation, String p_localeSubDir,
-            String p_exportBatchId, Integer p_pageCount, Integer p_pageNum, Integer p_docPageCount,
-            Integer p_docPageNum, String newObjId, long wfId, boolean isJobDone,
-            boolean p_isUnextracted, String p_fileName, int p_sourcePageBomType,
-            boolean p_isFinalExport, String p_companyId) throws Exception
-    {
-        if (s_logger.isDebugEnabled())
-        {
-            s_logger.debug("CXE Export Request: (requestType=" + p_cxeRequestType + ", " + "pageId="
-                    + p_messageId + ", " + "page " + p_docPageNum + " of " + p_docPageCount + ", "
-                    + "targetLocale=" + p_targetLocale + ", " + "unextracted=" + p_isUnextracted
-                    + ", " + "dir=" + p_localeSubDir + ")");
-        }
-
-        return getCxeMessage(p_eventFlowXml, p_gxml, p_cxeRequestType, p_targetLocale,
-                p_targetCharset, p_bomType, p_messageId, p_exportLocation, p_localeSubDir,
-                p_exportBatchId, p_pageCount, p_pageNum, p_docPageCount, p_docPageNum, newObjId,
-                wfId, isJobDone, p_isUnextracted, null, p_fileName, p_sourcePageBomType,
-                p_isFinalExport, p_companyId);
-    }
-
-    static private CxeMessage getCxeMessage(String p_eventFlowXml, MessageData p_gxml,
-            String p_cxeRequestType, String p_targetLocale, String p_targetCharset, int p_bomType,
-            String p_messageId, String p_exportLocation, String p_localeSubDir,
-            String p_exportBatchId, Integer p_pageCount, Integer p_pageNum, Integer p_docPageCount,
-            Integer p_docPageNum, String newObjId, long wfId, boolean isJobDone,
-            boolean p_isUnextracted, String p_sessionId, String p_fileName, int p_sourcePageBomType,
-            boolean p_isFinalExport, String p_companyId) throws Exception
-    {
-        CxeMessageType type;
-        if (p_isUnextracted)
-        {
-            type = CxeMessageType.getCxeMessageType(CxeMessageType.UNEXTRACTED_LOCALIZED_EVENT);
-        }
-        else
-        {
-            type = CxeMessageType.getCxeMessageType(CxeMessageType.GXML_LOCALIZED_EVENT);
-        }
-
-        // Handle STF created files as unextracted as well if it's not
-        // the STF creation, but a regular STF export.
-        if (ExportConstants.EXPORT_STF.equals(p_cxeRequestType))
-        {
-            type = CxeMessageType.getCxeMessageType(CxeMessageType.UNEXTRACTED_LOCALIZED_EVENT);
-        }
-
-        CxeMessage exportMsg = new CxeMessage(type);
-        HashMap params = new HashMap();
-
-        if (p_targetCharset != null && p_targetCharset.endsWith("_di"))
-        {
-            p_targetCharset = p_targetCharset.replace("_di", "");
-        }
-
-        else if ("Unicode Escape".equalsIgnoreCase(p_targetCharset))
-        {
-            p_targetCharset = "UTF-8";
-            params.put("UnicodeEscape", "true");
-        }
-        else
-        {
-            params.put("UnicodeEscape", "false");
-        }
-        if ("Entity Escape".equalsIgnoreCase(p_targetCharset))
-        {
-            p_targetCharset = "ISO-8859-1";
-            params.put("EntityEscape", "true");
-        }
-        else
-        {
-            params.put("EntityEscape", "false");
-        }
-        params.put(CompanyWrapper.CURRENT_COMPANY_ID, p_companyId);
-        params.put("TargetLocale", p_targetLocale);
-        params.put("TargetCharset", p_targetCharset);
-        params.put("BOMType", Integer.valueOf(p_bomType));
-        params.put("CxeRequestType", p_cxeRequestType);
-        params.put("MessageId", p_messageId);
-        params.put("ExportLocation", p_exportLocation);
-        params.put("LocaleSubDir", p_localeSubDir);
-        params.put("ExportBatchId", p_exportBatchId);
-        params.put("PageCount", p_pageCount);
-        params.put("PageNum", p_pageNum);
-        params.put("DocPageCount", p_docPageCount);
-        params.put("DocPageNum", p_docPageNum);
-
-        params.put(DocumentumOperator.DCTM_NEWOBJECTID, newObjId);
-        params.put(DocumentumOperator.DCTM_WORKFLOWID, String.valueOf(wfId));
-        params.put(DocumentumOperator.DCTM_ISJOBDONE, new Boolean(isJobDone));
-
-        params.put("SessionId", p_sessionId);
-        params.put("TargetFileName", p_fileName);
-        params.put("SourcePageBomType", Integer.valueOf(p_sourcePageBomType));
-        params.put("IsFinalExport", new Boolean(p_isFinalExport));
-
-        exportMsg.setParameters(params);
-        exportMsg.setEventFlowXml(p_eventFlowXml);
-        exportMsg.setMessageData(p_gxml);
-
-        return exportMsg;
-    }
-
-    /**
-     * Initiates a Documentum import.
-     * 
-     * @param p_objID
-     *            Documentum object ID
-     * @param p_filename
-     *            path based filename
-     * @param p_jobName
-     *            job name
-     * @param p_batchId
-     *            batch Id
-     * @param p_fileProfileId
-     *            file profile ID
-     * @param p_pageCount
-     *            number of pages in the batch
-     * @param p_pageNum
-     *            number of the current page in the batch (starting from 1)
-     * @param dctmFileAttrXml
-     *            - the xml string for DCTM file attributes.
-     */
-    static public void importFromDocumentum(String p_objID, String p_fileName, String p_jobName,
-            String p_batchId, String p_fileProfileId, Integer p_pageCount, Integer p_pageNum,
-            Integer p_docPageCount, Integer p_docPageNum, boolean isAttrFile,
-            String dctmFileAttrXml, String userId) throws Exception
-    {
-        CxeMessageType type = CxeMessageType
-                .getCxeMessageType(CxeMessageType.DOCUMENTUM_FILE_SELECTED_EVENT);
-        CxeMessage cxeMessage = new CxeMessage(type);
-        HashMap params = cxeMessage.getParameters();
-        params.put(DocumentumOperator.DCTM_OBJECTID, p_objID);
-        // params.put("DocbaseName", p_docbaseName);
-        String companyId = getCompanyIdByFileProfileId(p_fileProfileId);
-        params.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
-        params.put("Filename", p_fileName);
-        String jobName = p_jobName;
-        if (p_jobName == null || p_jobName.length() == 0)
-        {
-            long timeInSec = System.currentTimeMillis() / 1000L;
-            jobName = "dctmjob_" + timeInSec;
-        }
-
-        params.put("JobName", jobName);
-        params.put("BatchId", p_batchId);
-        params.put("FileProfileId", p_fileProfileId);
-        params.put("PageCount", p_pageCount);
-        params.put("PageNum", p_pageNum);
-        params.put("DocPageCount", p_docPageCount);
-        params.put("DocPageNum", p_docPageNum);
-
-        params.put(DocumentumOperator.DCTM_ISATTRFILE, new Boolean(isAttrFile));
-        params.put(DocumentumOperator.DCTM_FILEATTRXML, dctmFileAttrXml);
-        params.put(DocumentumOperator.DCTM_USERID, userId);
-
-        params.put("IsAutomaticImport", Boolean.FALSE);
-        params.put("OverrideFileProfileAsUnextracted", Boolean.FALSE);
-
-        // GBS-4400
-        FileImportUtil.importFileWithThread(cxeMessage);
     }
 
     private static String getCompanyIdByFileProfileId(String p_fileProfileId)

@@ -205,7 +205,6 @@ public class GitUtil
         IGNORE_FILTER.add("/tools/client tools/");
         IGNORE_FILTER.add("/src/webserviceClients/");
         IGNORE_FILTER.add("/tools/build/");
-        IGNORE_FILTER.add("/webtop-plugin/");
         IGNORE_FILTER.add("/AdobeXmpRule.properties");
         IGNORE_FILTER.add("/inddrule.properties");
         IGNORE_FILTER.add("/dist/conv_adobe_indesign_cs4.zip");

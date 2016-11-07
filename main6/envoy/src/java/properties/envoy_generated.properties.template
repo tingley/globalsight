@@ -49,7 +49,6 @@ server.classes=\
   com.globalsight.scheduling.EventSchedulerWLRMIImpl,\
   com.globalsight.calendar.CalendarManagerWLRMIImpl,\
   com.globalsight.util.mail.MailerWLRMIImpl,\
-  com.globalsight.cxe.persistence.documentum.DocumentumPersistenceManagerWLRMIImpl,\
   com.globalsight.everest.request.RequestHandlerWLRMIImpl,\
   com.globalsight.terminology.ITermbaseManagerImpl,\
   com.globalsight.terminology.scheduler.TermbaseScheduler,\

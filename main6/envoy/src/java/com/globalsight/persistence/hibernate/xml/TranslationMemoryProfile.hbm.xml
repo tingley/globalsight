@@ -128,6 +128,12 @@
         <property name="refTMsToLeverageFrom" length="160"
             column="REF_TMS" type="string" not-null="false"
             unique="false" />
+         <property name="isOldTuvMatch" column="IS_OLD_TUV_MATCH" type="yes_no"
+ 			not-null="false" unique="false"/>
+        <property name="oldTuvMatchPenalty" column="OLD_TUV_MATCH_PENALTY"
+        	type="long" not-null="false" unique="false"/>
+        <property name="oldTuvMatchDay" column="OLD_TUV_MATCH_DAY"
+        	type="long" not-null="false" unique="false"/>    
         <property name="uniqueFromMultipleTranslation"
             column="GET_UNIQUE_FROM_MULT_TRANS" type="yes_no"
             not-null="false" unique="false" />

@@ -452,4 +452,19 @@ public class LeverageOptions
     {
         return getTmProfile().isUniqueFromMultipleTranslation();
     }
+    
+    public boolean isOldTuvMatch()
+    {
+        return m_tmProfile.isOldTuvMatch();
+    }
+    
+    public long getOldTuvMatchPenalty()
+    {
+        return m_tmProfile.getOldTuvMatchPenalty();
+    }
+
+    public long getOldTuvMatchDay()
+    {
+        return m_tmProfile.getOldTuvMatchDay();
+    }
 }

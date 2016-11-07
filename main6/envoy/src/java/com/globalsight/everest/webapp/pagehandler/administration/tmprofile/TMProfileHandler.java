@@ -558,6 +558,26 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         String leverageRefPTMs = p_request.getParameter("leveragedRefProjects");
         tmProfile.setRefTMsToLeverageFrom(leverageRefPTMs);
 
+        String oldTuvMatch = p_request.getParameter("isOldTuvMatch");
+        boolean isOldTuvMatch = "true".equalsIgnoreCase(oldTuvMatch);
+        tmProfile.setIsOldTuvMatch(isOldTuvMatch);
+        
+        String oldTuvMatchP = p_request.getParameter("oldDiffPenalty");
+        long oldTuvMatchPenalty = 0;
+        if (oldTuvMatchP != null && oldTuvMatchP.trim().length() != 0)
+        {
+            oldTuvMatchPenalty = Long.parseLong(oldTuvMatchP);
+        }
+        tmProfile.setOldTuvMatchPenalty(oldTuvMatchPenalty);
+        
+        String oldTuvMatchD = p_request.getParameter("oldTuvMatchDay");
+        long oldTuvMatchDay = 0;
+        if (oldTuvMatchD != null && oldTuvMatchD.trim().length() != 0)
+        {
+            oldTuvMatchDay = Long.parseLong(oldTuvMatchD);
+        }
+        tmProfile.setOldTuvMatchDay(oldTuvMatchDay);
+        
         // 12 and 13
         String caseSensitiveLeveraging = p_request
                 .getParameter("caseSensitiveLeveraging");

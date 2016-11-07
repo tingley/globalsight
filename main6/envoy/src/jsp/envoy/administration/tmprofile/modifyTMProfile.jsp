@@ -490,7 +490,25 @@
        }
    }
    HashMap refTmInForm = new HashMap();
+   String chosenOldTuv = new Boolean(tmProfile.isOldTuvMatch()).toString();
+   String isOldTuvMatch = "";
+   if (chosenOldTuv.equals("true"))
+   {
+       isOldTuvMatch = "CHECKED";
+   }
    
+   String oldTuvMatchPenalty ="";
+   oldTuvMatchPenalty = new Long(tmProfile.getOldTuvMatchPenalty()).toString();
+   if (oldTuvMatchPenalty.equals("-1"))
+   {
+       oldTuvMatchPenalty = "";
+   }
+   String oldTuvMatchDay ="";
+   oldTuvMatchDay = new Long(tmProfile.getOldTuvMatchDay()).toString();
+   if (oldTuvMatchDay.equals("-1"))
+   {
+       oldTuvMatchDay = "";
+   }
    String tmpAvailableAtts = (String)request.getAttribute(WebAppConstants.TMP_AVAILABLE_ATTS);
    String tmpAtts = (String)request.getAttribute(WebAppConstants.TMP_TMP_ATTS);
 %>
@@ -915,7 +933,16 @@ function confirmForm(formSent) {
        alert("<%= bundle.getString("msg_tu_attribute_penalty") %>" + "<%= bundle.getString("jsmsg_numeric") %>");
        return false;
     }
-
+    if(!isAllDigits(formSent.oldDiffPenalty.value))
+    {
+    	 alert("<%=lbpenalty%>" + "<%= bundle.getString("jsmsg_numeric") %>");
+         return false;
+    }
+    if(!isAllDigits(formSent.oldTuvMatchDay.value))
+    {
+    	 alert("<%=bundle.getString("lb_day")%>" + "<%= bundle.getString("jsmsg_numeric") %>");
+         return false;
+    }
     //check penalty between 0 and 100;whiteDiffPenalty
 	if (!checkIsVaildPercent(formSent.refTmPenalty.value)){
 	   return false;
@@ -926,6 +953,9 @@ function confirmForm(formSent) {
 	if (!checkIsVaildPercent(formSent.fuzzyMatchThreshold.value)){
 	   return false;
 	}
+	if (!checkIsVaildPercent(formSent.oldDiffPenalty.value)){
+		   return false;
+		}
 	if (!checkIsVaildPercent(formSent.numberOfMatches.value)){
 	   return false;
 	}
@@ -1667,6 +1697,21 @@ function doOnLoad()
 
                                 </SELECT>
                               </TD>
+                        </TR>
+                                  <TR ALIGN="LEFT">
+                        	  <TD ALIGN="LEFT" STYLE="vertical-align: middle">
+                            <%=bundle.getString("lb_old_tuv_matche_leveraging") %>:</TD>
+                            <TD>
+                           
+                            <INPUT TYPE="checkbox" NAME="<%="isOldTuvMatch"%>"
+                              VALUE="true" <%=isOldTuvMatch%>>
+                              
+                                <SPAN ID="penaltyCodeSensitive">
+                                    <%=lbpenalty%>: <INPUT NAME="<%="oldDiffPenalty"%>" SIZE="1" MAXLENGTH="3" VALUE="<%=oldTuvMatchPenalty%>">%
+                                </SPAN>
+                                <br/>
+                                 <input id="oldTuvMatchDay" name="oldTuvMatchDay" size="2" MAXLENGTH="4" value="<%=oldTuvMatchDay%>">days
+                             </TD>
                         </TR>
                         <TR>
                            <TD ALIGN="LEFT" STYLE="vertical-align: middle">

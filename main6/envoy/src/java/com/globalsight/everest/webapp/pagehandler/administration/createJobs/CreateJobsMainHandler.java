@@ -1923,20 +1923,12 @@ public class CreateJobsMainHandler extends PageHandler
                         //delete "checkUploadFile" file
                         File checkUploadFile = new File(path + "checkUploadFile" + File.separator);
                         if (checkUploadFile.isDirectory())
-                        {
-                            File[] uploadFiles = checkUploadFile.listFiles();
-                            for (int i = 0; i < uploadFiles.length; i++)
-                            {
-                                if (uploadFiles[i].exists())
-                                {
-                                    if (uploadFiles[i].isFile())
-                                    {
-                                        uploadFiles[i].delete();
-                                    }
-                                }
-                            }
-                            checkUploadFile.delete();
-                        }
+						{
+							if (!(checkUploadFile.listFiles().length > 0))
+							{
+								checkUploadFile.delete();
+							}
+						}
                         continue;
                     }
 

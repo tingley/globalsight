@@ -64,7 +64,15 @@ public class CxeMessageType implements Serializable
     public static final int FRAME_LOCALIZED_EVENT = 14;
     public static final int QUARK_LOCALIZED_EVENT = 15;
 
+    /**
+     * Probably for database
+     * @deprecated
+     */
     public static final int PRSXML_IMPORTED_EVENT = 16;
+    /**
+     * Probably for database
+     * @deprecated
+     */
     public static final int PRSXML_LOCALIZED_EVENT = 17;
 
     public static final int RTF_IMPORTED_EVENT = 18;
@@ -109,7 +117,10 @@ public class CxeMessageType implements Serializable
     public static final int CAP_IMPORT_ERROR_EVENT = 505;
     public static final int STF_CREATION_EVENT = 506;
 
-    public static final int DATABASE_EXPORT_EVENT = 511;
+    /**
+     * Probably for database
+     * @deprecated
+     */
     public static final int DYNAMIC_PREVIEW_EVENT = 512;
 
     public static final int CATALYST_IMPORTED_EVENT = 515;
@@ -118,8 +129,8 @@ public class CxeMessageType implements Serializable
     //////////////////////////////////////
     // Private Members                  //
     //////////////////////////////////////
-    private static HashMap s_byNames;
-    private static HashMap s_byValues;
+    private static HashMap<String, CxeMessageType> s_byNames;
+    private static HashMap<Integer, CxeMessageType> s_byValues;
     private String m_name;
     private int m_value;
 
@@ -145,8 +156,8 @@ public class CxeMessageType implements Serializable
     // event type above be sure to add the entry to this section!!
     static
     {
-        s_byNames = new HashMap(50);
-        s_byValues = new HashMap(50);
+        s_byNames = new HashMap<String, CxeMessageType>(50);
+        s_byValues = new HashMap<Integer, CxeMessageType>(50);
         fillMaps(GXML_CREATED_EVENT,"GXML_CREATED_EVENT");
         fillMaps(GXML_LOCALIZED_EVENT,"GXML_LOCALIZED_EVENT");
         fillMaps(HTML_IMPORTED_EVENT,"HTML_IMPORTED_EVENT");
@@ -203,7 +214,6 @@ public class CxeMessageType implements Serializable
         fillMaps(RTF_LOCALIZED_EVENT,"RTF_LOCALIZED_EVENT");
 
         //database
-        fillMaps(DATABASE_EXPORT_EVENT, "DATABASE_EXPORT_EVENT");
         fillMaps(PRSXML_LOCALIZED_EVENT, "PRSXML_LOCALIZED_EVENT");
         fillMaps(PRSXML_IMPORTED_EVENT, "PRSXML_IMPORTED_EVENT");
         fillMaps(DYNAMIC_PREVIEW_EVENT, "DYNAMIC_PREVIEW_EVENT");
@@ -336,10 +346,7 @@ public class CxeMessageType implements Serializable
         }
         else if (p_oldEventName.indexOf("MergedEvent") > 0)
         {
-            if (p_oldEventName.indexOf("Database") > 0)
-                newEventValue= DATABASE_EXPORT_EVENT;
-            else
-                newEventValue = FILE_SYSTEM_EXPORT_EVENT;
+            newEventValue = FILE_SYSTEM_EXPORT_EVENT;
         }
 
         if (newEventValue == -1)

@@ -267,8 +267,6 @@ public interface SystemConfigParamNames
 
     public static final String WEB_SERVER_DOC_ROOT = "webserver.docroot";
 
-    public static final String DATABASE_INSTALL_KEY = "database.installKey";
-
     // for the desktop adapters (quark/frame)
     public static final String QUARK_INSTALL_KEY = "quark.installKey";
     public static final String FRAME_INSTALL_KEY = "frame.installKey";

@@ -48,7 +48,6 @@ public class UILocaleConstant
             "AmbassadorDwUpException", "CalendarManagerException",
             "CapAdapterMsg", "CatalystAdapterMsg", 
             "CommentException", "CopyFlowAdapterMsg", "CostingException",
-            "DatabaseAdapterMsg", "DBConnectionPersistenceManager",
             "DependencyCheckException", "DesktopApplicationAdapterMsg",
             "DiplomatMergerException",
             "EditorMatchTypeLabels", "EnvoyServletException",

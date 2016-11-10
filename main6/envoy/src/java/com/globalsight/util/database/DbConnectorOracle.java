@@ -16,13 +16,6 @@
  */
 package com.globalsight.util.database;
 
-/* Copyright (c) 1999, Global Sight Corporation.  All rights reserved. */
-
-// Import Core Java classes
-//import java.sql.DriverManager;
-//import java.sql.Connection;
-import java.sql.SQLException;
-
 /**
  * Handles Oracle specific operations as required by the abstract
  * super class that handles generic operations for making connections
@@ -36,7 +29,6 @@ import java.sql.SQLException;
  * MODIFIED     MM/DD/YYYY
  * mlau         12/06/1999   Ininitial version.
  */
-
 public class DbConnectorOracle extends DbConnectorAbstract
 {
     //TomyD --  replaced the oracle driver with the weblogic's.

@@ -40,6 +40,8 @@ import com.globalsight.util.GeneralException;
  */
 public class RequestHandlerException extends GeneralException 
 {
+    private static final long serialVersionUID = -3706014500815422238L;
+
     // Reuqest related messages are stored in the following property file
     final static String PROPERTY_FILE_NAME = "RequestHandlerException";
     
@@ -49,7 +51,6 @@ public class RequestHandlerException extends GeneralException
     static final String MSG_FAILED_TO_FIND_PAGE_MANAGER = "FailedToFindPageManager";
     static final String MSG_FAILED_TO_FIND_REQUEST_HANDLER = "FailedToFindRequestHandler";
     static final String MSG_FAILED_TO_FIND_FILE_PROFILE_MANAGER = "FailedToFindFileProfilePersistenceManager";
-    static final String MSG_FAILED_TO_FIND_DB_PROFILE_MANAGER = "FailedToFindDatabaseProfilePersistenceManager";
     static final String MSG_FAILED_TO_FIND_USER_MANAGER = "FailedToFindUserManager";
 
     //takes in three arguments - request id (may be 0), external page id, attribute that can't be updated (as string)

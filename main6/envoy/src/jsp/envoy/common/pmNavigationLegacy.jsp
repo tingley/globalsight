@@ -19,10 +19,6 @@
    String archivedJobsUrl = LinkHelper.getWebActivityURL(request, "archive");
    String calendarsUrl = LinkHelper.getWebActivityURL(request, "calendars");
    String currencyUrl = LinkHelper.getWebActivityURL(request, "currency");
-   String dbConnectionsUrl = LinkHelper.getWebActivityURL(request, "dbconnections");
-   String dbImportSettingsUrl = LinkHelper.getWebActivityURL(request, "dbimportsettings");
-   String dbPreviewRulesUrl = LinkHelper.getWebActivityURL(request, "dynamicURLs");
-   String dbProfilesUrl = LinkHelper.getWebActivityURL(request, "dbprofiles");
    String exportLocationsUrl = LinkHelper.getWebActivityURL(request, "exportlocation");
    String fileExtensionsUrl = LinkHelper.getWebActivityURL(request, "fileextensions");
    String fileProfilesUrl = LinkHelper.getWebActivityURL(request, "fileprofiles");
@@ -177,25 +173,6 @@ arMenu1 = new Array (
     "<%= menuBundle.getString("lb_export_locations") %>",
     "<%= exportLocationsUrl %>",
     0
-
-    <%if (b_database){%>
-    ,
-    "<%= menuBundle.getString("lb_db_connections2") %>",
-    "<%= dbConnectionsUrl %>",
-    0,
-
-    "<%= menuBundle.getString("lb_db_profiles2") %>",
-    "<%= dbProfilesUrl %>",
-    0,
-
-    "<%= menuBundle.getString("lb_db_import_settings2") %>",
-    "<%= dbImportSettingsUrl %>",
-    0,
-
-    "<%= menuBundle.getString("lb_db_preview") %>",
-    "<%= dbPreviewRulesUrl %>",
-    0
-    <%}%>
 );
 
 // Guides
@@ -212,12 +189,7 @@ arMenu3 = new Array(
 
     "<%= menuBundle.getString("lb_filesystem") %>",
     "javascript: showGuide('fileSystem');",
-    0<%if (b_database) {%>
-    ,
-    "<%= menuBundle.getString("lb_database") %>",
-    "javascript: showGuide('database');",
     0
-    <%}%>
 );
       
 

@@ -26,7 +26,6 @@ import com.globalsight.cxe.adaptermdb.catalyst.CatalystSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.catalyst.CatalystTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.copyflow.CopyFlowSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.copyflow.CopyFlowTargetAdapterMDB;
-import com.globalsight.cxe.adaptermdb.database.DatabaseTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.filesystem.FileSystemSourceAdapterMDB;
 import com.globalsight.cxe.adaptermdb.filesystem.FileSystemTargetAdapterMDB;
 import com.globalsight.cxe.adaptermdb.idml.IdmlSourceAdapterMDB;
@@ -114,13 +113,6 @@ public class EventTopicMap
         m_classMap.put(CxeMessageType.FRAME_LOCALIZED_EVENT, new QuarkFrameTargetAdapterMDB());
         m_classMap.put(CxeMessageType.COPYFLOW_IMPORTED_EVENT, new CopyFlowSourceAdapterMDB());
         m_classMap.put(CxeMessageType.COPYFLOW_LOCALIZED_EVENT, new CopyFlowTargetAdapterMDB());
-
-        // database
-        m_classMap.put(CxeMessageType.DATABASE_EXPORT_EVENT, new DatabaseTargetAdapterMDB());
-
-        // dynamic preview
-        // m_classMap.put(CxeMessageType.DYNAMIC_PREVIEW_EVENT,
-        // FOR_DYNAMIC_PREVIEW);
 
         // catalyst
         m_classMap.put(CxeMessageType.CATALYST_IMPORTED_EVENT, new CatalystSourceAdapterMDB());

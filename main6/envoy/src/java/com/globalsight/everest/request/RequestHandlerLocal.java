@@ -33,10 +33,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.globalsight.cxe.entity.databaseprofile.DatabaseProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
-import com.globalsight.cxe.persistence.databaseprofile.DatabaseProfileEntityException;
-import com.globalsight.cxe.persistence.databaseprofile.DatabaseProfilePersistenceManager;
 import com.globalsight.cxe.persistence.fileprofile.FileProfileEntityException;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -257,75 +254,37 @@ public class RequestHandlerLocal implements RequestHandler
         // if from a database - then call the database profile
         if (p_request.getDataSourceType() != null)
         {
-            if (p_request.getDataSourceType().equals("db"))
+            if (c_logger.isDebugEnabled())
             {
-                if (c_logger.isDebugEnabled())
-                {
-                    c_logger.debug("Looking for the data source name of a "
-                            + "database profile for request " + p_request.getId());
-                }
-
-                // get the database profile persistence manager
-                DatabaseProfilePersistenceManager dbProfMgr = null;
-                try
-                {
-                    dbProfMgr = ServerProxy.getDatabaseProfilePersistenceManager();
-                }
-                catch (GeneralException ge)
-                {
-                    throw new RequestHandlerException(
-                            RequestHandlerException.MSG_FAILED_TO_FIND_DB_PROFILE_MANAGER, null,
-                            ge);
-                }
-                try
-                {
-                    DatabaseProfile dbProfile = dbProfMgr
-                            .getDatabaseProfile(p_request.getDataSourceId());
-                    dsName = dbProfile.getName();
-                }
-                catch (DatabaseProfileEntityException dpee)
-                {
-                    String args[] = new String[2];
-                    args[0] = Long.toString(p_request.getDataSourceId());
-                    args[1] = Long.toString(p_request.getId());
-                    throw new RequestHandlerException(
-                            RequestHandlerException.MSG_FAILED_TO_GET_DATA_SOURCE_NAME, args, dpee);
-                }
+                c_logger.debug("Looking for the data source name of a "
+                        + "file profile for request " + p_request.getId());
             }
-            else
-            {
-                if (c_logger.isDebugEnabled())
-                {
-                    c_logger.debug("Looking for the data source name of a "
-                            + "file profile for request " + p_request.getId());
-                }
 
-                // get the file system profile persistence manager
-                FileProfilePersistenceManager fileProfMgr = null;
-                try
-                {
-                    fileProfMgr = ServerProxy.getFileProfilePersistenceManager();
-                }
-                catch (Exception e)
-                {
-                    throw new RequestHandlerException(
-                            RequestHandlerException.MSG_FAILED_TO_FIND_FILE_PROFILE_MANAGER, null,
-                            e);
-                }
-                try
-                {
-                    FileProfile fileProfile = fileProfMgr
-                            .readFileProfile(p_request.getDataSourceId());
-                    dsName = fileProfile.getName();
-                }
-                catch (FileProfileEntityException fpee)
-                {
-                    String args[] = new String[2];
-                    args[0] = Long.toString(p_request.getDataSourceId());
-                    args[1] = Long.toString(p_request.getId());
-                    throw new RequestHandlerException(
-                            RequestHandlerException.MSG_FAILED_TO_GET_DATA_SOURCE_NAME, args, fpee);
-                }
+            // get the file system profile persistence manager
+            FileProfilePersistenceManager fileProfMgr = null;
+            try
+            {
+                fileProfMgr = ServerProxy.getFileProfilePersistenceManager();
+            }
+            catch (Exception e)
+            {
+                throw new RequestHandlerException(
+                        RequestHandlerException.MSG_FAILED_TO_FIND_FILE_PROFILE_MANAGER, null,
+                        e);
+            }
+            try
+            {
+                FileProfile fileProfile = fileProfMgr
+                        .readFileProfile(p_request.getDataSourceId());
+                dsName = fileProfile.getName();
+            }
+            catch (FileProfileEntityException fpee)
+            {
+                String args[] = new String[2];
+                args[0] = Long.toString(p_request.getDataSourceId());
+                args[1] = Long.toString(p_request.getId());
+                throw new RequestHandlerException(
+                        RequestHandlerException.MSG_FAILED_TO_GET_DATA_SOURCE_NAME, args, fpee);
             }
         }
         else

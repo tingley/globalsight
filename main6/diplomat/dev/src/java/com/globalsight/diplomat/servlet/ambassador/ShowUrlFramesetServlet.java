@@ -16,24 +16,17 @@
  */
 package com.globalsight.diplomat.servlet.ambassador;
 
-import com.globalsight.diplomat.util.previewUrlXml.UrlElement;
-import com.globalsight.diplomat.util.previewUrlXml.ArgElement;
-import com.globalsight.diplomat.util.Logger;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.util.system.SystemConfiguration;
-
-
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.OutputStreamWriter;
 import java.util.Date;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
-import javax.servlet.RequestDispatcher;
+
+import com.globalsight.diplomat.util.Logger;
+import com.globalsight.everest.util.system.SystemConfiguration;
 
 /** 
 * ShowUrlFramesetServlet

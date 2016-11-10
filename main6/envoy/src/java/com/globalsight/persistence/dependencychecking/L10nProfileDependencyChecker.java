@@ -16,7 +16,6 @@
  */
 package com.globalsight.persistence.dependencychecking;
 
-// globalsight classes
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -59,15 +58,13 @@ public class L10nProfileDependencyChecker extends DependencyChecker
 
         BasicL10nProfile prof = (BasicL10nProfile) p_object;
 
-        Vector deps = fileProfileDependencies(prof);
-        deps.addAll(dbProfileDependencies(prof));
-
-        return deps;
+        return fileProfileDependencies(prof);
     }
 
     /**
      * Return the FileProfiles that are dependent on this L10nProfile.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private Vector fileProfileDependencies(BasicL10nProfile p_profile)
             throws DependencyCheckException
     {
@@ -102,45 +99,5 @@ public class L10nProfileDependencyChecker extends DependencyChecker
         }
 
         return fileProfiles;
-    }
-
-    /**
-     * Return the FileProfiles that are dependent on this L10nProfile.
-     */
-    private Vector dbProfileDependencies(BasicL10nProfile p_profile)
-            throws DependencyCheckException
-    {
-        Vector dbProfiles = new Vector();
-
-        try
-        {
-            // get all the database profiles associated with this l10nProfile
-            String hql = "from DatabaseProfileImpl d "
-                    + "where d.l10nProfileId = :lId";
-            Map map = new HashMap();
-            map.put("lId", p_profile.getIdAsLong());
-
-            dbProfiles = new Vector(HibernateUtil.search(hql, map));
-        }
-        catch (Exception e)
-        {
-            StringBuffer message = new StringBuffer();
-
-            message.append("Failed to retrieve the Db Profiles associated ");
-            message.append("with Localization Profile ");
-            message.append(p_profile.getId());
-            message.append(": ");
-            message.append(p_profile.getName());
-
-            c_logger.error(message.toString(), e);
-
-            String args[] = { Long.toString(p_profile.getId()),
-                    p_profile.getName() };
-            throw new DependencyCheckException(
-                    DependencyCheckException.FAILED_DB_PROFILE_DEPENDENCIES_FOR_L10N_PROFILE,
-                    args, e);
-        }
-
-        return dbProfiles;
     }
 }

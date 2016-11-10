@@ -21,23 +21,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
-// GlobalSight
-import com.globalsight.ling.docproc.ExtractorException;
-import com.globalsight.ling.docproc.ExtractorExceptionConstants;
-import com.globalsight.ling.docproc.DiplomatMerger;
-import com.globalsight.ling.docproc.DiplomatMergerException;
-import com.globalsight.ling.docproc.L10nContent;
-import com.globalsight.ling.common.XmlEntities;
-import com.globalsight.ling.docproc.merger.paginated.PaginatedMergerConstants;
-import com.globalsight.ling.common.CodesetMapper;
-
-// SAX & DOM
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-//import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.AttributeList;
-
 // Xerces & Xalan
 import org.apache.xerces.parsers.SAXParser;
 import org.apache.xerces.xni.Augmentations;
@@ -46,6 +29,19 @@ import org.apache.xerces.xni.XMLAttributes;
 import org.apache.xerces.xni.XMLLocator;
 import org.apache.xerces.xni.XMLString;
 import org.apache.xerces.xni.XNIException;
+// SAX & DOM
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.globalsight.ling.common.CodesetMapper;
+import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.ling.docproc.DiplomatMerger;
+import com.globalsight.ling.docproc.DiplomatMergerException;
+// GlobalSight
+import com.globalsight.ling.docproc.ExtractorException;
+import com.globalsight.ling.docproc.ExtractorExceptionConstants;
+import com.globalsight.ling.docproc.L10nContent;
 
 /**
  * PaginatedResultSetXml Extractor.

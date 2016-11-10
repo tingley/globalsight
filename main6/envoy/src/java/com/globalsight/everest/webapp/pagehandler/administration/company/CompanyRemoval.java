@@ -96,8 +96,6 @@ public class CompanyRemoval
     private static final String SQL_DELETE_COST = "delete from COST where CURRENCY_CONVERSION_ID in ";
     private static final String SQL_DELETE_COST_BY_WORD_COUNT = "delete from COST_BY_WORD_COUNT where COST_ID in ";
     private static final String SQL_DELETE_CURRENCY_CONVERSION = "delete from CURRENCY_CONVERSION where COMPANY_ID=?";
-    private static final String SQL_DELETE_CUSTOMER_COLUMN_DETAIL = "delete from CUSTOMER_COLUMN_DETAIL where XML_RULE_ID in ";
-    private static final String SQL_DELETE_CUSTOMER_DB_ACCESS_PROFILE = "delete from CUSTOMER_DB_ACCESS_PROFILE where L10N_PROFILE_ID in ";
     private static final String SQL_DELETE_CVS_FILE_PROFILE = "delete from CVS_FILE_PROFILE where COMPANY_ID=?";
     private static final String SQL_DELETE_CVS_MODULE = "delete from CVS_MODULE where SERVER in ";
     private static final String SQL_DELETE_CVS_REPOSITORY = "delete from CVS_REPOSITORY where SERVER in ";
@@ -304,7 +302,7 @@ public class CompanyRemoval
     private static final String SQL_QUERY_WORKFLOW_TEMPLATE_ID = "select ID from WORKFLOW_TEMPLATE where COMPANYID=?";
     private static final String SQL_QUERY_WORKFLOW_TEMPLATE_PROCESSDEFINITION_ID = "select IFLOW_TEMPLATE_ID from WORKFLOW_TEMPLATE where COMPANYID=?";
     private static final String SQL_QUERY_WORKFLOW = "select IFLOW_INSTANCE_ID from WORKFLOW where COMPANY_ID=?";
-    private static final String SQL_QUERY_XML_RULE = "select ID from XML_RULE where COMPANY_ID=?";
+//    private static final String SQL_QUERY_XML_RULE = "select ID from XML_RULE where COMPANY_ID=?";
     // hql for query
 //    private static final String HQL_QUERY_REQUEST = "from RequestImpl r where r.companyId=?";
     // sql for update
@@ -1602,22 +1600,6 @@ public class CompanyRemoval
         logEnd("CURRENCY_CONVERSION");
     }
 
-    private void removeCustomerColumnDetail(Connection conn,
-            List<List<Object>> xmlRuleIds) throws SQLException
-    {
-        logStart("CUSTOMER_COLUMN_DETAIL");
-        exec(conn, SQL_DELETE_CUSTOMER_COLUMN_DETAIL, xmlRuleIds);
-        logEnd("CUSTOMER_COLUMN_DETAIL");
-    }
-
-    private void removeCustomerDbAccessProfile(Connection conn,
-            List<List<Object>> l10nProfileIds) throws SQLException
-    {
-        logStart("CUSTOMER_DB_ACCESS_PROFILE");
-        exec(conn, SQL_DELETE_CUSTOMER_DB_ACCESS_PROFILE, l10nProfileIds);
-        logEnd("CUSTOMER_DB_ACCESS_PROFILE");
-    }
-
     private void removeCvsFileProfile(Connection conn) throws SQLException
     {
         logStart("CVS_FILE_PROFILE");
@@ -2390,7 +2372,6 @@ public class CompanyRemoval
             removeL10nProfileVersion(conn, l10nProfileIds);
             removeL10nProfileTmProfile(conn, l10nProfileIds);
             removeL10nProfileWfTemplateInfo(conn, l10nProfileIds);
-            removeCustomerDbAccessProfile(conn, l10nProfileIds);
         }
         logStart("L10N_PROFILE");
         execOnce(conn, SQL_DELETE_L10N_PROFILE, companyId);
@@ -3905,15 +3886,8 @@ public class CompanyRemoval
 
     private void removeXmlRule(Connection conn) throws SQLException
     {
-        long companyId = company.getId();
-        List<List<Object>> xmlRuleIds = queryBatchList(conn,
-                SQL_QUERY_XML_RULE, companyId);
-        if (xmlRuleIds.size() > 0)
-        {
-            removeCustomerColumnDetail(conn, xmlRuleIds);
-        }
         logStart("XML_RULE");
-        execOnce(conn, SQL_DELETE_XML_RULE, companyId);
+        execOnce(conn, SQL_DELETE_XML_RULE, company.getId());
         logEnd("XML_RULE");
     }
 

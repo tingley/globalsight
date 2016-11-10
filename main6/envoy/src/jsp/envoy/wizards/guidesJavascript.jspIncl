@@ -8,7 +8,6 @@
             java.util.ResourceBundle"
  %>
 <%!
-    static boolean b_databaseGuideJs = Modules.isDatabaseAdapterInstalled();
     static boolean b_costingGuideJs = Modules.isCostingInstalled();
     static boolean b_calendarGuideJs = Modules.isCalendaringInstalled();
 %>
@@ -37,10 +36,7 @@ dot_bottom_off.src = "/globalsight/images/dot_gray_guide_bottom.gif";
 var dot_bottom_on = new Image();
 dot_bottom_on.src = "/globalsight/images/dot_red_guide_bottom.gif";
 
-var layersArray = ["generic", 
-                   "fileSystem2"
-                   <%if (b_databaseGuideJs) {%>,"database2"<%}%>
-                  ];
+var layersArray = ["generic", "fileSystem2"];
 
 function loadGuides() {
    
@@ -104,38 +100,6 @@ function showGuide(guide)
    {
       guide = "generic_fileSystem";
    }
-   <%if (b_databaseGuideJs) {%>
-   else if ((guide == "database") && 
-            ((guideNode == "workflows") ||
-             (guideNode == "locProfiles") || 
-             (guideNode == "xmlRules") || 
-             (guideNode == "xmlDtds") || 
-             (guideNode == "segmentationRules") || 
-             (guideNode == "dbConnections") ||
-             (guideNode == "dbImportSettings") || 
-             (guideNode == "dbPreviewRules") || 
-             (guideNode == "dbProfiles") || 
-             (guideNode == "createZipJob") ||
-             (guideNode == "finish")))
-   {
-      guide = "database2";
-   }
-   else if ((guide == "database2") && 
-            ((guideNode != "workflows") ||
-             (guideNode != "locProfiles") || 
-             (guideNode != "xmlRules") || 
-             (guideNode != "xmlDtds") || 
-             (guideNode != "segmentationRules") || 
-             (guideNode != "dbConnections") ||
-             (guideNode != "dbImportSettings") || 
-             (guideNode != "dbPreviewRules") || 
-             (guideNode != "dbProfiles") || 
-             (guideNode != "createZipJob") ||
-             (guideNode != "finish")))
-   {
-      guide = "generic_database";
-   }
-   <%}%>
    else
    {  
       guide = (guide.indexOf("generic_") == 0) ? guide : "generic_" + guide;
@@ -279,34 +243,7 @@ function activateNodes(obj, guide)
     <%}%>
                          obj_finish];
     }
-    <%if (b_databaseGuideJs) {%>
-    else if (guide == 'database2')
-    {
-       obj_workflows = getRef('workflowsDatabase');
-       obj_locProfiles = getRef('locProfilesDatabase');
-       obj_xmlRules = getRef('xmlRulesDatabase');
-       obj_xmlDtds = getRef('xmlDtdsDatabase');
-       obj_segmentationRules = getRef('segmentationRulesDatabase');
-       obj_dbConnections = getRef('dbConnections');
-       obj_dbImportSettings = getRef('dbImportSettings');
-       obj_dbPreviewRules = getRef('dbPreviewRules');
-       obj_dbProfiles = getRef('dbProfiles');
-       obj_dbImport = getRef('importDatabase');
-       obj_finish = getRef('finishDatabase');
-       objects = [obj_workflows,
-                  obj_locProfiles,
-                  obj_xmlRules,
-                  obj_xmlDtds,
-                  obj_segmentationRules,
-                  obj_dbConnections,
-                  obj_dbImportSettings,
-                  obj_dbPreviewRules,
-                  obj_dbProfiles,
-                  obj_dbImport,
-                  obj_finish];
-    } 
-    <%}%>
-       
+      
     // Some screens are not part of the Guides so
     // turn all nodes OFF when on these screens
     var nodeFound = (obj == null) ? false : true;
@@ -646,10 +583,7 @@ function guideName()
     {   
         guideName = "<%= guideBundle.getString("lb_filesystem") %>";
     }
-    else if (guide.indexOf("database") != -1)
-    {
-        guideName = "<%= guideBundle.getString("lb_database") %>";
-    }
+
     return guideName;
 }
 </SCRIPT>

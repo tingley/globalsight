@@ -38,7 +38,6 @@ import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
-import com.globalsight.cxe.persistence.databaseprofile.DatabaseProfilePersistenceManager;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -845,23 +844,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     private String getCurrentDataSourceName(String p_dataSourceType, long p_dataSourceId)
             throws Exception
     {
-        String result;
-
-        if (p_dataSourceType.equals("db"))
-        {
-            result = getDBProfilePersistenceManager().getDatabaseProfile(p_dataSourceId).getName();
-        }
-        else
-        {
-            result = HibernateUtil.get(FileProfileImpl.class, p_dataSourceId, false).getName();
-        }
-
-        return result;
-    }
-
-    private DatabaseProfilePersistenceManager getDBProfilePersistenceManager() throws Exception
-    {
-        return ServerProxy.getDatabaseProfilePersistenceManager();
+        return HibernateUtil.get(FileProfileImpl.class, p_dataSourceId, false).getName();
     }
 
     private FileProfilePersistenceManager getFileProfilePersistenceManager() throws Exception

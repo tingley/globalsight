@@ -31,7 +31,6 @@ import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
-import com.globalsight.cxe.persistence.databaseprofile.DatabaseProfilePersistenceManager;
 import com.globalsight.cxe.persistence.fileprofile.FileProfileEntityException;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.everest.request.Request;
@@ -624,12 +623,6 @@ public class SourcePage extends Page
         this.targetPages = targetPages;
     }
 
-    private DatabaseProfilePersistenceManager getDBProfilePersistenceManager()
-            throws Exception
-    {
-        return ServerProxy.getDatabaseProfilePersistenceManager();
-    }
-
     private FileProfilePersistenceManager getFileProfilePersistenceManager()
             throws Exception
     {
@@ -638,22 +631,12 @@ public class SourcePage extends Page
 
     public String getDataSource()
     {
-        String dataSourceType = getDataSourceType();
-        long dataSourceId = getRequest().getDataSourceId();
-
         String currentRetString;
         try
         {
-            if (dataSourceType.equals("db"))
-            {
-                currentRetString = getDBProfilePersistenceManager()
-                        .getDatabaseProfile(dataSourceId).getName();
-            }
-            else
-            {
-                currentRetString = getFileProfilePersistenceManager()
-                        .readFileProfile(dataSourceId).getName();
-            }
+            long dataSourceId = getRequest().getDataSourceId();
+            currentRetString = getFileProfilePersistenceManager().readFileProfile(dataSourceId)
+                    .getName();
         }
         catch (Exception e)
         {

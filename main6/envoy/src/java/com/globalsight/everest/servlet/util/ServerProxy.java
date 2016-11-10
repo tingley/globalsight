@@ -27,12 +27,8 @@ import org.apache.log4j.Logger;
 import com.globalsight.calendar.CalendarManagerWLRemote;
 import com.globalsight.config.SystemParameterPersistenceManager;
 import com.globalsight.config.UserParameterPersistenceManager;
-import com.globalsight.cxe.persistence.databasecolumn.DatabaseColumnPersistenceManagerWLRemote;
-import com.globalsight.cxe.persistence.databaseprofile.DatabaseProfilePersistenceManagerWLRemote;
-import com.globalsight.cxe.persistence.dbconnection.DBConnectionPersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.exportlocation.ExportLocationPersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManagerWLRemote;
-import com.globalsight.cxe.persistence.previewurl.PreviewUrlPersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.segmentationrulefile.SegmentationRuleFilePersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.xmlrulefile.XmlRuleFilePersistenceManagerWLRemote;
 import com.globalsight.everest.comment.CommentManagerWLRemote;
@@ -95,9 +91,6 @@ public class ServerProxy
     private static CalendarManagerWLRemote m_calendarManager = null;
     private static CommentManagerWLRemote m_commentReferenceManager = null;
     private static CostingEngineWLRemote m_costingEngine = null;
-    private static DBConnectionPersistenceManagerWLRemote m_dbconnectionManager = null;
-    private static DatabaseColumnPersistenceManagerWLRemote m_dbColumnManager = null;
-    private static DatabaseProfilePersistenceManagerWLRemote m_dbProfileManager = null;
     private static EventSchedulerWLRemote m_eventScheduler = null;
     private static ExportEventObserverWLRemote m_exportEventObserver = null;
     private static ExportLocationPersistenceManagerWLRemote m_exportLocationManager = null;
@@ -119,7 +112,6 @@ public class ServerProxy
     private static OnlineEditorManagerWLRemote m_onlineEditorManager = null;
     private static PageEventObserverWLRemote m_pageEventObserver = null;
     private static PageManagerWLRemote m_pageManager = null;
-    private static PreviewUrlPersistenceManagerWLRemote m_previewUrlManager = null;
     private static ProjectEventObserverWLRemote m_projectEventObserver = null;
     private static ProjectHandlerWLRemote m_projectHandler = null;
     private static RequestHandlerWLRemote m_requestHandler = null;
@@ -404,21 +396,6 @@ public class ServerProxy
         }
 
         return m_workflowServer;
-    }
-
-    public static DBConnectionPersistenceManagerWLRemote getDBConnectionPersistenceManager()
-        throws GeneralException,
-               NamingException,
-               RemoteException
-    {
-        if (m_dbconnectionManager == null)
-        {
-            m_dbconnectionManager = (DBConnectionPersistenceManagerWLRemote)
-                SERVER_REGISTRY.lookup(
-                    DBConnectionPersistenceManagerWLRemote.SERVICE_NAME);
-        }
-
-        return m_dbconnectionManager;
     }
 
     public static XmlRuleFilePersistenceManagerWLRemote getXmlRuleFilePersistenceManager()
@@ -711,69 +688,8 @@ public class ServerProxy
         return m_workflowManager;
     }
 
-    public static DatabaseProfilePersistenceManagerWLRemote getDatabaseProfilePersistenceManager()
-        throws GeneralException
-    {
-        if (m_dbProfileManager == null)
-        {
-            try
-            {
-                m_dbProfileManager = (DatabaseProfilePersistenceManagerWLRemote)
-                    SERVER_REGISTRY.lookup(
-                        DatabaseProfilePersistenceManagerWLRemote.SERVICE_NAME);
-            }
-            catch (NamingException ne)
-            {
-                throwException(ne);
-            }
-        }
-
-        return m_dbProfileManager;
-    }
-
-    public static DatabaseColumnPersistenceManagerWLRemote getDatabaseColumnPersistenceManager()
-        throws GeneralException
-    {
-        if (m_dbColumnManager == null)
-        {
-            try
-            {
-                m_dbColumnManager = (DatabaseColumnPersistenceManagerWLRemote)
-                    SERVER_REGISTRY.lookup(
-                        DatabaseColumnPersistenceManagerWLRemote.SERVICE_NAME);
-            }
-            catch (NamingException ne)
-            {
-                throwException(ne);
-            }
-        }
-
-        return m_dbColumnManager;
-    }
-
-    public static PreviewUrlPersistenceManagerWLRemote getPreviewUrlPersistenceManager()
-        throws GeneralException
-    {
-        if (m_previewUrlManager == null)
-        {
-            try
-            {
-                m_previewUrlManager = (PreviewUrlPersistenceManagerWLRemote)
-                    SERVER_REGISTRY.lookup(
-                        PreviewUrlPersistenceManagerWLRemote.SERVICE_NAME);
-            }
-            catch (NamingException ne)
-            {
-                throwException(ne);
-            }
-        }
-
-        return m_previewUrlManager;
-    }
-
-    public static OfflineEditManager getOfflineEditManager()
-        throws GeneralException,
-               NamingException
+    public static OfflineEditManager getOfflineEditManager() throws GeneralException,
+            NamingException
     {
         if (m_offlineEditManager == null)
         {

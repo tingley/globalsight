@@ -283,9 +283,6 @@
      <permission id="<%=Permission.EXPORT_LOC_EDIT%>"/>
      <permission id="<%=Permission.EXPORT_LOC_NEW%>"/>
   </permission>
-<% if (b_database) { %>
-  <permission id="<%=Permission.DATABASE_INTEGRATION%>"/>
-<% } %>
 <% if (b_customerAccessGroup) { %>
   <permission id="<%=Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE%>"/>
   <% } %>

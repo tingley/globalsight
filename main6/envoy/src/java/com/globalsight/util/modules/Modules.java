@@ -20,7 +20,6 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.calendar.CalendarManagerLocal;
 import com.globalsight.cxe.adapter.catalyst.CatalystAdapter;
-import com.globalsight.cxe.adapter.database.DatabaseAdapter;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
@@ -38,8 +37,6 @@ public class Modules
     private static Logger s_logger = Logger.getLogger(Modules.class);
 
     // Keeps track of whether certain modules are installed
-    private static boolean s_db = false;
-
     private static boolean s_quark, s_frame, s_pdf = false;
 
     private static boolean s_ms_doc, s_ms_ppt, s_ms_xls = false;
@@ -63,17 +60,14 @@ public class Modules
         try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-            s_db = DatabaseAdapter.isInstalled();
             s_pdf = PdfAdapter.isInstalled();
             s_quark = QuarkFrameAdapter.isQuarkInstalled();
             s_frame = QuarkFrameAdapter.isFrameInstalled();
             s_ms_doc = MsOfficeAdapter.isWordInstalled();
             s_ms_ppt = MsOfficeAdapter.isPowerPointInstalled();
             s_ms_xls = MsOfficeAdapter.isExcelInstalled();
-            s_costing = sc
-                    .getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED);
-            s_reports = sc
-                    .getBooleanParameter(SystemConfigParamNames.REPORTS_ENABLED);
+            s_costing = sc.getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED);
+            s_reports = sc.getBooleanParameter(SystemConfigParamNames.REPORTS_ENABLED);
             s_vendorMgmt = VendorManagementLocal.isInstalled();
             s_l10nWebService = Ambassador.isInstalled();
             s_vmWebService = s_vendorMgmt && s_l10nWebService;
@@ -87,16 +81,6 @@ public class Modules
             s_logger.error(msg, e);
             throw new IllegalStateException(msg);
         }
-    }
-
-    /**
-     * Returns true if the Database Adapter is installed
-     * 
-     * @return true | false
-     */
-    public static boolean isDatabaseAdapterInstalled()
-    {
-        return s_db;
     }
 
     /**

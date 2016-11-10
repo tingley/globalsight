@@ -319,8 +319,7 @@ public class ConnectionPool
 
             pool._returnConnection(p_connection);
             m_connToPools.remove(p_connection);
-            CloseConnectionTask task = new CloseConnectionTask(pool,
-                    p_connection);
+            CloseConnectionTask task = new CloseConnectionTask(pool, p_connection);
             timer.schedule(task, MAX_CONNECTION_WAIT_TIME);
         }
     }
@@ -411,11 +410,7 @@ public class ConnectionPool
     {
         ConnectionProfile cp = null;
 
-        if (p_profileId == PRIVATE_ID)
-        {
-            cp = _defaultProfile();
-        }
-        else if (p_profileId == JDBCPOOL_ID)
+        if (p_profileId == JDBCPOOL_ID)
         {
             cp = _jdbcPoolProfile();
         }
@@ -425,7 +420,7 @@ public class ConnectionPool
         }
         else
         {
-            cp = _loadProfile(p_profileId);
+            cp = _defaultProfile();
         }
 
         ConnectionPool pool = new ConnectionPool(cp);
@@ -568,29 +563,6 @@ public class ConnectionPool
         }
 
         return m_systemConfiguration;
-    }
-
-    /**
-     * Load the connection profile with the given id from the database. NOTE:
-     * this method is a little tricky because it depends on the
-     * ConnectionProfileDbAccessor, which depends on the ConnectionPool.
-     */
-    private static ConnectionProfile _loadProfile(long p_profileId)
-            throws ConnectionPoolException
-    {
-        ConnectionProfile cp = null;
-
-        try
-        {
-            cp = ConnectionProfileDbAccessor.readConnectionProfile(p_profileId);
-        }
-        catch (Exception e)
-        {
-            throw new ConnectionPoolException("Unable to load profile with id="
-                    + p_profileId, e);
-        }
-
-        return cp;
     }
 
     /**

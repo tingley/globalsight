@@ -30,20 +30,24 @@ package com.globalsight.util.database;
  * MODIFIED     MM/DD/YYYY
  * mlau         12/06/1999   Initial version.
  */
-
 public class FailedToCreateFactoryException extends Exception
 {
-/**
- * FailedToCreateFactoryException constructor comment.
- */
-public FailedToCreateFactoryException() {
-	super();
-}
-/**
- * FailedToCreateFactoryException constructor comment.
- * @param s java.lang.String
- */
-public FailedToCreateFactoryException(String s) {
-	super(s);
-}
+    /**
+     * FailedToCreateFactoryException constructor comment.
+     */
+    public FailedToCreateFactoryException()
+    {
+        super();
+    }
+
+    /**
+     * FailedToCreateFactoryException constructor comment.
+     * 
+     * @param s
+     *            java.lang.String
+     */
+    public FailedToCreateFactoryException(String s)
+    {
+        super(s);
+    }
 }

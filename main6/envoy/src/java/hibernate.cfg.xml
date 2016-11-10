@@ -23,10 +23,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Currency.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CustomField.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CustomForm.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/DatabaseColumnImpl.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/DatabaseProfileImpl.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/DBConnectionImpl.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/DBDispatchImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/DelayedImportRequest.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ExportBatchEvent.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ExportingPage.hbm.xml" />
@@ -52,7 +48,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/LocalePair.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/PageTemplate.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/PermissionGroupImpl.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/PreviewUrlImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ProjectImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ProjectTM.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Rate.hbm.xml" />

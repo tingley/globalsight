@@ -16,53 +16,26 @@
  */
 package com.globalsight.everest.util.system;
 
-// globalsight
 import java.io.File;
 import java.io.FileFilter;
 import java.io.PrintStream;
-import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Properties;
-import java.util.Timer;
 
 import org.apache.log4j.Logger;
-import org.apache.lucene.store.FSDirectory;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import com.globalsight.config.SystemParameter;
-import com.globalsight.config.SystemParameterEntityException;
-import com.globalsight.config.SystemParameterPersistenceManagerLocal;
 import com.globalsight.connector.git.GitConnectorPushThread;
-import com.globalsight.cxe.adapter.database.DbAutoImporter;
 import com.globalsight.cxe.adapter.filesystem.autoImport.AutomaticImportMonitor;
 import com.globalsight.cxe.engine.util.FileUtils;
-import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
-import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
-import com.globalsight.cxe.entity.filterconfiguration.BaseFilterMapping;
-import com.globalsight.cxe.entity.filterconfiguration.BaseFilterParser;
-import com.globalsight.cxe.entity.filterconfiguration.Filter;
-import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
-import com.globalsight.cxe.entity.filterconfiguration.InternalItem;
-import com.globalsight.cxe.entity.filterconfiguration.InternalText;
-import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
-import com.globalsight.cxe.entity.filterconfiguration.PropertiesInternalText;
 import com.globalsight.diplomat.util.database.ConnectionPool;
-import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
-import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.permission.Permission;
-import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.netegrity.Netegrity;
 import com.globalsight.everest.util.system.migration.Migrate820InternalText;
-import com.globalsight.everest.util.system.migration.Migrate852UpgradeLucene;
 import com.globalsight.everest.util.system.migration.MigrateObj;
 import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
 import com.globalsight.everest.webapp.pagehandler.tasks.AutoCompleteActivityThread;
@@ -70,10 +43,7 @@ import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
-import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
-import com.globalsight.util.modules.Modules;
 
 /**
  * Used to be EnvoyWLServer. This is the main class that starts up all the RMI
@@ -90,13 +60,9 @@ public class AmbassadorServer
      * Boolean value to tell whether GlobalSight is ready for access
      */
     private static Boolean s_isSystem4Accessible = Boolean.FALSE;
-    private final static int MAX_NUM_OF_MESSAGES_PER_SESSION = 10;
     private final static long JDBCPOOL_ID = -1L;
-    private static final Logger CATEGORY = Logger
-            .getLogger(AmbassadorServer.class);
 
-    private static DbAutoImporter s_dbAutoImporter = null;
-    private static Timer s_dbTimer = null;
+    private static final Logger CATEGORY = Logger.getLogger(AmbassadorServer.class);
 
     private static PrintStream s_originalStdout = System.out;
     private static PrintStream s_originalStderr = System.err;
@@ -173,7 +139,6 @@ public class AmbassadorServer
         try
         {
             stopCxeFileSystemAutomaticImport();
-            stopCxeDatabaseAutomaticImport();
             ConnectionPool.terminate(JDBCPOOL_ID);
 
             CATEGORY.info("Stopping Envoy services.");
@@ -312,7 +277,6 @@ public class AmbassadorServer
             result = getClass().getName() + " started successfully";
 
             startCxeFileSystemAutomaticImport();
-            startCxeDatabaseAutomaticImport();
             
             WorkflowExportingHelper.cleanTable();
             
@@ -461,60 +425,6 @@ public class AmbassadorServer
         catch (Exception e)
         {
             CATEGORY.error("Failed to startup CXE auto import", e);
-            throw new SystemStartupException(
-                    SystemStartupException.EX_FAILEDTOINITSERVER, e);
-        }
-    }
-
-    /**
-     * Shuts down the CXE db auto import thread.
-     * 
-     * @exception SystemShutdownException
-     */
-    private static void stopCxeDatabaseAutomaticImport()
-            throws SystemShutdownException
-    {
-        CATEGORY.info("Stopping database auto import.");
-        try
-        {
-            if (s_dbTimer != null)
-            {
-                CATEGORY.info("Stopping CXE database auto-import.");
-                s_dbTimer.cancel();
-            }
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Failed to shutdown CXE database auto import", e);
-            throw new SystemShutdownException(
-                    SystemShutdownException.EX_FAILEDTOINITSERVER, e);
-        }
-    }
-
-    /**
-     * Initializes and Starts DB Automatic Import in a separate thread
-     * 
-     * @throws SystemStartupException
-     */
-    private static void startCxeDatabaseAutomaticImport()
-            throws SystemStartupException
-    {
-        try
-        {
-            if (Modules.isDatabaseAdapterInstalled())
-            {
-                s_dbAutoImporter = new DbAutoImporter();
-                s_dbTimer = new Timer(true); // isDaemon=true
-                CATEGORY.info("Starting CXE database auto-import.");
-                s_dbTimer.scheduleAtFixedRate(s_dbAutoImporter,
-                        s_dbAutoImporter.getDelay(),
-                        s_dbAutoImporter.getPeriod());
-
-            }
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Failed to startup CXE database auto import", e);
             throw new SystemStartupException(
                     SystemStartupException.EX_FAILEDTOINITSERVER, e);
         }

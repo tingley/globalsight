@@ -28,8 +28,7 @@ import java.sql.ResultSet;
  * the concrete subclass should be declared static only.
  * <p>
  * This class defines several protected static methods for reading and writing
- * CLOBs and BLOBs. See TaskClassifierDbAccessor for a detailed example of how
- * to access a BLOB field. (Accessing a CLOB field is analagous.)
+ * CLOBs and BLOBs.
  */
 public abstract class DbAccessor
 {

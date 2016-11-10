@@ -121,10 +121,6 @@
    String currencyUrl = LinkHelper.getWebActivityURL(request, "currency");
    String customUrl = LinkHelper.getWebActivityURL(request, "customPage");
    String customerJobsUrl = LinkHelper.getWebActivityURL(request, "customerJobs");
-   String dbConnectionsUrl = LinkHelper.getWebActivityURL(request, "dbconnections");
-   String dbImportSettingsUrl = LinkHelper.getWebActivityURL(request, "dbimportsettings");
-   String dbPreviewRulesUrl = LinkHelper.getWebActivityURL(request, "dynamicURLs");
-   String dbProfilesUrl = LinkHelper.getWebActivityURL(request, "dbprofiles");
    String exportLocationsUrl = LinkHelper.getWebActivityURL(request, "exportlocation");
    String fileExtensionsUrl = LinkHelper.getWebActivityURL(request, "fileextensions");
    
@@ -437,19 +433,6 @@ tmp.mnemonic = 'd';
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_segmentation_rules")%>", "javascript:goToUrl('<%=segmentationRulesUrl%>');", ""));
 <% } %>
 
-<%if (b_database){%>
-<% if (userPerms.getPermissionFor(Permission.DATABASE_INTEGRATION)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_db_connections2")%>", "javascript:goToUrl('<%=dbConnectionsUrl%>');", ""));
-
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_db_profiles2")%>", "javascript:goToUrl('<%=dbProfilesUrl%>');", ""));
-
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_db_import_settings2")%>", "javascript:goToUrl('<%=dbImportSettingsUrl%>');", ""));
-
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_db_preview")%>", "javascript:goToUrl('<%=dbPreviewRulesUrl%>');", ""));
-
-<%}%>
-<%}%>
-
 <% if (userPerms.getPermissionFor(Permission.EXPORT_LOC_VIEW)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_export_locations")%>", "javascript:goToUrl('<%=exportLocationsUrl%>');", ""));
 <% } %>
@@ -486,12 +469,6 @@ var guidesMenu = new WebFXMenu;
 
 guidesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_filesystem")%>", "javascript:showGuide('fileSystem');", ""));
 
-<%if (b_database) {%>
-<% if (userPerms.getPermissionFor(Permission.DATABASE_INTEGRATION)) { %>
-guidesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_database")%>", "javascript:showGuide('database');", ""));
-
-<%}%>
-<%}%>
 <% } // end hasGuidesMenu %> 
 
 

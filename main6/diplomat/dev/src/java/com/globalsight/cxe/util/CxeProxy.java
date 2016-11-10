@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.cxe.adapter.database.DatabaseAdapter;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
 import com.globalsight.cxe.adapter.pdf.PdfAdapter;
 import com.globalsight.cxe.adapter.quarkframe.QuarkFrameAdapter;
@@ -519,16 +518,6 @@ public class CxeProxy
     static public boolean isMsOfficeAdapterInstalled()
     {
         return MsOfficeAdapter.isInstalled();
-    }
-
-    /**
-     * Returns true if the Database Adapter is installed
-     * 
-     * @return true | false
-     */
-    static public boolean isDatabaseAdapterInstalled()
-    {
-        return DatabaseAdapter.isInstalled();
     }
 
     /**

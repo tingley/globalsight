@@ -193,7 +193,8 @@ public class CapExportServlet extends HttpServlet
             if (ExportConstants.PREVIEW.equals(requestType))
             {
                 c_logger.debug("CapExportServlet.doPost(), PREVIEW_REQUEST, calling exportForPreview()");
-                // this may be used only for db preview??
+                // Probably this is used only for db preview which had been
+                // removed in 8.7.3, so this will not be triggered probably.
                 exportForPreview(p_request, p_response, messageId);
             }
             else if (EXPORT_STATUS.equals(requestType))

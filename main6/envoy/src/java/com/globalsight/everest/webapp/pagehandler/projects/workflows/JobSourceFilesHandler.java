@@ -43,7 +43,6 @@ import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.cxe.entity.fileprofile.FileProfileUtil;
-import com.globalsight.cxe.persistence.databaseprofile.DatabaseProfilePersistenceManager;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -439,30 +438,19 @@ public class JobSourceFilesHandler extends PageHandler implements
 
     private String getDataSourceName(SourcePage p_sp)
     {
-        String dataSourceType = p_sp.getDataSourceType();
-        long dataSourceId = p_sp.getRequest().getDataSourceId();
-
         String currentRetString;
         try
         {
-            if (dataSourceType.equals("db"))
+            long dataSourceId = p_sp.getRequest().getDataSourceId();
+            currentRetString = getFileProfilePersistenceManager().readFileProfile(dataSourceId)
+                    .getName();
+            // If source file is XLZ,here show the XLZ file profile name
+            // instead of the XLF file profile name.
+            boolean isXlzReferFP = getFileProfilePersistenceManager().isXlzReferenceXlfFileProfile(
+                    currentRetString);
+            if (isXlzReferFP)
             {
-                currentRetString = getDBProfilePersistenceManager()
-                        .getDatabaseProfile(dataSourceId).getName();
-            }
-            else
-            {
-                currentRetString = getFileProfilePersistenceManager()
-                        .readFileProfile(dataSourceId).getName();
-                // If source file is XLZ,here show the XLZ file profile name
-                // instead of the XLF file profile name.
-                boolean isXlzReferFP = getFileProfilePersistenceManager()
-                        .isXlzReferenceXlfFileProfile(currentRetString);
-                if (isXlzReferFP)
-                {
-                    currentRetString = currentRetString.substring(0,
-                            currentRetString.length() - 4);
-                }
+                currentRetString = currentRetString.substring(0, currentRetString.length() - 4);
             }
         }
         catch (Exception e)
@@ -470,12 +458,6 @@ public class JobSourceFilesHandler extends PageHandler implements
             currentRetString = "Unknown";
         }
         return currentRetString;
-    }
-
-    private DatabaseProfilePersistenceManager getDBProfilePersistenceManager()
-            throws Exception
-    {
-        return ServerProxy.getDatabaseProfilePersistenceManager();
     }
 
     private FileProfilePersistenceManager getFileProfilePersistenceManager()

@@ -121,16 +121,6 @@ function openWizardWindow(url)
       <TD width="99%">
         <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" href="javascript: showGuide('fileSystem');location.replace('<%=startUrl%>');">
         <%=bundle.getString("lb_filesystem_guide")%></A><BR>
-        <%
-            if (b_database) {
-        %> 
-        <amb:permission name="<%=Permission.DATABASE_INTEGRATION%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" href="javascript: showGuide('database');location.replace('<%=startUrl%>');">
-        <%=bundle.getString("lb_database_guide")%></A><BR>
-        </amb:permission>
-        <%
-            }
-        %>
       </TD>
     </TR>
           </TABLE>
@@ -378,18 +368,6 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.SEGMENTATIONRULE_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=segmentationRulesUrl%>"><%=bundle.getString("lb_segmentation_rules")%></A><BR>
         </amb:permission>
-        <%
-            if (b_database) {
-        %>
-        <amb:permission name="<%=Permission.DATABASE_INTEGRATION%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=dbConnectionsUrl%>"><%=bundle.getString("lb_db_connections")%></A><BR>
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=dbProfilesUrl%>"><%=bundle.getString("lb_db_profiles")%></A><BR>
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=dbImportSettingsUrl%>"><%=bundle.getString("lb_db_import_settings")%></A><BR>
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=dbPreviewRulesUrl%>"><%=bundle.getString("lb_db_preview")%></A><BR>
-        </amb:permission>
-        <%
-            }
-        %>
         <amb:permission name="<%=Permission.EXPORT_LOC_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=exportLocationsUrl%>"><%=bundle.getString("lb_export_locations")%></A><BR>
         </amb:permission>

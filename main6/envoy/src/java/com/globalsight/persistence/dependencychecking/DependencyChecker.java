@@ -29,9 +29,7 @@ import java.util.Vector;
 
 public abstract class DependencyChecker
 {
-    private static final Logger c_logger =
-        Logger.getLogger(
-            DependencyChecker.class);
+    private static final Logger c_logger = Logger.getLogger(DependencyChecker.class);
 
     /**
      * Returns all the dependency names categorized by their type.

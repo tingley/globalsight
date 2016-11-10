@@ -45,7 +45,6 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.cxe.entity.customAttribute.TMAttribute;
-import com.globalsight.cxe.entity.databaseprofile.DatabaseProfileImpl;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.util.project.ProjectUpdateUtil;
@@ -408,22 +407,6 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
             // HibernateUtil.update(fProfiles);
 
-            hql = "from DatabaseProfileImpl d where d.l10nProfileId = :lId";
-            List dProfiles = HibernateUtil.search(hql, map);
-
-            for (int i = 0; i < dProfiles.size(); i++)
-            {
-                DatabaseProfileImpl dProfile = (DatabaseProfileImpl) dProfiles.get(i);
-                dProfile.setL10nProfileId(modifiedProfile.getId());
-            }
-
-            iterator = dProfiles.iterator();
-            while (iterator.hasNext())
-            {
-                session.update(iterator.next());
-            }
-
-            // HibernateUtil.update(dProfiles);
             ProjectHandler ph = ServerProxy.getProjectHandler();
 
             for (int i = 0; i < workflowInfos.size(); i++)

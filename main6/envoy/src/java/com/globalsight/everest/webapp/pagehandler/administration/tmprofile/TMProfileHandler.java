@@ -562,7 +562,7 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         boolean isOldTuvMatch = "true".equalsIgnoreCase(oldTuvMatch);
         tmProfile.setIsOldTuvMatch(isOldTuvMatch);
         
-        String oldTuvMatchP = p_request.getParameter("oldDiffPenalty");
+        String oldTuvMatchP = p_request.getParameter("oldTuvMatchPenalty");
         long oldTuvMatchPenalty = 0;
         if (oldTuvMatchP != null && oldTuvMatchP.trim().length() != 0)
         {

@@ -933,7 +933,7 @@ function confirmForm(formSent) {
        alert("<%= bundle.getString("msg_tu_attribute_penalty") %>" + "<%= bundle.getString("jsmsg_numeric") %>");
        return false;
     }
-    if(!isAllDigits(formSent.oldDiffPenalty.value))
+    if(!isAllDigits(formSent.oldTuvMatchPenalty.value))
     {
     	 alert("<%=lbpenalty%>" + "<%= bundle.getString("jsmsg_numeric") %>");
          return false;
@@ -953,7 +953,7 @@ function confirmForm(formSent) {
 	if (!checkIsVaildPercent(formSent.fuzzyMatchThreshold.value)){
 	   return false;
 	}
-	if (!checkIsVaildPercent(formSent.oldDiffPenalty.value)){
+	if (!checkIsVaildPercent(formSent.oldTuvMatchPenalty.value)){
 		   return false;
 		}
 	if (!checkIsVaildPercent(formSent.numberOfMatches.value)){
@@ -1664,7 +1664,7 @@ function doOnLoad()
                             <TD><INPUT TYPE="checkbox" NAME="<%="isRefTm"%>"
                               VALUE="true" <%=isRefTm%>>
                               
-                                <SPAN ID="penaltyCodeSensitive">
+                                <SPAN ID="penaltyReferenceTM">
                                     <%=lbpenalty%>: <INPUT NAME="<%="refTmPenalty"%>" SIZE="1" MAXLENGTH="3"      VALUE=<%=refTmPenalty%>>%
                                 </SPAN>
                              </TD>
@@ -1706,11 +1706,11 @@ function doOnLoad()
                             <INPUT TYPE="checkbox" NAME="<%="isOldTuvMatch"%>"
                               VALUE="true" <%=isOldTuvMatch%>>
                               
-                                <SPAN ID="penaltyCodeSensitive">
-                                    <%=lbpenalty%>: <INPUT NAME="<%="oldDiffPenalty"%>" SIZE="1" MAXLENGTH="3" VALUE="<%=oldTuvMatchPenalty%>">%
+                                <SPAN ID="penaltyOldTuvMatch">
+                                    <%=lbpenalty%>: <INPUT NAME="oldTuvMatchPenalty" SIZE="1" MAXLENGTH="3" VALUE="<%=oldTuvMatchPenalty%>">%
                                 </SPAN>
-                                <br/>
-                                 <input id="oldTuvMatchDay" name="oldTuvMatchDay" size="2" MAXLENGTH="4" value="<%=oldTuvMatchDay%>">days
+                                &nbsp;&nbsp;
+                                 <input SIZE="2" id="oldTuvMatchDay" name="oldTuvMatchDay" MAXLENGTH="4" value="<%=oldTuvMatchDay%>">days
                              </TD>
                         </TR>
                         <TR>

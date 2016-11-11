@@ -18,20 +18,19 @@
 package com.globalsight.util.j2ee;
 
 import javax.naming.Context;
-import javax.naming.NamingException;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import com.globalsight.everest.util.server.ServerRegistry;
 import com.globalsight.everest.util.server.ServerRegistryImpl;
 import com.globalsight.util.GeneralException;
 
 /**
- * This class exists to wrap functionality that does
- * not exist in standard J2EE but may be offered by
- * application server specific code.
+ * This class exists to wrap functionality that does not exist in standard J2EE
+ * but may be offered by application server specific code.
  * 
- * This class should be extened by implementation
- * specific classes that are free to use vendor
- * specific APIS
+ * This class should be extened by implementation specific classes that are free
+ * to use vendor specific APIS
  */
 public abstract class AppServerWrapper
 {
@@ -46,12 +45,14 @@ public abstract class AppServerWrapper
      */
     protected AppServerWrapper()
     {
-        try {
+        try
+        {
             m_context = new InitialContext();
         }
         catch (NamingException ne)
         {
-            throw new IllegalStateException("Could not load initial naming context: " + ne.getMessage());
+            throw new IllegalStateException(
+                    "Could not load initial naming context: " + ne.getMessage());
         }
     }
 
@@ -64,6 +65,7 @@ public abstract class AppServerWrapper
 
     /**
      * Get the JNDI lookup string for getting a UserTransaction object.
+     * 
      * @return The application server dependent string for the lookup.
      */
     public abstract String getUserTransactionString();
@@ -81,11 +83,17 @@ public abstract class AppServerWrapper
     /**
      * Sets the app server's naming context
      * 
-     * @param p_context naming context
+     * @param p_context
+     *            naming context
      */
     protected void setNamingContext(Context p_context)
     {
         m_context = p_context;
+    }
+
+    public void restart()
+    {
+        throw new IllegalStateException("Not implemented.");
     }
 
     /**
@@ -97,14 +105,12 @@ public abstract class AppServerWrapper
     }
 
     /**
-    * Returns a ServerRegistry object appropriate for the appserver.
-    * NOTE: The default is to return the one we used to use for WebLogic    
-    * (ServerRegistryImpl)
-    */
-    public ServerRegistry getServerRegistry()
-    throws GeneralException
+     * Returns a ServerRegistry object appropriate for the appserver. NOTE: The
+     * default is to return the one we used to use for WebLogic
+     * (ServerRegistryImpl)
+     */
+    public ServerRegistry getServerRegistry() throws GeneralException
     {
         return ServerRegistryImpl.getInstance();
     }
 }
-

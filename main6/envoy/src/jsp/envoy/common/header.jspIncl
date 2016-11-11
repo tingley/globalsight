@@ -100,6 +100,9 @@ a.headerText:hover {color: #fe7b23}
 </TABLE>
 </DIV>
 
+<DIV ID="restartBanner" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 260px;">
+<%@ include file="/envoy/common/restartBanner.jspIncl" %>
+</DIV>
 <DIV ID="shutdownBanner" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 260px;">
 <%@ include file="/envoy/common/shutdownBanner.jspIncl" %>
 </DIV>

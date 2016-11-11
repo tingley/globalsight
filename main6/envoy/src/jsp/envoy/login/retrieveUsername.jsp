@@ -358,6 +358,9 @@ if(null==mess || mess.length()==0)
 
     </DIV>
     
+    <DIV ID="restart" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 260px">
+        <%@ include file="/envoy/common/restartBanner.jspIncl" %>    
+    </DIV>
     <DIV ID="shutdown" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 260px">
 <%@ include file="/envoy/common/shutdownBanner.jspIncl" %>    
     </DIV>   

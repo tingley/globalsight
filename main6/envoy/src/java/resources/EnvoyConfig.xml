@@ -88,6 +88,11 @@
       </WebPage>
     </WebActivity>
   </WebModule>
+  <WebModule webModuleName="restart">
+    <WebActivity webActivityName="restart">
+      <WebPage pageName="RS1" isDefault="true" jspName="/envoy/administration/restart/restart.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.shutdown.ShutdownMainHandler"></WebPage>
+    </WebActivity>
+  </WebModule>
   <WebModule webModuleName="shutdown">
     <WebActivity webActivityName="shutdown">
       <WebPage pageName="SD1" isDefault="true" jspName="/envoy/administration/shutdown/shutdown.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.shutdown.ShutdownMainHandler"></WebPage>

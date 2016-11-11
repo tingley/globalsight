@@ -50,6 +50,48 @@ public class JBossWrapper extends AppServerWrapper
         return USER_TRANSACTION;
     }
 
+    public void restart()
+    {
+        try
+        {
+            String os = System.getProperty("os.name");
+            boolean isWindows = os.startsWith("Win");
+            StringBuilder c = new StringBuilder();
+            if (isWindows)
+            {
+                c.append("jboss-cli.bat");
+            }
+            else
+            {
+                c.append("jboss-cli.sh");
+            }
+            c.append(" --connect --command=:shutdown(restart=true)");
+
+            SystemConfiguration config = SystemConfiguration.getInstance();
+            String gsHome = config
+                    .getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY);
+            StringBuilder bin = new StringBuilder();
+            bin.append(gsHome.replace('/', File.separatorChar));
+            bin.append(File.separator);
+            bin.append("jboss");
+            bin.append(File.separator);
+            bin.append("server");
+            bin.append(File.separator);
+            bin.append("bin");
+            bin.append(File.separator);
+
+            String command = bin.toString() + c.toString();
+            s_logger.info("Executing command:" + command);
+            ProcessRunner pr = new ProcessRunner(command, System.out, System.err);
+            Thread t = new Thread(pr);
+            t.start();
+        }
+        catch (Exception e)
+        {
+            s_logger.error("Failed to execute script to restart jboss server", e);
+        }
+    }
+
     public void shutdown()
     {
         try

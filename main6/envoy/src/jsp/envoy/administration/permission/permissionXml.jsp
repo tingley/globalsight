@@ -215,6 +215,9 @@
   <permission id="<%=Permission.SYSTEM_PARAMS%>"/>
   <permission id="<%=Permission.LOGS_VIEW%>"/>
   <!--  <permission id="<%=Permission.OPERATION_LOG_VIEW%>"/>-->
+<% if (ShutdownMainHandler.restartUserInterfaceEnabled()) { %>
+  <permission id="<%=Permission.RESTART_SYSTEM%>"/>
+<% } %>
 <% if (ShutdownMainHandler.shutdownUserInterfaceEnabled()) { %>
   <permission id="<%=Permission.SHUTDOWN_SYSTEM%>"/>
 <% } %>

@@ -16,25 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.login;
 
-import java.net.InetAddress;
-import java.net.URL;
-import java.rmi.RemoteException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import jodd.util.StringUtil;
-
-import org.apache.commons.lang3.LocaleUtils;
-import org.apache.log4j.Logger;
-
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -48,11 +29,7 @@ import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.securitymgr.SecurityManagerException;
 import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.AppletDirectory;
-import com.globalsight.everest.servlet.util.CookieUtil;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.ServletUtil;
-import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.servlet.util.*;
 import com.globalsight.everest.usermgr.LoggedUser;
 import com.globalsight.everest.usermgr.UserInfo;
 import com.globalsight.everest.usermgr.UserLdapHelper;
@@ -66,6 +43,18 @@ import com.globalsight.log.ActivityLog;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.webservices.AmbassadorUtil;
+import jodd.util.StringUtil;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.log4j.Logger;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.net.InetAddress;
+import java.net.URL;
+import java.rmi.RemoteException;
+import java.util.*;
 
 /**
  * EntryPageControlFlowHelper, A page flow helper which does the 'login
@@ -142,10 +131,6 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         {
             userPassword = m_request
                     .getParameter(WebAppConstants.PASSWORD_NAME_FIELD);
-            // Below codes do nothing, just return the parameter value. I don't
-            // know why. Vincent at 09/12/2016
-            // if (userPassword != null)
-            // userPassword = EditUtil.utf8ToUnicode(userPassword);
             if ("........".equals(userPassword))
             {
                 // auto login
@@ -345,7 +330,7 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         }
         catch (EnvoyServletException ese)
         {
-            return loginFailed(null);
+            return loginFailed(ese);
         }
 
         // Load the user parameters and store them in the session.
@@ -482,6 +467,17 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
             // first do authentication
             user = ServerProxy.getSecurityManager().authenticateUser(p_userId,
                     p_password);
+
+            if (user.getResetPasswordTimes() == 0) {
+                //User do NOT change his weak password in 3 times, then knock him out.
+                String[] msgArgs = { "Failed to log in with weak password in 3 times against the Company Security Policy. Please using Forget Password to retrieve new password." };
+
+                CATEGORY.warn("Invalid login attempt for user '"
+                        + UserUtil.getUserNameById(p_userId)
+                        + "' because the user do NOT change his weak password.");
+                throw new EnvoyServletException(
+                        EnvoyServletException.MSG_FAILED_TO_LOGIN, msgArgs, null);
+            }
         }
         catch (GeneralException ge)
         {

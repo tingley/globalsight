@@ -16,30 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.users;
 
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
-import java.util.Vector;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-
 import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -77,9 +53,20 @@ import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
+import com.globalsight.webservices.AmbassadorUtil;
+import org.apache.log4j.Logger;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.*;
 
 /**
  * Class containing static utility methods available to user pagehandlers.
@@ -299,16 +286,16 @@ public class UserUtil
             p_wrapper.setLastName(lastName);
         }
 
-        if (password != null && !password.equals("***************************"))
+        if (StringUtil.isNotEmpty(password))
         {
-            if (password.equals(""))
+            try
             {
-                p_wrapper.setPassword(null);
+                password = AmbassadorUtil.encryptionString(password);
             }
-            else
+            catch (Exception e)
             {
-                p_wrapper.setPassword(password);
             }
+            p_wrapper.setPassword(password);
         }
 
         if (title != null)

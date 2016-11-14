@@ -16,27 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
-
-import javax.naming.NamingException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.costing.CostingException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
@@ -62,10 +41,23 @@ import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.SecurityUtil;
 import com.globalsight.util.ServerUtil;
 import com.globalsight.util.edit.EditUtil;
-
 import jodd.util.StringUtil;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+
+import javax.naming.NamingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * TaskHelper is used for communicating with remote objects and performing task
@@ -854,8 +846,6 @@ public class TaskHelper
         User user = (User) sessionMgr.getAttribute("myAccountUser");
         String password = EditUtil.utf8ToUnicode(p_request
                 .getParameter(WebAppConstants.USER_PASSWORD));
-        String password1 = EditUtil.utf8ToUnicode(p_request
-                .getParameter(WebAppConstants.USER_PASSWORD_CONFIRM));
         String firstName = EditUtil.utf8ToUnicode(p_request
                 .getParameter(WebAppConstants.USER_FIRST_NAME));
         String lastName = EditUtil.utf8ToUnicode(p_request
@@ -874,10 +864,10 @@ public class TaskHelper
         user.setTitle(title);
         user.setCompanyName(companyName);
 
-        if (password != null && password.equals(password1)
-                && (!password.trim().equals("")))
+        if (StringUtil.isNotBlank(password))
         {
-            user.setPassword(password);
+            user.setPassword(SecurityUtil.encryptPassword(password));
+            user.setResetPasswordTimes(-1);
             user.setPasswordSet(true);
         }
 

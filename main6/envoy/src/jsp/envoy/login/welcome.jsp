@@ -474,4 +474,17 @@ function openWizardWindow(url)
 </TABLE>
 </DIV>
 </BODY>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.11.3.min.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/gscommon.js"></SCRIPT>
+<script>
+    $(document).ready(function () {
+        var resetTimes = <%=userWelcome.getResetPasswordTimes()%>;
+        if (resetTimes > 1) {
+            alert("<%=bundle.getString("jsmsg_account_weak_password")%>" + "\r\nYou can log in " + resetTimes + " times before you reset your password.");
+        } else if (resetTimes == 1) {
+            alert("<%=bundle.getString("jsmsg_account_weak_password")%>" + "\r\nYOU NEED TO CHANGE YOUR PASSWORD IN THIS LAST TIME.\r\nOtherwise you will not logged in with the weakness password.");
+        }
+    });
+</script>
 </HTML>

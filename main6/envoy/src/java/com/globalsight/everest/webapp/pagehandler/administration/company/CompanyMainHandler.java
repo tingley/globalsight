@@ -16,46 +16,18 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.company;
 
-import java.io.File;
-import java.io.IOException;
-import java.rmi.RemoteException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Vector;
-
-import javax.naming.NamingException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-import org.hibernate.HibernateException;
-
 import com.globalsight.config.SystemParameter;
-import com.globalsight.config.SystemParameterEntityException;
 import com.globalsight.config.SystemParameterImpl;
 import com.globalsight.config.SystemParameterPersistenceManager;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl;
-import com.globalsight.cxe.persistence.segmentationrulefile.SegmentationRuleFileEntityException;
 import com.globalsight.cxe.util.company.CreateCompanyUtil;
 import com.globalsight.everest.category.CategoryHelper;
 import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.category.CommonCategory;
-import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
-import com.globalsight.everest.company.PostReviewCategory;
-import com.globalsight.everest.company.ScorecardCategory;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
@@ -74,6 +46,19 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
+import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
+
+import javax.naming.NamingException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.sql.SQLException;
+import java.util.*;
 
 public class CompanyMainHandler extends PageActionHandler implements CompanyConstants
 {
@@ -196,18 +181,7 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
     {
         // GBS-1389: restrict direct access to create company without
         // create company permission.
-        if (!userPerms.getPermissionFor(Permission.COMPANY_NEW))
-        {
-            if (userPerms.getPermissionFor(Permission.COMPANY_VIEW))
-            {
-                p_response.sendRedirect("/globalsight/ControlServlet?activityName=companies");
-            }
-            else
-            {
-                p_response.sendRedirect(p_request.getContextPath());
-            }
-            return;
-        }
+        if (checkPermission(Permission.COMPANY_NEW, p_request, p_response)) return;
 
         Company company = createCompanyObject(p_request);
         String userId = PageHandler.getUser(p_request.getSession()).getUserId();
@@ -243,9 +217,28 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         }
     }
 
+    private boolean checkPermission(String permission, HttpServletRequest req, HttpServletResponse res) throws IOException
+    {
+        // GBS-1389: restrict direct access to edit company without edit company
+        // permission.
+        if (!userPerms.getPermissionFor(permission))
+        {
+            if (userPerms.getPermissionFor(Permission.COMPANY_VIEW))
+            {
+                res.sendRedirect("/globalsight/ControlServlet?activityName=companies");
+            }
+            else
+            {
+                res.sendRedirect(req.getContextPath());
+            }
+            return true;
+        }
+        return false;
+    }
+
     private void processCategories(HttpServletRequest p_request, long companyId)
     {
-        String[] tmp = null;
+        String[] tmp;
 
         ArrayList<CommonCategory> allCommonCategories = new ArrayList<CommonCategory>();
         ArrayList<CommonCategory> commonCategories = null;
@@ -348,20 +341,7 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
     public void edit(HttpServletRequest p_request, HttpServletResponse p_response, Object form)
             throws Exception
     {
-        // GBS-1389: restrict direct access to edit company without edit company
-        // permission.
-        if (!userPerms.getPermissionFor(Permission.COMPANY_EDIT))
-        {
-            if (userPerms.getPermissionFor(Permission.COMPANY_VIEW))
-            {
-                p_response.sendRedirect("/globalsight/ControlServlet?activityName=companies");
-            }
-            else
-            {
-                p_response.sendRedirect(p_request.getContextPath());
-            }
-            return;
-        }
+        if (checkPermission(Permission.COMPANY_EDIT, p_request, p_response)) return;
 
         SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
         Company company = (Company) sessionMgr.getAttribute(CompanyConstants.COMPANY);
@@ -382,20 +362,7 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
     public void remove(HttpServletRequest p_request, HttpServletResponse p_response, Object form)
             throws Exception
     {
-        // gbs-1389: restrict direct access to remove company without
-        // remove company permission.
-        if (!userPerms.getPermissionFor(Permission.COMPANY_REMOVE))
-        {
-            if (userPerms.getPermissionFor(Permission.COMPANY_VIEW))
-            {
-                p_response.sendRedirect("/globalsight/ControlServlet?activityName=companies");
-            }
-            else
-            {
-                p_response.sendRedirect(p_request.getContextPath());
-            }
-            return;
-        }
+        if (checkPermission(Permission.COMPANY_REMOVE, p_request, p_response)) return;
 
         removeCompany(p_request);
     }
@@ -417,18 +384,7 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
     public void migrate(HttpServletRequest p_request, HttpServletResponse p_response, Object form)
             throws Exception
     {
-        if (!userPerms.getPermissionFor(Permission.COMPANY_MIGRATE))
-        {
-            if (userPerms.getPermissionFor(Permission.COMPANY_VIEW))
-            {
-                p_response.sendRedirect("/globalsight/ControlServlet?activityName=companies");
-            }
-            else
-            {
-                p_response.sendRedirect(p_request.getContextPath());
-            }
-            return;
-        }
+        if (checkPermission(Permission.COMPANY_MIGRATE, p_request, p_response)) return;
 
         String companyId = p_request.getParameter("id");
         migrateToSeparatedTables(companyId);
@@ -476,170 +432,25 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         p_request.setAttribute(CompanyConstants.SEARCH, CompanyConstants.SEARCH);
     }
 
-    /**
-     * Delete all categories of a company
-     * 
-     * @param companyId
-     */
-    private boolean deleteCategory(long companyId)
-    {
-        try
-        {
-            String hql = "from Category as c where c.companyId = " + companyId;
-            List<String> containedCategoryList = (List<String>) HibernateUtil.search(hql);
-            HibernateUtil.delete(containedCategoryList);
-            return true;
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
-    }
-
-    private boolean deleteScorecardCategory(long companyId)
-    {
-        try
-        {
-            String hql = "from ScorecardCategory as s where s.companyId = " + companyId;
-            List<String> containedCategoryList = (List<String>) HibernateUtil.search(hql);
-            HibernateUtil.delete(containedCategoryList);
-            return true;
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
-    }
-
-    private boolean deleteQualityAndMarketCategory(long companyId)
-    {
-        try
-        {
-            String hql = "from PostReviewCategory as q where q.companyId = " + companyId;
-            List<String> containedCategoryList = (List<String>) HibernateUtil.search(hql);
-            HibernateUtil.delete(containedCategoryList);
-            return true;
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
-    }
-
-    /**
-     * Create new categories for a company
-     * 
-     * @param p_request
-     * @param companyId
-     * @param active
-     * @throws JobException
-     */
-    private boolean createCategory(String[] categories, long companyId, boolean active)
-            throws JobException
-    {
-        try
-        {
-            for (int i = 0; i < categories.length; i++)
-            {
-                String categoryString = categories[i];
-                Category category = new Category();
-                category.setCategory(categoryString);
-                category.setCompanyId(companyId);
-                category.setIsActive(active);
-                ServerProxy.getJobHandler().createCategory(category);
-                // HibernateUtil.save(category);
-            }
-            return true;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private boolean createScorecardCategory(String[] categories, long companyId, boolean active)
-            throws JobException
-    {
-        try
-        {
-            for (int i = 0; i < categories.length; i++)
-            {
-                String categoryString = categories[i];
-                ScorecardCategory scorecardCategory = new ScorecardCategory();
-                scorecardCategory.setScorecardCategory(categoryString);
-                scorecardCategory.setCompanyId(companyId);
-                scorecardCategory.setIsActive(active);
-                ServerProxy.getJobHandler().createScorecardCategory(scorecardCategory);
-                // HibernateUtil.save(category);
-            }
-            return true;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private boolean createQualityCategory(String[] qualityCategories, long companyId,
-            boolean active)
-    {
-        try
-        {
-            for (int i = 0; i < qualityCategories.length; i++)
-            {
-                String categoryString = qualityCategories[i];
-                PostReviewCategory qualityCategory = new PostReviewCategory();
-                qualityCategory.setCategoryName(categoryString);
-                qualityCategory.setCompanyId(companyId);
-                qualityCategory.setCategoryType("Q");
-                qualityCategory.setIsActive(active);;
-                ServerProxy.getJobHandler().createPostReviewCategory(qualityCategory);
-            }
-            return true;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private boolean createMarketCategory(String[] marketCategories, long companyId, boolean active)
-    {
-        try
-        {
-            for (int i = 0; i < marketCategories.length; i++)
-            {
-                String categoryString = marketCategories[i];
-                PostReviewCategory marketCategory = new PostReviewCategory();
-                marketCategory.setCategoryName(categoryString);
-                marketCategory.setCompanyId(companyId);
-                marketCategory.setCategoryType("M");
-                marketCategory.setIsActive(active);
-                ServerProxy.getJobHandler().createPostReviewCategory(marketCategory);
-            }
-            return true;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     private void initialHTMLFilter(long companyId)
     {
         try
         {
+            getTagsProperties();
             tagsProperties.load(getClass().getResourceAsStream(PROPERTIES_TAGS));
             insert(companyId);
+            tagsProperties = null;
         }
         catch (IOException e)
         {
             throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, e);
         }
+    }
+
+    private void getTagsProperties()
+    {
+        if (tagsProperties == null)
+            tagsProperties = new Properties();
     }
 
     public void insert(Long companyId) throws IOException
@@ -649,41 +460,26 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         String placeHolderTrim = "embeddable_tags";
         String jsFunctionText = "l10n";
         String embeddableTags = tagsProperties.getProperty("InlineTag_html");
-        String defaultEmbeddableTags = embeddableTags;
         String pairedTags = tagsProperties.getProperty("PairedTag_html");
-        String defaultPairedTags = pairedTags;
         String unpairedTags = tagsProperties.getProperty("UnpairedTag_html");
-        String defaultUnpairedTags = unpairedTags;
         String switchTagMap = tagsProperties.getProperty("SwitchTagMap_html");
-        String defaultSwitchTagMap = switchTagMap;
         String whitePreservingTag = tagsProperties.getProperty("WhitePreservingTag_html");
-        String defaultWhitePreservingTag = whitePreservingTag;
         String nonTranslatableMetaAttribute = tagsProperties
                 .getProperty("NonTranslatableMetaAttribute_html");
-        String defaultNonTranslatableMetaAttribute = nonTranslatableMetaAttribute;
         String translatableAttribute = tagsProperties.getProperty("TranslatableAttribute_html");
-        String defaultTranslatableAttribute = translatableAttribute;
-        String localizableAttributeMap = tagsProperties.getProperty("LocalizableAttributeMap_html");
-        String defaultLocalizableAttributeMap = localizableAttributeMap;
         String chEntry = tagsProperties.getProperty("convertHtmlEntity");
-        // String defaultLocalizableInlineAtrributes = "href";
-        // String localizableInlineAttributes = "";
-        boolean convertHtmlEntity = (chEntry == null || "".equals(chEntry) ? false
-                : Boolean.parseBoolean(chEntry));
+        boolean convertHtmlEntity = StringUtil.isEmpty(chEntry) ? false : Boolean.parseBoolean(chEntry);
         String IIHtmlTags = tagsProperties.getProperty("IgnoreInvalidHtmlTags");
         boolean ignoreInvalidHtmlTags = ("".equals(IIHtmlTags) ? true
                 : Boolean.parseBoolean(IIHtmlTags));
         String aRDirectionality = tagsProperties.getProperty("addRtlDirectionality");
-        boolean addRtlDirectionality = (aRDirectionality == null || "".equals(aRDirectionality)
-                ? false : Boolean.parseBoolean(aRDirectionality));
-        HtmlFilter filter = new HtmlFilter(filterName, filterDescription, defaultEmbeddableTags,
+        boolean addRtlDirectionality = StringUtil.isEmpty(aRDirectionality) ? false : Boolean.parseBoolean(aRDirectionality);
+        HtmlFilter filter = new HtmlFilter(filterName, filterDescription, embeddableTags,
                 embeddableTags, placeHolderTrim, companyId, convertHtmlEntity,
-                ignoreInvalidHtmlTags, addRtlDirectionality, jsFunctionText, defaultPairedTags,
-                pairedTags, defaultUnpairedTags, unpairedTags, defaultSwitchTagMap, switchTagMap,
-                defaultWhitePreservingTag, whitePreservingTag, defaultNonTranslatableMetaAttribute,
-                nonTranslatableMetaAttribute, defaultTranslatableAttribute, translatableAttribute
-        // defaultLocalizableInlineAtrributes,
-        // localizableInlineAttributes
+                ignoreInvalidHtmlTags, addRtlDirectionality, jsFunctionText, pairedTags,
+                pairedTags, unpairedTags, unpairedTags, switchTagMap, switchTagMap,
+                whitePreservingTag, whitePreservingTag, nonTranslatableMetaAttribute,
+                nonTranslatableMetaAttribute, translatableAttribute, translatableAttribute
         );
         if (!checkExist(FilterConstants.HTML_TABLENAME, filterName, companyId))
         {
@@ -879,7 +675,7 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
     }
 
     private void createDefaultSRXRule(Company company) throws IOException,
-            SegmentationRuleFileEntityException, GeneralException, NamingException
+            GeneralException, NamingException
     {
         File jarFile = new File(CompanyMainHandler.class.getProtectionDomain().getCodeSource()
                 .getLocation().getFile());
@@ -907,62 +703,46 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
 
     private void modifyCompany(Company company, HttpServletRequest p_request)
     {
-        company.setDescription(p_request.getParameter(CompanyConstants.DESC));
-        company.setEmail(p_request.getParameter(CompanyConstants.EMAIL));
-        company.setSessionTime(p_request.getParameter(CompanyConstants.SESSIONTIME));
-        String enableIPFilter = p_request.getParameter(CompanyConstants.ENABLE_IP_FILTER);
-        String enableTMAccessControl = p_request
+        getCompanyData(p_request, company);
+        
+        setInContextReview(p_request, company);
+    }
+
+    private void getCompanyData(HttpServletRequest req, Company company)
+    {
+        company.setDescription(req.getParameter(CompanyConstants.DESC));
+        company.setEmail(req.getParameter(CompanyConstants.EMAIL));
+        company.setSessionTime(req.getParameter(CompanyConstants.SESSIONTIME));
+        String enableIPFilter = req.getParameter(CompanyConstants.ENABLE_IP_FILTER);
+        String enableTMAccessControl = req
                 .getParameter(CompanyConstants.ENABLE_TM_ACCESS_CONTROL);
-        String enableTBAccessControl = p_request
+        String enableTBAccessControl = req
                 .getParameter(CompanyConstants.ENABLE_TB_ACCESS_CONTROL);
-        String enableQAChecks = p_request.getParameter(CompanyConstants.ENABLE_QA_CHECKS);
-        String useSeparateTablesPerJob = p_request
+        String enableQAChecks = req.getParameter(CompanyConstants.ENABLE_QA_CHECKS);
+        String useSeparateTablesPerJob = req
                 .getParameter(CompanyConstants.BIG_DATA_STORE_LEVEL);
-        String enableDitaChecks = p_request.getParameter(CompanyConstants.ENABLE_DITA_CHECKS);
-        String enableWorkflowStatePosts = p_request
+        String enableDitaChecks = req.getParameter(CompanyConstants.ENABLE_DITA_CHECKS);
+        String enableWorkflowStatePosts = req
                 .getParameter(CompanyConstants.ENABLE_WORKFLOW_STATE_POSTS);
-        String enableBlankTmSearch = p_request
+        String enableBlankTmSearch = req
                 .getParameter(CompanyConstants.ENABLE_BLANK_TM_SEARCH);
-        String disableUploadFileTypes = p_request
+        String enableStrongPassword = ServletUtil.get(req, CompanyConstants.ENABLE_STRONG_PASSWORD);
+        String disableUploadFileTypes = req
                 .getParameter(CompanyConstants.DISABLE_UPLOAD_FILE_TYPES);
 
-        if ("on".equalsIgnoreCase(enableIPFilter))
-        {
-            company.setEnableIPFilter(true);
-        }
-        else
-        {
-            company.setEnableIPFilter(false);
-        }
-        if ("on".equalsIgnoreCase(enableTMAccessControl))
-        {
-            company.setEnableTMAccessControl(true);
-        }
-        else
-        {
-            company.setEnableTMAccessControl(false);
-        }
-        if ("on".equalsIgnoreCase(enableTBAccessControl))
-        {
-            company.setEnableTBAccessControl(true);
-        }
-        else
-        {
-            company.setEnableTBAccessControl(false);
-        }
+        company.setEnableIPFilter("on".equalsIgnoreCase(enableIPFilter));
+        company.setEnableTMAccessControl("on".equalsIgnoreCase(enableTMAccessControl));
+        company.setEnableTBAccessControl("on".equalsIgnoreCase(enableTBAccessControl));
+        company.setEnableQAChecks("on".equalsIgnoreCase(enableQAChecks));
+        company.setEnableStrongPassword("on".equalsIgnoreCase(enableStrongPassword));
+        company.setEnableDitaChecks("on".equalsIgnoreCase(enableDitaChecks));
+        company.setEnableWorkflowStatePosts("on".equalsIgnoreCase(enableWorkflowStatePosts));
+        company.setEnableBlankTmSearch("on".equalsIgnoreCase(enableBlankTmSearch));
+        company.setDisableUploadFileTypes(disableUploadFileTypes);
 
-        if ("on".equalsIgnoreCase(enableQAChecks))
-        {
-            company.setEnableQAChecks(true);
-        }
-        else
-        {
-            company.setEnableQAChecks(false);
-        }
-
-        String enableSso = p_request.getParameter(CompanyConstants.ENABLE_SSO_LOGON);
+        String enableSso = req.getParameter(CompanyConstants.ENABLE_SSO_LOGON);
         company.setEnableSSOLogin("on".equalsIgnoreCase(enableSso));
-        String ssoIdpUrl = p_request.getParameter(CompanyConstants.SSO_IDP_URL);
+        String ssoIdpUrl = req.getParameter(CompanyConstants.SSO_IDP_URL);
         company.setSsoIdpUrl(ssoIdpUrl);
 
         // always enable TM3
@@ -976,30 +756,6 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         {
             company.setBigDataStoreLevel(CompanyConstants.BIG_DATA_STORE_LEVEL_COMPNAY);
         }
-
-        company.setEnableDitaChecks(false);
-        if ("on".equalsIgnoreCase(enableDitaChecks))
-        {
-            company.setEnableDitaChecks(true);
-        }
-
-        company.setEnableWorkflowStatePosts(false);
-        if ("on".equalsIgnoreCase(enableWorkflowStatePosts))
-        {
-            company.setEnableWorkflowStatePosts(true);
-        }
-
-        company.setEnableBlankTmSearch(false);
-        if ("on".equalsIgnoreCase(enableBlankTmSearch))
-        {
-            company.setEnableBlankTmSearch(true);
-        }
-        company.setDisableUploadFileTypes(disableUploadFileTypes);
-        
-        setInContextReview(p_request, company);
-
-        //company.setDefaultFluency(ServletUtil.get(p_request, "defaultFluency"));
-        //company.setDefaultAdequacy(ServletUtil.get(p_request, "defaultAdequacy"));
     }
 
     private void setInContextReview(HttpServletRequest p_request, Company company)
@@ -1022,16 +778,18 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
             SystemParameterPersistenceManager spm = ServerProxy
                     .getSystemParameterPersistenceManager();
 
-            updateInContextReview(company, spm, SystemConfigParamNames.INCTXRV_ENABLE_INDD,
+            long companyId = company.getId();
+
+            updateInContextReview(companyId, spm, SystemConfigParamNames.INCTXRV_ENABLE_INDD,
                     enableInCtxRvIndd);
 
-            updateInContextReview(company, spm, SystemConfigParamNames.INCTXRV_ENABLE_OFFICE,
+            updateInContextReview(companyId, spm, SystemConfigParamNames.INCTXRV_ENABLE_OFFICE,
                     enableInCtxRvOffice);
 
-            updateInContextReview(company, spm, SystemConfigParamNames.INCTXRV_ENABLE_XML,
+            updateInContextReview(companyId, spm, SystemConfigParamNames.INCTXRV_ENABLE_XML,
                     enableInCtxRvXML);
 
-            updateInContextReview(company, spm, SystemConfigParamNames.INCTXRV_ENABLE_HTML,
+            updateInContextReview(companyId, spm, SystemConfigParamNames.INCTXRV_ENABLE_HTML,
                     enableInCtxRvHTML);
         }
         catch (Exception ex)
@@ -1040,15 +798,14 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         }
     }
 
-    private void updateInContextReview(Company company, SystemParameterPersistenceManager spm,
+    private void updateInContextReview(long companyId, SystemParameterPersistenceManager spm,
             String key, String value)
-            throws Exception, RemoteException, SystemParameterEntityException
+            throws Exception
     {
-        String companyId = "" + company.getId();
         SystemParameter spEnableIndd = null;
         try
         {
-            spEnableIndd = spm.getSystemParameter(key, companyId);
+            spEnableIndd = spm.getSystemParameter(key, String.valueOf(companyId));
         }
         catch (Exception ee)
         {
@@ -1057,7 +814,7 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
 
         if (spEnableIndd == null)
         {
-            spEnableIndd = new SystemParameterImpl(key, value, company.getId());
+            spEnableIndd = new SystemParameterImpl(key, value, companyId);
             HibernateUtil.save(spEnableIndd);
         }
         spEnableIndd.setValue(value);
@@ -1074,96 +831,8 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         // create the company.
         Company company = new Company();
         company.setName(p_request.getParameter(CompanyConstants.NAME).trim());
-        company.setDescription(p_request.getParameter(CompanyConstants.DESC));
-        company.setEmail(p_request.getParameter(CompanyConstants.EMAIL));
-        company.setSessionTime(p_request.getParameter(CompanyConstants.SESSIONTIME));
-        String enableIPFilter = p_request.getParameter(CompanyConstants.ENABLE_IP_FILTER);
-        String enableTMAccessControl = p_request
-                .getParameter(CompanyConstants.ENABLE_TM_ACCESS_CONTROL);
-        String enableTBAccessControl = p_request
-                .getParameter(CompanyConstants.ENABLE_TB_ACCESS_CONTROL);
-        String enableQAChecks = p_request.getParameter(CompanyConstants.ENABLE_QA_CHECKS);
-        String useSeparateTablesPerJob = p_request
-                .getParameter(CompanyConstants.BIG_DATA_STORE_LEVEL);
-        String enableDitaChecks = p_request.getParameter(CompanyConstants.ENABLE_DITA_CHECKS);
-        String enableWorkflowStatePosts = p_request
-                .getParameter(CompanyConstants.ENABLE_WORKFLOW_STATE_POSTS);
-        String enableBlankTmSearch = p_request
-                .getParameter(CompanyConstants.ENABLE_BLANK_TM_SEARCH);
-        String disableUploadFileTypes = p_request
-                .getParameter(CompanyConstants.DISABLE_UPLOAD_FILE_TYPES);
-        
-        if ("on".equalsIgnoreCase(enableIPFilter))
-        {
-            company.setEnableIPFilter(true);
-        }
-        else
-        {
-            company.setEnableIPFilter(false);
-        }
-        if ("on".equalsIgnoreCase(enableTMAccessControl))
-        {
-            company.setEnableTMAccessControl(true);
-        }
-        else
-        {
-            company.setEnableTMAccessControl(false);
-        }
-        if ("on".equalsIgnoreCase(enableTBAccessControl))
-        {
-            company.setEnableTBAccessControl(true);
-        }
-        else
-        {
-            company.setEnableTBAccessControl(false);
-        }
 
-        if ("on".equalsIgnoreCase(enableQAChecks))
-        {
-            company.setEnableQAChecks(true);
-        }
-        else
-        {
-            company.setEnableQAChecks(false);
-        }
-
-        String enableSso = p_request.getParameter(CompanyConstants.ENABLE_SSO_LOGON);
-        company.setEnableSSOLogin("on".equalsIgnoreCase(enableSso));
-        String ssoIdpUrl = p_request.getParameter(CompanyConstants.SSO_IDP_URL);
-        company.setSsoIdpUrl(ssoIdpUrl);
-
-        // always enable TM3
-        company.setTmVersion(TmVersion.fromValue(3));
-
-        if ("on".equalsIgnoreCase(useSeparateTablesPerJob))
-        {
-            company.setBigDataStoreLevel(CompanyConstants.BIG_DATA_STORE_LEVEL_JOB);
-        }
-        else
-        {
-            company.setBigDataStoreLevel(CompanyConstants.BIG_DATA_STORE_LEVEL_COMPNAY);
-        }
-
-        company.setEnableDitaChecks(false);
-        if ("on".equalsIgnoreCase(enableDitaChecks))
-        {
-            company.setEnableDitaChecks(true);
-        }
-
-        company.setEnableWorkflowStatePosts(false);
-        if ("on".equalsIgnoreCase(enableWorkflowStatePosts))
-        {
-            company.setEnableWorkflowStatePosts(true);
-        }
-
-        company.setEnableBlankTmSearch(false);
-        if ("on".equalsIgnoreCase(enableBlankTmSearch))
-        {
-            company.setEnableBlankTmSearch(true);
-        }
-        company.setDisableUploadFileTypes(disableUploadFileTypes);
-        //company.setDefaultFluency(ServletUtil.get(p_request, "defaultFluency"));
-        //company.setDefaultAdequacy(ServletUtil.get(p_request, "defaultAdequacy"));
+        getCompanyData(p_request, company);
 
         return company;
     }

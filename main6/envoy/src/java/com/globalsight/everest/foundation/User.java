@@ -212,4 +212,6 @@ public interface User
     public void setProjectNames(String projectN);
     public String getPermissiongNames();
     public void setPermissiongNames(String permisssingN);
+    public int getResetPasswordTimes();
+    public void setResetPasswordTimes(int times);
 }

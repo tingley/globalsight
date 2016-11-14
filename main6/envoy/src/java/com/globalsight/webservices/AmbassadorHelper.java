@@ -17,48 +17,12 @@
 
 package com.globalsight.webservices;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.Vector;
-
-import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.dom4j.Document;
-import org.dom4j.Element;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.jbpm.JbpmContext;
-import org.json.JSONObject;
-
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.edit.offline.OfflineEditManager;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
-import com.globalsight.everest.foundation.ContainerRole;
-import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.everest.foundation.LocalePair;
-import com.globalsight.everest.foundation.Role;
-import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.foundation.UserRole;
+import com.globalsight.everest.foundation.*;
 import com.globalsight.everest.jobhandler.JobHandlerWLRemote;
 import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.permission.Permission;
@@ -75,33 +39,34 @@ import com.globalsight.everest.usermgr.UserInfo;
 import com.globalsight.everest.usermgr.UserManagerWLRemote;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionHelper;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.PostReviewQAReportGenerator;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGenerator;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsReportGenerator;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsSimpleReportGenerator;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.TranslationVerificationReportGenerator;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.TranslationsEditReportGenerator;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.*;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadFileHelper;
-import com.globalsight.everest.workflow.Activity;
-import com.globalsight.everest.workflow.ConditionNodeTargetInfo;
-import com.globalsight.everest.workflow.WorkflowConfiguration;
-import com.globalsight.everest.workflow.WorkflowInstance;
-import com.globalsight.everest.workflow.WorkflowProcessAdapter;
-import com.globalsight.everest.workflow.WorkflowTask;
-import com.globalsight.everest.workflow.WorkflowTaskInstance;
+import com.globalsight.everest.workflow.*;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.AmbFileStoragePathUtils;
-import com.globalsight.util.Assert;
-import com.globalsight.util.ExcelUtil;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.RegexUtil;
-import com.globalsight.util.StringUtil;
-import com.globalsight.util.XmlParser;
+import com.globalsight.util.*;
+import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.jbpm.JbpmContext;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.*;
 
 /**
  * Helper for Ambassador.java.
@@ -909,18 +874,18 @@ public class AmbassadorHelper extends JsonTypeWebService
 			if (StringUtil.isNotEmpty(returnStr))
 				return INVALD_PERMISSION;
 
+			// Get current user as requesting user
+			UserManagerWLRemote userManager = ServerProxy.getUserManager();
+			Company company = ServerProxy.getJobHandler().getCompany(
+					loggedUser.getCompanyName());
+			long companyId = company.getId();
+			String companyIdString = String.valueOf(companyId);
+
 	        int checkResult = validateUserInfo(p_accessToken, p_userId, p_password,
 	                p_firstName, p_lastName, p_email, p_permissionGrps,
-	                p_isInAllProject, p_projectIds, true);
+	                p_isInAllProject, p_projectIds, true, company.isEnableStrongPassword());
 	        if (checkResult > 0)
 	            return checkResult;
-
-			// Get current user as requesting user
-            UserManagerWLRemote userManager = ServerProxy.getUserManager();
-            Company company = ServerProxy.getJobHandler().getCompany(
-                    loggedUser.getCompanyName());
-            long companyId = company.getId();
-            String companyIdString = String.valueOf(companyId);
 
             // Set up basic user information
             User user = userManager.createUser();
@@ -1009,37 +974,29 @@ public class AmbassadorHelper extends JsonTypeWebService
     private int validateUserInfo(String accessToken, String userId,
             String password, String firstName, String lastName, String email,
             String[] permissionGroups, boolean isInAllProjects,
-            String[] projectIds, boolean isToCreateUser)
+            String[] projectIds, boolean isToCreateUser, boolean needStrongPassword)
     {
         // Basic check of parameters
         if (StringUtil.isEmpty(accessToken))
             return INVALID_ACCESS_TOKEN;
         if (StringUtil.isEmpty(userId) || !RegexUtil.validUserId(userId))
             return INVALID_USER_ID;
+		if (StringUtil.isEmpty(password) || password.length() < 8)
+			return INVALID_PASSWORD;
+		if (needStrongPassword && !SecurityUtil.isStrongPassword(password, 8))
+			return INVALID_PASSWORD;
+		if (StringUtil.isEmpty(firstName) || firstName.length() > 100)
+			return INVALID_FIRST_NAME;
+		if (StringUtil.isEmpty(lastName) || lastName.length() > 100)
+			return INVALID_LAST_NAME;
+		if (StringUtil.isEmpty(email) || !RegexUtil.validEmail(email))
+			return INVALID_EMAIL_ADDRESS;
         if (isToCreateUser) {
             //Create new user
-            if (StringUtil.isEmpty(password) || password.length() < 8)
-                return INVALID_PASSWORD;
-            if (StringUtil.isEmpty(firstName) || firstName.length() > 100)
-                return INVALID_FIRST_NAME;
-            if (StringUtil.isEmpty(lastName) || lastName.length() > 100)
-                return INVALID_LAST_NAME;
-            if (StringUtil.isEmpty(email) || !RegexUtil.validEmail(email))
-                return INVALID_EMAIL_ADDRESS;
             if (permissionGroups == null || permissionGroups.length == 0)
                 return INVALID_PERMISSION_GROUPS;
             if (projectIds == null || projectIds.length == 0)
                 return INVALID_PROJECTS;
-        } else {
-            //Modify user
-            if (StringUtil.isNotEmpty(password) && password.length() < 8)
-                return INVALID_PASSWORD;
-            if (StringUtil.isNotEmpty(firstName) && firstName.length() > 100)
-                return INVALID_FIRST_NAME;
-            if (StringUtil.isNotEmpty(lastName) && lastName.length() > 100)
-                return INVALID_LAST_NAME;
-            if (StringUtil.isNotEmpty(email) && !RegexUtil.validEmail(email))
-                return INVALID_EMAIL_ADDRESS;
         }
         
         userId = userId.trim();
@@ -1254,19 +1211,19 @@ public class AmbassadorHelper extends JsonTypeWebService
     				Permission.USERS_EDIT);
     		if (StringUtil.isNotEmpty(returnStr))
     			return INVALD_PERMISSION;
-            
+
+			UserManagerWLRemote userManager = ServerProxy.getUserManager();
+			PermissionManager permissionManager = Permission
+					.getPermissionManager();
+			Company company = ServerProxy.getJobHandler().getCompany(
+					loggedUser.getCompanyName());
+			long companyId = company.getId();
+
             int checkResult = validateUserInfo(p_accessToken, p_userId, p_password,
                     p_firstName, p_lastName, p_email, p_permissionGrps,
-                    p_isInAllProject, p_projectIds, false);
+                    p_isInAllProject, p_projectIds, false, company.isEnableStrongPassword());
             if (checkResult > 0)
                 return checkResult;
-
-            UserManagerWLRemote userManager = ServerProxy.getUserManager();
-            PermissionManager permissionManager = Permission
-                    .getPermissionManager();
-            Company company = ServerProxy.getJobHandler().getCompany(
-                    loggedUser.getCompanyName());
-            long companyId = company.getId();
 
             // Set up basic user information
             User user = userManager.getUser(p_userId);
@@ -1277,7 +1234,10 @@ public class AmbassadorHelper extends JsonTypeWebService
             if (StringUtil.isNotEmpty(p_email))
                 user.setEmail(p_email.trim());
             if (StringUtil.isNotEmpty(p_password))
-                user.setPassword(p_password.trim());
+			{
+				user.setPassword(SecurityUtil.encryptPassword(p_password.trim()));
+				user.setResetPasswordTimes(-1);
+			}
             user.isInAllProjects(p_isInAllProject);
 
             // Set up project information

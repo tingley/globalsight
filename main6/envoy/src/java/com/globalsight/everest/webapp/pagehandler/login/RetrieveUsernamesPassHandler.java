@@ -16,21 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.login;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.permission.Permission;
@@ -45,10 +30,24 @@ import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.RegexUtil;
+import com.globalsight.util.SecurityUtil;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.mail.MailerConstants;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
+import org.apache.log4j.Logger;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
 
 public class RetrieveUsernamesPassHandler extends PageHandler
 {
@@ -272,9 +271,19 @@ public class RetrieveUsernamesPassHandler extends PageHandler
         }
 
         boolean result = false;
-        String password = new Password().generater(password_length);
+        String password = new Password().generateRamdomPassword();
         user.setPasswordSet(true);
-        user.setPassword(password);
+        try
+        {
+            //Encrypt generated random password and store it to DB
+            user.setPassword(SecurityUtil.encryptPassword(password));
+            user.setResetPasswordTimes(-1);
+        } catch (Exception e)
+        {
+            s_logger.error("Error found when encrypt the random password.", e);
+            user.setResetPasswordTimes(4);
+        }
+
         s_logger.info("The password of " + user.getSpecialNameForEmail() + " has been reset by "
                 + p_remoteHost);
         try

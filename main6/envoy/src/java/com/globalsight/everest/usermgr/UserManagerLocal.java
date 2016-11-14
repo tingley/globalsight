@@ -16,41 +16,11 @@
  */
 package com.globalsight.everest.usermgr;
 
-import java.rmi.RemoteException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.Vector;
-
-import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-
+import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.Rate;
-import com.globalsight.everest.foundation.ContainerRole;
-import com.globalsight.everest.foundation.ContainerRoleImpl;
-import com.globalsight.everest.foundation.EmailInformation;
-import com.globalsight.everest.foundation.Role;
-import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.foundation.UserImpl;
-import com.globalsight.everest.foundation.UserRole;
-import com.globalsight.everest.foundation.UserRoleImpl;
+import com.globalsight.everest.foundation.*;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionException;
 import com.globalsight.everest.permission.PermissionGroup;
@@ -67,6 +37,19 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SecurityUtil;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+
+import javax.naming.NamingException;
+import javax.naming.directory.DirContext;
+import java.rmi.RemoteException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 /**
  * UserManagerLocal implements UserManager and is responsible for managing user
@@ -511,12 +494,6 @@ public class UserManagerLocal implements UserManager
             errorMsgArg = new String[]
             { p_user.getUserName() };
             throw new UserManagerException(errorMsgKey, errorMsgArg, e);
-        }
-
-        String password = p_user.getPassword();
-        if (!password.startsWith("{MD5}"))
-        {
-        	p_user.setPassword(encyptMD5Password(password));
         }
         HibernateUtil.saveOrUpdate(p_user);
         OperationLog.log(p_userRequestingMod.getUserId(),
@@ -1875,9 +1852,16 @@ public class UserManagerLocal implements UserManager
             }
             
             String pass = p_user.getPassword();
-            if (pass != null && !pass.startsWith("{MD5}"))
+            Company company = CompanyWrapper.getCompanyByName(p_user.getCompanyName());
+            if (company == null)
+                company = CompanyWrapper.getCurrentCompany();
+
+            if (company.isEnableStrongPassword())
             {
-                pass = encyptMD5Password(pass);
+                if (SecurityUtil.isStrongPassword(pass, 8))
+                    p_user.setResetPasswordTimes(-1);
+                else
+                    p_user.setResetPasswordTimes(4);
             }
             p_user.setPassword(pass);
             HibernateUtil.saveOrUpdate(p_user);

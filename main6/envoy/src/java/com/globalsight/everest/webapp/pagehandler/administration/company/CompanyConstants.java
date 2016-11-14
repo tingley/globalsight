@@ -82,4 +82,5 @@ public interface CompanyConstants
      * translation_unit_variant_[companyId]_[jobId]".
      */
     public static final Integer BIG_DATA_STORE_LEVEL_JOB = 2;
+    String ENABLE_STRONG_PASSWORD = "enableStrongPassword";
 }

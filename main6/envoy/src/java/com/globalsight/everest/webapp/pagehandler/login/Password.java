@@ -40,7 +40,18 @@ public class Password
 		']','^'
 	};
 
-	/**
+    private String[] fixedPasswords = new String[]
+            { "MTKdH4uI", "tI4GOe3Z", "C9MpMcSw", "d9JNlHGv", "X0iOdw2r", "yVq88Wc9", "0mCavqwe",
+                    "dYw7OzWD", "F3Kuv69w", "xDU63eGy", "mg3JAUzs", "kPlb9t8B" };
+    private int fixedLength = 12;
+
+    public String generateRamdomPassword() {
+        Random random = new Random(System.currentTimeMillis());
+        int index = random.nextInt(fixedLength);
+        return fixedPasswords[index];
+    }
+
+    /**
 	 * Generate a password follow the char array and length
 	 * 
 	 * @param p_charArray	the char array

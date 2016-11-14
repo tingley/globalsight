@@ -17,30 +17,34 @@
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
 // globalsight
+
 import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.config.UserParamNames;
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.edit.EditUtil;
- 
-//java
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+
+//java
 
 /**
  * Provides the functionality of saving user's account information
@@ -105,6 +109,12 @@ public class AccountInfoHandler extends PageHandler
                 user = UserHandlerHelper.getUser(curUser.getUserId());
                 sessionMgr.setAttribute("myAccountUser", user);
             }
+            Company company = CompanyWrapper.getCurrentCompany();
+            if (company != null)
+            {
+                sessionMgr.setAttribute("needStrongPassword", company.isEnableStrongPassword() ? "1" : "0");
+            } else
+                sessionMgr.setAttribute("needStrongPassword", "0");
         }
         // Call parent invokePageHandler() to set link beans and invoke JSP
         super.invokePageHandler(pageDescriptor, request,

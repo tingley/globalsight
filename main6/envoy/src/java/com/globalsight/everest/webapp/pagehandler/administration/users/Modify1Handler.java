@@ -17,15 +17,9 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.users;
 
-import java.io.IOException;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import com.globalsight.calendar.UserFluxCalendar;
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.SSOUserMapping;
 import com.globalsight.everest.foundation.SSOUserUtil;
 import com.globalsight.everest.foundation.User;
@@ -37,6 +31,13 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
 
 public class Modify1Handler extends PageHandler
 {
@@ -86,6 +87,10 @@ public class Modify1Handler extends PageHandler
             // Also put field level securities hash table in the session
             sessionMgr.setAttribute("securitiesHash",
                     UserHandlerHelper.getSecurity(user, loggedInUser, true));
+            Company company = CompanyWrapper.getCompanyByName(user.getCompanyName());
+            sessionMgr.setAttribute("needStrongPassword", "0");
+            if (company != null && company.isEnableStrongPassword())
+                sessionMgr.setAttribute("needStrongPassword", "1");
         }
         else if (CalendarConstants.SAVE_ACTION.equals(action))
         {

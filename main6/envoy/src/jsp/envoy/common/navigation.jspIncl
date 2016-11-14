@@ -139,7 +139,8 @@
    String permissionGroupsUrl = LinkHelper.getWebActivityURL(request, "permissions");
    String projectsUrl = LinkHelper.getWebActivityURL(request, "projects");
    String rateUrl = LinkHelper.getWebActivityURL(request, "rate");
-   String reportsUrl = LinkHelper.getWebActivityURL(request, "reports");  
+   String reportsUrl = LinkHelper.getWebActivityURL(request, "reports");
+   String restartUrl = LinkHelper.getWebActivityURL(request, "restart");
    String shutdownUrl = LinkHelper.getWebActivityURL(request, "shutdown");
    String systemActivitiesUrl = LinkHelper.getWebActivityURL(request, "jobCreationStatus");
    String cvsServerUrl = LinkHelper.getWebActivityURL(request, "cvsserver");
@@ -391,6 +392,12 @@ setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_logs")%>", "jav
 
 <% if (userPerms.getPermissionFor(Permission.OPERATION_LOG_VIEW) && isSuperAdmin3) { %>
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_logs_operation")%>", "javascript:goToUrl('<%=operationLogUrl%>');", ""));
+<% } %>
+
+<% if (ShutdownMainHandler.restartUserInterfaceEnabled() && isSuperAdmin3) { %>
+<% if (userPerms.getPermissionFor(Permission.RESTART_SYSTEM)) { %>
+setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_restart")%>", "javascript:goToUrl('<%=restartUrl%>');", ""));
+<% } %>
 <% } %>
 
 <% if (ShutdownMainHandler.shutdownUserInterfaceEnabled() && isSuperAdmin3) { %>

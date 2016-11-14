@@ -78,5 +78,7 @@ insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (174, 'per.fil
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (175, 'per.job.charge.value', '#', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (176, 'sso.enabled', 'false', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (177, 'server.instance.id', 'GlobalSightInstanceID', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (178,'restart.ui.enabled','true','1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (179,'restart.ui.banner.enabled','true','1');
 
 commit;

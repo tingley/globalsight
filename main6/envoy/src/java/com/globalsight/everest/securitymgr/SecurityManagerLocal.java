@@ -16,17 +16,6 @@
  */
 package com.globalsight.everest.securitymgr;
 
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
-
-import javax.naming.NamingException;
-
-import org.apache.log4j.Logger;
-
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.projecthandler.Project;
@@ -40,6 +29,13 @@ import com.globalsight.everest.vendormanagement.VendorInfo;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.SecurityUtil;
+import com.globalsight.util.StringUtil;
+import org.apache.log4j.Logger;
+
+import javax.naming.NamingException;
+import java.rmi.RemoteException;
+import java.util.*;
 
 /**
  * SecurityManagerLocal implements SecurityManager and is responsible for
@@ -98,12 +94,12 @@ public class SecurityManagerLocal implements SecurityManager
         String userName = UserUtil.getUserNameById(p_userId);
 
         // Validate parameter
-        if (userName == null || "".equals(userName.trim())
-                || p_password == null || "".equals(p_password.trim()))
+        if (StringUtil.isEmpty(userName)
+                || StringUtil.isEmpty(p_password))
         {
             String[] messageArgument =
-            { "Invalid login info received: " + userName + ", password="
-                    + p_password };
+                    { "Invalid login info received: " + userName + ", password="
+                            + p_password };
 
             throw new SecurityManagerException(
                     SecurityManagerException.MSG_FAILED_TO_AUTHENTICATE,
@@ -157,6 +153,12 @@ public class SecurityManagerLocal implements SecurityManager
             }
 
             UserLdapHelper.authenticate(p_password, loginUser.getPassword());
+            if (loginUser.getResetPasswordTimes() > 0 && !SecurityUtil.isStrongPassword(p_password, 8))
+            {
+                //User uses less strong password, decrease user.RESET_PASSWORD_TIMES
+                loginUser.setResetPasswordTimes(loginUser.getResetPasswordTimes() - 1);
+                HibernateUtil.saveOrUpdate(loginUser);
+            }
         }
         catch (NamingException ex)
         {

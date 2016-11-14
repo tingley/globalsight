@@ -730,3 +730,44 @@ textarea {
     font-family:Arial, Helvetica, sans-serif;
     font-size: 10pt;
 }
+
+.vali_pass {
+    width: 280px;
+    padding: 0px;
+    border: #eee 0px solid;
+    text-align: center;
+}
+
+.vali_pass input {
+    width: 96%;
+    display: block;
+    margin: 0;
+    padding: 5px;
+    font-size: 9px;
+}
+.vali_pass_progress {
+    margin-top: 10px;
+    background-color: #efefef;
+    height: 10px;
+    border-radius: 5px;
+    width: 96%;
+}
+.vali_pass_inner_progress {
+    display: block;
+    height: 100%;
+    background-color: transparent;
+    border-radius: 5px;
+}
+.error {
+    background-color: #ff3300;
+}
+.middle {
+    background-color: gold;
+}
+.strong {
+    background-color: green;
+}
+
+.width100 {
+    width: 100%;
+}

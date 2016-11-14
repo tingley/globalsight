@@ -556,7 +556,7 @@ function confirmForm(formSent) {
        alert("<%=lbpenalty%>" + "<%= bundle.getString("jsmsg_numeric") %>");
        return false;
     }
-	if(!isAllDigits(formSent.oldDiffPenalty.value))
+	if(!isAllDigits(formSent.oldTuvMatchPenalty.value))
     {
    	 	alert("<%=lbpenalty%>" + "<%= bundle.getString("jsmsg_numeric") %>");
         return false;
@@ -576,7 +576,7 @@ function confirmForm(formSent) {
 	if (!checkIsVaildPercent(formSent.refTmPenalty.value)){
 	   return false;
 	}
-	if (!checkIsVaildPercent(formSent.oldDiffPenalty.value)){
+	if (!checkIsVaildPercent(formSent.oldTuvMatchPenalty.value)){
 		   return false;
 		}
 	if (!checkIsVaildPercent(formSent.multDiffPenalty.value)){
@@ -1263,7 +1263,7 @@ function doOnLoad()
                             <TD><INPUT TYPE="checkbox" NAME="<%="isRefTm"%>"
                               VALUE="true" CHECKED>
                               
-                                <SPAN ID="penaltyCodeSensitive">
+                                <SPAN ID="penaltyReferenceTM">
                                     <%=lbpenalty%>: <INPUT NAME="<%="refTmPenalty"%>" SIZE="1" MAXLENGTH="3"      VALUE="1">%
                                 </SPAN>
                              </TD>
@@ -1297,10 +1297,10 @@ function doOnLoad()
                             <INPUT TYPE="checkbox" NAME="<%="isOldTuvMatch"%>"
                               VALUE="true">
                               
-                                <SPAN ID="penaltyCodeSensitive">
-                                    <%=lbpenalty%>: <INPUT NAME="<%="oldDiffPenalty"%>" SIZE="1" MAXLENGTH="3" VALUE="1">%
+                                <SPAN ID="penaltyOldTuvMatch">
+                                    <%=lbpenalty%>: <INPUT NAME="oldTuvMatchPenalty" SIZE="1" MAXLENGTH="3" VALUE="1">%
                                 </SPAN>
-                                <br/>
+                                &nbsp;&nbsp;
                                  <input id="oldTuvMatchDay" name="oldTuvMatchDay" size="2" MAXLENGTH="4" value="1095">days
                              </TD>
                         </TR>

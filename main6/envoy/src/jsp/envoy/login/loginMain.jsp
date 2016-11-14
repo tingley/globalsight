@@ -9,6 +9,9 @@
             java.util.HashMap,
             com.globalsight.everest.webapp.WebAppConstants"
     session="false"%>
+<%@ page import="com.globalsight.everest.servlet.util.CookieUtil" %>
+<%@ page import="com.globalsight.util.StringUtil" %>
+<%@ page import="com.globalsight.util.GlobalSightLocale" %>
 <jsp:useBean id="dummyNavigationBean" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request" />
 <jsp:useBean id="skin" scope="application" class="com.globalsight.everest.webapp.javabean.SkinBean" />
 <%
@@ -20,81 +23,48 @@
       failed = null;
   }
 
-  String autoLoginCookie = "";
-  String[] supportedLocales = (String[])
-      request.getAttribute(SystemConfigParamNames.UI_LOCALES);
+    String uiLinks = "";
+    String[] supportedLocales = (String[]) request.getAttribute(SystemConfigParamNames.UI_LOCALES);
+    if (supportedLocales != null && supportedLocales.length > 0)
+    {
+        StringBuffer links = new StringBuffer();
+        String spacer = "&nbsp;&nbsp;&nbsp;&nbsp;";
+        Locale localeObject = null;
+        links.append("<P><HR SIZE=1 WIDTH=300>");
+        int index = 0;
+        for (String locale : supportedLocales)
+        {
+            if (index > 0)
+                links.append(spacer);
+            localeObject = GlobalSightLocale.makeLocaleFromString(locale);
+            if (localeObject != null)
+            {
+                links.append("<A CLASS=\"standardHref\"  HREF=\"javascript:changeLanguage('" + locale + "');\" onFocus=\"this.blur();\">");
+                links.append(localeObject.getDisplayName());
+                links.append("</A>");
+            }
+            index++;
+        }
+
+        if (supportedLocales.length > 1)
+            uiLinks = links.toString();
+    }
+
   String defaultLocale = (String)
       request.getAttribute(SystemConfigParamNames.DEFAULT_UI_LOCALE);
-  // get last uilocale from cookie 
-  String cookieUiLocale = "";
-  Cookie[] cookies = request.getCookies();
-  if (cookies != null)
-  {
-	  for(int i=0; i<cookies.length; i++)
-	  {
-	      Cookie cookie = cookies[i];
-	      String cookieName = cookie.getName();
-	      if ("localelang".equals(cookieName))
-	          cookieUiLocale = cookie.getValue();
-	      if("autoLogin".equals(cookieName))
-	          autoLoginCookie = cookie.getValue();
-	  }
-  }
-  if (!Arrays.asList(supportedLocales).contains(cookieUiLocale))
+
+  // Get locale language and autoLogin from cookies
+  String cookieUiLocale = CookieUtil.getCookieValue(request, "localelang");
+  String autoLoginCookie = CookieUtil.getCookieValue(request, "autoLogin");
+
+  if ("".equals(cookieUiLocale) || !Arrays.asList(supportedLocales).contains(cookieUiLocale))
       cookieUiLocale = defaultLocale;
-  if (cookieUiLocale.equals(""))
-      cookieUiLocale = defaultLocale;
-  
+
   ResourceBundle bundle = PageHandler.getBundleByLocale(cookieUiLocale);
   
   String userName = "";
   String passWord = "";
   boolean isSSO = false;
-  
-  HashMap<String,String> map = new HashMap<String,String>(5);
-  int numOfLocales = supportedLocales == null ? 0 : supportedLocales.length;
-  if (numOfLocales >= 1)
-  {
-      for (int i=0; i<numOfLocales; i++)
-      {
-          String value = supportedLocales[i];
-          Locale l = com.globalsight.util.GlobalSightLocale.makeLocaleFromString(value);
-          String longname = l.getDisplayName(l);
-          int indexOfMrow = longname.indexOf("(");
-          map.put(value, longname);
-      }
-  }
-  
-  
-  // links to be displayed... If only one locale, don't display any.
-  String uiLinks = "";
-  String spacer = "&nbsp;&nbsp;&nbsp;&nbsp;";
-  
-  if (numOfLocales > 1)
-  {      
-     StringBuffer links = new StringBuffer();
-     links.append("<P><HR SIZE=1 WIDTH=300>");
-     int added = 0;
-     for (int i=0; i<numOfLocales; i++)
-     {
-         Object value = supportedLocales[i];
-         if (value != null)
-         {
-            added++;
-            if (i != 0)
-            {
-                links.append(spacer);
-            }
-            links.append("<A CLASS=\"standardHref\"  HREF=\"javascript:changeLanguage('"+value+"');\" onFocus=\"this.blur();\">");
-            links.append(map.get(value));
-            links.append("</A>");
-         }
-     }
-     if (added < 2)
-        uiLinks = "";
-     else
-        uiLinks = links.toString();
-  }
   
   String res_loginHeader = null;
   String res_header = null;
@@ -123,7 +93,7 @@
       res_loginHeader = bundle.getString("lb_login") + " " + bundle.getString("msg_failed");            
       headerStyle = "warningText";
 
-      if (failed.equals("invalidUser")) 
+      if ("invalidUser".equals(failed))
       {
           res_header = bundle.getString("msg_login_fail");
       }
@@ -189,6 +159,7 @@ body {
 <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
 <SCRIPT TYPE="text/javascript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
+    <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/gscommon.js"></SCRIPT>
 <SCRIPT TYPE="text/javascript">
     function getLangCookie() 
     {
@@ -217,7 +188,6 @@ body {
     }
 
     function confirmForm(formSent) {
-       var locale = formSent.uiLocale.value;
        // Make sure a name has been given
        if (isEmptyString(formSent.nameField.value))
        {
@@ -235,7 +205,7 @@ body {
           formSent.passwordField.focus();
           return false;
        }
-       
+
        return true;
     }
 
@@ -435,6 +405,9 @@ body {
             </TABLE>
             <input type="hidden" name="token.login" value="<%=request.getAttribute("token.login")%>" />
         </FORM>
+    </DIV>
+    <DIV ID="restart" STYLE="POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 260px">
+        <%@ include file="/envoy/common/restartBanner.jspIncl"%>
     </DIV>
     <DIV ID="shutdown" STYLE="POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 260px">
         <%@ include file="/envoy/common/shutdownBanner.jspIncl"%>

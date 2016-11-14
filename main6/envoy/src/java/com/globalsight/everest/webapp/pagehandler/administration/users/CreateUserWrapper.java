@@ -17,16 +17,6 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.users;
 
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Vector;
-
-import org.apache.log4j.Logger;
-
 import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.everest.costing.Rate;
 import com.globalsight.everest.foundation.Role;
@@ -38,6 +28,10 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.util.GeneralException;
+import org.apache.log4j.Logger;
+
+import java.rmi.RemoteException;
+import java.util.*;
 
 /**
  * Helper class used by pagehandlers to contain code used to create new users,
@@ -588,4 +582,7 @@ public class CreateUserWrapper
 	{
 		m_user.setFaxPhoneNumber(faxPhoneNumber);
 	}
+
+	public void setResetPasswordTimes(int times) { m_user.setResetPasswordTimes(times); }
+    public int getResetPasswordTimes() { return m_user.getResetPasswordTimes(); }
 }

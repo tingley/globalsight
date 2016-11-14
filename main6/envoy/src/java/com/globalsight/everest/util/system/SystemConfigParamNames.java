@@ -478,6 +478,8 @@ public interface SystemConfigParamNames
     public static final String TM_TOKENIZER = "tm.tokenizer";
 
     // Shutdown UI properties
+    public static final String RESTART_UI_ENABLED = "restart.ui.enabled";
+    public static final String RESTART_UI_BANNER_ENABLED = "restart.ui.banner.enabled";
     public static final String SHUTDOWN_UI_ENABLED = "shutdown.ui.enabled";
     public static final String SHUTDOWN_UI_BANNER_ENABLED = "shutdown.ui.banner.enabled";
     public static final String SHUTDOWN_UI_MSG = "shutdown.ui.msg";

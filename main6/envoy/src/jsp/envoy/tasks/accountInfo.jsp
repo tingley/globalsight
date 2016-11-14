@@ -84,7 +84,7 @@
     if (companyName == null) companyName = "";
     String[] companies = (String[])sessionMgr.getAttribute("companyNames");
 	Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
-    
+    String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword");
 %>
 <HTML>
 <!-- This JSP is: /envoy/tasks/accountInfo.jsp --> 
@@ -94,6 +94,8 @@
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.11.3.min.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/gscommon.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">
 var needWarning = false;
 var objectName = "<%= bundle.getString("lb_account_information_my") %>";
@@ -159,36 +161,29 @@ function submitForm(button) {
 
 
 function confirmForm(formSent) {
-	if(formSent.password)
-	{
-	  var thePassword = formSent.password.value;
-	  thePassword = stripBlanks(thePassword);
+    if (formSent.password) {
+        //Validate password
+        var thePassword = formSent.password.value;
+        thePassword = stripBlanks(thePassword);
 
-	  // Make sure a password has been given
-      if (isEmptyString(thePassword)) {
-		  alert(" <%= bundle.getString("jsmsg_users_password")%>");
-		  formSent.password.value = "";
-		  formSent.password.focus();
-		  return false;
-	  }
-	
-	  var theRepeat = formSent.passwordConfirm.value;
-	  theRepeat = stripBlanks(theRepeat);
-
-	  if (theRepeat != thePassword) {
-		  alert(" <%= bundle.getString("jsmsg_users_repeat_password")%>");
-		  formSent.passwordConfirm.value = "";
-		  formSent.password.value = "";
-		  formSent.password.focus();
-		  return false;
-	  }
-	
-	  // Removing the dummypassword
-      if(thePassword == "***************************"){
-         formSent.password.value = "";
-         formSent.passwordConfirm.value = "";
-	  }
-	}
+        if (thePassword != "") {
+            //If password field has value, it means that user like to set/modify user's password
+            //First to check if password fit for strong password policy if user's company switch on strong password checking
+            if ("1" == "<%=needStrongPassword%>" && !passCheck) {
+                alert("<%=bundle.getString("jsmsg_account_weak_password")%>");
+                return false;
+            }
+            var theRepeat = formSent.passwordConfirm.value;
+            theRepeat = stripBlanks(theRepeat);
+            if (theRepeat != thePassword) {
+                alert(" <%= bundle.getString("jsmsg_users_repeat_password")%>");
+                formSent.passwordConfirm.value = "";
+                formSent.password.value = "";
+                formSent.password.focus();
+                return false;
+            }
+        }
+    }
 
 	var theFirst = accountForm.firstName.value;
 	theFirst = stripBlanks(theFirst);
@@ -213,6 +208,13 @@ function confirmForm(formSent) {
 	return true;
 }
 
+var passCheck = false;
+
+$(document).ready(function(){
+    $("#password1").keyup(function() {
+        passCheck = passwordChecking($(this).val());
+    });
+});
 </SCRIPT>
 <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
@@ -245,25 +247,36 @@ function confirmForm(formSent) {
   </TR>
   <TR>
 	<TD NOWRAP><%= lbFirstName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
-	<TD><input type="text" name="firstName" size="40" maxlength="40" value="<%= firstName %>" CLASS="standardText" onkeydown="updateNeedWarning()"></TD>
+	<TD><input type="text" name="firstName" maxlength="40" value="<%= firstName %>" CLASS="standardText width100" onkeydown="updateNeedWarning()"></TD>
   </TR>
   <TR>
 	<TD><%= lbLastName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
-	<TD><input type="text" name="lastName" size="40" maxlength="40" value="<%= lastName %>" CLASS="standardText" onkeydown="updateNeedWarning()"></TD>
+	<TD><input type="text" name="lastName" maxlength="40" value="<%= lastName %>" CLASS="standardText width100" onkeydown="updateNeedWarning()"></TD>
   </TR>
   <% if (pwdPerm) {%>
   <TR>
 	<TD><%= lbPassword %><SPAN CLASS="asterisk">*</SPAN>:</TD>
-	<TD><input type="password" name="password" size="40" maxlength="40" value="***************************" CLASS="standardText" onkeydown="updateNeedWarning()"></TD>
+	<TD>
+        <div class="vali_pass">
+            <input type="password" name="password" id="password1" maxlength="40" value="" class="standardText width100" onkeydown="updateNeedWarning()">
+            <div class="vali_pass_progress">
+                <span class="vali_pass_inner_progress"></span>
+            </div>
+        </div>
+    </TD>
   </TR>
   <TR>
 	<TD ><%= lbRepeatPassword %><SPAN CLASS="asterisk">*</SPAN>:</TD>
-	<TD><input type="password" name="passwordConfirm" size="40" maxlength="40" value="***************************" CLASS="standardText" onkeydown="updateNeedWarning()"></TD>
+	<TD>
+        <div class="vali_pass">
+            <input type="password" name="passwordConfirm" id="passwordConfirm" maxlength="40" value="" class="standardText width100" onkeydown="updateNeedWarning()">
+        </div>
+    </TD>
   </TR>
   <% }%>
   <TR>
 	<TD><%= lbTitle %>:</TD>
-	<TD><input type="text" name="title" size="40" value="<%= userTitle %>" CLASS="standardText" onkeydown="updateNeedWarning()"></TD>
+	<TD><input type="text" name="title" value="<%= userTitle %>" CLASS="standardText width100" onkeydown="updateNeedWarning()"></TD>
   </TR>
   <TR>
     <TD VALIGN="TOP"><%= lbCompanyName %>:</TD><TD>

@@ -26,5 +26,6 @@
 		<property name="homePhoneNumber" column="HOME_PHONE_NUMBER" type="string"/>
 		<property name="cellPhoneNumber" column="CELL_PHONE_NUMBER" type="string"/>
 		<property name="faxPhoneNumber" column="FAX_PHONE_NUMBER" type="string"/>
+		<property name="resetPasswordTimes" column="RESET_PASSWORD_TIMES" type="int" />
 	</class>
 </hibernate-mapping>

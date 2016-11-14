@@ -16,34 +16,7 @@
  */
 package com.globalsight.everest.jobhandler;
 
-import java.io.File;
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.naming.NamingException;
-
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-
-import com.globalsight.calendar.CalendarWorkingDay;
-import com.globalsight.calendar.CalendarWorkingHour;
-import com.globalsight.calendar.FluxCalendar;
-import com.globalsight.calendar.Holiday;
-import com.globalsight.calendar.WorkingHour;
+import com.globalsight.calendar.*;
 import com.globalsight.config.SystemParameter;
 import com.globalsight.config.SystemParameterEntityException;
 import com.globalsight.config.SystemParameterImpl;
@@ -52,22 +25,11 @@ import com.globalsight.cxe.entity.exportlocation.ExportLocation;
 import com.globalsight.cxe.entity.exportlocation.ExportLocationImpl;
 import com.globalsight.cxe.entity.fileextension.FileExtensionImpl;
 import com.globalsight.cxe.persistence.exportlocation.ExportLocationEntityException;
-import com.globalsight.everest.company.Category;
-import com.globalsight.everest.company.Company;
-import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.company.PostReviewCategory;
-import com.globalsight.everest.company.ScorecardCategory;
+import com.globalsight.everest.company.*;
 import com.globalsight.everest.costing.CostingEngine;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.IsoCurrency;
-import com.globalsight.everest.foundation.BasicL10nProfile;
-import com.globalsight.everest.foundation.ContainerRole;
-import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.everest.foundation.LocalePair;
-import com.globalsight.everest.foundation.Role;
-import com.globalsight.everest.foundation.Timestamp;
-import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.foundation.*;
 import com.globalsight.everest.jobhandler.jobmanagement.JobDispatchEngine;
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.page.PrimaryFile;
@@ -108,6 +70,17 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
+import javax.naming.NamingException;
+import java.io.File;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.*;
 
 /**
  * JobHandlerLocal implements JobHandler and is responsible for handling and
@@ -572,6 +545,7 @@ public class JobHandlerLocal implements JobHandler
 
     public void modifyCompany(Company p_company) throws RemoteException, JobException
     {
+        boolean isPasswordSettingChanged = false;
         try
         {
             Company c = (Company) HibernateUtil.get(Company.class, p_company.getIdAsLong());
@@ -591,8 +565,8 @@ public class JobHandlerLocal implements JobHandler
                 c.setEnableDitaChecks(p_company.getEnableDitaChecks());
                 c.setEnableWorkflowStatePosts(p_company.getEnableWorkflowStatePosts());
                 c.setEnableBlankTmSearch(p_company.getEnableBlankTmSearch());
-                c.setDefaultFluency(p_company.getDefaultFluency());
-                c.setDefaultAdequacy(p_company.getDefaultAdequacy());
+                isPasswordSettingChanged = c.isEnableStrongPassword() != p_company.isEnableStrongPassword();
+                c.setEnableStrongPassword(p_company.isEnableStrongPassword());
                 c.setDisableUploadFileTypes(p_company.getDisableUploadFileTypes());
                 HibernateUtil.update(c);
 
@@ -609,6 +583,17 @@ public class JobHandlerLocal implements JobHandler
                     {
                         DbUtil.returnConnection(conn);
                     }
+                }
+
+                if (isPasswordSettingChanged)
+                {
+                    //Admin modify the password policy of company
+                    //If the company uses STRONG password policy, all users in the company will have 3 times to change his weak password,
+                    String companyName = p_company.getCompanyName();
+                    String sql = "UPDATE user SET RESET_PASSWORD_TIMES="
+                            + (p_company.isEnableStrongPassword() ? "4" : "-1")
+                            + " WHERE COMPANY_NAME='" + companyName + "'";
+                    HibernateUtil.executeSql(sql);
                 }
             }
         }
@@ -754,7 +739,7 @@ public class JobHandlerLocal implements JobHandler
             // uow = getPersistence().acquireUnitOfWork();
 
             // verify that its name is not a duplicate
-            String hql = "select c.name from Company c where c.isActive = 'Y' and lower(c.name) = :name";
+            String hql = "select c.name from Company c where c.isActive = 'Y'  and lower(c.name) = :name";
             Map<String, String> map = new HashMap<String, String>();
             map.put("name", p_company.getName().toLowerCase());
             List<String> result = session.createQuery(hql)

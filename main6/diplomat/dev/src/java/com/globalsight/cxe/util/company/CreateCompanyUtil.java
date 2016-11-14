@@ -16,20 +16,6 @@
  */
 package com.globalsight.cxe.util.company;
 
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.Vector;
-
-import org.apache.log4j.Logger;
-
 import com.globalsight.calendar.FluxCalendar;
 import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.everest.company.Company;
@@ -54,15 +40,15 @@ import com.globalsight.everest.webapp.pagehandler.administration.projects.Projec
 import com.globalsight.everest.webapp.pagehandler.administration.users.CreateUserWrapper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
-import com.globalsight.everest.workflow.Activity;
-import com.globalsight.everest.workflow.SystemAction;
-import com.globalsight.everest.workflow.WorkflowConditionSpec;
-import com.globalsight.everest.workflow.WorkflowConstants;
-import com.globalsight.everest.workflow.WorkflowOwners;
-import com.globalsight.everest.workflow.WorkflowTask;
-import com.globalsight.everest.workflow.WorkflowTemplate;
+import com.globalsight.everest.workflow.*;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SecurityUtil;
+import org.apache.log4j.Logger;
+
+import java.awt.*;
+import java.util.*;
+import java.util.List;
 
 /**
  * Class {@code CreateCompanyUtil} is used for creating default items for a new
@@ -505,10 +491,12 @@ public class CreateCompanyUtil
         wrapper.setFirstName(p_userName);
         wrapper.setLastName(p_userName);
         wrapper.setCompanyName(p_company.getCompanyName());
-        wrapper.setPassword(DEFAULT_USER_PASSWORD);
+        wrapper.setPassword(SecurityUtil.encryptPassword(DEFAULT_USER_PASSWORD));
         wrapper.setEmail(DEFAULT_EMAIL);
         wrapper.setDefaultUILocale(DEFAULT_UI_LOCALE);
         wrapper.setCurCompanyId(String.valueOf(p_company.getId()));
+        if (p_company.isEnableStrongPassword())
+            wrapper.setResetPasswordTimes(4);
 
         // Adds roles
         Hashtable<Activity, Vector<String>> activityCostMap = new Hashtable<Activity, Vector<String>>();

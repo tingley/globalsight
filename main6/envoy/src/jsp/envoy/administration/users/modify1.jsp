@@ -167,7 +167,7 @@ if (companies != null)
 
 FieldSecurity hash = (FieldSecurity) sessionMgr.getAttribute("securitiesHash");
 String securityPermission = (String)hash.get("security");
-
+String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword");
 %>
 
 <HTML>
@@ -179,6 +179,8 @@ String securityPermission = (String)hash.get("security");
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.11.3.min.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/gscommon.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">
 var needWarning = true;
 var objectName = "<%= bundle.getString("lb_user") %>";
@@ -270,33 +272,25 @@ function confirmForm(formSent)
         alert("<%= lbUserName %>" + "<%= bundle.getString("msg_invalid_entry3") %>");
         return false;
     }
-    
-    if (formSent.password)
-    {
-        var thePassword = formSent.password.value;
-        thePassword = stripBlanks(thePassword);
 
-        <% if (isActive) { %>
-            if (isEmptyString(thePassword)) {
-                alert("<%= jsmsgPassword %>");
-                formSent.password.value = "";
-                formSent.password.focus();
-                return false;
-            }
-        <% } %>
+  if (formSent.password) {
+    var thePassword = formSent.password.value;
+    thePassword = stripBlanks(thePassword);
+    if (thePassword != "") {
+      if ("1" == "<%=needStrongPassword%>" && !passCheck) {
+        alert("<%=bundle.getString("jsmsg_account_weak_password")%>");
+        return false;
+      }
+      var theRepeat = formSent.passwordConfirm.value;
+      theRepeat = stripBlanks(theRepeat);
 
-        var theRepeat = formSent.passwordConfirm.value;
-        theRepeat = stripBlanks(theRepeat);
-
-        // Make sure the repeated password matches the first
-        if (theRepeat != thePassword) {
-            alert("<%= bundle.getString("jsmsg_users_repeat_password") %>");
-            formSent.passwordConfirm.value = "";
-            formSent.password.value = "";
-            formSent.password.focus();
-            return false;
-        }
+      // Make sure the repeated password matches the first
+      if (theRepeat != thePassword) {
+        alert("<%= bundle.getString("jsmsg_users_repeat_password") %>");
+        return false;
+      }
     }
+  }
 
     if (formSent.firstName)
     {
@@ -350,6 +344,14 @@ function doLoad()
 {
     loadGuides();
 }
+
+var passCheck = false;
+$(document).ready(function(){
+  $("#password1").keyup(function() {
+    passCheck = passwordChecking($(this).val());
+  });
+});
+
 </SCRIPT>
 <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
@@ -370,27 +372,27 @@ function doLoad()
   <TR>
     <TD VALIGN="TOP"><%= lbUserName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
     <TD >
-      <amb:textfield maxlength="40" size="40" name="userName" value="<%= userName %>" />
+      <amb:textfield maxlength="40" name="userName" value="<%= userName %>" class="standardText width100" />
     </TD>
   </TR>
   <% if (enableSSO) { %>
   <TR>
     <TD VALIGN="TOP"><%= lbSsoUserName %>:</TD>
     <TD >
-      <amb:textfield maxlength="40" size="40" name="ssoUserName" value="<%= ssoUserName %>" access='<%=(String)hash.get(UserSecureFields.SSO_USER_NAME)%>' />
+      <amb:textfield maxlength="40" name="ssoUserName" value="<%= ssoUserName %>" class="standardText width100" access='<%=(String)hash.get(UserSecureFields.SSO_USER_NAME)%>' />
     </TD>
   </TR>
   <% } %>
   <TR>
     <TD VALIGN="TOP"><%= lbFirstName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
     <TD >
-      <amb:textfield maxlength="40" size="40" name="firstName" value="<%= firstName %>" access='<%=(String)hash.get(UserSecureFields.FIRST_NAME)%>' />
+      <amb:textfield maxlength="40" name="firstName" value="<%= firstName %>" class="standardText width100" access='<%=(String)hash.get(UserSecureFields.FIRST_NAME)%>' />
     </TD>
   </TR>
   <TR>
     <TD VALIGN="TOP"><%= lbLastName%><SPAN CLASS="asterisk">*</SPAN>:</TD>
     <TD >
-      <amb:textfield maxlength="40" size="40" name="lastName" value="<%= lastName %>" access='<%=(String)hash.get(UserSecureFields.LAST_NAME)%>' />
+      <amb:textfield maxlength="40" name="lastName" value="<%= lastName %>" class="standardText width100" access='<%=(String)hash.get(UserSecureFields.LAST_NAME)%>' />
     </TD>
   </TR>
   
@@ -398,43 +400,44 @@ function doLoad()
   <TR style="display:none;">
     <TD></TD>
     <TD>
-      <input type="text" name="aliasUserName" value="<%= userName %>"/>
+      <input type="text" name="aliasUserName" value="<%= userName %>" class="standardText width100"/>
     </TD>
   </TR>
   <!-- End Added for alias name,...  -->
   
   <TR>
     <TD VALIGN="TOP"><%= lbPassword %>
-    <% if (isActive) { %>
         <SPAN CLASS="asterisk">*</SPAN>
-    <% } %>
     :</TD>
     <TD>
-      <amb:password size="20" name="password"
-      value="<%=password%>" access='<%=(String)hash.get(UserSecureFields.PASSWORD)%>' />
+	  <div class="vali_pass">
+		  <input type="password" name="password" id="password1" maxlength="40" value="" class="standardText width100" onkeydown="updateNeedWarning()">
+		  <div class="vali_pass_progress">
+			<span class="vali_pass_inner_progress"></span>
+		  </div>
+	  </div>
     </TD>
   </TR>
   <TR>
     <TD VALIGN="TOP"><%= lbPasswordRepeat %>
-    <% if (isActive) { %>
         <SPAN CLASS="asterisk">*</SPAN>
-    <% } %>
     :</TD>
     <TD >
-      <amb:password size="20" name="passwordConfirm"
-      value="<%=repeat%>" access='<%=(String)hash.get(UserSecureFields.PASSWORD)%>' />
+	  <div class="vali_pass">
+		  <input type="password" name="passwordConfirm" id="passwordConfirm" maxlength="40" value="" class="standardText width100" onkeydown="updateNeedWarning()">
+	  </div>
     </TD>
   </TR>
   <TR>
     <TD VALIGN="TOP"><%= lbTitle %>:</TD>
     <TD>
-      <amb:textfield maxlength="40" size="40" name="title" value="<%= userTitle %>" access='<%=(String)hash.get(UserSecureFields.TITLE)%>' />
+      <amb:textfield maxlength="40" class="standardText width100" name="title" value="<%= userTitle %>" access='<%=(String)hash.get(UserSecureFields.TITLE)%>' />
     </TD>
   </TR>
   <TR>
     <TD VALIGN="TOP"><%= lbWssePassword %>:</TD>
     <TD>
-      <amb:textfield maxlength="40" size="40" name="wssePassword" value="<%= wssePassword %>" access='<%=(String)hash.get(UserSecureFields.WSSE_PASSWORD)%>' />
+      <amb:textfield maxlength="40"  class="standardText width100" name="wssePassword" value="<%= wssePassword %>" access='<%=(String)hash.get(UserSecureFields.WSSE_PASSWORD)%>' />
     </TD>
   </TR>
   <TR>

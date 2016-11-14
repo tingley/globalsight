@@ -69,6 +69,7 @@
     String enableDitaChecksChecked = "";
     String enableWorkflowStatePosts = "";
     String enableBlankTmSearch = "";
+    boolean isEnableStrongPassword = false;
     
     String inCtxRvKeyIndd = (String) request.getAttribute("incontext_review_key_indd");
     String inCtxRvKeyOffice = (String) request.getAttribute("incontext_review_key_office");
@@ -86,8 +87,6 @@
     boolean isHTMLEnabled = PreviewPDFHelper.isHTMLEnabled();
     boolean showInContextReivew = (isInDesignEnabled ||  isOfficeEnabled || isXMLEnabled || isHTMLEnabled);
     
-    String defaultCompanyFluency = "";
-    String defaultCompanyAdequacy = "";
     String diableUploadFileTypes = "";
     if (company != null)
     {
@@ -144,9 +143,9 @@
         if(company.getEnableBlankTmSearch()){
             enableBlankTmSearch = "checked";
         }
-        
-        defaultCompanyFluency = company.getDefaultFluency();
-        defaultCompanyAdequacy = company.getDefaultAdequacy();
+
+        isEnableStrongPassword = company.isEnableStrongPassword();
+
         diableUploadFileTypes = company.getDisableUploadFileTypes();
         if(StringUtil.isEmptyAndNull(diableUploadFileTypes)){
         	diableUploadFileTypes = "";
@@ -290,7 +289,14 @@
         	<input class="standardText" type="checkbox" name="<%=CompanyConstants.ENABLE_BLANK_TM_SEARCH%>" <%=enableBlankTmSearch%>/>
         </td>
         </tr>
-        
+
+          <tr>
+              <td valign="top"><%=bundle.getString("lb_company_strong_password") %>:</td>
+              <td>
+                  <input class="standardText" type="checkbox" name="<%=CompanyConstants.ENABLE_STRONG_PASSWORD%>" <%=isEnableStrongPassword ? "checked" : "" %>/>
+              </td>
+          </tr>
+
         <tr id="inctxrvCheck" <% if (!showInContextReivew) {%>style="display:none;" <%}%> >
             <td valign="top"><%=bundle.getString("lb_incontext_review")%>:</td>
             <td colspan="2">

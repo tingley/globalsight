@@ -65,9 +65,18 @@ public class Company extends PersistentObject
     // GBS-3990
     private boolean m_enableBlankTmSearch = false;
 
-    private String defaultFluency = "";
-    private String defaultAdequacy = "";
     private String m_diableUploadFileTypes = "";
+    private boolean enableStrongPassword;
+
+    public boolean isEnableStrongPassword()
+    {
+        return enableStrongPassword;
+    }
+
+    public void setEnableStrongPassword(boolean enableStrongPassword)
+    {
+        this.enableStrongPassword = enableStrongPassword;
+    }
 
     // ////////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
@@ -376,26 +385,6 @@ public class Company extends PersistentObject
         this.m_enableBlankTmSearch = p_enableBlankTmSearch;
     }
 
-    public String getDefaultFluency()
-    {
-        return defaultFluency;
-    }
-
-    public void setDefaultFluency(String defaultFluency)
-    {
-        this.defaultFluency = defaultFluency;
-    }
-
-    public String getDefaultAdequacy()
-    {
-        return defaultAdequacy;
-    }
-
-    public void setDefaultAdequacy(String defaultAdequacy)
-    {
-        this.defaultAdequacy = defaultAdequacy;
-    }
-    
     public String getDisableUploadFileTypes()
     {
         return m_diableUploadFileTypes;

@@ -16,13 +16,13 @@
  */
 package com.globalsight.everest.foundation;
 
+import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.usermgr.UserInfo;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-
-import com.globalsight.everest.persistence.PersistentObject;
-import com.globalsight.everest.usermgr.UserInfo;
 
 /**
  * UserImpl implemented the User interface. Holds the user information (except
@@ -76,6 +76,18 @@ public class UserImpl extends PersistentObject implements User, Serializable
     private boolean m_isInAllProjects = false;
     
     private Set<ContainerRoleImpl> containerRoles = new HashSet<ContainerRoleImpl>();
+
+    private int resetPasswordTimes = -1;
+
+    public int getResetPasswordTimes()
+    {
+        return resetPasswordTimes;
+    }
+
+    public void setResetPasswordTimes(int resetPasswordTimes)
+    {
+        this.resetPasswordTimes = resetPasswordTimes;
+    }
 
     public String getProjectNames()
     {
@@ -131,7 +143,7 @@ public class UserImpl extends PersistentObject implements User, Serializable
 
     public boolean isActive()
     {
-        if (m_state == User.State.ACTIVE)
+        if (m_state == State.ACTIVE)
             return true;
         else
             return false;

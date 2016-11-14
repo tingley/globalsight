@@ -47,10 +47,8 @@
 			type="yes_no" not-null="false" unique="false" />
 		<property name="enableBlankTmSearch" column="ENABLE_BLANK_TM_SEARCH"
 			type="yes_no" not-null="false" unique="false" />
-		<property name="defaultFluency" column="DEFAULT_FLUENCY"
-			type="string" length="200" not-null="false" />
-		<property name="defaultAdequacy" column="DEFAULT_ADEQUACY"
-			type="string" length="200" not-null="false" />
+		<property name="enableStrongPassword" column="ENABLE_STRONG_PASSWORD"
+				  type="yes_no" not-null="false" unique="false" />
 		<property name="disableUploadFileTypes" column="DISABLE_UPLOAD_FILE_TYPES"
 			type="string" length="400" not-null="false" />
 	</class>

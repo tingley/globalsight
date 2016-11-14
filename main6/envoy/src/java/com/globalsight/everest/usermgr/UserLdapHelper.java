@@ -16,35 +16,23 @@
  */
 package com.globalsight.everest.usermgr;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.TreeSet;
-import java.util.Vector;
-
-import javax.naming.Context;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.BasicAttribute;
-import javax.naming.directory.BasicAttributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.ModificationItem;
-import javax.naming.directory.SearchResult;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
-
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.EmailInformation;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.UserImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.util.SecurityUtil;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
+
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 /**
  * UserLdapHelper, a LDAP Helper class that helps convert data for LDAP
@@ -1004,7 +992,8 @@ public class UserLdapHelper extends LdapHelper
     {
         if (encyptMD5Password(password).equals(truePassword)
                 || password.equals(truePassword)
-                || encyptShaPassword(password).equals(truePassword))
+                || encyptShaPassword(password).equals(truePassword)
+                || SecurityUtil.encryptPassword(password).equals(truePassword))
         {
             return;
         }

@@ -261,17 +261,18 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         String trgLang = trgLocale.getDisplayName(m_uiLocale);
         writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
 
-        int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat, SEGMENT_START_ROW);
-        
         // Create Name Areas for drop down list.
         ExcelUtil.createValidatorList(p_workbook, "FailureCategoriesValidator", getFailureCategoriesList(), SEGMENT_START_ROW, 26);
-        ExcelUtil.addValidation(sheet, "FailureCategoriesValidator", SEGMENT_START_ROW, lastRow - 1,
-                CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
                 currentCompanyId, CategoryType.Severity, true);
         ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories, SEGMENT_START_ROW, 27);
+
+        int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat, SEGMENT_START_ROW);
+
+        ExcelUtil.addValidation(sheet, "FailureCategoriesValidator", SEGMENT_START_ROW, lastRow - 1,
+                CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
         ExcelUtil.addValidation(sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW, lastRow - 1,
                 SEVERITY_COLUMN, SEVERITY_COLUMN);
 
@@ -937,7 +938,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     p_row++;
                 }
             }
-            
+
             // Add comment status
             addCommentStatus(p_sheet, rowsWithCommentSet, p_row);
         }

@@ -264,14 +264,16 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat, SEGMENT_START_ROW);
         
         // Create Name Areas for drop down list.
-        ExcelUtil.createValidatorList(p_workbook, "FailureCategoriesValidator", getFailureCategoriesList(), SEGMENT_START_ROW,
-                lastRow - 1, CATEGORY_FAILURE_COLUMN, 26);
+        ExcelUtil.createValidatorList(p_workbook, "FailureCategoriesValidator", getFailureCategoriesList(), SEGMENT_START_ROW, 26);
+        ExcelUtil.addValidation(sheet, "FailureCategoriesValidator", SEGMENT_START_ROW, lastRow - 1,
+                CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
                 currentCompanyId, CategoryType.Severity, true);
-        ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories,
-                SEGMENT_START_ROW, lastRow - 1, SEVERITY_COLUMN, 27);
+        ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories, SEGMENT_START_ROW, 27);
+        ExcelUtil.addValidation(sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW, lastRow - 1,
+                SEVERITY_COLUMN, SEVERITY_COLUMN);
 
         if (DQF_START_ROW > 0)
         {
@@ -281,8 +283,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
 
             categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId,
                     CategoryType.Adequacy, true);
-            ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW + 1, DQF_START_ROW + 1,
-                    1);
+            ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW + 1, DQF_START_ROW + 1, 1);
         }
         if (SCORECARD_START_ROW > 0)
         {

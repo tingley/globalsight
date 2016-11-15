@@ -346,24 +346,31 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             // Add Segment Header
             addSegmentHeader(p_workbook, sheet);
 
-            // Create Name Areas for drop down list.
-            // if (!categoryFailureDropDownAdded)
-            // {
-            // createCategoryFailureNameArea(p_workbook);
-            // createSeverityNameArea(p_workbook);
-            // createFluencyNameArea(p_workbook);
-            // createAdequacyNameArea(p_workbook);
-            // createScorecardNameArea(p_workbook);
-            // categoryFailureDropDownAdded = true;
-            // }
-
             // Insert Language Data
             String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
             String trgLang = trgLocale.getDisplayName(m_uiLocale);
             writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
 
+            // Create Name Areas for drop down list.
+            if (!categoryFailureDropDownAdded)
+            {
+                List<String> categories = getFailureCategoriesList();
+                ExcelUtil.createValidatorList(p_workbook, "FailureCategoriesValidator",
+                        categories, SEGMENT_START_ROW, 26);
+                categories = (List<String>) IssueOptions.getAllStatus();
+                ExcelUtil.createValidatorList(p_workbook, "StatusCategoriesValidator", categories,
+                        SEGMENT_START_ROW, 27);
+
+                String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
+                categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
+                        currentCompanyId, CategoryType.Severity, true);
+                ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories,
+                        SEGMENT_START_ROW, 28);
+
+                categoryFailureDropDownAdded = true;
+            }
             // Insert Segment Data
-            writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, SEGMENT_START_ROW);
+            int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, SEGMENT_START_ROW);
         }
     }
     
@@ -532,14 +539,15 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                         needProtect = !(task.isType(Task.TYPE_REVIEW) || task.isType(Task.TYPE_REVIEW_EDITABLE));
                     }
                 }
-                if (wf.enableDQF()) {
+                int scoreShowType = wf.getScorecardShowType();
+                if (scoreShowType > 1) {
                     isDQFEnabled = true;
                     fluencyScore = wf.getFluencyScore();
                     adequacyScore = wf.getAdequacyScore();
                     dqfComment = wf.getDQFComment();
                     DQF_START_ROW = 6;
                 }
-                if (wf.enableScorecard()) {
+                if (scoreShowType > -1 && scoreShowType < 4) {
                     isScorecradEnabled = true;
                     scorecardCategories = ScorecardScoreHelper.getScorecardCategories(wf.getCompanyId(), m_bundle);
                     scores = ScorecardScoreHelper.getScoreByWrkflowId(wf.getId());
@@ -970,19 +978,15 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                 }
             }
 
-            // Add category failure drop down list here.
-            ExcelUtil.createValidatorList(p_workBook, "FailureCategoriesValidator",
-                    getFailureCategoriesList(), SEGMENT_START_ROW,
-                    p_row - 1, CATEGORY_FAILURE_COLUMN, 26);
-            ExcelUtil.createValidatorList(p_workBook, "StatusCategoriesValidator", (List<String>)
-                            IssueOptions.getAllStatus(),
-                    SEGMENT_START_ROW, p_row - 1, COMMENT_STATUS_COLUMN, 27);
-
+            List<String> categories = null;
             String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
-            List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
-                    currentCompanyId, CategoryType.Severity, true);
-            ExcelUtil.createValidatorList(p_workBook, "SeverityCategoriesValidator", categories,
-                    SEGMENT_START_ROW, p_row - 1, SEVERITY_COLUMN, 28);
+
+            ExcelUtil.addValidation(p_sheet, "FailureCategoriesValidator", SEGMENT_START_ROW, p_row - 1,
+                    CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
+            ExcelUtil.addValidation(p_sheet, "StatusCategoriesValidator", SEGMENT_START_ROW, p_row - 1,
+                    COMMENT_STATUS_COLUMN, COMMENT_STATUS_COLUMN);
+            ExcelUtil.addValidation(p_sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW, p_row - 1,
+                    SEVERITY_COLUMN, SEVERITY_COLUMN);
 
             if (DQF_START_ROW > 0)
             {

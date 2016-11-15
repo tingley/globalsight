@@ -252,8 +252,7 @@ public class ExcelUtil
     }
 
     public static void createValidatorList(Workbook workbook, String validatorName, List<String>
-            values, int startRow,
-                                           int endRow, int columnNumber, int hiddenDataColumn)
+            values, int startRow, int hiddenDataColumn)
     {
         if (workbook == null || values == null || values.size() == 0)
             return;
@@ -261,13 +260,11 @@ public class ExcelUtil
         String[] array = new String[values.size()];
         values.toArray(array);
 
-        createValidatorList(workbook, validatorName, array, startRow, endRow, columnNumber,
-                hiddenDataColumn);
+        createValidatorList(workbook, validatorName, array, startRow, hiddenDataColumn);
     }
 
     public static void createValidatorList(Workbook workbook, String validatorName, String[]
-            values, int startRow,
-                                           int endRow, int columnNumber, int hiddenDataColumn)
+            values, int startRow, int hiddenDataColumn)
     {
         if (workbook == null || values == null || values.length == 0)
             return;
@@ -295,8 +292,6 @@ public class ExcelUtil
 
             // Hide "AA" column
             sheet.setColumnHidden(hiddenDataColumn, true);
-
-            addValidation(sheet, validatorName, startRow, endRow, columnNumber, columnNumber);
         }
         catch (Exception e)
         {

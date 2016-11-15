@@ -16,31 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-
 import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
@@ -80,17 +55,23 @@ import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
-import com.globalsight.util.ExcelUtil;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.ReportStyle;
-import com.globalsight.util.StringUtil;
+import com.globalsight.util.*;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
+import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.*;
 
 /**
  * Reviewers Comments Report Generator, Include Reviewers Comments Report in
@@ -990,16 +971,18 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             }
 
             // Add category failure drop down list here.
-            ExcelUtil.createValidatorList(p_sheet, getFailureCategoriesList(), SEGMENT_START_ROW,
-                    p_row - 1, CATEGORY_FAILURE_COLUMN);
-            ExcelUtil.createValidatorList(p_sheet, (List<String>) IssueOptions.getAllStatus(),
-                    SEGMENT_START_ROW, p_row - 1, COMMENT_STATUS_COLUMN);
+            ExcelUtil.createValidatorList(p_workBook, "FailureCategoriesValidator",
+                    getFailureCategoriesList(), SEGMENT_START_ROW,
+                    p_row - 1, CATEGORY_FAILURE_COLUMN, 26);
+            ExcelUtil.createValidatorList(p_workBook, "StatusCategoriesValidator", (List<String>)
+                            IssueOptions.getAllStatus(),
+                    SEGMENT_START_ROW, p_row - 1, COMMENT_STATUS_COLUMN, 27);
 
             String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
             List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
                     currentCompanyId, CategoryType.Severity, true);
-            ExcelUtil.createValidatorList(p_sheet, categories, SEGMENT_START_ROW, p_row - 1,
-                    SEVERITY_COLUMN);
+            ExcelUtil.createValidatorList(p_workBook, "SeverityCategoriesValidator", categories,
+                    SEGMENT_START_ROW, p_row - 1, SEVERITY_COLUMN, 28);
 
             if (DQF_START_ROW > 0)
             {

@@ -16,37 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataValidation;
-import org.apache.poi.ss.usermodel.DataValidationConstraint;
-import org.apache.poi.ss.usermodel.DataValidationHelper;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-
 import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
@@ -86,17 +55,25 @@ import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
-import com.globalsight.util.ExcelUtil;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.ReportStyle;
-import com.globalsight.util.StringUtil;
+import com.globalsight.util.*;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
+import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.*;
 
 /**
  * This Generator is used for creating Translations Edit Report (Include
@@ -287,14 +264,14 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat, SEGMENT_START_ROW);
         
         // Create Name Areas for drop down list.
-        ExcelUtil.createValidatorList(sheet, getFailureCategoriesList(), SEGMENT_START_ROW,
-                lastRow - 1, CATEGORY_FAILURE_COLUMN);
+        ExcelUtil.createValidatorList(p_workbook, "FailureCategoriesValidator", getFailureCategoriesList(), SEGMENT_START_ROW,
+                lastRow - 1, CATEGORY_FAILURE_COLUMN, 26);
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
                 currentCompanyId, CategoryType.Severity, true);
-        ExcelUtil.createValidatorList(sheet, categories, SEGMENT_START_ROW, lastRow - 1,
-                SEVERITY_COLUMN);
+        ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories,
+                SEGMENT_START_ROW, lastRow - 1, SEVERITY_COLUMN, 27);
 
         if (DQF_START_ROW > 0)
         {

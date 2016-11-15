@@ -43,12 +43,10 @@ public interface MachineTranslator
     public static final String PROMT_PTS9_FILE_TYPE = "text/xliff";
     
     public static final String MSMT_ENDPOINT = "msMtEndpoint";
-    public static final String MSMT_APPID = "msMtAppID";
     public static final String MSMT_CATEGORY = "msMtCategory";
     public static final String MSMT_CONTENT_TYPE = "text/plain";
     public static final String MSMT_URLFLAG = "msMtUrlFlag";
-    public static final String MSMT_CLIENTID = "msMtClientID";
-    public static final String MSMT_CLIENT_SECRET = "msMtClientSecret";
+    public static final String MSMT_SUBSCRIPTION_KEY = "msMtSubscriptionKey";
     
     public static final String AO_URL = "aoMtUrl";
     public static final String AO_PORT = "aoMtPort";

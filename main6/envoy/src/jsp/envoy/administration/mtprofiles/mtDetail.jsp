@@ -283,21 +283,18 @@
 		if (formAction == "MS_Translator")
 		{
 			var msTranslatorUrl = $.trim($("#idMsMtUrl").val());
-			var msTranslatorClientID = $.trim($("#idMsMtClientid").val());
-			var msTranslatorClientSecret = $.trim($("#idMsMtClientSecret").val());
 			if (msTranslatorUrl == null || msTranslatorUrl == "") 
 			{
 				alert("<%=bundle.getString("msg_tm_mt_url_empty")%>");
+				$("#idMsMtUrl").focus();
 				return false;
 			}
-			if (msTranslatorClientID == null || msTranslatorClientID == "") 
+
+			var msTranslatorSubscriptionKey = $.trim($("#idMsMtSubscriptionKey").val());
+			if (msTranslatorSubscriptionKey == null || msTranslatorSubscriptionKey == "")
 			{
-				alert("<%=bundle.getString("msg_tm_mt_clientid_empty")%>");
-				return false;
-			}
-			if (msTranslatorClientSecret == null || msTranslatorClientSecret == "") 
-			{
-				alert("<%=bundle.getString("msg_tm_mt_client_secret_empty")%>");
+				alert("<%=bundle.getString("msg_mt_ms_mt_subscription_key_null")%>");
+				$("#idMsMtSubscriptionKey").focus();
 				return false;
 			}
 		}
@@ -821,22 +818,13 @@
 										MAXLENGTH="99" SIZE="90" /></td>
 								</tr>
 								<tr>
-									<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_client_id")%><font
-										color="red">*</font>:</td>
-									<td colspan="2" style="white-space:nowrap"><INPUT CLASS="standardText" ID="idMsMtClientid"
-										NAME="<%=MTProfileConstants.MT_MS_CLIENT_ID%>"
-										value="<%=mtProfile4val.getUsername()%>" TYPE="text"
-										MAXLENGTH="100" SIZE="90"></input> <a
-										href="http://go.microsoft.com/?linkid=9782667" target="_blank"><%=bundle.getString("lb_tm_ms_mt_appid_tag")%></a>
-									</td>
-								</tr>
-								<tr>
-									<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_client_secret")%><font
-										color="red">*</font>:</td>
-									<td colspan="2"><INPUT CLASS="standardText" ID="idMsMtClientSecret"
-										NAME="<%=MTProfileConstants.MT_MS_CLIENT_SECRET%>"
-										value="<%=mtProfile4val.getPassword()%>" TYPE="password"
-										MAXLENGTH="100" SIZE="90" /></td>
+								    <td align="left"><%=bundle.getString("lb_mt_ms_mt_subscription_key")%><font color="red">*</font>:</td>
+								    <td colspan="2" style="white-space:nowrap">
+								        <INPUT CLASS="standardText" ID="idMsMtSubscriptionKey" NAME="<%=MTProfileConstants.MT_MS_SUBSCRIPTION_KEY%>" 
+								            value="<%=mtProfile4val.getPassword()%>" TYPE="password" MAXLENGTH="100" SIZE="90" /> 
+								        <a href="http://docs.microsofttranslator.com/text-translate.html" 
+								        target="_blank"><%=bundle.getString("lb_tm_ms_mt_appid_tag")%></a>
+								    </td>
 								</tr>
 								<tr>
 									<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_category")%>:

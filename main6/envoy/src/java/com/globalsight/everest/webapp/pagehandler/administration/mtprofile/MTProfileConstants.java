@@ -181,13 +181,11 @@ public interface MTProfileConstants
     public static final String MT_PTS_URL_FLAG_V9 = "1";
 
     public static final String MT_MS_URL = "ms_mt_url";
-    public static final String MT_MS_APPID = "ms_mt_appid";
-    public static final String MT_MS_CLIENT_ID = "ms_mt_client_id";
-    public static final String MT_MS_CLIENT_SECRET = "ms_mt_client_secret";
-    public static final String MT_MS_ACCESS_TOKEN = "ms_mt_access_token";
-    public static final String MT_MS_GRANT_TYPE = "client_credentials";
     public static final String MT_MS_SCOPE = "http://api.microsofttranslator.com";
-    public static final String MT_MS_GET_ACCESS_TOKEN_URL = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13";
+    public static final String MT_MS_SUBSCRIPTION_KEY = "azure_subscription_key";
+    public static final String MT_MS_SUBSCRIPTION_KEY_HEADER = "Ocp-Apim-Subscription-Key";
+    // It uses "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13" originally.
+    public static final String MT_MS_GET_ACCESS_TOKEN_URL = "https://api.cognitive.microsoft.com/sts/v1.0/issueToken";
     public static final String MT_MS_CATEGORY = "ms_mt_category";
     public static final String MT_MS_URL_FLAG = "ms_mt_url_flag";
     public static final int MT_MS_MAX_CHARACTER_NUM = 1000;

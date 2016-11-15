@@ -1,53 +1,42 @@
 package com.globalsight.machineTranslation.mstranslator;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileConstants;
-import com.microsofttranslator.api.V2.adm.AdmAccessToken;
 
 public class MSMTUtil implements MTProfileConstants
 {
     private static final Logger logger = Logger.getLogger(MSMTUtil.class);
     
-    public static String getAccessToken(String clientId, String clientSecret)
+    public static String getAccessToken(String subscriptionKey)
     {
         String accessToken = null;
         int count = 0;
         boolean gotten = false;
-        
+
         while (!gotten && count < 3)
         {
             count++;
+            CloseableHttpClient httpclient = null;
             try
             {
                 HttpPost post = new HttpPost(MT_MS_GET_ACCESS_TOKEN_URL);
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair("grant_type", MT_MS_GRANT_TYPE));
-                params.add(new BasicNameValuePair("client_id", clientId));
-                params.add(new BasicNameValuePair("client_secret", clientSecret));
-                params.add(new BasicNameValuePair("scope", MT_MS_SCOPE));
-                
-                post.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
-                HttpResponse httpResponse = new DefaultHttpClient().execute(post);
-                
+                post.setHeader(MT_MS_SUBSCRIPTION_KEY_HEADER, subscriptionKey);
+
+                httpclient = HttpClients.custom().build();
+                HttpResponse httpResponse = httpclient.execute(post);
+
                 if (httpResponse.getStatusLine().getStatusCode() == 200)
                 {
                     String strResult = EntityUtils.toString(httpResponse.getEntity());
-                    ObjectMapper mapper = new ObjectMapper();
-                    AdmAccessToken adm = mapper.readValue(strResult, AdmAccessToken.class);
-                    accessToken = "Bearer " + adm.getAccess_token();
+                    accessToken = "Bearer " + strResult;
                     gotten = true;
                 }
             }
@@ -60,7 +49,27 @@ public class MSMTUtil implements MTProfileConstants
                     logger.error(e);
                 }
             }
+            finally
+            {
+                shutdownHttpClient(httpclient);
+            }
         }
         return accessToken;
+    }
+    
+    private static void shutdownHttpClient(CloseableHttpClient httpclient)
+    {
+        if (httpclient == null)
+            return;
+
+        try
+        {
+            httpclient.close();
+            httpclient = null;
+        }
+        catch (IOException e)
+        {
+            logger.warn(e);
+        }
     }
 }

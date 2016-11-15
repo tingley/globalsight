@@ -333,26 +333,18 @@ public class MachineTranslateAdapter
             MachineTranslationProfile mtProfile)
     {
         String url = p_request.getParameter(MTProfileConstants.MT_MS_URL);
-        String category = p_request
-                .getParameter(MTProfileConstants.MT_MS_CATEGORY);
-        String clientId = p_request
-                .getParameter(MTProfileConstants.MT_MS_CLIENT_ID);
-        String clientSecret = p_request
-                .getParameter(MTProfileConstants.MT_MS_CLIENT_SECRET);
+        String category = p_request.getParameter(MTProfileConstants.MT_MS_CATEGORY);
+        String subscriptionKey = p_request.getParameter(MTProfileConstants.MT_MS_SUBSCRIPTION_KEY);
 
         if (url != null && !"".equals(url.trim()))
         {
             mtProfile.setUrl(url.trim());
         }
 
-        if (StringUtils.isNotEmpty(clientId))
+        // store azure subscription key into "password" column
+        if (StringUtils.isNotEmpty(subscriptionKey) && checkPassword(subscriptionKey))
         {
-            mtProfile.setUsername(clientId.trim());
-        }
-
-        if (StringUtils.isNotEmpty(clientSecret) && checkPassword(clientSecret))
-        {
-            mtProfile.setPassword(clientSecret.trim());
+            mtProfile.setPassword(subscriptionKey.trim());
         }
 
         if (category != null && !category.equals(""))
@@ -530,8 +522,7 @@ public class MachineTranslateAdapter
     private boolean testMSHost(MachineTranslationProfile mtProfile,
             PrintWriter writer) throws JSONException
     {
-        String clientId = mtProfile.getUsername();
-        String clientSecret = mtProfile.getPassword();
+        String subscriptionKey = mtProfile.getPassword();
         String category = mtProfile.getCategory();
         if (StringUtils.isBlank(category))
         {
@@ -543,12 +534,9 @@ public class MachineTranslateAdapter
             // Test if it is "public" URL
             String msMtUrl = mtProfile.getUrl();
             SoapService soap = new SoapServiceLocator(msMtUrl);
-            String accessToken = MSMTUtil
-                    .getAccessToken(clientId, clientSecret);
-            LanguageService service = soap
-                    .getBasicHttpBinding_LanguageService();
-            service.translate(accessToken, "hello world", "en", "fr",
-                    MSMT_CONTENT_TYPE, category);
+            String accessToken = MSMTUtil.getAccessToken(subscriptionKey);
+            LanguageService service = soap.getBasicHttpBinding_LanguageService();
+            service.translate(accessToken, "hello world", "en", "fr", MSMT_CONTENT_TYPE, category);
         }
         catch (Exception exx)
         {

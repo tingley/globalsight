@@ -73,8 +73,8 @@ public enum EngineEnum
         String[] getInfo()
         {
             return new String[]
-            { "mtProfileID", "msMtEndpoint", "Port", "msMtClientID",
-                    "msMtClientSecret", "msMtCategory", "msMtAppID" };
+            { "mtProfileID", "msMtEndpoint", "any1", "any2",
+                    "msMtSubscriptionKey", "msMtCategory", "any3" };
         }
 
         String getClassName()

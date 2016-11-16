@@ -1661,7 +1661,12 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     private boolean checkCommentStatus(org.apache.poi.ss.usermodel.Sheet p_sheet, int p_row)
     {
         String translatorComment = ExcelUtil.getCellValue(p_sheet, p_row, 2);
-        String commentStatus = ExcelUtil.getCellValue(p_sheet, p_row, 5);
+        String commentStatus = "";
+        if (DQF_START_ROW > 0)
+            commentStatus = ExcelUtil.getCellValue(p_sheet, p_row, 6);
+        else
+            commentStatus = ExcelUtil.getCellValue(p_sheet, p_row, 5);
+
         if (StringUtil.isNotEmpty(commentStatus) && StringUtil.isNotEmpty(translatorComment))
             return true;
 

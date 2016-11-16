@@ -27,15 +27,14 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * PageHandler for showing segment comments from the job details comments page.
@@ -93,6 +92,7 @@ public class SegmentCommentHandler
                      p_request.getParameter(WebAppConstants.TARGET_PAGE_ID));
             sessionMgr.setAttribute(WebAppConstants.JOB_ID,
                      p_request.getParameter(WebAppConstants.JOB_ID));
+            sessionMgr.setAttribute(WebAppConstants.TASK_ID, taskId);
             sessionMgr.setAttribute("targLocale",
                      p_request.getParameter("targLocale"));
         }

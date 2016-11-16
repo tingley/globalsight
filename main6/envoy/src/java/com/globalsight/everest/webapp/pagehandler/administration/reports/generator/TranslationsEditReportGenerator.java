@@ -90,12 +90,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
     public int SCORECARD_START_ROW = 0;
     public int DQF_START_ROW = 0;
     
-    // "E" column, index 4
-    public final int CATEGORY_FAILURE_COLUMN = 5;
-    // "F" column, index 5
-    public final int COMMENT_STATUS_COLUMN = 7;
-    
-    public final int SEVERITY_COLUMN = 6;
+    public int CATEGORY_FAILURE_COLUMN = 5;
+    public int SEVERITY_COLUMN = 6;
+    public int COMMENT_STATUS_COLUMN = 6;
 
     private Locale m_uiLocale;
     private String m_companyName = "";
@@ -273,11 +270,12 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
 
         ExcelUtil.addValidation(sheet, "FailureCategoriesValidator", SEGMENT_START_ROW, lastRow - 1,
                 CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
-        ExcelUtil.addValidation(sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW, lastRow - 1,
-                SEVERITY_COLUMN, SEVERITY_COLUMN);
-        
+
         if (DQF_START_ROW > 0)
         {
+            ExcelUtil.addValidation(sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW, lastRow - 1,
+                    SEVERITY_COLUMN, SEVERITY_COLUMN);
+
             categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId,
                     CategoryType.Fluency, true);
             ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW, DQF_START_ROW, 1);
@@ -461,13 +459,19 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     }
                 }
                 int scoreShowType = wf.getScorecardShowType();
-                if (scoreShowType > 1) {
+                if (scoreShowType > 1)
+                {
                     isDQFEnabled = true;
                     fluencyScore = wf.getFluencyScore();
                     adequacyScore = wf.getAdequacyScore();
                     dqfComment = wf.getDQFComment();
                     DQF_START_ROW = 6;
+
+                    COMMENT_STATUS_COLUMN = 7;
                 }
+                else
+                    COMMENT_STATUS_COLUMN = 6;
+
                 if (scoreShowType > -1 && scoreShowType < 4)
                 {
                     isScorecradEnabled = true;
@@ -577,11 +581,14 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
-        cell = ExcelUtil.getCell(segHeaderRow, col);
-        cell.setCellValue(m_bundle.getString("lb_dqf_severity"));
-        cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
-        p_sheet.setColumnWidth(col, 15 * 256);
-        col++;
+        if (isDQFEnabled)
+        {
+            cell = ExcelUtil.getCell(segHeaderRow, col);
+            cell.setCellValue(m_bundle.getString("lb_dqf_severity"));
+            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
+            p_sheet.setColumnWidth(col, 15 * 256);
+            col++;
+        }
 
         cell = ExcelUtil.getCell(segHeaderRow, col);
         cell.setCellValue(m_bundle.getString("lb_comment_status"));
@@ -863,11 +870,14 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     cell.setCellStyle(contentStyle);
                     col++;
 
-                    // Severity
-                    cell = ExcelUtil.getCell(currentRow, col);
-                    cell.setCellValue(severity);
-                    cell.setCellStyle(contentStyle);
-                    col++;
+                    if (isDQFEnabled)
+                    {
+                        // Severity
+                        cell = ExcelUtil.getCell(currentRow, col);
+                        cell.setCellValue(severity);
+                        cell.setCellStyle(contentStyle);
+                        col++;
+                    }
 
                     // Comment Status
                     cell = ExcelUtil.getCell(currentRow, col);

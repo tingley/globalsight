@@ -16,45 +16,11 @@
  */
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Vector;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.globalsight.config.UserParamNames;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.edit.CommentHelper;
-import com.globalsight.everest.edit.online.CommentThreadView;
-import com.globalsight.everest.edit.online.CommentView;
-import com.globalsight.everest.edit.online.OnlineEditorConstants;
-import com.globalsight.everest.edit.online.PageInfo;
-import com.globalsight.everest.edit.online.PaginateInfo;
-import com.globalsight.everest.edit.online.RenderingOptions;
-import com.globalsight.everest.edit.online.SegmentFilter;
-import com.globalsight.everest.edit.online.SegmentMatchResult;
-import com.globalsight.everest.edit.online.SegmentView;
-import com.globalsight.everest.edit.online.UIConstants;
+import com.globalsight.everest.edit.online.*;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
@@ -91,6 +57,21 @@ import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.*;
 
 /**
  * <p>
@@ -235,7 +216,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             initState(state, session);
         }
         // From Job Details (Admin or PM opening pages read-only)
-        else if (StringUtil.isNotEmpty(jobId) && StringUtil.isNotEmpty(srcPageId))
+        else if (StringUtil.isNotEmptyAndNull(jobId) && StringUtil.isNotEmpty(srcPageId))
         {
             // being assignee is not important when accessing editor from job
             // details.

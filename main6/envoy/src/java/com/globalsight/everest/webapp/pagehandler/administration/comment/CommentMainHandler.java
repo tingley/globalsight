@@ -17,34 +17,7 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.comment;
 
-import java.io.File;
-import java.io.IOException;
-import java.rmi.RemoteException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-
-import com.globalsight.everest.comment.Comment;
-import com.globalsight.everest.comment.CommentFile;
-import com.globalsight.everest.comment.CommentFilesDownLoad;
-import com.globalsight.everest.comment.CommentManager;
-import com.globalsight.everest.comment.Issue;
-import com.globalsight.everest.comment.TaskCommentInfo;
+import com.globalsight.everest.comment.*;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.WorkObject;
@@ -75,6 +48,19 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
+import org.apache.log4j.Logger;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.text.MessageFormat;
+import java.util.*;
 
 /**
  * <p>
@@ -263,6 +249,7 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                 Task task = (Task) wo;
                 wId = (new Long(task.getId())).toString();
                 sessionMgr.setAttribute("jobName", task.getJobName());
+                session.setAttribute("segmentCommentsBackPage", "taskComments");
 
                 // added for JobDetails Page Rewirte
                 JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
@@ -282,6 +269,7 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                 wId = (new Long(job.getId())).toString();
                 sessionMgr.setAttribute("jobName", job.getJobName());
                 sessionMgr.setAttribute("jobId", job.getJobId());
+                session.setAttribute("segmentCommentsBackPage", "jobComments");
                 // added for JobDetails Page Rewirte
                 JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
                 // prevent hibernate lazily initialize Job Object

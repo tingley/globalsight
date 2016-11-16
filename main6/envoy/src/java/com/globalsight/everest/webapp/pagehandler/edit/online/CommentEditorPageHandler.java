@@ -17,20 +17,6 @@
 
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-
 import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -46,6 +32,18 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
 import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import org.apache.log4j.Logger;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 /**
  * <p>
@@ -129,12 +127,12 @@ public class CommentEditorPageHandler extends PageHandler implements
         {
             commentId = Long.parseLong(value);
         }
-        
+
         String fromPage = p_request.getParameter("fromPage");
+        TargetPage targetPage = ServerProxy.getPageManager().getTargetPage(
+                state.getTargetPageId());
         if ("source".equals(fromPage))
         {
-            TargetPage targetPage = ServerProxy.getPageManager().getTargetPage(
-                    state.getTargetPageId());
             long jobId = targetPage.getSourcePage().getJobId();
 
             Tuv sourceTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
@@ -172,6 +170,7 @@ public class CommentEditorPageHandler extends PageHandler implements
         List<String> severityCategories = CompanyWrapper.getCompanyCategoryNames(bundle,
                 currentCompanyId, CategoryType.Severity, true);
         p_request.setAttribute("severityCategories", severityCategories);
+        p_request.setAttribute("enableDQF", targetPage.getWorkflowInstance().getScorecardShowType() > 1 ? "1" : "0");
 
         if (CATEGORY.isDebugEnabled())
         {

@@ -16,68 +16,19 @@
  */
 package com.globalsight.everest.edit.offline.upload;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.Vector;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
 import com.globalsight.everest.category.CategoryType;
-import com.globalsight.everest.comment.CommentManager;
-import com.globalsight.everest.comment.Issue;
-import com.globalsight.everest.comment.IssueHistory;
-import com.globalsight.everest.comment.IssueHistoryImpl;
-import com.globalsight.everest.comment.IssueImpl;
-import com.globalsight.everest.comment.IssueOptions;
+import com.globalsight.everest.comment.*;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
-import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
-import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
-import com.globalsight.everest.edit.offline.OEMProcessStatus;
-import com.globalsight.everest.edit.offline.OfflineEditHelper;
-import com.globalsight.everest.edit.offline.OfflineFileUploadStatus;
-import com.globalsight.everest.edit.offline.XliffConstants;
+import com.globalsight.everest.edit.offline.*;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.edit.offline.page.PageData;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.page.PageManager;
-import com.globalsight.everest.page.PrimaryFile;
-import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.page.UnextractedFile;
+import com.globalsight.everest.page.*;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
@@ -95,7 +46,6 @@ import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.Cancelable;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ImplementedCommentsCheckReportGenerator;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.edit.EditCommonHelper;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
@@ -118,6 +68,20 @@ import com.sun.org.apache.regexp.internal.RE;
 import com.sun.org.apache.regexp.internal.RECompiler;
 import com.sun.org.apache.regexp.internal.REProgram;
 import com.sun.org.apache.regexp.internal.RESyntaxException;
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
+import java.io.*;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.text.MessageFormat;
+import java.util.*;
 
 /**
  * Contains methods responsible for error-checking and saving uploaded content.
@@ -1061,7 +1025,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             int x = j * m / row;
             updateProcess(n + x);
 
-            if (isNew)
+            if (isNew && DQF_START_ROW > 0)
             {
                 severity = ExcelUtil.getCellValue(sheet, j, 6);
                 commentStatus = ExcelUtil.getCellValue(sheet, j, 7);
@@ -1357,6 +1321,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         String failureType = null;
         String commentStatus = null;
         String severity = null;
+        String translatorComment;
 
         if (task.isType(Task.TYPE_REVIEW) || task.isType(Task.TYPE_REVIEW_EDITABLE))
         {
@@ -1483,13 +1448,14 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             if (cancel)
                 return null;
 
+            translatorComment = ExcelUtil.getCellValue(sheet, k, 2);
             reviewerComment = ExcelUtil.getCellValue(sheet, k, 3);
             if (EditUtil.isRTLLocale(tLocale))
                 reviewerComment = EditUtil.removeU200F(reviewerComment);
 
             failureType = ExcelUtil.getCellValue(sheet, k, 4);
 
-            if (isNew)
+            if (isNew && DQF_START_ROW > 0)
             {
                 severity = ExcelUtil.getCellValue(sheet, k, 5);
                 commentStatus = ExcelUtil.getCellValue(sheet, k, 6);
@@ -1519,7 +1485,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             TargetPage targetPage = tuvImpl.getTargetPage(curJobId);
             pageId = new String(String.valueOf(targetPage.getId()));
 
-            if (StringUtil.isNotEmpty(reviewerComment) || checkCommentStatus(sheet, k))
+            if (StringUtil.isNotEmpty(reviewerComment) ||
+                    (StringUtil.isNotEmpty(translatorComment) && StringUtil.isNotEmpty(commentStatus)))
             {
                 if (segmentId != null && !segmentId.equals("") && pageId != null
                         && !pageId.equals(""))
@@ -1611,7 +1578,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         boolean isNew = SEGMENT_START_ROW > 0;
         String jobId, segmentId, pageName, revComments;
 
-        if (isNew)
+        if (isNew && DQF_START_ROW > 0)
         {
             // Cell "J7"
             jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 10);
@@ -1694,7 +1661,12 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     private boolean checkCommentStatus(org.apache.poi.ss.usermodel.Sheet p_sheet, int p_row)
     {
         String translatorComment = ExcelUtil.getCellValue(p_sheet, p_row, 2);
-        String commentStatus = ExcelUtil.getCellValue(p_sheet, p_row, 5);
+        String commentStatus = "";
+        if (DQF_START_ROW > 0)
+            commentStatus = ExcelUtil.getCellValue(p_sheet, p_row, 6);
+        else
+            commentStatus = ExcelUtil.getCellValue(p_sheet, p_row, 5);
+
         if (StringUtil.isNotEmpty(commentStatus) && StringUtil.isNotEmpty(translatorComment))
             return true;
 

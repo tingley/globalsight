@@ -1540,7 +1540,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         String jobId, segmentId, pageName;
 
         String modifyTranslation = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 2);
-        if (isNew)
+        if (isNew && DQF_START_ROW > 0)
         {
             // Cell "K7"
             jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 11);

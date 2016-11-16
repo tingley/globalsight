@@ -17,7 +17,7 @@
         <any name="object" id-type="long" meta-type="string">
             <meta-value value="J"
                 class="com.globalsight.everest.jobhandler.JobImpl" />
-            <meta-value value="S"
+            <meta-value value="W"
                 class="com.globalsight.everest.workflowmanager.WorkflowImpl" />
             <meta-value value="T"
                 class="com.globalsight.everest.taskmanager.TaskImpl" />

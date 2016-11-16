@@ -40,6 +40,7 @@ import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
 import com.globalsight.everest.comment.Comment;
+import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.WorkObject;
@@ -861,6 +862,8 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     public void addJobComment(Comment p_comment)
     {
         m_jobComments.add(p_comment);
+
+        CommentHelper.filterInvalidComments(m_jobComments, Comment.COMMENT_OBJECT_TYPE_JOB);
     }
 
     /**
@@ -890,6 +893,8 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         {
             m_jobComments = p_comments;
         }
+
+        CommentHelper.filterInvalidComments(m_jobComments, Comment.COMMENT_OBJECT_TYPE_JOB);
     }
 
     public void setJobCommentSet(Set p_comments)
@@ -902,6 +907,8 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         {
             m_jobComments = new ArrayList(p_comments);
         }
+
+        CommentHelper.filterInvalidComments(m_jobComments, Comment.COMMENT_OBJECT_TYPE_JOB);
     }
 
     /**

@@ -32,6 +32,7 @@ import java.util.Vector;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.comment.Comment;
+import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
@@ -1073,6 +1074,9 @@ public class WorkflowImpl extends PersistentObject implements Workflow, WorkObje
     {
         m_workflowComments.add(p_comment);
         m_workflowCommentsNeedSorting = true;
+
+        CommentHelper.filterInvalidComments(m_workflowComments,
+                Comment.COMMENT_OBJECT_TYPE_WORKFLOW);
     }
 
     /**
@@ -1097,6 +1101,9 @@ public class WorkflowImpl extends PersistentObject implements Workflow, WorkObje
     {
         m_workflowComments = p_comments;
         m_workflowCommentsNeedSorting = true;
+
+        CommentHelper.filterInvalidComments(m_workflowComments,
+                Comment.COMMENT_OBJECT_TYPE_WORKFLOW);
     }
 
     public void setWorkflowCommentSet(Set<Comment> p_comments)

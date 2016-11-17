@@ -290,13 +290,33 @@
 				return false;
 			}
 
+			var msTranslatorClientID = $.trim($("#idMsMtClientid").val());
+			var msTranslatorClientSecret = $.trim($("#idMsMtClientSecret").val());
+//			if (msTranslatorClientID == null || msTranslatorClientID == "")
+//			{
+//				alert("<%=bundle.getString("msg_tm_mt_clientid_empty")%>");
+//				return false;
+//			}
+//			if (msTranslatorClientSecret == null || msTranslatorClientSecret == "")
+//			{
+//				alert("<%=bundle.getString("msg_tm_mt_client_secret_empty")%>");
+//				return false;
+//			}
+
 			var msTranslatorSubscriptionKey = $.trim($("#idMsMtSubscriptionKey").val());
-			if (msTranslatorSubscriptionKey == null || msTranslatorSubscriptionKey == "")
-			{
-				alert("<%=bundle.getString("msg_mt_ms_mt_subscription_key_null")%>");
-				$("#idMsMtSubscriptionKey").focus();
-				return false;
-			}
+//			if (msTranslatorSubscriptionKey == null || msTranslatorSubscriptionKey == "")
+//			{
+//				alert("<%=bundle.getString("msg_mt_ms_mt_subscription_key_null")%>");
+//				$("#idMsMtSubscriptionKey").focus();
+//				return false;
+//			}
+
+            if ((msTranslatorClientID == null || msTranslatorClientID == "" || msTranslatorClientSecret == null || msTranslatorClientSecret == "") 
+            		&& (msTranslatorSubscriptionKey == null || msTranslatorSubscriptionKey == ""))
+            {
+            	alert("It is required to input value(s) for either 'Client ID', 'Client Secret' or 'Azure Subscription Key'.");
+            	return false;
+            }
 		}
 		else if (formAction == "Safaba")
 		{
@@ -634,7 +654,6 @@
 		<FORM NAME="MTOptionsForm" id="MTOptionsForm" METHOD="POST" action="">
 			<INPUT TYPE="HIDDEN" NAME="formAction" VALUE=""/>
 			<INPUT TYPE="HIDDEN" NAME="radioBtn" VALUE="" />
-			<INPUT TYPE="HIDDEN" NAME="ms_mt_url_flag" id="idURL_flag" VALUE="" />
 			<div id="baseInfo">
 				<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText">
 					<THEAD>
@@ -817,11 +836,30 @@
 										value="<%=mtProfile4val.getUrl()%>" TYPE="text"
 										MAXLENGTH="99" SIZE="90" /></td>
 								</tr>
+								<tr><td colspan="3" align="left"><b>It is required to input value(s) for either 'Client ID', 
+								        'Client Secret' or 'Azure Subscription Key'.</b></td></tr>
 								<tr>
-								    <td align="left"><%=bundle.getString("lb_mt_ms_mt_subscription_key")%><font color="red">*</font>:</td>
+									<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_client_id")%>:</td>
+									<td colspan="2" style="white-space:nowrap"><INPUT CLASS="standardText" ID="idMsMtClientid"
+										NAME="<%=MTProfileConstants.MT_MS_CLIENT_ID%>"
+										value="<%=mtProfile4val.getUsername()%>" TYPE="text"
+										MAXLENGTH="100" SIZE="90"></input>
+									</td>
+								</tr>
+								<tr>
+									<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_client_secret")%>:</td>
+									<td colspan="2"><INPUT CLASS="standardText" ID="idMsMtClientSecret"
+										NAME="<%=MTProfileConstants.MT_MS_CLIENT_SECRET%>"
+										value="<%=mtProfile4val.getPassword()%>" TYPE="password"
+										MAXLENGTH="100" SIZE="90" /></td>
+								</tr>
+								<tr>
+								    <td align="left"><%=bundle.getString("lb_mt_ms_mt_subscription_key")%>:</td>
 								    <td colspan="2" style="white-space:nowrap">
-								        <INPUT CLASS="standardText" ID="idMsMtSubscriptionKey" NAME="<%=MTProfileConstants.MT_MS_SUBSCRIPTION_KEY%>" 
-								            value="<%=mtProfile4val.getPassword()%>" TYPE="password" MAXLENGTH="100" SIZE="90" /> 
+								        <INPUT CLASS="standardText" ID="idMsMtSubscriptionKey" 
+								            NAME="<%=MTProfileConstants.MT_MS_SUBSCRIPTION_KEY%>" 
+								            value="<%=mtProfile4val.getAccountinfo()%>" 
+								            TYPE="password" MAXLENGTH="100" SIZE="90" /> 
 								        <a href="http://docs.microsofttranslator.com/text-translate.html" 
 								        target="_blank"><%=bundle.getString("lb_tm_ms_mt_appid_tag")%></a>
 								    </td>

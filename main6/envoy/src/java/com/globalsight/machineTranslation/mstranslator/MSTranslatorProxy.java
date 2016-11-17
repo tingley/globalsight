@@ -37,8 +37,7 @@ import com.microsofttranslator.api.V2.LanguageService;
  */
 public class MSTranslatorProxy extends AbstractTranslator implements MachineTranslator
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(MSTranslatorProxy.class);
+    private static final Logger CATEGORY = Logger.getLogger(MSTranslatorProxy.class);
     
     private static String MSMT_ACCESS_TOKEN = null;
 
@@ -68,20 +67,21 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
         targetLang = checkLang(targetLang, targetCountry);
 
         HashMap paramMap = getMtParameterMap();
-        String endpoint = (String) paramMap
-                .get(MachineTranslator.MSMT_ENDPOINT);
+        String endpoint = (String) paramMap.get(MachineTranslator.MSMT_ENDPOINT);
+        String msClientId = (String) paramMap.get(MachineTranslator.MSMT_CLIENTID);
+        String msClientSecret = (String) paramMap.get(MachineTranslator.MSMT_CLIENT_SECRET);
         String msSubscriptionKey = (String) paramMap.get(MachineTranslator.MSMT_SUBSCRIPTION_KEY);
         LanguageService service = null;
         try
         {
             if (MSMT_ACCESS_TOKEN == null)
             {
-                MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msSubscriptionKey);
+                MSMT_ACCESS_TOKEN = MSMTUtil.getMsAccessToken(msClientId, msClientSecret,
+                        msSubscriptionKey);
             }
             SoapService soap = new SoapServiceLocator(endpoint);
             service = soap.getBasicHttpBinding_LanguageService();
-            String[] languageArray = service
-                    .getLanguagesForTranslate(MSMT_ACCESS_TOKEN);
+            String[] languageArray = service.getLanguagesForTranslate(MSMT_ACCESS_TOKEN);
 
             Vector<String> langs = new Vector<String>();
             for (String lang : languageArray)
@@ -102,9 +102,9 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             {
                 try
                 {
-                    MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msSubscriptionKey);
-                    String[] languageArray = service
-                            .getLanguagesForTranslate(MSMT_ACCESS_TOKEN);
+                    MSMT_ACCESS_TOKEN = MSMTUtil.getMsAccessToken(msClientId, msClientSecret,
+                            msSubscriptionKey);
+                    String[] languageArray = service.getLanguagesForTranslate(MSMT_ACCESS_TOKEN);
 
                     Vector<String> langs = new Vector<String>();
                     for (String lang : languageArray)
@@ -146,6 +146,8 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
 		HashMap paramMap = getMtParameterMap();
         String endpoint = (String) paramMap.get(MachineTranslator.MSMT_ENDPOINT);
         String msCategory = (String) paramMap.get(MachineTranslator.MSMT_CATEGORY);
+        String msClientId = (String) paramMap.get(MachineTranslator.MSMT_CLIENTID);
+        String msClientSecret = (String) paramMap.get(MachineTranslator.MSMT_CLIENT_SECRET);
         String msSubscriptionKey = (String) paramMap.get(MachineTranslator.MSMT_SUBSCRIPTION_KEY);
 
    		LanguageService service = null;
@@ -154,7 +156,8 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
    		{
    		    if (MSMT_ACCESS_TOKEN == null)
    		    {
-   		        MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msSubscriptionKey);
+                MSMT_ACCESS_TOKEN = MSMTUtil.getMsAccessToken(msClientId, msClientSecret,
+                        msSubscriptionKey);
    		    }
    		    SoapService soap = new SoapServiceLocator(endpoint);
    		    service = soap.getBasicHttpBinding_LanguageService();
@@ -177,7 +180,8 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             {
                 try
                 {
-                    MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msSubscriptionKey);
+                    MSMT_ACCESS_TOKEN = MSMTUtil.getMsAccessToken(msClientId, msClientSecret,
+                            msSubscriptionKey);
                     boolean needTranslateAgain = true;
                     int count = 0;
                     // try at most 3 times
@@ -236,6 +240,8 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
         String exceptionMsg = null;
         String endpoint = (String) paramMap.get(MachineTranslator.MSMT_ENDPOINT);
         String msCategory = (String) paramMap.get(MachineTranslator.MSMT_CATEGORY);
+        String msClientId = (String) paramMap.get(MachineTranslator.MSMT_CLIENTID);
+        String msClientSecret = (String) paramMap.get(MachineTranslator.MSMT_CLIENT_SECRET);
         String msSubscriptionKey = (String) paramMap.get(MachineTranslator.MSMT_SUBSCRIPTION_KEY);
 
         LanguageService service = null;
@@ -247,7 +253,8 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
         {
             if (MSMT_ACCESS_TOKEN == null)
             {
-                MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msSubscriptionKey);
+                MSMT_ACCESS_TOKEN = MSMTUtil.getMsAccessToken(msClientId, msClientSecret,
+                        msSubscriptionKey);
             }
             SoapService soap = new SoapServiceLocator(endpoint);
             service = soap.getBasicHttpBinding_LanguageService();
@@ -270,12 +277,12 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             {
                 try
                 {
-                    MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msSubscriptionKey);
+                    MSMT_ACCESS_TOKEN = MSMTUtil.getMsAccessToken(msClientId, msClientSecret,
+                            msSubscriptionKey);
                     boolean needTranslateAgain = true;
                     int count = 0;
                     // try at most 3 times
-                    while (MSMT_ACCESS_TOKEN != null && needTranslateAgain
-                            && count < 3)
+                    while (MSMT_ACCESS_TOKEN != null && needTranslateAgain && count < 3)
                     {
                         count++;
                         result = service.translateArray(MSMT_ACCESS_TOKEN,

@@ -359,14 +359,11 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                 ExcelUtil.createValidatorList(p_workbook, "StatusCategoriesValidator", categories,
                         SEGMENT_START_ROW, 27);
 
-                if (isDQFEnabled)
-                {
-                    String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
-                    categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
-                            currentCompanyId, CategoryType.Severity, true);
-                    ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories,
-                            SEGMENT_START_ROW, 28);
-                }
+                String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
+                categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
+                        currentCompanyId, CategoryType.Severity, true);
+                ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories,
+                        SEGMENT_START_ROW, 28);
 
                 categoryFailureDropDownAdded = true;
             }

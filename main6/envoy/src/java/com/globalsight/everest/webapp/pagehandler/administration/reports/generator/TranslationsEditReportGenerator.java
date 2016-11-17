@@ -16,37 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataValidation;
-import org.apache.poi.ss.usermodel.DataValidationConstraint;
-import org.apache.poi.ss.usermodel.DataValidationHelper;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-
 import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
@@ -86,17 +55,25 @@ import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
-import com.globalsight.util.ExcelUtil;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.ReportStyle;
-import com.globalsight.util.StringUtil;
+import com.globalsight.util.*;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
+import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.*;
 
 /**
  * This Generator is used for creating Translations Edit Report (Include
@@ -113,12 +90,9 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
     public int SCORECARD_START_ROW = 0;
     public int DQF_START_ROW = 0;
     
-    // "E" column, index 4
-    public final int CATEGORY_FAILURE_COLUMN = 5;
-    // "F" column, index 5
-    public final int COMMENT_STATUS_COLUMN = 7;
-    
-    public final int SEVERITY_COLUMN = 6;
+    public int CATEGORY_FAILURE_COLUMN = 5;
+    public int SEVERITY_COLUMN = 6;
+    public int COMMENT_STATUS_COLUMN = 6;
 
     private Locale m_uiLocale;
     private String m_companyName = "";
@@ -284,28 +258,31 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         String trgLang = trgLocale.getDisplayName(m_uiLocale);
         writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
 
-        int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat, SEGMENT_START_ROW);
-        
         // Create Name Areas for drop down list.
-        ExcelUtil.createValidatorList(sheet, getFailureCategoriesList(), SEGMENT_START_ROW,
-                lastRow - 1, CATEGORY_FAILURE_COLUMN);
+        ExcelUtil.createValidatorList(p_workbook, "FailureCategoriesValidator", getFailureCategoriesList(), SEGMENT_START_ROW, 26);
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
                 currentCompanyId, CategoryType.Severity, true);
-        ExcelUtil.createValidatorList(sheet, categories, SEGMENT_START_ROW, lastRow - 1,
-                SEVERITY_COLUMN);
+        ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories, SEGMENT_START_ROW, 27);
+
+        int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat, SEGMENT_START_ROW);
+
+        ExcelUtil.addValidation(sheet, "FailureCategoriesValidator", SEGMENT_START_ROW, lastRow - 1,
+                CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
 
         if (DQF_START_ROW > 0)
         {
+            ExcelUtil.addValidation(sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW, lastRow - 1,
+                    SEVERITY_COLUMN, SEVERITY_COLUMN);
+
             categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId,
                     CategoryType.Fluency, true);
             ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW, DQF_START_ROW, 1);
 
             categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId,
                     CategoryType.Adequacy, true);
-            ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW + 1, DQF_START_ROW + 1,
-                    1);
+            ExcelUtil.createValidatorList(sheet, categories, DQF_START_ROW + 1, DQF_START_ROW + 1, 1);
         }
         if (SCORECARD_START_ROW > 0)
         {
@@ -482,13 +459,19 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     }
                 }
                 int scoreShowType = wf.getScorecardShowType();
-                if (scoreShowType > 1) {
+                if (scoreShowType > 1)
+                {
                     isDQFEnabled = true;
                     fluencyScore = wf.getFluencyScore();
                     adequacyScore = wf.getAdequacyScore();
                     dqfComment = wf.getDQFComment();
                     DQF_START_ROW = 6;
+
+                    COMMENT_STATUS_COLUMN = 7;
                 }
+                else
+                    COMMENT_STATUS_COLUMN = 6;
+
                 if (scoreShowType > -1 && scoreShowType < 4)
                 {
                     isScorecradEnabled = true;
@@ -598,11 +581,14 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
-        cell = ExcelUtil.getCell(segHeaderRow, col);
-        cell.setCellValue(m_bundle.getString("lb_dqf_severity"));
-        cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
-        p_sheet.setColumnWidth(col, 15 * 256);
-        col++;
+        if (isDQFEnabled)
+        {
+            cell = ExcelUtil.getCell(segHeaderRow, col);
+            cell.setCellValue(m_bundle.getString("lb_dqf_severity"));
+            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
+            p_sheet.setColumnWidth(col, 15 * 256);
+            col++;
+        }
 
         cell = ExcelUtil.getCell(segHeaderRow, col);
         cell.setCellValue(m_bundle.getString("lb_comment_status"));
@@ -884,11 +870,14 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     cell.setCellStyle(contentStyle);
                     col++;
 
-                    // Severity
-                    cell = ExcelUtil.getCell(currentRow, col);
-                    cell.setCellValue(severity);
-                    cell.setCellStyle(contentStyle);
-                    col++;
+                    if (isDQFEnabled)
+                    {
+                        // Severity
+                        cell = ExcelUtil.getCell(currentRow, col);
+                        cell.setCellValue(severity);
+                        cell.setCellStyle(contentStyle);
+                        col++;
+                    }
 
                     // Comment Status
                     cell = ExcelUtil.getCell(currentRow, col);
@@ -959,7 +948,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator, Cancela
                     p_row++;
                 }
             }
-            
+
             // Add comment status
             addCommentStatus(p_sheet, rowsWithCommentSet, p_row);
         }

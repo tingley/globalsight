@@ -333,26 +333,32 @@ public class MachineTranslateAdapter
             MachineTranslationProfile mtProfile)
     {
         String url = p_request.getParameter(MTProfileConstants.MT_MS_URL);
-        String category = p_request
-                .getParameter(MTProfileConstants.MT_MS_CATEGORY);
-        String clientId = p_request
-                .getParameter(MTProfileConstants.MT_MS_CLIENT_ID);
-        String clientSecret = p_request
-                .getParameter(MTProfileConstants.MT_MS_CLIENT_SECRET);
+        String clientId = p_request.getParameter(MTProfileConstants.MT_MS_CLIENT_ID);
+        String clientSecret = p_request.getParameter(MTProfileConstants.MT_MS_CLIENT_SECRET);
+        String subscriptionKey = p_request.getParameter(MTProfileConstants.MT_MS_SUBSCRIPTION_KEY);
+        String category = p_request.getParameter(MTProfileConstants.MT_MS_CATEGORY);
 
         if (url != null && !"".equals(url.trim()))
         {
             mtProfile.setUrl(url.trim());
         }
 
-        if (StringUtils.isNotEmpty(clientId))
+        if (StringUtils.isEmpty(clientId))
         {
-            mtProfile.setUsername(clientId.trim());
+            clientId = "";
         }
+        mtProfile.setUsername(clientId.trim());
 
-        if (StringUtils.isNotEmpty(clientSecret) && checkPassword(clientSecret))
+        if (StringUtils.isEmpty(clientSecret))
         {
-            mtProfile.setPassword(clientSecret.trim());
+            clientSecret = "";
+        }
+        mtProfile.setPassword(clientSecret.trim());
+
+        // store azure subscription key into "accountinfo" column
+        if (StringUtils.isNotEmpty(subscriptionKey))
+        {
+            mtProfile.setAccountinfo(subscriptionKey.trim());
         }
 
         if (category != null && !category.equals(""))
@@ -532,6 +538,7 @@ public class MachineTranslateAdapter
     {
         String clientId = mtProfile.getUsername();
         String clientSecret = mtProfile.getPassword();
+        String subscriptionKey = mtProfile.getAccountinfo();
         String category = mtProfile.getCategory();
         if (StringUtils.isBlank(category))
         {
@@ -541,14 +548,12 @@ public class MachineTranslateAdapter
         try
         {
             // Test if it is "public" URL
+            String accessToken = MSMTUtil.getMsAccessToken(clientId, clientSecret, subscriptionKey);
+
             String msMtUrl = mtProfile.getUrl();
             SoapService soap = new SoapServiceLocator(msMtUrl);
-            String accessToken = MSMTUtil
-                    .getAccessToken(clientId, clientSecret);
-            LanguageService service = soap
-                    .getBasicHttpBinding_LanguageService();
-            service.translate(accessToken, "hello world", "en", "fr",
-                    MSMT_CONTENT_TYPE, category);
+            LanguageService service = soap.getBasicHttpBinding_LanguageService();
+            service.translate(accessToken, "hello world", "en", "fr", MSMT_CONTENT_TYPE, category);
         }
         catch (Exception exx)
         {

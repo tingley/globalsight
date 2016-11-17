@@ -16,23 +16,17 @@
  */
 package com.globalsight.util;
 
+import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
-
-import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DataValidation;
-import org.apache.poi.ss.usermodel.DataValidationConstraint;
-import org.apache.poi.ss.usermodel.DataValidationHelper;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelUtil
 {
@@ -257,4 +251,82 @@ public class ExcelUtil
         createValidatorList(sheet, array, startRow, endRow, columnNumber);
     }
 
+    public static void createValidatorList(Workbook workbook, String validatorName, List<String>
+            values, int startRow, int hiddenDataColumn)
+    {
+        if (workbook == null || values == null || values.size() == 0)
+            return;
+
+        String[] array = new String[values.size()];
+        values.toArray(array);
+
+        createValidatorList(workbook, validatorName, array, startRow, hiddenDataColumn);
+    }
+
+    public static void createValidatorList(Workbook workbook, String validatorName, String[]
+            values, int startRow, int hiddenDataColumn)
+    {
+        if (workbook == null || values == null || values.length == 0)
+            return;
+
+        try
+        {
+            Sheet sheet = workbook.getSheetAt(0);
+            Row row;
+            Cell cell;
+            int len = values.length;
+            for (int i = 0; i < len; i++)
+            {
+                row = getRow(sheet, startRow + i);
+                cell = getCell(row, hiddenDataColumn);
+                cell.setCellValue(values[i]);
+            }
+            String hiddenColumn = "$" + indexToColumn(hiddenDataColumn) + "$";
+
+            String formula = sheet.getSheetName() + "!" + hiddenColumn + (startRow + 1) + ": " +
+                    hiddenColumn
+                    + (startRow + len);
+            Name name = workbook.createName();
+            name.setRefersToFormula(formula);
+            name.setNameName(validatorName);
+
+            // Hide "AA" column
+            sheet.setColumnHidden(hiddenDataColumn, true);
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when create hidden area for category failures.", e);
+        }
+    }
+
+    public static String indexToColumn(int index)
+    {
+        String column = "";
+        do
+        {
+            if (column.length() > 0)
+            {
+                index--;
+            }
+            column = ((char) (index % 26 + (int) 'A')) + column;
+            index = (int) ((index - index % 26) / 26);
+        }
+        while (index > 0);
+
+        return column;
+    }
+
+    public static void addValidation(Sheet sheet, String validatorName, int startRow, int lastRow,
+                                     int startColumn, int lastColumn)
+    {
+        DataValidationHelper dvHelper = sheet.getDataValidationHelper();
+        DataValidationConstraint dvConstraint = dvHelper
+                .createFormulaListConstraint(validatorName);
+        CellRangeAddressList addressList = new CellRangeAddressList(startRow, lastRow, startColumn,
+                lastColumn);
+        DataValidation validation = dvHelper.createValidation(dvConstraint, addressList);
+        validation.setSuppressDropDownArrow(true);
+        validation.setShowErrorBox(true);
+        sheet.addValidationData(validation);
+    }
 }

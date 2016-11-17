@@ -570,18 +570,22 @@ function doOnLoad()
 	    </select>
 	  </td>
 	</tr>
-    <tr class="row1">        
-      <td  colspan="3" >
-      <span class="label">&nbsp;<%=bundle.getString("lb_dqf_severity") %>:</span>
-        <c:set var="cmtSeverity" value="<%=cmtSeverity%>" />
-        <select id="idSeverity" name="idSeverity" onchange="setDirty()" style="width:300">
-            <option value="" selected>&nbsp;</option>
-            <c:forEach var="op" items="${severityCategories}">
-                <option title="${op}" value="${op}" <c:if test="${op == cmtSeverity}">selected</c:if>>${op}</option>
-            </c:forEach>
-        </select>
-      </td>
-    </tr>
+          <% String enableDQF = (String) request.getAttribute("enableDQF");
+              if ("1".equals(enableDQF)) {
+          %>
+          <tr class="row1">
+              <td colspan="3">
+                  <span class="label">&nbsp;<%=bundle.getString("lb_dqf_severity") %>:</span>
+                  <c:set var="cmtSeverity" value="<%=cmtSeverity%>"/>
+                  <select id="idSeverity" name="idSeverity" onchange="setDirty()" style="width:300">
+                      <option value="" selected>&nbsp;</option>
+                      <c:forEach var="op" items="${severityCategories}">
+                          <option title="${op}" value="${op}" <c:if test="${op == cmtSeverity}">selected</c:if>>${op}</option>
+                      </c:forEach>
+                  </select>
+              </td>
+          </tr>
+          <% } %>
 	<tr>		 
 	  <td  colspan="2" >
 	     <span class="label"><%=bundle.getString("lb_shareOtherLocales")%> :</span>

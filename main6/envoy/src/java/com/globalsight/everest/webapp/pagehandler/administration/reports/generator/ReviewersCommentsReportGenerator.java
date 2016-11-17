@@ -16,31 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-
 import com.globalsight.everest.category.CategoryType;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
@@ -68,6 +43,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportH
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
+import com.globalsight.everest.workflow.DQFData;
 import com.globalsight.everest.workflow.ScorecardScore;
 import com.globalsight.everest.workflow.ScorecardScoreHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -80,17 +56,23 @@ import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
-import com.globalsight.util.ExcelUtil;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.ReportStyle;
-import com.globalsight.util.StringUtil;
+import com.globalsight.util.*;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
+import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.*;
 
 /**
  * Reviewers Comments Report Generator, Include Reviewers Comments Report in
@@ -117,12 +99,9 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
     public int SCORECARD_START_ROW = 0;
     public int DQF_START_ROW = 0;
     
-    // "E" column, index 4
-    public final int CATEGORY_FAILURE_COLUMN = 4;
-    // "F" column, index 5
-    public final int COMMENT_STATUS_COLUMN = 6;
-    
-    public final int SEVERITY_COLUMN = 5;
+    public int CATEGORY_FAILURE_COLUMN = 4;
+    public int SEVERITY_COLUMN = 5;
+    public int COMMENT_STATUS_COLUMN = 5;
 
     private Locale m_uiLocale = Locale.US;
     String m_userId;
@@ -365,24 +344,34 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
             // Add Segment Header
             addSegmentHeader(p_workbook, sheet);
 
-            // Create Name Areas for drop down list.
-            // if (!categoryFailureDropDownAdded)
-            // {
-            // createCategoryFailureNameArea(p_workbook);
-            // createSeverityNameArea(p_workbook);
-            // createFluencyNameArea(p_workbook);
-            // createAdequacyNameArea(p_workbook);
-            // createScorecardNameArea(p_workbook);
-            // categoryFailureDropDownAdded = true;
-            // }
-
             // Insert Language Data
             String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
             String trgLang = trgLocale.getDisplayName(m_uiLocale);
             writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
 
+            // Create Name Areas for drop down list.
+            if (!categoryFailureDropDownAdded)
+            {
+                List<String> categories = getFailureCategoriesList();
+                ExcelUtil.createValidatorList(p_workbook, "FailureCategoriesValidator",
+                        categories, SEGMENT_START_ROW, 26);
+                categories = (List<String>) IssueOptions.getAllStatus();
+                ExcelUtil.createValidatorList(p_workbook, "StatusCategoriesValidator", categories,
+                        SEGMENT_START_ROW, 27);
+
+                if (isDQFEnabled)
+                {
+                    String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
+                    categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
+                            currentCompanyId, CategoryType.Severity, true);
+                    ExcelUtil.createValidatorList(p_workbook, "SeverityCategoriesValidator", categories,
+                            SEGMENT_START_ROW, 28);
+                }
+
+                categoryFailureDropDownAdded = true;
+            }
             // Insert Segment Data
-            writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, SEGMENT_START_ROW);
+            int lastRow = writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, SEGMENT_START_ROW);
         }
     }
     
@@ -392,61 +381,16 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
         Row rowLine = null;
         Cell cell = null;
         boolean isStored = false;
-        
-        if (isDQFEnabled) {
-            isStored = StringUtil.isNotEmpty(dqfComment);
-            
-            // DQF enabled
-            row = DQF_START_ROW;
-            rowLine = ExcelUtil.getRow(sheet, row);
-            cell = ExcelUtil.getCell(rowLine, col);
-            cell.setCellValue(m_bundle.getString("lb_dqf_fluency_only"));
-            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
-            
-            cell = ExcelUtil.getCell(rowLine, 1);
-            if (isStored || needProtect)
-            {
-                cell.setCellStyle(REPORT_STYLE.getLockedStyle());
-            }
-            else
-            {
-                cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
-            }
-            cell.setCellValue(fluencyScore);
-           
-            row++;
 
-            rowLine = ExcelUtil.getRow(sheet, row);
-            cell = ExcelUtil.getCell(rowLine, col);
-            cell.setCellValue(m_bundle.getString("lb_dqf_adequacy_only"));
-            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
-            cell = ExcelUtil.getCell(rowLine, 1);
-            if (isStored || needProtect)
-            {
-                cell.setCellStyle(REPORT_STYLE.getLockedStyle());
-            }
-            else
-            {
-                cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
-            }
-            cell.setCellValue(adequacyScore);
-            row++;
-            
-            rowLine = ExcelUtil.getRow(sheet, row);
-            cell = ExcelUtil.getCell(rowLine, col);
-            cell.setCellValue(m_bundle.getString("lb_comment"));
-            cell.setCellStyle(REPORT_STYLE.getHeaderStyle());
-            cell = ExcelUtil.getCell(rowLine, 1);
-            if (isStored || needProtect)
-            {
-                cell.setCellStyle(REPORT_STYLE.getLockedStyle());
-            }
-            else
-            {
-                cell.setCellStyle(REPORT_STYLE.getUnlockedStyle());
-            }
-            cell.setCellValue(dqfComment);
+        if (isDQFEnabled) {
+            DQFData dqfData = new DQFData();
+            dqfData.setFluency(fluencyScore);
+            dqfData.setAdequacy(adequacyScore);
+            dqfData.setComment(dqfComment);
+
+            DQFReportHelper.writeDQFInfo(needProtect, isDQFEnabled, dqfData, sheet, DQF_START_ROW,  m_bundle);
         }
+
         if (isScorecradEnabled) {
             isStored = StringUtil.isNotEmpty(scoreComment);
             
@@ -551,14 +495,19 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                         needProtect = !(task.isType(Task.TYPE_REVIEW) || task.isType(Task.TYPE_REVIEW_EDITABLE));
                     }
                 }
-                if (wf.enableDQF()) {
+                int scoreShowType = wf.getScorecardShowType();
+                if (scoreShowType > 1) {
                     isDQFEnabled = true;
                     fluencyScore = wf.getFluencyScore();
                     adequacyScore = wf.getAdequacyScore();
                     dqfComment = wf.getDQFComment();
                     DQF_START_ROW = 6;
+
+                    COMMENT_STATUS_COLUMN = 6;
                 }
-                if (wf.enableScorecard()) {
+                else
+                    COMMENT_STATUS_COLUMN = 5;
+                if (scoreShowType > -1 && scoreShowType < 4) {
                     isScorecradEnabled = true;
                     scorecardCategories = ScorecardScoreHelper.getScorecardCategories(wf.getCompanyId(), m_bundle);
                     scores = ScorecardScoreHelper.getScoreByWrkflowId(wf.getId());
@@ -660,11 +609,14 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
 
-        cell = ExcelUtil.getCell(segHeaderRow, col);
-        cell.setCellValue(m_bundle.getString("lb_dqf_severity"));
-        cell.setCellStyle(headerStyle);
-        p_sheet.setColumnWidth(col, 15 * 256);
-        col++;
+        if (isDQFEnabled)
+        {
+            cell = ExcelUtil.getCell(segHeaderRow, col);
+            cell.setCellValue(m_bundle.getString("lb_dqf_severity"));
+            cell.setCellStyle(headerStyle);
+            p_sheet.setColumnWidth(col, 15 * 256);
+            col++;
+        }
 
         cell = ExcelUtil.getCell(segHeaderRow, col);
         cell.setCellValue(m_bundle.getString("lb_comment_status"));
@@ -920,11 +872,14 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                     cell.setCellStyle(unlockedStyle);
                     col++;
 
-                    // Severity
-                    cell = ExcelUtil.getCell(currentRow, col);
-                    cell.setCellValue(severity);
-                    cell.setCellStyle(unlockedStyle);
-                    col++;
+                    if (isDQFEnabled)
+                    {
+                        // Severity
+                        cell = ExcelUtil.getCell(currentRow, col);
+                        cell.setCellValue(severity);
+                        cell.setCellStyle(unlockedStyle);
+                        col++;
+                    }
 
                     // Comment Status
                     cell = ExcelUtil.getCell(currentRow, col);
@@ -989,20 +944,18 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                 }
             }
 
-            // Add category failure drop down list here.
-            ExcelUtil.createValidatorList(p_sheet, getFailureCategoriesList(), SEGMENT_START_ROW,
-                    p_row - 1, CATEGORY_FAILURE_COLUMN);
-            ExcelUtil.createValidatorList(p_sheet, (List<String>) IssueOptions.getAllStatus(),
-                    SEGMENT_START_ROW, p_row - 1, COMMENT_STATUS_COLUMN);
-
+            List<String> categories = null;
             String currentCompanyId = CompanyWrapper.getCurrentCompanyId();
-            List<String> categories = CompanyWrapper.getCompanyCategoryNames(m_bundle,
-                    currentCompanyId, CategoryType.Severity, true);
-            ExcelUtil.createValidatorList(p_sheet, categories, SEGMENT_START_ROW, p_row - 1,
-                    SEVERITY_COLUMN);
 
-            if (DQF_START_ROW > 0)
+            ExcelUtil.addValidation(p_sheet, "FailureCategoriesValidator", SEGMENT_START_ROW, p_row - 1,
+                    CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
+            ExcelUtil.addValidation(p_sheet, "StatusCategoriesValidator", SEGMENT_START_ROW, p_row - 1,
+                    COMMENT_STATUS_COLUMN, COMMENT_STATUS_COLUMN);
+            if (isDQFEnabled)
             {
+                ExcelUtil.addValidation(p_sheet, "SeverityCategoriesValidator", SEGMENT_START_ROW, p_row - 1,
+                        SEVERITY_COLUMN, SEVERITY_COLUMN);
+
                 categories = CompanyWrapper.getCompanyCategoryNames(m_bundle, currentCompanyId,
                         CategoryType.Fluency, true);
                 ExcelUtil.createValidatorList(p_sheet, categories, DQF_START_ROW, DQF_START_ROW, 1);
@@ -1012,6 +965,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator, Cancel
                 ExcelUtil.createValidatorList(p_sheet, categories, DQF_START_ROW + 1,
                         DQF_START_ROW + 1, 1);
             }
+
             if (SCORECARD_START_ROW > 0)
             {
                 String[] data = new String[]

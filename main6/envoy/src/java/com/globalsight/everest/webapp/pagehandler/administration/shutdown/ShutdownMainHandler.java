@@ -336,6 +336,13 @@ public class ShutdownMainHandler extends PageHandler
                         s_restartTimer = null;
                         s_isRestarting = Boolean.FALSE;
                     }
+                    if (s_shutdownTimer != null)
+                    {
+                        s_shutdownTimer.cancel();
+                        s_shutdownTime = null;
+                        s_shutdownTimer = null;
+                        s_isShuttingDown = Boolean.FALSE;
+                    }
 
                     s_restartTimer = new Timer(false);
                     s_restartTimer.schedule(new Restarter(), s_restartTime);
@@ -387,6 +394,13 @@ public class ShutdownMainHandler extends PageHandler
                         s_shutdownTimer.cancel();
                         s_shutdownTimer = null;
                         s_isShuttingDown = Boolean.FALSE;
+                    }
+                    if (s_restartTimer != null)
+                    {
+                        s_restartTimer.cancel();
+                        s_restartTime = null;
+                        s_restartTimer = null;
+                        s_isRestarting = Boolean.FALSE;
                     }
 
                     s_shutdownTimer = new Timer(false);

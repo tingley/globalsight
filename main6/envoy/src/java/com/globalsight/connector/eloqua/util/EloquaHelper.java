@@ -479,9 +479,19 @@ public class EloquaHelper
     
     public void updateLandingPage(LandingPage page)
     {
+        JSONObject js = page.getJson();
         try
         {
-            _client.put("/assets/landingPage/" + page.getId(), page.getJson().toString());
+            js.put("relativePath", "");
+        }
+        catch (JSONException e1)
+        {
+            logger.error(e1);
+        }
+        
+        try
+        {
+            _client.put("/assets/landingPage/" + page.getId(), js.toString());
         }
         catch (Exception e)
         {
@@ -513,7 +523,17 @@ public class EloquaHelper
 
     public LandingPage saveLandingPage(LandingPage page)
     {
-        Response response = _client.post("/assets/landingPage", page.getJson().toString());
+        JSONObject js = page.getJson();
+        try
+        {
+            js.put("relativePath", "");
+        }
+        catch (JSONException e1)
+        {
+            logger.error(e1);
+        }
+        
+        Response response = _client.post("/assets/landingPage", js.toString());
         try
         {
             LandingPage p = new LandingPage();

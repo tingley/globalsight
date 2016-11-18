@@ -1006,9 +1006,30 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                                 .decodeXmlEntities(((TranslatableElement) de).getEscapingChars());
                     }
 
-                    String newchunk = EscapingHelper.handleString4Export(chunk, m_escapings,
-                            srcDataType, false, true, escapingChars, isInCDATA);
-
+//                    String newchunk = EscapingHelper.handleString4Export(chunk, m_escapings,
+//                            srcDataType, false, true, escapingChars, isInCDATA);
+                  //Modified GBS-4117
+                    String contentType = "";
+					if (isInCDATA)
+					{
+						contentType = "CDATA";
+					}
+					else if (FORMAT_XML.equals(srcDataType) && !m_isAttr)
+					{
+						contentType = "XmlNode";
+					}
+					else if (FORMAT_HTML.equals(srcDataType))
+					{
+						contentType = "HtmlNode";
+					}
+					else if (FORMAT_XML.equals(srcDataType) && m_isAttr)
+					{
+						contentType = "xmlAttribute";
+					}
+					String newchunk = EscapingHelper.newHandleString4Export(
+							chunk, m_escapings, srcDataType, false, true,
+							escapingChars, isInCDATA, contentType);
+                    
                     // GBS-3997&GBS-4066
                     newchunk = EmojiUtil.parseEmojiTagToAlias(newchunk);
 

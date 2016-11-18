@@ -22,6 +22,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.globalsight.everest.util.comparator.Priorityable;
+import com.globalsight.util.StringUtil;
 
 public class Escaping implements Priorityable
 {
@@ -29,18 +30,36 @@ public class Escaping implements Priorityable
     private boolean unEscapeOnImport = false;
     private boolean reEscapeOnExport = false;
     private int priority = 9;
-
+    private String escape = null;
+    private boolean isCheckActive = false;
+    private String activeValue = null;
+    private String partConentValue = null;
+    private boolean startIsRegex = false;
+    private boolean finishIsRegex = false;
+    private String startPattern = null;
+    private String finishPattern = null;
+    
     public Escaping()
     {
     }
 
-    public Escaping(String character, boolean unEscapeOnImport,
-            boolean reEscapeOnExport)
-    {
-        this.character = character;
-        this.unEscapeOnImport = unEscapeOnImport;
-        this.reEscapeOnExport = reEscapeOnExport;
-    }
+	public Escaping(String character, boolean unEscapeOnImport,
+			boolean reEscapeOnExport, String escape, boolean isCheckActive,
+			String activeValue, String partConentValue, boolean startIsRegex,
+			String startPattern, boolean finishIsRegex, String finishPattern)
+	{
+		this.character = character;
+		this.unEscapeOnImport = unEscapeOnImport;
+		this.reEscapeOnExport = reEscapeOnExport;
+		this.escape = escape;
+		this.isCheckActive = isCheckActive;
+		this.activeValue = activeValue;
+		this.partConentValue = partConentValue;
+		this.startIsRegex = startIsRegex;
+		this.startPattern = startPattern;
+		this.finishIsRegex = finishIsRegex;
+		this.finishPattern = finishPattern;
+	}
 
     public String getCharacter()
     {
@@ -72,7 +91,87 @@ public class Escaping implements Priorityable
         this.reEscapeOnExport = reEscapeOnExport;
     }
 
-    public String getName()
+    public String getEscape()
+	{
+		return escape;
+	}
+
+	public void setEscape(String escape)
+	{
+		this.escape = escape;
+	}
+	
+	public boolean isCheckActive()
+	{
+		return isCheckActive;
+	}
+
+	public void setCheckActive(boolean isCheckActive)
+	{
+		this.isCheckActive = isCheckActive;
+	}
+
+	public String getActiveValue()
+	{
+		return activeValue;
+	}
+
+	public void setActiveValue(String activeValue)
+	{
+		this.activeValue = activeValue;
+	}
+
+	public String getPartConentValue()
+	{
+		return partConentValue;
+	}
+
+	public void setPartConentValue(String partConentValue)
+	{
+		this.partConentValue = partConentValue;
+	}
+
+	public boolean isStartIsRegex()
+	{
+		return startIsRegex;
+	}
+
+	public void setStartIsRegex(boolean startIsRegex)
+	{
+		this.startIsRegex = startIsRegex;
+	}
+
+	public boolean isFinishIsRegex()
+	{
+		return finishIsRegex;
+	}
+
+	public void setFinishIsRegex(boolean finishIsRegex)
+	{
+		this.finishIsRegex = finishIsRegex;
+	}
+
+	public String getStartPattern()
+	{
+		return startPattern;
+	}
+
+	public void setStartPattern(String startPattern)
+	{
+		this.startPattern = startPattern;
+	}
+
+	public String getFinishPattern()
+	{
+		return finishPattern;
+	}
+
+	public void setFinishPattern(String finishPattern)
+	{
+		this.finishPattern = finishPattern;
+	}
+
+	public String getName()
     {
         return this.character;
     }
@@ -129,9 +228,86 @@ public class Escaping implements Priorityable
                 priority = 9;
             }
         }
+        
+		Node escapeNode = tagElement.getElementsByTagName("escape").item(0);
+		String escape = null;
+		if (escapeNode != null && escapeNode.getFirstChild() != null)
+		{
+			escape = escapeNode.getFirstChild().getNodeValue();
+			if (StringUtil.isEmptyAndNull(escape))
+			{
+				escape = "\\";
+			}
+		}
+		else
+		{
+			escape = "\\";
+		}
 
-        Escaping ee = new Escaping(name, unEscapeOnImport, reEscapeOnExport);
-        ee.setPriority(priority);
+		NodeList isCheckActiveElements = tagElement
+				.getElementsByTagName("isCheckActive");
+		boolean isCheckActive = false;
+		if (isCheckActiveElements != null
+				&& isCheckActiveElements.getLength() > 0)
+		{
+			isCheckActive = "true".equals(isCheckActiveElements.item(0)
+					.getFirstChild().getNodeValue());
+		}
+
+        String activeValue = null;
+        String partConentValue = null;
+        String startPattern = null;
+        String finishPattern = null;
+        boolean startIsRegex = false;
+        boolean finishIsRegex = false;
+		if (isCheckActive)
+		{
+			activeValue  = tagElement
+					.getElementsByTagName("activeValue").item(0)
+					.getFirstChild().getNodeValue();
+			partConentValue = tagElement
+					.getElementsByTagName("partConentValue").item(0)
+					.getFirstChild().getNodeValue();
+
+			if (StringUtil.isNotEmptyAndNull(partConentValue)
+					&& partConentValue.equalsIgnoreCase("startFinishes"))
+			{
+				NodeList startIsRegexElements = tagElement
+						.getElementsByTagName("startIsRegex");
+				if (startIsRegexElements != null
+						&& startIsRegexElements.getLength() > 0)
+				{
+					startIsRegex = "true".equals(startIsRegexElements.item(0)
+							.getFirstChild().getNodeValue());
+				}
+				if (startIsRegex)
+				{
+					startPattern = tagElement
+							.getElementsByTagName("startPattern").item(0)
+							.getFirstChild().getNodeValue();
+				}
+				
+				NodeList finishIsRegexElements = tagElement
+						.getElementsByTagName("finishIsRegex");
+				if (finishIsRegexElements != null
+						&& finishIsRegexElements.getLength() > 0)
+				{
+					finishIsRegex = "true".equals(finishIsRegexElements.item(0)
+							.getFirstChild().getNodeValue());
+				}
+				if (finishIsRegex)
+				{
+					finishPattern = tagElement
+							.getElementsByTagName("finishPattern").item(0)
+							.getFirstChild().getNodeValue();
+				}
+			}
+		}
+		
+		Escaping ee = new Escaping(name, unEscapeOnImport, reEscapeOnExport,
+				escape, isCheckActive, activeValue, partConentValue,
+				startIsRegex, startPattern, finishIsRegex, finishPattern);
+		ee.setPriority(priority);
 
         return ee;
     }

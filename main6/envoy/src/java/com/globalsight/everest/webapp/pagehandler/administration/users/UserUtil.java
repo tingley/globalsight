@@ -50,14 +50,10 @@ import com.globalsight.everest.webapp.pagehandler.administration.calendars.Calen
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowTask;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.SortUtil;
-import com.globalsight.util.StringUtil;
+import com.globalsight.util.*;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
-import com.globalsight.webservices.AmbassadorUtil;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -290,7 +286,7 @@ public class UserUtil
         {
             try
             {
-                password = AmbassadorUtil.encryptionString(password);
+                password = SecurityUtil.AES(password);
             }
             catch (Exception e)
             {

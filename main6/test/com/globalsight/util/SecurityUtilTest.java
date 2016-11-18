@@ -14,7 +14,7 @@ public class SecurityUtilTest
     @Test
     public void testEncryptPassword()
     {
-        assertEquals("BE732951EA1C03CF117B1C5D9B0F5527", SecurityUtil.encryptPassword
+        assertEquals("BE732951EA1C03CF117B1C5D9B0F5527", SecurityUtil.AES
                 ("password"));
     }
 
@@ -23,7 +23,7 @@ public class SecurityUtilTest
     {
         try
         {
-            assertEquals("{MD5}5F4DCC3B5AA765D61D8327DEB882CF99", SecurityUtil.encryptMD5Password
+            assertEquals("{MD5}X03MO1qnZdYdgyfeuILPmQ==", SecurityUtil.encryptMD5Password
                     ("password"));
         }
         catch (NoSuchAlgorithmException e)
@@ -37,7 +37,7 @@ public class SecurityUtilTest
     {
         try
         {
-            assertEquals("{sha}5BAA61E4C9B93F3F0682250B6CF8331B7EE68FD8", SecurityUtil
+            assertEquals("{sha}W6ph5Mm5Pz8GgiULbPgzG37mj9g=", SecurityUtil
                     .encryptSHAPassword("password"));
         }
         catch (NoSuchAlgorithmException e)
@@ -90,6 +90,6 @@ public class SecurityUtilTest
     public void testCheckPassword() {
         assertEquals(true, SecurityUtil.checkPassword("password", "password"));
         assertEquals(true, SecurityUtil.checkPassword("password", "BE732951EA1C03CF117B1C5D9B0F5527"));
-        assertEquals(true, SecurityUtil.checkPassword("password", "{MD5}5F4DCC3B5AA765D61D8327DEB882CF99"));
+        assertEquals(true, SecurityUtil.checkPassword("password", "{MD5}X03MO1qnZdYdgyfeuILPmQ=="));
     }
 }

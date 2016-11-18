@@ -23,14 +23,12 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.UserImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.util.SecurityUtil;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.*;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
@@ -703,14 +701,13 @@ public class UserLdapHelper extends LdapHelper
      * 
      * @param passwd
      * @return
+     * @deprecated Using com.globalsight.util.SecurityUtil.MD5(String) instead of this method.
      */
     public static String encyptMD5Password(String passwd)
     {
         try
         {
-            byte[] md5Msg = MessageDigest.getInstance(LDAP_PWD_MD5).digest(
-                    passwd.getBytes());
-            return LDAP_PREFIX_MD5 + new String(new Base64().encode(md5Msg));
+            return SecurityUtil.encryptMD5Password(passwd);
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -726,14 +723,13 @@ public class UserLdapHelper extends LdapHelper
      * 
      * @param passwd
      * @return
+     * @deprecated Using com.globalsight.util.SecurityUtil.SHA(String, String) instead of this method.
      */
     public static String encyptShaPassword(String passwd)
     {
         try
         {
-            byte[] shaMsg = MessageDigest.getInstance(LDAP_PWD_SHA).digest(
-                    passwd.getBytes());
-            return LDAP_PREFIX_SHA + new String(new Base64().encode(shaMsg));
+            return SecurityUtil.encryptSHAPassword(passwd);
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -990,10 +986,7 @@ public class UserLdapHelper extends LdapHelper
     public static void authenticate(String password, String truePassword)
             throws NamingException
     {
-        if (encyptMD5Password(password).equals(truePassword)
-                || password.equals(truePassword)
-                || encyptShaPassword(password).equals(truePassword)
-                || SecurityUtil.encryptPassword(password).equals(truePassword))
+        if (SecurityUtil.checkPassword(password, truePassword))
         {
             return;
         }

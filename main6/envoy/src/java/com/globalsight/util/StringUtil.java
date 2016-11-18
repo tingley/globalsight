@@ -16,36 +16,29 @@
  */
 package com.globalsight.util;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.webapp.applet.createjob.CreateJobUtil;
+import de.innosystec.unrar.Archive;
+import de.innosystec.unrar.rarfile.FileHeader;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
-
-import com.globalsight.everest.company.Company;
-import com.globalsight.everest.webapp.applet.createjob.CreateJobUtil;
-
-import de.innosystec.unrar.Archive;
-import de.innosystec.unrar.rarfile.FileHeader;
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.text.DecimalFormat;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StringUtil
 {
 
     public static final String EMPTY_STRING = "";
     public static final String STRING_SEPARARTOR = ",";
+    public static final char[] HEX_DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
 
     public static String transactSQLInjection(String str)
     {
@@ -743,4 +736,19 @@ public class StringUtil
         }
         return extension;
     }
+
+    /**
+     * Converts bytes to hex string.
+     */
+    public static String toHexString(byte[] bytes) {
+        char[] resultCharArray = new char[bytes.length * 2];
+        int index = 0;
+        for (byte b : bytes)
+        {
+            resultCharArray[index++] = HEX_DIGITS[b >>> 4 & 0xf];
+            resultCharArray[index++] = HEX_DIGITS[b & 0xf];
+        }
+        return new String(resultCharArray);
+    }
+
 }

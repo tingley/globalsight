@@ -866,7 +866,7 @@ public class TaskHelper
 
         if (StringUtil.isNotBlank(password))
         {
-            user.setPassword(SecurityUtil.encryptPassword(password));
+            user.setPassword(SecurityUtil.AES(password));
             user.setResetPasswordTimes(-1);
             user.setPasswordSet(true);
         }

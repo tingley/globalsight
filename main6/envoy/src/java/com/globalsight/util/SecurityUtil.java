@@ -17,20 +17,28 @@ public class SecurityUtil
     static final String MD5 = "MD5";
     static final String PREFIX_MD5 = "{MD5}";
     static final String SHA = "SHA";
+    static final String SHA_256 = "SHA-256";
+    static final String SHA_512 = "SHA-512";
+    static final String AES = "AES";
     static final String PREFIX_SHA = "{sha}";
-    static final char[] HEX_DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
 
+    /**
+     * Verify if password is fit for strength password rules
+     * @param password Input password which need to be verified
+     * @param minLength Minimum length of password should be
+     * @return if the password is strong enough (fit for at least 3 rules), will return true. Otherwise, false will be returned.
+     */
     public static boolean isStrongPassword(String password, int minLength)
     {
         if (StringUtil.isEmpty(password) || password.length() < minLength)
             return false;
 
         Pattern[] patterns = {
-                Pattern.compile("\\d"),
-                Pattern.compile("[a-z]"),
-                Pattern.compile("[A-Z]"),
-                Pattern.compile("\\W")
+                Pattern.compile("\\d"),             //Contain digits 0 - 9
+                Pattern.compile("[a-z]"),           //Contain lowercase characters
+                Pattern.compile("[A-Z]"),          //Contain uppercase characters
+                Pattern.compile("\\W")            //Contain special characters like '$','%'...
         };
 
         int score = 0;
@@ -57,8 +65,23 @@ public class SecurityUtil
         return pass1 != null ? pass1.equals(pass2) : pass2 == null;
     }
 
+    /**
+     * Check if password is correct
+     * Currently, GlobalSight uses different ways to generate/process password which maybe
+     * generated from different way. This means there are ways to test if the password fit for
+     * any one of different encryption algorithms.
+     * All ways to check password are list as below,
+     * 1. Plain text
+     * 2. MD5. It adds prefix string "{MD5}" before md5 string which is coded using Apache Base64 tool
+     * 3. SHA. It adds prefix string "{sha}" before sha string which is codes using Apache Base64 tool
+     * 4. AES. It uses
+     * @param password
+     * @param storedPassword
+     * @return
+     */
     public static boolean checkPassword(String password, String storedPassword)
     {
+        //TODO: After some later builds, we can same the algorithms in generating/checking password
         if (isSame(password, storedPassword))
             return true;
 
@@ -82,14 +105,27 @@ public class SecurityUtil
             {
                 e.printStackTrace();
             }
+
+            if (AES(password).equals(storedPassword))
+                return true;
+
+            if (MD5(password).equals(storedPassword))
+                return true;
+
+            if (SHA(password, SHA_256).equals(storedPassword) || SHA(password, SHA_512).equals(storedPassword))
+                return true;
         }
 
         return false;
     }
 
-    public static String encryptPassword(String password) {
+    public static String AES(String password) {
+        if (StringUtil.isEmpty(password))
+            return password;
+
         try
         {
+            //TODO: It's better to move detail codes from AmbassadorUtil.encryptionString() to here
             password = AmbassadorUtil.encryptionString(password);
         }
         catch (Exception e)
@@ -98,18 +134,38 @@ public class SecurityUtil
         return password;
     }
 
+    /**
+     * Encrypt password using MD5 algorithms
+     * @param passwd
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @deprecated Uing MD5(String) to instead of this method
+     */
     public static String encryptMD5Password(String passwd) throws NoSuchAlgorithmException
     {
-        byte[] md5Msg = MessageDigest.getInstance(MD5).digest(
+        if (StringUtil.isEmpty(passwd))
+            return passwd;
+
+        byte[] md5Msg = MessageDigest.getInstance("MD5").digest(
                 passwd.getBytes());
-        return PREFIX_MD5 + byteArrayToHex(md5Msg);
+        return PREFIX_MD5 + new String(new org.apache.commons.codec.binary.Base64().encode(md5Msg));
     }
 
+    /**
+     * Encrypt password using SHA algorithms
+     * @param passwd
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @deprecated Using SHA(String password, String encryptType) instead of this method
+     */
     public static String encryptSHAPassword(String passwd) throws NoSuchAlgorithmException
     {
+        if (StringUtil.isEmpty(passwd))
+            return passwd;
+
         byte[] shaMsg = MessageDigest.getInstance(SHA).digest(
                 passwd.getBytes());
-        return PREFIX_SHA + byteArrayToHex(shaMsg);
+        return PREFIX_SHA + new String(new org.apache.commons.codec.binary.Base64().encode(shaMsg));
     }
 
     public static String MD5(final String strText)
@@ -118,7 +174,7 @@ public class SecurityUtil
         try
         {
             byte[] md5 = MessageDigest.getInstance("MD5").digest(strText.getBytes());
-            result = byteArrayToHex(md5);
+            result = StringUtil.toHexString(md5);
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -129,27 +185,34 @@ public class SecurityUtil
 
     public static String SHA256(final String strText)
     {
-        return SHA(strText, "SHA-256");
+        return SHA(strText, SHA_256);
     }
 
     public static String SHA512(final String strText)
     {
-        return SHA(strText, "SHA-512");
+        return SHA(strText, SHA_512);
     }
 
-    private static String SHA(final String strText, final String strType)
+    /**
+     * Encrypt string with SHA algorithms.
+     * To enhance the security, this method use SHA-256/SHA-512 to encrypt string
+     * @param string String to be encrypted
+     * @param type Algorithms type, can be set to SHA-256 or SHA-512
+     * @return Encrypted string
+     */
+    private static String SHA(final String string, final String type)
     {
         String strResult = null;
 
-        if (strText != null && strText.length() > 0)
+        if (string != null && string.length() > 0)
         {
             try
             {
-                MessageDigest messageDigest = MessageDigest.getInstance(strType);
-                messageDigest.update(strText.getBytes());
+                MessageDigest messageDigest = MessageDigest.getInstance(type);
+                messageDigest.update(string.getBytes());
                 byte byteBuffer[] = messageDigest.digest();
 
-                strResult = byteArrayToHex(byteBuffer);
+                strResult = StringUtil.toHexString(byteBuffer);
             }
             catch (NoSuchAlgorithmException e)
             {
@@ -158,17 +221,5 @@ public class SecurityUtil
         }
 
         return strResult;
-    }
-
-    public static String byteArrayToHex(byte[] byteArray)
-    {
-        char[] resultCharArray = new char[byteArray.length * 2];
-        int index = 0;
-        for (byte b : byteArray)
-        {
-            resultCharArray[index++] = HEX_DIGITS[b >>> 4 & 0xf];
-            resultCharArray[index++] = HEX_DIGITS[b & 0xf];
-        }
-        return new String(resultCharArray);
     }
 }

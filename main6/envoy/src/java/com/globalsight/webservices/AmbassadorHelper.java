@@ -1235,7 +1235,7 @@ public class AmbassadorHelper extends JsonTypeWebService
                 user.setEmail(p_email.trim());
             if (StringUtil.isNotEmpty(p_password))
 			{
-				user.setPassword(SecurityUtil.encryptPassword(p_password.trim()));
+				user.setPassword(SecurityUtil.AES(p_password.trim()));
 				user.setResetPasswordTimes(-1);
 			}
             user.isInAllProjects(p_isInAllProject);

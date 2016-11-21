@@ -287,6 +287,7 @@ public class UserUtil
             try
             {
                 password = SecurityUtil.AES(password);
+                p_wrapper.setResetPasswordTimes(-1);
             }
             catch (Exception e)
             {

@@ -276,7 +276,7 @@ public class RetrieveUsernamesPassHandler extends PageHandler
         try
         {
             //Encrypt generated random password and store it to DB
-            user.setPassword(SecurityUtil.encryptPassword(password));
+            user.setPassword(SecurityUtil.AES(password));
             user.setResetPasswordTimes(-1);
         } catch (Exception e)
         {

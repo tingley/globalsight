@@ -1239,7 +1239,9 @@ public class DiplomatAPI implements IFormatNames
 
         if (!isSecondFilter)
         {
-            EscapingHelper.handleOutput4Import(m_output, mainFilter);
+//            EscapingHelper.handleOutput4Import(m_output, mainFilter);
+        	//Modified GBS-4117
+            EscapingHelper.newHandleOutput4Import(m_output, mainFilter);
         }
 
         if (m_debug)

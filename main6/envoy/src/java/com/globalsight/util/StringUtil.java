@@ -16,36 +16,29 @@
  */
 package com.globalsight.util;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.webapp.applet.createjob.CreateJobUtil;
+import de.innosystec.unrar.Archive;
+import de.innosystec.unrar.rarfile.FileHeader;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
-
-import com.globalsight.everest.company.Company;
-import com.globalsight.everest.webapp.applet.createjob.CreateJobUtil;
-
-import de.innosystec.unrar.Archive;
-import de.innosystec.unrar.rarfile.FileHeader;
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.text.DecimalFormat;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StringUtil
 {
 
     public static final String EMPTY_STRING = "";
     public static final String STRING_SEPARARTOR = ",";
+    public static final char[] HEX_DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
 
     public static String transactSQLInjection(String str)
     {
@@ -606,141 +599,19 @@ public class StringUtil
         }
         return result;
     }
-    
-    public static List<File> isDisableUploadFileType(Company company, List<File> fileList)
-    {
-        List<File> canNotUploadFiles = new ArrayList<File>();
-        String disableUploadFileTypes = company.getDisableUploadFileTypes();
-        if (isNotEmptyAndNull(disableUploadFileTypes))
-        {
-            Set<String> set = split(disableUploadFileTypes);
-            for (int i = 0; i < fileList.size(); i++)
-            {
-                List<String> extensionList = new ArrayList<String>();
-                try
-                {
-                    if (isSupportedZipFileFormat(fileList.get(i)))
-                    {
-                        if (CreateJobUtil.isZipFile(fileList.get(i)))
-                        {
-                            if (set.contains(".zip"))
-                            {
-                                canNotUploadFiles.add(fileList.get(i));
-                                continue;
-                            }
-                            extensionList = unzipFile(fileList.get(i));
-                        }
-                        else if (CreateJobUtil.isRarFile(fileList.get(i)))
-                        {
-                            if (set.contains(".rar"))
-                            {
-                                canNotUploadFiles.add(fileList.get(i));
-                                continue;
-                            }
-                            extensionList = unrarFile(fileList.get(i));
-                        }
-                        else if (CreateJobUtil.is7zFile(fileList.get(i)))
-                        {
-                            if (set.contains(".7z"))
-                            {
-                                canNotUploadFiles.add(fileList.get(i));
-                                continue;
-                            }
-                            extensionList = un7zFile(fileList.get(i));
-                        }
 
-                        for (int j = 0; j < extensionList.size(); j++)
-                        {
-                            if (set.contains(extensionList.get(i)))
-                            {
-                                canNotUploadFiles.add(fileList.get(i));
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (set.contains(getFileExtension(fileList.get(i).getName())))
-                        {
-                            canNotUploadFiles.add(fileList.get(i));
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
+    /**
+     * Converts bytes to hex string.
+     */
+    public static String toHexString(byte[] bytes) {
+        char[] resultCharArray = new char[bytes.length * 2];
+        int index = 0;
+        for (byte b : bytes)
+        {
+            resultCharArray[index++] = HEX_DIGITS[b >>> 4 & 0xf];
+            resultCharArray[index++] = HEX_DIGITS[b & 0xf];
+        }
+        return new String(resultCharArray);
+    }
 
-            }
-        }
-        return canNotUploadFiles;
-    }
-    
-    private static boolean isSupportedZipFileFormat(File file)
-    {
-        String extension = CreateJobUtil.getFileExtension(file);
-        if ("rar".equalsIgnoreCase(extension) || "zip".equalsIgnoreCase(extension)
-                || "7z".equalsIgnoreCase(extension))
-        {
-            return true;
-        }
-        return false;
-    }
-    
-    private static List<String> unzipFile(File zipFile) throws ZipException
-    {
-        List<String> extensionList = new ArrayList<String>();
-        ZipFile file = new ZipFile(zipFile);
-        List fileHeaderList = file.getFileHeaders();
-        String extension = "";
-        for (int i = 0; i < fileHeaderList.size(); i++)
-        {
-            net.lingala.zip4j.model.FileHeader fileHeader = (net.lingala.zip4j.model.FileHeader) fileHeaderList
-                    .get(i);
-            if (fileHeader != null)
-            {
-                extension = getFileExtension(fileHeader.getFileName());
-                extensionList.add(extension);
-            }
-        }
-        return extensionList;
-    }
-    
-    private static List<String> unrarFile(File rarFile) throws Exception
-    {
-        List<String> extensionList = new ArrayList<String>();
-        Archive archive = new Archive(rarFile);
-        FileHeader fileHeader = archive.nextFileHeader();
-        String extension = "";
-        while (fileHeader != null)
-        {
-            extension = getFileExtension(fileHeader.getFileNameString().trim());
-            fileHeader = archive.nextFileHeader();
-        }
-        return extensionList;
-    }
-    
-    private static List<String> un7zFile(File zip7zfile) throws Exception
-    {
-        List<String> extensionList = new ArrayList<String>();
-        SevenZFile sevenZFile = new SevenZFile(zip7zfile);
-        SevenZArchiveEntry entry = sevenZFile.getNextEntry();
-        String extension = "";
-        while (entry != null)
-        {
-            extension = getFileExtension(entry.getName());
-            entry = sevenZFile.getNextEntry();
-        }
-        return extensionList;
-    }
-    
-    private static String getFileExtension(String fileName)
-    {
-        String extension = "";
-        if (fileName.lastIndexOf(".") != -1)
-        {
-            extension = fileName.substring(fileName.lastIndexOf("."));
-        }
-        return extension;
-    }
 }

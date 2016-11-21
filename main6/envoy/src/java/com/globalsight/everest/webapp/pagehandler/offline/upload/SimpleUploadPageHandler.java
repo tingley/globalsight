@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -38,6 +39,7 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
 
 public class SimpleUploadPageHandler extends PageHandler
@@ -97,8 +99,17 @@ public class SimpleUploadPageHandler extends PageHandler
                     ServletOutputStream out = p_response.getOutputStream();
                     List<File> uploadFileList = new ArrayList<File>();
                     uploadFileList.add(uploadFile);
-                    List<File> canNotUploadFiles = StringUtil.isDisableUploadFileType(
-                            CompanyWrapper.getCompanyById(currentCompanyId), uploadFileList);
+                    String disableUploadFileTypes = CompanyWrapper.getCompanyById(
+            				currentCompanyId).getDisableUploadFileTypes();
+                    List<File> canNotUploadFiles = null;
+                    if (StringUtil.isNotEmptyAndNull(disableUploadFileTypes))
+            		{
+                    	Set<String> disableUploadFileTypeSet = StringUtil
+                    			.split(disableUploadFileTypes);
+                    	canNotUploadFiles = FileUtil.isDisableUploadFileType(
+                    			disableUploadFileTypeSet, uploadFileList);
+            		}
+                    
                     if (canNotUploadFiles != null && canNotUploadFiles.size() > 0)
                     {
                         out.write(((bundle.getString("lb_message_check_upload_file_type") + CompanyWrapper

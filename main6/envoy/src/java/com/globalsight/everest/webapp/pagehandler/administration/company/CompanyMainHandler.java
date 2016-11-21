@@ -738,6 +738,21 @@ public class CompanyMainHandler extends PageActionHandler implements CompanyCons
         company.setEnableDitaChecks("on".equalsIgnoreCase(enableDitaChecks));
         company.setEnableWorkflowStatePosts("on".equalsIgnoreCase(enableWorkflowStatePosts));
         company.setEnableBlankTmSearch("on".equalsIgnoreCase(enableBlankTmSearch));
+		if (StringUtil.isNotEmptyAndNull(disableUploadFileTypes))
+		{
+			String[] arrTypes = disableUploadFileTypes.split(",");
+			disableUploadFileTypes = "";
+			for (String type : arrTypes)
+			{
+				disableUploadFileTypes += type.trim() + ",";
+			}
+
+			if (disableUploadFileTypes.endsWith(","))
+			{
+				disableUploadFileTypes = disableUploadFileTypes.substring(0,
+						disableUploadFileTypes.lastIndexOf(","));
+			}
+		}
         company.setDisableUploadFileTypes(disableUploadFileTypes);
 
         String enableSso = req.getParameter(CompanyConstants.ENABLE_SSO_LOGON);

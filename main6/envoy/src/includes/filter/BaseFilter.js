@@ -463,8 +463,50 @@ BaseFilter.prototype.addTag = function(radioId)
 	{
 		var aName = isEdit ? editItem.aName : "";
 		document.getElementById("baseFilter_escaping_char").value = aName;
+		if(editItem.escape.length != 1)
+		{
+			document.getElementById("baseFilter_escaping_escape").value = "";
+		}
+		else
+		{
+			document.getElementById("baseFilter_escaping_escape").value = editItem.escape ? editItem.escape : "";
+		}
 		document.getElementById("baseFilter_escaping_import").checked = editItem.unEscapeOnImport;
 		document.getElementById("baseFilter_escaping_export").checked = editItem.reEscapeOnExport;
+		document.getElementById("baseFilter_escaping_checkboxActive").checked = editItem.isCheckActive;
+		if(editItem.isCheckActive == true)
+		{
+			var active = document.getElementById("baseFilter_escaping_active");
+			for(var i = 0; i < active.options.length; i++)
+			{
+				if(active.options[i].value == editItem.activeValue){
+					active.options[i].selected = true;
+				}
+			}
+			var partContent = document.getElementById("baseFilter_escaping_partContent");
+			for(var i = 0; i < partContent.options.length; i++)
+			{
+				if(partContent.options[i].value == editItem.partConentValue){
+					partContent.options[i].selected = true;
+				}
+			}
+			if(editItem.partConentValue == "startFinishes")
+			{
+				document.getElementById("baseFilter_escaping_regex").style.display = "block";
+				document.getElementById("baseFilter_escaping_startIsRegex").checked = editItem.startIsRegex;
+				document.getElementById("baseFilter_escaping_startPattern").value = editItem.startPattern ? editItem.startPattern : "";
+				document.getElementById("baseFilter_escaping_finishIsRegex").checked = editItem.finishIsRegex;
+				document.getElementById("baseFilter_escaping_finishPattern").value =editItem.finishPattern ? editItem.finishPattern : "";
+			}
+			else
+			{
+				document.getElementById("baseFilter_escaping_regex").style.display = "none";
+			}
+		}
+		else
+		{
+			document.getElementById("baseFilter_escaping_regex").style.display = "none";
+		}
 		document.getElementById("baseFilter_escaping_priority").value = isEdit ? editItem.priority : "";
 	}
 }
@@ -543,7 +585,9 @@ BaseFilter.prototype.saveEscaping = function()
 	var unEscapeOnImport = document.getElementById("baseFilter_escaping_import").checked;
 	var reEscapeOnExport = document.getElementById("baseFilter_escaping_export").checked;
 	var priority = document.getElementById("baseFilter_escaping_priority").value;
-
+	
+	var escape = document.getElementById("baseFilter_escaping_escape").value;
+	var isCheckActive = document.getElementById("baseFilter_escaping_checkboxActive").checked;
 	if(validate.isEmptyStr(aName.trim()))
 	{
 		document.getElementById("baseFilter_escaping_char").value = "";
@@ -562,13 +606,71 @@ BaseFilter.prototype.saveEscaping = function()
 		return;
 	}
 	
+	var activeValue;
+	var partConentValue;
+	var startIsRegex;
+	var startPattern;
+	var finishIsRegex;
+	var finishPattern;
+	if(isCheckActive == true)
+	{
+		var active = document.getElementById("baseFilter_escaping_active");
+		activeValue = active.options[active.options.selectedIndex].value;
+		var partContent = document.getElementById("baseFilter_escaping_partContent");
+		partConentValue = partContent.options[partContent.options.selectedIndex].value;
+		 if(partConentValue == "startFinishes")
+		 {
+			 startIsRegex = document.getElementById("baseFilter_escaping_startIsRegex").checked;
+			 finishIsRegex = document.getElementById("baseFilter_escaping_finishIsRegex").checked;
+			 
+			 if(startIsRegex != true && finishIsRegex != true)
+			 {
+				 alert(jsPatternMessage);
+				 return false;
+			 }
+			 
+			 if(startIsRegex == true)
+			 {
+				 startPattern = document.getElementById("baseFilter_escaping_startPattern").value.trim();
+				 if(startPattern == null || startPattern == '')
+				 {
+					 alert(jsStartPatternMessage);
+					 return false;
+				 }
+			 }
+			 if(finishIsRegex == true)
+			 {
+				 finishPattern = document.getElementById("baseFilter_escaping_finishPattern").value.trim();
+				 if(finishPattern == null || finishPattern == '')
+				 {
+					 alert(jsFinishPatternMessage);
+					 return false;
+				 }
+			 }
+		 }
+	}
+	
+	
 	var dialogId = "baseFilter_Escaping_Dialog";
 	
 	var enable = baseFilter.editItemEnable;
-	var item = {itemid : itemId, enable : enable, aName : aName.trim(), unEscapeOnImport : unEscapeOnImport, reEscapeOnExport : reEscapeOnExport, priority : priority};
+	var item = {itemid : itemId, enable : enable, aName : aName.trim(), unEscapeOnImport : unEscapeOnImport, reEscapeOnExport : reEscapeOnExport, priority : priority,
+			escape : escape, isCheckActive : isCheckActive, activeValue : activeValue, partConentValue : partConentValue, startIsRegex : startIsRegex, startPattern : startPattern, finishIsRegex : finishIsRegex, finishPattern : finishPattern};
 	
 	baseFilter.addOneItemInCurrentOptions(item);
 	baseFilter.closeTagDialog(dialogId);
+}
+
+BaseFilter.prototype.showRegexTable = function(value)
+{
+	 if(value == "startFinishes")
+	 {
+		 document.getElementById("baseFilter_escaping_regex").style.display = "block";
+	 }
+	 else
+	 {
+		 document.getElementById("baseFilter_escaping_regex").style.display = "none";
+	 }
 }
 
 BaseFilter.prototype.isEscapingExist = function(id, content, unEscapeOnImport, reEscapeOnExport, priority)
@@ -1114,8 +1216,10 @@ BaseFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 		else if (optionValue == baseFilter.optionEscapings)
 		{
 			str.append("<td width='30%' class='tagName_td'>" + jsCharacter + "</td>");
+			str.append("<td class='tagName_td'>" + jsEscape + "</td>");
 			str.append("<td class='tagName_td'>" + jsEscapeImport + "</td>");
 			str.append("<td class='tagName_td'>" + jsEscapeExport + "</td>");
+			str.append("<td class='tagName_td'>" + jsActiveOrInactive + "</td>");
 			str.append("<td class='tagName_td'>" + jsPriority + "</td>");
 		}
 		str.append("</tr>");
@@ -1156,8 +1260,17 @@ BaseFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 				{
 					var encodedName = ruleObj.aName;
 					str.append("<td class='tagValue_td'><a href='#' onclick=\"baseFilter.addTag('" + radioId + "')\">"+encodedName+"</a></td>");
+					if(typeof(ruleObj.escape) =='undefined' || ruleObj.escape.length != 1)
+					{
+						str.append("<td class='tagValue_td'>" + ("") + "</td>");
+					}
+					else
+					{
+						str.append("<td class='tagValue_td'>" + (ruleObj.escape ? ruleObj.escape : "") + "</td>");
+					}
 					str.append("<td class='tagValue_td'>" + (ruleObj.unEscapeOnImport?imgYes:"") + "</td>");
 					str.append("<td class='tagValue_td'>" + (ruleObj.reEscapeOnExport?imgYes:"") + "</td>");
+					str.append("<td class='tagValue_td'>" + (ruleObj.activeValue ? ruleObj.activeValue : "") + "</td>");
 					str.append("<td class='tagValue_td'>" + (ruleObj.priority ? ruleObj.priority : 9) + "</td>");
 				}
 				str.append("</tr>");
@@ -1177,8 +1290,10 @@ BaseFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 		else if (optionValue == baseFilter.optionEscapings)
 		{
 			str.append("<td width='30%' class='tagName_td'>" + jsCharacter + "</td>");
+			str.append("<td class='tagName_td'>" + jsEscape + "</td>");
 			str.append("<td class='tagName_td'>" + jsEscapeImport + "</td>");
 			str.append("<td class='tagName_td'>" + jsEscapeExport + "</td>");
+			str.append("<td class='tagName_td'>" + jsActiveOrInactive + "</td>");
 			str.append("<td class='tagName_td'>" + jsPriority + "</td>");
 		}
 		str.append("</tr>");

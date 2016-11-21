@@ -38,7 +38,6 @@ import com.globalsight.everest.workflow.Activity;
 import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.SecurityUtil;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -47,8 +46,6 @@ import org.hibernate.criterion.Restrictions;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import java.rmi.RemoteException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -1802,23 +1799,6 @@ public class UserManagerLocal implements UserManager
     }
 
     // --------------------- private methods -----------------------
-
-    static String encyptMD5Password(String passwd)
-    {
-        try
-        {
-            byte[] md5Msg = MessageDigest.getInstance(LDAP_PWD_MD5).digest(
-                    passwd.getBytes());
-            return LDAP_PREFIX_MD5 + new String(new Base64().encode(md5Msg));
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            CATEGORY.error("The system didn't support the Md5 ALGORITHM", e);
-        }
-
-        return passwd;
-    }
-    
     /**
      * Add the user's basic info which includes the field security and projects
      * too - but not roles.

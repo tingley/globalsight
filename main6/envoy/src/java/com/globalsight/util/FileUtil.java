@@ -41,6 +41,8 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.webapp.applet.createjob.CreateJobUtil;
+
 /**
  * A util class, let operate file more easy.
  * 
@@ -964,5 +966,85 @@ public class FileUtil
         }
         digest.update(s.getBytes(Charset.forName("UTF-8")));
         return digest.digest();
+    }
+    
+	public static List<File> isDisableUploadFileType(
+			Set<String> disableUploadFileTypeSet, List<File> fileList)
+	{
+		List<File> canNotUploadFiles = new ArrayList<File>();
+		for (int i = 0; i < fileList.size(); i++)
+		{
+			List<String> extensionList = new ArrayList<String>();
+			try
+			{
+				if (CreateJobUtil.isSupportedZipFileFormat(fileList.get(i)))
+				{
+					if (CreateJobUtil.isZipFile(fileList.get(i)))
+					{
+						if (disableUploadFileTypeSet.contains(".zip"))
+						{
+							canNotUploadFiles.add(fileList.get(i));
+							continue;
+						}
+						extensionList = CreateJobUtil
+								.unZipFile(fileList.get(i));
+					}
+					else if (CreateJobUtil.isRarFile(fileList.get(i)))
+					{
+						if (disableUploadFileTypeSet.contains(".rar"))
+						{
+							canNotUploadFiles.add(fileList.get(i));
+							continue;
+						}
+						extensionList = CreateJobUtil
+								.unRarFile(fileList.get(i));
+					}
+					else if (CreateJobUtil.is7zFile(fileList.get(i)))
+					{
+						if (disableUploadFileTypeSet.contains(".7z"))
+						{
+							canNotUploadFiles.add(fileList.get(i));
+							continue;
+						}
+						extensionList = CreateJobUtil.un7ZFile(fileList.get(i));
+					}
+
+					for (int j = 0; j < extensionList.size(); j++)
+					{
+						if (disableUploadFileTypeSet.contains(extensionList
+								.get(i)))
+						{
+							canNotUploadFiles.add(fileList.get(i));
+							break;
+						}
+					}
+				}
+				else
+				{
+					if (disableUploadFileTypeSet
+							.contains(getFileExtension(fileList.get(i)
+									.getName())))
+					{
+						canNotUploadFiles.add(fileList.get(i));
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+
+		}
+		return canNotUploadFiles;
+	}
+	
+    public static String getFileExtension(String fileName)
+    {
+        String extension = "";
+        if (fileName.lastIndexOf(".") != -1)
+        {
+            extension = fileName.substring(fileName.lastIndexOf("."));
+        }
+        return extension;
     }
 }

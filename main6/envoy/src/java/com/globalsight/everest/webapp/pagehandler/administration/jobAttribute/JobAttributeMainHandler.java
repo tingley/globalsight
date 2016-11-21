@@ -57,6 +57,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.F
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.zip.ZipIt;
@@ -476,8 +477,17 @@ public class JobAttributeMainHandler extends PageActionHandler
 
                 List<File> uploadFileList = new ArrayList<File>();
                 uploadFileList.add(targetFile);
-                List<File> canNotUploadFiles = StringUtil.isDisableUploadFileType(
-                        CompanyWrapper.getCompanyById(currentCompanyId), uploadFileList);
+                String disableUploadFileTypes = CompanyWrapper.getCompanyById(
+        				currentCompanyId).getDisableUploadFileTypes();
+                List<File> canNotUploadFiles = null;
+                if (StringUtil.isNotEmptyAndNull(disableUploadFileTypes))
+        		{
+                	Set<String> disableUploadFileTypeSet = StringUtil
+                			.split(disableUploadFileTypes);
+                	canNotUploadFiles = FileUtil.isDisableUploadFileType(
+                			disableUploadFileTypeSet, uploadFileList);
+        		}
+                
                 if (canNotUploadFiles != null && canNotUploadFiles.size() > 0)
                 {
                     Map<String, Object> returnValue = new HashMap();

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -56,6 +57,7 @@ import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.log.OperationLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.progress.ProcessStatus;
@@ -290,8 +292,17 @@ public class TmImportPageHandler extends PageHandler implements
                 String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
                 List<File> uploadFileList = new ArrayList<File>();
                 uploadFileList.add(uploadFile);
-                List<File> canNotUploadFiles = StringUtil.isDisableUploadFileType(
-                        CompanyWrapper.getCompanyById(currentCompanyId), uploadFileList);
+                String disableUploadFileTypes = CompanyWrapper.getCompanyById(
+        				currentCompanyId).getDisableUploadFileTypes();
+                List<File> canNotUploadFiles = null;
+                if (StringUtil.isNotEmptyAndNull(disableUploadFileTypes))
+        		{
+                	Set<String> disableUploadFileTypeSet = StringUtil
+                			.split(disableUploadFileTypes);
+                	canNotUploadFiles = FileUtil.isDisableUploadFileType(
+                			disableUploadFileTypeSet, uploadFileList);
+        		}
+                
                 if (canNotUploadFiles != null && canNotUploadFiles.size() > 0)
                 {
                     out.write(((bundle.getString("lb_message_check_upload_file_type") + CompanyWrapper

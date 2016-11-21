@@ -385,18 +385,23 @@ function doOnUnload()
 
 function selectValue(select, value)
 {
-    for (var i = 0; i < select.length; ++i)
-    {
-        if (select.options[i].value == value)
-        {
-            select.selectedIndex = i;
-            return;
-        }
-    }
+	if (select != null) {
+		for (var i = 0; i < select.length; ++i)
+		{
+			if (select.options[i].value == value)
+			{
+				select.selectedIndex = i;
+				return;
+			}
+		}
+	}
 }
 //Fix for GBS-2383, add no-existing option user uploaded
 function selectCategory(select, value)
 {
+	if (select == null)
+		return;
+	
 	for (var i = 0; i < select.length; ++i)
 	{
 		if (select.options[i].value == value)
@@ -412,6 +417,8 @@ function selectCategory(select, value)
 
 function getSelectedValue(select)
 {
+	if (select == null)
+		return "";
     return select.options[select.selectedIndex].value;
 }
 

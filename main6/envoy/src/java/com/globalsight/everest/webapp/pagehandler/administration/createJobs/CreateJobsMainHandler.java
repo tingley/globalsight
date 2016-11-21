@@ -215,8 +215,17 @@ public class CreateJobsMainHandler extends PageHandler
                 try
                 {
                     uploadedFiles = uploadSelectedFile(request, tempFolder, type,"checkUploadFileType");
-                    List<File> canNotUploadFiles = StringUtil.isDisableUploadFileType(
-                          CompanyWrapper.getCompanyById(currentCompanyId), uploadedFiles);
+                    String disableUploadFileTypes = CompanyWrapper.getCompanyById(
+            				currentCompanyId).getDisableUploadFileTypes();
+                    List<File> canNotUploadFiles = null;
+                    if (StringUtil.isNotEmptyAndNull(disableUploadFileTypes))
+            		{
+                    	Set<String> disableUploadFileTypeSet = StringUtil
+                    			.split(disableUploadFileTypes);
+                    	canNotUploadFiles = FileUtil.isDisableUploadFileType(
+                    			disableUploadFileTypeSet, uploadedFiles);
+            		}
+                    
                     if (canNotUploadFiles != null && canNotUploadFiles.size() > 0)
                     {
                         out.write(((bundle.getString("lb_message_check_upload_file_type") + CompanyWrapper

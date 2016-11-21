@@ -491,7 +491,7 @@ public class CreateCompanyUtil
         wrapper.setFirstName(p_userName);
         wrapper.setLastName(p_userName);
         wrapper.setCompanyName(p_company.getCompanyName());
-        wrapper.setPassword(SecurityUtil.encryptPassword(DEFAULT_USER_PASSWORD));
+        wrapper.setPassword(SecurityUtil.AES(DEFAULT_USER_PASSWORD));
         wrapper.setEmail(DEFAULT_EMAIL);
         wrapper.setDefaultUILocale(DEFAULT_UI_LOCALE);
         wrapper.setCurCompanyId(String.valueOf(p_company.getId()));

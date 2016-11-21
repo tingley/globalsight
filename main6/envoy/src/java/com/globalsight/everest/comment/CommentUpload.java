@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -163,8 +164,17 @@ public class CommentUpload
             File uploadFile = saveUploadFile();
             List<File> fileList = new ArrayList<File>();
             fileList.add(uploadFile);
-            List<File> canNotUploadFiles = StringUtil.isDisableUploadFileType(
-                    CompanyWrapper.getCompanyById(currentCompanyId), fileList);
+            String disableUploadFileTypes = CompanyWrapper.getCompanyById(
+    				currentCompanyId).getDisableUploadFileTypes();
+            List<File> canNotUploadFiles = null;
+            if (StringUtil.isNotEmptyAndNull(disableUploadFileTypes))
+    		{
+            	Set<String> disableUploadFileTypeSet = StringUtil
+            			.split(disableUploadFileTypes);
+            	canNotUploadFiles = FileUtil.isDisableUploadFileType(
+            			disableUploadFileTypeSet, fileList);
+    		}
+            
             return canNotUploadFiles;
         }
         catch (SecurityException se)

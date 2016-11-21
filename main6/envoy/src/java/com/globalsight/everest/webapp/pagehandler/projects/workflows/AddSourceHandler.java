@@ -712,8 +712,16 @@ public class AddSourceHandler extends PageActionHandler
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         List<File> uploadFiles = new ArrayList<File>();
         uploadFiles.add(trg);
-        List<File> canNotUploadFiles = StringUtil.isDisableUploadFileType(
-                CompanyWrapper.getCompanyById(currentCompanyId), uploadFiles);
+		String disableUploadFileTypes = CompanyWrapper.getCompanyById(
+				currentCompanyId).getDisableUploadFileTypes();
+		List<File> canNotUploadFiles = null;
+		if (StringUtil.isNotEmptyAndNull(disableUploadFileTypes))
+		{
+			Set<String> disableUploadFileTypeSet = StringUtil
+					.split(disableUploadFileTypes);
+			canNotUploadFiles = FileUtil.isDisableUploadFileType(
+					disableUploadFileTypeSet, uploadFiles);
+		}
         
         if (canNotUploadFiles != null && canNotUploadFiles.size() > 0)
         {

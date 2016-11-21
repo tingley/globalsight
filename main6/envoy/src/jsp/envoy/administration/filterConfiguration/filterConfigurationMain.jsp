@@ -896,7 +896,9 @@ session="true" %>
                             </div>
                             <div id="div_button_base_filter" style="margin-left:45px;margin-right:45px;margin-top:10px;margin-bottom:10px;">
                                 <center>
-                                    <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='saveBaseFilter()'/><input type='button' value='<%=bundle.getString("lb_priority_edit")%>' onclick='baseFilter.generatePriorityTagTableContent()'/><input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('baseFilterDialog'); baseFilter.closeAllTagPopup()"/>
+                                    <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='saveBaseFilter()'/>
+                                    <input type='button' value='<%=bundle.getString("lb_priority_edit")%>' onclick='baseFilter.generatePriorityTagTableContent()'/>
+                                    <input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('baseFilterDialog'); baseFilter.closeAllTagPopup()"/>
                                 </center>
                             </div>
                         </div>
@@ -932,18 +934,22 @@ session="true" %>
                         </div>
                     </span>
                     <span id="baseFilter_escapings">
-                        <div id='baseFilter_Escaping_Dialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:400px;position:absolute;top:120px;z-index:22'>
+                        <div id='baseFilter_Escaping_Dialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:510px;position:absolute;top:120px;z-index:22'>
                             <div id='baseFilter_Escaping_DialogT' onmousedown="DragAndDrop(document.getElementById('baseFilter_Escaping_Dialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
                                 <label class='whiteBold'>
                                      <%=bundle.getString("lb_filter_basefilter_escape")%>
                                 </label>
                             </div>
                             <div style='margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px'>
-                                <table width="360px" cellpadding="3" border="0" cellspacing="1">
+                                <table width="480px" cellpadding="3" border="0" cellspacing="1">
                                     <tr>
                                         <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_basefilter_escape_char")%>:</td>
                                         <td class='htmlFilter_right_td'><input type='text' id='baseFilter_escaping_char' maxlength="1"></td>
-                                    </tr>               
+                                    </tr>
+                                    <tr>
+                                        <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_basefilter_escape_escape")%>:</td>
+                                        <td class='htmlFilter_right_td'><input type='text' id='baseFilter_escaping_escape' maxlength="1"></td>
+                                    </tr>           
                                     <tr>
                                         <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_basefilter_escape_import")%>:</td>
                                         <td class='htmlFilter_right_td'><input type='checkbox' id='baseFilter_escaping_import'></input></td>
@@ -951,6 +957,40 @@ session="true" %>
                                     <tr>
                                         <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_basefilter_escape_export")%>:</td>
                                         <td class='htmlFilter_right_td'><input type='checkbox' id='baseFilter_escaping_export'></input></td>
+                                    </tr>
+                                    <tr>
+                                        <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_basefilter_escape_activeorinactive")%>:</td>
+                                        <td class='htmlFilter_right_td'>
+	                                        <input type='checkbox' id='baseFilter_escaping_checkboxActive'></input>
+	                                        <select id="baseFilter_escaping_active" onChange="">
+												<option value="active"><%=bundle.getString("lb_filter_basefilter_escape_active")%></option>
+												<option value="inactive"><%=bundle.getString("lb_filter_basefilter_escape_inactive")%></option>
+											</select>
+	                                        <select id="baseFilter_escaping_partContent" onChange="baseFilter.showRegexTable(this.value);">
+												<option value="cdata"><%=bundle.getString("lb_filter_basefilter_escape_cdata")%></option>
+												<option value="startFinishes"><%=bundle.getString("lb_filter_basefilter_escape_startFinish")%></option>
+												<option value="htmlXmlNode"><%=bundle.getString("lb_filter_basefilter_escape_htmlOrxmlNode")%></option>
+												<option value="xmlAttribute"><%=bundle.getString("lb_filter_basefilter_escape_xmlAttribute")%></option>
+											</select><br>
+											<table id="baseFilter_escaping_regex" style="display:none">
+												<tr>
+													<td class='baseFilter_left_td'><%=bundle.getString("lb_filter_basefilter_escape_startIsRegex")%></td>
+													<td class='htmlFilter_right_td'><input type='checkbox' id='baseFilter_escaping_startIsRegex'></input></td>
+												</tr>
+												<tr>
+													<td class='baseFilter_left_td'><%=bundle.getString("lb_filter_basefilter_escape_startPattern")%></td>
+													<td class='htmlFilter_right_td'><input type='text' id='baseFilter_escaping_startPattern'></input></td>
+												</tr>
+												<tr>
+													<td class='baseFilter_left_td'><%=bundle.getString("lb_filter_basefilter_escape_finishIsRegex")%></td>
+													<td class='htmlFilter_right_td'><input type='checkbox' id='baseFilter_escaping_finishIsRegex'></input></input></td>
+												</tr>
+												<tr>
+													<td class='baseFilter_left_td'><%=bundle.getString("lb_filter_basefilter_escape_finishPattern")%></td>
+													<td class='htmlFilter_right_td'><input type='text' id='baseFilter_escaping_finishPattern'></input></input></td>
+												</tr>
+											</table>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class='htmlFilter_left_td'><%=bundle.getString("lb_priority")%>:</td>

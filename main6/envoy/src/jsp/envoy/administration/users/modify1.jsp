@@ -372,27 +372,27 @@ $(document).ready(function(){
   <TR>
     <TD VALIGN="TOP"><%= lbUserName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
     <TD >
-      <amb:textfield maxlength="40" name="userName" value="<%= userName %>" class="standardText width100" />
+      <amb:textfield maxlength="40" name="userName" value="<%= userName %>" styleClass="standardText width100" />
     </TD>
   </TR>
   <% if (enableSSO) { %>
   <TR>
     <TD VALIGN="TOP"><%= lbSsoUserName %>:</TD>
     <TD >
-      <amb:textfield maxlength="40" name="ssoUserName" value="<%= ssoUserName %>" class="standardText width100" access='<%=(String)hash.get(UserSecureFields.SSO_USER_NAME)%>' />
+      <amb:textfield maxlength="40" name="ssoUserName" value="<%= ssoUserName %>" styleClass="standardText width100" access='<%=(String)hash.get(UserSecureFields.SSO_USER_NAME)%>' />
     </TD>
   </TR>
   <% } %>
   <TR>
     <TD VALIGN="TOP"><%= lbFirstName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
     <TD >
-      <amb:textfield maxlength="40" name="firstName" value="<%= firstName %>" class="standardText width100" access='<%=(String)hash.get(UserSecureFields.FIRST_NAME)%>' />
+      <amb:textfield maxlength="40" name="firstName" value="<%= firstName %>" styleClass="standardText width100" access='<%=(String)hash.get(UserSecureFields.FIRST_NAME)%>' />
     </TD>
   </TR>
   <TR>
     <TD VALIGN="TOP"><%= lbLastName%><SPAN CLASS="asterisk">*</SPAN>:</TD>
     <TD >
-      <amb:textfield maxlength="40" name="lastName" value="<%= lastName %>" class="standardText width100" access='<%=(String)hash.get(UserSecureFields.LAST_NAME)%>' />
+      <amb:textfield maxlength="40" name="lastName" value="<%= lastName %>" styleClass="standardText width100" access='<%=(String)hash.get(UserSecureFields.LAST_NAME)%>' />
     </TD>
   </TR>
   
@@ -431,7 +431,7 @@ $(document).ready(function(){
   <TR>
     <TD VALIGN="TOP"><%= lbTitle %>:</TD>
     <TD>
-      <amb:textfield maxlength="40" class="standardText width100" name="title" value="<%= userTitle %>" access='<%=(String)hash.get(UserSecureFields.TITLE)%>' />
+      <amb:textfield maxlength="40" styleClass="standardText width100" name="title" value="<%= userTitle %>" access='<%=(String)hash.get(UserSecureFields.TITLE)%>' />
     </TD>
   </TR>
   <TR>

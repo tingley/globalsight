@@ -48,7 +48,8 @@
     
     boolean isEnableWorkflowStatePosts = false;
     Company company = CompanyWrapper.getCurrentCompany();
-    isEnableWorkflowStatePosts = company.getEnableWorkflowStatePosts();
+	if (company != null)
+		isEnableWorkflowStatePosts = company.getEnableWorkflowStatePosts();
 %>
 <HTML>
 <!-- This JSP is envoy/login/welcome.jsp -->
@@ -452,7 +453,6 @@ function openWizardWindow(url)
 </TABLE>
 </DIV>
 </BODY>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.11.3.min.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/gscommon.js"></SCRIPT>
 <script>

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +34,7 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
 
 public class GlossaryUpload
@@ -139,8 +141,17 @@ public class GlossaryUpload
             File uploadFile = saveUploadFile();
             List<File> fileList = new ArrayList<File>();
             fileList.add(uploadFile);
-            List<File> canNotUploadFiles = StringUtil.isDisableUploadFileType(
-                    CompanyWrapper.getCompanyById(currentCompanyId), fileList);
+            String disableUploadFileTypes = CompanyWrapper.getCompanyById(
+    				currentCompanyId).getDisableUploadFileTypes();
+            List<File> canNotUploadFiles = null;
+            if (StringUtil.isNotEmptyAndNull(disableUploadFileTypes))
+    		{
+            	Set<String> disableUploadFileTypeSet = StringUtil
+            			.split(disableUploadFileTypes);
+            	canNotUploadFiles = FileUtil.isDisableUploadFileType(
+            			disableUploadFileTypeSet, fileList);
+    		}
+            
             return canNotUploadFiles;
         }
         catch (SecurityException se)

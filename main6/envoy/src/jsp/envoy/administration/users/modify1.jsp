@@ -437,7 +437,7 @@ $(document).ready(function(){
   <TR>
     <TD VALIGN="TOP"><%= lbWssePassword %>:</TD>
     <TD>
-      <amb:textfield maxlength="40"  class="standardText width100" name="wssePassword" value="<%= wssePassword %>" access='<%=(String)hash.get(UserSecureFields.WSSE_PASSWORD)%>' />
+      <amb:textfield maxlength="40"  styleClass="standardText width100" name="wssePassword" value="<%= wssePassword %>" access='<%=(String)hash.get(UserSecureFields.WSSE_PASSWORD)%>' />
     </TD>
   </TR>
   <TR>

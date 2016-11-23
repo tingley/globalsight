@@ -38,6 +38,8 @@ import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.cxe.entity.filterconfiguration.ValidateException;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.DefinedAttributeComparator;
@@ -53,6 +55,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.jobAttribute.Jo
 import com.globalsight.util.Assert;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -404,6 +407,70 @@ public class SetAttributeHandler extends PageActionHandler
         return label.toString();
     }
 
+	@ActionHandler(action = AttributeConstant.CHECK_UPLOAD_FILE_TYPE, formClass = "")
+	public void checkUploadFileType(HttpServletRequest request,
+			HttpServletResponse response, Object form) throws Exception
+	{
+		logger.debug("Check upload file type ...");
+		response.setContentType("text/html;charset=UTF-8");
+		ServletOutputStream out = response.getOutputStream();
+		ResourceBundle bundle = PageHandler.getBundle(request.getSession(false));
+		String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+		try
+		{
+			FileUploader uploader = new FileUploader();
+			File file = uploader.upload(request);
+			String attributeName = uploader.getFieldValue("attributeName");
+			String root = JobAttributeFileManager.getStorePath(uuid) + "/"
+					+ attributeName + "/checkUploadFile";
+
+			if (uploader.getName().length() > 0)
+			{
+				File targetFile = new File(root + "/" + uploader.getName());
+				if (!file.renameTo(targetFile))
+				{
+					FileUtils.copyFile(file, targetFile);
+				}
+				
+				List<File> uploadFileList = new ArrayList<File>();
+                uploadFileList.add(targetFile);
+                String disableUploadFileTypes = CompanyWrapper.getCompanyById(
+        				currentCompanyId).getDisableUploadFileTypes();
+                List<File> canNotUploadFiles = null;
+                if (StringUtil.isNotEmptyAndNull(disableUploadFileTypes))
+        		{
+                	Set<String> disableUploadFileTypeSet = StringUtil
+                			.split(disableUploadFileTypes);
+                	canNotUploadFiles = FileUtil.isDisableUploadFileType(
+                			disableUploadFileTypeSet, uploadFileList);
+        		}
+                
+                if (canNotUploadFiles != null && canNotUploadFiles.size() > 0)
+                {
+                    out.write(((bundle.getString("lb_message_check_upload_file_type") + CompanyWrapper
+                            .getCompanyById(currentCompanyId).getDisableUploadFileTypes()))
+                            .getBytes("UTF-8"));
+                }
+                else
+                {
+                    out.write(("notContain").getBytes("UTF-8"));
+                }
+                targetFile.delete();
+                targetFile.getParentFile().delete();
+                return;
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage(), e);
+		}
+		finally
+		{
+			pageReturn();
+		}
+		logger.debug("Check upload file type finished");
+	}
+	
     @ActionHandler(action = AttributeConstant.EDIT_FILE, formClass = "")
     public void saveFile(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception

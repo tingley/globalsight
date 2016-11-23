@@ -172,7 +172,7 @@ function filterJob()
         searchForm.jobNameList.options.add(varItem);
         searchForm.submitButton.disabled = true;
 
-        var url ="${self.pageURL}&action=getReportJobInfo";
+        var url ="${self.pageURL}&activityName=xlsReportFileList&action=getReportJobInfo";
         $.getJSON(url, function(data) {
 			reportJobInfo = data;
 			filterJob2();

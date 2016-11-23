@@ -37,6 +37,7 @@ import java.util.Vector;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -51,6 +52,7 @@ import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.glossaries.GlossaryException;
@@ -76,6 +78,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 
 import de.innosystec.unrar.rarfile.FileHeader;
 
@@ -128,6 +131,48 @@ public class AddSourceFilesHandler extends PageHandler
             deleteFile(request);
             return;
         }
+		else if ("checkUploadFileType".equals(action))
+		{
+			response.setContentType("text/html;charset=UTF-8");
+            ServletOutputStream out = response.getOutputStream();
+            String tempFolder = request.getParameter("tempFolder");
+            List<File> uploadedFiles = new ArrayList<File>();
+            try
+            {
+                uploadedFiles = uploadSelectedFile(request, tempFolder,"checkUploadFileType");
+                String disableUploadFileTypes = CompanyWrapper.getCompanyById(
+        				currentCompanyId).getDisableUploadFileTypes();
+                List<File> canNotUploadFiles = null;
+                if (StringUtil.isNotEmptyAndNull(disableUploadFileTypes))
+        		{
+                	Set<String> disableUploadFileTypeSet = StringUtil
+                			.split(disableUploadFileTypes);
+                	canNotUploadFiles = FileUtil.isDisableUploadFileType(
+                			disableUploadFileTypeSet, uploadedFiles);
+        		}
+                
+                if (canNotUploadFiles != null && canNotUploadFiles.size() > 0)
+                {
+                    out.write(((bundle.getString("lb_message_check_upload_file_type") + CompanyWrapper
+                            .getCompanyById(currentCompanyId).getDisableUploadFileTypes()))
+                            .getBytes("UTF-8"));
+                    for (File file : canNotUploadFiles)
+                    {
+                        file.delete();
+                    }
+                }
+                else
+                {
+                    out.write(("notContain").getBytes("UTF-8"));
+                }
+                return;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            return;
+		}
         else if ("uploadSelectedFile".equals(action))
         {
             uploadSelectedFile(request, response);
@@ -520,17 +565,27 @@ public class AddSourceFilesHandler extends PageHandler
         return false;
     }
 
-    private List<File> uploadSelectedFile(HttpServletRequest request, String tempFolder) throws GlossaryException, IOException
-    {
+	private List<File> uploadSelectedFile(HttpServletRequest request,
+			String tempFolder, String methodParamter) throws GlossaryException,
+			IOException
+	{
         File parentFile = null;
         List<String> fileNames = new ArrayList<String>();
         List<File> uploadedFiles = new ArrayList<File>();
         File saveDir = AmbFileStoragePathUtils.getCxeDocDir();
         String baseTmpDir = saveDir + File.separator + TMP_FOLDER_NAME;
-        parentFile = new File(baseTmpDir + File.separator + tempFolder);
+        if (methodParamter.equals("checkUploadFileType"))
+        {
+            parentFile = new File(baseTmpDir + File.separator + tempFolder + File.separator
+                    + "checkUploadFile");
+        }
+        else if (methodParamter.equals("uploadSelectedFile"))
+        {
+            parentFile = new File(baseTmpDir + File.separator + tempFolder);
+        }
         parentFile.mkdirs();
 
-        fileNames = uploadFile(request, parentFile);
+		fileNames = uploadFile(request, parentFile, methodParamter);
         for (String fileName : fileNames)
         {
             File uploadedFile = new File(fileName);
@@ -539,9 +594,10 @@ public class AddSourceFilesHandler extends PageHandler
         return uploadedFiles;
     }
     
-    private List<String> uploadFile(HttpServletRequest p_request, File parentFile)
-            throws GlossaryException, IOException
-    {
+	private List<String> uploadFile(HttpServletRequest p_request,
+			File parentFile, String methodParamter) throws GlossaryException,
+			IOException
+	{
         byte[] inBuf = new byte[MAX_LINE_LENGTH];
         int bytesRead;
         ServletInputStream in;
@@ -550,15 +606,28 @@ public class AddSourceFilesHandler extends PageHandler
         String filePath = "";
         String path = parentFile.getPath() + File.separator;
         List<String> filePaths = new ArrayList<String>();
-        File file = new File(path);
+        Set<String> checkFileNames = new HashSet<String>();
         Set<String> uploadedFileNames = new HashSet<String>();
-        for (File f : file.listFiles())
-        {
-            if (!existedAndAddedFiles.contains(f.getName()))
-            {
-                uploadedFileNames.add(f.getName());
-            }
-        }
+        if (methodParamter.equals("uploadSelectedFile"))
+		{
+			File file = new File(path);
+			for (File f : file.listFiles())
+			{
+				if (f.isFile())
+				{
+					if (!existedAndAddedFiles.contains(f.getName()))
+					{
+						uploadedFileNames.add(f.getName());
+					}
+				}
+			}
+			String checkPath = path + "checkUploadFile" + File.separator;
+			File checkFile = new File(checkPath);
+			for (File f : checkFile.listFiles())
+			{
+				checkFileNames.add(f.getName());
+			}
+		}
 
         // Let's make sure that we have the right type of content
         //
@@ -636,6 +705,26 @@ public class AddSourceFilesHandler extends PageHandler
                         continue;
                     }
 
+                    if (!uploadedFileNames.contains(fileName) && checkFileNames.contains(fileName))
+                    {
+                        filePath = path + fileName;
+                        filePaths.add(filePath);
+                        File srcFile = new File(path + "checkUploadFile" + File.separator+fileName+ File.separator);
+                        File targetFile = new File(filePath);
+                        FileUtil.copyFile(srcFile, targetFile);
+                        srcFile.delete();
+                        //delete "checkUploadFile" file
+                        File checkUploadFile = new File(path + "checkUploadFile" + File.separator);
+                        if (checkUploadFile.isDirectory())
+						{
+							if (!(checkUploadFile.listFiles().length > 0))
+							{
+								checkUploadFile.delete();
+							}
+						}
+                        continue;
+                    }
+                    
                     filePath = path + fileName;
                     filePaths.add(filePath);
                     File m_tempFile = new File(filePath);
@@ -1277,7 +1366,8 @@ public class AddSourceFilesHandler extends PageHandler
         PrintWriter writer = response.getWriter();
         try
         {
-            uploadedFiles = uploadSelectedFile(request, tempFolder);
+			uploadedFiles = uploadSelectedFile(request, tempFolder,
+					"uploadSelectedFile");
             for (File uploadedFile : uploadedFiles)
             {
                 StringBuffer ret = new StringBuffer("[");

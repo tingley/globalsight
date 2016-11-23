@@ -1260,7 +1260,7 @@ BaseFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 				{
 					var encodedName = ruleObj.aName;
 					str.append("<td class='tagValue_td'><a href='#' onclick=\"baseFilter.addTag('" + radioId + "')\">"+encodedName+"</a></td>");
-					if(ruleObj.escape.length != 1)
+					if(typeof(ruleObj.escape) =='undefined' || ruleObj.escape.length != 1)
 					{
 						str.append("<td class='tagValue_td'>" + ("") + "</td>");
 					}

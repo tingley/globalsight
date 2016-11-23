@@ -210,7 +210,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         List<GlobalSightLocale> mtedTargetLocales = new ArrayList<GlobalSightLocale>();
         findMTedJobs(jobs, p_selectedTargetLocales, mtedJobs, mtedTargetLocales);
 
-        Workbook workBook = new SXSSFWorkbook();
+        Workbook workBook = new SXSSFWorkbook(1000);
         Sheet summarySheet = workBook.createSheet(m_bundle.getString("lb_summary"));
         Map<GlobalSightLocale, Sheet> detailedSheets = new HashMap<GlobalSightLocale, Sheet>();
         for (GlobalSightLocale locale : mtedTargetLocales)

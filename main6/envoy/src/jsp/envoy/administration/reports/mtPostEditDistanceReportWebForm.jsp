@@ -25,8 +25,6 @@
     
     Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
 
-    List<ReportJobInfo> reportJobInfoList = 
-            (List<ReportJobInfo>) request.getAttribute(ReportConstants.REPORTJOBINFO_LIST);
     ArrayList<GlobalSightLocale> targetLocales =
             (ArrayList<GlobalSightLocale>) request.getAttribute(ReportConstants.TARGETLOCALE_LIST);
     List<Project> projectList =
@@ -42,33 +40,35 @@
 <script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT LANGUAGE="JAVASCRIPT">
+//All job info list.
+var reportJobInfo;
 
 function validateForm()
 {
     if(searchForm.reportOnJobId.checked)
     {
         var jobIDArr =  searchForm.jobIds.value.split(",");
-        var idInput=$("#jobNameList").find("option");
-		var idArray=new Array();
-		idInput.each(function(){
-			idArray.push({"jobId":$(this).val()});
-		})
-        if(!validateIDS(jobIDArr, idArray))
+//        var idInput=$("#jobNameList").find("option");
+//		var idArray=new Array();
+//		idInput.each(function(){
+//			idArray.push({"jobId":$(this).val()});
+//		});
+
+		if(!validateIDS(jobIDArr, null))
         {
         	$("#jobNameList").attr("selected", true);
            return ('<%=bundle.getString("lb_invalid_jobid")%>');
         }
     }
-    if(searchForm.reportOnJobName.checked){
-	    var len=$("#jobNameList").find("option:selected").length;
-	    if(len==0){
-	    	var ops=$("#jobNameList").children();
-	    	if(ops.length==0){
-	    		return ('<%=bundle.getString("msg_invalid_jobName")%>');
-	    	}else{
-	    		ops.attr("selected", true);
-	    	}
-	    	
+    if(searchForm.reportOnJobName.checked) {
+        var len = $("#jobNameList").find("option:selected").length;
+        if(len == 0) {
+            var ops = $("#jobNameList").children();
+            if(ops.length == 0) {
+                return ('<%=bundle.getString("msg_invalid_jobName")%>');
+            } else {
+                ops.attr("selected", true);
+            }
 	    }
 	}
     return "";
@@ -134,88 +134,96 @@ function submitForm()
 
 function filterJob()
 {
-   if(searchForm.reportOnJobId.checked)
-   {
-       return;   
-   }
-   searchForm.jobNameList.options.length=0;
-   
-   //selected job status
-   var currSelectValueJobStatus = new Array();
-   for(i=0;i<searchForm.jobStatus.length;i++)
-   {
-      var op= searchForm.jobStatus.options[i];
-      if(op.selected)
-      {
-          currSelectValueJobStatus.push(op.value);
-      }
-   } 
-   
-   //selected target locales
-   var currSelectValueTargetLocale = new Array();
-   for(i=0;i<searchForm.targetLocalesList.length;i++)
-   {
-      var op= searchForm.targetLocalesList.options[i];
-      if(op.selected)
-      {
-          currSelectValueTargetLocale.push(op.value);
-      }
-   }
-   
-   //selected project
-   var currSelectValueProject = new Array();
-   for(i=0;i<searchForm.projectNameList.length;i++)
-   {
-      var op= searchForm.projectNameList.options[i];
-      if(op.selected)
-      {
-          currSelectValueProject.push(op.value);
-      }
-   }
-   
-   <%
-     Iterator<ReportJobInfo> it = reportJobInfoList.iterator();
-     while (it.hasNext())
-     {
-         ReportJobInfo j = it.next();
-          %>
-          if(contains(currSelectValueProject, "<%=j.getProjectId()%>"))
-          {
-            if(contains(currSelectValueJobStatus, "<%=j.getJobState()%>"))
+    if(searchForm.reportOnJobId.checked)
+    {
+        return;
+    }
+
+    // If job list is null, initialize it first.
+    if (reportJobInfo == null)
+    {
+    	var varItem = new Option("Loading jobs, please wait ...", "-1");
+        searchForm.jobNameList.options.add(varItem);
+        searchForm.submitButton.disabled = true;
+
+        var url ="${self.pageURL}&activityName=MTPostEditDistanceReport&action=getReportJobInfo";
+        $.getJSON(url, function(data) {
+			reportJobInfo = data;
+			filterJob2();
+	    });
+    }
+    else
+    {
+        filterJob2();
+    }
+}
+
+function filterJob2()
+{
+    searchForm.jobNameList.options.length = 0;
+
+    //selected job status
+    var currSelectValueJobStatus = new Array();
+    for(i = 0; i < searchForm.jobStatus.length; i++)
+    {
+        var op = searchForm.jobStatus.options[i];
+        if(op.selected)
+        {
+            currSelectValueJobStatus.push(op.value);
+        }
+    }
+
+    //selected target locales
+    var currSelectValueTargetLocale = new Array();
+    for(i = 0; i < searchForm.targetLocalesList.length; i++)
+    {
+        var op = searchForm.targetLocalesList.options[i];
+        if(op.selected)
+        {
+            currSelectValueTargetLocale.push(op.value);
+        }
+    }
+
+    //selected project
+    var currSelectValueProject = new Array();
+    for(i = 0; i < searchForm.projectNameList.length; i++)
+    {
+        var op = searchForm.projectNameList.options[i];
+        if(op.selected)
+        {
+            currSelectValueProject.push(op.value);
+        }
+    }
+
+    $(reportJobInfo).each(function(i, item) {
+        if(contains(currSelectValueProject, item.projectId)
+ 	        && contains(currSelectValueJobStatus, item.jobState))
+        {
+            var isLocaleFlag = "false";
+            $.each(item.targetLocales, function(i, item) {
+                if (contains(currSelectValueTargetLocale, item)) {
+                    isLocaleFlag = "true";
+                    //break the target locales check for performance
+                    return false;
+                }
+            });
+            if(isLocaleFlag == "true")
             {
-               var isLocaleFlag = "false";
-               <%
-               List<String> jobLocales = j.getTargetLocales();
-               for(int i=0;i<jobLocales.size();i++)
-               {
-                   String locale = jobLocales.get(i);
-                   %>
-                   if(contains(currSelectValueTargetLocale,"<%=locale%>"))
-                   {
-                      isLocaleFlag = "true";
-                   }
-                   <%
-                }
-                %>
-                if(isLocaleFlag=="true")
-                {
-                   var varItem = new Option("<%=j.getJobName()%>", "<%=j.getJobId()%>");
-                   varItem.setAttribute("title","<%=j.getJobName()%>");
-                   searchForm.jobNameList.options.add(varItem);
-                }
-           }
-         }
-   <%
-     }
-   %>
-   if(searchForm.jobNameList.options.length==0)
-   {
-     searchForm.submitButton.disabled=true;
-   }
-   else
-   {
-     searchForm.submitButton.disabled=false;
-   }
+                var varItem = new Option(item.jobName, item.jobId);
+                varItem.setAttribute("title", item.jobName);
+                searchForm.jobNameList.options.add(varItem);
+            }
+        }
+     });
+
+    if(searchForm.jobNameList.options.length==0)
+    {
+        searchForm.submitButton.disabled=true;
+    }
+    else
+    {
+        searchForm.submitButton.disabled=false;
+    }
 }
 
 // Select JobIds or Job Name. 
@@ -223,11 +231,11 @@ function setDisableTRWrapper(trid)
 {
     if(trid == "idTRJobIds")
     {
-        filterJob();
         setDisableTR("idTRJobIds", true);
         setDisableTR("idTRJobNames", false);
         setDisableTR("idTRProject", false);
         setDisableTR("idTRJobStatus", false);
+        filterJob();
     }
     else if(trid == "idTRJobNames")
     {
@@ -274,17 +282,7 @@ function doOnload()
             <tr id="idTRJobNames">
                 <td><input type="radio" id="reportOnJobName" name="reportOn" onclick="setDisableTRWrapper('idTRJobIds');" value="jobNames"/><%=bundle.getString("lb_job_name")%>:</td>
                 <td>
-                <select id = "jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px;min-height:90px;" disabled>
-<%
-                 Iterator<ReportJobInfo> iterator = reportJobInfoList.iterator();
-                 while(iterator.hasNext())
-                 {
-                     ReportJobInfo j = iterator.next();
-%>
-                <option title="<%=j.getJobName()%>" VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></OPTION>
-<%
-                 }
-%>
+                <select id="jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px;min-height:90px;" disabled>
                 </select>
                 </td>
             </tr>

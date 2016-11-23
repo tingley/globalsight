@@ -2735,7 +2735,9 @@
       <WebPage pageName="CharacterCount" isDefault="true" jspName="/envoy/administration/reports/characterCountReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
     <WebActivity webActivityName="MTPostEditDistanceReport">
-      <WebPage pageName="mtPostED" isDefault="true" jspName="/envoy/administration/reports/mtPostEditDistanceReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+      <WebPage pageName="mtPostED" isDefault="true" jspName="/envoy/administration/reports/mtPostEditDistanceReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler">
+        <PageLink linkName="self" destinationPageName="mtPostED"></PageLink>
+      </WebPage>
     </WebActivity>
     <WebActivity webActivityName="jobAttributeReport">
       <WebPage pageName="JobAttributeReport" isDefault="true" jspName="/envoy/administration/reports/JobAttributeReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.JobAttributeReportHandler"></WebPage>

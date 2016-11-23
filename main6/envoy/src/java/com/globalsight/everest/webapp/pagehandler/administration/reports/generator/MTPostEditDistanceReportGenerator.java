@@ -27,6 +27,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,6 +59,7 @@ import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
@@ -79,7 +81,6 @@ import com.globalsight.util.edit.EditUtil;
 
 public class MTPostEditDistanceReportGenerator implements ReportGenerator
 {
-    @SuppressWarnings("unused")
     static private final Logger logger = Logger.getLogger(MTPostEditDistanceReportGenerator.class);
 
     private static int SUMMARY_HEADER_ROW = 2;
@@ -200,10 +201,14 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             data.jobIds = p_jobIDS;
         }
 
-        ArrayList<Job> jobs = ReportHelper.getJobListByIDS(p_jobIDS);
+        List<Job> jobs = ReportHelper.getJobListByIDS(p_jobIDS);
+
+        filterInvalidJobs(jobs);
 
         // Find MTed workflows/locales
-        List<GlobalSightLocale> mtedTargetLocales = findMTedWorkflows(jobs, p_selectedTargetLocales);
+        List<Job> mtedJobs = new ArrayList<Job>();
+        List<GlobalSightLocale> mtedTargetLocales = new ArrayList<GlobalSightLocale>();
+        findMTedJobs(jobs, p_selectedTargetLocales, mtedJobs, mtedTargetLocales);
 
         Workbook workBook = new SXSSFWorkbook();
         Sheet summarySheet = workBook.createSheet(m_bundle.getString("lb_summary"));
@@ -228,10 +233,10 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             addHeaderForDetail(workBook, sheet);
 
             GlobalSightLocale targetLocale = entry.getKey();
-            addPostEditDetail(workBook, sheet, jobs, targetLocale, dataMap);
+            addPostEditDetail(workBook, sheet, mtedJobs, targetLocale, dataMap);
         }
 
-        addJobsForSummary(workBook, summarySheet, jobs, p_selectedTargetLocales, dataMap);
+        addJobsForSummary(workBook, summarySheet, mtedJobs, p_selectedTargetLocales, dataMap);
 
         File file = ReportHelper.getXLSReportFile(getReportType(), null);
         if (workBook != null)
@@ -248,29 +253,35 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
     }
 
     /**
-     * Find workflows which have hit MT.
+     * Find MTed jobs and target locales.
      */
-    private List<GlobalSightLocale> findMTedWorkflows(ArrayList<Job> jobs,
-            List<GlobalSightLocale> p_selectedTargetLocales)
+    private void findMTedJobs(List<Job> jobs, List<GlobalSightLocale> p_selectedTargetLocales,
+            List<Job> mtedJobs, List<GlobalSightLocale> mtedTargetLocales)
     {
-        List<GlobalSightLocale> mtedTargetLocales = new ArrayList<GlobalSightLocale>();
+        Set<GlobalSightLocale> selectedTargetLocales = new HashSet<GlobalSightLocale>();
+        selectedTargetLocales.addAll(p_selectedTargetLocales);
+
+        Set<Job> mtedJobsSet = new HashSet<Job>();
+        Set<GlobalSightLocale> mtedTargetLocalesSet = new HashSet<GlobalSightLocale>();
         for (Job job : jobs)
         {
             for (Workflow w : job.getWorkflows())
             {
                 GlobalSightLocale gsl = w.getTargetLocale();
-                if (w.getMtTotalWordCount() > 0 && p_selectedTargetLocales.contains(gsl)
-                        && !mtedTargetLocales.contains(gsl))
+                if (w.getMtTotalWordCount() > 0 && selectedTargetLocales.contains(gsl))
                 {
-                    mtedTargetLocales.add(w.getTargetLocale());
+                    mtedTargetLocalesSet.add(w.getTargetLocale());
+                    mtedJobsSet.add(job);
                 }
             }
         }
 
+        mtedTargetLocales.addAll(mtedTargetLocalesSet);
         SortUtil.sort(mtedTargetLocales, new GlobalSightLocaleComparator(
                 GlobalSightLocaleComparator.ISO_CODE, Locale.US));
 
-        return mtedTargetLocales;
+        mtedJobs.addAll(mtedJobsSet);
+        SortUtil.sort(mtedJobs, new JobComparator(JobComparator.JOB_ID, Locale.US));
     }
 
     private void addReportTitle(Workbook p_workBook, Sheet p_sheet) throws Exception
@@ -420,7 +431,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         col++;
     }
 
-    private void addPostEditDetail(Workbook p_workBook, Sheet p_sheet, ArrayList<Job> jobs,
+    private void addPostEditDetail(Workbook p_workBook, Sheet p_sheet, List<Job> jobs,
             GlobalSightLocale targetLocale, Map<String, List<DetailedData>> dataMap)
             throws Exception
     {
@@ -722,7 +733,7 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
      * 
      * @exception Exception
      */
-    private void addJobsForSummary(Workbook p_workbook, Sheet p_sheet, ArrayList<Job> p_jobs,
+    private void addJobsForSummary(Workbook p_workbook, Sheet p_sheet, List<Job> p_jobs,
             List<GlobalSightLocale> p_targetLocales, Map<String, List<DetailedData>> dataMap)
             throws Exception
     {
@@ -737,9 +748,6 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
             cell_A.setCellStyle(style);
             return;
         }
-
-        // sort jobs by job name
-        SortUtil.sort(p_jobs, new JobComparator(JobComparator.JOB_ID, Locale.US));
 
         IntHolder row = new IntHolder(3);
         int finishedJobNum = 0;
@@ -1080,6 +1088,39 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         boolean writeToFile = true;
         double totalTer = new TERtest().calculateTER(args, hypsegs, refsegs, writeToFile);
         return Double.valueOf(this.get2DigitFormater().format(totalTer * 100));
+    }
+
+    /**
+     * Ensure jobs belong to current user's projects.
+     */
+    private void filterInvalidJobs(List<Job> jobs)
+    {
+        try
+        {
+            ArrayList<Project> projectList = (ArrayList<Project>) ServerProxy.getProjectHandler()
+                    .getProjectsByUser(m_userId);
+
+            Set<Long> projectIds = new HashSet<Long>();
+            if (projectList != null && projectList.size() > 0)
+            {
+                for (Project pro : projectList)
+                {
+                    projectIds.add(pro.getIdAsLong());
+                }
+            }
+
+            for (Iterator<Job> it = jobs.iterator(); it.hasNext();)
+            {
+                if (!projectIds.contains(it.next().getProjectId()))
+                {
+                    it.remove();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+        }
     }
 
     private void setAllCellStyleNull()

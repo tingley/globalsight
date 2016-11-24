@@ -1249,7 +1249,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         {
             twoDigitFormater = DecimalFormat.getInstance();
             twoDigitFormater.setMaximumFractionDigits(2);
-            twoDigitFormater.setMinimumFractionDigits(2);            
+            twoDigitFormater.setMinimumFractionDigits(2);
+            twoDigitFormater.setGroupingUsed(false);
         }
         return this.twoDigitFormater;
     }
@@ -1260,7 +1261,8 @@ public class MTPostEditDistanceReportGenerator implements ReportGenerator
         {
             threeDigitFormater = DecimalFormat.getInstance();
             threeDigitFormater.setMaximumFractionDigits(3);
-            threeDigitFormater.setMinimumFractionDigits(3);            
+            threeDigitFormater.setMinimumFractionDigits(3);
+            threeDigitFormater.setGroupingUsed(false);
         }
         return this.threeDigitFormater;
     }

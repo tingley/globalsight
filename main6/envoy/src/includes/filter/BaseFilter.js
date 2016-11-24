@@ -622,30 +622,24 @@ BaseFilter.prototype.saveEscaping = function()
 		 {
 			 startIsRegex = document.getElementById("baseFilter_escaping_startIsRegex").checked;
 			 finishIsRegex = document.getElementById("baseFilter_escaping_finishIsRegex").checked;
-			 
-			 if(startIsRegex != true && finishIsRegex != true)
+			 startPattern = document.getElementById("baseFilter_escaping_startPattern").value.trim();
+			 finishPattern = document.getElementById("baseFilter_escaping_finishPattern").value.trim();
+			 if(startIsRegex != true && finishIsRegex != true && (startPattern == null || startPattern == '') && (finishPattern == null || finishPattern == ''))
 			 {
 				 alert(jsPatternMessage);
 				 return false;
 			 }
 			 
-			 if(startIsRegex == true)
+			 if(startIsRegex == true && (startPattern == null || startPattern == ''))
 			 {
-				 startPattern = document.getElementById("baseFilter_escaping_startPattern").value.trim();
-				 if(startPattern == null || startPattern == '')
-				 {
-					 alert(jsStartPatternMessage);
-					 return false;
-				 }
+				 alert(jsStartPatternMessage);
+				 return false;
 			 }
-			 if(finishIsRegex == true)
+			 
+			 if(finishIsRegex == true && (finishPattern == null || finishPattern == ''))
 			 {
-				 finishPattern = document.getElementById("baseFilter_escaping_finishPattern").value.trim();
-				 if(finishPattern == null || finishPattern == '')
-				 {
-					 alert(jsFinishPatternMessage);
-					 return false;
-				 }
+				 alert(jsFinishPatternMessage);
+				 return false;
 			 }
 		 }
 	}

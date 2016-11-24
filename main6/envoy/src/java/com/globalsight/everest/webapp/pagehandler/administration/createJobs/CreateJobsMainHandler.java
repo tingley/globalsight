@@ -1822,24 +1822,27 @@ public class CreateJobsMainHandler extends PageHandler
         String contentType;
         String boundary;
         String filePath = "";
+        String path = parentFile.getPath() + File.separator;
         Set<String> checkFileNames = new HashSet<String>();
+        Set<String> uploadedFileNames = new HashSet<String>();
+        List<String> filePaths = new ArrayList<String>();
         if (methodParamter.equals("uploadSelectedFile"))
         {
-            String checkPath = parentFile.getPath() + File.separator + "checkUploadFile"
-                    + File.separator;
-            File file = new File(checkPath);
-            for (File f : file.listFiles())
+        	File file = new File(path);
+			if (file.isFile())
+			{
+				for (File f : file.listFiles())
+				{
+					uploadedFileNames.add(f.getName());
+				}
+			}
+
+			String checkPath = path + "checkUploadFile" + File.separator;
+            File checkFile = new File(checkPath);
+            for (File f : checkFile.listFiles())
             {
                 checkFileNames.add(f.getName());
             }
-        }
-        String path = parentFile.getPath() + File.separator;
-        List<String> filePaths = new ArrayList<String>();
-        File file = new File(path);
-        Set<String> uploadedFileNames = new HashSet<String>();
-        for (File f : file.listFiles())
-        {
-            uploadedFileNames.add(f.getName());
         }
 
         // Let's make sure that we have the right type of content

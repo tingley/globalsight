@@ -23,6 +23,7 @@
          com.globalsight.everest.permission.PermissionSet,         
          com.globalsight.everest.foundation.User,
          com.globalsight.everest.company.CompanyWrapper,
+         com.globalsight.everest.company.CompanyThreadLocal,
          com.globalsight.util.edit.EditUtil,
          java.text.MessageFormat,
          java.util.ArrayList,
@@ -51,7 +52,8 @@
     String helperText = "Upload your COTI packages here. Supporting zip compressed.";
     String errorResult = (String) request.getAttribute("COTI_errorResult");
     String successResult = (String) request.getAttribute("COTI_successResult");
-    
+    String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+    String disableUploadFileTypes = CompanyWrapper.getCompanyById(currentCompanyId).getDisableUploadFileTypes();
     SessionManager sessionMgr = (SessionManager) session
             .getAttribute(WebAppConstants.SESSION_MANAGER);
 %>
@@ -73,7 +75,7 @@ var needWarning = false;
 var objectName = "";
 var guideNode = "";
 var helpFile = "<%= bundle.getString("help_coti_job")%>";
-
+var disableUploadFileTypes = "<%=disableUploadFileTypes%>";
 var checkBoxValue = "";
 var uploadResult = "<%= (successResult == null? "" : successResult) %>";
 var errorResult = "<%= (errorResult == null? "" : errorResult) %>";
@@ -86,6 +88,19 @@ function submitForm(buttonClicked, curJobId)
 {
 	if (buttonClicked == "Upload")
 	{
+		var file = $("#uploadFile").val();
+		var ext = file.substring(file.lastIndexOf("."));
+		var fileTypeArr= new Array(); 
+    	fileTypeArr = disableUploadFileTypes.split(",");
+    	for(i=0;i<fileTypeArr.length ;i++ )
+    	{
+    		if(fileTypeArr[i] == ext)
+    		{
+    			alert("<%=bundle.getString("lb_message_check_upload_file_type")%>"+disableUploadFileTypes);
+        		return false;
+    		}
+    	}
+    	
 		UploadForm.action = "<%= selfURL %>" + "&uploadAction=startUpload";
 		UploadForm.submit();
 		return;

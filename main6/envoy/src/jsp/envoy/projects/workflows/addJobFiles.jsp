@@ -236,7 +236,13 @@ function addDivForNewFile(paramArray)
     $("#tmpFolderName").val(tempFolder);
 }
 
-function checkAndUpload(){
+function checkAndUpload()
+{
+	if(!checkUploadFileType())
+	{
+		return false;
+	} 
+	
 	if (isUploading)
 	{
 		alert("Please wait for the last file upload.");
@@ -249,6 +255,38 @@ function checkAndUpload(){
 	isUploading = true;
 	emptyFileValue();
 	$("#selectedSourceFile").prop('disabled', false);
+}
+
+function checkUploadFileType()
+{
+	var checkAction = "<%=selfURL%>"+"&uploadAction=checkUploadFileType&tempFolder="+tempFolder;
+	var formData = new FormData($( "#createJobForm" )[0]);
+	var result = true;
+    $.ajax({
+        type : "POST",
+        url : checkAction,
+        traditional:true,
+        async : false,
+        cache : false,
+        contentType: false,  
+        processData: false,  
+        data: formData,
+        success : function(data) {
+			if(data == 'notContain'){
+				//upload file does not contain disable file type
+				result = true;
+        	}else{
+        		//upload file contain disable file type
+        		alert(data);
+        		result = false;
+        	}
+        },
+        error : function(request, error, status) {
+            alert(error);
+            result = false;
+        }
+    });
+    return result;
 }
 
 function emptyFileValue()

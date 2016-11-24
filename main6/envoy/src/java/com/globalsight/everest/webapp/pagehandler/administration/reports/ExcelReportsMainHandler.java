@@ -91,6 +91,16 @@ public class ExcelReportsMainHandler extends PageHandler
         reportNameListUsing6States.add("xlsReportTranslationVerification");
     }
 
+    // Below reports load job name list on web form asynchronously.
+    private static HashSet<String> asynJobListReports = new HashSet<String>();
+    static
+    {
+        // Detailed Word Counts by Job
+        asynJobListReports.add("xlsReportFileList");
+        // MT Post Edit Distance Report
+        asynJobListReports.add("MTPostEditDistanceReport");
+    }
+
     @Override
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
             HttpServletRequest p_request, HttpServletResponse p_response,
@@ -129,8 +139,8 @@ public class ExcelReportsMainHandler extends PageHandler
             User curUser = getUser(session);
             initData(curUser.getUserId(), activityName);
 
-            // "Detailed Word Counts by Job" report get jobs via ajax.
-            if (!"xlsReportFileList".equals(activityName))
+            // Some reports get job name list via AJAX.
+            if (!asynJobListReports.contains(activityName))
             {
                 List<ReportJobInfo> reportJobInfoList = getReportJobInfo(activityName);
                 p_request.setAttribute(ReportConstants.REPORTJOBINFO_LIST, reportJobInfoList);

@@ -214,8 +214,44 @@ function editTextValue(obj, attributeId)
 
 function uploadFileMethod() 
 {
+	if(!checkUploadFileType())
+	{
+		return false;
+	}
 	$("#uploadForm").submit();
 	setTimeout("getAllFiles()", 1000);
+}
+
+function checkUploadFileType()
+{
+	var checkAction = "/globalsight/ControlServlet?linkName=self&pageName=SET_ATTRIBUTE&action=checkUploadFileType"
+	var formData = new FormData($( "#uploadForm" )[0]);
+	var result = true;
+    $.ajax({
+        type : "POST",
+        url : checkAction,
+        traditional:true,
+        async : false,
+        cache : false,
+        contentType: false,  
+        processData: false,  
+        data: formData,
+        success : function(data) {
+			if(data == 'notContain'){
+				//upload file does not contain disable file type
+				result = true;
+        	}else{
+        		//upload file contain disable file type
+        		alert(data);
+        		result = false;
+        	}
+        },
+        error : function(request, error, status) {
+            alert(error);
+            result = false;
+        }
+    });
+    return result;
 }
 
 function getAllFiles()

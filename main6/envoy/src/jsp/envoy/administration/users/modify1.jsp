@@ -178,181 +178,6 @@ String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.11.3.min.js"></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/gscommon.js"></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript">
-var needWarning = true;
-var objectName = "<%= bundle.getString("lb_user") %>";
-var guideNode = "users";
-var helpFile = "<%=bundle.getString("help_user_information")%>";
-var company;
-
-function submitForm(btnName)
-{
-    var theForm;
-
-    if (document.layers)
-    {
-        theForm = document.layers.contentLayer.document.userForm;
-    }
-    else
-    {
-        theForm = document.all.userForm;
-    }
-
-    if (btnName == "save")
-    {
-        theForm.action = "<%=saveURL %>";
-    }
-    else if (btnName == "cals")
-    {
-        theForm.action = "<%=calsURL %>";
-    }
-    else if (btnName == "contact")
-    {
-        theForm.action = "<%=contactURL %>";
-    }
-    else if (btnName == "projects")
-    {
-        theForm.action = "<%=projectsURL %>";
-    }
-    else if (btnName == "security")
-    {
-        theForm.action = "<%=securityURL %>";
-    }
-    else if (btnName == "perms")
-    {
-        theForm.action = "<%=permsURL %>";
-    }
-    else if (btnName == "defaultroles")
-    {
-        theForm.action = "<%=defaultRolesURL %>";
-    }
-
-    if (confirmForm(theForm))
-    {
-        if (userForm.password)
-        {
-            userForm.password.disabled = false;
-            userForm.passwordConfirm.disabled = false;
-        }
-
-        theForm.submit();
-    }
-}
-
-function confirmForm(formSent)
-{
-	var theUserName = formSent.userName.value;
-	theUserName = stripBlanks(theUserName);
-    if (isEmptyString(theUserName))
-    {
-        alert("<%= jsmsgUserName %>");
-        formSent.userName.value = "";
-        formSent.userName.focus();
-        return false;
-    }
-    
-    <% for (int i = 0; i < size; i++) { 
-        if (userName.equals(userNames[i]))
-        {
-     	   continue;
-        }
-     %>
-        if(theUserName.toLowerCase() == "<%= userNames[i].toLowerCase() %>")
-        {
-           alert('<%=bundle.getString("jsmsg_duplicate_users")%>');
-           return false;
-        }
-     <% } %>
-
-    if (hasSomeSpecialChars(theUserName))
-    {
-        alert("<%= lbUserName %>" + "<%= bundle.getString("msg_invalid_entry3") %>");
-        return false;
-    }
-
-  if (formSent.password) {
-    var thePassword = formSent.password.value;
-    thePassword = stripBlanks(thePassword);
-    if (thePassword != "") {
-      if ("1" == "<%=needStrongPassword%>" && !passCheck) {
-        alert("<%=bundle.getString("jsmsg_account_weak_password")%>");
-        return false;
-      }
-      var theRepeat = formSent.passwordConfirm.value;
-      theRepeat = stripBlanks(theRepeat);
-
-      // Make sure the repeated password matches the first
-      if (theRepeat != thePassword) {
-        alert("<%= bundle.getString("jsmsg_users_repeat_password") %>");
-        return false;
-      }
-    }
-  }
-
-    if (formSent.firstName)
-    {
-        var theFirst = formSent.firstName.value;
-        theFirst = stripBlanks(theFirst);
-
-        if (isEmptyString(theFirst)) {
-            alert("<%=jsmsgFirstName%>");
-            formSent.firstName.value = "";
-            formSent.firstName.focus();
-                return false;
-        }
-        if (hasSpecialChars(theFirst))
-        {
-            alert("<%= lbFirstName %>" + "<%= bundle.getString("msg_invalid_entry") %>");
-            return false;
-        }
-
-    }
-    if (formSent.lastName)
-    {
-        var theLast = formSent.lastName.value;
-        theLast = stripBlanks(theLast);
-
-        if (isEmptyString(theLast)) {
-            alert("<%=jsmsgLastName%>");
-            formSent.lastName.value = "";
-            formSent.lastName.focus();
-                return false;
-        }
-        if (hasSpecialChars(theLast))
-        {
-            alert("<%= lbLastName %>" + "<%= bundle.getString("msg_invalid_entry") %>");
-            return false;
-        }
-
-    }
-
-<% if (b_vendorManagement) {
-   // Users must belong to at least one group, either a GlobalSight
-   // or Vendor Management group. (If VM is not installed, one group
-   // is selected automatically.)
-%>
-     
-<% } %>
-
-    return true;
-}
-
-function doLoad()
-{
-    loadGuides();
-}
-
-var passCheck = false;
-$(document).ready(function(){
-  $("#password1").keyup(function() {
-    passCheck = passwordChecking($(this).val());
-  });
-});
-
-</SCRIPT>
 <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0"
@@ -494,5 +319,181 @@ $(document).ready(function(){
   </TR>
 </TABLE>
 </DIV>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.11.3.min.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/gscommon.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+    var needWarning = true;
+    var objectName = "<%= bundle.getString("lb_user") %>";
+    var guideNode = "users";
+    var helpFile = "<%=bundle.getString("help_user_information")%>";
+    var company;
+
+    function submitForm(btnName)
+    {
+        var theForm;
+
+        if (document.layers)
+        {
+            theForm = document.layers.contentLayer.document.userForm;
+        }
+        else
+        {
+            theForm = document.all.userForm;
+        }
+
+        if (btnName == "save")
+        {
+            theForm.action = "<%=saveURL %>";
+        }
+        else if (btnName == "cals")
+        {
+            theForm.action = "<%=calsURL %>";
+        }
+        else if (btnName == "contact")
+        {
+            theForm.action = "<%=contactURL %>";
+        }
+        else if (btnName == "projects")
+        {
+            theForm.action = "<%=projectsURL %>";
+        }
+        else if (btnName == "security")
+        {
+            theForm.action = "<%=securityURL %>";
+        }
+        else if (btnName == "perms")
+        {
+            theForm.action = "<%=permsURL %>";
+        }
+        else if (btnName == "defaultroles")
+        {
+            theForm.action = "<%=defaultRolesURL %>";
+        }
+
+        if (confirmForm(theForm))
+        {
+            if (userForm.password)
+            {
+                userForm.password.disabled = false;
+                userForm.passwordConfirm.disabled = false;
+            }
+
+            theForm.submit();
+        }
+    }
+
+    function confirmForm(formSent)
+    {
+        var theUserName = formSent.userName.value;
+        theUserName = stripBlanks(theUserName);
+        if (isEmptyString(theUserName))
+        {
+            alert("<%= jsmsgUserName %>");
+            formSent.userName.value = "";
+            formSent.userName.focus();
+            return false;
+        }
+
+        <% for (int i = 0; i < size; i++) {
+            if (userName.equals(userNames[i]))
+            {
+                continue;
+            }
+         %>
+        if(theUserName.toLowerCase() == "<%= userNames[i].toLowerCase() %>")
+        {
+            alert('<%=bundle.getString("jsmsg_duplicate_users")%>');
+            return false;
+        }
+        <% } %>
+
+        if (hasSomeSpecialChars(theUserName))
+        {
+            alert("<%= lbUserName %>" + "<%= bundle.getString("msg_invalid_entry3") %>");
+            return false;
+        }
+
+        if (formSent.password) {
+            var thePassword = formSent.password.value;
+            thePassword = stripBlanks(thePassword);
+            if (thePassword != "") {
+                if ("1" == "<%=needStrongPassword%>" && !passCheck) {
+                    alert("<%=bundle.getString("jsmsg_account_weak_password")%>");
+                    return false;
+                }
+                var theRepeat = formSent.passwordConfirm.value;
+                theRepeat = stripBlanks(theRepeat);
+
+                // Make sure the repeated password matches the first
+                if (theRepeat != thePassword) {
+                    alert("<%= bundle.getString("jsmsg_users_repeat_password") %>");
+                    return false;
+                }
+            }
+        }
+
+        if (formSent.firstName)
+        {
+            var theFirst = formSent.firstName.value;
+            theFirst = stripBlanks(theFirst);
+
+            if (isEmptyString(theFirst)) {
+                alert("<%=jsmsgFirstName%>");
+                formSent.firstName.value = "";
+                formSent.firstName.focus();
+                return false;
+            }
+            if (hasSpecialChars(theFirst))
+            {
+                alert("<%= lbFirstName %>" + "<%= bundle.getString("msg_invalid_entry") %>");
+                return false;
+            }
+
+        }
+        if (formSent.lastName)
+        {
+            var theLast = formSent.lastName.value;
+            theLast = stripBlanks(theLast);
+
+            if (isEmptyString(theLast)) {
+                alert("<%=jsmsgLastName%>");
+                formSent.lastName.value = "";
+                formSent.lastName.focus();
+                return false;
+            }
+            if (hasSpecialChars(theLast))
+            {
+                alert("<%= lbLastName %>" + "<%= bundle.getString("msg_invalid_entry") %>");
+                return false;
+            }
+
+        }
+
+        <% if (b_vendorManagement) {
+           // Users must belong to at least one group, either a GlobalSight
+           // or Vendor Management group. (If VM is not installed, one group
+           // is selected automatically.)
+        %>
+
+        <% } %>
+
+        return true;
+    }
+
+    function doLoad()
+    {
+        loadGuides();
+    }
+
+    var passCheck = false;
+    $(document).ready(function(){
+        $("#password1").keyup(function() {
+            passCheck = passwordChecking($(this).val());
+        });
+    });
+
+</SCRIPT>
+
 </BODY>
 </HTML>

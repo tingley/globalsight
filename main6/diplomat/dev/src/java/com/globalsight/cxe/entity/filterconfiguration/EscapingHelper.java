@@ -987,6 +987,7 @@ public class EscapingHelper
 			String contentType)
 	{
 		StringBuffer sub = new StringBuffer();
+		ccc = doDecode ? m_xmlEncoder.decodeStringBasic(ccc) : ccc;
 		int length = ccc.length() - 1;
 		// only 1 char, do not need to do un-escape
 		if (length == 0)
@@ -1021,7 +1022,8 @@ public class EscapingHelper
 		}
 
 		sub.append(ccc);
-		String subStr = sub.toString();
+		String subStr = doDecode ? m_xmlEncoder.encodeStringBasic(sub
+				.toString()) : sub.toString();
 		return subStr;
 	}
 	

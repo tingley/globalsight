@@ -195,7 +195,7 @@ String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword
   <input type="hidden" name="company">
   <input type="hidden" name="vgroup">
   <TR>
-    <TD VALIGN="TOP"><%= lbUserName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
+    <TD VALIGN="TOP" style="width:150px;"><%= lbUserName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
     <TD >
       <amb:textfield maxlength="40" name="userName" value="<%= userName %>" styleClass="standardText width100" />
     </TD>
@@ -209,13 +209,13 @@ String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword
   </TR>
   <% } %>
   <TR>
-    <TD VALIGN="TOP"><%= lbFirstName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
+    <TD VALIGN="TOP" style="width:150px;"><%= lbFirstName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
     <TD >
       <amb:textfield maxlength="40" name="firstName" value="<%= firstName %>" styleClass="standardText width100" access='<%=(String)hash.get(UserSecureFields.FIRST_NAME)%>' />
     </TD>
   </TR>
   <TR>
-    <TD VALIGN="TOP"><%= lbLastName%><SPAN CLASS="asterisk">*</SPAN>:</TD>
+    <TD VALIGN="TOP" style="width:150px;"><%= lbLastName%><SPAN CLASS="asterisk">*</SPAN>:</TD>
     <TD >
       <amb:textfield maxlength="40" name="lastName" value="<%= lastName %>" styleClass="standardText width100" access='<%=(String)hash.get(UserSecureFields.LAST_NAME)%>' />
     </TD>
@@ -223,7 +223,7 @@ String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword
   
   <!-- Added for alias name, for remember password in Firefox  -->
   <TR style="display:none;">
-    <TD></TD>
+    <TD style="width:150px;"></TD>
     <TD>
       <input type="text" name="aliasUserName" value="<%= userName %>" class="standardText width100"/>
     </TD>
@@ -231,7 +231,7 @@ String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword
   <!-- End Added for alias name,...  -->
   
   <TR>
-    <TD VALIGN="TOP"><%= lbPassword %>
+    <TD VALIGN="TOP" style="width:150px;"><%= lbPassword %>
         <SPAN CLASS="asterisk">*</SPAN>
     :</TD>
     <TD>
@@ -244,7 +244,7 @@ String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword
     </TD>
   </TR>
   <TR>
-    <TD VALIGN="TOP"><%= lbPasswordRepeat %>
+    <TD VALIGN="TOP" style="width:150px;"><%= lbPasswordRepeat %>
         <SPAN CLASS="asterisk">*</SPAN>
     :</TD>
     <TD >
@@ -254,19 +254,19 @@ String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword
     </TD>
   </TR>
   <TR>
-    <TD VALIGN="TOP"><%= lbTitle %>:</TD>
+    <TD VALIGN="TOP" style="width:150px;"><%= lbTitle %>:</TD>
     <TD>
       <amb:textfield maxlength="40" styleClass="standardText width100" name="title" value="<%= userTitle %>" access='<%=(String)hash.get(UserSecureFields.TITLE)%>' />
     </TD>
   </TR>
   <TR>
-    <TD VALIGN="TOP"><%= lbWssePassword %>:</TD>
+    <TD VALIGN="TOP" style="width:150px;"><%= lbWssePassword %>:</TD>
     <TD>
       <amb:textfield maxlength="40"  styleClass="standardText width100" name="wssePassword" value="<%= wssePassword %>" access='<%=(String)hash.get(UserSecureFields.WSSE_PASSWORD)%>' />
     </TD>
   </TR>
   <TR>
-    <TD VALIGN="TOP"><%= lbCompanyName %>:</TD>  
+    <TD VALIGN="TOP" style="width:150px;"><%= lbCompanyName %>:</TD>
     <TD>
       <B><%=companyName%></B>
       <INPUT TYPE='hidden' NAME='companyName' VALUE='<%=companyName%>'>

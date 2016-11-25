@@ -242,20 +242,20 @@ $(document).ready(function(){
   <form name="accountForm" method="post">
   <input type="hidden" name="company">
   <TR>
-	<TD NOWRAP><%= lbUserName %>:</TD>
+	<TD NOWRAP style="width:150px;"><%= lbUserName %>:</TD>
 	<TD><%=username%></TD>
   </TR>
   <TR>
-	<TD NOWRAP><%= lbFirstName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
+	<TD NOWRAP style="width:150px;"><%= lbFirstName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
 	<TD><input type="text" name="firstName" maxlength="40" value="<%= firstName %>" CLASS="standardText width100" onkeydown="updateNeedWarning()"></TD>
   </TR>
   <TR>
-	<TD><%= lbLastName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
+	<TD style="width:150px;"><%= lbLastName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
 	<TD><input type="text" name="lastName" maxlength="40" value="<%= lastName %>" CLASS="standardText width100" onkeydown="updateNeedWarning()"></TD>
   </TR>
   <% if (pwdPerm) {%>
   <TR>
-	<TD><%= lbPassword %><SPAN CLASS="asterisk">*</SPAN>:</TD>
+	<TD style="width:150px;"><%= lbPassword %><SPAN CLASS="asterisk">*</SPAN>:</TD>
 	<TD>
         <div class="vali_pass">
             <input type="password" name="password" id="password1" maxlength="40" value="" class="standardText width100" onkeydown="updateNeedWarning()">
@@ -266,7 +266,7 @@ $(document).ready(function(){
     </TD>
   </TR>
   <TR>
-	<TD ><%= lbRepeatPassword %><SPAN CLASS="asterisk">*</SPAN>:</TD>
+	<TD  style="width:150px;"><%= lbRepeatPassword %><SPAN CLASS="asterisk">*</SPAN>:</TD>
 	<TD>
         <div class="vali_pass">
             <input type="password" name="passwordConfirm" id="passwordConfirm" maxlength="40" value="" class="standardText width100" onkeydown="updateNeedWarning()">
@@ -275,7 +275,7 @@ $(document).ready(function(){
   </TR>
   <% }%>
   <TR>
-	<TD><%= lbTitle %>:</TD>
+	<TD style="width:150px;"><%= lbTitle %>:</TD>
 	<TD><input type="text" name="title" value="<%= userTitle %>" CLASS="standardText width100" onkeydown="updateNeedWarning()"></TD>
   </TR>
   <TR>

@@ -16,10 +16,14 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
-import java.io.IOException;
-import java.rmi.RemoteException;
-import java.util.HashMap;
-import java.util.Vector;
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServletUtil;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.javabean.NavigationBean;
+import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
+import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoAllSearcher;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -27,14 +31,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
-import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoAllSearcher;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.HashMap;
+import java.util.Vector;
 
 public class JobControlAllStatusHandler extends JobManagementHandler
 {
@@ -69,7 +69,7 @@ public class JobControlAllStatusHandler extends JobManagementHandler
         HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request,
                 BASE_BEAN);
         p_request.setAttribute("searchType",
-                p_request.getParameter("searchType"));
+                ServletUtil.getValue(p_request, "searchType"));
 
         Vector jobStates = new Vector();
         jobStates.addAll(Job.ALLSTATUSLIST);
@@ -80,7 +80,7 @@ public class JobControlAllStatusHandler extends JobManagementHandler
 
         p_request.setAttribute(JOB_ID, JOB_ID);
         p_request.setAttribute(JOB_LIST_START_PARAM,
-                p_request.getParameter(JOB_LIST_START_PARAM));
+                ServletUtil.getValue(p_request, JOB_LIST_START_PARAM));
         p_request.setAttribute(
                 PAGING_SCRIPTLET,
                 getPagingText(p_request,

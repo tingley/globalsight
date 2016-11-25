@@ -6,6 +6,8 @@
             java.util.HashMap,
             com.globalsight.everest.webapp.pagehandler.login.LoginConstants,
             com.globalsight.everest.webapp.WebAppConstants" session="false" %>
+<%@ page import="com.globalsight.everest.servlet.util.CookieUtil" %>
+<%@ page import="com.globalsight.everest.servlet.util.ServletUtil" %>
 
 <jsp:useBean id="dummyNavigationBean" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request" />
 <jsp:useBean id="skin" scope="application" class="com.globalsight.everest.webapp.javabean.SkinBean"/>
@@ -24,26 +26,17 @@
       request.getAttribute(SystemConfigParamNames.DEFAULT_UI_LOCALE);
   // get last uilocale from cookie 
   String cookieUiLocale = "";
-  Cookie[] cookies = request.getCookies();
-  if (cookies != null)
-  {
-	  for(int i=0; i<cookies.length; i++)
-	  {
-	      Cookie cookie = cookies[i];
-	      if ("localelang".equals(cookie.getName()))
-	          cookieUiLocale = cookie.getValue();
-	  }
-  }
+    cookieUiLocale =  CookieUtil.getCookieValue(request, "localelang", false);
   if (supportedLocales!=null && !Arrays.asList(supportedLocales).contains(cookieUiLocale))
       cookieUiLocale = defaultLocale;
-  if (cookieUiLocale.equals(""))
+  if ("".equals(cookieUiLocale))
       cookieUiLocale = defaultLocale;
   
   ResourceBundle bundle = PageHandler.getBundleByLocale(cookieUiLocale);
   // For "login directly" issue
   String userId = "";
   String forwardUrl = "";
-  String from = request.getParameter(WebAppConstants.LOGIN_FROM) != null ? request.getParameter(WebAppConstants.LOGIN_FROM) : "";
+  String from = ServletUtil.getValue(request, WebAppConstants.LOGIN_FROM);
   if(from != null && from.length() > 0)
   {
      userId = request.getParameter("nameField") != null ? request.getParameter("nameField") : "";

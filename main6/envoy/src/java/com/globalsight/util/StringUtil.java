@@ -16,16 +16,6 @@
  */
 package com.globalsight.util;
 
-import com.globalsight.everest.company.Company;
-import com.globalsight.everest.webapp.applet.createjob.CreateJobUtil;
-import de.innosystec.unrar.Archive;
-import de.innosystec.unrar.rarfile.FileHeader;
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
-import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
-
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -603,7 +593,8 @@ public class StringUtil
     /**
      * Converts bytes to hex string.
      */
-    public static String toHexString(byte[] bytes) {
+    public static String toHexString(byte[] bytes)
+    {
         char[] resultCharArray = new char[bytes.length * 2];
         int index = 0;
         for (byte b : bytes)

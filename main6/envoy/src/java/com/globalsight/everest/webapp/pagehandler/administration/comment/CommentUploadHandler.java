@@ -17,27 +17,7 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.comment;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Vector;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-
-import com.globalsight.everest.comment.Comment;
-import com.globalsight.everest.comment.CommentException;
-import com.globalsight.everest.comment.CommentFile;
-import com.globalsight.everest.comment.CommentManager;
-import com.globalsight.everest.comment.CommentUpload;
+import com.globalsight.everest.comment.*;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
@@ -45,6 +25,7 @@ import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -55,6 +36,20 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.StringUtil;
+import org.apache.log4j.Logger;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Vector;
 
 /**
  * <p>
@@ -109,7 +104,7 @@ public class CommentUploadHandler extends PageHandler implements
         HttpSession session = p_request.getSession();
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-        String commentStr = (String) p_request.getParameter("taskComment");
+        String commentStr = ServletUtil.getValue(p_request, "taskComment");
         if (commentStr != null)
             sessionMgr.setAttribute("taskComment", commentStr);
 

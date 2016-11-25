@@ -26,6 +26,7 @@
 		    com.globalsight.util.FormUtil"
 		    session="true"
 %>
+<%@ page import="com.globalsight.everest.servlet.util.ServletUtil" %>
 <jsp:useBean id="referenceUpload" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="cancel" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="done" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
@@ -49,8 +50,7 @@
 	String comments = (String) sessionMgr.getAttribute(WebAppConstants.TASK_COMMENT);
 	String sampleComments = "";
 	if (comments == null) {
-		comments = request
-				.getParameter(WebAppConstants.COMMENT_REFERENCE_TASK_COMMENT);
+		comments = ServletUtil.getValue(request, WebAppConstants.COMMENT_REFERENCE_TASK_COMMENT);
 		//request.setAttribute(
 			//	WebAppConstants.COMMENT_REFERENCE_TASK_COMMENT,	comments);
 	}
@@ -73,7 +73,7 @@
 		commentReferences = new ArrayList<CommentFile>();
 	}
 	boolean isTaskComment = true;
-	String saveCommStatus = (String) request.getParameter(CommentConstants.SAVE_COMMENT_STATUS);
+	String saveCommStatus = ServletUtil.getValue(request, CommentConstants.SAVE_COMMENT_STATUS);
     if(saveCommStatus!=null)
     {
     	if(saveCommStatus.equals(CommentConstants.SAVE_COMMENT_STATUS_JT))

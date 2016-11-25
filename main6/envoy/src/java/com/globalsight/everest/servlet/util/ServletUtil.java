@@ -15,21 +15,15 @@
  * */
 package com.globalsight.everest.servlet.util;
 
+import jodd.util.*;
+import org.apache.log4j.Logger;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletRequest;
-
-import jodd.util.HtmlDecoder;
-import jodd.util.HtmlEncoder;
-import jodd.util.StringUtil;
-import jodd.util.URLCoder;
-import jodd.util.URLDecoder;
-
-import org.apache.log4j.Logger;
 
 /**
  * @author VincentYan
@@ -335,15 +329,23 @@ public class ServletUtil extends jodd.servlet.ServletUtil
     {
         if (StringUtil.isNotBlank(value))
         {
+            String result = value.trim();
+            boolean hasXss = false;
+            // Change value if it is encoded by URLEncoder like %20%3d....
+            result = decodeUrl(result);
             Matcher matcher = null;
             for (Pattern pattern : getPatterns())
             {
-                matcher = pattern.matcher(value);
+                matcher = pattern.matcher(result);
                 if (matcher.find())
                 {
-                    value = matcher.replaceAll("");
+                    result = matcher.replaceAll("");
+                    hasXss = true;
                 }
             }
+
+            if (hasXss)
+                value = result;
 
             if (htmlEncoding)
                 value = encodeHtml(value);

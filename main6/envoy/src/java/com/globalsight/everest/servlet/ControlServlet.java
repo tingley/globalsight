@@ -18,25 +18,6 @@
 package com.globalsight.everest.servlet;
 
 // Envoy packages
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Vector;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.util.AppletDirectory;
@@ -62,6 +43,19 @@ import com.globalsight.util.LoginUtil;
 import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
+import org.apache.log4j.Logger;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.*;
 
 public class ControlServlet extends HttpServlet
 // implements SingleThreadModel
@@ -248,6 +242,7 @@ public class ControlServlet extends HttpServlet
         WebPageDescriptor targetPageDescriptor = null;
         WebPageDescriptor sourcePageDescriptor = null;
         HttpSession userSession = null;
+        p_response.addHeader("x-frame-options","SAMEORIGIN");
 
         // Vincent: Check if parameters contain invaild characters, 2016/08/16
         PageHandler sourcePageHandler = null;

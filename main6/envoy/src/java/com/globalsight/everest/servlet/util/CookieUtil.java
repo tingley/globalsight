@@ -3,19 +3,17 @@
  */
 package com.globalsight.everest.servlet.util;
 
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
+import com.globalsight.webservices.AmbassadorUtil;
+import jodd.util.StringBand;
+import jodd.util.StringUtil;
+import org.apache.log4j.Logger;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-
-import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
-import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
-import com.globalsight.webservices.AmbassadorUtil;
-
-import jodd.util.StringBand;
-import jodd.util.StringUtil;
 
 /**
  * Some methods used to get/set cookie value
@@ -77,7 +75,7 @@ public class CookieUtil
                 if (StringUtil.isBlank(value))
                     return "";
                 value = value.trim();
-                return noStrip ? value : ServletUtil.stripXss(ServletUtil.decodeUrl(value));
+                return noStrip ? value : ServletUtil.stripXss(value);
             }
         }
         return value;

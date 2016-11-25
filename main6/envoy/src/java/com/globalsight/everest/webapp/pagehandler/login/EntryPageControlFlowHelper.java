@@ -47,7 +47,6 @@ import jodd.util.StringUtil;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.log4j.Logger;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -129,8 +128,7 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         }
         else
         {
-            userPassword = m_request
-                    .getParameter(WebAppConstants.PASSWORD_NAME_FIELD);
+            userPassword = ServletUtil.get(m_request, WebAppConstants.PASSWORD_NAME_FIELD);
             if ("........".equals(userPassword))
             {
                 // auto login
@@ -152,7 +150,7 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
 
         // SSO user
         String isSSO = m_request.getParameter("isSSO");
-        boolean isSsoUser = (isSSO != null && isSSO.equalsIgnoreCase("on"));
+        boolean isSsoUser ="on".equalsIgnoreCase(isSSO);
         if (isSsoUser)
         {
             String requestUrl = m_request.getRequestURL().toString();
@@ -277,24 +275,6 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         }
     }
 
-    private String getCookieValue(Cookie[] cookies, String name)
-    {
-        if (cookies == null || cookies.length == 0 || StringUtil.isBlank(name))
-        {
-            return "";
-        }
-
-        for (Cookie cookie : cookies)
-        {
-            if (cookie.getName().equals(name))
-            {
-                return ServletUtil.stripXss(ServletUtil.decodeUrl(cookie.getValue()), true);
-            }
-        }
-
-        return "";
-    }
-
     /**
      * Login the user.
      */
@@ -393,6 +373,7 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
         catch (IllegalArgumentException le)
         {
             CATEGORY.error("Invalid user UI locale parameter value. [" + loginLocale + "]", le);
+            uiLocale = null;
         }
         if (uiLocale == null)
         {
@@ -428,7 +409,7 @@ public class EntryPageControlFlowHelper implements ControlFlowHelper,
 
         // These two fields are supposed to be permanent, so not put
         // in SessionManager, but directly in session
-        session.setAttribute(LOGIN_PORT, new Integer(loginPort));
+        session.setAttribute(LOGIN_PORT, loginPort);
         session.setAttribute(LOGIN_PROTOCOL, protocol);
         session.setAttribute(LOGIN_SERVER, loginServer);
 

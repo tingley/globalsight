@@ -96,116 +96,114 @@ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <TITLE><%= title %></TITLE>
 <%@ include file="/envoy/projects/workflows/myJobContextMenu.jspIncl" %>
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/taskList.css">
+<%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
+<%@ include file="/envoy/common/warning.jspIncl" %>
+</HEAD>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/includes/utilityScripts.js"></script>
-<%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
-<%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
-var needWarning = false;
-var objectName = "";
-var guideNode = "myJobs";
-var helpFile = "<%=bundle.getString("help_workflow_all_status_tab")%>";
+    var needWarning = false;
+    var objectName = "";
+    var guideNode = "myJobs";
+    var helpFile = "<%=bundle.getString("help_workflow_all_status_tab")%>";
 
-function loadPage() 
-{
-   // Only show the download button if something is available to download
-   //if (JobForm.jobId)
-   //{
-       //document.all.ButtonLayer.style.visibility = "visible";
-       //document.all.CheckAllLayer.style.visibility = "visible";
-   //}
-   // Load the Guide
-   loadGuides();
-   
-   ContextMenu.intializeContextMenu();
-}
-
-function setButtonState()
-{
-	// no buttons for this page for now
-}
-
-function ShowStatusMessage(p_msg)
-{
-    if (document.layers)
+    function loadPage()
     {
-        document.menu.document.statusMessage.innerHTML = p_msg;
+        // Only show the download button if something is available to download
+        //if (JobForm.jobId)
+        //{
+        //document.all.ButtonLayer.style.visibility = "visible";
+        //document.all.CheckAllLayer.style.visibility = "visible";
+        //}
+        // Load the Guide
+        loadGuides();
+
+        ContextMenu.intializeContextMenu();
     }
-    else
+
+    function setButtonState()
     {
-       statusMessage.innerHTML = p_msg;
+        // no buttons for this page for now
     }
-}
 
-function submitForm(buttonClicked)
-{
-    // no buttons for this page for now
-}
+    function ShowStatusMessage(p_msg)
+    {
+        if (document.layers)
+        {
+            document.menu.document.statusMessage.innerHTML = p_msg;
+        }
+        else
+        {
+            statusMessage.innerHTML = p_msg;
+        }
+    }
 
-//for GBS-2599
-function handleSelectAll() {
-	if (JobForm && JobForm.selectAll) {
-		if (JobForm.selectAll.checked) {
-			checkAll('JobForm');
-			setButtonState();
-	    }
-	    else {
-			clearAll('JobForm'); 
-			setButtonState();
-	    }
-	}
-}
+    function submitForm(buttonClicked)
+    {
+        // no buttons for this page for now
+    }
 
-function searchJob(fromRequest)
-{
-	var baseUrl = "";
-	var state = $("#sto").val();
-	if(state =="PENDING")
-		baseUrl = "<%=pendingURL%>";
-	else if(state =="READY_TO_BE_DISPATCHED")
-		baseUrl = "<%=readyURL%>";
-	else if(state =="DISPATCHED")
-		baseUrl = "<%=progressURL%>";
-	else if(state =="LOCALIZED")
-		baseUrl = "<%=completeURL%>";
-	else if(state =="EXPORTED")
-		baseUrl = "<%=exportedURL%>";
-	else if(state =="ARCHIVED")
-		baseUrl = "<%=archivedURL%>";
-	else if(state =="ALL_STATUS")
-		baseUrl = "<%=allStatusURL%>" + "&fromRequest=true";
-	if(fromRequest && state != "ALL_STATUS")
-	{
-		window.location = baseUrl+"&fromRequest=true"+"&sto="+$("#sto").val()
-		+"&csf="+$("#creationStartFilter").val()+"&cso="+$("#creationStartOptionsFilter").val()
-		+"&cef="+$("#creationEndFilter").val()+"&ceo="+$("#creationEndOptionsFilter").val()
-		+"&esf="+$("#completionStartFilter").val()+"&eso="+$("#completionStartOptionsFilter").val()
-		+"&eef="+$("#completionEndFilter").val()+"&eeo="+$("#completionEndOptionsFilter").val()
-		+"&edss="+$("#exportDateStartFilter").val()+"&edso="+$("#exportDateStartOptionsFilter").val()
-		+"&edee="+$("#exportDateEndFilter").val()+"&edes="+$("#exportDateEndOptionsFilter").val()
-		+"&advancedSearch="+advancedSearch;
-	}
-	else
-	{
-		window.location = baseUrl
-			+ "&sto="+$("#sto").val()+"&nf="+$("#jobNameFilter").val()
-			+"&idf="+$("#jobIdFilter").val()+"&idg="+$("#jobGroupIdFilter").val()+"&io="+$("#jobIdOption").val()+"&po="+$("#jobProjectFilter").val()
-			+"&sl="+$("#sourceLocaleFilter").val()+"&npp="+$("#numPerPage").val()+"&pro="+$("#priorityFilter").val()
-			+"&csf="+$("#creationStartFilter").val()+"&cso="+$("#creationStartOptionsFilter").val()
-			+"&cef="+$("#creationEndFilter").val()+"&ceo="+$("#creationEndOptionsFilter").val()
-			+"&esf="+$("#completionStartFilter").val()+"&eso="+$("#completionStartOptionsFilter").val()
-			+"&eef="+$("#completionEndFilter").val()+"&eeo="+$("#completionEndOptionsFilter").val()
-			+"&edss="+$("#exportDateStartFilter").val()+"&edso="+$("#exportDateStartOptionsFilter").val()
-			+"&edee="+$("#exportDateEndFilter").val()+"&edes="+$("#exportDateEndOptionsFilter").val()
-			+"&advancedSearch="+advancedSearch;
-	}
-}
+    //for GBS-2599
+    function handleSelectAll() {
+        if (JobForm && JobForm.selectAll) {
+            if (JobForm.selectAll.checked) {
+                checkAll('JobForm');
+                setButtonState();
+            }
+            else {
+                clearAll('JobForm');
+                setButtonState();
+            }
+        }
+    }
+
+    function searchJob(fromRequest)
+    {
+        var baseUrl = "";
+        var state = $("#sto").val();
+        if(state =="PENDING")
+            baseUrl = "<%=pendingURL%>";
+        else if(state =="READY_TO_BE_DISPATCHED")
+            baseUrl = "<%=readyURL%>";
+        else if(state =="DISPATCHED")
+            baseUrl = "<%=progressURL%>";
+        else if(state =="LOCALIZED")
+            baseUrl = "<%=completeURL%>";
+        else if(state =="EXPORTED")
+            baseUrl = "<%=exportedURL%>";
+        else if(state =="ARCHIVED")
+            baseUrl = "<%=archivedURL%>";
+        else if(state =="ALL_STATUS")
+            baseUrl = "<%=allStatusURL%>" + "&fromRequest=true";
+        if(fromRequest && state != "ALL_STATUS")
+        {
+            window.location = baseUrl+"&fromRequest=true"+"&sto="+$("#sto").val()
+                +"&csf="+$("#creationStartFilter").val()+"&cso="+$("#creationStartOptionsFilter").val()
+                +"&cef="+$("#creationEndFilter").val()+"&ceo="+$("#creationEndOptionsFilter").val()
+                +"&esf="+$("#completionStartFilter").val()+"&eso="+$("#completionStartOptionsFilter").val()
+                +"&eef="+$("#completionEndFilter").val()+"&eeo="+$("#completionEndOptionsFilter").val()
+                +"&edss="+$("#exportDateStartFilter").val()+"&edso="+$("#exportDateStartOptionsFilter").val()
+                +"&edee="+$("#exportDateEndFilter").val()+"&edes="+$("#exportDateEndOptionsFilter").val()
+                +"&advancedSearch="+advancedSearch;
+        }
+        else
+        {
+            window.location = baseUrl
+                + "&sto="+$("#sto").val()+"&nf="+$("#jobNameFilter").val()
+                +"&idf="+$("#jobIdFilter").val()+"&idg="+$("#jobGroupIdFilter").val()+"&io="+$("#jobIdOption").val()+"&po="+$("#jobProjectFilter").val()
+                +"&sl="+$("#sourceLocaleFilter").val()+"&npp="+$("#numPerPage").val()+"&pro="+$("#priorityFilter").val()
+                +"&csf="+$("#creationStartFilter").val()+"&cso="+$("#creationStartOptionsFilter").val()
+                +"&cef="+$("#creationEndFilter").val()+"&ceo="+$("#creationEndOptionsFilter").val()
+                +"&esf="+$("#completionStartFilter").val()+"&eso="+$("#completionStartOptionsFilter").val()
+                +"&eef="+$("#completionEndFilter").val()+"&eeo="+$("#completionEndOptionsFilter").val()
+                +"&edss="+$("#exportDateStartFilter").val()+"&edso="+$("#exportDateStartOptionsFilter").val()
+                +"&edee="+$("#exportDateEndFilter").val()+"&edes="+$("#exportDateEndOptionsFilter").val()
+                +"&advancedSearch="+advancedSearch;
+        }
+    }
 </SCRIPT>
-<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
-</HEAD>
 
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
     ONLOAD="loadPage()">
@@ -414,6 +412,7 @@ is defined in header.jspIncl which must be included in the body.
 <P id="statusMessage" CLASS="standardText" >&nbsp;</P>
 
 </FORM>
+
  
 </DIV>
 </BODY>

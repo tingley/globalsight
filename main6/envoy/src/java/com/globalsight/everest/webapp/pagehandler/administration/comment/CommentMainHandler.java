@@ -28,6 +28,7 @@ import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.CookieUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.util.comparator.CommentComparator;
@@ -788,7 +789,7 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
 
-        String commentInput = (String) p_request.getParameter("taskComment");
+        String commentInput = ServletUtil.getValue(p_request, "taskComment");
         if (commentInput == null)
         {
             commentInput = (String) sessionMgr.getAttribute("taskComment");
@@ -814,8 +815,7 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                     {
                         // GBS-1012: Added for create job comment from
                         // Task/Activity
-                        String saveCommStatus = (String) p_request
-                                .getParameter(SAVE_COMMENT_STATUS);
+                        String saveCommStatus = ServletUtil.getValue(p_request, SAVE_COMMENT_STATUS);
                         if (SAVE_COMMENT_STATUS_JT.equals(saveCommStatus))
                         {
                             Job tempJob = null;

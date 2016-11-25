@@ -463,18 +463,18 @@ BaseFilter.prototype.addTag = function(radioId)
 	{
 		var aName = isEdit ? editItem.aName : "";
 		document.getElementById("baseFilter_escaping_char").value = aName;
-		if(editItem.escape.length != 1)
+		if(typeof(editItem.escape) =='undefined' || editItem.escape.length != 1)
 		{
 			document.getElementById("baseFilter_escaping_escape").value = "";
 		}
 		else
 		{
-			document.getElementById("baseFilter_escaping_escape").value = editItem.escape ? editItem.escape : "";
+			document.getElementById("baseFilter_escaping_escape").value = isEdit ? editItem.escape : "";
 		}
-		document.getElementById("baseFilter_escaping_import").checked = editItem.unEscapeOnImport;
-		document.getElementById("baseFilter_escaping_export").checked = editItem.reEscapeOnExport;
-		document.getElementById("baseFilter_escaping_checkboxActive").checked = editItem.isCheckActive;
-		if(editItem.isCheckActive == true)
+		document.getElementById("baseFilter_escaping_import").checked = isEdit ? editItem.unEscapeOnImport : false;
+		document.getElementById("baseFilter_escaping_export").checked = isEdit ? editItem.reEscapeOnExport : false;
+		document.getElementById("baseFilter_escaping_checkboxActive").checked = isEdit ? editItem.isCheckActive : false;
+		if(isEdit && editItem.isCheckActive == true)
 		{
 			var active = document.getElementById("baseFilter_escaping_active");
 			for(var i = 0; i < active.options.length; i++)
@@ -486,7 +486,8 @@ BaseFilter.prototype.addTag = function(radioId)
 			var partContent = document.getElementById("baseFilter_escaping_partContent");
 			for(var i = 0; i < partContent.options.length; i++)
 			{
-				if(partContent.options[i].value == editItem.partConentValue){
+				if(partContent.options[i].value == editItem.partConentValue)
+				{
 					partContent.options[i].selected = true;
 				}
 			}
@@ -505,6 +506,12 @@ BaseFilter.prototype.addTag = function(radioId)
 		}
 		else
 		{
+			var partContent = document.getElementById("baseFilter_escaping_partContent");
+			partContent.options[0].selected = true;
+			document.getElementById("baseFilter_escaping_startIsRegex").checked = false;
+			document.getElementById("baseFilter_escaping_startPattern").value = "";
+			document.getElementById("baseFilter_escaping_finishIsRegex").checked = false;
+			document.getElementById("baseFilter_escaping_finishPattern").value = "";
 			document.getElementById("baseFilter_escaping_regex").style.display = "none";
 		}
 		document.getElementById("baseFilter_escaping_priority").value = isEdit ? editItem.priority : "";

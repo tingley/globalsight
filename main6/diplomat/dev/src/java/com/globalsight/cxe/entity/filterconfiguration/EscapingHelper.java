@@ -872,7 +872,7 @@ public class EscapingHelper
 				}
 				else
 				{
-					return "\\" + char1;
+					return escaping.getEscape() + char1;
 				}
 			}
 			// process ordinary chars
@@ -1052,6 +1052,9 @@ public class EscapingHelper
 			}
 		}
 
+		if (returnStr == null)
+			returnStr = ccc;
+		
 		return returnStr;
 	}
 

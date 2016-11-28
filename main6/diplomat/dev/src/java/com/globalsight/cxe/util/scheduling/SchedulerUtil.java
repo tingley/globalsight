@@ -289,7 +289,7 @@ public class SchedulerUtil
         // Quartz need diff(repeat intrerval) greater than 0.
         if (diff <= 0)
         {
-            logger.error("Modify the data, due Quartz need Repeat Interval greater than 0.");
+            logger.warn("Warning date is over than deadline date, event will be triggered in 10 seconds.");
             diff = 10000L;
         }
 

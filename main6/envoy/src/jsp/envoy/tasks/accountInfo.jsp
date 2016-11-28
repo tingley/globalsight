@@ -162,26 +162,31 @@ function submitForm(button) {
 
 function confirmForm(formSent) {
     if (formSent.password) {
-        //Validate password
-        var thePassword = formSent.password.value;
-        thePassword = stripBlanks(thePassword);
+        if (pwdChanged) {
+            //Validate password
+            var thePassword = formSent.password.value;
+            thePassword = stripBlanks(thePassword);
 
-        if (thePassword != "") {
-            //If password field has value, it means that user like to set/modify user's password
-            //First to check if password fit for strong password policy if user's company switch on strong password checking
-            if ("1" == "<%=needStrongPassword%>" && !passCheck) {
-                alert("<%=bundle.getString("jsmsg_account_weak_password")%>");
-                return false;
+            if (thePassword != "") {
+                //If password field has value, it means that user like to set/modify user's password
+                //First to check if password fit for strong password policy if user's company switch on strong password checking
+                if ("1" == "<%=needStrongPassword%>" && !passCheck) {
+                    alert("<%=bundle.getString("jsmsg_account_weak_password")%>");
+                    return false;
+                }
+                var theRepeat = formSent.passwordConfirm.value;
+                theRepeat = stripBlanks(theRepeat);
+                if (theRepeat != thePassword) {
+                    alert(" <%= bundle.getString("jsmsg_users_repeat_password")%>");
+                    formSent.passwordConfirm.value = "";
+                    formSent.password.value = "";
+                    formSent.password.focus();
+                    return false;
+                }
             }
-            var theRepeat = formSent.passwordConfirm.value;
-            theRepeat = stripBlanks(theRepeat);
-            if (theRepeat != thePassword) {
-                alert(" <%= bundle.getString("jsmsg_users_repeat_password")%>");
-                formSent.passwordConfirm.value = "";
-                formSent.password.value = "";
-                formSent.password.focus();
-                return false;
-            }
+        } else {
+            formSent.password.value = "";
+            formSent.passwordConfirm.value = "";
         }
     }
 
@@ -209,10 +214,12 @@ function confirmForm(formSent) {
 }
 
 var passCheck = false;
+var pwdChanged = false;
 
 $(document).ready(function(){
     $("#password1").keyup(function() {
         passCheck = passwordChecking($(this).val());
+		pwdChanged = true;
     });
 });
 </SCRIPT>
@@ -242,20 +249,20 @@ $(document).ready(function(){
   <form name="accountForm" method="post">
   <input type="hidden" name="company">
   <TR>
-	<TD NOWRAP><%= lbUserName %>:</TD>
+	<TD NOWRAP style="width:150px;"><%= lbUserName %>:</TD>
 	<TD><%=username%></TD>
   </TR>
   <TR>
-	<TD NOWRAP><%= lbFirstName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
+	<TD NOWRAP style="width:150px;"><%= lbFirstName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
 	<TD><input type="text" name="firstName" maxlength="40" value="<%= firstName %>" CLASS="standardText width100" onkeydown="updateNeedWarning()"></TD>
   </TR>
   <TR>
-	<TD><%= lbLastName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
+	<TD style="width:150px;"><%= lbLastName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
 	<TD><input type="text" name="lastName" maxlength="40" value="<%= lastName %>" CLASS="standardText width100" onkeydown="updateNeedWarning()"></TD>
   </TR>
   <% if (pwdPerm) {%>
   <TR>
-	<TD><%= lbPassword %><SPAN CLASS="asterisk">*</SPAN>:</TD>
+	<TD style="width:150px;"><%= lbPassword %><SPAN CLASS="asterisk">*</SPAN>:</TD>
 	<TD>
         <div class="vali_pass">
             <input type="password" name="password" id="password1" maxlength="40" value="" class="standardText width100" onkeydown="updateNeedWarning()">
@@ -266,7 +273,7 @@ $(document).ready(function(){
     </TD>
   </TR>
   <TR>
-	<TD ><%= lbRepeatPassword %><SPAN CLASS="asterisk">*</SPAN>:</TD>
+	<TD  style="width:150px;"><%= lbRepeatPassword %><SPAN CLASS="asterisk">*</SPAN>:</TD>
 	<TD>
         <div class="vali_pass">
             <input type="password" name="passwordConfirm" id="passwordConfirm" maxlength="40" value="" class="standardText width100" onkeydown="updateNeedWarning()">
@@ -275,7 +282,7 @@ $(document).ready(function(){
   </TR>
   <% }%>
   <TR>
-	<TD><%= lbTitle %>:</TD>
+	<TD style="width:150px;"><%= lbTitle %>:</TD>
 	<TD><input type="text" name="title" value="<%= userTitle %>" CLASS="standardText width100" onkeydown="updateNeedWarning()"></TD>
   </TR>
   <TR>

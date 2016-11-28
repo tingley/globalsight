@@ -138,7 +138,6 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
     private static Pattern repairOfficeXml = Pattern
             .compile("(<w:instrText[^>]*?>)(.*?)(</w:instrText>)");
     private XmlFilterHelper m_xmlFilterHelper = null;
-
     //
     // Constructors
     //
@@ -1006,26 +1005,9 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
                                 .decodeXmlEntities(((TranslatableElement) de).getEscapingChars());
                     }
 
-//                    String newchunk = EscapingHelper.handleString4Export(chunk, m_escapings,
-//                            srcDataType, false, true, escapingChars, isInCDATA);
-                  //Modified GBS-4117
-                    String contentType = "";
-					if (isInCDATA)
-					{
-						contentType = "CDATA";
-					}
-					else if (FORMAT_XML.equals(srcDataType) && !m_isAttr)
-					{
-						contentType = "XmlNode";
-					}
-					else if (FORMAT_HTML.equals(srcDataType))
-					{
-						contentType = "HtmlNode";
-					}
-					else if (FORMAT_XML.equals(srcDataType) && m_isAttr)
-					{
-						contentType = "xmlAttribute";
-					}
+					// Modified GBS-4117
+					String contentType = getContentType(chunk, srcDataType,
+							m_isAttr, isInCDATA);
 					String newchunk = EscapingHelper.newHandleString4Export(
 							chunk, m_escapings, srcDataType, false, true,
 							escapingChars, isInCDATA, contentType);
@@ -1164,6 +1146,33 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
             }
         }
     }
+
+	private static String getContentType(String segment, String format,
+			boolean isAttr, boolean isInCDATA)
+	{
+		String contentType = "";
+		if (isInCDATA)
+		{
+			contentType = "CDATA";
+		}
+		else if (IFormatNames.FORMAT_HTML.equals(format))
+		{
+			contentType = "HtmlNode";
+		}
+		else if (IFormatNames.FORMAT_XML.equals(format))
+		{
+			if (isAttr)
+			{
+				contentType = "xmlAttribute";
+			}
+			else
+			{
+				contentType = "XmlNode";
+			}
+		}
+
+		return contentType;
+	}
 
     private String entityEncodeForPassolo(String skeleton)
     {

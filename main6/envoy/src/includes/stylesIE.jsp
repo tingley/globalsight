@@ -732,17 +732,16 @@ textarea {
 }
 
 .vali_pass {
-    width: 280px;
+    width: 100%;
     padding: 0px;
     border: #eee 0px solid;
     text-align: center;
 }
 
 .vali_pass input {
-    width: 96%;
+    width: 100%;
     display: block;
     margin: 0;
-    padding: 5px;
     font-size: 9px;
 }
 .vali_pass_progress {
@@ -750,7 +749,7 @@ textarea {
     background-color: #efefef;
     height: 10px;
     border-radius: 5px;
-    width: 96%;
+    width: 100%;
 }
 .vali_pass_inner_progress {
     display: block;

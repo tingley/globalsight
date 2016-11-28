@@ -1,43 +1,15 @@
 package com.globalsight.util;
 
+import org.junit.*;
+
+import java.util.Set;
+
 import static com.globalsight.util.StringUtil.join;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Set;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 public class StringUtilTest
 {
-    @BeforeClass
-    public static void init()
-    {
-        System.out.println("BeforeClass :: init()");
-    }
-
-    @Before
-    public void init2()
-    {
-        System.out.println("Before :: init2()");
-    }
-
-    @After
-    public void clear()
-    {
-        System.out.println("After :: clear()");
-    }
-    
-    @AfterClass
-    public static void clear2()
-    {
-        System.out.println("AfterClass :: clear2()");
-    }
-    
     @Test
     public void testFormatPCT()
     {
@@ -240,5 +212,11 @@ public class StringUtilTest
         assertTrue(StringUtil.getBoolean("True "));
         assertTrue(StringUtil.getBoolean("yes"));
         assertTrue(StringUtil.getBoolean("yEs"));
+    }
+
+    @Test
+    public void testToHexString()
+    {
+        assertEquals("70617373776F7264", StringUtil.toHexString("password".getBytes()));
     }
 }

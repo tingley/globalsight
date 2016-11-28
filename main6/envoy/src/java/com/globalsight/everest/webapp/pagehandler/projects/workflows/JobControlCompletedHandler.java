@@ -23,22 +23,17 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.ServletUtil;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoLocalizedSearcher;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -47,11 +42,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
+import java.io.File;
+import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.*;
 
 public class JobControlCompletedHandler extends JobManagementHandler
 {
@@ -76,10 +70,8 @@ public class JobControlCompletedHandler extends JobManagementHandler
     	HttpSession session = p_request.getSession(false);
     	SessionManager sessionMgr = (SessionManager) session
     		.getAttribute(SESSION_MANAGER);
-    	
-    	if (p_request.getParameter("action") != null
-				&& "checkDownloadQAReport".equals(p_request
-						.getParameter("action")))
+    	String action = ServletUtil.getValue(p_request, "action");
+		if ("checkDownloadQAReport".equals(action))
 		{
 			ServletOutputStream out = p_response.getOutputStream();
 			String jobIds = p_request.getParameter("jobIds");
@@ -98,8 +90,7 @@ public class JobControlCompletedHandler extends JobManagementHandler
 			out.write((JsonUtil.toObjectJson(returnValue)).getBytes("UTF-8"));
 			return;
 		}
-		else if (p_request.getParameter("action") != null
-				&& "downloadQAReport".equals(p_request.getParameter("action")))
+		else if ("downloadQAReport".equals(action))
 		{
 			Set<Long> jobIdSet = (Set<Long>) sessionMgr
 					.getAttribute("jobIdSet");
@@ -126,8 +117,8 @@ public class JobControlCompletedHandler extends JobManagementHandler
         HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, 
                                                p_request,
                                                LOCALIZED_BEAN);
-        p_request.setAttribute("searchType", p_request.getParameter("searchType"));
-        p_request.setAttribute("action", p_request.getParameter("action"));
+        p_request.setAttribute("searchType", ServletUtil.getValue(p_request, "searchType"));
+        p_request.setAttribute("action", action);
         performAppropriateOperation(p_request);
 
         sessionMgr.setMyjobsAttribute("lastState", Job.LOCALIZED);

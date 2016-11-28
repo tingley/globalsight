@@ -23,7 +23,8 @@
                  com.globalsight.everest.webapp.pagehandler.administration.comment.CommentConstants"
 		session="true" 
 %>
-				 
+<%@ page import="com.globalsight.everest.servlet.util.ServletUtil" %>
+
 <jsp:useBean id="done" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="cancel" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="attach" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
@@ -190,7 +191,7 @@
     }
     
     //GBS-1012: Added for edit job comment from Task/Activity
-    saveCommStatus = (String) request.getParameter("saveCommStatus");
+    saveCommStatus = ServletUtil.getValue(request, "saveCommStatus");
     if(null!=saveCommStatus&&saveCommStatus.length()>0)
     {
     	isTaskComment = false;

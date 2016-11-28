@@ -16,39 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
-import java.io.IOException;
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.Vector;
-
-import javax.naming.NamingException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.costing.Cost;
@@ -85,6 +52,23 @@ import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.date.DateHelper;
+import org.apache.log4j.Logger;
+
+import javax.naming.NamingException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.text.MessageFormat;
+import java.util.*;
 
 public abstract class JobManagementHandler extends PageHandler
 {
@@ -809,8 +793,8 @@ public abstract class JobManagementHandler extends PageHandler
 
         // searchType == stateOnly is set if coming from Jobs menu:pending, in
         // progress...
-        String searchType = (String) p_request.getParameter("searchType");
-        if (searchType == null)
+        String searchType = ServletUtil.getValue(p_request,"searchType");
+        if (StringUtil.isEmpty(searchType))
         {
             searchType = (String) session.getAttribute("searchType");
         }
@@ -895,9 +879,8 @@ public abstract class JobManagementHandler extends PageHandler
                 jobsSet.addAll(ServerProxy.getJobHandler()
                         .getJobs(searchParams));
 
-                String status = (String) p_request
-                        .getParameter(JobSearchConstants.STATUS_OPTIONS);
-                if (status != null && status.equals(Job.DTPINPROGRESS))
+                String status = ServletUtil.getValue(p_request, JobSearchConstants.STATUS_OPTIONS);
+                if (StringUtil.isNotEmpty(status) && Job.DTPINPROGRESS.equals(status))
                 {
                     jobsSet.addAll(ServerProxy.getJobHandler().getJobsByState(
                             Job.DTPINPROGRESS));
@@ -943,7 +926,7 @@ public abstract class JobManagementHandler extends PageHandler
             }
         }
 
-        String criteria = p_request.getParameter(SORT_PARAM);
+        String criteria = ServletUtil.getValue(p_request, SORT_PARAM);
         List jobs = new ArrayList(jobsSet);
         Currency oCurrency = null;
         if (s_jobCosting)
@@ -1407,8 +1390,8 @@ public abstract class JobManagementHandler extends PageHandler
                         JobSearchParameters.CREATION_START_CONDITION));
 
                 Calendar now = Calendar.getInstance();
-                int negativeAmount = (int) 0 - amount.intValue();
-                if (!condition.equals(SearchCriteriaParameters.HOURS_AGO))
+                int negativeAmount =0 - amount.intValue();
+                if (!SearchCriteriaParameters.HOURS_AGO.equals(condition))
                 {
                     // if it's not hours ago, then start counting back from
                     // this morning just past midnight
@@ -1418,23 +1401,7 @@ public abstract class JobManagementHandler extends PageHandler
                     now.set(Calendar.MILLISECOND, 0);
                 }
 
-                if (condition.equals(SearchCriteriaParameters.MONTHS_AGO))
-                {
-                    now.add(Calendar.MONTH, negativeAmount);
-                }
-                else if (condition.equals(SearchCriteriaParameters.WEEKS_AGO))
-                {
-                    now.add(Calendar.WEEK_OF_YEAR, negativeAmount);
-                }
-                else if (condition.equals(SearchCriteriaParameters.DAYS_AGO))
-                {
-                    now.add(Calendar.DATE, negativeAmount);
-                }
-                else
-                {
-                    // assume SearchCriteriaParameters.HOURS_AGO
-                    now.add(Calendar.HOUR_OF_DAY, negativeAmount);
-                }
+                setCalendarValue(condition, now, negativeAmount);
 
                 if (j.getCreateDate().before(now.getTime()))
                 {
@@ -1452,10 +1419,10 @@ public abstract class JobManagementHandler extends PageHandler
 
                 Calendar now = Calendar.getInstance();
                 if (amount != null
-                        || !condition.equals(SearchCriteriaParameters.NOW))
+                        || !SearchCriteriaParameters.NOW.equals(condition))
                 {
-                    int negativeAmount = (int) 0 - amount.intValue();
-                    if (!condition.equals(SearchCriteriaParameters.HOURS_AGO))
+                    int negativeAmount = 0 - amount.intValue();
+                    if (!SearchCriteriaParameters.HOURS_AGO.equals(condition))
                     {
                         // if it's not hours ago, then start counting back from
                         // tonight just before midnight
@@ -1465,25 +1432,7 @@ public abstract class JobManagementHandler extends PageHandler
                         now.set(Calendar.MILLISECOND, 999);
                     }
 
-                    if (condition.equals(SearchCriteriaParameters.MONTHS_AGO))
-                    {
-                        now.add(Calendar.MONTH, negativeAmount);
-                    }
-                    else if (condition
-                            .equals(SearchCriteriaParameters.WEEKS_AGO))
-                    {
-                        now.add(Calendar.WEEK_OF_YEAR, negativeAmount);
-                    }
-                    else if (condition
-                            .equals(SearchCriteriaParameters.DAYS_AGO))
-                    {
-                        now.add(Calendar.DATE, negativeAmount);
-                    }
-                    else
-                    {
-                        // assume SearchCriteriaParameters.HOURS_AGO
-                        now.add(Calendar.HOUR_OF_DAY, negativeAmount);
-                    }
+                    setCalendarValue(condition, now, negativeAmount);
                 }
 
                 if (j.getCreateDate().after(now.getTime()))
@@ -1510,15 +1459,13 @@ public abstract class JobManagementHandler extends PageHandler
 
                     Calendar now = Calendar.getInstance();
                     if (amount != null
-                            || !condition.equals(SearchCriteriaParameters.NOW))
+                            || !SearchCriteriaParameters.NOW.equals(condition))
                     {
-                        int negativeAmount = (int) 0 - amount.intValue();
+                        int negativeAmount = 0 - amount.intValue();
                         int positiveAmount = amount.intValue();
 
-                        if (condition
-                                .equals(SearchCriteriaParameters.HOURS_AGO) == false
-                                && condition
-                                        .equals(SearchCriteriaParameters.HOURS_FROM_NOW) == false)
+                        if (!SearchCriteriaParameters.HOURS_AGO.equals(condition)
+                                && !SearchCriteriaParameters.HOURS_FROM_NOW.equals(condition))
                         {
                             // if it's not hours ago, then start counting back
                             // from
@@ -1529,46 +1476,7 @@ public abstract class JobManagementHandler extends PageHandler
                             now.set(Calendar.MILLISECOND, 0);
                         }
 
-                        if (condition
-                                .equals(SearchCriteriaParameters.MONTHS_AGO))
-                        {
-                            now.add(Calendar.MONTH, negativeAmount);
-                        }
-                        else if (condition
-                                .equals(SearchCriteriaParameters.WEEKS_AGO))
-                        {
-                            now.add(Calendar.WEEK_OF_YEAR, negativeAmount);
-                        }
-                        else if (condition
-                                .equals(SearchCriteriaParameters.DAYS_AGO))
-                        {
-                            now.add(Calendar.DATE, negativeAmount);
-                        }
-                        else if (condition
-                                .equals(SearchCriteriaParameters.MONTHS_FROM_NOW))
-                        {
-                            now.add(Calendar.MONTH, positiveAmount);
-                        }
-                        else if (condition
-                                .equals(SearchCriteriaParameters.WEEKS_FROM_NOW))
-                        {
-                            now.add(Calendar.WEEK_OF_YEAR, positiveAmount);
-                        }
-                        else if (condition
-                                .equals(SearchCriteriaParameters.DAYS_FROM_NOW))
-                        {
-                            now.add(Calendar.DATE, positiveAmount);
-                        }
-                        else if (condition
-                                .equals(SearchCriteriaParameters.HOURS_FROM_NOW))
-                        {
-                            now.add(Calendar.HOUR_OF_DAY, positiveAmount);
-                        }
-                        else
-                        {
-                            // assume SearchCriteriaParameters.HOURS_AGO
-                            now.add(Calendar.HOUR_OF_DAY, negativeAmount);
-                        }
+                        setCalendarValue(condition, now, negativeAmount, positiveAmount);
                     }
                     boolean found = false;
                     Collection<Workflow> wfs = j.getWorkflows();
@@ -1605,14 +1513,12 @@ public abstract class JobManagementHandler extends PageHandler
 
                     Calendar now = Calendar.getInstance();
                     if (amount != null
-                            || !condition.equals(SearchCriteriaParameters.NOW))
+                            || !SearchCriteriaParameters.NOW.equals(condition))
                     {
-                        int negativeAmount = (int) 0 - amount.intValue();
+                        int negativeAmount = 0 - amount.intValue();
                         int positiveAmount = amount.intValue();
-                        if (condition
-                                .equals(SearchCriteriaParameters.HOURS_AGO) == false
-                                && condition
-                                        .equals(SearchCriteriaParameters.HOURS_FROM_NOW) == false)
+                        if (!SearchCriteriaParameters.HOURS_AGO.equals(condition)
+                                && !SearchCriteriaParameters.HOURS_FROM_NOW.equals(condition))
                         {
                             // if it's not hours ago, then start counting back
                             // from
@@ -1623,46 +1529,7 @@ public abstract class JobManagementHandler extends PageHandler
                             now.set(Calendar.MILLISECOND, 999);
                         }
 
-                        if (condition
-                                .equals(SearchCriteriaParameters.MONTHS_AGO))
-                        {
-                            now.add(Calendar.MONTH, negativeAmount);
-                        }
-                        else if (condition
-                                .equals(SearchCriteriaParameters.WEEKS_AGO))
-                        {
-                            now.add(Calendar.WEEK_OF_YEAR, negativeAmount);
-                        }
-                        else if (condition
-                                .equals(SearchCriteriaParameters.DAYS_AGO))
-                        {
-                            now.add(Calendar.DATE, negativeAmount);
-                        }
-                        else if (condition
-                                .equals(SearchCriteriaParameters.MONTHS_FROM_NOW))
-                        {
-                            now.add(Calendar.MONTH, positiveAmount);
-                        }
-                        else if (condition
-                                .equals(SearchCriteriaParameters.WEEKS_FROM_NOW))
-                        {
-                            now.add(Calendar.WEEK_OF_YEAR, positiveAmount);
-                        }
-                        else if (condition
-                                .equals(SearchCriteriaParameters.DAYS_FROM_NOW))
-                        {
-                            now.add(Calendar.DATE, positiveAmount);
-                        }
-                        else if (condition
-                                .equals(SearchCriteriaParameters.HOURS_FROM_NOW))
-                        {
-                            now.add(Calendar.HOUR_OF_DAY, positiveAmount);
-                        }
-                        else
-                        {
-                            // assume SearchCriteriaParameters.HOURS_AGO
-                            now.add(Calendar.HOUR_OF_DAY, negativeAmount);
-                        }
+                        setCalendarValue(condition, now, negativeAmount, positiveAmount);
                     }
                     boolean found = false;
                     Collection<Workflow> wfs = j.getWorkflows();
@@ -1682,6 +1549,65 @@ public abstract class JobManagementHandler extends PageHandler
                     }
                 }
             }
+        }
+    }
+
+    private void setCalendarValue(String condition, Calendar now, int negativeAmount)
+    {
+        if (SearchCriteriaParameters.MONTHS_AGO.equals(condition))
+        {
+            now.add(Calendar.MONTH, negativeAmount);
+        }
+        else if (SearchCriteriaParameters.WEEKS_AGO.equals(condition))
+        {
+            now.add(Calendar.WEEK_OF_YEAR, negativeAmount);
+        }
+        else if (SearchCriteriaParameters.DAYS_AGO.equals(condition))
+        {
+            now.add(Calendar.DATE, negativeAmount);
+        }
+        else
+        {
+            // assume SearchCriteriaParameters.HOURS_AGO
+            now.add(Calendar.HOUR_OF_DAY, negativeAmount);
+        }
+    }
+
+    private void setCalendarValue(String condition, Calendar now, int negativeAmount, int
+            positiveAmount)
+    {
+        if (SearchCriteriaParameters.MONTHS_AGO.equals(condition))
+        {
+            now.add(Calendar.MONTH, negativeAmount);
+        }
+        else if (SearchCriteriaParameters.WEEKS_AGO.equals(condition))
+        {
+            now.add(Calendar.WEEK_OF_YEAR, negativeAmount);
+        }
+        else if (SearchCriteriaParameters.DAYS_AGO.equals(condition))
+        {
+            now.add(Calendar.DATE, negativeAmount);
+        }
+        else if (SearchCriteriaParameters.MONTHS_FROM_NOW.equals(condition))
+        {
+            now.add(Calendar.MONTH, positiveAmount);
+        }
+        else if (SearchCriteriaParameters.WEEKS_FROM_NOW.equals(condition))
+        {
+            now.add(Calendar.WEEK_OF_YEAR, positiveAmount);
+        }
+        else if (SearchCriteriaParameters.DAYS_FROM_NOW.equals(condition))
+        {
+            now.add(Calendar.DATE, positiveAmount);
+        }
+        else if (SearchCriteriaParameters.HOURS_FROM_NOW.equals(condition))
+        {
+            now.add(Calendar.HOUR_OF_DAY, positiveAmount);
+        }
+        else
+        {
+            // assume SearchCriteriaParameters.HOURS_AGO
+            now.add(Calendar.HOUR_OF_DAY, negativeAmount);
         }
     }
 
@@ -1862,13 +1788,16 @@ public abstract class JobManagementHandler extends PageHandler
     
 	protected void removeJobFromGroup(HttpServletRequest p_request)
 	{
-		String jobIds = p_request.getParameter("jobIds");
+		String jobIds = ServletUtil.getValue(p_request, "jobIds");
 		if (StringUtil.isNotEmpty(jobIds))
 		{
 			String[] jobIdArr = jobIds.split(",");
 			JobImpl impl = null;
 			for (String jobId : jobIdArr)
 			{
+			    if (StringUtil.isEmpty(jobId))
+			        continue;
+
 				Job job = WorkflowHandlerHelper.getJobById(Long
 						.parseLong(jobId));
 				impl = (JobImpl) job;
@@ -1881,23 +1810,24 @@ public abstract class JobManagementHandler extends PageHandler
 	protected void setJobSearchFilters(SessionManager sessionMgr,
 			HttpServletRequest p_request, boolean stateMarch)
 	{
-    	if(p_request.getParameter("fromRequest") != null && stateMarch)
+	    String fromRequest = ServletUtil.getValue(p_request, "fromRequest");
+    	if(StringUtil.isNotEmpty(fromRequest) && stateMarch)
     	{		
-    		String jobIdFilter = p_request.getParameter("idf");
-    		if(jobIdFilter != null)
+    		String jobIdFilter = ServletUtil.getValue(p_request, "idf");
+    		if(StringUtil.isNotEmpty(jobIdFilter))
     		{      	
     			sessionMgr.setMyjobsAttribute("jobIdFilter", jobIdFilter);
     		}
     		
-			String jobGroupIdFilter = p_request.getParameter("idg");
-			if (jobGroupIdFilter != null)
+			String jobGroupIdFilter = ServletUtil.getValue(p_request, "idg");
+			if (StringUtil.isNotEmpty(jobGroupIdFilter))
 			{
 				sessionMgr.setMyjobsAttribute("jobGroupIdFilter",
 						jobGroupIdFilter);
 			}
     		
-    		String jobIdOption = p_request.getParameter("io");
-    		if(jobIdOption != null)
+    		String jobIdOption = ServletUtil.getValue(p_request, "io");
+    		if(StringUtil.isNotEmpty(jobIdOption))
     		{      	
     			sessionMgr.setMyjobsAttribute("jobIdOption", jobIdOption);
     		}
@@ -1905,9 +1835,9 @@ public abstract class JobManagementHandler extends PageHandler
             String jobNameFilter;
             try
             {
-                jobNameFilter = new String(p_request.getParameter("nf")
+                jobNameFilter = new String(ServletUtil.getValue(p_request, "nf")
                         .getBytes("ISO8859-1"), "UTF-8");
-                if(jobNameFilter != null)
+                if(StringUtil.isNotEmpty(jobNameFilter))
                 {           
                     sessionMgr.setMyjobsAttribute("jobNameFilter", jobNameFilter);
                 }
@@ -1917,21 +1847,21 @@ public abstract class JobManagementHandler extends PageHandler
             }
 
     		
-    		String jobProjectFilter = p_request.getParameter("po");
-    		if(jobProjectFilter != null)
+    		String jobProjectFilter = ServletUtil.getValue(p_request, "po");
+    		if(StringUtil.isNotEmpty(jobProjectFilter))
     		{
     			sessionMgr.setMyjobsAttribute("jobProjectFilter", jobProjectFilter);
     		}
     		
-    		String sourceLocaleFilter = p_request.getParameter("sl");
-    		if(sourceLocaleFilter != null)
+    		String sourceLocaleFilter = ServletUtil.getValue(p_request, "sl");
+    		if(StringUtil.isNotEmpty(sourceLocaleFilter))
     		{
     			sessionMgr.setMyjobsAttribute("sourceLocaleFilter", sourceLocaleFilter);
     		}
     		
-    		String npp = p_request.getParameter("npp");
+    		String npp = ServletUtil.getValue(p_request, "npp");
     		boolean isNewNpp = false;
-    		if(npp != null)
+    		if(StringUtil.isNotEmpty(npp))
     		{
     			if(sessionMgr.getMyjobsAttribute("numPerPage") != null)
     			{
@@ -1942,16 +1872,16 @@ public abstract class JobManagementHandler extends PageHandler
     			sessionMgr.setMyjobsAttribute("numPerPage", Integer.valueOf(npp));
     		}
     		
-    		String jobListStart = p_request.getParameter("jobListStart");
+    		String jobListStart = ServletUtil.getValue(p_request, "jobListStart");
     		if(isNewNpp)
     			jobListStart = "0";
-    		if(jobListStart != null)
+    		if(StringUtil.isNotEmpty(jobListStart))
     		{
     			sessionMgr.setMyjobsAttribute("jobListStart", jobListStart);
     		}
     		
-    		String priorityFilter = p_request.getParameter("pro");
-    		if(priorityFilter != null)
+    		String priorityFilter = ServletUtil.getValue(p_request, "pro");
+    		if(StringUtil.isNotEmpty(priorityFilter))
     		{
     			sessionMgr.setMyjobsAttribute("priorityFilter", priorityFilter);
     		}
@@ -1984,59 +1914,54 @@ public abstract class JobManagementHandler extends PageHandler
     		}
 		}
     	
-    	if(p_request.getParameter("fromRequest") != null)
+    	if(StringUtil.isNotEmpty(fromRequest))
     	{
-    		String creationStartFilter = p_request.getParameter("csf");
-    		if(creationStartFilter != null)
+    		String creationStartFilter = ServletUtil.getValue(p_request, "csf");
+    		if(StringUtil.isNotEmpty(creationStartFilter))
     		{
     			sessionMgr.setMyjobsAttribute("creationStartFilter", creationStartFilter);
-    			sessionMgr.setMyjobsAttribute("creationStartOptionsFilter", p_request.getParameter("cso"));
+    			sessionMgr.setMyjobsAttribute("creationStartOptionsFilter", ServletUtil.getValue(p_request, "cso"));
     		}
     		
-    		String creationEndOptionsFilter = p_request.getParameter("ceo");
-    		if(creationEndOptionsFilter != null)
+    		String creationEndOptionsFilter = ServletUtil.getValue(p_request, "ceo");
+    		if(StringUtil.isNotEmpty(creationEndOptionsFilter))
     		{
-    			sessionMgr.setMyjobsAttribute("creationEndFilter", p_request.getParameter("cef"));
+    			sessionMgr.setMyjobsAttribute("creationEndFilter", ServletUtil.getValue(p_request, "cef"));
     			sessionMgr.setMyjobsAttribute("creationEndOptionsFilter", creationEndOptionsFilter);
     		}
     		
-    		String completionStartFilter = p_request.getParameter("esf");
-    		if(completionStartFilter != null)
+    		String completionStartFilter = ServletUtil.getValue(p_request, "esf");
+    		if(StringUtil.isNotEmpty(completionStartFilter))
     		{
     			sessionMgr.setMyjobsAttribute("completionStartFilter", completionStartFilter);
-    			sessionMgr.setMyjobsAttribute("completionStartOptionsFilter", p_request.getParameter("eso"));
+    			sessionMgr.setMyjobsAttribute("completionStartOptionsFilter", ServletUtil.getValue(p_request, "eso"));
     		}
     		
-    		String completionEndOptionsFilter = p_request.getParameter("eeo");
-    		if(completionEndOptionsFilter != null)
+    		String completionEndOptionsFilter = ServletUtil.getValue(p_request, "eeo");
+    		if(StringUtil.isNotEmpty(completionEndOptionsFilter))
     		{
-    			sessionMgr.setMyjobsAttribute("completionEndFilter", p_request.getParameter("eef"));
+    			sessionMgr.setMyjobsAttribute("completionEndFilter", ServletUtil.getValue(p_request, "eef"));
     			sessionMgr.setMyjobsAttribute("completionEndOptionsFilter", completionEndOptionsFilter);
     		}
     		
-    		String exportDateStartFilter = p_request.getParameter("edss");
-    		if(exportDateStartFilter != null)
+    		String exportDateStartFilter = ServletUtil.getValue(p_request, "edss");
+    		if(StringUtil.isNotEmpty(exportDateStartFilter))
     		{
     			sessionMgr.setMyjobsAttribute("exportDateStartFilter", exportDateStartFilter);
-    			sessionMgr.setMyjobsAttribute("exportDateStartOptionsFilter", p_request.getParameter("edso"));
+    			sessionMgr.setMyjobsAttribute("exportDateStartOptionsFilter", ServletUtil.getValue(p_request, "edso"));
     		}
     		
-    		String exportDateEndOptionsFilter = p_request.getParameter("edes");
-    		if(exportDateEndOptionsFilter != null)
+    		String exportDateEndOptionsFilter = ServletUtil.getValue(p_request, "edes");
+    		if(StringUtil.isNotEmpty(exportDateEndOptionsFilter))
     		{
-    			sessionMgr.setMyjobsAttribute("exportDateEndFilter", p_request.getParameter("edee"));
+    			sessionMgr.setMyjobsAttribute("exportDateEndFilter", ServletUtil.getValue(p_request, "edee"));
     			sessionMgr.setMyjobsAttribute("exportDateEndOptionsFilter", exportDateEndOptionsFilter);
     		}
     	}
     	
-    	String advancedSearch = p_request.getParameter("advancedSearch");
-    	if(advancedSearch != null)
-    	{
-    		if(advancedSearch.equals("true"))
-    			sessionMgr.setMyjobsAttribute("advancedSearch", "false");
-    		else
-    			sessionMgr.setMyjobsAttribute("advancedSearch", "true");
-    	}
+    	String advancedSearch = ServletUtil.getValue(p_request, "advancedSearch");
+    	if(StringUtil.isNotEmpty(advancedSearch))
+            sessionMgr.setMyjobsAttribute("advancedSearch", "true".equals(advancedSearch) ? "false" : "true");
     }
     
     protected void setJobProjectsLocales(SessionManager sessionMgr, HttpSession session)
@@ -2297,62 +2222,6 @@ public abstract class JobManagementHandler extends PageHandler
         return sb.toString();
     }
 
-    @SuppressWarnings("deprecation")
-    // private String getPlannedDateHTML(Job p_job, String p_pdateURL,
-    // Locale p_uiLocale, Timestamp ts, boolean hasPerm)
-    // {
-    // // get the date
-    // Collection wfs = p_job.getWorkflows();
-    // Date planned = null;
-    // Iterator iter = wfs.iterator();
-    // while (iter.hasNext())
-    // {
-    // Workflow wf = (Workflow) iter.next();
-    // Date d = wf.getPlannedCompletionDate();
-    // // note that 'd' can be null for a non-dispatched workflow
-    // if (planned == null || (d != null && planned.compareTo(d) < 0))
-    // {
-    // planned = d;
-    // }
-    // }
-    // // create the html
-    // StringBuffer sb = new StringBuffer();
-    // if (p_job.getState().equals(Workflow.DISPATCHED) && hasPerm)
-    // {
-    // sb.append("<TD><A STYLE=\"word-wrap:break-word\" CLASS=\"");
-    // sb.append("standard");
-    // sb.append("HREF\" HREF=\"");
-    // sb.append(p_pdateURL);
-    // sb.append("&");
-    // sb.append(JOB_ID);
-    // sb.append("=");
-    // sb.append(p_job.getJobId());
-    // sb.append("&");
-    // sb.append(JOB_STATE);
-    // sb.append("=");
-    // sb.append(p_job.getState());
-    // sb.append("\">");
-    //
-    // // For sla report issue
-    // // Ori Code:
-    // // sb.append(DateHelper.getFormattedDate(planned, p_uiLocale));
-    // ts.setDate(planned);
-    //
-    // sb.append(ts);
-    // sb.append("</A>");
-    // sb.append("</TD>\n");
-    // }
-    // else
-    // {
-    // sb
-    // .append("<TD  STYLE=\"padding-right: 10px;\"><SPAN CLASS=standardText>");
-    // ts.setDate(planned);
-    // sb.append(ts);
-    // sb.append("</SPAN></TD>\n");
-    // }
-    //
-    // return sb.toString();
-    // }
     private String getEstimatedJobDateHTML(Job p_job, Timestamp ts)
     {
         StringBuffer sb = new StringBuffer();
@@ -2425,7 +2294,7 @@ public abstract class JobManagementHandler extends PageHandler
             SessionManager p_sessionMgr)
     {
         HttpSession session = p_request.getSession(false);
-        String curr = (String) p_request
+        String curr = p_request
                 .getParameter(JobManagementHandler.CURRENCY);
         curr = curr == null ? (String) session
                 .getAttribute(JobManagementHandler.CURRENCY) : curr;
@@ -2463,7 +2332,7 @@ public abstract class JobManagementHandler extends PageHandler
             rs = ps.executeQuery();
             while (rs.next())
             {
-                list.add(new Long(rs.getLong(1)));
+                list.add(rs.getLong(1));
             }
             ps.close();
         }
@@ -2493,27 +2362,11 @@ public abstract class JobManagementHandler extends PageHandler
         Iterator it = p_job.getWorkflows().iterator();
         while (!inProgress && it.hasNext())
         {
-            // inProgress = exportIsInProgress((Workflow)it.next());
-            inProgress = inProgressWfs.contains(new Long(((Workflow) it.next())
-                    .getId()));
+            inProgress = inProgressWfs.contains(((Workflow) it.next())
+                    .getId());
         }
         return inProgress;
     }
-
-    // Return true if any of the target pages on the given workflow is in the
-    // Export-in-progress state.
-    // private boolean exportIsInProgress(Workflow p_workflow)
-    // {
-    // boolean inProgress = false;
-    // Vector tps = p_workflow.getTargetPages();
-    // for (int i = 0; !inProgress && i < tps.size(); i++)
-    // {
-    // TargetPage tp = (TargetPage) tps.elementAt(i);
-    // inProgress = (PageState.EXPORT_IN_PROGRESS).equals(tp
-    // .getPageState());
-    // }
-    // return inProgress;
-    // }
 
     // determine the starting index of the job list.
     private int determineStartIndex(HttpServletRequest p_request,
@@ -2531,8 +2384,7 @@ public abstract class JobManagementHandler extends PageHandler
         // Also when you click on sorting columns.
         catch (NumberFormatException e)
         {
-            String activityName = (String) p_request
-                    .getParameter(LinkHelper.ACTIVITY_NAME);
+            String activityName = p_request.getParameter(LinkHelper.ACTIVITY_NAME);
             Integer jls = null;
             // If user clicks on menu item, activityName in not null.
             // Therefore, we should not preserve paging.
@@ -2559,7 +2411,7 @@ public abstract class JobManagementHandler extends PageHandler
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
 
         // adding search criteria
-        if (request.getParameter("fromRequest") != null)
+        if (StringUtil.isNotEmpty(ServletUtil.getValue(request, "fromRequest")))
         {
             // New search
             sessionMgr.removeElement(JOB_LIST_START);
@@ -2586,49 +2438,40 @@ public abstract class JobManagementHandler extends PageHandler
             // set parameters
 
             // name
-            String buf = (String) request
-                    .getParameter(JobSearchConstants.NAME_FIELD);
-            if (buf.trim().length() != 0)
+            String buf =ServletUtil.getValue(request, JobSearchConstants.NAME_FIELD);
+            String tmp;
+            if (StringUtil.isNotEmpty(buf))
             {
                 sp.setJobName(buf);
-                sp.setJobNameCondition((String) request
-                        .getParameter(JobSearchConstants.NAME_OPTIONS));
-                jobSearch
-                        .append(JobSearchConstants.NAME_OPTIONS
-                                + "="
-                                + request
-                                        .getParameter(JobSearchConstants.NAME_OPTIONS));
+                tmp = ServletUtil.getValue(request, JobSearchConstants.NAME_OPTIONS);
+                sp.setJobNameCondition(tmp);
+                jobSearch.append(JobSearchConstants.NAME_OPTIONS ).append("=").append(tmp);
                 jobSearch.append(":");
-                jobSearch.append(JobSearchConstants.NAME_FIELD + "=" + buf);
+                jobSearch.append(JobSearchConstants.NAME_FIELD ).append("=").append(buf);
                 jobSearch.append(":");
             }
 
             // status
             List<String> list = new ArrayList<String>();
-            String status = (String) request
-                    .getParameter(JobSearchConstants.STATUS_OPTIONS);
-            if (status.equals(Job.ALLSTATUS))
+            String status = ServletUtil.getValue(request, JobSearchConstants.STATUS_OPTIONS);
+            switch (status)
             {
-                list.addAll(Job.ALLSTATUSLIST);
-            }
-            else
-            {
-                if (status.equals(Job.PENDING))
-                {
-                    list.addAll(Job.PENDING_STATUS_LIST);
-                }
-                else if (status.equals(Job.EXPORTED))
-                {
+                case Job.ALLSTATUS:
+                    list.addAll(Job.ALLSTATUSLIST);
+                    break;
+                case Job.PENDING:
+                    list.addAll(Job.ALLSTATUSLIST);
+                    break;
+                case Job.EXPORTED:
                     list.add(Job.EXPORTED);
                     list.add(Job.EXPORT_FAIL);
-                }
-                else
-                {
+                    break;
+                default:
                     list.add(status);
-                }
+                    break;
             }
             sp.setJobState(list);
-            jobSearch.append(JobSearchConstants.STATUS_OPTIONS + "=" + status);
+            jobSearch.append(JobSearchConstants.STATUS_OPTIONS ).append("=").append(status);
             jobSearch.append(":");
 
             if (searchType.equals(JobSearchConstants.MINI_JOB_SEARCH_COOKIE))
@@ -2641,189 +2484,156 @@ public abstract class JobManagementHandler extends PageHandler
             }
 
             // id
-            buf = (String) request.getParameter(JobSearchConstants.ID_FIELD);
-            if (buf.trim().length() != 0)
+            buf = ServletUtil.getValue(request, JobSearchConstants.ID_FIELD);
+            if (StringUtil.isNotEmpty(buf))
             {
                 sp.setJobId(buf);
-                sp.setJobIdCondition(request
-                        .getParameter(JobSearchConstants.ID_OPTIONS));
-                jobSearch.append(JobSearchConstants.ID_OPTIONS + "="
-                        + request.getParameter(JobSearchConstants.ID_OPTIONS));
+                tmp = ServletUtil.getValue(request, JobSearchConstants.ID_OPTIONS);
+                sp.setJobIdCondition(tmp);
+                jobSearch.append(JobSearchConstants.ID_OPTIONS).append("=").append(tmp);
                 jobSearch.append(":");
-                jobSearch.append(JobSearchConstants.ID_FIELD + "=" + buf);
+                jobSearch.append(JobSearchConstants.ID_FIELD ).append("=").append(buf);
                 jobSearch.append(":");
             }
 
             //group id
-            buf = (String) request
-                    .getParameter(JobSearchConstants.ID_GROUP);
-            if (buf.trim().length() != 0)
+            buf = ServletUtil.getValue(request, JobSearchConstants.ID_GROUP);
+            if (StringUtil.isNotEmpty(buf))
             {
                 sp.setJobGroupId(buf);
-                jobSearch
-                        .append(JobSearchConstants.ID_GROUP + "=" + buf);
+                jobSearch.append(JobSearchConstants.ID_GROUP ).append("=").append(buf);
                 jobSearch.append(":");
             }
+
             // project
-            buf = (String) request
-                    .getParameter(JobSearchConstants.PROJECT_OPTIONS);
-            if (!buf.equals("-1"))
+            buf = ServletUtil.getValue(request, JobSearchConstants.PROJECT_OPTIONS);
+            if (!"-1".equals(buf))
             {
                 sp.setProjectId(buf);
-                jobSearch
-                        .append(JobSearchConstants.PROJECT_OPTIONS + "=" + buf);
+                jobSearch.append(JobSearchConstants.PROJECT_OPTIONS ).append("=").append(buf);
                 jobSearch.append(":");
             }
 
             // source locale
-            buf = (String) request.getParameter(JobSearchConstants.SRC_LOCALE);
-            if (!buf.equals("-1"))
+            buf = ServletUtil.getValue(request, JobSearchConstants.SRC_LOCALE);
+            if (!"-1".equals(buf))
             {
                 sp.setSourceLocale(ServerProxy.getLocaleManager()
                         .getLocaleById(Long.parseLong(buf)));
-                jobSearch.append(JobSearchConstants.SRC_LOCALE + "=" + buf);
+                jobSearch.append(JobSearchConstants.SRC_LOCALE ).append("=").append(buf);
                 jobSearch.append(":");
             }
 
             // target locale
-            buf = (String) request.getParameter(JobSearchConstants.TARG_LOCALE);
-            if (!buf.equals("-1"))
+            buf = ServletUtil.getValue(request, JobSearchConstants.TARG_LOCALE);
+            if (!"-1".equals(buf))
             {
                 sp.setTargetLocale(ServerProxy.getLocaleManager()
                         .getLocaleById(Long.parseLong(buf)));
-                jobSearch.append(JobSearchConstants.TARG_LOCALE + "=" + buf);
+                jobSearch.append(JobSearchConstants.TARG_LOCALE ).append("=").append(buf);
                 jobSearch.append(":");
             }
 
             // priority
-            buf = (String) request
-                    .getParameter(JobSearchConstants.PRIORITY_OPTIONS);
-            if (!buf.equals("-1"))
+            buf = ServletUtil.getValue(request, JobSearchConstants.PRIORITY_OPTIONS);
+            if (!"-1".equals(buf))
             {
                 sp.setPriority(buf);
-                jobSearch.append(JobSearchConstants.PRIORITY_OPTIONS + "="
-                        + buf);
+                jobSearch.append(JobSearchConstants.PRIORITY_OPTIONS ).append("=").append(buf);
                 jobSearch.append(":");
             }
 
             // Creation Date start num and condition
-            buf = (String) request
-                    .getParameter(JobSearchConstants.CREATION_START);
-            if (buf.trim().length() != 0)
+            buf =ServletUtil.getValue(request, JobSearchConstants.CREATION_START);
+            if (StringUtil.isNotEmpty(buf))
             {
                 sp.setCreationStart(new Integer(buf));
-                sp.setCreationStartCondition(request
-                        .getParameter(JobSearchConstants.CREATION_START_OPTIONS));
-                jobSearch.append(JobSearchConstants.CREATION_START + "=" + buf);
+                tmp = ServletUtil.getValue(request, JobSearchConstants.CREATION_START_OPTIONS);
+                sp.setCreationStartCondition(tmp);
+                jobSearch.append(JobSearchConstants.CREATION_START ).append("=").append(buf);
                 jobSearch.append(":");
-                jobSearch
-                        .append(JobSearchConstants.CREATION_START_OPTIONS
-                                + "="
-                                + request
-                                        .getParameter(JobSearchConstants.CREATION_START_OPTIONS));
+                jobSearch.append(JobSearchConstants.CREATION_START_OPTIONS).append("=").append(tmp);
                 jobSearch.append(":");
             }
 
             // Creation Date end num
-            buf = (String) request
-                    .getParameter(JobSearchConstants.CREATION_END);
-            if (buf.trim().length() != 0)
+
+            buf = ServletUtil.getValue(request, JobSearchConstants.CREATION_END);
+            if (StringUtil.isNotEmpty(buf))
             {
                 sp.setCreationEnd(new Integer(buf));
-                jobSearch.append(JobSearchConstants.CREATION_END + "=" + buf);
+                jobSearch.append(JobSearchConstants.CREATION_END ).append("=").append(buf);
                 jobSearch.append(":");
             }
 
             // Creation Date end condition
-            buf = (String) request
-                    .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
-            if (!buf.equals("-1"))
+            buf = ServletUtil.getValue(request, JobSearchConstants.CREATION_END_OPTIONS);
+            if (!"-1".equals(buf))
             {
                 sp.setCreationEndCondition(buf);
-                jobSearch.append(JobSearchConstants.CREATION_END_OPTIONS + "="
-                        + buf);
+                jobSearch.append(JobSearchConstants.CREATION_END_OPTIONS ).append("=").append(buf);
                 jobSearch.append(":");
             }
 
             // Completion Date start num and condition
-            buf = (String) request
-                    .getParameter(JobSearchConstants.EST_COMPLETION_START);
-            if (buf.trim().length() != 0)
+            buf =ServletUtil.getValue(request, JobSearchConstants.EST_COMPLETION_START);
+            if (StringUtil.isNotEmpty(buf))
             {
                 sp.setEstCompletionStart(new Integer(buf));
-                sp.setEstCompletionStartCondition(request
-                        .getParameter(JobSearchConstants.EST_COMPLETION_START_OPTIONS));
-                jobSearch.append(JobSearchConstants.EST_COMPLETION_START + "="
-                        + buf);
+                tmp = ServletUtil.getValue(request, JobSearchConstants.EST_COMPLETION_START_OPTIONS);
+                sp.setEstCompletionStartCondition(tmp);
+                jobSearch.append(JobSearchConstants.EST_COMPLETION_START).append("=").append(buf);
                 jobSearch.append(":");
-                jobSearch
-                        .append(JobSearchConstants.EST_COMPLETION_START_OPTIONS
-                                + "="
-                                + request
-                                        .getParameter(JobSearchConstants.EST_COMPLETION_START_OPTIONS));
+                jobSearch.append(JobSearchConstants.EST_COMPLETION_START_OPTIONS).append("=").append(tmp);
                 jobSearch.append(":");
             }
 
             // Completion Date end num
-            buf = (String) request
-                    .getParameter(JobSearchConstants.EST_COMPLETION_END);
-            if (buf.trim().length() != 0)
+            buf =ServletUtil.getValue(request, JobSearchConstants.EST_COMPLETION_END);
+            if (StringUtil.isNotEmpty(buf))
             {
                 sp.setEstCompletionEnd(new Integer(buf));
-                jobSearch.append(JobSearchConstants.EST_COMPLETION_END + "="
-                        + buf);
+                jobSearch.append(JobSearchConstants.EST_COMPLETION_END ).append("=").append(buf);
                 jobSearch.append(":");
             }
 
             // Completion Date end condition
-            buf = (String) request
-                    .getParameter(JobSearchConstants.EST_COMPLETION_END_OPTIONS);
-            if (!buf.equals("-1"))
+            buf =ServletUtil.getValue(request, JobSearchConstants.EST_COMPLETION_END_OPTIONS);
+            if (!"-1".equals(buf))
             {
                 sp.setEstCompletionEndCondition(buf);
-                jobSearch.append(JobSearchConstants.EST_COMPLETION_END_OPTIONS
-                        + "=" + buf);
+                jobSearch.append(JobSearchConstants.EST_COMPLETION_END_OPTIONS).append("=").append(buf);
                 jobSearch.append(":");
             }
 
             // Creation Date start num and condition
-            buf = (String) request
-                    .getParameter(JobSearchConstants.EXPORT_DATE_START);
-            if (buf.trim().length() != 0)
+            buf = ServletUtil.getValue(request, JobSearchConstants.EXPORT_DATE_START);
+            if (StringUtil.isNotEmpty(buf))
             {
                 sp.setExportDateStart(new Integer(buf));
-                sp.setExportDateStartOptions(request
-                        .getParameter(JobSearchConstants.EXPORT_DATE_START_OPTIONS));
-                jobSearch.append(JobSearchConstants.EXPORT_DATE_START + "="
-                        + buf);
+                tmp = ServletUtil.getValue(request, JobSearchConstants.EXPORT_DATE_START_OPTIONS);
+                sp.setExportDateStartOptions(tmp);
+                jobSearch.append(JobSearchConstants.EXPORT_DATE_START).append("=").append(buf);
                 jobSearch.append(":");
-                jobSearch
-                        .append(JobSearchConstants.EXPORT_DATE_START_OPTIONS
-                                + "="
-                                + request
-                                        .getParameter(JobSearchConstants.EXPORT_DATE_START_OPTIONS));
+                jobSearch.append(JobSearchConstants.EXPORT_DATE_START_OPTIONS).append("=").append(tmp);
                 jobSearch.append(":");
             }
 
             // Creation Date end num
-            buf = (String) request
-                    .getParameter(JobSearchConstants.EXPORT_DATE_END);
-            if (buf.trim().length() != 0)
+            buf = ServletUtil.getValue(request, JobSearchConstants.EXPORT_DATE_END);
+            if (StringUtil.isNotEmpty(buf))
             {
                 sp.setExportDateEnd(new Integer(buf));
-                jobSearch
-                        .append(JobSearchConstants.EXPORT_DATE_END + "=" + buf);
+                jobSearch.append(JobSearchConstants.EXPORT_DATE_END ).append("=").append(buf);
                 jobSearch.append(":");
             }
 
             // Creation Date end condition
-            buf = (String) request
-                    .getParameter(JobSearchConstants.EXPORT_DATE_END_OPTIONS);
-            if (!buf.equals("-1"))
+            buf = ServletUtil.getValue(request, JobSearchConstants.EXPORT_DATE_END_OPTIONS);
+            if (!"-1".equals(buf))
             {
                 sp.setExportDateEndOptions(buf);
-                jobSearch.append(JobSearchConstants.EXPORT_DATE_END_OPTIONS
-                        + "=" + buf);
+                jobSearch.append(JobSearchConstants.EXPORT_DATE_END_OPTIONS).append("=").append(buf);
                 jobSearch.append(":");
             }
 

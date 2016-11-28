@@ -20,6 +20,7 @@ package com.globalsight.cxe.entity.filterconfiguration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
@@ -541,24 +542,6 @@ public class EscapingHelper
 					ArrayList segments = elem.getSegments();
 					List<Character> processedChars = new ArrayList<Character>();
 
-					String contentType = "";
-					if (isInCDATA)
-					{
-						contentType = "CDATA";
-					}
-					else if (IFormatNames.FORMAT_XML.equals(format) && !isAttr)
-					{
-						contentType = "XmlNode";
-					}
-					else if (IFormatNames.FORMAT_HTML.equals(format))
-					{
-						contentType = "HtmlNode";
-					}
-					else if (IFormatNames.FORMAT_XML.equals(format) && isAttr)
-					{
-						contentType = "xmlAttribute";
-					}
-
 					if (segments != null && !segments.isEmpty())
 					{
 						for (Object object : segments)
@@ -569,7 +552,8 @@ public class EscapingHelper
 							List<String> internalTexts = new ArrayList<String>();
 							segment = InternalTextHelper.protectInternalTexts(
 									segment, internalTexts);
-
+							String contentType = getContentType(segment,
+									format, isAttr, isInCDATA);
 							// String result = handleString4Import(segment, es,
 							// format, false, processedChars);
 							String result = newHandleString4Import(segment, es,
@@ -749,9 +733,9 @@ public class EscapingHelper
 			boolean finishMatch = false;
 			String startRegex = escaping.getStartPattern();
 			String finishRegex = escaping.getFinishPattern();
-			startMatch = checkStartMattch(ccc,startRegex,startIsRegex);
-			finishMatch = checkFinishMattch(ccc,finishRegex,finishIsRegex);
-			
+			startMatch = checkStartMattch(ccc, startRegex, startIsRegex);
+			finishMatch = checkFinishMattch(ccc, finishRegex, finishIsRegex);
+
 			if (startMatch || finishMatch)
 			{
 				ccc = checkActiveHandleChar4Export(ccc, escaping, format,
@@ -786,8 +770,8 @@ public class EscapingHelper
 			boolean startMatch = false, finishMatch = false;
 			String startRegex = escaping.getStartPattern();
 			String finishRegex = escaping.getFinishPattern();
-			startMatch = checkStartMattch(ccc,startRegex,startIsRegex);
-			finishMatch = checkFinishMattch(ccc,finishRegex,finishIsRegex);
+			startMatch = checkStartMattch(ccc, startRegex, startIsRegex);
+			finishMatch = checkFinishMattch(ccc, finishRegex, finishIsRegex);
 
 			if (!startMatch || !finishMatch)
 			{
@@ -795,6 +779,9 @@ public class EscapingHelper
 						escapingChars);
 			}
 		}
+		
+		if (returnStr == null)
+			returnStr = ccc;
 
 		return returnStr;
 	}
@@ -872,7 +859,7 @@ public class EscapingHelper
 				}
 				else
 				{
-					return "\\" + char1;
+					return escaping.getEscape() + char1;
 				}
 			}
 			// process ordinary chars
@@ -1006,8 +993,8 @@ public class EscapingHelper
 			boolean finishMatch = false;
 			String startRegex = escaping.getStartPattern();
 			String finishRegex = escaping.getFinishPattern();
-			startMatch = checkStartMattch(ccc,startRegex,startIsRegex);
-			finishMatch = checkFinishMattch(ccc,finishRegex,finishIsRegex);
+			startMatch = checkStartMattch(ccc, startRegex, startIsRegex);
+			finishMatch = checkFinishMattch(ccc, finishRegex, finishIsRegex);
 
 			if (startMatch || finishMatch)
 			{
@@ -1043,14 +1030,17 @@ public class EscapingHelper
 			boolean startMatch = false, finishMatch = false;
 			String startRegex = escaping.getStartPattern();
 			String finishRegex = escaping.getFinishPattern();
-			startMatch = checkStartMattch(ccc,startRegex,startIsRegex);
-			finishMatch = checkFinishMattch(ccc,finishRegex,finishIsRegex);
+			startMatch = checkStartMattch(ccc, startRegex, startIsRegex);
+			finishMatch = checkFinishMattch(ccc, finishRegex, finishIsRegex);
 			if (!startMatch || !finishMatch)
 			{
 				returnStr = checkActiveHandleChar4Import(ccc, escaping, format,
 						processedChars);
 			}
 		}
+
+		if (returnStr == null)
+			returnStr = ccc;
 
 		return returnStr;
 	}
@@ -1158,7 +1148,7 @@ public class EscapingHelper
 
 		return false;
 	}
-	
+
 	private static boolean checkStartMattch(String ccc, String startRegex,
 			boolean startIsRegex)
 	{
@@ -1182,7 +1172,7 @@ public class EscapingHelper
 		}
 		return false;
 	}
-	
+
 	private static boolean checkFinishMattch(String ccc, String finishRegex,
 			boolean finishIsRegex)
 	{
@@ -1205,5 +1195,32 @@ public class EscapingHelper
 			}
 		}
 		return false;
+	}
+
+	private static String getContentType(String segment,
+			String format, boolean isAttr, boolean isInCDATA)
+	{
+		String contentType = "";
+		if (isInCDATA)
+		{
+			contentType = "CDATA";
+		}
+		else if (IFormatNames.FORMAT_HTML.equals(format))
+		{
+			contentType = "HtmlNode";
+		}
+		else if (IFormatNames.FORMAT_XML.equals(format))
+		{
+			if (isAttr)
+			{
+				contentType = "xmlAttribute";
+			}
+			else
+			{
+				contentType = "XmlNode";
+			}
+		}
+
+		return contentType;
 	}
 }

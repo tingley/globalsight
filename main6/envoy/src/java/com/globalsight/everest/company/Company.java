@@ -68,16 +68,6 @@ public class Company extends PersistentObject
     private String m_diableUploadFileTypes = "";
     private boolean enableStrongPassword;
 
-    public boolean isEnableStrongPassword()
-    {
-        return enableStrongPassword;
-    }
-
-    public void setEnableStrongPassword(boolean enableStrongPassword)
-    {
-        this.enableStrongPassword = enableStrongPassword;
-    }
-
     // ////////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
     // ////////////////////////////////////////////////////////////////////////////////
@@ -394,4 +384,15 @@ public class Company extends PersistentObject
     {
         this.m_diableUploadFileTypes = disableUploadFileTypes;
     }
+
+    public boolean isEnableStrongPassword()
+    {
+        return enableStrongPassword;
+    }
+
+    public void setEnableStrongPassword(boolean enableStrongPassword)
+    {
+        this.enableStrongPassword = enableStrongPassword;
+    }
+
 }

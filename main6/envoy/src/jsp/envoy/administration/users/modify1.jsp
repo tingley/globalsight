@@ -414,24 +414,29 @@ String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword
             return false;
         }
 
-        if (formSent.password) {
-            var thePassword = formSent.password.value;
-            thePassword = stripBlanks(thePassword);
-            if (thePassword != "") {
-                if ("1" == "<%=needStrongPassword%>" && !passCheck) {
-                    alert("<%=bundle.getString("jsmsg_account_weak_password")%>");
-                    return false;
-                }
-                var theRepeat = formSent.passwordConfirm.value;
-                theRepeat = stripBlanks(theRepeat);
+		if (formSent.password) {
+			if (pwdChanged) {
+				var thePassword = formSent.password.value;
+				thePassword = stripBlanks(thePassword);
+				if (thePassword != "") {
+					if ("1" == "<%=needStrongPassword%>" && !passCheck) {
+						alert("<%=bundle.getString("jsmsg_account_weak_password")%>");
+						return false;
+					}
+					var theRepeat = formSent.passwordConfirm.value;
+					theRepeat = stripBlanks(theRepeat);
 
-                // Make sure the repeated password matches the first
-                if (theRepeat != thePassword) {
-                    alert("<%= bundle.getString("jsmsg_users_repeat_password") %>");
-                    return false;
-                }
-            }
-        }
+					// Make sure the repeated password matches the first
+					if (theRepeat != thePassword) {
+						alert("<%= bundle.getString("jsmsg_users_repeat_password") %>");
+						return false;
+					}
+				}
+			} else {
+				formSent.password.value = "";
+				formSent.passwordConfirm.value = "";
+			}
+		}
 
         if (formSent.firstName)
         {
@@ -487,9 +492,11 @@ String needStrongPassword = (String) sessionMgr.getAttribute("needStrongPassword
     }
 
     var passCheck = false;
+	var pwdChanged = false;
     $(document).ready(function(){
         $("#password1").keyup(function() {
             passCheck = passwordChecking($(this).val());
+			pwdChanged = true;
         });
     });
 

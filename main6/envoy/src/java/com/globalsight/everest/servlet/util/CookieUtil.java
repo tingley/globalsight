@@ -304,14 +304,9 @@ public class CookieUtil
         
         int DEFAULT_ITEMS_COUNT = 3;
 
-        String taskInfo = "";
-        if (JobSearchConstants.MRU_TASKS.equals(attributeName))
-        {
-            int index = value.lastIndexOf(":");
-            if (index < 1)
-                return;
-            taskInfo = value.substring(0, index);
-        }
+        String taskInfo = getTaskInfo(attributeName, value);
+        if (taskInfo == null)
+            return;
 
         // Get value from cookie
         String cookieValue = getCookieValue(request, cookieName);
@@ -349,14 +344,9 @@ public class CookieUtil
                 || StringUtil.isBlank(value) || ":".equals(value.trim()))
             return;
 
-        String taskInfo = "";
-        if (JobSearchConstants.MRU_TASKS.equals(attributeName))
-        {
-            int index = value.lastIndexOf(":");
-            if (index < 1)
-                return;
-            taskInfo = value.substring(0, index);
-        }
+        String taskInfo = getTaskInfo(attributeName, value);
+        if (taskInfo == null)
+            return;
 
         String cookieValue = getCookieValue(request, cookieName);
 
@@ -373,6 +363,18 @@ public class CookieUtil
         cookieValue = newValue.toString();
         session.setAttribute(attributeName, cookieValue);
         setCookie(response, cookieName, cookieValue);
+    }
+
+    private static String getTaskInfo(String attributeName, String value)
+    {
+        String taskInfo = null;
+        if (JobSearchConstants.MRU_TASKS.equals(attributeName) && StringUtil.isNotBlank(value))
+        {
+            int index = value.lastIndexOf(":");
+            if (index > 0)
+                taskInfo = value.substring(0, index);
+        }
+        return taskInfo;
     }
 
 }

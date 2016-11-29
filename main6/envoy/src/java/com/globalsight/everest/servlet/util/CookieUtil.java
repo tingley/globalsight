@@ -1,11 +1,23 @@
 /**
- * 
+ * Copyright 2016 Welocalize, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.
+ *
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.globalsight.everest.servlet.util;
 
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
-import com.globalsight.webservices.AmbassadorUtil;
+import com.globalsight.util.SecurityUtil;
 import jodd.util.StringBand;
 import jodd.util.StringUtil;
 import org.apache.log4j.Logger;
@@ -92,7 +104,7 @@ public class CookieUtil
      */
     public static Cookie getCookie(HttpServletRequest request, String name)
     {
-        Cookie[] cookies = null;
+        Cookie[] cookies;
         if (request == null || StringUtil.isBlank(name) || (cookies = request.getCookies()) == null)
             return null;
         for (Cookie cookie : cookies)
@@ -230,7 +242,7 @@ public class CookieUtil
         String userName = UserUtil.getUserNameById(userId);
         try
         {
-            pass = AmbassadorUtil.encryptionString(pass);
+            pass = SecurityUtil.AES(pass);
         }
         catch (Exception e)
         {
@@ -305,7 +317,7 @@ public class CookieUtil
         String cookieValue = getCookieValue(request, cookieName);
 
         StringBand newValue = new StringBand(value);
-        int len = 0;
+        int len;
         String[] oldValues = StringUtil.split(cookieValue, "|");
         if (oldValues != null && (len = oldValues.length) > 0)
         {

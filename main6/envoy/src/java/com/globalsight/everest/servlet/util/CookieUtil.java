@@ -16,7 +16,6 @@
 package com.globalsight.everest.servlet.util;
 
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
-import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.util.SecurityUtil;
 import jodd.util.StringBand;
 import jodd.util.StringUtil;
@@ -304,8 +303,8 @@ public class CookieUtil
         
         int DEFAULT_ITEMS_COUNT = 3;
 
-        String taskInfo = getTaskInfo(attributeName, value);
-        if (taskInfo == null)
+        String info = getInfo(attributeName, value);
+        if (info == null)
             return;
 
         // Get value from cookie
@@ -319,8 +318,7 @@ public class CookieUtil
             for (int i = 0, count = 0; i < len && count < DEFAULT_ITEMS_COUNT - 1; i++)
             {
                 if (StringUtil.isBlank(oldValues[i])
-                        || (JobSearchConstants.MRU_TASKS.equals(attributeName)
-                                && oldValues[i].startsWith(taskInfo))
+                        || oldValues[i].startsWith(info)
                         || oldValues[i].equals(value))
                         continue;
                 newValue.append("|").append(oldValues[i]);
@@ -344,8 +342,8 @@ public class CookieUtil
                 || StringUtil.isBlank(value) || ":".equals(value.trim()))
             return;
 
-        String taskInfo = getTaskInfo(attributeName, value);
-        if (taskInfo == null)
+        String info = getInfo(attributeName, value);
+        if (info == null)
             return;
 
         String cookieValue = getCookieValue(request, cookieName);
@@ -354,8 +352,7 @@ public class CookieUtil
         StringBand newValue = new StringBand();
         for (String string : values)
         {
-            if (StringUtil.isBlank(string) || (JobSearchConstants.MRU_TASKS.equals(attributeName)
-                    && string.startsWith(taskInfo)) || string.equals(value))
+            if (StringUtil.isBlank(string) || string.startsWith(info) || string.equals(value))
                 continue;
 
             newValue.append(string).append("|");
@@ -365,16 +362,16 @@ public class CookieUtil
         setCookie(response, cookieName, cookieValue);
     }
 
-    private static String getTaskInfo(String attributeName, String value)
+    private static String getInfo(String attributeName, String value)
     {
-        String taskInfo = null;
-        if (JobSearchConstants.MRU_TASKS.equals(attributeName) && StringUtil.isNotBlank(value))
+        String info = null;
+        if (StringUtil.isNotBlank(value))
         {
             int index = value.lastIndexOf(":");
             if (index > 0)
-                taskInfo = value.substring(0, index);
+                info = value.substring(0, index);
         }
-        return taskInfo;
+        return info;
     }
 
 }

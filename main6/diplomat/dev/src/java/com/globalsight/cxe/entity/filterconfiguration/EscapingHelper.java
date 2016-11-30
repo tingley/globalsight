@@ -34,6 +34,7 @@ import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.SkeletonElement;
 import com.globalsight.ling.docproc.TranslatableElement;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.TagIndex;
 
 public class EscapingHelper
@@ -1010,14 +1011,13 @@ public class EscapingHelper
 			String format, List<Character> processedChars, String contentType)
 	{
 		String returnStr = null;
-		if ((escaping.getPartConentValue().equalsIgnoreCase("cdata") && contentType
+		String partContentValue = escaping.getPartConentValue();
+		if ((partContentValue.equalsIgnoreCase("cdata") && contentType
 				.equalsIgnoreCase("CDATA"))
-				|| (escaping.getPartConentValue().equalsIgnoreCase(
-						"htmlXmlNode") && (contentType
+				|| (partContentValue.equalsIgnoreCase("htmlXmlNode") && (contentType
 						.equalsIgnoreCase("HtmlNode") || contentType
 						.equalsIgnoreCase("XmlNode")))
-				|| (escaping.getPartConentValue().equalsIgnoreCase(
-						"xmlAttribute") && contentType
+				|| (partContentValue.equalsIgnoreCase("xmlAttribute") && contentType
 						.equalsIgnoreCase("xmlAttribute")))
 		{
 			returnStr = ccc;
@@ -1037,6 +1037,11 @@ public class EscapingHelper
 				returnStr = checkActiveHandleChar4Import(ccc, escaping, format,
 						processedChars);
 			}
+		}
+		else if (StringUtil.isEmptyAndNull(contentType))
+		{
+			returnStr = checkActiveHandleChar4Import(ccc, escaping, format,
+					processedChars);
 		}
 
 		if (returnStr == null)

@@ -280,8 +280,12 @@ public class Escaping implements Priorityable
 					startIsRegex = "true".equals(startIsRegexElements.item(0)
 							.getFirstChild().getNodeValue());
 				}
-				startPattern = tagElement.getElementsByTagName("startPattern")
-						.item(0).getFirstChild().getNodeValue();
+				
+				Node startPatternNode = tagElement.getElementsByTagName("startPattern").item(0);
+				if (startPatternNode != null && startPatternNode.getFirstChild() != null)
+				{
+					startPattern = startPatternNode.getFirstChild().getNodeValue();
+				}
 				
 				NodeList finishIsRegexElements = tagElement
 						.getElementsByTagName("finishIsRegex");
@@ -291,9 +295,12 @@ public class Escaping implements Priorityable
 					finishIsRegex = "true".equals(finishIsRegexElements.item(0)
 							.getFirstChild().getNodeValue());
 				}
-				finishPattern = tagElement
-						.getElementsByTagName("finishPattern").item(0)
-						.getFirstChild().getNodeValue();
+				
+				Node finishPatternNode = tagElement.getElementsByTagName("finishPattern").item(0);
+				if (finishPatternNode != null && finishPatternNode.getFirstChild() != null)
+				{
+					finishPattern = finishPatternNode.getFirstChild().getNodeValue();
+				}
 			}
 		}
 		

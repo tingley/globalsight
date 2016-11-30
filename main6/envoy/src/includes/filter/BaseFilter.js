@@ -491,13 +491,29 @@ BaseFilter.prototype.addTag = function(radioId)
 					partContent.options[i].selected = true;
 				}
 			}
+			
 			if(editItem.partConentValue == "startFinishes")
 			{
 				document.getElementById("baseFilter_escaping_regex").style.display = "block";
 				document.getElementById("baseFilter_escaping_startIsRegex").checked = editItem.startIsRegex;
-				document.getElementById("baseFilter_escaping_startPattern").value = editItem.startPattern ? editItem.startPattern : "";
 				document.getElementById("baseFilter_escaping_finishIsRegex").checked = editItem.finishIsRegex;
-				document.getElementById("baseFilter_escaping_finishPattern").value =editItem.finishPattern ? editItem.finishPattern : "";
+				if(typeof(editItem.startPattern) =='undefined' || isEmptyObject(editItem.startPattern))
+				{
+					document.getElementById("baseFilter_escaping_startPattern").value = "";
+				}
+				else
+				{
+					document.getElementById("baseFilter_escaping_startPattern").value = editItem.startPattern;
+				}
+				
+				if(typeof(editItem.finishPattern) =='undefined' ||isEmptyObject(editItem.finishPattern))
+				{
+					document.getElementById("baseFilter_escaping_finishPattern").value = "";
+				}
+				else
+				{
+					document.getElementById("baseFilter_escaping_finishPattern").value = editItem.finishPattern;
+				}
 			}
 			else
 			{
@@ -517,6 +533,14 @@ BaseFilter.prototype.addTag = function(radioId)
 		document.getElementById("baseFilter_escaping_priority").value = isEdit ? editItem.priority : "";
 	}
 }
+
+function isEmptyObject(e) {  
+	var t;  
+	for (t in e)  
+       return !1;
+	
+    return !0  
+}  
 
 BaseFilter.prototype.cloneObject = function(oriObj)
 {

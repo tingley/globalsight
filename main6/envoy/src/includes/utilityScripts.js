@@ -153,6 +153,19 @@ function checkSomeSpecialChar(theField)
     return false;
 }
 
+function checkSpecialCharForFileType(theField)
+{
+    var iChars = "~!@#$%^&*()-_+=[]\\\';/{}|\":<>?";
+    for (var i = 0; i < theField.length; i++)
+    {
+        if (iChars.indexOf(theField.charAt(i)) != -1)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 function checkSomeSpecialChars(theField)
 {
     var iChars = "#%^&+\\\'\"<>";

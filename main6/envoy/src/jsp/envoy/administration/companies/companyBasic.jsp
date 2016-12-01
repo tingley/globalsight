@@ -155,6 +155,7 @@
 <html>
 <head>
 <title><%=title%></title>
+ <script language="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
@@ -1070,6 +1071,11 @@ function confirmForm()
 
     //check disable upload file types
 	var disableFileTypes = document.getElementById("fileTypeId").value;
+    if(checkSpecialCharForFileType(disableFileTypes))
+    {
+    	alert("File Type" + "<%= bundle.getString("jsmsg_invalid_file_type") %>");
+        return false;
+    }
 	if (disableFileTypes.replace(/^\s+|\s+$/g,"").length > 0)
 	{
 		var array= new Array();

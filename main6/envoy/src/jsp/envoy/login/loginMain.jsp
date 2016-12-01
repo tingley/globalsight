@@ -1,17 +1,13 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page contentType="text/html; charset=UTF-8" errorPage="/envoy/common/error.jsp"
-    import="java.util.*,com.globalsight.everest.webapp.javabean.NavigationBean,
-            com.globalsight.everest.util.system.SystemConfigParamNames,
+    import="com.globalsight.everest.servlet.util.CookieUtil,com.globalsight.everest.util.system.SystemConfigParamNames,
+            com.globalsight.everest.webapp.WebAppConstants,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
-            com.globalsight.ling.common.URLDecoder,
-            com.globalsight.util.Base64,
-            com.globalsight.util.FormUtil,
-            java.util.HashMap,
-            com.globalsight.everest.webapp.WebAppConstants"
+            com.globalsight.util.GlobalSightLocale,
+            java.util.Arrays,
+            java.util.Locale,
+            java.util.ResourceBundle"
     session="false"%>
-<%@ page import="com.globalsight.everest.servlet.util.CookieUtil" %>
-<%@ page import="com.globalsight.util.StringUtil" %>
-<%@ page import="com.globalsight.util.GlobalSightLocale" %>
 <jsp:useBean id="dummyNavigationBean" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request" />
 <jsp:useBean id="skin" scope="application" class="com.globalsight.everest.webapp.javabean.SkinBean" />
 <%
@@ -156,6 +152,7 @@ body {
 </style>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%=title%></TITLE>
+    <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" onLoad="init();">
@@ -294,7 +291,6 @@ body {
         <%@ include file="/envoy/common/shutdownBanner.jspIncl"%>
     </DIV>
 
-    <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
     <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
     <SCRIPT TYPE="text/javascript" SRC="/globalsight/jquery/jquery-1.11.3.min.js"></SCRIPT>
     <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/gscommon.js"></SCRIPT>

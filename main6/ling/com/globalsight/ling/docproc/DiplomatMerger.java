@@ -1012,6 +1012,8 @@ public class DiplomatMerger implements DiplomatMergerImpl, DiplomatBasicHandler,
 							chunk, m_escapings, srcDataType, false, true,
 							escapingChars, isInCDATA, contentType);
                     
+//                    String newchunk = EscapingHelper.handleString4Export(chunk, m_escapings,
+//                    		srcDataType, false, true, escapingChars, isInCDATA);
                     // GBS-3997&GBS-4066
                     newchunk = EmojiUtil.parseEmojiTagToAlias(newchunk);
 

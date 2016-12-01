@@ -1010,9 +1010,9 @@ public class EscapingHelper
 							processedChars);
 				}
 			}
+			sub.append(ccc);
 		}
 
-		sub.append(ccc);
 		String subStr = doDecode ? m_xmlEncoder.encodeStringBasic(sub
 				.toString()) : sub.toString();
 		return subStr;
@@ -1232,54 +1232,6 @@ public class EscapingHelper
 		return false;
 	}
 
-	private static boolean checkStartMattch(String ccc, String startRegex,
-			boolean startIsRegex)
-	{
-		if (startRegex != null)
-		{
-			if (startIsRegex)
-			{
-				Pattern startPattern = Pattern.compile(startRegex);
-				if (startPattern.matcher(ccc).find())
-				{
-					return true;
-				}
-			}
-			else
-			{
-				if (ccc.startsWith(startRegex))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	private static boolean checkFinishMattch(String ccc, String finishRegex,
-			boolean finishIsRegex)
-	{
-		if (finishRegex != null)
-		{
-			if (finishIsRegex)
-			{
-				Pattern finishPattern = Pattern.compile(finishRegex);
-				if (finishPattern.matcher(ccc).find())
-				{
-					return true;
-				}
-			}
-			else
-			{
-				if (ccc.endsWith(finishRegex))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	private static String getContentType(String segment,
 			String format, boolean isAttr, boolean isInCDATA)
 	{
@@ -1314,78 +1266,56 @@ public class EscapingHelper
 		{
 			return null;
 		}
-		boolean startMatch = false;
-		boolean finishMatch = false;
 		int extractIndexStart = -1;
 		int extractIndexFinish = -1;
 
-		if (startIsRegex)
+		if (StringUtil.isNotEmptyAndNull(startStr))
 		{
-			Pattern p = Pattern.compile(startStr);
-			Matcher m = p.matcher(ccc);
-
-			if (m.find())
+			if (startIsRegex)
 			{
-				extractIndexStart = m.end();
-				startMatch = true;
-			}
+				Pattern p = Pattern.compile(startStr);
+				Matcher m = p.matcher(ccc);
 
-		}
-		else
-		{
-			int i0 = ccc.indexOf(startStr);
-			if (i0 != -1)
-			{
-				extractIndexStart = i0 + startStr.length();
-				startMatch = true;
-			}
-		}
+				if (m.find())
+				{
+					extractIndexStart = m.end();
+				}
 
-		if (startMatch)
-		{
-			int startIndex = extractIndexStart;
-
-			// there is no more string after start string
-			if (startIndex >= ccc.length())
-			{
-				finishMatch = true;
 			}
-			// finish string is empty, extract all after start string
-			else if (finishStr == null || finishStr.length() == 0)
-			{
-				finishMatch = true;
-			}
-			// find the index of finish string's
 			else
 			{
-				if (finishRegex)
-				{
-					Pattern p = Pattern.compile(finishStr);
-					Matcher m = p.matcher(ccc);
 
-					if (m.find(startIndex))
-					{
-						extractIndexFinish = m.start();
-						finishMatch = true;
-					}
-				}
-				else
+				int i0 = ccc.indexOf(startStr);
+				if (i0 != -1)
 				{
-					int i0 = ccc.indexOf(finishStr, startIndex);
-					if (i0 != -1)
-					{
-						extractIndexFinish = i0;
-						finishMatch = true;
-					}
+					extractIndexStart = i0 + startStr.length();
 				}
 			}
 		}
-		
-		if (startMatch && finishMatch)
+
+		// find the index of finish string's
+		if (StringUtil.isNotEmptyAndNull(finishStr))
 		{
-			return new int[] { extractIndexStart, extractIndexFinish };
+			if (finishRegex)
+			{
+				Pattern p = Pattern.compile(finishStr);
+				Matcher m = p.matcher(ccc);
+
+				if (m.find(extractIndexStart))
+				{
+					extractIndexFinish = m.start();
+				}
+			}
+			else
+			{
+				int i0 = ccc.indexOf(finishStr, extractIndexStart);
+				if (i0 != -1)
+				{
+					extractIndexFinish = i0;
+				}
+			}
 		}
 
-		return null;
+		return new int[] { extractIndexStart, extractIndexFinish };
 	}
 }

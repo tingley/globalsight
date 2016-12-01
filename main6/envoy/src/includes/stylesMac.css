@@ -46,7 +46,7 @@
     word-wrap: break-word;
 }
 
-.editorSegment: visited {
+.editorSegment:visited {
     color: blue;
 }
 
@@ -59,7 +59,7 @@
     word-wrap: break-word;
 }
 
-.editorSegmentExact: visited {
+.editorSegmentExact:visited {
     background-color: #CCFFCC;
     color: blue;
 }
@@ -73,7 +73,7 @@
     word-wrap: break-word;
 }
 
-.editorSegmentFuzzy: visited {
+.editorSegmentFuzzy:visited {
     background-color: #FFFFCC;
     color: blue;
 }
@@ -170,7 +170,7 @@
 }
 
 .standardTextNew {
-    font-family:Verdana,Arial;
+    font-family:Verdana, Arial;
     font-size: 10pt;
 }
 
@@ -207,7 +207,7 @@
     text-decoration: none;
 }
 
-.startHere: hover
+.startHere:hover
 {
     text-decoration: underline;
 }

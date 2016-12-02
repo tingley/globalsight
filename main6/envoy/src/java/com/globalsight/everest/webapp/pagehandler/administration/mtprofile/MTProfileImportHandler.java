@@ -613,6 +613,22 @@ public class MTProfileImportHandler extends PageHandler
                     mtp.setIncludeMTIdentifiers(Boolean
                             .parseBoolean(valueField));
                 }
+                else if (keyField.equalsIgnoreCase("IGNORE_TM_MATCHES"))
+                {
+                    mtp.setIgnoreTMMatch(Boolean.parseBoolean(valueField));
+                }
+                else if (keyField.equalsIgnoreCase("LOG_DEBUG_INFO"))
+                {
+                    mtp.setLogDebugInfo(Boolean.parseBoolean(valueField));
+                }
+                else if (keyField.equalsIgnoreCase("MS_TRANS_TYPE"))
+                {
+                    mtp.setMsTransType(valueField);
+                }
+                else if (keyField.equalsIgnoreCase("MS_MAX_LENGTH"))
+                {
+                    mtp.setMsMaxLength(Long.parseLong(valueField));
+                }
                 else if (keyField.equalsIgnoreCase("MT_IDENTIFIER_LEADING"))
                 {
                     mtp.setMtIdentifierLeading(valueField);

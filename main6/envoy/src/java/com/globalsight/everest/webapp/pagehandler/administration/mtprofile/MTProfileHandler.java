@@ -225,6 +225,18 @@ public class MTProfileHandler extends PageHandler
                 .append(".INCLUDE_MT_IDENTIFIERS=")
                 .append(mtp.isIncludeMTIdentifiers()).append(NEW_LINE);
         buffer.append("MachineTranslationProfile.").append(mtp.getId())
+                .append(".IGNORE_TM_MATCHES=")
+                .append(mtp.isIgnoreTMMatch()).append(NEW_LINE);
+        buffer.append("MachineTranslationProfile.").append(mtp.getId())
+                .append(".LOG_DEBUG_INFO=")
+                .append(mtp.isLogDebugInfo()).append(NEW_LINE);
+        buffer.append("MachineTranslationProfile.").append(mtp.getId())
+                .append(".MS_TRANS_TYPE=")
+                .append(mtp.getMsTransType()).append(NEW_LINE);
+        buffer.append("MachineTranslationProfile.").append(mtp.getId())
+                .append(".MS_MAX_LENGTH=")
+                .append(mtp.getMsMaxLength()).append(NEW_LINE);
+        buffer.append("MachineTranslationProfile.").append(mtp.getId())
                 .append(".MT_IDENTIFIER_LEADING=")
                 .append(mtp.getMtIdentifierLeading()).append(NEW_LINE);
         buffer.append("MachineTranslationProfile.").append(mtp.getId())

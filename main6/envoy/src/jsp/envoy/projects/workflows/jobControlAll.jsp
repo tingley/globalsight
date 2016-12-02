@@ -98,6 +98,7 @@ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/taskList.css">
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
+<%@ include file="/envoy/common/shortcutIcon.jspIncl" %>
 </HEAD>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>

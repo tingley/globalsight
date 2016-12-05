@@ -465,11 +465,11 @@ BaseFilter.prototype.addTag = function(radioId)
 		document.getElementById("baseFilter_escaping_char").value = aName;
 		if(typeof(editItem.escape) =='undefined' || editItem.escape.length != 1)
 		{
-			document.getElementById("baseFilter_escaping_escape").value = "";
+			document.getElementById("baseFilter_escaping_escape").value = "\\";
 		}
 		else
 		{
-			document.getElementById("baseFilter_escaping_escape").value = isEdit ? editItem.escape : "";
+			document.getElementById("baseFilter_escaping_escape").value = isEdit ? editItem.escape : "\\";
 		}
 		document.getElementById("baseFilter_escaping_import").checked = isEdit ? editItem.unEscapeOnImport : false;
 		document.getElementById("baseFilter_escaping_export").checked = isEdit ? editItem.reEscapeOnExport : false;
@@ -923,7 +923,7 @@ BaseFilter.prototype.generatePriorityTagTableContent = function()
 	str.append("<Label class='tagName_td'>" + jsCurrentPriority + "</Label>");
 	str.append("</td>");
 	str.append("<td width='200px'>");
-	str.append("<Label class='tagName_td'>" + jsInternalContent + "</Label>");
+	str.append("<Label class='tagName_td'>" + jsEntityChar + "</Label>");
 	str.append("</td>");
 	str.append("<td width='200px'>");
 	str.append("<Label class='tagName_td'>" + jsNewPriority + "</Label>");
@@ -1234,13 +1234,13 @@ BaseFilter.prototype.generateTagsContent = function(optionValue, pageIndex)
 
 		if (optionValue == baseFilter.optionInternalTexts)
 		{
-			str.append("<td width='50%' class='tagName_td'>" + jsInternalContent + "</td>");
+			str.append("<td width='40%' class='tagName_td'>" + jsInternalContent + "</td>");
 			str.append("<td class='tagName_td'>" + jsInternalIsRegex + "</td>");
 			str.append("<td class='tagName_td'>" + jsPriority + "</td>");
 		}
 		else if (optionValue == baseFilter.optionEscapings)
 		{
-			str.append("<td width='30%' class='tagName_td'>" + jsCharacter + "</td>");
+			str.append("<td width='15%' class='tagName_td'>" + jsCharacter + "</td>");
 			str.append("<td class='tagName_td'>" + jsEscape + "</td>");
 			str.append("<td class='tagName_td'>" + jsEscapeImport + "</td>");
 			str.append("<td class='tagName_td'>" + jsEscapeExport + "</td>");

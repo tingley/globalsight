@@ -32,6 +32,7 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +40,15 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.webapp.applet.createjob.CreateJobUtil;
+import de.innosystec.unrar.Archive;
+import de.innosystec.unrar.rarfile.FileHeader;
 
 /**
  * A util class, let operate file more easy.
@@ -971,48 +978,51 @@ public class FileUtil
 	public static List<File> isDisableUploadFileType(
 			Set<String> disableUploadFileTypeSet, List<File> fileList)
 	{
+		Set<String> newDisableUploadFileTypeSet = new HashSet<String>();
+		for (String str : disableUploadFileTypeSet)
+		{
+			newDisableUploadFileTypeSet.add(str.toLowerCase());
+		}
 		List<File> canNotUploadFiles = new ArrayList<File>();
 		for (int i = 0; i < fileList.size(); i++)
 		{
 			List<String> extensionList = new ArrayList<String>();
 			try
 			{
-				if (CreateJobUtil.isSupportedZipFileFormat(fileList.get(i)))
+				if (isSupportedZipFileFormat(fileList.get(i)))
 				{
-					if (CreateJobUtil.isZipFile(fileList.get(i)))
+					if (isZipFile(fileList.get(i)))
 					{
-						if (disableUploadFileTypeSet.contains(".zip"))
+						if (newDisableUploadFileTypeSet.contains(".zip"))
 						{
 							canNotUploadFiles.add(fileList.get(i));
 							continue;
 						}
-						extensionList = CreateJobUtil
-								.unZipFile(fileList.get(i));
+						extensionList = unZipFile(fileList.get(i));
 					}
-					else if (CreateJobUtil.isRarFile(fileList.get(i)))
+					else if (isRarFile(fileList.get(i)))
 					{
-						if (disableUploadFileTypeSet.contains(".rar"))
+						if (newDisableUploadFileTypeSet.contains(".rar"))
 						{
 							canNotUploadFiles.add(fileList.get(i));
 							continue;
 						}
-						extensionList = CreateJobUtil
-								.unRarFile(fileList.get(i));
+						extensionList = unRarFile(fileList.get(i));
 					}
-					else if (CreateJobUtil.is7zFile(fileList.get(i)))
+					else if (is7zFile(fileList.get(i)))
 					{
-						if (disableUploadFileTypeSet.contains(".7z"))
+						if (newDisableUploadFileTypeSet.contains(".7z"))
 						{
 							canNotUploadFiles.add(fileList.get(i));
 							continue;
 						}
-						extensionList = CreateJobUtil.un7ZFile(fileList.get(i));
+						extensionList = un7ZFile(fileList.get(i));
 					}
 
 					for (int j = 0; j < extensionList.size(); j++)
 					{
-						if (disableUploadFileTypeSet.contains(extensionList
-								.get(i)))
+						if (newDisableUploadFileTypeSet.contains(extensionList
+								.get(i).toLowerCase()))
 						{
 							canNotUploadFiles.add(fileList.get(i));
 							break;
@@ -1021,9 +1031,9 @@ public class FileUtil
 				}
 				else
 				{
-					if (disableUploadFileTypeSet
+					if (newDisableUploadFileTypeSet
 							.contains(getFileExtension(fileList.get(i)
-									.getName())))
+									.getName()).toLowerCase()))
 					{
 						canNotUploadFiles.add(fileList.get(i));
 					}
@@ -1036,6 +1046,106 @@ public class FileUtil
 
 		}
 		return canNotUploadFiles;
+	}
+	
+	public static List<String> unZipFile(File zipFile) throws ZipException
+	{
+		List<String> extensionList = new ArrayList<String>();
+		ZipFile file = new ZipFile(zipFile);
+		List fileHeaderList = file.getFileHeaders();
+		String extension = "";
+		for (int i = 0; i < fileHeaderList.size(); i++)
+		{
+			net.lingala.zip4j.model.FileHeader fileHeader = (net.lingala.zip4j.model.FileHeader) fileHeaderList
+					.get(i);
+			if (fileHeader != null)
+			{
+				extension = getFileExtension(fileHeader.getFileName());
+				extensionList.add(extension);
+			}
+		}
+		return extensionList;
+	}
+    
+	public static List<String> unRarFile(File rarFile) throws Exception
+	{
+		List<String> extensionList = new ArrayList<String>();
+		Archive archive = new Archive(rarFile);
+		FileHeader fileHeader = archive.nextFileHeader();
+		String extension = "";
+		while (fileHeader != null)
+		{
+			extension = getFileExtension(fileHeader.getFileNameString().trim());
+			extensionList.add(extension);
+			fileHeader = archive.nextFileHeader();
+		}
+		return extensionList;
+	}
+    
+	public static List<String> un7ZFile(File zip7zfile) throws Exception
+	{
+		List<String> extensionList = new ArrayList<String>();
+		SevenZFile sevenZFile = new SevenZFile(zip7zfile);
+		SevenZArchiveEntry entry = sevenZFile.getNextEntry();
+		String extension = "";
+		while (entry != null)
+		{
+			extension = getFileExtension(entry.getName());
+			extensionList.add(extension);
+			entry = sevenZFile.getNextEntry();
+		}
+		return extensionList;
+	}
+	
+	 public static boolean isZipFile(File file)
+	    {
+	        String extension = getFileExtension(file.getName());
+	        if (extension != null && extension.equalsIgnoreCase("zip"))
+	        {
+	            return true;
+	        }
+	        else
+	        {
+	            return false;
+	        }
+	    }
+	    
+	    public static boolean isRarFile(File file)
+	    {
+	        String extension = getFileExtension(file.getName());
+	        if (extension != null && extension.equalsIgnoreCase("rar"))
+	        {
+	            return true;
+	        }
+	        else
+	        {
+	            return false;
+	        }
+	    }
+	    
+	    public static boolean is7zFile(File file)
+	    {
+	        String extension = getFileExtension(file.getName());
+	        if (extension != null && extension.equalsIgnoreCase("7z"))
+	        {
+	            return true;
+	        }
+	        else
+	        {
+	            return false;
+	        }
+	    }
+	
+	public static boolean isSupportedZipFileFormat(File file)
+	{
+		String extension = getFileExtension(file.getName());
+		if ("rar".equalsIgnoreCase(extension)
+				|| "zip".equalsIgnoreCase(extension)
+				|| "7z".equalsIgnoreCase(extension))
+		{
+			return true;
+		}
+		return false;
 	}
 	
     public static String getFileExtension(String fileName)

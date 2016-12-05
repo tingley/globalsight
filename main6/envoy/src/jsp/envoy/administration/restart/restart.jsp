@@ -71,6 +71,17 @@
            alert ("<%=bundle.getString("jsmsg_shutdown_badnumber")%>");
            return false;
         }
+        
+        if (!isRange(hours, 0, 1000))
+        {
+           alert ("<%=bundle.getString("jsmsg_shutdown_range_hours")%>");
+           return false;
+        }
+        if (!isRange(mins, 0, 59))
+        {
+           alert ("<%=bundle.getString("jsmsg_shutdown_range_minutes")%>");
+           return false;
+        }
      }
 
      return true;

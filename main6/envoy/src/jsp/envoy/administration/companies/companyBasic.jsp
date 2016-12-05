@@ -1088,6 +1088,12 @@ function confirmForm()
 				alert("<%=bundle.getString("jsmsg_disable_upload_file_types")%>"+disableFileTypes);
 	            return false;
 			}
+			
+			if(fileType.charAt(0) == "." && fileType.charAt(1) == ".")
+			{
+				alert("<%=bundle.getString("jsmsg_disable_upload_file_types")%>"+disableFileTypes);
+	            return false;
+			}
 		}
     }
 	

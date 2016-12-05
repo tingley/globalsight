@@ -19,9 +19,6 @@ import netscape.javascript.JSObject;
 
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
-
-import com.globalsight.util.FileUtil;
-
 import de.innosystec.unrar.Archive;
 import de.innosystec.unrar.rarfile.FileHeader;
 
@@ -508,66 +505,4 @@ public class CreateJobUtil
             }
         }
     }
-    
-	public static boolean isSupportedZipFileFormat(File file)
-	{
-		String extension = CreateJobUtil.getFileExtension(file);
-		if ("rar".equalsIgnoreCase(extension)
-				|| "zip".equalsIgnoreCase(extension)
-				|| "7z".equalsIgnoreCase(extension))
-		{
-			return true;
-		}
-		return false;
-	}
-    
-	public static List<String> unZipFile(File zipFile) throws ZipException
-	{
-		List<String> extensionList = new ArrayList<String>();
-		ZipFile file = new ZipFile(zipFile);
-		List fileHeaderList = file.getFileHeaders();
-		String extension = "";
-		for (int i = 0; i < fileHeaderList.size(); i++)
-		{
-			net.lingala.zip4j.model.FileHeader fileHeader = (net.lingala.zip4j.model.FileHeader) fileHeaderList
-					.get(i);
-			if (fileHeader != null)
-			{
-				extension = FileUtil.getFileExtension(fileHeader.getFileName());
-				extensionList.add(extension);
-			}
-		}
-		return extensionList;
-	}
-    
-	public static List<String> unRarFile(File rarFile) throws Exception
-	{
-		List<String> extensionList = new ArrayList<String>();
-		Archive archive = new Archive(rarFile);
-		FileHeader fileHeader = archive.nextFileHeader();
-		String extension = "";
-		while (fileHeader != null)
-		{
-			extension = FileUtil.getFileExtension(fileHeader
-					.getFileNameString().trim());
-			extensionList.add(extension);
-			fileHeader = archive.nextFileHeader();
-		}
-		return extensionList;
-	}
-    
-	public static List<String> un7ZFile(File zip7zfile) throws Exception
-	{
-		List<String> extensionList = new ArrayList<String>();
-		SevenZFile sevenZFile = new SevenZFile(zip7zfile);
-		SevenZArchiveEntry entry = sevenZFile.getNextEntry();
-		String extension = "";
-		while (entry != null)
-		{
-			extension = FileUtil.getFileExtension(entry.getName());
-			extensionList.add(extension);
-			entry = sevenZFile.getNextEntry();
-		}
-		return extensionList;
-	}
 }

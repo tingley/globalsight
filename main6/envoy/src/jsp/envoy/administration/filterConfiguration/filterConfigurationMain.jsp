@@ -886,7 +886,7 @@ session="true" %>
                         </div>
                     </span>
                     <span id="baseFilter_content">
-                        <div id='baseFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:440px;position:absolute;top:100px;z-index:21'>
+                        <div id='baseFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:500px;position:absolute;top:100px;z-index:21'>
                             <div id='baseFilterDialogT' onmousedown="DragAndDrop(document.getElementById('baseFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
                                 <label class='whiteBold'>
                                     <%=bundle.getString("lb_filter_basefilter")%>

@@ -1100,7 +1100,7 @@ public class FileUtil
 	 public static boolean isZipFile(File file)
 	    {
 	        String extension = getFileExtension(file.getName());
-	        if (extension != null && extension.equalsIgnoreCase("zip"))
+	        if (extension != null && extension.equalsIgnoreCase(".zip"))
 	        {
 	            return true;
 	        }
@@ -1113,7 +1113,7 @@ public class FileUtil
 	    public static boolean isRarFile(File file)
 	    {
 	        String extension = getFileExtension(file.getName());
-	        if (extension != null && extension.equalsIgnoreCase("rar"))
+	        if (extension != null && extension.equalsIgnoreCase(".rar"))
 	        {
 	            return true;
 	        }
@@ -1126,7 +1126,7 @@ public class FileUtil
 	    public static boolean is7zFile(File file)
 	    {
 	        String extension = getFileExtension(file.getName());
-	        if (extension != null && extension.equalsIgnoreCase("7z"))
+	        if (extension != null && extension.equalsIgnoreCase(".7z"))
 	        {
 	            return true;
 	        }
@@ -1139,9 +1139,9 @@ public class FileUtil
 	public static boolean isSupportedZipFileFormat(File file)
 	{
 		String extension = getFileExtension(file.getName());
-		if ("rar".equalsIgnoreCase(extension)
-				|| "zip".equalsIgnoreCase(extension)
-				|| "7z".equalsIgnoreCase(extension))
+		if (".rar".equalsIgnoreCase(extension)
+				|| ".zip".equalsIgnoreCase(extension)
+				|| ".7z".equalsIgnoreCase(extension))
 		{
 			return true;
 		}

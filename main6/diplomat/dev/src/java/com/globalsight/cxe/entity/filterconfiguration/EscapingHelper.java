@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import com.cognitran.core.model.util.Collections;
 import com.globalsight.everest.util.comparator.PriorityComparator;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.DocumentElement;
@@ -647,7 +648,6 @@ public class EscapingHelper
 		{
 			tags = TagIndex.getContentIndexes(oriStr, false);
 		}
-
 		int count = tags.size();
 		for (int i = 0; i < count; i++)
 		{
@@ -704,7 +704,6 @@ public class EscapingHelper
 	{
 		StringBuffer sub = new StringBuffer();
 		ccc = doDecode ? m_xmlEncoder.decodeStringBasic(ccc) : ccc;
-
 		for (Escaping escaping : es)
 		{
 			if (escaping.isCheckActive())
@@ -920,7 +919,7 @@ public class EscapingHelper
 		return "" + char1;
 	}
 
-	public static String newHandleString4Import(String oriStr,
+	private static String newHandleString4Import(String oriStr,
 			List<Escaping> es, String format, boolean isPureText,
 			List<Character> processedChars, String contentType)
 	{
@@ -933,7 +932,6 @@ public class EscapingHelper
 		boolean doDecode = !isPureText;
 		StringBuffer sb = new StringBuffer();
 		List<TagIndex> tags = TagIndex.getContentIndexes(oriStr, isPureText);
-
 		int count = tags.size();
 		for (int i = 0; i < count; i++)
 		{
@@ -1017,7 +1015,7 @@ public class EscapingHelper
 				.toString()) : sub.toString();
 		return subStr;
 	}
-
+	
 	private static String checkActiveForImport(String ccc, Escaping escaping,
 			String format, List<Character> processedChars, String contentType)
 	{
@@ -1206,6 +1204,10 @@ public class EscapingHelper
 						}
 					}
 				}
+				else
+				{
+					sub.append(char1);
+				}
 			}
 
 			if (j == length - 1)
@@ -1301,9 +1303,19 @@ public class EscapingHelper
 				Pattern p = Pattern.compile(finishStr);
 				Matcher m = p.matcher(ccc);
 
-				if (m.find(extractIndexStart))
+				if (extractIndexStart != -1)
 				{
-					extractIndexFinish = m.start();
+					if (m.find(extractIndexStart))
+					{
+						extractIndexFinish = m.start();
+					}
+				}
+				else
+				{
+					if (m.find())
+					{
+						extractIndexFinish = m.start();
+					}
 				}
 			}
 			else

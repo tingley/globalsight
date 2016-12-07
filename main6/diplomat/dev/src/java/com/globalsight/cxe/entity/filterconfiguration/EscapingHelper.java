@@ -18,8 +18,11 @@
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -752,29 +755,26 @@ public class EscapingHelper
 		{
 			boolean startIsRegex = escaping.isStartIsRegex();
 			boolean finishIsRegex = escaping.isFinishIsRegex();
-			boolean startMatch = false;
-			boolean finishMatch = false;
 			String startStr = escaping.getStartPattern();
 			String finishStr = escaping.getFinishPattern();
-			int[] index = extractOneLine(ccc, startStr, finishStr, startIsRegex,
-					finishIsRegex);
-			if (index != null && index.length == 2)
+			List<String> contentList = extractOneLine(ccc, startStr,
+					finishStr, startIsRegex, finishIsRegex);
+			StringBuffer buffer = new StringBuffer();
+			for (String con : contentList)
 			{
-				if (index[0] > -1)
+				if (con.startsWith("match||"))
 				{
-					startMatch = true;
+					buffer.append(checkActiveHandleChar4Export(
+							con.substring(("match||").length(), con.length()),
+							escaping, format, escapingChars));
 				}
-				if (index[1] > -1)
+				else if (con.startsWith("notmatch||"))
 				{
-					finishMatch = true;
+					buffer.append(con.substring(("notmatch||").length(),
+							con.length()));
 				}
 			}
-
-			if (startMatch || finishMatch)
-			{
-				ccc = checkActiveHandleChar4Export(ccc, escaping, format,
-						escapingChars);
-			}
+			ccc = buffer.toString();
 		}
 
 		return ccc;
@@ -801,27 +801,26 @@ public class EscapingHelper
 		{
 			boolean startIsRegex = escaping.isStartIsRegex();
 			boolean finishIsRegex = escaping.isFinishIsRegex();
-			boolean startMatch = false, finishMatch = false;
 			String startStr = escaping.getStartPattern();
 			String finishStr = escaping.getFinishPattern();
-			int[] index = extractOneLine(ccc, startStr, finishStr, startIsRegex,
-					finishIsRegex);
-			if (index != null && index.length == 2)
+			List<String> contentList = extractOneLine(ccc, startStr,
+					finishStr, startIsRegex, finishIsRegex);
+			StringBuffer buffer = new StringBuffer();
+			for (String con : contentList)
 			{
-				if (index[0] > -1)
+				if (con.startsWith("match||"))
 				{
-					startMatch = true;
+					buffer.append(con.substring(("match||").length(),
+							con.length()));
 				}
-				if (index[1] > -1)
+				else if (con.startsWith("notmatch||"))
 				{
-					finishMatch = true;
+					buffer.append(checkActiveHandleChar4Export(
+							con.substring(("notmatch||").length(), con.length()),
+							escaping, format, escapingChars));
 				}
 			}
-			if (!startMatch || !finishMatch)
-			{
-				returnStr = checkActiveHandleChar4Export(ccc, escaping, format,
-						escapingChars);
-			}
+			ccc = buffer.toString();
 		}
 		else
 		{
@@ -1037,28 +1036,26 @@ public class EscapingHelper
 		{
 			boolean startIsRegex = escaping.isStartIsRegex();
 			boolean finishIsRegex = escaping.isFinishIsRegex();
-			boolean startMatch = false;
-			boolean finishMatch = false;
 			String startStr = escaping.getStartPattern();
 			String finishStr = escaping.getFinishPattern();
-			int[] index = extractOneLine(ccc, startStr, finishStr, startIsRegex,
-					finishIsRegex);
-			if (index != null && index.length == 2)
+			List<String> contentList = extractOneLine(ccc, startStr, finishStr,
+					startIsRegex, finishIsRegex);
+			StringBuffer buffer = new StringBuffer();
+			for (String con : contentList)
 			{
-				if (index[0] > -1)
+				if (con.startsWith("match||"))
 				{
-					startMatch = true;
+					buffer.append(checkActiveHandleChar4Import(
+							con.substring(("match||").length(), con.length()),
+							escaping, format, processedChars));
 				}
-				if (index[1] > -1)
+				else if (con.startsWith("notmatch||"))
 				{
-					finishMatch = true;
+					buffer.append(con.substring(("notmatch||").length(),
+							con.length()));
 				}
 			}
-			if (startMatch || finishMatch)
-			{
-				ccc = checkActiveHandleChar4Import(ccc, escaping, format,
-						processedChars);
-			}
+			ccc = buffer.toString();
 		}
 
 		return ccc;
@@ -1084,27 +1081,27 @@ public class EscapingHelper
 		{
 			boolean startIsRegex = escaping.isStartIsRegex();
 			boolean finishIsRegex = escaping.isFinishIsRegex();
-			boolean startMatch = false, finishMatch = false;
 			String startStr = escaping.getStartPattern();
 			String finishStr = escaping.getFinishPattern();
-			int[] index = extractOneLine(ccc, startStr, finishStr, startIsRegex,
-					finishIsRegex);
-			if (index != null && index.length == 2)
+			List<String> contentList = extractOneLine(ccc, startStr, finishStr,
+					startIsRegex, finishIsRegex);
+			StringBuffer buffer = new StringBuffer();
+			for (String con : contentList)
 			{
-				if (index[0] > -1)
+				if (con.startsWith("match||"))
 				{
-					startMatch = true;
+					buffer.append(con.substring(("match||").length(),
+							con.length()));
 				}
-				if (index[1] > -1)
+				else if (con.startsWith("notmatch||"))
 				{
-					finishMatch = true;
+					buffer.append(checkActiveHandleChar4Import(
+							con.substring(("notmatch||").length(),
+									con.length()), escaping, format,
+							processedChars));
 				}
 			}
-			if (!startMatch || !finishMatch)
-			{
-				returnStr = checkActiveHandleChar4Import(ccc, escaping, format,
-						processedChars);
-			}
+			ccc = buffer.toString();
 		}
 		else
 		{
@@ -1261,13 +1258,16 @@ public class EscapingHelper
 		return contentType;
 	}
 	
-	public static int[] extractOneLine(String ccc, String startStr,
+	public static List<String> extractOneLine(String ccc, String startStr,
 			String finishStr, boolean startIsRegex, boolean finishRegex)
 	{
 		if (ccc == null || ccc.length() == 0)
 		{
 			return null;
 		}
+		List<Integer> extractIndexStartList = new ArrayList<Integer>();
+		Map<Integer, Integer> indexMap = new HashMap<Integer, Integer>();
+		List<String> contentList = new ArrayList<String>();
 		int extractIndexStart = -1;
 		int extractIndexFinish = -1;
 
@@ -1278,19 +1278,37 @@ public class EscapingHelper
 				Pattern p = Pattern.compile(startStr);
 				Matcher m = p.matcher(ccc);
 
-				if (m.find())
+				while (m.find())
 				{
-					extractIndexStart = m.end();
+					extractIndexStart = m.start();
+					extractIndexStartList.add(extractIndexStart);
 				}
-
 			}
 			else
 			{
-
-				int i0 = ccc.indexOf(startStr);
-				if (i0 != -1)
+				for (int k = 0; k < ccc.length();)
 				{
-					extractIndexStart = i0 + startStr.length();
+					int i0 = -1;
+					if (k == 0)
+					{
+						i0 = ccc.indexOf(startStr);
+						if (i0 == -1)
+							break;
+
+						extractIndexStart = i0 + startStr.length();
+						extractIndexStartList.add(i0);
+						k = extractIndexStart;
+					}
+					else
+					{
+						i0 = ccc.indexOf(startStr, extractIndexStart);
+						if (i0 == -1)
+							break;
+
+						extractIndexStart = i0 + startStr.length();
+						extractIndexStartList.add(i0);
+						k = extractIndexStart;
+					}
 				}
 			}
 		}
@@ -1302,32 +1320,140 @@ public class EscapingHelper
 			{
 				Pattern p = Pattern.compile(finishStr);
 				Matcher m = p.matcher(ccc);
-
-				if (extractIndexStart != -1)
+				if (extractIndexStartList != null
+						&& extractIndexStartList.size() > 0)
 				{
-					if (m.find(extractIndexStart))
+					int length = extractIndexStartList.size();
+					for (int i = 0; i < length; i++)
 					{
-						extractIndexFinish = m.start();
-					}
-				}
-				else
-				{
-					if (m.find())
-					{
-						extractIndexFinish = m.start();
+						if (m.find(extractIndexStartList.get(i)))
+						{
+							extractIndexFinish = m.end();
+							if (i < length - 1
+									&& extractIndexFinish > extractIndexStartList
+											.get(i)
+									&& extractIndexFinish < extractIndexStartList
+											.get(i + 1))
+							{
+								indexMap.put(extractIndexStartList.get(i),
+										extractIndexFinish);
+							}
+							else if (i == length - 1
+									&& extractIndexFinish > extractIndexStartList
+											.get(i))
+							{
+								indexMap.put(extractIndexStartList.get(i),
+										extractIndexFinish);
+							}
+							else continue;
+						}
 					}
 				}
 			}
 			else
 			{
-				int i0 = ccc.indexOf(finishStr, extractIndexStart);
-				if (i0 != -1)
+				if (extractIndexStartList != null
+						&& extractIndexStartList.size() > 0)
 				{
-					extractIndexFinish = i0;
+					int length = extractIndexStartList.size();
+					int i0 = -1;
+					for (int i = 0; i < length; i++)
+					{
+						i0 = ccc.indexOf(finishStr,
+								extractIndexStartList.get(i));
+						if (i0 == -1)
+							break;
+
+						extractIndexFinish = i0 + finishStr.length();
+						if (i < length - 1
+								&& extractIndexFinish > extractIndexStartList
+										.get(i)
+								&& extractIndexFinish < extractIndexStartList
+										.get(i + 1))
+						{
+							indexMap.put(extractIndexStartList.get(i),
+									extractIndexFinish);
+						}
+						else if (i == length - 1
+								&& extractIndexFinish > extractIndexStartList
+										.get(i))
+						{
+							indexMap.put(extractIndexStartList.get(i),
+									extractIndexFinish);
+						}
+						else continue;
+					}
 				}
 			}
 		}
+		
+		if (!indexMap.isEmpty())
+		{
+			Set<Integer> keySet = indexMap.keySet();
+			List<Integer> keyList = new ArrayList<Integer>();
+			keyList.addAll(keySet);
+			Collections.sort(keyList);
+			for (int i = 0; i < keyList.size(); i++)
+			{
+				if (i == 0)
+				{
+					String con01 = ccc.substring(0, keyList.get(i));
+					if (StringUtil.isNotEmptyAndNull(con01))
+					{
+						contentList.add("notmatch||"+con01);
+					}
+				}
+				String con02 = ccc.substring(keyList.get(i),
+						indexMap.get(keyList.get(i)));
+				contentList.add("match||"+con02);
+				String con03 = "";
+				if (i < keyList.size() - 1)
+				{
+					con03 = ccc.substring(indexMap.get(keyList.get(i)),
+							keyList.get(i+1));
+				}
+				else
+				{
+					con03 = ccc.substring(indexMap.get(keyList.get(i)),
+							ccc.length());
+				}
+				if (StringUtil.isNotEmptyAndNull(con03))
+				{
+					contentList.add("notmatch||"+con03);
+				}
+			}
+		}
+		else
+		{
+			if (extractIndexStartList != null
+					&& extractIndexStartList.size() > 0)
+			{
+				if (StringUtil.isNotEmptyAndNull(finishStr))
+				{
+					contentList.add("notmatch||"+ccc);
+				}
+				else
+				{
+					String con01 = ccc.substring(0,
+							extractIndexStartList.get(0));
+					String con02 = ccc.substring(extractIndexStartList.get(0),
+							ccc.length());
+					if (StringUtil.isNotEmptyAndNull(con01))
+					{
+						contentList.add("notmatch||"+con01);
+					}
+					if (StringUtil.isNotEmptyAndNull(con02))
+					{
+						contentList.add("match||"+con02);
+					}
+				}
+			}
+			else
+			{
+				contentList.add("notmatch||"+ccc);
+			}
+		}
 
-		return new int[] { extractIndexStart, extractIndexFinish };
+		return contentList;
 	}
 }

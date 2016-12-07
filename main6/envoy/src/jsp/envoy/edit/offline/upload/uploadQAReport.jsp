@@ -92,7 +92,6 @@
     long task_id = task.getId();
     boolean review_only = task.isType(Task.TYPE_REVIEW);
     boolean review_editable = task.isType(Task.TYPE_REVIEW_EDITABLE);
-
     String detailUrl = detail.getPageURL() + 
         "&" + WebAppConstants.TASK_ACTION + 
         "=" + WebAppConstants.TASK_ACTION_RETRIEVE +
@@ -223,6 +222,7 @@
     String jobName = task.getJobName();
 
     Task theTask = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
+    String disableUploadFileTypes = CompanyWrapper.getCompanyById(theTask.getCompanyId()).getDisableUploadFileTypes();
     TaskImpl taskImpl = (TaskImpl)theTask;
     int isReportUploadCheck = taskImpl.getIsReportUploadCheck();
     int isUploaded = taskImpl.getIsReportUploaded();
@@ -563,7 +563,7 @@ var needWarning = false;
 var guideNode = "myActivitiesUpload";
 var helpFile = "<%=bundle.getString("help_upload_qa_report")%>";
 var taskId = <%=task_id%>;
-
+var disableUploadFileTypes = "<%=disableUploadFileTypes%>";
 function submitForm()
 {
     ignoreClose = true;
@@ -578,6 +578,17 @@ function submitForm()
     var file = theForm.<%=fileFieldName%>.value;
     if (!isEmptyString(file))
     {
+		var ext = file.substring(file.lastIndexOf("."));
+		var fileTypeArr= new Array(); 
+    	fileTypeArr = disableUploadFileTypes.split(",");
+    	for(i=0;i<fileTypeArr.length ;i++ )
+    	{
+    		if(fileTypeArr[i] == ext)
+    		{
+    			alert("<%= bundle.getString("lb_message_check_upload_file_type") %>"+disableUploadFileTypes);
+        		return false;
+    		}
+    	}
     	theForm.action = "/globalsight/ControlServlet?activityName=QAReports&action=<%=ReportConstants.ACTION_QA_REPORT_UPLOAD%>&taskId=" + taskId;
         theForm.submit();
     }

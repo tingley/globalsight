@@ -24,6 +24,7 @@
 		session="true" 
 %>
 <%@ page import="com.globalsight.everest.servlet.util.ServletUtil" %>
+<%@ page import="com.globalsight.util.edit.EditUtil" %>
 
 <jsp:useBean id="done" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="cancel" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
@@ -195,6 +196,7 @@
     if(null!=saveCommStatus&&saveCommStatus.length()>0)
     {
     	isTaskComment = false;
+    	saveCommStatus = EditUtil.encodeHtmlEntities(saveCommStatus);
     	if(saveCommStatus.equals(CommentConstants.SAVE_COMMENT_STATUS_JT))
     	{
     		msgDlgHeading = bundle.getString("msg_my_jobs_add");

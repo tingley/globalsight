@@ -340,11 +340,9 @@ class OrderedMatchSegments
             // the above condition is satisfied, there are multiple
             // translation.
             if ((firstState.equals(MatchState.PAGE_TM_EXACT_MATCH)
-                    || firstState.equals(MatchState.SEGMENT_TM_EXACT_MATCH)
-                    ||firstState.equals(MatchState.FUZZY_MATCH_OLD))
+                    || firstState.equals(MatchState.SEGMENT_TM_EXACT_MATCH))
                     && (secondState.equals(MatchState.PAGE_TM_EXACT_MATCH)
-                            || secondState.equals(MatchState.SEGMENT_TM_EXACT_MATCH)
-                            || secondState.equals(MatchState.FUZZY_MATCH_OLD))
+                            || secondState.equals(MatchState.SEGMENT_TM_EXACT_MATCH))
                     && (!(firstLocale.equals(targetLocale) ^ secondLocale.equals(targetLocale))))
             {
                 if (LeverageUtil.getSidCompareRusult(firstTuv, p_jobId) == 1
@@ -394,8 +392,7 @@ class OrderedMatchSegments
         for (int i = 1; i < p_leveragedTuvList.size(); i++)
         {
             LeveragedTuv tuv = (LeveragedTuv) p_leveragedTuvList.get(i);
-            MatchState state = tuv.getMatchState();
-            if (tuv.getScore() != 100 && state != MatchState.FUZZY_MATCH_OLD)
+            if (tuv.getScore() != 100)
             {
                 break;
             }
@@ -403,9 +400,9 @@ class OrderedMatchSegments
             // Demote other 100% matches such as
             // TYPE_DIFFERENCE. Since multiple translations are better
             // matches, the other state of matches cannot be 100%.
+            MatchState state = tuv.getMatchState();
             if ((!state.equals(MatchState.PAGE_TM_EXACT_MATCH))
-                    && (!state.equals(MatchState.SEGMENT_TM_EXACT_MATCH))
-                    &&(!state.equals(MatchState.FUZZY_MATCH_OLD)))
+                    && (!state.equals(MatchState.SEGMENT_TM_EXACT_MATCH)))
             {
                 demoteExact(tuv, p_leverageOptions);
             }

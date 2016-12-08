@@ -110,7 +110,7 @@
 <TD><TABLE CELLPADDING=0 CELLSPACING=2 BORDER=0 CLASS=standardText>
 <TR><TD><%=bundle.getString("lb_shutdownHours")%></TD><TD><INPUT  SIZE="1" TYPE="TEXT" NAME="<%=ShutdownMainHandler.PARAM_RESTART_HOUR%>" MAXLENGTH="3" VALUE="0"/></TD></TR>
 <TR><TD><%=bundle.getString("lb_shutdownMinutes")%></TD><TD><INPUT  SIZE="1" TYPE="TEXT" NAME="<%=ShutdownMainHandler.PARAM_RESTART_MIN%>" MAXLENGTH="2" VALUE="30"/></TD></TR>
-<TR><TD><%=bundle.getString("lb_shutdownMsg")%></TD><TD><TEXTAREA  COLS="60" NAME="<%=ShutdownMainHandler.PARAM_RESTART_MSG%>"><%=bundle.getString("lb_restartUiMsg")%></TEXTAREA></TD></TR>
+<TR><TD><%=bundle.getString("lb_shutdownMsg")%></TD><TD><TEXTAREA  COLS="60" NAME="<%=ShutdownMainHandler.PARAM_RESTART_MSG%>" MAXLENGTH="150"><%=bundle.getString("lb_restartUiMsg")%></TEXTAREA></TD></TR>
 </TABLE></TD></TR>
 
 <% if (isRestarting==true) { %>
